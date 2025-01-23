@@ -13,11 +13,17 @@ class Shape {
   final ShapeType type;
   final Color color;
 
-  Shape(this.start, this.end, this.type, this.color);
+  Shape(
+    this.start,
+    this.end,
+    this.type,
+    this.color,
+  );
 }
 
 class PaintLayer {
   List<Shape> shapes = [];
+  bool isVisible = true;
 }
 
 class PaintModel extends ChangeNotifier {
@@ -40,6 +46,10 @@ class PaintModel extends ChangeNotifier {
     }
   }
 
+  bool isVisible(final int layerIndex) {
+    return layers[layerIndex].isVisible;
+  }
+
   void addShape(
       {Shape? shape,
       Offset? start,
@@ -57,6 +67,13 @@ class PaintModel extends ChangeNotifier {
   void updateLastShape(Offset end) {
     if (currentLayer.shapes.isNotEmpty) {
       currentLayer.shapes.last.end = end;
+      notifyListeners();
+    }
+  }
+
+  void toggleLayerVisibility(final int layerIndex) {
+    if (layerIndex >= 0 && layerIndex < layers.length) {
+      layers[layerIndex].isVisible = !layers[layerIndex].isVisible;
       notifyListeners();
     }
   }

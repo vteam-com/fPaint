@@ -32,15 +32,15 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   // Method to select a layer
-  void _selectLayer(int index) {
+  void _selectLayer(final int layerIndex) {
     setState(() {
-      _selectedLayerIndex = index;
+      _selectedLayerIndex = layerIndex;
     });
   }
 
   // Method to remove a layer
-  void _removeLayer(int index) {
-    Provider.of<PaintModel>(context, listen: false).removeLayer(index);
+  void _removeLayer(final int layerIndex) {
+    Provider.of<PaintModel>(context, listen: false).removeLayer(layerIndex);
     setState(() {
       if (_selectedLayerIndex >=
           Provider.of<PaintModel>(context, listen: false).layers.length) {
@@ -48,6 +48,12 @@ class HomeScreenState extends State<HomeScreen> {
             Provider.of<PaintModel>(context, listen: false).layers.length - 1;
       }
     });
+  }
+
+  void _onToggleViewLayer(final int layerIndex) {
+    Provider.of<PaintModel>(context, listen: false)
+        .toggleLayerVisibility(layerIndex);
+    setState(() {});
   }
 
   void _handlePanStart(Offset position) {
@@ -131,6 +137,7 @@ class HomeScreenState extends State<HomeScreen> {
                   onSelectLayer: _selectLayer,
                   onAddLayer: _addLayer,
                   onRemoveLayer: _removeLayer,
+                  onToggleViewLayer: _onToggleViewLayer,
                 ),
               ),
             ],

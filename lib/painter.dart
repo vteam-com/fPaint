@@ -23,28 +23,30 @@ class CanvasPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (final PaintLayer layer in _paintModel.layers) {
-      for (final Shape shape in layer.shapes) {
-        final Paint paint = Paint()
-          ..color = shape.color
-          ..strokeCap = StrokeCap.round
-          ..strokeWidth = 5.0;
+      if (layer.isVisible) {
+        for (final Shape shape in layer.shapes) {
+          final Paint paint = Paint()
+            ..color = shape.color
+            ..strokeCap = StrokeCap.round
+            ..strokeWidth = 5.0;
 
-        switch (shape.type) {
-          case ShapeType.pencil:
-            canvas.drawLine(shape.start, shape.end, paint);
-            break;
-          case ShapeType.line:
-            canvas.drawLine(shape.start, shape.end, paint);
-            break;
-          case ShapeType.circle:
-            final radius = (shape.start - shape.end).distance / 2;
-            final center = Offset((shape.start.dx + shape.end.dx) / 2,
-                (shape.start.dy + shape.end.dy) / 2);
-            canvas.drawCircle(center, radius, paint);
-            break;
-          case ShapeType.rectangle:
-            canvas.drawRect(Rect.fromPoints(shape.start, shape.end), paint);
-            break;
+          switch (shape.type) {
+            case ShapeType.pencil:
+              canvas.drawLine(shape.start, shape.end, paint);
+              break;
+            case ShapeType.line:
+              canvas.drawLine(shape.start, shape.end, paint);
+              break;
+            case ShapeType.circle:
+              final radius = (shape.start - shape.end).distance / 2;
+              final center = Offset((shape.start.dx + shape.end.dx) / 2,
+                  (shape.start.dy + shape.end.dy) / 2);
+              canvas.drawCircle(center, radius, paint);
+              break;
+            case ShapeType.rectangle:
+              canvas.drawRect(Rect.fromPoints(shape.start, shape.end), paint);
+              break;
+          }
         }
       }
     }
