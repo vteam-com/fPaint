@@ -8,6 +8,7 @@ export 'package:fpaint/models/layers.dart';
 class PaintModel extends ChangeNotifier {
   List<PaintLayer> layers = [PaintLayer(name: 'Layer1')];
   Size canvasSize = const Size(800, 600); // Default canvas size
+  Offset offset = Offset(0, 0);
 
   int _currentLayerIndex = 0;
   int get currentLayerIndex => _currentLayerIndex;

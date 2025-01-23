@@ -119,15 +119,17 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(final BuildContext context) {
     // Ensure that PaintModel is provided above this widget in the widget tree
-    final paintModel = Provider.of<PaintModel>(context);
+    final PaintModel paintModel = Provider.of<PaintModel>(context);
 
     return Scaffold(
       backgroundColor: Colors.grey,
       body: Stack(
         children: [
           GestureDetector(
-            onPanStart: (details) => _handlePanStart(details.localPosition),
-            onPanUpdate: (details) => _handlePanUpdate(details.localPosition),
+            onPanStart: (details) =>
+                _handlePanStart(details.localPosition - paintModel.offset),
+            onPanUpdate: (details) =>
+                _handlePanUpdate(details.localPosition - paintModel.offset),
             onPanEnd: _handlePanEnd,
             child: Painter(paintModel: paintModel),
           ),
