@@ -1,13 +1,12 @@
 import 'dart:ui';
 
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
-
 import 'models/app_model.dart';
 import 'my_canvas.dart';
 
@@ -21,7 +20,8 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   ShapeType _currentShapeType = ShapeType.pencil;
-  Color _currentColor = Colors.black;
+  Color _colorFill = Colors.black;
+  Color _colorBorder = Colors.blue;
   Offset? _panStart;
   Shape? _currentShape;
   late AppModel appModel = Provider.of<AppModel>(context, listen: false);
@@ -103,8 +103,7 @@ class HomeScreenState extends State<HomeScreen> {
   void _handlePanStart(Offset position) {
     _panStart = position;
     if (_currentShapeType != ShapeType.pencil) {
-      _currentShape =
-          Shape(position, position, _currentShapeType, _currentColor);
+      _currentShape = Shape(position, position, _currentShapeType, _colorFill);
       Provider.of<AppModel>(context, listen: false)
           .addShape(shape: _currentShape);
     }
@@ -118,7 +117,7 @@ class HomeScreenState extends State<HomeScreen> {
         start: _panStart!,
         end: position,
         type: _currentShapeType,
-        color: _currentColor,
+        color: _colorFill,
       );
       _panStart = position;
     }
@@ -129,21 +128,30 @@ class HomeScreenState extends State<HomeScreen> {
     _currentShape = null;
   }
 
-  void _showColorPicker() {
+  void _showColorPicker(
+    final String title,
+    Color color,
+    ValueChanged<Color> onSelectedColor,
+  ) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Pick a color'),
+          title: Text(title),
           content: SingleChildScrollView(
-            child: BlockPicker(
-              pickerColor: _currentColor,
+            child: ColorPicker(
+              color: color,
               onColorChanged: (Color color) {
                 setState(() {
-                  _currentColor = color;
+                  onSelectedColor(color);
                 });
-                Navigator.of(context).pop();
               },
+              pickersEnabled: {
+                ColorPickerType.wheel: true,
+                ColorPickerType.primary: true,
+                ColorPickerType.accent: true,
+              },
+              showColorCode: true,
             ),
           ),
         );
@@ -181,9 +189,19 @@ class HomeScreenState extends State<HomeScreen> {
               elevation: 8,
               child: ToolsPanel(
                 currentShapeType: _currentShapeType,
-                currentColor: _currentColor,
+                colorFill: _colorFill,
+                colorBorder: _colorBorder,
                 onShapeSelected: _onShapeSelected,
-                onColorPicker: _showColorPicker,
+                onColorPickerFill: () => _showColorPicker(
+                  'Fill Color',
+                  _colorFill,
+                  (Color color) => _colorFill = color,
+                ),
+                onColorPickerBorder: () => _showColorPicker(
+                  'Border Color',
+                  _colorBorder,
+                  (Color color) => _colorBorder = color,
+                ),
               ),
             ),
           ),

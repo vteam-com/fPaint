@@ -6,14 +6,18 @@ class ToolsPanel extends StatelessWidget {
   const ToolsPanel({
     super.key,
     required this.currentShapeType,
-    required this.currentColor,
+    required this.colorFill,
+    required this.colorBorder,
     required this.onShapeSelected,
-    required this.onColorPicker,
+    required this.onColorPickerFill,
+    required this.onColorPickerBorder,
   });
   final ShapeType currentShapeType;
-  final Color currentColor;
+  final Color colorFill;
+  final Color colorBorder;
   final Function(ShapeType) onShapeSelected;
-  final VoidCallback onColorPicker;
+  final VoidCallback onColorPickerFill;
+  final VoidCallback onColorPickerBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -54,10 +58,20 @@ class ToolsPanel extends StatelessWidget {
             onPressed: () => onShapeSelected(ShapeType.circle),
           ),
 
+          // Color Fill
           IconButton(
-            icon: Icon(Icons.color_lens),
-            onPressed: onColorPicker,
-            color: currentColor,
+            icon: Icon(Icons.water_drop),
+            onPressed: onColorPickerFill,
+            color: colorFill,
+            tooltip: 'Fill Color',
+          ),
+
+          // Color Border
+          IconButton(
+            icon: Icon(Icons.water_drop_outlined),
+            onPressed: onColorPickerBorder,
+            color: colorBorder,
+            tooltip: 'Border Color',
           ),
         ],
       ),
