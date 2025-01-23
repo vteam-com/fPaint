@@ -7,6 +7,7 @@ export 'package:fpaint/models/layers.dart';
 
 class PaintModel extends ChangeNotifier {
   List<PaintLayer> layers = [PaintLayer(name: 'Layer1')];
+  Size canvasSize = const Size(800, 600); // Default canvas size
 
   int _currentLayerIndex = 0;
   int get currentLayerIndex => _currentLayerIndex;
@@ -46,18 +47,29 @@ class PaintModel extends ChangeNotifier {
       ShapeType? type,
       Color? color}) {
     if (shape != null) {
-      currentLayer.shapes.add(shape);
+      if (_isWithinCanvas(shape.start) && _isWithinCanvas(shape.end)) {
+        currentLayer.shapes.add(shape);
+      }
     } else if (start != null && end != null && type != null && color != null) {
-      currentLayer.shapes.add(Shape(start, end, type, color));
+      if (_isWithinCanvas(start) && _isWithinCanvas(end)) {
+        currentLayer.shapes.add(Shape(start, end, type, color));
+      }
     }
     notifyListeners();
   }
 
   void updateLastShape(Offset end) {
-    if (currentLayer.shapes.isNotEmpty) {
+    if (currentLayer.shapes.isNotEmpty && _isWithinCanvas(end)) {
       currentLayer.shapes.last.end = end;
       notifyListeners();
     }
+  }
+
+  bool _isWithinCanvas(Offset point) {
+    return point.dx >= 0 &&
+        point.dx <= canvasSize.width &&
+        point.dy >= 0 &&
+        point.dy <= canvasSize.height;
   }
 
   void toggleLayerVisibility(final int layerIndex) {
