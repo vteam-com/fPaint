@@ -112,37 +112,89 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Flutter Paint'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.color_lens),
-            onPressed: _showColorPicker,
-          ),
-        ],
-      ),
-      body: Row(
+      body: Column(
         children: [
-          Expanded(
-            child: GestureDetector(
-              onPanStart: (details) => _handlePanStart(details.localPosition),
-              onPanUpdate: (details) => _handlePanUpdate(details.localPosition),
-              onPanEnd: _handlePanEnd,
-              child: Painter(paintModel: Provider.of<PaintModel>(context)),
-            ),
-          ),
-          Column(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Expanded(
-                child: LayersPanel(
-                  selectedLayerIndex: _selectedLayerIndex,
-                  onSelectLayer: _selectLayer,
-                  onAddLayer: _addLayer,
-                  onRemoveLayer: _removeLayer,
-                  onToggleViewLayer: _onToggleViewLayer,
-                ),
+              // Pencil
+              IconButton(
+                icon: Icon(Icons.edit_outlined),
+                onPressed: () => setState(() {
+                  _currentShapeType = ShapeType.pencil;
+                }),
+                color: _currentShapeType == ShapeType.pencil
+                    ? _currentColor
+                    : null,
+              ),
+
+              // Line
+              IconButton(
+                icon: Icon(Icons.line_axis),
+                onPressed: () => setState(() {
+                  _currentShapeType = ShapeType.line;
+                }),
+                color: _currentShapeType == ShapeType.pencil
+                    ? _currentColor
+                    : null,
+              ),
+
+              // Rectangle
+              IconButton(
+                icon: Icon(Icons.crop_square),
+                onPressed: () => setState(() {
+                  _currentShapeType = ShapeType.rectangle;
+                }),
+                color: _currentShapeType == ShapeType.rectangle
+                    ? _currentColor
+                    : null,
+              ),
+              // Circle
+              IconButton(
+                icon: Icon(Icons.circle_outlined),
+                onPressed: () => setState(() {
+                  _currentShapeType = ShapeType.circle;
+                }),
+                color: _currentShapeType == ShapeType.circle
+                    ? _currentColor
+                    : null,
+              ),
+              IconButton(
+                icon: Icon(Icons.color_lens),
+                onPressed: _showColorPicker,
+                color: _currentColor,
               ),
             ],
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onPanStart: (details) =>
+                        _handlePanStart(details.localPosition),
+                    onPanUpdate: (details) =>
+                        _handlePanUpdate(details.localPosition),
+                    onPanEnd: _handlePanEnd,
+                    child:
+                        Painter(paintModel: Provider.of<PaintModel>(context)),
+                  ),
+                ),
+                Column(
+                  children: [
+                    Expanded(
+                      child: LayersPanel(
+                        selectedLayerIndex: _selectedLayerIndex,
+                        onSelectLayer: _selectLayer,
+                        onAddLayer: _addLayer,
+                        onRemoveLayer: _removeLayer,
+                        onToggleViewLayer: _onToggleViewLayer,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -161,59 +213,6 @@ class HomeScreenState extends State<HomeScreen> {
             child: Icon(Icons.redo),
           ),
         ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            // Pencil
-            IconButton(
-              icon: Icon(Icons.edit_outlined),
-              onPressed: () => setState(() {
-                _currentShapeType = ShapeType.pencil;
-              }),
-              color:
-                  _currentShapeType == ShapeType.pencil ? _currentColor : null,
-            ),
-
-            // Line
-            IconButton(
-              icon: Icon(Icons.line_axis),
-              onPressed: () => setState(() {
-                _currentShapeType = ShapeType.line;
-              }),
-              color:
-                  _currentShapeType == ShapeType.pencil ? _currentColor : null,
-            ),
-
-            // Rectangle
-            IconButton(
-              icon: Icon(Icons.crop_square),
-              onPressed: () => setState(() {
-                _currentShapeType = ShapeType.rectangle;
-              }),
-              color: _currentShapeType == ShapeType.rectangle
-                  ? _currentColor
-                  : null,
-            ),
-            // Circle
-            IconButton(
-              icon: Icon(Icons.circle_outlined),
-              onPressed: () => setState(() {
-                _currentShapeType = ShapeType.circle;
-              }),
-              color:
-                  _currentShapeType == ShapeType.circle ? _currentColor : null,
-            ),
-            IconButton(
-              icon: Icon(Icons.color_lens),
-              onPressed: _showColorPicker,
-              color: _currentColor,
-            ),
-          ],
-        ),
       ),
     );
   }
