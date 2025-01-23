@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/paint_model.dart';
+import 'package:fpaint/models/shapes.dart';
 
 class ToolsPanel extends StatelessWidget {
   final ShapeType currentShapeType;

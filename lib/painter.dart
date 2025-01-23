@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'paint_model.dart';
+import 'models/paint_model.dart';
 
 class Painter extends StatelessWidget {
   final PaintModel paintModel;

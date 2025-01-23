@@ -3,7 +3,7 @@ import 'package:fpaint/layers_panel.dart';
 import 'package:fpaint/tools_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'paint_model.dart';
+import 'models/paint_model.dart';
 import 'painter.dart';
 
 class HomeScreen extends StatefulWidget {

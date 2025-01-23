@@ -1,30 +1,9 @@
+// Imports
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/layers.dart';
 
-enum ShapeType {
-  pencil,
-  line,
-  circle,
-  rectangle,
-}
-
-class Shape {
-  Offset start;
-  Offset end;
-  final ShapeType type;
-  final Color color;
-
-  Shape(
-    this.start,
-    this.end,
-    this.type,
-    this.color,
-  );
-}
-
-class PaintLayer {
-  List<Shape> shapes = [];
-  bool isVisible = true;
-}
+// Exports
+export 'package:fpaint/models/layers.dart';
 
 class PaintModel extends ChangeNotifier {
   List<PaintLayer> layers = [PaintLayer()];

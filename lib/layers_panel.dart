@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/paint_model.dart';
+import 'package:fpaint/models/paint_model.dart';
 import 'package:provider/provider.dart';
 
 class LayersPanel extends StatelessWidget {

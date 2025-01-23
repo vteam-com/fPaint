@@ -5,8 +5,10 @@ digraph "" {
   "/test/paint_model_test.dart" [label="paint_model_test"];
   "/test/widget_test.dart" [label="widget_test"];
   "/lib/tools_panel.dart" [label="tools_panel"];
+  "/lib/models/layers.dart" [label="layers"];
+  "/lib/models/shapes.dart" [label="shapes"];
+  "/lib/models/paint_model.dart" [label="paint_model"];
   "/lib/main.dart" [label="main"];
-  "/lib/paint_model.dart" [label="paint_model"];
   "/lib/layers_panel.dart" [label="layers_panel"];
   "/lib/painter.dart" [label="painter"];
   "/lib/home_screen.dart" [label="home_screen"];
@@ -21,21 +23,30 @@ digraph "" {
       label="lib";
       "/lib/tools_panel.dart";
       "/lib/main.dart";
-      "/lib/paint_model.dart";
       "/lib/layers_panel.dart";
       "/lib/painter.dart";
       "/lib/home_screen.dart";
+      subgraph "cluster~/lib/models" {
+        label="models";
+        "/lib/models/layers.dart";
+        "/lib/models/shapes.dart";
+        "/lib/models/paint_model.dart";
+      }
     }
   }
-  "/test/paint_model_test.dart" -> "/lib/paint_model.dart";
+  "/test/paint_model_test.dart" -> "/lib/models/paint_model.dart";
   "/test/widget_test.dart" -> "/lib/main.dart";
-  "/lib/tools_panel.dart" -> "/lib/paint_model.dart";
+  "/lib/tools_panel.dart" -> "/lib/models/shapes.dart";
+  "/lib/models/layers.dart" -> "/lib/models/shapes.dart";
+  "/lib/models/layers.dart" -> "/lib/models/shapes.dart" [style=dashed];
+  "/lib/models/paint_model.dart" -> "/lib/models/layers.dart";
+  "/lib/models/paint_model.dart" -> "/lib/models/layers.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/home_screen.dart";
-  "/lib/main.dart" -> "/lib/paint_model.dart";
-  "/lib/layers_panel.dart" -> "/lib/paint_model.dart";
-  "/lib/painter.dart" -> "/lib/paint_model.dart";
+  "/lib/main.dart" -> "/lib/models/paint_model.dart";
+  "/lib/layers_panel.dart" -> "/lib/models/paint_model.dart";
+  "/lib/painter.dart" -> "/lib/models/paint_model.dart";
   "/lib/home_screen.dart" -> "/lib/layers_panel.dart";
   "/lib/home_screen.dart" -> "/lib/tools_panel.dart";
-  "/lib/home_screen.dart" -> "/lib/paint_model.dart";
+  "/lib/home_screen.dart" -> "/lib/models/paint_model.dart";
   "/lib/home_screen.dart" -> "/lib/painter.dart";
 }
