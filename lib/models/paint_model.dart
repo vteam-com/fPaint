@@ -6,7 +6,7 @@ import 'package:fpaint/models/layers.dart';
 export 'package:fpaint/models/layers.dart';
 
 class PaintModel extends ChangeNotifier {
-  List<PaintLayer> layers = [PaintLayer()];
+  List<PaintLayer> layers = [PaintLayer(name: 'Layer1')];
 
   int _currentLayerIndex = 0;
   int get currentLayerIndex => _currentLayerIndex;
@@ -23,7 +23,8 @@ class PaintModel extends ChangeNotifier {
   PaintLayer get currentLayer => layers[currentLayerIndex];
 
   void addLayer() {
-    layers.add(PaintLayer());
+    final PaintLayer newLayer = PaintLayer(name: 'Layer${layers.length + 1}');
+    layers.add(newLayer);
     setActiveLayer(layers.length - 1);
   }
 

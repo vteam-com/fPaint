@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/layers_panel.dart';
-import 'package:fpaint/tools_panel.dart';
+import 'package:fpaint/models/layers_panel.dart';
+import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'models/paint_model.dart';

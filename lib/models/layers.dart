@@ -5,7 +5,8 @@ import 'package:fpaint/models/shapes.dart';
 export 'package:fpaint/models/shapes.dart';
 
 class PaintLayer {
-  String name = '';
+  PaintLayer({required this.name});
+  String name;
   List<Shape> shapes = [];
   bool isVisible = true;
 }

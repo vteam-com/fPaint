@@ -45,7 +45,7 @@ class LayersPanel extends StatelessWidget {
                       if (newIndex > oldIndex) {
                         newIndex -= 1;
                       }
-                      final layer = paintModel.layers[oldIndex];
+                      final PaintLayer layer = paintModel.layers[oldIndex];
                       paintModel.layers.removeAt(oldIndex);
                       paintModel.layers.insert(newIndex, layer);
                       if (selectedLayerIndex == oldIndex) {
@@ -53,13 +53,14 @@ class LayersPanel extends StatelessWidget {
                       }
                     },
                     itemBuilder: (context, index) {
+                      final PaintLayer layer = paintModel.layers[index];
                       final bool isSelected = index == selectedLayerIndex;
                       return ReorderableDragStartListener(
                         key: Key('$index'),
                         index: index,
                         child: GestureDetector(
                           onTap: () => onSelectLayer(index),
-                          child: layerRow(context, isSelected, index),
+                          child: layerRow(context, isSelected, index, layer),
                         ),
                       );
                     },
@@ -77,10 +78,8 @@ class LayersPanel extends StatelessWidget {
     final BuildContext context,
     final bool isSelected,
     final int index,
+    final PaintLayer layer,
   ) {
-    bool isVisible =
-        Provider.of<PaintModel>(context, listen: false).isVisible(index);
-
     return Container(
       key: ValueKey(index),
       margin: EdgeInsets.all(4),
@@ -95,10 +94,11 @@ class LayersPanel extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text('Layer ${index + 1}'),
+            child: Text(layer.name),
           ),
           IconButton(
-            icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
+            icon:
+                Icon(layer.isVisible ? Icons.visibility : Icons.visibility_off),
             onPressed: () => onToggleViewLayer(index),
           ),
           IconButton(
