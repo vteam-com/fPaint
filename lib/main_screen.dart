@@ -187,7 +187,13 @@ class MainScreenState extends State<MainScreen> {
   void _handlePanStart(Offset position) {
     _panStart = position;
     if (_currentShapeType != ShapeType.pencil) {
-      _currentShape = Shape(position, position, _currentShapeType, _colorFill);
+      _currentShape = Shape(
+        start: position,
+        end: position,
+        type: _currentShapeType,
+        colorStroke: _colorBorder,
+        colorFill: _colorFill,
+      );
       Provider.of<AppModel>(context, listen: false)
           .addShape(shape: _currentShape);
     }
@@ -201,7 +207,8 @@ class MainScreenState extends State<MainScreen> {
         start: _panStart!,
         end: position,
         type: _currentShapeType,
-        color: _colorFill,
+        colorFill: _colorFill,
+        colorStroke: _colorBorder,
       );
       _panStart = position;
     }

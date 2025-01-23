@@ -46,7 +46,8 @@ class AppModel extends ChangeNotifier {
   void addShape({
     Shape? shape,
     ShapeType? type,
-    Color? color,
+    Color? colorFill,
+    Color? colorStroke,
     Offset? start,
     Offset? end,
   }) {
@@ -54,9 +55,21 @@ class AppModel extends ChangeNotifier {
       if (_isWithinCanvas(shape.start) && _isWithinCanvas(shape.end)) {
         currentLayer.shapes.add(shape);
       }
-    } else if (start != null && end != null && type != null && color != null) {
+    } else if (start != null &&
+        end != null &&
+        type != null &&
+        colorFill != null &&
+        colorStroke != null) {
       if (_isWithinCanvas(start) && _isWithinCanvas(end)) {
-        currentLayer.shapes.add(Shape(start, end, type, color));
+        currentLayer.shapes.add(
+          Shape(
+            start: start,
+            end: end,
+            type: type,
+            colorFill: colorFill,
+            colorStroke: colorStroke,
+          ),
+        );
       }
     }
     notifyListeners();

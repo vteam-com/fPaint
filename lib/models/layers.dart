@@ -19,10 +19,11 @@ class Layers {
 
     firstLayer.shapes.add(
       Shape(
-        Offset(0, 0),
-        Offset(size.width, size.height),
-        ShapeType.rectangle,
-        Colors.white,
+        start: Offset(0, 0),
+        end: Offset(size.width, size.height),
+        type: ShapeType.rectangle,
+        colorFill: Colors.white,
+        colorStroke: Colors.white,
       ),
     );
 

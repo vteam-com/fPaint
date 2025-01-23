@@ -21,10 +21,11 @@ void main() {
 
     test('addShape with Shape object should add to current layer', () {
       final shape = Shape(
-        const Offset(0, 0),
-        const Offset(10, 10),
-        ShapeType.pencil,
-        Colors.black,
+        start: const Offset(0, 0),
+        end: const Offset(10, 10),
+        type: ShapeType.pencil,
+        colorFill: Colors.black,
+        colorStroke: Colors.black,
       );
       paintModel.addShape(shape: shape);
       expect(
@@ -39,7 +40,8 @@ void main() {
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: ShapeType.circle,
-        color: Colors.red,
+        colorFill: Colors.red,
+        colorStroke: Colors.yellow,
       );
       expect(
         paintModel.currentLayer.shapes.length,
@@ -48,7 +50,7 @@ void main() {
       expect(paintModel.currentLayer.shapes.last.start, const Offset(0, 0));
       expect(paintModel.currentLayer.shapes.last.end, const Offset(10, 10));
       expect(paintModel.currentLayer.shapes.last.type, ShapeType.circle);
-      expect(paintModel.currentLayer.shapes.last.color, Colors.red);
+      expect(paintModel.currentLayer.shapes.last.colorFill, Colors.red);
     });
 
     test('updateLastShape should modify end position of last shape', () {
@@ -56,7 +58,7 @@ void main() {
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: ShapeType.rectangle,
-        color: Colors.blue,
+        colorFill: Colors.blue,
       );
       paintModel.updateLastShape(const Offset(20, 20));
       expect(paintModel.currentLayer.shapes.last.end, const Offset(20, 20));
@@ -72,7 +74,8 @@ void main() {
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: ShapeType.pencil,
-        color: Colors.green,
+        colorFill: Colors.green,
+        colorStroke: Colors.black,
       );
       expect(paintModel.currentLayer.shapes.length, 2);
       paintModel.undo();
@@ -90,13 +93,15 @@ void main() {
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: ShapeType.pencil,
-        color: Colors.black,
+        colorFill: Colors.blue,
+        colorStroke: Colors.black,
       );
       paintModel.addShape(
         start: const Offset(20, 20),
         end: const Offset(30, 30),
         type: ShapeType.circle,
-        color: Colors.red,
+        colorFill: Colors.red,
+        colorStroke: Colors.black,
       );
       expect(paintModel.currentLayer.shapes.length, 3);
       paintModel.undo();

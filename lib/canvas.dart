@@ -58,12 +58,13 @@ class MyCanvasPainter extends CustomPainter {
     for (final PaintLayer layer in _paintModel.layers.list.reversed) {
       if (layer.isVisible) {
         for (final Shape shape in layer.shapes) {
-          final Paint paint = Paint()
-            ..color = shape.color
-            ..strokeCap = StrokeCap.round
-            ..strokeWidth = 5.0;
+          final Paint paint = Paint();
+          paint.color = shape.colorFill;
+          paint.strokeCap = StrokeCap.round;
+          paint.strokeWidth = 5.0;
 
           switch (shape.type) {
+            // Draw
             case ShapeType.pencil:
               canvas.drawLine(
                 shape.start
@@ -73,7 +74,11 @@ class MyCanvasPainter extends CustomPainter {
                 paint,
               );
               break;
+
+            // Line
             case ShapeType.line:
+              paint.style = PaintingStyle.stroke;
+              paint.color = shape.colorStroke;
               canvas.drawLine(
                 shape.start
                     .translate(_paintModel.offset.dx, _paintModel.offset.dy),
@@ -82,15 +87,46 @@ class MyCanvasPainter extends CustomPainter {
                 paint,
               );
               break;
+
+            // Circle
             case ShapeType.circle:
               final radius = (shape.start - shape.end).distance / 2;
               final center = Offset(
                 (shape.start.dx + shape.end.dx) / 2,
                 (shape.start.dy + shape.end.dy) / 2,
               ).translate(_paintModel.offset.dx, _paintModel.offset.dy);
+
+              // Fill
+              canvas.drawCircle(center, radius, paint);
+
+              // Border
+              paint.style = PaintingStyle.stroke;
+              paint.color = shape.colorStroke;
+
               canvas.drawCircle(center, radius, paint);
               break;
+
+            // Rectangle
             case ShapeType.rectangle:
+
+              // Fill
+              canvas.drawRect(
+                Rect.fromPoints(
+                  shape.start.translate(
+                    _paintModel.offset.dx,
+                    _paintModel.offset.dy,
+                  ),
+                  shape.end.translate(
+                    _paintModel.offset.dx,
+                    _paintModel.offset.dy,
+                  ),
+                ),
+                paint,
+              );
+
+              // Border
+              paint.style = PaintingStyle.stroke;
+              paint.color = shape.colorStroke;
               canvas.drawRect(
                 Rect.fromPoints(
                   shape.start.translate(
