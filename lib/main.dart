@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/home_screen.dart';
+import 'package:fpaint/main_screen.dart';
 import 'package:provider/provider.dart';
 import 'models/app_model.dart';
 
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
       create: (_) => AppModel(),
       child: MaterialApp(
         title: 'Flutter Paint App',
-        home: HomeScreen(),
+        home: MainScreen(),
       ),
     );
   }

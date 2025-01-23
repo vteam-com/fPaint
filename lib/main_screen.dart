@@ -3,22 +3,22 @@ import 'dart:ui';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fpaint/canvas.dart';
 import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 import 'models/app_model.dart';
-import 'my_canvas.dart';
 
-class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key});
+class MainScreen extends StatefulWidget {
+  MainScreen({super.key});
   final TextEditingController controller = TextEditingController();
 
   @override
-  HomeScreenState createState() => HomeScreenState();
+  MainScreenState createState() => MainScreenState();
 }
 
-class HomeScreenState extends State<HomeScreen> {
+class MainScreenState extends State<MainScreen> {
   ShapeType _currentShapeType = ShapeType.pencil;
   Color _colorFill = Colors.black;
   Color _colorBorder = Colors.blue;
@@ -27,6 +27,90 @@ class HomeScreenState extends State<HomeScreen> {
   late AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
   int _selectedLayerIndex = 0; // Track the selected layer
+
+  @override
+  Widget build(final BuildContext context) {
+    // Ensure that PaintModel is provided above this widget in the widget tree
+    final AppModel paintModel = Provider.of<AppModel>(context);
+
+    return Scaffold(
+      backgroundColor: Colors.grey,
+      body: Stack(
+        children: [
+          GestureDetector(
+            onPanStart: (details) =>
+                _handlePanStart(details.localPosition - paintModel.offset),
+            onPanUpdate: (details) =>
+                _handlePanUpdate(details.localPosition - paintModel.offset),
+            onPanEnd: _handlePanEnd,
+            child: MyCanvas(paintModel: paintModel),
+          ),
+
+          // Panel for Layers
+          Positioned(
+            top: 64,
+            right: 8,
+            child: Card(
+              elevation: 8,
+              child: LayersPanel(
+                selectedLayerIndex: _selectedLayerIndex,
+                onSelectLayer: _selectLayer,
+                onAddLayer: _onAddLayer,
+                onShare: _onShare,
+                onRemoveLayer: _removeLayer,
+                onToggleViewLayer: _onToggleViewLayer,
+              ),
+            ),
+          ),
+
+          // Panel for tools
+          Positioned(
+            top: 8,
+            left: 8,
+            child: Card(
+              elevation: 8,
+              child: ToolsPanel(
+                currentShapeType: _currentShapeType,
+                colorFill: _colorFill,
+                colorBorder: _colorBorder,
+                onShapeSelected: _onShapeSelected,
+                onColorPickerFill: () => _showColorPicker(
+                  'Fill Color',
+                  _colorFill,
+                  (Color color) => _colorFill = color,
+                ),
+                onColorPickerBorder: () => _showColorPicker(
+                  'Border Color',
+                  _colorBorder,
+                  (Color color) => _colorBorder = color,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+
+      // Undo/Redo
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            backgroundColor: Colors.grey.shade200,
+            foregroundColor: Colors.grey.shade700,
+            onPressed: () => paintModel.undo(),
+            child: Icon(Icons.undo),
+          ),
+          SizedBox(height: 8),
+          FloatingActionButton(
+            backgroundColor: Colors.grey.shade200,
+            foregroundColor: Colors.grey.shade700,
+            onPressed: () => paintModel.redo(),
+            child: Icon(Icons.redo),
+          ),
+        ],
+      ),
+    );
+  }
 
   // Method to add a new layer
   void _onAddLayer() {
@@ -163,89 +247,5 @@ class HomeScreenState extends State<HomeScreen> {
     setState(() {
       _currentShapeType = shape;
     });
-  }
-
-  @override
-  Widget build(final BuildContext context) {
-    // Ensure that PaintModel is provided above this widget in the widget tree
-    final AppModel paintModel = Provider.of<AppModel>(context);
-
-    return Scaffold(
-      backgroundColor: Colors.grey,
-      body: Stack(
-        children: [
-          GestureDetector(
-            onPanStart: (details) =>
-                _handlePanStart(details.localPosition - paintModel.offset),
-            onPanUpdate: (details) =>
-                _handlePanUpdate(details.localPosition - paintModel.offset),
-            onPanEnd: _handlePanEnd,
-            child: MyCanvas(paintModel: paintModel),
-          ),
-
-          // Panel for Layers
-          Positioned(
-            top: 64,
-            right: 8,
-            child: Card(
-              elevation: 8,
-              child: LayersPanel(
-                selectedLayerIndex: _selectedLayerIndex,
-                onSelectLayer: _selectLayer,
-                onAddLayer: _onAddLayer,
-                onShare: _onShare,
-                onRemoveLayer: _removeLayer,
-                onToggleViewLayer: _onToggleViewLayer,
-              ),
-            ),
-          ),
-
-          // Panel for tools
-          Positioned(
-            top: 8,
-            left: 8,
-            child: Card(
-              elevation: 8,
-              child: ToolsPanel(
-                currentShapeType: _currentShapeType,
-                colorFill: _colorFill,
-                colorBorder: _colorBorder,
-                onShapeSelected: _onShapeSelected,
-                onColorPickerFill: () => _showColorPicker(
-                  'Fill Color',
-                  _colorFill,
-                  (Color color) => _colorFill = color,
-                ),
-                onColorPickerBorder: () => _showColorPicker(
-                  'Border Color',
-                  _colorBorder,
-                  (Color color) => _colorBorder = color,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-
-      // Undo/Redo
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            backgroundColor: Colors.grey.shade200,
-            foregroundColor: Colors.grey.shade700,
-            onPressed: () => paintModel.undo(),
-            child: Icon(Icons.undo),
-          ),
-          SizedBox(height: 8),
-          FloatingActionButton(
-            backgroundColor: Colors.grey.shade200,
-            foregroundColor: Colors.grey.shade700,
-            onPressed: () => paintModel.redo(),
-            child: Icon(Icons.redo),
-          ),
-        ],
-      ),
-    );
   }
 }
