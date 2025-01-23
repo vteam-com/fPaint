@@ -26,12 +26,34 @@ class MyCanvasPainter extends CustomPainter {
       (size.height - _paintModel.canvasSize.height) / 2,
     );
 
-    // Draw white background
-    final Paint backgroundPaint = Paint()..color = Colors.white;
-    canvas.drawRect(
-      _paintModel.offset & _paintModel.canvasSize,
-      backgroundPaint,
+    /// Render the transparent grid
+    final double cellSize = _paintModel.canvasSize.width /
+        ((_paintModel.canvasSize.width / 10.0).floor());
+    canvas.save();
+    canvas.clipRect(
+      Rect.fromLTWH(
+        _paintModel.offset.dx,
+        _paintModel.offset.dy,
+        _paintModel.canvasSize.width,
+        _paintModel.canvasSize.height,
+      ),
     );
+    for (double x = 0; x < _paintModel.canvasSize.width; x += cellSize) {
+      for (double y = 0; y < _paintModel.canvasSize.height; y += cellSize) {
+        if ((x ~/ cellSize + y ~/ cellSize) % 2 == 0) {
+          canvas.drawRect(
+            Rect.fromLTWH(
+              x + _paintModel.offset.dx,
+              y + _paintModel.offset.dy,
+              cellSize,
+              cellSize,
+            ),
+            Paint()..color = Colors.grey.shade400,
+          );
+        }
+      }
+    }
+    canvas.restore();
 
     for (final PaintLayer layer in _paintModel.layers.list) {
       if (layer.isVisible) {

@@ -6,8 +6,8 @@ import 'package:fpaint/models/layers.dart';
 export 'package:fpaint/models/layers.dart';
 
 class AppModel extends ChangeNotifier {
-  Layers layers = Layers();
   Size canvasSize = const Size(800, 600); // Default canvas size
+  late Layers layers = Layers(canvasSize);
   Offset offset = Offset(0, 0);
 
   int _currentLayerIndex = 0;
@@ -43,10 +43,10 @@ class AppModel extends ChangeNotifier {
 
   void addShape({
     Shape? shape,
-    Offset? start,
-    Offset? end,
     ShapeType? type,
     Color? color,
+    Offset? start,
+    Offset? end,
   }) {
     if (shape != null) {
       if (_isWithinCanvas(shape.start) && _isWithinCanvas(shape.end)) {

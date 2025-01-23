@@ -108,11 +108,10 @@ class LayersPanel extends StatelessWidget {
                 Icon(layer.isVisible ? Icons.visibility : Icons.visibility_off),
             onPressed: () => onToggleViewLayer(index),
           ),
-          if (layer.isPaper)
-            IconButton(
-              icon: Icon(Icons.delete_outline),
-              onPressed: () => onRemoveLayer(index),
-            ),
+          IconButton(
+            icon: Icon(Icons.delete_outline),
+            onPressed: () => onRemoveLayer(index),
+          ),
         ],
       ),
     );

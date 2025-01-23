@@ -1,4 +1,6 @@
 // Imports
+import 'package:flutter/material.dart';
+import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/models/shapes.dart';
 
 // Exports
@@ -9,14 +11,24 @@ class PaintLayer {
   String name;
   List<Shape> shapes = [];
   bool isVisible = true;
-  bool isPaper = true;
 }
 
 class Layers {
-  final List<PaintLayer> _list = [
-    PaintLayer(name: 'Layer1'),
-    PaintLayer(name: 'Paper')..isPaper = false,
-  ];
+  Layers(final Size size) {
+    final PaintLayer firstLayer = PaintLayer(name: 'Layer1');
+
+    firstLayer.shapes.add(
+      Shape(
+        Offset(0, 0),
+        Offset(size.width, size.height),
+        ShapeType.rectangle,
+        Colors.white,
+      ),
+    );
+
+    _list.add(firstLayer);
+  }
+  final List<PaintLayer> _list = [];
 
   int get length => _list.length;
 
