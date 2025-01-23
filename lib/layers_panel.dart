@@ -94,7 +94,6 @@ class LayersPanel extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.drag_handle),
           Expanded(
             child: Text('Layer ${index + 1}'),
           ),
