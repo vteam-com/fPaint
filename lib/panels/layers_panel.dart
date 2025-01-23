@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/paint_model.dart';
+import 'package:fpaint/models/app_model.dart';
 import 'package:provider/provider.dart';
 
 class LayersPanel extends StatelessWidget {
@@ -43,7 +43,7 @@ class LayersPanel extends StatelessWidget {
               ],
             ),
             Expanded(
-              child: Consumer<PaintModel>(
+              child: Consumer<AppModel>(
                 builder: (context, paintModel, child) {
                   return ReorderableListView.builder(
                     itemCount: paintModel.layers.length,
@@ -52,15 +52,15 @@ class LayersPanel extends StatelessWidget {
                       if (newIndex > oldIndex) {
                         newIndex -= 1;
                       }
-                      final PaintLayer layer = paintModel.layers[oldIndex];
-                      paintModel.layers.removeAt(oldIndex);
+                      final PaintLayer layer = paintModel.layers.get(oldIndex);
+                      paintModel.layers.remove(oldIndex);
                       paintModel.layers.insert(newIndex, layer);
                       if (selectedLayerIndex == oldIndex) {
                         onSelectLayer(newIndex);
                       }
                     },
                     itemBuilder: (context, index) {
-                      final PaintLayer layer = paintModel.layers[index];
+                      final PaintLayer layer = paintModel.layers.get(index);
                       final bool isSelected = index == selectedLayerIndex;
                       return ReorderableDragStartListener(
                         key: Key('$index'),
@@ -108,10 +108,11 @@ class LayersPanel extends StatelessWidget {
                 Icon(layer.isVisible ? Icons.visibility : Icons.visibility_off),
             onPressed: () => onToggleViewLayer(index),
           ),
-          IconButton(
-            icon: Icon(Icons.delete_outline),
-            onPressed: () => onRemoveLayer(index),
-          ),
+          if (layer.isPaper)
+            IconButton(
+              icon: Icon(Icons.delete_outline),
+              onPressed: () => onRemoveLayer(index),
+            ),
         ],
       ),
     );

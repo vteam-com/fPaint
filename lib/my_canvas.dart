@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
-import 'models/paint_model.dart';
+import 'models/app_model.dart';
 
-class Painter extends StatelessWidget {
-  const Painter({super.key, required this.paintModel});
-  final PaintModel paintModel;
+class MyCanvas extends StatelessWidget {
+  const MyCanvas({super.key, required this.paintModel});
+  final AppModel paintModel;
 
   @override
   Widget build(final BuildContext context) {
     return CustomPaint(
       size: Size.infinite,
-      painter: CanvasPainter(paintModel),
+      painter: MyCanvasPainter(paintModel),
     );
   }
 }
 
-class CanvasPainter extends CustomPainter {
-  CanvasPainter(this._paintModel);
-  final PaintModel _paintModel;
+class MyCanvasPainter extends CustomPainter {
+  MyCanvasPainter(this._paintModel);
+  final AppModel _paintModel;
 
   @override
   void paint(final Canvas canvas, final Size size) {
@@ -33,7 +33,7 @@ class CanvasPainter extends CustomPainter {
       backgroundPaint,
     );
 
-    for (final PaintLayer layer in _paintModel.layers) {
+    for (final PaintLayer layer in _paintModel.layers.list) {
       if (layer.isVisible) {
         for (final Shape shape in layer.shapes) {
           final Paint paint = Paint()
@@ -90,5 +90,5 @@ class CanvasPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CanvasPainter oldDelegate) => true;
+  bool shouldRepaint(MyCanvasPainter oldDelegate) => true;
 }

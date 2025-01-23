@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/models/paint_model.dart';
+import 'package:fpaint/models/app_model.dart';
 
 void main() {
   group('PaintModel Tests', () {
-    late PaintModel paintModel;
+    late AppModel paintModel;
 
     setUp(() {
-      paintModel = PaintModel();
+      paintModel = AppModel();
     });
 
     test('initial state should have one empty layer', () {
-      expect(paintModel.layers.length, 1);
+      expect(paintModel.layers.length, 2); // includes the background
       expect(paintModel.currentLayerIndex, 0);
       expect(paintModel.currentLayer.shapes.isEmpty, true);
     });

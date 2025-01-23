@@ -5,40 +5,40 @@ import 'package:fpaint/models/layers.dart';
 // Exports
 export 'package:fpaint/models/layers.dart';
 
-class PaintModel extends ChangeNotifier {
-  List<PaintLayer> layers = [PaintLayer(name: 'Layer1')];
+class AppModel extends ChangeNotifier {
+  Layers layers = Layers();
   Size canvasSize = const Size(800, 600); // Default canvas size
   Offset offset = Offset(0, 0);
 
   int _currentLayerIndex = 0;
   int get currentLayerIndex => _currentLayerIndex;
-  bool isIndexInRange(final int indexLayer) =>
-      indexLayer >= 0 && indexLayer < layers.length;
 
   void setActiveLayer(final int layerIndex) {
-    if (isIndexInRange(layerIndex)) {
+    if (layers.isIndexInRange(layerIndex)) {
       _currentLayerIndex = layerIndex;
       notifyListeners();
     }
   }
 
-  PaintLayer get currentLayer => layers[currentLayerIndex];
+  PaintLayer get currentLayer => layers.get(currentLayerIndex);
 
   void addLayer() {
-    final PaintLayer newLayer = PaintLayer(name: 'Layer${layers.length + 1}');
-    layers.add(newLayer);
+    layers.add(PaintLayer(name: 'Layer${layers.length + 1}'));
     setActiveLayer(layers.length - 1);
   }
 
   void removeLayer(int index) {
-    if (layers.length > 1) {
-      layers.removeAt(index);
+    if (layers.isIndexInRange(index)) {
+      layers.remove(index);
       setActiveLayer(currentLayerIndex > 0 ? currentLayerIndex - 1 : 0);
     }
   }
 
   bool isVisible(final int layerIndex) {
-    return layers[layerIndex].isVisible;
+    if (layers.isIndexInRange(layerIndex)) {
+      return layers.get(layerIndex).isVisible;
+    }
+    return false;
   }
 
   void addShape({
@@ -76,7 +76,7 @@ class PaintModel extends ChangeNotifier {
 
   void toggleLayerVisibility(final int layerIndex) {
     if (layerIndex >= 0 && layerIndex < layers.length) {
-      layers[layerIndex].isVisible = !layers[layerIndex].isVisible;
+      layers.get(layerIndex).isVisible = !layers.get(layerIndex).isVisible;
       notifyListeners();
     }
   }

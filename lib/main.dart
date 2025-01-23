@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/home_screen.dart';
 import 'package:provider/provider.dart';
-import 'models/paint_model.dart';
+import 'models/app_model.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => PaintModel(),
+      create: (_) => AppModel(),
       child: MaterialApp(
         title: 'Flutter Paint App',
         home: HomeScreen(),

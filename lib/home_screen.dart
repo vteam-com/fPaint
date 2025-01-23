@@ -8,8 +8,8 @@ import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
-import 'models/paint_model.dart';
-import 'painter.dart';
+import 'models/app_model.dart';
+import 'my_canvas.dart';
 
 class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
@@ -29,20 +29,20 @@ class HomeScreenState extends State<HomeScreen> {
 
   // Method to add a new layer
   void _addLayer() {
-    Provider.of<PaintModel>(context, listen: false).addLayer();
+    Provider.of<AppModel>(context, listen: false).addLayer();
     setState(() {
       _selectedLayerIndex =
-          Provider.of<PaintModel>(context, listen: false).layers.length - 1;
+          Provider.of<AppModel>(context, listen: false).layers.length - 1;
     });
   }
 
   Future<Uint8List> _capturePainterToImageBytes(BuildContext context) async {
-    final PaintModel model = Provider.of<PaintModel>(context, listen: false);
+    final AppModel model = Provider.of<AppModel>(context, listen: false);
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
 
     // Draw the custom painter on the canvas
-    final CanvasPainter painter = CanvasPainter(model);
+    final MyCanvasPainter painter = MyCanvasPainter(model);
 
     painter.paint(canvas, model.canvasSize);
 
@@ -78,25 +78,24 @@ class HomeScreenState extends State<HomeScreen> {
   void _selectLayer(final int layerIndex) {
     setState(() {
       _selectedLayerIndex = layerIndex;
-      Provider.of<PaintModel>(context, listen: false)
-          .setActiveLayer(layerIndex);
+      Provider.of<AppModel>(context, listen: false).setActiveLayer(layerIndex);
     });
   }
 
   // Method to remove a layer
   void _removeLayer(final int layerIndex) {
-    Provider.of<PaintModel>(context, listen: false).removeLayer(layerIndex);
+    Provider.of<AppModel>(context, listen: false).removeLayer(layerIndex);
     setState(() {
       if (_selectedLayerIndex >=
-          Provider.of<PaintModel>(context, listen: false).layers.length) {
+          Provider.of<AppModel>(context, listen: false).layers.length) {
         _selectedLayerIndex =
-            Provider.of<PaintModel>(context, listen: false).layers.length - 1;
+            Provider.of<AppModel>(context, listen: false).layers.length - 1;
       }
     });
   }
 
   void _onToggleViewLayer(final int layerIndex) {
-    Provider.of<PaintModel>(context, listen: false)
+    Provider.of<AppModel>(context, listen: false)
         .toggleLayerVisibility(layerIndex);
     setState(() {});
   }
@@ -106,16 +105,16 @@ class HomeScreenState extends State<HomeScreen> {
     if (_currentShapeType != ShapeType.pencil) {
       _currentShape =
           Shape(position, position, _currentShapeType, _currentColor);
-      Provider.of<PaintModel>(context, listen: false)
+      Provider.of<AppModel>(context, listen: false)
           .addShape(shape: _currentShape);
     }
   }
 
   void _handlePanUpdate(Offset position) {
     if (_panStart != null && _currentShapeType != ShapeType.pencil) {
-      Provider.of<PaintModel>(context, listen: false).updateLastShape(position);
+      Provider.of<AppModel>(context, listen: false).updateLastShape(position);
     } else if (_panStart != null && _currentShapeType == ShapeType.pencil) {
-      Provider.of<PaintModel>(context, listen: false).addShape(
+      Provider.of<AppModel>(context, listen: false).addShape(
         start: _panStart!,
         end: position,
         type: _currentShapeType,
@@ -161,7 +160,7 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(final BuildContext context) {
     // Ensure that PaintModel is provided above this widget in the widget tree
-    final PaintModel paintModel = Provider.of<PaintModel>(context);
+    final AppModel paintModel = Provider.of<AppModel>(context);
 
     return Scaffold(
       backgroundColor: Colors.grey,
@@ -173,7 +172,7 @@ class HomeScreenState extends State<HomeScreen> {
             onPanUpdate: (details) =>
                 _handlePanUpdate(details.localPosition - paintModel.offset),
             onPanEnd: _handlePanEnd,
-            child: Painter(paintModel: paintModel),
+            child: MyCanvas(paintModel: paintModel),
           ),
           Positioned(
             top: 16,
