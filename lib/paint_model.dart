@@ -28,21 +28,30 @@ class PaintLayer {
 
 class PaintModel extends ChangeNotifier {
   List<PaintLayer> layers = [PaintLayer()];
-  int currentLayerIndex = 0;
+
+  int _currentLayerIndex = 0;
+  int get currentLayerIndex => _currentLayerIndex;
+  bool isIndexInRange(final int indexLayer) =>
+      indexLayer >= 0 && indexLayer < layers.length;
+
+  void setActiveLayer(final int layerIndex) {
+    if (isIndexInRange(layerIndex)) {
+      _currentLayerIndex = layerIndex;
+      notifyListeners();
+    }
+  }
 
   PaintLayer get currentLayer => layers[currentLayerIndex];
 
   void addLayer() {
     layers.add(PaintLayer());
-    currentLayerIndex = layers.length - 1;
-    notifyListeners();
+    setActiveLayer(layers.length - 1);
   }
 
   void removeLayer(int index) {
     if (layers.length > 1) {
       layers.removeAt(index);
-      currentLayerIndex = currentLayerIndex > 0 ? currentLayerIndex - 1 : 0;
-      notifyListeners();
+      setActiveLayer(currentLayerIndex > 0 ? currentLayerIndex - 1 : 0);
     }
   }
 

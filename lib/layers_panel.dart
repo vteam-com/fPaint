@@ -35,11 +35,30 @@ class LayersPanel extends StatelessWidget {
           Expanded(
             child: Consumer<PaintModel>(
               builder: (context, paintModel, child) {
-                return ListView.builder(
+                return ReorderableListView.builder(
                   itemCount: paintModel.layers.length,
+                  buildDefaultDragHandles: false,
+                  onReorder: (oldIndex, newIndex) {
+                    if (newIndex > oldIndex) {
+                      newIndex -= 1;
+                    }
+                    final layer = paintModel.layers[oldIndex];
+                    paintModel.layers.removeAt(oldIndex);
+                    paintModel.layers.insert(newIndex, layer);
+                    if (selectedLayerIndex == oldIndex) {
+                      onSelectLayer(newIndex);
+                    }
+                  },
                   itemBuilder: (context, index) {
                     final bool isSelected = index == selectedLayerIndex;
-                    return layerRow(context, isSelected, index);
+                    return ReorderableDragStartListener(
+                      key: Key('$index'),
+                      index: index,
+                      child: GestureDetector(
+                        onTap: () => onSelectLayer(index),
+                        child: layerRow(context, isSelected, index),
+                      ),
+                    );
                   },
                 );
               },
@@ -59,6 +78,7 @@ class LayersPanel extends StatelessWidget {
         Provider.of<PaintModel>(context, listen: false).isVisible(index);
 
     return Container(
+      key: ValueKey(index),
       margin: EdgeInsets.all(4),
       padding: EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -70,6 +90,7 @@ class LayersPanel extends StatelessWidget {
       ),
       child: Row(
         children: [
+          Icon(Icons.drag_handle),
           Expanded(
             child: Text('Layer ${index + 1}'),
           ),

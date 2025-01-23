@@ -35,6 +35,8 @@ class HomeScreenState extends State<HomeScreen> {
   void _selectLayer(final int layerIndex) {
     setState(() {
       _selectedLayerIndex = layerIndex;
+      Provider.of<PaintModel>(context, listen: false)
+          .setActiveLayer(layerIndex);
     });
   }
 
