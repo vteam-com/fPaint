@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/layers_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'paint_model.dart';
@@ -14,14 +15,44 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  ShapeType _currentShapeType = ShapeType.line;
+  ShapeType _currentShapeType = ShapeType.pencil;
   Color _currentColor = Colors.black;
   Offset? _panStart;
   Shape? _currentShape;
 
+  int _selectedLayerIndex = 0; // Track the selected layer
+
+  // Method to add a new layer
+  void _addLayer() {
+    Provider.of<PaintModel>(context, listen: false).addLayer();
+    setState(() {
+      _selectedLayerIndex =
+          Provider.of<PaintModel>(context, listen: false).layers.length - 1;
+    });
+  }
+
+  // Method to select a layer
+  void _selectLayer(int index) {
+    setState(() {
+      _selectedLayerIndex = index;
+    });
+  }
+
+  // Method to remove a layer
+  void _removeLayer(int index) {
+    Provider.of<PaintModel>(context, listen: false).removeLayer(index);
+    setState(() {
+      if (_selectedLayerIndex >=
+          Provider.of<PaintModel>(context, listen: false).layers.length) {
+        _selectedLayerIndex =
+            Provider.of<PaintModel>(context, listen: false).layers.length - 1;
+      }
+    });
+  }
+
   void _handlePanStart(Offset position) {
     _panStart = position;
-    if (_currentShapeType != ShapeType.line) {
+    if (_currentShapeType != ShapeType.pencil) {
       _currentShape =
           Shape(position, position, _currentShapeType, _currentColor);
       Provider.of<PaintModel>(context, listen: false)
@@ -30,9 +61,9 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   void _handlePanUpdate(Offset position) {
-    if (_panStart != null && _currentShapeType != ShapeType.line) {
+    if (_panStart != null && _currentShapeType != ShapeType.pencil) {
       Provider.of<PaintModel>(context, listen: false).updateLastShape(position);
-    } else if (_panStart != null && _currentShapeType == ShapeType.line) {
+    } else if (_panStart != null && _currentShapeType == ShapeType.pencil) {
       Provider.of<PaintModel>(context, listen: false).addShape(
         start: _panStart!,
         end: position,
@@ -82,11 +113,29 @@ class HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: GestureDetector(
-        onPanStart: (details) => _handlePanStart(details.localPosition),
-        onPanUpdate: (details) => _handlePanUpdate(details.localPosition),
-        onPanEnd: _handlePanEnd,
-        child: Painter(paintModel: Provider.of<PaintModel>(context)),
+      body: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onPanStart: (details) => _handlePanStart(details.localPosition),
+              onPanUpdate: (details) => _handlePanUpdate(details.localPosition),
+              onPanEnd: _handlePanEnd,
+              child: Painter(paintModel: Provider.of<PaintModel>(context)),
+            ),
+          ),
+          Column(
+            children: [
+              Expanded(
+                child: LayersPanel(
+                  selectedLayerIndex: _selectedLayerIndex,
+                  onSelectLayer: _selectLayer,
+                  onAddLayer: _addLayer,
+                  onRemoveLayer: _removeLayer,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -114,9 +163,20 @@ class HomeScreenState extends State<HomeScreen> {
             IconButton(
               icon: Icon(Icons.edit_outlined),
               onPressed: () => setState(() {
+                _currentShapeType = ShapeType.pencil;
+              }),
+              color:
+                  _currentShapeType == ShapeType.pencil ? _currentColor : null,
+            ),
+
+            // Line
+            IconButton(
+              icon: Icon(Icons.line_axis),
+              onPressed: () => setState(() {
                 _currentShapeType = ShapeType.line;
               }),
-              color: _currentShapeType == ShapeType.line ? _currentColor : null,
+              color:
+                  _currentShapeType == ShapeType.pencil ? _currentColor : null,
             ),
 
             // Rectangle

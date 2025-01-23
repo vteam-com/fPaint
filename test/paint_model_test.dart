@@ -20,7 +20,7 @@ void main() {
       final shape = Shape(
         const Offset(0, 0),
         const Offset(10, 10),
-        ShapeType.line,
+        ShapeType.pencil,
         Colors.black,
       );
       paintModel.addShape(shape: shape);
@@ -62,7 +62,7 @@ void main() {
       paintModel.addShape(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: ShapeType.line,
+        type: ShapeType.pencil,
         color: Colors.green,
       );
       expect(paintModel.currentLayer.shapes.length, 1);
@@ -80,7 +80,7 @@ void main() {
       paintModel.addShape(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: ShapeType.line,
+        type: ShapeType.pencil,
         color: Colors.black,
       );
       paintModel.addShape(
@@ -92,7 +92,7 @@ void main() {
       expect(paintModel.currentLayer.shapes.length, 2);
       paintModel.undo();
       expect(paintModel.currentLayer.shapes.length, 1);
-      expect(paintModel.currentLayer.shapes.first.type, ShapeType.line);
+      expect(paintModel.currentLayer.shapes.first.type, ShapeType.pencil);
     });
   });
 }

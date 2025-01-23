@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 enum ShapeType {
+  pencil,
   line,
   circle,
   rectangle,
@@ -24,6 +25,20 @@ class PaintModel extends ChangeNotifier {
   int currentLayerIndex = 0;
 
   PaintLayer get currentLayer => layers[currentLayerIndex];
+
+  void addLayer() {
+    layers.add(PaintLayer());
+    currentLayerIndex = layers.length - 1;
+    notifyListeners();
+  }
+
+  void removeLayer(int index) {
+    if (layers.length > 1) {
+      layers.removeAt(index);
+      currentLayerIndex = currentLayerIndex > 0 ? currentLayerIndex - 1 : 0;
+      notifyListeners();
+    }
+  }
 
   void addShape(
       {Shape? shape,

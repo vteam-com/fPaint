@@ -31,15 +31,15 @@ A feature-rich drawing and painting application built with Flutter that allows u
 
 git clone <https://github.com/yourusername/flutter-drawing-app.git>
 
-2. Navigate to project directory
+1. Navigate to project directory
 
 cd flutter-drawing-app
 
-3. Install dependencies
+1. Install dependencies
 
 flutter pub get
 
-4. Run the app
+1. Run the app
 
 flutter run
 

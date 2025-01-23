@@ -22,14 +22,17 @@ class CanvasPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (var layer in _paintModel.layers) {
-      for (var shape in layer.shapes) {
-        final paint = Paint()
+    for (final PaintLayer layer in _paintModel.layers) {
+      for (final Shape shape in layer.shapes) {
+        final Paint paint = Paint()
           ..color = shape.color
           ..strokeCap = StrokeCap.round
           ..strokeWidth = 5.0;
 
         switch (shape.type) {
+          case ShapeType.pencil:
+            canvas.drawLine(shape.start, shape.end, paint);
+            break;
           case ShapeType.line:
             canvas.drawLine(shape.start, shape.end, paint);
             break;
