@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/layers_panel.dart';
+import 'package:fpaint/tools_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'paint_model.dart';
@@ -109,62 +110,22 @@ class HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _onShapeSelected(final ShapeType shape) {
+    setState(() {
+      _currentShapeType = shape;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              // Pencil
-              IconButton(
-                icon: Icon(Icons.edit_outlined),
-                onPressed: () => setState(() {
-                  _currentShapeType = ShapeType.pencil;
-                }),
-                color: _currentShapeType == ShapeType.pencil
-                    ? _currentColor
-                    : null,
-              ),
-
-              // Line
-              IconButton(
-                icon: Icon(Icons.line_axis),
-                onPressed: () => setState(() {
-                  _currentShapeType = ShapeType.line;
-                }),
-                color: _currentShapeType == ShapeType.pencil
-                    ? _currentColor
-                    : null,
-              ),
-
-              // Rectangle
-              IconButton(
-                icon: Icon(Icons.crop_square),
-                onPressed: () => setState(() {
-                  _currentShapeType = ShapeType.rectangle;
-                }),
-                color: _currentShapeType == ShapeType.rectangle
-                    ? _currentColor
-                    : null,
-              ),
-              // Circle
-              IconButton(
-                icon: Icon(Icons.circle_outlined),
-                onPressed: () => setState(() {
-                  _currentShapeType = ShapeType.circle;
-                }),
-                color: _currentShapeType == ShapeType.circle
-                    ? _currentColor
-                    : null,
-              ),
-              IconButton(
-                icon: Icon(Icons.color_lens),
-                onPressed: _showColorPicker,
-                color: _currentColor,
-              ),
-            ],
+          ToolsPanel(
+            currentShapeType: _currentShapeType,
+            currentColor: _currentColor,
+            onShapeSelected: _onShapeSelected,
+            onColorPicker: _showColorPicker,
           ),
           Expanded(
             child: Row(
@@ -180,18 +141,12 @@ class HomeScreenState extends State<HomeScreen> {
                         Painter(paintModel: Provider.of<PaintModel>(context)),
                   ),
                 ),
-                Column(
-                  children: [
-                    Expanded(
-                      child: LayersPanel(
-                        selectedLayerIndex: _selectedLayerIndex,
-                        onSelectLayer: _selectLayer,
-                        onAddLayer: _addLayer,
-                        onRemoveLayer: _removeLayer,
-                        onToggleViewLayer: _onToggleViewLayer,
-                      ),
-                    ),
-                  ],
+                LayersPanel(
+                  selectedLayerIndex: _selectedLayerIndex,
+                  onSelectLayer: _selectLayer,
+                  onAddLayer: _addLayer,
+                  onRemoveLayer: _removeLayer,
+                  onToggleViewLayer: _onToggleViewLayer,
                 ),
               ],
             ),

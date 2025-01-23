@@ -20,51 +20,55 @@ class LayersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 200,
-      color: Colors.grey,
-      child: Column(
-        children: [
-          // toolbar
-          Row(children: [
-            IconButton(
-              icon: Icon(Icons.add),
-              onPressed: onAddLayer,
+    return Material(
+      elevation: 4,
+      color: Colors.grey.shade200,
+      child: SizedBox(
+        width: 200,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // toolbar
+            Row(children: [
+              IconButton(
+                icon: Icon(Icons.add),
+                onPressed: onAddLayer,
+              ),
+            ]),
+            Expanded(
+              child: Consumer<PaintModel>(
+                builder: (context, paintModel, child) {
+                  return ReorderableListView.builder(
+                    itemCount: paintModel.layers.length,
+                    buildDefaultDragHandles: false,
+                    onReorder: (oldIndex, newIndex) {
+                      if (newIndex > oldIndex) {
+                        newIndex -= 1;
+                      }
+                      final layer = paintModel.layers[oldIndex];
+                      paintModel.layers.removeAt(oldIndex);
+                      paintModel.layers.insert(newIndex, layer);
+                      if (selectedLayerIndex == oldIndex) {
+                        onSelectLayer(newIndex);
+                      }
+                    },
+                    itemBuilder: (context, index) {
+                      final bool isSelected = index == selectedLayerIndex;
+                      return ReorderableDragStartListener(
+                        key: Key('$index'),
+                        index: index,
+                        child: GestureDetector(
+                          onTap: () => onSelectLayer(index),
+                          child: layerRow(context, isSelected, index),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ]),
-          Expanded(
-            child: Consumer<PaintModel>(
-              builder: (context, paintModel, child) {
-                return ReorderableListView.builder(
-                  itemCount: paintModel.layers.length,
-                  buildDefaultDragHandles: false,
-                  onReorder: (oldIndex, newIndex) {
-                    if (newIndex > oldIndex) {
-                      newIndex -= 1;
-                    }
-                    final layer = paintModel.layers[oldIndex];
-                    paintModel.layers.removeAt(oldIndex);
-                    paintModel.layers.insert(newIndex, layer);
-                    if (selectedLayerIndex == oldIndex) {
-                      onSelectLayer(newIndex);
-                    }
-                  },
-                  itemBuilder: (context, index) {
-                    final bool isSelected = index == selectedLayerIndex;
-                    return ReorderableDragStartListener(
-                      key: Key('$index'),
-                      index: index,
-                      child: GestureDetector(
-                        onTap: () => onSelectLayer(index),
-                        child: layerRow(context, isSelected, index),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
