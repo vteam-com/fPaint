@@ -182,9 +182,28 @@ class HomeScreenState extends State<HomeScreen> {
             onPanEnd: _handlePanEnd,
             child: MyCanvas(paintModel: paintModel),
           ),
+
+          // Panel for Layers
           Positioned(
-            top: 16,
-            left: 16,
+            top: 64,
+            right: 8,
+            child: Card(
+              elevation: 8,
+              child: LayersPanel(
+                selectedLayerIndex: _selectedLayerIndex,
+                onSelectLayer: _selectLayer,
+                onAddLayer: _onAddLayer,
+                onShare: _onShare,
+                onRemoveLayer: _removeLayer,
+                onToggleViewLayer: _onToggleViewLayer,
+              ),
+            ),
+          ),
+
+          // Panel for tools
+          Positioned(
+            top: 8,
+            left: 8,
             child: Card(
               elevation: 8,
               child: ToolsPanel(
@@ -205,32 +224,23 @@ class HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          Positioned(
-            top: 16,
-            right: 16,
-            child: Card(
-              elevation: 8,
-              child: LayersPanel(
-                selectedLayerIndex: _selectedLayerIndex,
-                onSelectLayer: _selectLayer,
-                onAddLayer: _onAddLayer,
-                onShare: _onShare,
-                onRemoveLayer: _removeLayer,
-                onToggleViewLayer: _onToggleViewLayer,
-              ),
-            ),
-          ),
         ],
       ),
+
+      // Undo/Redo
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
+            backgroundColor: Colors.grey.shade200,
+            foregroundColor: Colors.grey.shade700,
             onPressed: () => paintModel.undo(),
             child: Icon(Icons.undo),
           ),
           SizedBox(height: 8),
           FloatingActionButton(
+            backgroundColor: Colors.grey.shade200,
+            foregroundColor: Colors.grey.shade700,
             onPressed: () => paintModel.redo(),
             child: Icon(Icons.redo),
           ),
