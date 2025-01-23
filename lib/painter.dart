@@ -22,6 +22,10 @@ class CanvasPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Draw white background
+    final Paint backgroundPaint = Paint()..color = Colors.white;
+    canvas.drawRect(Offset.zero & _paintModel.canvasSize, backgroundPaint);
+
     for (final PaintLayer layer in _paintModel.layers) {
       if (layer.isVisible) {
         for (final Shape shape in layer.shapes) {
