@@ -1,10 +1,14 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'models/paint_model.dart';
 import 'painter.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 class HomeScreen extends StatefulWidget {
   final TextEditingController controller = TextEditingController();
@@ -30,6 +34,44 @@ class HomeScreenState extends State<HomeScreen> {
       _selectedLayerIndex =
           Provider.of<PaintModel>(context, listen: false).layers.length - 1;
     });
+  }
+
+  Future<Uint8List> _capturePainterToImageBytes(BuildContext context) async {
+    final PaintModel model = Provider.of<PaintModel>(context, listen: false);
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    // Draw the custom painter on the canvas
+    final CanvasPainter painter = CanvasPainter(model);
+
+    painter.paint(canvas, model.canvasSize);
+
+    // End the recording and get the picture
+    final Picture picture = recorder.endRecording();
+
+    // Convert the picture to an image
+    final image = await picture.toImage(
+      model.canvasSize.width.toInt(),
+      model.canvasSize.height.toInt(),
+    );
+
+    // Convert the image to byte data (e.g., PNG)
+    final ByteData? byteData = await image.toByteData(
+      format: ImageByteFormat.png,
+    );
+    return byteData!.buffer.asUint8List();
+  }
+
+  void _onShare() async {
+    final clipboard = SystemClipboard.instance;
+    if (clipboard != null) {
+      final image = await _capturePainterToImageBytes(context);
+      final item = DataWriterItem(suggestedName: 'fPaint.png');
+      item.add(Formats.png(image));
+      await clipboard.write([item]);
+    } else {
+      //
+    }
   }
 
   // Method to select a layer
@@ -155,6 +197,7 @@ class HomeScreenState extends State<HomeScreen> {
                 selectedLayerIndex: _selectedLayerIndex,
                 onSelectLayer: _selectLayer,
                 onAddLayer: _addLayer,
+                onShare: _onShare,
                 onRemoveLayer: _removeLayer,
                 onToggleViewLayer: _onToggleViewLayer,
               ),

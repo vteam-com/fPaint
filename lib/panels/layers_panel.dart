@@ -6,6 +6,7 @@ class LayersPanel extends StatelessWidget {
   final int selectedLayerIndex;
   final Function(int) onSelectLayer;
   final Function() onAddLayer;
+  final Function() onShare;
   final Function(int) onRemoveLayer;
   final Function(int) onToggleViewLayer;
 
@@ -14,6 +15,7 @@ class LayersPanel extends StatelessWidget {
     required this.selectedLayerIndex,
     required this.onSelectLayer,
     required this.onAddLayer,
+    required this.onShare,
     required this.onRemoveLayer,
     required this.onToggleViewLayer,
   });
@@ -33,6 +35,10 @@ class LayersPanel extends StatelessWidget {
               IconButton(
                 icon: Icon(Icons.add),
                 onPressed: onAddLayer,
+              ),
+              IconButton(
+                icon: Icon(Icons.ios_share_outlined),
+                onPressed: onShare,
               ),
             ]),
             Expanded(
