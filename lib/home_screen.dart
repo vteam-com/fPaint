@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/layers_panel.dart';
+import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -117,39 +117,45 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
+    // Ensure that PaintModel is provided above this widget in the widget tree
+    final paintModel = Provider.of<PaintModel>(context);
+
     return Scaffold(
       backgroundColor: Colors.grey,
-      body: Column(
+      body: Stack(
         children: [
-          ToolsPanel(
-            currentShapeType: _currentShapeType,
-            currentColor: _currentColor,
-            onShapeSelected: _onShapeSelected,
-            onColorPicker: _showColorPicker,
+          GestureDetector(
+            onPanStart: (details) => _handlePanStart(details.localPosition),
+            onPanUpdate: (details) => _handlePanUpdate(details.localPosition),
+            onPanEnd: _handlePanEnd,
+            child: Painter(paintModel: paintModel),
           ),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onPanStart: (details) =>
-                        _handlePanStart(details.localPosition),
-                    onPanUpdate: (details) =>
-                        _handlePanUpdate(details.localPosition),
-                    onPanEnd: _handlePanEnd,
-                    child:
-                        Painter(paintModel: Provider.of<PaintModel>(context)),
-                  ),
-                ),
-                LayersPanel(
-                  selectedLayerIndex: _selectedLayerIndex,
-                  onSelectLayer: _selectLayer,
-                  onAddLayer: _addLayer,
-                  onRemoveLayer: _removeLayer,
-                  onToggleViewLayer: _onToggleViewLayer,
-                ),
-              ],
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Card(
+              elevation: 8,
+              child: ToolsPanel(
+                currentShapeType: _currentShapeType,
+                currentColor: _currentColor,
+                onShapeSelected: _onShapeSelected,
+                onColorPicker: _showColorPicker,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Card(
+              elevation: 8,
+              child: LayersPanel(
+                selectedLayerIndex: _selectedLayerIndex,
+                onSelectLayer: _selectLayer,
+                onAddLayer: _addLayer,
+                onRemoveLayer: _removeLayer,
+                onToggleViewLayer: _onToggleViewLayer,
+              ),
             ),
           ),
         ],
@@ -158,14 +164,12 @@ class HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-            onPressed: () =>
-                Provider.of<PaintModel>(context, listen: false).undo(),
+            onPressed: () => paintModel.undo(),
             child: Icon(Icons.undo),
           ),
           SizedBox(height: 8),
           FloatingActionButton(
-            onPressed: () =>
-                Provider.of<PaintModel>(context, listen: false).redo(),
+            onPressed: () => paintModel.redo(),
             child: Icon(Icons.redo),
           ),
         ],

@@ -25,8 +25,8 @@ class LayersPanel extends StatelessWidget {
       color: Colors.grey.shade200,
       child: SizedBox(
         width: 200,
+        height: 500,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
             // toolbar
             Row(children: [
