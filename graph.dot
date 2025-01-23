@@ -6,6 +6,7 @@ digraph "" {
   "/test/widget_test.dart" [label="widget_test"];
   "/lib/panels/tools_panel.dart" [label="tools_panel"];
   "/lib/panels/layers_panel.dart" [label="layers_panel"];
+  "/lib/panels/tool.dart" [label="tool"];
   "/lib/models/layers.dart" [label="layers"];
   "/lib/models/shapes.dart" [label="shapes"];
   "/lib/models/paint_model.dart" [label="paint_model"];
@@ -28,6 +29,7 @@ digraph "" {
         label="panels";
         "/lib/panels/tools_panel.dart";
         "/lib/panels/layers_panel.dart";
+        "/lib/panels/tool.dart";
       }
       subgraph "cluster~/lib/models" {
         label="models";
@@ -40,6 +42,7 @@ digraph "" {
   "/test/paint_model_test.dart" -> "/lib/models/paint_model.dart";
   "/test/widget_test.dart" -> "/lib/main.dart";
   "/lib/panels/tools_panel.dart" -> "/lib/models/shapes.dart";
+  "/lib/panels/tools_panel.dart" -> "/lib/panels/tool.dart";
   "/lib/panels/layers_panel.dart" -> "/lib/models/paint_model.dart";
   "/lib/models/layers.dart" -> "/lib/models/shapes.dart";
   "/lib/models/layers.dart" -> "/lib/models/shapes.dart" [style=dashed];

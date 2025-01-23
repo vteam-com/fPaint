@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/shapes.dart';
+import 'package:fpaint/panels/tool.dart';
 
 class ToolsPanel extends StatelessWidget {
   final ShapeType currentShapeType;
@@ -24,32 +25,36 @@ class ToolsPanel extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           // Pencil
-          IconButton(
-            icon: Icon(Icons.edit_outlined),
+          ToolItem(
+            name: 'Draw',
+            icon: Icons.edit_outlined,
+            isSelected: currentShapeType == ShapeType.pencil,
             onPressed: () => onShapeSelected(ShapeType.pencil),
-            color: currentShapeType == ShapeType.pencil ? currentColor : null,
           ),
 
           // Line
-          IconButton(
-            icon: Icon(Icons.line_axis),
+          ToolItem(
+            name: 'Line',
+            icon: Icons.line_axis,
+            isSelected: currentShapeType == ShapeType.line,
             onPressed: () => onShapeSelected(ShapeType.line),
-            color: currentShapeType == ShapeType.pencil ? currentColor : null,
           ),
 
           // Rectangle
-          IconButton(
-            icon: Icon(Icons.crop_square),
+          ToolItem(
+            name: 'Rectangle',
+            icon: Icons.crop_square,
+            isSelected: currentShapeType == ShapeType.rectangle,
             onPressed: () => onShapeSelected(ShapeType.rectangle),
-            color:
-                currentShapeType == ShapeType.rectangle ? currentColor : null,
           ),
           // Circle
-          IconButton(
-            icon: Icon(Icons.circle_outlined),
+          ToolItem(
+            name: 'Circle',
+            icon: Icons.circle_outlined,
+            isSelected: currentShapeType == ShapeType.circle,
             onPressed: () => onShapeSelected(ShapeType.circle),
-            color: currentShapeType == ShapeType.circle ? currentColor : null,
           ),
+
           IconButton(
             icon: Icon(Icons.color_lens),
             onPressed: onColorPicker,
