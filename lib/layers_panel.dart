@@ -87,7 +87,7 @@ class LayersPanel extends StatelessWidget {
       padding: EdgeInsets.all(8),
       decoration: BoxDecoration(
         border: Border.all(
-          color: isSelected ? Colors.blue.shade100 : Colors.grey,
+          color: isSelected ? Colors.blue : Colors.grey.shade300,
           width: 3,
         ),
         borderRadius: BorderRadius.circular(4),
