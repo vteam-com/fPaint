@@ -44,30 +44,36 @@ class LayersPanel extends StatelessWidget {
             ),
             Expanded(
               child: Consumer<AppModel>(
-                builder: (context, paintModel, child) {
+                builder: (context, appModel, child) {
                   return ReorderableListView.builder(
-                    itemCount: paintModel.layers.length,
+                    itemCount: appModel.layers.length,
                     buildDefaultDragHandles: false,
                     onReorder: (oldIndex, newIndex) {
                       if (newIndex > oldIndex) {
                         newIndex -= 1;
                       }
-                      final PaintLayer layer = paintModel.layers.get(oldIndex);
-                      paintModel.layers.remove(oldIndex);
-                      paintModel.layers.insert(newIndex, layer);
+                      final PaintLayer layer = appModel.layers.get(oldIndex);
+                      appModel.layers.remove(oldIndex);
+                      appModel.layers.insert(newIndex, layer);
                       if (selectedLayerIndex == oldIndex) {
                         onSelectLayer(newIndex);
                       }
                     },
                     itemBuilder: (context, index) {
-                      final PaintLayer layer = paintModel.layers.get(index);
+                      final PaintLayer layer = appModel.layers.get(index);
                       final bool isSelected = index == selectedLayerIndex;
                       return ReorderableDragStartListener(
                         key: Key('$index'),
                         index: index,
                         child: GestureDetector(
                           onTap: () => onSelectLayer(index),
-                          child: layerRow(context, isSelected, index, layer),
+                          child: layerRow(
+                            context,
+                            isSelected,
+                            index,
+                            layer,
+                            appModel.layers.length > 1,
+                          ),
                         ),
                       );
                     },
@@ -86,6 +92,7 @@ class LayersPanel extends StatelessWidget {
     final bool isSelected,
     final int index,
     final PaintLayer layer,
+    final bool showDelete,
   ) {
     return Container(
       key: ValueKey(index),
@@ -108,10 +115,11 @@ class LayersPanel extends StatelessWidget {
                 Icon(layer.isVisible ? Icons.visibility : Icons.visibility_off),
             onPressed: () => onToggleViewLayer(index),
           ),
-          IconButton(
-            icon: Icon(Icons.delete_outline),
-            onPressed: () => onRemoveLayer(index),
-          ),
+          if (showDelete)
+            IconButton(
+              icon: Icon(Icons.delete_outline),
+              onPressed: () => onRemoveLayer(index),
+            ),
         ],
       ),
     );
