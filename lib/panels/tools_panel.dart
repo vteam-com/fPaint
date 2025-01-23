@@ -3,11 +3,6 @@ import 'package:fpaint/models/shapes.dart';
 import 'package:fpaint/panels/tool.dart';
 
 class ToolsPanel extends StatelessWidget {
-  final ShapeType currentShapeType;
-  final Color currentColor;
-  final Function(ShapeType) onShapeSelected;
-  final VoidCallback onColorPicker;
-
   const ToolsPanel({
     super.key,
     required this.currentShapeType,
@@ -15,6 +10,10 @@ class ToolsPanel extends StatelessWidget {
     required this.onShapeSelected,
     required this.onColorPicker,
   });
+  final ShapeType currentShapeType;
+  final Color currentColor;
+  final Function(ShapeType) onShapeSelected;
+  final VoidCallback onColorPicker;
 
   @override
   Widget build(BuildContext context) {

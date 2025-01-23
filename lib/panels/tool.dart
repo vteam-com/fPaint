@@ -20,7 +20,9 @@ class ToolItem extends StatelessWidget {
       margin: EdgeInsets.all(2),
       decoration: BoxDecoration(
         border: Border.all(
-            color: isSelected ? Colors.blue : Colors.transparent, width: 2),
+          color: isSelected ? Colors.blue : Colors.transparent,
+          width: 2,
+        ),
         borderRadius: BorderRadius.circular(4),
       ),
       child: IconButton(

@@ -41,12 +41,13 @@ class PaintModel extends ChangeNotifier {
     return layers[layerIndex].isVisible;
   }
 
-  void addShape(
-      {Shape? shape,
-      Offset? start,
-      Offset? end,
-      ShapeType? type,
-      Color? color}) {
+  void addShape({
+    Shape? shape,
+    Offset? start,
+    Offset? end,
+    ShapeType? type,
+    Color? color,
+  }) {
     if (shape != null) {
       if (_isWithinCanvas(shape.start) && _isWithinCanvas(shape.end)) {
         currentLayer.shapes.add(shape);

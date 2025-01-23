@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'models/paint_model.dart';
 
 class Painter extends StatelessWidget {
-  final PaintModel paintModel;
-
   const Painter({super.key, required this.paintModel});
+  final PaintModel paintModel;
 
   @override
   Widget build(final BuildContext context) {
@@ -16,20 +15,23 @@ class Painter extends StatelessWidget {
 }
 
 class CanvasPainter extends CustomPainter {
-  final PaintModel _paintModel;
-
   CanvasPainter(this._paintModel);
+  final PaintModel _paintModel;
 
   @override
   void paint(final Canvas canvas, final Size size) {
     // Calculate offset to center the drawing
-    _paintModel.offset = Offset((size.width - _paintModel.canvasSize.width) / 2,
-        (size.height - _paintModel.canvasSize.height) / 2);
+    _paintModel.offset = Offset(
+      (size.width - _paintModel.canvasSize.width) / 2,
+      (size.height - _paintModel.canvasSize.height) / 2,
+    );
 
     // Draw white background
     final Paint backgroundPaint = Paint()..color = Colors.white;
     canvas.drawRect(
-        _paintModel.offset & _paintModel.canvasSize, backgroundPaint);
+      _paintModel.offset & _paintModel.canvasSize,
+      backgroundPaint,
+    );
 
     for (final PaintLayer layer in _paintModel.layers) {
       if (layer.isVisible) {
@@ -42,35 +44,44 @@ class CanvasPainter extends CustomPainter {
           switch (shape.type) {
             case ShapeType.pencil:
               canvas.drawLine(
-                  shape.start
-                      .translate(_paintModel.offset.dx, _paintModel.offset.dy),
-                  shape.end
-                      .translate(_paintModel.offset.dx, _paintModel.offset.dy),
-                  paint);
+                shape.start
+                    .translate(_paintModel.offset.dx, _paintModel.offset.dy),
+                shape.end
+                    .translate(_paintModel.offset.dx, _paintModel.offset.dy),
+                paint,
+              );
               break;
             case ShapeType.line:
               canvas.drawLine(
-                  shape.start
-                      .translate(_paintModel.offset.dx, _paintModel.offset.dy),
-                  shape.end
-                      .translate(_paintModel.offset.dx, _paintModel.offset.dy),
-                  paint);
+                shape.start
+                    .translate(_paintModel.offset.dx, _paintModel.offset.dy),
+                shape.end
+                    .translate(_paintModel.offset.dx, _paintModel.offset.dy),
+                paint,
+              );
               break;
             case ShapeType.circle:
               final radius = (shape.start - shape.end).distance / 2;
-              final center = Offset((shape.start.dx + shape.end.dx) / 2,
-                      (shape.start.dy + shape.end.dy) / 2)
-                  .translate(_paintModel.offset.dx, _paintModel.offset.dy);
+              final center = Offset(
+                (shape.start.dx + shape.end.dx) / 2,
+                (shape.start.dy + shape.end.dy) / 2,
+              ).translate(_paintModel.offset.dx, _paintModel.offset.dy);
               canvas.drawCircle(center, radius, paint);
               break;
             case ShapeType.rectangle:
               canvas.drawRect(
-                  Rect.fromPoints(
-                      shape.start.translate(
-                          _paintModel.offset.dx, _paintModel.offset.dy),
-                      shape.end.translate(
-                          _paintModel.offset.dx, _paintModel.offset.dy)),
-                  paint);
+                Rect.fromPoints(
+                  shape.start.translate(
+                    _paintModel.offset.dx,
+                    _paintModel.offset.dy,
+                  ),
+                  shape.end.translate(
+                    _paintModel.offset.dx,
+                    _paintModel.offset.dy,
+                  ),
+                ),
+                paint,
+              );
               break;
           }
         }

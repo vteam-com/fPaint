@@ -3,13 +3,6 @@ import 'package:fpaint/models/paint_model.dart';
 import 'package:provider/provider.dart';
 
 class LayersPanel extends StatelessWidget {
-  final int selectedLayerIndex;
-  final Function(int) onSelectLayer;
-  final Function() onAddLayer;
-  final Function() onShare;
-  final Function(int) onRemoveLayer;
-  final Function(int) onToggleViewLayer;
-
   const LayersPanel({
     super.key,
     required this.selectedLayerIndex,
@@ -19,6 +12,12 @@ class LayersPanel extends StatelessWidget {
     required this.onRemoveLayer,
     required this.onToggleViewLayer,
   });
+  final int selectedLayerIndex;
+  final Function(int) onSelectLayer;
+  final Function() onAddLayer;
+  final Function() onShare;
+  final Function(int) onRemoveLayer;
+  final Function(int) onToggleViewLayer;
 
   @override
   Widget build(BuildContext context) {
@@ -31,16 +30,18 @@ class LayersPanel extends StatelessWidget {
         child: Column(
           children: [
             // toolbar
-            Row(children: [
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: onAddLayer,
-              ),
-              IconButton(
-                icon: Icon(Icons.ios_share_outlined),
-                onPressed: onShare,
-              ),
-            ]),
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: onAddLayer,
+                ),
+                IconButton(
+                  icon: Icon(Icons.ios_share_outlined),
+                  onPressed: onShare,
+                ),
+              ],
+            ),
             Expanded(
               child: Consumer<PaintModel>(
                 builder: (context, paintModel, child) {

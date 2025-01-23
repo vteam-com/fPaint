@@ -8,15 +8,14 @@ enum ShapeType {
 }
 
 class Shape {
-  Offset start;
-  Offset end;
-  final ShapeType type;
-  final Color color;
-
   Shape(
     this.start,
     this.end,
     this.type,
     this.color,
   );
+  Offset start;
+  Offset end;
+  final ShapeType type;
+  final Color color;
 }

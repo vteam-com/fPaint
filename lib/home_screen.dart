@@ -2,18 +2,18 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'models/paint_model.dart';
-import 'painter.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
-class HomeScreen extends StatefulWidget {
-  final TextEditingController controller = TextEditingController();
+import 'models/paint_model.dart';
+import 'painter.dart';
 
+class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
+  final TextEditingController controller = TextEditingController();
 
   @override
   HomeScreenState createState() => HomeScreenState();
