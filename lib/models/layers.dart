@@ -15,7 +15,7 @@ class PaintLayer {
 
 class Layers {
   Layers(final Size size) {
-    final PaintLayer firstLayer = PaintLayer(name: 'Layer1');
+    final PaintLayer firstLayer = PaintLayer(name: 'Background');
 
     firstLayer.shapes.add(
       Shape(
@@ -35,12 +35,16 @@ class Layers {
   bool isIndexInRange(final int indexLayer) =>
       indexLayer >= 0 && indexLayer < _list.length;
 
+  int getLayerIndex(final PaintLayer layer) {
+    return _list.indexOf(layer);
+  }
+
   PaintLayer get(final int index) {
     return _list[index];
   }
 
   void add(final PaintLayer layerToAdd) {
-    _list.add(layerToAdd);
+    _list.insert(0, layerToAdd);
   }
 
   void insert(final index, final PaintLayer layerToInsert) {
@@ -48,7 +52,9 @@ class Layers {
   }
 
   void remove(final int index) {
-    _list[index];
+    if (isIndexInRange(index)) {
+      _list.removeAt(index);
+    }
   }
 
   List<PaintLayer> get list => _list;

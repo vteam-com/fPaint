@@ -22,9 +22,11 @@ class AppModel extends ChangeNotifier {
 
   PaintLayer get currentLayer => layers.get(currentLayerIndex);
 
-  void addLayer() {
-    layers.add(PaintLayer(name: 'Layer${layers.length + 1}'));
-    setActiveLayer(layers.length - 1);
+  PaintLayer addLayer() {
+    final PaintLayer newLayer = PaintLayer(name: 'Layer${layers.length}');
+    layers.add(newLayer);
+    setActiveLayer(layers.getLayerIndex(newLayer));
+    return newLayer;
   }
 
   void removeLayer(int index) {

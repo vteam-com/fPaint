@@ -24,15 +24,15 @@ class HomeScreenState extends State<HomeScreen> {
   Color _currentColor = Colors.black;
   Offset? _panStart;
   Shape? _currentShape;
+  late AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
   int _selectedLayerIndex = 0; // Track the selected layer
 
   // Method to add a new layer
-  void _addLayer() {
-    Provider.of<AppModel>(context, listen: false).addLayer();
+  void _onAddLayer() {
+    final PaintLayer newLayer = appModel.addLayer();
     setState(() {
-      _selectedLayerIndex =
-          Provider.of<AppModel>(context, listen: false).layers.length - 1;
+      _selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
     });
   }
 
@@ -195,7 +195,7 @@ class HomeScreenState extends State<HomeScreen> {
               child: LayersPanel(
                 selectedLayerIndex: _selectedLayerIndex,
                 onSelectLayer: _selectLayer,
-                onAddLayer: _addLayer,
+                onAddLayer: _onAddLayer,
                 onShare: _onShare,
                 onRemoveLayer: _removeLayer,
                 onToggleViewLayer: _onToggleViewLayer,

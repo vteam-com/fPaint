@@ -55,7 +55,7 @@ class MyCanvasPainter extends CustomPainter {
     }
     canvas.restore();
 
-    for (final PaintLayer layer in _paintModel.layers.list) {
+    for (final PaintLayer layer in _paintModel.layers.list.reversed) {
       if (layer.isVisible) {
         for (final Shape shape in layer.shapes) {
           final Paint paint = Paint()
