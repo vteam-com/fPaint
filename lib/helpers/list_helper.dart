@@ -299,3 +299,25 @@ extension RandomItemExtension<T> on List<T> {
     return this[random.nextInt(length)];
   }
 }
+
+extension FindFirstMatchExtension<T> on Iterable<T> {
+  T? findFirstMatch(bool Function(T) test) {
+    for (final item in this) {
+      if (test(item)) {
+        return item;
+      }
+    }
+    return null;
+  }
+}
+
+extension FindFirsOrNull<T> on List<T> {
+  T? findFirstMatch(bool Function(T) test) {
+    for (final item in this) {
+      if (test(item)) {
+        return item;
+      }
+    }
+    return null;
+  }
+}

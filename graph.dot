@@ -71,6 +71,7 @@ digraph "" {
   "/lib/panels/tools_panel.dart" -> "/lib/widgets/color_picker.dart";
   "/lib/panels/tools_panel.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/layers_panel.dart" -> "/lib/models/app_model.dart";
+  "/lib/models/layers.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/models/layers.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layers.dart" -> "/lib/models/user_action.dart" [style=dashed];
   "/lib/models/user_action.dart" -> "/lib/brushes/brushes.dart";

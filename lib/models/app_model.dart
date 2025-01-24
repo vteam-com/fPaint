@@ -100,7 +100,7 @@ class AppModel extends ChangeNotifier {
   }) {
     if (shape != null) {
       if (_isWithinCanvas(shape.start) && _isWithinCanvas(shape.end)) {
-        currentLayer.shapes.add(shape);
+        currentLayer.actionStack.add(shape);
       }
     } else if (start != null &&
         end != null &&
@@ -108,7 +108,7 @@ class AppModel extends ChangeNotifier {
         colorFill != null &&
         colorStroke != null) {
       if (_isWithinCanvas(start) && _isWithinCanvas(end)) {
-        currentLayer.shapes.add(
+        currentLayer.actionStack.add(
           UserAction(
             start: start,
             end: end,
@@ -124,8 +124,8 @@ class AppModel extends ChangeNotifier {
   }
 
   void updateLastShape(Offset end) {
-    if (currentLayer.shapes.isNotEmpty && _isWithinCanvas(end)) {
-      currentLayer.shapes.last.end = end;
+    if (currentLayer.actionStack.isNotEmpty && _isWithinCanvas(end)) {
+      currentLayer.actionStack.last.end = end;
       notifyListeners();
     }
   }
@@ -145,15 +145,15 @@ class AppModel extends ChangeNotifier {
   }
 
   void undo() {
-    if (currentLayer.shapes.isNotEmpty) {
-      currentLayer.redoStack.add(currentLayer.shapes.removeLast());
+    if (currentLayer.actionStack.isNotEmpty) {
+      currentLayer.redoStack.add(currentLayer.actionStack.removeLast());
       notifyListeners();
     }
   }
 
   void redo() {
     if (currentLayer.redoStack.isNotEmpty) {
-      currentLayer.shapes.add(currentLayer.redoStack.removeLast());
+      currentLayer.actionStack.add(currentLayer.redoStack.removeLast());
       notifyListeners();
     }
   }

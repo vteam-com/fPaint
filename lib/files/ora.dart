@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:xml/xml.dart';
@@ -21,19 +23,23 @@ Future<void> readOraFile(final AppModel appModel, String filePath) async {
     // Extract the ZIP contents
     final Archive archive = ZipDecoder().decodeBytes(bytes);
 
-    for (final ArchiveFile file in archive.files) {
-      print('- ${file.name}');
-    }
-
     // Find the stack.xml file
-    final stackFile = archive.files.firstWhere(
+    final ArchiveFile stackFile = archive.files.firstWhere(
       (file) => file.name == 'stack.xml',
       orElse: () => throw Exception('stack.xml not found in ORA file'),
     );
 
     // Parse the stack.xml content
-    final XmlDocument stackXml =
-        XmlDocument.parse(String.fromCharCodes(stackFile.content));
+    final XmlDocument stackXml = XmlDocument.parse(
+      String.fromCharCodes(stackFile.content),
+    );
+
+    //print(stackXml.toString());
+    final XmlElement? rootImage = stackXml.getElement('image');
+    appModel.canvasSize = ui.Size(
+      double.parse(rootImage!.getAttribute('w')!),
+      double.parse(rootImage.getAttribute('h')!),
+    );
 
     // Extract layers
     for (final XmlElement xmlLayer in stackXml.findAllElements('layer')) {
@@ -44,17 +50,53 @@ Future<void> readOraFile(final AppModel appModel, String filePath) async {
       final PaintLayer newLayer = appModel.addLayerBottom(name);
       newLayer.isVisible = visibleAsText == 'true';
       newLayer.opacity = double.parse(opacityAsText);
-    }
 
-    // Extract PNG image data for layers (if needed)
-    for (final ArchiveFile file
-        in archive.files.where((file) => file.name.endsWith('.png'))) {
-      final String outputPath = 'output/${file.name}';
-      final File outputFile = File(outputPath)..createSync(recursive: true);
-      outputFile.writeAsBytesSync(file.content);
-      // print('Extracted image: $outputPath');
+      // is there an image on this layer?
+      final String? src = xmlLayer.getAttribute('src');
+      if (src != null) {
+        final String? xAsText = xmlLayer.getAttribute('x');
+        final String? yAsText = xmlLayer.getAttribute('y');
+
+        final ui.Offset offset = ui.Offset(
+          double.parse(xAsText ?? '0'),
+          double.parse(yAsText ?? '0'),
+        );
+
+        await addImageToLayer(
+          appModel: appModel,
+          layer: newLayer,
+          archive: archive,
+          imageName: src,
+          offset: offset,
+        );
+      }
     }
   } catch (e) {
     throw Exception('Failed to read ORA file: $e');
   }
+}
+
+Future<void> addImageToLayer({
+  required final AppModel appModel,
+  required final PaintLayer layer,
+  required final Archive archive,
+  required final String imageName,
+  required final ui.Offset offset,
+}) async {
+  try {
+    final ArchiveFile file =
+        archive.files.firstWhere((f) => f.name == imageName);
+    final List<int> bytes = file.content as List<int>;
+    final ui.Image image = await decodeImage(bytes);
+
+    layer.addImage(image, offset);
+  } catch (e) {
+    print(e.toString());
+  }
+}
+
+Future<ui.Image> decodeImage(List<int> bytes) async {
+  final completer = Completer<ui.Image>();
+  ui.decodeImageFromList(Uint8List.fromList(bytes), completer.complete);
+  return completer.future;
 }

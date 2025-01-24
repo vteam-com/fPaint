@@ -1,5 +1,8 @@
 // Imports
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/app_model.dart';
 
 // Exports
@@ -8,17 +11,34 @@ export 'package:fpaint/models/user_action.dart';
 class PaintLayer {
   PaintLayer({required this.name});
   String name;
-  List<UserAction> shapes = [];
+  List<UserAction> actionStack = [];
   List<UserAction> redoStack = [];
   bool isVisible = true;
   double opacity = 1;
+
+  void addImage(ui.Image imageToAdd, ui.Offset offset) {
+    actionStack.add(
+      UserAction(
+        type: Tools.image,
+        start: offset,
+        end: Offset(
+          offset.dx + imageToAdd.width.toDouble(),
+          offset.dy + imageToAdd.height.toDouble(),
+        ),
+        colorOutline: Colors.transparent,
+        colorFill: Colors.transparent,
+        brushSize: 0,
+        image: imageToAdd,
+      ),
+    );
+  }
 }
 
 class Layers {
   Layers(final Size size) {
     final PaintLayer firstLayer = PaintLayer(name: 'Background');
 
-    firstLayer.shapes.add(
+    firstLayer.actionStack.add(
       UserAction(
         start: Offset(0, 0),
         end: Offset(size.width, size.height),
@@ -44,6 +64,10 @@ class Layers {
 
   PaintLayer get(final int index) {
     return _list[index];
+  }
+
+  PaintLayer? getByName(final String name) {
+    return _list.findFirstMatch((layer) => layer.name == name);
   }
 
   void add(final PaintLayer layerToAdd) {

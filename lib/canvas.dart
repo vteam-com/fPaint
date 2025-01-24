@@ -39,20 +39,22 @@ class MyCanvasPainter extends CustomPainter {
 
     for (final PaintLayer layer in _appModel.layers.list.reversed) {
       if (layer.isVisible) {
-        for (final UserAction shape in layer.shapes) {
+        for (final UserAction userAction in layer.actionStack) {
           final Paint paint = Paint();
-          paint.color = shape.colorFill;
+          paint.color = userAction.colorFill;
           paint.strokeCap = StrokeCap.round;
-          paint.strokeWidth = shape.brushSize;
+          paint.strokeWidth = userAction.brushSize;
 
-          switch (shape.type) {
+          switch (userAction.type) {
             // Draw
             case Tools.draw:
               paint.style = PaintingStyle.stroke;
-              paint.color = shape.colorOutline;
+              paint.color = userAction.colorOutline;
               canvas.drawLine(
-                shape.start.translate(_appModel.offset.dx, _appModel.offset.dy),
-                shape.end.translate(_appModel.offset.dx, _appModel.offset.dy),
+                userAction.start
+                    .translate(_appModel.offset.dx, _appModel.offset.dy),
+                userAction.end
+                    .translate(_appModel.offset.dx, _appModel.offset.dy),
                 paint,
               );
               break;
@@ -60,14 +62,14 @@ class MyCanvasPainter extends CustomPainter {
             // Line
             case Tools.line:
               paint.style = PaintingStyle.stroke;
-              paint.color = shape.colorOutline;
+              paint.color = userAction.colorOutline;
 
-              if (shape.brushStyle == BrushStyle.dash) {
+              if (userAction.brushStyle == BrushStyle.dash) {
                 final path = Path();
 
-                final Offset s = shape.start
+                final Offset s = userAction.start
                     .translate(_appModel.offset.dx, _appModel.offset.dy);
-                final Offset e = shape.end
+                final Offset e = userAction.end
                     .translate(_appModel.offset.dx, _appModel.offset.dy);
 
                 path.moveTo(s.dx, s.dy);
@@ -75,15 +77,16 @@ class MyCanvasPainter extends CustomPainter {
 
                 final Path dashedPath = createDashedPath(
                   path,
-                  dashWidth: shape.brushSize * 3,
-                  dashGap: shape.brushSize * 2,
+                  dashWidth: userAction.brushSize * 3,
+                  dashGap: userAction.brushSize * 2,
                 );
                 canvas.drawPath(dashedPath, paint);
               } else {
                 canvas.drawLine(
-                  shape.start
+                  userAction.start
                       .translate(_appModel.offset.dx, _appModel.offset.dy),
-                  shape.end.translate(_appModel.offset.dx, _appModel.offset.dy),
+                  userAction.end
+                      .translate(_appModel.offset.dx, _appModel.offset.dy),
                   paint,
                 );
               }
@@ -91,10 +94,10 @@ class MyCanvasPainter extends CustomPainter {
 
             // Circle
             case Tools.circle:
-              final radius = (shape.start - shape.end).distance / 2;
+              final radius = (userAction.start - userAction.end).distance / 2;
               final center = Offset(
-                (shape.start.dx + shape.end.dx) / 2,
-                (shape.start.dy + shape.end.dy) / 2,
+                (userAction.start.dx + userAction.end.dx) / 2,
+                (userAction.start.dy + userAction.end.dy) / 2,
               ).translate(_appModel.offset.dx, _appModel.offset.dy);
 
               // Fill
@@ -102,7 +105,7 @@ class MyCanvasPainter extends CustomPainter {
 
               // Border
               paint.style = PaintingStyle.stroke;
-              paint.color = shape.colorOutline;
+              paint.color = userAction.colorOutline;
 
               canvas.drawCircle(center, radius, paint);
               break;
@@ -113,11 +116,11 @@ class MyCanvasPainter extends CustomPainter {
               // Fill
               canvas.drawRect(
                 Rect.fromPoints(
-                  shape.start.translate(
+                  userAction.start.translate(
                     _appModel.offset.dx,
                     _appModel.offset.dy,
                   ),
-                  shape.end.translate(
+                  userAction.end.translate(
                     _appModel.offset.dx,
                     _appModel.offset.dy,
                   ),
@@ -127,14 +130,14 @@ class MyCanvasPainter extends CustomPainter {
 
               // Border
               paint.style = PaintingStyle.stroke;
-              paint.color = shape.colorOutline;
+              paint.color = userAction.colorOutline;
               canvas.drawRect(
                 Rect.fromPoints(
-                  shape.start.translate(
+                  userAction.start.translate(
                     _appModel.offset.dx,
                     _appModel.offset.dy,
                   ),
-                  shape.end.translate(
+                  userAction.end.translate(
                     _appModel.offset.dx,
                     _appModel.offset.dy,
                   ),
@@ -146,13 +149,30 @@ class MyCanvasPainter extends CustomPainter {
             case Tools.eraser:
               paint.color = Colors.white;
               // paint.blendMode = BlendMode.clear;
-              paint.strokeWidth = shape.brushSize;
+              paint.strokeWidth = userAction.brushSize;
               paint.style = PaintingStyle.stroke;
               canvas.drawLine(
-                shape.start.translate(_appModel.offset.dx, _appModel.offset.dy),
-                shape.end.translate(_appModel.offset.dx, _appModel.offset.dy),
+                userAction.start
+                    .translate(_appModel.offset.dx, _appModel.offset.dy),
+                userAction.end
+                    .translate(_appModel.offset.dx, _appModel.offset.dy),
                 paint,
               );
+              break;
+
+            case Tools.image:
+              if (userAction.image != null) {
+                final Offset offset = userAction.start.translate(
+                  _appModel.offset.dx,
+                  _appModel.offset.dy,
+                );
+
+                canvas.drawImage(
+                  userAction.image!,
+                  offset,
+                  Paint(),
+                );
+              }
               break;
           }
         }

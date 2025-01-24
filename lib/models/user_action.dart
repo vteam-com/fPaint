@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'dart:ui';
 
 import 'package:fpaint/brushes/brushes.dart';
@@ -8,7 +9,8 @@ enum Tools {
   line,
   circle,
   rectangle,
-  eraser;
+  eraser,
+  image;
 
   bool isSupported(ToolAttribute attribute) {
     return toolsSupportedAttributes[this]?.contains(attribute) ?? false;
@@ -52,20 +54,21 @@ const Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
 
 class UserAction {
   UserAction({
+    required this.type,
     required this.start,
     required this.end,
-    required this.type,
     required this.colorOutline,
     required this.colorFill,
     required this.brushSize,
     this.brushStyle = BrushStyle.solid,
+    this.image,
   });
-
+  final Tools type;
   final Offset start;
   Offset end;
-  final Tools type;
   final double brushSize;
   final BrushStyle brushStyle;
   final Color colorOutline;
   final Color colorFill;
+  final ui.Image? image;
 }
