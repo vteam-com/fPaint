@@ -10,6 +10,42 @@ class AppModel extends ChangeNotifier {
   late Layers layers = Layers(canvasSize);
   Offset offset = Offset(0, 0);
 
+  // Color for Stroke
+  Color _colorForStroke = Colors.black;
+
+  Color get colorForStroke => _colorForStroke;
+
+  set colorForStroke(Color value) {
+    _colorForStroke = value;
+    notifyListeners();
+  }
+
+  // Color for Fill
+  Color _colorForFill = Colors.lightBlue;
+
+  Color get colorForFill => _colorForFill;
+
+  set colorForFill(Color value) {
+    _colorForFill = value;
+    notifyListeners();
+  }
+
+  // Line Weight
+  double _lineWeight = 5;
+  double get lineWeight => _lineWeight;
+  set lineWeight(double value) {
+    _lineWeight = value;
+    notifyListeners();
+  }
+
+  // Line Style
+  double _lineStyle = 5;
+  double get lineStyle => _lineStyle;
+  set lineStyle(double value) {
+    _lineStyle = value;
+    notifyListeners();
+  }
+
   int _currentLayerIndex = 0;
   int get currentLayerIndex => _currentLayerIndex;
 
@@ -68,6 +104,7 @@ class AppModel extends ChangeNotifier {
             type: type,
             colorFill: colorFill,
             colorStroke: colorStroke,
+            lineWeight: this.lineWeight,
           ),
         );
       }

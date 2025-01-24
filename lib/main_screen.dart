@@ -1,6 +1,4 @@
 import 'dart:ui';
-
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/canvas.dart';
@@ -20,8 +18,6 @@ class MainScreen extends StatefulWidget {
 
 class MainScreenState extends State<MainScreen> {
   ShapeType _currentShapeType = ShapeType.pencil;
-  Color _colorFill = Colors.black;
-  Color _colorBorder = Colors.blue;
   Offset? _panStart;
   Shape? _currentShape;
   late AppModel appModel = Provider.of<AppModel>(context, listen: false);
@@ -43,7 +39,7 @@ class MainScreenState extends State<MainScreen> {
             onPanUpdate: (details) =>
                 _handlePanUpdate(details.localPosition - paintModel.offset),
             onPanEnd: _handlePanEnd,
-            child: MyCanvas(paintModel: paintModel),
+            child: MyCanvas(appModel: paintModel),
           ),
 
           // Panel for Layers
@@ -71,19 +67,7 @@ class MainScreenState extends State<MainScreen> {
               elevation: 8,
               child: ToolsPanel(
                 currentShapeType: _currentShapeType,
-                colorFill: _colorFill,
-                colorBorder: _colorBorder,
                 onShapeSelected: _onShapeSelected,
-                onColorPickerFill: () => _showColorPicker(
-                  'Fill Color',
-                  _colorFill,
-                  (Color color) => _colorFill = color,
-                ),
-                onColorPickerBorder: () => _showColorPicker(
-                  'Border Color',
-                  _colorBorder,
-                  (Color color) => _colorBorder = color,
-                ),
               ),
             ),
           ),
@@ -191,8 +175,9 @@ class MainScreenState extends State<MainScreen> {
         start: position,
         end: position,
         type: _currentShapeType,
-        colorStroke: _colorBorder,
-        colorFill: _colorFill,
+        colorStroke: appModel.colorForStroke,
+        colorFill: appModel.colorForFill,
+        lineWeight: appModel.lineWeight,
       );
       Provider.of<AppModel>(context, listen: false)
           .addShape(shape: _currentShape);
@@ -207,8 +192,8 @@ class MainScreenState extends State<MainScreen> {
         start: _panStart!,
         end: position,
         type: _currentShapeType,
-        colorFill: _colorFill,
-        colorStroke: _colorBorder,
+        colorFill: appModel.colorForFill,
+        colorStroke: appModel.colorForStroke,
       );
       _panStart = position;
     }
@@ -217,37 +202,6 @@ class MainScreenState extends State<MainScreen> {
   void _handlePanEnd(DragEndDetails details) {
     _panStart = null;
     _currentShape = null;
-  }
-
-  void _showColorPicker(
-    final String title,
-    Color color,
-    ValueChanged<Color> onSelectedColor,
-  ) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              color: color,
-              onColorChanged: (Color color) {
-                setState(() {
-                  onSelectedColor(color);
-                });
-              },
-              pickersEnabled: {
-                ColorPickerType.wheel: true,
-                ColorPickerType.primary: true,
-                ColorPickerType.accent: true,
-              },
-              showColorCode: true,
-            ),
-          ),
-        );
-      },
-    );
   }
 
   void _onShapeSelected(final ShapeType shape) {

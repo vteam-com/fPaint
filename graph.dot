@@ -41,7 +41,7 @@ digraph "" {
   }
   "/test/paint_model_test.dart" -> "/lib/models/app_model.dart";
   "/test/widget_test.dart" -> "/lib/main.dart";
-  "/lib/panels/tools_panel.dart" -> "/lib/models/shapes.dart";
+  "/lib/panels/tools_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/tools_panel.dart" -> "/lib/panels/tool.dart";
   "/lib/panels/layers_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layers.dart" -> "/lib/models/app_model.dart";

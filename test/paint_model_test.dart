@@ -26,6 +26,7 @@ void main() {
         type: ShapeType.pencil,
         colorFill: Colors.black,
         colorStroke: Colors.black,
+        lineWeight: 1,
       );
       paintModel.addShape(shape: shape);
       expect(

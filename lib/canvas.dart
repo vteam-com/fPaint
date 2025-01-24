@@ -2,49 +2,49 @@ import 'package:flutter/material.dart';
 import 'models/app_model.dart';
 
 class MyCanvas extends StatelessWidget {
-  const MyCanvas({super.key, required this.paintModel});
-  final AppModel paintModel;
+  const MyCanvas({super.key, required this.appModel});
+  final AppModel appModel;
 
   @override
   Widget build(final BuildContext context) {
     return CustomPaint(
       size: Size.infinite,
-      painter: MyCanvasPainter(paintModel),
+      painter: MyCanvasPainter(appModel),
     );
   }
 }
 
 class MyCanvasPainter extends CustomPainter {
-  MyCanvasPainter(this._paintModel);
-  final AppModel _paintModel;
+  MyCanvasPainter(this._appModel);
+  final AppModel _appModel;
 
   @override
   void paint(final Canvas canvas, final Size size) {
     // Calculate offset to center the drawing
-    _paintModel.offset = Offset(
-      (size.width - _paintModel.canvasSize.width) / 2,
-      (size.height - _paintModel.canvasSize.height) / 2,
+    _appModel.offset = Offset(
+      (size.width - _appModel.canvasSize.width) / 2,
+      (size.height - _appModel.canvasSize.height) / 2,
     );
 
     /// Render the transparent grid
-    final double cellSize = _paintModel.canvasSize.width /
-        ((_paintModel.canvasSize.width / 10.0).floor());
+    final double cellSize = _appModel.canvasSize.width /
+        ((_appModel.canvasSize.width / 10.0).floor());
     canvas.save();
     canvas.clipRect(
       Rect.fromLTWH(
-        _paintModel.offset.dx,
-        _paintModel.offset.dy,
-        _paintModel.canvasSize.width,
-        _paintModel.canvasSize.height,
+        _appModel.offset.dx,
+        _appModel.offset.dy,
+        _appModel.canvasSize.width,
+        _appModel.canvasSize.height,
       ),
     );
-    for (double x = 0; x < _paintModel.canvasSize.width; x += cellSize) {
-      for (double y = 0; y < _paintModel.canvasSize.height; y += cellSize) {
+    for (double x = 0; x < _appModel.canvasSize.width; x += cellSize) {
+      for (double y = 0; y < _appModel.canvasSize.height; y += cellSize) {
         if ((x ~/ cellSize + y ~/ cellSize) % 2 == 0) {
           canvas.drawRect(
             Rect.fromLTWH(
-              x + _paintModel.offset.dx,
-              y + _paintModel.offset.dy,
+              x + _appModel.offset.dx,
+              y + _appModel.offset.dy,
               cellSize,
               cellSize,
             ),
@@ -55,22 +55,22 @@ class MyCanvasPainter extends CustomPainter {
     }
     canvas.restore();
 
-    for (final PaintLayer layer in _paintModel.layers.list.reversed) {
+    for (final PaintLayer layer in _appModel.layers.list.reversed) {
       if (layer.isVisible) {
         for (final Shape shape in layer.shapes) {
           final Paint paint = Paint();
           paint.color = shape.colorFill;
           paint.strokeCap = StrokeCap.round;
-          paint.strokeWidth = 5.0;
+          paint.strokeWidth = shape.lineWeight;
 
           switch (shape.type) {
             // Draw
             case ShapeType.pencil:
+              paint.style = PaintingStyle.stroke;
+              paint.color = shape.colorStroke;
               canvas.drawLine(
-                shape.start
-                    .translate(_paintModel.offset.dx, _paintModel.offset.dy),
-                shape.end
-                    .translate(_paintModel.offset.dx, _paintModel.offset.dy),
+                shape.start.translate(_appModel.offset.dx, _appModel.offset.dy),
+                shape.end.translate(_appModel.offset.dx, _appModel.offset.dy),
                 paint,
               );
               break;
@@ -80,10 +80,8 @@ class MyCanvasPainter extends CustomPainter {
               paint.style = PaintingStyle.stroke;
               paint.color = shape.colorStroke;
               canvas.drawLine(
-                shape.start
-                    .translate(_paintModel.offset.dx, _paintModel.offset.dy),
-                shape.end
-                    .translate(_paintModel.offset.dx, _paintModel.offset.dy),
+                shape.start.translate(_appModel.offset.dx, _appModel.offset.dy),
+                shape.end.translate(_appModel.offset.dx, _appModel.offset.dy),
                 paint,
               );
               break;
@@ -94,7 +92,7 @@ class MyCanvasPainter extends CustomPainter {
               final center = Offset(
                 (shape.start.dx + shape.end.dx) / 2,
                 (shape.start.dy + shape.end.dy) / 2,
-              ).translate(_paintModel.offset.dx, _paintModel.offset.dy);
+              ).translate(_appModel.offset.dx, _appModel.offset.dy);
 
               // Fill
               canvas.drawCircle(center, radius, paint);
@@ -113,12 +111,12 @@ class MyCanvasPainter extends CustomPainter {
               canvas.drawRect(
                 Rect.fromPoints(
                   shape.start.translate(
-                    _paintModel.offset.dx,
-                    _paintModel.offset.dy,
+                    _appModel.offset.dx,
+                    _appModel.offset.dy,
                   ),
                   shape.end.translate(
-                    _paintModel.offset.dx,
-                    _paintModel.offset.dy,
+                    _appModel.offset.dx,
+                    _appModel.offset.dy,
                   ),
                 ),
                 paint,
@@ -130,12 +128,12 @@ class MyCanvasPainter extends CustomPainter {
               canvas.drawRect(
                 Rect.fromPoints(
                   shape.start.translate(
-                    _paintModel.offset.dx,
-                    _paintModel.offset.dy,
+                    _appModel.offset.dx,
+                    _appModel.offset.dy,
                   ),
                   shape.end.translate(
-                    _paintModel.offset.dx,
-                    _paintModel.offset.dy,
+                    _appModel.offset.dx,
+                    _appModel.offset.dy,
                   ),
                 ),
                 paint,

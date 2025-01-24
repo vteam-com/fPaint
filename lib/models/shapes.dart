@@ -14,10 +14,12 @@ class Shape {
     required this.type,
     required this.colorStroke,
     required this.colorFill,
+    required this.lineWeight,
   });
   final Offset start;
   Offset end;
   final ShapeType type;
   final Color colorStroke;
   final Color colorFill;
+  final double lineWeight;
 }

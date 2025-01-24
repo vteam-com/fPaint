@@ -24,6 +24,7 @@ class Layers {
         type: ShapeType.rectangle,
         colorFill: Colors.white,
         colorStroke: Colors.white,
+        lineWeight: 0,
       ),
     );
 
