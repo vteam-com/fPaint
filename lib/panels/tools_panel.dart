@@ -95,7 +95,7 @@ class ToolsPanel extends StatelessWidget {
                       buttonIcon: Icons.line_style_outlined,
                       buttonIconColor: Colors.black,
                       onButtonPressed: () {},
-                      child: pickBrush(appModel),
+                      child: brushSelection(appModel),
                     ),
 
                 divider(),
@@ -143,25 +143,6 @@ class ToolsPanel extends StatelessWidget {
               ],
             ),
           );
-        },
-      ),
-    );
-  }
-
-  Widget pickBrush(final AppModel appModel) {
-    return SizedBox(
-      width: 300,
-      child: DropdownButton<int>(
-        menuWidth: 300,
-        value: appModel.brush.index,
-        items: BrushStyle.values.map<DropdownMenuItem<int>>((BrushStyle value) {
-          return DropdownMenuItem<int>(
-            value: value.index,
-            child: Text(value.name),
-          );
-        }).toList(),
-        onChanged: (int? selectedBrush) {
-          appModel.brush = BrushStyle.values[selectedBrush!];
         },
       ),
     );

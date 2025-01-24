@@ -1,18 +1,13 @@
 import 'dart:ui';
 
+import 'package:fpaint/brushes/brushes.dart';
+export 'package:fpaint/brushes/brushes.dart';
+
 enum ShapeType {
   pencil,
   line,
   circle,
   rectangle,
-}
-
-enum BrushStyle {
-  solid,
-  dash,
-  // airbrush,
-  // charcoal,
-  // marker,
 }
 
 class Shape {
