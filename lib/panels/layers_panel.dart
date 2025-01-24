@@ -8,6 +8,7 @@ class LayersPanel extends StatelessWidget {
     required this.selectedLayerIndex,
     required this.onSelectLayer,
     required this.onAddLayer,
+    required this.onFileOpen,
     required this.onShare,
     required this.onRemoveLayer,
     required this.onToggleViewLayer,
@@ -15,6 +16,7 @@ class LayersPanel extends StatelessWidget {
   final int selectedLayerIndex;
   final Function(int) onSelectLayer;
   final Function() onAddLayer;
+  final Function() onFileOpen;
   final Function() onShare;
   final Function(int) onRemoveLayer;
   final Function(int) onToggleViewLayer;
@@ -34,12 +36,16 @@ class LayersPanel extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: onAddLayer,
+                  icon: Icon(Icons.download),
+                  onPressed: onFileOpen,
                 ),
                 IconButton(
                   icon: Icon(Icons.ios_share_outlined),
                   onPressed: onShare,
+                ),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: onAddLayer,
                 ),
               ],
             ),

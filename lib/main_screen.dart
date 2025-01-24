@@ -1,7 +1,9 @@
 import 'dart:ui';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/canvas.dart';
+import 'package:fpaint/files/ora.dart';
 import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
@@ -45,13 +47,14 @@ class MainScreenState extends State<MainScreen> {
           // Panel for Layers
           Positioned(
             top: 8,
-            right: 8,
+            left: 8,
             child: Card(
               elevation: 8,
               child: LayersPanel(
                 selectedLayerIndex: _selectedLayerIndex,
                 onSelectLayer: _selectLayer,
                 onAddLayer: _onAddLayer,
+                onFileOpen: _onFileOpen,
                 onShare: _onShare,
                 onRemoveLayer: _removeLayer,
                 onToggleViewLayer: _onToggleViewLayer,
@@ -62,7 +65,7 @@ class MainScreenState extends State<MainScreen> {
           // Panel for tools
           Positioned(
             top: 8,
-            left: 8,
+            right: 8,
             child: Card(
               elevation: 8,
               child: ToolsPanel(
@@ -98,7 +101,7 @@ class MainScreenState extends State<MainScreen> {
 
   // Method to add a new layer
   void _onAddLayer() {
-    final PaintLayer newLayer = appModel.addLayer();
+    final PaintLayer newLayer = appModel.addLayerTop();
     setState(() {
       _selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
     });
@@ -128,6 +131,26 @@ class MainScreenState extends State<MainScreen> {
       format: ImageByteFormat.png,
     );
     return byteData!.buffer.asUint8List();
+  }
+
+  void _onFileOpen() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
+      );
+
+      if (result != null) {
+        appModel.layers.clear();
+        await readOraFile(appModel, result.files.single.path!);
+        setState(() {
+          // Refresh UI after importing
+        });
+      }
+    } catch (e) {
+      // Handle any errors that occur during file picking/loading
+      print('Error opening file: $e');
+    }
   }
 
   void _onShare() async {

@@ -11,6 +11,7 @@ class PaintLayer {
   List<UserAction> shapes = [];
   List<UserAction> redoStack = [];
   bool isVisible = true;
+  double opacity = 1;
 }
 
 class Layers {
@@ -31,7 +32,7 @@ class Layers {
     _list.add(firstLayer);
   }
   final List<PaintLayer> _list = [];
-
+  void clear() => _list.clear();
   int get length => _list.length;
 
   bool isIndexInRange(final int indexLayer) =>
@@ -50,7 +51,11 @@ class Layers {
   }
 
   void insert(final index, final PaintLayer layerToInsert) {
-    _list.insert(index, layerToInsert);
+    if (isIndexInRange(index)) {
+      _list.insert(index, layerToInsert);
+    } else {
+      _list.add(layerToInsert);
+    }
   }
 
   void remove(final int index) {
