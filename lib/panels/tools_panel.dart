@@ -68,6 +68,7 @@ class ToolsPanel extends StatelessWidget {
                 ),
 
                 divider(),
+
                 // Stroke Weight
                 adjustmentWidget(
                   name: 'Stroke Style',
@@ -85,7 +86,9 @@ class ToolsPanel extends StatelessWidget {
                     },
                   ),
                 ),
+
                 divider(),
+
                 // Stroke Style
                 adjustmentWidget(
                   name: 'Stroke Style',
@@ -103,7 +106,9 @@ class ToolsPanel extends StatelessWidget {
                     },
                   ),
                 ),
+
                 divider(),
+
                 // Color Stroke
                 adjustmentWidget(
                   name: 'Stroke Color',
@@ -122,7 +127,9 @@ class ToolsPanel extends StatelessWidget {
                         appModel.colorForStroke = color,
                   ),
                 ),
+
                 divider(),
+
                 // Color Fill
                 if (shapeSupportsFill(currentShapeType))
                   adjustmentWidget(
