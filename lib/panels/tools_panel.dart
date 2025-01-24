@@ -87,25 +87,16 @@ class ToolsPanel extends StatelessWidget {
                   ),
                 ),
 
-                divider(),
-
                 // Stroke Style
-                adjustmentWidget(
-                  name: 'Stroke Style',
-                  buttonIcon: Icons.line_style_outlined,
-                  buttonIconColor: Colors.black,
-                  onButtonPressed: () {},
-                  child: Slider(
-                    value: appModel.lineStyle,
-                    min: 1,
-                    max: 100,
-                    divisions: 100,
-                    label: appModel.lineWeight.round().toString(),
-                    onChanged: (double value) {
-                      appModel.lineStyle = value;
-                    },
-                  ),
-                ),
+                if (currentShapeType == ShapeType.line)
+                  if (currentShapeType == ShapeType.line)
+                    adjustmentWidget(
+                      name: 'Brush Style',
+                      buttonIcon: Icons.line_style_outlined,
+                      buttonIconColor: Colors.black,
+                      onButtonPressed: () {},
+                      child: pickBrush(appModel),
+                    ),
 
                 divider(),
 
@@ -152,6 +143,25 @@ class ToolsPanel extends StatelessWidget {
               ],
             ),
           );
+        },
+      ),
+    );
+  }
+
+  Widget pickBrush(final AppModel appModel) {
+    return SizedBox(
+      width: 300,
+      child: DropdownButton<int>(
+        menuWidth: 300,
+        value: appModel.brush.index,
+        items: BrushStyle.values.map<DropdownMenuItem<int>>((BrushStyle value) {
+          return DropdownMenuItem<int>(
+            value: value.index,
+            child: Text(value.name),
+          );
+        }).toList(),
+        onChanged: (int? selectedBrush) {
+          appModel.brush = BrushStyle.values[selectedBrush!];
         },
       ),
     );

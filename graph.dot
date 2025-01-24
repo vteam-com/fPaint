@@ -15,6 +15,7 @@ digraph "" {
   "/lib/main_screen.dart" [label="main_screen"];
   "/lib/helpers/list_helper.dart" [label="list_helper"];
   "/lib/helpers/color_helper.dart" [label="color_helper"];
+  "/lib/widgets/dash.dart" [label="dash"];
   "/lib/widgets/color_picker.dart" [label="color_picker"];
   subgraph "cluster~" {
     label="fpaint";
@@ -47,6 +48,7 @@ digraph "" {
       }
       subgraph "cluster~/lib/widgets" {
         label="widgets";
+        "/lib/widgets/dash.dart";
         "/lib/widgets/color_picker.dart";
       }
     }

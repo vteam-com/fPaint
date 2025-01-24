@@ -7,6 +7,14 @@ enum ShapeType {
   rectangle,
 }
 
+enum BrushStyle {
+  solid,
+  dash,
+  // airbrush,
+  // charcoal,
+  // marker,
+}
+
 class Shape {
   Shape({
     required this.start,
@@ -15,6 +23,7 @@ class Shape {
     required this.colorStroke,
     required this.colorFill,
     required this.lineWeight,
+    this.brush = BrushStyle.solid,
   });
   final Offset start;
   Offset end;
@@ -22,4 +31,5 @@ class Shape {
   final Color colorStroke;
   final Color colorFill;
   final double lineWeight;
+  final BrushStyle brush;
 }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'models/app_model.dart';
 
@@ -79,11 +81,32 @@ class MyCanvasPainter extends CustomPainter {
             case ShapeType.line:
               paint.style = PaintingStyle.stroke;
               paint.color = shape.colorStroke;
-              canvas.drawLine(
-                shape.start.translate(_appModel.offset.dx, _appModel.offset.dy),
-                shape.end.translate(_appModel.offset.dx, _appModel.offset.dy),
-                paint,
-              );
+
+              if (shape.brush == BrushStyle.dash) {
+                final path = Path();
+
+                final Offset s = shape.start
+                    .translate(_appModel.offset.dx, _appModel.offset.dy);
+                final Offset e = shape.end
+                    .translate(_appModel.offset.dx, _appModel.offset.dy);
+
+                path.moveTo(s.dx, s.dy);
+                path.lineTo(e.dx, e.dy);
+
+                final Path dashedPath = createDashedPath(
+                  path,
+                  dashWidth: shape.lineWeight * 3,
+                  dashGap: shape.lineWeight * 2,
+                );
+                canvas.drawPath(dashedPath, paint);
+              } else {
+                canvas.drawLine(
+                  shape.start
+                      .translate(_appModel.offset.dx, _appModel.offset.dy),
+                  shape.end.translate(_appModel.offset.dx, _appModel.offset.dy),
+                  paint,
+                );
+              }
               break;
 
             // Circle
@@ -147,4 +170,27 @@ class MyCanvasPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(MyCanvasPainter oldDelegate) => true;
+
+  Path createDashedPath(
+    Path source, {
+    required double dashWidth,
+    required double dashGap,
+  }) {
+    final Path dashedPath = Path();
+    for (final PathMetric pathMetric in source.computeMetrics()) {
+      double distance = 0.0;
+      while (distance < pathMetric.length) {
+        final double nextDashLength = distance + dashWidth;
+        dashedPath.addPath(
+          pathMetric.extractPath(
+            distance,
+            nextDashLength.clamp(0.0, pathMetric.length),
+          ),
+          Offset.zero,
+        );
+        distance = nextDashLength + dashGap;
+      }
+    }
+    return dashedPath;
+  }
 }

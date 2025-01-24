@@ -178,7 +178,9 @@ class MainScreenState extends State<MainScreen> {
         colorStroke: appModel.colorForStroke,
         colorFill: appModel.colorForFill,
         lineWeight: appModel.lineWeight,
+        brush: appModel.brush,
       );
+
       Provider.of<AppModel>(context, listen: false)
           .addShape(shape: _currentShape);
     }

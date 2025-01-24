@@ -38,11 +38,11 @@ class AppModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Line Style
-  double _lineStyle = 5;
-  double get lineStyle => _lineStyle;
-  set lineStyle(double value) {
-    _lineStyle = value;
+  // Brush Style
+  BrushStyle _brush = BrushStyle.solid;
+  BrushStyle get brush => _brush;
+  set brush(BrushStyle value) {
+    _brush = value;
     notifyListeners();
   }
 
