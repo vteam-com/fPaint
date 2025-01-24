@@ -163,6 +163,9 @@ class MyCanvasPainter extends CustomPainter {
                 paint,
               );
               break;
+
+            case ShapeType.eraser:
+              break;
           }
         }
       }

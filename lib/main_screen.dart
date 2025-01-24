@@ -187,17 +187,32 @@ class MainScreenState extends State<MainScreen> {
   }
 
   void _handlePanUpdate(Offset position) {
-    if (_panStart != null && _currentShapeType != ShapeType.pencil) {
-      Provider.of<AppModel>(context, listen: false).updateLastShape(position);
-    } else if (_panStart != null && _currentShapeType == ShapeType.pencil) {
-      Provider.of<AppModel>(context, listen: false).addShape(
-        start: _panStart!,
-        end: position,
-        type: _currentShapeType,
-        colorFill: appModel.colorForFill,
-        colorStroke: appModel.colorForStroke,
-      );
-      _panStart = position;
+    if (_panStart != null) {
+      if (_currentShapeType == ShapeType.eraser) {
+        // Eraser implementation
+        Provider.of<AppModel>(context, listen: false).addShape(
+          start: _panStart!,
+          end: position,
+          type: _currentShapeType,
+          colorStroke: Colors.white, // Or your canvas background color
+          colorFill: Colors.white,
+          // lineWeight: appModel.lineWeight * 2, // Make eraser slightly bigger
+        );
+        _panStart = position;
+      } else if (_currentShapeType == ShapeType.pencil) {
+        // Existing pencil logic
+        Provider.of<AppModel>(context, listen: false).addShape(
+          start: _panStart!,
+          end: position,
+          type: _currentShapeType,
+          colorFill: appModel.colorForFill,
+          colorStroke: appModel.colorForStroke,
+        );
+        _panStart = position;
+      } else {
+        // Existing shape logic
+        Provider.of<AppModel>(context, listen: false).updateLastShape(position);
+      }
     }
   }
 

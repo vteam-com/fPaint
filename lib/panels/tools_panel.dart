@@ -26,120 +26,18 @@ class ToolsPanel extends StatelessWidget {
           final AppModel appModel,
           Widget? child,
         ) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
+          return Container(
+            constraints: const BoxConstraints(
+              maxHeight: 400,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // Pencil
-                    ToolItem(
-                      name: 'Draw',
-                      icon: Icons.edit_outlined,
-                      isSelected: currentShapeType == ShapeType.pencil,
-                      onPressed: () => onShapeSelected(ShapeType.pencil),
-                    ),
-
-                    // Line
-                    ToolItem(
-                      name: 'Line',
-                      icon: Icons.line_axis,
-                      isSelected: currentShapeType == ShapeType.line,
-                      onPressed: () => onShapeSelected(ShapeType.line),
-                    ),
-
-                    // Rectangle
-                    ToolItem(
-                      name: 'Rectangle',
-                      icon: Icons.crop_square,
-                      isSelected: currentShapeType == ShapeType.rectangle,
-                      onPressed: () => onShapeSelected(ShapeType.rectangle),
-                    ),
-                    // Circle
-                    ToolItem(
-                      name: 'Circle',
-                      icon: Icons.circle_outlined,
-                      isSelected: currentShapeType == ShapeType.circle,
-                      onPressed: () => onShapeSelected(ShapeType.circle),
-                    ),
-                  ],
+                buildTools(),
+                Expanded(
+                  child: buildAttributes(context, appModel),
                 ),
-
-                divider(),
-
-                // Stroke Weight
-                adjustmentWidget(
-                  name: 'Stroke Style',
-                  buttonIcon: Icons.line_weight,
-                  buttonIconColor: Colors.black,
-                  onButtonPressed: () {},
-                  child: Slider(
-                    value: appModel.lineWeight,
-                    min: 1,
-                    max: 100,
-                    divisions: 100,
-                    label: appModel.lineWeight.round().toString(),
-                    onChanged: (double value) {
-                      appModel.lineWeight = value;
-                    },
-                  ),
-                ),
-
-                // Stroke Style
-                if (currentShapeType == ShapeType.line)
-                  if (currentShapeType == ShapeType.line)
-                    adjustmentWidget(
-                      name: 'Brush Style',
-                      buttonIcon: Icons.line_style_outlined,
-                      buttonIconColor: Colors.black,
-                      onButtonPressed: () {},
-                      child: brushSelection(appModel),
-                    ),
-
-                divider(),
-
-                // Color Stroke
-                adjustmentWidget(
-                  name: 'Stroke Color',
-                  buttonIcon: Icons.water_drop_outlined,
-                  buttonIconColor: appModel.colorForStroke,
-                  onButtonPressed: () => showColorPicker(
-                    context: context,
-                    title: 'Stroke',
-                    color: appModel.colorForStroke,
-                    onSelectedColor: (final Color color) =>
-                        appModel.colorForStroke = color,
-                  ),
-                  child: MyColorPicker(
-                    color: appModel.colorForStroke,
-                    onColorChanged: (Color color) =>
-                        appModel.colorForStroke = color,
-                  ),
-                ),
-
-                divider(),
-
-                // Color Fill
-                if (shapeSupportsFill(currentShapeType))
-                  adjustmentWidget(
-                    name: 'Fill Color',
-                    buttonIcon: Icons.water_drop,
-                    buttonIconColor: appModel.colorForFill,
-                    onButtonPressed: () => showColorPicker(
-                      context: context,
-                      title: 'Fill',
-                      color: appModel.colorForFill,
-                      onSelectedColor: (final Color color) =>
-                          appModel.colorForFill = color,
-                    ),
-                    child: MyColorPicker(
-                      color: appModel.colorForFill,
-                      onColorChanged: (Color color) =>
-                          appModel.colorForFill = color,
-                    ),
-                  ),
               ],
             ),
           );
@@ -148,23 +46,147 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  Widget divider() {
-    return Container(
-      margin: EdgeInsets.all(8),
-      width: 340,
-      height: 1,
-      color: Colors.grey,
+  Widget buildTools() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        // Pencil
+        ToolItem(
+          name: 'Draw',
+          icon: Icons.brush,
+          isSelected: currentShapeType == ShapeType.pencil,
+          onPressed: () => onShapeSelected(ShapeType.pencil),
+        ),
+
+        // Line
+        ToolItem(
+          name: 'Line',
+          icon: Icons.line_axis,
+          isSelected: currentShapeType == ShapeType.line,
+          onPressed: () => onShapeSelected(ShapeType.line),
+        ),
+
+        // Rectangle
+        ToolItem(
+          name: 'Rectangle',
+          icon: Icons.crop_square,
+          isSelected: currentShapeType == ShapeType.rectangle,
+          onPressed: () => onShapeSelected(ShapeType.rectangle),
+        ),
+
+        // Circle
+        ToolItem(
+          name: 'Circle',
+          icon: Icons.circle_outlined,
+          isSelected: currentShapeType == ShapeType.circle,
+          onPressed: () => onShapeSelected(ShapeType.circle),
+        ),
+
+        ToolItem(
+          name: 'Eraser',
+          icon: Icons.cleaning_services,
+          isSelected: currentShapeType == ShapeType.eraser,
+          onPressed: () => onShapeSelected(ShapeType.eraser),
+        ),
+      ],
     );
   }
 
-  bool shapeSupportsFill(final ShapeType type) {
-    switch (type) {
-      case ShapeType.pencil:
-      case ShapeType.line:
-        return false;
-      default:
-        return true;
+  Widget buildAttributes(final BuildContext context, final AppModel appModel) {
+    List<Widget> widgets = [];
+
+    // Stroke Weight
+    if (currentShapeType.isSupported(ShapeAttribute.lineWeight)) {
+      widgets.add(
+        adjustmentWidget(
+          name: 'Stroke Style',
+          buttonIcon: Icons.line_weight,
+          buttonIconColor: Colors.black,
+          onButtonPressed: () {},
+          child: Slider(
+            value: appModel.lineWeight,
+            min: 1,
+            max: 100,
+            divisions: 100,
+            label: appModel.lineWeight.round().toString(),
+            onChanged: (double value) {
+              appModel.lineWeight = value;
+            },
+          ),
+        ),
+      );
     }
+
+    // Bruse Style
+    if (currentShapeType.isSupported(ShapeAttribute.brush)) {
+      widgets.add(
+        adjustmentWidget(
+          name: 'Brush Style',
+          buttonIcon: Icons.line_style_outlined,
+          buttonIconColor: Colors.black,
+          onButtonPressed: () {},
+          child: brushSelection(appModel),
+        ),
+      );
+    }
+
+    // Color Stroke
+    if (currentShapeType.isSupported(ShapeAttribute.stroke)) {
+      widgets.add(
+        adjustmentWidget(
+          name: 'Stroke Color',
+          buttonIcon: Icons.water_drop_outlined,
+          buttonIconColor: appModel.colorForStroke,
+          onButtonPressed: () => showColorPicker(
+            context: context,
+            title: 'Stroke',
+            color: appModel.colorForStroke,
+            onSelectedColor: (final Color color) =>
+                appModel.colorForStroke = color,
+          ),
+          child: MyColorPicker(
+            color: appModel.colorForStroke,
+            onColorChanged: (Color color) => appModel.colorForStroke = color,
+          ),
+        ),
+      );
+    }
+
+    // Color Fill
+    if (currentShapeType.isSupported(ShapeAttribute.fill)) {
+      widgets.add(
+        adjustmentWidget(
+          name: 'Fill Color',
+          buttonIcon: Icons.water_drop,
+          buttonIconColor: appModel.colorForFill,
+          onButtonPressed: () => showColorPicker(
+            context: context,
+            title: 'Fill',
+            color: appModel.colorForFill,
+            onSelectedColor: (final Color color) =>
+                appModel.colorForFill = color,
+          ),
+          child: MyColorPicker(
+            color: appModel.colorForFill,
+            onColorChanged: (Color color) => appModel.colorForFill = color,
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      width: 360,
+      child: ListView.separated(
+        itemCount: widgets.length,
+        separatorBuilder: (context, index) => const Divider(),
+        itemBuilder: (context, index) => widgets[index],
+      ),
+    );
+  }
+
+  bool shapeSupportsFill(final ShapeType type, final ShapeAttribute attribute) {
+    final Set<ShapeAttribute>? tool = toolsSupportedAttributes[type];
+    return tool!.contains(attribute);
   }
 
   Widget adjustmentWidget({
@@ -174,7 +196,7 @@ class ToolsPanel extends StatelessWidget {
     required VoidCallback onButtonPressed,
     required Widget child,
   }) {
-    return Padding(
+    return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Row(
         children: [
@@ -184,8 +206,7 @@ class ToolsPanel extends StatelessWidget {
             color: buttonIconColor,
             tooltip: name,
           ),
-          SizedBox(
-            width: 300,
+          Expanded(
             child: child,
           ),
         ],
