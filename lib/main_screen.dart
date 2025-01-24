@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/canvas.dart';
@@ -135,14 +136,20 @@ class MainScreenState extends State<MainScreen> {
 
   void _onFileOpen() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.any,
         allowMultiple: false,
+        withData: true,
       );
 
       if (result != null) {
         appModel.layers.clear();
-        await readOraFile(appModel, result.files.single.path!);
+
+        if (kIsWeb) {
+          await readOraFileFromBytes(appModel, result.files.single.bytes!);
+        } else {
+          await readOraFile(appModel, result.files.single.path!);
+        }
         setState(() {
           // Refresh UI after importing
         });
