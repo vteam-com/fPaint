@@ -13,6 +13,9 @@ digraph "" {
   "/lib/main.dart" [label="main"];
   "/lib/canvas.dart" [label="canvas"];
   "/lib/main_screen.dart" [label="main_screen"];
+  "/lib/helpers/list_helper.dart" [label="list_helper"];
+  "/lib/helpers/color_helper.dart" [label="color_helper"];
+  "/lib/widgets/color_picker.dart" [label="color_picker"];
   subgraph "cluster~" {
     label="fpaint";
     subgraph "cluster~/test" {
@@ -37,12 +40,22 @@ digraph "" {
         "/lib/models/shapes.dart";
         "/lib/models/app_model.dart";
       }
+      subgraph "cluster~/lib/helpers" {
+        label="helpers";
+        "/lib/helpers/list_helper.dart";
+        "/lib/helpers/color_helper.dart";
+      }
+      subgraph "cluster~/lib/widgets" {
+        label="widgets";
+        "/lib/widgets/color_picker.dart";
+      }
     }
   }
   "/test/paint_model_test.dart" -> "/lib/models/app_model.dart";
   "/test/widget_test.dart" -> "/lib/main.dart";
   "/lib/panels/tools_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/tools_panel.dart" -> "/lib/panels/tool.dart";
+  "/lib/panels/tools_panel.dart" -> "/lib/widgets/color_picker.dart";
   "/lib/panels/layers_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layers.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layers.dart" -> "/lib/models/shapes.dart";
@@ -56,4 +69,7 @@ digraph "" {
   "/lib/main_screen.dart" -> "/lib/panels/layers_panel.dart";
   "/lib/main_screen.dart" -> "/lib/panels/tools_panel.dart";
   "/lib/main_screen.dart" -> "/lib/models/app_model.dart";
+  "/lib/helpers/color_helper.dart" -> "/lib/helpers/list_helper.dart";
+  "/lib/widgets/color_picker.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/widgets/color_picker.dart" -> "/lib/helpers/list_helper.dart";
 }

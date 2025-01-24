@@ -2,6 +2,7 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/tool.dart';
+import 'package:fpaint/widgets/color_picker.dart';
 import 'package:provider/provider.dart';
 
 class ToolsPanel extends StatelessWidget {
@@ -18,128 +19,143 @@ class ToolsPanel extends StatelessWidget {
     return Material(
       elevation: 4,
       color: Colors.grey.shade200,
+      borderRadius: BorderRadius.circular(12),
       child: Consumer<AppModel>(
         builder: (
           final BuildContext context,
           final AppModel appModel,
           Widget? child,
         ) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  // Pencil
-                  ToolItem(
-                    name: 'Draw',
-                    icon: Icons.edit_outlined,
-                    isSelected: currentShapeType == ShapeType.pencil,
-                    onPressed: () => onShapeSelected(ShapeType.pencil),
-                  ),
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    // Pencil
+                    ToolItem(
+                      name: 'Draw',
+                      icon: Icons.edit_outlined,
+                      isSelected: currentShapeType == ShapeType.pencil,
+                      onPressed: () => onShapeSelected(ShapeType.pencil),
+                    ),
 
-                  // Line
-                  ToolItem(
-                    name: 'Line',
-                    icon: Icons.line_axis,
-                    isSelected: currentShapeType == ShapeType.line,
-                    onPressed: () => onShapeSelected(ShapeType.line),
-                  ),
+                    // Line
+                    ToolItem(
+                      name: 'Line',
+                      icon: Icons.line_axis,
+                      isSelected: currentShapeType == ShapeType.line,
+                      onPressed: () => onShapeSelected(ShapeType.line),
+                    ),
 
-                  // Rectangle
-                  ToolItem(
-                    name: 'Rectangle',
-                    icon: Icons.crop_square,
-                    isSelected: currentShapeType == ShapeType.rectangle,
-                    onPressed: () => onShapeSelected(ShapeType.rectangle),
-                  ),
-                  // Circle
-                  ToolItem(
-                    name: 'Circle',
-                    icon: Icons.circle_outlined,
-                    isSelected: currentShapeType == ShapeType.circle,
-                    onPressed: () => onShapeSelected(ShapeType.circle),
-                  ),
-                ],
-              ),
-
-              Container(
-                margin: EdgeInsets.all(8),
-                width: 340,
-                height: 1,
-                color: Colors.grey,
-              ),
-
-              // Stroke Weight
-              adjustmentWidget(
-                name: 'Stroke Style',
-                buttonIcon: Icons.line_weight,
-                buttonIconColor: Colors.black,
-                onButtonPressed: () {},
-                child: Slider(
-                  value: appModel.lineWeight,
-                  min: 1,
-                  max: 100,
-                  divisions: 100,
-                  label: appModel.lineWeight.round().toString(),
-                  onChanged: (double value) {
-                    appModel.lineWeight = value;
-                  },
+                    // Rectangle
+                    ToolItem(
+                      name: 'Rectangle',
+                      icon: Icons.crop_square,
+                      isSelected: currentShapeType == ShapeType.rectangle,
+                      onPressed: () => onShapeSelected(ShapeType.rectangle),
+                    ),
+                    // Circle
+                    ToolItem(
+                      name: 'Circle',
+                      icon: Icons.circle_outlined,
+                      isSelected: currentShapeType == ShapeType.circle,
+                      onPressed: () => onShapeSelected(ShapeType.circle),
+                    ),
+                  ],
                 ),
-              ),
 
-              // Stroke Style
-              adjustmentWidget(
-                name: 'Stroke Style',
-                buttonIcon: Icons.line_style_outlined,
-                buttonIconColor: Colors.black,
-                onButtonPressed: () {},
-                child: Slider(
-                  value: appModel.lineStyle,
-                  min: 1,
-                  max: 100,
-                  divisions: 100,
-                  label: appModel.lineWeight.round().toString(),
-                  onChanged: (double value) {
-                    appModel.lineStyle = value;
-                  },
-                ),
-              ),
-
-              // Color Stroke
-              adjustmentWidget(
-                name: 'Stroke Color',
-                buttonIcon: Icons.water_drop_outlined,
-                buttonIconColor: appModel.colorForStroke,
-                onButtonPressed: () => showColorPicker(
-                  context: context,
-                  title: 'Stroke',
-                  color: appModel.colorForStroke,
-                  onSelectedColor: (final Color color) =>
-                      appModel.colorForStroke = color,
-                ),
-                child: Text('TODO'),
-              ),
-
-              // Color Fill
-              if (shapeSupportsFill(currentShapeType))
+                divider(),
+                // Stroke Weight
                 adjustmentWidget(
-                  name: 'Fill Color',
-                  buttonIcon: Icons.water_drop,
-                  buttonIconColor: appModel.colorForFill,
+                  name: 'Stroke Style',
+                  buttonIcon: Icons.line_weight,
+                  buttonIconColor: Colors.black,
+                  onButtonPressed: () {},
+                  child: Slider(
+                    value: appModel.lineWeight,
+                    min: 1,
+                    max: 100,
+                    divisions: 100,
+                    label: appModel.lineWeight.round().toString(),
+                    onChanged: (double value) {
+                      appModel.lineWeight = value;
+                    },
+                  ),
+                ),
+                divider(),
+                // Stroke Style
+                adjustmentWidget(
+                  name: 'Stroke Style',
+                  buttonIcon: Icons.line_style_outlined,
+                  buttonIconColor: Colors.black,
+                  onButtonPressed: () {},
+                  child: Slider(
+                    value: appModel.lineStyle,
+                    min: 1,
+                    max: 100,
+                    divisions: 100,
+                    label: appModel.lineWeight.round().toString(),
+                    onChanged: (double value) {
+                      appModel.lineStyle = value;
+                    },
+                  ),
+                ),
+                divider(),
+                // Color Stroke
+                adjustmentWidget(
+                  name: 'Stroke Color',
+                  buttonIcon: Icons.water_drop_outlined,
+                  buttonIconColor: appModel.colorForStroke,
                   onButtonPressed: () => showColorPicker(
                     context: context,
-                    title: 'Fill',
-                    color: appModel.colorForFill,
+                    title: 'Stroke',
+                    color: appModel.colorForStroke,
                     onSelectedColor: (final Color color) =>
-                        appModel.colorForFill = color,
+                        appModel.colorForStroke = color,
                   ),
-                  child: Text('TODO'),
+                  child: MyColorPicker(
+                    color: appModel.colorForStroke,
+                    onColorChanged: (Color color) =>
+                        appModel.colorForStroke = color,
+                  ),
                 ),
-            ],
+                divider(),
+                // Color Fill
+                if (shapeSupportsFill(currentShapeType))
+                  adjustmentWidget(
+                    name: 'Fill Color',
+                    buttonIcon: Icons.water_drop,
+                    buttonIconColor: appModel.colorForFill,
+                    onButtonPressed: () => showColorPicker(
+                      context: context,
+                      title: 'Fill',
+                      color: appModel.colorForFill,
+                      onSelectedColor: (final Color color) =>
+                          appModel.colorForFill = color,
+                    ),
+                    child: MyColorPicker(
+                      color: appModel.colorForFill,
+                      onColorChanged: (Color color) =>
+                          appModel.colorForFill = color,
+                    ),
+                  ),
+              ],
+            ),
           );
         },
       ),
+    );
+  }
+
+  Widget divider() {
+    return Container(
+      margin: EdgeInsets.all(8),
+      width: 340,
+      height: 1,
+      color: Colors.grey,
     );
   }
 

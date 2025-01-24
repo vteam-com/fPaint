@@ -44,7 +44,7 @@ class MainScreenState extends State<MainScreen> {
 
           // Panel for Layers
           Positioned(
-            top: 64,
+            top: 8,
             right: 8,
             child: Card(
               elevation: 8,

@@ -23,6 +23,7 @@ class LayersPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       elevation: 4,
+      borderRadius: BorderRadius.circular(12),
       color: Colors.grey.shade200,
       child: SizedBox(
         width: 200,
