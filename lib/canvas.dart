@@ -31,7 +31,11 @@ class MyCanvasPainter extends CustomPainter {
     );
 
     /// Render the transparent grid
-    drawTransaparentBackground(canvas, _appModel.offset, _appModel.canvasSize);
+    drawTransaparentBackgroundOffsetAndSize(
+      canvas,
+      _appModel.offset,
+      _appModel.canvasSize,
+    );
 
     for (final PaintLayer layer in _appModel.layers.list.reversed) {
       if (layer.isVisible) {

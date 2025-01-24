@@ -1,15 +1,64 @@
 import 'package:flutter/material.dart';
 
+class TransparentPaper extends StatelessWidget {
+  const TransparentPaper({super.key, this.patternSize = 10.0});
+  final double patternSize;
+
+  @override
+  Widget build(final BuildContext context) {
+    return CustomPaint(
+      size: Size.infinite,
+      painter: TransparentBackgroundPainter(patternSize),
+    );
+  }
+}
+
+class TransparentBackgroundPainter extends CustomPainter {
+  TransparentBackgroundPainter([this.patternSize = 10.0]);
+  final double patternSize;
+
+  @override
+  void paint(final Canvas canvas, final Size size) {
+    if (size.isFinite) {
+      drawTransaparentBackgroundOffsetAndSize(
+        canvas,
+        Offset(0, 0),
+        size,
+        patternSize,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(TransparentBackgroundPainter oldDelegate) => true;
+}
+
+void drawTransaparentBackgroundLTWH(
+  final Canvas canvas,
+  final double left,
+  final double top,
+  final double width,
+  final double height, {
+  patternSize = 10,
+}) {
+  drawTransaparentBackgroundOffsetAndSize(
+    canvas,
+    Offset(left, top),
+    Size(width, height),
+  );
+}
+
 /// Draws a transparent background grid on the canvas.
 /// The grid is composed of alternating grey and transparent squares,
 /// with the size of each square determined by the canvas size and a fixed cell size.
 /// The grid is clipped to the canvas bounds and is drawn using the provided Canvas object.
-void drawTransaparentBackground(
+void drawTransaparentBackgroundOffsetAndSize(
   final Canvas canvas,
   final Offset offset,
-  final Size size,
-) {
-  final double cellSize = size.width / ((size.width / 10.0).floor());
+  final Size size, [
+  patternSize = 10,
+]) {
+  final double cellSize = size.width / ((size.width / patternSize).floor());
   canvas.save();
   canvas.clipRect(
     Rect.fromLTWH(

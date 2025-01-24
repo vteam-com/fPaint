@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/tool.dart';
 import 'package:fpaint/widgets/color_picker.dart';
+import 'package:fpaint/widgets/transparent_background.dart';
 import 'package:provider/provider.dart';
 
+/// Represents a panel that displays tools for the application.
+/// The ToolsPanel is a stateless widget that displays a set of tools
+/// that the user can interact with to perform various actions in the
+/// application. It includes a list of tools, as well as any associated
+/// attributes or settings for the selected tool.
 class ToolsPanel extends StatelessWidget {
   const ToolsPanel({
     super.key,
@@ -46,6 +52,13 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
+  /// Builds the tools panel, which displays a row of tool items that the user can
+  /// select to perform various actions in the application.
+  ///
+  /// The `buildTools` method returns a `Row` widget that contains a list of
+  /// `ToolItem` widgets, each representing a different tool that the user can
+  /// select. The selected tool is determined by the `currentShapeType` property,
+  /// and the `onShapeSelected` callback is called when the user selects a tool.
   Widget buildTools() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -92,6 +105,12 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
+  /// The `buildAttributes` method creates a list of widgets that represent various
+  /// tool attributes, such as stroke weight, brush style, stroke color, and fill
+  /// color. The method checks if the current shape type supports each attribute,
+  /// and if so, it adds a corresponding widget to the list. The list of widgets
+  /// is then returned as a `SizedBox` with a `ListView.separated` to display the
+  /// attributes.
   Widget buildAttributes(final BuildContext context, final AppModel appModel) {
     List<Widget> widgets = [];
 
@@ -144,6 +163,7 @@ class ToolsPanel extends StatelessWidget {
             onSelectedColor: (final Color color) =>
                 appModel.colorForStroke = color,
           ),
+          transparentPaper: true,
           child: MyColorPicker(
             color: appModel.colorForStroke,
             onColorChanged: (Color color) => appModel.colorForStroke = color,
@@ -166,6 +186,7 @@ class ToolsPanel extends StatelessWidget {
             onSelectedColor: (final Color color) =>
                 appModel.colorForFill = color,
           ),
+          transparentPaper: true,
           child: MyColorPicker(
             color: appModel.colorForFill,
             onColorChanged: (Color color) => appModel.colorForFill = color,
@@ -184,27 +205,37 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  bool shapeSupportsFill(final Tools type, final ToolAttribute attribute) {
-    final Set<ToolAttribute>? tool = toolsSupportedAttributes[type];
-    return tool!.contains(attribute);
-  }
-
   Widget adjustmentWidget({
     required String name,
     required IconData buttonIcon,
     required Color buttonIconColor,
     required VoidCallback onButtonPressed,
     required Widget child,
+    bool transparentPaper = false,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Row(
         children: [
-          IconButton(
-            icon: Icon(buttonIcon),
-            onPressed: onButtonPressed,
-            color: buttonIconColor,
-            tooltip: name,
+          Container(
+            width: 40,
+            height: 40,
+            margin: EdgeInsets.only(right: 8),
+            child: Stack(
+              alignment: AlignmentDirectional.center,
+              children: [
+                if (transparentPaper)
+                  TransparentPaper(
+                    patternSize: 4,
+                  ),
+                IconButton(
+                  icon: Icon(buttonIcon),
+                  onPressed: onButtonPressed,
+                  color: buttonIconColor,
+                  tooltip: name,
+                ),
+              ],
+            ),
           ),
           Expanded(
             child: child,
@@ -214,6 +245,16 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
+  /// Displays a color picker dialog with the given title, initial color, and callback for the selected color.
+  ///
+  /// The color picker dialog is displayed using the [showDialog] function, and includes a [ColorPicker] widget
+  /// that allows the user to select a color. The selected color is passed to the [onSelectedColor] callback.
+  ///
+  /// Parameters:
+  /// - `context`: The [BuildContext] used to display the dialog.
+  /// - `title`: The title of the color picker dialog.
+  /// - `color`: The initial color to be displayed in the color picker.
+  /// - `onSelectedColor`: A callback that is called when the user selects a color. The selected color is passed as an argument.
   void showColorPicker({
     required final BuildContext context,
     required final String title,
