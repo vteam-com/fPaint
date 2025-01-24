@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/widgets/transparent_background.dart';
 
 import 'models/app_model.dart';
 
@@ -30,33 +31,7 @@ class MyCanvasPainter extends CustomPainter {
     );
 
     /// Render the transparent grid
-    final double cellSize = _appModel.canvasSize.width /
-        ((_appModel.canvasSize.width / 10.0).floor());
-    canvas.save();
-    canvas.clipRect(
-      Rect.fromLTWH(
-        _appModel.offset.dx,
-        _appModel.offset.dy,
-        _appModel.canvasSize.width,
-        _appModel.canvasSize.height,
-      ),
-    );
-    for (double x = 0; x < _appModel.canvasSize.width; x += cellSize) {
-      for (double y = 0; y < _appModel.canvasSize.height; y += cellSize) {
-        if ((x ~/ cellSize + y ~/ cellSize) % 2 == 0) {
-          canvas.drawRect(
-            Rect.fromLTWH(
-              x + _appModel.offset.dx,
-              y + _appModel.offset.dy,
-              cellSize,
-              cellSize,
-            ),
-            Paint()..color = Colors.grey.shade400,
-          );
-        }
-      }
-    }
-    canvas.restore();
+    drawTransaparentBackground(canvas, _appModel.offset, _appModel.canvasSize);
 
     for (final PaintLayer layer in _appModel.layers.list.reversed) {
       if (layer.isVisible) {
