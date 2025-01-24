@@ -80,8 +80,8 @@ class AppModel extends ChangeNotifier {
   }
 
   void addShape({
-    Shape? shape,
-    ShapeType? type,
+    UserAction? shape,
+    Tools? type,
     Color? colorFill,
     Color? colorStroke,
     Offset? start,
@@ -98,13 +98,13 @@ class AppModel extends ChangeNotifier {
         colorStroke != null) {
       if (_isWithinCanvas(start) && _isWithinCanvas(end)) {
         currentLayer.shapes.add(
-          Shape(
+          UserAction(
             start: start,
             end: end,
             type: type,
             colorFill: colorFill,
-            colorStroke: colorStroke,
-            lineWeight: this.lineWeight,
+            colorOutline: colorStroke,
+            brushSize: this.lineWeight,
           ),
         );
       }

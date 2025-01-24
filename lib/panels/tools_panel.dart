@@ -11,8 +11,8 @@ class ToolsPanel extends StatelessWidget {
     required this.currentShapeType,
     required this.onShapeSelected,
   });
-  final ShapeType currentShapeType;
-  final Function(ShapeType) onShapeSelected;
+  final Tools currentShapeType;
+  final Function(Tools) onShapeSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -54,39 +54,39 @@ class ToolsPanel extends StatelessWidget {
         ToolItem(
           name: 'Draw',
           icon: Icons.brush,
-          isSelected: currentShapeType == ShapeType.pencil,
-          onPressed: () => onShapeSelected(ShapeType.pencil),
+          isSelected: currentShapeType == Tools.draw,
+          onPressed: () => onShapeSelected(Tools.draw),
         ),
 
         // Line
         ToolItem(
           name: 'Line',
           icon: Icons.line_axis,
-          isSelected: currentShapeType == ShapeType.line,
-          onPressed: () => onShapeSelected(ShapeType.line),
+          isSelected: currentShapeType == Tools.line,
+          onPressed: () => onShapeSelected(Tools.line),
         ),
 
         // Rectangle
         ToolItem(
           name: 'Rectangle',
           icon: Icons.crop_square,
-          isSelected: currentShapeType == ShapeType.rectangle,
-          onPressed: () => onShapeSelected(ShapeType.rectangle),
+          isSelected: currentShapeType == Tools.rectangle,
+          onPressed: () => onShapeSelected(Tools.rectangle),
         ),
 
         // Circle
         ToolItem(
           name: 'Circle',
           icon: Icons.circle_outlined,
-          isSelected: currentShapeType == ShapeType.circle,
-          onPressed: () => onShapeSelected(ShapeType.circle),
+          isSelected: currentShapeType == Tools.circle,
+          onPressed: () => onShapeSelected(Tools.circle),
         ),
 
         ToolItem(
           name: 'Eraser',
           icon: Icons.cleaning_services,
-          isSelected: currentShapeType == ShapeType.eraser,
-          onPressed: () => onShapeSelected(ShapeType.eraser),
+          isSelected: currentShapeType == Tools.eraser,
+          onPressed: () => onShapeSelected(Tools.eraser),
         ),
       ],
     );
@@ -96,7 +96,7 @@ class ToolsPanel extends StatelessWidget {
     List<Widget> widgets = [];
 
     // Stroke Weight
-    if (currentShapeType.isSupported(ShapeAttribute.lineWeight)) {
+    if (currentShapeType.isSupported(ToolAttribute.brushSize)) {
       widgets.add(
         adjustmentWidget(
           name: 'Stroke Style',
@@ -118,7 +118,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Bruse Style
-    if (currentShapeType.isSupported(ShapeAttribute.brush)) {
+    if (currentShapeType.isSupported(ToolAttribute.brushStyle)) {
       widgets.add(
         adjustmentWidget(
           name: 'Brush Style',
@@ -131,7 +131,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Color Stroke
-    if (currentShapeType.isSupported(ShapeAttribute.stroke)) {
+    if (currentShapeType.isSupported(ToolAttribute.colorOutline)) {
       widgets.add(
         adjustmentWidget(
           name: 'Stroke Color',
@@ -153,7 +153,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Color Fill
-    if (currentShapeType.isSupported(ShapeAttribute.fill)) {
+    if (currentShapeType.isSupported(ToolAttribute.colorFill)) {
       widgets.add(
         adjustmentWidget(
           name: 'Fill Color',
@@ -184,8 +184,8 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  bool shapeSupportsFill(final ShapeType type, final ShapeAttribute attribute) {
-    final Set<ShapeAttribute>? tool = toolsSupportedAttributes[type];
+  bool shapeSupportsFill(final Tools type, final ToolAttribute attribute) {
+    final Set<ToolAttribute>? tool = toolsSupportedAttributes[type];
     return tool!.contains(attribute);
   }
 

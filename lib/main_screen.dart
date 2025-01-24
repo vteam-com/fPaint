@@ -17,9 +17,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class MainScreenState extends State<MainScreen> {
-  ShapeType _currentShapeType = ShapeType.pencil;
+  Tools _currentShapeType = Tools.draw;
   Offset? _panStart;
-  Shape? _currentShape;
+  UserAction? _currentShape;
   late AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
   int _selectedLayerIndex = 0; // Track the selected layer
@@ -170,15 +170,15 @@ class MainScreenState extends State<MainScreen> {
 
   void _handlePanStart(Offset position) {
     _panStart = position;
-    if (_currentShapeType != ShapeType.pencil) {
-      _currentShape = Shape(
+    if (_currentShapeType != Tools.draw) {
+      _currentShape = UserAction(
         start: position,
         end: position,
         type: _currentShapeType,
-        colorStroke: appModel.colorForStroke,
+        colorOutline: appModel.colorForStroke,
         colorFill: appModel.colorForFill,
-        lineWeight: appModel.lineWeight,
-        brush: appModel.brush,
+        brushSize: appModel.lineWeight,
+        brushStyle: appModel.brush,
       );
 
       Provider.of<AppModel>(context, listen: false)
@@ -188,18 +188,17 @@ class MainScreenState extends State<MainScreen> {
 
   void _handlePanUpdate(Offset position) {
     if (_panStart != null) {
-      if (_currentShapeType == ShapeType.eraser) {
+      if (_currentShapeType == Tools.eraser) {
         // Eraser implementation
         Provider.of<AppModel>(context, listen: false).addShape(
           start: _panStart!,
           end: position,
           type: _currentShapeType,
-          colorStroke: Colors.white, // Or your canvas background color
-          colorFill: Colors.white,
-          // lineWeight: appModel.lineWeight * 2, // Make eraser slightly bigger
+          colorStroke: Colors.transparent, // Or your canvas background color
+          colorFill: Colors.transparent,
         );
         _panStart = position;
-      } else if (_currentShapeType == ShapeType.pencil) {
+      } else if (_currentShapeType == Tools.draw) {
         // Existing pencil logic
         Provider.of<AppModel>(context, listen: false).addShape(
           start: _panStart!,
@@ -221,7 +220,7 @@ class MainScreenState extends State<MainScreen> {
     _currentShape = null;
   }
 
-  void _onShapeSelected(final ShapeType shape) {
+  void _onShapeSelected(final Tools shape) {
     setState(() {
       _currentShapeType = shape;
     });

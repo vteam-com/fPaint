@@ -1,16 +1,15 @@
 // Imports
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/shapes.dart';
 
 // Exports
-export 'package:fpaint/models/shapes.dart';
+export 'package:fpaint/models/user_action.dart';
 
 class PaintLayer {
   PaintLayer({required this.name});
   String name;
-  List<Shape> shapes = [];
-  List<Shape> redoStack = [];
+  List<UserAction> shapes = [];
+  List<UserAction> redoStack = [];
   bool isVisible = true;
 }
 
@@ -19,13 +18,13 @@ class Layers {
     final PaintLayer firstLayer = PaintLayer(name: 'Background');
 
     firstLayer.shapes.add(
-      Shape(
+      UserAction(
         start: Offset(0, 0),
         end: Offset(size.width, size.height),
-        type: ShapeType.rectangle,
+        type: Tools.rectangle,
         colorFill: Colors.white,
-        colorStroke: Colors.white,
-        lineWeight: 0,
+        colorOutline: Colors.white,
+        brushSize: 0,
       ),
     );
 

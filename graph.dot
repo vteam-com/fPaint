@@ -9,7 +9,7 @@ digraph "" {
   "/lib/panels/layers_panel.dart" [label="layers_panel"];
   "/lib/panels/tool.dart" [label="tool"];
   "/lib/models/layers.dart" [label="layers"];
-  "/lib/models/shapes.dart" [label="shapes"];
+  "/lib/models/user_action.dart" [label="user_action"];
   "/lib/models/app_model.dart" [label="app_model"];
   "/lib/main.dart" [label="main"];
   "/lib/canvas.dart" [label="canvas"];
@@ -42,7 +42,7 @@ digraph "" {
       subgraph "cluster~/lib/models" {
         label="models";
         "/lib/models/layers.dart";
-        "/lib/models/shapes.dart";
+        "/lib/models/user_action.dart";
         "/lib/models/app_model.dart";
       }
       subgraph "cluster~/lib/helpers" {
@@ -64,10 +64,9 @@ digraph "" {
   "/lib/panels/tools_panel.dart" -> "/lib/widgets/color_picker.dart";
   "/lib/panels/layers_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layers.dart" -> "/lib/models/app_model.dart";
-  "/lib/models/layers.dart" -> "/lib/models/shapes.dart";
-  "/lib/models/layers.dart" -> "/lib/models/shapes.dart" [style=dashed];
-  "/lib/models/shapes.dart" -> "/lib/brushes/brushes.dart";
-  "/lib/models/shapes.dart" -> "/lib/brushes/brushes.dart" [style=dashed];
+  "/lib/models/layers.dart" -> "/lib/models/user_action.dart" [style=dashed];
+  "/lib/models/user_action.dart" -> "/lib/brushes/brushes.dart";
+  "/lib/models/user_action.dart" -> "/lib/brushes/brushes.dart" [style=dashed];
   "/lib/models/app_model.dart" -> "/lib/models/layers.dart";
   "/lib/models/app_model.dart" -> "/lib/models/layers.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/main_screen.dart";

@@ -20,13 +20,13 @@ void main() {
     });
 
     test('addShape with Shape object should add to current layer', () {
-      final shape = Shape(
+      final shape = UserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: ShapeType.pencil,
+        type: Tools.draw,
         colorFill: Colors.black,
-        colorStroke: Colors.black,
-        lineWeight: 1,
+        colorOutline: Colors.black,
+        brushSize: 1,
       );
       paintModel.addShape(shape: shape);
       expect(
@@ -40,7 +40,7 @@ void main() {
       paintModel.addShape(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: ShapeType.circle,
+        type: Tools.circle,
         colorFill: Colors.red,
         colorStroke: Colors.yellow,
       );
@@ -50,7 +50,7 @@ void main() {
       ); // also has the default white rectangle
       expect(paintModel.currentLayer.shapes.last.start, const Offset(0, 0));
       expect(paintModel.currentLayer.shapes.last.end, const Offset(10, 10));
-      expect(paintModel.currentLayer.shapes.last.type, ShapeType.circle);
+      expect(paintModel.currentLayer.shapes.last.type, Tools.circle);
       expect(paintModel.currentLayer.shapes.last.colorFill, Colors.red);
     });
 
@@ -58,7 +58,7 @@ void main() {
       paintModel.addShape(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: ShapeType.rectangle,
+        type: Tools.rectangle,
         colorFill: Colors.blue,
       );
       paintModel.updateLastShape(const Offset(20, 20));
@@ -74,7 +74,7 @@ void main() {
       paintModel.addShape(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: ShapeType.pencil,
+        type: Tools.draw,
         colorFill: Colors.green,
         colorStroke: Colors.black,
       );
@@ -93,21 +93,21 @@ void main() {
       paintModel.addShape(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: ShapeType.pencil,
+        type: Tools.draw,
         colorFill: Colors.blue,
         colorStroke: Colors.black,
       );
       paintModel.addShape(
         start: const Offset(20, 20),
         end: const Offset(30, 30),
-        type: ShapeType.circle,
+        type: Tools.circle,
         colorFill: Colors.red,
         colorStroke: Colors.black,
       );
       expect(paintModel.currentLayer.shapes.length, 3);
       paintModel.undo();
       expect(paintModel.currentLayer.shapes.length, 2);
-      expect(paintModel.currentLayer.shapes.last.type, ShapeType.pencil);
+      expect(paintModel.currentLayer.shapes.last.type, Tools.draw);
     });
   });
 }

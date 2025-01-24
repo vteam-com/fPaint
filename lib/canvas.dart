@@ -60,17 +60,17 @@ class MyCanvasPainter extends CustomPainter {
 
     for (final PaintLayer layer in _appModel.layers.list.reversed) {
       if (layer.isVisible) {
-        for (final Shape shape in layer.shapes) {
+        for (final UserAction shape in layer.shapes) {
           final Paint paint = Paint();
           paint.color = shape.colorFill;
           paint.strokeCap = StrokeCap.round;
-          paint.strokeWidth = shape.lineWeight;
+          paint.strokeWidth = shape.brushSize;
 
           switch (shape.type) {
             // Draw
-            case ShapeType.pencil:
+            case Tools.draw:
               paint.style = PaintingStyle.stroke;
-              paint.color = shape.colorStroke;
+              paint.color = shape.colorOutline;
               canvas.drawLine(
                 shape.start.translate(_appModel.offset.dx, _appModel.offset.dy),
                 shape.end.translate(_appModel.offset.dx, _appModel.offset.dy),
@@ -79,11 +79,11 @@ class MyCanvasPainter extends CustomPainter {
               break;
 
             // Line
-            case ShapeType.line:
+            case Tools.line:
               paint.style = PaintingStyle.stroke;
-              paint.color = shape.colorStroke;
+              paint.color = shape.colorOutline;
 
-              if (shape.brush == BrushStyle.dash) {
+              if (shape.brushStyle == BrushStyle.dash) {
                 final path = Path();
 
                 final Offset s = shape.start
@@ -96,8 +96,8 @@ class MyCanvasPainter extends CustomPainter {
 
                 final Path dashedPath = createDashedPath(
                   path,
-                  dashWidth: shape.lineWeight * 3,
-                  dashGap: shape.lineWeight * 2,
+                  dashWidth: shape.brushSize * 3,
+                  dashGap: shape.brushSize * 2,
                 );
                 canvas.drawPath(dashedPath, paint);
               } else {
@@ -111,7 +111,7 @@ class MyCanvasPainter extends CustomPainter {
               break;
 
             // Circle
-            case ShapeType.circle:
+            case Tools.circle:
               final radius = (shape.start - shape.end).distance / 2;
               final center = Offset(
                 (shape.start.dx + shape.end.dx) / 2,
@@ -123,13 +123,13 @@ class MyCanvasPainter extends CustomPainter {
 
               // Border
               paint.style = PaintingStyle.stroke;
-              paint.color = shape.colorStroke;
+              paint.color = shape.colorOutline;
 
               canvas.drawCircle(center, radius, paint);
               break;
 
             // Rectangle
-            case ShapeType.rectangle:
+            case Tools.rectangle:
 
               // Fill
               canvas.drawRect(
@@ -148,7 +148,7 @@ class MyCanvasPainter extends CustomPainter {
 
               // Border
               paint.style = PaintingStyle.stroke;
-              paint.color = shape.colorStroke;
+              paint.color = shape.colorOutline;
               canvas.drawRect(
                 Rect.fromPoints(
                   shape.start.translate(
@@ -164,7 +164,16 @@ class MyCanvasPainter extends CustomPainter {
               );
               break;
 
-            case ShapeType.eraser:
+            case Tools.eraser:
+              paint.color = Colors.white;
+              // paint.blendMode = BlendMode.clear;
+              paint.strokeWidth = shape.brushSize;
+              paint.style = PaintingStyle.stroke;
+              canvas.drawLine(
+                shape.start.translate(_appModel.offset.dx, _appModel.offset.dy),
+                shape.end.translate(_appModel.offset.dx, _appModel.offset.dy),
+                paint,
+              );
               break;
           }
         }
