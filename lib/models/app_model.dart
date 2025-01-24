@@ -135,13 +135,15 @@ class AppModel extends ChangeNotifier {
 
   void undo() {
     if (currentLayer.shapes.isNotEmpty) {
-      currentLayer.shapes.removeLast();
+      currentLayer.redoStack.add(currentLayer.shapes.removeLast());
       notifyListeners();
     }
   }
 
   void redo() {
-    // Basic redo implementation (can be improved)
-    notifyListeners();
+    if (currentLayer.redoStack.isNotEmpty) {
+      currentLayer.shapes.add(currentLayer.redoStack.removeLast());
+      notifyListeners();
+    }
   }
 }

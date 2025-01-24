@@ -10,6 +10,7 @@ class PaintLayer {
   PaintLayer({required this.name});
   String name;
   List<Shape> shapes = [];
+  List<Shape> redoStack = [];
   bool isVisible = true;
 }
 
