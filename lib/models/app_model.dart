@@ -16,6 +16,14 @@ class AppModel extends ChangeNotifier {
 
   Color get colorForStroke => _colorForStroke;
 
+  // Scale
+  double _scale = 1;
+  double get scale => _scale;
+  set scale(double value) {
+    _scale = value;
+    notifyListeners();
+  }
+
   set colorForStroke(Color value) {
     _colorForStroke = value;
     notifyListeners();

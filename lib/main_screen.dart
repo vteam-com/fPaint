@@ -37,33 +37,42 @@ class MainScreenState extends State<MainScreen> {
           // Left side panels
           SizedBox(
             width: 400,
-            child: Material(
-              elevation: 8,
-              child: Column(
-                children: [
-                  // Layers Panel
-                  Expanded(
-                    child: LayersPanel(
-                      selectedLayerIndex: _selectedLayerIndex,
-                      onSelectLayer: _selectLayer,
-                      onAddLayer: _onAddLayer,
-                      onFileOpen: _onFileOpen,
-                      onRemoveLayer: _removeLayer,
-                      onToggleViewLayer: _onToggleViewLayer,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8.0, bottom: 8),
+              child: Material(
+                elevation: 18,
+                color: Colors.grey.shade200,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+                child: Column(
+                  children: [
+                    // Layers Panel
+                    Expanded(
+                      child: LayersPanel(
+                        selectedLayerIndex: _selectedLayerIndex,
+                        onSelectLayer: _selectLayer,
+                        onAddLayer: _onAddLayer,
+                        onFileOpen: _onFileOpen,
+                        onRemoveLayer: _removeLayer,
+                        onToggleViewLayer: _onToggleViewLayer,
+                      ),
                     ),
-                  ),
-                  // Tools Panel
-                  Divider(
-                    thickness: 8,
-                    height: 16,
-                  ),
-                  Expanded(
-                    child: ToolsPanel(
-                      currentShapeType: _currentShapeType,
-                      onShapeSelected: _onShapeSelected,
+                    // Tools Panel
+                    Divider(
+                      thickness: 8,
+                      height: 16,
+                      color: Colors.grey,
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: ToolsPanel(
+                        currentShapeType: _currentShapeType,
+                        onShapeSelected: _onShapeSelected,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -74,10 +83,8 @@ class MainScreenState extends State<MainScreen> {
                 width: appModel.canvasSize.width,
                 height: appModel.canvasSize.height,
                 child: GestureDetector(
-                  onPanStart: (details) =>
-                      _handlePanStart(details.localPosition),
-                  onPanUpdate: (details) =>
-                      _handlePanUpdate(details.localPosition),
+                  onPanStart: (details) => _handlePanStart(details.localPosition),
+                  onPanUpdate: (details) => _handlePanUpdate(details.localPosition),
                   onPanEnd: _handlePanEnd,
                   child: CanvasPanel(appModel: paintModel),
                 ),
@@ -96,12 +103,38 @@ class MainScreenState extends State<MainScreen> {
             onPressed: () => paintModel.undo(),
             child: Icon(Icons.undo),
           ),
-          SizedBox(height: 8),
           FloatingActionButton(
             backgroundColor: Colors.grey.shade200,
             foregroundColor: Colors.grey.shade700,
             onPressed: () => paintModel.redo(),
             child: Icon(Icons.redo),
+          ),
+          SizedBox(height: 8),
+          FloatingActionButton(
+            backgroundColor: Colors.grey.shade200,
+            foregroundColor: Colors.grey.shade700,
+            onPressed: () => paintModel.scale *= 1.10,
+            child: Icon(Icons.zoom_in),
+          ),
+          FloatingActionButton(
+            backgroundColor: Colors.grey.shade200,
+            foregroundColor: Colors.grey.shade700,
+            onPressed: () => paintModel.scale = 1,
+            child: Text(
+              '${(paintModel.scale * 100).toInt()}%\n${paintModel.canvasSize.width.toInt()}\n${paintModel.canvasSize.height.toInt()}',
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: Colors.grey.shade700,
+                fontWeight: FontWeight.bold,
+                fontSize: 10,
+              ),
+            ),
+          ),
+          FloatingActionButton(
+            backgroundColor: Colors.grey.shade200,
+            foregroundColor: Colors.grey.shade700,
+            onPressed: () => paintModel.scale *= 0.90,
+            child: Icon(Icons.zoom_out),
           ),
         ],
       ),
@@ -154,17 +187,14 @@ class MainScreenState extends State<MainScreen> {
   void _removeLayer(final int layerIndex) {
     Provider.of<AppModel>(context, listen: false).removeLayer(layerIndex);
     setState(() {
-      if (_selectedLayerIndex >=
-          Provider.of<AppModel>(context, listen: false).layers.length) {
-        _selectedLayerIndex =
-            Provider.of<AppModel>(context, listen: false).layers.length - 1;
+      if (_selectedLayerIndex >= Provider.of<AppModel>(context, listen: false).layers.length) {
+        _selectedLayerIndex = Provider.of<AppModel>(context, listen: false).layers.length - 1;
       }
     });
   }
 
   void _onToggleViewLayer(final int layerIndex) {
-    Provider.of<AppModel>(context, listen: false)
-        .toggleLayerVisibility(layerIndex);
+    Provider.of<AppModel>(context, listen: false).toggleLayerVisibility(layerIndex);
     setState(() {});
   }
 
@@ -181,8 +211,7 @@ class MainScreenState extends State<MainScreen> {
         brushStyle: appModel.brush,
       );
 
-      Provider.of<AppModel>(context, listen: false)
-          .addShape(shape: _currentShape);
+      Provider.of<AppModel>(context, listen: false).addShape(shape: _currentShape);
     }
   }
 
