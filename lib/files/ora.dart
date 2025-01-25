@@ -35,8 +35,6 @@ Future<void> readOraFileFromBytes(
   AppModel appModel,
   Uint8List bytes,
 ) async {
-  bool showInfo = false;
-
   // Extract the ZIP contents
   final Archive archive = ZipDecoder().decodeBytes(bytes);
 
@@ -51,13 +49,8 @@ Future<void> readOraFileFromBytes(
     String.fromCharCodes(stackFile.content),
   );
 
-  if (showInfo) {
-    print(stackXml.toString());
-    //   'width:${appModel.canvasSize.width} height:${appModel.canvasSize.height}',
-    // );
-  }
-
   //print(stackXml.toString());
+
   final XmlElement? rootImage = stackXml.getElement('image');
   appModel.canvasSize = ui.Size(
     double.parse(rootImage!.getAttribute('w')!),
@@ -93,11 +86,10 @@ Future<void> readOraFileFromBytes(
         offset: offset,
       );
     }
-    if (showInfo) {
-      print(
-        'Layer:"$name" opacity:$opacityAsText visible:$visibleAsText',
-      );
-    }
+
+    // print(
+    //   'Layer:"$name" opacity:$opacityAsText visible:$visibleAsText',
+    // );
   }
 }
 
@@ -134,6 +126,12 @@ Future<void> saveToORA({
   required final AppModel appModel,
   required final String filePath,
 }) async {
+  List<int> encodedData = await createOraAchive(appModel);
+
+  await File(filePath).writeAsBytes(encodedData);
+}
+
+Future<List<int>> createOraAchive(AppModel appModel) async {
   final Archive archive = Archive();
   final XmlBuilder builder = XmlBuilder();
 
@@ -162,7 +160,7 @@ Future<void> saveToORA({
         await image.toByteData(format: ui.ImageByteFormat.png);
 
     archive.addFile(
-      ArchiveFile.noCompress(
+      ArchiveFile(
         imageName,
         bytes!.lengthInBytes,
         bytes.buffer.asUint8List(),
@@ -221,5 +219,5 @@ Future<void> saveToORA({
 
   // Write archive to file
   final List<int> encodedData = ZipEncoder().encode(archive)!;
-  await File(filePath).writeAsBytes(encodedData);
+  return encodedData;
 }
