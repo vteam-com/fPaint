@@ -8,6 +8,7 @@ digraph "" {
   "/lib/panels/tools_panel.dart" [label="tools_panel"];
   "/lib/panels/layers_panel.dart" [label="layers_panel"];
   "/lib/panels/tool.dart" [label="tool"];
+  "/lib/panels/share.dart" [label="share"];
   "/lib/models/layers.dart" [label="layers"];
   "/lib/models/user_action.dart" [label="user_action"];
   "/lib/models/app_model.dart" [label="app_model"];
@@ -40,6 +41,7 @@ digraph "" {
         "/lib/panels/tools_panel.dart";
         "/lib/panels/layers_panel.dart";
         "/lib/panels/tool.dart";
+        "/lib/panels/share.dart";
       }
       subgraph "cluster~/lib/models" {
         label="models";
@@ -71,6 +73,10 @@ digraph "" {
   "/lib/panels/tools_panel.dart" -> "/lib/widgets/color_picker.dart";
   "/lib/panels/tools_panel.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/layers_panel.dart" -> "/lib/models/app_model.dart";
+  "/lib/panels/layers_panel.dart" -> "/lib/panels/share.dart";
+  "/lib/panels/share.dart" -> "/lib/canvas.dart";
+  "/lib/panels/share.dart" -> "/lib/files/ora.dart";
+  "/lib/panels/share.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layers.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/models/layers.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layers.dart" -> "/lib/models/user_action.dart" [style=dashed];
@@ -80,6 +86,7 @@ digraph "" {
   "/lib/models/app_model.dart" -> "/lib/models/layers.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/main_screen.dart";
   "/lib/main.dart" -> "/lib/models/app_model.dart";
+  "/lib/files/ora.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/files/ora.dart" -> "/lib/models/app_model.dart";
   "/lib/canvas.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/canvas.dart" -> "/lib/models/app_model.dart";

@@ -1,14 +1,11 @@
-import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fpaint/canvas.dart';
 import 'package:fpaint/files/ora.dart';
 import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
-import 'package:super_clipboard/super_clipboard.dart';
 import 'models/app_model.dart';
 
 class MainScreen extends StatefulWidget {
@@ -56,7 +53,6 @@ class MainScreenState extends State<MainScreen> {
                 onSelectLayer: _selectLayer,
                 onAddLayer: _onAddLayer,
                 onFileOpen: _onFileOpen,
-                onShare: _onShare,
                 onRemoveLayer: _removeLayer,
                 onToggleViewLayer: _onToggleViewLayer,
               ),
@@ -108,32 +104,6 @@ class MainScreenState extends State<MainScreen> {
     });
   }
 
-  Future<Uint8List> _capturePainterToImageBytes(BuildContext context) async {
-    final AppModel model = Provider.of<AppModel>(context, listen: false);
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-
-    // Draw the custom painter on the canvas
-    final MyCanvasPainter painter = MyCanvasPainter(model);
-
-    painter.paint(canvas, model.canvasSize);
-
-    // End the recording and get the picture
-    final Picture picture = recorder.endRecording();
-
-    // Convert the picture to an image
-    final image = await picture.toImage(
-      model.canvasSize.width.toInt(),
-      model.canvasSize.height.toInt(),
-    );
-
-    // Convert the image to byte data (e.g., PNG)
-    final ByteData? byteData = await image.toByteData(
-      format: ImageByteFormat.png,
-    );
-    return byteData!.buffer.asUint8List();
-  }
-
   void _onFileOpen() async {
     try {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -157,18 +127,6 @@ class MainScreenState extends State<MainScreen> {
     } catch (e) {
       // Handle any errors that occur during file picking/loading
       print('Error opening file: $e');
-    }
-  }
-
-  void _onShare() async {
-    final clipboard = SystemClipboard.instance;
-    if (clipboard != null) {
-      final image = await _capturePainterToImageBytes(context);
-      final item = DataWriterItem(suggestedName: 'fPaint.png');
-      item.add(Formats.png(image));
-      await clipboard.write([item]);
-    } else {
-      //
     }
   }
 

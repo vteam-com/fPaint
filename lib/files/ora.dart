@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
+import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:xml/xml.dart';
 
@@ -32,6 +35,8 @@ Future<void> readOraFileFromBytes(
   AppModel appModel,
   Uint8List bytes,
 ) async {
+  bool showInfo = false;
+
   // Extract the ZIP contents
   final Archive archive = ZipDecoder().decodeBytes(bytes);
 
@@ -45,6 +50,12 @@ Future<void> readOraFileFromBytes(
   final XmlDocument stackXml = XmlDocument.parse(
     String.fromCharCodes(stackFile.content),
   );
+
+  if (showInfo) {
+    print(stackXml.toString());
+    //   'width:${appModel.canvasSize.width} height:${appModel.canvasSize.height}',
+    // );
+  }
 
   //print(stackXml.toString());
   final XmlElement? rootImage = stackXml.getElement('image');
@@ -82,23 +93,32 @@ Future<void> readOraFileFromBytes(
         offset: offset,
       );
     }
+    if (showInfo) {
+      print(
+        'Layer:"$name" opacity:$opacityAsText visible:$visibleAsText',
+      );
+    }
   }
 }
 
 Future<void> addImageToLayer({
+  required final Archive archive,
   required final AppModel appModel,
   required final PaintLayer layer,
-  required final Archive archive,
   required final String imageName,
   required final ui.Offset offset,
 }) async {
   try {
-    final ArchiveFile file =
-        archive.files.firstWhere((f) => f.name == imageName);
-    final List<int> bytes = file.content as List<int>;
-    final ui.Image image = await decodeImage(bytes);
+    final ArchiveFile? file =
+        archive.files.toList().findFirstMatch((f) => f.name == imageName);
+    if (file != null) {
+      final List<int> bytes = file.content as List<int>;
+      final ui.Image image = await decodeImage(bytes);
 
-    layer.addImage(image, offset);
+      layer.addImage(image, offset);
+    } else {
+      print('$imageName not found in the achive');
+    }
   } catch (e) {
     print(e.toString());
   }
@@ -108,4 +128,98 @@ Future<ui.Image> decodeImage(List<int> bytes) async {
   final completer = Completer<ui.Image>();
   ui.decodeImageFromList(Uint8List.fromList(bytes), completer.complete);
   return completer.future;
+}
+
+Future<void> saveToORA({
+  required final AppModel appModel,
+  required final String filePath,
+}) async {
+  final Archive archive = Archive();
+  final XmlBuilder builder = XmlBuilder();
+
+  // Add uncompressed mimetype
+  archive.addFile(
+    ArchiveFile.noCompress(
+      'mimetype',
+      'image/openraster'.length,
+      utf8.encode('image/openraster'),
+    ),
+  );
+
+  // Placeholder for layer image names
+  final List<Map<String, dynamic>> layersData = [];
+
+  // Generate PNG files and add them to the archive
+  for (int i = 0; i < appModel.layers.length; i++) {
+    final PaintLayer layer = appModel.layers.get(i);
+    final String imageName = 'data/layer-$i.png';
+
+    // Save layer image as PNG
+    final ui.Image image =
+        await layer.toImage(Offset.zero, appModel.canvasSize);
+
+    final ByteData? bytes =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+
+    archive.addFile(
+      ArchiveFile.noCompress(
+        imageName,
+        bytes!.lengthInBytes,
+        bytes.buffer.asUint8List(),
+      ),
+    );
+
+    layersData.add({
+      'name': layer.name,
+      'visibility': layer.isVisible ? 'visible' : 'hidden',
+      'opacity': layer.opacity.toString(),
+      'src': imageName,
+      'x': appModel.offset.dx.toString(),
+      'y': appModel.offset.dy.toString(),
+    });
+  }
+
+  // Create stack.xml synchronously
+  builder.processing('xml', 'version="1.0" encoding="UTF-8"');
+  builder.element(
+    'image',
+    nest: () {
+      builder.attribute('version', '0.0.1');
+      builder.attribute('w', appModel.canvasSize.width.toInt().toString());
+      builder.attribute('h', appModel.canvasSize.height.toInt().toString());
+
+      builder.element(
+        'stack',
+        nest: () {
+          for (final layerData in layersData) {
+            builder.element(
+              'layer',
+              nest: () {
+                builder.attribute('name', layerData['name']);
+                builder.attribute('visibility', layerData['visibility']);
+                builder.attribute('opacity', layerData['opacity']);
+                builder.attribute('src', layerData['src']);
+                builder.attribute('x', layerData['x']);
+                builder.attribute('y', layerData['y']);
+              },
+            );
+          }
+        },
+      );
+    },
+  );
+
+  // Add stack.xml to the archive
+  final String stackXml = builder.buildDocument().toString();
+  archive.addFile(
+    ArchiveFile.noCompress(
+      'stack.xml',
+      stackXml.length,
+      utf8.encode(stackXml),
+    ),
+  );
+
+  // Write archive to file
+  final List<int> encodedData = ZipEncoder().encode(archive)!;
+  await File(filePath).writeAsBytes(encodedData);
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/panels/share.dart';
 import 'package:provider/provider.dart';
 
 class LayersPanel extends StatelessWidget {
@@ -9,7 +10,6 @@ class LayersPanel extends StatelessWidget {
     required this.onSelectLayer,
     required this.onAddLayer,
     required this.onFileOpen,
-    required this.onShare,
     required this.onRemoveLayer,
     required this.onToggleViewLayer,
   });
@@ -17,7 +17,6 @@ class LayersPanel extends StatelessWidget {
   final Function(int) onSelectLayer;
   final Function() onAddLayer;
   final Function() onFileOpen;
-  final Function() onShare;
   final Function(int) onRemoveLayer;
   final Function(int) onToggleViewLayer;
 
@@ -36,16 +35,17 @@ class LayersPanel extends StatelessWidget {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.download),
+                  icon: Icon(Icons.file_open_outlined),
                   onPressed: onFileOpen,
                 ),
                 IconButton(
-                  icon: Icon(Icons.ios_share_outlined),
-                  onPressed: onShare,
-                ),
-                IconButton(
-                  icon: Icon(Icons.add),
+                  icon: Icon(Icons.library_add_rounded),
                   onPressed: onAddLayer,
+                ),
+                Spacer(),
+                IconButton(
+                  icon: Icon(Icons.ios_share_outlined),
+                  onPressed: () => share(context),
                 ),
               ],
             ),
