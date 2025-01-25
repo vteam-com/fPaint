@@ -79,14 +79,21 @@ class MainScreenState extends State<MainScreen> {
           // Canvas on the right
           Expanded(
             child: Center(
-              child: SizedBox(
-                width: appModel.canvasSize.width,
-                height: appModel.canvasSize.height,
-                child: GestureDetector(
-                  onPanStart: (details) => _handlePanStart(details.localPosition),
-                  onPanUpdate: (details) => _handlePanUpdate(details.localPosition),
-                  onPanEnd: _handlePanEnd,
-                  child: CanvasPanel(appModel: paintModel),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SingleChildScrollView(
+                  child: SizedBox(
+                    width: appModel.canvasSize.width,
+                    height: appModel.canvasSize.height,
+                    child: GestureDetector(
+                      onPanStart: (details) =>
+                          _handlePanStart(details.localPosition),
+                      onPanUpdate: (details) =>
+                          _handlePanUpdate(details.localPosition),
+                      onPanEnd: _handlePanEnd,
+                      child: CanvasPanel(appModel: paintModel),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -187,14 +194,17 @@ class MainScreenState extends State<MainScreen> {
   void _removeLayer(final int layerIndex) {
     Provider.of<AppModel>(context, listen: false).removeLayer(layerIndex);
     setState(() {
-      if (_selectedLayerIndex >= Provider.of<AppModel>(context, listen: false).layers.length) {
-        _selectedLayerIndex = Provider.of<AppModel>(context, listen: false).layers.length - 1;
+      if (_selectedLayerIndex >=
+          Provider.of<AppModel>(context, listen: false).layers.length) {
+        _selectedLayerIndex =
+            Provider.of<AppModel>(context, listen: false).layers.length - 1;
       }
     });
   }
 
   void _onToggleViewLayer(final int layerIndex) {
-    Provider.of<AppModel>(context, listen: false).toggleLayerVisibility(layerIndex);
+    Provider.of<AppModel>(context, listen: false)
+        .toggleLayerVisibility(layerIndex);
     setState(() {});
   }
 
@@ -211,7 +221,8 @@ class MainScreenState extends State<MainScreen> {
         brushStyle: appModel.brush,
       );
 
-      Provider.of<AppModel>(context, listen: false).addShape(shape: _currentShape);
+      Provider.of<AppModel>(context, listen: false)
+          .addShape(shape: _currentShape);
     }
   }
 
