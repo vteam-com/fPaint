@@ -1,11 +1,23 @@
 // Imports
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/layers.dart';
+import 'package:provider/provider.dart';
 
 // Exports
 export 'package:fpaint/models/layers.dart';
 
 class AppModel extends ChangeNotifier {
+  /// Gets the [AppModel] instance from the provided [BuildContext].
+  ///
+  /// If [listen] is true, the returned [AppModel] instance will notify listeners
+  /// when its state changes. Otherwise, the returned instance will not notify
+  /// listeners.
+  static AppModel get(
+    final BuildContext context, {
+    final bool listen = false,
+  }) =>
+      Provider.of<AppModel>(context, listen: listen);
+
   String loadedFileName = '';
 
   Size canvasSize = const Size(800, 600); // Default canvas size

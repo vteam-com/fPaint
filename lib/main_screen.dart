@@ -5,7 +5,6 @@ import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
-import 'package:provider/provider.dart';
 
 import 'models/app_model.dart';
 
@@ -21,61 +20,19 @@ class MainScreenState extends State<MainScreen> {
   Tools _currentShapeType = Tools.draw;
   Offset? _panStart;
   UserAction? _currentShape;
-  late AppModel appModel = Provider.of<AppModel>(context, listen: false);
-
   int _selectedLayerIndex = 0; // Track the selected layer
 
   @override
   Widget build(final BuildContext context) {
-    // Ensure that PaintModel is provided above this widget in the widget tree
-    final AppModel paintModel = Provider.of<AppModel>(context);
+    // Ensure that AppModel is provided above this widget in the widget tree and listening
+    final AppModel appModel = AppModel.get(context, listen: true);
 
     return Scaffold(
       backgroundColor: Colors.grey,
       body: Row(
         children: [
           // Left side panels
-          SizedBox(
-            width: 400,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8.0, bottom: 8),
-              child: Material(
-                elevation: 18,
-                color: Colors.grey.shade200,
-                borderRadius: const BorderRadius.only(
-                  topRight: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    // Layers Panel
-                    Expanded(
-                      child: LayersPanel(
-                        selectedLayerIndex: _selectedLayerIndex,
-                        onSelectLayer: _selectLayer,
-                        onAddLayer: _onAddLayer,
-                        onFileOpen: _onFileOpen,
-                        onRemoveLayer: _removeLayer,
-                        onToggleViewLayer: _onToggleViewLayer,
-                      ),
-                    ),
-                    // Tools Panel
-                    Divider(
-                      thickness: 8,
-                      height: 16,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                      child: ToolsPanel(
-                        currentShapeType: _currentShapeType,
-                        onShapeSelected: _onShapeSelected,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          sidePanel(),
           // Canvas on the right
           Expanded(
             child: Center(
@@ -91,7 +48,7 @@ class MainScreenState extends State<MainScreen> {
                       onPanUpdate: (details) =>
                           _handlePanUpdate(details.localPosition),
                       onPanEnd: _handlePanEnd,
-                      child: CanvasPanel(appModel: paintModel),
+                      child: CanvasPanel(appModel: appModel),
                     ),
                   ),
                 ),
@@ -101,12 +58,57 @@ class MainScreenState extends State<MainScreen> {
         ],
       ),
       // Undo/Redo
-      floatingActionButton: floatingActionButtons(paintModel),
+      floatingActionButton: floatingActionButtons(appModel),
+    );
+  }
+
+  Widget sidePanel() {
+    return SizedBox(
+      width: 400,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 8.0, bottom: 8),
+        child: Material(
+          elevation: 18,
+          color: Colors.grey.shade200,
+          borderRadius: const BorderRadius.only(
+            topRight: Radius.circular(12),
+            bottomRight: Radius.circular(12),
+          ),
+          child: Column(
+            children: [
+              // Layers Panel
+              Expanded(
+                child: LayersPanel(
+                  selectedLayerIndex: _selectedLayerIndex,
+                  onSelectLayer: _selectLayer,
+                  onAddLayer: _onAddLayer,
+                  onFileOpen: _onFileOpen,
+                  onRemoveLayer: _removeLayer,
+                  onToggleViewLayer: _onToggleViewLayer,
+                ),
+              ),
+              // Tools Panel
+              Divider(
+                thickness: 8,
+                height: 16,
+                color: Colors.grey,
+              ),
+              Expanded(
+                child: ToolsPanel(
+                  currentShapeType: _currentShapeType,
+                  onShapeSelected: _onShapeSelected,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   // Method to add a new layer
   void _onAddLayer() {
+    final AppModel appModel = AppModel.get(context);
     final Layer newLayer = appModel.addLayerTop();
     setState(() {
       _selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
@@ -114,6 +116,8 @@ class MainScreenState extends State<MainScreen> {
   }
 
   void _onFileOpen() async {
+    final AppModel appModel = AppModel.get(context);
+
     try {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.any,
@@ -143,29 +147,30 @@ class MainScreenState extends State<MainScreen> {
   void _selectLayer(final int layerIndex) {
     setState(() {
       _selectedLayerIndex = layerIndex;
-      Provider.of<AppModel>(context, listen: false).setActiveLayer(layerIndex);
+      AppModel.get(context).setActiveLayer(layerIndex);
     });
   }
 
   // Method to remove a layer
   void _removeLayer(final int layerIndex) {
-    Provider.of<AppModel>(context, listen: false).removeLayer(layerIndex);
+    final AppModel appModel = AppModel.get(context);
+
+    appModel.removeLayer(layerIndex);
     setState(() {
-      if (_selectedLayerIndex >=
-          Provider.of<AppModel>(context, listen: false).layers.length) {
-        _selectedLayerIndex =
-            Provider.of<AppModel>(context, listen: false).layers.length - 1;
+      if (_selectedLayerIndex >= appModel.layers.length) {
+        _selectedLayerIndex = appModel.layers.length - 1;
       }
     });
   }
 
   void _onToggleViewLayer(final int layerIndex) {
-    Provider.of<AppModel>(context, listen: false)
-        .toggleLayerVisibility(layerIndex);
+    AppModel.get(context).toggleLayerVisibility(layerIndex);
     setState(() {});
   }
 
   void _handlePanStart(Offset position) {
+    final AppModel appModel = AppModel.get(context);
+
     _panStart = position;
     if (_currentShapeType != Tools.draw) {
       _currentShape = UserAction(
@@ -178,16 +183,17 @@ class MainScreenState extends State<MainScreen> {
         brushStyle: appModel.brush,
       );
 
-      Provider.of<AppModel>(context, listen: false)
-          .addShape(shape: _currentShape);
+      appModel.addShape(shape: _currentShape);
     }
   }
 
   void _handlePanUpdate(Offset position) {
+    final AppModel appModel = AppModel.get(context);
+
     if (_panStart != null) {
       if (_currentShapeType == Tools.eraser) {
         // Eraser implementation
-        Provider.of<AppModel>(context, listen: false).addShape(
+        appModel.addShape(
           start: _panStart!,
           end: position,
           type: _currentShapeType,
@@ -197,7 +203,7 @@ class MainScreenState extends State<MainScreen> {
         _panStart = position;
       } else if (_currentShapeType == Tools.draw) {
         // Existing pencil logic
-        Provider.of<AppModel>(context, listen: false).addShape(
+        appModel.addShape(
           start: _panStart!,
           end: position,
           type: _currentShapeType,
@@ -207,7 +213,7 @@ class MainScreenState extends State<MainScreen> {
         _panStart = position;
       } else {
         // Existing shape logic
-        Provider.of<AppModel>(context, listen: false).updateLastShape(position);
+        appModel.updateLastShape(position);
       }
     }
   }
