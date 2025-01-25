@@ -58,15 +58,30 @@ class MainScreenState extends State<MainScreen> {
                     width: appModel.width,
                     height: appModel.height,
                     child: GestureDetector(
-                      onPanStart: (final DragStartDetails details) {
-                        _handlePanStart(details.localPosition / appModel.scale);
+                      onScaleStart: (final ScaleStartDetails details) {
+                        if (details.pointerCount == 1 && _panStart == null) {
+                          _handlePanStart(
+                            details.localFocalPoint / appModel.scale,
+                          );
+                        } else {
+                          appModel.scale = appModel.scale;
+                        }
                       },
-                      onPanUpdate: (final DragUpdateDetails details) {
-                        _handlePanUpdate(
-                          details.localPosition / appModel.scale,
-                        );
+                      onScaleUpdate: (final ScaleUpdateDetails details) {
+                        appModel.scale = appModel.scale * details.scale;
+
+                        if (_panStart != null && details.pointerCount == 1) {
+                          _handlePanUpdate(
+                            details.localFocalPoint / appModel.scale,
+                          );
+                        }
                       },
-                      onPanEnd: _handlePanEnd,
+                      onScaleEnd: (ScaleEndDetails details) {
+                        if (details.pointerCount == 0) {
+                          // Reset pan start after scaling ends
+                          _panStart = null;
+                        }
+                      },
                       child: CanvasPanel(appModel: appModel),
                     ),
                   ),
@@ -190,6 +205,7 @@ class MainScreenState extends State<MainScreen> {
     final AppModel appModel = AppModel.get(context);
 
     _panStart = position;
+
     if (_currentShapeType != Tools.draw) {
       _currentShape = UserAction(
         start: position,
@@ -234,13 +250,6 @@ class MainScreenState extends State<MainScreen> {
         appModel.updateLastShape(position);
       }
     }
-  }
-
-  /// Handles the end of a pan gesture, resetting the `_panStart` and `_currentShape` properties.
-  /// This method is called when the user lifts their finger or mouse button after a pan gesture.
-  void _handlePanEnd(DragEndDetails details) {
-    _panStart = null;
-    _currentShape = null;
   }
 
   /// Handles the selection of a shape type by the user.
