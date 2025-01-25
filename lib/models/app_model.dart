@@ -23,6 +23,10 @@ class AppModel extends ChangeNotifier {
   Size canvasSize = const Size(800, 600); // Default canvas size
   late Layers layers = Layers(canvasSize);
 
+  double get width => canvasSize.width * scale;
+  double get height => canvasSize.height * scale;
+  Size get canvasSizeScaled => Size(width, height);
+
   // Color for Stroke
   Color _colorForStroke = Colors.black;
 

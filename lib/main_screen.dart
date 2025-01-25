@@ -40,20 +40,18 @@ class MainScreenState extends State<MainScreen> {
                 scrollDirection: Axis.vertical,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: Transform.scale(
-                    scale: appModel.scale,
-                    alignment: Alignment.center,
-                    child: SizedBox(
-                      width: appModel.canvasSize.width,
-                      height: appModel.canvasSize.height,
-                      child: GestureDetector(
-                        onPanStart: (details) =>
-                            _handlePanStart(details.localPosition),
-                        onPanUpdate: (details) =>
-                            _handlePanUpdate(details.localPosition),
-                        onPanEnd: _handlePanEnd,
-                        child: CanvasPanel(appModel: appModel),
+                  child: SizedBox(
+                    width: appModel.width,
+                    height: appModel.height,
+                    child: GestureDetector(
+                      onPanStart: (details) => _handlePanStart(
+                        details.localPosition / appModel.scale,
                       ),
+                      onPanUpdate: (details) => _handlePanUpdate(
+                        details.localPosition / appModel.scale,
+                      ),
+                      onPanEnd: _handlePanEnd,
+                      child: CanvasPanel(appModel: appModel),
                     ),
                   ),
                 ),
@@ -68,44 +66,43 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget sidePanel() {
-    return SizedBox(
+    return Container(
       width: 400,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8.0, bottom: 8),
-        child: Material(
-          elevation: 18,
-          color: Colors.grey.shade200,
-          borderRadius: const BorderRadius.only(
-            topRight: Radius.circular(12),
-            bottomRight: Radius.circular(12),
-          ),
-          child: Column(
-            children: [
-              // Layers Panel
-              Expanded(
-                child: LayersPanel(
-                  selectedLayerIndex: _selectedLayerIndex,
-                  onSelectLayer: _selectLayer,
-                  onAddLayer: _onAddLayer,
-                  onFileOpen: _onFileOpen,
-                  onRemoveLayer: _removeLayer,
-                  onToggleViewLayer: _onToggleViewLayer,
-                ),
+      padding: const EdgeInsets.only(top: 8.0, bottom: 8),
+      child: Material(
+        elevation: 18,
+        color: Colors.grey.shade200,
+        borderRadius: const BorderRadius.only(
+          topRight: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+        ),
+        clipBehavior: Clip.none,
+        child: Column(
+          children: [
+            // Layers Panel
+            Expanded(
+              child: LayersPanel(
+                selectedLayerIndex: _selectedLayerIndex,
+                onSelectLayer: _selectLayer,
+                onAddLayer: _onAddLayer,
+                onFileOpen: _onFileOpen,
+                onRemoveLayer: _removeLayer,
+                onToggleViewLayer: _onToggleViewLayer,
               ),
-              // Tools Panel
-              Divider(
-                thickness: 8,
-                height: 16,
-                color: Colors.grey,
+            ),
+            // Tools Panel
+            Divider(
+              thickness: 8,
+              height: 16,
+              color: Colors.grey,
+            ),
+            Expanded(
+              child: ToolsPanel(
+                currentShapeType: _currentShapeType,
+                onShapeSelected: _onShapeSelected,
               ),
-              Expanded(
-                child: ToolsPanel(
-                  currentShapeType: _currentShapeType,
-                  onShapeSelected: _onShapeSelected,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

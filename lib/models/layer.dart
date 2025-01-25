@@ -130,7 +130,6 @@ void renderLayer(
           paint,
         );
         break;
-
       case Tools.eraser:
         paint.color = Colors.white;
         // paint.blendMode = BlendMode.clear;
