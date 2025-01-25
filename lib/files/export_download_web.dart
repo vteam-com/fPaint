@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/panels/share.dart';
+import 'package:fpaint/panels/share_panel.dart';
 
 Future<void> onExportAsPng(final BuildContext context) async {
   // Capture the image bytes

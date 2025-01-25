@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/panels/share.dart';
+import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
 
 class LayersPanel extends StatelessWidget {
@@ -45,7 +45,7 @@ class LayersPanel extends StatelessWidget {
                 Spacer(),
                 IconButton(
                   icon: Icon(Icons.ios_share_outlined),
-                  onPressed: () => share(context),
+                  onPressed: () => sharePanel(context),
                 ),
               ],
             ),

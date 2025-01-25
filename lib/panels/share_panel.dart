@@ -1,13 +1,12 @@
-import 'dart:ui';
 import 'dart:ui' as ui;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fpaint/canvas.dart';
-
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:provider/provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
@@ -18,7 +17,7 @@ Widget textAction(final String fileName) {
   return Text(text);
 }
 
-void share(final BuildContext context) {
+void sharePanel(final BuildContext context) {
   final AppModel appModel = Provider.of<AppModel>(context, listen: false);
 
   showModalBottomSheet(
@@ -80,7 +79,7 @@ Future<Uint8List> capturePainterToImageBytes(BuildContext context) async {
   final Canvas canvas = Canvas(recorder);
 
   // Draw the custom painter on the canvas
-  final MyCanvasPainter painter = MyCanvasPainter(model);
+  final CanvasPanelPainter painter = CanvasPanelPainter(model);
 
   painter.paint(canvas, model.canvasSize);
 

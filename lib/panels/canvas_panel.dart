@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
-import 'models/app_model.dart';
+import '../models/app_model.dart';
 
-class MyCanvas extends StatelessWidget {
-  const MyCanvas({super.key, required this.appModel});
+class CanvasPanel extends StatelessWidget {
+  const CanvasPanel({super.key, required this.appModel});
   final AppModel appModel;
 
   @override
   Widget build(final BuildContext context) {
     return CustomPaint(
       size: Size.infinite,
-      painter: MyCanvasPainter(appModel),
+      painter: CanvasPanelPainter(appModel),
     );
   }
 }
 
-class MyCanvasPainter extends CustomPainter {
-  MyCanvasPainter(this._appModel);
+class CanvasPanelPainter extends CustomPainter {
+  CanvasPanelPainter(this._appModel);
   final AppModel _appModel;
 
   @override
@@ -37,5 +37,5 @@ class MyCanvasPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(MyCanvasPainter oldDelegate) => true;
+  bool shouldRepaint(CanvasPanelPainter oldDelegate) => true;
 }

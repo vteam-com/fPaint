@@ -1,11 +1,12 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:fpaint/canvas.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
+
 import 'models/app_model.dart';
 
 class MainScreen extends StatefulWidget {
@@ -37,7 +38,7 @@ class MainScreenState extends State<MainScreen> {
             onPanStart: (details) => _handlePanStart(details.localPosition),
             onPanUpdate: (details) => _handlePanUpdate(details.localPosition),
             onPanEnd: _handlePanEnd,
-            child: MyCanvas(appModel: paintModel),
+            child: CanvasPanel(appModel: paintModel),
           ),
 
           // Panel for Layers

@@ -5,10 +5,11 @@ digraph "" {
   "/test/paint_model_test.dart" [label="paint_model_test"];
   "/test/widget_test.dart" [label="widget_test"];
   "/lib/brushes/brushes.dart" [label="brushes"];
+  "/lib/panels/canvas_panel.dart" [label="canvas_panel"];
+  "/lib/panels/tool_item.dart" [label="tool_item"];
+  "/lib/panels/share_panel.dart" [label="share_panel"];
   "/lib/panels/tools_panel.dart" [label="tools_panel"];
   "/lib/panels/layers_panel.dart" [label="layers_panel"];
-  "/lib/panels/tool.dart" [label="tool"];
-  "/lib/panels/share.dart" [label="share"];
   "/lib/models/layers.dart" [label="layers"];
   "/lib/models/user_action.dart" [label="user_action"];
   "/lib/models/app_model.dart" [label="app_model"];
@@ -17,7 +18,6 @@ digraph "" {
   "/lib/files/export_download_web.dart" [label="export_download_web"];
   "/lib/files/file_ora.dart" [label="file_ora"];
   "/lib/files/export_download_non_web.dart" [label="export_download_non_web"];
-  "/lib/canvas.dart" [label="canvas"];
   "/lib/main_screen.dart" [label="main_screen"];
   "/lib/helpers/list_helper.dart" [label="list_helper"];
   "/lib/helpers/color_helper.dart" [label="color_helper"];
@@ -33,7 +33,6 @@ digraph "" {
     subgraph "cluster~/lib" {
       label="lib";
       "/lib/main.dart";
-      "/lib/canvas.dart";
       "/lib/main_screen.dart";
       subgraph "cluster~/lib/brushes" {
         label="brushes";
@@ -41,10 +40,11 @@ digraph "" {
       }
       subgraph "cluster~/lib/panels" {
         label="panels";
+        "/lib/panels/canvas_panel.dart";
+        "/lib/panels/tool_item.dart";
+        "/lib/panels/share_panel.dart";
         "/lib/panels/tools_panel.dart";
         "/lib/panels/layers_panel.dart";
-        "/lib/panels/tool.dart";
-        "/lib/panels/share.dart";
       }
       subgraph "cluster~/lib/models" {
         label="models";
@@ -74,14 +74,16 @@ digraph "" {
   "/test/paint_model_test.dart" -> "/lib/models/app_model.dart";
   "/test/widget_test.dart" -> "/lib/main.dart";
   "/lib/brushes/brushes.dart" -> "/lib/models/app_model.dart";
+  "/lib/panels/canvas_panel.dart" -> "/lib/widgets/transparent_background.dart";
+  "/lib/panels/canvas_panel.dart" -> "/lib/models/app_model.dart";
+  "/lib/panels/share_panel.dart" -> "/lib/models/app_model.dart";
+  "/lib/panels/share_panel.dart" -> "/lib/panels/canvas_panel.dart";
   "/lib/panels/tools_panel.dart" -> "/lib/models/app_model.dart";
-  "/lib/panels/tools_panel.dart" -> "/lib/panels/tool.dart";
+  "/lib/panels/tools_panel.dart" -> "/lib/panels/tool_item.dart";
   "/lib/panels/tools_panel.dart" -> "/lib/widgets/color_picker.dart";
   "/lib/panels/tools_panel.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/layers_panel.dart" -> "/lib/models/app_model.dart";
-  "/lib/panels/layers_panel.dart" -> "/lib/panels/share.dart";
-  "/lib/panels/share.dart" -> "/lib/canvas.dart";
-  "/lib/panels/share.dart" -> "/lib/models/app_model.dart";
+  "/lib/panels/layers_panel.dart" -> "/lib/panels/share_panel.dart";
   "/lib/models/layers.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart" [style=dashed];
@@ -95,15 +97,13 @@ digraph "" {
   "/lib/main.dart" -> "/lib/models/app_model.dart";
   "/lib/files/export_download_web.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/export_download_web.dart" -> "/lib/models/app_model.dart";
-  "/lib/files/export_download_web.dart" -> "/lib/panels/share.dart";
+  "/lib/files/export_download_web.dart" -> "/lib/panels/share_panel.dart";
   "/lib/files/file_ora.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/files/file_ora.dart" -> "/lib/models/app_model.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/models/app_model.dart";
-  "/lib/canvas.dart" -> "/lib/widgets/transparent_background.dart";
-  "/lib/canvas.dart" -> "/lib/models/app_model.dart";
-  "/lib/main_screen.dart" -> "/lib/canvas.dart";
   "/lib/main_screen.dart" -> "/lib/files/file_ora.dart";
+  "/lib/main_screen.dart" -> "/lib/panels/canvas_panel.dart";
   "/lib/main_screen.dart" -> "/lib/panels/layers_panel.dart";
   "/lib/main_screen.dart" -> "/lib/panels/tools_panel.dart";
   "/lib/main_screen.dart" -> "/lib/models/app_model.dart";
