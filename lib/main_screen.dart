@@ -34,13 +34,19 @@ class MainScreenState extends State<MainScreen> {
       backgroundColor: Colors.grey,
       body: Stack(
         children: [
-          GestureDetector(
-            onPanStart: (details) => _handlePanStart(details.localPosition),
-            onPanUpdate: (details) => _handlePanUpdate(details.localPosition),
-            onPanEnd: _handlePanEnd,
-            child: CanvasPanel(appModel: paintModel),
+          Center(
+            child: SizedBox(
+              width: appModel.canvasSize.width,
+              height: appModel.canvasSize.height,
+              child: GestureDetector(
+                onPanStart: (details) => _handlePanStart(details.localPosition),
+                onPanUpdate: (details) =>
+                    _handlePanUpdate(details.localPosition),
+                onPanEnd: _handlePanEnd,
+                child: CanvasPanel(appModel: paintModel),
+              ),
+            ),
           ),
-
           // Panel for Layers
           Positioned(
             top: 8,
