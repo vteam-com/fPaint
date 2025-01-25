@@ -16,10 +16,24 @@ class MainScreen extends StatefulWidget {
   MainScreenState createState() => MainScreenState();
 }
 
+/// The [MainScreenState] class represents the state management for the main screen of
+/// a paint application. It handles user interactions such as drawing, shape selection,
+/// layer management, undo/redo operations, and file handling.
+///
+/// This class maintains state variables including:
+/// - [_currentShapeType]: Current tool selected (e.g., draw, erase).
+/// - [_panStart]: The starting position of a pan gesture.
+/// - [_selectedLayerIndex]: Index of the currently selected layer in the layers panel.
+/// - [_currentShape]: The current shape being drawn or edited.
 class MainScreenState extends State<MainScreen> {
+  /// Tracks the type of tool currently selected by the user.
   Tools _currentShapeType = Tools.draw;
+
+  /// Stores the starting position of a pan gesture for drawing operations.
   Offset? _panStart;
   UserAction? _currentShape;
+
+  /// Maintains the index of the currently active or selected layer in the layers panel.
   int _selectedLayerIndex = 0; // Track the selected layer
 
   @override
@@ -44,12 +58,14 @@ class MainScreenState extends State<MainScreen> {
                     width: appModel.width,
                     height: appModel.height,
                     child: GestureDetector(
-                      onPanStart: (details) => _handlePanStart(
-                        details.localPosition / appModel.scale,
-                      ),
-                      onPanUpdate: (details) => _handlePanUpdate(
-                        details.localPosition / appModel.scale,
-                      ),
+                      onPanStart: (final DragStartDetails details) {
+                        _handlePanStart(details.localPosition / appModel.scale);
+                      },
+                      onPanUpdate: (final DragUpdateDetails details) {
+                        _handlePanUpdate(
+                          details.localPosition / appModel.scale,
+                        );
+                      },
                       onPanEnd: _handlePanEnd,
                       child: CanvasPanel(appModel: appModel),
                     ),
@@ -199,7 +215,7 @@ class MainScreenState extends State<MainScreen> {
           start: _panStart!,
           end: position,
           type: _currentShapeType,
-          colorStroke: Colors.transparent, // Or your canvas background color
+          colorStroke: Colors.transparent,
           colorFill: Colors.transparent,
         );
         _panStart = position;
@@ -220,17 +236,27 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
+  /// Handles the end of a pan gesture, resetting the `_panStart` and `_currentShape` properties.
+  /// This method is called when the user lifts their finger or mouse button after a pan gesture.
   void _handlePanEnd(DragEndDetails details) {
     _panStart = null;
     _currentShape = null;
   }
 
+  /// Handles the selection of a shape type by the user.
+  ///
+  /// When the user selects a shape type, this method updates the `_currentShapeType`
+  /// property to the selected shape. This allows the application to render the
+  /// appropriate shape based on the user's selection.
   void _onShapeSelected(final Tools shape) {
     setState(() {
       _currentShapeType = shape;
     });
   }
 
+  /// Builds a column of floating action buttons for the paint application,
+  /// including buttons for undo, redo, zoom in, zoom out,
+  ///  and a button that displays the current zoom level and canvas size.
   Widget floatingActionButtons(AppModel paintModel) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
