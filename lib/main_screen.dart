@@ -98,7 +98,7 @@ class MainScreenState extends State<MainScreen> {
 
   // Method to add a new layer
   void _onAddLayer() {
-    final PaintLayer newLayer = appModel.addLayerTop();
+    final Layer newLayer = appModel.addLayerTop();
     setState(() {
       _selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
     });

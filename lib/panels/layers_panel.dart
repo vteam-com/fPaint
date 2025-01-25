@@ -59,7 +59,7 @@ class LayersPanel extends StatelessWidget {
                       if (newIndex > oldIndex) {
                         newIndex -= 1;
                       }
-                      final PaintLayer layer = appModel.layers.get(oldIndex);
+                      final Layer layer = appModel.layers.get(oldIndex);
                       appModel.layers.remove(oldIndex);
                       appModel.layers.insert(newIndex, layer);
                       if (selectedLayerIndex == oldIndex) {
@@ -67,7 +67,7 @@ class LayersPanel extends StatelessWidget {
                       }
                     },
                     itemBuilder: (context, index) {
-                      final PaintLayer layer = appModel.layers.get(index);
+                      final Layer layer = appModel.layers.get(index);
                       final bool isSelected = index == selectedLayerIndex;
                       return ReorderableDragStartListener(
                         key: Key('$index'),
@@ -98,7 +98,7 @@ class LayersPanel extends StatelessWidget {
     final BuildContext context,
     final bool isSelected,
     final int index,
-    final PaintLayer layer,
+    final Layer layer,
     final bool showDelete,
   ) {
     return Container(

@@ -63,7 +63,7 @@ Future<void> readOraFileFromBytes(
     final String opacityAsText = xmlLayer.getAttribute('opacity') ?? '1.0';
     final String visibleAsText = xmlLayer.getAttribute('visible') ?? 'true';
 
-    final PaintLayer newLayer = appModel.addLayerBottom(name);
+    final Layer newLayer = appModel.addLayerBottom(name);
     newLayer.isVisible = visibleAsText == 'true';
     newLayer.opacity = double.parse(opacityAsText);
 
@@ -96,7 +96,7 @@ Future<void> readOraFileFromBytes(
 Future<void> addImageToLayer({
   required final Archive archive,
   required final AppModel appModel,
-  required final PaintLayer layer,
+  required final Layer layer,
   required final String imageName,
   required final ui.Offset offset,
 }) async {
@@ -149,7 +149,7 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
 
   // Generate PNG files and add them to the archive
   for (int i = 0; i < appModel.layers.length; i++) {
-    final PaintLayer layer = appModel.layers.get(i);
+    final Layer layer = appModel.layers.get(i);
     final String imageName = 'data/layer-$i.png';
 
     // Save layer image as PNG

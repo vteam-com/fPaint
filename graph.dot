@@ -12,6 +12,7 @@ digraph "" {
   "/lib/models/layers.dart" [label="layers"];
   "/lib/models/user_action.dart" [label="user_action"];
   "/lib/models/app_model.dart" [label="app_model"];
+  "/lib/models/layer.dart" [label="layer"];
   "/lib/main.dart" [label="main"];
   "/lib/files/ora.dart" [label="ora"];
   "/lib/files/export_download_web.dart" [label="export_download_web"];
@@ -50,6 +51,7 @@ digraph "" {
         "/lib/models/layers.dart";
         "/lib/models/user_action.dart";
         "/lib/models/app_model.dart";
+        "/lib/models/layer.dart";
       }
       subgraph "cluster~/lib/files" {
         label="files";
@@ -81,12 +83,14 @@ digraph "" {
   "/lib/panels/share.dart" -> "/lib/canvas.dart";
   "/lib/panels/share.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layers.dart" -> "/lib/helpers/list_helper.dart";
-  "/lib/models/layers.dart" -> "/lib/models/app_model.dart";
-  "/lib/models/layers.dart" -> "/lib/models/user_action.dart" [style=dashed];
+  "/lib/models/layers.dart" -> "/lib/models/layer.dart";
+  "/lib/models/layers.dart" -> "/lib/models/layer.dart" [style=dashed];
   "/lib/models/user_action.dart" -> "/lib/brushes/brushes.dart";
   "/lib/models/user_action.dart" -> "/lib/brushes/brushes.dart" [style=dashed];
   "/lib/models/app_model.dart" -> "/lib/models/layers.dart";
   "/lib/models/app_model.dart" -> "/lib/models/layers.dart" [style=dashed];
+  "/lib/models/layer.dart" -> "/lib/models/app_model.dart";
+  "/lib/models/layer.dart" -> "/lib/models/user_action.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/main_screen.dart";
   "/lib/main.dart" -> "/lib/models/app_model.dart";
   "/lib/files/ora.dart" -> "/lib/helpers/list_helper.dart";

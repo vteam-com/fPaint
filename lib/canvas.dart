@@ -35,7 +35,7 @@ class MyCanvasPainter extends CustomPainter {
       _appModel.canvasSize,
     );
 
-    for (final PaintLayer layer in _appModel.layers.list.reversed) {
+    for (final Layer layer in _appModel.layers.list.reversed) {
       if (layer.isVisible) {
         renderLayer(layer, canvas, _appModel.offset);
       }

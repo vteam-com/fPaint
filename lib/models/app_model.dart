@@ -58,19 +58,19 @@ class AppModel extends ChangeNotifier {
     }
   }
 
-  PaintLayer get currentLayer => layers.get(currentLayerIndex);
+  Layer get currentLayer => layers.get(currentLayerIndex);
 
-  PaintLayer addLayerTop([String? name]) {
+  Layer addLayerTop([String? name]) {
     return insertLayer(0, name);
   }
 
-  PaintLayer addLayerBottom([String? name]) {
+  Layer addLayerBottom([String? name]) {
     return insertLayer(layers.length, name);
   }
 
-  PaintLayer insertLayer(final int index, [String? name]) {
+  Layer insertLayer(final int index, [String? name]) {
     name ??= 'Layer${layers.length}';
-    final PaintLayer newLayer = PaintLayer(name: name);
+    final Layer newLayer = Layer(name: name);
     layers.insert(index, newLayer);
     setActiveLayer(layers.getLayerIndex(newLayer));
     return newLayer;
