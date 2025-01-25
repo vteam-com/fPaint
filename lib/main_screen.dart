@@ -37,18 +37,23 @@ class MainScreenState extends State<MainScreen> {
           Expanded(
             child: Center(
               child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
+                scrollDirection: Axis.vertical,
                 child: SingleChildScrollView(
-                  child: SizedBox(
-                    width: appModel.canvasSize.width,
-                    height: appModel.canvasSize.height,
-                    child: GestureDetector(
-                      onPanStart: (details) =>
-                          _handlePanStart(details.localPosition),
-                      onPanUpdate: (details) =>
-                          _handlePanUpdate(details.localPosition),
-                      onPanEnd: _handlePanEnd,
-                      child: CanvasPanel(appModel: appModel),
+                  scrollDirection: Axis.horizontal,
+                  child: Transform.scale(
+                    scale: appModel.scale,
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      width: appModel.canvasSize.width,
+                      height: appModel.canvasSize.height,
+                      child: GestureDetector(
+                        onPanStart: (details) =>
+                            _handlePanStart(details.localPosition),
+                        onPanUpdate: (details) =>
+                            _handlePanUpdate(details.localPosition),
+                        onPanEnd: _handlePanEnd,
+                        child: CanvasPanel(appModel: appModel),
+                      ),
                     ),
                   ),
                 ),
