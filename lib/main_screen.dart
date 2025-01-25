@@ -101,50 +101,7 @@ class MainScreenState extends State<MainScreen> {
         ],
       ),
       // Undo/Redo
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            backgroundColor: Colors.grey.shade200,
-            foregroundColor: Colors.grey.shade700,
-            onPressed: () => paintModel.undo(),
-            child: Icon(Icons.undo),
-          ),
-          FloatingActionButton(
-            backgroundColor: Colors.grey.shade200,
-            foregroundColor: Colors.grey.shade700,
-            onPressed: () => paintModel.redo(),
-            child: Icon(Icons.redo),
-          ),
-          SizedBox(height: 8),
-          FloatingActionButton(
-            backgroundColor: Colors.grey.shade200,
-            foregroundColor: Colors.grey.shade700,
-            onPressed: () => paintModel.scale *= 1.10,
-            child: Icon(Icons.zoom_in),
-          ),
-          FloatingActionButton(
-            backgroundColor: Colors.grey.shade200,
-            foregroundColor: Colors.grey.shade700,
-            onPressed: () => paintModel.scale = 1,
-            child: Text(
-              '${(paintModel.scale * 100).toInt()}%\n${paintModel.canvasSize.width.toInt()}\n${paintModel.canvasSize.height.toInt()}',
-              textAlign: TextAlign.right,
-              style: TextStyle(
-                color: Colors.grey.shade700,
-                fontWeight: FontWeight.bold,
-                fontSize: 10,
-              ),
-            ),
-          ),
-          FloatingActionButton(
-            backgroundColor: Colors.grey.shade200,
-            foregroundColor: Colors.grey.shade700,
-            onPressed: () => paintModel.scale *= 0.90,
-            child: Icon(Icons.zoom_out),
-          ),
-        ],
-      ),
+      floatingActionButton: floatingActionButtons(paintModel),
     );
   }
 
@@ -264,5 +221,52 @@ class MainScreenState extends State<MainScreen> {
     setState(() {
       _currentShapeType = shape;
     });
+  }
+
+  Widget floatingActionButtons(AppModel paintModel) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        FloatingActionButton(
+          backgroundColor: Colors.grey.shade200,
+          foregroundColor: Colors.grey.shade700,
+          onPressed: () => paintModel.undo(),
+          child: Icon(Icons.undo),
+        ),
+        FloatingActionButton(
+          backgroundColor: Colors.grey.shade200,
+          foregroundColor: Colors.grey.shade700,
+          onPressed: () => paintModel.redo(),
+          child: Icon(Icons.redo),
+        ),
+        SizedBox(height: 8),
+        FloatingActionButton(
+          backgroundColor: Colors.grey.shade200,
+          foregroundColor: Colors.grey.shade700,
+          onPressed: () => paintModel.scale *= 1.10,
+          child: Icon(Icons.zoom_in),
+        ),
+        FloatingActionButton(
+          backgroundColor: Colors.grey.shade200,
+          foregroundColor: Colors.grey.shade700,
+          onPressed: () => paintModel.scale = 1,
+          child: Text(
+            '${(paintModel.scale * 100).toInt()}%\n${paintModel.canvasSize.width.toInt()}\n${paintModel.canvasSize.height.toInt()}',
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.bold,
+              fontSize: 10,
+            ),
+          ),
+        ),
+        FloatingActionButton(
+          backgroundColor: Colors.grey.shade200,
+          foregroundColor: Colors.grey.shade700,
+          onPressed: () => paintModel.scale *= 0.90,
+          child: Icon(Icons.zoom_out),
+        ),
+      ],
+    );
   }
 }
