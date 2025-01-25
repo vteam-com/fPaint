@@ -14,8 +14,8 @@ digraph "" {
   "/lib/models/app_model.dart" [label="app_model"];
   "/lib/models/layer.dart" [label="layer"];
   "/lib/main.dart" [label="main"];
-  "/lib/files/ora.dart" [label="ora"];
   "/lib/files/export_download_web.dart" [label="export_download_web"];
+  "/lib/files/file_ora.dart" [label="file_ora"];
   "/lib/files/export_download_non_web.dart" [label="export_download_non_web"];
   "/lib/canvas.dart" [label="canvas"];
   "/lib/main_screen.dart" [label="main_screen"];
@@ -55,8 +55,8 @@ digraph "" {
       }
       subgraph "cluster~/lib/files" {
         label="files";
-        "/lib/files/ora.dart";
         "/lib/files/export_download_web.dart";
+        "/lib/files/file_ora.dart";
         "/lib/files/export_download_non_web.dart";
       }
       subgraph "cluster~/lib/helpers" {
@@ -93,17 +93,17 @@ digraph "" {
   "/lib/models/layer.dart" -> "/lib/models/user_action.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/main_screen.dart";
   "/lib/main.dart" -> "/lib/models/app_model.dart";
-  "/lib/files/ora.dart" -> "/lib/helpers/list_helper.dart";
-  "/lib/files/ora.dart" -> "/lib/models/app_model.dart";
-  "/lib/files/export_download_web.dart" -> "/lib/files/ora.dart";
+  "/lib/files/export_download_web.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/export_download_web.dart" -> "/lib/models/app_model.dart";
   "/lib/files/export_download_web.dart" -> "/lib/panels/share.dart";
-  "/lib/files/export_download_non_web.dart" -> "/lib/files/ora.dart";
+  "/lib/files/file_ora.dart" -> "/lib/helpers/list_helper.dart";
+  "/lib/files/file_ora.dart" -> "/lib/models/app_model.dart";
+  "/lib/files/export_download_non_web.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/models/app_model.dart";
   "/lib/canvas.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/canvas.dart" -> "/lib/models/app_model.dart";
   "/lib/main_screen.dart" -> "/lib/canvas.dart";
-  "/lib/main_screen.dart" -> "/lib/files/ora.dart";
+  "/lib/main_screen.dart" -> "/lib/files/file_ora.dart";
   "/lib/main_screen.dart" -> "/lib/panels/layers_panel.dart";
   "/lib/main_screen.dart" -> "/lib/panels/tools_panel.dart";
   "/lib/main_screen.dart" -> "/lib/models/app_model.dart";

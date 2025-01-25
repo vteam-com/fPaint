@@ -3,7 +3,7 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:fpaint/files/ora.dart';
+import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/share.dart';
 

@@ -2,7 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/canvas.dart';
-import 'package:fpaint/files/ora.dart';
+import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
 import 'package:provider/provider.dart';
@@ -34,10 +34,8 @@ class MainScreenState extends State<MainScreen> {
       body: Stack(
         children: [
           GestureDetector(
-            onPanStart: (details) =>
-                _handlePanStart(details.localPosition - paintModel.offset),
-            onPanUpdate: (details) =>
-                _handlePanUpdate(details.localPosition - paintModel.offset),
+            onPanStart: (details) => _handlePanStart(details.localPosition),
+            onPanUpdate: (details) => _handlePanUpdate(details.localPosition),
             onPanEnd: _handlePanEnd,
             child: MyCanvas(appModel: paintModel),
           ),

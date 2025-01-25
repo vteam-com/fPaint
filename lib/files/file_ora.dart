@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
-import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:xml/xml.dart';
@@ -153,8 +152,7 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
     final String imageName = 'data/layer-$i.png';
 
     // Save layer image as PNG
-    final ui.Image image =
-        await layer.toImage(Offset.zero, appModel.canvasSize);
+    final ui.Image image = await layer.toImage(appModel.canvasSize);
 
     final ByteData? bytes =
         await image.toByteData(format: ui.ImageByteFormat.png);
@@ -172,8 +170,8 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
       'visibility': layer.isVisible ? 'visible' : 'hidden',
       'opacity': layer.opacity.toString(),
       'src': imageName,
-      'x': appModel.offset.dx.toString(),
-      'y': appModel.offset.dy.toString(),
+      'x': 0,
+      'y': 0,
     });
   }
 

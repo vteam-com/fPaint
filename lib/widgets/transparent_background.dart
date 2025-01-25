@@ -33,6 +33,10 @@ class TransparentBackgroundPainter extends CustomPainter {
   bool shouldRepaint(TransparentBackgroundPainter oldDelegate) => true;
 }
 
+/// Draws a transparent background grid on the canvas using the provided left, top, width, and height parameters.
+/// The grid is composed of alternating grey and transparent squares,
+/// with the size of each square determined by the canvas size and a fixed cell size.
+/// The grid is clipped to the canvas bounds and is drawn using the provided Canvas object.
 void drawTransaparentBackgroundLTWH(
   final Canvas canvas,
   final double left,

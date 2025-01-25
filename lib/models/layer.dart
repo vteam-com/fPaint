@@ -32,19 +32,22 @@ class Layer {
     );
   }
 
-  Future<ui.Image> toImage(Offset offset, Size size) async {
+  Future<ui.Image> toImage(Size size) async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = Canvas(recorder);
 
     canvas.saveLayer(null, Paint());
-    renderLayer(this, canvas, offset);
+    renderLayer(this, canvas);
 
     final ui.Picture picture = recorder.endRecording();
     return await picture.toImage(size.width.toInt(), size.height.toInt());
   }
 }
 
-void renderLayer(Layer layer, Canvas canvas, Offset offset) {
+void renderLayer(
+  final Layer layer,
+  final Canvas canvas,
+) {
   for (final UserAction userAction in layer.actionStack) {
     final Paint paint = Paint();
     paint.color = userAction.colorFill;
@@ -57,8 +60,8 @@ void renderLayer(Layer layer, Canvas canvas, Offset offset) {
         paint.style = PaintingStyle.stroke;
         paint.color = userAction.colorOutline;
         canvas.drawLine(
-          userAction.start.translate(offset.dx, offset.dy),
-          userAction.end.translate(offset.dx, offset.dy),
+          userAction.start,
+          userAction.end,
           paint,
         );
         break;
@@ -71,11 +74,8 @@ void renderLayer(Layer layer, Canvas canvas, Offset offset) {
         if (userAction.brushStyle == BrushStyle.dash) {
           final path = Path();
 
-          final Offset s = userAction.start.translate(offset.dx, offset.dy);
-          final Offset e = userAction.end.translate(offset.dx, offset.dy);
-
-          path.moveTo(s.dx, s.dy);
-          path.lineTo(e.dx, e.dy);
+          path.moveTo(userAction.start.dx, userAction.start.dy);
+          path.lineTo(userAction.end.dx, userAction.end.dy);
 
           final Path dashedPath = createDashedPath(
             path,
@@ -85,8 +85,8 @@ void renderLayer(Layer layer, Canvas canvas, Offset offset) {
           canvas.drawPath(dashedPath, paint);
         } else {
           canvas.drawLine(
-            userAction.start.translate(offset.dx, offset.dy),
-            userAction.end.translate(offset.dx, offset.dy),
+            userAction.start,
+            userAction.end,
             paint,
           );
         }
@@ -98,7 +98,7 @@ void renderLayer(Layer layer, Canvas canvas, Offset offset) {
         final center = Offset(
           (userAction.start.dx + userAction.end.dx) / 2,
           (userAction.start.dy + userAction.end.dy) / 2,
-        ).translate(offset.dx, offset.dy);
+        );
 
         // Fill
         canvas.drawCircle(center, radius, paint);
@@ -115,16 +115,7 @@ void renderLayer(Layer layer, Canvas canvas, Offset offset) {
 
         // Fill
         canvas.drawRect(
-          Rect.fromPoints(
-            userAction.start.translate(
-              offset.dx,
-              offset.dy,
-            ),
-            userAction.end.translate(
-              offset.dx,
-              offset.dy,
-            ),
-          ),
+          Rect.fromPoints(userAction.start, userAction.end),
           paint,
         );
 
@@ -133,14 +124,8 @@ void renderLayer(Layer layer, Canvas canvas, Offset offset) {
         paint.color = userAction.colorOutline;
         canvas.drawRect(
           Rect.fromPoints(
-            userAction.start.translate(
-              offset.dx,
-              offset.dy,
-            ),
-            userAction.end.translate(
-              offset.dx,
-              offset.dy,
-            ),
+            userAction.start,
+            userAction.end,
           ),
           paint,
         );
@@ -152,8 +137,8 @@ void renderLayer(Layer layer, Canvas canvas, Offset offset) {
         paint.strokeWidth = userAction.brushSize;
         paint.style = PaintingStyle.stroke;
         canvas.drawLine(
-          userAction.start.translate(offset.dx, offset.dy),
-          userAction.end.translate(offset.dx, offset.dy),
+          userAction.start,
+          userAction.end,
           paint,
         );
         break;
@@ -162,10 +147,7 @@ void renderLayer(Layer layer, Canvas canvas, Offset offset) {
         if (userAction.image != null) {
           canvas.drawImage(
             userAction.image!,
-            userAction.start.translate(
-              offset.dx,
-              offset.dy,
-            ),
+            userAction.start,
             Paint(),
           );
         }

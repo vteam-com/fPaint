@@ -22,22 +22,16 @@ class MyCanvasPainter extends CustomPainter {
 
   @override
   void paint(final Canvas canvas, final Size size) {
-    // Calculate offset to center the drawing
-    _appModel.offset = Offset(
-      (size.width - _appModel.canvasSize.width) / 2,
-      (size.height - _appModel.canvasSize.height) / 2,
-    );
-
     /// Render the transparent grid
     drawTransaparentBackgroundOffsetAndSize(
       canvas,
-      _appModel.offset,
+      Offset.zero,
       _appModel.canvasSize,
     );
 
     for (final Layer layer in _appModel.layers.list.reversed) {
       if (layer.isVisible) {
-        renderLayer(layer, canvas, _appModel.offset);
+        renderLayer(layer, canvas);
       }
     }
   }
