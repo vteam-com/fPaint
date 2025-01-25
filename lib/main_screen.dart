@@ -243,7 +243,7 @@ class MainScreenState extends State<MainScreen> {
         FloatingActionButton(
           backgroundColor: Colors.grey.shade200,
           foregroundColor: Colors.grey.shade700,
-          onPressed: () => paintModel.scale *= 1.10,
+          onPressed: () => paintModel.scale += 0.10,
           child: Icon(Icons.zoom_in),
         ),
         FloatingActionButton(
@@ -263,7 +263,7 @@ class MainScreenState extends State<MainScreen> {
         FloatingActionButton(
           backgroundColor: Colors.grey.shade200,
           foregroundColor: Colors.grey.shade700,
-          onPressed: () => paintModel.scale *= 0.90,
+          onPressed: () => paintModel.scale -= 0.10,
           child: Icon(Icons.zoom_out),
         ),
       ],

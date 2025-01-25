@@ -19,8 +19,13 @@ class AppModel extends ChangeNotifier {
   // Scale
   double _scale = 1;
   double get scale => _scale;
-  set scale(double value) {
-    _scale = value;
+
+  /// Sets the scale of the canvas.
+  ///
+  /// The scale value is clamped between 10% and 400% to ensure a valid range.
+  /// Calling this method will notify any listeners of the [AppModel] that the scale has changed.
+  set scale(final double value) {
+    _scale = value.clamp(10 / 100, 400 / 100);
     notifyListeners();
   }
 
