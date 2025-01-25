@@ -22,33 +22,28 @@ class ToolsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      elevation: 4,
-      color: Colors.grey.shade200,
-      borderRadius: BorderRadius.circular(12),
-      child: Consumer<AppModel>(
-        builder: (
-          final BuildContext context,
-          final AppModel appModel,
-          Widget? child,
-        ) {
-          return Container(
-            constraints: const BoxConstraints(
-              maxHeight: 400,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                buildTools(),
-                Expanded(
-                  child: buildAttributes(context, appModel),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
+    return Consumer<AppModel>(
+      builder: (
+        final BuildContext context,
+        final AppModel appModel,
+        Widget? child,
+      ) {
+        return Container(
+          constraints: const BoxConstraints(
+            maxHeight: 400,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              buildTools(),
+              Expanded(
+                child: buildAttributes(context, appModel),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

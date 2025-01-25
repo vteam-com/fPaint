@@ -32,53 +32,60 @@ class MainScreenState extends State<MainScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey,
-      body: Stack(
+      body: Row(
         children: [
-          Center(
-            child: SizedBox(
-              width: appModel.canvasSize.width,
-              height: appModel.canvasSize.height,
-              child: GestureDetector(
-                onPanStart: (details) => _handlePanStart(details.localPosition),
-                onPanUpdate: (details) =>
-                    _handlePanUpdate(details.localPosition),
-                onPanEnd: _handlePanEnd,
-                child: CanvasPanel(appModel: paintModel),
+          // Left side panels
+          SizedBox(
+            width: 400,
+            child: Material(
+              elevation: 8,
+              child: Column(
+                children: [
+                  // Layers Panel
+                  Expanded(
+                    child: LayersPanel(
+                      selectedLayerIndex: _selectedLayerIndex,
+                      onSelectLayer: _selectLayer,
+                      onAddLayer: _onAddLayer,
+                      onFileOpen: _onFileOpen,
+                      onRemoveLayer: _removeLayer,
+                      onToggleViewLayer: _onToggleViewLayer,
+                    ),
+                  ),
+                  // Tools Panel
+                  Divider(
+                    thickness: 8,
+                    height: 16,
+                  ),
+                  Expanded(
+                    child: ToolsPanel(
+                      currentShapeType: _currentShapeType,
+                      onShapeSelected: _onShapeSelected,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          // Panel for Layers
-          Positioned(
-            top: 8,
-            left: 8,
-            child: Card(
-              elevation: 8,
-              child: LayersPanel(
-                selectedLayerIndex: _selectedLayerIndex,
-                onSelectLayer: _selectLayer,
-                onAddLayer: _onAddLayer,
-                onFileOpen: _onFileOpen,
-                onRemoveLayer: _removeLayer,
-                onToggleViewLayer: _onToggleViewLayer,
-              ),
-            ),
-          ),
-
-          // Panel for tools
-          Positioned(
-            top: 8,
-            right: 8,
-            child: Card(
-              elevation: 8,
-              child: ToolsPanel(
-                currentShapeType: _currentShapeType,
-                onShapeSelected: _onShapeSelected,
+          // Canvas on the right
+          Expanded(
+            child: Center(
+              child: SizedBox(
+                width: appModel.canvasSize.width,
+                height: appModel.canvasSize.height,
+                child: GestureDetector(
+                  onPanStart: (details) =>
+                      _handlePanStart(details.localPosition),
+                  onPanUpdate: (details) =>
+                      _handlePanUpdate(details.localPosition),
+                  onPanEnd: _handlePanEnd,
+                  child: CanvasPanel(appModel: paintModel),
+                ),
               ),
             ),
           ),
         ],
       ),
-
       // Undo/Redo
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
