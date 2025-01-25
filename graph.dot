@@ -102,6 +102,7 @@ digraph "" {
   "/lib/files/file_ora.dart" -> "/lib/models/app_model.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/models/app_model.dart";
+  "/lib/files/export_download_non_web.dart" -> "/lib/panels/share_panel.dart";
   "/lib/main_screen.dart" -> "/lib/files/file_ora.dart";
   "/lib/main_screen.dart" -> "/lib/panels/canvas_panel.dart";
   "/lib/main_screen.dart" -> "/lib/panels/layers_panel.dart";

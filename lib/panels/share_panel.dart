@@ -7,7 +7,6 @@ import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
-import 'package:provider/provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 Widget textAction(final String fileName) {
@@ -18,8 +17,6 @@ Widget textAction(final String fileName) {
 }
 
 void sharePanel(final BuildContext context) {
-  final AppModel appModel = Provider.of<AppModel>(context, listen: false);
-
   showModalBottomSheet(
     context: context,
     builder: (final BuildContext context) {
@@ -50,7 +47,7 @@ void sharePanel(final BuildContext context) {
                 title: textAction('image.ORA'),
                 onTap: () {
                   Navigator.pop(context);
-                  onExportAsOra(context, appModel);
+                  onExportAsOra(context);
                 },
               ),
             ],
@@ -64,7 +61,8 @@ void sharePanel(final BuildContext context) {
 void _onExportToClipboard(final BuildContext context) async {
   final clipboard = SystemClipboard.instance;
   if (clipboard != null) {
-    final Uint8List image = await capturePainterToImageBytes(context);
+    final Uint8List image =
+        await capturePainterToImageBytes(AppModel.get(context));
     final DataWriterItem item = DataWriterItem(suggestedName: 'fPaint.png');
     item.add(Formats.png(image));
     await clipboard.write([item]);
@@ -73,23 +71,22 @@ void _onExportToClipboard(final BuildContext context) async {
   }
 }
 
-Future<Uint8List> capturePainterToImageBytes(BuildContext context) async {
-  final AppModel model = Provider.of<AppModel>(context, listen: false);
+Future<Uint8List> capturePainterToImageBytes(final AppModel appModel) async {
   final PictureRecorder recorder = PictureRecorder();
   final Canvas canvas = Canvas(recorder);
 
   // Draw the custom painter on the canvas
-  final CanvasPanelPainter painter = CanvasPanelPainter(model);
+  final CanvasPanelPainter painter = CanvasPanelPainter(appModel);
 
-  painter.paint(canvas, model.canvasSize);
+  painter.paint(canvas, appModel.canvasSize);
 
   // End the recording and get the picture
   final Picture picture = recorder.endRecording();
 
   // Convert the picture to an image
   final ui.Image image = await picture.toImage(
-    model.canvasSize.width.toInt(),
-    model.canvasSize.height.toInt(),
+    appModel.canvasSize.width.toInt(),
+    appModel.canvasSize.height.toInt(),
   );
 
   // Convert the image to byte data (e.g., PNG)

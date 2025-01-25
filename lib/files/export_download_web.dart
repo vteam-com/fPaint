@@ -9,7 +9,8 @@ import 'package:fpaint/panels/share_panel.dart';
 
 Future<void> onExportAsPng(final BuildContext context) async {
   // Capture the image bytes
-  final Uint8List image = await capturePainterToImageBytes(context);
+  final Uint8List image =
+      await capturePainterToImageBytes(AppModel.get(context));
 
   // Create a Blob from the image bytes
   downloadBlob(image, 'image.png');
@@ -17,9 +18,8 @@ Future<void> onExportAsPng(final BuildContext context) async {
 
 Future<void> onExportAsOra(
   final BuildContext context,
-  final AppModel appModel,
 ) async {
-  List<int> image = await createOraAchive(appModel);
+  List<int> image = await createOraAchive(AppModel.get(context));
   downloadBlob(Uint8List.fromList(image), 'image.ora');
 }
 
