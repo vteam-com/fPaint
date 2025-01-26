@@ -8,15 +8,6 @@ import 'package:fpaint/panels/tools_panel.dart';
 
 import 'models/app_model.dart';
 
-/// The [MainScreenState] class represents the state management for the main screen of
-/// a paint application. It handles user interactions such as drawing, shape selection,
-/// layer management, undo/redo operations, and file handling.
-///
-/// This class maintains state variables including:
-/// - [_currentShapeType]: Current tool selected (e.g., draw, erase).
-/// - [appModel.panStart]: The starting position of a pan gesture.
-/// - [_selectedLayerIndex]: Index of the currently selected layer in the layers panel.
-/// - [_currentShape]: The current shape being drawn or edited.
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
@@ -47,8 +38,8 @@ class MainScreen extends StatelessWidget {
                     child: GestureDetector(
                       onScaleStart: (final ScaleStartDetails details) {
                         if (details.pointerCount == 1 &&
-                            appModel.panStart == null) {
-                          _handlePanStart(
+                            appModel.userActionStartingOffset == null) {
+                          _onUserActionStart(
                             context,
                             details.localFocalPoint / appModel.scale,
                           );
@@ -59,9 +50,9 @@ class MainScreen extends StatelessWidget {
                       onScaleUpdate: (final ScaleUpdateDetails details) {
                         appModel.scale = appModel.scale * details.scale;
 
-                        if (appModel.panStart != null &&
+                        if (appModel.userActionStartingOffset != null &&
                             details.pointerCount == 1) {
-                          _handlePanUpdate(
+                          _onUserActionUpdate(
                             appModel,
                             details.localFocalPoint / appModel.scale,
                           );
@@ -69,8 +60,8 @@ class MainScreen extends StatelessWidget {
                       },
                       onScaleEnd: (ScaleEndDetails details) {
                         if (details.pointerCount == 0) {
-                          // Reset pan start after scaling ends
-                          appModel.panStart = null;
+                          // Reset
+                          appModel.userActionStartingOffset = null;
                         }
                       },
                       child: CanvasPanel(appModel: appModel),
@@ -169,13 +160,13 @@ class MainScreen extends StatelessWidget {
     }
   }
 
-  void _handlePanStart(final BuildContext context, Offset position) {
+  void _onUserActionStart(final BuildContext context, Offset position) {
     final AppModel appModel = AppModel.get(context);
 
-    appModel.panStart = position;
+    appModel.userActionStartingOffset = position;
 
     if (appModel.selectedTool != Tools.draw) {
-      appModel.currentShape = UserAction(
+      appModel.currentUserAction = UserAction(
         start: position,
         end: position,
         type: appModel.selectedTool,
@@ -185,32 +176,32 @@ class MainScreen extends StatelessWidget {
         brushStyle: appModel.brush,
       );
 
-      appModel.addShape(shape: appModel.currentShape);
+      appModel.addShape(shape: appModel.currentUserAction);
     }
   }
 
-  void _handlePanUpdate(AppModel appModel, Offset position) {
-    if (appModel.panStart != null) {
+  void _onUserActionUpdate(AppModel appModel, Offset position) {
+    if (appModel.userActionStartingOffset != null) {
       if (appModel.selectedTool == Tools.eraser) {
         // Eraser implementation
         appModel.addShape(
-          start: appModel.panStart!,
+          start: appModel.userActionStartingOffset!,
           end: position,
           type: appModel.selectedTool,
           colorStroke: Colors.transparent,
           colorFill: Colors.transparent,
         );
-        appModel.panStart = position;
+        appModel.userActionStartingOffset = position;
       } else if (appModel.selectedTool == Tools.draw) {
         // Existing pencil logic
         appModel.addShape(
-          start: appModel.panStart!,
+          start: appModel.userActionStartingOffset!,
           end: position,
           type: appModel.selectedTool,
           colorFill: appModel.colorForFill,
           colorStroke: appModel.colorForStroke,
         );
-        appModel.panStart = position;
+        appModel.userActionStartingOffset = position;
       } else {
         // Existing shape logic
         appModel.updateLastShape(position);

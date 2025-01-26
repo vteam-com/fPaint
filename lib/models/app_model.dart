@@ -38,8 +38,8 @@ class AppModel extends ChangeNotifier {
   }
 
   /// Stores the starting position of a pan gesture for drawing operations.
-  Offset? panStart;
-  UserAction? currentShape;
+  UserAction? currentUserAction;
+  Offset? userActionStartingOffset;
 
   // Color for Stroke
   Color _colorForStroke = Colors.black;
