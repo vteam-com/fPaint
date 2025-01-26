@@ -50,7 +50,10 @@ class ToolsPanel extends StatelessWidget {
 
               Expanded(
                 child: buildAttributes(
-                    context: context, appModel: appModel, vertical: minimal),
+                  context: context,
+                  appModel: appModel,
+                  vertical: minimal,
+                ),
               ),
             ],
           ),

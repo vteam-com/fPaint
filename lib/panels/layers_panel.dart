@@ -84,12 +84,12 @@ class LayersPanel extends StatelessWidget {
                       onTap: () => onSelectLayer(index),
                       onDoubleTap: () => onToggleViewLayer(index),
                       child: layerSelector(
-                        context,
-                        isSelected,
-                        index,
-                        layer,
-                        appModel.layers.length > 1,
-                        appModel.isSidePanelExpanded,
+                        context: context,
+                        minimal: !appModel.isSidePanelExpanded,
+                        layer: layer,
+                        index: index,
+                        isSelected: isSelected,
+                        showDelete: appModel.layers.length > 1,
                       ),
                     ),
                   );
@@ -102,32 +102,29 @@ class LayersPanel extends StatelessWidget {
     );
   }
 
-  Widget layerSelector(
-    final BuildContext context,
-    final bool isSelected,
-    final int index,
-    final Layer layer,
-    final bool showDelete,
-    final bool isExpanded,
-  ) {
+  Widget layerSelector({
+    required final BuildContext context,
+    required final bool isSelected,
+    required final int index,
+    required final Layer layer,
+    required final bool showDelete,
+    required final bool minimal,
+  }) {
     return Container(
       key: ValueKey(index),
-      margin: EdgeInsets.all(4),
-      padding: EdgeInsets.all(8),
+      margin: EdgeInsets.all(minimal ? 2 : 4),
+      padding: EdgeInsets.all(minimal ? 2 : 8),
       decoration: BoxDecoration(
-        color: isExpanded
-            ? null
-            : layer.isVisible
-                ? null
-                : Colors.grey,
+        color: minimal ? (layer.isVisible ? null : Colors.grey) : null,
         border: Border.all(
           color: isSelected ? Colors.blue : Colors.grey.shade300,
           width: 3,
         ),
         borderRadius: BorderRadius.circular(4),
       ),
-      child: isExpanded
-          ? Row(
+      child: minimal
+          ? TruncatedTextWidget(text: layer.name)
+          : Row(
               children: [
                 Expanded(
                   child: Text(layer.name),
@@ -144,8 +141,40 @@ class LayersPanel extends StatelessWidget {
                     onPressed: () => onRemoveLayer(index),
                   ),
               ],
-            )
-          : Text('$index', style: TextStyle(fontSize: 10)),
+            ),
     );
+  }
+}
+
+class TruncatedTextWidget extends StatelessWidget {
+  const TruncatedTextWidget({super.key, required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    String truncatedText = _truncateText(text);
+
+    return SizedBox(
+      width: double.infinity, // Ensure the text has a bounded width
+      child: Text(
+        truncatedText,
+        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  String _truncateText(String text) {
+    if (text.length <= 6) {
+      return text; // No truncation needed for short texts
+    }
+
+    // Ensure the first character, middle ellipsis, and last character are kept
+    String start = text.substring(0, 3);
+    String end = text.substring(text.length - 3);
+
+    // If there are multiple digits at the end, we keep them
+    String middle = text.length > 3 ? '…' : '';
+
+    return '$start$middle$end';
   }
 }
