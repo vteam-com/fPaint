@@ -21,6 +21,7 @@ digraph "" {
   "/lib/main_screen.dart" [label="main_screen"];
   "/lib/helpers/list_helper.dart" [label="list_helper"];
   "/lib/helpers/color_helper.dart" [label="color_helper"];
+  "/lib/widgets/truncated_text.dart" [label="truncated_text"];
   "/lib/widgets/transparent_background.dart" [label="transparent_background"];
   "/lib/widgets/color_picker.dart" [label="color_picker"];
   subgraph "cluster~" {
@@ -66,6 +67,7 @@ digraph "" {
       }
       subgraph "cluster~/lib/widgets" {
         label="widgets";
+        "/lib/widgets/truncated_text.dart";
         "/lib/widgets/transparent_background.dart";
         "/lib/widgets/color_picker.dart";
       }
@@ -84,6 +86,7 @@ digraph "" {
   "/lib/panels/tools_panel.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/layers_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/layers_panel.dart" -> "/lib/panels/share_panel.dart";
+  "/lib/panels/layers_panel.dart" -> "/lib/widgets/truncated_text.dart";
   "/lib/models/layers.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart" [style=dashed];
