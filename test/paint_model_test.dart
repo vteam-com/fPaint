@@ -12,7 +12,7 @@ void main() {
 
     test('initial state should have one empty layer', () {
       expect(paintModel.layers.length, 1);
-      expect(paintModel.currentLayerIndex, 0);
+      expect(paintModel.selectedLayerIndex, 0);
       expect(
         paintModel.currentLayer.actionStack.length,
         1,

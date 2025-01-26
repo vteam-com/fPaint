@@ -8,33 +8,17 @@ import 'package:fpaint/panels/tools_panel.dart';
 
 import 'models/app_model.dart';
 
-class MainScreen extends StatefulWidget {
-  MainScreen({super.key});
-  final TextEditingController controller = TextEditingController();
-
-  @override
-  MainScreenState createState() => MainScreenState();
-}
-
 /// The [MainScreenState] class represents the state management for the main screen of
 /// a paint application. It handles user interactions such as drawing, shape selection,
 /// layer management, undo/redo operations, and file handling.
 ///
 /// This class maintains state variables including:
 /// - [_currentShapeType]: Current tool selected (e.g., draw, erase).
-/// - [_panStart]: The starting position of a pan gesture.
+/// - [appModel.panStart]: The starting position of a pan gesture.
 /// - [_selectedLayerIndex]: Index of the currently selected layer in the layers panel.
 /// - [_currentShape]: The current shape being drawn or edited.
-class MainScreenState extends State<MainScreen> {
-  /// Tracks the type of tool currently selected by the user.
-  Tools _currentShapeType = Tools.draw;
-
-  /// Stores the starting position of a pan gesture for drawing operations.
-  Offset? _panStart;
-  UserAction? _currentShape;
-
-  /// Maintains the index of the currently active or selected layer in the layers panel.
-  int _selectedLayerIndex = 0; // Track the selected layer
+class MainScreen extends StatelessWidget {
+  const MainScreen({super.key});
 
   @override
   Widget build(final BuildContext context) {
@@ -49,7 +33,7 @@ class MainScreenState extends State<MainScreen> {
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             width: appModel.isSidePanelExpanded ? 360 : 40,
-            child: sidePanel(),
+            child: sidePanel(context),
           ), // Canvas on the right
           Expanded(
             child: Center(
@@ -62,8 +46,10 @@ class MainScreenState extends State<MainScreen> {
                     height: appModel.height,
                     child: GestureDetector(
                       onScaleStart: (final ScaleStartDetails details) {
-                        if (details.pointerCount == 1 && _panStart == null) {
+                        if (details.pointerCount == 1 &&
+                            appModel.panStart == null) {
                           _handlePanStart(
+                            context,
                             details.localFocalPoint / appModel.scale,
                           );
                         } else {
@@ -73,8 +59,10 @@ class MainScreenState extends State<MainScreen> {
                       onScaleUpdate: (final ScaleUpdateDetails details) {
                         appModel.scale = appModel.scale * details.scale;
 
-                        if (_panStart != null && details.pointerCount == 1) {
+                        if (appModel.panStart != null &&
+                            details.pointerCount == 1) {
                           _handlePanUpdate(
+                            appModel,
                             details.localFocalPoint / appModel.scale,
                           );
                         }
@@ -82,7 +70,7 @@ class MainScreenState extends State<MainScreen> {
                       onScaleEnd: (ScaleEndDetails details) {
                         if (details.pointerCount == 0) {
                           // Reset pan start after scaling ends
-                          _panStart = null;
+                          appModel.panStart = null;
                         }
                       },
                       child: CanvasPanel(appModel: appModel),
@@ -99,7 +87,7 @@ class MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget sidePanel() {
+  Widget sidePanel(BuildContext context) {
     final appModel = AppModel.get(context);
     return Container(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8),
@@ -116,12 +104,15 @@ class MainScreenState extends State<MainScreen> {
             // Layers Panel
             Expanded(
               child: LayersPanel(
-                selectedLayerIndex: _selectedLayerIndex,
-                onSelectLayer: _selectLayer,
-                onAddLayer: _onAddLayer,
-                onFileOpen: _onFileOpen,
-                onRemoveLayer: _removeLayer,
-                onToggleViewLayer: _onToggleViewLayer,
+                selectedLayerIndex: appModel.selectedLayerIndex,
+                onSelectLayer: (final int layerIndex) =>
+                    appModel.selectedLayerIndex = layerIndex,
+                onAddLayer: () => _onAddLayer(context),
+                onFileOpen: () => _onFileOpen(context),
+                onRemoveLayer: (final int indexToRemove) =>
+                    AppModel.get(context).removeLayer(indexToRemove),
+                onToggleViewLayer: (indexToToggle) =>
+                    AppModel.get(context).toggleLayerVisibility(indexToToggle),
               ),
             ),
             // Tools Panel
@@ -134,8 +125,9 @@ class MainScreenState extends State<MainScreen> {
             if (appModel.isSidePanelExpanded)
               Expanded(
                 child: ToolsPanel(
-                  currentShapeType: _currentShapeType,
-                  onShapeSelected: _onShapeSelected,
+                  currentShapeType: appModel.selectedTool,
+                  onShapeSelected: (final Tools tool) =>
+                      appModel.selectedTool = tool,
                 ),
               ),
           ],
@@ -145,15 +137,14 @@ class MainScreenState extends State<MainScreen> {
   }
 
   // Method to add a new layer
-  void _onAddLayer() {
+  void _onAddLayer(final BuildContext context) {
     final AppModel appModel = AppModel.get(context);
     final Layer newLayer = appModel.addLayerTop();
-    setState(() {
-      _selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
-    });
+
+    appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
   }
 
-  void _onFileOpen() async {
+  void _onFileOpen(final BuildContext context) async {
     final AppModel appModel = AppModel.get(context);
 
     try {
@@ -171,9 +162,6 @@ class MainScreenState extends State<MainScreen> {
         } else {
           await readOraFile(appModel, result.files.single.path!);
         }
-        setState(() {
-          // Refresh UI after importing
-        });
       }
     } catch (e) {
       // Handle any errors that occur during file picking/loading
@@ -181,91 +169,53 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
-  // Method to select a layer
-  void _selectLayer(final int layerIndex) {
-    setState(() {
-      _selectedLayerIndex = layerIndex;
-      AppModel.get(context).setActiveLayer(layerIndex);
-    });
-  }
-
-  // Method to remove a layer
-  void _removeLayer(final int layerIndex) {
+  void _handlePanStart(final BuildContext context, Offset position) {
     final AppModel appModel = AppModel.get(context);
 
-    appModel.removeLayer(layerIndex);
-    setState(() {
-      if (_selectedLayerIndex >= appModel.layers.length) {
-        _selectedLayerIndex = appModel.layers.length - 1;
-      }
-    });
-  }
+    appModel.panStart = position;
 
-  void _onToggleViewLayer(final int layerIndex) {
-    AppModel.get(context).toggleLayerVisibility(layerIndex);
-    setState(() {});
-  }
-
-  void _handlePanStart(Offset position) {
-    final AppModel appModel = AppModel.get(context);
-
-    _panStart = position;
-
-    if (_currentShapeType != Tools.draw) {
-      _currentShape = UserAction(
+    if (appModel.selectedTool != Tools.draw) {
+      appModel.currentShape = UserAction(
         start: position,
         end: position,
-        type: _currentShapeType,
+        type: appModel.selectedTool,
         colorOutline: appModel.colorForStroke,
         colorFill: appModel.colorForFill,
         brushSize: appModel.lineWeight,
         brushStyle: appModel.brush,
       );
 
-      appModel.addShape(shape: _currentShape);
+      appModel.addShape(shape: appModel.currentShape);
     }
   }
 
-  void _handlePanUpdate(Offset position) {
-    final AppModel appModel = AppModel.get(context);
-
-    if (_panStart != null) {
-      if (_currentShapeType == Tools.eraser) {
+  void _handlePanUpdate(AppModel appModel, Offset position) {
+    if (appModel.panStart != null) {
+      if (appModel.selectedTool == Tools.eraser) {
         // Eraser implementation
         appModel.addShape(
-          start: _panStart!,
+          start: appModel.panStart!,
           end: position,
-          type: _currentShapeType,
+          type: appModel.selectedTool,
           colorStroke: Colors.transparent,
           colorFill: Colors.transparent,
         );
-        _panStart = position;
-      } else if (_currentShapeType == Tools.draw) {
+        appModel.panStart = position;
+      } else if (appModel.selectedTool == Tools.draw) {
         // Existing pencil logic
         appModel.addShape(
-          start: _panStart!,
+          start: appModel.panStart!,
           end: position,
-          type: _currentShapeType,
+          type: appModel.selectedTool,
           colorFill: appModel.colorForFill,
           colorStroke: appModel.colorForStroke,
         );
-        _panStart = position;
+        appModel.panStart = position;
       } else {
         // Existing shape logic
         appModel.updateLastShape(position);
       }
     }
-  }
-
-  /// Handles the selection of a shape type by the user.
-  ///
-  /// When the user selects a shape type, this method updates the `_currentShapeType`
-  /// property to the selected shape. This allows the application to render the
-  /// appropriate shape based on the user's selection.
-  void _onShapeSelected(final Tools shape) {
-    setState(() {
-      _currentShapeType = shape;
-    });
   }
 
   /// Builds a column of floating action buttons for the paint application,

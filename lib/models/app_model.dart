@@ -27,6 +27,20 @@ class AppModel extends ChangeNotifier {
   double get height => canvasSize.height * scale;
   Size get canvasSizeScaled => Size(width, height);
 
+  // Selected Tool
+  Tools _selectedTool = Tools.draw;
+
+  Tools get selectedTool => _selectedTool;
+
+  set selectedTool(Tools value) {
+    _selectedTool = value;
+    notifyListeners();
+  }
+
+  /// Stores the starting position of a pan gesture for drawing operations.
+  Offset? panStart;
+  UserAction? currentShape;
+
   // Color for Stroke
   Color _colorForStroke = Colors.black;
 
@@ -86,17 +100,17 @@ class AppModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  int _currentLayerIndex = 0;
-  int get currentLayerIndex => _currentLayerIndex;
+  int _selectedLayerIndex = 0;
+  int get selectedLayerIndex => _selectedLayerIndex;
 
-  void setActiveLayer(final int layerIndex) {
-    if (layers.isIndexInRange(layerIndex)) {
-      _currentLayerIndex = layerIndex;
+  set selectedLayerIndex(final int value) {
+    if (layers.isIndexInRange(value)) {
+      _selectedLayerIndex = value;
       notifyListeners();
     }
   }
 
-  Layer get currentLayer => layers.get(currentLayerIndex);
+  Layer get currentLayer => layers.get(selectedLayerIndex);
 
   Layer addLayerTop([String? name]) {
     return insertLayer(0, name);
@@ -110,14 +124,15 @@ class AppModel extends ChangeNotifier {
     name ??= 'Layer${layers.length}';
     final Layer newLayer = Layer(name: name);
     layers.insert(index, newLayer);
-    setActiveLayer(layers.getLayerIndex(newLayer));
+    selectedLayerIndex = layers.getLayerIndex(newLayer);
     return newLayer;
   }
 
   void removeLayer(int index) {
     if (layers.isIndexInRange(index)) {
       layers.remove(index);
-      setActiveLayer(currentLayerIndex > 0 ? currentLayerIndex - 1 : 0);
+      selectedLayerIndex =
+          (selectedLayerIndex > 0 ? selectedLayerIndex - 1 : 0);
     }
   }
 
