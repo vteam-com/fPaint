@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
@@ -15,6 +16,8 @@ class MainScreen extends StatelessWidget {
   Widget build(final BuildContext context) {
     // Ensure that AppModel is provided above this widget in the widget tree and listening
     final AppModel appModel = AppModel.get(context, listen: true);
+    final ScrollController scrollControllerX = ScrollController();
+    final ScrollController scrollControllerY = ScrollController();
 
     return Scaffold(
       backgroundColor: Colors.grey,
@@ -25,45 +28,61 @@ class MainScreen extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             width: appModel.isSidePanelExpanded ? 360 : 40,
             child: sidePanel(context),
-          ), // Canvas on the right
+          ),
+          // Canvas on the righ
           Expanded(
             child: Center(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
+              child: Listener(
+                onPointerSignal: (final PointerSignalEvent event) {
+                  if (event is PointerScaleEvent) {
+                    appModel.scale = appModel.scale * event.scale;
+                  }
+                },
+                onPointerPanZoomUpdate: (final event) {
+                  appModel.scale = appModel.scale * event.scale;
+                },
+                onPointerDown: (PointerDownEvent details) {
+                  if (appModel.userActionStartingOffset == null) {
+                    double scrollOffsetX = scrollControllerX.offset;
+                    double scrollOffsetY = scrollControllerY.offset;
+                    Offset adjustedPosition = details.localPosition +
+                        Offset(scrollOffsetX, scrollOffsetY);
+                    _onUserActionStart(
+                      context,
+                      adjustedPosition / appModel.scale,
+                    );
+                  }
+                },
+                onPointerMove: (PointerEvent details) {
+                  if (details is PointerMoveEvent) {
+                    if (details.buttons == kPrimaryButton &&
+                        appModel.userActionStartingOffset != null) {
+                      double scrollOffsetX = scrollControllerX.offset;
+                      double scrollOffsetY = scrollControllerY.offset;
+                      Offset adjustedPosition = details.localPosition +
+                          Offset(scrollOffsetX, scrollOffsetY);
+                      _onUserActionUpdate(
+                        appModel,
+                        adjustedPosition / appModel.scale,
+                      );
+                    }
+                  }
+                },
+                onPointerUp: (PointerUpEvent details) {
+                  appModel.userActionStartingOffset = null;
+                },
+                onPointerCancel: (PointerCancelEvent details) {
+                  appModel.userActionStartingOffset = null;
+                },
                 child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: SizedBox(
-                    width: appModel.width,
-                    height: appModel.height,
-                    child: GestureDetector(
-                      onScaleStart: (final ScaleStartDetails details) {
-                        if (details.pointerCount == 1 &&
-                            appModel.userActionStartingOffset == null) {
-                          _onUserActionStart(
-                            context,
-                            details.localFocalPoint / appModel.scale,
-                          );
-                        } else {
-                          appModel.scale = appModel.scale;
-                        }
-                      },
-                      onScaleUpdate: (final ScaleUpdateDetails details) {
-                        appModel.scale = appModel.scale * details.scale;
-
-                        if (appModel.userActionStartingOffset != null &&
-                            details.pointerCount == 1) {
-                          _onUserActionUpdate(
-                            appModel,
-                            details.localFocalPoint / appModel.scale,
-                          );
-                        }
-                      },
-                      onScaleEnd: (ScaleEndDetails details) {
-                        if (details.pointerCount == 0) {
-                          // Reset
-                          appModel.userActionStartingOffset = null;
-                        }
-                      },
+                  controller: scrollControllerY,
+                  scrollDirection: Axis.vertical,
+                  child: SingleChildScrollView(
+                    controller: scrollControllerX,
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: appModel.width,
+                      height: appModel.height,
                       child: CanvasPanel(appModel: appModel),
                     ),
                   ),
