@@ -22,65 +22,78 @@ class LayersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appModel = AppModel.get(context, listen: true);
     return Column(
       children: [
         // toolbar
         Row(
           children: [
+            if (appModel.isSidePanelExpanded)
+              IconButton(
+                icon: Icon(Icons.file_open_outlined),
+                onPressed: onFileOpen,
+              ),
+            if (appModel.isSidePanelExpanded)
+              IconButton(
+                icon: Icon(Icons.library_add_rounded),
+                onPressed: onAddLayer,
+              ),
+            if (appModel.isSidePanelExpanded)
+              IconButton(
+                icon: Icon(Icons.ios_share_outlined),
+                onPressed: () => sharePanel(context),
+              ),
+            if (appModel.isSidePanelExpanded) Spacer(),
             IconButton(
-              icon: Icon(Icons.file_open_outlined),
-              onPressed: onFileOpen,
-            ),
-            IconButton(
-              icon: Icon(Icons.library_add_rounded),
-              onPressed: onAddLayer,
-            ),
-            Spacer(),
-            IconButton(
-              icon: Icon(Icons.ios_share_outlined),
-              onPressed: () => sharePanel(context),
+              icon: Icon(appModel.isSidePanelExpanded
+                  ? Icons.chevron_left
+                  : Icons.chevron_right),
+              onPressed: () {
+                appModel.isSidePanelExpanded = !appModel.isSidePanelExpanded;
+              },
             ),
           ],
         ),
-        Expanded(
-          child: Consumer<AppModel>(
-            builder: (context, appModel, child) {
-              return ReorderableListView.builder(
-                itemCount: appModel.layers.length,
-                buildDefaultDragHandles: false,
-                onReorder: (oldIndex, newIndex) {
-                  if (newIndex > oldIndex) {
-                    newIndex -= 1;
-                  }
-                  final Layer layer = appModel.layers.get(oldIndex);
-                  appModel.layers.remove(oldIndex);
-                  appModel.layers.insert(newIndex, layer);
-                  if (selectedLayerIndex == oldIndex) {
-                    onSelectLayer(newIndex);
-                  }
-                },
-                itemBuilder: (context, index) {
-                  final Layer layer = appModel.layers.get(index);
-                  final bool isSelected = index == selectedLayerIndex;
-                  return ReorderableDragStartListener(
-                    key: Key('$index'),
-                    index: index,
-                    child: GestureDetector(
-                      onTap: () => onSelectLayer(index),
-                      child: layerRow(
-                        context,
-                        isSelected,
-                        index,
-                        layer,
-                        appModel.layers.length > 1,
+        if (appModel.isSidePanelExpanded)
+          Expanded(
+            child: Consumer<AppModel>(
+              builder: (context, appModel, child) {
+                return ReorderableListView.builder(
+                  itemCount: appModel.layers.length,
+                  buildDefaultDragHandles: false,
+                  onReorder: (oldIndex, newIndex) {
+                    if (newIndex > oldIndex) {
+                      newIndex -= 1;
+                    }
+                    final Layer layer = appModel.layers.get(oldIndex);
+                    appModel.layers.remove(oldIndex);
+                    appModel.layers.insert(newIndex, layer);
+                    if (selectedLayerIndex == oldIndex) {
+                      onSelectLayer(newIndex);
+                    }
+                  },
+                  itemBuilder: (context, index) {
+                    final Layer layer = appModel.layers.get(index);
+                    final bool isSelected = index == selectedLayerIndex;
+                    return ReorderableDragStartListener(
+                      key: Key('$index'),
+                      index: index,
+                      child: GestureDetector(
+                        onTap: () => onSelectLayer(index),
+                        child: layerRow(
+                          context,
+                          isSelected,
+                          index,
+                          layer,
+                          appModel.layers.length > 1,
+                        ),
                       ),
-                    ),
-                  );
-                },
-              );
-            },
+                    );
+                  },
+                );
+              },
+            ),
           ),
-        ),
       ],
     );
   }

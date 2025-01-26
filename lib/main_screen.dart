@@ -46,8 +46,11 @@ class MainScreenState extends State<MainScreen> {
       body: Row(
         children: [
           // Left side panels
-          sidePanel(),
-          // Canvas on the right
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: appModel.isSidePanelExpanded ? 360 : 40,
+            child: sidePanel(),
+          ), // Canvas on the right
           Expanded(
             child: Center(
               child: SingleChildScrollView(
@@ -97,8 +100,8 @@ class MainScreenState extends State<MainScreen> {
   }
 
   Widget sidePanel() {
+    final appModel = AppModel.get(context);
     return Container(
-      width: 400,
       padding: const EdgeInsets.only(top: 8.0, bottom: 8),
       child: Material(
         elevation: 18,
@@ -122,17 +125,19 @@ class MainScreenState extends State<MainScreen> {
               ),
             ),
             // Tools Panel
-            Divider(
-              thickness: 8,
-              height: 16,
-              color: Colors.grey,
-            ),
-            Expanded(
-              child: ToolsPanel(
-                currentShapeType: _currentShapeType,
-                onShapeSelected: _onShapeSelected,
+            if (appModel.isSidePanelExpanded)
+              Divider(
+                thickness: 8,
+                height: 16,
+                color: Colors.grey,
               ),
-            ),
+            if (appModel.isSidePanelExpanded)
+              Expanded(
+                child: ToolsPanel(
+                  currentShapeType: _currentShapeType,
+                  onShapeSelected: _onShapeSelected,
+                ),
+              ),
           ],
         ),
       ),

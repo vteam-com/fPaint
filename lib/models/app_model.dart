@@ -36,6 +36,16 @@ class AppModel extends ChangeNotifier {
   double _scale = 1;
   double get scale => _scale;
 
+  // SidePanel Expanded/Collapsed
+  bool _isSidePanelExpanded = true;
+
+  bool get isSidePanelExpanded => _isSidePanelExpanded;
+
+  set isSidePanelExpanded(bool value) {
+    _isSidePanelExpanded = value;
+    notifyListeners();
+  }
+
   /// Sets the scale of the canvas.
   ///
   /// The scale value is clamped between 10% and 400% to ensure a valid range.
