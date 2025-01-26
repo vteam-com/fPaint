@@ -43,12 +43,12 @@ class LayersPanel extends StatelessWidget {
                 icon: Icon(Icons.ios_share_outlined),
                 onPressed: () => sharePanel(context),
               ),
-            if (appModel.isSidePanelExpanded) Spacer(),
+            Spacer(),
             IconButton(
               icon: Icon(
                 appModel.isSidePanelExpanded
-                    ? Icons.chevron_left
-                    : Icons.chevron_right,
+                    ? Icons.keyboard_double_arrow_left
+                    : Icons.keyboard_double_arrow_right,
               ),
               onPressed: () {
                 appModel.isSidePanelExpanded = !appModel.isSidePanelExpanded;

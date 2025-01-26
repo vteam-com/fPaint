@@ -16,9 +16,11 @@ class ToolsPanel extends StatelessWidget {
     super.key,
     required this.currentShapeType,
     required this.onShapeSelected,
+    required this.minimal,
   });
   final Tools currentShapeType;
   final Function(Tools) onShapeSelected;
+  final bool minimal;
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +38,19 @@ class ToolsPanel extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              buildTools(),
+              buildTools(vertical: minimal),
+              //
+              // Divider
+              //
+              Divider(
+                thickness: 8,
+                height: 16,
+                color: Colors.grey,
+              ),
+
               Expanded(
-                child: buildAttributes(context, appModel),
+                child: buildAttributes(
+                    context: context, appModel: appModel, vertical: minimal),
               ),
             ],
           ),
@@ -54,50 +66,59 @@ class ToolsPanel extends StatelessWidget {
   /// `ToolItem` widgets, each representing a different tool that the user can
   /// select. The selected tool is determined by the `currentShapeType` property,
   /// and the `onShapeSelected` callback is called when the user selects a tool.
-  Widget buildTools() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        // Pencil
-        ToolItem(
-          name: 'Draw',
-          icon: Icons.brush,
-          isSelected: currentShapeType == Tools.draw,
-          onPressed: () => onShapeSelected(Tools.draw),
-        ),
+  Widget buildTools({required bool vertical}) {
+    final List<Widget> tools = [
+      // Pencil
+      ToolItem(
+        name: 'Draw',
+        icon: Icons.brush,
+        isSelected: currentShapeType == Tools.draw,
+        onPressed: () => onShapeSelected(Tools.draw),
+      ),
 
-        // Line
-        ToolItem(
-          name: 'Line',
-          icon: Icons.line_axis,
-          isSelected: currentShapeType == Tools.line,
-          onPressed: () => onShapeSelected(Tools.line),
-        ),
+      // Line
+      ToolItem(
+        name: 'Line',
+        icon: Icons.line_axis,
+        isSelected: currentShapeType == Tools.line,
+        onPressed: () => onShapeSelected(Tools.line),
+      ),
 
-        // Rectangle
-        ToolItem(
-          name: 'Rectangle',
-          icon: Icons.crop_square,
-          isSelected: currentShapeType == Tools.rectangle,
-          onPressed: () => onShapeSelected(Tools.rectangle),
-        ),
+      // Rectangle
+      ToolItem(
+        name: 'Rectangle',
+        icon: Icons.crop_square,
+        isSelected: currentShapeType == Tools.rectangle,
+        onPressed: () => onShapeSelected(Tools.rectangle),
+      ),
 
-        // Circle
-        ToolItem(
-          name: 'Circle',
-          icon: Icons.circle_outlined,
-          isSelected: currentShapeType == Tools.circle,
-          onPressed: () => onShapeSelected(Tools.circle),
-        ),
+      // Circle
+      ToolItem(
+        name: 'Circle',
+        icon: Icons.circle_outlined,
+        isSelected: currentShapeType == Tools.circle,
+        onPressed: () => onShapeSelected(Tools.circle),
+      ),
 
-        ToolItem(
-          name: 'Eraser',
-          icon: Icons.cleaning_services,
-          isSelected: currentShapeType == Tools.eraser,
-          onPressed: () => onShapeSelected(Tools.eraser),
-        ),
-      ],
-    );
+      ToolItem(
+        name: 'Eraser',
+        icon: Icons.cleaning_services,
+        isSelected: currentShapeType == Tools.eraser,
+        onPressed: () => onShapeSelected(Tools.eraser),
+      ),
+    ];
+
+    if (vertical) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: tools,
+      );
+    } else {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: tools,
+      );
+    }
   }
 
   /// The `buildAttributes` method creates a list of widgets that represent various
@@ -106,7 +127,11 @@ class ToolsPanel extends StatelessWidget {
   /// and if so, it adds a corresponding widget to the list. The list of widgets
   /// is then returned as a `SizedBox` with a `ListView.separated` to display the
   /// attributes.
-  Widget buildAttributes(final BuildContext context, final AppModel appModel) {
+  Widget buildAttributes({
+    required final BuildContext context,
+    required final AppModel appModel,
+    required bool vertical,
+  }) {
     List<Widget> widgets = [];
 
     // Stroke Weight
@@ -117,16 +142,18 @@ class ToolsPanel extends StatelessWidget {
           buttonIcon: Icons.line_weight,
           buttonIconColor: Colors.black,
           onButtonPressed: () {},
-          child: Slider(
-            value: appModel.lineWeight,
-            min: 1,
-            max: 100,
-            divisions: 100,
-            label: appModel.lineWeight.round().toString(),
-            onChanged: (double value) {
-              appModel.lineWeight = value;
-            },
-          ),
+          child: vertical
+              ? SizedBox()
+              : Slider(
+                  value: appModel.lineWeight,
+                  min: 1,
+                  max: 100,
+                  divisions: 100,
+                  label: appModel.lineWeight.round().toString(),
+                  onChanged: (double value) {
+                    appModel.lineWeight = value;
+                  },
+                ),
         ),
       );
     }
@@ -139,7 +166,7 @@ class ToolsPanel extends StatelessWidget {
           buttonIcon: Icons.line_style_outlined,
           buttonIconColor: Colors.black,
           onButtonPressed: () {},
-          child: brushSelection(appModel),
+          child: vertical ? SizedBox() : brushSelection(appModel),
         ),
       );
     }
@@ -159,10 +186,13 @@ class ToolsPanel extends StatelessWidget {
                 appModel.colorForStroke = color,
           ),
           transparentPaper: true,
-          child: MyColorPicker(
-            color: appModel.colorForStroke,
-            onColorChanged: (Color color) => appModel.colorForStroke = color,
-          ),
+          child: vertical
+              ? SizedBox()
+              : MyColorPicker(
+                  color: appModel.colorForStroke,
+                  onColorChanged: (Color color) =>
+                      appModel.colorForStroke = color,
+                ),
         ),
       );
     }
@@ -182,10 +212,13 @@ class ToolsPanel extends StatelessWidget {
                 appModel.colorForFill = color,
           ),
           transparentPaper: true,
-          child: MyColorPicker(
-            color: appModel.colorForFill,
-            onColorChanged: (Color color) => appModel.colorForFill = color,
-          ),
+          child: vertical
+              ? SizedBox()
+              : MyColorPicker(
+                  color: appModel.colorForFill,
+                  onColorChanged: (Color color) =>
+                      appModel.colorForFill = color,
+                ),
         ),
       );
     }

@@ -26,7 +26,7 @@ class MainScreen extends StatelessWidget {
           // Left side panels
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            width: appModel.isSidePanelExpanded ? 360 : 40,
+            width: appModel.isSidePanelExpanded ? 360 : 64,
             child: sidePanel(context),
           ),
           // Canvas on the righ
@@ -97,7 +97,7 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  Widget sidePanel(BuildContext context) {
+  Widget sidePanel(final BuildContext context) {
     final appModel = AppModel.get(context);
     return Container(
       padding: const EdgeInsets.only(top: 8.0, bottom: 8),
@@ -111,7 +111,9 @@ class MainScreen extends StatelessWidget {
         clipBehavior: Clip.none,
         child: Column(
           children: [
+            //
             // Layers Panel
+            //
             Expanded(
               child: LayersPanel(
                 selectedLayerIndex: appModel.selectedLayerIndex,
@@ -125,21 +127,26 @@ class MainScreen extends StatelessWidget {
                     AppModel.get(context).toggleLayerVisibility(indexToToggle),
               ),
             ),
+            //
+            // Divider
+            //
+            Divider(
+              thickness: 8,
+              height: 16,
+              color: Colors.grey,
+            ),
+
+            //
             // Tools Panel
-            if (appModel.isSidePanelExpanded)
-              Divider(
-                thickness: 8,
-                height: 16,
-                color: Colors.grey,
+            //
+            Expanded(
+              child: ToolsPanel(
+                currentShapeType: appModel.selectedTool,
+                onShapeSelected: (final Tools tool) =>
+                    appModel.selectedTool = tool,
+                minimal: !appModel.isSidePanelExpanded,
               ),
-            if (appModel.isSidePanelExpanded)
-              Expanded(
-                child: ToolsPanel(
-                  currentShapeType: appModel.selectedTool,
-                  onShapeSelected: (final Tools tool) =>
-                      appModel.selectedTool = tool,
-                ),
-              ),
+            ),
           ],
         ),
       ),
