@@ -21,14 +21,16 @@ void main() {
 
     test('addShape with Shape object should add to current layer', () {
       final shape = UserAction(
-        positionStart: const Offset(0, 0),
-        positionEnd: const Offset(10, 10),
+        positions: [
+          const Offset(0, 0),
+          const Offset(10, 10),
+        ],
         tool: Tools.draw,
         fillColor: Colors.black,
         brushColor: Colors.black,
         brushSize: 1,
       );
-      paintModel.addUserAction(shape: shape);
+      paintModel.addUserAction(action: shape);
       expect(
         paintModel.currentLayer.actionStack.length,
         2,
@@ -36,7 +38,7 @@ void main() {
       expect(paintModel.currentLayer.actionStack.last, shape);
     });
 
-    test('addShape with parameters should create and add new shape', () {
+    test('add UserAction with parameters should create and add new shape', () {
       paintModel.addUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
@@ -49,11 +51,11 @@ void main() {
         2,
       ); // also has the default white rectangle
       expect(
-        paintModel.currentLayer.actionStack.last.positionStart,
+        paintModel.currentLayer.actionStack.last.positions.first,
         const Offset(0, 0),
       );
       expect(
-        paintModel.currentLayer.actionStack.last.positionEnd,
+        paintModel.currentLayer.actionStack.last.positions.last,
         const Offset(10, 10),
       );
       expect(paintModel.currentLayer.actionStack.last.tool, Tools.circle);
@@ -69,7 +71,7 @@ void main() {
       );
       paintModel.updateLastUserAction(const Offset(20, 20));
       expect(
-        paintModel.currentLayer.actionStack.last.positionEnd,
+        paintModel.currentLayer.actionStack.last.positions.last,
         const Offset(20, 20),
       );
     });

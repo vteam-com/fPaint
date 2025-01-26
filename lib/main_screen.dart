@@ -203,8 +203,7 @@ class MainScreen extends StatelessWidget {
     appModel.userActionStartingOffset = position;
 
     appModel.currentUserAction = UserAction(
-      positionStart: position,
-      positionEnd: position,
+      positions: [position, position],
       tool: appModel.selectedTool,
       brushColor: appModel.brushColor,
       fillColor: appModel.fillColor,
@@ -212,7 +211,7 @@ class MainScreen extends StatelessWidget {
       brushStyle: appModel.brushStyle,
     );
 
-    appModel.addUserAction(shape: appModel.currentUserAction);
+    appModel.addUserAction(action: appModel.currentUserAction);
   }
 
   void _onUserActionUpdate(AppModel appModel, Offset position) {

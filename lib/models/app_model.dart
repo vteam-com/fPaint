@@ -144,18 +144,15 @@ class AppModel extends ChangeNotifier {
   }
 
   void addUserAction({
-    UserAction? shape,
+    UserAction? action,
     Tools? type,
     Color? colorFill,
     Color? colorStroke,
     Offset? start,
     Offset? end,
   }) {
-    if (shape != null) {
-      if (_isWithinCanvas(shape.positionStart) &&
-          _isWithinCanvas(shape.positionEnd)) {
-        currentLayer.actionStack.add(shape);
-      }
+    if (action != null) {
+      currentLayer.actionStack.add(action);
     } else if (start != null &&
         end != null &&
         type != null &&
@@ -164,8 +161,7 @@ class AppModel extends ChangeNotifier {
       if (_isWithinCanvas(start) && _isWithinCanvas(end)) {
         currentLayer.actionStack.add(
           UserAction(
-            positionStart: start,
-            positionEnd: end,
+            positions: [start, end],
             tool: type,
             fillColor: colorFill,
             brushColor: colorStroke,
@@ -177,9 +173,10 @@ class AppModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateLastUserAction(Offset end) {
-    if (currentLayer.actionStack.isNotEmpty && _isWithinCanvas(end)) {
-      currentLayer.actionStack.last.positionEnd = end;
+  void updateLastUserAction(final Offset end) {
+    if (currentLayer.actionStack.isNotEmpty &&
+        currentLayer.actionStack.last.positions.length >= 2) {
+      currentLayer.actionStack.last.positions.last = end;
       notifyListeners();
     }
   }

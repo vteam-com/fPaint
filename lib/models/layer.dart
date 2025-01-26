@@ -19,11 +19,13 @@ class Layer {
     actionStack.add(
       UserAction(
         tool: Tools.image,
-        positionStart: offset,
-        positionEnd: Offset(
-          offset.dx + imageToAdd.width.toDouble(),
-          offset.dy + imageToAdd.height.toDouble(),
-        ),
+        positions: [
+          offset,
+          Offset(
+            offset.dx + imageToAdd.width.toDouble(),
+            offset.dy + imageToAdd.height.toDouble(),
+          ),
+        ],
         brushColor: Colors.transparent,
         fillColor: Colors.transparent,
         brushSize: 0,
@@ -68,10 +70,11 @@ void renderLayer(
       // Circle
       case Tools.circle:
         final radius =
-            (userAction.positionStart - userAction.positionEnd).distance / 2;
+            (userAction.positions.first - userAction.positions.last).distance /
+                2;
         final center = Offset(
-          (userAction.positionStart.dx + userAction.positionEnd.dx) / 2,
-          (userAction.positionStart.dy + userAction.positionEnd.dy) / 2,
+          (userAction.positions.first.dx + userAction.positions.last.dx) / 2,
+          (userAction.positions.first.dy + userAction.positions.last.dy) / 2,
         );
 
         // Fill
@@ -86,23 +89,27 @@ void renderLayer(
 
       // Rectangle
       case Tools.rectangle:
+        if (userAction.positions.length == 2) {
+          // Fill
+          canvas.drawRect(
+            Rect.fromPoints(
+              userAction.positions.first,
+              userAction.positions.last,
+            ),
+            paint,
+          );
 
-        // Fill
-        canvas.drawRect(
-          Rect.fromPoints(userAction.positionStart, userAction.positionEnd),
-          paint,
-        );
-
-        // Border
-        paint.style = PaintingStyle.stroke;
-        paint.color = userAction.brushColor;
-        canvas.drawRect(
-          Rect.fromPoints(
-            userAction.positionStart,
-            userAction.positionEnd,
-          ),
-          paint,
-        );
+          // Border
+          paint.style = PaintingStyle.stroke;
+          paint.color = userAction.brushColor;
+          canvas.drawRect(
+            Rect.fromPoints(
+              userAction.positions.first,
+              userAction.positions.last,
+            ),
+            paint,
+          );
+        }
         break;
       case Tools.eraser:
         paint.color = Colors.white;
@@ -110,8 +117,8 @@ void renderLayer(
         paint.strokeWidth = userAction.brushSize;
         paint.style = PaintingStyle.stroke;
         canvas.drawLine(
-          userAction.positionStart,
-          userAction.positionEnd,
+          userAction.positions.first,
+          userAction.positions.last,
           paint,
         );
         break;
@@ -120,7 +127,7 @@ void renderLayer(
         if (userAction.image != null) {
           canvas.drawImage(
             userAction.image!,
-            userAction.positionStart,
+            userAction.positions.first,
             Paint(),
           );
         }
@@ -136,8 +143,8 @@ void renderLine(ui.Paint paint, UserAction userAction, ui.Canvas canvas) {
   if (userAction.brushStyle == BrushStyle.dash) {
     final path = Path();
 
-    path.moveTo(userAction.positionStart.dx, userAction.positionStart.dy);
-    path.lineTo(userAction.positionEnd.dx, userAction.positionEnd.dy);
+    path.moveTo(userAction.positions.first.dx, userAction.positions.first.dy);
+    path.lineTo(userAction.positions.last.dx, userAction.positions.last.dy);
 
     final Path dashedPath = createDashedPath(
       path,
@@ -147,8 +154,8 @@ void renderLine(ui.Paint paint, UserAction userAction, ui.Canvas canvas) {
     canvas.drawPath(dashedPath, paint);
   } else {
     canvas.drawLine(
-      userAction.positionStart,
-      userAction.positionEnd,
+      userAction.positions.first,
+      userAction.positions.last,
       paint,
     );
   }
