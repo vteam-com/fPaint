@@ -21,14 +21,14 @@ void main() {
 
     test('addShape with Shape object should add to current layer', () {
       final shape = UserAction(
-        start: const Offset(0, 0),
-        end: const Offset(10, 10),
-        type: Tools.draw,
+        positionStart: const Offset(0, 0),
+        positionEnd: const Offset(10, 10),
+        tool: Tools.draw,
         fillColor: Colors.black,
         brushColor: Colors.black,
         brushSize: 1,
       );
-      paintModel.addShape(shape: shape);
+      paintModel.addUserAction(shape: shape);
       expect(
         paintModel.currentLayer.actionStack.length,
         2,
@@ -37,7 +37,7 @@ void main() {
     });
 
     test('addShape with parameters should create and add new shape', () {
-      paintModel.addShape(
+      paintModel.addUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: Tools.circle,
@@ -49,38 +49,38 @@ void main() {
         2,
       ); // also has the default white rectangle
       expect(
-        paintModel.currentLayer.actionStack.last.start,
+        paintModel.currentLayer.actionStack.last.positionStart,
         const Offset(0, 0),
       );
       expect(
-        paintModel.currentLayer.actionStack.last.end,
+        paintModel.currentLayer.actionStack.last.positionEnd,
         const Offset(10, 10),
       );
-      expect(paintModel.currentLayer.actionStack.last.type, Tools.circle);
+      expect(paintModel.currentLayer.actionStack.last.tool, Tools.circle);
       expect(paintModel.currentLayer.actionStack.last.fillColor, Colors.red);
     });
 
     test('updateLastShape should modify end position of last shape', () {
-      paintModel.addShape(
+      paintModel.addUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: Tools.rectangle,
         colorFill: Colors.blue,
       );
-      paintModel.updateLastShape(const Offset(20, 20));
+      paintModel.updateLastUserAction(const Offset(20, 20));
       expect(
-        paintModel.currentLayer.actionStack.last.end,
+        paintModel.currentLayer.actionStack.last.positionEnd,
         const Offset(20, 20),
       );
     });
 
     test('updateLastShape should do nothing if no shapes exist', () {
-      paintModel.updateLastShape(const Offset(20, 20));
+      paintModel.updateLastUserAction(const Offset(20, 20));
       expect(paintModel.currentLayer.actionStack.length, 1);
     });
 
     test('undo should remove last shape', () {
-      paintModel.addShape(
+      paintModel.addUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: Tools.draw,
@@ -99,14 +99,14 @@ void main() {
     });
 
     test('multiple shapes should be added and managed correctly', () {
-      paintModel.addShape(
+      paintModel.addUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: Tools.draw,
         colorFill: Colors.blue,
         colorStroke: Colors.black,
       );
-      paintModel.addShape(
+      paintModel.addUserAction(
         start: const Offset(20, 20),
         end: const Offset(30, 30),
         type: Tools.circle,
@@ -116,7 +116,7 @@ void main() {
       expect(paintModel.currentLayer.actionStack.length, 3);
       paintModel.undo();
       expect(paintModel.currentLayer.actionStack.length, 2);
-      expect(paintModel.currentLayer.actionStack.last.type, Tools.draw);
+      expect(paintModel.currentLayer.actionStack.last.tool, Tools.draw);
     });
   });
 }

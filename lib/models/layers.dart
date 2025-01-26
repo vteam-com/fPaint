@@ -12,9 +12,9 @@ class Layers {
 
     firstLayer.actionStack.add(
       UserAction(
-        start: Offset(0, 0),
-        end: Offset(size.width, size.height),
-        type: Tools.rectangle,
+        positionStart: Offset(0, 0),
+        positionEnd: Offset(size.width, size.height),
+        tool: Tools.rectangle,
         fillColor: Colors.white,
         brushColor: Colors.white,
         brushSize: 0,

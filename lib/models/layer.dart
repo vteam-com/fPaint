@@ -18,9 +18,9 @@ class Layer {
   void addImage(ui.Image imageToAdd, ui.Offset offset) {
     actionStack.add(
       UserAction(
-        type: Tools.image,
-        start: offset,
-        end: Offset(
+        tool: Tools.image,
+        positionStart: offset,
+        positionEnd: Offset(
           offset.dx + imageToAdd.width.toDouble(),
           offset.dy + imageToAdd.height.toDouble(),
         ),
@@ -54,50 +54,24 @@ void renderLayer(
     paint.strokeCap = StrokeCap.round;
     paint.strokeWidth = userAction.brushSize;
 
-    switch (userAction.type) {
+    switch (userAction.tool) {
       // Draw
       case Tools.draw:
-        paint.style = PaintingStyle.stroke;
-        paint.color = userAction.brushColor;
-        canvas.drawLine(
-          userAction.start,
-          userAction.end,
-          paint,
-        );
+        renderLine(paint, userAction, canvas);
         break;
 
       // Line
       case Tools.line:
-        paint.style = PaintingStyle.stroke;
-        paint.color = userAction.brushColor;
-
-        if (userAction.brushStyle == BrushStyle.dash) {
-          final path = Path();
-
-          path.moveTo(userAction.start.dx, userAction.start.dy);
-          path.lineTo(userAction.end.dx, userAction.end.dy);
-
-          final Path dashedPath = createDashedPath(
-            path,
-            dashWidth: userAction.brushSize * 3,
-            dashGap: userAction.brushSize * 2,
-          );
-          canvas.drawPath(dashedPath, paint);
-        } else {
-          canvas.drawLine(
-            userAction.start,
-            userAction.end,
-            paint,
-          );
-        }
+        renderLine(paint, userAction, canvas);
         break;
 
       // Circle
       case Tools.circle:
-        final radius = (userAction.start - userAction.end).distance / 2;
+        final radius =
+            (userAction.positionStart - userAction.positionEnd).distance / 2;
         final center = Offset(
-          (userAction.start.dx + userAction.end.dx) / 2,
-          (userAction.start.dy + userAction.end.dy) / 2,
+          (userAction.positionStart.dx + userAction.positionEnd.dx) / 2,
+          (userAction.positionStart.dy + userAction.positionEnd.dy) / 2,
         );
 
         // Fill
@@ -115,7 +89,7 @@ void renderLayer(
 
         // Fill
         canvas.drawRect(
-          Rect.fromPoints(userAction.start, userAction.end),
+          Rect.fromPoints(userAction.positionStart, userAction.positionEnd),
           paint,
         );
 
@@ -124,8 +98,8 @@ void renderLayer(
         paint.color = userAction.brushColor;
         canvas.drawRect(
           Rect.fromPoints(
-            userAction.start,
-            userAction.end,
+            userAction.positionStart,
+            userAction.positionEnd,
           ),
           paint,
         );
@@ -136,8 +110,8 @@ void renderLayer(
         paint.strokeWidth = userAction.brushSize;
         paint.style = PaintingStyle.stroke;
         canvas.drawLine(
-          userAction.start,
-          userAction.end,
+          userAction.positionStart,
+          userAction.positionEnd,
           paint,
         );
         break;
@@ -146,12 +120,37 @@ void renderLayer(
         if (userAction.image != null) {
           canvas.drawImage(
             userAction.image!,
-            userAction.start,
+            userAction.positionStart,
             Paint(),
           );
         }
         break;
     }
+  }
+}
+
+void renderLine(ui.Paint paint, UserAction userAction, ui.Canvas canvas) {
+  paint.style = PaintingStyle.stroke;
+  paint.color = userAction.brushColor;
+
+  if (userAction.brushStyle == BrushStyle.dash) {
+    final path = Path();
+
+    path.moveTo(userAction.positionStart.dx, userAction.positionStart.dy);
+    path.lineTo(userAction.positionEnd.dx, userAction.positionEnd.dy);
+
+    final Path dashedPath = createDashedPath(
+      path,
+      dashWidth: userAction.brushSize * 3,
+      dashGap: userAction.brushSize * 2,
+    );
+    canvas.drawPath(dashedPath, paint);
+  } else {
+    canvas.drawLine(
+      userAction.positionStart,
+      userAction.positionEnd,
+      paint,
+    );
   }
 }
 

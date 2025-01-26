@@ -33,14 +33,18 @@ class MainScreen extends StatelessWidget {
           Expanded(
             child: Center(
               child: Listener(
+                // Pinch/Zoom scaling for WEB
                 onPointerSignal: (final PointerSignalEvent event) {
                   if (event is PointerScaleEvent) {
                     appModel.scale = appModel.scale * event.scale;
                   }
                 },
+                // Pinch/Zoom scaling for Desktop
                 onPointerPanZoomUpdate: (final event) {
                   appModel.scale = appModel.scale * event.scale;
                 },
+
+                // Draw Start
                 onPointerDown: (PointerDownEvent details) {
                   if (appModel.userActionStartingOffset == null) {
                     double scrollOffsetX = scrollControllerX.offset;
@@ -53,6 +57,7 @@ class MainScreen extends StatelessWidget {
                     );
                   }
                 },
+                // Draw Update
                 onPointerMove: (PointerEvent details) {
                   if (details is PointerMoveEvent) {
                     if (details.buttons == kPrimaryButton &&
@@ -68,12 +73,18 @@ class MainScreen extends StatelessWidget {
                     }
                   }
                 },
+                // Draw End
                 onPointerUp: (PointerUpEvent details) {
-                  appModel.userActionStartingOffset = null;
+                  _onUserActionEnded(appModel);
                 },
+                // Draw End
                 onPointerCancel: (PointerCancelEvent details) {
-                  appModel.userActionStartingOffset = null;
+                  _onUserActionEnded(appModel);
                 },
+
+                //
+                // Render canvas
+                //
                 child: SingleChildScrollView(
                   controller: scrollControllerY,
                   scrollDirection: Axis.vertical,
@@ -191,26 +202,24 @@ class MainScreen extends StatelessWidget {
 
     appModel.userActionStartingOffset = position;
 
-    if (appModel.selectedTool != Tools.draw) {
-      appModel.currentUserAction = UserAction(
-        start: position,
-        end: position,
-        type: appModel.selectedTool,
-        brushColor: appModel.brushColor,
-        fillColor: appModel.fillColor,
-        brushSize: appModel.brusSize,
-        brushStyle: appModel.brushStyle,
-      );
+    appModel.currentUserAction = UserAction(
+      positionStart: position,
+      positionEnd: position,
+      tool: appModel.selectedTool,
+      brushColor: appModel.brushColor,
+      fillColor: appModel.fillColor,
+      brushSize: appModel.brusSize,
+      brushStyle: appModel.brushStyle,
+    );
 
-      appModel.addShape(shape: appModel.currentUserAction);
-    }
+    appModel.addUserAction(shape: appModel.currentUserAction);
   }
 
   void _onUserActionUpdate(AppModel appModel, Offset position) {
     if (appModel.userActionStartingOffset != null) {
       if (appModel.selectedTool == Tools.eraser) {
         // Eraser implementation
-        appModel.addShape(
+        appModel.addUserAction(
           start: appModel.userActionStartingOffset!,
           end: position,
           type: appModel.selectedTool,
@@ -220,7 +229,7 @@ class MainScreen extends StatelessWidget {
         appModel.userActionStartingOffset = position;
       } else if (appModel.selectedTool == Tools.draw) {
         // Existing pencil logic
-        appModel.addShape(
+        appModel.addUserAction(
           start: appModel.userActionStartingOffset!,
           end: position,
           type: appModel.selectedTool,
@@ -230,9 +239,20 @@ class MainScreen extends StatelessWidget {
         appModel.userActionStartingOffset = position;
       } else {
         // Existing shape logic
-        appModel.updateLastShape(position);
+        appModel.updateLastUserAction(position);
       }
     }
+  }
+
+  void _onUserActionEnded(
+    AppModel appModel,
+  ) {
+    if (appModel.currentUserAction?.tool == Tools.draw) {
+      // Optimize list of draw actions into a single path
+    }
+
+    appModel.currentUserAction = null;
+    appModel.userActionStartingOffset = null;
   }
 
   /// Builds a column of floating action buttons for the paint application,

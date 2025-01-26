@@ -54,18 +54,18 @@ const Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
 
 class UserAction {
   UserAction({
-    required this.type,
-    required this.start,
-    required this.end,
+    required this.tool,
+    required this.positionStart,
+    required this.positionEnd,
     required this.brushColor,
     required this.fillColor,
     required this.brushSize,
     this.brushStyle = BrushStyle.solid,
     this.image,
   });
-  final Tools type;
-  final Offset start;
-  Offset end;
+  final Tools tool;
+  final Offset positionStart;
+  Offset positionEnd;
   final double brushSize;
   final BrushStyle brushStyle;
   final Color brushColor;
