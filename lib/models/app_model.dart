@@ -181,6 +181,10 @@ class AppModel extends ChangeNotifier {
     }
   }
 
+  void update() {
+    notifyListeners();
+  }
+
   bool _isWithinCanvas(Offset point) {
     return point.dx >= 0 &&
         point.dx <= canvasSize.width &&

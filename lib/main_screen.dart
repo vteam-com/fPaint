@@ -227,15 +227,9 @@ class MainScreen extends StatelessWidget {
         );
         appModel.userActionStartingOffset = position;
       } else if (appModel.selectedTool == Tools.draw) {
-        // Existing pencil logic
-        appModel.addUserAction(
-          start: appModel.userActionStartingOffset!,
-          end: position,
-          type: appModel.selectedTool,
-          colorFill: appModel.fillColor,
-          colorStroke: appModel.brushColor,
-        );
-        appModel.userActionStartingOffset = position;
+        // Cumulate more points in the draw path
+        appModel.layers.list.last.actionStack.last.positions.add(position);
+        appModel.update();
       } else {
         // Existing shape logic
         appModel.updateLastUserAction(position);

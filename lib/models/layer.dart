@@ -59,7 +59,24 @@ void renderLayer(
     switch (userAction.tool) {
       // Draw
       case Tools.draw:
-        renderLine(paint, userAction, canvas);
+        final path = Path();
+
+        path.moveTo(
+            userAction.positions.first.dx, userAction.positions.first.dy);
+
+        for (int i = 1; i < userAction.positions.length; i++) {
+          path.lineTo(userAction.positions[i].dx, userAction.positions[i].dy);
+        }
+        paint.style = PaintingStyle.stroke;
+        paint.color = userAction.brushColor;
+
+        if (userAction.brushStyle == BrushStyle.dash) {
+          double dashWidth = userAction.brushSize * 3;
+          double dashGap = userAction.brushSize * 2;
+          drawPath(path, canvas, paint, dashWidth, dashGap);
+        } else {
+          canvas.drawPath(path, paint);
+        }
         break;
 
       // Line
@@ -146,12 +163,13 @@ void renderLine(ui.Paint paint, UserAction userAction, ui.Canvas canvas) {
     path.moveTo(userAction.positions.first.dx, userAction.positions.first.dy);
     path.lineTo(userAction.positions.last.dx, userAction.positions.last.dy);
 
-    final Path dashedPath = createDashedPath(
+    drawPath(
       path,
-      dashWidth: userAction.brushSize * 3,
-      dashGap: userAction.brushSize * 2,
+      canvas,
+      paint,
+      userAction.brushSize * 3,
+      userAction.brushSize * 2,
     );
-    canvas.drawPath(dashedPath, paint);
   } else {
     canvas.drawLine(
       userAction.positions.first,
@@ -159,6 +177,15 @@ void renderLine(ui.Paint paint, UserAction userAction, ui.Canvas canvas) {
       paint,
     );
   }
+}
+
+void drawPath(Path path, ui.Canvas canvas, ui.Paint paint, dashWidth, dashGap) {
+  final Path dashedPath = createDashedPath(
+    path,
+    dashWidth: dashWidth,
+    dashGap: dashGap,
+  );
+  canvas.drawPath(dashedPath, paint);
 }
 
 Path createDashedPath(
