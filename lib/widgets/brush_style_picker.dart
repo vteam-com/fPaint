@@ -9,9 +9,9 @@ enum BrushStyle {
   // marker,
 }
 
-Widget brushSelection(final AppModel appModel) {
+Widget brushStyleSelection(final AppModel appModel) {
   return DropdownButton<int>(
-    value: appModel.brush.index,
+    value: appModel.brushStyle.index,
     items: BrushStyle.values.map<DropdownMenuItem<int>>((BrushStyle value) {
       return DropdownMenuItem<int>(
         value: value.index,
@@ -22,7 +22,23 @@ Widget brushSelection(final AppModel appModel) {
       );
     }).toList(),
     onChanged: (int? selectedBrush) {
-      appModel.brush = BrushStyle.values[selectedBrush!];
+      appModel.brushStyle = BrushStyle.values[selectedBrush!];
+    },
+  );
+}
+
+void showBrushStylePicker(
+  final BuildContext context,
+) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Select Line Style'),
+        content: IntrinsicHeight(
+          child: brushStyleSelection(AppModel.get(context)),
+        ),
+      );
     },
   );
 }

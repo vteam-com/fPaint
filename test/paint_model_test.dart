@@ -24,8 +24,8 @@ void main() {
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: Tools.draw,
-        colorFill: Colors.black,
-        colorOutline: Colors.black,
+        fillColor: Colors.black,
+        brushColor: Colors.black,
         brushSize: 1,
       );
       paintModel.addShape(shape: shape);
@@ -57,7 +57,7 @@ void main() {
         const Offset(10, 10),
       );
       expect(paintModel.currentLayer.actionStack.last.type, Tools.circle);
-      expect(paintModel.currentLayer.actionStack.last.colorFill, Colors.red);
+      expect(paintModel.currentLayer.actionStack.last.fillColor, Colors.red);
     });
 
     test('updateLastShape should modify end position of last shape', () {

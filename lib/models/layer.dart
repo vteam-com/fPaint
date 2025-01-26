@@ -24,8 +24,8 @@ class Layer {
           offset.dx + imageToAdd.width.toDouble(),
           offset.dy + imageToAdd.height.toDouble(),
         ),
-        colorOutline: Colors.transparent,
-        colorFill: Colors.transparent,
+        brushColor: Colors.transparent,
+        fillColor: Colors.transparent,
         brushSize: 0,
         image: imageToAdd,
       ),
@@ -50,7 +50,7 @@ void renderLayer(
 ) {
   for (final UserAction userAction in layer.actionStack) {
     final Paint paint = Paint();
-    paint.color = userAction.colorFill;
+    paint.color = userAction.fillColor;
     paint.strokeCap = StrokeCap.round;
     paint.strokeWidth = userAction.brushSize;
 
@@ -58,7 +58,7 @@ void renderLayer(
       // Draw
       case Tools.draw:
         paint.style = PaintingStyle.stroke;
-        paint.color = userAction.colorOutline;
+        paint.color = userAction.brushColor;
         canvas.drawLine(
           userAction.start,
           userAction.end,
@@ -69,7 +69,7 @@ void renderLayer(
       // Line
       case Tools.line:
         paint.style = PaintingStyle.stroke;
-        paint.color = userAction.colorOutline;
+        paint.color = userAction.brushColor;
 
         if (userAction.brushStyle == BrushStyle.dash) {
           final path = Path();
@@ -105,7 +105,7 @@ void renderLayer(
 
         // Border
         paint.style = PaintingStyle.stroke;
-        paint.color = userAction.colorOutline;
+        paint.color = userAction.brushColor;
 
         canvas.drawCircle(center, radius, paint);
         break;
@@ -121,7 +121,7 @@ void renderLayer(
 
         // Border
         paint.style = PaintingStyle.stroke;
-        paint.color = userAction.colorOutline;
+        paint.color = userAction.brushColor;
         canvas.drawRect(
           Rect.fromPoints(
             userAction.start,

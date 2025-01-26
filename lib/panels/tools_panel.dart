@@ -2,6 +2,7 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/tool_item.dart';
+import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,7 @@ class ToolsPanel extends StatelessWidget {
       builder: (
         final BuildContext context,
         final AppModel appModel,
-        Widget? child,
+        final Widget? child,
       ) {
         return Container(
           constraints: const BoxConstraints(
@@ -51,7 +52,6 @@ class ToolsPanel extends StatelessWidget {
               Expanded(
                 child: buildAttributes(
                   context: context,
-                  appModel: appModel,
                   vertical: minimal,
                 ),
               ),
@@ -132,29 +132,30 @@ class ToolsPanel extends StatelessWidget {
   /// attributes.
   Widget buildAttributes({
     required final BuildContext context,
-    required final AppModel appModel,
     required bool vertical,
   }) {
     List<Widget> widgets = [];
+    final appModel = AppModel.get(context, listen: true);
 
     // Stroke Weight
     if (currentShapeType.isSupported(ToolAttribute.brushSize)) {
       widgets.add(
         adjustmentWidget(
-          name: 'Stroke Style',
+          name: 'Brush Style',
           buttonIcon: Icons.line_weight,
           buttonIconColor: Colors.black,
-          onButtonPressed: () {},
+          onButtonPressed: () {
+            showBrushSizePicker(context, appModel.brusSize,
+                (final double newValue) {
+              appModel.brusSize = newValue;
+            });
+          },
           child: vertical
               ? SizedBox()
-              : Slider(
-                  value: appModel.lineWeight,
-                  min: 1,
-                  max: 100,
-                  divisions: 100,
-                  label: appModel.lineWeight.round().toString(),
-                  onChanged: (double value) {
-                    appModel.lineWeight = value;
+              : BrushSizePicker(
+                  value: appModel.brusSize,
+                  onChanged: (value) {
+                    appModel.brusSize = value;
                   },
                 ),
         ),
@@ -168,8 +169,10 @@ class ToolsPanel extends StatelessWidget {
           name: 'Brush Style',
           buttonIcon: Icons.line_style_outlined,
           buttonIconColor: Colors.black,
-          onButtonPressed: () {},
-          child: vertical ? SizedBox() : brushSelection(appModel),
+          onButtonPressed: () {
+            showBrushStylePicker(context);
+          },
+          child: vertical ? SizedBox() : brushStyleSelection(appModel),
         ),
       );
     }
@@ -178,23 +181,21 @@ class ToolsPanel extends StatelessWidget {
     if (currentShapeType.isSupported(ToolAttribute.colorOutline)) {
       widgets.add(
         adjustmentWidget(
-          name: 'Stroke Color',
+          name: 'Brush Color',
           buttonIcon: Icons.water_drop_outlined,
-          buttonIconColor: appModel.colorForStroke,
+          buttonIconColor: appModel.brushColor,
           onButtonPressed: () => showColorPicker(
             context: context,
-            title: 'Stroke',
-            color: appModel.colorForStroke,
-            onSelectedColor: (final Color color) =>
-                appModel.colorForStroke = color,
+            title: 'Brush',
+            color: appModel.brushColor,
+            onSelectedColor: (final Color color) => appModel.brushColor = color,
           ),
           transparentPaper: true,
           child: vertical
               ? SizedBox()
               : MyColorPicker(
-                  color: appModel.colorForStroke,
-                  onColorChanged: (Color color) =>
-                      appModel.colorForStroke = color,
+                  color: appModel.brushColor,
+                  onColorChanged: (Color color) => appModel.brushColor = color,
                 ),
         ),
       );
@@ -206,21 +207,19 @@ class ToolsPanel extends StatelessWidget {
         adjustmentWidget(
           name: 'Fill Color',
           buttonIcon: Icons.water_drop,
-          buttonIconColor: appModel.colorForFill,
+          buttonIconColor: appModel.fillColor,
           onButtonPressed: () => showColorPicker(
             context: context,
             title: 'Fill',
-            color: appModel.colorForFill,
-            onSelectedColor: (final Color color) =>
-                appModel.colorForFill = color,
+            color: appModel.fillColor,
+            onSelectedColor: (final Color color) => appModel.fillColor = color,
           ),
           transparentPaper: true,
           child: vertical
               ? SizedBox()
               : MyColorPicker(
-                  color: appModel.colorForFill,
-                  onColorChanged: (Color color) =>
-                      appModel.colorForFill = color,
+                  color: appModel.fillColor,
+                  onColorChanged: (Color color) => appModel.fillColor = color,
                 ),
         ),
       );

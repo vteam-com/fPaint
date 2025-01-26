@@ -196,10 +196,10 @@ class MainScreen extends StatelessWidget {
         start: position,
         end: position,
         type: appModel.selectedTool,
-        colorOutline: appModel.colorForStroke,
-        colorFill: appModel.colorForFill,
-        brushSize: appModel.lineWeight,
-        brushStyle: appModel.brush,
+        brushColor: appModel.brushColor,
+        fillColor: appModel.fillColor,
+        brushSize: appModel.brusSize,
+        brushStyle: appModel.brushStyle,
       );
 
       appModel.addShape(shape: appModel.currentUserAction);
@@ -224,8 +224,8 @@ class MainScreen extends StatelessWidget {
           start: appModel.userActionStartingOffset!,
           end: position,
           type: appModel.selectedTool,
-          colorFill: appModel.colorForFill,
-          colorStroke: appModel.colorForStroke,
+          colorFill: appModel.fillColor,
+          colorStroke: appModel.brushColor,
         );
         appModel.userActionStartingOffset = position;
       } else {

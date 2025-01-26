@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
 import 'dart:ui';
 
-import 'package:fpaint/brushes/brushes.dart';
-export 'package:fpaint/brushes/brushes.dart';
+import 'package:fpaint/widgets/brush_style_picker.dart';
+export 'package:fpaint/widgets/brush_style_picker.dart';
 
 enum Tools {
   draw,
@@ -57,8 +57,8 @@ class UserAction {
     required this.type,
     required this.start,
     required this.end,
-    required this.colorOutline,
-    required this.colorFill,
+    required this.brushColor,
+    required this.fillColor,
     required this.brushSize,
     this.brushStyle = BrushStyle.solid,
     this.image,
@@ -68,7 +68,7 @@ class UserAction {
   Offset end;
   final double brushSize;
   final BrushStyle brushStyle;
-  final Color colorOutline;
-  final Color colorFill;
+  final Color brushColor;
+  final Color fillColor;
   final ui.Image? image;
 }

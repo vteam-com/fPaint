@@ -44,7 +44,7 @@ class AppModel extends ChangeNotifier {
   // Color for Stroke
   Color _colorForStroke = Colors.black;
 
-  Color get colorForStroke => _colorForStroke;
+  Color get brushColor => _colorForStroke;
 
   // Scale
   double _scale = 1;
@@ -69,7 +69,7 @@ class AppModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  set colorForStroke(Color value) {
+  set brushColor(Color value) {
     _colorForStroke = value;
     notifyListeners();
   }
@@ -77,25 +77,25 @@ class AppModel extends ChangeNotifier {
   // Color for Fill
   Color _colorForFill = Colors.lightBlue;
 
-  Color get colorForFill => _colorForFill;
+  Color get fillColor => _colorForFill;
 
-  set colorForFill(Color value) {
+  set fillColor(Color value) {
     _colorForFill = value;
     notifyListeners();
   }
 
   // Line Weight
   double _lineWeight = 5;
-  double get lineWeight => _lineWeight;
-  set lineWeight(double value) {
+  double get brusSize => _lineWeight;
+  set brusSize(double value) {
     _lineWeight = value;
     notifyListeners();
   }
 
   // Brush Style
   BrushStyle _brush = BrushStyle.solid;
-  BrushStyle get brush => _brush;
-  set brush(BrushStyle value) {
+  BrushStyle get brushStyle => _brush;
+  set brushStyle(BrushStyle value) {
     _brush = value;
     notifyListeners();
   }
@@ -166,9 +166,9 @@ class AppModel extends ChangeNotifier {
             start: start,
             end: end,
             type: type,
-            colorFill: colorFill,
-            colorOutline: colorStroke,
-            brushSize: this.lineWeight,
+            fillColor: colorFill,
+            brushColor: colorStroke,
+            brushSize: this.brusSize,
           ),
         );
       }
