@@ -34,7 +34,7 @@ class AppModel extends ChangeNotifier {
 
   set selectedTool(Tools value) {
     _selectedTool = value;
-    notifyListeners();
+    update();
   }
 
   /// Stores the starting position of a pan gesture for drawing operations.
@@ -57,7 +57,7 @@ class AppModel extends ChangeNotifier {
 
   set isSidePanelExpanded(bool value) {
     _isSidePanelExpanded = value;
-    notifyListeners();
+    update();
   }
 
   /// Sets the scale of the canvas.
@@ -66,12 +66,12 @@ class AppModel extends ChangeNotifier {
   /// Calling this method will notify any listeners of the [AppModel] that the scale has changed.
   set scale(final double value) {
     _scale = value.clamp(10 / 100, 400 / 100);
-    notifyListeners();
+    update();
   }
 
   set brushColor(Color value) {
     _colorForStroke = value;
-    notifyListeners();
+    update();
   }
 
   // Color for Fill
@@ -81,7 +81,7 @@ class AppModel extends ChangeNotifier {
 
   set fillColor(Color value) {
     _colorForFill = value;
-    notifyListeners();
+    update();
   }
 
   // Line Weight
@@ -89,7 +89,7 @@ class AppModel extends ChangeNotifier {
   double get brusSize => _lineWeight;
   set brusSize(double value) {
     _lineWeight = value;
-    notifyListeners();
+    update();
   }
 
   // Brush Style
@@ -97,7 +97,7 @@ class AppModel extends ChangeNotifier {
   BrushStyle get brushStyle => _brush;
   set brushStyle(BrushStyle value) {
     _brush = value;
-    notifyListeners();
+    update();
   }
 
   int _selectedLayerIndex = 0;
@@ -106,7 +106,7 @@ class AppModel extends ChangeNotifier {
   set selectedLayerIndex(final int value) {
     if (layers.isIndexInRange(value)) {
       _selectedLayerIndex = value;
-      notifyListeners();
+      update();
     }
   }
 
@@ -170,14 +170,14 @@ class AppModel extends ChangeNotifier {
         );
       }
     }
-    notifyListeners();
+    update();
   }
 
   void updateLastUserAction(final Offset end) {
     if (currentLayer.actionStack.isNotEmpty &&
         currentLayer.actionStack.last.positions.length >= 2) {
       currentLayer.actionStack.last.positions.last = end;
-      notifyListeners();
+      update();
     }
   }
 
@@ -195,21 +195,21 @@ class AppModel extends ChangeNotifier {
   void toggleLayerVisibility(final int layerIndex) {
     if (layerIndex >= 0 && layerIndex < layers.length) {
       layers.get(layerIndex).isVisible = !layers.get(layerIndex).isVisible;
-      notifyListeners();
+      update();
     }
   }
 
   void undo() {
     if (currentLayer.actionStack.isNotEmpty) {
       currentLayer.redoStack.add(currentLayer.actionStack.removeLast());
-      notifyListeners();
+      update();
     }
   }
 
   void redo() {
     if (currentLayer.redoStack.isNotEmpty) {
       currentLayer.actionStack.add(currentLayer.redoStack.removeLast());
-      notifyListeners();
+      update();
     }
   }
 }

@@ -62,7 +62,9 @@ void renderLayer(
         final path = Path();
 
         path.moveTo(
-            userAction.positions.first.dx, userAction.positions.first.dy);
+          userAction.positions.first.dx,
+          userAction.positions.first.dy,
+        );
 
         for (int i = 1; i < userAction.positions.length; i++) {
           path.lineTo(userAction.positions[i].dx, userAction.positions[i].dy);
