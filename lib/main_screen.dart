@@ -109,9 +109,11 @@ class MainScreen extends StatelessWidget {
   }
 
   Widget sidePanel(final BuildContext context) {
-    final appModel = AppModel.get(context);
-    return Container(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 8),
+    final AppModel appModel = AppModel.get(context);
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: appModel.isSidePanelExpanded ? 360 : 64,
       child: Material(
         elevation: 18,
         color: Colors.grey.shade200,
