@@ -27,8 +27,10 @@ digraph "" {
   "/lib/helpers/list_helper.dart" [label="list_helper"];
   "/lib/helpers/color_helper.dart" [label="color_helper"];
   "/lib/widgets/truncated_text.dart" [label="truncated_text"];
+  "/lib/widgets/container_slider.dart" [label="container_slider"];
   "/lib/widgets/brush_size_picker.dart" [label="brush_size_picker"];
   "/lib/widgets/transparent_background.dart" [label="transparent_background"];
+  "/lib/widgets/image_painter.dart" [label="image_painter"];
   "/lib/widgets/brush_style_picker.dart" [label="brush_style_picker"];
   "/lib/widgets/color_picker.dart" [label="color_picker"];
   subgraph "cluster~" {
@@ -77,8 +79,10 @@ digraph "" {
       subgraph "cluster~/lib/widgets" {
         label="widgets";
         "/lib/widgets/truncated_text.dart";
+        "/lib/widgets/container_slider.dart";
         "/lib/widgets/brush_size_picker.dart";
         "/lib/widgets/transparent_background.dart";
+        "/lib/widgets/image_painter.dart";
         "/lib/widgets/brush_style_picker.dart";
         "/lib/widgets/color_picker.dart";
       }
@@ -90,6 +94,8 @@ digraph "" {
   "/lib/panels/canvas_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/canvas_panel.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/layer_selector.dart" -> "/lib/models/app_model.dart";
+  "/lib/panels/layer_selector.dart" -> "/lib/widgets/container_slider.dart";
+  "/lib/panels/layer_selector.dart" -> "/lib/widgets/image_painter.dart";
   "/lib/panels/layer_selector.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/layer_selector.dart" -> "/lib/widgets/truncated_text.dart";
   "/lib/panels/side_panel.dart" -> "/lib/models/app_model.dart";
