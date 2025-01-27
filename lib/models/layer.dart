@@ -61,13 +61,13 @@ class Layer {
 
   void undo() {
     if (_actionStack.isNotEmpty) {
-      _actionStack.removeLast();
+      redoStack.add(_actionStack.removeLast());
       clearCache();
     }
   }
 
   void redo() {
-    if (_actionStack.isNotEmpty) {
+    if (redoStack.isNotEmpty) {
       _actionStack.add(this.redoStack.removeLast());
       clearCache();
     }
