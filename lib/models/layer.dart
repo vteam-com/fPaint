@@ -11,6 +11,7 @@ export 'package:fpaint/models/user_action.dart';
 class Layer {
   Layer({required this.name});
   String name;
+  String id = '';
   final List<UserAction> _actionStack = [];
   List<UserAction> redoStack = [];
   bool isSelected = false;

@@ -106,7 +106,9 @@ class AppModel extends ChangeNotifier {
   set selectedLayerIndex(final int index) {
     if (layers.isIndexInRange(index)) {
       for (int i = 0; i < layers.length; i++) {
-        layers.get(i).isSelected = i == index;
+        final Layer layer = layers.get(i);
+        layer.id = i.toString();
+        layer.isSelected = i == index;
       }
       _selectedLayerIndex = index;
       layers.get(_selectedLayerIndex).isSelected = true;

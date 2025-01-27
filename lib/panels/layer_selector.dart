@@ -22,70 +22,68 @@ class LayerSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appModel = AppModel.get(context);
-    return Container(
-      margin: EdgeInsets.all(minimal ? 2 : 4),
-      padding: EdgeInsets.all(minimal ? 2 : 8),
-      decoration: BoxDecoration(
-        color: minimal ? (layer.isVisible ? null : Colors.grey) : null,
-        border: Border.all(
-          color: layer.isSelected ? Colors.blue : Colors.grey.shade300,
-          width: 3,
+    return Tooltip(
+      message: '${layer.name} [${layer.id}]',
+      child: Container(
+        margin: EdgeInsets.all(minimal ? 2 : 4),
+        padding: EdgeInsets.all(minimal ? 2 : 8),
+        decoration: BoxDecoration(
+          color: minimal ? (layer.isVisible ? null : Colors.grey) : null,
+          border: Border.all(
+            color: layer.isSelected ? Colors.blue : Colors.grey.shade300,
+            width: 3,
+          ),
+          borderRadius: BorderRadius.circular(4),
         ),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: minimal
-          ? Column(
-              children: [
-                TruncatedTextWidget(text: layer.name, maxLength: 10),
-                LayerThumbnail(layer: layer),
-              ],
-            )
-          : Row(
-              children: [
-                Expanded(
-                  child: Text(layer.name),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: LayerThumbnail(layer: layer),
-                ),
-                // SizedBox(
-                //   height: 60,
-                //   child: OpacitySlider(
-                //     layer: layer,
-                //   ),
-                // ),
-                SizedBox(
-                  height: 60,
-                  width: 60,
-                  child: HorizontalValueAdjuster(
-                    minValue: 0.0,
-                    maxValue: 100.0,
-                    initialValue: layer.opacity,
-                    onSlideStart: () {
-                      // appModel.update();
-                    },
-                    onChanged: (value) => layer.opacity = value,
-                    onChangeEnd: (value) {
-                      layer.opacity = value;
-                      appModel.update();
-                    },
-                    onSlideEnd: () => appModel.update(),
+        child: minimal
+            ? Column(
+                children: [
+                  TruncatedTextWidget(text: layer.name, maxLength: 10),
+                  LayerThumbnail(layer: layer),
+                ],
+              )
+            : Row(
+                children: [
+                  Expanded(
+                    child: Text(layer.name),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    layer.isVisible ? Icons.visibility : Icons.visibility_off,
+                  Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: LayerThumbnail(layer: layer),
                   ),
-                  onPressed: () => appModel.toggleLayerVisibility(layer),
-                ),
-                if (showDelete)
+                  SizedBox(
+                    height: 60,
+                    width: 60,
+                    child: HorizontalValueAdjuster(
+                      key: ValueKey(layer.name + layer.id),
+                      minValue: 0.0,
+                      maxValue: 100.0,
+                      initialValue: layer.opacity,
+                      onSlideStart: () {
+                        // appModel.update();
+                      },
+                      onChanged: (value) => layer.opacity = value,
+                      onChangeEnd: (value) {
+                        layer.opacity = value;
+                        appModel.update();
+                      },
+                      onSlideEnd: () => appModel.update(),
+                    ),
+                  ),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline),
-                    onPressed: () => appModel.removeLayer(layer),
+                    icon: Icon(
+                      layer.isVisible ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () => appModel.toggleLayerVisibility(layer),
                   ),
-              ],
-            ),
+                  if (showDelete)
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => appModel.removeLayer(layer),
+                    ),
+                ],
+              ),
+      ),
     );
   }
 }

@@ -68,6 +68,7 @@ class LayersPanel extends StatelessWidget {
                       onTap: () => appModel.selectedLayerIndex = index,
                       onDoubleTap: () => appModel.toggleLayerVisibility(layer),
                       child: LayerSelector(
+                        key: Key(layer.id),
                         context: context,
                         layer: layer,
                         minimal: !appModel.isSidePanelExpanded,
