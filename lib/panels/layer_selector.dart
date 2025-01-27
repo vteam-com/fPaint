@@ -39,7 +39,7 @@ class LayerSelector extends StatelessWidget {
             ? Column(
                 children: [
                   TruncatedTextWidget(text: layer.name, maxLength: 10),
-                  LayerThumbnail(layer: layer),
+                  _buildThumbnailAndOpacity(appModel, layer),
                 ],
               )
             : Row(
@@ -47,29 +47,7 @@ class LayerSelector extends StatelessWidget {
                   Expanded(
                     child: Text(layer.name),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: LayerThumbnail(layer: layer),
-                  ),
-                  SizedBox(
-                    height: 60,
-                    width: 60,
-                    child: HorizontalValueAdjuster(
-                      key: ValueKey(layer.name + layer.id),
-                      minValue: 0.0,
-                      maxValue: 100.0,
-                      initialValue: layer.opacity,
-                      onSlideStart: () {
-                        // appModel.update();
-                      },
-                      onChanged: (value) => layer.opacity = value,
-                      onChangeEnd: (value) {
-                        layer.opacity = value;
-                        appModel.update();
-                      },
-                      onSlideEnd: () => appModel.update(),
-                    ),
-                  ),
+                  _buildThumbnailAndOpacity(appModel, layer),
                   IconButton(
                     icon: Icon(
                       layer.isVisible ? Icons.visibility : Icons.visibility_off,
@@ -83,6 +61,29 @@ class LayerSelector extends StatelessWidget {
                     ),
                 ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildThumbnailAndOpacity(final AppModel appModel, final Layer layer) {
+    return SizedBox(
+      height: 60,
+      width: 60,
+      child: HorizontalValueAdjuster(
+        key: ValueKey(layer.name + layer.id),
+        minValue: 0.0,
+        maxValue: 100.0,
+        initialValue: layer.opacity,
+        onSlideStart: () {
+          // appModel.update();
+        },
+        onChanged: (value) => layer.opacity = value,
+        onChangeEnd: (value) {
+          layer.opacity = value;
+          appModel.update();
+        },
+        onSlideEnd: () => appModel.update(),
+        child: LayerThumbnail(layer: layer),
       ),
     );
   }
@@ -210,6 +211,7 @@ class HorizontalValueAdjuster extends StatefulWidget {
     required this.onChangeEnd,
     required this.onSlideStart,
     required this.onSlideEnd,
+    required this.child,
   });
   final double minValue;
   final double maxValue;
@@ -218,6 +220,7 @@ class HorizontalValueAdjuster extends StatefulWidget {
   final ValueChanged<double> onChangeEnd;
   final VoidCallback onSlideStart;
   final VoidCallback onSlideEnd;
+  final Widget child;
 
   @override
   State<HorizontalValueAdjuster> createState() =>
@@ -267,16 +270,24 @@ class _HorizontalValueAdjusterState extends State<HorizontalValueAdjuster> {
         ),
       },
       child: Container(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(1.0),
         decoration: BoxDecoration(
           color: Colors.grey[300],
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: Center(
-          child: Text(
-            currentValue.toStringAsFixed(0),
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-          ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            widget.child,
+            Positioned(
+              bottom: 0,
+              child: Text(
+                currentValue.toStringAsFixed(0),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
         ),
       ),
     );
