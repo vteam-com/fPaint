@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -133,7 +134,7 @@ class MainScreen extends StatelessWidget {
                 onSelectLayer: (final int layerIndex) =>
                     appModel.selectedLayerIndex = layerIndex,
                 onAddLayer: () => _onAddLayer(context),
-                onFileOpen: () => _onFileOpen(context),
+                onFileOpen: () async => await _onFileOpen(context),
                 onRemoveLayer: (final int indexToRemove) =>
                     AppModel.get(context).removeLayer(indexToRemove),
                 onToggleViewLayer: (indexToToggle) =>
@@ -174,7 +175,7 @@ class MainScreen extends StatelessWidget {
     appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
   }
 
-  void _onFileOpen(final BuildContext context) async {
+  Future<void> _onFileOpen(final BuildContext context) async {
     final AppModel appModel = AppModel.get(context);
 
     try {
@@ -188,15 +189,53 @@ class MainScreen extends StatelessWidget {
         appModel.layers.clear();
 
         if (kIsWeb) {
-          await readOraFileFromBytes(appModel, result.files.single.bytes!);
+          final bytes = result.files.single.bytes!;
+          if (result.files.single.extension == 'ora') {
+            await readOraFileFromBytes(appModel, bytes);
+          } else if (result.files.single.extension == 'png' ||
+              result.files.single.extension == 'jpg' ||
+              result.files.single.extension == 'jpeg') {
+            await readImageFileFromBytes(appModel, bytes);
+          }
         } else {
-          await readOraFile(appModel, result.files.single.path!);
+          final path = result.files.single.path!;
+          if (result.files.single.extension == 'ora') {
+            await readOraFile(appModel, path);
+          } else if (result.files.single.extension == 'png' ||
+              result.files.single.extension == 'jpg' ||
+              result.files.single.extension == 'jpeg') {
+            await readImageFilePath(appModel, path);
+          }
         }
       }
     } catch (e) {
       // Handle any errors that occur during file picking/loading
       debugPrint('Error opening file: $e');
     }
+  }
+
+  Future<void> _readImageFile(
+    AppModel appModel,
+    Future<Uint8List> bytesFuture,
+  ) async {
+    final image = await decodeImageFromList(await bytesFuture);
+    appModel.layers.clear();
+    appModel.addLayerTop();
+    appModel.selectedLayer.addImage(image);
+  }
+
+  Future<void> readImageFilePath(
+    AppModel appModel,
+    String path,
+  ) async {
+    await _readImageFile(appModel, File(path).readAsBytes());
+  }
+
+  Future<void> readImageFileFromBytes(
+    AppModel appModel,
+    Uint8List bytes,
+  ) async {
+    await _readImageFile(appModel, Future.value(bytes));
   }
 
   void _onUserActionStart(final BuildContext context, Offset position) {
