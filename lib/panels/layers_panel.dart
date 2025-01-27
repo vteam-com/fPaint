@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
 
 class LayersPanel extends StatelessWidget {
-  const LayersPanel({
-    super.key,
-    required this.selectedLayerIndex,
-    required this.onSelectLayer,
-    required this.onAddLayer,
-    required this.onFileOpen,
-    required this.onRemoveLayer,
-  });
-  final int selectedLayerIndex;
-  final Function(int) onSelectLayer;
-  final Function() onAddLayer;
-  final Function() onFileOpen;
-  final Function(int) onRemoveLayer;
+  const LayersPanel({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +19,12 @@ class LayersPanel extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(Icons.file_open_outlined),
-              onPressed: onFileOpen,
+              onPressed: () => onFileOpen(context),
             ),
             if (appModel.isSidePanelExpanded)
               IconButton(
                 icon: const Icon(Icons.library_add_rounded),
-                onPressed: onAddLayer,
+                onPressed: () => _onAddLayer(appModel),
               ),
             if (appModel.isSidePanelExpanded)
               IconButton(
@@ -66,11 +55,9 @@ class LayersPanel extends StatelessWidget {
                     newIndex -= 1;
                   }
                   final Layer layer = appModel.layers.get(oldIndex);
-                  appModel.layers.remove(oldIndex);
+                  appModel.layers.removeByIndex(oldIndex);
                   appModel.layers.insert(newIndex, layer);
-                  if (selectedLayerIndex == oldIndex) {
-                    onSelectLayer(newIndex);
-                  }
+                  appModel.selectedLayerIndex = newIndex;
                 },
                 itemBuilder: (context, index) {
                   final Layer layer = appModel.layers.get(index);
@@ -78,15 +65,14 @@ class LayersPanel extends StatelessWidget {
                     key: Key('$index'),
                     index: index,
                     child: GestureDetector(
-                      onTap: () => onSelectLayer(index),
-                      onDoubleTap: () => appModel.toggleLayerVisibility(index),
+                      onTap: () => appModel.selectedLayerIndex = index,
+                      onDoubleTap: () => appModel.toggleLayerVisibility(layer),
                       child: LayerSelector(
                         context: context,
-                        minimal: !appModel.isSidePanelExpanded,
                         layer: layer,
-                        index: index,
-                        showDelete: appModel.layers.length > 1,
-                        onRemoveLayer: onRemoveLayer,
+                        minimal: !appModel.isSidePanelExpanded,
+                        showDelete: appModel.layers.length >
+                            1, // Never allow deletion of the last layer
                       ),
                     ),
                   );
@@ -97,5 +83,11 @@ class LayersPanel extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  // Method to add a new layer
+  void _onAddLayer(final AppModel appModel) {
+    final Layer newLayer = appModel.addLayerTop();
+    appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
   }
 }

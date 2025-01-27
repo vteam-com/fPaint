@@ -132,12 +132,9 @@ class AppModel extends ChangeNotifier {
     return newLayer;
   }
 
-  void removeLayer(int index) {
-    if (layers.isIndexInRange(index)) {
-      layers.remove(index);
-      selectedLayerIndex =
-          (selectedLayerIndex > 0 ? selectedLayerIndex - 1 : 0);
-    }
+  void removeLayer(final Layer layer) {
+    layers.remove(layer);
+    selectedLayerIndex = (selectedLayerIndex > 0 ? selectedLayerIndex - 1 : 0);
   }
 
   bool isVisible(final int layerIndex) {
@@ -196,11 +193,9 @@ class AppModel extends ChangeNotifier {
         point.dy <= canvasSize.height;
   }
 
-  void toggleLayerVisibility(final int layerIndex) {
-    if (layerIndex >= 0 && layerIndex < layers.length) {
-      layers.get(layerIndex).isVisible = !layers.get(layerIndex).isVisible;
-      update();
-    }
+  void toggleLayerVisibility(final Layer layer) {
+    layer.isVisible = !layer.isVisible;
+    update();
   }
 
   void undo() {

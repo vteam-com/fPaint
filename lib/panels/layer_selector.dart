@@ -8,23 +8,18 @@ class LayerSelector extends StatelessWidget {
     required this.context,
     required this.layer,
     required this.minimal,
-    required this.index,
     required this.showDelete,
-    required this.onRemoveLayer,
   });
 
   final BuildContext context;
   final Layer layer;
-  final int index;
   final bool showDelete;
   final bool minimal;
-  final Function(int) onRemoveLayer;
 
   @override
   Widget build(BuildContext context) {
     final appModel = AppModel.get(context);
     return Container(
-      key: ValueKey(index),
       margin: EdgeInsets.all(minimal ? 2 : 4),
       padding: EdgeInsets.all(minimal ? 2 : 8),
       decoration: BoxDecoration(
@@ -46,12 +41,12 @@ class LayerSelector extends StatelessWidget {
                   icon: Icon(
                     layer.isVisible ? Icons.visibility : Icons.visibility_off,
                   ),
-                  onPressed: () => appModel.toggleLayerVisibility(index),
+                  onPressed: () => appModel.toggleLayerVisibility(layer),
                 ),
                 if (showDelete)
                   IconButton(
                     icon: const Icon(Icons.delete_outline),
-                    onPressed: () => onRemoveLayer(index),
+                    onPressed: () => appModel.removeLayer(layer),
                   ),
               ],
             ),

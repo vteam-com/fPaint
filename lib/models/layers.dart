@@ -56,7 +56,11 @@ class Layers {
     }
   }
 
-  void remove(final int index) {
+  bool remove(final Layer layer) {
+    return _list.remove(layer);
+  }
+
+  void removeByIndex(final int index) {
     if (isIndexInRange(index)) {
       _list.removeAt(index);
     }

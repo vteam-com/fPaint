@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/layers_panel.dart';
 import 'package:fpaint/panels/tools_panel.dart';
@@ -27,16 +26,8 @@ class SidePanel extends StatelessWidget {
             //
             // Layers Panel
             //
-            Expanded(
-              child: LayersPanel(
-                selectedLayerIndex: appModel.selectedLayerIndex,
-                onSelectLayer: (final int layerIndex) =>
-                    appModel.selectedLayerIndex = layerIndex,
-                onAddLayer: () => _onAddLayer(context),
-                onFileOpen: () async => await onFileOpen(context),
-                onRemoveLayer: (final int indexToRemove) =>
-                    AppModel.get(context).removeLayer(indexToRemove),
-              ),
+            const Expanded(
+              child: LayersPanel(),
             ),
             //
             // Divider
@@ -62,13 +53,5 @@ class SidePanel extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // Method to add a new layer
-  void _onAddLayer(final BuildContext context) {
-    final AppModel appModel = AppModel.get(context);
-    final Layer newLayer = appModel.addLayerTop();
-
-    appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
   }
 }
