@@ -66,9 +66,10 @@ void renderLayer(
           userAction.positions.first.dy,
         );
 
-        for (int i = 1; i < userAction.positions.length; i++) {
-          path.lineTo(userAction.positions[i].dx, userAction.positions[i].dy);
+        for (final ui.Offset position in userAction.positions) {
+          path.lineTo(position.dx, position.dy);
         }
+
         paint.style = PaintingStyle.stroke;
         paint.color = userAction.brushColor;
 
@@ -103,7 +104,14 @@ void renderLayer(
         paint.style = PaintingStyle.stroke;
         paint.color = userAction.brushColor;
 
-        canvas.drawCircle(center, radius, paint);
+        if (userAction.brushStyle == BrushStyle.dash) {
+          final path = Path();
+          path.addOval(Rect.fromCircle(center: center, radius: radius));
+          drawPath(path, canvas, paint, userAction.brushSize * 3,
+              userAction.brushSize * 2);
+        } else {
+          canvas.drawCircle(center, radius, paint);
+        }
         break;
 
       // Rectangle
@@ -121,13 +129,26 @@ void renderLayer(
           // Border
           paint.style = PaintingStyle.stroke;
           paint.color = userAction.brushColor;
-          canvas.drawRect(
-            Rect.fromPoints(
-              userAction.positions.first,
-              userAction.positions.last,
-            ),
-            paint,
-          );
+
+          if (userAction.brushStyle == BrushStyle.dash) {
+            final path = Path();
+            path.addRect(
+              Rect.fromPoints(
+                userAction.positions.first,
+                userAction.positions.last,
+              ),
+            );
+            drawPath(path, canvas, paint, userAction.brushSize * 3,
+                userAction.brushSize * 2);
+          } else {
+            canvas.drawRect(
+              Rect.fromPoints(
+                userAction.positions.first,
+                userAction.positions.last,
+              ),
+              paint,
+            );
+          }
         }
         break;
       case Tools.eraser:
