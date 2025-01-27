@@ -80,10 +80,17 @@ class _ContainerSliderState extends State<ContainerSlider> {
             widget.child,
             Positioned(
               bottom: 0,
-              child: Text(
-                currentValue.toStringAsFixed(0),
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              child: Container(
+                padding: const EdgeInsets.all(1),
+                decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(140),
+                  borderRadius: BorderRadius.circular(2.0),
+                ),
+                child: Text(
+                  currentValue.toStringAsFixed(0),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ],
