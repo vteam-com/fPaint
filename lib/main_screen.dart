@@ -229,8 +229,10 @@ class MainScreen extends StatelessWidget {
         );
         appModel.userActionStartingOffset = position;
       } else if (appModel.selectedTool == Tools.draw) {
-        // Cumulate more points in the draw path
-        appModel.layers.list.last.actionStack.last.positions.add(position);
+        // Cumulate more points in the draw path onthe selected layer
+        appModel
+            .layers.list[appModel.selectedLayerIndex].actionStack.last.positions
+            .add(position);
         appModel.update();
       } else {
         // Existing shape logic
