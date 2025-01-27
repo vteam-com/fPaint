@@ -143,7 +143,7 @@ class MainScreen extends StatelessWidget {
             //
             // Divider
             //
-            Divider(
+            const Divider(
               thickness: 8,
               height: 16,
               color: Colors.grey,
@@ -263,20 +263,20 @@ class MainScreen extends StatelessWidget {
           backgroundColor: Colors.grey.shade200,
           foregroundColor: Colors.grey.shade700,
           onPressed: () => paintModel.undo(),
-          child: Icon(Icons.undo),
+          child: const Icon(Icons.undo),
         ),
         FloatingActionButton(
           backgroundColor: Colors.grey.shade200,
           foregroundColor: Colors.grey.shade700,
           onPressed: () => paintModel.redo(),
-          child: Icon(Icons.redo),
+          child: const Icon(Icons.redo),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         FloatingActionButton(
           backgroundColor: Colors.grey.shade200,
           foregroundColor: Colors.grey.shade700,
           onPressed: () => paintModel.scale += 0.10,
-          child: Icon(Icons.zoom_in),
+          child: const Icon(Icons.zoom_in),
         ),
         FloatingActionButton(
           backgroundColor: Colors.grey.shade200,
@@ -296,7 +296,7 @@ class MainScreen extends StatelessWidget {
           backgroundColor: Colors.grey.shade200,
           foregroundColor: Colors.grey.shade700,
           onPressed: () => paintModel.scale -= 0.10,
-          child: Icon(Icons.zoom_out),
+          child: const Icon(Icons.zoom_out),
         ),
       ],
     );

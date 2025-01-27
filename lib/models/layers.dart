@@ -13,7 +13,7 @@ class Layers {
     firstLayer.actionStack.add(
       UserAction(
         positions: [
-          Offset(0, 0),
+          const Offset(0, 0),
           Offset(size.width, size.height),
         ],
         tool: Tools.rectangle,

@@ -31,20 +31,20 @@ class LayersPanel extends StatelessWidget {
           children: [
             if (appModel.isSidePanelExpanded)
               IconButton(
-                icon: Icon(Icons.file_open_outlined),
+                icon: const Icon(Icons.file_open_outlined),
                 onPressed: onFileOpen,
               ),
             if (appModel.isSidePanelExpanded)
               IconButton(
-                icon: Icon(Icons.library_add_rounded),
+                icon: const Icon(Icons.library_add_rounded),
                 onPressed: onAddLayer,
               ),
             if (appModel.isSidePanelExpanded)
               IconButton(
-                icon: Icon(Icons.ios_share_outlined),
+                icon: const Icon(Icons.ios_share_outlined),
                 onPressed: () => sharePanel(context),
               ),
-            Spacer(),
+            const Spacer(),
             IconButton(
               icon: Icon(
                 appModel.isSidePanelExpanded
@@ -138,7 +138,7 @@ class LayersPanel extends StatelessWidget {
                 ),
                 if (showDelete)
                   IconButton(
-                    icon: Icon(Icons.delete_outline),
+                    icon: const Icon(Icons.delete_outline),
                     onPressed: () => onRemoveLayer(index),
                   ),
               ],

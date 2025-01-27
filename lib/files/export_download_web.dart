@@ -7,6 +7,12 @@ import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/share_panel.dart';
 
+/// Exports the current painter as a PNG image and triggers a download.
+///
+/// This function captures the current painter's image bytes and creates a PNG
+/// file that is then downloaded to the user's device.
+///
+/// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsPng(final BuildContext context) async {
   // Capture the image bytes
   final Uint8List image =
@@ -16,6 +22,12 @@ Future<void> onExportAsPng(final BuildContext context) async {
   downloadBlob(image, 'image.png');
 }
 
+/// Exports the current painter as an ORA file and triggers a download.
+///
+/// This function captures the current painter's image bytes, creates an ORA
+/// archive, and then downloads the file to the user's device.
+///
+/// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsOra(
   final BuildContext context,
 ) async {
@@ -23,6 +35,14 @@ Future<void> onExportAsOra(
   downloadBlob(Uint8List.fromList(image), 'image.ora');
 }
 
+/// Downloads a file represented by the given image bytes and file name.
+///
+/// This function creates a Blob from the provided image bytes, generates an
+/// object URL for the Blob, creates an anchor element for downloading the file,
+/// triggers the download, and then revokes the object URL.
+///
+/// [image] The image bytes to be downloaded.
+/// [fileName] The name of the file to be downloaded.
 void downloadBlob(final Uint8List image, final String fileName) {
   // Create a Blob from the image bytes
   final blob = html.Blob([image]);

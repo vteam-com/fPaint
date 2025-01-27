@@ -22,7 +22,7 @@ class TransparentBackgroundPainter extends CustomPainter {
     if (size.isFinite) {
       drawTransaparentBackgroundOffsetAndSize(
         canvas,
-        Offset(0, 0),
+        const Offset(0, 0),
         size,
         patternSize,
       );

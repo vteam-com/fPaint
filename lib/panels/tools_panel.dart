@@ -43,7 +43,7 @@ class ToolsPanel extends StatelessWidget {
               //
               // Divider
               //
-              Divider(
+              const Divider(
                 thickness: 8,
                 height: 16,
                 color: Colors.grey,
@@ -151,7 +151,7 @@ class ToolsPanel extends StatelessWidget {
             });
           },
           child: vertical
-              ? SizedBox()
+              ? const SizedBox()
               : BrushSizePicker(
                   value: appModel.brusSize,
                   onChanged: (value) {
@@ -172,7 +172,7 @@ class ToolsPanel extends StatelessWidget {
           onButtonPressed: () {
             showBrushStylePicker(context);
           },
-          child: vertical ? SizedBox() : brushStyleSelection(appModel),
+          child: vertical ? const SizedBox() : brushStyleSelection(appModel),
         ),
       );
     }
@@ -192,7 +192,7 @@ class ToolsPanel extends StatelessWidget {
           ),
           transparentPaper: true,
           child: vertical
-              ? SizedBox()
+              ? const SizedBox()
               : MyColorPicker(
                   color: appModel.brushColor,
                   onColorChanged: (Color color) => appModel.brushColor = color,
@@ -216,7 +216,7 @@ class ToolsPanel extends StatelessWidget {
           ),
           transparentPaper: true,
           child: vertical
-              ? SizedBox()
+              ? const SizedBox()
               : MyColorPicker(
                   color: appModel.fillColor,
                   onColorChanged: (Color color) => appModel.fillColor = color,
@@ -250,12 +250,12 @@ class ToolsPanel extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            margin: EdgeInsets.only(right: 8),
+            margin: const EdgeInsets.only(right: 8),
             child: Stack(
               alignment: AlignmentDirectional.center,
               children: [
                 if (transparentPaper)
-                  TransparentPaper(
+                  const TransparentPaper(
                     patternSize: 4,
                   ),
                 IconButton(

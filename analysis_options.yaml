@@ -42,3 +42,4 @@ linter:
     sort_pub_dependencies: true
     always_put_required_named_parameters_first: false
     # public_member_api_docs: true
+    prefer_const_constructors: true

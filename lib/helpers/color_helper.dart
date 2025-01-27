@@ -122,6 +122,7 @@ TextStyle adjustOpacityOfTextStyle(
   );
 }
 
+///
 enum ColorState {
   success,
   warning,

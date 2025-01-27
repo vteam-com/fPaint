@@ -8,7 +8,16 @@ import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:xml/xml.dart';
 
-// Load the ORA file
+/// Reads an ORA file and updates the provided [AppModel] with its contents.
+///
+/// This function asynchronously reads the ORA file located at the given [filePath]
+/// and updates the [appModel] with the data extracted from the file.
+///
+/// - Parameters:
+///   - appModel: The application model to be updated with the ORA file's contents.
+///   - filePath: The path to the ORA file to be read.
+///
+/// - Returns: A [Future] that completes when the file has been read and the model updated.
 Future<void> readOraFile(final AppModel appModel, String filePath) async {
   try {
     final File oraFile = File(filePath);
@@ -29,7 +38,7 @@ Future<void> readOraFile(final AppModel appModel, String filePath) async {
   }
 }
 
-// Read the file from  bytes
+/// Read the file from  bytes
 Future<void> readOraFileFromBytes(
   AppModel appModel,
   Uint8List bytes,
@@ -92,6 +101,7 @@ Future<void> readOraFileFromBytes(
   }
 }
 
+///
 Future<void> addImageToLayer({
   required final Archive archive,
   required final AppModel appModel,
@@ -115,12 +125,28 @@ Future<void> addImageToLayer({
   }
 }
 
+/// Decodes a list of bytes into a [ui.Image].
+///
+/// This function takes a list of bytes representing an image and decodes it
+/// into a [ui.Image] object asynchronously.
+///
+/// - Parameters:
+///   - bytes: A list of integers representing the image data.
+///
+/// - Returns: A [Future] that completes with the decoded [ui.Image].
+///
+/// Example:
+/// ```dart
+/// List<int> imageData = ...; // your image data here
+/// ui.Image image = await decodeImage(imageData);
+/// ```
 Future<ui.Image> decodeImage(List<int> bytes) async {
   final completer = Completer<ui.Image>();
   ui.decodeImageFromList(Uint8List.fromList(bytes), completer.complete);
   return completer.future;
 }
 
+///
 Future<void> saveToORA({
   required final AppModel appModel,
   required final String filePath,
@@ -130,6 +156,7 @@ Future<void> saveToORA({
   await File(filePath).writeAsBytes(encodedData);
 }
 
+///
 Future<List<int>> createOraAchive(AppModel appModel) async {
   final Archive archive = Archive();
   final XmlBuilder builder = XmlBuilder();

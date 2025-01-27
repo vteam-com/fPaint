@@ -27,15 +27,15 @@ void sharePanel(final BuildContext context) {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: Icon(Icons.copy),
-                title: Text('Copy to clipboard'),
+                leading: const Icon(Icons.copy),
+                title: const Text('Copy to clipboard'),
                 onTap: () {
                   Navigator.pop(context);
                   _onExportToClipboard(context);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.download),
+                leading: const Icon(Icons.download),
                 title: textAction('image.PNG'),
                 onTap: () {
                   Navigator.pop(context);
@@ -43,7 +43,7 @@ void sharePanel(final BuildContext context) {
                 },
               ),
               ListTile(
-                leading: Icon(Icons.download),
+                leading: const Icon(Icons.download),
                 title: textAction('image.ORA'),
                 onTap: () {
                   Navigator.pop(context);
