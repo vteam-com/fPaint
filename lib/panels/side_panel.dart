@@ -36,8 +36,6 @@ class SidePanel extends StatelessWidget {
                 onFileOpen: () async => await onFileOpen(context),
                 onRemoveLayer: (final int indexToRemove) =>
                     AppModel.get(context).removeLayer(indexToRemove),
-                onToggleViewLayer: (indexToToggle) =>
-                    AppModel.get(context).toggleLayerVisibility(indexToToggle),
               ),
             ),
             //

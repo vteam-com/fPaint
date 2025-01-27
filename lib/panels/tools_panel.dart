@@ -1,7 +1,7 @@
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/panels/tool_item.dart';
+import 'package:fpaint/panels/tool_selector.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker.dart';
 import 'package:fpaint/widgets/transparent_background.dart';

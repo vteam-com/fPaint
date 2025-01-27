@@ -12,6 +12,7 @@ class Layer {
   String name;
   List<UserAction> actionStack = [];
   List<UserAction> redoStack = [];
+  bool isSelected = false;
   bool isVisible = true;
   double opacity = 1;
 
