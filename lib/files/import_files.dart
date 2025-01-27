@@ -68,6 +68,7 @@ Future<void> _readImageFile(
   final image = await decodeImageFromList(await bytesFuture);
   appModel.layers.clear();
   appModel.addLayerTop();
+  appModel.canvasSize = Size(image.width.toDouble(), image.height.toDouble());
   appModel.selectedLayer.addImage(image);
 }
 
