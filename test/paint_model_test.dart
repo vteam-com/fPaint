@@ -14,7 +14,7 @@ void main() {
       expect(paintModel.layers.length, 1);
       expect(paintModel.selectedLayerIndex, 0);
       expect(
-        paintModel.selectedLayer.actionStack.length,
+        paintModel.selectedLayer.count,
         1,
       ); // default layer has one white rectangle
     });
@@ -32,10 +32,10 @@ void main() {
       );
       paintModel.addUserAction(action: shape);
       expect(
-        paintModel.selectedLayer.actionStack.length,
+        paintModel.selectedLayer.count,
         2,
       ); // the first layer has one default white rectangle shape
-      expect(paintModel.selectedLayer.actionStack.last, shape);
+      expect(paintModel.selectedLayer.lastUserAction, shape);
     });
 
     test('add UserAction with parameters should create and add new shape', () {
@@ -47,19 +47,19 @@ void main() {
         colorStroke: Colors.yellow,
       );
       expect(
-        paintModel.selectedLayer.actionStack.length,
+        paintModel.selectedLayer.count,
         2,
       ); // also has the default white rectangle
       expect(
-        paintModel.selectedLayer.actionStack.last.positions.first,
+        paintModel.selectedLayer.lastUserAction!.positions.first,
         const Offset(0, 0),
       );
       expect(
-        paintModel.selectedLayer.actionStack.last.positions.last,
+        paintModel.selectedLayer.lastUserAction!.positions.last,
         const Offset(10, 10),
       );
-      expect(paintModel.selectedLayer.actionStack.last.tool, Tools.circle);
-      expect(paintModel.selectedLayer.actionStack.last.fillColor, Colors.red);
+      expect(paintModel.selectedLayer.lastUserAction!.tool, Tools.circle);
+      expect(paintModel.selectedLayer.lastUserAction!.fillColor, Colors.red);
     });
 
     test('updateLastShape should modify end position of last shape', () {
@@ -71,14 +71,14 @@ void main() {
       );
       paintModel.updateLastUserAction(const Offset(20, 20));
       expect(
-        paintModel.selectedLayer.actionStack.last.positions.last,
+        paintModel.selectedLayer.lastUserAction!.positions.last,
         const Offset(20, 20),
       );
     });
 
     test('updateLastShape should do nothing if no shapes exist', () {
       paintModel.updateLastUserAction(const Offset(20, 20));
-      expect(paintModel.selectedLayer.actionStack.length, 1);
+      expect(paintModel.selectedLayer.count, 1);
     });
 
     test('undo should remove last shape', () {
@@ -89,15 +89,15 @@ void main() {
         colorFill: Colors.green,
         colorStroke: Colors.black,
       );
-      expect(paintModel.selectedLayer.actionStack.length, 2);
+      expect(paintModel.selectedLayer.count, 2);
       paintModel.undo();
-      expect(paintModel.selectedLayer.actionStack.length, 1);
+      expect(paintModel.selectedLayer.count, 1);
       paintModel.undo();
-      expect(paintModel.selectedLayer.actionStack.isEmpty, true);
+      expect(paintModel.selectedLayer.isEmpty, true);
 
       // opne more time to check if undo work when there is nothing to undo
       paintModel.undo();
-      expect(paintModel.selectedLayer.actionStack.isEmpty, true);
+      expect(paintModel.selectedLayer.isEmpty, true);
     });
 
     test('multiple shapes should be added and managed correctly', () {
@@ -115,10 +115,10 @@ void main() {
         colorFill: Colors.red,
         colorStroke: Colors.black,
       );
-      expect(paintModel.selectedLayer.actionStack.length, 3);
+      expect(paintModel.selectedLayer.count, 3);
       paintModel.undo();
-      expect(paintModel.selectedLayer.actionStack.length, 2);
-      expect(paintModel.selectedLayer.actionStack.last.tool, Tools.draw);
+      expect(paintModel.selectedLayer.count, 2);
+      expect(paintModel.selectedLayer.lastUserAction!.tool, Tools.draw);
     });
   });
 }

@@ -131,13 +131,13 @@ class MainScreen extends StatelessWidget {
         appModel.userActionStartingOffset = position;
       } else if (appModel.selectedTool == Tools.draw) {
         // Cumulate more points in the draw path onthe selected layer
-        appModel
-            .layers.list[appModel.selectedLayerIndex].actionStack.last.positions
-            .add(position);
+        appModel.layers.list[appModel.selectedLayerIndex]
+            .appendPositionToLastUserAction(position);
         appModel.update();
       } else {
         // Existing shape logic
         appModel.updateLastUserAction(position);
+        appModel.update();
       }
     }
   }
@@ -151,6 +151,7 @@ class MainScreen extends StatelessWidget {
 
     appModel.currentUserAction = null;
     appModel.userActionStartingOffset = null;
+    appModel.update();
   }
 
   /// Builds a column of floating action buttons for the paint application,

@@ -10,7 +10,7 @@ class Layers {
   Layers(final Size size) {
     final Layer firstLayer = Layer(name: 'Background');
 
-    firstLayer.actionStack.add(
+    firstLayer.addUserAction(
       UserAction(
         positions: [
           const Offset(0, 0),
@@ -25,6 +25,7 @@ class Layers {
 
     _list.add(firstLayer);
   }
+
   final List<Layer> _list = [];
   void clear() => _list.clear();
   int get length => _list.length;

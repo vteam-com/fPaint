@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/widgets/transparent_background.dart';
 
 // Exports
 export 'package:fpaint/models/user_action.dart';
@@ -10,14 +11,24 @@ export 'package:fpaint/models/user_action.dart';
 class Layer {
   Layer({required this.name});
   String name;
-  List<UserAction> actionStack = [];
+  final List<UserAction> _actionStack = [];
   List<UserAction> redoStack = [];
   bool isSelected = false;
   bool isVisible = true;
   double opacity = 1;
+  int get count => _actionStack.length;
+  bool get isEmpty => _actionStack.isEmpty;
+
+  void addUserAction(UserAction userAction) {
+    _actionStack.add(userAction);
+    clearCache();
+  }
+
+  UserAction? get lastUserAction =>
+      _actionStack.isEmpty ? null : _actionStack.last;
 
   void addImage(ui.Image imageToAdd, [ui.Offset offset = Offset.zero]) {
-    actionStack.add(
+    _actionStack.add(
       UserAction(
         tool: Tools.image,
         positions: [
@@ -33,9 +44,62 @@ class Layer {
         image: imageToAdd,
       ),
     );
+    clearCache();
   }
 
-  Future<ui.Image> toImage(Size size) async {
+  void appendPositionToLastUserAction(Offset position) {
+    _actionStack.last.positions.add(position);
+    clearCache();
+  }
+
+  void updateLastUserActionEndPosition(Offset position) {
+    if (_actionStack.isNotEmpty && _actionStack.last.positions.length >= 2) {
+      _actionStack.last.positions.last = position;
+      clearCache();
+    }
+  }
+
+  void undo() {
+    if (_actionStack.isNotEmpty) {
+      _actionStack.removeLast();
+      clearCache();
+    }
+  }
+
+  void redo() {
+    if (_actionStack.isNotEmpty) {
+      _actionStack.add(this.redoStack.removeLast());
+      clearCache();
+    }
+  }
+
+  ui.Image? cachedRendering;
+
+  void clearCache() {
+    cachedRendering = null; // reset cache
+  }
+
+  Future<ui.Image> toImage(final Size size) async {
+    cachedRendering ??=
+        await renderImageWH(size.width.toInt(), size.height.toInt());
+    return cachedRendering!;
+  }
+
+  Future<ui.Image> getThumbnail(final Size size) async {
+    if (cachedRendering == null) {
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final painter = TransparentBackgroundPainter(40);
+      painter.paint(canvas, size);
+      renderLayer(canvas);
+      final picture = recorder.endRecording();
+      cachedRendering =
+          await picture.toImage(size.width.toInt(), size.height.toInt());
+    }
+    return cachedRendering!;
+  }
+
+  Future<ui.Image> renderImageWH(final int width, final int height) async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = Canvas(recorder);
 
@@ -43,11 +107,11 @@ class Layer {
     renderLayer(canvas);
 
     final ui.Picture picture = recorder.endRecording();
-    return await picture.toImage(size.width.toInt(), size.height.toInt());
+    return await picture.toImage(width, height);
   }
 
   void renderLayer(final Canvas canvas) {
-    for (final UserAction userAction in actionStack) {
+    for (final UserAction userAction in _actionStack) {
       final Paint paint = Paint()
         ..color = userAction.fillColor
         ..strokeCap = StrokeCap.round

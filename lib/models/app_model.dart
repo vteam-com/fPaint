@@ -153,14 +153,14 @@ class AppModel extends ChangeNotifier {
     Offset? end,
   }) {
     if (action != null) {
-      selectedLayer.actionStack.add(action);
+      selectedLayer.addUserAction(action);
     } else if (start != null &&
         end != null &&
         type != null &&
         colorFill != null &&
         colorStroke != null) {
       if (_isWithinCanvas(start) && _isWithinCanvas(end)) {
-        selectedLayer.actionStack.add(
+        selectedLayer.addUserAction(
           UserAction(
             positions: [start, end],
             tool: type,
@@ -175,11 +175,8 @@ class AppModel extends ChangeNotifier {
   }
 
   void updateLastUserAction(final Offset end) {
-    if (selectedLayer.actionStack.isNotEmpty &&
-        selectedLayer.actionStack.last.positions.length >= 2) {
-      selectedLayer.actionStack.last.positions.last = end;
-      update();
-    }
+    selectedLayer.updateLastUserActionEndPosition(end);
+    update();
   }
 
   void update() {
@@ -199,16 +196,12 @@ class AppModel extends ChangeNotifier {
   }
 
   void undo() {
-    if (selectedLayer.actionStack.isNotEmpty) {
-      selectedLayer.redoStack.add(selectedLayer.actionStack.removeLast());
-      update();
-    }
+    selectedLayer.undo();
+    update();
   }
 
   void redo() {
-    if (selectedLayer.redoStack.isNotEmpty) {
-      selectedLayer.actionStack.add(selectedLayer.redoStack.removeLast());
-      update();
-    }
+    selectedLayer.redo();
+    update();
   }
 }
