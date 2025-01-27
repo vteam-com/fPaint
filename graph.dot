@@ -5,6 +5,7 @@ digraph "" {
   "/test/paint_model_test.dart" [label="paint_model_test"];
   "/test/widget_test.dart" [label="widget_test"];
   "/lib/panels/canvas_panel.dart" [label="canvas_panel"];
+  "/lib/panels/side_panel.dart" [label="side_panel"];
   "/lib/panels/tool_item.dart" [label="tool_item"];
   "/lib/panels/share_panel.dart" [label="share_panel"];
   "/lib/panels/tools_panel.dart" [label="tools_panel"];
@@ -40,6 +41,7 @@ digraph "" {
       subgraph "cluster~/lib/panels" {
         label="panels";
         "/lib/panels/canvas_panel.dart";
+        "/lib/panels/side_panel.dart";
         "/lib/panels/tool_item.dart";
         "/lib/panels/share_panel.dart";
         "/lib/panels/tools_panel.dart";
@@ -78,6 +80,10 @@ digraph "" {
   "/test/widget_test.dart" -> "/lib/main.dart";
   "/lib/panels/canvas_panel.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/canvas_panel.dart" -> "/lib/models/app_model.dart";
+  "/lib/panels/side_panel.dart" -> "/lib/files/import_files.dart";
+  "/lib/panels/side_panel.dart" -> "/lib/models/app_model.dart";
+  "/lib/panels/side_panel.dart" -> "/lib/panels/layers_panel.dart";
+  "/lib/panels/side_panel.dart" -> "/lib/panels/tools_panel.dart";
   "/lib/panels/share_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/share_panel.dart" -> "/lib/panels/canvas_panel.dart";
   "/lib/panels/tools_panel.dart" -> "/lib/models/app_model.dart";
@@ -109,10 +115,8 @@ digraph "" {
   "/lib/files/export_download_non_web.dart" -> "/lib/panels/share_panel.dart";
   "/lib/files/import_files.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/import_files.dart" -> "/lib/models/app_model.dart";
-  "/lib/main_screen.dart" -> "/lib/files/import_files.dart";
   "/lib/main_screen.dart" -> "/lib/panels/canvas_panel.dart";
-  "/lib/main_screen.dart" -> "/lib/panels/layers_panel.dart";
-  "/lib/main_screen.dart" -> "/lib/panels/tools_panel.dart";
+  "/lib/main_screen.dart" -> "/lib/panels/side_panel.dart";
   "/lib/main_screen.dart" -> "/lib/models/app_model.dart";
   "/lib/helpers/color_helper.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/widgets/brush_style_picker.dart" -> "/lib/models/app_model.dart";

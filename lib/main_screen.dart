@@ -1,9 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
-import 'package:fpaint/panels/layers_panel.dart';
-import 'package:fpaint/panels/tools_panel.dart';
+import 'package:fpaint/panels/side_panel.dart';
 
 import 'models/app_model.dart';
 
@@ -25,7 +23,7 @@ class MainScreen extends StatelessWidget {
           AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             width: appModel.isSidePanelExpanded ? 360 : 64,
-            child: sidePanel(context),
+            child: const SidePanel(),
           ),
           // Canvas on the righ
           Expanded(
@@ -104,72 +102,6 @@ class MainScreen extends StatelessWidget {
       // Undo/Redo
       floatingActionButton: floatingActionButtons(appModel),
     );
-  }
-
-  Widget sidePanel(final BuildContext context) {
-    final AppModel appModel = AppModel.get(context);
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: appModel.isSidePanelExpanded ? 360 : 64,
-      child: Material(
-        elevation: 18,
-        color: Colors.grey.shade200,
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(12),
-          bottomRight: Radius.circular(12),
-        ),
-        clipBehavior: Clip.none,
-        child: Column(
-          children: [
-            //
-            // Layers Panel
-            //
-            Expanded(
-              child: LayersPanel(
-                selectedLayerIndex: appModel.selectedLayerIndex,
-                onSelectLayer: (final int layerIndex) =>
-                    appModel.selectedLayerIndex = layerIndex,
-                onAddLayer: () => _onAddLayer(context),
-                onFileOpen: () async => await onFileOpen(context),
-                onRemoveLayer: (final int indexToRemove) =>
-                    AppModel.get(context).removeLayer(indexToRemove),
-                onToggleViewLayer: (indexToToggle) =>
-                    AppModel.get(context).toggleLayerVisibility(indexToToggle),
-              ),
-            ),
-            //
-            // Divider
-            //
-            const Divider(
-              thickness: 8,
-              height: 16,
-              color: Colors.grey,
-            ),
-
-            //
-            // Tools Panel
-            //
-            Expanded(
-              child: ToolsPanel(
-                currentShapeType: appModel.selectedTool,
-                onShapeSelected: (final Tools tool) =>
-                    appModel.selectedTool = tool,
-                minimal: !appModel.isSidePanelExpanded,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Method to add a new layer
-  void _onAddLayer(final BuildContext context) {
-    final AppModel appModel = AppModel.get(context);
-    final Layer newLayer = appModel.addLayerTop();
-
-    appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
   }
 
   void _onUserActionStart(final BuildContext context, Offset position) {
