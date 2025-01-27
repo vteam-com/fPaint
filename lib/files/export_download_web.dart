@@ -3,6 +3,7 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/share_panel.dart';
@@ -20,6 +21,24 @@ Future<void> onExportAsPng(final BuildContext context) async {
 
   // Create a Blob from the image bytes
   downloadBlob(image, 'image.png');
+}
+
+/// Exports the current painter as a JPG image and triggers a download.
+///
+/// This function captures the current painter's image bytes, converts it to JPG,
+/// and creates a JPG file that is then downloaded to the user's device.
+///
+/// [context] The BuildContext to access the current AppModel.
+Future<void> onExportAsJpg(final BuildContext context) async {
+  // Capture the image bytes
+  final Uint8List image =
+      await capturePainterToImageBytes(AppModel.get(context));
+
+  // Convert the image bytes to JPG format
+  final Uint8List jpgImage = await convertToJpg(image);
+
+  // Create a Blob from the image bytes
+  downloadBlob(jpgImage, 'image.jpg');
 }
 
 /// Exports the current painter as an ORA file and triggers a download.

@@ -16,6 +16,7 @@ digraph "" {
   "/lib/models/app_model.dart" [label="app_model"];
   "/lib/models/layer.dart" [label="layer"];
   "/lib/main.dart" [label="main"];
+  "/lib/files/file_jpeg.dart" [label="file_jpeg"];
   "/lib/files/export_download_web.dart" [label="export_download_web"];
   "/lib/files/file_ora.dart" [label="file_ora"];
   "/lib/files/export_download_non_web.dart" [label="export_download_non_web"];
@@ -58,6 +59,7 @@ digraph "" {
       }
       subgraph "cluster~/lib/files" {
         label="files";
+        "/lib/files/file_jpeg.dart";
         "/lib/files/export_download_web.dart";
         "/lib/files/file_ora.dart";
         "/lib/files/export_download_non_web.dart";
@@ -109,6 +111,7 @@ digraph "" {
   "/lib/models/layer.dart" -> "/lib/models/user_action.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/main_screen.dart";
   "/lib/main.dart" -> "/lib/models/app_model.dart";
+  "/lib/files/export_download_web.dart" -> "/lib/files/file_jpeg.dart";
   "/lib/files/export_download_web.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/export_download_web.dart" -> "/lib/models/app_model.dart";
   "/lib/files/export_download_web.dart" -> "/lib/panels/share_panel.dart";

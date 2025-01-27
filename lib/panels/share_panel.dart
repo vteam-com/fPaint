@@ -44,6 +44,14 @@ void sharePanel(final BuildContext context) {
               ),
               ListTile(
                 leading: const Icon(Icons.download),
+                title: textAction('image.JPG'),
+                onTap: () {
+                  Navigator.pop(context);
+                  onExportAsJpg(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.download),
                 title: textAction('image.ORA'),
                 onTap: () {
                   Navigator.pop(context);
