@@ -110,7 +110,7 @@ class AppModel extends ChangeNotifier {
     }
   }
 
-  Layer get currentLayer => layers.get(selectedLayerIndex);
+  Layer get selectedLayer => layers.get(selectedLayerIndex);
 
   Layer addLayerTop([String? name]) {
     return insertLayer(0, name);
@@ -152,14 +152,14 @@ class AppModel extends ChangeNotifier {
     Offset? end,
   }) {
     if (action != null) {
-      currentLayer.actionStack.add(action);
+      selectedLayer.actionStack.add(action);
     } else if (start != null &&
         end != null &&
         type != null &&
         colorFill != null &&
         colorStroke != null) {
       if (_isWithinCanvas(start) && _isWithinCanvas(end)) {
-        currentLayer.actionStack.add(
+        selectedLayer.actionStack.add(
           UserAction(
             positions: [start, end],
             tool: type,
@@ -174,9 +174,9 @@ class AppModel extends ChangeNotifier {
   }
 
   void updateLastUserAction(final Offset end) {
-    if (currentLayer.actionStack.isNotEmpty &&
-        currentLayer.actionStack.last.positions.length >= 2) {
-      currentLayer.actionStack.last.positions.last = end;
+    if (selectedLayer.actionStack.isNotEmpty &&
+        selectedLayer.actionStack.last.positions.length >= 2) {
+      selectedLayer.actionStack.last.positions.last = end;
       update();
     }
   }
@@ -200,15 +200,15 @@ class AppModel extends ChangeNotifier {
   }
 
   void undo() {
-    if (currentLayer.actionStack.isNotEmpty) {
-      currentLayer.redoStack.add(currentLayer.actionStack.removeLast());
+    if (selectedLayer.actionStack.isNotEmpty) {
+      selectedLayer.redoStack.add(selectedLayer.actionStack.removeLast());
       update();
     }
   }
 
   void redo() {
-    if (currentLayer.redoStack.isNotEmpty) {
-      currentLayer.actionStack.add(currentLayer.redoStack.removeLast());
+    if (selectedLayer.redoStack.isNotEmpty) {
+      selectedLayer.actionStack.add(selectedLayer.redoStack.removeLast());
       update();
     }
   }

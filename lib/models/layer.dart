@@ -45,191 +45,128 @@ class Layer {
     return await picture.toImage(size.width.toInt(), size.height.toInt());
   }
 
-  void renderLayer(
-    final Canvas canvas,
-  ) {
-    for (final UserAction userAction in this.actionStack) {
-      final Paint paint = Paint();
-      paint.color = userAction.fillColor;
-      paint.strokeCap = StrokeCap.round;
-      paint.strokeWidth = userAction.brushSize;
+  void renderLayer(final Canvas canvas) {
+    for (final UserAction userAction in actionStack) {
+      final Paint paint = Paint()
+        ..color = userAction.fillColor
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = userAction.brushSize;
 
       switch (userAction.tool) {
-        // Draw
         case Tools.draw:
-          final path = Path();
-
-          path.moveTo(
-            userAction.positions.first.dx,
-            userAction.positions.first.dy,
-          );
-
-          for (final ui.Offset position in userAction.positions) {
-            path.lineTo(position.dx, position.dy);
-          }
-
-          paint.style = PaintingStyle.stroke;
-          paint.color = userAction.brushColor;
-
-          if (userAction.brushStyle == BrushStyle.dash) {
-            double dashWidth = userAction.brushSize * 3;
-            double dashGap = userAction.brushSize * 2;
-            drawPath(path, canvas, paint, dashWidth, dashGap);
-          } else {
-            canvas.drawPath(path, paint);
-          }
+          renderPath(canvas, paint, userAction);
           break;
-
-        // Line
         case Tools.line:
-          renderLine(paint, userAction, canvas);
+          renderLine(canvas, paint, userAction);
           break;
-
-        // Circle
         case Tools.circle:
-          final radius =
-              (userAction.positions.first - userAction.positions.last)
-                      .distance /
-                  2;
-          final center = Offset(
-            (userAction.positions.first.dx + userAction.positions.last.dx) / 2,
-            (userAction.positions.first.dy + userAction.positions.last.dy) / 2,
-          );
-
-          // Fill
-          canvas.drawCircle(center, radius, paint);
-
-          // Border
-          paint.style = PaintingStyle.stroke;
-          paint.color = userAction.brushColor;
-
-          if (userAction.brushStyle == BrushStyle.dash) {
-            final path = Path();
-            path.addOval(Rect.fromCircle(center: center, radius: radius));
-            drawPath(path, canvas, paint, userAction.brushSize * 3,
-                userAction.brushSize * 2);
-          } else {
-            canvas.drawCircle(center, radius, paint);
-          }
+          renderCircle(canvas, paint, userAction);
           break;
-
-        // Rectangle
         case Tools.rectangle:
-          if (userAction.positions.length == 2) {
-            // Fill
-            canvas.drawRect(
-              Rect.fromPoints(
-                userAction.positions.first,
-                userAction.positions.last,
-              ),
-              paint,
-            );
-
-            // Border
-            paint.style = PaintingStyle.stroke;
-            paint.color = userAction.brushColor;
-
-            if (userAction.brushStyle == BrushStyle.dash) {
-              final path = Path();
-              path.addRect(
-                Rect.fromPoints(
-                  userAction.positions.first,
-                  userAction.positions.last,
-                ),
-              );
-              drawPath(path, canvas, paint, userAction.brushSize * 3,
-                  userAction.brushSize * 2);
-            } else {
-              canvas.drawRect(
-                Rect.fromPoints(
-                  userAction.positions.first,
-                  userAction.positions.last,
-                ),
-                paint,
-              );
-            }
-          }
+          renderRectangle(canvas, paint, userAction);
           break;
         case Tools.eraser:
-          paint.color = Colors.white;
-          // paint.blendMode = BlendMode.clear;
-          paint.strokeWidth = userAction.brushSize;
-          paint.style = PaintingStyle.stroke;
-          canvas.drawLine(
-            userAction.positions.first,
-            userAction.positions.last,
-            paint,
-          );
+          renderEraser(canvas, paint, userAction);
           break;
-
         case Tools.image:
-          if (userAction.image != null) {
-            canvas.drawImage(
-              userAction.image!,
-              userAction.positions.first,
-              Paint(),
-            );
-          }
+          renderImage(canvas, userAction);
           break;
       }
     }
   }
-}
 
-void renderLine(ui.Paint paint, UserAction userAction, ui.Canvas canvas) {
-  paint.style = PaintingStyle.stroke;
-  paint.color = userAction.brushColor;
-
-  if (userAction.brushStyle == BrushStyle.dash) {
-    final path = Path();
-
-    path.moveTo(userAction.positions.first.dx, userAction.positions.first.dy);
-    path.lineTo(userAction.positions.last.dx, userAction.positions.last.dy);
-
-    drawPath(
-      path,
-      canvas,
-      paint,
-      userAction.brushSize * 3,
-      userAction.brushSize * 2,
-    );
-  } else {
-    canvas.drawLine(
-      userAction.positions.first,
-      userAction.positions.last,
-      paint,
-    );
+  void renderPath(Canvas canvas, Paint paint, UserAction userAction) {
+    final path = Path()
+      ..moveTo(userAction.positions.first.dx, userAction.positions.first.dy);
+    for (final ui.Offset position in userAction.positions) {
+      path.lineTo(position.dx, position.dy);
+    }
+    paint.style = PaintingStyle.stroke;
+    paint.color = userAction.brushColor;
+    applyBrushStyle(canvas, paint, path, userAction);
   }
-}
 
-void drawPath(Path path, ui.Canvas canvas, ui.Paint paint, dashWidth, dashGap) {
-  final Path dashedPath = createDashedPath(
-    path,
-    dashWidth: dashWidth,
-    dashGap: dashGap,
-  );
-  canvas.drawPath(dashedPath, paint);
-}
+  void renderLine(Canvas canvas, Paint paint, UserAction userAction) {
+    final path = Path()
+      ..moveTo(userAction.positions.first.dx, userAction.positions.first.dy)
+      ..lineTo(userAction.positions.last.dx, userAction.positions.last.dy);
+    paint.style = PaintingStyle.stroke;
+    paint.color = userAction.brushColor;
+    applyBrushStyle(canvas, paint, path, userAction);
+  }
 
-Path createDashedPath(
-  Path source, {
-  required double dashWidth,
-  required double dashGap,
-}) {
-  final Path dashedPath = Path();
-  for (final ui.PathMetric pathMetric in source.computeMetrics()) {
-    double distance = 0.0;
-    while (distance < pathMetric.length) {
-      final double nextDashLength = distance + dashWidth;
-      dashedPath.addPath(
-        pathMetric.extractPath(
-          distance,
-          nextDashLength.clamp(0.0, pathMetric.length),
-        ),
-        Offset.zero,
-      );
-      distance = nextDashLength + dashGap;
+  void renderCircle(Canvas canvas, Paint paint, UserAction userAction) {
+    final radius =
+        (userAction.positions.first - userAction.positions.last).distance / 2;
+    final center = Offset(
+      (userAction.positions.first.dx + userAction.positions.last.dx) / 2,
+      (userAction.positions.first.dy + userAction.positions.last.dy) / 2,
+    );
+    canvas.drawCircle(center, radius, paint);
+    paint.style = PaintingStyle.stroke;
+    paint.color = userAction.brushColor;
+    final path = Path()
+      ..addOval(Rect.fromCircle(center: center, radius: radius));
+    applyBrushStyle(canvas, paint, path, userAction);
+  }
+
+  void renderRectangle(Canvas canvas, Paint paint, UserAction userAction) {
+    if (userAction.positions.length == 2) {
+      final rect = Rect.fromPoints(
+          userAction.positions.first, userAction.positions.last);
+      canvas.drawRect(rect, paint);
+      paint.style = PaintingStyle.stroke;
+      paint.color = userAction.brushColor;
+      final path = Path()..addRect(rect);
+      applyBrushStyle(canvas, paint, path, userAction);
     }
   }
-  return dashedPath;
+
+  void renderEraser(Canvas canvas, Paint paint, UserAction userAction) {
+    paint.color = Colors.white;
+    paint.style = PaintingStyle.stroke;
+    canvas.drawLine(
+        userAction.positions.first, userAction.positions.last, paint);
+  }
+
+  void renderImage(Canvas canvas, UserAction userAction) {
+    if (userAction.image != null) {
+      canvas.drawImage(userAction.image!, userAction.positions.first, Paint());
+    }
+  }
+
+  void applyBrushStyle(
+      Canvas canvas, Paint paint, Path path, UserAction userAction) {
+    if (userAction.brushStyle == BrushStyle.dash) {
+      drawPath(path, canvas, paint, userAction.brushSize * 3,
+          userAction.brushSize * 2);
+    } else {
+      canvas.drawPath(path, paint);
+    }
+  }
+
+  void drawPath(Path path, ui.Canvas canvas, ui.Paint paint, double dashWidth,
+      double dashGap) {
+    final Path dashedPath =
+        createDashedPath(path, dashWidth: dashWidth, dashGap: dashGap);
+    canvas.drawPath(dashedPath, paint);
+  }
+
+  Path createDashedPath(Path source,
+      {required double dashWidth, required double dashGap}) {
+    final Path dashedPath = Path();
+    for (final ui.PathMetric pathMetric in source.computeMetrics()) {
+      double distance = 0.0;
+      while (distance < pathMetric.length) {
+        final double nextDashLength = distance + dashWidth;
+        dashedPath.addPath(
+          pathMetric.extractPath(
+              distance, nextDashLength.clamp(0.0, pathMetric.length)),
+          Offset.zero,
+        );
+        distance = nextDashLength + dashGap;
+      }
+    }
+    return dashedPath;
+  }
 }
