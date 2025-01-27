@@ -1,6 +1,7 @@
 {
     "cmake.configureOnOpen": false,
     "editor.wordWrap": "off",
+    "editor.formatOnType": true,
     "editor.wordWrapColumn": 120,
     "editor.overviewRulerBorder": false,
     "editor.rulers": [
@@ -19,7 +20,6 @@
         "graph.svg": "graph.dot",
         "layers.sh": "layers.svg",
     },
-    "editor.formatOnType": true,
     "markdownlint.config": {
         "MD024": { // Rule for multiple headings with the same name
             "siblings_only": true // Only check for duplicate headings within the same level
@@ -40,12 +40,13 @@
     },
     "editor.formatOnSave": true,
     "workbench.editor.closeOnFileDelete": true,
+    "cSpell.enabled": true,
     "cSpell.words": [
-        "vteam"
+        "vteam",
+        "fpaint"
     ],
-    "cmake.ignoreCMakeListsMissing": true,
     "cSpell.ignorePaths": [
-        "*.json"
+        // "*.json"
     ],
     "files.autoSave": "onFocusChange",
 }

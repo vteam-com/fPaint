@@ -28,12 +28,12 @@ class LayersPanel extends StatelessWidget {
       children: [
         // toolbar
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (appModel.isSidePanelExpanded)
-              IconButton(
-                icon: const Icon(Icons.file_open_outlined),
-                onPressed: onFileOpen,
-              ),
+            IconButton(
+              icon: const Icon(Icons.file_open_outlined),
+              onPressed: onFileOpen,
+            ),
             if (appModel.isSidePanelExpanded)
               IconButton(
                 icon: const Icon(Icons.library_add_rounded),
@@ -44,7 +44,6 @@ class LayersPanel extends StatelessWidget {
                 icon: const Icon(Icons.ios_share_outlined),
                 onPressed: () => sharePanel(context),
               ),
-            const Spacer(),
             IconButton(
               icon: Icon(
                 appModel.isSidePanelExpanded

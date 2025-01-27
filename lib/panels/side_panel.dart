@@ -9,11 +9,11 @@ class SidePanel extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final AppModel appModel = AppModel.get(context);
+    final AppModel appModel = AppModel.get(context, listen: true);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      width: appModel.isSidePanelExpanded ? 360 : 64,
+      width: appModel.isSidePanelExpanded ? 360 : 80,
       child: Material(
         elevation: 18,
         color: Colors.grey.shade200,

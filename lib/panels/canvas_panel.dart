@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
-
-import '../models/app_model.dart';
 
 class CanvasPanel extends StatelessWidget {
   const CanvasPanel({super.key, required this.appModel});

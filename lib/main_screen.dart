@@ -20,12 +20,8 @@ class MainScreen extends StatelessWidget {
       body: Row(
         children: [
           // Left side panels
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            width: appModel.isSidePanelExpanded ? 360 : 64,
-            child: const SidePanel(),
-          ),
-          // Canvas on the righ
+          const SidePanel(),
+          // Canvas on the right
           Expanded(
             child: Center(
               child: Listener(
