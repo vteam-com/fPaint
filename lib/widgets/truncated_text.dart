@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 class TruncatedTextWidget extends StatelessWidget {
-  const TruncatedTextWidget({super.key, required this.text});
+  const TruncatedTextWidget(
+      {super.key, required this.text, this.maxLength = 6});
   final String text;
+  final int maxLength;
 
   @override
   Widget build(BuildContext context) {
@@ -18,13 +20,15 @@ class TruncatedTextWidget extends StatelessWidget {
   }
 
   String _truncateText(String text) {
-    if (text.length <= 6) {
+    if (text.length <= maxLength) {
       return text; // No truncation needed for short texts
     }
 
+    int splitLength = (maxLength / 2).floor();
+
     // Ensure the first character, middle ellipsis, and last character are kept
-    String start = text.substring(0, 3);
-    String end = text.substring(text.length - 3);
+    String start = text.substring(0, splitLength);
+    String end = text.substring(text.length - splitLength);
 
     // If there are multiple digits at the end, we keep them
     String middle = text.length > 3 ? '…' : '';

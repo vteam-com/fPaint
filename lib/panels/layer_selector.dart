@@ -33,7 +33,12 @@ class LayerSelector extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: minimal
-          ? TruncatedTextWidget(text: layer.name)
+          ? Column(
+              children: [
+                TruncatedTextWidget(text: layer.name, maxLength: 10),
+                LayerThumbnail(layer: layer),
+              ],
+            )
           : Row(
               children: [
                 Expanded(
