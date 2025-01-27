@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:xml/xml.dart';
@@ -13,7 +13,7 @@ Future<void> readOraFile(final AppModel appModel, String filePath) async {
   try {
     final File oraFile = File(filePath);
     if (!await oraFile.exists()) {
-      print('File not found: $filePath');
+      debugPrint('File not found: $filePath');
       return;
     }
 
@@ -108,10 +108,10 @@ Future<void> addImageToLayer({
 
       layer.addImage(image, offset);
     } else {
-      print('$imageName not found in the achive');
+      debugPrint('$imageName not found in the achive');
     }
   } catch (e) {
-    print(e.toString());
+    debugPrint(e.toString());
   }
 }
 

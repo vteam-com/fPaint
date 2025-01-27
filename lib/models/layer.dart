@@ -113,7 +113,9 @@ class Layer {
   void renderRectangle(Canvas canvas, Paint paint, UserAction userAction) {
     if (userAction.positions.length == 2) {
       final rect = Rect.fromPoints(
-          userAction.positions.first, userAction.positions.last);
+        userAction.positions.first,
+        userAction.positions.last,
+      );
       canvas.drawRect(rect, paint);
       paint.style = PaintingStyle.stroke;
       paint.color = userAction.brushColor;
@@ -126,7 +128,10 @@ class Layer {
     paint.color = Colors.white;
     paint.style = PaintingStyle.stroke;
     canvas.drawLine(
-        userAction.positions.first, userAction.positions.last, paint);
+      userAction.positions.first,
+      userAction.positions.last,
+      paint,
+    );
   }
 
   void renderImage(Canvas canvas, UserAction userAction) {
@@ -136,24 +141,41 @@ class Layer {
   }
 
   void applyBrushStyle(
-      Canvas canvas, Paint paint, Path path, UserAction userAction) {
+    Canvas canvas,
+    Paint paint,
+    Path path,
+    UserAction userAction,
+  ) {
     if (userAction.brushStyle == BrushStyle.dash) {
-      drawPath(path, canvas, paint, userAction.brushSize * 3,
-          userAction.brushSize * 2);
+      drawPath(
+        path,
+        canvas,
+        paint,
+        userAction.brushSize * 3,
+        userAction.brushSize * 2,
+      );
     } else {
       canvas.drawPath(path, paint);
     }
   }
 
-  void drawPath(Path path, ui.Canvas canvas, ui.Paint paint, double dashWidth,
-      double dashGap) {
+  void drawPath(
+    Path path,
+    ui.Canvas canvas,
+    ui.Paint paint,
+    double dashWidth,
+    double dashGap,
+  ) {
     final Path dashedPath =
         createDashedPath(path, dashWidth: dashWidth, dashGap: dashGap);
     canvas.drawPath(dashedPath, paint);
   }
 
-  Path createDashedPath(Path source,
-      {required double dashWidth, required double dashGap}) {
+  Path createDashedPath(
+    Path source, {
+    required double dashWidth,
+    required double dashGap,
+  }) {
     final Path dashedPath = Path();
     for (final ui.PathMetric pathMetric in source.computeMetrics()) {
       double distance = 0.0;
@@ -161,7 +183,9 @@ class Layer {
         final double nextDashLength = distance + dashWidth;
         dashedPath.addPath(
           pathMetric.extractPath(
-              distance, nextDashLength.clamp(0.0, pathMetric.length)),
+            distance,
+            nextDashLength.clamp(0.0, pathMetric.length),
+          ),
           Offset.zero,
         );
         distance = nextDashLength + dashGap;

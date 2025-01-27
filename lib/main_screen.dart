@@ -195,7 +195,7 @@ class MainScreen extends StatelessWidget {
       }
     } catch (e) {
       // Handle any errors that occur during file picking/loading
-      print('Error opening file: $e');
+      debugPrint('Error opening file: $e');
     }
   }
 
