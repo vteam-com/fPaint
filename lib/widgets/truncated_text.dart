@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 class TruncatedTextWidget extends StatelessWidget {
-  const TruncatedTextWidget(
-      {super.key, required this.text, this.maxLength = 6});
+  const TruncatedTextWidget({
+    super.key,
+    required this.text,
+    this.maxLength = 6,
+  });
   final String text;
   final int maxLength;
 
