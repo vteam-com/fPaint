@@ -15,7 +15,7 @@ class Layer {
   bool isVisible = true;
   double opacity = 1;
 
-  void addImage(ui.Image imageToAdd, ui.Offset offset) {
+  void addImage(ui.Image imageToAdd, [ui.Offset offset = Offset.zero]) {
     actionStack.add(
       UserAction(
         tool: Tools.image,
