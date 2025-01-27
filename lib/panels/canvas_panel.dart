@@ -33,7 +33,7 @@ class CanvasPanelPainter extends CustomPainter {
 
     for (final Layer layer in _appModel.layers.list.reversed) {
       if (layer.isVisible) {
-        renderLayer(layer, canvas);
+        layer.renderLayer(canvas);
       }
     }
   }

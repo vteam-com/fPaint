@@ -39,92 +39,65 @@ class Layer {
     final ui.Canvas canvas = Canvas(recorder);
 
     canvas.saveLayer(null, Paint());
-    renderLayer(this, canvas);
+    renderLayer(canvas);
 
     final ui.Picture picture = recorder.endRecording();
     return await picture.toImage(size.width.toInt(), size.height.toInt());
   }
-}
 
-void renderLayer(
-  final Layer layer,
-  final Canvas canvas,
-) {
-  for (final UserAction userAction in layer.actionStack) {
-    final Paint paint = Paint();
-    paint.color = userAction.fillColor;
-    paint.strokeCap = StrokeCap.round;
-    paint.strokeWidth = userAction.brushSize;
+  void renderLayer(
+    final Canvas canvas,
+  ) {
+    for (final UserAction userAction in this.actionStack) {
+      final Paint paint = Paint();
+      paint.color = userAction.fillColor;
+      paint.strokeCap = StrokeCap.round;
+      paint.strokeWidth = userAction.brushSize;
 
-    switch (userAction.tool) {
-      // Draw
-      case Tools.draw:
-        final path = Path();
-
-        path.moveTo(
-          userAction.positions.first.dx,
-          userAction.positions.first.dy,
-        );
-
-        for (final ui.Offset position in userAction.positions) {
-          path.lineTo(position.dx, position.dy);
-        }
-
-        paint.style = PaintingStyle.stroke;
-        paint.color = userAction.brushColor;
-
-        if (userAction.brushStyle == BrushStyle.dash) {
-          double dashWidth = userAction.brushSize * 3;
-          double dashGap = userAction.brushSize * 2;
-          drawPath(path, canvas, paint, dashWidth, dashGap);
-        } else {
-          canvas.drawPath(path, paint);
-        }
-        break;
-
-      // Line
-      case Tools.line:
-        renderLine(paint, userAction, canvas);
-        break;
-
-      // Circle
-      case Tools.circle:
-        final radius =
-            (userAction.positions.first - userAction.positions.last).distance /
-                2;
-        final center = Offset(
-          (userAction.positions.first.dx + userAction.positions.last.dx) / 2,
-          (userAction.positions.first.dy + userAction.positions.last.dy) / 2,
-        );
-
-        // Fill
-        canvas.drawCircle(center, radius, paint);
-
-        // Border
-        paint.style = PaintingStyle.stroke;
-        paint.color = userAction.brushColor;
-
-        if (userAction.brushStyle == BrushStyle.dash) {
+      switch (userAction.tool) {
+        // Draw
+        case Tools.draw:
           final path = Path();
-          path.addOval(Rect.fromCircle(center: center, radius: radius));
-          drawPath(path, canvas, paint, userAction.brushSize * 3,
-              userAction.brushSize * 2);
-        } else {
-          canvas.drawCircle(center, radius, paint);
-        }
-        break;
 
-      // Rectangle
-      case Tools.rectangle:
-        if (userAction.positions.length == 2) {
-          // Fill
-          canvas.drawRect(
-            Rect.fromPoints(
-              userAction.positions.first,
-              userAction.positions.last,
-            ),
-            paint,
+          path.moveTo(
+            userAction.positions.first.dx,
+            userAction.positions.first.dy,
           );
+
+          for (final ui.Offset position in userAction.positions) {
+            path.lineTo(position.dx, position.dy);
+          }
+
+          paint.style = PaintingStyle.stroke;
+          paint.color = userAction.brushColor;
+
+          if (userAction.brushStyle == BrushStyle.dash) {
+            double dashWidth = userAction.brushSize * 3;
+            double dashGap = userAction.brushSize * 2;
+            drawPath(path, canvas, paint, dashWidth, dashGap);
+          } else {
+            canvas.drawPath(path, paint);
+          }
+          break;
+
+        // Line
+        case Tools.line:
+          renderLine(paint, userAction, canvas);
+          break;
+
+        // Circle
+        case Tools.circle:
+          final radius =
+              (userAction.positions.first - userAction.positions.last)
+                      .distance /
+                  2;
+          final center = Offset(
+            (userAction.positions.first.dx + userAction.positions.last.dx) / 2,
+            (userAction.positions.first.dy + userAction.positions.last.dy) / 2,
+          );
+
+          // Fill
+          canvas.drawCircle(center, radius, paint);
 
           // Border
           paint.style = PaintingStyle.stroke;
@@ -132,15 +105,18 @@ void renderLayer(
 
           if (userAction.brushStyle == BrushStyle.dash) {
             final path = Path();
-            path.addRect(
-              Rect.fromPoints(
-                userAction.positions.first,
-                userAction.positions.last,
-              ),
-            );
+            path.addOval(Rect.fromCircle(center: center, radius: radius));
             drawPath(path, canvas, paint, userAction.brushSize * 3,
                 userAction.brushSize * 2);
           } else {
+            canvas.drawCircle(center, radius, paint);
+          }
+          break;
+
+        // Rectangle
+        case Tools.rectangle:
+          if (userAction.positions.length == 2) {
+            // Fill
             canvas.drawRect(
               Rect.fromPoints(
                 userAction.positions.first,
@@ -148,30 +124,54 @@ void renderLayer(
               ),
               paint,
             );
-          }
-        }
-        break;
-      case Tools.eraser:
-        paint.color = Colors.white;
-        // paint.blendMode = BlendMode.clear;
-        paint.strokeWidth = userAction.brushSize;
-        paint.style = PaintingStyle.stroke;
-        canvas.drawLine(
-          userAction.positions.first,
-          userAction.positions.last,
-          paint,
-        );
-        break;
 
-      case Tools.image:
-        if (userAction.image != null) {
-          canvas.drawImage(
-            userAction.image!,
+            // Border
+            paint.style = PaintingStyle.stroke;
+            paint.color = userAction.brushColor;
+
+            if (userAction.brushStyle == BrushStyle.dash) {
+              final path = Path();
+              path.addRect(
+                Rect.fromPoints(
+                  userAction.positions.first,
+                  userAction.positions.last,
+                ),
+              );
+              drawPath(path, canvas, paint, userAction.brushSize * 3,
+                  userAction.brushSize * 2);
+            } else {
+              canvas.drawRect(
+                Rect.fromPoints(
+                  userAction.positions.first,
+                  userAction.positions.last,
+                ),
+                paint,
+              );
+            }
+          }
+          break;
+        case Tools.eraser:
+          paint.color = Colors.white;
+          // paint.blendMode = BlendMode.clear;
+          paint.strokeWidth = userAction.brushSize;
+          paint.style = PaintingStyle.stroke;
+          canvas.drawLine(
             userAction.positions.first,
-            Paint(),
+            userAction.positions.last,
+            paint,
           );
-        }
-        break;
+          break;
+
+        case Tools.image:
+          if (userAction.image != null) {
+            canvas.drawImage(
+              userAction.image!,
+              userAction.positions.first,
+              Paint(),
+            );
+          }
+          break;
+      }
     }
   }
 }
