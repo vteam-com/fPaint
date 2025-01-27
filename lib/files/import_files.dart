@@ -30,10 +30,13 @@ Future<void> onFileOpen(final BuildContext context) async {
       appModel.layers.clear();
 
       if (kIsWeb) {
-        final bytes = result.files.single.bytes!;
+        final Uint8List bytes = result.files.single.bytes!;
         if (result.files.single.extension == 'ora') {
           await readOraFileFromBytes(appModel, bytes);
         } else if (result.files.single.extension == 'png' ||
+            result.files.single.extension == 'psd' ||
+            result.files.single.extension == 'tif' ||
+            result.files.single.extension == 'tiff' ||
             result.files.single.extension == 'jpg' ||
             result.files.single.extension == 'jpeg') {
           await readImageFileFromBytes(appModel, bytes);
@@ -43,6 +46,9 @@ Future<void> onFileOpen(final BuildContext context) async {
         if (result.files.single.extension == 'ora') {
           await readOraFile(appModel, path);
         } else if (result.files.single.extension == 'png' ||
+            result.files.single.extension == 'psd' ||
+            result.files.single.extension == 'tif' ||
+            result.files.single.extension == 'tiff' ||
             result.files.single.extension == 'jpg' ||
             result.files.single.extension == 'jpeg') {
           await readImageFilePath(appModel, path);

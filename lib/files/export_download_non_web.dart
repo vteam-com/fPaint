@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/share_panel.dart';
 
@@ -27,7 +28,6 @@ import 'package:fpaint/panels/share_panel.dart';
 /// - A `Future<void>` that completes when the image has been successfully saved.
 Future<void> onExportAsPng(final BuildContext context) async {
   final AppModel appModel = AppModel.get(context);
-  // Capture the image bytes
   final String? filePath = await FilePicker.platform.saveFile(
     dialogTitle: 'Save image',
     fileName: 'image.png',
@@ -35,8 +35,9 @@ Future<void> onExportAsPng(final BuildContext context) async {
     type: FileType.custom,
   );
   if (filePath != null) {
-    final Uint8List image = await capturePainterToImageBytes(appModel);
-    await File(filePath).writeAsBytes(image);
+    // Capture the image bytes
+    final Uint8List bytes = await capturePainterToImageBytes(appModel);
+    await File(filePath).writeAsBytes(bytes);
   }
 }
 
@@ -57,9 +58,9 @@ Future<void> onExportAsPng(final BuildContext context) async {
 ///
 /// Returns:
 /// - A `Future<void>` that completes when the image has been successfully saved.
-Future<void> onExportAsJpg(final BuildContext context) async {
+Future<void> onExportAsJpeg(final BuildContext context) async {
   final AppModel appModel = AppModel.get(context);
-  // Capture the image bytes
+
   final String? filePath = await FilePicker.platform.saveFile(
     dialogTitle: 'Save image',
     fileName: 'image.jpg',
@@ -68,11 +69,29 @@ Future<void> onExportAsJpg(final BuildContext context) async {
   );
   if (filePath != null) {
     // Capture the image bytes
-    final Uint8List image = await capturePainterToImageBytes(appModel);
+    final Uint8List imageBytes = await capturePainterToImageBytes(appModel);
 
     // Convert the image bytes to JPG format
-    final Uint8List jpgImage = await convertToJpg(image);
-    await File(filePath).writeAsBytes(jpgImage);
+    final Uint8List outputBytes = await convertToJpg(imageBytes);
+    await File(filePath).writeAsBytes(outputBytes);
+  }
+}
+
+Future<void> onExportAsTiff(final BuildContext context) async {
+  final AppModel appModel = AppModel.get(context);
+  final String? filePath = await FilePicker.platform.saveFile(
+    dialogTitle: 'Save image',
+    fileName: 'image.tif',
+    allowedExtensions: ['tif', 'tiff'],
+    type: FileType.custom,
+  );
+  if (filePath != null) {
+    // Capture the image bytes
+    final Uint8List imageBytes = await capturePainterToImageBytes(appModel);
+
+    // Convert the image bytes to JPG format
+    final Uint8List outputBytes = await convertToTif(imageBytes);
+    await File(filePath).writeAsBytes(outputBytes);
   }
 }
 

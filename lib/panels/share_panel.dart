@@ -47,7 +47,15 @@ void sharePanel(final BuildContext context) {
                 title: textAction('image.JPG'),
                 onTap: () {
                   Navigator.pop(context);
-                  onExportAsJpg(context);
+                  onExportAsJpeg(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.download),
+                title: textAction('image.TIF'),
+                onTap: () {
+                  Navigator.pop(context);
+                  onExportAsTiff(context);
                 },
               ),
               ListTile(

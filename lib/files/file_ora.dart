@@ -163,7 +163,7 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
 
   // Add uncompressed mimetype
   archive.addFile(
-    ArchiveFile.noCompress(
+    ArchiveFile(
       'mimetype',
       'image/openraster'.length,
       utf8.encode('image/openraster'),
@@ -235,7 +235,7 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
   // Add stack.xml to the archive
   final String stackXml = builder.buildDocument().toString();
   archive.addFile(
-    ArchiveFile.noCompress(
+    ArchiveFile(
       'stack.xml',
       stackXml.length,
       utf8.encode(stackXml),
@@ -243,6 +243,6 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
   );
 
   // Write archive to file
-  final List<int> encodedData = ZipEncoder().encode(archive)!;
+  final List<int> encodedData = ZipEncoder().encode(archive);
   return encodedData;
 }
