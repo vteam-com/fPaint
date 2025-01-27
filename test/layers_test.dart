@@ -15,7 +15,7 @@ void main() {
       expect(layer.name, 'Test Layer');
       expect(layer.isSelected, false);
       expect(layer.isVisible, true);
-      expect(layer.opacity, 1);
+      expect(layer.opacity, 100);
       expect(layer.count, 0);
       expect(layer.isEmpty, true);
     });

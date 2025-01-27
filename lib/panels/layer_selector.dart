@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
@@ -47,6 +48,30 @@ class LayerSelector extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(2.0),
                   child: LayerThumbnail(layer: layer),
+                ),
+                // SizedBox(
+                //   height: 60,
+                //   child: OpacitySlider(
+                //     layer: layer,
+                //   ),
+                // ),
+                SizedBox(
+                  height: 60,
+                  width: 60,
+                  child: HorizontalValueAdjuster(
+                    minValue: 0.0,
+                    maxValue: 100.0,
+                    initialValue: layer.opacity,
+                    onSlideStart: () {
+                      // appModel.update();
+                    },
+                    onChanged: (value) => layer.opacity = value,
+                    onChangeEnd: (value) {
+                      layer.opacity = value;
+                      appModel.update();
+                    },
+                    onSlideEnd: () => appModel.update(),
+                  ),
                 ),
                 IconButton(
                   icon: Icon(
@@ -144,4 +169,126 @@ class ImagePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class OpacitySlider extends StatefulWidget {
+  const OpacitySlider({
+    super.key,
+    required this.layer,
+  });
+
+  final Layer layer;
+
+  @override
+  OpacitySliderState createState() => OpacitySliderState();
+}
+
+class OpacitySliderState extends State<OpacitySlider> {
+  @override
+  Widget build(BuildContext context) {
+    return RotatedBox(
+      quarterTurns: -1,
+      child: Slider(
+        value: widget.layer.opacity,
+        min: 0.0,
+        max: 1.0,
+        onChanged: (final double value) {
+          setState(() {
+            widget.layer.opacity = value;
+          });
+        },
+      ),
+    );
+  }
+}
+
+class HorizontalValueAdjuster extends StatefulWidget {
+  const HorizontalValueAdjuster({
+    super.key,
+    this.minValue = 0.0,
+    this.maxValue = 100.0,
+    this.initialValue = 50.0,
+    required this.onChanged,
+    required this.onChangeEnd,
+    required this.onSlideStart,
+    required this.onSlideEnd,
+  });
+  final double minValue;
+  final double maxValue;
+  final double initialValue;
+  final ValueChanged<double> onChanged;
+  final ValueChanged<double> onChangeEnd;
+  final VoidCallback onSlideStart;
+  final VoidCallback onSlideEnd;
+
+  @override
+  State<HorizontalValueAdjuster> createState() =>
+      _HorizontalValueAdjusterState();
+}
+
+class _HorizontalValueAdjusterState extends State<HorizontalValueAdjuster> {
+  late double currentValue;
+  double? initialTouchValue;
+
+  @override
+  void initState() {
+    super.initState();
+    currentValue = widget.initialValue.clamp(widget.minValue, widget.maxValue);
+  }
+
+  void _adjustValue(double delta) {
+    setState(() {
+      currentValue =
+          (currentValue + delta).clamp(widget.minValue, widget.maxValue);
+    });
+    widget.onChanged(currentValue);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RawGestureDetector(
+      gestures: {
+        _HorizontalDragRecognizer:
+            GestureRecognizerFactoryWithHandlers<_HorizontalDragRecognizer>(
+          () => _HorizontalDragRecognizer(),
+          (instance) {
+            instance
+              ..onStart = (_) {
+                widget.onSlideStart(); // Pause reordering.
+              }
+              ..onUpdate = (details) {
+                _adjustValue(
+                  details.primaryDelta! * 0.2,
+                ); // Adjust sensitivity.
+              }
+              ..onEnd = (_) {
+                widget.onSlideEnd(); // Resume reordering.
+                widget.onChangeEnd(currentValue);
+              };
+          },
+        ),
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Center(
+          child: Text(
+            currentValue.toStringAsFixed(0),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HorizontalDragRecognizer extends HorizontalDragGestureRecognizer {
+  @override
+  void rejectGesture(int pointer) {
+    // Accept gesture even if it's competing with other gestures.
+    acceptGesture(pointer);
+  }
 }

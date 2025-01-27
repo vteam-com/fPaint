@@ -14,8 +14,31 @@ class Layer {
   final List<UserAction> _actionStack = [];
   List<UserAction> redoStack = [];
   bool isSelected = false;
-  bool isVisible = true;
-  double opacity = 1;
+
+  //
+  // Visibility
+  //
+  bool _isVisible = true;
+
+  bool get isVisible => _isVisible;
+
+  set isVisible(bool value) {
+    _isVisible = value;
+    clearCache();
+  }
+
+  //
+  // Opacity
+  //
+  double _opacity = 100; // 0 to 100 %
+
+  double get opacity => _opacity;
+
+  set opacity(double value) {
+    _opacity = value;
+    clearCache();
+  }
+
   int get count => _actionStack.length;
   bool get isEmpty => _actionStack.isEmpty;
 
@@ -80,8 +103,10 @@ class Layer {
   }
 
   Future<ui.Image> toImage(final Size size) async {
-    cachedRendering ??=
-        await renderImageWH(size.width.toInt(), size.height.toInt());
+    cachedRendering ??= await renderImageWH(
+      size.width.toInt(),
+      size.height.toInt(),
+    );
     return cachedRendering!;
   }
 
@@ -111,11 +136,21 @@ class Layer {
   }
 
   void renderLayer(final Canvas canvas) {
+    // Save a layer with opacity applied
+    Paint layerPaint = Paint()
+      ..color = Colors.black.withAlpha((255 * (opacity / 100)).toInt());
+    canvas.saveLayer(null, layerPaint);
+
+    // Render all actions within the saved layer
     for (final UserAction userAction in _actionStack) {
       final Paint paint = Paint()
         ..color = userAction.fillColor
         ..strokeCap = StrokeCap.round
-        ..strokeWidth = userAction.brushSize;
+        ..strokeWidth = userAction.brushSize
+        ..style = userAction.tool == Tools.circle ||
+                userAction.tool == Tools.rectangle
+            ? PaintingStyle.fill // Ensure fill for these tools
+            : PaintingStyle.stroke; // Stroke for other tools
 
       switch (userAction.tool) {
         case Tools.draw:
@@ -138,11 +173,17 @@ class Layer {
           break;
       }
     }
+
+    // Restore the canvas to apply the opacity
+    canvas.restore();
   }
 
   void renderPath(Canvas canvas, Paint paint, UserAction userAction) {
     final path = Path()
-      ..moveTo(userAction.positions.first.dx, userAction.positions.first.dy);
+      ..moveTo(
+        userAction.positions.first.dx,
+        userAction.positions.first.dy,
+      );
     for (final ui.Offset position in userAction.positions) {
       path.lineTo(position.dx, position.dy);
     }
@@ -171,7 +212,12 @@ class Layer {
     paint.style = PaintingStyle.stroke;
     paint.color = userAction.brushColor;
     final path = Path()
-      ..addOval(Rect.fromCircle(center: center, radius: radius));
+      ..addOval(
+        Rect.fromCircle(
+          center: center,
+          radius: radius,
+        ),
+      );
     applyBrushStyle(canvas, paint, path, userAction);
   }
 
@@ -231,8 +277,11 @@ class Layer {
     double dashWidth,
     double dashGap,
   ) {
-    final Path dashedPath =
-        createDashedPath(path, dashWidth: dashWidth, dashGap: dashGap);
+    final Path dashedPath = createDashedPath(
+      path,
+      dashWidth: dashWidth,
+      dashGap: dashGap,
+    );
     canvas.drawPath(dashedPath, paint);
   }
 
