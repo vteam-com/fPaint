@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
-import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/share_panel.dart';
 
@@ -40,24 +39,6 @@ Future<void> onExportAsJpeg(final BuildContext context) async {
 
   // Create a Blob from the image bytes
   downloadBlob(outputBytes, 'image.jpg');
-}
-
-/// Exports the current painter as a TIF image and triggers a download.
-///
-/// This function captures the current painter's image bytes, converts it to TIF,
-/// and creates a TIF file that is then downloaded to the user's device.
-///
-/// [context] The BuildContext to access the current AppModel.
-Future<void> onExportAsTiff(final BuildContext context) async {
-  // Capture the image bytes
-  final Uint8List imageBytes =
-      await capturePainterToImageBytes(AppModel.get(context));
-
-  // Convert the image bytes to TIF format
-  final Uint8List outputBytes = await convertToTif(imageBytes);
-
-  // Create a Blob from the image bytes
-  downloadBlob(outputBytes, 'image.tif');
 }
 
 /// Exports the current painter as an ORA file and triggers a download.

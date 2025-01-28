@@ -5,7 +5,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
-import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/share_panel.dart';
 
@@ -73,24 +72,6 @@ Future<void> onExportAsJpeg(final BuildContext context) async {
 
     // Convert the image bytes to JPG format
     final Uint8List outputBytes = await convertToJpg(imageBytes);
-    await File(filePath).writeAsBytes(outputBytes);
-  }
-}
-
-Future<void> onExportAsTiff(final BuildContext context) async {
-  final AppModel appModel = AppModel.get(context);
-  final String? filePath = await FilePicker.platform.saveFile(
-    dialogTitle: 'Save image',
-    fileName: 'image.tif',
-    allowedExtensions: ['tif', 'tiff'],
-    type: FileType.custom,
-  );
-  if (filePath != null) {
-    // Capture the image bytes
-    final Uint8List imageBytes = await capturePainterToImageBytes(appModel);
-
-    // Convert the image bytes to JPG format
-    final Uint8List outputBytes = await convertToTif(imageBytes);
     await File(filePath).writeAsBytes(outputBytes);
   }
 }

@@ -16,8 +16,10 @@ class CanvasPanel extends StatelessWidget {
 }
 
 class CanvasPanelPainter extends CustomPainter {
-  CanvasPanelPainter(this._appModel,
-      {this.includeTransparentBackground = false});
+  CanvasPanelPainter(
+    this._appModel, {
+    this.includeTransparentBackground = false,
+  });
   final AppModel _appModel;
   final bool includeTransparentBackground;
 

@@ -37,6 +37,7 @@ Future<void> onFileOpen(final BuildContext context) async {
             result.files.single.extension == 'psd' ||
             result.files.single.extension == 'tif' ||
             result.files.single.extension == 'tiff' ||
+            result.files.single.extension == 'webp' ||
             result.files.single.extension == 'jpg' ||
             result.files.single.extension == 'jpeg') {
           await readImageFileFromBytes(appModel, bytes);
@@ -49,6 +50,7 @@ Future<void> onFileOpen(final BuildContext context) async {
             result.files.single.extension == 'psd' ||
             result.files.single.extension == 'tif' ||
             result.files.single.extension == 'tiff' ||
+            result.files.single.extension == 'webp' ||
             result.files.single.extension == 'jpg' ||
             result.files.single.extension == 'jpeg') {
           await readImageFilePath(appModel, path);
