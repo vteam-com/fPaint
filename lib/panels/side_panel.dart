@@ -22,17 +22,28 @@ class SidePanel extends StatelessWidget {
         ),
         clipBehavior: Clip.none,
         child: Column(
+          spacing: 8,
           children: [
             //
             // Layers Panel
             //
             const Expanded(
+              flex: 1,
               child: LayersPanel(),
             ),
+            // Divider
+            //
+            const Divider(
+              thickness: 1,
+              height: 1,
+              color: Colors.grey,
+            ),
+
             //
             // Tools Panel
             //
             Expanded(
+              flex: 2,
               child: ToolsPanel(
                 currentShapeType: appModel.selectedTool,
                 onShapeSelected: (final Tools tool) =>

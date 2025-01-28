@@ -30,44 +30,66 @@ class ToolsPanel extends StatelessWidget {
         final AppModel appModel,
         final Widget? child,
       ) {
-        return Container(
-          constraints: const BoxConstraints(
-            maxHeight: 400,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              buildTools(vertical: minimal),
-              //
-              // Divider
-              //
-              const Divider(
-                thickness: 6,
-                height: 10,
-              ),
-
-              Expanded(
-                child: buildAttributes(
-                  context: context,
-                  vertical: minimal,
-                ),
-              ),
-            ],
-          ),
-        );
+        if (minimal) {
+          return slimLayout(context);
+        } else {
+          return largeLayout(context);
+        }
       },
     );
   }
 
-  /// Builds the tools panel, which displays a row of tool items that the user can
-  /// select to perform various actions in the application.
-  ///
-  /// The `buildTools` method returns a `Row` widget that contains a list of
-  /// `ToolItem` widgets, each representing a different tool that the user can
-  /// select. The selected tool is determined by the `currentShapeType` property,
-  /// and the `onShapeSelected` callback is called when the user selects a tool.
-  Widget buildTools({required bool vertical}) {
+  Widget slimLayout(context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Column(
+        spacing: 8,
+        children: [
+          ...getListOfTools(),
+          // Divider
+          //
+          const Divider(
+            thickness: 1,
+            height: 1,
+            color: Colors.grey,
+          ),
+
+          ...getWidgetForSelectedTool(
+            context: context,
+            slim: true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget largeLayout(context) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Column(
+        spacing: 8,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: getListOfTools(),
+          ),
+          // Divider
+          //
+          const Divider(
+            thickness: 6,
+            height: 10,
+          ),
+
+          ...getWidgetForSelectedTool(
+            context: context,
+            slim: false,
+          ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> getListOfTools() {
     final List<Widget> tools = [
       // Pencil
       ToolSelector(
@@ -108,29 +130,12 @@ class ToolsPanel extends StatelessWidget {
         onPressed: () => onShapeSelected(Tools.eraser),
       ),
     ];
-
-    if (vertical) {
-      return Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: tools,
-      );
-    } else {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: tools,
-      );
-    }
+    return tools;
   }
 
-  /// The `buildAttributes` method creates a list of widgets that represent various
-  /// tool attributes, such as stroke weight, brush style, stroke color, and fill
-  /// color. The method checks if the current shape type supports each attribute,
-  /// and if so, it adds a corresponding widget to the list. The list of widgets
-  /// is then returned as a `SizedBox` with a `ListView.separated` to display the
-  /// attributes.
-  Widget buildAttributes({
-    required final BuildContext context,
-    required bool vertical,
+  List<Widget> getWidgetForSelectedTool({
+    required BuildContext context,
+    required bool slim,
   }) {
     List<Widget> widgets = [];
     final appModel = AppModel.get(context, listen: true);
@@ -148,7 +153,7 @@ class ToolsPanel extends StatelessWidget {
               appModel.brusSize = newValue;
             });
           },
-          child: vertical
+          child: slim
               ? null
               : BrushSizePicker(
                   value: appModel.brusSize,
@@ -170,7 +175,7 @@ class ToolsPanel extends StatelessWidget {
           onButtonPressed: () {
             showBrushStylePicker(context);
           },
-          child: vertical ? null : brushStyleSelection(appModel),
+          child: slim ? null : brushStyleSelection(appModel),
         ),
       );
     }
@@ -189,7 +194,7 @@ class ToolsPanel extends StatelessWidget {
             onSelectedColor: (final Color color) => appModel.brushColor = color,
           ),
           transparentPaper: true,
-          child: vertical
+          child: slim
               ? null
               : MyColorPicker(
                   color: appModel.brushColor,
@@ -213,7 +218,7 @@ class ToolsPanel extends StatelessWidget {
             onSelectedColor: (final Color color) => appModel.fillColor = color,
           ),
           transparentPaper: true,
-          child: vertical
+          child: slim
               ? null
               : MyColorPicker(
                   color: appModel.fillColor,
@@ -222,14 +227,6 @@ class ToolsPanel extends StatelessWidget {
         ),
       );
     }
-
-    return SizedBox(
-      width: 360,
-      child: ListView.separated(
-        itemCount: widgets.length,
-        separatorBuilder: (context, index) => const Divider(),
-        itemBuilder: (context, index) => widgets[index],
-      ),
-    );
+    return widgets;
   }
 }
