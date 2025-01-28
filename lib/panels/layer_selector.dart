@@ -24,7 +24,8 @@ class LayerSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final appModel = AppModel.get(context);
     return Tooltip(
-      message: '${layer.name} [${layer.id}]',
+      message:
+          '${layer.id}:"${layer.name}" Opacity: ${layer.opacity.toStringAsFixed(0)}',
       child: Container(
         margin: EdgeInsets.all(minimal ? 2 : 4),
         padding: EdgeInsets.all(minimal ? 2 : 8),
@@ -40,7 +41,14 @@ class LayerSelector extends StatelessWidget {
             ? Column(
                 children: [
                   TruncatedTextWidget(text: layer.name, maxLength: 10),
-                  _buildThumbnailAndOpacity(appModel, layer),
+                  Stack(
+                    alignment: Alignment.topCenter,
+                    children: [
+                      _buildThumbnailAndOpacity(appModel, layer),
+                      if (!layer.isVisible)
+                        const Icon(Icons.visibility_off, color: Colors.red),
+                    ],
+                  ),
                 ],
               )
             : Row(
