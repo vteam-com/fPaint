@@ -162,41 +162,41 @@ class MainScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         FloatingActionButton(
-          backgroundColor: Colors.grey.shade200,
-          foregroundColor: Colors.grey.shade700,
+          backgroundColor: Colors.grey.shade800,
+          foregroundColor: Colors.white,
           onPressed: () => paintModel.undo(),
           child: const Icon(Icons.undo),
         ),
         FloatingActionButton(
-          backgroundColor: Colors.grey.shade200,
-          foregroundColor: Colors.grey.shade700,
+          backgroundColor: Colors.grey.shade800,
+          foregroundColor: Colors.white,
           onPressed: () => paintModel.redo(),
           child: const Icon(Icons.redo),
         ),
         const SizedBox(height: 8),
         FloatingActionButton(
-          backgroundColor: Colors.grey.shade200,
-          foregroundColor: Colors.grey.shade700,
+          backgroundColor: Colors.grey.shade800,
+          foregroundColor: Colors.white,
           onPressed: () => paintModel.scale += 0.10,
           child: const Icon(Icons.zoom_in),
         ),
         FloatingActionButton(
-          backgroundColor: Colors.grey.shade200,
-          foregroundColor: Colors.grey.shade700,
+          backgroundColor: Colors.grey.shade800,
+          foregroundColor: Colors.white,
           onPressed: () => paintModel.scale = 1,
           child: Text(
             '${(paintModel.scale * 100).toInt()}%\n${paintModel.canvasSize.width.toInt()}\n${paintModel.canvasSize.height.toInt()}',
             textAlign: TextAlign.right,
-            style: TextStyle(
-              color: Colors.grey.shade700,
+            style: const TextStyle(
+              color: Colors.white,
               fontWeight: FontWeight.bold,
               fontSize: 10,
             ),
           ),
         ),
         FloatingActionButton(
-          backgroundColor: Colors.grey.shade200,
-          foregroundColor: Colors.grey.shade700,
+          backgroundColor: Colors.grey.shade800,
+          foregroundColor: Colors.white,
           onPressed: () => paintModel.scale -= 0.10,
           child: const Icon(Icons.zoom_out),
         ),

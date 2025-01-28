@@ -31,7 +31,7 @@ class LayerSelector extends StatelessWidget {
         decoration: BoxDecoration(
           color: minimal ? (layer.isVisible ? null : Colors.grey) : null,
           border: Border.all(
-            color: layer.isSelected ? Colors.blue : Colors.grey.shade300,
+            color: layer.isSelected ? Colors.blue : Colors.grey.shade700,
             width: 3,
           ),
           borderRadius: BorderRadius.circular(4),

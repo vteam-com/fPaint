@@ -15,7 +15,7 @@ class SidePanel extends StatelessWidget {
       width: appModel.isSidePanelExpanded ? 360 : 80,
       child: Material(
         elevation: 18,
-        color: Colors.grey.shade200,
+        color: Colors.grey.shade800,
         borderRadius: const BorderRadius.only(
           topRight: Radius.circular(12),
           bottomRight: Radius.circular(12),
@@ -29,15 +29,6 @@ class SidePanel extends StatelessWidget {
             const Expanded(
               child: LayersPanel(),
             ),
-            //
-            // Divider
-            //
-            const Divider(
-              thickness: 8,
-              height: 16,
-              color: Colors.grey,
-            ),
-
             //
             // Tools Panel
             //

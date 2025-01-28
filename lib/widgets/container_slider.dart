@@ -71,8 +71,8 @@ class _ContainerSliderState extends State<ContainerSlider> {
       child: Container(
         padding: const EdgeInsets.all(1.0),
         decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(8.0),
+          color: Colors.grey,
+          borderRadius: BorderRadius.circular(3.0),
         ),
         child: Stack(
           alignment: Alignment.center,
@@ -83,7 +83,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
               child: Container(
                 padding: const EdgeInsets.all(1),
                 decoration: BoxDecoration(
-                  color: Colors.white.withAlpha(140),
+                  color: Colors.black.withAlpha(140),
                   borderRadius: BorderRadius.circular(2.0),
                 ),
                 child: Text(

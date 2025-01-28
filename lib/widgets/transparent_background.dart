@@ -82,7 +82,7 @@ void drawTransaparentBackgroundOffsetAndSize(
             cellSize,
             cellSize,
           ),
-          Paint()..color = Colors.grey.shade400,
+          Paint()..color = Colors.grey.shade600,
         );
       }
     }

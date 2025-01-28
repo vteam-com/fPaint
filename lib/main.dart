@@ -14,9 +14,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => AppModel(),
-      child: const MaterialApp(
+      child: MaterialApp(
         title: 'Flutter Paint App',
-        home: MainScreen(),
+        theme: ThemeData.dark(), // Use dark theme
+        home: const MainScreen(),
       ),
     );
   }

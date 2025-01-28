@@ -44,9 +44,8 @@ class ToolsPanel extends StatelessWidget {
               // Divider
               //
               const Divider(
-                thickness: 8,
-                height: 16,
-                color: Colors.grey,
+                thickness: 6,
+                height: 10,
               ),
 
               Expanded(
@@ -143,7 +142,7 @@ class ToolsPanel extends StatelessWidget {
         adjustmentWidget(
           name: 'Brush Style',
           buttonIcon: Icons.line_weight,
-          buttonIconColor: Colors.black,
+          buttonIconColor: Colors.grey.shade500,
           onButtonPressed: () {
             showBrushSizePicker(context, appModel.brusSize,
                 (final double newValue) {
@@ -168,7 +167,7 @@ class ToolsPanel extends StatelessWidget {
         adjustmentWidget(
           name: 'Brush Style',
           buttonIcon: Icons.line_style_outlined,
-          buttonIconColor: Colors.black,
+          buttonIconColor: Colors.grey.shade500,
           onButtonPressed: () {
             showBrushStylePicker(context);
           },
