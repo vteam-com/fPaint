@@ -237,8 +237,9 @@ class Layer {
   }
 
   void renderEraser(Canvas canvas, Paint paint, UserAction userAction) {
-    paint.color = Colors.white;
+    paint.blendMode = BlendMode.clear;
     paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = userAction.brushSize;
     canvas.drawLine(
       userAction.positions.first,
       userAction.positions.last,

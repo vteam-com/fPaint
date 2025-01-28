@@ -26,7 +26,8 @@ class LayerSelector extends StatelessWidget {
     return Tooltip(
       margin: const EdgeInsets.only(left: 150),
       waitDuration: const Duration(milliseconds: 1000),
-      message: '${layer.id}:"${layer.name}" Opacity: ${layer.opacity.toStringAsFixed(0)}',
+      message:
+          '${layer.id}:"${layer.name}" Opacity: ${layer.opacity.toStringAsFixed(0)}',
       child: Container(
         margin: EdgeInsets.all(minimal ? 2 : 4),
         padding: EdgeInsets.all(minimal ? 2 : 8),
@@ -46,7 +47,8 @@ class LayerSelector extends StatelessWidget {
                     alignment: Alignment.topCenter,
                     children: [
                       _buildThumbnailAndOpacity(appModel, layer),
-                      if (!layer.isVisible) const Icon(Icons.visibility_off, color: Colors.red),
+                      if (!layer.isVisible)
+                        const Icon(Icons.visibility_off, color: Colors.red),
                     ],
                   ),
                 ],
@@ -112,7 +114,8 @@ class LayerThumbnail extends StatelessWidget {
     return FutureBuilder<ui.Image>(
       future: layer.getThumbnail(appModel.canvasSize),
       builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.hasData) {
           return SizedBox(
             width: 50,
             height: 50,
