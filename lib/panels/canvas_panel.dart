@@ -10,25 +10,29 @@ class CanvasPanel extends StatelessWidget {
   Widget build(final BuildContext context) {
     return CustomPaint(
       size: Size.infinite,
-      painter: CanvasPanelPainter(appModel),
+      painter: CanvasPanelPainter(appModel, includeTransparentBackground: true),
     );
   }
 }
 
 class CanvasPanelPainter extends CustomPainter {
-  CanvasPanelPainter(this._appModel);
+  CanvasPanelPainter(this._appModel,
+      {this.includeTransparentBackground = false});
   final AppModel _appModel;
+  final bool includeTransparentBackground;
 
   @override
   void paint(final Canvas canvas, final Size size) {
     canvas.scale(_appModel.scale);
 
     /// Render the transparent grid
-    drawTransaparentBackgroundOffsetAndSize(
-      canvas,
-      Offset.zero,
-      _appModel.canvasSize,
-    );
+    if (includeTransparentBackground) {
+      drawTransaparentBackgroundOffsetAndSize(
+        canvas,
+        Offset.zero,
+        _appModel.canvasSize,
+      );
+    }
 
     for (final Layer layer in _appModel.layers.list.reversed) {
       if (layer.isVisible) {
