@@ -24,7 +24,8 @@ class LayerSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final appModel = AppModel.get(context);
     return Tooltip(
-      verticalOffset: 40,
+      margin: const EdgeInsets.only(left: 150),
+      waitDuration: const Duration(milliseconds: 1000),
       message: '${layer.id}:"${layer.name}" Opacity: ${layer.opacity.toStringAsFixed(0)}',
       child: Container(
         margin: EdgeInsets.all(minimal ? 2 : 4),
