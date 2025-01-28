@@ -68,12 +68,12 @@ Future<void> readOraFileFromBytes(
   // Extract layers
   for (final XmlElement xmlLayer in stackXml.findAllElements('layer')) {
     final String name = xmlLayer.getAttribute('name') ?? 'Unnamed';
-    final String opacityAsText = xmlLayer.getAttribute('opacity') ?? '1.0';
+    final String opacityAsText = xmlLayer.getAttribute('opacity') ?? '1';
     final String visibleAsText = xmlLayer.getAttribute('visible') ?? 'true';
 
     final Layer newLayer = appModel.addLayerBottom(name);
     newLayer.isVisible = visibleAsText == 'true';
-    newLayer.opacity = double.parse(opacityAsText);
+    newLayer.opacity = double.parse(opacityAsText) * 100;
 
     // is there an image on this layer?
     final String? src = xmlLayer.getAttribute('src');
@@ -195,7 +195,7 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
     layersData.add({
       'name': layer.name,
       'visibility': layer.isVisible ? 'visible' : 'hidden',
-      'opacity': layer.opacity.toString(),
+      'opacity': (layer.opacity / 100).toString(),
       'src': imageName,
       'x': 0,
       'y': 0,

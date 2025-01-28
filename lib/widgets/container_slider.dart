@@ -89,7 +89,9 @@ class _ContainerSliderState extends State<ContainerSlider> {
                 child: Text(
                   currentValue.toStringAsFixed(0),
                   style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.bold),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
