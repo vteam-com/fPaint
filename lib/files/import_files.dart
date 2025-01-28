@@ -33,26 +33,16 @@ Future<void> onFileOpen(final BuildContext context) async {
         final Uint8List bytes = result.files.single.bytes!;
         if (result.files.single.extension == 'ora') {
           await readOraFileFromBytes(appModel, bytes);
-        } else if (result.files.single.extension == 'png' ||
-            result.files.single.extension == 'psd' ||
-            result.files.single.extension == 'tif' ||
-            result.files.single.extension == 'tiff' ||
-            result.files.single.extension == 'webp' ||
-            result.files.single.extension == 'jpg' ||
-            result.files.single.extension == 'jpeg') {
+        } else if (isFileExtensionSupported(
+            result.files.single.extension ?? '')) {
           await readImageFileFromBytes(appModel, bytes);
         }
       } else {
         final path = result.files.single.path!;
         if (result.files.single.extension == 'ora') {
           await readOraFile(appModel, path);
-        } else if (result.files.single.extension == 'png' ||
-            result.files.single.extension == 'psd' ||
-            result.files.single.extension == 'tif' ||
-            result.files.single.extension == 'tiff' ||
-            result.files.single.extension == 'webp' ||
-            result.files.single.extension == 'jpg' ||
-            result.files.single.extension == 'jpeg') {
+        } else if (isFileExtensionSupported(
+            result.files.single.extension ?? '')) {
           await readImageFilePath(appModel, path);
         }
       }
@@ -61,6 +51,19 @@ Future<void> onFileOpen(final BuildContext context) async {
     // Handle any errors that occur during file picking/loading
     debugPrint('Error opening file: $e');
   }
+}
+
+bool isFileExtensionSupported(String extension) {
+  List<String> supportedExtensions = [
+    'ora',
+    'png',
+    'psd',
+    'tif',
+    'tiff',
+    'webp',
+    'jpg' 'jpeg'
+  ];
+  return supportedExtensions.contains(extension.toLowerCase());
 }
 
 Future<void> _readImageFile(
