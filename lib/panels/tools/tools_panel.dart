@@ -1,10 +1,9 @@
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/panels/tool_selector.dart';
+import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
+import 'package:fpaint/panels/tools/tool_selector.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker.dart';
-import 'package:fpaint/widgets/transparent_background.dart';
 import 'package:provider/provider.dart';
 
 /// Represents a panel that displays tools for the application.
@@ -71,7 +70,7 @@ class ToolsPanel extends StatelessWidget {
   Widget buildTools({required bool vertical}) {
     final List<Widget> tools = [
       // Pencil
-      ToolItem(
+      ToolSelector(
         name: 'Draw',
         icon: Icons.brush,
         isSelected: currentShapeType == Tools.draw,
@@ -79,7 +78,7 @@ class ToolsPanel extends StatelessWidget {
       ),
 
       // Line
-      ToolItem(
+      ToolSelector(
         name: 'Line',
         icon: Icons.line_axis,
         isSelected: currentShapeType == Tools.line,
@@ -87,7 +86,7 @@ class ToolsPanel extends StatelessWidget {
       ),
 
       // Rectangle
-      ToolItem(
+      ToolSelector(
         name: 'Rectangle',
         icon: Icons.crop_square,
         isSelected: currentShapeType == Tools.rectangle,
@@ -95,14 +94,14 @@ class ToolsPanel extends StatelessWidget {
       ),
 
       // Circle
-      ToolItem(
+      ToolSelector(
         name: 'Circle',
         icon: Icons.circle_outlined,
         isSelected: currentShapeType == Tools.circle,
         onPressed: () => onShapeSelected(Tools.circle),
       ),
 
-      ToolItem(
+      ToolSelector(
         name: 'Eraser',
         icon: Icons.cleaning_services,
         isSelected: currentShapeType == Tools.eraser,
@@ -139,7 +138,7 @@ class ToolsPanel extends StatelessWidget {
     // Stroke Weight
     if (currentShapeType.isSupported(ToolAttribute.brushSize)) {
       widgets.add(
-        adjustmentWidget(
+        ToolAttributeWidget(
           name: 'Brush Style',
           buttonIcon: Icons.line_weight,
           buttonIconColor: Colors.grey.shade500,
@@ -150,7 +149,7 @@ class ToolsPanel extends StatelessWidget {
             });
           },
           child: vertical
-              ? const SizedBox()
+              ? null
               : BrushSizePicker(
                   value: appModel.brusSize,
                   onChanged: (value) {
@@ -164,14 +163,14 @@ class ToolsPanel extends StatelessWidget {
     // Bruse Style
     if (currentShapeType.isSupported(ToolAttribute.brushStyle)) {
       widgets.add(
-        adjustmentWidget(
+        ToolAttributeWidget(
           name: 'Brush Style',
           buttonIcon: Icons.line_style_outlined,
           buttonIconColor: Colors.grey.shade500,
           onButtonPressed: () {
             showBrushStylePicker(context);
           },
-          child: vertical ? const SizedBox() : brushStyleSelection(appModel),
+          child: vertical ? null : brushStyleSelection(appModel),
         ),
       );
     }
@@ -179,7 +178,7 @@ class ToolsPanel extends StatelessWidget {
     // Color Stroke
     if (currentShapeType.isSupported(ToolAttribute.colorOutline)) {
       widgets.add(
-        adjustmentWidget(
+        ToolAttributeWidget(
           name: 'Brush Color',
           buttonIcon: Icons.water_drop_outlined,
           buttonIconColor: appModel.brushColor,
@@ -191,7 +190,7 @@ class ToolsPanel extends StatelessWidget {
           ),
           transparentPaper: true,
           child: vertical
-              ? const SizedBox()
+              ? null
               : MyColorPicker(
                   color: appModel.brushColor,
                   onColorChanged: (Color color) => appModel.brushColor = color,
@@ -203,7 +202,7 @@ class ToolsPanel extends StatelessWidget {
     // Color Fill
     if (currentShapeType.isSupported(ToolAttribute.colorFill)) {
       widgets.add(
-        adjustmentWidget(
+        ToolAttributeWidget(
           name: 'Fill Color',
           buttonIcon: Icons.water_drop,
           buttonIconColor: appModel.fillColor,
@@ -215,7 +214,7 @@ class ToolsPanel extends StatelessWidget {
           ),
           transparentPaper: true,
           child: vertical
-              ? const SizedBox()
+              ? null
               : MyColorPicker(
                   color: appModel.fillColor,
                   onColorChanged: (Color color) => appModel.fillColor = color,
@@ -231,86 +230,6 @@ class ToolsPanel extends StatelessWidget {
         separatorBuilder: (context, index) => const Divider(),
         itemBuilder: (context, index) => widgets[index],
       ),
-    );
-  }
-
-  Widget adjustmentWidget({
-    required String name,
-    required IconData buttonIcon,
-    required Color buttonIconColor,
-    required VoidCallback onButtonPressed,
-    required Widget child,
-    bool transparentPaper = false,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            margin: const EdgeInsets.only(right: 8),
-            child: Stack(
-              alignment: AlignmentDirectional.center,
-              children: [
-                if (transparentPaper)
-                  const TransparentPaper(
-                    patternSize: 4,
-                  ),
-                IconButton(
-                  icon: Icon(buttonIcon),
-                  onPressed: onButtonPressed,
-                  color: buttonIconColor,
-                  tooltip: name,
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: child,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Displays a color picker dialog with the given title, initial color, and callback for the selected color.
-  ///
-  /// The color picker dialog is displayed using the [showDialog] function, and includes a [ColorPicker] widget
-  /// that allows the user to select a color. The selected color is passed to the [onSelectedColor] callback.
-  ///
-  /// Parameters:
-  /// - `context`: The [BuildContext] used to display the dialog.
-  /// - `title`: The title of the color picker dialog.
-  /// - `color`: The initial color to be displayed in the color picker.
-  /// - `onSelectedColor`: A callback that is called when the user selects a color. The selected color is passed as an argument.
-  void showColorPicker({
-    required final BuildContext context,
-    required final String title,
-    required final Color color,
-    required final ValueChanged<Color> onSelectedColor,
-  }) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              color: color,
-              onColorChanged: (Color color) {
-                onSelectedColor(color);
-              },
-              pickersEnabled: {
-                ColorPickerType.wheel: true,
-                ColorPickerType.primary: true,
-                ColorPickerType.accent: true,
-              },
-              showColorCode: true,
-            ),
-          ),
-        );
-      },
     );
   }
 }

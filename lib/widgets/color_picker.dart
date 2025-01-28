@@ -1,3 +1,4 @@
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
@@ -165,4 +166,44 @@ class BrightnessGradientPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true; // We want to repaint when the hue changes
   }
+}
+
+/// Displays a color picker dialog with the given title, initial color, and callback for the selected color.
+///
+/// The color picker dialog is displayed using the [showDialog] function, and includes a [ColorPicker] widget
+/// that allows the user to select a color. The selected color is passed to the [onSelectedColor] callback.
+///
+/// Parameters:
+/// - `context`: The [BuildContext] used to display the dialog.
+/// - `title`: The title of the color picker dialog.
+/// - `color`: The initial color to be displayed in the color picker.
+/// - `onSelectedColor`: A callback that is called when the user selects a color. The selected color is passed as an argument.
+void showColorPicker({
+  required final BuildContext context,
+  required final String title,
+  required final Color color,
+  required final ValueChanged<Color> onSelectedColor,
+}) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            color: color,
+            onColorChanged: (Color color) {
+              onSelectedColor(color);
+            },
+            pickersEnabled: {
+              ColorPickerType.wheel: true,
+              ColorPickerType.primary: true,
+              ColorPickerType.accent: true,
+            },
+            showColorCode: true,
+          ),
+        ),
+      );
+    },
+  );
 }

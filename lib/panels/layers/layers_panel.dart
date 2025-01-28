@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/panels/layer_selector.dart';
+import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
 

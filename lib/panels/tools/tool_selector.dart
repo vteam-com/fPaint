@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class ToolItem extends StatelessWidget {
-  const ToolItem({
+class ToolSelector extends StatelessWidget {
+  const ToolSelector({
     super.key,
     required this.name,
     required this.icon,

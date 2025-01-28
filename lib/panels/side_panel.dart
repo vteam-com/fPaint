@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/panels/layers_panel.dart';
-import 'package:fpaint/panels/tools_panel.dart';
+import 'package:fpaint/panels/layers/layers_panel.dart';
+import 'package:fpaint/panels/tools/tools_panel.dart';
 
 class SidePanel extends StatelessWidget {
   const SidePanel({super.key});
