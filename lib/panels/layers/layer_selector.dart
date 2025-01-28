@@ -83,7 +83,7 @@ class LayerSelector extends StatelessWidget {
       child: ContainerSlider(
         key: ValueKey(layer.name + layer.id),
         minValue: 0.0,
-        maxValue: 100.0,
+        maxValue: 1.0,
         initialValue: layer.opacity,
         onSlideStart: () {
           // appModel.update();

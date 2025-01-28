@@ -34,7 +34,8 @@ Future<void> onFileOpen(final BuildContext context) async {
         if (result.files.single.extension == 'ora') {
           await readOraFileFromBytes(appModel, bytes);
         } else if (isFileExtensionSupported(
-            result.files.single.extension ?? '')) {
+          result.files.single.extension ?? '',
+        )) {
           await readImageFileFromBytes(appModel, bytes);
         }
       } else {
@@ -42,7 +43,8 @@ Future<void> onFileOpen(final BuildContext context) async {
         if (result.files.single.extension == 'ora') {
           await readOraFile(appModel, path);
         } else if (isFileExtensionSupported(
-            result.files.single.extension ?? '')) {
+          result.files.single.extension ?? '',
+        )) {
           await readImageFilePath(appModel, path);
         }
       }
@@ -61,7 +63,8 @@ bool isFileExtensionSupported(String extension) {
     'tif',
     'tiff',
     'webp',
-    'jpg' 'jpeg'
+    'jpg',
+    'jpeg',
   ];
   return supportedExtensions.contains(extension.toLowerCase());
 }

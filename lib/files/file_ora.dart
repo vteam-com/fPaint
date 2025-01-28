@@ -73,7 +73,7 @@ Future<void> readOraFileFromBytes(
 
     final Layer newLayer = appModel.addLayerBottom(name);
     newLayer.isVisible = visibleAsText == 'true';
-    newLayer.opacity = double.parse(opacityAsText) * 100;
+    newLayer.opacity = double.parse(opacityAsText);
 
     // is there an image on this layer?
     final String? src = xmlLayer.getAttribute('src');
@@ -94,10 +94,6 @@ Future<void> readOraFileFromBytes(
         offset: offset,
       );
     }
-
-    // print(
-    //   'Layer:"$name" opacity:$opacityAsText visible:$visibleAsText',
-    // );
   }
 }
 
@@ -179,10 +175,11 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
     final String imageName = 'data/layer-$i.png';
 
     // Save layer image as PNG
-    final ui.Image image = await layer.toImage(appModel.canvasSize);
+    final ui.Image imageLayer =
+        await layer.toImageForStorage(appModel.canvasSize);
 
     final ByteData? bytes =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+        await imageLayer.toByteData(format: ui.ImageByteFormat.png);
 
     archive.addFile(
       ArchiveFile(
@@ -195,7 +192,7 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
     layersData.add({
       'name': layer.name,
       'visibility': layer.isVisible ? 'visible' : 'hidden',
-      'opacity': (layer.opacity / 100).toString(),
+      'opacity': layer.opacity.toStringAsFixed(5),
       'src': imageName,
       'x': 0,
       'y': 0,

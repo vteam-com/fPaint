@@ -5,8 +5,8 @@ class ContainerSlider extends StatefulWidget {
   const ContainerSlider({
     super.key,
     this.minValue = 0.0,
-    this.maxValue = 100.0,
-    this.initialValue = 50.0,
+    this.maxValue = 1.0,
+    this.initialValue = 0.5,
     required this.onChanged,
     required this.onChangeEnd,
     required this.onSlideStart,
@@ -58,7 +58,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
               }
               ..onUpdate = (details) {
                 _adjustValue(
-                  details.primaryDelta! * 0.2,
+                  details.primaryDelta! * 0.01,
                 ); // Adjust sensitivity.
               }
               ..onEnd = (_) {
@@ -87,9 +87,9 @@ class _ContainerSliderState extends State<ContainerSlider> {
                   borderRadius: BorderRadius.circular(2.0),
                 ),
                 child: Text(
-                  currentValue.toStringAsFixed(0),
+                  '${(currentValue * 100).toStringAsFixed(1)}%',
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

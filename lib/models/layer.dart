@@ -31,7 +31,7 @@ class Layer {
   //
   // Opacity
   //
-  double _opacity = 100; // 0 to 100 %
+  double _opacity = 1; // 0.0 to 1.0=100%
 
   double get opacity => _opacity;
 
@@ -111,6 +111,13 @@ class Layer {
     return cachedRendering!;
   }
 
+  Future<ui.Image> toImageForStorage(final Size size) async {
+    return await renderImageWH(
+      size.width.toInt(),
+      size.height.toInt(),
+    );
+  }
+
   Future<ui.Image> getThumbnail(final Size size) async {
     if (cachedRendering == null) {
       final recorder = ui.PictureRecorder();
@@ -139,7 +146,7 @@ class Layer {
   void renderLayer(final Canvas canvas) {
     // Save a layer with opacity applied
     Paint layerPaint = Paint()
-      ..color = Colors.black.withAlpha((255 * (opacity / 100)).toInt());
+      ..color = Colors.black.withAlpha((255 * opacity).toInt());
     canvas.saveLayer(null, layerPaint);
 
     // Render all actions within the saved layer
