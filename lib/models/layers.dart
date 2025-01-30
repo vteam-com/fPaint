@@ -29,6 +29,7 @@ class Layers {
   final List<Layer> _list = [];
   void clear() => _list.clear();
   int get length => _list.length;
+  bool get isEmpty => _list.isEmpty;
 
   bool isIndexInRange(final int indexLayer) =>
       indexLayer >= 0 && indexLayer < _list.length;
@@ -38,7 +39,14 @@ class Layers {
   }
 
   Layer get(final int index) {
+    ensureLayerAtIndex(index);
     return _list[index];
+  }
+
+  void ensureLayerAtIndex(final int index) {
+    while (_list.length <= index) {
+      _list.add(Layer(name: 'Layer ${_list.length + 1}'));
+    }
   }
 
   Layer? getByName(final String name) {

@@ -40,7 +40,10 @@ Future<void> onFileOpen(final BuildContext context) async {
         }
       } else {
         final path = result.files.single.path!;
-        if (result.files.single.extension == 'ora') {
+
+        if (result.files.single.extension == 'xcf') {
+          // TODO
+        } else if (result.files.single.extension == 'ora') {
           await readOraFile(appModel, path);
         } else if (isFileExtensionSupported(
           result.files.single.extension ?? '',
@@ -65,6 +68,7 @@ bool isFileExtensionSupported(String extension) {
     'webp',
     'jpg',
     'jpeg',
+    'xcf',
   ];
   return supportedExtensions.contains(extension.toLowerCase());
 }

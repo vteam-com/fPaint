@@ -9,12 +9,22 @@ import 'package:fpaint/widgets/transparent_background.dart';
 export 'package:fpaint/models/user_action.dart';
 
 class Layer {
-  Layer({required this.name});
+  Layer({
+    required this.name,
+    this.id = '',
+    this.isSelected = false,
+    bool isVisible = true,
+    opacity = 1.0,
+  }) {
+    _isVisible = isVisible;
+    _opacity = opacity;
+  }
+
   String name;
   String id = '';
   final List<UserAction> _actionStack = [];
-  List<UserAction> redoStack = [];
-  bool isSelected = false;
+  final List<UserAction> redoStack = [];
+  bool isSelected;
 
   //
   // Visibility

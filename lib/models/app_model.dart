@@ -131,6 +131,7 @@ class AppModel extends ChangeNotifier {
     final Layer newLayer = Layer(name: name);
     layers.insert(index, newLayer);
     selectedLayerIndex = layers.getLayerIndex(newLayer);
+    update();
     return newLayer;
   }
 
