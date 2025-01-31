@@ -139,6 +139,7 @@ digraph "" {
   "/lib/models/layer.dart" -> "/lib/models/user_action.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/main_screen.dart";
   "/lib/main.dart" -> "/lib/models/app_model.dart";
+  "/lib/files/xcf_reader.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/files/export_download_web.dart" -> "/lib/files/file_jpeg.dart";
   "/lib/files/export_download_web.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/export_download_web.dart" -> "/lib/models/app_model.dart";

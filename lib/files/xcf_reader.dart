@@ -2,45 +2,144 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
+
+import 'package:fpaint/helpers/list_helper.dart';
+
+/*
+The image structure always starts at offset 0 in the XCF file.
+
+  byte[9]     "gimp xcf " File type identification
+  byte[4]     version     XCF version
+                             "file": version 0
+                             "v001": version 1
+                             "v002": version 2
+                             "v003": version 3
+  byte        0            Zero marks the end of the version tag.
+  uint32      width        Width of canvas
+  uint32      height       Height of canvas
+  uint32      base_type    Color mode of the image; one of
+                             0: RGB color
+                             1: Grayscale
+                             2: Indexed color
+                           (see enum GimpImageBaseType
+                           in libgimpbase/gimpbaseenums.h)
+  uint32      precision    Image precision; this field is only present for
+                           XCF 4 or over (since GIMP 2.10.0). Its value for
+                           XCF 7 or over is one of:
+                             100: 8-bit linear integer
+                             150: 8-bit gamma integer
+                             200: 16-bit linear integer
+                             250: 16-bit gamma integer
+                             300: 32-bit linear integer
+                             350: 32-bit gamma integer
+                             500: 16-bit linear floating point
+                             550: 16-bit gamma floating point
+                             600: 32-bit linear floating point
+                             650: 32-bit gamma floating point
+                             700: 64-bit linear floating point
+                             750: 64-bit gamma floating point
+                           For XCF 4 (which was a development version, hence
+                           this format should not be found often and may be
+                           ignored by readers), its value may be one of:
+                             0: 8-bit gamma integer
+                             1: 16-bit gamma integer
+                             2: 32-bit linear integer
+                             3: 16-bit linear floating point
+                             4: 32-bit linear floating point
+                           For XCF 5 or 6 (which were development versions,
+                           hence these formats may be ignored by readers),
+                           its value may be one of:
+                             100: 8-bit linear integer
+                             150: 8-bit gamma integer
+                             200: 16-bit linear integer
+                             250: 16-bit gamma integer
+                             300: 32-bit linear integer
+                             350: 32-bit gamma integer
+                             400: 16-bit linear floating point
+                             450: 16-bit gamma floating point
+                             500: 32-bit linear floating point
+                             550: 32-bit gamma floating point
+                           NOTE: XCF 3 or older's precision was always
+                           "8-bit gamma integer".
+  property-list        Image properties
+  ,-----------------   Repeat once for each layer, topmost layer first:
+  | pointer lptr       Pointer to the layer structure.
+  `--
+  pointer   0           Zero marks the end of the array of layer pointers.
+  ,------------------  Repeat once for each channel, in no particular order:
+  | pointer cptr       Pointer to the channel structure.
+  `--
+  pointer   0           Zero marks the end of the array of channel pointers.
+
+The last 4 characters of the initial 13-character identification string are
+a version indicator. The version will be higher than 3 if the correct
+reconstruction of pixel data from the file requires that the reader
+understands features not described in this specification. On the other
+hand, optional extra information that can be safely ignored will not
+cause the version to increase.
+
+GIMP's XCF writer dynamically selects the lowest version that will
+allow the image to be represented. Third-party XCF writers should do
+likewise.
+
+Version numbers from v100 upwards have been used by CinePaint, which
+originated as a 16-bit fork of GIMP, see "Scope".
+
+
+*/
+enum PropType {
+  PROP_END(0),
+  PROP_COLORMAP(1),
+  PROP_ACTIVE_LAYER(2),
+  PROP_ACTIVE_CHANNEL(3),
+  PROP_SELECTION(4),
+  PROP_FLOATING_SELECTION(5),
+  PROP_OPACITY(6),
+  PROP_MODE(7),
+  PROP_VISIBLE(8),
+  PROP_LINKED(9),
+  PROP_LOCK_ALPHA(10),
+  PROP_APPLY_MASK(11),
+  PROP_EDIT_MASK(12),
+  PROP_SHOW_MASK(13),
+  PROP_SHOW_MASKED(14),
+  PROP_OFFSETS(15),
+  PROP_COLOR(16),
+  PROP_COMPRESSION(17),
+  PROP_GUIDES(18),
+  PROP_RESOLUTION(19),
+  PROP_TATTOO(20),
+  PROP_PARASITES(21),
+  PROP_UNIT(22),
+  PROP_PATHS(23),
+  PROP_USER_UNIT(24),
+  PROP_VECTORS(25),
+  PROP_TEXT_LAYER_FLAGS(26),
+  PROP_OLD_SAMPLE_POINTS(27),
+  PROP_LOCK_CONTENT(28),
+  PROP_GROUP_ITEM(29),
+  PROP_ITEM_PATH(30),
+  PROP_GROUP_ITEM_FLAGS(31),
+  PROP_LOCK_POSITION(32),
+  PROP_FLOAT_OPACITY(33),
+  PROP_COLOR_TAG(34),
+  PROP_COMPOSITE_MODE(35),
+  PROP_COMPOSITE_SPACE(36),
+  PROP_BLEND_SPACE(37),
+  PROP_FLOAT_COLOR(38),
+  PROP_SAMPLE_POINTS(39),
+  PROP_NUM_PROPS(40);
+
+  const PropType(this.value);
+  final int value;
+  static PropType? fromValue(int value) {
+    return PropType.values.findFirstMatch((e) => e.value == value);
+  }
+}
 
 class FileXcf {
   static const String XCF_SIGNATURE = 'gimp xcf ';
-
-  // Property type constants
-  static const int PROP_END = 0;
-  static const int PROP_COLORMAP = 1;
-  static const int PROP_ACTIVE_LAYER = 2;
-  static const int PROP_ACTIVE_CHANNEL = 3;
-  static const int PROP_SELECTION = 4;
-  static const int PROP_FLOATING_SELECTION = 5;
-  static const int PROP_OPACITY = 6;
-  static const int PROP_MODE = 7;
-  static const int PROP_VISIBLE = 8;
-  static const int PROP_LINKED = 9;
-  static const int PROP_LOCK_CONTENT = 10;
-  static const int PROP_APPLY_MASK = 11;
-  static const int PROP_EDIT_MASK = 12;
-  static const int PROP_SHOW_MASK = 13;
-  static const int PROP_SHOW_MASKED = 14;
-  static const int PROP_OFFSETS = 15;
-  static const int PROP_COLOR = 16;
-  static const int PROP_COMPRESSION = 17;
-  static const int PROP_GUIDES = 18;
-  static const int PROP_PARASITES = 19;
-  static const int PROP_TATTOO = 20;
-  static const int PROP_UNIT = 21;
-  static const int PROP_PATHS = 22;
-  static const int PROP_USER_UNIT = 23;
-  static const int PROP_VECTORS = 24;
-  static const int PROP_TEXT_LAYER_FLAGS = 25;
-  static const int PROP_TEXT_LAYER_HINTS = 26;
-  static const int PROP_ITEM_ID = 27;
-  static const int PROP_ITEM_LOCKED = 28;
-  static const int PROP_GROUP_ITEM_FLAGS = 29;
-  static const int PROP_LOCK_POSITION = 30;
-  static const int PROP_LOCK_SIZE = 31;
-  static const int PROP_LOCK_ALPHA = 32;
-  static const int PROP_RESOLUTION = 150;
 
   int _offset = 0;
   final XcfFile xcfFile = XcfFile();
@@ -51,7 +150,7 @@ class FileXcf {
     _data = ByteData.sublistView(bytes);
 
     // Verify XCF signature
-    xcfFile.signature = _readString(9);
+    xcfFile.signature = _readString(XCF_SIGNATURE.length);
     if (!xcfFile.signature.startsWith(XCF_SIGNATURE)) {
       throw Exception('Invalid XCF file: incorrect signature');
     }
@@ -63,47 +162,128 @@ class FileXcf {
     xcfFile.width = _readUint32();
     xcfFile.height = _readUint32();
     xcfFile.baseType = _readUint32();
+    xcfFile.precision = _readUint32();
 
     // Read properties until encountering PROP_END
-
     while (true) {
-      final int propType = _readUint32();
-      if (propType == 0) {
+      final int propTypeValue = _readUint32();
+      final PropType? propType = PropType.fromValue(propTypeValue);
+      if (propType == null) {
+        print('Invalid PropertyTYpe $propTypeValue');
         break;
       }
 
-      // PROP_END
-      final int propSize = _readUint32();
-      final Uint8List propData = _readBytes(propSize);
+      print('Property: ${propType.toString()}');
+      if (propType == PropType.PROP_END) {
+        break;
+      }
 
-      // Parse property based on type
       switch (propType) {
-        case PROP_COLORMAP:
-          properties['colormap'] = _parseColormap(propData);
+        case PropType.PROP_COLORMAP:
+          /*
+            PROP_COLORMAP (essential)
+              uint32  1        Type identification
+              uint32  3*n+4    Payload length in bytes
+              uint32  n        Number of colors in the color map (should be <256)
+              ,------------    Repeat n times:
+              | byte  r        Red component of a color map color
+              | byte  g        Green component of a color map color
+              | byte  b        Blue component of a color map color
+              `--
+
+              PROP_COLORMAP stores the color map.
+              It appears in all indexed images.
+
+              The property will be ignored if it is encountered in an RGB or grayscale
+              image. The current GIMP will not write a color map with RGB or
+              grayscale images, but some older ones occasionally did, and readers
+              should be prepared to gracefully ignore it in those cases.
+
+              Note that in contrast to the palette data model of, for example, the
+              PNG format, an XCF color map does not contain alpha components, and
+              there is no color map entry for "transparent"; the alpha channel of
+              layers that have one is always represented separately.
+
+              The structure here is that of since XCF version 1.  Comments in the
+              GIMP source code indicate that XCF version 0 could not store indexed
+              images in a sane way; contemporary GIMP versions will complain and
+              reinterpret the pixel data as a grayscale image if they meet a
+              version-0 indexed image.
+
+              Beware that the payload length of the PROP_COLORMAP in particular
+              cannot be trusted: some historic releases of GIMP erroneously
+              wrote n+4 instead of 3*n+4 into the length word (but still actually
+              followed it by 3*n+4 bytes of payload).          
+          */
+          final numColors = _readUint32();
+          final colorMap = [];
+
+          for (var i = 0; i < numColors; i++) {
+            final r = _readBytes(1)[0];
+            final g = _readBytes(1)[0];
+            final b = _readBytes(1)[0];
+            colorMap.add(Color.fromRGBO(r, g, b, 1.0));
+          }
+
+          properties['colormap'] = colorMap;
           break;
-        case PROP_COMPRESSION:
-          properties['compression'] = propData[0];
+        case PropType.PROP_COMPRESSION:
+          /*
+              uint32  17       Type identification
+              uint32  1        One byte of payload
+              byte    comp     Compression indicator; one of
+                        0: No compression
+                        1: RLE encoding
+                        2: zlib compression
+                        3: (Never used, but reserved for some fractal compression)
+
+           */
+          properties['compression'] = _readBytes(1)[0];
+          // properties['compression'] = _readUint32();
           break;
-        case PROP_GUIDES:
-          properties['guides'] = _parseGuides(propData);
+        case PropType.PROP_GUIDES:
+          // properties['guides'] = _parseGuides(propData);
           break;
-        case PROP_PARASITES:
-          properties['parasites'] = _parseParasites(propSize);
+        case PropType.PROP_PARASITES:
+          final int payloadSise = _readUint32();
+          properties['parasites'] = _parseParasites(payloadSise);
           break;
-        case PROP_UNIT:
+        case PropType.PROP_UNIT:
           // properties['unit'] = _readUint32();
           break;
-        case PROP_PATHS:
+        case PropType.PROP_PATHS:
           // readPropPath();
           break;
-        case PROP_RESOLUTION:
-          properties['resolution'] = _parseResolution();
+        case PropType.PROP_RESOLUTION:
+          // properties['resolution'] = _parseResolution();
+          break;
+        case PropType.PROP_TATTOO:
+          // properties['resolution'] = _parseResolution();
           break;
 
         default:
-          print('Unhandled property type: $propType'); // Debug line
+          print(
+            'Unhandled property type: ${propType.toString()}',
+          ); // Debug line
           break;
       }
+    }
+
+    // Read layer pointers
+    List<int> layerPointers = [];
+    while (true) {
+      final pointer = _readUint32();
+      if (pointer == 0) break;
+      layerPointers.add(pointer);
+    }
+
+    // Read layers
+    for (final pointer in layerPointers) {
+      final savedOffset = _offset;
+      _offset = pointer;
+      final layer = await _readLayer(_data, _offset);
+      xcfFile.layers.add(layer);
+      _offset = savedOffset;
     }
 
     return xcfFile;
@@ -129,30 +309,7 @@ class FileXcf {
     return value;
   }
 
-  List<int> _parseColormap(Uint8List data) {
-    final colormap = <int>[];
-    for (var i = 0; i < data.length; i += 3) {
-      final color = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
-      colormap.add(color);
-    }
-    return colormap;
-  }
-
-  List<Map<String, int>> _parseGuides(Uint8List data) {
-    final guides = <Map<String, int>>[];
-    var offset = 0;
-    while (offset < data.length) {
-      final position = ByteData.view(data.buffer).getInt32(offset, Endian.big);
-      final orientation = data[offset + 4];
-      guides.add({
-        'position': position,
-        'orientation': orientation,
-      });
-      offset += 5;
-    }
-    return guides;
-  }
-
+  // ignore: unused_element
   double _readFloat() {
     final value = _data.getFloat32(_offset, Endian.big);
     _offset += 4;
@@ -219,19 +376,6 @@ class FileXcf {
     }
 
     return name;
-  }
-
-  Map<String, double> _parseResolution() {
-    // Read the x resolution as float
-    final xRes = _readFloat();
-
-    // The next three values are uint32s that we'll skip
-    _offset += 12; // Skip 3 uint32s (4 bytes each)
-
-    return {
-      'xResolution': xRes,
-      'yResolution': xRes, // In XCF, x and y resolution are typically the same
-    };
   }
 
   Future<XcfPath?> readPropPath(propData) async {
@@ -302,6 +446,7 @@ class XcfFile {
   int width = 0;
   int height = 0;
   int baseType = 0;
+  int precision = 0;
   List<XcfLayer> layers = [];
 
   String get baseTypeString {
@@ -329,38 +474,21 @@ class XcfFile {
   }
 }
 
-Future<List<int>> readLayerOffsets(ByteData buffer, int startOffset) async {
-  List<int> offsets = [];
-  int currentOffset = startOffset;
-
-  while (true) {
-    final offset = buffer.getUint32(currentOffset, Endian.big);
-    if (offset == 0) {
-      break;
-    }
-    offsets.add(offset);
-    currentOffset += 4;
-  }
-
-  return offsets;
-}
-
 Future<String> readProperty(ByteData buffer, int offset) async {
   final length = buffer.getUint32(offset + 4, Endian.big);
   final bytes = Uint8List.sublistView(buffer, offset + 8, offset + 8 + length);
   return String.fromCharCodes(bytes).replaceAll('\x00', '');
 }
 
-Future<XcfLayer> readLayer(
+Future<XcfLayer> _readLayer(
   ByteData buffer,
   int offset,
-  bool isNewVersion,
 ) async {
-  final layer = XcfLayer();
-
-  layer.width = buffer.getUint32(offset, Endian.big);
-  layer.height = buffer.getUint32(offset + 4, Endian.big);
-  layer.type = buffer.getUint32(offset + 8, Endian.big);
+  final XcfLayer layer = XcfLayer(
+    width: buffer.getUint32(offset, Endian.big),
+    height: buffer.getUint32(offset + 4, Endian.big),
+    layerType: buffer.getUint32(offset + 8, Endian.big),
+  );
 
   // Skip layer name length (4 bytes)
   final nameLength = buffer.getUint32(offset + 12, Endian.big);
@@ -382,7 +510,7 @@ Future<XcfLayer> readLayer(
 
     switch (propType) {
       case 6: // Opacity
-        layer.opacity = buffer.getUint32(propOffset + 8, Endian.big);
+        layer.opacity = buffer.getUint32(propOffset + 8, Endian.big).toDouble();
         break;
       case 7: // Visible
         layer.visible = buffer.getUint32(propOffset + 8, Endian.big) != 0;
@@ -433,15 +561,110 @@ class PathPoint {
 }
 
 class XcfLayer {
-  late int width;
-  late int height;
-  late int type;
-  late String name;
-  late int opacity;
-  late bool visible;
+  XcfLayer({
+    this.name = '',
+    this.width = 0,
+    this.height = 0,
+    this.layerType = 0,
+    this.properties = const {},
+    this.hierarchy,
+  });
+  String name;
+  final int width;
+  final int height;
+  final int layerType;
+  final Map<String, dynamic> properties;
+  final XcfHierarchy? hierarchy;
+  double opacity = 0;
+  bool visible = false;
 
   @override
   String toString() {
-    return 'Layer "$name" (${width}x$height), opacity: ${(opacity / 255 * 100).round()}%, ${visible ? "visible" : "hidden"}';
+    return 'Layer(name: $name, size: ${width}x$height, type: $layerType, properties: $properties)';
   }
+}
+
+class XcfHierarchy {
+  XcfHierarchy({
+    required this.width,
+    required this.height,
+    required this.bpp,
+    required this.tileOffsets,
+  });
+  final int width;
+  final int height;
+  final int bpp;
+  final List<int> tileOffsets;
+
+  @override
+  String toString() {
+    return 'Hierarchy(width: $width, height: $height, bpp: $bpp, tileOffsets: $tileOffsets)';
+  }
+}
+
+enum GimpImageBaseType { GIMP_RGB, GIMP_GRAY, GIMP_INDEXED }
+
+enum GimpLayerMode {
+  GIMP_LAYER_MODE_NORMAL_LEGACY,
+  GIMP_LAYER_MODE_DISSOLVE,
+  GIMP_LAYER_MODE_BEHIND_LEGACY,
+  GIMP_LAYER_MODE_MULTIPLY_LEGACY,
+  GIMP_LAYER_MODE_SCREEN_LEGACY,
+  GIMP_LAYER_MODE_OVERLAY_LEGACY,
+  GIMP_LAYER_MODE_DIFFERENCE_LEGACY,
+  GIMP_LAYER_MODE_ADDITION_LEGACY,
+  GIMP_LAYER_MODE_SUBTRACT_LEGACY,
+  GIMP_LAYER_MODE_DARKEN_ONLY_LEGACY,
+  GIMP_LAYER_MODE_LIGHTEN_ONLY_LEGACY,
+  GIMP_LAYER_MODE_HSV_HUE_LEGACY,
+  GIMP_LAYER_MODE_HSV_SATURATION_LEGACY,
+  GIMP_LAYER_MODE_HSL_COLOR_LEGACY,
+  GIMP_LAYER_MODE_HSV_VALUE_LEGACY,
+  GIMP_LAYER_MODE_DIVIDE_LEGACY,
+  GIMP_LAYER_MODE_DODGE_LEGACY,
+  GIMP_LAYER_MODE_BURN_LEGACY,
+  GIMP_LAYER_MODE_HARDLIGHT_LEGACY,
+  GIMP_LAYER_MODE_SOFTLIGHT_LEGACY,
+  GIMP_LAYER_MODE_GRAIN_EXTRACT_LEGACY,
+  GIMP_LAYER_MODE_GRAIN_MERGE_LEGACY,
+  GIMP_LAYER_MODE_COLOR_ERASE_LEGACY,
+  GIMP_LAYER_MODE_OVERLAY,
+  GIMP_LAYER_MODE_LCH_HUE,
+  GIMP_LAYER_MODE_LCH_CHROMA,
+  GIMP_LAYER_MODE_LCH_COLOR,
+  GIMP_LAYER_MODE_LCH_LIGHTNESS,
+  GIMP_LAYER_MODE_NORMAL,
+  GIMP_LAYER_MODE_BEHIND,
+  GIMP_LAYER_MODE_MULTIPLY,
+  GIMP_LAYER_MODE_SCREEN,
+  GIMP_LAYER_MODE_DIFFERENCE,
+  GIMP_LAYER_MODE_ADDITION,
+  GIMP_LAYER_MODE_SUBTRACT,
+  GIMP_LAYER_MODE_DARKEN_ONLY,
+  GIMP_LAYER_MODE_LIGHTEN_ONLY,
+  GIMP_LAYER_MODE_HSV_HUE,
+  GIMP_LAYER_MODE_HSV_SATURATION,
+  GIMP_LAYER_MODE_HSL_COLOR,
+  GIMP_LAYER_MODE_HSV_VALUE,
+  GIMP_LAYER_MODE_DIVIDE,
+  GIMP_LAYER_MODE_DODGE,
+  GIMP_LAYER_MODE_BURN,
+  GIMP_LAYER_MODE_HARDLIGHT,
+  GIMP_LAYER_MODE_SOFTLIGHT,
+  GIMP_LAYER_MODE_GRAIN_EXTRACT,
+  GIMP_LAYER_MODE_GRAIN_MERGE,
+  GIMP_LAYER_MODE_VIVID_LIGHT,
+  GIMP_LAYER_MODE_PIN_LIGHT,
+  GIMP_LAYER_MODE_LINEAR_LIGHT,
+  GIMP_LAYER_MODE_HARD_MIX,
+  GIMP_LAYER_MODE_EXCLUSION,
+  GIMP_LAYER_MODE_LINEAR_BURN,
+  GIMP_LAYER_MODE_LUMA_DARKEN_ONLY,
+  GIMP_LAYER_MODE_LUMA_LIGHTEN_ONLY,
+  GIMP_LAYER_MODE_LUMINANCE,
+  GIMP_LAYER_MODE_COLOR_ERASE,
+  GIMP_LAYER_MODE_ERASE,
+  GIMP_LAYER_MODE_MERGE,
+  GIMP_LAYER_MODE_SPLIT,
+  GIMP_LAYER_MODE_PASS_THROUGH,
 }

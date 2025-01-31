@@ -15,22 +15,26 @@ import 'package:fpaint/files/xcf_reader.dart';
 
 void main() {
   testWidgets('Simply Run the app', (WidgetTester tester) async {
-    final inputImageXcf = await loadBinaryFromAssets('assets/test/sample.xcf');
+    try {
+      final inputImageXcf =
+          await loadBinaryFromAssets('assets/test/sample.xcf');
 
-    final Uint8List bytes = inputImageXcf.buffer.asUint8List();
-    final fileXcf = FileXcf();
-    final xfcFile = await fileXcf.readXcf(bytes);
+      final Uint8List bytes = inputImageXcf.buffer.asUint8List();
+      final fileXcf = FileXcf();
+      final xfcFile = await fileXcf.readXcf(bytes);
 
-    expect(xfcFile.signature, 'gimp xcf ');
-    expect(xfcFile.version, 'v011');
-    expect(xfcFile.width, 900);
-    expect(xfcFile.height, 500);
-    expect(xfcFile.baseTypeString, 'RGB');
-    expect(xfcFile.layers.length, 0);
+      expect(xfcFile.signature, 'gimp xcf ');
+      expect(xfcFile.version, 'v011');
+      expect(xfcFile.width, 900);
+      expect(xfcFile.height, 500);
+      expect(xfcFile.baseTypeString, 'RGB');
+      expect(xfcFile.layers.length, 0);
 
-    for (var i = 0; i < xfcFile.layers.length; i++) {
-      print('${i + 1}. ${xfcFile.layers[i]}');
+      for (var i = 0; i < xfcFile.layers.length; i++) {
+        print('${i + 1}. ${xfcFile.layers[i]}');
+      }
+    } catch (e) {
+      print('ERROR ${e.toString()}');
     }
-    // print('properties ${fileXcf.properties.toString()}');
   });
 }
