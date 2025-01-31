@@ -1,28 +1,307 @@
-// ignore_for_file: avoid_print, constant_identifier_names
+// ignore_for_file: avoid_print, constant_identifier_names, always_put_control_body_on_new_line
 
 import 'dart:async';
 import 'dart:typed_data';
 
-class XcfLayer {
-  late int width;
-  late int height;
-  late int type;
-  late String name;
-  late int opacity;
-  late bool visible;
+class FileXcf {
+  static const String XCF_SIGNATURE = 'gimp xcf ';
 
-  @override
-  String toString() {
-    return 'Layer "$name" (${width}x$height), opacity: ${(opacity / 255 * 100).round()}%, ${visible ? "visible" : "hidden"}';
+  // Property type constants
+  static const int PROP_END = 0;
+  static const int PROP_COLORMAP = 1;
+  static const int PROP_ACTIVE_LAYER = 2;
+  static const int PROP_ACTIVE_CHANNEL = 3;
+  static const int PROP_SELECTION = 4;
+  static const int PROP_FLOATING_SELECTION = 5;
+  static const int PROP_OPACITY = 6;
+  static const int PROP_MODE = 7;
+  static const int PROP_VISIBLE = 8;
+  static const int PROP_LINKED = 9;
+  static const int PROP_LOCK_CONTENT = 10;
+  static const int PROP_APPLY_MASK = 11;
+  static const int PROP_EDIT_MASK = 12;
+  static const int PROP_SHOW_MASK = 13;
+  static const int PROP_SHOW_MASKED = 14;
+  static const int PROP_OFFSETS = 15;
+  static const int PROP_COLOR = 16;
+  static const int PROP_COMPRESSION = 17;
+  static const int PROP_GUIDES = 18;
+  static const int PROP_PARASITES = 19;
+  static const int PROP_TATTOO = 20;
+  static const int PROP_UNIT = 21;
+  static const int PROP_PATHS = 22;
+  static const int PROP_USER_UNIT = 23;
+  static const int PROP_VECTORS = 24;
+  static const int PROP_TEXT_LAYER_FLAGS = 25;
+  static const int PROP_TEXT_LAYER_HINTS = 26;
+  static const int PROP_ITEM_ID = 27;
+  static const int PROP_ITEM_LOCKED = 28;
+  static const int PROP_GROUP_ITEM_FLAGS = 29;
+  static const int PROP_LOCK_POSITION = 30;
+  static const int PROP_LOCK_SIZE = 31;
+  static const int PROP_LOCK_ALPHA = 32;
+  static const int PROP_RESOLUTION = 150;
+
+  int _offset = 0;
+  final XcfFile xcfFile = XcfFile();
+  late final ByteData _data;
+  final Map<String, dynamic> properties = <String, dynamic>{};
+
+  Future<XcfFile> readXcf(Uint8List bytes) async {
+    _data = ByteData.sublistView(bytes);
+
+    // Verify XCF signature
+    xcfFile.signature = _readString(9);
+    if (!xcfFile.signature.startsWith(XCF_SIGNATURE)) {
+      throw Exception('Invalid XCF file: incorrect signature');
+    }
+
+    // Read version
+    xcfFile.version = _readNullTerminatedString();
+
+    // Read basic properties
+    xcfFile.width = _readUint32();
+    xcfFile.height = _readUint32();
+    xcfFile.baseType = _readUint32();
+
+    // Read properties until encountering PROP_END
+
+    while (true) {
+      final int propType = _readUint32();
+      if (propType == 0) {
+        break;
+      }
+
+      // PROP_END
+      final int propSize = _readUint32();
+      final Uint8List propData = _readBytes(propSize);
+
+      // Parse property based on type
+      switch (propType) {
+        case PROP_COLORMAP:
+          properties['colormap'] = _parseColormap(propData);
+          break;
+        case PROP_COMPRESSION:
+          properties['compression'] = propData[0];
+          break;
+        case PROP_GUIDES:
+          properties['guides'] = _parseGuides(propData);
+          break;
+        case PROP_PARASITES:
+          properties['parasites'] = _parseParasites(propSize);
+          break;
+        case PROP_UNIT:
+          // properties['unit'] = _readUint32();
+          break;
+        case PROP_PATHS:
+          // readPropPath();
+          break;
+        case PROP_RESOLUTION:
+          properties['resolution'] = _parseResolution();
+          break;
+
+        default:
+          print('Unhandled property type: $propType'); // Debug line
+          break;
+      }
+    }
+
+    return xcfFile;
+  }
+
+  String _readString(int length) {
+    final bytes = _readBytes(length);
+    return String.fromCharCodes(bytes);
+  }
+
+  Uint8List _readBytes(int length) {
+    final bytes = Uint8List(length);
+    for (var i = 0; i < length; i++) {
+      bytes[i] = _data.getUint8(_offset + i);
+    }
+    _offset += length;
+    return bytes;
+  }
+
+  int _readUint32() {
+    final value = _data.getUint32(_offset, Endian.big);
+    _offset += 4;
+    return value;
+  }
+
+  List<int> _parseColormap(Uint8List data) {
+    final colormap = <int>[];
+    for (var i = 0; i < data.length; i += 3) {
+      final color = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
+      colormap.add(color);
+    }
+    return colormap;
+  }
+
+  List<Map<String, int>> _parseGuides(Uint8List data) {
+    final guides = <Map<String, int>>[];
+    var offset = 0;
+    while (offset < data.length) {
+      final position = ByteData.view(data.buffer).getInt32(offset, Endian.big);
+      final orientation = data[offset + 4];
+      guides.add({
+        'position': position,
+        'orientation': orientation,
+      });
+      offset += 5;
+    }
+    return guides;
+  }
+
+  double _readFloat() {
+    final value = _data.getFloat32(_offset, Endian.big);
+    _offset += 4;
+    return value;
+  }
+
+  List<Map<String, dynamic>> _parseParasites(int totalSize) {
+    final parasites = <Map<String, dynamic>>[];
+    final endOffset = _offset + totalSize;
+
+    print('Parsing parasites at offset $_offset');
+
+    while (_offset < endOffset) {
+      // Read parasite name (null-terminated string)
+      final name = _readNullTerminatedString();
+      if (name.isEmpty) {
+        break; // Avoid infinite loops if parsing fails
+      }
+
+      print('Found parasite: $name');
+
+      // Read flags (4 bytes)
+      if (_offset + 4 > endOffset) break;
+      // Safety check
+      final int flags = _readUint32();
+
+      // Read size of parasite data
+      if (_offset + 4 > endOffset) break; // Safety check
+      final int size = _readUint32();
+
+      print('Parasite "$name" size: $size bytes');
+
+      // Read parasite data safely
+      if (_offset + size > endOffset) break; // Safety check
+      final Uint8List data = _readBytes(size);
+
+      parasites.add({
+        'name': name,
+        'flags': flags,
+        'size': size,
+        'data': data,
+      });
+    }
+
+    return parasites;
+  }
+
+  String _readNullTerminatedString() {
+    List<int> chars = [];
+    final startOffset = _offset; // Track starting position
+
+    while (_offset < _data.lengthInBytes) {
+      int byte = _data.getUint8(_offset++);
+      if (byte == 0) {
+        break; // Stop at null terminator
+      }
+      chars.add(byte);
+    }
+
+    final name = String.fromCharCodes(chars);
+
+    if (name.isEmpty) {
+      print('Warning: Exepected a non Empty string at offset $startOffset');
+    }
+
+    return name;
+  }
+
+  Map<String, double> _parseResolution() {
+    // Read the x resolution as float
+    final xRes = _readFloat();
+
+    // The next three values are uint32s that we'll skip
+    _offset += 12; // Skip 3 uint32s (4 bytes each)
+
+    return {
+      'xResolution': xRes,
+      'yResolution': xRes, // In XCF, x and y resolution are typically the same
+    };
+  }
+
+  Future<XcfPath?> readPropPath(propData) async {
+    try {
+      // Read the length of PROP_PATH data
+      int length = _readUint32();
+      _offset += length;
+      return XcfPath(name: '', strokes: []);
+
+      // int startOffset = _offset; // Store the start position
+
+      // // Read the path name (null-terminated string)
+      // String pathName = _readNullTerminatedString();
+
+      // // Read number of strokes
+      // int numStrokes = _readUint32();
+      // List<Stroke> strokes = [];
+
+      // for (int i = 0; i < numStrokes; i++) {
+      //   // Read number of points in this stroke
+      //   int numPoints = _readUint32();
+      //   List<PathPoint> points = [];
+
+      //   for (int j = 0; j < numPoints; j++) {
+      //     // Read 6 double values (48 bytes per point)
+      //     double x = _readFloat();
+      //     double y = _readFloat();
+      //     double c1X = _readFloat();
+      //     double c1Y = _readFloat();
+      //     double c2X = _readFloat();
+      //     double c2Y = _readFloat();
+
+      //     points.add(
+      //       PathPoint(
+      //         x: x,
+      //         y: y,
+      //         control1X: c1X,
+      //         control1Y: c1Y,
+      //         control2X: c2X,
+      //         control2Y: c2Y,
+      //       ),
+      //     );
+      //   }
+
+      //   // Read stroke closed flag (1 byte)
+      //   bool isClosed = _readBytes(1)[0] == 1;
+
+      //   strokes.add(Stroke(points: points, isClosed: isClosed));
+      // }
+
+      // // Validate that we did not exceed the PROP_PATH length
+      // int bytesRead = _offset - startOffset;
+      // if (bytesRead != length) {
+      //   throw Exception('PROP_PATH length mismatch: expected $length bytes, but read $bytesRead bytes.');
+      // }
+
+      //return XcfPath(name: pathName, strokes: strokes);
+    } catch (e) {
+      print('Error reading PROP_PATH: $e');
+      return null;
+    }
   }
 }
 
-class XcfHeader {
-  late String magic;
-  late String version;
-  late int width;
-  late int height;
-  late int baseType;
+class XcfFile {
+  String signature = '';
+  String version = '';
+  int width = 0;
+  int height = 0;
+  int baseType = 0;
   List<XcfLayer> layers = [];
 
   String get baseTypeString {
@@ -35,37 +314,6 @@ class XcfHeader {
         return 'INDEXED';
       default:
         return 'UNKNOWN';
-    }
-  }
-
-  String get versionInfo {
-    switch (version) {
-      case 'file':
-        return 'v001 (File)';
-      case 'v001':
-        return 'v001';
-      case 'v002':
-        return 'v002';
-      case 'v003':
-        return 'v003';
-      case 'v004':
-        return 'v004';
-      case 'v005':
-        return 'v005';
-      case 'v006':
-        return 'v006';
-      case 'v007':
-        return 'v007';
-      case 'v008':
-        return 'v008';
-      case 'v009':
-        return 'v009';
-      case 'v010':
-        return 'v010';
-      case 'v011':
-        return 'v011 (Latest)';
-      default:
-        return 'Unknown version: $version';
     }
   }
 
@@ -148,181 +396,52 @@ Future<XcfLayer> readLayer(
   return layer;
 }
 
-class FileXcf {
-  static const String XCF_SIGNATURE = 'gimp xcf ';
+class XcfPath {
+  XcfPath({required this.name, required this.strokes});
+  final String name;
+  final List<Stroke> strokes;
 
-  // Property type constants
-  static const int PROP_END = 0;
-  static const int PROP_COLORMAP = 1;
-  static const int PROP_COMPRESSION = 2;
-  static const int PROP_GUIDES = 3;
-  static const int PROP_PARASITES = 22;
-  static const int PROP_RESOLUTION = 150;
-
-  int _offset = 0;
-  final header = XcfHeader();
-  late final ByteData _data;
-
-  Future<XcfHeader> readXcf(Uint8List bytes) async {
-    _data = ByteData.sublistView(bytes);
-
-    // Verify XCF signature
-    final signature = _readString(9);
-    if (!signature.startsWith(XCF_SIGNATURE)) {
-      throw Exception('Invalid XCF file: incorrect signature');
-    }
-
-    // Read version
-    header.version = _readString(5);
-
-    // Read basic properties
-    header.width = _readUint32();
-    header.height = _readUint32();
-    header.baseType = _readUint32();
-
-    // Read properties until encountering PROP_END
-    final properties = <String, dynamic>{};
-    while (true) {
-      final propType = _readUint32();
-      if (propType == 0) {
-        break;
-      }
-
-      // PROP_END
-      final propSize = _readUint32();
-      final propData = _readBytes(propSize);
-
-      // Parse property based on type
-      switch (propType) {
-        case PROP_COLORMAP:
-          properties['colormap'] = _parseColormap(propData);
-          break;
-        case PROP_COMPRESSION:
-          properties['compression'] = propData[0];
-          break;
-        case PROP_GUIDES:
-          properties['guides'] = _parseGuides(propData);
-          break;
-        case PROP_PARASITES:
-          properties['parasites'] = _parseParasites(propSize);
-          break;
-        case PROP_RESOLUTION:
-          properties['resolution'] = _parseResolution();
-          break;
-
-        default:
-          print('Unhandled property type: $propType'); // Debug line
-          break;
-      }
-    }
-
-    return header;
+  @override
+  String toString() {
+    return 'Path Name: $name, Strokes: ${strokes.length}';
   }
+}
 
-  String _readString(int length) {
-    final bytes = _readBytes(length);
-    return String.fromCharCodes(bytes);
+class Stroke {
+  Stroke({required this.points, required this.isClosed});
+  final List<PathPoint> points;
+  final bool isClosed;
+}
+
+class PathPoint {
+  PathPoint({
+    required this.x,
+    required this.y,
+    required this.control1X,
+    required this.control1Y,
+    required this.control2X,
+    required this.control2Y,
+  });
+  final double x, y;
+  final double control1X, control1Y;
+  final double control2X, control2Y;
+
+  @override
+  String toString() {
+    return 'Point(x: $x, y: $y, c1: [$control1X, $control1Y], c2: [$control2X, $control2Y])';
   }
+}
 
-  Uint8List _readBytes(int length) {
-    final bytes = Uint8List(length);
-    for (var i = 0; i < length; i++) {
-      bytes[i] = _data.getUint8(_offset + i);
-    }
-    _offset += length;
-    return bytes;
-  }
+class XcfLayer {
+  late int width;
+  late int height;
+  late int type;
+  late String name;
+  late int opacity;
+  late bool visible;
 
-  int _readUint32() {
-    final value = _data.getUint32(_offset, Endian.big);
-    _offset += 4;
-    return value;
-  }
-
-  List<int> _parseColormap(Uint8List data) {
-    final colormap = <int>[];
-    for (var i = 0; i < data.length; i += 3) {
-      final color = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
-      colormap.add(color);
-    }
-    return colormap;
-  }
-
-  List<Map<String, int>> _parseGuides(Uint8List data) {
-    final guides = <Map<String, int>>[];
-    var offset = 0;
-    while (offset < data.length) {
-      final position = ByteData.view(data.buffer).getInt32(offset, Endian.big);
-      final orientation = data[offset + 4];
-      guides.add({
-        'position': position,
-        'orientation': orientation,
-      });
-      offset += 5;
-    }
-    return guides;
-  }
-
-  double _readFloat() {
-    final value = _data.getFloat32(_offset, Endian.big);
-    _offset += 4;
-    return value;
-  }
-
-  List<Map<String, dynamic>> _parseParasites(int totalSize) {
-    final parasites = <Map<String, dynamic>>[];
-    final endOffset = _offset + totalSize;
-
-    print('Starting to parse parasites at offset $_offset');
-
-    while (_offset < endOffset) {
-      // Read parasite name (null-terminated string)
-      final name = _readNullTerminatedString();
-      print('Found parasite: $name');
-
-      // Read flags (4 bytes)
-      final flags = _readUint32();
-
-      // Read size of parasite data
-      final size = _readUint32();
-      print('Parasite $name size: $size bytes');
-
-      // Read parasite data
-      final data = _readBytes(size);
-
-      parasites.add({
-        'name': name,
-        'flags': flags,
-        'size': size,
-        'data': data,
-      });
-    }
-
-    return parasites;
-  }
-
-  String _readNullTerminatedString() {
-    List<int> chars = [];
-    while (true) {
-      int byte = _data.getUint8(_offset++);
-      if (byte == 0) {
-        break;
-      }
-      chars.add(byte);
-    }
-    return String.fromCharCodes(chars);
-  }
-
-  Map<String, double> _parseResolution() {
-    // Read the x resolution as float
-    final xRes = _readFloat();
-
-    // The next three values are uint32s that we'll skip
-    _offset += 12; // Skip 3 uint32s (4 bytes each)
-
-    return {
-      'xResolution': xRes,
-      'yResolution': xRes, // In XCF, x and y resolution are typically the same
-    };
+  @override
+  String toString() {
+    return 'Layer "$name" (${width}x$height), opacity: ${(opacity / 255 * 100).round()}%, ${visible ? "visible" : "hidden"}';
   }
 }
