@@ -59,8 +59,8 @@ class MainScreen extends StatelessWidget {
                       Offset adjustedPosition = details.localPosition +
                           Offset(scrollOffsetX, scrollOffsetY);
                       _onUserActionUpdate(
-                        appModel,
-                        adjustedPosition / appModel.scale,
+                        appModel: appModel,
+                        position: adjustedPosition / appModel.scale,
                       );
                     }
                   }
@@ -117,7 +117,10 @@ class MainScreen extends StatelessWidget {
     appModel.addUserAction(action: appModel.currentUserAction);
   }
 
-  void _onUserActionUpdate(AppModel appModel, Offset position) {
+  void _onUserActionUpdate({
+    required final AppModel appModel,
+    required final Offset position,
+  }) {
     if (appModel.userActionStartingOffset != null) {
       if (appModel.selectedTool == Tools.eraser) {
         // Eraser implementation
