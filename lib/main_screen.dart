@@ -44,8 +44,8 @@ class MainScreen extends StatelessWidget {
                     Offset adjustedPosition = details.localPosition +
                         Offset(scrollOffsetX, scrollOffsetY);
                     _onUserActionStart(
-                      context,
-                      adjustedPosition / appModel.scale,
+                      appModel: appModel,
+                      position: adjustedPosition / appModel.scale,
                     );
                   }
                 },
@@ -100,14 +100,15 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  void _onUserActionStart(final BuildContext context, Offset position) {
-    final AppModel appModel = AppModel.get(context);
-
+  void _onUserActionStart({
+    required final AppModel appModel,
+    required final Offset position,
+  }) {
     appModel.userActionStartingOffset = position;
 
     appModel.currentUserAction = UserAction(
-      positions: [position, position],
       tool: appModel.selectedTool,
+      positions: [position, position],
       brushColor: appModel.brushColor,
       fillColor: appModel.fillColor,
       brushSize: appModel.brusSize,
