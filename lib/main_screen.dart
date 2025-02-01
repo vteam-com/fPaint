@@ -119,6 +119,7 @@ class MainScreen extends StatelessWidget {
         x: position.dx.toInt(),
         y: position.dy.toInt(),
         newColor: appModel.fillColor,
+        tolerance: appModel.tolerance,
       );
       appModel.selectedLayer.addImage(img, tool: Tools.fill);
       appModel.update();

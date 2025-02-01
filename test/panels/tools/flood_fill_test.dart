@@ -23,6 +23,7 @@ void main() {
         x: 5,
         y: 5,
         newColor: Colors.white,
+        tolerance: 1,
       );
 
       expect(result.width, equals(testImage.width));
@@ -36,6 +37,7 @@ void main() {
         x: -1,
         y: -1,
         newColor: Colors.red,
+        tolerance: 1,
       );
 
       expect(result.width, equals(testImage.width));
@@ -48,6 +50,7 @@ void main() {
         x: 5,
         y: 5,
         newColor: Colors.red,
+        tolerance: 1,
       );
 
       expect(result.width, equals(testImage.width));

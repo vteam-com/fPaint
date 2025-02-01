@@ -8,6 +8,7 @@ Future<ui.Image> applyFloodFill({
   required int x,
   required int y,
   required Color newColor,
+  required int tolerance,
 }) async {
   ByteData? byteData =
       await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
@@ -81,8 +82,18 @@ Future<ui.Image> applyFloodFill({
     int b = pixels[pixelIndex + 2];
     int a = pixels[pixelIndex + 3];
 
-    // Skip if color doesn't match target
-    if (r != targetR || g != targetG || b != targetB || a != targetA) {
+    /// Converts the given tolerance percentage to a value out of 255.
+    ///
+    /// The tolerance is expected to be a percentage (0-100). This value is then
+    /// converted to a scale of 0-255, which is commonly used in color calculations.
+    ///
+    double tolerance255 = 255 * (tolerance / 100);
+
+    // Skip if color doesn't match target within tolerance
+    if ((r - targetR).abs() > tolerance255 ||
+        (g - targetG).abs() > tolerance255 ||
+        (b - targetB).abs() > tolerance255 ||
+        (a - targetA).abs() > tolerance255) {
       continue;
     }
 

@@ -5,6 +5,7 @@ import 'package:fpaint/panels/tools/tool_selector.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
+import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:provider/provider.dart';
 
 /// Represents a panel that displays tools for the application.
@@ -127,8 +128,10 @@ class ToolsPanel extends StatelessWidget {
       // Paint Bucket
       ToolSelector(
         name: 'Paint Bucket',
-        image:
-            Icon(Icons.format_color_fill, color: IconTheme.of(context).color!),
+        image: Icon(
+          Icons.format_color_fill,
+          color: IconTheme.of(context).color!,
+        ),
         isSelected: currentShapeType == Tools.fill,
         onPressed: () => onShapeSelected(Tools.fill),
       ),
@@ -161,10 +164,15 @@ class ToolsPanel extends StatelessWidget {
           buttonIcon: Icons.line_weight,
           buttonIconColor: Colors.grey.shade500,
           onButtonPressed: () {
-            showBrushSizePicker(context, appModel.brusSize,
-                (final double newValue) {
-              appModel.brusSize = newValue;
-            });
+            showBrushSizePicker(
+              context,
+              appModel.brusSize,
+              (
+                final double newValue,
+              ) {
+                appModel.brusSize = newValue;
+              },
+            );
           },
           child: slim
               ? null
@@ -236,6 +244,29 @@ class ToolsPanel extends StatelessWidget {
               : MyColorPicker(
                   color: appModel.fillColor,
                   onColorChanged: (Color color) => appModel.fillColor = color,
+                ),
+        ),
+      );
+    }
+
+    // Fill Color Tolerance
+    if (currentShapeType.isSupported(ToolAttribute.tolerance)) {
+      widgets.add(
+        ToolAttributeWidget(
+          name: 'Color Tolerance',
+          buttonIcon: Icons.support,
+          buttonIconColor: Colors.grey.shade500,
+          onButtonPressed: () => showTolerancePicker(
+              context, appModel.tolerance, (final int newValue) {
+            appModel.tolerance = newValue;
+          }),
+          child: slim
+              ? null
+              : TolerancePicker(
+                  value: appModel.tolerance,
+                  onChanged: (value) {
+                    appModel.tolerance = value;
+                  },
                 ),
         ),
       );

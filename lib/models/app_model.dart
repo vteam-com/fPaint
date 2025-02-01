@@ -1,5 +1,7 @@
 // Imports
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/layers.dart';
 import 'package:provider/provider.dart';
@@ -99,6 +101,14 @@ class AppModel extends ChangeNotifier {
   BrushStyle get brushStyle => _brush;
   set brushStyle(BrushStyle value) {
     _brush = value;
+    update();
+  }
+
+  // Tolerance
+  int _tolarance = 50; // Mid point 0..100
+  int get tolerance => _tolarance;
+  set tolerance(int value) {
+    _tolarance = max(1, min(100, value));
     update();
   }
 

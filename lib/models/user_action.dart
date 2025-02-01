@@ -28,6 +28,7 @@ enum ToolAttribute {
   brushStyle,
   colorOutline,
   colorFill,
+  tolerance,
 }
 
 const Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
@@ -55,6 +56,7 @@ const Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
   },
   Tools.fill: {
     ToolAttribute.colorFill,
+    ToolAttribute.tolerance,
   },
   Tools.eraser: {
     ToolAttribute.brushSize,
