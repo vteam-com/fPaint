@@ -27,8 +27,8 @@
     },
     "files.exclude": {
         "android/": true,
-        "ios/": true,
-        "macos/": true,
+        "ios/": false,
+        "macos/": false,
         "windows/": true,
         "linux/": true,
         "web/": true,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/panels/about.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
@@ -17,18 +18,55 @@ class ToolsAndLayersPanel extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            PopupMenuButton<int>(
+              tooltip: 'Menu',
+              icon: const Icon(Icons.menu),
+              onSelected: (int result) {
+                switch (result) {
+                  case 0:
+                    onFileNew(context);
+                    break;
+                  case 1:
+                    onFileOpen(context);
+                    break;
+                  case 2:
+                    sharePanel(context);
+                    break;
+                  case 3:
+                    showAboutBox(context);
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+                const PopupMenuItem<int>(
+                  value: 0,
+                  child: Text('Start over...'),
+                ),
+                const PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('Open file...'),
+                ),
+                const PopupMenuItem<int>(
+                  value: 2,
+                  child: Text('Export...'),
+                ),
+                const PopupMenuItem<int>(
+                  value: 3,
+                  child: Text('About...'),
+                ),
+              ],
+            ),
             if (appModel.isSidePanelExpanded)
               IconButton(
                 tooltip: 'Start over...',
                 icon: const Icon(Icons.power_settings_new_outlined),
                 onPressed: () => onFileNew(context),
               ),
-            // Alway show
-            IconButton(
-              tooltip: 'Open file...',
-              icon: const Icon(Icons.folder_open_outlined),
-              onPressed: () => onFileOpen(context),
-            ),
+            if (appModel.isSidePanelExpanded)
+              IconButton(
+                tooltip: 'Open file...',
+                icon: const Icon(Icons.folder_open_outlined),
+                onPressed: () => onFileOpen(context),
+              ),
             if (appModel.isSidePanelExpanded)
               IconButton(
                 tooltip: 'Add Layer',
