@@ -31,7 +31,7 @@ enum ToolAttribute {
   tolerance,
 }
 
-const Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
+final Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
   Tools.draw: {
     ToolAttribute.brushSize,
     ToolAttribute.brushStyle,

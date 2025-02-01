@@ -20,8 +20,8 @@ class Layer {
     _opacity = opacity;
   }
 
-  String name;
-  String id = '';
+  final String name;
+  String id;
   final List<UserAction> _actionStack = [];
   final List<UserAction> redoStack = [];
   bool isSelected;
@@ -83,9 +83,9 @@ class Layer {
       _actionStack.isEmpty ? null : _actionStack.last;
 
   void addImage(
-    ui.Image imageToAdd, {
-    Tools tool = Tools.image,
-    ui.Offset offset = Offset.zero,
+    final ui.Image imageToAdd, {
+    final Tools tool = Tools.image,
+    final ui.Offset offset = Offset.zero,
   }) {
     _actionStack.add(
       UserAction(
@@ -132,7 +132,7 @@ class Layer {
     }
   }
 
-  void mergeFrom(Layer layerToMerge) {
+  void mergeFrom(final Layer layerToMerge) {
     _actionStack.addAll(layerToMerge._actionStack);
     clearCache();
   }
@@ -225,7 +225,7 @@ class Layer {
 
   void renderLayer(final Canvas canvas) {
     // Save a layer with opacity applied
-    Paint layerPaint = Paint()
+    final Paint layerPaint = Paint()
       ..color = Colors.black.withAlpha((255 * opacity).toInt());
     canvas.saveLayer(null, layerPaint);
 
@@ -267,7 +267,11 @@ class Layer {
     canvas.restore();
   }
 
-  void renderPath(Canvas canvas, Paint paint, UserAction userAction) {
+  void renderPath(
+    final Canvas canvas,
+    final Paint paint,
+    final UserAction userAction,
+  ) {
     final path = Path()
       ..moveTo(
         userAction.positions.first.dx,
@@ -281,7 +285,11 @@ class Layer {
     applyBrushStyle(canvas, paint, path, userAction);
   }
 
-  void renderLine(Canvas canvas, Paint paint, UserAction userAction) {
+  void renderLine(
+    final Canvas canvas,
+    final Paint paint,
+    final UserAction userAction,
+  ) {
     final path = Path()
       ..moveTo(userAction.positions.first.dx, userAction.positions.first.dy)
       ..lineTo(userAction.positions.last.dx, userAction.positions.last.dy);
@@ -290,7 +298,11 @@ class Layer {
     applyBrushStyle(canvas, paint, path, userAction);
   }
 
-  void renderCircle(Canvas canvas, Paint paint, UserAction userAction) {
+  void renderCircle(
+    final Canvas canvas,
+    final Paint paint,
+    final UserAction userAction,
+  ) {
     final radius =
         (userAction.positions.first - userAction.positions.last).distance / 2;
     final center = Offset(
@@ -310,7 +322,11 @@ class Layer {
     applyBrushStyle(canvas, paint, path, userAction);
   }
 
-  void renderRectangle(Canvas canvas, Paint paint, UserAction userAction) {
+  void renderRectangle(
+    final Canvas canvas,
+    final Paint paint,
+    final UserAction userAction,
+  ) {
     if (userAction.positions.length == 2) {
       final rect = Rect.fromPoints(
         userAction.positions.first,
@@ -330,8 +346,8 @@ class Layer {
     final int tolerance = 1,
   }) {
     final path = Path();
-    final width = image.width;
-    final height = image.height;
+    final int width = image.width;
+    final int height = image.height;
 
     final visited = List.generate(
       height,
@@ -343,8 +359,8 @@ class Layer {
 
     while (queue.isNotEmpty) {
       final current = queue.removeAt(0);
-      final x = current.dx.round();
-      final y = current.dy.round();
+      final int x = current.dx.round();
+      final int y = current.dy.round();
 
       if (x < 0 || x >= width || y < 0 || y >= height) {
         continue;
@@ -366,7 +382,11 @@ class Layer {
     return path;
   }
 
-  void renderEraser(Canvas canvas, Paint paint, UserAction userAction) {
+  void renderEraser(
+    final Canvas canvas,
+    final Paint paint,
+    final UserAction userAction,
+  ) {
     paint.blendMode = BlendMode.clear;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = userAction.brushSize;
@@ -377,17 +397,17 @@ class Layer {
     );
   }
 
-  void renderImage(Canvas canvas, UserAction userAction) {
+  void renderImage(final Canvas canvas, final UserAction userAction) {
     if (userAction.image != null) {
       canvas.drawImage(userAction.image!, userAction.positions.first, Paint());
     }
   }
 
   void applyBrushStyle(
-    Canvas canvas,
-    Paint paint,
-    Path path,
-    UserAction userAction,
+    final Canvas canvas,
+    final Paint paint,
+    final Path path,
+    final UserAction userAction,
   ) {
     if (userAction.brushStyle == BrushStyle.dash) {
       drawPath(
@@ -403,11 +423,11 @@ class Layer {
   }
 
   void drawPath(
-    Path path,
-    ui.Canvas canvas,
-    ui.Paint paint,
-    double dashWidth,
-    double dashGap,
+    final Path path,
+    final ui.Canvas canvas,
+    final ui.Paint paint,
+    final double dashWidth,
+    final double dashGap,
   ) {
     final Path dashedPath = createDashedPath(
       path,
@@ -418,9 +438,9 @@ class Layer {
   }
 
   Path createDashedPath(
-    Path source, {
-    required double dashWidth,
-    required double dashGap,
+    final Path source, {
+    required final double dashWidth,
+    required final double dashGap,
   }) {
     final Path dashedPath = Path();
     for (final ui.PathMetric pathMetric in source.computeMetrics()) {
@@ -440,7 +460,7 @@ class Layer {
     return dashedPath;
   }
 
-  List<String> actionHistory([int? numberOfHistoryAction]) {
+  List<String> actionHistory([final int? numberOfHistoryAction]) {
     return _actionStack
         .take(numberOfHistoryAction ?? _actionStack.length)
         .map((final UserAction action) => action.toString())

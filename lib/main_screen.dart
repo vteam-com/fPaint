@@ -40,11 +40,11 @@ class MainScreen extends StatelessWidget {
                 },
 
                 // Draw Start
-                onPointerDown: (PointerDownEvent details) async {
+                onPointerDown: (final PointerDownEvent details) async {
                   if (appModel.userActionStartingOffset == null) {
-                    double scrollOffsetX = scrollControllerX.offset;
-                    double scrollOffsetY = scrollControllerY.offset;
-                    Offset adjustedPosition = details.localPosition +
+                    final double scrollOffsetX = scrollControllerX.offset;
+                    final double scrollOffsetY = scrollControllerY.offset;
+                    final Offset adjustedPosition = details.localPosition +
                         Offset(scrollOffsetX, scrollOffsetY);
                     await _onUserActionStart(
                       appModel: appModel,
@@ -53,13 +53,13 @@ class MainScreen extends StatelessWidget {
                   }
                 },
                 // Draw Update
-                onPointerMove: (PointerEvent details) {
+                onPointerMove: (final PointerEvent details) {
                   if (details is PointerMoveEvent) {
                     if (details.buttons == kPrimaryButton &&
                         appModel.userActionStartingOffset != null) {
-                      double scrollOffsetX = scrollControllerX.offset;
-                      double scrollOffsetY = scrollControllerY.offset;
-                      Offset adjustedPosition = details.localPosition +
+                      final double scrollOffsetX = scrollControllerX.offset;
+                      final double scrollOffsetY = scrollControllerY.offset;
+                      final Offset adjustedPosition = details.localPosition +
                           Offset(scrollOffsetX, scrollOffsetY);
                       _onUserActionUpdate(
                         appModel: appModel,
@@ -69,11 +69,11 @@ class MainScreen extends StatelessWidget {
                   }
                 },
                 // Draw End
-                onPointerUp: (PointerUpEvent details) {
+                onPointerUp: (final PointerUpEvent details) {
                   _onUserActionEnded(appModel);
                 },
                 // Draw End
-                onPointerCancel: (PointerCancelEvent details) {
+                onPointerCancel: (final PointerCancelEvent details) {
                   _onUserActionEnded(appModel);
                 },
 
@@ -110,18 +110,18 @@ class MainScreen extends StatelessWidget {
     appModel.userActionStartingOffset = position;
     if (appModel.selectedTool == Tools.fill) {
       // Create a flattened image from the current layer
-      ui.Image img =
+      final ui.Image img =
           await appModel.selectedLayer.toImageForStorage(appModel.canvasSize);
 
       // Perform flood fill at the clicked position
-      img = await applyFloodFill(
+      final ui.Image filledImage = await applyFloodFill(
         image: img,
         x: position.dx.toInt(),
         y: position.dy.toInt(),
         newColor: appModel.fillColor,
         tolerance: appModel.tolerance,
       );
-      appModel.selectedLayer.addImage(img, tool: Tools.fill);
+      appModel.selectedLayer.addImage(filledImage, tool: Tools.fill);
       appModel.update();
     } else {
       appModel.currentUserAction = UserAction(
@@ -153,7 +153,7 @@ class MainScreen extends StatelessWidget {
         );
         appModel.userActionStartingOffset = position;
       } else if (appModel.selectedTool == Tools.draw) {
-        // Cumulate more points in the draw path onthe selected layer
+        // Cumulate more points in the draw path on the selected layer
         appModel.layers.list[appModel.selectedLayerIndex]
             .lastActionAddPosition(position: position);
         appModel.update();
@@ -166,7 +166,7 @@ class MainScreen extends StatelessWidget {
   }
 
   void _onUserActionEnded(
-    AppModel appModel,
+    final AppModel appModel,
   ) {
     if (appModel.currentUserAction?.tool == Tools.draw) {
       // Optimize list of draw actions into a single path
@@ -180,7 +180,7 @@ class MainScreen extends StatelessWidget {
   /// Builds a column of floating action buttons for the paint application,
   /// including buttons for undo, redo, zoom in, zoom out,
   ///  and a button that displays the current zoom level and canvas size.
-  Widget floatingActionButtons(AppModel appModel) {
+  Widget floatingActionButtons(final AppModel appModel) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [

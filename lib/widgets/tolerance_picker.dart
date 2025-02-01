@@ -33,7 +33,7 @@ class TolerancePickerState extends State<TolerancePicker> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: [
         Text('Tolerance: ${_value.toStringAsFixed(0)}'),

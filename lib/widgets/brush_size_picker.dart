@@ -33,7 +33,7 @@ class BrushSizePickerState extends State<BrushSizePicker> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Column(
       children: [
         Text('Brush Size: ${_value.toStringAsFixed(1)}'),

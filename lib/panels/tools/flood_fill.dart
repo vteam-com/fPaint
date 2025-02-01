@@ -4,24 +4,24 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 Future<ui.Image> applyFloodFill({
-  required ui.Image image,
-  required int x,
-  required int y,
-  required Color newColor,
-  required int tolerance,
+  required final ui.Image image,
+  required final int x,
+  required final int y,
+  required final Color newColor,
+  required final int tolerance,
 }) async {
-  ByteData? byteData =
+  final ByteData? byteData =
       await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
   if (byteData == null) {
     return image;
   }
 
-  Uint8List pixels = byteData.buffer.asUint8List();
-  int width = image.width;
-  int height = image.height;
-  int bytesPerPixel = 4; // RGBA format
+  final Uint8List pixels = byteData.buffer.asUint8List();
+  final int width = image.width;
+  final int height = image.height;
+  final int bytesPerPixel = 4; // RGBA format
 
-  int index(int x, int y) {
+  int index(final int x, final int y) {
     return (y * width + x) * bytesPerPixel;
   }
 
@@ -31,21 +31,21 @@ Future<ui.Image> applyFloodFill({
   }
 
   // Extract target color
-  int targetIndex = index(x, y);
-  int targetR = pixels[targetIndex];
-  int targetG = pixels[targetIndex + 1];
-  int targetB = pixels[targetIndex + 2];
-  int targetA = pixels[targetIndex + 3];
+  final int targetIndex = index(x, y);
+  final int targetR = pixels[targetIndex];
+  final int targetG = pixels[targetIndex + 1];
+  final int targetB = pixels[targetIndex + 2];
+  final int targetA = pixels[targetIndex + 3];
 
   // Extract new color
   // ignore: deprecated_member_use
-  int fillR = newColor.red;
+  final int fillR = newColor.red;
   // ignore: deprecated_member_use
-  int fillG = newColor.green;
+  final int fillG = newColor.green;
   // ignore: deprecated_member_use
-  int fillB = newColor.blue;
+  final int fillB = newColor.blue;
   // ignore: deprecated_member_use
-  int fillA = newColor.alpha;
+  final int fillA = newColor.alpha;
 
   // Avoid unnecessary fill
   if (targetR == fillR &&
@@ -56,13 +56,13 @@ Future<ui.Image> applyFloodFill({
   }
 
   // Stack-based flood fill with visited tracking
-  Set<String> visited = {};
-  List<Point> stack = [Point(x, y)];
+  final Set<String> visited = {};
+  final List<Point> stack = [Point(x, y)];
 
   while (stack.isNotEmpty) {
-    Point p = stack.removeLast();
-    int px = p.x;
-    int py = p.y;
+    final Point p = stack.removeLast();
+    final int px = p.x;
+    final int py = p.y;
 
     // Skip if out of bounds
     if (px < 0 || px >= width || py < 0 || py >= height) {
@@ -70,24 +70,24 @@ Future<ui.Image> applyFloodFill({
     }
 
     // Skip if already visited
-    String key = '$px,$py';
+    final String key = '$px,$py';
     if (visited.contains(key)) {
       continue;
     }
     visited.add(key);
 
-    int pixelIndex = index(px, py);
-    int r = pixels[pixelIndex];
-    int g = pixels[pixelIndex + 1];
-    int b = pixels[pixelIndex + 2];
-    int a = pixels[pixelIndex + 3];
+    final int pixelIndex = index(px, py);
+    final int r = pixels[pixelIndex];
+    final int g = pixels[pixelIndex + 1];
+    final int b = pixels[pixelIndex + 2];
+    final int a = pixels[pixelIndex + 3];
 
     /// Converts the given tolerance percentage to a value out of 255.
     ///
     /// The tolerance is expected to be a percentage (0-100). This value is then
     /// converted to a scale of 0-255, which is commonly used in color calculations.
     ///
-    double tolerance255 = 255 * (tolerance / 100);
+    final double tolerance255 = 255 * (tolerance / 100);
 
     // Skip if color doesn't match target within tolerance
     if ((r - targetR).abs() > tolerance255 ||
@@ -119,9 +119,9 @@ Future<ui.Image> applyFloodFill({
 }
 
 Future<ui.Image> _createImageFromPixels({
-  required Uint8List pixels,
-  required int width,
-  required int height,
+  required final Uint8List pixels,
+  required final int width,
+  required final int height,
 }) async {
   final Completer<ui.Image> completer = Completer();
   ui.decodeImageFromPixels(
