@@ -110,8 +110,8 @@ class MainScreen extends StatelessWidget {
     appModel.userActionStartingOffset = position;
     if (appModel.selectedTool == Tools.fill) {
       // Create a flattened image from the current layer
-      final ui.Rect rect = appModel.selectedLayer.getArea();
-      ui.Image img = await appModel.selectedLayer.toImageForStorage(rect.size);
+      ui.Image img =
+          await appModel.selectedLayer.toImageForStorage(appModel.canvasSize);
 
       // Perform flood fill at the clicked position
       img = await applyFloodFill(
