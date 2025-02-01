@@ -2,6 +2,7 @@ import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
+import 'package:fpaint/widgets/transparent_background.dart';
 
 class MyColorPicker extends StatefulWidget {
   const MyColorPicker({
@@ -24,16 +25,19 @@ class _MyColorPickerState extends State<MyColorPicker> {
   /// From 0 to 360
   late double hue;
 
+  /// From 0.0 to 1.0
+  late double alpha;
+
   @override
   void didUpdateWidget(covariant MyColorPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    fromInputColorToHueAndBrightness();
+    fromInputColorToHueBrightnessAndAlpha();
   }
 
   @override
   void initState() {
     super.initState();
-    fromInputColorToHueAndBrightness();
+    fromInputColorToHueBrightnessAndAlpha();
   }
 
   @override
@@ -73,7 +77,7 @@ class _MyColorPickerState extends State<MyColorPicker> {
                       if (brightness == 0 || brightness == 1) {
                         brightness = 0.5;
                       }
-                      widget.onColorChanged(hsvToColor(hue, brightness));
+                      widget.onColorChanged(hsvToColor(hue, brightness, alpha));
                     });
                   },
                 ),
@@ -92,10 +96,37 @@ class _MyColorPickerState extends State<MyColorPicker> {
                   onChanged: (double value) {
                     setState(() {
                       brightness = value;
-                      widget.onColorChanged(hsvToColor(hue, brightness));
+                      widget.onColorChanged(hsvToColor(hue, brightness, alpha));
                     });
                   },
                 ),
+              ),
+            ),
+            SizedBox(
+              height: 30,
+              child: Stack(
+                alignment: AlignmentDirectional.center,
+                children: [
+                  const TransparentPaper(patternSize: 4),
+                  CustomPaint(
+                    painter: AlphaGradientPainter(hue: hue, brightness: brightness),
+                    child: Slider(
+                      value: alpha,
+                      min: 0,
+                      max: 1,
+                      divisions: 100,
+                      label: (alpha * 100).round().toString(),
+                      onChanged: (double value) {
+                        setState(() {
+                          alpha = value;
+                          widget.onColorChanged(
+                            hsvToColor(hue, brightness, alpha),
+                          );
+                        });
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -104,10 +135,11 @@ class _MyColorPickerState extends State<MyColorPicker> {
     );
   }
 
-  void fromInputColorToHueAndBrightness() {
+  void fromInputColorToHueBrightnessAndAlpha() {
     final bothValues = getHueAndBrightnessFromColor(widget.color);
     hue = bothValues.first;
     brightness = bothValues.second;
+    alpha = widget.color.a.toDouble();
   }
 }
 
@@ -168,6 +200,32 @@ class BrightnessGradientPainter extends CustomPainter {
   }
 }
 
+class AlphaGradientPainter extends CustomPainter {
+  AlphaGradientPainter({required this.hue, required this.brightness});
+
+  final double hue;
+  final double brightness;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Rect rect = Offset.zero & size;
+    final Gradient gradient = LinearGradient(
+      colors: [
+        hsvToColor(hue, brightness, 0.0), // Transparent
+        hsvToColor(hue, brightness, 1.0), // Opaque
+      ],
+    );
+
+    final Paint paint = Paint()..shader = gradient.createShader(rect);
+    canvas.drawRect(rect, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true; // We want to repaint when the hue or brightness changes
+  }
+}
+
 /// Displays a color picker dialog with the given title, initial color, and callback for the selected color.
 ///
 /// The color picker dialog is displayed using the [showDialog] function, and includes a [ColorPicker] widget
@@ -206,4 +264,9 @@ void showColorPicker({
       );
     },
   );
+}
+
+Color hsvToColor(final double hue, final double brightness, final double alpha) {
+  final hslColor = HSLColor.fromAHSL(alpha, hue, 1.0, brightness);
+  return hslColor.toColor();
 }
