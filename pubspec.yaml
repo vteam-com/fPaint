@@ -34,6 +34,7 @@ dependencies:
   flex_color_picker: ^3.7.0
   flutter:
     sdk: flutter
+  flutter_svg: ^2.0.17
   image: ^4.5.2
   path_provider: ^2.0.7
   provider: ^6.0.0
@@ -62,6 +63,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/app_icon.png
+    - assets/icons/
     - assets/test/
 
 # dart run flutter_launcher_icons

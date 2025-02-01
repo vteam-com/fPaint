@@ -4,13 +4,13 @@ class ToolSelector extends StatelessWidget {
   const ToolSelector({
     super.key,
     required this.name,
-    required this.icon,
+    required this.image,
     required this.isSelected,
     required this.onPressed,
   });
 
   final String name;
-  final IconData icon;
+  final Widget image;
   final bool isSelected;
   final VoidCallback onPressed;
 
@@ -26,7 +26,7 @@ class ToolSelector extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: IconButton(
-        icon: Icon(icon),
+        icon: image,
         onPressed: onPressed,
         tooltip: name,
       ),

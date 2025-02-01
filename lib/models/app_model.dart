@@ -78,6 +78,7 @@ class AppModel extends ChangeNotifier {
   // Color for Fill
   Color _colorForFill = Colors.lightBlue;
 
+  /// The color used to fill the canvas.
   Color get fillColor => _colorForFill;
 
   set fillColor(Color value) {
@@ -104,6 +105,15 @@ class AppModel extends ChangeNotifier {
   int _selectedLayerIndex = 0;
   int get selectedLayerIndex => _selectedLayerIndex;
 
+  /// Sets the index of the currently selected layer.
+  ///
+  /// If the provided `index` is within the range of the `layers` list, this method will:
+  /// - Update the `id` property of each layer to reflect its position in the list (from bottom to top).
+  /// - Set the `isSelected` property of the layer at the provided `index` to `true`.
+  /// - Set the `_selectedLayerIndex` private field to the provided `index`.
+  /// - Call the `update()` method to notify any listeners of the change.
+  ///
+  /// If the provided `index` is not within the range of the `layers` list, this method will do nothing.
   set selectedLayerIndex(final int index) {
     if (layers.isIndexInRange(index)) {
       for (int i = 0; i < layers.length; i++) {
@@ -127,6 +137,17 @@ class AppModel extends ChangeNotifier {
     return insertLayer(layers.length, name);
   }
 
+  /// Inserts a new [Layer] at the specified [index] in the [layers] list.
+  ///
+  /// If [name] is not provided, a default name will be generated in the format `'Layer{layers.length}'`.
+  ///
+  /// This method will:
+  /// - Create a new [Layer] instance with the provided or generated name.
+  /// - Insert the new layer at the specified [index] in the [layers] list.
+  /// - Set the [selectedLayerIndex] to the index of the newly inserted layer.
+  /// - Call the [update()] method to notify any listeners of the change.
+  ///
+  /// Returns the newly inserted [Layer] instance.
   Layer insertLayer(final int index, [String? name]) {
     name ??= 'Layer${layers.length}';
     final Layer newLayer = Layer(name: name);
@@ -183,10 +204,20 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
+  /// Notifies all listeners that the model has been updated.
+  /// This method should be called whenever the state of the model changes
+  /// to ensure that any UI components observing the model are updated.
   void update() {
     notifyListeners();
   }
 
+  /// Checks if the given [Offset] point is within the bounds of the canvas.
+  ///
+  /// The canvas is defined by the [canvasSize] property, which represents the
+  /// width and height of the canvas. This method returns `true` if the point's
+  /// x and y coordinates are between 0 and the canvas width/height, respectively.
+  /// This is used to ensure that user actions (e.g. drawing) are performed
+  /// within the bounds of the canvas.
   bool _isWithinCanvas(Offset point) {
     return point.dx >= 0 &&
         point.dx <= canvasSize.width &&
@@ -194,6 +225,11 @@ class AppModel extends ChangeNotifier {
         point.dy <= canvasSize.height;
   }
 
+  /// Toggles the visibility of the specified [Layer].
+  ///
+  /// This method updates the `isVisible` property of the given [Layer] to the
+  /// opposite of its current value, and then calls the `update()` method to
+  /// notify any observers of the change.
   void toggleLayerVisibility(final Layer layer) {
     layer.isVisible = !layer.isVisible;
     update();

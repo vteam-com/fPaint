@@ -4,6 +4,7 @@ import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
 import 'package:fpaint/panels/tools/tool_selector.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker.dart';
+import 'package:fpaint/widgets/svg_icon.dart';
 import 'package:provider/provider.dart';
 
 /// Represents a panel that displays tools for the application.
@@ -45,7 +46,7 @@ class ToolsPanel extends StatelessWidget {
       child: Column(
         spacing: 8,
         children: [
-          ...getListOfTools(),
+          ...getListOfTools(context),
           // Divider
           //
           const Divider(
@@ -71,7 +72,7 @@ class ToolsPanel extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: getListOfTools(),
+            children: getListOfTools(context),
           ),
           // Divider
           //
@@ -89,12 +90,12 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  List<Widget> getListOfTools() {
+  List<Widget> getListOfTools(BuildContext context) {
     final List<Widget> tools = [
       // Pencil
       ToolSelector(
         name: 'Draw',
-        icon: Icons.brush,
+        image: Icon(Icons.brush, color: IconTheme.of(context).color!),
         isSelected: currentShapeType == Tools.draw,
         onPressed: () => onShapeSelected(Tools.draw),
       ),
@@ -102,7 +103,7 @@ class ToolsPanel extends StatelessWidget {
       // Line
       ToolSelector(
         name: 'Line',
-        icon: Icons.line_axis,
+        image: Icon(Icons.line_axis, color: IconTheme.of(context).color!),
         isSelected: currentShapeType == Tools.line,
         onPressed: () => onShapeSelected(Tools.line),
       ),
@@ -110,7 +111,7 @@ class ToolsPanel extends StatelessWidget {
       // Rectangle
       ToolSelector(
         name: 'Rectangle',
-        icon: Icons.crop_square,
+        image: Icon(Icons.crop_square, color: IconTheme.of(context).color!),
         isSelected: currentShapeType == Tools.rectangle,
         onPressed: () => onShapeSelected(Tools.rectangle),
       ),
@@ -118,7 +119,7 @@ class ToolsPanel extends StatelessWidget {
       // Circle
       ToolSelector(
         name: 'Circle',
-        icon: Icons.circle_outlined,
+        image: Icon(Icons.circle_outlined, color: IconTheme.of(context).color!),
         isSelected: currentShapeType == Tools.circle,
         onPressed: () => onShapeSelected(Tools.circle),
       ),
@@ -126,14 +127,18 @@ class ToolsPanel extends StatelessWidget {
       // Paint Bucket
       ToolSelector(
         name: 'Paint Bucket',
-        icon: Icons.format_paint,
+        image:
+            Icon(Icons.format_color_fill, color: IconTheme.of(context).color!),
         isSelected: currentShapeType == Tools.fill,
         onPressed: () => onShapeSelected(Tools.fill),
       ),
 
       ToolSelector(
         name: 'Eraser',
-        icon: Icons.cleaning_services,
+        image: iconFromSvgAsset(
+          'assets/icons/eraser.svg',
+          IconTheme.of(context).color!,
+        ),
         isSelected: currentShapeType == Tools.eraser,
         onPressed: () => onShapeSelected(Tools.eraser),
       ),
@@ -152,7 +157,7 @@ class ToolsPanel extends StatelessWidget {
     if (currentShapeType.isSupported(ToolAttribute.brushSize)) {
       widgets.add(
         ToolAttributeWidget(
-          name: 'Brush Style',
+          name: 'Brush Size',
           buttonIcon: Icons.line_weight,
           buttonIconColor: Colors.grey.shade500,
           onButtonPressed: () {
