@@ -115,7 +115,7 @@ class MainScreen extends StatelessWidget {
       brushStyle: appModel.brushStyle,
     );
 
-    appModel.addUserAction(action: appModel.currentUserAction);
+    appModel.addUserAction(action: appModel.currentUserAction!);
   }
 
   void _onUserActionUpdate({
@@ -125,7 +125,7 @@ class MainScreen extends StatelessWidget {
     if (appModel.userActionStartingOffset != null) {
       if (appModel.selectedTool == Tools.eraser) {
         // Eraser implementation
-        appModel.addUserAction(
+        appModel.updateLastUserAction(
           start: appModel.userActionStartingOffset!,
           end: position,
           type: appModel.selectedTool,
@@ -136,7 +136,7 @@ class MainScreen extends StatelessWidget {
       } else if (appModel.selectedTool == Tools.draw) {
         // Cumulate more points in the draw path onthe selected layer
         appModel.layers.list[appModel.selectedLayerIndex]
-            .appendPositionToLastUserAction(position);
+            .lastActionAddPosition(position: position);
         appModel.update();
       } else {
         // Existing shape logic

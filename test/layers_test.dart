@@ -73,7 +73,7 @@ void main() {
         brushSize: 1,
       );
       layer.addUserAction(userAction);
-      layer.updateLastUserActionEndPosition(const Offset(2, 2));
+      layer.lastActionUpdatePositionEnd(end: const Offset(2, 2));
       expect(layer.lastUserAction?.positions.last, const Offset(2, 2));
     });
 

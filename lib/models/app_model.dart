@@ -1,4 +1,5 @@
 // Imports
+
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/layers.dart';
 import 'package:provider/provider.dart';
@@ -148,17 +149,20 @@ class AppModel extends ChangeNotifier {
   }
 
   void addUserAction({
-    UserAction? action,
+    required UserAction action,
+  }) {
+    selectedLayer.addUserAction(action);
+    update();
+  }
+
+  void updateLastUserAction({
+    required final Offset end,
     Tools? type,
     Color? colorFill,
     Color? colorStroke,
     Offset? start,
-    Offset? end,
   }) {
-    if (action != null) {
-      selectedLayer.addUserAction(action);
-    } else if (start != null &&
-        end != null &&
+    if (start != null &&
         type != null &&
         colorFill != null &&
         colorStroke != null) {
@@ -173,12 +177,9 @@ class AppModel extends ChangeNotifier {
           ),
         );
       }
+    } else {
+      selectedLayer.lastActionUpdatePositionEnd(end: end);
     }
-    update();
-  }
-
-  void updateLastUserAction({required final Offset end}) {
-    selectedLayer.updateLastUserActionEndPosition(end);
     update();
   }
 

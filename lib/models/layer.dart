@@ -81,14 +81,14 @@ class Layer {
     clearCache();
   }
 
-  void appendPositionToLastUserAction(Offset position) {
+  void lastActionAddPosition({required final Offset position}) {
     _actionStack.last.positions.add(position);
     clearCache();
   }
 
-  void updateLastUserActionEndPosition(Offset position) {
+  void lastActionUpdatePositionEnd({required final Offset end}) {
     if (_actionStack.isNotEmpty && _actionStack.last.positions.length >= 2) {
-      _actionStack.last.positions.last = position;
+      _actionStack.last.positions.last = end;
       clearCache();
     }
   }

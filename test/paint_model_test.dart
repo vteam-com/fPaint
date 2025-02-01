@@ -39,7 +39,7 @@ void main() {
     });
 
     test('add UserAction with parameters should create and add new shape', () {
-      paintModel.addUserAction(
+      paintModel.updateLastUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: Tools.circle,
@@ -63,7 +63,7 @@ void main() {
     });
 
     test('updateLastShape should modify end position of last shape', () {
-      paintModel.addUserAction(
+      paintModel.updateLastUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: Tools.rectangle,
@@ -82,7 +82,7 @@ void main() {
     });
 
     test('undo should remove last shape', () {
-      paintModel.addUserAction(
+      paintModel.updateLastUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: Tools.draw,
@@ -101,14 +101,14 @@ void main() {
     });
 
     test('multiple shapes should be added and managed correctly', () {
-      paintModel.addUserAction(
+      paintModel.updateLastUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: Tools.draw,
         colorFill: Colors.blue,
         colorStroke: Colors.black,
       );
-      paintModel.addUserAction(
+      paintModel.updateLastUserAction(
         start: const Offset(20, 20),
         end: const Offset(30, 30),
         type: Tools.circle,
