@@ -23,8 +23,19 @@ class LayersPanel extends StatelessWidget {
             ),
             if (appModel.isSidePanelExpanded)
               IconButton(
-                icon: const Icon(Icons.library_add_rounded),
+                icon: const Icon(Icons.my_library_add_outlined),
                 onPressed: () => _onAddLayer(appModel),
+              ),
+            if (appModel.isSidePanelExpanded &&
+                appModel.layers.length > 1 &&
+                appModel.layers.list.last != appModel.selectedLayer)
+              IconButton(
+                icon: const Icon(Icons.layers_outlined),
+                onPressed: () => _onFlattenLayers(
+                  appModel,
+                  appModel.selectedLayerIndex,
+                  appModel.selectedLayerIndex + 1,
+                ),
               ),
             if (appModel.isSidePanelExpanded)
               IconButton(
@@ -90,5 +101,23 @@ class LayersPanel extends StatelessWidget {
   void _onAddLayer(final AppModel appModel) {
     final Layer newLayer = appModel.addLayerTop();
     appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
+  }
+
+  // Method to flatten all layers
+  void _onFlattenLayers(
+    final AppModel appModel,
+    final int layerIndexToMerge,
+    final int layerIndexToMergIn,
+  ) {
+    final Layer layerToMege = appModel.layers.get(layerIndexToMerge);
+    final Layer receivingLayer = appModel.layers.get(layerIndexToMergIn);
+
+    receivingLayer.mergeFrom(layerToMege);
+    appModel.removeLayer(layerToMege);
+    if (layerIndexToMergIn > layerIndexToMerge) {
+      appModel.selectedLayerIndex = layerIndexToMergIn - 1;
+    } else {
+      appModel.selectedLayerIndex = layerIndexToMergIn;
+    }
   }
 }

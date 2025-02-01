@@ -132,6 +132,11 @@ class Layer {
     }
   }
 
+  void mergeFrom(Layer layerToMerge) {
+    _actionStack.addAll(layerToMerge._actionStack);
+    clearCache();
+  }
+
   ui.Image? cachedRendering;
 
   void clearCache() {

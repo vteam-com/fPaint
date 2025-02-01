@@ -30,6 +30,7 @@ class Layers {
   void clear() => _list.clear();
   int get length => _list.length;
   bool get isEmpty => _list.isEmpty;
+  bool get isNotEmpty => _list.isNotEmpty;
 
   bool isIndexInRange(final int indexLayer) =>
       indexLayer >= 0 && indexLayer < _list.length;
