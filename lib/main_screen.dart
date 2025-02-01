@@ -1,7 +1,10 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/panels/side_panel.dart';
+import 'package:fpaint/panels/tools/flood_fill.dart';
 
 import 'models/app_model.dart';
 
@@ -37,13 +40,13 @@ class MainScreen extends StatelessWidget {
                 },
 
                 // Draw Start
-                onPointerDown: (PointerDownEvent details) {
+                onPointerDown: (PointerDownEvent details) async {
                   if (appModel.userActionStartingOffset == null) {
                     double scrollOffsetX = scrollControllerX.offset;
                     double scrollOffsetY = scrollControllerY.offset;
                     Offset adjustedPosition = details.localPosition +
                         Offset(scrollOffsetX, scrollOffsetY);
-                    _onUserActionStart(
+                    await _onUserActionStart(
                       appModel: appModel,
                       position: adjustedPosition / appModel.scale,
                     );
@@ -100,22 +103,37 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  void _onUserActionStart({
+  Future<void> _onUserActionStart({
     required final AppModel appModel,
     required final Offset position,
-  }) {
+  }) async {
     appModel.userActionStartingOffset = position;
+    if (appModel.selectedTool == Tools.fill) {
+      // Create a flattened image from the current layer
+      final ui.Rect rect = appModel.selectedLayer.getArea();
+      ui.Image img = await appModel.selectedLayer.toImageForStorage(rect.size);
 
-    appModel.currentUserAction = UserAction(
-      tool: appModel.selectedTool,
-      positions: [position, position],
-      brushColor: appModel.brushColor,
-      fillColor: appModel.fillColor,
-      brushSize: appModel.brusSize,
-      brushStyle: appModel.brushStyle,
-    );
+      // Perform flood fill at the clicked position
+      img = await applyFloodFill(
+        image: img,
+        x: position.dx.toInt(),
+        y: position.dy.toInt(),
+        newColor: appModel.fillColor,
+      );
+      appModel.selectedLayer.addImage(img, tool: Tools.fill);
+      appModel.update();
+    } else {
+      appModel.currentUserAction = UserAction(
+        tool: appModel.selectedTool,
+        positions: [position, position],
+        brushColor: appModel.brushColor,
+        fillColor: appModel.fillColor,
+        brushSize: appModel.brusSize,
+        brushStyle: appModel.brushStyle,
+      );
 
-    appModel.addUserAction(action: appModel.currentUserAction!);
+      appModel.addUserAction(action: appModel.currentUserAction!);
+    }
   }
 
   void _onUserActionUpdate({

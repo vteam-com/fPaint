@@ -26,11 +26,32 @@ class Layer {
   final List<UserAction> redoStack = [];
   bool isSelected;
 
+  Rect getArea() {
+    if (_actionStack.isEmpty) {
+      return Rect.zero;
+    }
+
+    double minX = double.infinity;
+    double minY = double.infinity;
+    double maxX = double.negativeInfinity;
+    double maxY = double.negativeInfinity;
+
+    for (final UserAction action in _actionStack) {
+      for (final ui.Offset position in action.positions) {
+        minX = minX < position.dx ? minX : position.dx;
+        minY = minY < position.dy ? minY : position.dy;
+        maxX = maxX > position.dx ? maxX : position.dx;
+        maxY = maxY > position.dy ? maxY : position.dy;
+      }
+    }
+
+    return Rect.fromLTRB(minX, minY, maxX, maxY);
+  }
+
   //
   // Visibility
   //
   bool _isVisible = true;
-
   bool get isVisible => _isVisible;
 
   set isVisible(bool value) {
@@ -61,10 +82,14 @@ class Layer {
   UserAction? get lastUserAction =>
       _actionStack.isEmpty ? null : _actionStack.last;
 
-  void addImage(ui.Image imageToAdd, [ui.Offset offset = Offset.zero]) {
+  void addImage(
+    ui.Image imageToAdd, {
+    Tools tool = Tools.image,
+    ui.Offset offset = Offset.zero,
+  }) {
     _actionStack.add(
       UserAction(
-        tool: Tools.image,
+        tool: tool,
         positions: [
           offset,
           Offset(
@@ -153,6 +178,46 @@ class Layer {
     return await picture.toImage(width, height);
   }
 
+  /// Each user action are painted on an image and removed
+  Future<void> flattenUserActionsToImage() async {
+    if (_actionStack.isEmpty) {
+      return;
+    }
+
+    final Size size = Size(
+      _actionStack
+          .map(
+            (a) => a.positions.map((p) => p.dx).reduce((a, b) => a > b ? a : b),
+          )
+          .reduce((a, b) => a > b ? a : b),
+      _actionStack
+          .map(
+            (a) => a.positions.map((p) => p.dy).reduce((a, b) => a > b ? a : b),
+          )
+          .reduce((a, b) => a > b ? a : b),
+    );
+
+    final ui.Image image =
+        await renderImageWH(size.width.toInt(), size.height.toInt());
+
+    // Clear existing actions
+    // _actionStack.clear();
+
+    // Add new image action
+    _actionStack.add(
+      UserAction(
+        tool: Tools.image,
+        positions: [Offset.zero, Offset(size.width, size.height)],
+        image: image,
+        fillColor: Colors.transparent,
+        brushColor: Colors.transparent,
+        brushSize: 1,
+      ),
+    );
+
+    clearCache();
+  }
+
   void renderLayer(final Canvas canvas) {
     // Save a layer with opacity applied
     Paint layerPaint = Paint()
@@ -186,6 +251,7 @@ class Layer {
         case Tools.eraser:
           renderEraser(canvas, paint, userAction);
           break;
+        case Tools.fill:
         case Tools.image:
           renderImage(canvas, userAction);
           break;
@@ -251,6 +317,48 @@ class Layer {
       final path = Path()..addRect(rect);
       applyBrushStyle(canvas, paint, path, userAction);
     }
+  }
+
+  Path getPathUsingFloodFill({
+    required final ui.Image image,
+    required final Offset position,
+    final int tolerance = 1,
+  }) {
+    final path = Path();
+    final width = image.width;
+    final height = image.height;
+
+    final visited = List.generate(
+      height,
+      (y) => List.filled(width, false),
+    );
+
+    final queue = <Offset>[];
+    queue.add(position);
+
+    while (queue.isNotEmpty) {
+      final current = queue.removeAt(0);
+      final x = current.dx.round();
+      final y = current.dy.round();
+
+      if (x < 0 || x >= width || y < 0 || y >= height) {
+        continue;
+      }
+      if (visited[y][x]) {
+        continue;
+      }
+
+      visited[y][x] = true;
+      path.addRect(Rect.fromLTWH(x.toDouble(), y.toDouble(), 1, 1));
+
+      // Add adjacent pixels to queue
+      queue.add(Offset(x + 1, y.toDouble()));
+      queue.add(Offset(x - 1, y.toDouble()));
+      queue.add(Offset(x.toDouble(), y + 1));
+      queue.add(Offset(x.toDouble(), y - 1));
+    }
+
+    return path;
   }
 
   void renderEraser(Canvas canvas, Paint paint, UserAction userAction) {

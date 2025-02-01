@@ -112,7 +112,7 @@ Future<void> addImageToLayer({
       final List<int> bytes = file.content as List<int>;
       final ui.Image image = await decodeImage(bytes);
 
-      layer.addImage(image, offset);
+      layer.addImage(image, offset: offset);
     } else {
       debugPrint('$imageName not found in the achive');
     }

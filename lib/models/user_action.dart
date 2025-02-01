@@ -9,6 +9,7 @@ enum Tools {
   line,
   circle,
   rectangle,
+  fill,
   eraser,
   image;
 
@@ -50,6 +51,9 @@ const Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
     ToolAttribute.brushSize,
     ToolAttribute.brushStyle,
     ToolAttribute.colorOutline,
+    ToolAttribute.colorFill,
+  },
+  Tools.fill: {
     ToolAttribute.colorFill,
   },
   Tools.eraser: {

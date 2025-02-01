@@ -123,6 +123,14 @@ class ToolsPanel extends StatelessWidget {
         onPressed: () => onShapeSelected(Tools.circle),
       ),
 
+      // Paint Bucket
+      ToolSelector(
+        name: 'Paint Bucket',
+        icon: Icons.format_paint,
+        isSelected: currentShapeType == Tools.fill,
+        onPressed: () => onShapeSelected(Tools.fill),
+      ),
+
       ToolSelector(
         name: 'Eraser',
         icon: Icons.cleaning_services,
