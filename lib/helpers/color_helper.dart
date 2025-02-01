@@ -158,19 +158,42 @@ String colorToHexString(
   bool alphaFirst = false,
   bool includeAlpha = true,
 }) {
-  final String red = (color.r * 255).toInt().toRadixString(16).padLeft(2, '0');
-  final String green =
-      (color.g * 255).toInt().toRadixString(16).padLeft(2, '0');
-  final String blue = (color.b * 255).toInt().toRadixString(16).padLeft(2, '0');
-  final String alpha =
-      (color.a * 255).toInt().toRadixString(16).padLeft(2, '0');
-  if (includeAlpha == false) {
+  final components = getColorComponentsAsHex(color);
+  final String alpha = components[0];
+  final String red = components[1];
+  final String green = components[2];
+  final String blue = components[3];
+
+  if (!includeAlpha) {
     return '#$red$green$blue';
   }
   if (alphaFirst) {
     return '#$alpha$red$green$blue';
   }
   return '#$red$green$blue$alpha';
+}
+
+/// Returns the color components (alpha, red, green, blue) as an array of hexadecimal strings.
+///
+/// The [color] parameter represents the color to be converted.
+/// The returned array contains the alpha, red, green, and blue components as hexadecimal strings.
+///
+/// Returns an array of hexadecimal strings representing the color components.
+List<String> getColorComponentsAsHex(final Color color) {
+  final String alpha =
+      (color.a * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String red =
+      (color.r * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String green =
+      (color.g * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String blue =
+      (color.b * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  return [alpha, red, green, blue];
+}
+
+String getHexOnMultiline(final Color color) {
+  final list = getColorComponentsAsHex(color);
+  return list.join('\n');
 }
 
 /// Calculates the contrast color based on the luminance of the input color.
@@ -182,14 +205,16 @@ String colorToHexString(
 /// Returns the contrast color as a [Color] object.
 ///
 Color contrastColor(Color color) {
-  // Calculate the luminance of the color
+  // Calculate the luminance of the color including alpha
   final luminance = (0.299 * (color.r * 255) +
           0.587 * (color.g * 255) +
           0.114 * (color.b * 255)) /
       255;
+  final alphaFactor = color.a;
 
-  // Determine whether to make the contrast color black or white based on the luminance
-  final contrastColor = luminance > 0.5 ? Colors.black : Colors.white;
+  // Determine whether to make the contrast color black or white based on the luminance and alpha
+  final contrastColor =
+      (luminance * alphaFactor) > 0.5 ? Colors.black : Colors.white;
 
   return contrastColor;
 }

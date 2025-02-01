@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 class ToolAttributeWidget extends StatelessWidget {
@@ -9,6 +10,7 @@ class ToolAttributeWidget extends StatelessWidget {
     required this.onButtonPressed,
     this.child,
     this.transparentPaper = false,
+    this.showColorHexValue = false,
     super.key,
   });
 
@@ -18,6 +20,7 @@ class ToolAttributeWidget extends StatelessWidget {
   final VoidCallback onButtonPressed;
   final Widget? child;
   final bool transparentPaper;
+  final bool showColorHexValue;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +30,7 @@ class ToolAttributeWidget extends StatelessWidget {
           ? IconButtonWithBackground(
               name: name,
               buttonIcon: buttonIcon,
-              buttonIconColor: buttonIconColor,
+              color: buttonIconColor,
               onButtonPressed: onButtonPressed,
               transparentPaper: transparentPaper,
             )
@@ -37,7 +40,7 @@ class ToolAttributeWidget extends StatelessWidget {
                 IconButtonWithBackground(
                   name: name,
                   buttonIcon: buttonIcon,
-                  buttonIconColor: buttonIconColor,
+                  color: buttonIconColor,
                   onButtonPressed: onButtonPressed,
                   transparentPaper: transparentPaper,
                 ),
@@ -58,21 +61,23 @@ class IconButtonWithBackground extends StatelessWidget {
     super.key,
     required this.name,
     required this.buttonIcon,
-    required this.buttonIconColor,
-    required this.onButtonPressed,
+    required this.color,
     this.transparentPaper = false,
+    this.showHexValue = false,
+    required this.onButtonPressed,
   });
   final String name;
   final IconData buttonIcon;
-  final Color buttonIconColor;
-  final VoidCallback onButtonPressed;
+  final Color color;
   final bool transparentPaper;
+  final bool showHexValue;
+  final VoidCallback onButtonPressed;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 40,
-      height: 40,
+      height: transparentPaper ? 90 : 40,
       child: Stack(
         alignment: AlignmentDirectional.center,
         children: [
@@ -80,12 +85,32 @@ class IconButtonWithBackground extends StatelessWidget {
             const TransparentPaper(
               patternSize: 4,
             ),
-          IconButton(
-            icon: Icon(buttonIcon),
-            onPressed: onButtonPressed,
-            color: buttonIconColor,
-            tooltip: name,
+          Positioned(
+            top: transparentPaper ? -5 : null,
+            child: IconButton(
+              icon: Icon(buttonIcon),
+              onPressed: onButtonPressed,
+              color: color,
+              tooltip: name,
+            ),
           ),
+          if (transparentPaper)
+            Positioned(
+              bottom: 0,
+              child: Container(
+                color: color,
+                margin: const EdgeInsets.only(bottom: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  getHexOnMultiline(color),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: contrastColor(color),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

@@ -109,7 +109,8 @@ class _MyColorPickerState extends State<MyColorPicker> {
                 children: [
                   const TransparentPaper(patternSize: 4),
                   CustomPaint(
-                    painter: AlphaGradientPainter(hue: hue, brightness: brightness),
+                    painter:
+                        AlphaGradientPainter(hue: hue, brightness: brightness),
                     child: Slider(
                       value: alpha,
                       min: 0,
@@ -266,7 +267,11 @@ void showColorPicker({
   );
 }
 
-Color hsvToColor(final double hue, final double brightness, final double alpha) {
+Color hsvToColor(
+  final double hue,
+  final double brightness,
+  final double alpha,
+) {
   final hslColor = HSLColor.fromAHSL(alpha, hue, 1.0, brightness);
   return hslColor.toColor();
 }

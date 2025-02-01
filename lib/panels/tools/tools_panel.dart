@@ -240,6 +240,21 @@ class ToolsPanel extends StatelessWidget {
         ),
       );
     }
-    return widgets;
+
+    // Add a separator between each element
+    List<Widget> separatedWidgets = [];
+    for (int i = 0; i < widgets.length; i++) {
+      separatedWidgets.add(widgets[i]);
+      if (i < widgets.length - 1) {
+        separatedWidgets.add(
+          const Divider(
+            thickness: 1,
+            height: 15,
+            color: Colors.black,
+          ),
+        );
+      }
+    }
+    return separatedWidgets;
   }
 }
