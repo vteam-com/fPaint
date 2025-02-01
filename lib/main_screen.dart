@@ -136,7 +136,7 @@ class MainScreen extends StatelessWidget {
         appModel.update();
       } else {
         // Existing shape logic
-        appModel.updateLastUserAction(position);
+        appModel.updateLastUserAction(end: position);
         appModel.update();
       }
     }

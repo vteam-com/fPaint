@@ -177,7 +177,7 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
-  void updateLastUserAction(final Offset end) {
+  void updateLastUserAction({required final Offset end}) {
     selectedLayer.updateLastUserActionEndPosition(end);
     update();
   }

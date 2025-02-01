@@ -69,7 +69,7 @@ void main() {
         type: Tools.rectangle,
         colorFill: Colors.blue,
       );
-      paintModel.updateLastUserAction(const Offset(20, 20));
+      paintModel.updateLastUserAction(end: const Offset(20, 20));
       expect(
         paintModel.selectedLayer.lastUserAction!.positions.last,
         const Offset(20, 20),
@@ -77,7 +77,7 @@ void main() {
     });
 
     test('updateLastShape should do nothing if no shapes exist', () {
-      paintModel.updateLastUserAction(const Offset(20, 20));
+      paintModel.updateLastUserAction(end: const Offset(20, 20));
       expect(paintModel.selectedLayer.count, 1);
     });
 
