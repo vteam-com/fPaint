@@ -444,6 +444,8 @@ class Layer {
     return _actionStack
         .take(numberOfHistoryAction ?? _actionStack.length)
         .map((final UserAction action) => action.toString())
+        .toList()
+        .reversed
         .toList();
   }
 }
