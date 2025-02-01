@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/panels/layers/layers_panel.dart';
+import 'package:fpaint/panels/layers/tools_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 
 class SidePanel extends StatelessWidget {
@@ -25,11 +25,11 @@ class SidePanel extends StatelessWidget {
           spacing: 8,
           children: [
             //
-            // Layers Panel
+            // Toola dn Layers Panel
             //
             const Expanded(
               flex: 1,
-              child: LayersPanel(),
+              child: ToolsAndLayersPanel(),
             ),
             // Divider
             //

@@ -5,8 +5,8 @@ import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
 
-class LayersPanel extends StatelessWidget {
-  const LayersPanel({super.key});
+class ToolsAndLayersPanel extends StatelessWidget {
+  const ToolsAndLayersPanel({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +17,21 @@ class LayersPanel extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            if (appModel.isSidePanelExpanded)
+              IconButton(
+                tooltip: 'Start over...',
+                icon: const Icon(Icons.power_settings_new_outlined),
+                onPressed: () => onFileNew(context),
+              ),
+            // Alway show
             IconButton(
-              icon: const Icon(Icons.file_open_outlined),
+              tooltip: 'Open file...',
+              icon: const Icon(Icons.folder_open_outlined),
               onPressed: () => onFileOpen(context),
             ),
             if (appModel.isSidePanelExpanded)
               IconButton(
+                tooltip: 'Add Layer',
                 icon: const Icon(Icons.my_library_add_outlined),
                 onPressed: () => _onAddLayer(appModel),
               ),
@@ -30,6 +39,7 @@ class LayersPanel extends StatelessWidget {
                 appModel.layers.length > 1 &&
                 appModel.layers.list.last != appModel.selectedLayer)
               IconButton(
+                tooltip: 'Merge to below layer',
                 icon: const Icon(Icons.layers_outlined),
                 onPressed: () => _onFlattenLayers(
                   appModel,
@@ -39,10 +49,12 @@ class LayersPanel extends StatelessWidget {
               ),
             if (appModel.isSidePanelExpanded)
               IconButton(
+                tooltip: 'Export...',
                 icon: const Icon(Icons.ios_share_outlined),
                 onPressed: () => sharePanel(context),
               ),
             IconButton(
+              tooltip: 'Expand/Collapse',
               icon: Icon(
                 appModel.isSidePanelExpanded
                     ? Icons.keyboard_double_arrow_left
