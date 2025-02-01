@@ -15,6 +15,11 @@ enum Tools {
   bool isSupported(ToolAttribute attribute) {
     return toolsSupportedAttributes[this]?.contains(attribute) ?? false;
   }
+
+  @override
+  String toString() {
+    return name;
+  }
 }
 
 enum ToolAttribute {
@@ -69,4 +74,8 @@ class UserAction {
   final Color brushColor;
   final Color fillColor;
   final ui.Image? image;
+  @override
+  String toString() {
+    return '$tool';
+  }
 }

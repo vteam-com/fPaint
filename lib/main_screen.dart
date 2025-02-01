@@ -161,35 +161,37 @@ class MainScreen extends StatelessWidget {
   /// Builds a column of floating action buttons for the paint application,
   /// including buttons for undo, redo, zoom in, zoom out,
   ///  and a button that displays the current zoom level and canvas size.
-  Widget floatingActionButtons(AppModel paintModel) {
+  Widget floatingActionButtons(AppModel appModel) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => paintModel.undo(),
+          tooltip:
+              'Undo\n---------------\n${appModel.selectedLayer.actionHistory(20).join('\n')}',
+          onPressed: () => appModel.undo(),
           child: const Icon(Icons.undo),
         ),
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => paintModel.redo(),
+          onPressed: () => appModel.redo(),
           child: const Icon(Icons.redo),
         ),
         const SizedBox(height: 8),
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => paintModel.scale += 0.10,
+          onPressed: () => appModel.scale += 0.10,
           child: const Icon(Icons.zoom_in),
         ),
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => paintModel.scale = 1,
+          onPressed: () => appModel.scale = 1,
           child: Text(
-            '${(paintModel.scale * 100).toInt()}%\n${paintModel.canvasSize.width.toInt()}\n${paintModel.canvasSize.height.toInt()}',
+            '${(appModel.scale * 100).toInt()}%\n${appModel.canvasSize.width.toInt()}\n${appModel.canvasSize.height.toInt()}',
             textAlign: TextAlign.right,
             style: const TextStyle(
               color: Colors.white,
@@ -201,7 +203,7 @@ class MainScreen extends StatelessWidget {
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => paintModel.scale -= 0.10,
+          onPressed: () => appModel.scale -= 0.10,
           child: const Icon(Icons.zoom_out),
         ),
       ],

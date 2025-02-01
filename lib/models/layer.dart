@@ -326,4 +326,11 @@ class Layer {
     }
     return dashedPath;
   }
+
+  List<String> actionHistory([int? numberOfHistoryAction]) {
+    return _actionStack
+        .take(numberOfHistoryAction ?? _actionStack.length)
+        .map((final UserAction action) => action.toString())
+        .toList();
+  }
 }
