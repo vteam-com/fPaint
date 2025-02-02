@@ -27,11 +27,14 @@ import 'package:fpaint/panels/share_panel.dart';
 /// - A `Future<void>` that completes when the image has been successfully saved.
 Future<void> onExportAsPng(final BuildContext context) async {
   final AppModel appModel = AppModel.get(context);
+
   final String? filePath = await FilePicker.platform.saveFile(
-    dialogTitle: 'Save image',
+    dialogTitle: 'fPaint Save Image',
+    initialDirectory: '.',
     fileName: 'image.png',
-    allowedExtensions: ['png'],
     type: FileType.custom,
+    allowedExtensions: ['png'],
+    lockParentWindow: true,
   );
   if (filePath != null) {
     // Capture the image bytes
