@@ -11,9 +11,7 @@ A feature-rich drawing and painting application built with Flutter that allows u
 - Multiple brush sizes and styles
 - Color picker with custom color palette
 - Undo/Redo functionality
-- Save drawings to device gallery
-- Clear canvas option
-- Background color customization
+- Save drawings to device/Dowload folder for Web
 - Responsive design for different screen sizes
 
 ## Getting Started
@@ -29,19 +27,19 @@ A feature-rich drawing and painting application built with Flutter that allows u
 
 1. Clone the repository
 
-git clone <https://github.com/yourusername/flutter-drawing-app.git>
+    ```git clone <https://github.com/vteam-com/fPaint.git>```
 
 1. Navigate to project directory
 
-cd flutter-drawing-app
+    ```cd flutter-drawing-app```
 
 1. Install dependencies
 
-flutter pub get
+    ```flutter pub get```
 
 1. Run the app
 
-flutter run
+    ```flutter run```
 
 ## Usage
 
@@ -55,34 +53,13 @@ flutter run
    - Clear canvas
    - Save your artwork
 
-## Dependencies
-
-- `flutter_colorpicker`: For color selection
-- `path_provider`: For saving drawings locally
-- `permission_handler`: For handling storage permissions
-- `image_gallery_saver`: For saving to device gallery
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Flutter team for the amazing framework
-- Contributors and maintainers
-- Open source community
+This project is licensed under the **MIT** License
 
 ## Screenshots
 
-[Add your app screenshots here]
+![fPaint Screenshot](fPaint.png)
 
 ## OpenRaster ORA file
 
@@ -99,3 +76,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
     </stack>
 </image>
 ```
+
+## Graph Dependencies
+
+- install **Lakos**
+
+    ```bash
+    dart pub global activate lakos
+    ```
+
+- install **GraphViz**
+
+  - on macOS
+
+    ```bash
+    brew install graphviz
+    ```
