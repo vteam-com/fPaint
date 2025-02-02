@@ -138,7 +138,7 @@ class AppModel extends ChangeNotifier {
   }
 
   Layer get selectedLayer => layers.get(selectedLayerIndex);
-
+  bool get isCurrentSelectionReadyForAction => selectedLayer.isVisible;
   Layer addLayerTop([String? name]) {
     return insertLayer(0, name);
   }

@@ -41,14 +41,22 @@ class MainScreen extends StatelessWidget {
 
                 // Draw Start
                 onPointerDown: (final PointerDownEvent details) async {
-                  if (appModel.userActionStartingOffset == null) {
-                    final double scrollOffsetX = scrollControllerX.offset;
-                    final double scrollOffsetY = scrollControllerY.offset;
-                    final Offset adjustedPosition = details.localPosition +
-                        Offset(scrollOffsetX, scrollOffsetY);
-                    await _onUserActionStart(
-                      appModel: appModel,
-                      position: adjustedPosition / appModel.scale,
+                  if (appModel.isCurrentSelectionReadyForAction) {
+                    if (appModel.userActionStartingOffset == null) {
+                      final double scrollOffsetX = scrollControllerX.offset;
+                      final double scrollOffsetY = scrollControllerY.offset;
+                      final Offset adjustedPosition = details.localPosition +
+                          Offset(scrollOffsetX, scrollOffsetY);
+                      await _onUserActionStart(
+                        appModel: appModel,
+                        position: adjustedPosition / appModel.scale,
+                      );
+                    }
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Selection is hidden.'),
+                      ),
                     );
                   }
                 },
