@@ -3,8 +3,15 @@ import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/layers/tools_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 
-class SidePanel extends StatelessWidget {
+class SidePanel extends StatefulWidget {
   const SidePanel({super.key});
+
+  @override
+  State<SidePanel> createState() => _SidePanelState();
+}
+
+class _SidePanelState extends State<SidePanel> {
+  double topPanelHeight = 200.0; // Initial height for the top panel
 
   @override
   Widget build(final BuildContext context) {
@@ -22,28 +29,46 @@ class SidePanel extends StatelessWidget {
         ),
         clipBehavior: Clip.none,
         child: Column(
-          spacing: 8,
           children: [
             //
-            // Toola dn Layers Panel
+            // Tools and Layers Panel
             //
-            const Expanded(
-              flex: 1,
-              child: ToolsAndLayersPanel(),
+            SizedBox(
+              height: topPanelHeight,
+              child: const ToolsAndLayersPanel(),
             ),
-            // Divider
             //
-            const Divider(
-              thickness: 1,
-              height: 1,
-              color: Colors.grey,
-            ),
+            // Resizable Slipper
+            //
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onVerticalDragUpdate: (details) {
+                setState(() {
+                  topPanelHeight += details.delta.dy;
 
+                  // Ensure the height is within a reasonable range
+                  if (topPanelHeight < 50) {
+                    topPanelHeight = 50;
+                  }
+                  if (topPanelHeight >
+                      MediaQuery.of(context).size.height - 100) {
+                    topPanelHeight = MediaQuery.of(context).size.height - 100;
+                  }
+                });
+              },
+              child: const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Divider(
+                  thickness: 4,
+                  height: 8,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
             //
             // Tools Panel
             //
             Expanded(
-              flex: 2,
               child: ToolsPanel(
                 currentShapeType: appModel.selectedTool,
                 onShapeSelected: (final Tools tool) =>
