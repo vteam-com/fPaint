@@ -95,9 +95,12 @@ Future<void> onFileOpen(final BuildContext context) async {
 
   try {
     final FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
+      dialogTitle: 'fPaint Load Image',
+      type: FileType.custom,
+      allowedExtensions: supportedImageFileExtensions,
       allowMultiple: false,
       withData: true,
+      lockParentWindow: true,
     );
 
     if (result != null) {
@@ -132,19 +135,20 @@ Future<void> onFileOpen(final BuildContext context) async {
   }
 }
 
+final List<String> supportedImageFileExtensions = [
+  'ora',
+  'png',
+  'psd',
+  // 'tif',
+  // 'tiff',
+  'webp',
+  'jpg',
+  'jpeg',
+  // 'xcf',
+];
+
 bool isFileExtensionSupported(String extension) {
-  List<String> supportedExtensions = [
-    'ora',
-    'png',
-    'psd',
-    'tif',
-    'tiff',
-    'webp',
-    'jpg',
-    'jpeg',
-    'xcf',
-  ];
-  return supportedExtensions.contains(extension.toLowerCase());
+  return supportedImageFileExtensions.contains(extension.toLowerCase());
 }
 
 Future<void> _readImageFile(
