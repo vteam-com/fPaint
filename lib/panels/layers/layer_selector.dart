@@ -59,21 +59,76 @@ class LayerSelector extends StatelessWidget {
                     child: Text(layer.name),
                   ),
                   _buildThumbnailAndOpacity(appModel, layer),
-                  IconButton(
-                    icon: Icon(
-                      layer.isVisible ? Icons.visibility : Icons.visibility_off,
+                  SizedBox(
+                    width: 100,
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      children: [
+                        IconButton(
+                          tooltip: 'Hide/Show this layer',
+                          icon: Icon(
+                            layer.isVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () =>
+                              appModel.toggleLayerVisibility(layer),
+                        ),
+                        IconButton(
+                          tooltip: 'Add a layer above',
+                          icon: const Icon(Icons.my_library_add_outlined),
+                          onPressed: () => _onAddLayer(appModel),
+                        ),
+                        IconButton(
+                          tooltip: 'Merge to below layer',
+                          icon: const Icon(Icons.layers_outlined),
+                          onPressed: layer == appModel.layers.list.last
+                              ? null
+                              : () => _onFlattenLayers(
+                                    appModel,
+                                    appModel.selectedLayerIndex,
+                                    appModel.selectedLayerIndex + 1,
+                                  ),
+                        ),
+                        IconButton(
+                          tooltip: 'Delete this layer',
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: showDelete
+                              ? () => appModel.removeLayer(layer)
+                              : null,
+                        ),
+                      ],
                     ),
-                    onPressed: () => appModel.toggleLayerVisibility(layer),
                   ),
-                  if (showDelete)
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () => appModel.removeLayer(layer),
-                    ),
                 ],
               ),
       ),
     );
+  }
+
+  // Method to insert a new layer above the currently selected one
+  void _onAddLayer(final AppModel appModel) {
+    final int currentIndex = appModel.selectedLayerIndex;
+    final Layer newLayer = appModel.insertLayer(currentIndex);
+    appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
+  }
+
+  // Method to flatten all layers
+  void _onFlattenLayers(
+    final AppModel appModel,
+    final int layerIndexToMerge,
+    final int layerIndexToMergIn,
+  ) {
+    final Layer layerToMege = appModel.layers.get(layerIndexToMerge);
+    final Layer receivingLayer = appModel.layers.get(layerIndexToMergIn);
+
+    receivingLayer.mergeFrom(layerToMege);
+    appModel.removeLayer(layerToMege);
+    if (layerIndexToMergIn > layerIndexToMerge) {
+      appModel.selectedLayerIndex = layerIndexToMergIn - 1;
+    } else {
+      appModel.selectedLayerIndex = layerIndexToMergIn;
+    }
   }
 
   Widget _buildThumbnailAndOpacity(final AppModel appModel, final Layer layer) {
