@@ -183,46 +183,6 @@ class Layer {
     return await picture.toImage(width, height);
   }
 
-  /// Each user action are painted on an image and removed
-  Future<void> flattenUserActionsToImage() async {
-    if (_actionStack.isEmpty) {
-      return;
-    }
-
-    final Size size = Size(
-      _actionStack
-          .map(
-            (a) => a.positions.map((p) => p.dx).reduce((a, b) => a > b ? a : b),
-          )
-          .reduce((a, b) => a > b ? a : b),
-      _actionStack
-          .map(
-            (a) => a.positions.map((p) => p.dy).reduce((a, b) => a > b ? a : b),
-          )
-          .reduce((a, b) => a > b ? a : b),
-    );
-
-    final ui.Image image =
-        await renderImageWH(size.width.toInt(), size.height.toInt());
-
-    // Clear existing actions
-    // _actionStack.clear();
-
-    // Add new image action
-    _actionStack.add(
-      UserAction(
-        tool: Tools.image,
-        positions: [Offset.zero, Offset(size.width, size.height)],
-        image: image,
-        fillColor: Colors.transparent,
-        brushColor: Colors.transparent,
-        brushSize: 1,
-      ),
-    );
-
-    clearCache();
-  }
-
   void renderLayer(final Canvas canvas) {
     // Save a layer with opacity applied
     final Paint layerPaint = Paint()
