@@ -186,38 +186,69 @@ class Layer {
 
   void renderLayer(final Canvas canvas) {
     // Save a layer with opacity applied
-    final Paint layerPaint = Paint()
-      ..color = Colors.black.withAlpha((255 * opacity).toInt());
+    final Paint layerPaint = Paint()..color = Colors.black.withAlpha((255 * opacity).toInt());
     canvas.saveLayer(null, layerPaint);
 
     // Render all actions within the saved layer
     for (final UserAction userAction in _actionStack) {
-      final Paint paint = Paint()
-        ..color = userAction.fillColor
-        ..strokeCap = StrokeCap.round
-        ..strokeWidth = userAction.brushSize
-        ..style = userAction.tool == Tools.circle ||
-                userAction.tool == Tools.rectangle
-            ? PaintingStyle.fill // Ensure fill for these tools
-            : PaintingStyle.stroke; // Stroke for other tools
-
       switch (userAction.tool) {
         case Tools.draw:
+          final Paint paint = Paint();
+          paint.color = userAction.fillColor;
+          paint.strokeCap = StrokeCap.round;
+          paint.strokeWidth = userAction.brushSize;
+          paint.style = PaintingStyle.stroke;
+
           renderPath(canvas, paint, userAction);
           break;
+
         case Tools.line:
+          final Paint paint = Paint();
+          paint.color = userAction.fillColor;
+          paint.strokeCap = StrokeCap.round;
+          paint.strokeWidth = userAction.brushSize;
+          paint.style = PaintingStyle.stroke;
+
           renderLine(canvas, paint, userAction);
           break;
+
         case Tools.circle:
+          final Paint paint = Paint();
+          paint.color = userAction.fillColor;
+          paint.strokeCap = StrokeCap.round;
+          paint.strokeWidth = userAction.brushSize;
+          paint.style = PaintingStyle.fill;
+
           renderCircle(canvas, paint, userAction);
           break;
+          
         case Tools.rectangle:
+          final Paint paint = Paint();
+          paint.color = userAction.fillColor;
+          paint.strokeCap = StrokeCap.round;
+          paint.strokeWidth = userAction.brushSize;
+          paint.style = PaintingStyle.fill;
           renderRectangle(canvas, paint, userAction);
           break;
+
         case Tools.eraser:
+          final Paint paint = Paint();
+          paint.color = userAction.fillColor;
+          paint.strokeCap = StrokeCap.round;
+          paint.strokeWidth = userAction.brushSize;
+          paint.style = PaintingStyle.stroke;
+
           renderEraser(canvas, paint, userAction);
           break;
+
         case Tools.fill:
+          final Paint paint = Paint();
+          paint.color = userAction.fillColor;
+          paint.strokeCap = StrokeCap.round;
+          paint.strokeWidth = userAction.brushSize;
+          paint.style = PaintingStyle.stroke;
+          renderImage(canvas, userAction);
+          
         case Tools.image:
           renderImage(canvas, userAction);
           break;
