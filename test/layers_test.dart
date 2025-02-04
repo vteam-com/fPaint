@@ -59,7 +59,7 @@ void main() {
       final picture = recorder.endRecording();
       final image = await picture.toImage(10, 10);
 
-      layer.addImage(image);
+      layer.addImage(imageToAdd: image);
       expect(layer.count, 1);
       expect(layer.lastUserAction?.tool, Tools.image);
     });

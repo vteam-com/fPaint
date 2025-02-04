@@ -80,6 +80,7 @@ class UserAction {
   final Color brushColor;
   final Color fillColor;
   final ui.Image? image;
+
   @override
   String toString() {
     return '$tool';

@@ -48,7 +48,7 @@ class Layer {
     return Rect.fromLTRB(minX, minY, maxX, maxY);
   }
 
-  //
+  ///---------------------------------------
   // Visibility
   //
   bool _isVisible = true;
@@ -59,7 +59,7 @@ class Layer {
     clearCache();
   }
 
-  //
+  ///---------------------------------------
   // Opacity
   //
   double _opacity = 1; // 0.0 to 1.0=100%
@@ -82,13 +82,12 @@ class Layer {
   UserAction? get lastUserAction =>
       _actionStack.isEmpty ? null : _actionStack.last;
 
-  void addImage(
-    final ui.Image imageToAdd, {
-    final Tools tool = Tools.image,
+  UserAction addImage({
+    required final ui.Image imageToAdd,
     final ui.Offset offset = Offset.zero,
+    final Tools tool = Tools.image,
   }) {
-    _actionStack.add(
-      UserAction(
+    final UserAction newAction = UserAction(
         tool: tool,
         positions: [
           offset,
@@ -101,9 +100,11 @@ class Layer {
         fillColor: Colors.transparent,
         brushSize: 0,
         image: imageToAdd,
-      ),
     );
+
+    _actionStack.add(newAction);
     clearCache();
+    return newAction;
   }
 
   void lastActionAddPosition({required final Offset position}) {
