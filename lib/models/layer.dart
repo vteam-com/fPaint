@@ -25,6 +25,8 @@ class Layer {
   final List<UserAction> _actionStack = [];
   final List<UserAction> redoStack = [];
   bool isSelected;
+  bool preserveAlpha = true;
+  ui.BlendMode blendMode = ui.BlendMode.srcOver;
 
   Rect getArea() {
     if (_actionStack.isEmpty) {
@@ -88,18 +90,18 @@ class Layer {
     final Tools tool = Tools.image,
   }) {
     final UserAction newAction = UserAction(
-        tool: tool,
-        positions: [
-          offset,
-          Offset(
-            offset.dx + imageToAdd.width.toDouble(),
-            offset.dy + imageToAdd.height.toDouble(),
-          ),
-        ],
-        brushColor: Colors.transparent,
-        fillColor: Colors.transparent,
-        brushSize: 0,
-        image: imageToAdd,
+      tool: tool,
+      positions: [
+        offset,
+        Offset(
+          offset.dx + imageToAdd.width.toDouble(),
+          offset.dy + imageToAdd.height.toDouble(),
+        ),
+      ],
+      brushColor: Colors.transparent,
+      fillColor: Colors.transparent,
+      brushSize: 0,
+      image: imageToAdd,
     );
 
     _actionStack.add(newAction);
@@ -187,7 +189,8 @@ class Layer {
   void renderLayer(final Canvas canvas) {
     // Save a layer with opacity applied
     final Paint layerPaint = Paint()
-      ..color = Colors.black.withAlpha((255 * opacity).toInt());
+      ..color = Colors.black.withAlpha((255 * opacity).toInt())
+      ..blendMode = blendMode;
     canvas.saveLayer(null, layerPaint);
 
     // Render all actions within the saved layer
@@ -222,7 +225,7 @@ class Layer {
 
           renderCircle(canvas, paint, userAction);
           break;
-          
+
         case Tools.rectangle:
           final Paint paint = Paint();
           paint.color = userAction.fillColor;
@@ -249,7 +252,7 @@ class Layer {
           paint.strokeWidth = userAction.brushSize;
           paint.style = PaintingStyle.stroke;
           renderImage(canvas, userAction);
-          
+
         case Tools.image:
           renderImage(canvas, userAction);
           break;
@@ -460,5 +463,48 @@ class Layer {
         .toList()
         .reversed
         .toList();
+  }
+
+  Future<ui.Image> blendWithPreserveAlpha({
+    required ui.Image baseImage,
+    required ui.Image topImage,
+    required BlendMode blendMode,
+  }) async {
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    // Draw the base layer
+    canvas.drawImage(baseImage, Offset.zero, Paint());
+
+    // Create a paint object with the blend mode
+    Paint paint = Paint()..blendMode = blendMode;
+
+    // Save the alpha channel of the base image
+    final alphaRecorder = ui.PictureRecorder();
+    final alphaCanvas = Canvas(alphaRecorder);
+    alphaCanvas.drawImage(
+      baseImage,
+      Offset.zero,
+      Paint()
+        ..colorFilter =
+            const ui.ColorFilter.mode(Colors.black, BlendMode.srcIn),
+    );
+    final alphaPicture = alphaRecorder.endRecording();
+    final alphaImage =
+        await alphaPicture.toImage(baseImage.width, baseImage.height);
+
+    // Apply the blend mode
+    canvas.drawImage(topImage, Offset.zero, paint);
+
+    // Restore the original alpha
+    canvas.drawImage(
+      alphaImage,
+      Offset.zero,
+      Paint()..blendMode = BlendMode.dstIn,
+    );
+
+    // Convert the picture to an image
+    final picture = recorder.endRecording();
+    return picture.toImage(baseImage.width, baseImage.height);
   }
 }

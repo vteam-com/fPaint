@@ -159,7 +159,7 @@ Future<void> _readImageFile(
   appModel.layers.clear();
   appModel.addLayerTop();
   appModel.canvasSize = Size(image.width.toDouble(), image.height.toDouble());
-  appModel.selectedLayer.addImage(image);
+  appModel.selectedLayer.addImage(imageToAdd: image);
 }
 
 Future<void> readImageFilePath(

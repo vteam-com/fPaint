@@ -70,6 +70,11 @@ Future<void> readOraFileFromBytes(
     final String name = xmlLayer.getAttribute('name') ?? 'Unnamed';
     final String opacityAsText = xmlLayer.getAttribute('opacity') ?? '1';
     final String visibleAsText = xmlLayer.getAttribute('visible') ?? 'true';
+    final String compositeOp =
+        xmlLayer.getAttribute('composite-op') ?? 'svg:src-over';
+
+    final bool preserveAlpha =
+        xmlLayer.getAttribute('alpha-preserve') == 'true';
 
     final Layer newLayer = appModel.addLayerBottom(name);
     newLayer.isVisible = visibleAsText == 'true';
@@ -86,6 +91,9 @@ Future<void> readOraFileFromBytes(
         double.parse(yAsText ?? '0'),
       );
 
+      newLayer.blendMode = getBlendModeFromOraCompositOp(compositeOp);
+      newLayer.preserveAlpha = preserveAlpha;
+
       await addImageToLayer(
         appModel: appModel,
         layer: newLayer,
@@ -94,6 +102,37 @@ Future<void> readOraFileFromBytes(
         offset: offset,
       );
     }
+  }
+}
+
+ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
+  switch (compositeOp) {
+    case 'svg:source-over':
+      return ui.BlendMode.srcOver;
+    case 'svg:multiply':
+      return ui.BlendMode.multiply;
+    case 'svg:screen':
+      return ui.BlendMode.screen;
+    case 'svg:overlay':
+      return ui.BlendMode.overlay;
+    case 'svg:darken':
+      return ui.BlendMode.darken;
+    case 'svg:lighten':
+      return ui.BlendMode.lighten;
+    case 'svg:color-dodge':
+      return ui.BlendMode.colorDodge;
+    case 'svg:color-burn':
+      return ui.BlendMode.colorBurn;
+    case 'svg:hard-light':
+      return ui.BlendMode.hardLight;
+    case 'svg:soft-light':
+      return ui.BlendMode.softLight;
+    case 'svg:difference':
+      return ui.BlendMode.difference;
+    case 'svg:exclusion':
+      return ui.BlendMode.exclusion;
+    default:
+      return ui.BlendMode.srcOver;
   }
 }
 

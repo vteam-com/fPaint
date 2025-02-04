@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/widgets/container_slider.dart';
 import 'package:fpaint/widgets/image_painter.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
@@ -78,6 +79,16 @@ class LayerSelector extends StatelessWidget {
                           tooltip: 'Add a layer above',
                           icon: const Icon(Icons.my_library_add_outlined),
                           onPressed: () => _onAddLayer(appModel),
+                        ),
+                        IconButton(
+                          tooltip: 'Blend Mode',
+                          icon: const Icon(Icons.blender_outlined),
+                          onPressed: () async {
+                            layer.blendMode = await showBlendModeMenu(
+                              context: context,
+                              selectedBlendMode: layer.blendMode,
+                            );
+                          },
                         ),
                         IconButton(
                           tooltip: 'Merge to below layer',
