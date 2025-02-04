@@ -186,7 +186,8 @@ class Layer {
 
   void renderLayer(final Canvas canvas) {
     // Save a layer with opacity applied
-    final Paint layerPaint = Paint()..color = Colors.black.withAlpha((255 * opacity).toInt());
+    final Paint layerPaint = Paint()
+      ..color = Colors.black.withAlpha((255 * opacity).toInt());
     canvas.saveLayer(null, layerPaint);
 
     // Render all actions within the saved layer
