@@ -24,11 +24,11 @@ class AppModel extends ChangeNotifier {
 
   String loadedFileName = '';
 
-  CanvasModel canvasModel = CanvasModel();
-  late Layers layers = Layers(canvasModel.canvasSize);
+  CanvasModel canvas = CanvasModel();
+  late Layers layers = Layers(canvas.canvasSize);
 
-  double get width => canvasModel.canvasSize.width * canvasModel.scale;
-  double get height => canvasModel.canvasSize.height * canvasModel.scale;
+  double get width => canvas.canvasSize.width * canvas.scale;
+  double get height => canvas.canvasSize.height * canvas.scale;
   Size get canvasSizeScaled => Size(width, height);
 
   // Selected Tool
@@ -37,26 +37,25 @@ class AppModel extends ChangeNotifier {
   Tools get selectedTool => _selectedTool;
 
   //-------------------------------------------
-  bool get canvasResizeLockAspectRatio =>
-      canvasModel.canvasResizeLockAspectRatio;
+  bool get canvasResizeLockAspectRatio => canvas.canvasResizeLockAspectRatio;
   set canvasResizeLockAspectRatio(bool value) {
-    canvasModel.canvasResizeLockAspectRatio = value;
+    canvas.canvasResizeLockAspectRatio = value;
     update();
   }
 
   //-------------------------------------------
   // Canvas Resize position
 
-  int get canvasResizePosition => canvasModel.resizePosition;
+  int get canvasResizePosition => canvas.resizePosition;
   set canvasResizePosition(int value) {
-    canvasModel.resizePosition = value;
+    canvas.resizePosition = value;
     update();
   } // center
 
   void resizeCanvas(final int newWidth, final int newHeight) {
-    final Size oldSize = canvasModel.canvasSize;
+    final Size oldSize = canvas.canvasSize;
     final Size newSize = Size(newWidth.toDouble(), newHeight.toDouble());
-    canvasModel.canvasSize = newSize;
+    canvas.canvasSize = newSize;
 
     // Scale layers only when shrinking
     if (newWidth < oldSize.width || newHeight < oldSize.height) {
@@ -68,7 +67,7 @@ class AppModel extends ChangeNotifier {
 
     // Calculate the offset adjustment based on resize position
     Offset offset = CanvasResizePosition.anchorTranslate(
-      canvasModel.resizePosition,
+      canvas.resizePosition,
       oldSize,
       newSize,
     );
@@ -105,7 +104,7 @@ class AppModel extends ChangeNotifier {
   /// The scale value is clamped between 10% and 400% to ensure a valid range.
   /// Calling this method will notify any listeners of the [AppModel] that the scale has changed.
   set scale(final double value) {
-    canvasModel.scale = value.clamp(10 / 100, 400 / 100);
+    canvas.scale = value.clamp(10 / 100, 400 / 100);
     update();
   }
 

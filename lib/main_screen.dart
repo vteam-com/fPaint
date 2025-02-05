@@ -31,14 +31,12 @@ class MainScreen extends StatelessWidget {
                 // Pinch/Zoom scaling for WEB
                 onPointerSignal: (final PointerSignalEvent event) {
                   if (event is PointerScaleEvent) {
-                    appModel.canvasModel.scale =
-                        appModel.canvasModel.scale * event.scale;
+                    appModel.canvas.scale = appModel.canvas.scale * event.scale;
                   }
                 },
                 // Pinch/Zoom scaling for Desktop
                 onPointerPanZoomUpdate: (final event) {
-                  appModel.canvasModel.scale =
-                      appModel.canvasModel.scale * event.scale;
+                  appModel.canvas.scale = appModel.canvas.scale * event.scale;
                 },
 
                 // Draw Start
@@ -51,7 +49,7 @@ class MainScreen extends StatelessWidget {
                           Offset(scrollOffsetX, scrollOffsetY);
                       await _onUserActionStart(
                         appModel: appModel,
-                        position: adjustedPosition / appModel.canvasModel.scale,
+                        position: adjustedPosition / appModel.canvas.scale,
                       );
                     }
                   } else {
@@ -73,7 +71,7 @@ class MainScreen extends StatelessWidget {
                           Offset(scrollOffsetX, scrollOffsetY);
                       _onUserActionUpdate(
                         appModel: appModel,
-                        position: adjustedPosition / appModel.canvasModel.scale,
+                        position: adjustedPosition / appModel.canvas.scale,
                       );
                     }
                   }
@@ -121,7 +119,7 @@ class MainScreen extends StatelessWidget {
     if (appModel.selectedTool == Tools.fill) {
       // Create a flattened image from the current layer
       final ui.Image img = await appModel.selectedLayer
-          .toImageForStorage(appModel.canvasModel.canvasSize);
+          .toImageForStorage(appModel.canvas.canvasSize);
 
       // Perform flood fill at the clicked position
       final ui.Image filledImage = await applyFloodFill(
@@ -213,15 +211,15 @@ class MainScreen extends StatelessWidget {
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => appModel.canvasModel.scale += 0.10,
+          onPressed: () => appModel.canvas.scale += 0.10,
           child: const Icon(Icons.zoom_in),
         ),
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => appModel.canvasModel.scale = 1,
+          onPressed: () => appModel.canvas.scale = 1,
           child: Text(
-            '${(appModel.canvasModel.scale * 100).toInt()}%\n${appModel.canvasModel.canvasSize.width.toInt()}\n${appModel.canvasModel.canvasSize.height.toInt()}',
+            '${(appModel.canvas.scale * 100).toInt()}%\n${appModel.canvas.canvasSize.width.toInt()}\n${appModel.canvas.canvasSize.height.toInt()}',
             textAlign: TextAlign.right,
             style: const TextStyle(
               color: Colors.white,
@@ -233,7 +231,7 @@ class MainScreen extends StatelessWidget {
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => appModel.canvasModel.scale -= 0.10,
+          onPressed: () => appModel.canvas.scale -= 0.10,
           child: const Icon(Icons.zoom_out),
         ),
       ],
