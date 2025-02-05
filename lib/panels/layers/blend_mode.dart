@@ -132,3 +132,10 @@ Future<BlendMode> showBlendModeMenu({
       ) ??
       BlendMode.srcOver;
 }
+
+String blendModeToText(BlendMode blendMode) {
+  if (blendMode == BlendMode.srcOver) {
+    return 'Normal';
+  }
+  return blendMode.name[0].toUpperCase() + blendMode.name.substring(1);
+}
