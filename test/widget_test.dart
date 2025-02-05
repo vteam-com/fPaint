@@ -12,6 +12,6 @@ import 'package:fpaint/main.dart';
 void main() {
   testWidgets('Simply Run the app', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(MyApp());
   });
 }
