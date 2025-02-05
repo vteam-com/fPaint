@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/layers/tools_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
+import 'package:multi_split_view/multi_split_view.dart';
 
 class SidePanel extends StatefulWidget {
   const SidePanel({super.key});
@@ -11,10 +12,8 @@ class SidePanel extends StatefulWidget {
 }
 
 class _SidePanelState extends State<SidePanel> {
-  double topPanelHeight = 200.0; // Initial height for the top panel
-
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppModel appModel = AppModel.get(context, listen: true);
 
     return AnimatedContainer(
@@ -27,56 +26,38 @@ class _SidePanelState extends State<SidePanel> {
           topRight: Radius.circular(12),
           bottomRight: Radius.circular(12),
         ),
-        clipBehavior: Clip.none,
-        child: Column(
-          children: [
-            //
-            // Tools and Layers Panel
-            //
-            SizedBox(
-              height: topPanelHeight,
-              child: const ToolsAndLayersPanel(),
+        child: MultiSplitViewTheme(
+          data: MultiSplitViewThemeData(
+            dividerPainter: DividerPainters.dashed(
+              animationEnabled: true,
+              color: Colors.grey,
+              highlightedColor: Colors.blue,
+              highlightedThickness: 4,
+              strokeCap: StrokeCap.round,
             ),
-            //
-            // Resizable Slipper
-            //
-            GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onVerticalDragUpdate: (details) {
-                setState(() {
-                  topPanelHeight += details.delta.dy;
-
-                  // Ensure the height is within a reasonable range
-                  if (topPanelHeight < 50) {
-                    topPanelHeight = 50;
-                  }
-                  if (topPanelHeight >
-                      MediaQuery.of(context).size.height - 100) {
-                    topPanelHeight = MediaQuery.of(context).size.height - 100;
-                  }
-                });
-              },
-              child: const Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Divider(
-                  thickness: 4,
-                  height: 8,
-                  color: Colors.grey,
+          ),
+          child: MultiSplitView(
+            axis: Axis.vertical,
+            initialAreas: [
+              Area(
+                size: 200,
+                min: 100,
+                builder: (context, area) => const ToolsAndLayersPanel(),
+              ),
+              Area(
+                size: 400,
+                min: 100,
+                builder: (context, area) => Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: ToolsPanel(
+                    currentShapeType: appModel.selectedTool,
+                    onShapeSelected: (Tools tool) => appModel.selectedTool = tool,
+                    minimal: !appModel.isSidePanelExpanded,
+                  ),
                 ),
               ),
-            ),
-            //
-            // Tools Panel
-            //
-            Expanded(
-              child: ToolsPanel(
-                currentShapeType: appModel.selectedTool,
-                onShapeSelected: (final Tools tool) =>
-                    appModel.selectedTool = tool,
-                minimal: !appModel.isSidePanelExpanded,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
