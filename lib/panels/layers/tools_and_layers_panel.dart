@@ -2,9 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/about.dart';
+// import 'package:fpaint/panels/canvas_settings.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
+
+class MenuIds {
+  static const int newFile = 0;
+  static const int openFile = 1;
+  static const int export = 2;
+  static const int canvasSize = 3;
+  static const int about = 4;
+}
 
 class ToolsAndLayersPanel extends StatelessWidget {
   const ToolsAndLayersPanel({super.key});
@@ -23,34 +32,42 @@ class ToolsAndLayersPanel extends StatelessWidget {
               icon: const Icon(Icons.menu),
               onSelected: (int result) {
                 switch (result) {
-                  case 0:
+                  case MenuIds.newFile:
                     onFileNew(context);
                     break;
-                  case 1:
+                  case MenuIds.openFile:
                     onFileOpen(context);
                     break;
-                  case 2:
+                  case MenuIds.export:
                     sharePanel(context);
                     break;
-                  case 3:
+                  // case MenuIds.canvasSize:
+                  //   showCanvasSettings(context);
+                  //   break;
+                  case MenuIds.about:
                     showAboutBox(context);
+                    break;
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
                 const PopupMenuItem<int>(
-                  value: 0,
+                  value: MenuIds.newFile,
                   child: Text('Start over...'),
                 ),
                 const PopupMenuItem<int>(
-                  value: 1,
+                  value: MenuIds.openFile,
                   child: Text('Open file...'),
                 ),
                 const PopupMenuItem<int>(
-                  value: 2,
+                  value: MenuIds.export,
                   child: Text('Export...'),
                 ),
                 const PopupMenuItem<int>(
-                  value: 3,
+                  value: MenuIds.canvasSize,
+                  child: Text('Canvas...'),
+                ),
+                const PopupMenuItem<int>(
+                  value: MenuIds.about,
                   child: Text('About...'),
                 ),
               ],
