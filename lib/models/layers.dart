@@ -77,4 +77,16 @@ class Layers {
   }
 
   List<Layer> get list => _list;
+
+  void offset(final Offset offset) {
+    for (final Layer layer in _list) {
+      layer.offset(offset);
+    }
+  }
+
+  void scale(final double scale) {
+    for (final Layer layer in _list) {
+      layer.scale(scale);
+    }
+  }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/about.dart';
-// import 'package:fpaint/panels/canvas_settings.dart';
+import 'package:fpaint/panels/canvas_settings.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
@@ -41,9 +41,9 @@ class ToolsAndLayersPanel extends StatelessWidget {
                   case MenuIds.export:
                     sharePanel(context);
                     break;
-                  // case MenuIds.canvasSize:
-                  //   showCanvasSettings(context);
-                  //   break;
+                  case MenuIds.canvasSize:
+                    showCanvasSettings(context);
+                    break;
                   case MenuIds.about:
                     showAboutBox(context);
                     break;

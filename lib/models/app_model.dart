@@ -9,6 +9,16 @@ import 'package:provider/provider.dart';
 // Exports
 export 'package:fpaint/models/layers.dart';
 
+const int topLeft = 0;
+const int top = 1;
+const int topRight = 2;
+const int left = 3;
+const int center = 4;
+const int right = 5;
+const int bottomLeft = 6;
+const int bottom = 7;
+const int bottomRight = 8;
+
 class AppModel extends ChangeNotifier {
   /// Gets the [AppModel] instance from the provided [BuildContext].
   ///
@@ -34,6 +44,78 @@ class AppModel extends ChangeNotifier {
   Tools _selectedTool = Tools.draw;
 
   Tools get selectedTool => _selectedTool;
+
+  //-------------------------------------------
+  bool _canvasResizeLockAspectRatio = true;
+
+  bool get canvasResizeLockAspectRatio => _canvasResizeLockAspectRatio;
+
+  set canvasResizeLockAspectRatio(bool value) {
+    _canvasResizeLockAspectRatio = value;
+    update();
+  }
+
+  //-------------------------------------------
+  // Canvas Resize position
+  int _canvasResizePosition = 4; // Center
+
+  int get canvasResizePosition => _canvasResizePosition;
+
+  set canvasResizePosition(int value) {
+    _canvasResizePosition = value;
+    update();
+  } // center
+
+  void resizeCanvas(final int newWidth, final int newHeight) {
+    final Size oldSize = canvasSize;
+    canvasSize = Size(newWidth.toDouble(), newHeight.toDouble());
+
+    // Scale layers only when shrinking
+    if (newWidth < oldSize.width || newHeight < oldSize.height) {
+      final double scaleX = newWidth / oldSize.width;
+      final double scaleY = newHeight / oldSize.height;
+      final double scale = min(scaleX, scaleY);
+      layers.scale(scale);
+    }
+
+    // Calculate the offset adjustment based on resize position
+    Offset offset = Offset.zero;
+
+    final double dx = (newWidth - oldSize.width).toDouble();
+    final double dy = (newHeight - oldSize.height).toDouble();
+
+    switch (_canvasResizePosition) {
+      case topLeft:
+        offset = Offset.zero;
+        break;
+      case top:
+        offset = Offset(dx / 2, 0);
+        break;
+      case topRight:
+        offset = Offset(dx, 0);
+        break;
+      case left:
+        offset = Offset(0, dy / 2);
+        break;
+      case center:
+        offset = Offset(dx / 2, dy / 2);
+        break;
+      case right:
+        offset = Offset(dx, dy / 2);
+        break;
+      case bottomLeft:
+        offset = Offset(0, dy);
+        break;
+      case bottom:
+        offset = Offset(dx / 2, dy);
+        break;
+      case bottomRight:
+        offset = Offset(dx, dy);
+        break;
+    }
+    layers.offset(offset);
+    update();
+  }
 
   set selectedTool(Tools value) {
     _selectedTool = value;

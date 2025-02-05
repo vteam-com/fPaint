@@ -18,6 +18,7 @@ digraph "" {
   "/lib/panels/layers/blend_mode.dart" [label="blend_mode"];
   "/lib/panels/side_panel.dart" [label="side_panel"];
   "/lib/panels/share_panel.dart" [label="share_panel"];
+  "/lib/panels/canvas_settings.dart" [label="canvas_settings"];
   "/lib/models/layers.dart" [label="layers"];
   "/lib/models/user_action.dart" [label="user_action"];
   "/lib/models/app_model.dart" [label="app_model"];
@@ -41,6 +42,7 @@ digraph "" {
   "/lib/widgets/tolerance_picker.dart" [label="tolerance_picker"];
   "/lib/widgets/image_painter.dart" [label="image_painter"];
   "/lib/widgets/brush_style_picker.dart" [label="brush_style_picker"];
+  "/lib/widgets/nine_grid_selector.dart" [label="nine_grid_selector"];
   "/lib/widgets/color_picker.dart" [label="color_picker"];
   subgraph "cluster~" {
     label="fpaint";
@@ -68,6 +70,7 @@ digraph "" {
         "/lib/panels/canvas_panel.dart";
         "/lib/panels/side_panel.dart";
         "/lib/panels/share_panel.dart";
+        "/lib/panels/canvas_settings.dart";
         subgraph "cluster~/lib/panels/tools" {
           label="tools";
           "/lib/panels/tools/tool_selector.dart";
@@ -114,6 +117,7 @@ digraph "" {
         "/lib/widgets/tolerance_picker.dart";
         "/lib/widgets/image_painter.dart";
         "/lib/widgets/brush_style_picker.dart";
+        "/lib/widgets/nine_grid_selector.dart";
         "/lib/widgets/color_picker.dart";
       }
     }
@@ -138,6 +142,7 @@ digraph "" {
   "/lib/panels/layers/tools_and_layers_panel.dart" -> "/lib/files/import_files.dart";
   "/lib/panels/layers/tools_and_layers_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/layers/tools_and_layers_panel.dart" -> "/lib/panels/about.dart";
+  "/lib/panels/layers/tools_and_layers_panel.dart" -> "/lib/panels/canvas_settings.dart";
   "/lib/panels/layers/tools_and_layers_panel.dart" -> "/lib/panels/layers/layer_selector.dart";
   "/lib/panels/layers/tools_and_layers_panel.dart" -> "/lib/panels/share_panel.dart";
   "/lib/panels/layers/layer_selector.dart" -> "/lib/models/app_model.dart";
@@ -151,6 +156,8 @@ digraph "" {
   "/lib/panels/side_panel.dart" -> "/lib/panels/tools/tools_panel.dart";
   "/lib/panels/share_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/share_panel.dart" -> "/lib/panels/canvas_panel.dart";
+  "/lib/panels/canvas_settings.dart" -> "/lib/models/app_model.dart";
+  "/lib/panels/canvas_settings.dart" -> "/lib/widgets/nine_grid_selector.dart";
   "/lib/models/layers.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart" [style=dashed];

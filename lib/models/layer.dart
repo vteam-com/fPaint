@@ -81,6 +81,28 @@ class Layer {
     clearCache();
   }
 
+  void offset(final Offset offset) {
+    for (final UserAction action in _actionStack) {
+      for (int i = 0; i < action.positions.length; i++) {
+        action.positions[i] =
+            action.positions[i].translate(offset.dx, offset.dy);
+      }
+    }
+    clearCache();
+  }
+
+  void scale(final double scale) {
+    for (final UserAction action in _actionStack) {
+      for (int i = 0; i < action.positions.length; i++) {
+        action.positions[i] = Offset(
+          action.positions[i].dx * scale,
+          action.positions[i].dy * scale,
+        );
+      }
+    }
+    clearCache();
+  }
+
   UserAction? get lastUserAction =>
       _actionStack.isEmpty ? null : _actionStack.last;
 
