@@ -32,7 +32,7 @@ class CanvasPanelPainter extends CustomPainter {
       drawTransaparentBackgroundOffsetAndSize(
         canvas,
         Offset.zero,
-        _appModel.canvasSize,
+        _appModel.canvasModel.canvasSize,
       );
     }
 

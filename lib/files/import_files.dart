@@ -70,7 +70,7 @@ Future<void> onFileNew(final BuildContext context) async {
 
     if (canvasSize != null) {
       appModel.layers.clear();
-      appModel.canvasSize = canvasSize;
+      appModel.canvasModel.canvasSize = canvasSize;
       appModel.addLayerTop();
     }
   }
@@ -158,7 +158,8 @@ Future<void> _readImageFile(
   final image = await decodeImageFromList(await bytesFuture);
   appModel.layers.clear();
   appModel.addLayerTop();
-  appModel.canvasSize = Size(image.width.toDouble(), image.height.toDouble());
+  appModel.canvasModel.canvasSize =
+      Size(image.width.toDouble(), image.height.toDouble());
   appModel.selectedLayer.addImage(imageToAdd: image);
 }
 

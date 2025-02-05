@@ -22,6 +22,7 @@ digraph "" {
   "/lib/models/layers.dart" [label="layers"];
   "/lib/models/user_action.dart" [label="user_action"];
   "/lib/models/app_model.dart" [label="app_model"];
+  "/lib/models/canvas.dart" [label="canvas"];
   "/lib/models/layer.dart" [label="layer"];
   "/lib/main.dart" [label="main"];
   "/lib/files/xcf_reader.dart" [label="xcf_reader"];
@@ -90,6 +91,7 @@ digraph "" {
         "/lib/models/layers.dart";
         "/lib/models/user_action.dart";
         "/lib/models/app_model.dart";
+        "/lib/models/canvas.dart";
         "/lib/models/layer.dart";
       }
       subgraph "cluster~/lib/files" {
@@ -163,8 +165,9 @@ digraph "" {
   "/lib/models/layers.dart" -> "/lib/models/layer.dart" [style=dashed];
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart" [style=dashed];
-  "/lib/models/app_model.dart" -> "/lib/models/layers.dart";
+  "/lib/models/app_model.dart" -> "/lib/models/canvas.dart";
   "/lib/models/app_model.dart" -> "/lib/models/layers.dart" [style=dashed];
+  "/lib/models/canvas.dart" -> "/lib/models/layers.dart" [style=dashed];
   "/lib/models/layer.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layer.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/models/layer.dart" -> "/lib/models/user_action.dart" [style=dashed];

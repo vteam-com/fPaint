@@ -86,15 +86,15 @@ Future<Uint8List> capturePainterToImageBytes(final AppModel appModel) async {
   // Draw the custom painter on the canvas
   final CanvasPanelPainter painter = CanvasPanelPainter(appModel);
 
-  painter.paint(canvas, appModel.canvasSize);
+  painter.paint(canvas, appModel.canvasModel.canvasSize);
 
   // End the recording and get the picture
   final Picture picture = recorder.endRecording();
 
   // Convert the picture to an image
   final ui.Image image = await picture.toImage(
-    appModel.canvasSize.width.toInt(),
-    appModel.canvasSize.height.toInt(),
+    appModel.canvasModel.canvasSize.width.toInt(),
+    appModel.canvasModel.canvasSize.height.toInt(),
   );
 
   // Convert the image to byte data (e.g., PNG)

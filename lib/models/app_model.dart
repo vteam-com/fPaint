@@ -3,21 +3,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/layers.dart';
+import 'package:fpaint/models/canvas.dart';
 import 'package:provider/provider.dart';
 
 // Exports
 export 'package:fpaint/models/layers.dart';
-
-const int topLeft = 0;
-const int top = 1;
-const int topRight = 2;
-const int left = 3;
-const int center = 4;
-const int right = 5;
-const int bottomLeft = 6;
-const int bottom = 7;
-const int bottomRight = 8;
 
 class AppModel extends ChangeNotifier {
   /// Gets the [AppModel] instance from the provided [BuildContext].
@@ -33,11 +23,11 @@ class AppModel extends ChangeNotifier {
 
   String loadedFileName = '';
 
-  Size canvasSize = const Size(800, 600); // Default canvas size
-  late Layers layers = Layers(canvasSize);
+  CanvasModel canvasModel = CanvasModel();
+  late Layers layers = Layers(canvasModel.canvasSize);
 
-  double get width => canvasSize.width * scale;
-  double get height => canvasSize.height * scale;
+  double get width => canvasModel.canvasSize.width * scale;
+  double get height => canvasModel.canvasSize.height * scale;
   Size get canvasSizeScaled => Size(width, height);
 
   // Selected Tool
@@ -67,8 +57,8 @@ class AppModel extends ChangeNotifier {
   } // center
 
   void resizeCanvas(final int newWidth, final int newHeight) {
-    final Size oldSize = canvasSize;
-    canvasSize = Size(newWidth.toDouble(), newHeight.toDouble());
+    final Size oldSize = canvasModel.canvasSize;
+    canvasModel.canvasSize = Size(newWidth.toDouble(), newHeight.toDouble());
 
     // Scale layers only when shrinking
     if (newWidth < oldSize.width || newHeight < oldSize.height) {

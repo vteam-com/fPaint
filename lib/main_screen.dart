@@ -118,8 +118,8 @@ class MainScreen extends StatelessWidget {
     appModel.userActionStartingOffset = position;
     if (appModel.selectedTool == Tools.fill) {
       // Create a flattened image from the current layer
-      final ui.Image img =
-          await appModel.selectedLayer.toImageForStorage(appModel.canvasSize);
+      final ui.Image img = await appModel.selectedLayer
+          .toImageForStorage(appModel.canvasModel.canvasSize);
 
       // Perform flood fill at the clicked position
       final ui.Image filledImage = await applyFloodFill(
@@ -219,7 +219,7 @@ class MainScreen extends StatelessWidget {
           foregroundColor: Colors.white,
           onPressed: () => appModel.scale = 1,
           child: Text(
-            '${(appModel.scale * 100).toInt()}%\n${appModel.canvasSize.width.toInt()}\n${appModel.canvasSize.height.toInt()}',
+            '${(appModel.scale * 100).toInt()}%\n${appModel.canvasModel.canvasSize.width.toInt()}\n${appModel.canvasModel.canvasSize.height.toInt()}',
             textAlign: TextAlign.right,
             style: const TextStyle(
               color: Colors.white,
