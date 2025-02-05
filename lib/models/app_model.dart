@@ -279,17 +279,15 @@ class AppModel extends ChangeNotifier {
         type != null &&
         colorFill != null &&
         colorStroke != null) {
-      if (_isWithinCanvas(start) && _isWithinCanvas(end)) {
-        selectedLayer.addUserAction(
-          UserAction(
-            positions: [start, end],
-            tool: type,
-            fillColor: colorFill,
-            brushColor: colorStroke,
-            brushSize: this.brusSize,
-          ),
-        );
-      }
+      selectedLayer.addUserAction(
+        UserAction(
+          positions: [start, end],
+          tool: type,
+          fillColor: colorFill,
+          brushColor: colorStroke,
+          brushSize: this.brusSize,
+        ),
+      );
     } else {
       selectedLayer.lastActionUpdatePositionEnd(end: end);
     }
@@ -301,20 +299,6 @@ class AppModel extends ChangeNotifier {
   /// to ensure that any UI components observing the model are updated.
   void update() {
     notifyListeners();
-  }
-
-  /// Checks if the given [Offset] point is within the bounds of the canvas.
-  ///
-  /// The canvas is defined by the [canvasSize] property, which represents the
-  /// width and height of the canvas. This method returns `true` if the point's
-  /// x and y coordinates are between 0 and the canvas width/height, respectively.
-  /// This is used to ensure that user actions (e.g. drawing) are performed
-  /// within the bounds of the canvas.
-  bool _isWithinCanvas(Offset point) {
-    return point.dx >= 0 &&
-        point.dx <= canvasSize.width &&
-        point.dy >= 0 &&
-        point.dy <= canvasSize.height;
   }
 
   /// Toggles the visibility of the specified [Layer].
