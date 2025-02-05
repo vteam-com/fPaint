@@ -31,12 +31,16 @@ class MainScreen extends StatelessWidget {
                 // Pinch/Zoom scaling for WEB
                 onPointerSignal: (final PointerSignalEvent event) {
                   if (event is PointerScaleEvent) {
-                    appModel.canvas.scale = appModel.canvas.scale * event.scale;
+                    appModel.setCanvasScale(
+                      appModel.canvas.scale * event.scale,
+                    );
                   }
                 },
                 // Pinch/Zoom scaling for Desktop
                 onPointerPanZoomUpdate: (final event) {
-                  appModel.canvas.scale = appModel.canvas.scale * event.scale;
+                  appModel.setCanvasScale(
+                    appModel.canvas.scale * event.scale,
+                  );
                 },
 
                 // Draw Start
@@ -95,8 +99,8 @@ class MainScreen extends StatelessWidget {
                     controller: scrollControllerX,
                     scrollDirection: Axis.horizontal,
                     child: SizedBox(
-                      width: appModel.width,
-                      height: appModel.height,
+                      width: appModel.canvas.width,
+                      height: appModel.canvas.height,
                       child: CanvasPanel(appModel: appModel),
                     ),
                   ),
@@ -211,13 +215,14 @@ class MainScreen extends StatelessWidget {
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => appModel.canvas.scale += 0.10,
+          onPressed: () => appModel
+              .setCanvasScale(((appModel.canvas.scale * 10).ceil() + 1) / 10),
           child: const Icon(Icons.zoom_in),
         ),
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => appModel.canvas.scale = 1,
+          onPressed: () => appModel.setCanvasScale(1),
           child: Text(
             '${(appModel.canvas.scale * 100).toInt()}%\n${appModel.canvas.canvasSize.width.toInt()}\n${appModel.canvas.canvasSize.height.toInt()}',
             textAlign: TextAlign.right,
@@ -231,7 +236,8 @@ class MainScreen extends StatelessWidget {
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => appModel.canvas.scale -= 0.10,
+          onPressed: () => appModel
+              .setCanvasScale(((appModel.canvas.scale * 10).floor() - 1) / 10),
           child: const Icon(Icons.zoom_out),
         ),
       ],

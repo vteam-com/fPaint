@@ -27,10 +27,6 @@ class AppModel extends ChangeNotifier {
   CanvasModel canvas = CanvasModel();
   late Layers layers = Layers(canvas.canvasSize);
 
-  double get width => canvas.canvasSize.width * canvas.scale;
-  double get height => canvas.canvasSize.height * canvas.scale;
-  Size get canvasSizeScaled => Size(width, height);
-
   // Selected Tool
   Tools _selectedTool = Tools.draw;
 
@@ -103,8 +99,8 @@ class AppModel extends ChangeNotifier {
   ///
   /// The scale value is clamped between 10% and 400% to ensure a valid range.
   /// Calling this method will notify any listeners of the [AppModel] that the scale has changed.
-  set scale(final double value) {
-    canvas.scale = value.clamp(10 / 100, 400 / 100);
+  void setCanvasScale(final double value) {
+    canvas.scale = value;
     update();
   }
 
