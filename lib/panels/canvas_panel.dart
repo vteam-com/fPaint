@@ -25,7 +25,7 @@ class CanvasPanelPainter extends CustomPainter {
 
   @override
   void paint(final Canvas canvas, final Size size) {
-    canvas.scale(_appModel.scale);
+    canvas.scale(_appModel.canvasModel.scale);
 
     /// Render the transparent grid
     if (includeTransparentBackground) {

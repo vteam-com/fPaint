@@ -3,7 +3,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/canvas.dart';
+import 'package:fpaint/models/canvas_model.dart';
+import 'package:fpaint/models/canvas_resize.dart';
 import 'package:provider/provider.dart';
 
 // Exports
@@ -26,8 +27,8 @@ class AppModel extends ChangeNotifier {
   CanvasModel canvasModel = CanvasModel();
   late Layers layers = Layers(canvasModel.canvasSize);
 
-  double get width => canvasModel.canvasSize.width * scale;
-  double get height => canvasModel.canvasSize.height * scale;
+  double get width => canvasModel.canvasSize.width * canvasModel.scale;
+  double get height => canvasModel.canvasSize.height * canvasModel.scale;
   Size get canvasSizeScaled => Size(width, height);
 
   // Selected Tool
@@ -36,29 +37,26 @@ class AppModel extends ChangeNotifier {
   Tools get selectedTool => _selectedTool;
 
   //-------------------------------------------
-  bool _canvasResizeLockAspectRatio = true;
-
-  bool get canvasResizeLockAspectRatio => _canvasResizeLockAspectRatio;
-
+  bool get canvasResizeLockAspectRatio =>
+      canvasModel.canvasResizeLockAspectRatio;
   set canvasResizeLockAspectRatio(bool value) {
-    _canvasResizeLockAspectRatio = value;
+    canvasModel.canvasResizeLockAspectRatio = value;
     update();
   }
 
   //-------------------------------------------
   // Canvas Resize position
-  int _canvasResizePosition = 4; // Center
 
-  int get canvasResizePosition => _canvasResizePosition;
-
+  int get canvasResizePosition => canvasModel.resizePosition;
   set canvasResizePosition(int value) {
-    _canvasResizePosition = value;
+    canvasModel.resizePosition = value;
     update();
   } // center
 
   void resizeCanvas(final int newWidth, final int newHeight) {
     final Size oldSize = canvasModel.canvasSize;
-    canvasModel.canvasSize = Size(newWidth.toDouble(), newHeight.toDouble());
+    final Size newSize = Size(newWidth.toDouble(), newHeight.toDouble());
+    canvasModel.canvasSize = newSize;
 
     // Scale layers only when shrinking
     if (newWidth < oldSize.width || newHeight < oldSize.height) {
@@ -69,40 +67,11 @@ class AppModel extends ChangeNotifier {
     }
 
     // Calculate the offset adjustment based on resize position
-    Offset offset = Offset.zero;
-
-    final double dx = (newWidth - oldSize.width).toDouble();
-    final double dy = (newHeight - oldSize.height).toDouble();
-
-    switch (_canvasResizePosition) {
-      case topLeft:
-        offset = Offset.zero;
-        break;
-      case top:
-        offset = Offset(dx / 2, 0);
-        break;
-      case topRight:
-        offset = Offset(dx, 0);
-        break;
-      case left:
-        offset = Offset(0, dy / 2);
-        break;
-      case center:
-        offset = Offset(dx / 2, dy / 2);
-        break;
-      case right:
-        offset = Offset(dx, dy / 2);
-        break;
-      case bottomLeft:
-        offset = Offset(0, dy);
-        break;
-      case bottom:
-        offset = Offset(dx / 2, dy);
-        break;
-      case bottomRight:
-        offset = Offset(dx, dy);
-        break;
-    }
+    Offset offset = CanvasResizePosition.anchorTranslate(
+      canvasModel.resizePosition,
+      oldSize,
+      newSize,
+    );
     layers.offset(offset);
     update();
   }
@@ -121,10 +90,6 @@ class AppModel extends ChangeNotifier {
 
   Color get brushColor => _colorForStroke;
 
-  // Scale
-  double _scale = 1;
-  double get scale => _scale;
-
   // SidePanel Expanded/Collapsed
   bool _isSidePanelExpanded = true;
 
@@ -140,7 +105,7 @@ class AppModel extends ChangeNotifier {
   /// The scale value is clamped between 10% and 400% to ensure a valid range.
   /// Calling this method will notify any listeners of the [AppModel] that the scale has changed.
   set scale(final double value) {
-    _scale = value.clamp(10 / 100, 400 / 100);
+    canvasModel.scale = value.clamp(10 / 100, 400 / 100);
     update();
   }
 
