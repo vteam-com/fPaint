@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
@@ -66,10 +67,11 @@ class ToolsAndLayersPanel extends StatelessWidget {
                   value: MenuIds.export,
                   child: Text('Export...'),
                 ),
-                const PopupMenuItem<int>(
-                  value: MenuIds.save,
-                  child: Text('Save...'),
-                ),
+                if (!kIsWeb)
+                  const PopupMenuItem<int>(
+                    value: MenuIds.save,
+                    child: Text('Save...'),
+                  ),
                 const PopupMenuItem<int>(
                   value: MenuIds.canvasSize,
                   child: Text('Canvas...'),

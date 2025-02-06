@@ -2,7 +2,6 @@
 import 'dart:html' as html;
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/models/app_model.dart';
@@ -15,15 +14,10 @@ import 'package:fpaint/panels/share_panel.dart';
 ///
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsPng(
-  final BuildContext context, [
+  final AppModel appModel, [
   final fileName = 'image.png',
 ]) async {
-  // Capture the image bytes
-  final Uint8List imageBytes =
-      await capturePainterToImageBytes(AppModel.get(context));
-
-  // Create a Blob from the image bytes
-  downloadBlob(imageBytes, fileName);
+  await saveAsPng(appModel, fileName);
 }
 
 Future<void> saveAsPng(
@@ -43,18 +37,10 @@ Future<void> saveAsPng(
 ///
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsJpeg(
-  final BuildContext context, [
+  final AppModel appModel, [
   final fileName = 'image.jpg',
 ]) async {
-  // Capture the image bytes
-  final Uint8List imageBytes =
-      await capturePainterToImageBytes(AppModel.get(context));
-
-  // Convert the image bytes to JPG format
-  final Uint8List outputBytes = await convertToJpg(imageBytes);
-
-  // Create a Blob from the image bytes
-  downloadBlob(outputBytes, fileName);
+  await saveAsJpeg(appModel, fileName);
 }
 
 Future<void> saveAsJpeg(
@@ -77,11 +63,10 @@ Future<void> saveAsJpeg(
 ///
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsOra(
-  final BuildContext context, [
+  final AppModel appModel, [
   final fileName = 'image.ora',
 ]) async {
-  List<int> image = await createOraAchive(AppModel.get(context));
-  downloadBlob(Uint8List.fromList(image), fileName);
+  await saveAsOra(appModel, fileName);
 }
 
 Future<void> saveAsOra(

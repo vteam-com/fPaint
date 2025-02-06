@@ -17,6 +17,7 @@ Widget textAction(final String fileName) {
 }
 
 void sharePanel(final BuildContext context) {
+  final AppModel appModel = AppModel.get(context);
   showModalBottomSheet(
     context: context,
     builder: (final BuildContext context) {
@@ -39,7 +40,7 @@ void sharePanel(final BuildContext context) {
                 title: textAction('image.PNG'),
                 onTap: () {
                   Navigator.pop(context);
-                  onExportAsPng(context);
+                  onExportAsPng(appModel);
                 },
               ),
               ListTile(
@@ -47,7 +48,7 @@ void sharePanel(final BuildContext context) {
                 title: textAction('image.JPG'),
                 onTap: () {
                   Navigator.pop(context);
-                  onExportAsJpeg(context);
+                  onExportAsJpeg(appModel);
                 },
               ),
               ListTile(
@@ -55,7 +56,7 @@ void sharePanel(final BuildContext context) {
                 title: textAction('image.ORA'),
                 onTap: () {
                   Navigator.pop(context);
-                  onExportAsOra(context);
+                  onExportAsOra(appModel);
                 },
               ),
             ],
