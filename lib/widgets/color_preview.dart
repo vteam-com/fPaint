@@ -18,9 +18,13 @@ class ColorPreview extends StatelessWidget {
     final String green = components[2];
     final String blue = components[3];
 
+    String usageNumber = '';
+    if (colorUsed.percentage < 1) {
+      usageNumber = '\nUsage ${colorUsed.toStringPercentage(1)}';
+    }
+
     return Tooltip(
-      message:
-          '${colorToHexString(colorUsed.color, gapForAlpha: true)}\n${colorUsed.toStringPercentage(3)}',
+      message: '${colorToHexString(colorUsed.color)}$usageNumber',
       child: InkWell(
         onTap: onPressed,
         child: Container(

@@ -155,24 +155,12 @@ Widget colorBox(Color color, Color colorText) {
 ///
 String colorToHexString(
   final Color color, {
-  bool alphaFirst = false,
+  bool alphaFirst = true,
   bool includeAlpha = true,
-  bool gapForAlpha = false,
+  String seperator = '',
 }) {
-  final components = getColorComponentsAsHex(color);
-  final String alpha = components[0];
-  final String red = components[1];
-  final String green = components[2];
-  final String blue = components[3];
-
-  if (!includeAlpha) {
-    return '#$red$green$blue';
-  }
-  String gap = gapForAlpha ? ' ' : '';
-  if (alphaFirst) {
-    return '#$alpha$gap$red$green$blue';
-  }
-  return '#$red$green$blue$gap$alpha';
+  final components = getColorComponentsAsHex(color, includeAlpha, alphaFirst);
+  return '#${components.join(seperator)}';
 }
 
 /// Returns the color components (alpha, red, green, blue) as an array of hexadecimal strings.
@@ -181,7 +169,11 @@ String colorToHexString(
 /// The returned array contains the alpha, red, green, and blue components as hexadecimal strings.
 ///
 /// Returns an array of hexadecimal strings representing the color components.
-List<String> getColorComponentsAsHex(final Color color) {
+List<String> getColorComponentsAsHex(
+  final Color color, [
+  bool includeAlpha = true,
+  bool alphaIsFirst = true,
+]) {
   final String alpha =
       (color.a * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
   final String red =
@@ -190,7 +182,20 @@ List<String> getColorComponentsAsHex(final Color color) {
       (color.g * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
   final String blue =
       (color.b * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
-  return [alpha, red, green, blue];
+  if (alphaIsFirst) {
+    return [
+      if (includeAlpha) alpha,
+      red,
+      green,
+      blue,
+    ];
+  } else {}
+  return [
+    red,
+    green,
+    blue,
+    if (includeAlpha) alpha,
+  ];
 }
 
 String getHexOnMultiline(final Color color) {
