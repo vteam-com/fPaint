@@ -187,7 +187,7 @@ class ToolsPanel extends StatelessWidget {
       );
     }
 
-    // Bruse Style
+    // Brush Style
     if (currentShapeType.isSupported(ToolAttribute.brushStyle)) {
       widgets.add(
         ToolAttributeWidget(
@@ -277,6 +277,7 @@ class ToolsPanel extends StatelessWidget {
       TopColors(
         colors: appModel.topColors,
         onRefresh: () => appModel.evaluatTopColor(),
+        showTitle: !minimal,
       ),
     );
 

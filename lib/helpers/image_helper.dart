@@ -13,15 +13,20 @@ Future<List<ColorUsage>> getImageColors(ui.Image image) async {
   final Map<ui.Color, int> colorCount = {};
 
   // Count color occurrences
-  for (var i = 0; i < pixels.length; i += 4) {
-    final ui.Color color = ui.Color.fromARGB(
-      pixels[i + 3], // Use alpha channel
-      pixels[i],
-      pixels[i + 1],
-      pixels[i + 2],
-    );
+  for (int i = 0; i < pixels.length; i += 4) {
+    final int alpha = pixels[i + 3];
+    if (alpha == 0) {
+      // discard true transparent color
+    } else {
+      final ui.Color color = ui.Color.fromARGB(
+        alpha,
+        pixels[i],
+        pixels[i + 1],
+        pixels[i + 2],
+      );
 
-    colorCount[color] = (colorCount[color] ?? 0) + 1;
+      colorCount[color] = (colorCount[color] ?? 0) + 1;
+    }
   }
 
   final int totalPixels = pixels.length ~/ 4;

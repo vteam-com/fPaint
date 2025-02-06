@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 class ToolAttributeWidget extends StatelessWidget {
@@ -97,18 +98,8 @@ class IconButtonWithBackground extends StatelessWidget {
           if (transparentPaper)
             Positioned(
               bottom: 0,
-              child: Container(
-                color: color,
-                margin: const EdgeInsets.only(bottom: 4),
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  getHexOnMultiline(color),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: contrastColor(color),
-                  ),
-                ),
+              child: ColorPreview(
+                colorUsed: ColorUsage(color, 1),
               ),
             ),
         ],

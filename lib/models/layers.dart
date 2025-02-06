@@ -108,9 +108,7 @@ class Layers {
     }
 
     topColors.sort((a, b) => b.percentage.compareTo(a.percentage));
-    if (topColors.length > 20) {
-      topColors = topColors.take(20).toList();
-    }
+    topColors = topColors.take(14).toList();
     return topColors;
   }
 }
