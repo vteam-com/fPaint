@@ -150,16 +150,16 @@ digraph "" {
   "/test/file_xcf_test.dart" -> "/lib/files/assets_helper.dart";
   "/test/file_xcf_test.dart" -> "/lib/files/xcf_reader.dart";
   "/test/layers_test.dart" -> "/lib/models/layer.dart";
+  "/lib/panels/tools/tools_panel.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/panels/tools/tool_attributes_widget.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/panels/tools/tool_selector.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/brush_size_picker.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/color_picker.dart";
+  "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/color_preview.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/svg_icon.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/tolerance_picker.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/top_colors.dart";
-  "/lib/panels/tools/tool_attributes_widget.dart" -> "/lib/helpers/color_helper.dart";
-  "/lib/panels/tools/tool_attributes_widget.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/canvas_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/canvas_panel.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/layers/tools_and_layers_panel.dart" -> "/lib/files/import_files.dart";
@@ -223,8 +223,8 @@ digraph "" {
   "/lib/helpers/image_helper.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/helpers/color_helper.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/helpers/color_helper.dart";
-  "/lib/widgets/color_preview.dart" -> "/lib/models/app_model.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/widgets/top_colors.dart" -> "/lib/models/app_model.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/color_preview.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/brush_style_picker.dart" -> "/lib/models/app_model.dart";

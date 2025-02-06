@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
-import 'package:fpaint/models/app_model.dart';
 
 class ColorPreview extends StatelessWidget {
   const ColorPreview({
     super.key,
     required this.colorUsed,
+    required this.onPressed,
   });
   final ColorUsage colorUsed;
+  final GestureTapCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    AppModel appModel = AppModel.get(context);
-
     final List<String> components = getColorComponentsAsHex(colorUsed.color);
     final String alpha = components[0];
     final String red = components[1];
@@ -22,10 +21,8 @@ class ColorPreview extends StatelessWidget {
     return Tooltip(
       message:
           '${colorToHexString(colorUsed.color, gapForAlpha: true)}\n${colorUsed.toStringPercentage(3)}',
-      child: GestureDetector(
-        onTap: () {
-          appModel.brushColor = colorUsed.color;
-        },
+      child: InkWell(
+        onTap: onPressed,
         child: Container(
           width: 40,
           height: 60,

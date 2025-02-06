@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
@@ -17,8 +18,14 @@ class TopColors extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppModel appModel = AppModel.get(context);
     List<Widget> colorPreviews = colors
-        .map((final ColorUsage colorUsed) => ColorPreview(colorUsed: colorUsed))
+        .map(
+          (final ColorUsage colorUsed) => ColorPreview(
+            colorUsed: colorUsed,
+            onPressed: () => appModel.brushColor = colorUsed.color,
+          ),
+        )
         .toList();
     return Column(
       children: [

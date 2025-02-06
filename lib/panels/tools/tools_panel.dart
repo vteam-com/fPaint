@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
 import 'package:fpaint/panels/tools/tool_selector.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker.dart';
+import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/top_colors.dart';
@@ -162,20 +164,22 @@ class ToolsPanel extends StatelessWidget {
       widgets.add(
         ToolAttributeWidget(
           name: 'Brush Size',
-          buttonIcon: Icons.line_weight,
-          buttonIconColor: Colors.grey.shade500,
-          onButtonPressed: () {
-            showBrushSizePicker(
-              context,
-              appModel.brusSize,
-              (
-                final double newValue,
-              ) {
-                appModel.brusSize = newValue;
-              },
-            );
-          },
-          child: slim
+          childLeft: IconButton(
+            icon: const Icon(Icons.line_weight),
+            color: Colors.grey.shade500,
+            onPressed: () {
+              showBrushSizePicker(
+                context,
+                appModel.brusSize,
+                (
+                  final double newValue,
+                ) {
+                  appModel.brusSize = newValue;
+                },
+              );
+            },
+          ),
+          childRight: slim
               ? null
               : BrushSizePicker(
                   value: appModel.brusSize,
@@ -192,31 +196,44 @@ class ToolsPanel extends StatelessWidget {
       widgets.add(
         ToolAttributeWidget(
           name: 'Brush Style',
-          buttonIcon: Icons.line_style_outlined,
-          buttonIconColor: Colors.grey.shade500,
-          onButtonPressed: () {
-            showBrushStylePicker(context);
-          },
-          child: slim ? null : brushStyleSelection(appModel),
+          childLeft: IconButton(
+            icon: const Icon(Icons.line_style_outlined),
+            color: Colors.grey.shade500,
+            onPressed: () {
+              showBrushSizePicker(
+                context,
+                appModel.brusSize,
+                (
+                  final double newValue,
+                ) {
+                  appModel.brusSize = newValue;
+                },
+              );
+            },
+          ),
+          childRight: slim ? null : brushStyleSelection(appModel),
         ),
       );
     }
 
-    // Color Stroke
+    // Brush color
     if (currentShapeType.isSupported(ToolAttribute.colorOutline)) {
       widgets.add(
         ToolAttributeWidget(
           name: 'Brush Color',
-          buttonIcon: Icons.water_drop_outlined,
-          buttonIconColor: appModel.brushColor,
-          onButtonPressed: () => showColorPicker(
-            context: context,
-            title: 'Brush',
-            color: appModel.brushColor,
-            onSelectedColor: (final Color color) => appModel.brushColor = color,
+          childLeft: ColorPreview(
+            colorUsed: ColorUsage(appModel.brushColor, 1),
+            onPressed: () {
+              showColorPicker(
+                context: context,
+                title: 'Brush',
+                color: appModel.brushColor,
+                onSelectedColor: (final Color color) =>
+                    appModel.brushColor = color,
+              );
+            },
           ),
-          transparentPaper: true,
-          child: slim
+          childRight: slim
               ? null
               : MyColorPicker(
                   color: appModel.brushColor,
@@ -231,16 +248,19 @@ class ToolsPanel extends StatelessWidget {
       widgets.add(
         ToolAttributeWidget(
           name: 'Fill Color',
-          buttonIcon: Icons.water_drop,
-          buttonIconColor: appModel.fillColor,
-          onButtonPressed: () => showColorPicker(
-            context: context,
-            title: 'Fill',
-            color: appModel.fillColor,
-            onSelectedColor: (final Color color) => appModel.fillColor = color,
+          childLeft: ColorPreview(
+            colorUsed: ColorUsage(appModel.fillColor, 1),
+            onPressed: () {
+              showColorPicker(
+                context: context,
+                title: 'Fill',
+                color: appModel.brushColor,
+                onSelectedColor: (final Color color) =>
+                    appModel.fillColor = color,
+              );
+            },
           ),
-          transparentPaper: true,
-          child: slim
+          childRight: slim
               ? null
               : MyColorPicker(
                   color: appModel.fillColor,
@@ -255,13 +275,17 @@ class ToolsPanel extends StatelessWidget {
       widgets.add(
         ToolAttributeWidget(
           name: 'Color Tolerance',
-          buttonIcon: Icons.support,
-          buttonIconColor: Colors.grey.shade500,
-          onButtonPressed: () => showTolerancePicker(
-              context, appModel.tolerance, (final int newValue) {
-            appModel.tolerance = newValue;
-          }),
-          child: slim
+          childLeft: IconButton(
+            icon: const Icon(Icons.support),
+            color: Colors.grey.shade500,
+            onPressed: () {
+              showTolerancePicker(context, appModel.tolerance,
+                  (final int newValue) {
+                appModel.tolerance = newValue;
+              });
+            },
+          ),
+          childRight: slim
               ? null
               : TolerancePicker(
                   value: appModel.tolerance,
