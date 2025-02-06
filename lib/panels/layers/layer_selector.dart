@@ -13,14 +13,14 @@ class LayerSelector extends StatelessWidget {
     required this.layer,
     required this.minimal,
     required this.isSelected,
-    required this.showDelete,
+    required this.allowRemoveLayer,
   });
 
   final BuildContext context;
   final Layer layer;
-  final bool showDelete;
   final bool minimal;
   final bool isSelected;
+  final bool allowRemoveLayer;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +37,8 @@ class LayerSelector extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: minimal
-          ? _buildForSmallSurface(context, appModel, layer, showDelete)
-          : _buildForLargeSurface(context, appModel, layer, showDelete),
+          ? _buildForSmallSurface(context, appModel, layer, allowRemoveLayer)
+          : _buildForLargeSurface(context, appModel, layer, allowRemoveLayer),
     );
   }
 
@@ -46,7 +46,7 @@ class LayerSelector extends StatelessWidget {
     BuildContext context,
     AppModel appModel,
     Layer layer,
-    bool showDelete,
+    bool allowRemoveLayer,
   ) {
     return Tooltip(
       margin: const EdgeInsets.only(left: 50),
@@ -82,7 +82,7 @@ class LayerSelector extends StatelessWidget {
     BuildContext context,
     AppModel appModel,
     Layer layer,
-    bool showDelete,
+    bool allowRemoveLayer,
   ) {
     return Row(
       children: [
@@ -91,7 +91,7 @@ class LayerSelector extends StatelessWidget {
             children: [
               _buildLayerName(appModel),
               if (isSelected)
-                _buildLayerControls(context, appModel, layer, showDelete),
+                _buildLayerControls(context, appModel, layer, allowRemoveLayer),
             ],
           ),
         ),
@@ -136,7 +136,14 @@ class LayerSelector extends StatelessWidget {
           layer.name = newName;
         }
       },
-      child: Text(layer.name),
+      child: Text(
+        layer.name,
+        style: TextStyle(
+          fontSize: 13 * 1.3,
+          fontWeight: FontWeight.bold,
+          color: isSelected ? Colors.blue.shade100 : Colors.grey.shade400,
+        ),
+      ),
     );
   }
 
@@ -144,7 +151,7 @@ class LayerSelector extends StatelessWidget {
     BuildContext context,
     AppModel appModel,
     Layer layer,
-    bool showDelete,
+    bool allowRemoveLayer,
   ) {
     return Wrap(
       alignment: WrapAlignment.center,
@@ -155,14 +162,10 @@ class LayerSelector extends StatelessWidget {
           onPressed: () => _onAddLayer(appModel),
         ),
         IconButton(
-          tooltip: 'Blend Mode\n"${blendModeToText(layer.blendMode)}"',
-          icon: const Icon(Icons.blender_outlined),
-          onPressed: () async {
-            layer.blendMode = await showBlendModeMenu(
-              context: context,
-              selectedBlendMode: layer.blendMode,
-            );
-          },
+          tooltip: 'Delete this layer',
+          icon: const Icon(Icons.playlist_remove),
+          onPressed:
+              allowRemoveLayer ? () => appModel.removeLayer(layer) : null,
         ),
         IconButton(
           tooltip: 'Merge to below layer',
@@ -176,9 +179,14 @@ class LayerSelector extends StatelessWidget {
                   ),
         ),
         IconButton(
-          tooltip: 'Delete this layer',
-          icon: const Icon(Icons.delete_outline),
-          onPressed: showDelete ? () => appModel.removeLayer(layer) : null,
+          tooltip: 'Blend Mode\n"${blendModeToText(layer.blendMode)}"',
+          icon: const Icon(Icons.blender_outlined),
+          onPressed: () async {
+            layer.blendMode = await showBlendModeMenu(
+              context: context,
+              selectedBlendMode: layer.blendMode,
+            );
+          },
         ),
         const SizedBox(
           width: 20,
