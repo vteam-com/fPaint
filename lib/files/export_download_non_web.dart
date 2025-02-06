@@ -25,22 +25,32 @@ import 'package:fpaint/panels/share_panel.dart';
 ///
 /// Returns:
 /// - A `Future<void>` that completes when the image has been successfully saved.
-Future<void> onExportAsPng(final BuildContext context) async {
+Future<void> onExportAsPng(
+  final BuildContext context, [
+  final fileName = 'image.png',
+]) async {
   final AppModel appModel = AppModel.get(context);
 
   final String? filePath = await FilePicker.platform.saveFile(
     dialogTitle: 'fPaint Save Image',
     initialDirectory: '.',
-    fileName: 'image.png',
+    fileName: fileName,
     type: FileType.custom,
     allowedExtensions: ['png'],
     lockParentWindow: true,
   );
-  if (filePath != null) {
-    // Capture the image bytes
-    final Uint8List bytes = await capturePainterToImageBytes(appModel);
-    await File(filePath).writeAsBytes(bytes);
+  if (filePath != null && filePath.isNotEmpty) {
+    await saveAsPng(appModel, filePath);
   }
+}
+
+Future<void> saveAsPng(
+  final AppModel appModel,
+  final String filePath,
+) async {
+  // Capture the image bytes
+  final Uint8List bytes = await capturePainterToImageBytes(appModel);
+  await File(filePath).writeAsBytes(bytes);
 }
 
 /// Exports the current painter content as a JPG image file.
@@ -60,15 +70,25 @@ Future<void> onExportAsPng(final BuildContext context) async {
 ///
 /// Returns:
 /// - A `Future<void>` that completes when the image has been successfully saved.
-Future<void> onExportAsJpeg(final BuildContext context) async {
+Future<void> onExportAsJpeg(
+  final BuildContext context, [
+  final fileName = 'image.jpg',
+]) async {
   final AppModel appModel = AppModel.get(context);
 
   final String? filePath = await FilePicker.platform.saveFile(
     dialogTitle: 'Save image',
-    fileName: 'image.jpg',
+    fileName: fileName,
     allowedExtensions: ['jpg', 'jpeg'],
     type: FileType.custom,
   );
+  await saveAsJpeg(appModel, filePath);
+}
+
+Future<void> saveAsJpeg(
+  final AppModel appModel,
+  final String? filePath,
+) async {
   if (filePath != null) {
     // Capture the image bytes
     final Uint8List imageBytes = await capturePainterToImageBytes(appModel);
@@ -89,15 +109,23 @@ Future<void> onExportAsJpeg(final BuildContext context) async {
 ///
 /// Throws an [Exception] if the export process fails.
 Future<void> onExportAsOra(
-  final BuildContext context,
-) async {
+  final BuildContext context, [
+  final fileName = 'image.jpg',
+]) async {
   final AppModel appModel = AppModel.get(context);
   final String? filePath = await FilePicker.platform.saveFile(
     dialogTitle: 'Save image',
-    fileName: 'image.ora',
+    fileName: fileName,
     allowedExtensions: ['ora'],
     type: FileType.custom,
   );
+  await saveAsOra(appModel, filePath);
+}
+
+Future<void> saveAsOra(
+  final AppModel appModel,
+  final String? filePath,
+) async {
   if (filePath != null) {
     final List<int> encodedData = await createOraAchive(appModel);
     await File(filePath).writeAsBytes(encodedData);

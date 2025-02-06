@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
+import 'package:fpaint/files/save.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/menu_model.dart';
 import 'package:fpaint/panels/about.dart';
 import 'package:fpaint/panels/canvas_settings.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
-
-class MenuIds {
-  static const int newFile = 0;
-  static const int openFile = 1;
-  static const int export = 2;
-  static const int canvasSize = 3;
-  static const int about = 4;
-}
 
 class ToolsAndLayersPanel extends StatelessWidget {
   const ToolsAndLayersPanel({super.key});
@@ -38,6 +32,16 @@ class ToolsAndLayersPanel extends StatelessWidget {
                   case MenuIds.openFile:
                     onFileOpen(context);
                     break;
+                  case MenuIds.save:
+                    saveFile(context, appModel).then(
+                      // ignore: use_build_context_synchronously
+                      (_) => ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Saved ${appModel.loadedFileName}'),
+                        ),
+                      ),
+                    );
+                    break;
                   case MenuIds.export:
                     sharePanel(context);
                     break;
@@ -61,6 +65,10 @@ class ToolsAndLayersPanel extends StatelessWidget {
                 const PopupMenuItem<int>(
                   value: MenuIds.export,
                   child: Text('Export...'),
+                ),
+                const PopupMenuItem<int>(
+                  value: MenuIds.save,
+                  child: Text('Save...'),
                 ),
                 const PopupMenuItem<int>(
                   value: MenuIds.canvasSize,

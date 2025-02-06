@@ -14,13 +14,26 @@ import 'package:fpaint/panels/share_panel.dart';
 /// file that is then downloaded to the user's device.
 ///
 /// [context] The BuildContext to access the current AppModel.
-Future<void> onExportAsPng(final BuildContext context) async {
+Future<void> onExportAsPng(
+  final BuildContext context, [
+  final fileName = 'image.png',
+]) async {
   // Capture the image bytes
   final Uint8List imageBytes =
       await capturePainterToImageBytes(AppModel.get(context));
 
   // Create a Blob from the image bytes
-  downloadBlob(imageBytes, 'image.png');
+  downloadBlob(imageBytes, fileName);
+}
+
+Future<void> saveAsPng(
+  final AppModel appModel,
+  final String filePath,
+) async {
+  final Uint8List imageBytes = await capturePainterToImageBytes(appModel);
+
+  // Create a Blob from the image bytes
+  downloadBlob(imageBytes, filePath);
 }
 
 /// Exports the current painter as a JPG image and triggers a download.
@@ -29,7 +42,10 @@ Future<void> onExportAsPng(final BuildContext context) async {
 /// and creates a JPG file that is then downloaded to the user's device.
 ///
 /// [context] The BuildContext to access the current AppModel.
-Future<void> onExportAsJpeg(final BuildContext context) async {
+Future<void> onExportAsJpeg(
+  final BuildContext context, [
+  final fileName = 'image.jpg',
+]) async {
   // Capture the image bytes
   final Uint8List imageBytes =
       await capturePainterToImageBytes(AppModel.get(context));
@@ -38,7 +54,20 @@ Future<void> onExportAsJpeg(final BuildContext context) async {
   final Uint8List outputBytes = await convertToJpg(imageBytes);
 
   // Create a Blob from the image bytes
-  downloadBlob(outputBytes, 'image.jpg');
+  downloadBlob(outputBytes, fileName);
+}
+
+Future<void> saveAsJpeg(
+  final AppModel appModel,
+  final String filePath,
+) async {
+  final Uint8List imageBytes = await capturePainterToImageBytes(appModel);
+
+  // Convert the image bytes to JPG format
+  final Uint8List outputBytes = await convertToJpg(imageBytes);
+
+  // Create a Blob from the image bytes
+  downloadBlob(outputBytes, filePath);
 }
 
 /// Exports the current painter as an ORA file and triggers a download.
@@ -48,10 +77,20 @@ Future<void> onExportAsJpeg(final BuildContext context) async {
 ///
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsOra(
-  final BuildContext context,
-) async {
+  final BuildContext context, [
+  final fileName = 'image.ora',
+]) async {
   List<int> image = await createOraAchive(AppModel.get(context));
-  downloadBlob(Uint8List.fromList(image), 'image.ora');
+  downloadBlob(Uint8List.fromList(image), fileName);
+}
+
+Future<void> saveAsOra(
+  final AppModel appModel,
+  final String filePath,
+) async {
+  List<int> image = await createOraAchive(appModel);
+  // Create a Blob from the image bytes
+  downloadBlob(Uint8List.fromList(image), filePath);
 }
 
 /// Downloads a file represented by the given image bytes and file name.

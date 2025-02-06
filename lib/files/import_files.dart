@@ -117,7 +117,7 @@ Future<void> onFileOpen(final BuildContext context) async {
         }
       } else {
         final path = result.files.single.path!;
-
+        appModel.loadedFileName = path;
         if (result.files.single.extension == 'xcf') {
           // TODO
         } else if (result.files.single.extension == 'ora') {
