@@ -6,6 +6,7 @@ import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
+import 'package:fpaint/widgets/top_colors.dart';
 import 'package:provider/provider.dart';
 
 /// Represents a panel that displays tools for the application.
@@ -271,6 +272,13 @@ class ToolsPanel extends StatelessWidget {
         ),
       );
     }
+
+    widgets.add(
+      TopColors(
+        colors: appModel.topColors,
+        onRefresh: () => appModel.evaluatTopColor(),
+      ),
+    );
 
     // Add a separator between each element
     List<Widget> separatedWidgets = [];

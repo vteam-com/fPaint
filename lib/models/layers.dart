@@ -1,5 +1,6 @@
 // Imports
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/layer.dart';
 
@@ -88,5 +89,28 @@ class Layers {
     for (final Layer layer in _list) {
       layer.scale(scale);
     }
+  }
+
+  Future<List<ColorUsage>> getTopColorUsed() async {
+    List<ColorUsage> topColors = [];
+
+    for (final Layer layer in _list) {
+      final List<ColorUsage> colorsInLayer = await layer.getTopColorUsed();
+      for (final ColorUsage colorUsed in colorsInLayer) {
+        if (!topColors.any(
+          (c) =>
+              c.color == colorUsed.color &&
+              c.percentage == colorUsed.percentage,
+        )) {
+          topColors.add(colorUsed);
+        }
+      }
+    }
+
+    topColors.sort((a, b) => b.percentage.compareTo(a.percentage));
+    if (topColors.length > 20) {
+      topColors = topColors.take(20).toList();
+    }
+    return topColors;
   }
 }

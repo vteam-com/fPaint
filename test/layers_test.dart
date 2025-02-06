@@ -79,7 +79,7 @@ void main() {
 
     test('Clear cache', () {
       layer.clearCache();
-      expect(layer.cachedRendering, null);
+      expect(layer.cachedThumnailImage, null);
     });
   });
 }

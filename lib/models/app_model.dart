@@ -3,6 +3,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/canvas_model.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:provider/provider.dart';
@@ -242,6 +243,18 @@ class AppModel extends ChangeNotifier {
       selectedLayer.lastActionUpdatePositionEnd(end: end);
     }
     update();
+  }
+
+  List<ColorUsage> topColors = [
+    ColorUsage(Colors.white, 1),
+    ColorUsage(Colors.black, 1),
+  ];
+
+  void evaluatTopColor() {
+    this.layers.getTopColorUsed().then((topColorsFound) {
+      topColors = topColorsFound;
+      update();
+    });
   }
 
   /// Notifies all listeners that the model has been updated.

@@ -38,6 +38,7 @@ digraph "" {
   "/lib/files/export_download_non_web.dart" [label="export_download_non_web"];
   "/lib/files/import_files.dart" [label="import_files"];
   "/lib/main_screen.dart" [label="main_screen"];
+  "/lib/helpers/image_helper.dart" [label="image_helper"];
   "/lib/helpers/list_helper.dart" [label="list_helper"];
   "/lib/helpers/color_helper.dart" [label="color_helper"];
   "/lib/widgets/svg_icon.dart" [label="svg_icon"];
@@ -47,6 +48,7 @@ digraph "" {
   "/lib/widgets/transparent_background.dart" [label="transparent_background"];
   "/lib/widgets/tolerance_picker.dart" [label="tolerance_picker"];
   "/lib/widgets/image_painter.dart" [label="image_painter"];
+  "/lib/widgets/top_colors.dart" [label="top_colors"];
   "/lib/widgets/brush_style_picker.dart" [label="brush_style_picker"];
   "/lib/widgets/nine_grid_selector.dart" [label="nine_grid_selector"];
   "/lib/widgets/color_picker.dart" [label="color_picker"];
@@ -119,6 +121,7 @@ digraph "" {
       }
       subgraph "cluster~/lib/helpers" {
         label="helpers";
+        "/lib/helpers/image_helper.dart";
         "/lib/helpers/list_helper.dart";
         "/lib/helpers/color_helper.dart";
       }
@@ -131,6 +134,7 @@ digraph "" {
         "/lib/widgets/transparent_background.dart";
         "/lib/widgets/tolerance_picker.dart";
         "/lib/widgets/image_painter.dart";
+        "/lib/widgets/top_colors.dart";
         "/lib/widgets/brush_style_picker.dart";
         "/lib/widgets/nine_grid_selector.dart";
         "/lib/widgets/color_picker.dart";
@@ -151,6 +155,7 @@ digraph "" {
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/color_picker.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/svg_icon.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/tolerance_picker.dart";
+  "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/top_colors.dart";
   "/lib/panels/tools/tool_attributes_widget.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/panels/tools/tool_attributes_widget.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/canvas_panel.dart" -> "/lib/models/app_model.dart";
@@ -178,15 +183,19 @@ digraph "" {
   "/lib/panels/share_panel.dart" -> "/lib/panels/canvas_panel.dart";
   "/lib/panels/canvas_settings.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/canvas_settings.dart" -> "/lib/widgets/nine_grid_selector.dart";
+  "/lib/models/layers.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/models/layers.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart" [style=dashed];
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart" [style=dashed];
   "/lib/models/canvas_model.dart" -> "/lib/models/layers.dart" [style=dashed];
+  "/lib/models/app_model.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_model.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_resize.dart";
   "/lib/models/app_model.dart" -> "/lib/models/layers.dart" [style=dashed];
+  "/lib/models/layer.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/models/layer.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/models/layer.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layer.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/models/layer.dart" -> "/lib/models/user_action.dart" [style=dashed];
@@ -210,7 +219,10 @@ digraph "" {
   "/lib/main_screen.dart" -> "/lib/panels/side_panel.dart";
   "/lib/main_screen.dart" -> "/lib/panels/tools/flood_fill.dart";
   "/lib/main_screen.dart" -> "/lib/models/app_model.dart";
+  "/lib/helpers/image_helper.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/helpers/color_helper.dart" -> "/lib/helpers/list_helper.dart";
+  "/lib/widgets/top_colors.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/widgets/top_colors.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/brush_style_picker.dart" -> "/lib/models/app_model.dart";
   "/lib/widgets/color_picker.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_picker.dart" -> "/lib/helpers/list_helper.dart";

@@ -2,6 +2,8 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
@@ -162,18 +164,18 @@ class Layer {
     clearCache();
   }
 
-  ui.Image? cachedRendering;
+  ui.Image? cachedThumnailImage;
 
   void clearCache() {
-    cachedRendering = null; // reset cache
+    cachedThumnailImage = null; // reset cache
   }
 
   Future<ui.Image> toImage(final Size size) async {
-    cachedRendering ??= await renderImageWH(
+    cachedThumnailImage ??= await renderImageWH(
       size.width.toInt(),
       size.height.toInt(),
     );
-    return cachedRendering!;
+    return cachedThumnailImage!;
   }
 
   Future<ui.Image> toImageForStorage(final Size size) async {
@@ -184,17 +186,17 @@ class Layer {
   }
 
   Future<ui.Image> getThumbnail(final Size size) async {
-    if (cachedRendering == null) {
+    if (cachedThumnailImage == null) {
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
       final painter = TransparentBackgroundPainter(40);
       painter.paint(canvas, size);
       renderLayer(canvas);
       final picture = recorder.endRecording();
-      cachedRendering =
+      cachedThumnailImage =
           await picture.toImage(size.width.toInt(), size.height.toInt());
     }
-    return cachedRendering!;
+    return cachedThumnailImage!;
   }
 
   Future<ui.Image> renderImageWH(final int width, final int height) async {
@@ -528,5 +530,20 @@ class Layer {
     // Convert the picture to an image
     final picture = recorder.endRecording();
     return picture.toImage(baseImage.width, baseImage.height);
+  }
+
+  Future<List<ColorUsage>> getTopColorUsed() async {
+    final colors = <ColorUsage>[];
+    if (cachedThumnailImage != null) {
+      final List<ColorUsage> imageColors =
+          await getImageColors(cachedThumnailImage!);
+
+      for (final ColorUsage colorUsage in imageColors) {
+        if (!colors.any((c) => c.color == colorUsage.color)) {
+          colors.add(colorUsage);
+        }
+      }
+    }
+    return colors;
   }
 }

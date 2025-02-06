@@ -157,6 +157,7 @@ String colorToHexString(
   final Color color, {
   bool alphaFirst = false,
   bool includeAlpha = true,
+  bool gapForAlpha = false,
 }) {
   final components = getColorComponentsAsHex(color);
   final String alpha = components[0];
@@ -167,10 +168,11 @@ String colorToHexString(
   if (!includeAlpha) {
     return '#$red$green$blue';
   }
+  String gap = gapForAlpha ? ' ' : '';
   if (alphaFirst) {
-    return '#$alpha$red$green$blue';
+    return '#$alpha$gap$red$green$blue';
   }
-  return '#$red$green$blue$alpha';
+  return '#$red$green$blue$gap$alpha';
 }
 
 /// Returns the color components (alpha, red, green, blue) as an array of hexadecimal strings.
@@ -318,4 +320,26 @@ Color invertColor(final Color color) {
     (invertedBlue * 255).toInt(),
     1.0,
   );
+}
+
+/// Represents a color usage with a specific color and percentage.
+///
+/// The [ColorUsage] class is used to encapsulate information about a color usage,
+/// including the color itself and the percentage of that color usage.
+///
+/// The [color] property represents the color to be used, and the [percentage] property
+/// represents the percentage of that color usage, ranging from 0.0 to 1.0.
+///
+/// This class is typically used in contexts where color usage information needs to be
+/// tracked and managed, such as in UI design or data visualization.
+class ColorUsage {
+  ColorUsage(this.color, this.percentage);
+  Color color = Colors.black;
+  double percentage = 1.0; // from 0 to 1
+  String toStringPercentage([final int decimals = 3]) {
+    if (decimals < 2 && this.percentage < 0.01) {
+      return '<0.1%';
+    }
+    return '${(this.percentage * 100).toStringAsFixed(decimals)}%';
+  }
 }
