@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/panels/side_panel.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
+import 'package:multi_split_view/multi_split_view.dart';
 
 import 'models/app_model.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
+  final double minSidePanelSize = 80.0;
 
   @override
   Widget build(final BuildContext context) {
@@ -20,13 +22,18 @@ class MainScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey,
-      body: Row(
-        children: [
-          // Left side panels
-          const SidePanel(),
-          // Canvas on the right
-          Expanded(
-            child: Center(
+      body: MultiSplitView(
+        key: Key('key_side_panel_size_${appModel.isSidePanelExpanded}'),
+        axis: Axis.horizontal,
+        initialAreas: [
+          Area(
+            size: appModel.isSidePanelExpanded ? 400 : minSidePanelSize,
+            min: appModel.isSidePanelExpanded ? 350 : minSidePanelSize,
+            max: appModel.isSidePanelExpanded ? 600 : minSidePanelSize,
+            builder: (context, area) => const SidePanel(),
+          ),
+          Area(
+            builder: (context, area) => Center(
               child: Listener(
                 // Pinch/Zoom scaling for WEB
                 onPointerSignal: (final PointerSignalEvent event) {

@@ -91,7 +91,7 @@ class AppModel extends ChangeNotifier {
 
   bool get isSidePanelExpanded => _isSidePanelExpanded;
 
-  set isSidePanelExpanded(bool value) {
+  set isSidePanelExpanded(final bool value) {
     _isSidePanelExpanded = value;
     update();
   }

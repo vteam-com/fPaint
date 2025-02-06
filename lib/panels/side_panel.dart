@@ -14,51 +14,46 @@ class SidePanel extends StatefulWidget {
 class _SidePanelState extends State<SidePanel> {
   @override
   Widget build(BuildContext context) {
-    final AppModel appModel = AppModel.get(context, listen: true);
+    final AppModel appModel = AppModel.get(context);
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: appModel.isSidePanelExpanded ? 360 : 80,
-      child: Material(
-        elevation: 18,
-        color: Colors.grey.shade800,
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(12),
-          bottomRight: Radius.circular(12),
-        ),
-        child: MultiSplitViewTheme(
-          data: MultiSplitViewThemeData(
-            dividerPainter: DividerPainters.dashed(
-              animationEnabled: true,
-              color: Colors.grey,
-              highlightedColor: Colors.blue,
-              highlightedThickness: 4,
-              strokeCap: StrokeCap.round,
-            ),
+    return Material(
+      elevation: 18,
+      color: Colors.grey.shade800,
+      borderRadius: const BorderRadius.only(
+        topRight: Radius.circular(12),
+        bottomRight: Radius.circular(12),
+      ),
+      child: MultiSplitViewTheme(
+        data: MultiSplitViewThemeData(
+          dividerPainter: DividerPainters.dashed(
+            animationEnabled: true,
+            color: Colors.grey,
+            highlightedColor: Colors.blue,
+            highlightedThickness: 4,
+            strokeCap: StrokeCap.round,
           ),
-          child: MultiSplitView(
-            axis: Axis.vertical,
-            initialAreas: [
-              Area(
-                size: 200,
-                min: 100,
-                builder: (context, area) => const ToolsAndLayersPanel(),
-              ),
-              Area(
-                size: 400,
-                min: 100,
-                builder: (context, area) => Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: ToolsPanel(
-                    currentShapeType: appModel.selectedTool,
-                    onShapeSelected: (Tools tool) =>
-                        appModel.selectedTool = tool,
-                    minimal: !appModel.isSidePanelExpanded,
-                  ),
+        ),
+        child: MultiSplitView(
+          axis: Axis.vertical,
+          initialAreas: [
+            Area(
+              size: 200,
+              min: 100,
+              builder: (context, area) => const ToolsAndLayersPanel(),
+            ),
+            Area(
+              size: 400,
+              min: 100,
+              builder: (context, area) => Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: ToolsPanel(
+                  currentShapeType: appModel.selectedTool,
+                  onShapeSelected: (Tools tool) => appModel.selectedTool = tool,
+                  minimal: !appModel.isSidePanelExpanded,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
