@@ -87,13 +87,53 @@ class LayerSelector extends StatelessWidget {
         Expanded(
           child: Column(
             children: [
-              Text(layer.name),
+              _buildLayerName(appModel),
               _buildLayerControls(context, appModel, layer, showDelete),
             ],
           ),
         ),
         _buildThumbnailAndOpacity(appModel, layer),
       ],
+    );
+  }
+
+  Widget _buildLayerName(final AppModel appModel) {
+    return GestureDetector(
+      onLongPress: () async {
+        final TextEditingController controller =
+            TextEditingController(text: layer.name);
+
+        final newName = await showDialog<String>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Layer Name'),
+            content: TextField(
+              controller: controller,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Layer Name',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context, controller.text);
+                  appModel.update();
+                },
+                child: const Text('Apply'),
+              ),
+            ],
+          ),
+        );
+        if (newName != null && newName.isNotEmpty) {
+          layer.name = newName;
+        }
+      },
+      child: Text(layer.name),
     );
   }
 

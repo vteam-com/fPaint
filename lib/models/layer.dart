@@ -20,7 +20,7 @@ class Layer {
     _opacity = opacity;
   }
 
-  final String name;
+  String name;
   String id;
   final List<UserAction> _actionStack = [];
   final List<UserAction> redoStack = [];
