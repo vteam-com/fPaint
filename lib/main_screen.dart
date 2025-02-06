@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/panels/side_panel.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
+import 'package:fpaint/widgets/canvas_widget.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
 import 'models/app_model.dart';
@@ -17,8 +18,6 @@ class MainScreen extends StatelessWidget {
   Widget build(final BuildContext context) {
     // Ensure that AppModel is provided above this widget in the widget tree and listening
     final AppModel appModel = AppModel.get(context, listen: true);
-    final ScrollController scrollControllerX = ScrollController();
-    final ScrollController scrollControllerY = ScrollController();
 
     return Scaffold(
       backgroundColor: Colors.grey,
@@ -33,7 +32,9 @@ class MainScreen extends StatelessWidget {
             builder: (context, area) => const SidePanel(),
           ),
           Area(
-            builder: (context, area) => Center(
+            builder: (context, area) => CanvasWidget(
+              canvasWidth: appModel.canvas.width,
+              canvasHeight: appModel.canvas.height,
               child: Listener(
                 // Pinch/Zoom scaling for WEB
                 onPointerSignal: (final PointerSignalEvent event) {
@@ -44,23 +45,18 @@ class MainScreen extends StatelessWidget {
                   }
                 },
                 // Pinch/Zoom scaling for Desktop
-                onPointerPanZoomUpdate: (final event) {
-                  appModel.setCanvasScale(
-                    appModel.canvas.scale * event.scale,
-                  );
+                onPointerPanZoomUpdate:
+                    (final PointerPanZoomUpdateEvent event) {
+                  _scaleCanvas(appModel, event.scale, event.position);
                 },
 
                 // Draw Start
                 onPointerDown: (final PointerDownEvent details) async {
                   if (appModel.isCurrentSelectionReadyForAction) {
                     if (appModel.userActionStartingOffset == null) {
-                      final double scrollOffsetX = scrollControllerX.offset;
-                      final double scrollOffsetY = scrollControllerY.offset;
-                      final Offset adjustedPosition = details.localPosition +
-                          Offset(scrollOffsetX, scrollOffsetY);
                       await _onUserActionStart(
                         appModel: appModel,
-                        position: adjustedPosition / appModel.canvas.scale,
+                        position: details.localPosition / appModel.canvas.scale,
                       );
                     }
                   } else {
@@ -76,13 +72,9 @@ class MainScreen extends StatelessWidget {
                   if (details is PointerMoveEvent) {
                     if (details.buttons == kPrimaryButton &&
                         appModel.userActionStartingOffset != null) {
-                      final double scrollOffsetX = scrollControllerX.offset;
-                      final double scrollOffsetY = scrollControllerY.offset;
-                      final Offset adjustedPosition = details.localPosition +
-                          Offset(scrollOffsetX, scrollOffsetY);
                       _onUserActionUpdate(
                         appModel: appModel,
-                        position: adjustedPosition / appModel.canvas.scale,
+                        position: details.localPosition / appModel.canvas.scale,
                       );
                     }
                   }
@@ -95,23 +87,7 @@ class MainScreen extends StatelessWidget {
                 onPointerCancel: (final PointerCancelEvent details) {
                   _onUserActionEnded(appModel);
                 },
-
-                //
-                // Render canvas
-                //
-                child: SingleChildScrollView(
-                  controller: scrollControllerY,
-                  scrollDirection: Axis.vertical,
-                  child: SingleChildScrollView(
-                    controller: scrollControllerX,
-                    scrollDirection: Axis.horizontal,
-                    child: SizedBox(
-                      width: appModel.canvas.width,
-                      height: appModel.canvas.height,
-                      child: CanvasPanel(appModel: appModel),
-                    ),
-                  ),
-                ),
+                child: CanvasPanel(appModel: appModel),
               ),
             ),
           ),
@@ -197,6 +173,25 @@ class MainScreen extends StatelessWidget {
     appModel.update();
   }
 
+  void _scaleCanvas(AppModel appModel, double scaleDelta, Offset focalPoint) {
+    final double newScale = appModel.canvas.scale * scaleDelta;
+
+    // Ensure scale remains within reasonable limits
+    final double minScale = 0.1;
+    final double maxScale = 5.0;
+    if (newScale < minScale || newScale > maxScale) {
+      return;
+    }
+
+    // Adjust canvas offset so that focalPoint remains at the same screen position
+    final Offset beforeFocalCanvas =
+        (focalPoint - appModel.offset) / appModel.canvas.scale;
+    final Offset newOffset = focalPoint - (beforeFocalCanvas * newScale);
+
+    appModel.offset = newOffset;
+    appModel.setCanvasScale(newScale);
+  }
+
   /// Builds a column of floating action buttons for the paint application,
   /// including buttons for undo, redo, zoom in, zoom out,
   ///  and a button that displays the current zoom level and canvas size.
@@ -229,7 +224,7 @@ class MainScreen extends StatelessWidget {
         FloatingActionButton(
           backgroundColor: Colors.grey.shade800,
           foregroundColor: Colors.white,
-          onPressed: () => appModel.setCanvasScale(1),
+          onPressed: () => appModel.resetCanvasSizeAndPlacement(),
           child: Text(
             '${(appModel.canvas.scale * 100).toInt()}%\n${appModel.canvas.canvasSize.width.toInt()}\n${appModel.canvas.canvasSize.height.toInt()}',
             textAlign: TextAlign.right,

@@ -77,6 +77,9 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
+  Offset offset = Offset.zero;
+  Offset? lastFocalPoint;
+
   /// Stores the starting position of a pan gesture for drawing operations.
   UserAction? currentUserAction;
   Offset? userActionStartingOffset;
@@ -94,6 +97,12 @@ class AppModel extends ChangeNotifier {
   set isSidePanelExpanded(final bool value) {
     _isSidePanelExpanded = value;
     update();
+  }
+
+  void resetCanvasSizeAndPlacement() {
+    this.offset = Offset.zero;
+    this.lastFocalPoint = null;
+    this.setCanvasScale(1); // this will notify
   }
 
   /// Sets the scale of the canvas.
