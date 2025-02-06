@@ -197,7 +197,6 @@ digraph "" {
   "/lib/models/layer.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/models/layer.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/models/layer.dart" -> "/lib/models/app_model.dart";
-  "/lib/models/layer.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/models/layer.dart" -> "/lib/models/user_action.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/main_screen.dart";
   "/lib/main.dart" -> "/lib/models/app_model.dart";

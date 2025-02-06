@@ -68,8 +68,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
           },
         ),
       },
-      child: Container(
-        padding: const EdgeInsets.all(1.0),
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.grey,
           borderRadius: BorderRadius.circular(3.0),

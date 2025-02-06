@@ -55,7 +55,7 @@ class LayerSelector extends StatelessWidget {
           Stack(
             alignment: Alignment.topCenter,
             children: [
-              _buildThumbnailAndOpacity(appModel, layer),
+              _buildThumbnailPreview(appModel, layer),
               if (!layer.isVisible)
                 const Icon(Icons.visibility_off, color: Colors.red),
             ],
@@ -92,7 +92,7 @@ class LayerSelector extends StatelessWidget {
             ],
           ),
         ),
-        _buildThumbnailAndOpacity(appModel, layer),
+        _buildThumbnailPreview(appModel, layer),
       ],
     );
   }
@@ -219,7 +219,7 @@ class LayerSelector extends StatelessWidget {
     }
   }
 
-  Widget _buildThumbnailAndOpacity(final AppModel appModel, final Layer layer) {
+  Widget _buildThumbnailPreview(final AppModel appModel, final Layer layer) {
     return SizedBox(
       height: 60,
       width: 60,

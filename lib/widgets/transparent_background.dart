@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class TransparentPaper extends StatelessWidget {
-  const TransparentPaper({super.key, this.patternSize = 10.0});
-  final double patternSize;
+  const TransparentPaper({super.key, this.patternSize = 10});
+  final int patternSize;
 
   @override
   Widget build(final BuildContext context) {
@@ -14,8 +14,8 @@ class TransparentPaper extends StatelessWidget {
 }
 
 class TransparentBackgroundPainter extends CustomPainter {
-  TransparentBackgroundPainter([this.patternSize = 10.0]);
-  final double patternSize;
+  TransparentBackgroundPainter([this.patternSize = 10]);
+  final int patternSize;
 
   @override
   void paint(final Canvas canvas, final Size size) {

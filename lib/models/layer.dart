@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/widgets/transparent_background.dart';
 
 // Exports
 export 'package:fpaint/models/user_action.dart';
@@ -187,10 +186,8 @@ class Layer {
 
   Future<ui.Image> getThumbnail(final Size size) async {
     if (cachedThumnailImage == null) {
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      final painter = TransparentBackgroundPainter(40);
-      painter.paint(canvas, size);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = Canvas(recorder);
       renderLayer(canvas);
       final picture = recorder.endRecording();
       cachedThumnailImage =
