@@ -12,6 +12,7 @@ class LayerSelector extends StatelessWidget {
     required this.context,
     required this.layer,
     required this.minimal,
+    required this.isSelected,
     required this.showDelete,
   });
 
@@ -19,6 +20,7 @@ class LayerSelector extends StatelessWidget {
   final Layer layer;
   final bool showDelete;
   final bool minimal;
+  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +90,8 @@ class LayerSelector extends StatelessWidget {
           child: Column(
             children: [
               _buildLayerName(appModel),
-              _buildLayerControls(context, appModel, layer, showDelete),
+              if (isSelected)
+                _buildLayerControls(context, appModel, layer, showDelete),
             ],
           ),
         ),

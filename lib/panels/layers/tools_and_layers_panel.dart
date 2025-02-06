@@ -142,6 +142,7 @@ class ToolsAndLayersPanel extends StatelessWidget {
                         context: context,
                         layer: layer,
                         minimal: !appModel.isSidePanelExpanded,
+                        isSelected: appModel.selectedLayerIndex == index,
                         showDelete: appModel.layers.length >
                             1, // Never allow deletion of the last layer
                       ),
