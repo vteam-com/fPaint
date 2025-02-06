@@ -9,7 +9,6 @@ import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/top_colors.dart';
-import 'package:provider/provider.dart';
 
 /// Represents a panel that displays tools for the application.
 /// The ToolsPanel is a stateless widget that displays a set of tools
@@ -19,38 +18,33 @@ import 'package:provider/provider.dart';
 class ToolsPanel extends StatelessWidget {
   const ToolsPanel({
     super.key,
-    required this.currentShapeType,
-    required this.onShapeSelected,
     required this.minimal,
   });
-  final Tools currentShapeType;
-  final Function(Tools) onShapeSelected;
+
   final bool minimal;
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppModel>(
-      builder: (
-        final BuildContext context,
-        final AppModel appModel,
-        final Widget? child,
-      ) {
-        if (minimal) {
-          return slimLayout(context);
-        } else {
-          return largeLayout(context);
-        }
-      },
-    );
+    AppModel appModel = AppModel.get(context, listen: true);
+    final tools = getListOfTools(context, appModel);
+
+    if (minimal) {
+      return slimLayout(
+        context,
+        tools,
+      );
+    } else {
+      return largeLayout(context, tools);
+    }
   }
 
-  Widget slimLayout(context) {
+  Widget slimLayout(final BuildContext context, final List<Widget> tools) {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
         spacing: 8,
         children: [
-          ...getListOfTools(context),
+          ...tools,
           // Divider
           //
           const Divider(
@@ -68,7 +62,7 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  Widget largeLayout(context) {
+  Widget largeLayout(final BuildContext context, final List<Widget> tools) {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
@@ -76,7 +70,7 @@ class ToolsPanel extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: getListOfTools(context),
+            children: tools,
           ),
           // Divider
           //
@@ -94,38 +88,47 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  List<Widget> getListOfTools(BuildContext context) {
+  List<Widget> getListOfTools(BuildContext context, final AppModel appModel) {
+    final selectedTool = appModel.selectedTool;
     final List<Widget> tools = [
       // Pencil
       ToolSelector(
         name: 'Draw',
         image: Icon(Icons.brush, color: IconTheme.of(context).color!),
-        isSelected: currentShapeType == Tools.draw,
-        onPressed: () => onShapeSelected(Tools.draw),
+        isSelected: selectedTool == Tools.draw,
+        onPressed: () {
+          appModel.selectedTool = Tools.draw;
+        },
       ),
 
       // Line
       ToolSelector(
         name: 'Line',
         image: Icon(Icons.line_axis, color: IconTheme.of(context).color!),
-        isSelected: currentShapeType == Tools.line,
-        onPressed: () => onShapeSelected(Tools.line),
+        isSelected: selectedTool == Tools.line,
+        onPressed: () {
+          appModel.selectedTool = Tools.line;
+        },
       ),
 
       // Rectangle
       ToolSelector(
         name: 'Rectangle',
         image: Icon(Icons.crop_square, color: IconTheme.of(context).color!),
-        isSelected: currentShapeType == Tools.rectangle,
-        onPressed: () => onShapeSelected(Tools.rectangle),
+        isSelected: selectedTool == Tools.rectangle,
+        onPressed: () {
+          appModel.selectedTool = Tools.rectangle;
+        },
       ),
 
       // Circle
       ToolSelector(
         name: 'Circle',
         image: Icon(Icons.circle_outlined, color: IconTheme.of(context).color!),
-        isSelected: currentShapeType == Tools.circle,
-        onPressed: () => onShapeSelected(Tools.circle),
+        isSelected: selectedTool == Tools.circle,
+        onPressed: () {
+          appModel.selectedTool = Tools.circle;
+        },
       ),
 
       // Paint Bucket
@@ -135,8 +138,10 @@ class ToolsPanel extends StatelessWidget {
           Icons.format_color_fill,
           color: IconTheme.of(context).color!,
         ),
-        isSelected: currentShapeType == Tools.fill,
-        onPressed: () => onShapeSelected(Tools.fill),
+        isSelected: selectedTool == Tools.fill,
+        onPressed: () {
+          appModel.selectedTool = Tools.fill;
+        },
       ),
 
       ToolSelector(
@@ -145,8 +150,10 @@ class ToolsPanel extends StatelessWidget {
           'assets/icons/eraser.svg',
           IconTheme.of(context).color!,
         ),
-        isSelected: currentShapeType == Tools.eraser,
-        onPressed: () => onShapeSelected(Tools.eraser),
+        isSelected: selectedTool == Tools.eraser,
+        onPressed: () {
+          appModel.selectedTool = Tools.eraser;
+        },
       ),
     ];
     return tools;
@@ -158,9 +165,9 @@ class ToolsPanel extends StatelessWidget {
   }) {
     List<Widget> widgets = [];
     final appModel = AppModel.get(context, listen: true);
-
+    final selectedTool = appModel.selectedTool;
     // Stroke Weight
-    if (currentShapeType.isSupported(ToolAttribute.brushSize)) {
+    if (selectedTool.isSupported(ToolAttribute.brushSize)) {
       widgets.add(
         ToolAttributeWidget(
           name: 'Brush Size',
@@ -192,7 +199,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Brush Style
-    if (currentShapeType.isSupported(ToolAttribute.brushStyle)) {
+    if (selectedTool.isSupported(ToolAttribute.brushStyle)) {
       widgets.add(
         ToolAttributeWidget(
           name: 'Brush Style',
@@ -217,7 +224,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Brush color
-    if (currentShapeType.isSupported(ToolAttribute.colorOutline)) {
+    if (selectedTool.isSupported(ToolAttribute.colorOutline)) {
       widgets.add(
         ToolAttributeWidget(
           name: 'Brush Color',
@@ -244,7 +251,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Color Fill
-    if (currentShapeType.isSupported(ToolAttribute.colorFill)) {
+    if (selectedTool.isSupported(ToolAttribute.colorFill)) {
       widgets.add(
         ToolAttributeWidget(
           name: 'Fill Color',
@@ -271,7 +278,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Fill Color Tolerance
-    if (currentShapeType.isSupported(ToolAttribute.tolerance)) {
+    if (selectedTool.isSupported(ToolAttribute.tolerance)) {
       widgets.add(
         ToolAttributeWidget(
           name: 'Color Tolerance',

@@ -47,8 +47,6 @@ class _SidePanelState extends State<SidePanel> {
               builder: (context, area) => Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ToolsPanel(
-                  currentShapeType: appModel.selectedTool,
-                  onShapeSelected: (Tools tool) => appModel.selectedTool = tool,
                   minimal: !appModel.isSidePanelExpanded,
                 ),
               ),
