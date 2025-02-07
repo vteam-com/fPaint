@@ -105,7 +105,9 @@ class Layers {
 
   void hideShowAllExcept(final Layer exceptLayer, final bool show) {
     for (final Layer layer in _list) {
-      if (layer != exceptLayer) {
+      if (layer == exceptLayer) {
+        layer.isVisible = true;
+      } else {
         layer.isVisible = show;
       }
     }

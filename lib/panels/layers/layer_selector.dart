@@ -96,6 +96,17 @@ class LayerSelector extends StatelessWidget {
   List<PopupMenuItem<String>> _buildPopupMenuItems(AppModel appModel) {
     return [
       const PopupMenuItem(
+        value: 'rename',
+        enabled: true,
+        child: Row(
+          children: [
+            Icon(Icons.edit),
+            SizedBox(width: 8),
+            Text('Rename layer'),
+          ],
+        ),
+      ),
+      const PopupMenuItem(
         value: 'add',
         enabled: true,
         child: Row(
@@ -177,7 +188,7 @@ class LayerSelector extends StatelessWidget {
               Icons.visibility,
             ),
             SizedBox(width: 8),
-            Text('Show all other layers too'),
+            Text('Show all layers'),
           ],
         ),
       ),
@@ -189,6 +200,9 @@ class LayerSelector extends StatelessWidget {
     AppModel appModel,
   ) async {
     switch (value) {
+      case 'rename':
+        await renameLayer(appModel);
+        break;
       case 'add':
         _onAddLayer(appModel);
         break;
@@ -217,9 +231,11 @@ class LayerSelector extends StatelessWidget {
         break;
       case 'allHide':
         appModel.layers.hideShowAllExcept(layer, false);
+        appModel.update();
         break;
       case 'allShow':
         appModel.layers.hideShowAllExcept(layer, true);
+        appModel.update();
         break;
     }
   }
@@ -230,38 +246,7 @@ class LayerSelector extends StatelessWidget {
         Expanded(
           child: GestureDetector(
             onLongPress: () async {
-              final TextEditingController controller =
-                  TextEditingController(text: layer.name);
-
-              final newName = await showDialog<String>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Layer Name'),
-                  content: TextField(
-                    controller: controller,
-                    autofocus: true,
-                    decoration: const InputDecoration(
-                      labelText: 'Layer Name',
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context, controller.text);
-                        appModel.update();
-                      },
-                      child: const Text('Apply'),
-                    ),
-                  ],
-                ),
-              );
-              if (newName != null && newName.isNotEmpty) {
-                layer.name = newName;
-              }
+              await renameLayer(appModel);
             },
             child: Text(
               layer.name,
@@ -281,6 +266,42 @@ class LayerSelector extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> renameLayer(AppModel appModel) async {
+    final TextEditingController controller =
+        TextEditingController(text: layer.name);
+
+    final String? newName = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Layer Name'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Layer Name',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, controller.text);
+              appModel.update();
+            },
+            child: const Text('Apply'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName != null && newName.isNotEmpty) {
+      layer.name = newName;
+    }
   }
 
   Widget _buildLayerControls(
