@@ -3,10 +3,16 @@ import 'package:flutter/material.dart';
 class BrushSizePicker extends StatefulWidget {
   const BrushSizePicker({
     super.key,
+    required this.title,
     required this.value,
+    required this.min,
+    required this.max,
     required this.onChanged,
   });
+  final String title;
   final double value;
+  final double min;
+  final double max;
   final ValueChanged<double> onChanged;
 
   @override
@@ -19,15 +25,17 @@ class BrushSizePickerState extends State<BrushSizePicker> {
   @override
   void initState() {
     super.initState();
-    _value = widget.value;
+    _value = widget.value.clamp(widget.min, widget.max);
   }
 
   @override
   void didUpdateWidget(covariant BrushSizePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value) {
+    if (oldWidget.value != widget.value ||
+        oldWidget.min != widget.min ||
+        oldWidget.max != widget.max) {
       setState(() {
-        _value = widget.value;
+        _value = widget.value.clamp(widget.min, widget.max);
       });
     }
   }
@@ -36,12 +44,12 @@ class BrushSizePickerState extends State<BrushSizePicker> {
   Widget build(final BuildContext context) {
     return Column(
       children: [
-        Text('Brush Size: ${_value.toStringAsFixed(1)}'),
+        Text('${widget.title}: ${_value.toStringAsFixed(1)}'),
         Slider(
           value: _value,
-          min: 0.1,
-          max: 100.0,
-          divisions: 1000,
+          min: widget.min,
+          max: widget.max,
+          divisions: (widget.max * 10).toInt(),
           label: _value.toStringAsFixed(1),
           onChanged: (double value) {
             setState(() {
@@ -55,19 +63,25 @@ class BrushSizePickerState extends State<BrushSizePicker> {
   }
 }
 
-void showBrushSizePicker(
-  final BuildContext context,
-  final double value,
-  final ValueChanged<double> onChanged,
-) {
+void showBrushSizePicker({
+  required final BuildContext context,
+  required final String title,
+  required final double value,
+  required final double min,
+  required final double max,
+  required final ValueChanged<double> onChanged,
+}) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Select Brush Size'),
+        title: Text('Select $title'),
         content: IntrinsicHeight(
           child: BrushSizePicker(
+            title: title,
             value: value,
+            min: min,
+            max: max,
             onChanged: (final double newValue) {
               onChanged(newValue);
             },

@@ -147,21 +147,27 @@ class ToolsPanel extends StatelessWidget {
     List<Widget> widgets = [];
     final appModel = AppModel.of(context, listen: true);
     final selectedTool = appModel.selectedTool;
+    final String title =
+        appModel.selectedTool == Tools.pencil ? 'Pencil Size' : 'Brush Size';
+    final double min = appModel.selectedTool == Tools.pencil ? 1 : 0.1;
+    final double max = 100;
+
     // Stroke Weight
     if (selectedTool.isSupported(ToolAttribute.strokeSize)) {
       widgets.add(
         ToolAttributeWidget(
-          name: 'Brush Size',
+          name: title,
           childLeft: IconButton(
             icon: const Icon(Icons.line_weight),
             color: Colors.grey.shade500,
             onPressed: () {
               showBrushSizePicker(
-                context,
-                appModel.brusSize,
-                (
-                  final double newValue,
-                ) {
+                context: context,
+                title: title,
+                value: appModel.brusSize,
+                min: min,
+                max: max,
+                onChanged: (final double newValue) {
                   appModel.brusSize = newValue;
                 },
               );
@@ -170,7 +176,10 @@ class ToolsPanel extends StatelessWidget {
           childRight: slim
               ? null
               : BrushSizePicker(
+                  title: title,
                   value: appModel.brusSize,
+                  min: min,
+                  max: max,
                   onChanged: (value) {
                     appModel.brusSize = value;
                   },
@@ -189,11 +198,12 @@ class ToolsPanel extends StatelessWidget {
             color: Colors.grey.shade500,
             onPressed: () {
               showBrushSizePicker(
-                context,
-                appModel.brusSize,
-                (
-                  final double newValue,
-                ) {
+                context: context,
+                title: 'Brush Style',
+                min: min,
+                max: max,
+                value: appModel.brusSize,
+                onChanged: (final double newValue) {
                   appModel.brusSize = newValue;
                 },
               );
