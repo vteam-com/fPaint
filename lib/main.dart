@@ -18,7 +18,12 @@ class MyApp extends StatelessWidget {
       create: (_) => appModel,
       child: MaterialApp(
         title: 'Flutter Paint App',
-        theme: ThemeData.dark(), // Use dark theme
+        theme: ThemeData.dark().copyWith(
+          colorScheme: const ColorScheme.dark(
+            primary: Colors.blue,
+            secondary: Colors.lightBlue,
+          ),
+        ),
         home: Shortcuts(
           shortcuts: {
             // Undo
