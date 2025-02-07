@@ -103,6 +103,14 @@ class Layers {
     }
   }
 
+  void hideShowAllExcept(final Layer exceptLayer, final bool show) {
+    for (final Layer layer in _list) {
+      if (layer != exceptLayer) {
+        layer.isVisible = show;
+      }
+    }
+  }
+
   Future<List<ColorUsage>> getTopColorUsed() async {
     List<ColorUsage> topColors = [];
 
