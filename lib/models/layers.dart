@@ -128,11 +128,7 @@ class Layers {
     for (final Layer layer in _list) {
       final List<ColorUsage> colorsInLayer = await layer.getTopColorUsed();
       for (final ColorUsage colorUsed in colorsInLayer) {
-        if (!topColors.any(
-          (c) =>
-              c.color == colorUsed.color &&
-              c.percentage == colorUsed.percentage,
-        )) {
+        if (!topColors.any((c) => c.color == colorUsed.color)) {
           topColors.add(colorUsed);
         }
       }
