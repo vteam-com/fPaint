@@ -45,7 +45,7 @@ class AppModel extends ChangeNotifier {
   /// If [listen] is true, the returned [AppModel] instance will notify listeners
   /// when its state changes. Otherwise, the returned instance will not notify
   /// listeners.
-  static AppModel get(
+  static AppModel of(
     final BuildContext context, {
     final bool listen = false,
   }) =>

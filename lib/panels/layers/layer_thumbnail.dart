@@ -15,7 +15,7 @@ class LayerThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appModel = AppModel.get(context);
+    final appModel = AppModel.of(context);
     const int patternSize = 4;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {

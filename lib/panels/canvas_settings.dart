@@ -11,7 +11,7 @@ void showCanvasSettings(final BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (final BuildContext context) {
-      AppModel appModel = AppModel.get(context, listen: true);
+      AppModel appModel = AppModel.of(context, listen: true);
       if (initOnce) {
         widthController.text =
             appModel.canvas.canvasSize.width.toInt().toString();

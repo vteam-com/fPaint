@@ -19,7 +19,7 @@ class SidePanel extends StatefulWidget {
 class _SidePanelState extends State<SidePanel> {
   @override
   Widget build(BuildContext context) {
-    final AppModel appModel = AppModel.get(context);
+    final AppModel appModel = AppModel.of(context);
 
     return Material(
       elevation: 18,

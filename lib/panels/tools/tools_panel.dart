@@ -25,7 +25,7 @@ class ToolsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppModel appModel = AppModel.get(context, listen: true);
+    AppModel appModel = AppModel.of(context, listen: true);
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
@@ -135,7 +135,7 @@ class ToolsPanel extends StatelessWidget {
     required bool slim,
   }) {
     List<Widget> widgets = [];
-    final appModel = AppModel.get(context, listen: true);
+    final appModel = AppModel.of(context, listen: true);
     final selectedTool = appModel.selectedTool;
     // Stroke Weight
     if (selectedTool.isSupported(ToolAttribute.brushSize)) {

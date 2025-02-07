@@ -19,7 +19,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appModel = AppModel.get(context, listen: true);
+    final appModel = AppModel.of(context, listen: true);
     return Column(
       children: [
         // toolbar

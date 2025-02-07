@@ -36,7 +36,7 @@ void showBrushStylePicker(
       return AlertDialog(
         title: const Text('Select Line Style'),
         content: IntrinsicHeight(
-          child: brushStyleSelection(AppModel.get(context)),
+          child: brushStyleSelection(AppModel.of(context)),
         ),
       );
     },

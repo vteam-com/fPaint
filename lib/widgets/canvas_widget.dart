@@ -41,14 +41,14 @@ class CanvasWidgetState extends State<CanvasWidget> {
   @override
   void initState() {
     super.initState();
-    final appModel = AppModel.get(context);
+    final appModel = AppModel.of(context);
     _scale = appModel.canvas.scale;
     _offset = appModel.offset;
   }
 
   @override
   Widget build(BuildContext context) {
-    final appModel = AppModel.get(context);
+    final appModel = AppModel.of(context);
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {

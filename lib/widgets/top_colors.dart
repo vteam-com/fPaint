@@ -32,7 +32,7 @@ class TopColors extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppModel appModel = AppModel.get(context);
+    final AppModel appModel = AppModel.of(context);
     List<Widget> colorPreviews = colors
         .map(
           (final ColorUsage colorUsed) => ColorPreview(

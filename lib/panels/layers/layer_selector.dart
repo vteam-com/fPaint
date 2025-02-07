@@ -24,7 +24,7 @@ class LayerSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appModel = AppModel.get(context);
+    final appModel = AppModel.of(context);
     return Container(
       margin: EdgeInsets.all(minimal ? 2 : 4),
       padding: EdgeInsets.all(minimal ? 2 : 8),
@@ -260,9 +260,9 @@ class LayerSelector extends StatelessWidget {
         ),
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
-          itemBuilder: (context) => _buildPopupMenuItems(AppModel.get(context)),
+          itemBuilder: (context) => _buildPopupMenuItems(AppModel.of(context)),
           onSelected: (value) =>
-              _handlePopupMenuSelection(value, AppModel.get(context)),
+              _handlePopupMenuSelection(value, AppModel.of(context)),
         ),
       ],
     );

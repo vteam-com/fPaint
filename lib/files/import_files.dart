@@ -7,7 +7,7 @@ import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/models/app_model.dart';
 
 Future<void> onFileNew(final BuildContext context) async {
-  final AppModel appModel = AppModel.get(context);
+  final AppModel appModel = AppModel.of(context);
 
   if (appModel.layers.hasChanged &&
       await confirmDiscardCurrentWork(context) == false) {
@@ -88,7 +88,7 @@ Future<void> onFileNew(final BuildContext context) async {
 /// Returns:
 /// - A `Future<void>` indicating the completion of the file open operation.
 Future<void> onFileOpen(final BuildContext context) async {
-  final AppModel appModel = AppModel.get(context);
+  final AppModel appModel = AppModel.of(context);
 
   if (appModel.layers.hasChanged &&
       await confirmDiscardCurrentWork(context) == false) {

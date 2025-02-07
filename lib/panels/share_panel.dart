@@ -17,7 +17,7 @@ Widget textAction(final String fileName) {
 }
 
 void sharePanel(final BuildContext context) {
-  final AppModel appModel = AppModel.get(context);
+  final AppModel appModel = AppModel.of(context);
   showModalBottomSheet(
     context: context,
     builder: (final BuildContext context) {
@@ -71,7 +71,7 @@ void _onExportToClipboard(final BuildContext context) async {
   final clipboard = SystemClipboard.instance;
   if (clipboard != null) {
     final Uint8List image =
-        await capturePainterToImageBytes(AppModel.get(context));
+        await capturePainterToImageBytes(AppModel.of(context));
     final DataWriterItem item = DataWriterItem(suggestedName: 'fPaint.png');
     item.add(Formats.png(image));
     await clipboard.write([item]);

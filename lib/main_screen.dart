@@ -17,7 +17,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     // Ensure that AppModel is provided above this widget in the widget tree and listening
-    final AppModel appModel = AppModel.get(context, listen: true);
+    final AppModel appModel = AppModel.of(context, listen: true);
 
     return Scaffold(
       backgroundColor: Colors.grey,
