@@ -25,8 +25,7 @@ class ToolSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(2),
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border.all(
           color: isSelected ? Colors.blue : Colors.transparent,

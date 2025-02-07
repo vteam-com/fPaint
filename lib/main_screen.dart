@@ -12,7 +12,7 @@ import 'models/app_model.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
-  final double minSidePanelSize = 80.0;
+  final double minSidePanelSize = 100.0;
 
   @override
   Widget build(final BuildContext context) {

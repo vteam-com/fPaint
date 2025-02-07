@@ -31,7 +31,7 @@ class ToolsPanel extends StatelessWidget {
       child: Column(
         spacing: 8,
         children: [
-          _buildToolsLayout(context, appModel),
+          Wrap(children: getListOfTools(context, appModel)),
           ...getWidgetForSelectedTool(
             context: context,
             slim: minimal,
@@ -39,21 +39,6 @@ class ToolsPanel extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Widget _buildToolsLayout(
-    BuildContext context,
-    final AppModel appModel,
-  ) {
-    final tools = getListOfTools(context, appModel);
-    if (minimal) {
-      return Column(children: tools);
-    } else {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: tools,
-      );
-    }
   }
 
   List<Widget> getListOfTools(
