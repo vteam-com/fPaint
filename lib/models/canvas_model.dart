@@ -11,8 +11,8 @@ class CanvasModel extends ChangeNotifier {
   double get height => this.canvasSize.height * this.scale;
   Size get canvasSizeScaled => Size(width, height);
 
-  //-------------------------------------------
-  // canvasResizeLockAspectRatio
+  ///-------------------------------------------
+  /// canvasResizeLockAspectRatio
   bool _resizeLockAspectRatio = true;
   bool get canvasResizeLockAspectRatio => _resizeLockAspectRatio;
 

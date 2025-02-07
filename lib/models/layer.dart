@@ -29,6 +29,10 @@ class Layer {
   bool preserveAlpha = true;
   ui.BlendMode blendMode = ui.BlendMode.srcOver;
 
+  ///-------------------------------------------
+  /// Modifed state
+  bool hasChanged = true;
+
   Rect getArea() {
     if (_actionStack.isEmpty) {
       return Rect.zero;
@@ -79,6 +83,7 @@ class Layer {
 
   void addUserAction(UserAction userAction) {
     _actionStack.add(userAction);
+    hasChanged = true;
     clearCache();
   }
 
@@ -147,6 +152,7 @@ class Layer {
   void undo() {
     if (_actionStack.isNotEmpty) {
       redoStack.add(_actionStack.removeLast());
+      hasChanged = true;
       clearCache();
     }
   }
@@ -154,6 +160,7 @@ class Layer {
   void redo() {
     if (redoStack.isNotEmpty) {
       _actionStack.add(this.redoStack.removeLast());
+      hasChanged = true;
       clearCache();
     }
   }

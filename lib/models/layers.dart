@@ -25,17 +25,29 @@ class Layers {
     );
 
     _list.add(firstLayer);
+    clearHasChanged();
   }
 
   final List<Layer> _list = [];
-  void clear() => _list.clear();
+
+  void clear() {
+    _list.clear();
+    clearHasChanged();
+  }
+
   int get length => _list.length;
   bool get isEmpty => _list.isEmpty;
   bool get isNotEmpty => _list.isNotEmpty;
+  bool get hasChanged => _list.any((layer) => layer.hasChanged);
+
+  void clearHasChanged() {
+    for (final Layer layer in _list) {
+      layer.hasChanged = false;
+    }
+  }
 
   bool isIndexInRange(final int indexLayer) =>
       indexLayer >= 0 && indexLayer < _list.length;
-
   int getLayerIndex(final Layer layer) {
     return _list.indexOf(layer);
   }

@@ -35,13 +35,17 @@ class ToolsAndLayersPanel extends StatelessWidget {
                     break;
                   case MenuIds.save:
                     saveFile(context, appModel).then(
-                      // ignore: use_build_context_synchronously
-                      (_) => ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Saved ${appModel.loadedFileName}'),
-                        ),
-                      ),
-                    );
+                        // ignore: use_build_context_synchronously
+                        (_) {
+                      appModel.layers.clearHasChanged();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Saved ${appModel.loadedFileName}'),
+                          ),
+                        );
+                      }
+                    });
                     break;
                   case MenuIds.export:
                     sharePanel(context);

@@ -9,7 +9,8 @@ import 'package:fpaint/models/app_model.dart';
 Future<void> onFileNew(final BuildContext context) async {
   final AppModel appModel = AppModel.get(context);
 
-  if (await confirmDiscardCurrentWork(context) == false) {
+  if (appModel.layers.hasChanged &&
+      await confirmDiscardCurrentWork(context) == false) {
     return;
   }
 
@@ -89,7 +90,8 @@ Future<void> onFileNew(final BuildContext context) async {
 Future<void> onFileOpen(final BuildContext context) async {
   final AppModel appModel = AppModel.get(context);
 
-  if (await confirmDiscardCurrentWork(context) == false) {
+  if (appModel.layers.hasChanged &&
+      await confirmDiscardCurrentWork(context) == false) {
     return;
   }
 
@@ -128,6 +130,7 @@ Future<void> onFileOpen(final BuildContext context) async {
           await readImageFilePath(appModel, path);
         }
       }
+      appModel.layers.clearHasChanged();
     }
   } catch (e) {
     // Handle any errors that occur during file picking/loading
