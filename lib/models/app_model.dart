@@ -57,7 +57,7 @@ class AppModel extends ChangeNotifier {
   late Layers layers = Layers(canvas.canvasSize);
 
   // Selected Tool
-  Tools _selectedTool = Tools.draw;
+  Tools _selectedTool = Tools.brush;
 
   Tools get selectedTool => _selectedTool;
 

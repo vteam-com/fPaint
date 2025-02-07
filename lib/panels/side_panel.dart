@@ -42,7 +42,7 @@ class _SidePanelState extends State<SidePanel> {
           axis: Axis.vertical,
           initialAreas: [
             Area(
-              size: 200,
+              size: 400,
               min: 100,
               builder: (context, area) => const TopMenuAndLayersPanel(),
             ),

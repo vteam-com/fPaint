@@ -22,7 +22,7 @@ void main() {
 
     test('Add user action', () {
       final userAction = UserAction(
-        tool: Tools.draw,
+        tool: Tools.brush,
         positions: [Offset.zero],
         brushColor: Colors.black,
         fillColor: Colors.transparent,
@@ -36,7 +36,7 @@ void main() {
 
     test('Undo and redo actions', () {
       final userAction = UserAction(
-        tool: Tools.draw,
+        tool: Tools.brush,
         positions: [Offset.zero],
         brushColor: Colors.black,
         fillColor: Colors.transparent,
@@ -66,7 +66,7 @@ void main() {
 
     test('Update last user action end position', () {
       final userAction = UserAction(
-        tool: Tools.draw,
+        tool: Tools.brush,
         positions: [Offset.zero, const Offset(1, 1)],
         brushColor: Colors.black,
         fillColor: Colors.transparent,

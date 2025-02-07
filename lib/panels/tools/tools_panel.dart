@@ -62,13 +62,23 @@ class ToolsPanel extends StatelessWidget {
   ) {
     final selectedTool = appModel.selectedTool;
     final List<Widget> tools = [
-      // Pencil
+      // Brush
       ToolSelector(
-        name: 'Draw',
-        image: Icon(Icons.brush, color: IconTheme.of(context).color!),
-        isSelected: selectedTool == Tools.draw,
+        name: 'Pencil',
+        image: Icon(Icons.draw, color: IconTheme.of(context).color!),
+        isSelected: selectedTool == Tools.pencil,
         onPressed: () {
-          appModel.selectedTool = Tools.draw;
+          appModel.selectedTool = Tools.pencil;
+        },
+      ),
+
+      // Brush
+      ToolSelector(
+        name: 'Brush',
+        image: Icon(Icons.brush, color: IconTheme.of(context).color!),
+        isSelected: selectedTool == Tools.brush,
+        onPressed: () {
+          appModel.selectedTool = Tools.brush;
         },
       ),
 
@@ -138,7 +148,7 @@ class ToolsPanel extends StatelessWidget {
     final appModel = AppModel.of(context, listen: true);
     final selectedTool = appModel.selectedTool;
     // Stroke Weight
-    if (selectedTool.isSupported(ToolAttribute.brushSize)) {
+    if (selectedTool.isSupported(ToolAttribute.strokeSize)) {
       widgets.add(
         ToolAttributeWidget(
           name: 'Brush Size',

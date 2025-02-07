@@ -231,13 +231,21 @@ class Layer {
     // Render all actions within the saved layer
     for (final UserAction userAction in _actionStack) {
       switch (userAction.tool) {
-        case Tools.draw:
+        case Tools.pencil:
+          final Paint paint = Paint();
+          paint.color = userAction.brushColor;
+          paint.strokeWidth = userAction.brushSize;
+          paint.style = PaintingStyle.stroke;
+          paint.strokeCap = StrokeCap.square;
+          renderPencil(canvas, paint, userAction);
+          break;
+
+        case Tools.brush:
           final Paint paint = Paint();
           paint.color = userAction.fillColor;
           paint.strokeCap = StrokeCap.round;
           paint.strokeWidth = userAction.brushSize;
           paint.style = PaintingStyle.stroke;
-
           renderPath(canvas, paint, userAction);
           break;
 
@@ -247,7 +255,6 @@ class Layer {
           paint.strokeCap = StrokeCap.round;
           paint.strokeWidth = userAction.brushSize;
           paint.style = PaintingStyle.stroke;
-
           renderLine(canvas, paint, userAction);
           break;
 
@@ -257,7 +264,6 @@ class Layer {
           paint.strokeCap = StrokeCap.round;
           paint.strokeWidth = userAction.brushSize;
           paint.style = PaintingStyle.fill;
-
           renderCircle(canvas, paint, userAction);
           break;
 
@@ -276,7 +282,6 @@ class Layer {
           paint.strokeCap = StrokeCap.round;
           paint.strokeWidth = userAction.brushSize;
           paint.style = PaintingStyle.stroke;
-
           renderEraser(canvas, paint, userAction);
           break;
 
@@ -411,6 +416,21 @@ class Layer {
     }
 
     return path;
+  }
+
+  void renderPencil(
+    final Canvas canvas,
+    final Paint paint,
+    final UserAction userAction,
+  ) {
+    paint.blendMode = BlendMode.srcATop;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeWidth = userAction.brushSize;
+    canvas.drawLine(
+      userAction.positions.first,
+      userAction.positions.last,
+      paint,
+    );
   }
 
   void renderEraser(

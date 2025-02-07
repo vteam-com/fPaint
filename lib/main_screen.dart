@@ -138,7 +138,17 @@ class MainScreen extends StatelessWidget {
     required final Offset position,
   }) {
     if (appModel.userActionStartingOffset != null) {
-      if (appModel.selectedTool == Tools.eraser) {
+      if (appModel.selectedTool == Tools.pencil) {
+        // Add the pixel
+        appModel.updateLastUserAction(
+          start: appModel.userActionStartingOffset!,
+          end: position,
+          type: appModel.selectedTool,
+          colorStroke: appModel.brushColor,
+          colorFill: appModel.brushColor,
+        );
+        appModel.userActionStartingOffset = position;
+      } else if (appModel.selectedTool == Tools.eraser) {
         // Eraser implementation
         appModel.updateLastUserAction(
           start: appModel.userActionStartingOffset!,
@@ -148,7 +158,7 @@ class MainScreen extends StatelessWidget {
           colorFill: Colors.transparent,
         );
         appModel.userActionStartingOffset = position;
-      } else if (appModel.selectedTool == Tools.draw) {
+      } else if (appModel.selectedTool == Tools.brush) {
         // Cumulate more points in the draw path on the selected layer
         appModel.layers.list[appModel.selectedLayerIndex]
             .lastActionAddPosition(position: position);
@@ -164,7 +174,7 @@ class MainScreen extends StatelessWidget {
   void _onUserActionEnded(
     final AppModel appModel,
   ) {
-    if (appModel.currentUserAction?.tool == Tools.draw) {
+    if (appModel.currentUserAction?.tool == Tools.brush) {
       // Optimize list of draw actions into a single path
     }
 

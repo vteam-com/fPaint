@@ -5,7 +5,8 @@ import 'package:fpaint/widgets/brush_style_picker.dart';
 export 'package:fpaint/widgets/brush_style_picker.dart';
 
 enum Tools {
-  draw,
+  pencil,
+  brush,
   line,
   circle,
   rectangle,
@@ -24,7 +25,7 @@ enum Tools {
 }
 
 enum ToolAttribute {
-  brushSize,
+  strokeSize,
   brushStyle,
   colorOutline,
   colorFill,
@@ -32,24 +33,28 @@ enum ToolAttribute {
 }
 
 final Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
-  Tools.draw: {
-    ToolAttribute.brushSize,
+  Tools.pencil: {
+    ToolAttribute.strokeSize,
+    ToolAttribute.colorOutline,
+  },
+  Tools.brush: {
+    ToolAttribute.strokeSize,
     ToolAttribute.brushStyle,
     ToolAttribute.colorOutline,
   },
   Tools.line: {
     ToolAttribute.colorOutline,
-    ToolAttribute.brushSize,
+    ToolAttribute.strokeSize,
     ToolAttribute.brushStyle,
   },
   Tools.circle: {
-    ToolAttribute.brushSize,
+    ToolAttribute.strokeSize,
     ToolAttribute.brushStyle,
     ToolAttribute.colorOutline,
     ToolAttribute.colorFill,
   },
   Tools.rectangle: {
-    ToolAttribute.brushSize,
+    ToolAttribute.strokeSize,
     ToolAttribute.brushStyle,
     ToolAttribute.colorOutline,
     ToolAttribute.colorFill,
@@ -59,7 +64,7 @@ final Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
     ToolAttribute.tolerance,
   },
   Tools.eraser: {
-    ToolAttribute.brushSize,
+    ToolAttribute.strokeSize,
   },
 };
 

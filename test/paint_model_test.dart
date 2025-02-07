@@ -25,7 +25,7 @@ void main() {
           const Offset(0, 0),
           const Offset(10, 10),
         ],
-        tool: Tools.draw,
+        tool: Tools.brush,
         fillColor: Colors.black,
         brushColor: Colors.black,
         brushSize: 1,
@@ -85,7 +85,7 @@ void main() {
       paintModel.updateLastUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: Tools.draw,
+        type: Tools.brush,
         colorFill: Colors.green,
         colorStroke: Colors.black,
       );
@@ -104,7 +104,7 @@ void main() {
       paintModel.updateLastUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: Tools.draw,
+        type: Tools.brush,
         colorFill: Colors.blue,
         colorStroke: Colors.black,
       );
@@ -118,7 +118,7 @@ void main() {
       expect(paintModel.selectedLayer.count, 3);
       paintModel.undo();
       expect(paintModel.selectedLayer.count, 2);
-      expect(paintModel.selectedLayer.lastUserAction!.tool, Tools.draw);
+      expect(paintModel.selectedLayer.lastUserAction!.tool, Tools.brush);
     });
   });
 }
