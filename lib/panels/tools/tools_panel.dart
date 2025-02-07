@@ -26,69 +26,40 @@ class ToolsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppModel appModel = AppModel.get(context, listen: true);
-    final tools = getListOfTools(context, appModel);
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Column(
+        spacing: 8,
+        children: [
+          _buildToolsLayout(context, appModel),
+          ...getWidgetForSelectedTool(
+            context: context,
+            slim: minimal,
+          ),
+        ],
+      ),
+    );
+  }
 
+  Widget _buildToolsLayout(
+    BuildContext context,
+    final AppModel appModel,
+  ) {
+    final tools = getListOfTools(context, appModel);
     if (minimal) {
-      return slimLayout(
-        context,
-        tools,
-      );
+      return Column(children: tools);
     } else {
-      return largeLayout(context, tools);
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: tools,
+      );
     }
   }
 
-  Widget slimLayout(final BuildContext context, final List<Widget> tools) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Column(
-        spacing: 8,
-        children: [
-          ...tools,
-          // Divider
-          //
-          const Divider(
-            thickness: 1,
-            height: 1,
-            color: Colors.grey,
-          ),
-
-          ...getWidgetForSelectedTool(
-            context: context,
-            slim: true,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget largeLayout(final BuildContext context, final List<Widget> tools) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Column(
-        spacing: 8,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: tools,
-          ),
-          // Divider
-          //
-          const Divider(
-            thickness: 6,
-            height: 10,
-          ),
-
-          ...getWidgetForSelectedTool(
-            context: context,
-            slim: false,
-          ),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> getListOfTools(BuildContext context, final AppModel appModel) {
+  List<Widget> getListOfTools(
+    BuildContext context,
+    final AppModel appModel,
+  ) {
     final selectedTool = appModel.selectedTool;
     final List<Widget> tools = [
       // Pencil
@@ -315,17 +286,17 @@ class ToolsPanel extends StatelessWidget {
     // Add a separator between each element
     List<Widget> separatedWidgets = [];
     for (int i = 0; i < widgets.length; i++) {
+      separatedWidgets.add(separator());
       separatedWidgets.add(widgets[i]);
-      if (i < widgets.length - 1) {
-        separatedWidgets.add(
-          const Divider(
-            thickness: 1,
-            height: 15,
-            color: Colors.black,
-          ),
-        );
-      }
     }
     return separatedWidgets;
   }
+}
+
+Widget separator() {
+  return const Divider(
+    thickness: 1,
+    height: 15,
+    color: Colors.black,
+  );
 }
