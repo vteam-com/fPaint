@@ -183,14 +183,6 @@ class Layer {
     cachedThumnailImage = null; // reset cache
   }
 
-  Future<ui.Image> toImage(final Size size) async {
-    cachedThumnailImage ??= await renderImageWH(
-      size.width.toInt(),
-      size.height.toInt(),
-    );
-    return cachedThumnailImage!;
-  }
-
   Future<ui.Image> toImageForStorage(final Size size) async {
     return await renderImageWH(
       size.width.toInt(),
