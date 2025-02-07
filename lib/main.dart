@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fpaint/files/save.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:provider/provider.dart';
 import 'models/app_model.dart';
@@ -41,6 +42,16 @@ class MyApp extends StatelessWidget {
               LogicalKeyboardKey.keyZ,
               LogicalKeyboardKey.shift,
             ): const RedoIntent(),
+
+            // Save
+            LogicalKeySet(
+              LogicalKeyboardKey.control,
+              LogicalKeyboardKey.keyS,
+            ): const SaveIntent(),
+            LogicalKeySet(
+              LogicalKeyboardKey.meta,
+              LogicalKeyboardKey.keyS,
+            ): const SaveIntent(),
           },
           child: Actions(
             actions: {
@@ -49,6 +60,10 @@ class MyApp extends StatelessWidget {
               ),
               RedoIntent: CallbackAction<RedoIntent>(
                 onInvoke: (RedoIntent intent) => appModel.redo(),
+              ),
+              SaveIntent: CallbackAction<SaveIntent>(
+                onInvoke: (SaveIntent intent) async =>
+                    await saveFile(context, appModel),
               ),
             },
             child: const Focus(
@@ -69,4 +84,8 @@ class UndoIntent extends Intent {
 
 class RedoIntent extends Intent {
   const RedoIntent();
+}
+
+class SaveIntent extends Intent {
+  const SaveIntent();
 }
