@@ -23,7 +23,13 @@ class TopColors extends StatelessWidget {
         .map(
           (final ColorUsage colorUsed) => ColorPreview(
             colorUsed: colorUsed,
-            onPressed: () => appModel.brushColor = colorUsed.color,
+            onPressed: () {
+              (appModel.selectedTool == Tools.rectangle ||
+                      appModel.selectedTool == Tools.circle ||
+                      appModel.selectedTool == Tools.fill)
+                  ? appModel.fillColor = colorUsed.color
+                  : appModel.brushColor = colorUsed.color;
+            },
           ),
         )
         .toList();
