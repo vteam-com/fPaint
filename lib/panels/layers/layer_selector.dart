@@ -93,6 +93,137 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
+  List<PopupMenuItem<String>> _buildPopupMenuItems(AppModel appModel) {
+    return [
+      const PopupMenuItem(
+        value: 'add',
+        enabled: true,
+        child: Row(
+          children: [
+            Icon(Icons.playlist_add),
+            SizedBox(width: 8),
+            Text('Add a layer above'),
+          ],
+        ),
+      ),
+      PopupMenuItem(
+        value: 'delete',
+        enabled: allowRemoveLayer,
+        child: const Row(
+          children: [
+            Icon(Icons.playlist_remove),
+            SizedBox(width: 8),
+            Text('Delete this layer'),
+          ],
+        ),
+      ),
+      PopupMenuItem(
+        value: 'merge',
+        enabled: layer != appModel.layers.list.last,
+        child: const Row(
+          children: [
+            Icon(Icons.layers_outlined),
+            SizedBox(width: 8),
+            Text('Merge to below layer'),
+          ],
+        ),
+      ),
+      const PopupMenuItem(
+        value: 'blend',
+        enabled: true,
+        child: Row(
+          children: [
+            Icon(Icons.blender_outlined),
+            SizedBox(width: 8),
+            Text('Change Blend Mode'),
+          ],
+        ),
+      ),
+      PopupMenuItem(
+        value: 'visibility',
+        enabled: true,
+        child: Row(
+          children: [
+            Icon(
+              layer.isVisible ? Icons.visibility : Icons.visibility_off,
+              color: layer.isVisible
+                  ? Colors.blue
+                  : const ui.Color.fromARGB(255, 135, 9, 9),
+            ),
+            const SizedBox(width: 8),
+            Text(layer.isVisible ? 'Hide layer' : 'Show layer'),
+          ],
+        ),
+      ),
+      const PopupMenuItem(
+        value: 'allHide',
+        enabled: true,
+        child: Row(
+          children: [
+            Icon(
+              Icons.visibility_off,
+            ),
+            SizedBox(width: 8),
+            Text('Hide all other layers'),
+          ],
+        ),
+      ),
+      const PopupMenuItem(
+        value: 'allShow',
+        enabled: true,
+        child: Row(
+          children: [
+            Icon(
+              Icons.visibility,
+            ),
+            SizedBox(width: 8),
+            Text('Show all other layers too'),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  Future<void> _handlePopupMenuSelection(
+    String value,
+    AppModel appModel,
+  ) async {
+    switch (value) {
+      case 'add':
+        _onAddLayer(appModel);
+        break;
+      case 'delete':
+        if (allowRemoveLayer) {
+          appModel.removeLayer(layer);
+        }
+        break;
+      case 'merge':
+        if (layer != appModel.layers.list.last) {
+          _onFlattenLayers(
+            appModel,
+            appModel.selectedLayerIndex,
+            appModel.selectedLayerIndex + 1,
+          );
+        }
+        break;
+      case 'blend':
+        layer.blendMode = await showBlendModeMenu(
+          context: context,
+          selectedBlendMode: layer.blendMode,
+        );
+        break;
+      case 'visibility':
+        appModel.toggleLayerVisibility(layer);
+        break;
+      case 'allHide':
+        appModel.layers.hideShowAllExcept(layer, false);
+        break;
+      case 'allShow':
+        appModel.layers.hideShowAllExcept(layer, true);
+        break;
+    }
+  }
+
   Widget _buildLayerName(final AppModel appModel) {
     return Row(
       children: [
@@ -144,134 +275,9 @@ class LayerSelector extends StatelessWidget {
         ),
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
-          itemBuilder: (context) {
-            final appModel = AppModel.get(context);
-            return [
-              const PopupMenuItem(
-                value: 'add',
-                enabled: true,
-                child: Row(
-                  children: [
-                    Icon(Icons.playlist_add),
-                    SizedBox(width: 8),
-                    Text('Add a layer above'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                enabled: allowRemoveLayer,
-                child: const Row(
-                  children: [
-                    Icon(Icons.playlist_remove),
-                    SizedBox(width: 8),
-                    Text('Delete this layer'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'merge',
-                enabled: layer != appModel.layers.list.last,
-                child: const Row(
-                  children: [
-                    Icon(Icons.layers_outlined),
-                    SizedBox(width: 8),
-                    Text('Merge to below layer'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'blend',
-                enabled: true,
-                child: Row(
-                  children: [
-                    Icon(Icons.blender_outlined),
-                    SizedBox(width: 8),
-                    Text('Change Blend Mode'),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: 'visibility',
-                enabled: true,
-                child: Row(
-                  children: [
-                    Icon(
-                      layer.isVisible ? Icons.visibility : Icons.visibility_off,
-                      color: layer.isVisible
-                          ? Colors.blue
-                          : const ui.Color.fromARGB(255, 135, 9, 9),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(layer.isVisible ? 'Hide layer' : 'Show layer'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'allHide',
-                enabled: true,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.visibility_off,
-                    ),
-                    SizedBox(width: 8),
-                    Text('Hide all other layers'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'allShow',
-                enabled: true,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.visibility,
-                    ),
-                    SizedBox(width: 8),
-                    Text('Show all other layers too'),
-                  ],
-                ),
-              ),
-            ];
-          },
-          onSelected: (value) async {
-            final appModel = AppModel.get(context);
-            switch (value) {
-              case 'add':
-                _onAddLayer(appModel);
-                break;
-              case 'delete':
-                if (allowRemoveLayer) {
-                  appModel.removeLayer(layer);
-                }
-                break;
-              case 'merge':
-                if (layer != appModel.layers.list.last) {
-                  _onFlattenLayers(
-                    appModel,
-                    appModel.selectedLayerIndex,
-                    appModel.selectedLayerIndex + 1,
-                  );
-                }
-                break;
-              case 'blend':
-                layer.blendMode = await showBlendModeMenu(
-                  context: context,
-                  selectedBlendMode: layer.blendMode,
-                );
-                break;
-              case 'visibility':
-                appModel.toggleLayerVisibility(layer);
-                break;
-              case 'allHide':
-                appModel.layers.hideShowAllExcept(layer, false);
-                break;
-              case 'allShow':
-                appModel.layers.hideShowAllExcept(layer, true);
-                break;
-            }
-          },
+          itemBuilder: (context) => _buildPopupMenuItems(AppModel.get(context)),
+          onSelected: (value) =>
+              _handlePopupMenuSelection(value, AppModel.get(context)),
         ),
       ],
     );
@@ -364,13 +370,27 @@ class LayerSelector extends StatelessWidget {
     final AppModel appModel,
     final Layer layer,
   ) {
-    return Stack(
-      alignment: Alignment.topCenter,
-      children: [
-        _buildThumbnailPreview(appModel, layer),
-        if (!layer.isVisible)
-          const Icon(Icons.visibility_off, color: Colors.red),
-      ],
+    return GestureDetector(
+      onLongPress: () {
+        showMenu(
+          context: context,
+          position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+          items: _buildPopupMenuItems(appModel),
+          elevation: 8,
+        ).then((value) {
+          if (value != null) {
+            _handlePopupMenuSelection(value, appModel);
+          }
+        });
+      },
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          _buildThumbnailPreview(appModel, layer),
+          if (!layer.isVisible)
+            const Icon(Icons.visibility_off, color: Colors.red),
+        ],
+      ),
     );
   }
 
