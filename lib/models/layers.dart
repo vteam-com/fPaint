@@ -135,8 +135,7 @@ class Layers {
     int totalLayers = _list.length;
 
     for (final Layer layer in _list) {
-      final List<ColorUsage> colorsInLayer = await layer.getTopColorUsed();
-      for (final ColorUsage colorUsed in colorsInLayer) {
+      for (final ColorUsage colorUsed in layer.topColorsUsed) {
         final existingColor = topColors.firstWhere(
           (c) => c.color == colorUsed.color,
           orElse: () => colorUsed,
@@ -150,7 +149,7 @@ class Layers {
     }
 
     topColors.sort((a, b) => b.percentage.compareTo(a.percentage));
-    topColors = topColors.take(10).toList();
+    topColors = topColors.take(20).toList();
     return topColors;
   }
 }

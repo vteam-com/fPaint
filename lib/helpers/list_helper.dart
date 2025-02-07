@@ -311,8 +311,8 @@ extension FindFirstMatchExtension<T> on Iterable<T> {
   }
 }
 
-extension FindFirsOrNull<T> on List<T> {
-  T? findFirstMatch(bool Function(T) test) {
+extension FirWheresOrNull<T> on List<T> {
+  T? firstWhereOrNull(bool Function(T) test) {
     for (final item in this) {
       if (test(item)) {
         return item;

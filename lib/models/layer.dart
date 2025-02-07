@@ -91,7 +91,6 @@ class Layer {
   void addUserAction(UserAction userAction) {
     _actionStack.add(userAction);
     hasChanged = true;
-    clearCache();
   }
 
   void offset(final Offset offset) {
@@ -146,13 +145,11 @@ class Layer {
 
   void lastActionAddPosition({required final Offset position}) {
     _actionStack.last.positions.add(position);
-    clearCache();
   }
 
   void lastActionUpdatePositionEnd({required final Offset end}) {
     if (_actionStack.isNotEmpty && _actionStack.last.positions.length >= 2) {
       _actionStack.last.positions.last = end;
-      clearCache();
     }
   }
 
@@ -198,6 +195,7 @@ class Layer {
       final picture = recorder.endRecording();
       cachedThumnailImage =
           await picture.toImage(size.width.toInt(), size.height.toInt());
+      _cacheTopColorUsed();
     }
     return cachedThumnailImage!;
   }
@@ -555,18 +553,19 @@ class Layer {
     return picture.toImage(baseImage.width, baseImage.height);
   }
 
-  Future<List<ColorUsage>> getTopColorUsed() async {
-    final colors = <ColorUsage>[];
+  List<ColorUsage> topColorsUsed = [];
+
+  void _cacheTopColorUsed() async {
+    topColorsUsed = [];
     if (cachedThumnailImage != null) {
       final List<ColorUsage> imageColors =
           await getImageColors(cachedThumnailImage!);
 
       for (final ColorUsage colorUsage in imageColors) {
-        if (!colors.any((c) => c.color == colorUsage.color)) {
-          colors.add(colorUsage);
+        if (!topColorsUsed.any((c) => c.color == colorUsage.color)) {
+          topColorsUsed.add(colorUsage);
         }
       }
     }
-    return colors;
   }
 }

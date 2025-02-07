@@ -180,6 +180,7 @@ class MainScreen extends StatelessWidget {
 
     appModel.currentUserAction = null;
     appModel.userActionStartingOffset = null;
+    appModel.selectedLayer.clearCache();
     appModel.update();
   }
 
