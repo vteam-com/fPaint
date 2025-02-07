@@ -10,8 +10,8 @@ import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
 
-class ToolsAndLayersPanel extends StatelessWidget {
-  const ToolsAndLayersPanel({super.key});
+class TopMenuAndLayersPanel extends StatelessWidget {
+  const TopMenuAndLayersPanel({super.key});
 
   @override
   Widget build(BuildContext context) {

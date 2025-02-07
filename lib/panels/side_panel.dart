@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/panels/layers/tools_and_layers_panel.dart';
+import 'package:fpaint/panels/layers/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
@@ -39,7 +39,7 @@ class _SidePanelState extends State<SidePanel> {
             Area(
               size: 200,
               min: 100,
-              builder: (context, area) => const ToolsAndLayersPanel(),
+              builder: (context, area) => const TopMenuAndLayersPanel(),
             ),
             Area(
               size: 400,
