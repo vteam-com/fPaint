@@ -2,6 +2,20 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
 
+/// Provides a canvas widget that supports scaling and panning.
+///
+/// The [CanvasWidget] is a stateful widget that allows the user to scale and pan the content
+/// within a bounded canvas area. It manages the scaling and panning state, and updates the
+/// [AppModel] with the current scale and offset values.
+///
+/// The [CanvasWidget] takes in the [canvasWidth], [canvasHeight], and [child] widgets to be
+/// displayed within the canvas. The [child] widget is transformed based on the current scale
+/// and offset values.
+///
+/// The scaling and panning behavior is implemented using the [GestureDetector] widget, which
+/// listens for scale and pan gestures from the user. The scale and offset values are updated
+/// accordingly, and the [AppModel] is updated to persist the changes.
+
 class CanvasWidget extends StatefulWidget {
   const CanvasWidget({
     super.key,

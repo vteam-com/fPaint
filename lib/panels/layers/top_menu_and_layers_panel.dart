@@ -10,6 +10,10 @@ import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
 
+/// The `TopMenuAndLayersPanel` widget is a stateless widget that represents the top menu and layers panel in the application.
+/// It includes a toolbar with various menu options, such as creating a new file, opening a file, saving a file, exporting, adjusting canvas settings, and displaying the about page.
+/// The panel also includes a reorderable list view that displays the layers in the application, allowing the user to reorder, select, and toggle the visibility of the layers.
+
 class TopMenuAndLayersPanel extends StatelessWidget {
   const TopMenuAndLayersPanel({super.key});
 

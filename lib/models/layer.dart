@@ -9,6 +9,13 @@ import 'package:fpaint/models/app_model.dart';
 // Exports
 export 'package:fpaint/models/user_action.dart';
 
+/// Represents a layer in the painting application.
+///
+/// A layer contains a stack of user actions, such as drawing, erasing, or adding images.
+/// Layers can be made visible or invisible, and their opacity can be adjusted.
+/// The layer also provides methods for rendering the layer to an image, managing the undo/redo stack,
+/// and merging layers.
+
 class Layer {
   Layer({
     required this.name,

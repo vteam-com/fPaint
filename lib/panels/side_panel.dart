@@ -4,6 +4,11 @@ import 'package:fpaint/panels/layers/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
+/// The `SidePanel` widget is a stateful widget that represents the side panel of the application.
+/// It uses the `MultiSplitView` widget to display the top menu and layers panel, as well as the tools panel.
+/// The side panel is styled with a material elevation and a rounded border on the top-right and bottom-right corners.
+/// The `MultiSplitViewTheme` is used to customize the appearance of the divider between the two panels.
+
 class SidePanel extends StatefulWidget {
   const SidePanel({super.key});
 

@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 
+/// Represents a selectable tool in the user interface.
+///
+/// The [ToolSelector] widget displays an icon button with a border that indicates
+/// whether the tool is currently selected. When the button is pressed, the
+/// [onPressed] callback is invoked.
+///
+/// The [name] parameter provides a tooltip for the button, and the [image]
+/// parameter specifies the icon to be displayed.
+
 class ToolSelector extends StatelessWidget {
   const ToolSelector({
     super.key,

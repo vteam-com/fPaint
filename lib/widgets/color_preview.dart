@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 
+/// Displays a preview of a color with its hexadecimal components.
+///
+/// The [ColorPreview] widget displays a square preview of a color, along with its
+/// hexadecimal components (alpha, red, green, blue) in a centered text. The
+/// preview also includes a white bar on the left side and a black bar on the
+/// right side to help visualize the color.
+///
+/// The widget can be tapped to trigger the provided [onPressed] callback.
+/// The tooltip displays the full hexadecimal color code and the usage percentage
+/// (if the color usage is less than 100%).
+
 class ColorPreview extends StatelessWidget {
   const ColorPreview({
     super.key,

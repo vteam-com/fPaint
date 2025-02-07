@@ -5,6 +5,11 @@ import 'package:fpaint/main_screen.dart';
 import 'package:provider/provider.dart';
 import 'models/app_model.dart';
 
+/// The main entry point for the Flutter Paint App.
+///
+/// This class sets up the app's theme, keyboard shortcuts, and actions for undo, redo, and saving the file.
+/// The [MainScreen] widget is the root of the app's UI.
+
 void main() {
   runApp(MyApp());
 }
