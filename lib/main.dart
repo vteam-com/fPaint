@@ -20,8 +20,8 @@ class MyApp extends StatelessWidget {
         title: 'Flutter Paint App',
         theme: ThemeData.dark().copyWith(
           colorScheme: const ColorScheme.dark(
-            primary: Colors.blue,
-            secondary: Colors.lightBlue,
+            primary: Colors.lightBlue,
+            secondary: Colors.blue,
           ),
         ),
         home: Shortcuts(
