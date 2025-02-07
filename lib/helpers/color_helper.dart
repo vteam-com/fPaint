@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 
@@ -347,4 +349,12 @@ class ColorUsage {
     }
     return '${(this.percentage * 100).toStringAsFixed(decimals)}%';
   }
+}
+
+double colorDistance(Color a, Color b) {
+  return sqrt(
+    pow(a.r.toDouble() - b.r.toDouble(), 2) +
+        pow(a.g.toDouble() - b.g.toDouble(), 2) +
+        pow(a.b.toDouble() - b.b.toDouble(), 2),
+  );
 }

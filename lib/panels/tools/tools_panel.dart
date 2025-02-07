@@ -297,7 +297,7 @@ class ToolsPanel extends StatelessWidget {
 
     widgets.add(
       TopColors(
-        colors: appModel.topColors,
+        colorUsages: appModel.topColors,
         onRefresh: () => appModel.evaluatTopColor(),
         showTitle: !minimal,
       ),
