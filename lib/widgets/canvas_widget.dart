@@ -18,58 +18,78 @@ class CanvasWidget extends StatefulWidget {
 }
 
 class CanvasWidgetState extends State<CanvasWidget> {
+  double _scale = 1.0;
+  Offset _offset = Offset.zero;
+  Offset? _lastFocalPoint;
+  double _lastScale = 1.0;
+  Offset? _panStartFocalPoint;
+
+  @override
+  void initState() {
+    super.initState();
+    final appModel = AppModel.get(context);
+    _scale = appModel.canvas.scale;
+    _offset = appModel.offset;
+  }
+
   @override
   Widget build(BuildContext context) {
-    AppModel appModel = AppModel.get(context);
+    final appModel = AppModel.get(context);
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         final double viewportWidth = constraints.maxWidth;
         final double viewportHeight = constraints.maxHeight;
 
-        final double scaledWidth = widget.canvasWidth * appModel.canvas.scale;
-        final double scaledHeight = widget.canvasHeight * appModel.canvas.scale;
+        final double scaledWidth = widget.canvasWidth * _scale;
+        final double scaledHeight = widget.canvasHeight * _scale;
 
-        // Ensure the canvas is always centered when it's smaller than the viewport
         final double centerX = max(0, (viewportWidth - scaledWidth) / 2);
         final double centerY = max(0, (viewportHeight - scaledHeight) / 2);
 
         return GestureDetector(
           onScaleStart: (details) {
             if (details.pointerCount == 2) {
-              appModel.lastFocalPoint = details.focalPoint;
+              _lastFocalPoint = details.focalPoint;
+              _lastScale = _scale;
+              _panStartFocalPoint =
+                  details.focalPoint; //Initialize PanStart on 2 finger
             }
           },
           onScaleUpdate: (details) {
-            setState(() {
-              if (details.pointerCount == 2) {
-                final double newScale =
-                    (appModel.canvas.scale * (1 + (details.scale - 1) * 0.005))
-                        .clamp(0.5, 4.0);
-
-                if (appModel.lastFocalPoint != null) {
-                  final Offset focalPointDelta =
-                      details.focalPoint - appModel.lastFocalPoint!;
-                  final Offset scaleAdjustment =
-                      (appModel.offset - details.focalPoint) *
-                          (newScale / appModel.canvas.scale - 1);
-
-                  appModel.offset += focalPointDelta + scaleAdjustment;
+            if (details.pointerCount == 2) {
+              setState(() {
+                if (_lastFocalPoint != null && _panStartFocalPoint != null) {
+                  if (details.scale != 1.0) {
+                    // Scaling
+                    _scale = (_lastScale * details.scale).clamp(0.5, 4.0);
+                    final Offset focalPointDelta =
+                        details.focalPoint - _lastFocalPoint!;
+                    _offset += focalPointDelta -
+                        focalPointDelta * (_scale / _lastScale);
+                    _lastFocalPoint = details.focalPoint;
+                  } else {
+                    // Panning
+                    final Offset delta =
+                        details.focalPoint - _panStartFocalPoint!;
+                    _offset += delta;
+                    _panStartFocalPoint = details.focalPoint;
+                  }
                 }
-
-                appModel.canvas.scale = newScale;
-                appModel.lastFocalPoint = details.focalPoint;
-              }
-            });
+                // Update appModel with the new scale and offset
+                appModel.canvas.scale = _scale;
+                appModel.offset = _offset;
+              });
+            }
           },
           child: ClipRect(
             child: Transform(
               transform: Matrix4.identity()
                 ..translate(
-                  appModel.offset.dx + centerX,
-                  appModel.offset.dy + centerY,
+                  _offset.dx + centerX,
+                  _offset.dy + centerY,
                 )
-                ..scale(appModel.canvas.scale),
+                ..scale(_scale),
               alignment: Alignment.topLeft,
               child: SizedBox(
                 width: max(widget.canvasWidth, viewportWidth),
