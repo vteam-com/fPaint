@@ -122,14 +122,29 @@ class Layers {
     }
   }
 
+  /// Retrieves the top most used colors across all layers.
+  ///
+  /// This method iterates through all layers, collects the top color usage for each layer,
+  /// and then aggregates the results to find the overall top 10 most used colors. The
+  /// percentage for each color is calculated based on the total number of layers.
+  ///
+  /// Returns:
+  ///   A list of [ColorUsage] objects representing the top 10 most used colors.
   Future<List<ColorUsage>> getTopColorUsed() async {
     List<ColorUsage> topColors = [];
+    int totalLayers = _list.length;
 
     for (final Layer layer in _list) {
       final List<ColorUsage> colorsInLayer = await layer.getTopColorUsed();
       for (final ColorUsage colorUsed in colorsInLayer) {
-        if (!topColors.any((c) => c.color == colorUsed.color)) {
+        final existingColor = topColors.firstWhere(
+          (c) => c.color == colorUsed.color,
+          orElse: () => colorUsed,
+        );
+        if (existingColor == colorUsed) {
           topColors.add(colorUsed);
+        } else {
+          existingColor.percentage += colorUsed.percentage / totalLayers;
         }
       }
     }
