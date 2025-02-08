@@ -41,171 +41,178 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final appModel = AppModel.of(context);
-    return AlertDialog(
-      content: SingleChildScrollView(
-        child: SizedBox(
-          width: 400,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 20,
-            children: [
-              //----------------------------
-              // Color preview and selection sliders
-              Row(
-                spacing: 10,
-                children: [
-                  SizedBox(
-                    height: 60,
-                    width: 60,
-                    child: transparentPaperContainer(
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ColorPreview(
-                          colorUsed: ColorUsage(_currentColor, 1),
-                          border: false,
-                          minimal: false,
-                          onPressed: () {},
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: ColorSelector(
-                      color: _currentColor,
-                      onColorChanged: (color) {
-                        setState(() {
-                          _currentColor = color;
-                          _hexController.text = colorToHexString(color);
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  for (Color color in [
-                    Colors.red,
-                    Colors.orange,
-                    Colors.yellow,
-                    Colors.green,
-                    Colors.blue,
-                    Colors.purple,
-                  ])
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _currentColor = color;
-                          _hexController.text = colorToHexString(color);
-                        });
-                      },
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.grey.shade300,
-                            width: 1,
+    // ignore: deprecated_member_use
+    return WillPopScope(
+      onWillPop: () async {
+        widget.onColorChanged(_currentColor);
+        return true;
+      },
+      child: AlertDialog(
+        content: SingleChildScrollView(
+          child: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 20,
+              children: [
+                //----------------------------
+                // Color preview and selection sliders
+                Row(
+                  spacing: 10,
+                  children: [
+                    SizedBox(
+                      height: 60,
+                      width: 60,
+                      child: transparentPaperContainer(
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ColorPreview(
+                            colorUsed: ColorUsage(_currentColor, 1),
+                            border: false,
+                            minimal: false,
+                            onPressed: () {},
                           ),
                         ),
                       ),
                     ),
-                ],
-              ),
-
-              //----------------------------
-              // Top colors used in the image
-              TopColors(
-                colorUsages: appModel.topColors,
-                onRefresh: () {
-                  setState(() {
-                    appModel.evaluatTopColor();
-                  });
-                },
-              ),
-
-              //----------------------------
-              // Hex value edit copy/paste
-              SizedBox(
-                width: 200,
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.paste),
-                      onPressed: () async {
-                        final data = await Clipboard.getData('text/plain');
-
-                        try {
-                          final color = getColorFromString(
-                            data?.text! as String,
-                          ); // #FF00FF00
+                    Expanded(
+                      child: ColorSelector(
+                        color: _currentColor,
+                        onColorChanged: (color) {
                           setState(() {
                             _currentColor = color;
                             _hexController.text = colorToHexString(color);
                           });
-                        } catch (e) {
-                          // Invalid hex color format
-                        }
-                      },
+                        },
+                      ),
                     ),
-                    Expanded(
-                      child: TextField(
-                        controller: _hexController,
-                        decoration: const InputDecoration(
-                          labelText: 'Hex Color',
-                          border: OutlineInputBorder(),
+                  ],
+                ),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    for (Color color in [
+                      Colors.red,
+                      Colors.orange,
+                      Colors.yellow,
+                      Colors.green,
+                      Colors.blue,
+                      Colors.purple,
+                    ])
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _currentColor = color;
+                            _hexController.text = colorToHexString(color);
+                          });
+                        },
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: color,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                              width: 1,
+                            ),
+                          ),
                         ),
-                        onChanged: (value) {
+                      ),
+                  ],
+                ),
+
+                //----------------------------
+                // Top colors used in the image
+                TopColors(
+                  colorUsages: appModel.topColors,
+                  onRefresh: () {
+                    setState(() {
+                      appModel.evaluatTopColor();
+                    });
+                  },
+                ),
+
+                //----------------------------
+                // Hex value edit copy/paste
+                SizedBox(
+                  width: 200,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.paste),
+                        onPressed: () async {
+                          final data = await Clipboard.getData('text/plain');
+
                           try {
-                            final color = getColorFromString(value);
+                            final color = getColorFromString(
+                              data?.text! as String,
+                            ); // #FF00FF00
                             setState(() {
                               _currentColor = color;
+                              _hexController.text = colorToHexString(color);
                             });
                           } catch (e) {
                             // Invalid hex color format
                           }
                         },
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.copy),
-                      onPressed: () {
-                        Clipboard.setData(
-                          ClipboardData(
-                            text: colorToHexString(_currentColor),
+                      Expanded(
+                        child: TextField(
+                          controller: _hexController,
+                          decoration: const InputDecoration(
+                            labelText: 'Hex Color',
+                            border: OutlineInputBorder(),
                           ),
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Hex Color copied to clipboard'),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                          onChanged: (value) {
+                            try {
+                              final color = getColorFromString(value);
+                              setState(() {
+                                _currentColor = color;
+                              });
+                            } catch (e) {
+                              // Invalid hex color format
+                            }
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.copy),
+                        onPressed: () {
+                          Clipboard.setData(
+                            ClipboardData(
+                              text: colorToHexString(_currentColor),
+                            ),
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Hex Color copied to clipboard'),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              widget.onColorChanged(_currentColor);
+              Navigator.of(context).pop();
+            },
+            child: const Text('Apply'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () {
-            widget.onColorChanged(_currentColor);
-            Navigator.of(context).pop();
-          },
-          child: const Text('Apply'),
-        ),
-      ],
     );
   }
 }
