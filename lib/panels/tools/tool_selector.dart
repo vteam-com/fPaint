@@ -27,24 +27,12 @@ class ToolSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: isSelected ? Colors.blue : Colors.transparent,
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Padding(
-        padding: minimal ? const EdgeInsets.all(2) : const EdgeInsets.all(8),
-        child: IconButton(
-          icon: image,
-          onPressed: onPressed,
-          tooltip: name,
-          constraints: minimal ? const BoxConstraints() : null,
-          padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
-        ),
-      ),
+    return IconButton(
+      icon: image,
+      onPressed: onPressed,
+      tooltip: name,
+      constraints: minimal ? const BoxConstraints() : null,
+      padding: EdgeInsets.all(minimal ? 2 : 8),
     );
   }
 }

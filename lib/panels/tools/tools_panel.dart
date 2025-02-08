@@ -28,12 +28,19 @@ class ToolsPanel extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
-        crossAxisAlignment:
-            minimal ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Wrap(children: getListOfTools(context, appModel)),
           Wrap(
-            runSpacing: minimal ? 8.0 : 0,
+            spacing: minimal ? 2.0 : 4,
+            runSpacing: minimal ? 2.0 : 4,
+            alignment: WrapAlignment.center,
+            children: getListOfTools(context, appModel),
+          ),
+          const Divider(
+            color: Colors.black,
+          ),
+          Wrap(
+            runSpacing: minimal ? 8.0 : 2,
             alignment: WrapAlignment.center,
             children: getWidgetForSelectedTool(context: context),
           ),
@@ -42,17 +49,23 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
+  Icon iconAndColor(context, isSelected, tool) {
+    Color? color = isSelected ? Colors.blue : null;
+    return Icon(tool, color: color);
+  }
+
   List<Widget> getListOfTools(
     BuildContext context,
     final AppModel appModel,
   ) {
-    final selectedTool = appModel.selectedTool;
+    final Tools selectedTool = appModel.selectedTool;
+
     final List<Widget> tools = [
-      // Brush
+      // Pencil
       ToolSelector(
         minimal: minimal,
         name: 'Pencil',
-        image: Icon(Icons.draw, color: IconTheme.of(context).color!),
+        image: iconAndColor(context, selectedTool == Tools.pencil, Icons.draw),
         isSelected: selectedTool == Tools.pencil,
         onPressed: () {
           appModel.selectedTool = Tools.pencil;
@@ -63,7 +76,7 @@ class ToolsPanel extends StatelessWidget {
       ToolSelector(
         minimal: minimal,
         name: 'Brush',
-        image: Icon(Icons.brush, color: IconTheme.of(context).color!),
+        image: iconAndColor(context, selectedTool == Tools.brush, Icons.brush),
         isSelected: selectedTool == Tools.brush,
         onPressed: () {
           appModel.selectedTool = Tools.brush;
@@ -74,7 +87,8 @@ class ToolsPanel extends StatelessWidget {
       ToolSelector(
         minimal: minimal,
         name: 'Line',
-        image: Icon(Icons.line_axis, color: IconTheme.of(context).color!),
+        image:
+            iconAndColor(context, selectedTool == Tools.line, Icons.line_axis),
         isSelected: selectedTool == Tools.line,
         onPressed: () {
           appModel.selectedTool = Tools.line;
@@ -85,7 +99,11 @@ class ToolsPanel extends StatelessWidget {
       ToolSelector(
         minimal: minimal,
         name: 'Rectangle',
-        image: Icon(Icons.crop_square, color: IconTheme.of(context).color!),
+        image: iconAndColor(
+          context,
+          selectedTool == Tools.rectangle,
+          Icons.crop_square,
+        ),
         isSelected: selectedTool == Tools.rectangle,
         onPressed: () {
           appModel.selectedTool = Tools.rectangle;
@@ -96,7 +114,11 @@ class ToolsPanel extends StatelessWidget {
       ToolSelector(
         minimal: minimal,
         name: 'Circle',
-        image: Icon(Icons.circle_outlined, color: IconTheme.of(context).color!),
+        image: iconAndColor(
+          context,
+          selectedTool == Tools.circle,
+          Icons.circle_outlined,
+        ),
         isSelected: selectedTool == Tools.circle,
         onPressed: () {
           appModel.selectedTool = Tools.circle;
@@ -107,9 +129,10 @@ class ToolsPanel extends StatelessWidget {
       ToolSelector(
         minimal: minimal,
         name: 'Paint Bucket',
-        image: Icon(
+        image: iconAndColor(
+          context,
+          selectedTool == Tools.fill,
           Icons.format_color_fill,
-          color: IconTheme.of(context).color!,
         ),
         isSelected: selectedTool == Tools.fill,
         onPressed: () {
@@ -122,7 +145,9 @@ class ToolsPanel extends StatelessWidget {
         name: 'Eraser',
         image: iconFromSvgAsset(
           'assets/icons/eraser.svg',
-          IconTheme.of(context).color!,
+          selectedTool == Tools.eraser
+              ? Colors.blue
+              : IconTheme.of(context).color!,
         ),
         isSelected: selectedTool == Tools.eraser,
         onPressed: () {
@@ -195,15 +220,8 @@ class ToolsPanel extends StatelessWidget {
             constraints: minimal ? const BoxConstraints() : null,
             padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
             onPressed: () {
-              showBrushSizePicker(
-                context: context,
-                title: 'Brush Style',
-                min: min,
-                max: max,
-                value: appModel.brusSize,
-                onChanged: (final double newValue) {
-                  appModel.brusSize = newValue;
-                },
+              showBrushStylePicker(
+                context,
               );
             },
           ),
@@ -310,8 +328,8 @@ class ToolsPanel extends StatelessWidget {
     if (!minimal) {
       List<Widget> separatedWidgets = [];
       for (int i = 0; i < widgets.length; i++) {
-        separatedWidgets.add(separator());
         separatedWidgets.add(widgets[i]);
+        separatedWidgets.add(separator());
       }
       return separatedWidgets;
     }

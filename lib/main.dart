@@ -11,6 +11,8 @@ import 'models/app_model.dart';
 /// The [MainScreen] widget is the root of the app's UI.
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(MyApp());
 }
 

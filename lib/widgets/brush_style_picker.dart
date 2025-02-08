@@ -15,10 +15,7 @@ Widget brushStyleSelection(final AppModel appModel) {
     items: BrushStyle.values.map<DropdownMenuItem<int>>((BrushStyle value) {
       return DropdownMenuItem<int>(
         value: value.index,
-        child: SizedBox(
-          width: 250,
-          child: Text(value.name),
-        ),
+        child: Text(value.name),
       );
     }).toList(),
     onChanged: (int? selectedBrush) {
