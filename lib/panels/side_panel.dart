@@ -30,11 +30,13 @@ class _SidePanelState extends State<SidePanel> {
       ),
       child: MultiSplitViewTheme(
         data: MultiSplitViewThemeData(
-          dividerPainter: DividerPainters.dashed(
+          dividerPainter: DividerPainters.grooved1(
             animationEnabled: true,
-            color: Colors.grey,
-            highlightedColor: Colors.blue,
-            highlightedThickness: 4,
+            backgroundColor: Colors.grey,
+            highlightedBackgroundColor: Colors.blue,
+            color: Colors.grey.shade800,
+            thickness: 6,
+            highlightedThickness: 8,
             strokeCap: StrokeCap.round,
           ),
         ),
