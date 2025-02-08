@@ -28,12 +28,14 @@ class ToolsPanel extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
-        spacing: 8,
+        crossAxisAlignment:
+            minimal ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
           Wrap(children: getListOfTools(context, appModel)),
-          ...getWidgetForSelectedTool(
-            context: context,
-            slim: minimal,
+          Wrap(
+            runSpacing: minimal ? 8.0 : 0,
+            alignment: WrapAlignment.center,
+            children: getWidgetForSelectedTool(context: context),
           ),
         ],
       ),
@@ -48,6 +50,7 @@ class ToolsPanel extends StatelessWidget {
     final List<Widget> tools = [
       // Brush
       ToolSelector(
+        minimal: minimal,
         name: 'Pencil',
         image: Icon(Icons.draw, color: IconTheme.of(context).color!),
         isSelected: selectedTool == Tools.pencil,
@@ -58,6 +61,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Brush
       ToolSelector(
+        minimal: minimal,
         name: 'Brush',
         image: Icon(Icons.brush, color: IconTheme.of(context).color!),
         isSelected: selectedTool == Tools.brush,
@@ -68,6 +72,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Line
       ToolSelector(
+        minimal: minimal,
         name: 'Line',
         image: Icon(Icons.line_axis, color: IconTheme.of(context).color!),
         isSelected: selectedTool == Tools.line,
@@ -78,6 +83,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Rectangle
       ToolSelector(
+        minimal: minimal,
         name: 'Rectangle',
         image: Icon(Icons.crop_square, color: IconTheme.of(context).color!),
         isSelected: selectedTool == Tools.rectangle,
@@ -88,6 +94,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Circle
       ToolSelector(
+        minimal: minimal,
         name: 'Circle',
         image: Icon(Icons.circle_outlined, color: IconTheme.of(context).color!),
         isSelected: selectedTool == Tools.circle,
@@ -98,6 +105,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Paint Bucket
       ToolSelector(
+        minimal: minimal,
         name: 'Paint Bucket',
         image: Icon(
           Icons.format_color_fill,
@@ -110,6 +118,7 @@ class ToolsPanel extends StatelessWidget {
       ),
 
       ToolSelector(
+        minimal: minimal,
         name: 'Eraser',
         image: iconFromSvgAsset(
           'assets/icons/eraser.svg',
@@ -126,7 +135,6 @@ class ToolsPanel extends StatelessWidget {
 
   List<Widget> getWidgetForSelectedTool({
     required BuildContext context,
-    required bool slim,
   }) {
     List<Widget> widgets = [];
     final appModel = AppModel.of(context, listen: true);
@@ -140,10 +148,13 @@ class ToolsPanel extends StatelessWidget {
     if (selectedTool.isSupported(ToolAttribute.strokeSize)) {
       widgets.add(
         ToolAttributeWidget(
+          minimal: minimal,
           name: title,
           childLeft: IconButton(
             icon: const Icon(Icons.line_weight),
             color: Colors.grey.shade500,
+            constraints: minimal ? const BoxConstraints() : null,
+            padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
             onPressed: () {
               showBrushSizePicker(
                 context: context,
@@ -157,7 +168,7 @@ class ToolsPanel extends StatelessWidget {
               );
             },
           ),
-          childRight: slim
+          childRight: minimal
               ? null
               : BrushSizePicker(
                   title: title,
@@ -176,10 +187,13 @@ class ToolsPanel extends StatelessWidget {
     if (selectedTool.isSupported(ToolAttribute.brushStyle)) {
       widgets.add(
         ToolAttributeWidget(
+          minimal: minimal,
           name: 'Brush Style',
           childLeft: IconButton(
             icon: const Icon(Icons.line_style_outlined),
             color: Colors.grey.shade500,
+            constraints: minimal ? const BoxConstraints() : null,
+            padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
             onPressed: () {
               showBrushSizePicker(
                 context: context,
@@ -193,7 +207,7 @@ class ToolsPanel extends StatelessWidget {
               );
             },
           ),
-          childRight: slim ? null : brushStyleSelection(appModel),
+          childRight: minimal ? null : brushStyleSelection(appModel),
         ),
       );
     }
@@ -202,6 +216,7 @@ class ToolsPanel extends StatelessWidget {
     if (selectedTool.isSupported(ToolAttribute.colorOutline)) {
       widgets.add(
         ToolAttributeWidget(
+          minimal: minimal,
           name: 'Brush Color',
           childLeft: colorPreviewWithTransparentPaper(
             minimal: minimal,
@@ -216,7 +231,7 @@ class ToolsPanel extends StatelessWidget {
               );
             },
           ),
-          childRight: slim
+          childRight: minimal
               ? null
               : ColorSelector(
                   color: appModel.brushColor,
@@ -230,6 +245,7 @@ class ToolsPanel extends StatelessWidget {
     if (selectedTool.isSupported(ToolAttribute.colorFill)) {
       widgets.add(
         ToolAttributeWidget(
+          minimal: minimal,
           name: 'Fill Color',
           childLeft: colorPreviewWithTransparentPaper(
             minimal: minimal,
@@ -244,7 +260,7 @@ class ToolsPanel extends StatelessWidget {
               );
             },
           ),
-          childRight: slim
+          childRight: minimal
               ? null
               : ColorSelector(
                   color: appModel.fillColor,
@@ -258,6 +274,7 @@ class ToolsPanel extends StatelessWidget {
     if (selectedTool.isSupported(ToolAttribute.tolerance)) {
       widgets.add(
         ToolAttributeWidget(
+          minimal: minimal,
           name: 'Color Tolerance',
           childLeft: IconButton(
             icon: const Icon(Icons.support),
@@ -269,7 +286,7 @@ class ToolsPanel extends StatelessWidget {
               });
             },
           ),
-          childRight: slim
+          childRight: minimal
               ? null
               : TolerancePicker(
                   value: appModel.tolerance,
@@ -290,12 +307,15 @@ class ToolsPanel extends StatelessWidget {
     );
 
     // Add a separator between each element
-    List<Widget> separatedWidgets = [];
-    for (int i = 0; i < widgets.length; i++) {
-      separatedWidgets.add(separator());
-      separatedWidgets.add(widgets[i]);
+    if (!minimal) {
+      List<Widget> separatedWidgets = [];
+      for (int i = 0; i < widgets.length; i++) {
+        separatedWidgets.add(separator());
+        separatedWidgets.add(widgets[i]);
+      }
+      return separatedWidgets;
     }
-    return separatedWidgets;
+    return widgets;
   }
 }
 

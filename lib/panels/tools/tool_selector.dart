@@ -15,12 +15,14 @@ class ToolSelector extends StatelessWidget {
     required this.name,
     required this.image,
     required this.isSelected,
+    required this.minimal,
     required this.onPressed,
   });
 
   final String name;
   final Widget image;
   final bool isSelected;
+  final bool minimal;
   final VoidCallback onPressed;
 
   @override
@@ -33,10 +35,15 @@ class ToolSelector extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(4),
       ),
-      child: IconButton(
-        icon: image,
-        onPressed: onPressed,
-        tooltip: name,
+      child: Padding(
+        padding: minimal ? const EdgeInsets.all(2) : const EdgeInsets.all(8),
+        child: IconButton(
+          icon: image,
+          onPressed: onPressed,
+          tooltip: name,
+          constraints: minimal ? const BoxConstraints() : null,
+          padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
+        ),
       ),
     );
   }
