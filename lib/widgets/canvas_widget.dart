@@ -62,7 +62,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
         final double centerY = max(0, (viewportHeight - scaledHeight) / 2);
 
         return GestureDetector(
-          onScaleStart: (details) {
+          onScaleStart: (final ScaleStartDetails details) {
             if (details.pointerCount == 2) {
               _lastFocalPoint = details.focalPoint;
               _lastScale = _scale;
@@ -70,30 +70,36 @@ class CanvasWidgetState extends State<CanvasWidget> {
                   details.focalPoint; //Initialize PanStart on 2 finger
             }
           },
-          onScaleUpdate: (details) {
+          onScaleUpdate: (final ScaleUpdateDetails details) {
             if (details.pointerCount == 2) {
-              setState(() {
-                if (_lastFocalPoint != null && _panStartFocalPoint != null) {
-                  if (details.scale != 1.0) {
-                    // Scaling
-                    _scale = (_lastScale * details.scale).clamp(0.5, 4.0);
-                    final Offset focalPointDelta =
-                        details.focalPoint - _lastFocalPoint!;
-                    _offset += focalPointDelta -
-                        focalPointDelta * (_scale / _lastScale);
-                    _lastFocalPoint = details.focalPoint;
-                  } else {
-                    // Panning
-                    final Offset delta =
-                        details.focalPoint - _panStartFocalPoint!;
-                    _offset += delta;
-                    _panStartFocalPoint = details.focalPoint;
+              setState(
+                () {
+                  if (_lastFocalPoint != null && _panStartFocalPoint != null) {
+                    final double scaleDelta =
+                        (details.scale - _lastScale).abs();
+
+                    if (scaleDelta > 0.3) {
+                      // debugPrint('Scale by $scaleDelta');
+                      // Scaling
+                      _scale = (_lastScale * details.scale).clamp(0.5, 4.0);
+                      final Offset focalPointDelta =
+                          details.focalPoint - _lastFocalPoint!;
+                      _offset += focalPointDelta -
+                          focalPointDelta * (_scale / _lastScale);
+                      _lastFocalPoint = details.focalPoint;
+                    } else {
+                      // Panning
+                      final Offset delta =
+                          details.focalPoint - _panStartFocalPoint!;
+                      _offset += delta;
+                      _panStartFocalPoint = details.focalPoint;
+                    }
                   }
-                }
-                // Update appModel with the new scale and offset
-                appModel.canvas.scale = _scale;
-                appModel.offset = _offset;
-              });
+                  // Update appModel with the new scale and offset
+                  appModel.canvas.scale = _scale;
+                  appModel.offset = _offset;
+                },
+              );
             }
           },
           child: ClipRect(

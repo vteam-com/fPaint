@@ -10,6 +10,8 @@ import 'package:multi_split_view/multi_split_view.dart';
 
 import 'models/app_model.dart';
 
+int _activePointerId = -1;
+
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
   final double minSidePanelSize = 100.0;
@@ -52,26 +54,32 @@ class MainScreen extends StatelessWidget {
 
                 // Draw Start
                 onPointerDown: (final PointerDownEvent details) async {
-                  if (appModel.isCurrentSelectionReadyForAction) {
-                    if (appModel.userActionStartingOffset == null) {
-                      await _onUserActionStart(
-                        appModel: appModel,
-                        position: details.localPosition / appModel.canvas.scale,
+                  //debugPrint('DOWN ${details.buttons} P:${details.pointer}');
+                  if (details.buttons == 1 && _activePointerId == -1) {
+                    _activePointerId = details.pointer;
+                    if (appModel.isCurrentSelectionReadyForAction) {
+                      if (appModel.userActionStartingOffset == null) {
+                        await _onUserActionStart(
+                          appModel: appModel,
+                          position:
+                              details.localPosition / appModel.canvas.scale,
+                        );
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Selection is hidden.'),
+                        ),
                       );
                     }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Selection is hidden.'),
-                      ),
-                    );
                   }
                 },
                 // Draw Update
                 onPointerMove: (final PointerEvent details) {
-                  if (details is PointerMoveEvent) {
-                    if (details.buttons == kPrimaryButton &&
-                        appModel.userActionStartingOffset != null) {
+                  // debugPrint('MOVE ${details.buttons} P:${details.pointer}');
+                  if (details.buttons == 1 &&
+                      _activePointerId == details.pointer) {
+                    if (appModel.userActionStartingOffset != null) {
                       _onUserActionUpdate(
                         appModel: appModel,
                         position: details.localPosition / appModel.canvas.scale,
@@ -81,11 +89,17 @@ class MainScreen extends StatelessWidget {
                 },
                 // Draw End
                 onPointerUp: (final PointerUpEvent details) {
-                  _onUserActionEnded(appModel);
+                  if (_activePointerId == details.pointer) {
+                    // debugPrint('UP ${details.buttons}');
+                    _onUserActionEnded(appModel);
+                  }
                 },
                 // Draw End
                 onPointerCancel: (final PointerCancelEvent details) {
-                  _onUserActionEnded(appModel);
+                  if (_activePointerId == details.pointer) {
+                    // debugPrint('CANCEL ${details.buttons}');
+                    _onUserActionEnded(appModel);
+                  }
                 },
                 child: CanvasPanel(appModel: appModel),
               ),
@@ -177,7 +191,8 @@ class MainScreen extends StatelessWidget {
     if (appModel.currentUserAction?.tool == Tools.brush) {
       // Optimize list of draw actions into a single path
     }
-
+    //debugPrint('End gesture $_activePointerId now -1');
+    _activePointerId = -1;
     appModel.currentUserAction = null;
     appModel.userActionStartingOffset = null;
     appModel.selectedLayer.clearCache();
