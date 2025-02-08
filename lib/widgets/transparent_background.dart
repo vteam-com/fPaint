@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
-Widget transparentPaperContainer(final Widget child) {
+Widget transparentPaperContainer(
+  final Widget child, {
+  final double radius = 8,
+}) {
   return ClipRRect(
-    borderRadius: BorderRadius.circular(8),
+    borderRadius: BorderRadius.circular(radius),
     child: Padding(
       padding: const EdgeInsets.all(1.0),
       child: Stack(

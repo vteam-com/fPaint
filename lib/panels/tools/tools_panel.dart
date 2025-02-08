@@ -259,7 +259,7 @@ class ToolsPanel extends StatelessWidget {
       );
     }
 
-    // Color Fill
+    // Fill Color
     if (selectedTool.isSupported(ToolAttribute.colorFill)) {
       widgets.add(
         ToolAttributeWidget(
@@ -272,7 +272,7 @@ class ToolsPanel extends StatelessWidget {
               showColorPicker(
                 context: context,
                 title: 'Fill Color',
-                color: appModel.brushColor,
+                color: appModel.fillColor,
                 onSelectedColor: (final Color color) =>
                     appModel.fillColor = color,
               );

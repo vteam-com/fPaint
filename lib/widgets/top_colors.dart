@@ -53,6 +53,7 @@ class TopColors extends StatelessWidget {
         .toList();
     return Column(
       children: [
+        if (minimal) const Divider(color: Colors.black),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

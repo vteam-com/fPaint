@@ -8,9 +8,10 @@ Widget colorPreviewWithTransparentPaper({
   required GestureTapCallback onPressed,
 }) {
   return SizedBox(
-    height: 60,
-    width: 60,
+    height: minimal ? 50 : 60,
+    width: minimal ? 50 : 60,
     child: transparentPaperContainer(
+      radius: minimal ? 10 : 8,
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: ColorPreview(

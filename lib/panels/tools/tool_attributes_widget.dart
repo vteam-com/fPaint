@@ -17,7 +17,11 @@ class ToolAttributeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (minimal && childRight == null) {
-      return childLeft!;
+      return SizedBox(
+        width: 50,
+        height: 50,
+        child: childLeft!,
+      );
     }
     return Container(
       padding: EdgeInsets.symmetric(horizontal: minimal ? 0 : 8.0),
