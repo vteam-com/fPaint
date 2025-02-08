@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
-Widget colorPreviewWithTransparentPaper(
-  Color color,
-  GestureTapCallback onPressed,
-) {
+Widget colorPreviewWithTransparentPaper({
+  required bool minimal,
+  required Color color,
+  required GestureTapCallback onPressed,
+}) {
   return SizedBox(
     height: 60,
     width: 60,
@@ -16,6 +17,7 @@ Widget colorPreviewWithTransparentPaper(
           colorUsed: ColorUsage(color, 1),
           onPressed: onPressed,
           border: false,
+          minimal: minimal,
         ),
       ),
     ),
@@ -39,10 +41,12 @@ class ColorPreview extends StatelessWidget {
     required this.colorUsed,
     required this.onPressed,
     this.border = true,
+    this.minimal = true,
   });
   final ColorUsage colorUsed;
   final GestureTapCallback onPressed;
   final bool border;
+  final bool minimal;
 
   @override
   Widget build(BuildContext context) {
@@ -56,47 +60,21 @@ class ColorPreview extends StatelessWidget {
     if (colorUsed.percentage < 1) {
       usageNumber = '\nUsage ${colorUsed.toStringPercentage(1)}';
     }
-    const double width = 50;
+    double size = minimal ? 40 : 50;
 
     return Tooltip(
       message: '${colorToHexString(colorUsed.color)}$usageNumber',
       child: InkWell(
         onTap: onPressed,
         child: SizedBox(
-          width: width,
-          height: 50,
+          width: size,
+          height: size,
           child: Stack(
             alignment: AlignmentDirectional.center,
             children: [
               //--------------------------------
-              //
-              // Left Side White Rectangle
-              //
-              Positioned(
-                left: 0,
-                child: Container(
-                  width: 21.5,
-                  height: 30,
-                  color: Colors.white,
-                ),
-              ),
-              //--------------------------------
-              //
-              // Right Side Black Rectangle
-              //
-              Positioned(
-                right: 0,
-                child: Container(
-                  width: 21.5,
-                  height: 30,
-                  color: Colors.black,
-                ),
-              ),
-
-              //--------------------------------
               // Rectangle of the final color
               //
-
               Positioned(
                 child: Container(
                   decoration: BoxDecoration(
@@ -110,19 +88,20 @@ class ColorPreview extends StatelessWidget {
               //--------------------------------
               // Hex color
               //
-              Center(
-                child: Text(
-                  textAlign: TextAlign.center,
-                  '$red$green$blue\n$alpha',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 9,
-                    color: colorUsed.color.computeLuminance() > 0.5
-                        ? Colors.black
-                        : Colors.white,
+              if (!minimal)
+                Center(
+                  child: Text(
+                    textAlign: TextAlign.center,
+                    '$red$green$blue\n$alpha',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 9,
+                      color: colorUsed.color.computeLuminance() > 0.5
+                          ? Colors.black
+                          : Colors.white,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ),

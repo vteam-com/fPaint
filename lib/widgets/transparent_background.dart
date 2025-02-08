@@ -47,7 +47,7 @@ class TransparentBackgroundPainter extends CustomPainter {
         canvas,
         const Offset(0, 0),
         size,
-        patternSize,
+        patternSize: patternSize,
       );
     }
   }
@@ -82,9 +82,11 @@ void drawTransaparentBackgroundLTWH(
 void drawTransaparentBackgroundOffsetAndSize(
   final Canvas canvas,
   final Offset offset,
-  final Size size, [
-  patternSize = 10,
-]) {
+  final Size size, {
+  final int patternSize = 10,
+  Color? color,
+}) {
+  color ??= Colors.grey.shade600;
   final double cellSize = size.width / (size.width / patternSize);
   canvas.save();
   canvas.clipRect(
@@ -105,7 +107,7 @@ void drawTransaparentBackgroundOffsetAndSize(
             cellSize,
             cellSize,
           ),
-          Paint()..color = Colors.grey.shade600,
+          Paint()..color = color,
         );
       }
     }

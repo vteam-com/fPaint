@@ -23,12 +23,12 @@ class TopColors extends StatelessWidget {
     super.key,
     required this.colorUsages,
     required this.onRefresh,
-    this.showTitle = true,
+    this.minimal = false,
   });
 
   final List<ColorUsage> colorUsages;
   final VoidCallback onRefresh;
-  final bool showTitle;
+  final bool minimal;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +40,7 @@ class TopColors extends StatelessWidget {
         .map(
           (final ColorUsage colorUsed) => ColorPreview(
             colorUsed: colorUsed,
+            minimal: minimal,
             onPressed: () {
               (appModel.selectedTool == Tools.rectangle ||
                       appModel.selectedTool == Tools.circle ||
@@ -55,7 +56,7 @@ class TopColors extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (showTitle) Text('Top ${colorUsages.length} colors'),
+            if (!minimal) Text('Top ${colorUsages.length} colors'),
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: onRefresh,
@@ -65,7 +66,7 @@ class TopColors extends StatelessWidget {
         IntrinsicHeight(
           child: transparentPaperContainer(
             Padding(
-              padding: const EdgeInsets.all(4.0),
+              padding: EdgeInsets.all(minimal ? 0 : 4.0),
               child: Wrap(
                 spacing: 1,
                 runSpacing: 1,

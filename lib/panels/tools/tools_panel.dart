@@ -204,8 +204,9 @@ class ToolsPanel extends StatelessWidget {
         ToolAttributeWidget(
           name: 'Brush Color',
           childLeft: colorPreviewWithTransparentPaper(
-            appModel.brushColor,
-            () {
+            minimal: minimal,
+            color: appModel.brushColor,
+            onPressed: () {
               showColorPicker(
                 context: context,
                 title: 'Brush Color',
@@ -231,8 +232,9 @@ class ToolsPanel extends StatelessWidget {
         ToolAttributeWidget(
           name: 'Fill Color',
           childLeft: colorPreviewWithTransparentPaper(
-            appModel.fillColor,
-            () {
+            minimal: minimal,
+            color: appModel.fillColor,
+            onPressed: () {
               showColorPicker(
                 context: context,
                 title: 'Fill Color',
@@ -283,7 +285,7 @@ class ToolsPanel extends StatelessWidget {
       TopColors(
         colorUsages: appModel.topColors,
         onRefresh: () => appModel.evaluatTopColor(),
-        showTitle: !minimal,
+        minimal: minimal,
       ),
     );
 

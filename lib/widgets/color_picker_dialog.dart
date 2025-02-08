@@ -63,6 +63,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                         child: ColorPreview(
                           colorUsed: ColorUsage(_currentColor, 1),
                           border: false,
+                          minimal: false,
                           onPressed: () {},
                         ),
                       ),
