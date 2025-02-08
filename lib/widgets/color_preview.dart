@@ -1,5 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/widgets/transparent_background.dart';
+
+Widget colorPreviewWithTransparentPaper(
+  Color color,
+  GestureTapCallback onPressed,
+) {
+  return SizedBox(
+    height: 90,
+    width: 53,
+    child: transparentPaperContainer(
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: ColorPreview(
+          colorUsed: ColorUsage(color, 1),
+          onPressed: onPressed,
+          border: false,
+        ),
+      ),
+    ),
+  );
+}
 
 /// Displays a preview of a color with its hexadecimal components.
 ///
@@ -17,9 +38,11 @@ class ColorPreview extends StatelessWidget {
     super.key,
     required this.colorUsed,
     required this.onPressed,
+    this.border = true,
   });
   final ColorUsage colorUsed;
   final GestureTapCallback onPressed;
+  final bool border;
 
   @override
   Widget build(BuildContext context) {
@@ -43,12 +66,16 @@ class ColorPreview extends StatelessWidget {
           height: 60,
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: const BorderRadius.all(Radius.circular(4)),
+            border: border ? Border.all(color: Colors.grey) : null,
+            borderRadius: const BorderRadius.all(Radius.circular(2)),
           ),
           child: Stack(
             alignment: AlignmentDirectional.center,
             children: [
+              //--------------------------------
+              //
+              // Left Side White Rectangle
+              //
               Positioned(
                 left: 0,
                 child: Container(
@@ -57,6 +84,10 @@ class ColorPreview extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
+              //--------------------------------
+              //
+              // Right Side Black Rectangle
+              //
               Positioned(
                 right: 0,
                 child: Container(
@@ -65,6 +96,11 @@ class ColorPreview extends StatelessWidget {
                   color: Colors.black,
                 ),
               ),
+
+              //--------------------------------
+              // Rectangle of the final color
+              //
+
               Positioned(
                 child: Container(
                   decoration: BoxDecoration(
@@ -73,6 +109,10 @@ class ColorPreview extends StatelessWidget {
                   ),
                 ),
               ),
+
+              //--------------------------------
+              // Hex color
+              //
               Center(
                 child: Text(
                   textAlign: TextAlign.center,

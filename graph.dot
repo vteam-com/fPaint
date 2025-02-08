@@ -41,6 +41,7 @@ digraph "" {
   "/lib/helpers/image_helper.dart" [label="image_helper"];
   "/lib/helpers/list_helper.dart" [label="list_helper"];
   "/lib/helpers/color_helper.dart" [label="color_helper"];
+  "/lib/widgets/color_picker_dialog.dart" [label="color_picker_dialog"];
   "/lib/widgets/canvas_widget.dart" [label="canvas_widget"];
   "/lib/widgets/svg_icon.dart" [label="svg_icon"];
   "/lib/widgets/truncated_text.dart" [label="truncated_text"];
@@ -52,8 +53,8 @@ digraph "" {
   "/lib/widgets/color_preview.dart" [label="color_preview"];
   "/lib/widgets/top_colors.dart" [label="top_colors"];
   "/lib/widgets/brush_style_picker.dart" [label="brush_style_picker"];
+  "/lib/widgets/color_selector.dart" [label="color_selector"];
   "/lib/widgets/nine_grid_selector.dart" [label="nine_grid_selector"];
-  "/lib/widgets/color_picker.dart" [label="color_picker"];
   subgraph "cluster~" {
     label="fpaint";
     subgraph "cluster~/test" {
@@ -129,6 +130,7 @@ digraph "" {
       }
       subgraph "cluster~/lib/widgets" {
         label="widgets";
+        "/lib/widgets/color_picker_dialog.dart";
         "/lib/widgets/canvas_widget.dart";
         "/lib/widgets/svg_icon.dart";
         "/lib/widgets/truncated_text.dart";
@@ -140,8 +142,8 @@ digraph "" {
         "/lib/widgets/color_preview.dart";
         "/lib/widgets/top_colors.dart";
         "/lib/widgets/brush_style_picker.dart";
+        "/lib/widgets/color_selector.dart";
         "/lib/widgets/nine_grid_selector.dart";
-        "/lib/widgets/color_picker.dart";
       }
     }
   }
@@ -152,13 +154,12 @@ digraph "" {
   "/test/file_xcf_test.dart" -> "/lib/files/assets_helper.dart";
   "/test/file_xcf_test.dart" -> "/lib/files/xcf_reader.dart";
   "/test/layers_test.dart" -> "/lib/models/layer.dart";
-  "/lib/panels/tools/tools_panel.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/panels/tools/tool_attributes_widget.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/panels/tools/tool_selector.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/brush_size_picker.dart";
-  "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/color_picker.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/color_preview.dart";
+  "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/color_selector.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/svg_icon.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/tolerance_picker.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/top_colors.dart";
@@ -226,14 +227,22 @@ digraph "" {
   "/lib/main_screen.dart" -> "/lib/models/app_model.dart";
   "/lib/helpers/image_helper.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/helpers/color_helper.dart" -> "/lib/helpers/list_helper.dart";
+  "/lib/widgets/color_picker_dialog.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/widgets/color_picker_dialog.dart" -> "/lib/models/app_model.dart";
+  "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/color_preview.dart";
+  "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/color_selector.dart";
+  "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/top_colors.dart";
+  "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/canvas_widget.dart" -> "/lib/models/app_model.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/widgets/color_preview.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/models/app_model.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/color_preview.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/brush_style_picker.dart" -> "/lib/models/app_model.dart";
-  "/lib/widgets/color_picker.dart" -> "/lib/helpers/color_helper.dart";
-  "/lib/widgets/color_picker.dart" -> "/lib/helpers/list_helper.dart";
-  "/lib/widgets/color_picker.dart" -> "/lib/widgets/transparent_background.dart";
+  "/lib/widgets/color_selector.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/widgets/color_selector.dart" -> "/lib/helpers/list_helper.dart";
+  "/lib/widgets/color_selector.dart" -> "/lib/widgets/color_picker_dialog.dart";
+  "/lib/widgets/color_selector.dart" -> "/lib/widgets/transparent_background.dart";
 }

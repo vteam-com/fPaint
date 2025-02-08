@@ -1,5 +1,28 @@
 import 'package:flutter/material.dart';
 
+Widget transparentPaperContainer(final Widget child) {
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(8),
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border.all(width: 1, color: Colors.grey),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(1.0),
+        child: Stack(
+          children: [
+            const TransparentPaper(patternSize: 4),
+            Container(
+              alignment: Alignment.center,
+              child: child,
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class TransparentPaper extends StatelessWidget {
   const TransparentPaper({super.key, this.patternSize = 10});
   final int patternSize;
@@ -62,7 +85,7 @@ void drawTransaparentBackgroundOffsetAndSize(
   final Size size, [
   patternSize = 10,
 ]) {
-  final double cellSize = size.width / ((size.width / patternSize).floor());
+  final double cellSize = size.width / (size.width / patternSize);
   canvas.save();
   canvas.clipRect(
     Rect.fromLTWH(

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
 import 'package:fpaint/panels/tools/tool_selector.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
-import 'package:fpaint/widgets/color_picker.dart';
 import 'package:fpaint/widgets/color_preview.dart';
+import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/top_colors.dart';
@@ -204,12 +203,12 @@ class ToolsPanel extends StatelessWidget {
       widgets.add(
         ToolAttributeWidget(
           name: 'Brush Color',
-          childLeft: ColorPreview(
-            colorUsed: ColorUsage(appModel.brushColor, 1),
-            onPressed: () {
+          childLeft: colorPreviewWithTransparentPaper(
+            appModel.brushColor,
+            () {
               showColorPicker(
                 context: context,
-                title: 'Brush',
+                title: 'Brush Color',
                 color: appModel.brushColor,
                 onSelectedColor: (final Color color) =>
                     appModel.brushColor = color,
@@ -218,7 +217,7 @@ class ToolsPanel extends StatelessWidget {
           ),
           childRight: slim
               ? null
-              : MyColorPicker(
+              : ColorSelector(
                   color: appModel.brushColor,
                   onColorChanged: (Color color) => appModel.brushColor = color,
                 ),
@@ -231,12 +230,12 @@ class ToolsPanel extends StatelessWidget {
       widgets.add(
         ToolAttributeWidget(
           name: 'Fill Color',
-          childLeft: ColorPreview(
-            colorUsed: ColorUsage(appModel.fillColor, 1),
-            onPressed: () {
+          childLeft: colorPreviewWithTransparentPaper(
+            appModel.fillColor,
+            () {
               showColorPicker(
                 context: context,
-                title: 'Fill',
+                title: 'Fill Color',
                 color: appModel.brushColor,
                 onSelectedColor: (final Color color) =>
                     appModel.fillColor = color,
@@ -245,7 +244,7 @@ class ToolsPanel extends StatelessWidget {
           ),
           childRight: slim
               ? null
-              : MyColorPicker(
+              : ColorSelector(
                   color: appModel.fillColor,
                   onColorChanged: (Color color) => appModel.fillColor = color,
                 ),

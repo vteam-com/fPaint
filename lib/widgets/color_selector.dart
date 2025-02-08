@@ -1,11 +1,11 @@
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
+import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
-class MyColorPicker extends StatefulWidget {
-  const MyColorPicker({
+class ColorSelector extends StatefulWidget {
+  const ColorSelector({
     required this.color,
     required this.onColorChanged,
     super.key,
@@ -15,10 +15,10 @@ class MyColorPicker extends StatefulWidget {
   final Function(Color) onColorChanged;
 
   @override
-  State<MyColorPicker> createState() => _MyColorPickerState();
+  State<ColorSelector> createState() => _ColorSelectorState();
 }
 
-class _MyColorPickerState extends State<MyColorPicker> {
+class _ColorSelectorState extends State<ColorSelector> {
   /// From 0.0% to 1.0% 0%=Black 100%=White
   late double brightness;
 
@@ -29,7 +29,7 @@ class _MyColorPickerState extends State<MyColorPicker> {
   late double alpha;
 
   @override
-  void didUpdateWidget(covariant MyColorPicker oldWidget) {
+  void didUpdateWidget(covariant ColorSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
     fromInputColorToHueBrightnessAndAlpha();
   }
@@ -51,86 +51,93 @@ class _MyColorPickerState extends State<MyColorPicker> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.black,
+          color: Colors.grey,
           width: 1,
         ),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(7), // Same radius as container
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(
-              height: 30,
-              child: CustomPaint(
-                painter: HueGradientPainter(),
-                child: Slider(
-                  value: hue,
-                  min: 0,
-                  max: maxHue,
-                  divisions: 360 * 2,
-                  label: hue.floor().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      hue = value;
-                      if (brightness == 0 || brightness == 1) {
-                        brightness = 0.5;
-                      }
-                      widget.onColorChanged(hsvToColor(hue, brightness, alpha));
-                    });
-                  },
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 30,
-              child: CustomPaint(
-                painter: BrightnessGradientPainter(hue: hue),
-                child: Slider(
-                  value: brightness,
-                  min: 0,
-                  max: 1,
-                  divisions: 100,
-                  label: (brightness * 100).round().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      brightness = value;
-                      widget.onColorChanged(hsvToColor(hue, brightness, alpha));
-                    });
-                  },
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 30,
-              child: Stack(
-                alignment: AlignmentDirectional.center,
-                children: [
-                  const TransparentPaper(patternSize: 4),
-                  CustomPaint(
-                    painter:
-                        AlphaGradientPainter(hue: hue, brightness: brightness),
-                    child: Slider(
-                      value: alpha,
-                      min: 0,
-                      max: 1,
-                      divisions: 100,
-                      label: (alpha * 100).round().toString(),
-                      onChanged: (double value) {
-                        setState(() {
-                          alpha = value;
-                          widget.onColorChanged(
-                            hsvToColor(hue, brightness, alpha),
-                          );
-                        });
-                      },
-                    ),
+      child: Padding(
+        padding: const EdgeInsets.all(1.0),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(7), // Same radius as container
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: 30,
+                child: CustomPaint(
+                  painter: HueGradientPainter(),
+                  child: Slider(
+                    value: hue,
+                    min: 0,
+                    max: maxHue,
+                    divisions: 360 * 2,
+                    label: hue.floor().toString(),
+                    onChanged: (double value) {
+                      setState(() {
+                        hue = value;
+                        if (brightness == 0 || brightness == 1) {
+                          brightness = 0.5;
+                        }
+                        widget
+                            .onColorChanged(hsvToColor(hue, brightness, alpha));
+                      });
+                    },
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+              SizedBox(
+                height: 30,
+                child: CustomPaint(
+                  painter: BrightnessGradientPainter(hue: hue),
+                  child: Slider(
+                    value: brightness,
+                    min: 0,
+                    max: 1,
+                    divisions: 100,
+                    label: (brightness * 100).round().toString(),
+                    onChanged: (double value) {
+                      setState(() {
+                        brightness = value;
+                        widget
+                            .onColorChanged(hsvToColor(hue, brightness, alpha));
+                      });
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 30,
+                child: Stack(
+                  alignment: AlignmentDirectional.center,
+                  children: [
+                    const TransparentPaper(patternSize: 4),
+                    CustomPaint(
+                      painter: AlphaGradientPainter(
+                        hue: hue,
+                        brightness: brightness,
+                      ),
+                      child: Slider(
+                        value: alpha,
+                        min: 0,
+                        max: 1,
+                        divisions: 100,
+                        label: (alpha * 100).round().toString(),
+                        onChanged: (double value) {
+                          setState(() {
+                            alpha = value;
+                            widget.onColorChanged(
+                              hsvToColor(hue, brightness, alpha),
+                            );
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -229,7 +236,7 @@ class AlphaGradientPainter extends CustomPainter {
 
 /// Displays a color picker dialog with the given title, initial color, and callback for the selected color.
 ///
-/// The color picker dialog is displayed using the [showDialog] function, and includes a [ColorPicker] widget
+/// The color picker dialog is displayed using the [showDialog] function, and includes a [ColorSelector] widget
 /// that allows the user to select a color. The selected color is passed to the [onSelectedColor] callback.
 ///
 /// Parameters:
@@ -249,17 +256,11 @@ void showColorPicker({
       return AlertDialog(
         title: Text(title),
         content: SingleChildScrollView(
-          child: ColorPicker(
+          child: ColorPickerDialog(
             color: color,
             onColorChanged: (Color color) {
               onSelectedColor(color);
             },
-            pickersEnabled: {
-              ColorPickerType.wheel: true,
-              ColorPickerType.primary: true,
-              ColorPickerType.accent: true,
-            },
-            showColorCode: true,
           ),
         ),
       );

@@ -63,16 +63,10 @@ class TopColors extends StatelessWidget {
           ],
         ),
         IntrinsicHeight(
-          child: Stack(
-            children: [
-              const TransparentPaper(patternSize: 4),
-              Container(
-                alignment: Alignment.center,
-                child: Wrap(
-                  children: colorPreviews,
-                ),
-              ),
-            ],
+          child: transparentPaperContainer(
+            Wrap(
+              children: colorPreviews,
+            ),
           ),
         ),
       ],
