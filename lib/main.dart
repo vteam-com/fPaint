@@ -28,6 +28,12 @@ class MyApp extends StatelessWidget {
             primary: Colors.lightBlue,
             secondary: Colors.blue,
           ),
+          sliderTheme: SliderThemeData(
+            activeTrackColor: Colors.blue.shade800,
+            inactiveTrackColor: Colors.white24,
+            thumbColor: Colors.blue.shade100,
+            overlayColor: Colors.blue.withAlpha(100),
+          ),
         ),
         home: Shortcuts(
           shortcuts: {
