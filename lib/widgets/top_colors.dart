@@ -64,8 +64,13 @@ class TopColors extends StatelessWidget {
         ),
         IntrinsicHeight(
           child: transparentPaperContainer(
-            Wrap(
-              children: colorPreviews,
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Wrap(
+                spacing: 1,
+                runSpacing: 1,
+                children: colorPreviews,
+              ),
             ),
           ),
         ),

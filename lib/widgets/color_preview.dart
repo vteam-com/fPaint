@@ -7,8 +7,8 @@ Widget colorPreviewWithTransparentPaper(
   GestureTapCallback onPressed,
 ) {
   return SizedBox(
-    height: 90,
-    width: 53,
+    height: 60,
+    width: 60,
     child: transparentPaperContainer(
       Padding(
         padding: const EdgeInsets.all(8.0),
@@ -56,19 +56,15 @@ class ColorPreview extends StatelessWidget {
     if (colorUsed.percentage < 1) {
       usageNumber = '\nUsage ${colorUsed.toStringPercentage(1)}';
     }
+    const double width = 50;
 
     return Tooltip(
       message: '${colorToHexString(colorUsed.color)}$usageNumber',
       child: InkWell(
         onTap: onPressed,
-        child: Container(
-          width: 40,
-          height: 60,
-          margin: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            border: border ? Border.all(color: Colors.grey) : null,
-            borderRadius: const BorderRadius.all(Radius.circular(2)),
-          ),
+        child: SizedBox(
+          width: width,
+          height: 50,
           child: Stack(
             alignment: AlignmentDirectional.center,
             children: [
@@ -79,8 +75,8 @@ class ColorPreview extends StatelessWidget {
               Positioned(
                 left: 0,
                 child: Container(
-                  width: 10,
-                  height: 50,
+                  width: 21.5,
+                  height: 30,
                   color: Colors.white,
                 ),
               ),
@@ -91,8 +87,8 @@ class ColorPreview extends StatelessWidget {
               Positioned(
                 right: 0,
                 child: Container(
-                  width: 10,
-                  height: 50,
+                  width: 21.5,
+                  height: 30,
                   color: Colors.black,
                 ),
               ),
@@ -105,6 +101,7 @@ class ColorPreview extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: colorUsed.color,
+                    border: border ? Border.all(color: Colors.grey) : null,
                     borderRadius: const BorderRadius.all(Radius.circular(4)),
                   ),
                 ),
@@ -116,7 +113,7 @@ class ColorPreview extends StatelessWidget {
               Center(
                 child: Text(
                   textAlign: TextAlign.center,
-                  '$alpha\n$red\n$green\n$blue',
+                  '$red$green$blue\n$alpha',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 9,

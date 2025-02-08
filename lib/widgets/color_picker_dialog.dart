@@ -43,13 +43,14 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 spacing: 10,
                 children: [
                   SizedBox(
-                    height: 90,
-                    width: 53,
+                    height: 60,
+                    width: 60,
                     child: transparentPaperContainer(
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ColorPreview(
                           colorUsed: ColorUsage(_currentColor, 1),
+                          border: false,
                           onPressed: () {},
                         ),
                       ),
