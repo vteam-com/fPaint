@@ -75,34 +75,37 @@ class CanvasWidgetState extends State<CanvasWidget> {
           },
           onScaleUpdate: (final ScaleUpdateDetails details) {
             if (details.pointerCount == 2) {
-              setState(
-                () {
-                  if (_lastFocalPoint != null && _panStartFocalPoint != null) {
-                    final double scaleDelta =
-                        (details.scale - _lastScale).abs();
+              if (_lastFocalPoint != null && _panStartFocalPoint != null) {
+                if (details.scale != 1) {
+                  // debugPrint('+++ Scale by $scaleDelta');
+                  // Scaling
+                  _scale = (_lastScale * details.scale).clamp(0.5, 4.0);
+                  final Offset focalPointDelta =
+                      details.focalPoint - _lastFocalPoint!;
+                  _offset +=
+                      focalPointDelta - focalPointDelta * (_scale / _lastScale);
+                  _lastFocalPoint = details.focalPoint;
+                } else {
+                  // debugPrint('>>> PAN');
+                  // Panning
+                  final Offset delta =
+                      details.focalPoint - _panStartFocalPoint!;
+                  _offset += delta;
+                  _panStartFocalPoint = details.focalPoint;
+                }
+              }
 
-                    if (scaleDelta > 0.3) {
-                      // debugPrint('Scale by $scaleDelta');
-                      // Scaling
-                      _scale = (_lastScale * details.scale).clamp(0.5, 4.0);
-                      final Offset focalPointDelta =
-                          details.focalPoint - _lastFocalPoint!;
-                      _offset += focalPointDelta -
-                          focalPointDelta * (_scale / _lastScale);
-                      _lastFocalPoint = details.focalPoint;
-                    } else {
-                      // Panning
-                      final Offset delta =
-                          details.focalPoint - _panStartFocalPoint!;
-                      _offset += delta;
-                      _panStartFocalPoint = details.focalPoint;
-                    }
-                  }
-                  // Update appModel with the new scale and offset
-                  appModel.canvas.scale = _scale;
-                  appModel.offset = _offset;
-                },
-              );
+              if (appModel.canvas.scale != _scale ||
+                  appModel.offset != _offset) {
+                setState(
+                  () {
+                    // Update appModel with the new scale and offset
+                    // debugPrint('setState > Scale $_scale  offset $_offset');
+                    appModel.canvas.scale = _scale;
+                    appModel.offset = _offset;
+                  },
+                );
+              }
             }
           },
           child: ClipRect(
