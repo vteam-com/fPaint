@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/render_user_actions.dart';
 
 // Exports
 export 'package:fpaint/models/user_action.dart';
@@ -222,65 +223,30 @@ class Layer {
     for (final UserAction userAction in _actionStack) {
       switch (userAction.tool) {
         case Tools.pencil:
-          final Paint paint = Paint();
-          paint.color = userAction.brushColor;
-          paint.strokeWidth = userAction.brushSize;
-          paint.style = PaintingStyle.stroke;
-          paint.strokeCap = StrokeCap.square;
-          renderPencil(canvas, paint, userAction);
+          renderPencil(canvas, userAction);
           break;
 
         case Tools.brush:
-          final Paint paint = Paint();
-          paint.color = userAction.fillColor;
-          paint.strokeCap = StrokeCap.round;
-          paint.strokeWidth = userAction.brushSize;
-          paint.style = PaintingStyle.stroke;
-          renderPath(canvas, paint, userAction);
+          renderPath(canvas, userAction);
           break;
 
         case Tools.line:
-          final Paint paint = Paint();
-          paint.color = userAction.fillColor;
-          paint.strokeCap = StrokeCap.round;
-          paint.strokeWidth = userAction.brushSize;
-          paint.style = PaintingStyle.stroke;
-          renderLine(canvas, paint, userAction);
+          renderLine(canvas, userAction);
           break;
 
         case Tools.circle:
-          final Paint paint = Paint();
-          paint.color = userAction.fillColor;
-          paint.strokeCap = StrokeCap.round;
-          paint.strokeWidth = userAction.brushSize;
-          paint.style = PaintingStyle.fill;
-          renderCircle(canvas, paint, userAction);
+          renderCircle(canvas, userAction);
           break;
 
         case Tools.rectangle:
-          final Paint paint = Paint();
-          paint.color = userAction.fillColor;
-          paint.strokeCap = StrokeCap.round;
-          paint.strokeWidth = userAction.brushSize;
-          paint.style = PaintingStyle.fill;
-          renderRectangle(canvas, paint, userAction);
+          renderRectangle(canvas, userAction);
           break;
 
         case Tools.eraser:
-          final Paint paint = Paint();
-          paint.color = userAction.fillColor;
-          paint.strokeCap = StrokeCap.round;
-          paint.strokeWidth = userAction.brushSize;
-          paint.style = PaintingStyle.stroke;
-          renderEraser(canvas, paint, userAction);
+          renderEraser(canvas, userAction);
           break;
 
         case Tools.fill:
-          final Paint paint = Paint();
-          paint.color = userAction.fillColor;
-          paint.strokeCap = StrokeCap.round;
-          paint.strokeWidth = userAction.brushSize;
-          paint.style = PaintingStyle.stroke;
           renderImage(canvas, userAction);
 
         case Tools.image:
@@ -293,12 +259,17 @@ class Layer {
     canvas.restore();
   }
 
-  void renderPath(
+  static void renderPath(
     final Canvas canvas,
-    final Paint paint,
     final UserAction userAction,
   ) {
-    final path = Path()
+    final Paint paint = Paint();
+    paint.color = userAction.fillColor;
+    paint.style = PaintingStyle.stroke;
+    paint.strokeCap = StrokeCap.round;
+    paint.strokeWidth = userAction.brushSize;
+
+    final ui.Path path = Path()
       ..moveTo(
         userAction.positions.first.dx,
         userAction.positions.first.dy,
@@ -311,27 +282,36 @@ class Layer {
     applyBrushStyle(canvas, paint, path, userAction);
   }
 
-  void renderLine(
+  static void renderLine(
     final Canvas canvas,
-    final Paint paint,
     final UserAction userAction,
   ) {
-    final path = Path()
+    final Paint paint = Paint();
+    paint.color = userAction.fillColor;
+    paint.strokeCap = StrokeCap.round;
+    paint.strokeWidth = userAction.brushSize;
+    paint.style = PaintingStyle.stroke;
+
+    final ui.Path path = Path()
       ..moveTo(userAction.positions.first.dx, userAction.positions.first.dy)
       ..lineTo(userAction.positions.last.dx, userAction.positions.last.dy);
-    paint.style = PaintingStyle.stroke;
     paint.color = userAction.brushColor;
     applyBrushStyle(canvas, paint, path, userAction);
   }
 
-  void renderCircle(
+  static void renderCircle(
     final Canvas canvas,
-    final Paint paint,
     final UserAction userAction,
   ) {
-    final radius =
+    final Paint paint = Paint();
+    paint.color = userAction.fillColor;
+    paint.strokeCap = StrokeCap.round;
+    paint.strokeWidth = userAction.brushSize;
+    paint.style = PaintingStyle.fill;
+
+    final double radius =
         (userAction.positions.first - userAction.positions.last).distance / 2;
-    final center = Offset(
+    final ui.Offset center = Offset(
       (userAction.positions.first.dx + userAction.positions.last.dx) / 2,
       (userAction.positions.first.dy + userAction.positions.last.dy) / 2,
     );
@@ -348,11 +328,16 @@ class Layer {
     applyBrushStyle(canvas, paint, path, userAction);
   }
 
-  void renderRectangle(
+  static void renderRectangle(
     final Canvas canvas,
-    final Paint paint,
     final UserAction userAction,
   ) {
+    final Paint paint = Paint();
+    paint.color = userAction.fillColor;
+    paint.strokeCap = StrokeCap.round;
+    paint.strokeWidth = userAction.brushSize;
+    paint.style = PaintingStyle.fill;
+
     if (userAction.positions.length == 2) {
       final rect = Rect.fromPoints(
         userAction.positions.first,
@@ -406,99 +391,6 @@ class Layer {
     }
 
     return path;
-  }
-
-  void renderPencil(
-    final Canvas canvas,
-    final Paint paint,
-    final UserAction userAction,
-  ) {
-    paint.blendMode = BlendMode.src;
-    paint.style = PaintingStyle.stroke;
-    paint.strokeWidth = userAction.brushSize;
-    canvas.drawLine(
-      userAction.positions.first,
-      userAction.positions.last,
-      paint,
-    );
-  }
-
-  void renderEraser(
-    final Canvas canvas,
-    final Paint paint,
-    final UserAction userAction,
-  ) {
-    paint.blendMode = BlendMode.clear;
-    paint.style = PaintingStyle.stroke;
-    paint.strokeWidth = userAction.brushSize;
-    canvas.drawLine(
-      userAction.positions.first,
-      userAction.positions.last,
-      paint,
-    );
-  }
-
-  void renderImage(final Canvas canvas, final UserAction userAction) {
-    if (userAction.image != null) {
-      canvas.drawImage(userAction.image!, userAction.positions.first, Paint());
-    }
-  }
-
-  void applyBrushStyle(
-    final Canvas canvas,
-    final Paint paint,
-    final Path path,
-    final UserAction userAction,
-  ) {
-    if (userAction.brushStyle == BrushStyle.dash) {
-      drawPath(
-        path,
-        canvas,
-        paint,
-        userAction.brushSize * 3,
-        userAction.brushSize * 2,
-      );
-    } else {
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  void drawPath(
-    final Path path,
-    final ui.Canvas canvas,
-    final ui.Paint paint,
-    final double dashWidth,
-    final double dashGap,
-  ) {
-    final Path dashedPath = createDashedPath(
-      path,
-      dashWidth: dashWidth,
-      dashGap: dashGap,
-    );
-    canvas.drawPath(dashedPath, paint);
-  }
-
-  Path createDashedPath(
-    final Path source, {
-    required final double dashWidth,
-    required final double dashGap,
-  }) {
-    final Path dashedPath = Path();
-    for (final ui.PathMetric pathMetric in source.computeMetrics()) {
-      double distance = 0.0;
-      while (distance < pathMetric.length) {
-        final double nextDashLength = distance + dashWidth;
-        dashedPath.addPath(
-          pathMetric.extractPath(
-            distance,
-            nextDashLength.clamp(0.0, pathMetric.length),
-          ),
-          Offset.zero,
-        );
-        distance = nextDashLength + dashGap;
-      }
-    }
-    return dashedPath;
   }
 
   List<String> actionHistory([final int? numberOfHistoryAction]) {
