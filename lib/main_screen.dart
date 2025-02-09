@@ -16,23 +16,41 @@ class MainScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey,
-      body: MultiSplitView(
-        key: Key('key_side_panel_size_${appModel.isSidePanelExpanded}'),
-        axis: Axis.horizontal,
-        initialAreas: [
-          Area(
-            size: appModel.isSidePanelExpanded ? 400 : minSidePanelSize,
-            min: appModel.isSidePanelExpanded ? 350 : minSidePanelSize,
-            max: appModel.isSidePanelExpanded ? 600 : minSidePanelSize,
-            builder: (context, area) => const SidePanel(),
+      body: MultiSplitViewTheme(
+        data: MultiSplitViewThemeData(
+          dividerPainter: DividerPainters.grooved1(
+            animationEnabled: true,
+            backgroundColor: Colors.grey.shade600,
+            highlightedBackgroundColor: Colors.blue,
+            color: Colors.grey.shade800,
+            thickness: 6,
+            highlightedThickness: 8,
+            strokeCap: StrokeCap.round,
           ),
-          Area(
-            builder: (context, area) => CanvasWidget(
-              canvasWidth: appModel.canvas.width,
-              canvasHeight: appModel.canvas.height,
+        ),
+        child: MultiSplitView(
+          key: Key('key_side_panel_size_${appModel.isSidePanelExpanded}'),
+          axis: Axis.horizontal,
+          onDividerDoubleTap: (dividerIndex) {
+            appModel.isSidePanelExpanded = !appModel.isSidePanelExpanded;
+          },
+          initialAreas: [
+            Area(
+              size: appModel.isSidePanelExpanded ? 400 : minSidePanelSize,
+              min: appModel.isSidePanelExpanded ? 350 : minSidePanelSize,
+              max: appModel.isSidePanelExpanded ? 600 : minSidePanelSize,
+              builder: (final BuildContext context, final Area area) =>
+                  const SidePanel(),
             ),
-          ),
-        ],
+            Area(
+              builder: (final BuildContext context, final Area area) =>
+                  CanvasWidget(
+                canvasWidth: appModel.canvas.width,
+                canvasHeight: appModel.canvas.height,
+              ),
+            ),
+          ],
+        ),
       ),
       // Undo/Redo
       floatingActionButton: floatingActionButtons(appModel),

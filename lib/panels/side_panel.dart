@@ -22,17 +22,12 @@ class _SidePanelState extends State<SidePanel> {
     final AppModel appModel = AppModel.of(context);
 
     return Material(
-      elevation: 18,
       color: Colors.grey.shade800,
-      borderRadius: const BorderRadius.only(
-        topRight: Radius.circular(12),
-        bottomRight: Radius.circular(12),
-      ),
       child: MultiSplitViewTheme(
         data: MultiSplitViewThemeData(
           dividerPainter: DividerPainters.grooved1(
             animationEnabled: true,
-            backgroundColor: Colors.grey,
+            backgroundColor: Colors.grey.shade600,
             highlightedBackgroundColor: Colors.blue,
             color: Colors.grey.shade800,
             thickness: 6,

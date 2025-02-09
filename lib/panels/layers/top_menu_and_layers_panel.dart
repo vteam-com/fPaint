@@ -108,17 +108,6 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                 icon: const Icon(Icons.ios_share_outlined),
                 onPressed: () => sharePanel(context),
               ),
-            IconButton(
-              tooltip: 'Expand/Collapse',
-              icon: Icon(
-                appModel.isSidePanelExpanded
-                    ? Icons.keyboard_double_arrow_left
-                    : Icons.keyboard_double_arrow_right,
-              ),
-              onPressed: () {
-                appModel.isSidePanelExpanded = !appModel.isSidePanelExpanded;
-              },
-            ),
           ],
         ),
 

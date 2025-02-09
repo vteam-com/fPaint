@@ -49,9 +49,5 @@
         // "*.json"
     ],
     "files.autoSave": "onFocusChange",
-    "continue.showInlineTip": true,
-    "continue.telemetryEnabled": false,
-    "continue.enableContinueForTeams": true,
-    "continue.enableDebugLogs": true,
-    "continue.enableQuickActions": true,
+    "CodeGPT.apiKey": "Ollama",
 }
