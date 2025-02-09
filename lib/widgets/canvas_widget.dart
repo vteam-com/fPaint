@@ -41,6 +41,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
   double _lastScale = 1.0;
   Offset? _panStartFocalPoint;
 
+  bool get isPanningOrScaling =>
+      _panStartFocalPoint != null || _lastFocalPoint != null;
+
   @override
   void initState() {
     super.initState();
@@ -66,7 +69,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
         return GestureDetector(
           onScaleStart: (final ScaleStartDetails details) {
+            // debugPrint('SSS onScaleStart {$details.pointerCount}');
             if (details.pointerCount == 2) {
+              _activePointerId = -1; // cancel any drawing
               _lastFocalPoint = details.focalPoint;
               _lastScale = _scale;
               _panStartFocalPoint =
@@ -75,8 +80,18 @@ class CanvasWidgetState extends State<CanvasWidget> {
           },
           onScaleUpdate: (final ScaleUpdateDetails details) {
             if (details.pointerCount == 2) {
-              if (_lastFocalPoint != null && _panStartFocalPoint != null) {
-                if (details.scale != 1) {
+              // debugPrint(
+              //   'onScaleUpdate P2 ${details.scale}',
+              // );
+              if (isPanningOrScaling) {
+                if (details.scale < 1.1 && details.scale > 0.9) {
+                  // debugPrint('>>> PAN');
+                  // Panning
+                  final Offset delta =
+                      details.focalPoint - _panStartFocalPoint!;
+                  _offset += delta;
+                  _panStartFocalPoint = details.focalPoint;
+                } else {
                   // debugPrint('+++ Scale by $scaleDelta');
                   // Scaling
                   _scale = (_lastScale * details.scale).clamp(0.5, 4.0);
@@ -85,13 +100,6 @@ class CanvasWidgetState extends State<CanvasWidget> {
                   _offset +=
                       focalPointDelta - focalPointDelta * (_scale / _lastScale);
                   _lastFocalPoint = details.focalPoint;
-                } else {
-                  // debugPrint('>>> PAN');
-                  // Panning
-                  final Offset delta =
-                      details.focalPoint - _panStartFocalPoint!;
-                  _offset += delta;
-                  _panStartFocalPoint = details.focalPoint;
                 }
               }
 
@@ -107,6 +115,11 @@ class CanvasWidgetState extends State<CanvasWidget> {
                 );
               }
             }
+          },
+          onScaleEnd: (final ScaleEndDetails details) {
+            _activePointerId = -1;
+            _lastFocalPoint = null;
+            _panStartFocalPoint = null;
           },
           child: ClipRect(
             child: Transform(
@@ -137,45 +150,74 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
                   // Draw Start
                   onPointerDown: (final PointerDownEvent details) async {
-                    //debugPrint('DOWN ${details.buttons} P:${details.pointer}');
-                    if (details.buttons == 1 && _activePointerId == -1) {
-                      _activePointerId = details.pointer;
-                      if (appModel.isCurrentSelectionReadyForAction) {
+                    // only draw when not panning or scalling
+                    if (isPanningOrScaling) {
+                      // debugPrint(
+                      //   'currently panning or scaling ignore pointer down event',
+                      // );
+                    } else {
+                      // debugPrint(
+                      //   'DOWN ${details.buttons} P:${details.pointer}',
+                      // );
+                      if (details.buttons == 1 && _activePointerId == -1) {
+                        if (appModel.isCurrentSelectionReadyForAction) {
+                          _activePointerId = details.pointer;
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Selection is hidden.'),
+                            ),
+                          );
+                        }
+                      }
+                    }
+                  },
+                  // Draw Update
+                  onPointerMove: (final PointerEvent details) async {
+                    if (isPanningOrScaling) {
+                      // Currently panning or scaling so don't draw
+                      // debugPrint('DRAW MOVE PANNING IS ON');
+                    } else {
+                      // debugPrint(
+                      //   'DRAW MOVE ${details.buttons} P:${details.pointer}',
+                      // );
+                      if (details.buttons == 1 &&
+                          _activePointerId == details.pointer) {
                         if (appModel.userActionStartingOffset == null) {
                           await _onUserActionStart(
                             appModel: appModel,
                             position:
                                 details.localPosition / appModel.canvas.scale,
                           );
+                        } else {
+                          _onUserActionUpdate(
+                            appModel: appModel,
+                            position:
+                                details.localPosition / appModel.canvas.scale,
+                          );
                         }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Selection is hidden.'),
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  // Draw Update
-                  onPointerMove: (final PointerEvent details) {
-                    // debugPrint('MOVE ${details.buttons} P:${details.pointer}');
-                    if (details.buttons == 1 &&
-                        _activePointerId == details.pointer) {
-                      if (appModel.userActionStartingOffset != null) {
-                        _onUserActionUpdate(
-                          appModel: appModel,
-                          position:
-                              details.localPosition / appModel.canvas.scale,
-                        );
                       }
                     }
                   },
                   // Draw End
-                  onPointerUp: (final PointerUpEvent details) {
-                    if (_activePointerId == details.pointer) {
-                      // debugPrint('UP ${details.buttons}');
-                      _onUserActionEnded(appModel);
+                  onPointerUp: (final PointerUpEvent details) async {
+                    if (!isPanningOrScaling) {
+                      if (_activePointerId == details.pointer) {
+                        // debugPrint('UP ${details.buttons}');
+                        // handle the case that the user click and release the mouse withou moving
+                        if (appModel.userActionStartingOffset == null &&
+                            (appModel.selectedTool == Tools.pencil ||
+                                appModel.selectedTool == Tools.fill ||
+                                appModel.selectedTool == Tools.eraser)) {
+                          await _onUserActionStart(
+                            appModel: appModel,
+                            position:
+                                details.localPosition / appModel.canvas.scale,
+                          );
+                        }
+
+                        _onUserActionEnded(appModel);
+                      }
                     }
                   },
                   // Draw End
