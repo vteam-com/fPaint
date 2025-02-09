@@ -1,6 +1,10 @@
 import 'dart:math';
+import 'dart:ui' as ui;
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/panels/canvas_panel.dart';
+import 'package:fpaint/panels/tools/flood_fill.dart';
 
 /// Provides a canvas widget that supports scaling and panning.
 ///
@@ -21,17 +25,16 @@ class CanvasWidget extends StatefulWidget {
     super.key,
     required this.canvasWidth,
     required this.canvasHeight,
-    required this.child,
   });
   final double canvasWidth;
   final double canvasHeight;
-  final Widget child;
 
   @override
   CanvasWidgetState createState() => CanvasWidgetState();
 }
 
 class CanvasWidgetState extends State<CanvasWidget> {
+  int _activePointerId = -1;
   double _scale = 1.0;
   Offset _offset = Offset.zero;
   Offset? _lastFocalPoint;
@@ -114,12 +117,184 @@ class CanvasWidgetState extends State<CanvasWidget> {
               child: SizedBox(
                 width: max(widget.canvasWidth, viewportWidth),
                 height: max(widget.canvasHeight, viewportHeight),
-                child: widget.child,
+                child: Listener(
+                  // Pinch/Zoom scaling for WEB
+                  onPointerSignal: (final PointerSignalEvent event) {
+                    if (event is PointerScaleEvent) {
+                      appModel.setCanvasScale(
+                        appModel.canvas.scale * event.scale,
+                      );
+                    }
+                  },
+                  // Pinch/Zoom scaling for Desktop
+                  onPointerPanZoomUpdate:
+                      (final PointerPanZoomUpdateEvent event) {
+                    _scaleCanvas(appModel, event.scale, event.position);
+                  },
+
+                  // Draw Start
+                  onPointerDown: (final PointerDownEvent details) async {
+                    //debugPrint('DOWN ${details.buttons} P:${details.pointer}');
+                    if (details.buttons == 1 && _activePointerId == -1) {
+                      _activePointerId = details.pointer;
+                      if (appModel.isCurrentSelectionReadyForAction) {
+                        if (appModel.userActionStartingOffset == null) {
+                          await _onUserActionStart(
+                            appModel: appModel,
+                            position:
+                                details.localPosition / appModel.canvas.scale,
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Selection is hidden.'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  // Draw Update
+                  onPointerMove: (final PointerEvent details) {
+                    // debugPrint('MOVE ${details.buttons} P:${details.pointer}');
+                    if (details.buttons == 1 &&
+                        _activePointerId == details.pointer) {
+                      if (appModel.userActionStartingOffset != null) {
+                        _onUserActionUpdate(
+                          appModel: appModel,
+                          position:
+                              details.localPosition / appModel.canvas.scale,
+                        );
+                      }
+                    }
+                  },
+                  // Draw End
+                  onPointerUp: (final PointerUpEvent details) {
+                    if (_activePointerId == details.pointer) {
+                      // debugPrint('UP ${details.buttons}');
+                      _onUserActionEnded(appModel);
+                    }
+                  },
+                  // Draw End
+                  onPointerCancel: (final PointerCancelEvent details) {
+                    if (_activePointerId == details.pointer) {
+                      // debugPrint('CANCEL ${details.buttons}');
+                      _onUserActionEnded(appModel);
+                    }
+                  },
+                  child: CanvasPanel(appModel: appModel),
+                ),
               ),
             ),
           ),
         );
       },
     );
+  }
+
+  Future<void> _onUserActionStart({
+    required final AppModel appModel,
+    required final Offset position,
+  }) async {
+    appModel.userActionStartingOffset = position;
+    if (appModel.selectedTool == Tools.fill) {
+      // Create a flattened image from the current layer
+      final ui.Image img = await appModel.selectedLayer
+          .toImageForStorage(appModel.canvas.canvasSize);
+
+      // Perform flood fill at the clicked position
+      final ui.Image filledImage = await applyFloodFill(
+        image: img,
+        x: position.dx.toInt(),
+        y: position.dy.toInt(),
+        newColor: appModel.fillColor,
+        tolerance: appModel.tolerance,
+      );
+      appModel.selectedLayer
+          .addImage(imageToAdd: filledImage, tool: Tools.fill);
+      appModel.update();
+    } else {
+      appModel.currentUserAction = UserAction(
+        tool: appModel.selectedTool,
+        positions: [position, position],
+        brushColor: appModel.brushColor,
+        fillColor: appModel.fillColor,
+        brushSize: appModel.brusSize,
+        brushStyle: appModel.brushStyle,
+      );
+
+      appModel.addUserAction(action: appModel.currentUserAction!);
+    }
+  }
+
+  void _onUserActionUpdate({
+    required final AppModel appModel,
+    required final Offset position,
+  }) {
+    if (appModel.userActionStartingOffset != null) {
+      if (appModel.selectedTool == Tools.pencil) {
+        // Add the pixel
+        appModel.updateLastUserAction(
+          start: appModel.userActionStartingOffset!,
+          end: position,
+          type: appModel.selectedTool,
+          colorStroke: appModel.brushColor,
+          colorFill: appModel.brushColor,
+        );
+        appModel.userActionStartingOffset = position;
+      } else if (appModel.selectedTool == Tools.eraser) {
+        // Eraser implementation
+        appModel.updateLastUserAction(
+          start: appModel.userActionStartingOffset!,
+          end: position,
+          type: appModel.selectedTool,
+          colorStroke: Colors.transparent,
+          colorFill: Colors.transparent,
+        );
+        appModel.userActionStartingOffset = position;
+      } else if (appModel.selectedTool == Tools.brush) {
+        // Cumulate more points in the draw path on the selected layer
+        appModel.layers.list[appModel.selectedLayerIndex]
+            .lastActionAddPosition(position: position);
+        appModel.update();
+      } else {
+        // Existing shape logic
+        appModel.updateLastUserAction(end: position);
+        appModel.update();
+      }
+    }
+  }
+
+  void _onUserActionEnded(
+    final AppModel appModel,
+  ) {
+    if (appModel.currentUserAction?.tool == Tools.brush) {
+      // Optimize list of draw actions into a single path
+    }
+    //debugPrint('End gesture $_activePointerId now -1');
+    _activePointerId = -1;
+    appModel.currentUserAction = null;
+    appModel.userActionStartingOffset = null;
+    appModel.selectedLayer.clearCache();
+    appModel.update();
+  }
+
+  void _scaleCanvas(AppModel appModel, double scaleDelta, Offset focalPoint) {
+    final double newScale = appModel.canvas.scale * scaleDelta;
+
+    // Ensure scale remains within reasonable limits
+    final double minScale = 0.1;
+    final double maxScale = 5.0;
+    if (newScale < minScale || newScale > maxScale) {
+      return;
+    }
+
+    // Adjust canvas offset so that focalPoint remains at the same screen position
+    final Offset beforeFocalCanvas =
+        (focalPoint - appModel.offset) / appModel.canvas.scale;
+    final Offset newOffset = focalPoint - (beforeFocalCanvas * newScale);
+
+    appModel.offset = newOffset;
+    appModel.setCanvasScale(newScale);
   }
 }
