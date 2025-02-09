@@ -413,7 +413,7 @@ class Layer {
     final Paint paint,
     final UserAction userAction,
   ) {
-    paint.blendMode = BlendMode.srcATop;
+    paint.blendMode = BlendMode.src;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = userAction.brushSize;
     canvas.drawLine(
