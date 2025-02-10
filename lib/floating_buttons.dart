@@ -5,45 +5,57 @@ import 'package:fpaint/models/app_model.dart';
 /// including buttons for undo, redo, zoom in, zoom out,
 ///  and a button that displays the current zoom level and canvas size.
 Widget floatingActionButtons(final AppModel appModel) {
+  final undoButton = FloatingActionButton(
+    backgroundColor: Colors.grey.shade600,
+    foregroundColor: Colors.white,
+    tooltip: appModel.selectedLayer.actionHistory(20).join('\n'),
+    onPressed: () => appModel.undo(),
+    child: const Icon(Icons.undo),
+  );
+
+  final redo = FloatingActionButton(
+    backgroundColor: Colors.grey.shade600,
+    foregroundColor: Colors.white,
+    onPressed: () => appModel.redo(),
+    child: const Icon(Icons.redo),
+  );
+
   Color colorBackground = Colors.grey.shade600;
   Color colorForegound = Colors.white;
   if (appModel.deviceSizeSmall) {
     if (appModel.showMenu) {
       colorBackground = Colors.blue;
     }
-    return FloatingActionButton(
-      backgroundColor: colorBackground,
-      foregroundColor: colorForegound,
-      tooltip: 'Menu',
-      onPressed: () {
-        appModel.showMenu = !appModel.showMenu;
-        appModel.isSidePanelExpanded = true;
-      },
-      child: Icon(
-        appModel.showMenu
-            ? Icons.double_arrow_rounded
-            : Icons.more_vert_outlined,
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      spacing: 5,
+      children: [
+        if (!appModel.showMenu) undoButton,
+        if (!appModel.showMenu) redo,
+        FloatingActionButton(
+          backgroundColor: colorBackground,
+          foregroundColor: colorForegound,
+          tooltip: 'Menu',
+          onPressed: () {
+            appModel.showMenu = !appModel.showMenu;
+            appModel.isSidePanelExpanded = true;
+          },
+          child: Icon(
+            appModel.showMenu
+                ? Icons.double_arrow_rounded
+                : Icons.more_vert_outlined,
+          ),
+        ),
+      ],
     );
   }
 
   return Column(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
-      FloatingActionButton(
-        backgroundColor: colorBackground,
-        foregroundColor: colorForegound,
-        tooltip:
-            'Undo\n---------------\n${appModel.selectedLayer.actionHistory(20).join('\n')}',
-        onPressed: () => appModel.undo(),
-        child: const Icon(Icons.undo),
-      ),
-      FloatingActionButton(
-        backgroundColor: colorBackground,
-        foregroundColor: colorForegound,
-        onPressed: () => appModel.redo(),
-        child: const Icon(Icons.redo),
-      ),
+      undoButton,
+      redo,
       const SizedBox(height: 8),
       FloatingActionButton(
         backgroundColor: colorBackground,
