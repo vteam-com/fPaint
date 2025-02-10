@@ -10,9 +10,11 @@ import 'package:fpaint/widgets/transparent_background.dart';
 class ColorPickerDialog extends StatefulWidget {
   const ColorPickerDialog({
     super.key,
+    this.title = 'Choose a Color',
     required this.color,
     required this.onColorChanged,
   });
+  final String title;
   final Color color;
   final ValueChanged<Color> onColorChanged;
 
@@ -41,175 +43,199 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final appModel = AppModel.of(context);
+
     // ignore: deprecated_member_use
     return WillPopScope(
       onWillPop: () async {
         widget.onColorChanged(_currentColor);
         return true;
       },
-      child: AlertDialog(
-        content: SingleChildScrollView(
-          child: SizedBox(
-            width: 400,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 20,
-              children: [
-                //----------------------------
-                // Color preview and selection sliders
-                Row(
-                  spacing: 10,
-                  children: [
-                    SizedBox(
-                      height: 60,
-                      width: 60,
-                      child: transparentPaperContainer(
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ColorPreview(
-                            colorUsed: ColorUsage(_currentColor, 1),
-                            border: false,
-                            minimal: false,
-                            onPressed: () {},
-                          ),
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: ColorSelector(
-                        color: _currentColor,
-                        onColorChanged: (color) {
-                          setState(() {
-                            _currentColor = color;
-                            _hexController.text = colorToHexString(color);
-                          });
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+      child: appModel.deviceSizeSmall
+          ? Dialog.fullscreen(
+              child: Column(
+                spacing: 20,
+                children: [
+                  Text(widget.title),
+                  _buildContent(appModel),
+                ],
+              ),
+            )
+          : AlertDialog(
+              title: Text(widget.title),
+              contentPadding: const EdgeInsets.all(2),
+              content: SizedBox(
+                width: 600,
+                child: _buildContent(appModel),
+              ),
+            ),
+    );
+  }
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    for (Color color in [
-                      Colors.red,
-                      Colors.orange,
-                      Colors.yellow,
-                      Colors.green,
-                      Colors.blue,
-                      Colors.purple,
-                    ])
-                      GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _currentColor = color;
-                            _hexController.text = colorToHexString(color);
-                          });
-                        },
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.grey.shade300,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+  Widget _buildContent(final AppModel appModel) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        spacing: 30,
+        children: [
+          //----------------------------
+          // Color preview and selection sliders
+          Row(
+            spacing: 10,
+            children: [
+              SizedBox(
+                height: 60,
+                width: 60,
+                child: transparentPaperContainer(
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ColorPreview(
+                      colorUsed: ColorUsage(_currentColor, 1),
+                      border: false,
+                      minimal: false,
+                      onPressed: () {},
+                    ),
+                  ),
                 ),
-
-                //----------------------------
-                // Top colors used in the image
-                TopColors(
-                  colorUsages: appModel.topColors,
-                  onRefresh: () {
+              ),
+              Expanded(
+                child: ColorSelector(
+                  color: _currentColor,
+                  onColorChanged: (color) {
                     setState(() {
-                      appModel.evaluatTopColor();
+                      _currentColor = color;
+                      _hexController.text = colorToHexString(color);
                     });
                   },
                 ),
+              ),
+            ],
+          ),
 
-                //----------------------------
-                // Hex value edit copy/paste
-                SizedBox(
-                  width: 200,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.paste),
-                        onPressed: () async {
-                          final data = await Clipboard.getData('text/plain');
-
-                          try {
-                            final color = getColorFromString(
-                              data?.text! as String,
-                            ); // #FF00FF00
-                            setState(() {
-                              _currentColor = color;
-                              _hexController.text = colorToHexString(color);
-                            });
-                          } catch (e) {
-                            // Invalid hex color format
-                          }
-                        },
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              for (Color color in [
+                Colors.red,
+                Colors.orange,
+                Colors.yellow,
+                Colors.green,
+                Colors.blue,
+                Colors.purple,
+              ])
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _currentColor = color;
+                      _hexController.text = colorToHexString(color);
+                    });
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 1,
                       ),
-                      Expanded(
-                        child: TextField(
-                          controller: _hexController,
-                          decoration: const InputDecoration(
-                            labelText: 'Hex Color',
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (value) {
-                            try {
-                              final color = getColorFromString(value);
-                              setState(() {
-                                _currentColor = color;
-                              });
-                            } catch (e) {
-                              // Invalid hex color format
-                            }
-                          },
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.copy),
-                        onPressed: () {
-                          Clipboard.setData(
-                            ClipboardData(
-                              text: colorToHexString(_currentColor),
-                            ),
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Hex Color copied to clipboard'),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              widget.onColorChanged(_currentColor);
-              Navigator.of(context).pop();
+
+          //----------------------------
+          // Top colors used in the image
+          TopColors(
+            colorUsages: appModel.topColors,
+            onRefresh: () {
+              setState(() {
+                appModel.evaluatTopColor();
+              });
             },
-            child: const Text('Apply'),
+          ),
+
+          //----------------------------
+          // Hex value edit copy/paste
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.paste),
+                onPressed: () async {
+                  final data = await Clipboard.getData('text/plain');
+
+                  try {
+                    final color = getColorFromString(
+                      data?.text! as String,
+                    ); // #FF00FF00
+                    setState(() {
+                      _currentColor = color;
+                      _hexController.text = colorToHexString(color);
+                    });
+                  } catch (e) {
+                    // Invalid hex color format
+                  }
+                },
+              ),
+              SizedBox(
+                width: 150,
+                child: TextField(
+                  controller: _hexController,
+                  decoration: const InputDecoration(
+                    labelText: 'Hex Color',
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    try {
+                      final color = getColorFromString(value);
+                      setState(() {
+                        _currentColor = color;
+                      });
+                    } catch (e) {
+                      // Invalid hex color format
+                    }
+                  },
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.copy),
+                onPressed: () {
+                  Clipboard.setData(
+                    ClipboardData(
+                      text: colorToHexString(_currentColor),
+                    ),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Hex Color copied to clipboard'),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 40,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  widget.onColorChanged(_currentColor);
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Apply'),
+              ),
+            ],
           ),
         ],
       ),

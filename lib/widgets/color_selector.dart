@@ -253,16 +253,12 @@ void showColorPicker({
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text(title),
-        content: SingleChildScrollView(
-          child: ColorPickerDialog(
-            color: color,
-            onColorChanged: (Color color) {
-              onSelectedColor(color);
-            },
-          ),
-        ),
+      return ColorPickerDialog(
+        title: title,
+        color: color,
+        onColorChanged: (Color color) {
+          onSelectedColor(color);
+        },
       );
     },
   );
