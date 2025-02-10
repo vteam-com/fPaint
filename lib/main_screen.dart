@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fpaint/floating_buttons.dart';
 import 'package:fpaint/panels/side_panel.dart';
 import 'package:fpaint/widgets/canvas_widget.dart';
@@ -12,6 +13,8 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    // Hide status bar and use full screen
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     // Ensure that AppModel is provided above this widget in the widget tree and listening
     final AppModel appModel = AppModel.of(context, listen: true);
 
