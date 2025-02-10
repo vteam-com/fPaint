@@ -53,9 +53,17 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
       child: appModel.deviceSizeSmall
           ? Dialog.fullscreen(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: 20,
                 children: [
-                  Text(widget.title),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      widget.title,
+                      textAlign: TextAlign.start,
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
                   _buildContent(appModel),
                 ],
               ),

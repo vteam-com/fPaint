@@ -19,7 +19,11 @@ Widget floatingActionButtons(final AppModel appModel) {
         appModel.showMenu = !appModel.showMenu;
         appModel.isSidePanelExpanded = !appModel.isSidePanelExpanded;
       },
-      child: const Icon(Icons.more_vert_outlined),
+      child: Icon(
+        appModel.showMenu
+            ? Icons.double_arrow_rounded
+            : Icons.more_vert_outlined,
+      ),
     );
   }
 
