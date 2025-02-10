@@ -1,28 +1,5 @@
 import 'dart:ui';
-
-import 'package:flutter/material.dart';
 import 'package:fpaint/models/user_action.dart';
-
-class Selector {
-  bool isVisible = false;
-  Path path = Path();
-  bool isMoving = false;
-
-  void addPosition(final Offset position) {
-    isVisible = true;
-    if (isMoving) {
-      // debugPrint('Selector isMoving - addPosition ${path.getBounds().topLeft}');
-      final r = Rect.fromPoints(path.getBounds().topLeft, position);
-      path = Path();
-      path.addRect(r);
-    } else {
-      // debugPrint('Selector start from $position');
-      path = Path();
-      path.addRect(Rect.fromPoints(position, position));
-      isMoving = true;
-    }
-  }
-}
 
 void renderPencil(
   final Canvas canvas,
@@ -162,29 +139,6 @@ void renderImage(final Canvas canvas, final UserAction userAction) {
 
   if (userAction.image != null) {
     canvas.drawImage(userAction.image!, userAction.positions.first, Paint());
-  }
-}
-
-void renderSelector(
-  final Canvas canvas,
-  final Selector selector,
-) {
-  if (selector.isVisible) {
-    final Paint paint = Paint();
-    paint.color = Colors.transparent;
-    paint.strokeCap = StrokeCap.square;
-    paint.strokeWidth = 1;
-    paint.style = PaintingStyle.fill;
-    paint.style = PaintingStyle.stroke;
-    paint.color = Colors.blueGrey;
-
-    drawPath(
-      selector.path,
-      canvas,
-      paint,
-      4,
-      4,
-    );
   }
 }
 

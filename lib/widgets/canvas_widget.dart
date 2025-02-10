@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
+import 'package:fpaint/widgets/selector_model.dart';
 
 /// Provides a canvas widget that supports scaling and panning.
 ///
@@ -67,6 +68,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
         final double centerX = max(0, (viewportWidth - scaledWidth) / 2);
         final double centerY = max(0, (viewportHeight - scaledHeight) / 2);
 
+        final double topLeftTranslated = _offset.dx + centerX;
+        final double topTopTranslated = _offset.dy + centerY;
+
         return GestureDetector(
           onScaleStart: (final ScaleStartDetails details) {
             // debugPrint('SSS onScaleStart {$details.pointerCount}');
@@ -121,62 +125,86 @@ class CanvasWidgetState extends State<CanvasWidget> {
             _lastFocalPoint = null;
             _panStartFocalPoint = null;
           },
-          child: ClipRect(
-            child: Transform(
-              transform: Matrix4.identity()
-                ..translate(
-                  _offset.dx + centerX,
-                  _offset.dy + centerY,
-                )
-                ..scale(_scale),
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                width: max(widget.canvasWidth, viewportWidth),
-                height: max(widget.canvasHeight, viewportHeight),
-                child: Listener(
-                  //----------------------------------------------------------------
-                  // Pinch/Zoom scaling for WEB
-                  onPointerSignal: (final PointerSignalEvent event) {
-                    if (event is PointerScaleEvent) {
-                      appModel.setCanvasScale(
-                        appModel.canvas.scale * event.scale,
-                      );
-                    }
-                  },
+          child: Stack(
+            children: [
+              Transform(
+                alignment: Alignment.topLeft,
+                transform: Matrix4.identity()
+                  ..translate(
+                    topLeftTranslated,
+                    topTopTranslated,
+                  )
+                  ..scale(_scale),
+                child: SizedBox(
+                  width: max(widget.canvasWidth, viewportWidth),
+                  height: max(widget.canvasHeight, viewportHeight),
+                  child: Listener(
+                    //----------------------------------------------------------------
+                    // Pinch/Zoom scaling for WEB
+                    onPointerSignal: (final PointerSignalEvent event) {
+                      if (event is PointerScaleEvent) {
+                        appModel.setCanvasScale(
+                          appModel.canvas.scale * event.scale,
+                        );
+                      }
+                    },
 
-                  //----------------------------------------------------------------
-                  // Pinch/Zoom scaling for Desktop
-                  onPointerPanZoomUpdate:
-                      (final PointerPanZoomUpdateEvent event) {
-                    _scaleCanvas(appModel, event.scale, event.position);
-                  },
+                    //----------------------------------------------------------------
+                    // Pinch/Zoom scaling for Desktop
+                    onPointerPanZoomUpdate:
+                        (final PointerPanZoomUpdateEvent event) {
+                      _scaleCanvas(appModel, event.scale, event.position);
+                    },
 
-                  //----------------------------------------------------------------
-                  // Draw Start
-                  onPointerDown: (final PointerDownEvent event) =>
-                      _handlePointerStart(appModel, event),
+                    //----------------------------------------------------------------
+                    // Draw Start
+                    onPointerDown: (final PointerDownEvent event) =>
+                        _handlePointerStart(appModel, event),
 
-                  //----------------------------------------------------------------
-                  // Draw Update
-                  onPointerMove: (final PointerEvent event) =>
-                      _handlePointerMove(appModel, event),
+                    //----------------------------------------------------------------
+                    // Draw Update
+                    onPointerMove: (final PointerEvent event) =>
+                        _handlePointerMove(appModel, event),
 
-                  //----------------------------------------------------------------
-                  // Draw End
-                  onPointerUp: (PointerUpEvent event) =>
-                      _handPointerEnd(appModel, event),
+                    //----------------------------------------------------------------
+                    // Draw End
+                    onPointerUp: (PointerUpEvent event) =>
+                        _handPointerEnd(appModel, event),
 
-                  //----------------------------------------------------------------
-                  // Draw End
-                  onPointerCancel: (final PointerCancelEvent event) =>
-                      _handPointerEnd(appModel, event),
+                    //----------------------------------------------------------------
+                    // Draw End
+                    onPointerCancel: (final PointerCancelEvent event) =>
+                        _handPointerEnd(appModel, event),
 
-                  //----------------------------------------------------------------
-                  // Main content
-                  child: CanvasPanel(appModel: appModel),
+                    //----------------------------------------------------------------
+                    // Main content
+                    child: CanvasPanel(appModel: appModel),
+                  ),
                 ),
               ),
-            ),
+              if (appModel.selector.isVisible)
+                SelectionHandleWidget(
+                  selectionRect: Rect.fromLTRB(
+                    topLeftTranslated +
+                        appModel.selector.boundingRect.left * (_scale * _scale),
+                    topTopTranslated +
+                        appModel.selector.boundingRect.top * (_scale * _scale),
+                    topLeftTranslated +
+                        appModel.selector.boundingRect.right *
+                            (_scale * _scale),
+                    topTopTranslated +
+                        appModel.selector.boundingRect.bottom *
+                            (_scale * _scale),
+                  ),
+                  onDrag: (Offset offset) {
+                    appModel.selector.translate(offset);
+                    appModel.update();
+                  },
+                  onResize: (final ui.Offset p0, final HandlePosition handle) {
+                    // TODO
+                  },
+                ),
+            ],
           ),
         );
       },

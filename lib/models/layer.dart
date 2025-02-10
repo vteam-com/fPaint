@@ -29,8 +29,6 @@ class Layer {
     _opacity = opacity;
   }
 
-  Selector selector = Selector();
-
   String name;
   String id;
   final List<UserAction> _actionStack = [];
@@ -275,8 +273,6 @@ class Layer {
           break;
       }
     }
-
-    renderSelector(canvas, selector);
 
     // Restore the canvas to apply the opacity
     canvas.restore();

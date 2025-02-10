@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/canvas_model.dart';
 import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/widgets/selector_model.dart';
 import 'package:provider/provider.dart';
 
 // Exports
@@ -62,6 +63,8 @@ class AppModel extends ChangeNotifier {
   Tools get selectedTool => _selectedTool;
 
   bool deviceSizeSmall = false;
+
+  SelectorModel selector = SelectorModel();
 
   //-------------------------------------------
   bool get canvasResizeLockAspectRatio => canvas.canvasResizeLockAspectRatio;
@@ -298,19 +301,19 @@ class AppModel extends ChangeNotifier {
 
   void selectorStart(final Offset position) {
     // debugPrint('Selector start: $position');
-    this.selectedLayer.selector.addPosition(position);
+    this.selector.addPosition(position);
     update();
   }
 
   void selectorMove(final Offset position) {
     // debugPrint('Selector MOVE: $position');
-    this.selectedLayer.selector.addPosition(position);
+    this.selector.addPosition(position);
     update();
   }
 
   void selectorEndMovement() {
     // debugPrint('Selector END');
-    this.selectedLayer.selector.isMoving = false;
+    this.selector.isMoving = false;
     update();
   }
 
