@@ -12,7 +12,8 @@ enum Tools {
   rectangle,
   fill,
   eraser,
-  image;
+  image,
+  selector;
 
   bool isSupported(ToolAttribute attribute) {
     return toolsSupportedAttributes[this]?.contains(attribute) ?? false;
@@ -30,41 +31,51 @@ enum ToolAttribute {
   colorOutline,
   colorFill,
   tolerance,
+  topColors,
 }
 
 final Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
   Tools.pencil: {
     ToolAttribute.strokeSize,
     ToolAttribute.colorOutline,
+    ToolAttribute.topColors,
   },
   Tools.brush: {
     ToolAttribute.strokeSize,
     ToolAttribute.brushStyle,
     ToolAttribute.colorOutline,
+    ToolAttribute.topColors,
   },
   Tools.line: {
     ToolAttribute.colorOutline,
     ToolAttribute.strokeSize,
     ToolAttribute.brushStyle,
+    ToolAttribute.topColors,
   },
   Tools.circle: {
     ToolAttribute.strokeSize,
     ToolAttribute.brushStyle,
     ToolAttribute.colorOutline,
     ToolAttribute.colorFill,
+    ToolAttribute.topColors,
   },
   Tools.rectangle: {
     ToolAttribute.strokeSize,
     ToolAttribute.brushStyle,
     ToolAttribute.colorOutline,
     ToolAttribute.colorFill,
+    ToolAttribute.topColors,
   },
   Tools.fill: {
     ToolAttribute.colorFill,
     ToolAttribute.tolerance,
+    ToolAttribute.topColors,
   },
   Tools.eraser: {
     ToolAttribute.strokeSize,
+  },
+  Tools.selector: {
+    // nothing to support yet
   },
 };
 

@@ -134,6 +134,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
                 width: max(widget.canvasWidth, viewportWidth),
                 height: max(widget.canvasHeight, viewportHeight),
                 child: Listener(
+                  //----------------------------------------------------------------
                   // Pinch/Zoom scaling for WEB
                   onPointerSignal: (final PointerSignalEvent event) {
                     if (event is PointerScaleEvent) {
@@ -142,91 +143,36 @@ class CanvasWidgetState extends State<CanvasWidget> {
                       );
                     }
                   },
+
+                  //----------------------------------------------------------------
                   // Pinch/Zoom scaling for Desktop
                   onPointerPanZoomUpdate:
                       (final PointerPanZoomUpdateEvent event) {
                     _scaleCanvas(appModel, event.scale, event.position);
                   },
 
+                  //----------------------------------------------------------------
                   // Draw Start
-                  onPointerDown: (final PointerDownEvent details) async {
-                    // only draw when not panning or scalling
-                    if (isPanningOrScaling) {
-                      // debugPrint(
-                      //   'currently panning or scaling ignore pointer down event',
-                      // );
-                    } else {
-                      // debugPrint(
-                      //   'DOWN ${details.buttons} P:${details.pointer}',
-                      // );
-                      if (details.buttons == 1 && _activePointerId == -1) {
-                        if (appModel.isCurrentSelectionReadyForAction) {
-                          _activePointerId = details.pointer;
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Selection is hidden.'),
-                            ),
-                          );
-                        }
-                      }
-                    }
-                  },
-                  // Draw Update
-                  onPointerMove: (final PointerEvent details) async {
-                    if (isPanningOrScaling) {
-                      // Currently panning or scaling so don't draw
-                      // debugPrint('DRAW MOVE PANNING IS ON');
-                    } else {
-                      // debugPrint(
-                      //   'DRAW MOVE ${details.buttons} P:${details.pointer}',
-                      // );
-                      if (details.buttons == 1 &&
-                          _activePointerId == details.pointer) {
-                        if (appModel.userActionStartingOffset == null) {
-                          await _onUserActionStart(
-                            appModel: appModel,
-                            position:
-                                details.localPosition / appModel.canvas.scale,
-                          );
-                        } else {
-                          _onUserActionUpdate(
-                            appModel: appModel,
-                            position:
-                                details.localPosition / appModel.canvas.scale,
-                          );
-                        }
-                      }
-                    }
-                  },
-                  // Draw End
-                  onPointerUp: (final PointerUpEvent details) async {
-                    if (!isPanningOrScaling) {
-                      if (_activePointerId == details.pointer) {
-                        // debugPrint('UP ${details.buttons}');
-                        // handle the case that the user click and release the mouse withou moving
-                        if (appModel.userActionStartingOffset == null &&
-                            (appModel.selectedTool == Tools.pencil ||
-                                appModel.selectedTool == Tools.fill ||
-                                appModel.selectedTool == Tools.eraser)) {
-                          await _onUserActionStart(
-                            appModel: appModel,
-                            position:
-                                details.localPosition / appModel.canvas.scale,
-                          );
-                        }
+                  onPointerDown: (final PointerDownEvent event) =>
+                      _handlePointerStart(appModel, event),
 
-                        _onUserActionEnded(appModel);
-                      }
-                    }
-                  },
+                  //----------------------------------------------------------------
+                  // Draw Update
+                  onPointerMove: (final PointerEvent event) =>
+                      _handlePointerMove(appModel, event),
+
+                  //----------------------------------------------------------------
                   // Draw End
-                  onPointerCancel: (final PointerCancelEvent details) {
-                    if (_activePointerId == details.pointer) {
-                      // debugPrint('CANCEL ${details.buttons}');
-                      _onUserActionEnded(appModel);
-                    }
-                  },
+                  onPointerUp: (PointerUpEvent event) =>
+                      _handPointerEnd(appModel, event),
+
+                  //----------------------------------------------------------------
+                  // Draw End
+                  onPointerCancel: (final PointerCancelEvent event) =>
+                      _handPointerEnd(appModel, event),
+
+                  //----------------------------------------------------------------
+                  // Main content
                   child: CanvasPanel(appModel: appModel),
                 ),
               ),
@@ -237,11 +183,100 @@ class CanvasWidgetState extends State<CanvasWidget> {
     );
   }
 
-  Future<void> _onUserActionStart({
+  Future<void> _handlePointerStart(
+    final AppModel appModel,
+    final PointerDownEvent event,
+  ) async {
+    // only draw when not panning or scalling
+    if (isPanningOrScaling) {
+      // debugPrint('currently panning or scaling ignore pointer down event');
+    } else {
+      // debugPrint('DOWN ${details.buttons} P:${details.pointer}');
+      if (event.buttons == 1 && _activePointerId == -1) {
+        if (appModel.isCurrentSelectionReadyForAction) {
+          _activePointerId = event.pointer;
+
+          if (appModel.selectedTool == Tools.selector) {
+            appModel.selectorStart(event.localPosition / appModel.canvas.scale);
+            return;
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Selection is hidden.'),
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _handlePointerMove(
+    final AppModel appModel,
+    final PointerEvent event,
+  ) async {
+    final Offset position = event.localPosition / appModel.canvas.scale;
+    if (isPanningOrScaling) {
+      // Currently panning or scaling so don't draw
+      // debugPrint('DRAW MOVE PANNING IS ON');
+    } else {
+      // debugPrint('DRAW MOVE ${details.buttons} P:${details.pointer}');
+      if (event.buttons == 1 && _activePointerId == event.pointer) {
+        if (appModel.selectedTool == Tools.selector) {
+          appModel.selectorMove(position);
+          return;
+        }
+
+        // the other tools
+        if (appModel.userActionStartingOffset == null) {
+          await _onUserActionStart(
+            appModel: appModel,
+            position: position,
+          );
+        } else {
+          _onUserActionMove(
+            appModel: appModel,
+            position: event.localPosition / appModel.canvas.scale,
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _handPointerEnd(
+    final AppModel appModel,
+    final PointerEvent event,
+  ) async {
+    if (!isPanningOrScaling) {
+      if (_activePointerId == event.pointer) {
+        // debugPrint('UP ${details.buttons}');
+        // handle the case that the user click and release the mouse withou moving
+        if (appModel.selectedTool == Tools.selector) {
+          appModel.selectorEndMovement();
+          return;
+        }
+
+        if (appModel.userActionStartingOffset == null &&
+            (appModel.selectedTool == Tools.pencil ||
+                appModel.selectedTool == Tools.fill ||
+                appModel.selectedTool == Tools.eraser)) {
+          await _onUserActionStart(
+            appModel: appModel,
+            position: event.localPosition / appModel.canvas.scale,
+          );
+        }
+
+        _onUserActionEnded(appModel);
+      }
+    }
+  }
+
+  Future<bool> _onUserActionStart({
     required final AppModel appModel,
     required final Offset position,
   }) async {
     appModel.userActionStartingOffset = position;
+
     if (appModel.selectedTool == Tools.fill) {
       // Create a flattened image from the current layer
       final ui.Image img = await appModel.selectedLayer
@@ -258,25 +293,32 @@ class CanvasWidgetState extends State<CanvasWidget> {
       appModel.selectedLayer
           .addImage(imageToAdd: filledImage, tool: Tools.fill);
       appModel.update();
-    } else {
-      appModel.currentUserAction = UserAction(
-        tool: appModel.selectedTool,
-        positions: [position, position],
-        brushColor: appModel.brushColor,
-        fillColor: appModel.fillColor,
-        brushSize: appModel.brusSize,
-        brushStyle: appModel.brushStyle,
-      );
-
-      appModel.addUserAction(action: appModel.currentUserAction!);
+      return true;
     }
+
+    appModel.currentUserAction = UserAction(
+      tool: appModel.selectedTool,
+      positions: [position, position],
+      brushColor: appModel.brushColor,
+      fillColor: appModel.fillColor,
+      brushSize: appModel.brusSize,
+      brushStyle: appModel.brushStyle,
+    );
+
+    appModel.addUserAction(action: appModel.currentUserAction!);
+    return false;
   }
 
-  void _onUserActionUpdate({
+  void _onUserActionMove({
     required final AppModel appModel,
     required final Offset position,
   }) {
     if (appModel.userActionStartingOffset != null) {
+      if (appModel.selectedTool == Tools.selector) {
+        appModel.selectorMove(position);
+        return;
+      }
+
       if (appModel.selectedTool == Tools.pencil) {
         // Add the pixel
         appModel.updateLastUserAction(
@@ -313,6 +355,11 @@ class CanvasWidgetState extends State<CanvasWidget> {
   void _onUserActionEnded(
     final AppModel appModel,
   ) {
+    if (appModel.selectedTool == Tools.selector) {
+      appModel.selectorEndMovement();
+      return;
+    }
+
     if (appModel.currentUserAction?.tool == Tools.brush) {
       // Optimize list of draw actions into a single path
     }

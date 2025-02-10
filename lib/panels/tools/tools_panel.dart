@@ -154,6 +154,20 @@ class ToolsPanel extends StatelessWidget {
           appModel.selectedTool = Tools.eraser;
         },
       ),
+
+      ToolSelector(
+        minimal: minimal,
+        name: 'Selector',
+        image: iconAndColor(
+          context,
+          selectedTool == Tools.selector,
+          Icons.photo_size_select_large,
+        ),
+        isSelected: selectedTool == Tools.selector,
+        onPressed: () {
+          appModel.selectedTool = Tools.selector;
+        },
+      ),
     ];
     return tools;
   }
@@ -316,22 +330,25 @@ class ToolsPanel extends StatelessWidget {
       );
     }
 
-    widgets.add(
-      TopColors(
-        colorUsages: appModel.topColors,
-        onRefresh: () => appModel.evaluatTopColor(),
-        minimal: minimal,
-      ),
-    );
+    // Top colors
+    if (selectedTool.isSupported(ToolAttribute.topColors)) {
+      widgets.add(
+        TopColors(
+          colorUsages: appModel.topColors,
+          onRefresh: () => appModel.evaluatTopColor(),
+          minimal: minimal,
+        ),
+      );
 
-    // Add a separator between each element
-    if (!minimal) {
-      List<Widget> separatedWidgets = [];
-      for (int i = 0; i < widgets.length; i++) {
-        separatedWidgets.add(widgets[i]);
-        separatedWidgets.add(separator());
+      // Add a separator between each element
+      if (!minimal) {
+        List<Widget> separatedWidgets = [];
+        for (int i = 0; i < widgets.length; i++) {
+          separatedWidgets.add(widgets[i]);
+          separatedWidgets.add(separator());
+        }
+        return separatedWidgets;
       }
-      return separatedWidgets;
     }
     return widgets;
   }

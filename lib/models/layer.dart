@@ -29,6 +29,8 @@ class Layer {
     _opacity = opacity;
   }
 
+  Selector selector = Selector();
+
   String name;
   String id;
   final List<UserAction> _actionStack = [];
@@ -40,6 +42,22 @@ class Layer {
   ///-------------------------------------------
   /// Modifed state
   bool hasChanged = true;
+
+  List<ColorUsage> topColorsUsed = [];
+
+  void _cacheTopColorUsed() async {
+    topColorsUsed = [];
+    if (cachedThumnailImage != null) {
+      final List<ColorUsage> imageColors =
+          await getImageColors(cachedThumnailImage!);
+
+      for (final ColorUsage colorUsage in imageColors) {
+        if (!topColorsUsed.any((c) => c.color == colorUsage.color)) {
+          topColorsUsed.add(colorUsage);
+        }
+      }
+    }
+  }
 
   Rect getArea() {
     if (_actionStack.isEmpty) {
@@ -252,103 +270,16 @@ class Layer {
         case Tools.image:
           renderImage(canvas, userAction);
           break;
+        case Tools.selector:
+          // the rendering for this tool is done below
+          break;
       }
     }
 
+    renderSelector(canvas, selector);
+
     // Restore the canvas to apply the opacity
     canvas.restore();
-  }
-
-  static void renderPath(
-    final Canvas canvas,
-    final UserAction userAction,
-  ) {
-    final Paint paint = Paint();
-    paint.color = userAction.fillColor;
-    paint.style = PaintingStyle.stroke;
-    paint.strokeCap = StrokeCap.round;
-    paint.strokeWidth = userAction.brushSize;
-
-    final ui.Path path = Path()
-      ..moveTo(
-        userAction.positions.first.dx,
-        userAction.positions.first.dy,
-      );
-    for (final ui.Offset position in userAction.positions) {
-      path.lineTo(position.dx, position.dy);
-    }
-    paint.style = PaintingStyle.stroke;
-    paint.color = userAction.brushColor;
-    applyBrushStyle(canvas, paint, path, userAction);
-  }
-
-  static void renderLine(
-    final Canvas canvas,
-    final UserAction userAction,
-  ) {
-    final Paint paint = Paint();
-    paint.color = userAction.fillColor;
-    paint.strokeCap = StrokeCap.round;
-    paint.strokeWidth = userAction.brushSize;
-    paint.style = PaintingStyle.stroke;
-
-    final ui.Path path = Path()
-      ..moveTo(userAction.positions.first.dx, userAction.positions.first.dy)
-      ..lineTo(userAction.positions.last.dx, userAction.positions.last.dy);
-    paint.color = userAction.brushColor;
-    applyBrushStyle(canvas, paint, path, userAction);
-  }
-
-  static void renderCircle(
-    final Canvas canvas,
-    final UserAction userAction,
-  ) {
-    final Paint paint = Paint();
-    paint.color = userAction.fillColor;
-    paint.strokeCap = StrokeCap.round;
-    paint.strokeWidth = userAction.brushSize;
-    paint.style = PaintingStyle.fill;
-
-    final double radius =
-        (userAction.positions.first - userAction.positions.last).distance / 2;
-    final ui.Offset center = Offset(
-      (userAction.positions.first.dx + userAction.positions.last.dx) / 2,
-      (userAction.positions.first.dy + userAction.positions.last.dy) / 2,
-    );
-    canvas.drawCircle(center, radius, paint);
-    paint.style = PaintingStyle.stroke;
-    paint.color = userAction.brushColor;
-    final path = Path()
-      ..addOval(
-        Rect.fromCircle(
-          center: center,
-          radius: radius,
-        ),
-      );
-    applyBrushStyle(canvas, paint, path, userAction);
-  }
-
-  static void renderRectangle(
-    final Canvas canvas,
-    final UserAction userAction,
-  ) {
-    final Paint paint = Paint();
-    paint.color = userAction.fillColor;
-    paint.strokeCap = StrokeCap.round;
-    paint.strokeWidth = userAction.brushSize;
-    paint.style = PaintingStyle.fill;
-
-    if (userAction.positions.length == 2) {
-      final rect = Rect.fromPoints(
-        userAction.positions.first,
-        userAction.positions.last,
-      );
-      canvas.drawRect(rect, paint);
-      paint.style = PaintingStyle.stroke;
-      paint.color = userAction.brushColor;
-      final path = Path()..addRect(rect);
-      applyBrushStyle(canvas, paint, path, userAction);
-    }
   }
 
   Path getPathUsingFloodFill({
@@ -443,21 +374,5 @@ class Layer {
     // Convert the picture to an image
     final picture = recorder.endRecording();
     return picture.toImage(baseImage.width, baseImage.height);
-  }
-
-  List<ColorUsage> topColorsUsed = [];
-
-  void _cacheTopColorUsed() async {
-    topColorsUsed = [];
-    if (cachedThumnailImage != null) {
-      final List<ColorUsage> imageColors =
-          await getImageColors(cachedThumnailImage!);
-
-      for (final ColorUsage colorUsage in imageColors) {
-        if (!topColorsUsed.any((c) => c.color == colorUsage.color)) {
-          topColorsUsed.add(colorUsage);
-        }
-      }
-    }
   }
 }

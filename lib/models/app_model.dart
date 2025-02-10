@@ -296,6 +296,24 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
+  void selectorStart(final Offset position) {
+    // debugPrint('Selector start: $position');
+    this.selectedLayer.selector.addPosition(position);
+    update();
+  }
+
+  void selectorMove(final Offset position) {
+    // debugPrint('Selector MOVE: $position');
+    this.selectedLayer.selector.addPosition(position);
+    update();
+  }
+
+  void selectorEndMovement() {
+    // debugPrint('Selector END');
+    this.selectedLayer.selector.isMoving = false;
+    update();
+  }
+
   List<ColorUsage> topColors = [
     ColorUsage(Colors.white, 1),
     ColorUsage(Colors.black, 1),
