@@ -31,7 +31,7 @@
         "macos/": false,
         "windows/": true,
         "linux/": true,
-        "web/": true,
+        "web/": false,
         "node_modules/": true,
         "build/": true,
         ".dart_tool/": true,
