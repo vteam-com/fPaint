@@ -18,9 +18,7 @@ class MainScreen extends StatelessWidget {
     // Ensure that AppModel is provided above this widget in the widget tree and listening
     final AppModel appModel = AppModel.of(context, listen: true);
 
-    if (MediaQuery.of(context).size.width < 600) {
-      appModel.deviceSizeSmall = true;
-    }
+    appModel.deviceSizeSmall = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
       backgroundColor: Colors.grey,
