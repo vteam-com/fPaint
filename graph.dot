@@ -21,6 +21,7 @@ digraph "" {
   "/lib/panels/side_panel.dart" [label="side_panel"];
   "/lib/panels/share_panel.dart" [label="share_panel"];
   "/lib/panels/canvas_settings.dart" [label="canvas_settings"];
+  "/lib/floating_buttons.dart" [label="floating_buttons"];
   "/lib/models/menu_model.dart" [label="menu_model"];
   "/lib/models/layers.dart" [label="layers"];
   "/lib/models/user_action.dart" [label="user_action"];
@@ -78,6 +79,7 @@ digraph "" {
     }
     subgraph "cluster~/lib" {
       label="lib";
+      "/lib/floating_buttons.dart";
       "/lib/main.dart";
       "/lib/main_screen.dart";
       subgraph "cluster~/lib/panels" {
@@ -190,6 +192,7 @@ digraph "" {
   "/lib/panels/share_panel.dart" -> "/lib/panels/canvas_panel.dart";
   "/lib/panels/canvas_settings.dart" -> "/lib/models/app_model.dart";
   "/lib/panels/canvas_settings.dart" -> "/lib/widgets/nine_grid_selector.dart";
+  "/lib/floating_buttons.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layers.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/models/layers.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart";
@@ -224,6 +227,7 @@ digraph "" {
   "/lib/files/export_download_non_web.dart" -> "/lib/panels/share_panel.dart";
   "/lib/files/import_files.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/import_files.dart" -> "/lib/models/app_model.dart";
+  "/lib/main_screen.dart" -> "/lib/floating_buttons.dart";
   "/lib/main_screen.dart" -> "/lib/panels/side_panel.dart";
   "/lib/main_screen.dart" -> "/lib/widgets/canvas_widget.dart";
   "/lib/main_screen.dart" -> "/lib/models/app_model.dart";
