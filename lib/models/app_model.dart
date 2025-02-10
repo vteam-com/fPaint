@@ -61,6 +61,8 @@ class AppModel extends ChangeNotifier {
 
   Tools get selectedTool => _selectedTool;
 
+  bool deviceSizeSmall = false;
+
   //-------------------------------------------
   bool get canvasResizeLockAspectRatio => canvas.canvasResizeLockAspectRatio;
   set canvasResizeLockAspectRatio(bool value) {
@@ -117,6 +119,18 @@ class AppModel extends ChangeNotifier {
 
   Color get brushColor => _colorForStroke;
 
+  //----------------------------------------------------------------
+  // SidePanel Expanded/Collapsed
+  bool _showMenu = false;
+
+  bool get showMenu => _showMenu;
+
+  set showMenu(final bool value) {
+    _showMenu = value;
+    update();
+  }
+
+  //----------------------------------------------------------------
   // SidePanel Expanded/Collapsed
   bool _isSidePanelExpanded = true;
 

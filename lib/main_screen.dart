@@ -15,6 +15,10 @@ class MainScreen extends StatelessWidget {
     // Ensure that AppModel is provided above this widget in the widget tree and listening
     final AppModel appModel = AppModel.of(context, listen: true);
 
+    if (MediaQuery.of(context).size.width < 600) {
+      appModel.deviceSizeSmall = true;
+    }
+
     return Scaffold(
       backgroundColor: Colors.grey,
       body: MultiSplitViewTheme(
@@ -29,32 +33,49 @@ class MainScreen extends StatelessWidget {
             strokeCap: StrokeCap.round,
           ),
         ),
-        child: MultiSplitView(
-          key: Key('key_side_panel_size_${appModel.isSidePanelExpanded}'),
-          axis: Axis.horizontal,
-          onDividerDoubleTap: (dividerIndex) {
-            appModel.isSidePanelExpanded = !appModel.isSidePanelExpanded;
-          },
-          initialAreas: [
-            Area(
-              size: appModel.isSidePanelExpanded ? 400 : minSidePanelSize,
-              min: appModel.isSidePanelExpanded ? 350 : minSidePanelSize,
-              max: appModel.isSidePanelExpanded ? 600 : minSidePanelSize,
-              builder: (final BuildContext context, final Area area) =>
-                  const SidePanel(),
-            ),
-            Area(
-              builder: (final BuildContext context, final Area area) =>
-                  CanvasWidget(
-                canvasWidth: appModel.canvas.width,
-                canvasHeight: appModel.canvas.height,
-              ),
-            ),
-          ],
-        ),
+        child: (appModel.deviceSizeSmall)
+            ? _buildMobilePhoneLayout(appModel)
+            : _buildMidToLargeDevices(appModel),
       ),
       // Undo/Redo
       floatingActionButton: floatingActionButtons(appModel),
+    );
+  }
+
+  Widget _buildMobilePhoneLayout(final AppModel appModel) {
+    if (appModel.showMenu) {
+      return const SidePanel();
+    } else {
+      return CanvasWidget(
+        canvasWidth: appModel.canvas.width,
+        canvasHeight: appModel.canvas.height,
+      );
+    }
+  }
+
+  Widget _buildMidToLargeDevices(final AppModel appModel) {
+    return MultiSplitView(
+      key: Key('key_side_panel_size_${appModel.isSidePanelExpanded}'),
+      axis: Axis.horizontal,
+      onDividerDoubleTap: (dividerIndex) {
+        appModel.isSidePanelExpanded = !appModel.isSidePanelExpanded;
+      },
+      initialAreas: [
+        Area(
+          size: appModel.isSidePanelExpanded ? 400 : minSidePanelSize,
+          min: appModel.isSidePanelExpanded ? 350 : minSidePanelSize,
+          max: appModel.isSidePanelExpanded ? 600 : minSidePanelSize,
+          builder: (final BuildContext context, final Area area) =>
+              const SidePanel(),
+        ),
+        Area(
+          builder: (final BuildContext context, final Area area) =>
+              CanvasWidget(
+            canvasWidth: appModel.canvas.width,
+            canvasHeight: appModel.canvas.height,
+          ),
+        ),
+      ],
     );
   }
 }
