@@ -17,7 +17,7 @@ Widget floatingActionButtons(final AppModel appModel) {
       tooltip: 'Menu',
       onPressed: () {
         appModel.showMenu = !appModel.showMenu;
-        appModel.isSidePanelExpanded = !appModel.isSidePanelExpanded;
+        appModel.isSidePanelExpanded = true;
       },
       child: Icon(
         appModel.showMenu
