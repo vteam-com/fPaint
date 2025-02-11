@@ -8,8 +8,10 @@ class SelectionHandleWidget extends StatelessWidget {
     required this.selectionRect,
     required this.onDrag,
     required this.onResize,
+    this.enableMoveAndResize = true,
   });
   final Rect selectionRect;
+  final bool enableMoveAndResize;
   final Function(Offset) onDrag;
   final Function(SelectorHandlePosition, Offset) onResize;
 
@@ -18,100 +20,104 @@ class SelectionHandleWidget extends StatelessWidget {
     return SizedBox(
       width: selectionRect.left + selectionRect.width + 20,
       height: selectionRect.bottom + selectionRect.height + 20,
-      child: Stack(
-        children: [
-          MarchingAntsSelection(rect: selectionRect),
+      child: enableMoveAndResize
+          ? Stack(
+              children: [
+                MarchingAntsSelection(rect: selectionRect),
 
-          // Center handle for moving
-          _buildHandle(
-            position: selectionRect.center,
-            cursor: SystemMouseCursors.move,
-            onPanUpdate: (details) => onDrag(
-              details.delta,
-            ),
-          ),
+                // Center handle for moving
+                _buildHandle(
+                  position: selectionRect.center,
+                  cursor: SystemMouseCursors.move,
+                  onPanUpdate: (details) => onDrag(
+                    details.delta,
+                  ),
+                ),
 
-          // Top Left
-          _buildHandle(
-            position: selectionRect.topLeft,
-            cursor: SystemMouseCursors.resizeUpLeft,
-            onPanUpdate: (details) => onResize(
-              SelectorHandlePosition.topLeft,
-              details.delta,
-            ),
-          ),
+                // Top Left
+                _buildHandle(
+                  position: selectionRect.topLeft,
+                  cursor: SystemMouseCursors.resizeUpLeft,
+                  onPanUpdate: (details) => onResize(
+                    SelectorHandlePosition.topLeft,
+                    details.delta,
+                  ),
+                ),
 
-          // Top Right
-          _buildHandle(
-            position: selectionRect.topRight,
-            cursor: SystemMouseCursors.resizeUpRight,
-            onPanUpdate: (details) => onResize(
-              SelectorHandlePosition.topRight,
-              details.delta,
-            ),
-          ),
+                // Top Right
+                _buildHandle(
+                  position: selectionRect.topRight,
+                  cursor: SystemMouseCursors.resizeUpRight,
+                  onPanUpdate: (details) => onResize(
+                    SelectorHandlePosition.topRight,
+                    details.delta,
+                  ),
+                ),
 
-          // Bottom Left
-          _buildHandle(
-            position: selectionRect.bottomLeft,
-            cursor: SystemMouseCursors.resizeDownLeft,
-            onPanUpdate: (details) => onResize(
-              SelectorHandlePosition.bottomLeft,
-              details.delta,
-            ),
-          ),
+                // Bottom Left
+                _buildHandle(
+                  position: selectionRect.bottomLeft,
+                  cursor: SystemMouseCursors.resizeDownLeft,
+                  onPanUpdate: (details) => onResize(
+                    SelectorHandlePosition.bottomLeft,
+                    details.delta,
+                  ),
+                ),
 
-          // Bottom right
-          _buildHandle(
-            position: selectionRect.bottomRight,
-            cursor: SystemMouseCursors.resizeDownRight,
-            onPanUpdate: (details) => onResize(
-              SelectorHandlePosition.bottomRight,
-              details.delta,
-            ),
-          ),
+                // Bottom right
+                _buildHandle(
+                  position: selectionRect.bottomRight,
+                  cursor: SystemMouseCursors.resizeDownRight,
+                  onPanUpdate: (details) => onResize(
+                    SelectorHandlePosition.bottomRight,
+                    details.delta,
+                  ),
+                ),
 
-          // Side Left
-          _buildHandle(
-            position: Offset(selectionRect.left, selectionRect.center.dy),
-            cursor: SystemMouseCursors.resizeLeft,
-            onPanUpdate: (details) => onResize(
-              SelectorHandlePosition.left,
-              details.delta,
-            ),
-          ),
+                // Side Left
+                _buildHandle(
+                  position: Offset(selectionRect.left, selectionRect.center.dy),
+                  cursor: SystemMouseCursors.resizeLeft,
+                  onPanUpdate: (details) => onResize(
+                    SelectorHandlePosition.left,
+                    details.delta,
+                  ),
+                ),
 
-          // Side Right
-          _buildHandle(
-            position: Offset(selectionRect.right, selectionRect.center.dy),
-            cursor: SystemMouseCursors.resizeRight,
-            onPanUpdate: (details) => onResize(
-              SelectorHandlePosition.right,
-              details.delta,
-            ),
-          ),
+                // Side Right
+                _buildHandle(
+                  position:
+                      Offset(selectionRect.right, selectionRect.center.dy),
+                  cursor: SystemMouseCursors.resizeRight,
+                  onPanUpdate: (details) => onResize(
+                    SelectorHandlePosition.right,
+                    details.delta,
+                  ),
+                ),
 
-          // Center Top
-          _buildHandle(
-            position: Offset(selectionRect.center.dx, selectionRect.top),
-            cursor: SystemMouseCursors.resizeUp,
-            onPanUpdate: (details) => onResize(
-              SelectorHandlePosition.top,
-              details.delta,
-            ),
-          ),
+                // Center Top
+                _buildHandle(
+                  position: Offset(selectionRect.center.dx, selectionRect.top),
+                  cursor: SystemMouseCursors.resizeUp,
+                  onPanUpdate: (details) => onResize(
+                    SelectorHandlePosition.top,
+                    details.delta,
+                  ),
+                ),
 
-          // Center Bottom
-          _buildHandle(
-            position: Offset(selectionRect.center.dx, selectionRect.bottom),
-            cursor: SystemMouseCursors.resizeDown,
-            onPanUpdate: (details) => onResize(
-              SelectorHandlePosition.bottom,
-              details.delta,
-            ),
-          ),
-        ],
-      ),
+                // Center Bottom
+                _buildHandle(
+                  position:
+                      Offset(selectionRect.center.dx, selectionRect.bottom),
+                  cursor: SystemMouseCursors.resizeDown,
+                  onPanUpdate: (details) => onResize(
+                    SelectorHandlePosition.bottom,
+                    details.delta,
+                  ),
+                ),
+              ],
+            )
+          : MarchingAntsSelection(rect: selectionRect),
     );
   }
 

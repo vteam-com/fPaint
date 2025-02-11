@@ -205,6 +205,8 @@ class CanvasWidgetState extends State<CanvasWidget> {
               if (appModel.selector.isVisible && selectionRect != null)
                 SelectionHandleWidget(
                   selectionRect: selectionRect,
+                  enableMoveAndResize:
+                      appModel.selectedTool == ActionType.selector,
                   onDrag: (Offset offset) {
                     appModel.selector.translate(offset);
                     appModel.update();
