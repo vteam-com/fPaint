@@ -250,7 +250,7 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            userAction.brush,
+            userAction.brush!,
           );
           break;
 
@@ -258,8 +258,8 @@ class Layer {
           renderPath(
             canvas,
             userAction.positions,
-            userAction.brush,
-            userAction.fillColor,
+            userAction.brush!,
+            userAction.fillColor!,
           );
           break;
 
@@ -268,8 +268,8 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            userAction.brush,
-            userAction.fillColor,
+            userAction.brush!,
+            userAction.fillColor!,
           );
           break;
 
@@ -278,8 +278,8 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            userAction.brush,
-            userAction.fillColor,
+            userAction.brush!,
+            userAction.fillColor!,
           );
           break;
 
@@ -288,8 +288,8 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            userAction.brush,
-            userAction.fillColor,
+            userAction.brush!,
+            userAction.fillColor!,
           );
           break;
 
@@ -298,7 +298,7 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            userAction.brush.size,
+            userAction.brush!.size,
           );
           break;
 
@@ -306,7 +306,7 @@ class Layer {
           renderFill(
             canvas,
             userAction.positions.first,
-            userAction.fillColor,
+            userAction.fillColor!,
             userAction.image!,
           );
           break;

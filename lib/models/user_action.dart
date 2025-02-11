@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
-import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 export 'package:fpaint/widgets/brush_style_picker.dart';
 
@@ -84,14 +84,18 @@ class UserAction {
   UserAction({
     required this.tool,
     required this.positions,
-    required this.brush,
-    required this.fillColor,
+    // optionals
+    this.brush,
+    this.fillColor,
     this.image,
   });
+
   final Tools tool;
   final List<Offset> positions;
-  final MyBrush brush;
-  final Color fillColor;
+
+  // optional used  based on the action type
+  final MyBrush? brush;
+  final Color? fillColor;
   final ui.Image? image;
 
   @override
