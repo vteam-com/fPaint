@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/localized_strings.dart';
 import 'package:fpaint/models/menu_model.dart';
 import 'package:fpaint/panels/about.dart';
 import 'package:fpaint/panels/canvas_settings.dart';
@@ -24,7 +25,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             PopupMenuButton<int>(
-              tooltip: 'Menu',
+              tooltip: strings[StringId.menuTooltip],
               icon: const Icon(Icons.menu),
               onSelected: (int result) {
                 switch (result) {
@@ -42,7 +43,9 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Saved ${appModel.loadedFileName}'),
+                            content: Text(
+                              '${strings[StringId.savedMessage]}${appModel.loadedFileName}',
+                            ),
                           ),
                         );
                       }
@@ -62,17 +65,17 @@ class TopMenuAndLayersPanel extends StatelessWidget {
               itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
                 buildMenuItem(
                   value: MenuIds.newFile,
-                  text: 'Start over...',
+                  text: strings[StringId.startOver]!,
                   icon: Icons.power_settings_new_outlined,
                 ),
                 buildMenuItem(
                   value: MenuIds.openFile,
-                  text: 'Import...',
+                  text: strings[StringId.import]!,
                   icon: Icons.file_download_outlined,
                 ),
                 buildMenuItem(
                   value: MenuIds.export,
-                  text: 'Export...',
+                  text: strings[StringId.export]!,
                   icon: Icons.ios_share_outlined,
                 ),
                 if (!kIsWeb && appModel.loadedFileName.isNotEmpty)
@@ -83,31 +86,31 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                   ),
                 buildMenuItem(
                   value: MenuIds.canvasSize,
-                  text: 'Canvas...',
+                  text: strings[StringId.canvas]!,
                   icon: Icons.edit,
                 ),
                 buildMenuItem(
                   value: MenuIds.about,
-                  text: 'About...',
+                  text: strings[StringId.about]!,
                   icon: Icons.info_outline,
                 ),
               ],
             ),
             if (appModel.isSidePanelExpanded)
               buildIconButton(
-                tooltip: 'Start over...',
+                tooltip: strings[StringId.startOverTooltip]!,
                 icon: Icons.power_settings_new_outlined,
                 onPressed: () => onFileNew(context),
               ),
             if (appModel.isSidePanelExpanded)
               buildIconButton(
-                tooltip: 'Import...',
+                tooltip: strings[StringId.importTooltip]!,
                 icon: Icons.file_download_outlined,
                 onPressed: () => onFileOpen(context),
               ),
             if (appModel.isSidePanelExpanded)
               buildIconButton(
-                tooltip: 'Export...',
+                tooltip: strings[StringId.exportTooltip]!,
                 icon: Icons.ios_share_outlined,
                 onPressed: () => sharePanel(context),
               ),

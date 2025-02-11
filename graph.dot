@@ -31,6 +31,7 @@ digraph "" {
   "/lib/models/render_helper.dart" [label="render_helper"];
   "/lib/models/canvas_model.dart" [label="canvas_model"];
   "/lib/models/app_model.dart" [label="app_model"];
+  "/lib/models/localized_strings.dart" [label="localized_strings"];
   "/lib/models/layer.dart" [label="layer"];
   "/lib/main.dart" [label="main"];
   "/lib/files/xcf_reader.dart" [label="xcf_reader"];
@@ -120,6 +121,7 @@ digraph "" {
         "/lib/models/render_helper.dart";
         "/lib/models/canvas_model.dart";
         "/lib/models/app_model.dart";
+        "/lib/models/localized_strings.dart";
         "/lib/models/layer.dart";
       }
       subgraph "cluster~/lib/files" {
@@ -190,6 +192,7 @@ digraph "" {
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/files/import_files.dart";
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/files/save.dart";
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/models/app_model.dart";
+  "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/models/localized_strings.dart";
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/models/menu_model.dart";
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/panels/about.dart";
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/panels/canvas_settings.dart";
