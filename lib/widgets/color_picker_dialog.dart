@@ -164,6 +164,12 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 appModel.evaluatTopColor();
               });
             },
+            onColorPicked: (color) {
+              setState(() {
+                _currentColor = color;
+                _hexController.text = colorToHexString(color);
+              });
+            },
           ),
 
           //----------------------------

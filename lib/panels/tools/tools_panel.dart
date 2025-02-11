@@ -348,6 +348,13 @@ class ToolsPanel extends StatelessWidget {
         TopColors(
           colorUsages: appModel.topColors,
           onRefresh: () => appModel.evaluatTopColor(),
+          onColorPicked: (color) {
+            (appModel.selectedTool == ActionType.rectangle ||
+                    appModel.selectedTool == ActionType.circle ||
+                    appModel.selectedTool == ActionType.fill)
+                ? appModel.fillColor = color
+                : appModel.brushColor = color;
+          },
           minimal: minimal,
         ),
       );

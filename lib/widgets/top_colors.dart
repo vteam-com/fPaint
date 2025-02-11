@@ -23,17 +23,17 @@ class TopColors extends StatelessWidget {
     super.key,
     required this.colorUsages,
     required this.onRefresh,
+    required this.onColorPicked,
     this.minimal = false,
   });
 
   final List<ColorUsage> colorUsages;
   final VoidCallback onRefresh;
+  final Function(Color) onColorPicked;
   final bool minimal;
 
   @override
   Widget build(BuildContext context) {
-    final AppModel appModel = AppModel.of(context);
-
     final List<ColorUsage> sortedColors = sortColorByHueAndPopularity();
 
     List<Widget> colorPreviews = sortedColors
@@ -42,11 +42,7 @@ class TopColors extends StatelessWidget {
             colorUsed: colorUsed,
             minimal: minimal,
             onPressed: () {
-              (appModel.selectedTool == ActionType.rectangle ||
-                      appModel.selectedTool == ActionType.circle ||
-                      appModel.selectedTool == ActionType.fill)
-                  ? appModel.fillColor = colorUsed.color
-                  : appModel.brushColor = colorUsed.color;
+              onColorPicked(colorUsed.color);
             },
           ),
         )
