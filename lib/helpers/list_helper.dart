@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 /// Calculates a list of evenly spaced values between a start and end value.
 ///
@@ -320,4 +321,12 @@ extension FirWheresOrNull<T> on List<T> {
     }
     return null;
   }
+}
+
+String uint8ListToHex(Uint8List list) {
+  StringBuffer hexString = StringBuffer();
+  for (int byte in list) {
+    hexString.write(byte.toRadixString(16).padLeft(2, '0'));
+  }
+  return hexString.toString();
 }

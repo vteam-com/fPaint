@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:fpaint/helpers/color_helper.dart';
@@ -47,4 +48,53 @@ Future<List<ColorUsage>> getImageColors(ui.Image image) async {
 
   // Take top 20 colors
   return colorUsages.sublist(0, 20);
+}
+
+Future<Uint8List?> convertImageToUint8List(ui.Image image) async {
+  ByteData? byteData =
+      await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+  return byteData?.buffer.asUint8List();
+}
+
+List<String> imageBytesListToString(Uint8List bytes, int width) {
+  final int length = bytes.length;
+  final List<String> rows = [];
+
+  for (int i = 0; i < length; i += 4 * width) {
+    final List<String> row = [];
+    for (int j = 0; j < width * 4; j += 4) {
+      final int index = i + j;
+      if (index + 3 < length) {
+        final int alpha = bytes[index + 3];
+        final int red = bytes[index];
+        final int green = bytes[index + 1];
+        final int blue = bytes[index + 2];
+        row.add('${red.toRadixString(16).padLeft(2, '0')}'
+            '${green.toRadixString(16).padLeft(2, '0')}'
+            '${blue.toRadixString(16).padLeft(2, '0')}'
+            '${alpha.toRadixString(16).padLeft(2, '0')}');
+      }
+    }
+    rows.add(row.join('|'));
+  }
+
+  return rows;
+}
+
+Future<ui.Image> createImageFromBytes({
+  required final Uint8List bytes,
+  required final int width,
+  required final int height,
+}) async {
+  final Completer<ui.Image> completer = Completer();
+  ui.decodeImageFromPixels(
+    bytes,
+    width,
+    height,
+    ui.PixelFormat.rgba8888,
+    (ui.Image img) {
+      completer.complete(img);
+    },
+  );
+  return completer.future;
 }

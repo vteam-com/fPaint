@@ -398,10 +398,6 @@ class CanvasWidgetState extends State<CanvasWidget> {
       appModel.selectorEndMovement();
       return;
     }
-
-    if (appModel.currentUserAction?.tool == ActionType.brush) {
-      // Optimize list of draw actions into a single path
-    }
     //debugPrint('End gesture $_activePointerId now -1');
     _activePointerId = -1;
     appModel.currentUserAction = null;

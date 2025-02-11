@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 
 Future<ui.Image> applyFloodFill({
   required final ui.Image image,
@@ -10,16 +11,15 @@ Future<ui.Image> applyFloodFill({
   required final Color newColor,
   required final int tolerance,
 }) async {
-  final ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
-  if (byteData == null) {
+  // ARGB
+  final Uint8List? pixels = await convertImageToUint8List(image);
+  if (pixels == null) {
     return image;
   }
 
-  final Uint8List pixels = byteData.buffer.asUint8List();
   final int width = image.width;
   final int height = image.height;
-  final int bytesPerPixel = 4; // RGBA format
+  final int bytesPerPixel = 4; // ARGB format
 
   int index(final int x, final int y) {
     return (y * width + x) * bytesPerPixel;
@@ -46,14 +46,6 @@ Future<ui.Image> applyFloodFill({
   final int fillB = newColor.blue;
   // ignore: deprecated_member_use
   final int fillA = newColor.alpha;
-
-  // Avoid unnecessary fill
-  if (targetR == fillR &&
-      targetG == fillG &&
-      targetB == fillB &&
-      targetA == fillA) {
-    return image;
-  }
 
   // Stack-based flood fill with visited tracking
   final Set<String> visited = {};
@@ -111,29 +103,11 @@ Future<ui.Image> applyFloodFill({
   }
 
   // Convert back to ui.Image
-  return await _createImageFromPixels(
-    pixels: pixels,
+  return await createImageFromBytes(
+    bytes: pixels,
     width: width,
     height: height,
   );
-}
-
-Future<ui.Image> _createImageFromPixels({
-  required final Uint8List pixels,
-  required final int width,
-  required final int height,
-}) async {
-  final Completer<ui.Image> completer = Completer();
-  ui.decodeImageFromPixels(
-    pixels,
-    width,
-    height,
-    ui.PixelFormat.rgba8888,
-    (ui.Image img) {
-      completer.complete(img);
-    },
-  );
-  return completer.future;
 }
 
 class Point {
