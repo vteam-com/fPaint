@@ -90,6 +90,7 @@ class UserAction {
     // optionals
     this.brush,
     this.fillColor,
+    this.path,
     this.image,
   });
 
@@ -99,6 +100,7 @@ class UserAction {
   // optional used  based on the action type
   final MyBrush? brush;
   final Color? fillColor;
+  final ui.Path? path;
   final ui.Image? image;
 
   @override

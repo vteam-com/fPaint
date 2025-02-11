@@ -66,6 +66,10 @@ class AppModel extends ChangeNotifier {
 
   SelectorModel selector = SelectorModel();
 
+  void deleteSelectedRegion() {
+    selectedLayer.deleteSelectedRegion(selector.path);
+  }
+
   //-------------------------------------------
   bool get canvasResizeLockAspectRatio => canvas.canvasResizeLockAspectRatio;
   set canvasResizeLockAspectRatio(bool value) {

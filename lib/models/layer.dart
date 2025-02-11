@@ -188,8 +188,10 @@ class Layer {
     }
   }
 
-  void deleteRegion(final ui.Path path) {
-    // TODO
+  void deleteSelectedRegion(final ui.Path path) {
+    addUserAction(
+      UserAction(tool: ActionType.cut, positions: [], path: path),
+    );
     clearCache();
   }
 
@@ -302,6 +304,10 @@ class Layer {
           );
           break;
 
+        case ActionType.cut:
+          renderRegionErase(canvas, userAction.path!);
+          break;
+
         case ActionType.fill:
           renderFill(
             canvas,
@@ -314,7 +320,7 @@ class Layer {
         case ActionType.image:
           renderImage(canvas, userAction.positions.first, userAction.image!);
           break;
-        case ActionType.cut:
+
         case ActionType.selector:
           // the rendering for this tool is done below
           break;

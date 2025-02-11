@@ -154,6 +154,20 @@ void renderEraser(
   canvas.drawLine(p1, p2, paint);
 }
 
+void renderRegion(final Canvas canvas, Path path, Color fillColor) {
+  final Paint paint = Paint();
+  paint.color = fillColor;
+  paint.style = PaintingStyle.fill;
+  canvas.drawPath(path, paint);
+}
+
+void renderRegionErase(final Canvas canvas, Path path) {
+  final Paint paint = Paint();
+  paint.blendMode = BlendMode.clear;
+  paint.style = PaintingStyle.fill;
+  canvas.drawPath(path, paint);
+}
+
 void renderImage(
   final Canvas canvas,
   final Offset topLeftPosition,

@@ -50,6 +50,10 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
       LogicalKeySet(
         LogicalKeyboardKey.delete,
       ): const DeleteIntent(),
+
+      LogicalKeySet(
+        LogicalKeyboardKey.backspace,
+      ): const DeleteIntent(),
     },
     child: Actions(
       actions: {
@@ -71,8 +75,7 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         ),
         DeleteIntent: CallbackAction<DeleteIntent>(
           onInvoke: (DeleteIntent intent) async {
-            // TODO
-            appModel.update();
+            appModel.deleteSelectedRegion();
             return null;
           },
         ),
