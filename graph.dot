@@ -25,6 +25,7 @@ digraph "" {
   "/lib/floating_buttons.dart" [label="floating_buttons"];
   "/lib/models/menu_model.dart" [label="menu_model"];
   "/lib/models/layers.dart" [label="layers"];
+  "/lib/models/selector_model.dart" [label="selector_model"];
   "/lib/models/user_action.dart" [label="user_action"];
   "/lib/models/canvas_resize.dart" [label="canvas_resize"];
   "/lib/models/render_helper.dart" [label="render_helper"];
@@ -113,6 +114,7 @@ digraph "" {
         label="models";
         "/lib/models/menu_model.dart";
         "/lib/models/layers.dart";
+        "/lib/models/selector_model.dart";
         "/lib/models/user_action.dart";
         "/lib/models/canvas_resize.dart";
         "/lib/models/render_helper.dart";
@@ -215,7 +217,7 @@ digraph "" {
   "/lib/models/app_model.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_model.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_resize.dart";
-  "/lib/models/app_model.dart" -> "/lib/widgets/selector_model.dart";
+  "/lib/models/app_model.dart" -> "/lib/models/selector_model.dart";
   "/lib/models/app_model.dart" -> "/lib/models/layers.dart" [style=dashed];
   "/lib/models/layer.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/models/layer.dart" -> "/lib/helpers/image_helper.dart";
@@ -252,9 +254,11 @@ digraph "" {
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/top_colors.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/canvas_widget.dart" -> "/lib/models/app_model.dart";
+  "/lib/widgets/canvas_widget.dart" -> "/lib/models/selector_model.dart";
   "/lib/widgets/canvas_widget.dart" -> "/lib/panels/canvas_panel.dart";
   "/lib/widgets/canvas_widget.dart" -> "/lib/panels/tools/flood_fill.dart";
   "/lib/widgets/canvas_widget.dart" -> "/lib/widgets/selector_model.dart";
+  "/lib/widgets/selector_model.dart" -> "/lib/models/selector_model.dart";
   "/lib/widgets/selector_model.dart" -> "/lib/widgets/marching_ants_rect.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/widgets/transparent_background.dart";

@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/canvas_model.dart';
 import 'package:fpaint/models/canvas_resize.dart';
-import 'package:fpaint/widgets/selector_model.dart';
+import 'package:fpaint/models/selector_model.dart';
 import 'package:provider/provider.dart';
 
 // Exports

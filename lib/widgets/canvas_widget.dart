@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:fpaint/widgets/selector_model.dart';
@@ -208,7 +209,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
                     appModel.selector.translate(offset);
                     appModel.update();
                   },
-                  onResize: (HandlePosition handle, Offset offset) {
+                  onResize: (SelectorHandlePosition handle, Offset offset) {
                     appModel.selector.inflate(handle, offset);
                     appModel.update();
                   },
