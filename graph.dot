@@ -26,8 +26,8 @@ digraph "" {
   "/lib/models/layers.dart" [label="layers"];
   "/lib/models/user_action.dart" [label="user_action"];
   "/lib/models/canvas_resize.dart" [label="canvas_resize"];
+  "/lib/models/render_helper.dart" [label="render_helper"];
   "/lib/models/canvas_model.dart" [label="canvas_model"];
-  "/lib/models/render_user_actions.dart" [label="render_user_actions"];
   "/lib/models/app_model.dart" [label="app_model"];
   "/lib/models/layer.dart" [label="layer"];
   "/lib/main.dart" [label="main"];
@@ -112,8 +112,8 @@ digraph "" {
         "/lib/models/layers.dart";
         "/lib/models/user_action.dart";
         "/lib/models/canvas_resize.dart";
+        "/lib/models/render_helper.dart";
         "/lib/models/canvas_model.dart";
-        "/lib/models/render_user_actions.dart";
         "/lib/models/app_model.dart";
         "/lib/models/layer.dart";
       }
@@ -203,8 +203,8 @@ digraph "" {
   "/lib/models/layers.dart" -> "/lib/models/layer.dart" [style=dashed];
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart" [style=dashed];
+  "/lib/models/render_helper.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/canvas_model.dart" -> "/lib/models/layers.dart" [style=dashed];
-  "/lib/models/render_user_actions.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/app_model.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_model.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_resize.dart";
@@ -213,7 +213,7 @@ digraph "" {
   "/lib/models/layer.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/models/layer.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/models/layer.dart" -> "/lib/models/app_model.dart";
-  "/lib/models/layer.dart" -> "/lib/models/render_user_actions.dart";
+  "/lib/models/layer.dart" -> "/lib/models/render_helper.dart";
   "/lib/models/layer.dart" -> "/lib/models/user_action.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/files/save.dart";
   "/lib/main.dart" -> "/lib/main_screen.dart";

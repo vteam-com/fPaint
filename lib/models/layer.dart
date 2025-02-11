@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/render_user_actions.dart';
+import 'package:fpaint/models/render_helper.dart';
 
 // Exports
 export 'package:fpaint/models/user_action.dart';
