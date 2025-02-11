@@ -115,14 +115,13 @@ void renderEraser(
   final UserAction userAction,
 ) {
   final Paint paint = Paint();
-  paint.color = userAction.fillColor;
-  paint.strokeCap = StrokeCap.round;
-  paint.strokeWidth = userAction.brushSize;
-  paint.style = PaintingStyle.stroke;
 
   paint.blendMode = BlendMode.clear;
+  paint.color = userAction.fillColor;
   paint.style = PaintingStyle.stroke;
   paint.strokeWidth = userAction.brushSize;
+  paint.strokeCap = StrokeCap.round;
+
   canvas.drawLine(
     userAction.positions.first,
     userAction.positions.last,

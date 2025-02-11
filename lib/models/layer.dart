@@ -186,6 +186,11 @@ class Layer {
     }
   }
 
+  void deleteRegion(final ui.Path path) {
+    // TODO
+    clearCache();
+  }
+
   void mergeFrom(final Layer layerToMerge) {
     _actionStack.addAll(layerToMerge._actionStack);
     clearCache();
@@ -268,6 +273,7 @@ class Layer {
         case Tools.image:
           renderImage(canvas, userAction);
           break;
+        case Tools.cut:
         case Tools.selector:
           // the rendering for this tool is done below
           break;

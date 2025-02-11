@@ -13,6 +13,7 @@ enum Tools {
   fill,
   eraser,
   image,
+  cut,
   selector;
 
   bool isSupported(ToolAttribute attribute) {

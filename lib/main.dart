@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
               LogicalKeyboardKey.control,
               LogicalKeyboardKey.keyZ,
             ): const UndoIntent(),
+
             LogicalKeySet(
               LogicalKeyboardKey.meta,
               LogicalKeyboardKey.keyZ,
@@ -55,6 +56,7 @@ class MyApp extends StatelessWidget {
               LogicalKeyboardKey.keyZ,
               LogicalKeyboardKey.shift,
             ): const RedoIntent(),
+
             LogicalKeySet(
               LogicalKeyboardKey.meta,
               LogicalKeyboardKey.keyZ,
@@ -66,10 +68,21 @@ class MyApp extends StatelessWidget {
               LogicalKeyboardKey.control,
               LogicalKeyboardKey.keyS,
             ): const SaveIntent(),
+
             LogicalKeySet(
               LogicalKeyboardKey.meta,
               LogicalKeyboardKey.keyS,
             ): const SaveIntent(),
+
+            // Escape
+            LogicalKeySet(
+              LogicalKeyboardKey.escape,
+            ): const EscapeIntent(),
+
+            // Delete/Backspace
+            LogicalKeySet(
+              LogicalKeyboardKey.delete,
+            ): const DeleteIntent(),
           },
           child: Actions(
             actions: {
@@ -82,6 +95,20 @@ class MyApp extends StatelessWidget {
               SaveIntent: CallbackAction<SaveIntent>(
                 onInvoke: (SaveIntent intent) async =>
                     await saveFile(context, appModel),
+              ),
+              EscapeIntent: CallbackAction<EscapeIntent>(
+                onInvoke: (EscapeIntent intent) async {
+                  appModel.selector.isVisible = false;
+                  appModel.update();
+                  return null;
+                },
+              ),
+              DeleteIntent: CallbackAction<DeleteIntent>(
+                onInvoke: (DeleteIntent intent) async {
+                  // TODO
+                  appModel.update();
+                  return null;
+                },
               ),
             },
             child: const Focus(
@@ -106,4 +133,12 @@ class RedoIntent extends Intent {
 
 class SaveIntent extends Intent {
   const SaveIntent();
+}
+
+class EscapeIntent extends Intent {
+  const EscapeIntent();
+}
+
+class DeleteIntent extends Intent {
+  const DeleteIntent();
 }

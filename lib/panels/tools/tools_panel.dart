@@ -161,7 +161,7 @@ class ToolsPanel extends StatelessWidget {
         image: iconAndColor(
           context,
           selectedTool == Tools.selector,
-          Icons.photo_size_select_large,
+          Icons.highlight_alt,
         ),
         isSelected: selectedTool == Tools.selector,
         onPressed: () {
