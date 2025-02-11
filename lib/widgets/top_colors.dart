@@ -42,9 +42,9 @@ class TopColors extends StatelessWidget {
             colorUsed: colorUsed,
             minimal: minimal,
             onPressed: () {
-              (appModel.selectedTool == Tools.rectangle ||
-                      appModel.selectedTool == Tools.circle ||
-                      appModel.selectedTool == Tools.fill)
+              (appModel.selectedTool == ActionType.rectangle ||
+                      appModel.selectedTool == ActionType.circle ||
+                      appModel.selectedTool == ActionType.fill)
                   ? appModel.fillColor = colorUsed.color
                   : appModel.brushColor = colorUsed.color;
             },

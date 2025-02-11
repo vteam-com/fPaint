@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 export 'package:fpaint/widgets/brush_style_picker.dart';
 
-enum Tools {
+enum ActionType {
   pencil,
   brush,
   line,
@@ -16,7 +16,7 @@ enum Tools {
   cut,
   selector;
 
-  bool isSupported(ToolAttribute attribute) {
+  bool isSupported(ActionOptions attribute) {
     return toolsSupportedAttributes[this]?.contains(attribute) ?? false;
   }
 
@@ -26,7 +26,7 @@ enum Tools {
   }
 }
 
-enum ToolAttribute {
+enum ActionOptions {
   strokeSize,
   brushStyle,
   colorOutline,
@@ -35,47 +35,50 @@ enum ToolAttribute {
   topColors,
 }
 
-final Map<Tools, Set<ToolAttribute>> toolsSupportedAttributes = {
-  Tools.pencil: {
-    ToolAttribute.strokeSize,
-    ToolAttribute.colorOutline,
-    ToolAttribute.topColors,
+final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = {
+  ActionType.pencil: {
+    ActionOptions.strokeSize,
+    ActionOptions.colorOutline,
+    ActionOptions.topColors,
   },
-  Tools.brush: {
-    ToolAttribute.strokeSize,
-    ToolAttribute.brushStyle,
-    ToolAttribute.colorOutline,
-    ToolAttribute.topColors,
+  ActionType.brush: {
+    ActionOptions.strokeSize,
+    ActionOptions.brushStyle,
+    ActionOptions.colorOutline,
+    ActionOptions.topColors,
   },
-  Tools.line: {
-    ToolAttribute.colorOutline,
-    ToolAttribute.strokeSize,
-    ToolAttribute.brushStyle,
-    ToolAttribute.topColors,
+  ActionType.line: {
+    ActionOptions.colorOutline,
+    ActionOptions.strokeSize,
+    ActionOptions.brushStyle,
+    ActionOptions.topColors,
   },
-  Tools.circle: {
-    ToolAttribute.strokeSize,
-    ToolAttribute.brushStyle,
-    ToolAttribute.colorOutline,
-    ToolAttribute.colorFill,
-    ToolAttribute.topColors,
+  ActionType.circle: {
+    ActionOptions.strokeSize,
+    ActionOptions.brushStyle,
+    ActionOptions.colorOutline,
+    ActionOptions.colorFill,
+    ActionOptions.topColors,
   },
-  Tools.rectangle: {
-    ToolAttribute.strokeSize,
-    ToolAttribute.brushStyle,
-    ToolAttribute.colorOutline,
-    ToolAttribute.colorFill,
-    ToolAttribute.topColors,
+  ActionType.rectangle: {
+    ActionOptions.strokeSize,
+    ActionOptions.brushStyle,
+    ActionOptions.colorOutline,
+    ActionOptions.colorFill,
+    ActionOptions.topColors,
   },
-  Tools.fill: {
-    ToolAttribute.colorFill,
-    ToolAttribute.tolerance,
-    ToolAttribute.topColors,
+  ActionType.fill: {
+    ActionOptions.colorFill,
+    ActionOptions.tolerance,
+    ActionOptions.topColors,
   },
-  Tools.eraser: {
-    ToolAttribute.strokeSize,
+  ActionType.eraser: {
+    ActionOptions.strokeSize,
   },
-  Tools.selector: {
+  ActionType.cut: {
+    // nothing to support yet
+  },
+  ActionType.selector: {
     // nothing to support yet
   },
 };
@@ -90,7 +93,7 @@ class UserAction {
     this.image,
   });
 
-  final Tools tool;
+  final ActionType tool;
   final List<Offset> positions;
 
   // optional used  based on the action type

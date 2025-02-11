@@ -233,7 +233,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
         if (appModel.isCurrentSelectionReadyForAction) {
           _activePointerId = event.pointer;
 
-          if (appModel.selectedTool == Tools.selector) {
+          if (appModel.selectedTool == ActionType.selector) {
             appModel.selectorStart(event.localPosition / appModel.canvas.scale);
             return;
           }
@@ -259,7 +259,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
     } else {
       // debugPrint('DRAW MOVE ${details.buttons} P:${details.pointer}');
       if (event.buttons == 1 && _activePointerId == event.pointer) {
-        if (appModel.selectedTool == Tools.selector) {
+        if (appModel.selectedTool == ActionType.selector) {
           appModel.selectorMove(position);
           return;
         }
@@ -288,15 +288,15 @@ class CanvasWidgetState extends State<CanvasWidget> {
       if (_activePointerId == event.pointer) {
         // debugPrint('UP ${details.buttons}');
         // handle the case that the user click and release the mouse withou moving
-        if (appModel.selectedTool == Tools.selector) {
+        if (appModel.selectedTool == ActionType.selector) {
           appModel.selectorEndMovement();
           return;
         }
 
         if (appModel.userActionStartingOffset == null &&
-            (appModel.selectedTool == Tools.pencil ||
-                appModel.selectedTool == Tools.fill ||
-                appModel.selectedTool == Tools.eraser)) {
+            (appModel.selectedTool == ActionType.pencil ||
+                appModel.selectedTool == ActionType.fill ||
+                appModel.selectedTool == ActionType.eraser)) {
           await _onUserActionStart(
             appModel: appModel,
             position: event.localPosition / appModel.canvas.scale,
@@ -314,7 +314,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
   }) async {
     appModel.userActionStartingOffset = position;
 
-    if (appModel.selectedTool == Tools.fill) {
+    if (appModel.selectedTool == ActionType.fill) {
       // Create a flattened image from the current layer
       final ui.Image img = await appModel.selectedLayer
           .toImageForStorage(appModel.canvas.canvasSize);
@@ -328,7 +328,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
         tolerance: appModel.tolerance,
       );
       appModel.selectedLayer
-          .addImage(imageToAdd: filledImage, tool: Tools.fill);
+          .addImage(imageToAdd: filledImage, tool: ActionType.fill);
       appModel.update();
       return true;
     }
@@ -353,12 +353,12 @@ class CanvasWidgetState extends State<CanvasWidget> {
     required final Offset position,
   }) {
     if (appModel.userActionStartingOffset != null) {
-      if (appModel.selectedTool == Tools.selector) {
+      if (appModel.selectedTool == ActionType.selector) {
         appModel.selectorMove(position);
         return;
       }
 
-      if (appModel.selectedTool == Tools.pencil) {
+      if (appModel.selectedTool == ActionType.pencil) {
         // Add the pixel
         appModel.updateLastUserAction(
           start: appModel.userActionStartingOffset!,
@@ -368,7 +368,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
           colorFill: appModel.brushColor,
         );
         appModel.userActionStartingOffset = position;
-      } else if (appModel.selectedTool == Tools.eraser) {
+      } else if (appModel.selectedTool == ActionType.eraser) {
         // Eraser implementation
         appModel.updateLastUserAction(
           start: appModel.userActionStartingOffset!,
@@ -378,7 +378,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
           colorFill: Colors.transparent,
         );
         appModel.userActionStartingOffset = position;
-      } else if (appModel.selectedTool == Tools.brush) {
+      } else if (appModel.selectedTool == ActionType.brush) {
         // Cumulate more points in the draw path on the selected layer
         appModel.layers.list[appModel.selectedLayerIndex]
             .lastActionAddPosition(position: position);
@@ -394,12 +394,12 @@ class CanvasWidgetState extends State<CanvasWidget> {
   void _onUserActionEnded(
     final AppModel appModel,
   ) {
-    if (appModel.selectedTool == Tools.selector) {
+    if (appModel.selectedTool == ActionType.selector) {
       appModel.selectorEndMovement();
       return;
     }
 
-    if (appModel.currentUserAction?.tool == Tools.brush) {
+    if (appModel.currentUserAction?.tool == ActionType.brush) {
       // Optimize list of draw actions into a single path
     }
     //debugPrint('End gesture $_activePointerId now -1');

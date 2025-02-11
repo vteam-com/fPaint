@@ -58,17 +58,21 @@ class ToolsPanel extends StatelessWidget {
     BuildContext context,
     final AppModel appModel,
   ) {
-    final Tools selectedTool = appModel.selectedTool;
+    final ActionType selectedTool = appModel.selectedTool;
 
     final List<Widget> tools = [
       // Pencil
       ToolSelector(
         minimal: minimal,
         name: 'Pencil',
-        image: iconAndColor(context, selectedTool == Tools.pencil, Icons.draw),
-        isSelected: selectedTool == Tools.pencil,
+        image: iconAndColor(
+          context,
+          selectedTool == ActionType.pencil,
+          Icons.draw,
+        ),
+        isSelected: selectedTool == ActionType.pencil,
         onPressed: () {
-          appModel.selectedTool = Tools.pencil;
+          appModel.selectedTool = ActionType.pencil;
         },
       ),
 
@@ -76,10 +80,14 @@ class ToolsPanel extends StatelessWidget {
       ToolSelector(
         minimal: minimal,
         name: 'Brush',
-        image: iconAndColor(context, selectedTool == Tools.brush, Icons.brush),
-        isSelected: selectedTool == Tools.brush,
+        image: iconAndColor(
+          context,
+          selectedTool == ActionType.brush,
+          Icons.brush,
+        ),
+        isSelected: selectedTool == ActionType.brush,
         onPressed: () {
-          appModel.selectedTool = Tools.brush;
+          appModel.selectedTool = ActionType.brush;
         },
       ),
 
@@ -87,11 +95,14 @@ class ToolsPanel extends StatelessWidget {
       ToolSelector(
         minimal: minimal,
         name: 'Line',
-        image:
-            iconAndColor(context, selectedTool == Tools.line, Icons.line_axis),
-        isSelected: selectedTool == Tools.line,
+        image: iconAndColor(
+          context,
+          selectedTool == ActionType.line,
+          Icons.line_axis,
+        ),
+        isSelected: selectedTool == ActionType.line,
         onPressed: () {
-          appModel.selectedTool = Tools.line;
+          appModel.selectedTool = ActionType.line;
         },
       ),
 
@@ -101,12 +112,12 @@ class ToolsPanel extends StatelessWidget {
         name: 'Rectangle',
         image: iconAndColor(
           context,
-          selectedTool == Tools.rectangle,
+          selectedTool == ActionType.rectangle,
           Icons.crop_square,
         ),
-        isSelected: selectedTool == Tools.rectangle,
+        isSelected: selectedTool == ActionType.rectangle,
         onPressed: () {
-          appModel.selectedTool = Tools.rectangle;
+          appModel.selectedTool = ActionType.rectangle;
         },
       ),
 
@@ -116,12 +127,12 @@ class ToolsPanel extends StatelessWidget {
         name: 'Circle',
         image: iconAndColor(
           context,
-          selectedTool == Tools.circle,
+          selectedTool == ActionType.circle,
           Icons.circle_outlined,
         ),
-        isSelected: selectedTool == Tools.circle,
+        isSelected: selectedTool == ActionType.circle,
         onPressed: () {
-          appModel.selectedTool = Tools.circle;
+          appModel.selectedTool = ActionType.circle;
         },
       ),
 
@@ -131,12 +142,12 @@ class ToolsPanel extends StatelessWidget {
         name: 'Paint Bucket',
         image: iconAndColor(
           context,
-          selectedTool == Tools.fill,
+          selectedTool == ActionType.fill,
           Icons.format_color_fill,
         ),
-        isSelected: selectedTool == Tools.fill,
+        isSelected: selectedTool == ActionType.fill,
         onPressed: () {
-          appModel.selectedTool = Tools.fill;
+          appModel.selectedTool = ActionType.fill;
         },
       ),
 
@@ -145,13 +156,13 @@ class ToolsPanel extends StatelessWidget {
         name: 'Eraser',
         image: iconFromSvgAsset(
           'assets/icons/eraser.svg',
-          selectedTool == Tools.eraser
+          selectedTool == ActionType.eraser
               ? Colors.blue
               : IconTheme.of(context).color!,
         ),
-        isSelected: selectedTool == Tools.eraser,
+        isSelected: selectedTool == ActionType.eraser,
         onPressed: () {
-          appModel.selectedTool = Tools.eraser;
+          appModel.selectedTool = ActionType.eraser;
         },
       ),
 
@@ -160,12 +171,12 @@ class ToolsPanel extends StatelessWidget {
         name: 'Selector',
         image: iconAndColor(
           context,
-          selectedTool == Tools.selector,
+          selectedTool == ActionType.selector,
           Icons.highlight_alt,
         ),
-        isSelected: selectedTool == Tools.selector,
+        isSelected: selectedTool == ActionType.selector,
         onPressed: () {
-          appModel.selectedTool = Tools.selector;
+          appModel.selectedTool = ActionType.selector;
         },
       ),
     ];
@@ -178,13 +189,14 @@ class ToolsPanel extends StatelessWidget {
     List<Widget> widgets = [];
     final appModel = AppModel.of(context, listen: true);
     final selectedTool = appModel.selectedTool;
-    final String title =
-        appModel.selectedTool == Tools.pencil ? 'Pencil Size' : 'Brush Size';
-    final double min = appModel.selectedTool == Tools.pencil ? 1 : 0.1;
+    final String title = appModel.selectedTool == ActionType.pencil
+        ? 'Pencil Size'
+        : 'Brush Size';
+    final double min = appModel.selectedTool == ActionType.pencil ? 1 : 0.1;
     final double max = 100;
 
     // Stroke Weight
-    if (selectedTool.isSupported(ToolAttribute.strokeSize)) {
+    if (selectedTool.isSupported(ActionOptions.strokeSize)) {
       widgets.add(
         ToolAttributeWidget(
           minimal: minimal,
@@ -223,7 +235,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Brush Style
-    if (selectedTool.isSupported(ToolAttribute.brushStyle)) {
+    if (selectedTool.isSupported(ActionOptions.brushStyle)) {
       widgets.add(
         ToolAttributeWidget(
           minimal: minimal,
@@ -245,7 +257,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Brush color
-    if (selectedTool.isSupported(ToolAttribute.colorOutline)) {
+    if (selectedTool.isSupported(ActionOptions.colorOutline)) {
       widgets.add(
         ToolAttributeWidget(
           minimal: minimal,
@@ -274,7 +286,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Fill Color
-    if (selectedTool.isSupported(ToolAttribute.colorFill)) {
+    if (selectedTool.isSupported(ActionOptions.colorFill)) {
       widgets.add(
         ToolAttributeWidget(
           minimal: minimal,
@@ -303,7 +315,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Fill Color Tolerance
-    if (selectedTool.isSupported(ToolAttribute.tolerance)) {
+    if (selectedTool.isSupported(ActionOptions.tolerance)) {
       widgets.add(
         ToolAttributeWidget(
           minimal: minimal,
@@ -331,7 +343,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Top colors
-    if (selectedTool.isSupported(ToolAttribute.topColors)) {
+    if (selectedTool.isSupported(ActionOptions.topColors)) {
       widgets.add(
         TopColors(
           colorUsages: appModel.topColors,

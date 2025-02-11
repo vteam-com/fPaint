@@ -22,7 +22,7 @@ void main() {
 
     test('Add user action', () {
       final userAction = UserAction(
-        tool: Tools.brush,
+        tool: ActionType.brush,
         positions: [Offset.zero],
         brush: MyBrush(
           color: Colors.black,
@@ -38,7 +38,7 @@ void main() {
 
     test('Undo and redo actions', () {
       final userAction = UserAction(
-        tool: Tools.brush,
+        tool: ActionType.brush,
         positions: [Offset.zero],
         brush: MyBrush(
           color: Colors.black,
@@ -65,12 +65,12 @@ void main() {
 
       layer.addImage(imageToAdd: image);
       expect(layer.count, 1);
-      expect(layer.lastUserAction?.tool, Tools.image);
+      expect(layer.lastUserAction?.tool, ActionType.image);
     });
 
     test('Update last user action end position', () {
       final userAction = UserAction(
-        tool: Tools.brush,
+        tool: ActionType.brush,
         positions: [Offset.zero, const Offset(1, 1)],
         brush: MyBrush(
           color: Colors.black,

@@ -25,7 +25,7 @@ void main() {
           const Offset(0, 0),
           const Offset(10, 10),
         ],
-        tool: Tools.brush,
+        tool: ActionType.brush,
         brush: MyBrush(
           color: Colors.black,
           size: 1,
@@ -44,7 +44,7 @@ void main() {
       paintModel.updateLastUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: Tools.circle,
+        type: ActionType.circle,
         colorFill: Colors.red,
         colorStroke: Colors.yellow,
       );
@@ -60,7 +60,7 @@ void main() {
         paintModel.selectedLayer.lastUserAction!.positions.last,
         const Offset(10, 10),
       );
-      expect(paintModel.selectedLayer.lastUserAction!.tool, Tools.circle);
+      expect(paintModel.selectedLayer.lastUserAction!.tool, ActionType.circle);
       expect(paintModel.selectedLayer.lastUserAction!.fillColor, Colors.red);
     });
 
@@ -68,7 +68,7 @@ void main() {
       paintModel.updateLastUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: Tools.rectangle,
+        type: ActionType.rectangle,
         colorFill: Colors.blue,
       );
       paintModel.updateLastUserAction(end: const Offset(20, 20));
@@ -87,7 +87,7 @@ void main() {
       paintModel.updateLastUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: Tools.brush,
+        type: ActionType.brush,
         colorFill: Colors.green,
         colorStroke: Colors.black,
       );
@@ -106,21 +106,21 @@ void main() {
       paintModel.updateLastUserAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
-        type: Tools.brush,
+        type: ActionType.brush,
         colorFill: Colors.blue,
         colorStroke: Colors.black,
       );
       paintModel.updateLastUserAction(
         start: const Offset(20, 20),
         end: const Offset(30, 30),
-        type: Tools.circle,
+        type: ActionType.circle,
         colorFill: Colors.red,
         colorStroke: Colors.black,
       );
       expect(paintModel.selectedLayer.count, 3);
       paintModel.undo();
       expect(paintModel.selectedLayer.count, 2);
-      expect(paintModel.selectedLayer.lastUserAction!.tool, Tools.brush);
+      expect(paintModel.selectedLayer.lastUserAction!.tool, ActionType.brush);
     });
   });
 }

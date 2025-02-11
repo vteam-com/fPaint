@@ -138,7 +138,7 @@ class Layer {
   UserAction addImage({
     required final ui.Image imageToAdd,
     final ui.Offset offset = Offset.zero,
-    final Tools tool = Tools.image,
+    final ActionType tool = ActionType.image,
   }) {
     final UserAction newAction = UserAction(
       tool: tool,
@@ -245,7 +245,7 @@ class Layer {
     // Render all actions within the saved layer
     for (final UserAction userAction in _actionStack) {
       switch (userAction.tool) {
-        case Tools.pencil:
+        case ActionType.pencil:
           renderPencil(
             canvas,
             userAction.positions.first,
@@ -254,7 +254,7 @@ class Layer {
           );
           break;
 
-        case Tools.brush:
+        case ActionType.brush:
           renderPath(
             canvas,
             userAction.positions,
@@ -263,7 +263,7 @@ class Layer {
           );
           break;
 
-        case Tools.line:
+        case ActionType.line:
           renderLine(
             canvas,
             userAction.positions.first,
@@ -273,7 +273,7 @@ class Layer {
           );
           break;
 
-        case Tools.circle:
+        case ActionType.circle:
           renderCircle(
             canvas,
             userAction.positions.first,
@@ -283,7 +283,7 @@ class Layer {
           );
           break;
 
-        case Tools.rectangle:
+        case ActionType.rectangle:
           renderRectangle(
             canvas,
             userAction.positions.first,
@@ -293,7 +293,7 @@ class Layer {
           );
           break;
 
-        case Tools.eraser:
+        case ActionType.eraser:
           renderEraser(
             canvas,
             userAction.positions.first,
@@ -302,7 +302,7 @@ class Layer {
           );
           break;
 
-        case Tools.fill:
+        case ActionType.fill:
           renderFill(
             canvas,
             userAction.positions.first,
@@ -311,11 +311,11 @@ class Layer {
           );
           break;
 
-        case Tools.image:
+        case ActionType.image:
           renderImage(canvas, userAction.positions.first, userAction.image!);
           break;
-        case Tools.cut:
-        case Tools.selector:
+        case ActionType.cut:
+        case ActionType.selector:
           // the rendering for this tool is done below
           break;
       }

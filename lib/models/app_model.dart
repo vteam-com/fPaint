@@ -58,9 +58,9 @@ class AppModel extends ChangeNotifier {
   late Layers layers = Layers(canvas.canvasSize);
 
   // Selected Tool
-  Tools _selectedTool = Tools.brush;
+  ActionType _selectedTool = ActionType.brush;
 
-  Tools get selectedTool => _selectedTool;
+  ActionType get selectedTool => _selectedTool;
 
   bool deviceSizeSmall = false;
 
@@ -105,7 +105,7 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
-  set selectedTool(Tools value) {
+  set selectedTool(ActionType value) {
     _selectedTool = value;
     update();
   }
@@ -275,7 +275,7 @@ class AppModel extends ChangeNotifier {
 
   void updateLastUserAction({
     required final Offset end,
-    Tools? type,
+    ActionType? type,
     Color? colorFill,
     Color? colorStroke,
     Offset? start,
