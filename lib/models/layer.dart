@@ -244,34 +244,82 @@ class Layer {
     for (final UserAction userAction in _actionStack) {
       switch (userAction.tool) {
         case Tools.pencil:
-          renderPencil(canvas, userAction);
+          renderPencil(
+            canvas,
+            userAction.positions.first,
+            userAction.positions.last,
+            userAction.brushColor,
+            userAction.brushSize,
+          );
           break;
 
         case Tools.brush:
-          renderPath(canvas, userAction);
+          renderPath(
+            canvas,
+            userAction.positions,
+            userAction.brushColor,
+            userAction.brushSize,
+            userAction.brushStyle,
+            userAction.fillColor,
+          );
           break;
 
         case Tools.line:
-          renderLine(canvas, userAction);
+          renderLine(
+            canvas,
+            userAction.positions.first,
+            userAction.positions.last,
+            userAction.brushColor,
+            userAction.brushSize,
+            userAction.brushStyle,
+            userAction.fillColor,
+          );
           break;
 
         case Tools.circle:
-          renderCircle(canvas, userAction);
+          renderCircle(
+            canvas,
+            userAction.positions.first,
+            userAction.positions.last,
+            userAction.fillColor,
+            userAction.brushSize,
+            userAction.brushColor,
+            userAction.brushStyle,
+          );
           break;
 
         case Tools.rectangle:
-          renderRectangle(canvas, userAction);
+          renderRectangle(
+            canvas,
+            userAction.positions.first,
+            userAction.positions.last,
+            userAction.brushColor,
+            userAction.brushSize,
+            userAction.brushStyle,
+            userAction.fillColor,
+          );
           break;
 
         case Tools.eraser:
-          renderEraser(canvas, userAction);
+          renderEraser(
+            canvas,
+            userAction.positions.first,
+            userAction.positions.last,
+            userAction.brushSize,
+          );
           break;
 
         case Tools.fill:
-          renderImage(canvas, userAction);
+          renderFill(
+            canvas,
+            userAction.positions.first,
+            userAction.fillColor,
+            userAction.image!,
+          );
+          break;
 
         case Tools.image:
-          renderImage(canvas, userAction);
+          renderImage(canvas, userAction.positions.first, userAction.image!);
           break;
         case Tools.cut:
         case Tools.selector:

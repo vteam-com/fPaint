@@ -204,7 +204,7 @@ digraph "" {
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart" [style=dashed];
   "/lib/models/canvas_model.dart" -> "/lib/models/layers.dart" [style=dashed];
-  "/lib/models/render_user_actions.dart" -> "/lib/models/user_action.dart";
+  "/lib/models/render_user_actions.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/app_model.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_model.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_resize.dart";
