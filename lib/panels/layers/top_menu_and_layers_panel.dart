@@ -38,7 +38,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                     onFileOpen(context);
                     break;
                   case MenuIds.save:
-                    saveFile(context, appModel).then(
+                    saveFile(appModel).then(
                         // ignore: use_build_context_synchronously
                         (_) {
                       appModel.layers.clearHasChanged();

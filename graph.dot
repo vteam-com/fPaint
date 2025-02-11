@@ -55,6 +55,7 @@ digraph "" {
   "/lib/widgets/tolerance_picker.dart" [label="tolerance_picker"];
   "/lib/widgets/image_painter.dart" [label="image_painter"];
   "/lib/widgets/color_preview.dart" [label="color_preview"];
+  "/lib/widgets/shortcuts.dart" [label="shortcuts"];
   "/lib/widgets/top_colors.dart" [label="top_colors"];
   "/lib/widgets/brush_style_picker.dart" [label="brush_style_picker"];
   "/lib/widgets/color_selector.dart" [label="color_selector"];
@@ -148,6 +149,7 @@ digraph "" {
         "/lib/widgets/tolerance_picker.dart";
         "/lib/widgets/image_painter.dart";
         "/lib/widgets/color_preview.dart";
+        "/lib/widgets/shortcuts.dart";
         "/lib/widgets/top_colors.dart";
         "/lib/widgets/brush_style_picker.dart";
         "/lib/widgets/color_selector.dart";
@@ -215,8 +217,8 @@ digraph "" {
   "/lib/models/layer.dart" -> "/lib/models/app_model.dart";
   "/lib/models/layer.dart" -> "/lib/models/render_helper.dart";
   "/lib/models/layer.dart" -> "/lib/models/user_action.dart" [style=dashed];
-  "/lib/main.dart" -> "/lib/files/save.dart";
   "/lib/main.dart" -> "/lib/main_screen.dart";
+  "/lib/main.dart" -> "/lib/widgets/shortcuts.dart";
   "/lib/main.dart" -> "/lib/models/app_model.dart";
   "/lib/files/xcf_reader.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/files/export_download_web.dart" -> "/lib/files/file_jpeg.dart";
@@ -251,6 +253,8 @@ digraph "" {
   "/lib/widgets/selector_model.dart" -> "/lib/widgets/marching_ants_rect.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/widgets/transparent_background.dart";
+  "/lib/widgets/shortcuts.dart" -> "/lib/files/save.dart";
+  "/lib/widgets/shortcuts.dart" -> "/lib/models/app_model.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/models/app_model.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/color_preview.dart";

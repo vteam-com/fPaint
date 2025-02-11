@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/models/app_model.dart';
 
 Future<void> saveFile(
-  final BuildContext context,
   final AppModel appModel,
 ) async {
   final String fileName = appModel.loadedFileName;
