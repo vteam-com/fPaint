@@ -9,8 +9,91 @@ class SelectorModel {
   Rect get boundingRect => path.getBounds();
 
   void translate(final Offset offset) {
+    final Rect bounds = path.getBounds();
+
+    if (bounds.width <= 0 || bounds.height <= 0) {
+      return; // Prevent invalid transformations
+    }
+
     final Matrix4 matrix = Matrix4.identity()..translate(offset.dx, offset.dy);
     path = path.transform(matrix.storage);
+  }
+
+  void inflate(final HandlePosition handle, final Offset offset) {
+    final Rect bounds = path.getBounds();
+    late Rect newBounds;
+
+    switch (handle) {
+      case HandlePosition.topLeft:
+        newBounds = Rect.fromLTRB(
+          bounds.left + offset.dx,
+          bounds.top + offset.dy,
+          bounds.right,
+          bounds.bottom,
+        );
+        break;
+      case HandlePosition.top:
+        newBounds = Rect.fromLTRB(
+          bounds.left,
+          bounds.top + offset.dy,
+          bounds.right,
+          bounds.bottom,
+        );
+        break;
+      case HandlePosition.topRight:
+        newBounds = Rect.fromLTRB(
+          bounds.left,
+          bounds.top + offset.dy,
+          bounds.right + offset.dx,
+          bounds.bottom,
+        );
+        break;
+      case HandlePosition.right:
+        newBounds = Rect.fromLTRB(
+          bounds.left,
+          bounds.top,
+          bounds.right + offset.dx,
+          bounds.bottom,
+        );
+        break;
+      case HandlePosition.bottomRight:
+        newBounds = Rect.fromLTRB(
+          bounds.left,
+          bounds.top,
+          bounds.right + offset.dx,
+          bounds.bottom + offset.dy,
+        );
+        break;
+      case HandlePosition.bottom:
+        newBounds = Rect.fromLTRB(
+          bounds.left,
+          bounds.top,
+          bounds.right,
+          bounds.bottom + offset.dy,
+        );
+        break;
+      case HandlePosition.bottomLeft:
+        newBounds = Rect.fromLTRB(
+          bounds.left + offset.dx,
+          bounds.top,
+          bounds.right,
+          bounds.bottom + offset.dy,
+        );
+        break;
+      case HandlePosition.left:
+        newBounds = Rect.fromLTRB(
+          bounds.left + offset.dx,
+          bounds.top,
+          bounds.right,
+          bounds.bottom,
+        );
+        break;
+    }
+
+    // Ensure the width and height remain positive
+    if (newBounds.width > 0 && newBounds.height > 0) {
+      path = Path()..addRect(newBounds);
+    }
   }
 
   void addPosition(final Offset position) {
@@ -38,7 +121,7 @@ class SelectionHandleWidget extends StatelessWidget {
   });
   final Rect selectionRect;
   final Function(Offset) onDrag;
-  final Function(Offset, HandlePosition) onResize;
+  final Function(HandlePosition, Offset) onResize;
 
   @override
   Widget build(BuildContext context) {
@@ -53,61 +136,89 @@ class SelectionHandleWidget extends StatelessWidget {
           _buildHandle(
             position: selectionRect.center,
             cursor: SystemMouseCursors.move,
-            onPanUpdate: (details) => onDrag(details.delta),
+            onPanUpdate: (details) => onDrag(
+              details.delta,
+            ),
           ),
-          // Corner top left
+
+          // Top Left
           _buildHandle(
             position: selectionRect.topLeft,
             cursor: SystemMouseCursors.resizeUpLeft,
-            onPanUpdate: (details) =>
-                onResize(details.delta, HandlePosition.topLeft),
+            onPanUpdate: (details) => onResize(
+              HandlePosition.topLeft,
+              details.delta,
+            ),
           ),
-          // Center top
+
+          // Top Right
           _buildHandle(
             position: selectionRect.topRight,
             cursor: SystemMouseCursors.resizeUpRight,
-            onPanUpdate: (details) =>
-                onResize(details.delta, HandlePosition.topRight),
+            onPanUpdate: (details) => onResize(
+              HandlePosition.topRight,
+              details.delta,
+            ),
           ),
-          // bottom left
+
+          // Bottom Left
           _buildHandle(
             position: selectionRect.bottomLeft,
             cursor: SystemMouseCursors.resizeDownLeft,
-            onPanUpdate: (details) =>
-                onResize(details.delta, HandlePosition.bottomLeft),
+            onPanUpdate: (details) => onResize(
+              HandlePosition.bottomLeft,
+              details.delta,
+            ),
           ),
-          // bottom right
+
+          // Bottom right
           _buildHandle(
             position: selectionRect.bottomRight,
             cursor: SystemMouseCursors.resizeDownRight,
-            onPanUpdate: (details) =>
-                onResize(details.delta, HandlePosition.bottomRight),
+            onPanUpdate: (details) => onResize(
+              HandlePosition.bottomRight,
+              details.delta,
+            ),
           ),
-          // Side handles
+
+          // Side Left
           _buildHandle(
             position: Offset(selectionRect.left, selectionRect.center.dy),
             cursor: SystemMouseCursors.resizeLeft,
-            onPanUpdate: (details) =>
-                onResize(details.delta, HandlePosition.left),
+            onPanUpdate: (details) => onResize(
+              HandlePosition.left,
+              details.delta,
+            ),
           ),
+
+          // Side Right
           _buildHandle(
             position: Offset(selectionRect.right, selectionRect.center.dy),
             cursor: SystemMouseCursors.resizeRight,
-            onPanUpdate: (details) =>
-                onResize(details.delta, HandlePosition.right),
+            onPanUpdate: (details) => onResize(
+              HandlePosition.right,
+              details.delta,
+            ),
           ),
+
+          // Center Top
           _buildHandle(
             position: Offset(selectionRect.center.dx, selectionRect.top),
             cursor: SystemMouseCursors.resizeUp,
-            onPanUpdate: (details) =>
-                onResize(details.delta, HandlePosition.top),
+            onPanUpdate: (details) => onResize(
+              HandlePosition.top,
+              details.delta,
+            ),
           ),
 
+          // Center Bottom
           _buildHandle(
             position: Offset(selectionRect.center.dx, selectionRect.bottom),
             cursor: SystemMouseCursors.resizeDown,
-            onPanUpdate: (details) =>
-                onResize(details.delta, HandlePosition.bottom),
+            onPanUpdate: (details) => onResize(
+              HandlePosition.bottom,
+              details.delta,
+            ),
           ),
         ],
       ),
@@ -120,18 +231,18 @@ class SelectionHandleWidget extends StatelessWidget {
     required Function(DragUpdateDetails) onPanUpdate,
   }) {
     return Positioned(
-      left: position.dx - 5,
-      top: position.dy - 5,
+      left: position.dx - 10,
+      top: position.dy - 10,
       child: GestureDetector(
         onPanUpdate: onPanUpdate,
         child: MouseRegion(
           cursor: cursor,
           child: Container(
-            width: 10,
-            height: 10,
+            width: 20,
+            height: 20,
             decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(color: Colors.blue, width: 2),
+              color: Colors.blue,
+              border: Border.all(color: Colors.white, width: 2),
               shape: BoxShape.circle,
             ),
           ),
@@ -144,10 +255,13 @@ class SelectionHandleWidget extends StatelessWidget {
 enum HandlePosition {
   topLeft,
   topRight,
+  //
   bottomLeft,
   bottomRight,
+  //
   left,
   right,
+  //
   top,
   bottom,
 }

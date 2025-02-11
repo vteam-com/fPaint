@@ -46,17 +46,30 @@ class MarchingAntsSelectionState extends State<MarchingAntsSelection>
 
 class MarchingAntsPainter extends CustomPainter {
   MarchingAntsPainter({required this.rect, required this.phase});
+
   final Rect rect;
   final double phase;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Path path = Path()..addRect(rect);
+    // First, draw a solid white rectangle border
+    final Paint paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 2
+      ..style = PaintingStyle.stroke;
+    canvas.drawRect(rect, paint);
 
+    // Now, draw the black dashes on top
+
+    paint.color = Colors.black;
+    paint.strokeCap = StrokeCap.square;
+
+    final Path path = Path()..addRect(rect);
     final Path dashPath = Path();
-    const double dashWidth = 6;
-    const double dashSpace = 4;
+    const double dashWidth = 4;
+    const double dashSpace = 6;
     double distance = phase;
+
     for (ui.PathMetric pathMetric in path.computeMetrics()) {
       while (distance < pathMetric.length) {
         final double nextDistance = distance + dashWidth;
@@ -68,13 +81,8 @@ class MarchingAntsPainter extends CustomPainter {
       }
     }
 
-    final Paint dashedPaint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawPath(dashPath, dashedPaint);
+    // Draw black dashes over the white border
+    canvas.drawPath(dashPath, paint);
   }
 
   @override

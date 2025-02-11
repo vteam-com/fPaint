@@ -71,6 +71,25 @@ class CanvasWidgetState extends State<CanvasWidget> {
         final double topLeftTranslated = _offset.dx + centerX;
         final double topTopTranslated = _offset.dy + centerY;
 
+        Rect? selectionRect;
+        if (appModel.selector.isVisible) {
+          final Rect bounds = appModel.selector.boundingRect;
+          final double scaledFactor = _scale * _scale;
+
+          final double left = topLeftTranslated + bounds.left * scaledFactor;
+          final double top = topTopTranslated + bounds.top * scaledFactor;
+          final double right = topLeftTranslated + bounds.right * scaledFactor;
+          final double bottom = topTopTranslated + bounds.bottom * scaledFactor;
+
+          // Ensure width and height are positive
+          selectionRect = Rect.fromLTRB(
+            left,
+            top,
+            right < 0 ? 1 : right,
+            bottom < 0 ? 1 : bottom,
+          );
+        }
+
         return GestureDetector(
           onScaleStart: (final ScaleStartDetails details) {
             // debugPrint('SSS onScaleStart {$details.pointerCount}');
@@ -182,26 +201,16 @@ class CanvasWidgetState extends State<CanvasWidget> {
                   ),
                 ),
               ),
-              if (appModel.selector.isVisible)
+              if (appModel.selector.isVisible && selectionRect != null)
                 SelectionHandleWidget(
-                  selectionRect: Rect.fromLTRB(
-                    topLeftTranslated +
-                        appModel.selector.boundingRect.left * (_scale * _scale),
-                    topTopTranslated +
-                        appModel.selector.boundingRect.top * (_scale * _scale),
-                    topLeftTranslated +
-                        appModel.selector.boundingRect.right *
-                            (_scale * _scale),
-                    topTopTranslated +
-                        appModel.selector.boundingRect.bottom *
-                            (_scale * _scale),
-                  ),
+                  selectionRect: selectionRect,
                   onDrag: (Offset offset) {
                     appModel.selector.translate(offset);
                     appModel.update();
                   },
-                  onResize: (final ui.Offset p0, final HandlePosition handle) {
-                    // TODO
+                  onResize: (HandlePosition handle, Offset offset) {
+                    appModel.selector.inflate(handle, offset);
+                    appModel.update();
                   },
                 ),
             ],
