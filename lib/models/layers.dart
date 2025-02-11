@@ -28,8 +28,7 @@ class Layers {
         ],
         tool: Tools.rectangle,
         fillColor: Colors.white,
-        brushColor: Colors.white,
-        brushSize: 0,
+        brush: MyBrush(color: Colors.white, size: 0),
       ),
     );
 

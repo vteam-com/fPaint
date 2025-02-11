@@ -336,10 +336,12 @@ class CanvasWidgetState extends State<CanvasWidget> {
     appModel.currentUserAction = UserAction(
       tool: appModel.selectedTool,
       positions: [position, position],
-      brushColor: appModel.brushColor,
+      brush: MyBrush(
+        color: appModel.brushColor,
+        size: appModel.brusSize,
+        style: appModel.brushStyle,
+      ),
       fillColor: appModel.fillColor,
-      brushSize: appModel.brusSize,
-      brushStyle: appModel.brushStyle,
     );
 
     appModel.addUserAction(action: appModel.currentUserAction!);

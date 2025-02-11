@@ -288,9 +288,11 @@ class AppModel extends ChangeNotifier {
         UserAction(
           positions: [start, end],
           tool: type,
+          brush: MyBrush(
+            color: colorStroke,
+            size: this.brusSize,
+          ),
           fillColor: colorFill,
-          brushColor: colorStroke,
-          brushSize: this.brusSize,
         ),
       );
     } else {

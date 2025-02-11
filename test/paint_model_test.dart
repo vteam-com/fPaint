@@ -26,9 +26,11 @@ void main() {
           const Offset(10, 10),
         ],
         tool: Tools.brush,
+        brush: MyBrush(
+          color: Colors.black,
+          size: 1,
+        ),
         fillColor: Colors.black,
-        brushColor: Colors.black,
-        brushSize: 1,
       );
       paintModel.addUserAction(action: shape);
       expect(

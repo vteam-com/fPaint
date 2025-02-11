@@ -24,9 +24,11 @@ void main() {
       final userAction = UserAction(
         tool: Tools.brush,
         positions: [Offset.zero],
-        brushColor: Colors.black,
+        brush: MyBrush(
+          color: Colors.black,
+          size: 1,
+        ),
         fillColor: Colors.transparent,
-        brushSize: 1,
       );
       layer.addUserAction(userAction);
       expect(layer.count, 1);
@@ -38,9 +40,11 @@ void main() {
       final userAction = UserAction(
         tool: Tools.brush,
         positions: [Offset.zero],
-        brushColor: Colors.black,
+        brush: MyBrush(
+          color: Colors.black,
+          size: 1,
+        ),
         fillColor: Colors.transparent,
-        brushSize: 1,
       );
       layer.addUserAction(userAction);
       layer.undo();
@@ -68,9 +72,11 @@ void main() {
       final userAction = UserAction(
         tool: Tools.brush,
         positions: [Offset.zero, const Offset(1, 1)],
-        brushColor: Colors.black,
+        brush: MyBrush(
+          color: Colors.black,
+          size: 1,
+        ),
         fillColor: Colors.transparent,
-        brushSize: 1,
       );
       layer.addUserAction(userAction);
       layer.lastActionUpdatePositionEnd(end: const Offset(2, 2));

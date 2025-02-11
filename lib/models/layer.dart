@@ -149,9 +149,11 @@ class Layer {
           offset.dy + imageToAdd.height.toDouble(),
         ),
       ],
-      brushColor: Colors.transparent,
+      brush: MyBrush(
+        color: Colors.transparent,
+        size: 0,
+      ),
       fillColor: Colors.transparent,
-      brushSize: 0,
       image: imageToAdd,
     );
 
@@ -248,10 +250,7 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            MyBrush(
-              color: userAction.brushColor,
-              size: userAction.brushSize,
-            ),
+            userAction.brush,
           );
           break;
 
@@ -259,11 +258,7 @@ class Layer {
           renderPath(
             canvas,
             userAction.positions,
-            MyBrush(
-              style: userAction.brushStyle,
-              color: userAction.brushColor,
-              size: userAction.brushSize,
-            ),
+            userAction.brush,
             userAction.fillColor,
           );
           break;
@@ -273,11 +268,7 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            MyBrush(
-              style: userAction.brushStyle,
-              color: userAction.brushColor,
-              size: userAction.brushSize,
-            ),
+            userAction.brush,
             userAction.fillColor,
           );
           break;
@@ -287,11 +278,7 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            MyBrush(
-              style: userAction.brushStyle,
-              color: userAction.brushColor,
-              size: userAction.brushSize,
-            ),
+            userAction.brush,
             userAction.fillColor,
           );
           break;
@@ -301,11 +288,7 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            MyBrush(
-              style: userAction.brushStyle,
-              color: userAction.brushColor,
-              size: userAction.brushSize,
-            ),
+            userAction.brush,
             userAction.fillColor,
           );
           break;
@@ -315,7 +298,7 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            userAction.brushSize,
+            userAction.brush.size,
           );
           break;
 
