@@ -10,16 +10,13 @@ import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:provider/provider.dart';
 
-/// The `TopMenuAndLayersPanel` widget is a stateless widget that represents the top menu and layers panel in the application.
-/// It includes a toolbar with various menu options, such as creating a new file, opening a file, saving a file, exporting, adjusting canvas settings, and displaying the about page.
-/// The panel also includes a reorderable list view that displays the layers in the application, allowing the user to reorder, select, and toggle the visibility of the layers.
-
 class TopMenuAndLayersPanel extends StatelessWidget {
   const TopMenuAndLayersPanel({super.key});
 
   @override
   Widget build(BuildContext context) {
     final appModel = AppModel.of(context, listen: true);
+
     return Column(
       children: [
         // toolbar
@@ -63,49 +60,55 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                const PopupMenuItem<int>(
+                buildMenuItem(
                   value: MenuIds.newFile,
-                  child: Text('Start over...'),
+                  text: 'Start over...',
+                  icon: Icons.power_settings_new_outlined,
                 ),
-                const PopupMenuItem<int>(
+                buildMenuItem(
                   value: MenuIds.openFile,
-                  child: Text('Open file...'),
+                  text: 'Import...',
+                  icon: Icons.file_download_outlined,
                 ),
-                const PopupMenuItem<int>(
+                buildMenuItem(
                   value: MenuIds.export,
-                  child: Text('Export...'),
+                  text: 'Export...',
+                  icon: Icons.ios_share_outlined,
                 ),
-                if (!kIsWeb)
-                  const PopupMenuItem<int>(
+                if (!kIsWeb && appModel.loadedFileName.isNotEmpty)
+                  buildMenuItem(
                     value: MenuIds.save,
-                    child: Text('Save...'),
+                    text: 'Save "${appModel.loadedFileName}"',
+                    icon: Icons.check_circle_outline,
                   ),
-                const PopupMenuItem<int>(
+                buildMenuItem(
                   value: MenuIds.canvasSize,
-                  child: Text('Canvas...'),
+                  text: 'Canvas...',
+                  icon: Icons.edit,
                 ),
-                const PopupMenuItem<int>(
+                buildMenuItem(
                   value: MenuIds.about,
-                  child: Text('About...'),
+                  text: 'About...',
+                  icon: Icons.info_outline,
                 ),
               ],
             ),
             if (appModel.isSidePanelExpanded)
-              IconButton(
+              buildIconButton(
                 tooltip: 'Start over...',
-                icon: const Icon(Icons.power_settings_new_outlined),
+                icon: Icons.power_settings_new_outlined,
                 onPressed: () => onFileNew(context),
               ),
             if (appModel.isSidePanelExpanded)
-              IconButton(
-                tooltip: 'Open file...',
-                icon: const Icon(Icons.folder_open_outlined),
+              buildIconButton(
+                tooltip: 'Import...',
+                icon: Icons.file_download_outlined,
                 onPressed: () => onFileOpen(context),
               ),
             if (appModel.isSidePanelExpanded)
-              IconButton(
+              buildIconButton(
                 tooltip: 'Export...',
-                icon: const Icon(Icons.ios_share_outlined),
+                icon: Icons.ios_share_outlined,
                 onPressed: () => sharePanel(context),
               ),
           ],
@@ -140,8 +143,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                         layer: layer,
                         minimal: !appModel.isSidePanelExpanded,
                         isSelected: appModel.selectedLayerIndex == index,
-                        allowRemoveLayer: appModel.layers.length >
-                            1, // Never allow deletion of the last layer
+                        allowRemoveLayer: appModel.layers.length > 1,
                       ),
                     ),
                   );
@@ -151,6 +153,36 @@ class TopMenuAndLayersPanel extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  PopupMenuEntry<int> buildMenuItem({
+    required int value,
+    required String text,
+    IconData? icon,
+    VoidCallback? onPressed,
+  }) {
+    return PopupMenuItem<int>(
+      value: value,
+      child: Row(
+        children: [
+          if (icon != null) Icon(icon, size: 18),
+          if (icon != null) const SizedBox(width: 8),
+          Text(text),
+        ],
+      ),
+    );
+  }
+
+  Widget buildIconButton({
+    required String tooltip,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return IconButton(
+      tooltip: tooltip,
+      icon: Icon(icon),
+      onPressed: onPressed,
     );
   }
 }
