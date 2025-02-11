@@ -188,7 +188,7 @@ class Layer {
     }
   }
 
-  void deleteSelectedRegion(final ui.Path path) {
+  void regionCut(final ui.Path path) {
     addUserAction(
       UserAction(tool: ActionType.cut, positions: [], path: path),
     );

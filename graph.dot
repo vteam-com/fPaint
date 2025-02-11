@@ -49,7 +49,6 @@ digraph "" {
   "/lib/widgets/color_picker_dialog.dart" [label="color_picker_dialog"];
   "/lib/widgets/canvas_widget.dart" [label="canvas_widget"];
   "/lib/widgets/svg_icon.dart" [label="svg_icon"];
-  "/lib/widgets/selector_model.dart" [label="selector_model"];
   "/lib/widgets/truncated_text.dart" [label="truncated_text"];
   "/lib/widgets/container_slider.dart" [label="container_slider"];
   "/lib/widgets/brush_size_picker.dart" [label="brush_size_picker"];
@@ -63,6 +62,7 @@ digraph "" {
   "/lib/widgets/brush_style_picker.dart" [label="brush_style_picker"];
   "/lib/widgets/color_selector.dart" [label="color_selector"];
   "/lib/widgets/nine_grid_selector.dart" [label="nine_grid_selector"];
+  "/lib/widgets/selector_widget.dart" [label="selector_widget"];
   subgraph "cluster~" {
     label="fpaint";
     subgraph "cluster~/test" {
@@ -146,7 +146,6 @@ digraph "" {
         "/lib/widgets/color_picker_dialog.dart";
         "/lib/widgets/canvas_widget.dart";
         "/lib/widgets/svg_icon.dart";
-        "/lib/widgets/selector_model.dart";
         "/lib/widgets/truncated_text.dart";
         "/lib/widgets/container_slider.dart";
         "/lib/widgets/brush_size_picker.dart";
@@ -160,6 +159,7 @@ digraph "" {
         "/lib/widgets/brush_style_picker.dart";
         "/lib/widgets/color_selector.dart";
         "/lib/widgets/nine_grid_selector.dart";
+        "/lib/widgets/selector_widget.dart";
       }
     }
   }
@@ -218,6 +218,7 @@ digraph "" {
   "/lib/models/render_helper.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/canvas_model.dart" -> "/lib/models/layers.dart" [style=dashed];
   "/lib/models/app_model.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/models/app_model.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_model.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_resize.dart";
   "/lib/models/app_model.dart" -> "/lib/models/selector_model.dart";
@@ -260,9 +261,7 @@ digraph "" {
   "/lib/widgets/canvas_widget.dart" -> "/lib/models/selector_model.dart";
   "/lib/widgets/canvas_widget.dart" -> "/lib/panels/canvas_panel.dart";
   "/lib/widgets/canvas_widget.dart" -> "/lib/panels/tools/flood_fill.dart";
-  "/lib/widgets/canvas_widget.dart" -> "/lib/widgets/selector_model.dart";
-  "/lib/widgets/selector_model.dart" -> "/lib/models/selector_model.dart";
-  "/lib/widgets/selector_model.dart" -> "/lib/widgets/marching_ants_rect.dart";
+  "/lib/widgets/canvas_widget.dart" -> "/lib/widgets/selector_widget.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/shortcuts.dart" -> "/lib/files/save.dart";
@@ -276,4 +275,6 @@ digraph "" {
   "/lib/widgets/color_selector.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/color_picker_dialog.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/transparent_background.dart";
+  "/lib/widgets/selector_widget.dart" -> "/lib/models/selector_model.dart";
+  "/lib/widgets/selector_widget.dart" -> "/lib/widgets/marching_ants_rect.dart";
 }

@@ -1,9 +1,11 @@
 // Imports
 
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/canvas_model.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/selector_model.dart';
@@ -65,9 +67,39 @@ class AppModel extends ChangeNotifier {
   bool deviceSizeSmall = false;
 
   SelectorModel selector = SelectorModel();
+  Rect selectorAdjusterRect = Rect.zero;
 
-  void deleteSelectedRegion() {
-    selectedLayer.deleteSelectedRegion(selector.path);
+  void regionCut() {
+    selectedLayer.regionCut(selector.path);
+    update();
+  }
+
+  Future<void> regionCopy() async {
+    final ui.Image image = await getImageForCurrentSelectedLayer();
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder);
+
+    // Get the bounds of the selected path
+    final Rect bounds = selector.path.getBounds();
+
+    // Translate canvas so the clipped area is positioned at (0,0)
+    canvas.translate(-bounds.left, -bounds.top);
+
+    // Clip the canvas with the selected path
+    canvas.clipPath(selector.path);
+
+    // Draw the image, making sure to align it properly
+    canvas.drawImage(image, Offset.zero, Paint());
+
+    // Convert the recorded drawing into an image
+    final ui.Image clippedImage = await recorder.endRecording().toImage(
+          bounds.width.toInt(),
+          bounds.height.toInt(),
+        );
+
+    // Copy the image to the clipboard
+    await copyImageToClipboard(clippedImage);
   }
 
   //-------------------------------------------
@@ -360,5 +392,9 @@ class AppModel extends ChangeNotifier {
   void redo() {
     selectedLayer.redo();
     update();
+  }
+
+  Future<ui.Image> getImageForCurrentSelectedLayer() async {
+    return await selectedLayer.toImageForStorage(canvas.canvasSize);
   }
 }

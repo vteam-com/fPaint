@@ -29,7 +29,7 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         LogicalKeyboardKey.keyZ,
         LogicalKeyboardKey.shift,
       ): const RedoIntent(),
-
+      //-------------------------------------------------
       // Save
       LogicalKeySet(
         LogicalKeyboardKey.control,
@@ -40,6 +40,18 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         LogicalKeyboardKey.meta,
         LogicalKeyboardKey.keyS,
       ): const SaveIntent(),
+
+      //-------------------------------------------------
+      // Copy
+      LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.keyC,
+      ): const CopyIntent(),
+
+      LogicalKeySet(
+        LogicalKeyboardKey.meta,
+        LogicalKeyboardKey.keyC,
+      ): const CopyIntent(),
 
       // Escape
       LogicalKeySet(
@@ -66,6 +78,9 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         SaveIntent: CallbackAction<SaveIntent>(
           onInvoke: (SaveIntent intent) async => await saveFile(appModel),
         ),
+        CopyIntent: CallbackAction<CopyIntent>(
+          onInvoke: (CopyIntent intent) async => await appModel.regionCopy(),
+        ),
         EscapeIntent: CallbackAction<EscapeIntent>(
           onInvoke: (EscapeIntent intent) async {
             appModel.selector.isVisible = false;
@@ -75,7 +90,7 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         ),
         DeleteIntent: CallbackAction<DeleteIntent>(
           onInvoke: (DeleteIntent intent) async {
-            appModel.deleteSelectedRegion();
+            appModel.regionCut();
             return null;
           },
         ),
@@ -99,6 +114,10 @@ class RedoIntent extends Intent {
 
 class SaveIntent extends Intent {
   const SaveIntent();
+}
+
+class CopyIntent extends Intent {
+  const CopyIntent();
 }
 
 class EscapeIntent extends Intent {

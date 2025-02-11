@@ -6,7 +6,7 @@ import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
-import 'package:fpaint/widgets/selector_model.dart';
+import 'package:fpaint/widgets/selector_widget.dart';
 
 /// Provides a canvas widget that supports scaling and panning.
 ///
@@ -74,21 +74,9 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
         Rect? selectionRect;
         if (appModel.selector.isVisible) {
-          final Rect bounds = appModel.selector.boundingRect;
-          final double scaledFactor = _scale * _scale;
-
-          final double left = topLeftTranslated + bounds.left * scaledFactor;
-          final double top = topTopTranslated + bounds.top * scaledFactor;
-          final double right = topLeftTranslated + bounds.right * scaledFactor;
-          final double bottom = topTopTranslated + bounds.bottom * scaledFactor;
-
-          // Ensure width and height are positive
-          selectionRect = Rect.fromLTRB(
-            left,
-            top,
-            right < 0 ? 1 : right,
-            bottom < 0 ? 1 : bottom,
-          );
+          appModel.selectorAdjusterRect =
+              getAdjustedRect(appModel, topLeftTranslated, topTopTranslated);
+          selectionRect = appModel.selectorAdjusterRect;
         }
 
         return GestureDetector(
@@ -223,6 +211,28 @@ class CanvasWidgetState extends State<CanvasWidget> {
     );
   }
 
+  ui.Rect getAdjustedRect(
+    AppModel appModel,
+    double topLeftTranslated,
+    double topTopTranslated,
+  ) {
+    final Rect bounds = appModel.selector.boundingRect;
+    final double scaledFactor = _scale * _scale;
+
+    final double left = topLeftTranslated + bounds.left * scaledFactor;
+    final double top = topTopTranslated + bounds.top * scaledFactor;
+    final double right = topLeftTranslated + bounds.right * scaledFactor;
+    final double bottom = topTopTranslated + bounds.bottom * scaledFactor;
+
+    // Ensure width and height are positive
+    return Rect.fromLTRB(
+      left,
+      top,
+      right < 0 ? 1 : right,
+      bottom < 0 ? 1 : bottom,
+    );
+  }
+
   Future<void> _handlePointerStart(
     final AppModel appModel,
     final PointerDownEvent event,
@@ -319,8 +329,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
     if (appModel.selectedTool == ActionType.fill) {
       // Create a flattened image from the current layer
-      final ui.Image img = await appModel.selectedLayer
-          .toImageForStorage(appModel.canvas.canvasSize);
+      final ui.Image img = await appModel.getImageForCurrentSelectedLayer();
 
       // Perform flood fill at the clicked position
       final ui.Image filledImage = await applyFloodFill(

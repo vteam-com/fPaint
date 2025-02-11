@@ -1,7 +1,11 @@
 import 'dart:async';
-import 'dart:typed_data';
+import 'dart:convert';
 import 'dart:ui' as ui;
-import 'package:fpaint/helpers/color_helper.dart';
+
+import 'package:flutter/services.dart';
+import 'package:super_clipboard/super_clipboard.dart';
+
+import 'color_helper.dart';
 
 Future<List<ColorUsage>> getImageColors(ui.Image image) async {
   final ByteData? byteData =
@@ -53,7 +57,7 @@ Future<List<ColorUsage>> getImageColors(ui.Image image) async {
 Future<Uint8List?> convertImageToUint8List(ui.Image image) async {
   ByteData? byteData =
       await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
-  return byteData?.buffer.asUint8List();
+  return byteData!.buffer.asUint8List();
 }
 
 List<String> imageBytesListToString(Uint8List bytes, int width) {
@@ -97,4 +101,24 @@ Future<ui.Image> createImageFromBytes({
     },
   );
   return completer.future;
+}
+
+Future<void> copyImageBase64(Uint8List imageBytes) async {
+  final base64String = base64Encode(imageBytes);
+  final clipboardData =
+      ClipboardData(text: 'data:image/png;base64,$base64String');
+  await Clipboard.setData(clipboardData);
+}
+
+Future<void> copyImageToClipboard(ui.Image image) async {
+  final SystemClipboard? clipboard = SystemClipboard.instance;
+  if (clipboard != null) {
+    final DataWriterItem item = DataWriterItem(suggestedName: 'fpaint.png');
+    final ByteData? data =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+    item.add(Formats.png(data!.buffer.asUint8List()));
+    await clipboard.write([item]);
+  } else {
+    // showMessage(_notAvailableMessage);
+  }
 }
