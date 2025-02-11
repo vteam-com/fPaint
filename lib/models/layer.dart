@@ -248,8 +248,10 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            userAction.brushColor,
-            userAction.brushSize,
+            MyBrush(
+              color: userAction.brushColor,
+              size: userAction.brushSize,
+            ),
           );
           break;
 
@@ -257,9 +259,11 @@ class Layer {
           renderPath(
             canvas,
             userAction.positions,
-            userAction.brushColor,
-            userAction.brushSize,
-            userAction.brushStyle,
+            MyBrush(
+              style: userAction.brushStyle,
+              color: userAction.brushColor,
+              size: userAction.brushSize,
+            ),
             userAction.fillColor,
           );
           break;
@@ -269,9 +273,11 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            userAction.brushColor,
-            userAction.brushSize,
-            userAction.brushStyle,
+            MyBrush(
+              style: userAction.brushStyle,
+              color: userAction.brushColor,
+              size: userAction.brushSize,
+            ),
             userAction.fillColor,
           );
           break;
@@ -281,10 +287,12 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
+            MyBrush(
+              style: userAction.brushStyle,
+              color: userAction.brushColor,
+              size: userAction.brushSize,
+            ),
             userAction.fillColor,
-            userAction.brushSize,
-            userAction.brushColor,
-            userAction.brushStyle,
           );
           break;
 
@@ -293,9 +301,11 @@ class Layer {
             canvas,
             userAction.positions.first,
             userAction.positions.last,
-            userAction.brushColor,
-            userAction.brushSize,
-            userAction.brushStyle,
+            MyBrush(
+              style: userAction.brushStyle,
+              color: userAction.brushColor,
+              size: userAction.brushSize,
+            ),
             userAction.fillColor,
           );
           break;

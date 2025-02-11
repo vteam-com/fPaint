@@ -6,12 +6,11 @@ void renderPencil(
   final Canvas canvas,
   final Offset p1,
   final Offset p2,
-  final Color brushColor,
-  final double brushSize,
+  final MyBrush brush,
 ) {
   final Paint paint = Paint();
-  paint.color = brushColor;
-  paint.strokeWidth = brushSize;
+  paint.color = brush.color;
+  paint.strokeWidth = brush.size;
   paint.style = PaintingStyle.stroke;
   paint.strokeCap = StrokeCap.round;
   paint.blendMode = BlendMode.src;
@@ -26,30 +25,28 @@ void renderRectangle(
   final Canvas canvas,
   final Offset p1,
   final Offset p2,
-  final Color brushColor,
-  final double brushSize,
-  final BrushStyle brushStyle,
+  final MyBrush brush,
   final Color fillColor,
 ) {
   // Draw the base rectangle
   final Paint paint = Paint();
   paint.color = fillColor;
   paint.strokeCap = StrokeCap.round;
-  paint.strokeWidth = brushSize;
+  paint.strokeWidth = brush.size;
   paint.style = PaintingStyle.fill;
   final rect = Rect.fromPoints(p1, p2);
   canvas.drawRect(rect, paint);
 
   // Draw the path arround the rectangle
   paint.style = PaintingStyle.stroke;
-  paint.color = brushColor;
+  paint.color = brush.color;
   final path = Path()..addRect(rect);
   drawPathWithBrushStyle(
     canvas,
     paint,
     path,
-    brushStyle,
-    brushSize,
+    brush.style,
+    brush.size,
   );
 }
 
@@ -57,15 +54,13 @@ void renderCircle(
   final Canvas canvas,
   final Offset p1,
   final Offset p2,
+  final MyBrush brush,
   final Color fillColor,
-  final double brushSize,
-  final Color brushColor,
-  final BrushStyle brushStyle,
 ) {
   final Paint paint = Paint();
   paint.color = fillColor;
   paint.strokeCap = StrokeCap.round;
-  paint.strokeWidth = brushSize;
+  paint.strokeWidth = brush.size;
   paint.style = PaintingStyle.fill;
 
   final double radius = (p1 - p2).distance / 2;
@@ -75,7 +70,7 @@ void renderCircle(
   );
   canvas.drawCircle(center, radius, paint);
   paint.style = PaintingStyle.stroke;
-  paint.color = brushColor;
+  paint.color = brush.color;
   final path = Path()
     ..addOval(
       Rect.fromCircle(
@@ -87,24 +82,22 @@ void renderCircle(
     canvas,
     paint,
     path,
-    brushStyle,
-    brushSize,
+    brush.style,
+    brush.size,
   );
 }
 
 void renderPath(
   final Canvas canvas,
   final List<Offset> positions,
-  final Color brushColor,
-  final double brushSize,
-  final BrushStyle brushStyle,
+  final MyBrush brush,
   final Color fillColor,
 ) {
   final Paint paint = Paint();
   paint.color = fillColor;
   paint.style = PaintingStyle.stroke;
   paint.strokeCap = StrokeCap.round;
-  paint.strokeWidth = brushSize;
+  paint.strokeWidth = brush.size;
 
   final Path path = Path()
     ..moveTo(
@@ -115,35 +108,33 @@ void renderPath(
     path.lineTo(position.dx, position.dy);
   }
   paint.style = PaintingStyle.stroke;
-  paint.color = brushColor;
-  drawPathWithBrushStyle(canvas, paint, path, brushStyle, brushSize);
+  paint.color = brush.color;
+  drawPathWithBrushStyle(canvas, paint, path, brush.style, brush.size);
 }
 
 void renderLine(
   final Canvas canvas,
   final Offset p1,
   final Offset p2,
-  final Color brushColor,
-  final double brushSize,
-  final BrushStyle brushStyle,
+  final MyBrush brush,
   final Color fillColor,
 ) {
   final Paint paint = Paint();
   paint.color = fillColor;
   paint.strokeCap = StrokeCap.round;
-  paint.strokeWidth = brushSize;
+  paint.strokeWidth = brush.size;
   paint.style = PaintingStyle.stroke;
 
   final Path path = Path()
     ..moveTo(p1.dx, p1.dy)
     ..lineTo(p2.dx, p2.dy);
-  paint.color = brushColor;
+  paint.color = brush.color;
   drawPathWithBrushStyle(
     canvas,
     paint,
     path,
-    brushStyle,
-    brushSize,
+    brush.style,
+    brush.size,
   );
 }
 

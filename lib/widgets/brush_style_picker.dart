@@ -9,6 +9,17 @@ enum BrushStyle {
   // marker,
 }
 
+class MyBrush {
+  MyBrush({
+    this.style = BrushStyle.solid,
+    this.color = Colors.black,
+    this.size = 1,
+  });
+  BrushStyle style;
+  Color color;
+  double size;
+}
+
 Widget brushStyleSelection(final AppModel appModel) {
   return DropdownButton<int>(
     value: appModel.brushStyle.index,
