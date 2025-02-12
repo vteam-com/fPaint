@@ -109,6 +109,18 @@ class SelectorModel {
     // Ensure the width and height remain positive
     if (newBounds.width > 0 && newBounds.height > 0) {
       path = Path()..addRect(newBounds);
+    } else {
+      // Flip the rectangle if it goes beyond the bounds
+      final double left =
+          newBounds.left < newBounds.right ? newBounds.left : newBounds.right;
+      final double right =
+          newBounds.left > newBounds.right ? newBounds.left : newBounds.right;
+      final double top =
+          newBounds.top < newBounds.bottom ? newBounds.top : newBounds.bottom;
+      final double bottom =
+          newBounds.top > newBounds.bottom ? newBounds.top : newBounds.bottom;
+
+      path = Path()..addRect(Rect.fromLTRB(left, top, right, bottom));
     }
   }
 

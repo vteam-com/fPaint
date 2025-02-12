@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/marching_ants_rect.dart';
 
-class SelectionHandleWidget extends StatelessWidget {
+class SelectionHandleWidget extends StatefulWidget {
   const SelectionHandleWidget({
     super.key,
     required this.selectionRect,
@@ -16,29 +16,42 @@ class SelectionHandleWidget extends StatelessWidget {
   final Function(SelectorHandlePosition, Offset) onResize;
 
   @override
+  State<SelectionHandleWidget> createState() => _SelectionHandleWidgetState();
+}
+
+const defaultHandleSize = 20;
+
+class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
+  bool showCoordinate = false;
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: selectionRect.left + selectionRect.width + 20,
-      height: selectionRect.bottom + selectionRect.height + 20,
-      child: enableMoveAndResize
+      width: widget.selectionRect.left +
+          widget.selectionRect.width +
+          defaultHandleSize,
+      height: widget.selectionRect.bottom +
+          widget.selectionRect.height +
+          defaultHandleSize,
+      child: widget.enableMoveAndResize
           ? Stack(
               children: [
-                MarchingAntsSelection(rect: selectionRect),
+                MarchingAntsSelection(rect: widget.selectionRect),
 
                 // Center handle for moving
                 _buildHandle(
-                  position: selectionRect.center,
+                  position: widget.selectionRect.center,
                   cursor: SystemMouseCursors.move,
-                  onPanUpdate: (details) => onDrag(
+                  onPanUpdate: (details) => widget.onDrag(
                     details.delta,
                   ),
                 ),
 
                 // Top Left
                 _buildHandle(
-                  position: selectionRect.topLeft,
+                  position: widget.selectionRect.topLeft,
                   cursor: SystemMouseCursors.resizeUpLeft,
-                  onPanUpdate: (details) => onResize(
+                  onPanUpdate: (details) => widget.onResize(
                     SelectorHandlePosition.topLeft,
                     details.delta,
                   ),
@@ -46,9 +59,9 @@ class SelectionHandleWidget extends StatelessWidget {
 
                 // Top Right
                 _buildHandle(
-                  position: selectionRect.topRight,
+                  position: widget.selectionRect.topRight,
                   cursor: SystemMouseCursors.resizeUpRight,
-                  onPanUpdate: (details) => onResize(
+                  onPanUpdate: (details) => widget.onResize(
                     SelectorHandlePosition.topRight,
                     details.delta,
                   ),
@@ -56,9 +69,9 @@ class SelectionHandleWidget extends StatelessWidget {
 
                 // Bottom Left
                 _buildHandle(
-                  position: selectionRect.bottomLeft,
+                  position: widget.selectionRect.bottomLeft,
                   cursor: SystemMouseCursors.resizeDownLeft,
-                  onPanUpdate: (details) => onResize(
+                  onPanUpdate: (details) => widget.onResize(
                     SelectorHandlePosition.bottomLeft,
                     details.delta,
                   ),
@@ -66,9 +79,9 @@ class SelectionHandleWidget extends StatelessWidget {
 
                 // Bottom right
                 _buildHandle(
-                  position: selectionRect.bottomRight,
+                  position: widget.selectionRect.bottomRight,
                   cursor: SystemMouseCursors.resizeDownRight,
-                  onPanUpdate: (details) => onResize(
+                  onPanUpdate: (details) => widget.onResize(
                     SelectorHandlePosition.bottomRight,
                     details.delta,
                   ),
@@ -76,9 +89,12 @@ class SelectionHandleWidget extends StatelessWidget {
 
                 // Side Left
                 _buildHandle(
-                  position: Offset(selectionRect.left, selectionRect.center.dy),
+                  position: Offset(
+                    widget.selectionRect.left,
+                    widget.selectionRect.center.dy,
+                  ),
                   cursor: SystemMouseCursors.resizeLeft,
-                  onPanUpdate: (details) => onResize(
+                  onPanUpdate: (details) => widget.onResize(
                     SelectorHandlePosition.left,
                     details.delta,
                   ),
@@ -86,10 +102,12 @@ class SelectionHandleWidget extends StatelessWidget {
 
                 // Side Right
                 _buildHandle(
-                  position:
-                      Offset(selectionRect.right, selectionRect.center.dy),
+                  position: Offset(
+                    widget.selectionRect.right,
+                    widget.selectionRect.center.dy,
+                  ),
                   cursor: SystemMouseCursors.resizeRight,
-                  onPanUpdate: (details) => onResize(
+                  onPanUpdate: (details) => widget.onResize(
                     SelectorHandlePosition.right,
                     details.delta,
                   ),
@@ -97,9 +115,12 @@ class SelectionHandleWidget extends StatelessWidget {
 
                 // Center Top
                 _buildHandle(
-                  position: Offset(selectionRect.center.dx, selectionRect.top),
+                  position: Offset(
+                    widget.selectionRect.center.dx,
+                    widget.selectionRect.top,
+                  ),
                   cursor: SystemMouseCursors.resizeUp,
-                  onPanUpdate: (details) => onResize(
+                  onPanUpdate: (details) => widget.onResize(
                     SelectorHandlePosition.top,
                     details.delta,
                   ),
@@ -107,17 +128,19 @@ class SelectionHandleWidget extends StatelessWidget {
 
                 // Center Bottom
                 _buildHandle(
-                  position:
-                      Offset(selectionRect.center.dx, selectionRect.bottom),
+                  position: Offset(
+                    widget.selectionRect.center.dx,
+                    widget.selectionRect.bottom,
+                  ),
                   cursor: SystemMouseCursors.resizeDown,
-                  onPanUpdate: (details) => onResize(
+                  onPanUpdate: (details) => widget.onResize(
                     SelectorHandlePosition.bottom,
                     details.delta,
                   ),
                 ),
               ],
             )
-          : MarchingAntsSelection(rect: selectionRect),
+          : MarchingAntsSelection(rect: widget.selectionRect),
     );
   }
 
@@ -126,21 +149,40 @@ class SelectionHandleWidget extends StatelessWidget {
     required MouseCursor cursor,
     required Function(DragUpdateDetails) onPanUpdate,
   }) {
+    final int handleSize =
+        (showCoordinate ? (defaultHandleSize * 1.5) : defaultHandleSize)
+            .toInt();
+
     return Positioned(
-      left: position.dx - 10,
-      top: position.dy - 10,
+      left: position.dx - (handleSize / 2),
+      top: position.dy - (handleSize / 2),
       child: GestureDetector(
-        onPanUpdate: onPanUpdate,
+        onPanUpdate: (details) {
+          setState(() {
+            showCoordinate = true;
+          });
+          onPanUpdate(details);
+        },
+        onPanEnd: (details) => setState(() => showCoordinate = false),
         child: MouseRegion(
           cursor: cursor,
           child: Container(
-            width: 20,
-            height: 20,
+            width: handleSize.toDouble(),
+            height: handleSize.toDouble(),
             decoration: BoxDecoration(
               color: Colors.blue,
               border: Border.all(color: Colors.white, width: 2),
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(10),
             ),
+            child: showCoordinate
+                ? Center(
+                    child: Text(
+                      '${position.dx.toInt()}\n${position.dy.toInt()}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 8, color: Colors.white),
+                    ),
+                  )
+                : null,
           ),
         ),
       ),
