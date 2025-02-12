@@ -126,4 +126,31 @@ class SelectorModel {
       isMoving = true;
     }
   }
+
+  Rect getAdjustedRect(
+    double topLeftTranslated,
+    double topTopTranslated,
+    double scale,
+  ) {
+    final Rect bounds = this.boundingRect;
+    final double scaledFactor = scale * scale;
+
+    final double left = topLeftTranslated + bounds.left * scaledFactor;
+    final double top = topTopTranslated + bounds.top * scaledFactor;
+    final double right = topLeftTranslated + bounds.right * scaledFactor;
+    final double bottom = topTopTranslated + bounds.bottom * scaledFactor;
+
+    // Normalize the rectangle
+    final double normalizedLeft = left < right ? left : right;
+    final double normalizedRight = left > right ? left : right;
+    final double normalizedTop = top < bottom ? top : bottom;
+    final double normalizedBottom = top > bottom ? top : bottom;
+
+    return Rect.fromLTRB(
+      normalizedLeft,
+      normalizedTop,
+      normalizedRight,
+      normalizedBottom,
+    );
+  }
 }

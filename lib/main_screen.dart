@@ -60,6 +60,7 @@ class MainScreen extends StatelessWidget {
   }
 
   Widget _buildMobilePhoneLayout(final AppModel appModel) {
+    // On small device we either show the full screen canvas with a few floating action buttons
     if (appModel.showMenu) {
       return const SidePanel();
     } else {

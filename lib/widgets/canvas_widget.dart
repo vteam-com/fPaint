@@ -74,8 +74,11 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
         Rect? selectionRect;
         if (appModel.selector.isVisible) {
-          appModel.selectorAdjusterRect =
-              getAdjustedRect(appModel, topLeftTranslated, topTopTranslated);
+          appModel.selectorAdjusterRect = appModel.selector.getAdjustedRect(
+            topLeftTranslated,
+            topTopTranslated,
+            _scale,
+          );
           selectionRect = appModel.selectorAdjusterRect;
         }
 
@@ -208,28 +211,6 @@ class CanvasWidgetState extends State<CanvasWidget> {
           ),
         );
       },
-    );
-  }
-
-  ui.Rect getAdjustedRect(
-    AppModel appModel,
-    double topLeftTranslated,
-    double topTopTranslated,
-  ) {
-    final Rect bounds = appModel.selector.boundingRect;
-    final double scaledFactor = _scale * _scale;
-
-    final double left = topLeftTranslated + bounds.left * scaledFactor;
-    final double top = topTopTranslated + bounds.top * scaledFactor;
-    final double right = topLeftTranslated + bounds.right * scaledFactor;
-    final double bottom = topTopTranslated + bounds.bottom * scaledFactor;
-
-    // Ensure width and height are positive
-    return Rect.fromLTRB(
-      left,
-      top,
-      right < 0 ? 1 : right,
-      bottom < 0 ? 1 : bottom,
     );
   }
 
