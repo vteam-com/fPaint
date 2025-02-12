@@ -17,7 +17,7 @@ enum SelectorHandlePosition {
 class SelectorModel {
   bool isVisible = false;
   Path path = Path();
-  bool isMoving = false;
+  bool userIsCreatingTheSelector = false;
 
   Rect get boundingRect => path.getBounds();
 
@@ -32,7 +32,7 @@ class SelectorModel {
     path = path.transform(matrix.storage);
   }
 
-  void inflate(
+  void resizeFromSides(
     final SelectorHandlePosition handle,
     final Offset offset,
   ) {
@@ -42,8 +42,10 @@ class SelectorModel {
     switch (handle) {
       case SelectorHandlePosition.topLeft:
         newBounds = Rect.fromLTRB(
-          bounds.left + offset.dx,
-          bounds.top + offset.dy,
+          (bounds.left + offset.dx)
+              .clamp(double.negativeInfinity, bounds.right),
+          (bounds.top + offset.dy)
+              .clamp(double.negativeInfinity, bounds.bottom),
           bounds.right,
           bounds.bottom,
         );
@@ -51,7 +53,8 @@ class SelectorModel {
       case SelectorHandlePosition.top:
         newBounds = Rect.fromLTRB(
           bounds.left,
-          bounds.top + offset.dy,
+          (bounds.top + offset.dy)
+              .clamp(double.negativeInfinity, bounds.bottom),
           bounds.right,
           bounds.bottom,
         );
@@ -59,8 +62,9 @@ class SelectorModel {
       case SelectorHandlePosition.topRight:
         newBounds = Rect.fromLTRB(
           bounds.left,
-          bounds.top + offset.dy,
-          bounds.right + offset.dx,
+          (bounds.top + offset.dy)
+              .clamp(double.negativeInfinity, bounds.bottom),
+          (bounds.right + offset.dx).clamp(bounds.left, double.infinity),
           bounds.bottom,
         );
         break;
@@ -68,7 +72,7 @@ class SelectorModel {
         newBounds = Rect.fromLTRB(
           bounds.left,
           bounds.top,
-          bounds.right + offset.dx,
+          (bounds.right + offset.dx).clamp(bounds.left, double.infinity),
           bounds.bottom,
         );
         break;
@@ -76,8 +80,8 @@ class SelectorModel {
         newBounds = Rect.fromLTRB(
           bounds.left,
           bounds.top,
-          bounds.right + offset.dx,
-          bounds.bottom + offset.dy,
+          (bounds.right + offset.dx).clamp(bounds.left, double.infinity),
+          (bounds.bottom + offset.dy).clamp(bounds.top, double.infinity),
         );
         break;
       case SelectorHandlePosition.bottom:
@@ -85,20 +89,22 @@ class SelectorModel {
           bounds.left,
           bounds.top,
           bounds.right,
-          bounds.bottom + offset.dy,
+          (bounds.bottom + offset.dy).clamp(bounds.top, double.infinity),
         );
         break;
       case SelectorHandlePosition.bottomLeft:
         newBounds = Rect.fromLTRB(
-          bounds.left + offset.dx,
+          (bounds.left + offset.dx)
+              .clamp(double.negativeInfinity, bounds.right),
           bounds.top,
           bounds.right,
-          bounds.bottom + offset.dy,
+          (bounds.bottom + offset.dy).clamp(bounds.top, double.infinity),
         );
         break;
       case SelectorHandlePosition.left:
         newBounds = Rect.fromLTRB(
-          bounds.left + offset.dx,
+          (bounds.left + offset.dx)
+              .clamp(double.negativeInfinity, bounds.right),
           bounds.top,
           bounds.right,
           bounds.bottom,
@@ -126,16 +132,17 @@ class SelectorModel {
 
   void addPosition(final Offset position) {
     isVisible = true;
-    if (isMoving) {
+    if (userIsCreatingTheSelector) {
       // debugPrint('Selector isMoving - addPosition ${path.getBounds().topLeft}');
-      final r = Rect.fromPoints(path.getBounds().topLeft, position);
+      final r =
+          path.getBounds().expandToInclude(Rect.fromPoints(position, position));
       path = Path();
       path.addRect(r);
     } else {
       // debugPrint('Selector start from $position');
       path = Path();
       path.addRect(Rect.fromPoints(position, position));
-      isMoving = true;
+      userIsCreatingTheSelector = true;
     }
   }
 

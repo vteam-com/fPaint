@@ -203,7 +203,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
                     appModel.update();
                   },
                   onResize: (SelectorHandlePosition handle, Offset offset) {
-                    appModel.selector.inflate(handle, offset);
+                    appModel.selector.resizeFromSides(handle, offset);
                     appModel.update();
                   },
                 ),

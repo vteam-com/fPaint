@@ -384,7 +384,7 @@ class AppModel extends ChangeNotifier {
 
   void selectorEndMovement() {
     // debugPrint('Selector END');
-    this.selector.isMoving = false;
+    this.selector.userIsCreatingTheSelector = false;
     update();
   }
 
