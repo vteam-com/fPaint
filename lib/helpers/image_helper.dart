@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:pasteboard/pasteboard.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 import 'color_helper.dart';
@@ -54,7 +56,15 @@ Future<List<ColorUsage>> getImageColors(ui.Image image) async {
   return colorUsages.sublist(0, 20);
 }
 
-Future<Uint8List?> convertImageToUint8List(ui.Image image) async {
+Future<ui.Image> fromBytesToImage(final Uint8List list) async {
+  // Decode the image
+  final ui.Codec codec = await ui.instantiateImageCodec(list);
+  final ui.FrameInfo frameInfo = await codec.getNextFrame();
+
+  return frameInfo.image;
+}
+
+Future<Uint8List?> convertImageToUint8List(final ui.Image image) async {
   ByteData? byteData =
       await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
   return byteData!.buffer.asUint8List();
@@ -121,4 +131,16 @@ Future<void> copyImageToClipboard(ui.Image image) async {
   } else {
     // showMessage(_notAvailableMessage);
   }
+}
+
+Future<ui.Image?> getImageFromClipboard() async {
+  final Uint8List? bytes = await Pasteboard.image;
+  if (bytes != null) {
+    try {
+      return await fromBytesToImage(bytes);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+  return null;
 }

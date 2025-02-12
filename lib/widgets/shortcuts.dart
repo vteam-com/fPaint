@@ -65,6 +65,19 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         LogicalKeyboardKey.keyC,
       ): const CopyIntent(),
 
+      //-------------------------------------------------
+      // Paste
+      LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.keyV,
+      ): const PasteIntent(),
+
+      LogicalKeySet(
+        LogicalKeyboardKey.meta,
+        LogicalKeyboardKey.keyV,
+      ): const PasteIntent(),
+
+      //-------------------------------------------------
       // Escape
       LogicalKeySet(
         LogicalKeyboardKey.escape,
@@ -95,6 +108,9 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         ),
         CopyIntent: CallbackAction<CopyIntent>(
           onInvoke: (CopyIntent intent) async => await appModel.regionCopy(),
+        ),
+        PasteIntent: CallbackAction<PasteIntent>(
+          onInvoke: (PasteIntent intent) async => await appModel.paste(),
         ),
         EscapeIntent: CallbackAction<EscapeIntent>(
           onInvoke: (EscapeIntent intent) async {
@@ -137,6 +153,10 @@ class CutIntent extends Intent {
 
 class CopyIntent extends Intent {
   const CopyIntent();
+}
+
+class PasteIntent extends Intent {
+  const PasteIntent();
 }
 
 class EscapeIntent extends Intent {

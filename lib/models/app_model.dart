@@ -79,7 +79,28 @@ class AppModel extends ChangeNotifier {
     regionErase();
   }
 
+  Future<void> paste() async {
+    final ui.Image? image = await getImageFromClipboard();
+    if (image == null) {
+      return;
+    }
+
+    final newLayerForPatedImage = addLayerTop('Pasted');
+    newLayerForPatedImage.addImage(
+      imageToAdd: image,
+      offset: const Offset(0, 0),
+    );
+
+    // Add the pasted image to the selected layer
+    update();
+  }
+
   Future<void> regionCopy() async {
+    if (selector.path.getBounds().isEmpty) {
+      // nothing to copy
+      return;
+    }
+
     final ui.Image image = await getImageForCurrentSelectedLayer();
 
     final ui.PictureRecorder recorder = ui.PictureRecorder();
