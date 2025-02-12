@@ -38,7 +38,6 @@ class CanvasWidget extends StatefulWidget {
 class CanvasWidgetState extends State<CanvasWidget> {
   int _activePointerId = -1;
   double _scale = 1.0;
-  Offset _offset = Offset.zero;
   Offset? _lastFocalPoint;
   double _lastScale = 1.0;
   Offset? _panStartFocalPoint;
@@ -51,7 +50,6 @@ class CanvasWidgetState extends State<CanvasWidget> {
     super.initState();
     final appModel = AppModel.of(context);
     _scale = appModel.canvas.scale;
-    _offset = appModel.offset;
   }
 
   @override
@@ -69,8 +67,8 @@ class CanvasWidgetState extends State<CanvasWidget> {
         final double centerX = max(0, (viewportWidth - scaledWidth) / 2);
         final double centerY = max(0, (viewportHeight - scaledHeight) / 2);
 
-        final double topLeftTranslated = _offset.dx + centerX;
-        final double topTopTranslated = _offset.dy + centerY;
+        final double topLeftTranslated = appModel.offset.dx + centerX;
+        final double topTopTranslated = appModel.offset.dy + centerY;
 
         Rect? selectionRect;
         if (appModel.selector.isVisible) {
@@ -104,7 +102,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
                   // Panning
                   final Offset delta =
                       details.focalPoint - _panStartFocalPoint!;
-                  _offset += delta;
+                  appModel.offset += delta;
                   _panStartFocalPoint = details.focalPoint;
                 } else {
                   // debugPrint('+++ Scale by $scaleDelta');
@@ -112,20 +110,19 @@ class CanvasWidgetState extends State<CanvasWidget> {
                   _scale = (_lastScale * details.scale).clamp(0.5, 4.0);
                   final Offset focalPointDelta =
                       details.focalPoint - _lastFocalPoint!;
-                  _offset +=
+                  appModel.offset +=
                       focalPointDelta - focalPointDelta * (_scale / _lastScale);
                   _lastFocalPoint = details.focalPoint;
                 }
               }
 
-              if (appModel.canvas.scale != _scale ||
-                  appModel.offset != _offset) {
+              if (appModel.canvas.scale != _scale) {
                 setState(
                   () {
                     // Update appModel with the new scale and offset
                     // debugPrint('setState > Scale $_scale  offset $_offset');
                     appModel.canvas.scale = _scale;
-                    appModel.offset = _offset;
+                    appModel.offset = appModel.offset;
                   },
                 );
               }
