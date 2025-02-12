@@ -69,9 +69,14 @@ class AppModel extends ChangeNotifier {
   SelectorModel selector = SelectorModel();
   Rect selectorAdjusterRect = Rect.zero;
 
-  void regionCut() {
+  void regionErase() {
     selectedLayer.regionCut(selector.path);
     update();
+  }
+
+  Future<void> regionCut() async {
+    regionCopy();
+    regionErase();
   }
 
   Future<void> regionCopy() async {

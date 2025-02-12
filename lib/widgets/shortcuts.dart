@@ -42,6 +42,18 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
       ): const SaveIntent(),
 
       //-------------------------------------------------
+      // Cut
+      LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.keyX,
+      ): const CutIntent(),
+
+      LogicalKeySet(
+        LogicalKeyboardKey.meta,
+        LogicalKeyboardKey.keyX,
+      ): const CutIntent(),
+
+      //-------------------------------------------------
       // Copy
       LogicalKeySet(
         LogicalKeyboardKey.control,
@@ -78,6 +90,9 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         SaveIntent: CallbackAction<SaveIntent>(
           onInvoke: (SaveIntent intent) async => await saveFile(appModel),
         ),
+        CutIntent: CallbackAction<CutIntent>(
+          onInvoke: (CutIntent intent) async => appModel.regionCut(),
+        ),
         CopyIntent: CallbackAction<CopyIntent>(
           onInvoke: (CopyIntent intent) async => await appModel.regionCopy(),
         ),
@@ -90,7 +105,7 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         ),
         DeleteIntent: CallbackAction<DeleteIntent>(
           onInvoke: (DeleteIntent intent) async {
-            appModel.regionCut();
+            appModel.regionErase();
             return null;
           },
         ),
@@ -114,6 +129,10 @@ class RedoIntent extends Intent {
 
 class SaveIntent extends Intent {
   const SaveIntent();
+}
+
+class CutIntent extends Intent {
+  const CutIntent();
 }
 
 class CopyIntent extends Intent {
