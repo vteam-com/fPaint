@@ -78,11 +78,18 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
       ): const PasteIntent(),
 
       //-------------------------------------------------
+      // Tab key
+      LogicalKeySet(
+        LogicalKeyboardKey.tab,
+      ): const ToggleShellModeIntent(),
+
+      //-------------------------------------------------
       // Escape
       LogicalKeySet(
         LogicalKeyboardKey.escape,
       ): const EscapeIntent(),
 
+      //-------------------------------------------------
       // Delete/Backspace
       LogicalKeySet(
         LogicalKeyboardKey.delete,
@@ -112,6 +119,24 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         PasteIntent: CallbackAction<PasteIntent>(
           onInvoke: (PasteIntent intent) async => await appModel.paste(),
         ),
+
+        //-------------------------------------------------------------
+        // toggle shell mode aka the tools
+        ToggleShellModeIntent: CallbackAction<ToggleShellModeIntent>(
+          onInvoke: (ToggleShellModeIntent intent) async {
+            switch (appModel.shellMode) {
+              case ShellMode.hidden:
+                appModel.shellMode = ShellMode.full;
+                break;
+              default:
+                appModel.shellMode = ShellMode.hidden;
+            }
+            appModel.update();
+            return null;
+          },
+        ),
+
+        //-------------------------------------------------------------
         EscapeIntent: CallbackAction<EscapeIntent>(
           onInvoke: (EscapeIntent intent) async {
             appModel.selector.isVisible = false;
@@ -161,6 +186,10 @@ class PasteIntent extends Intent {
 
 class EscapeIntent extends Intent {
   const EscapeIntent();
+}
+
+class ToggleShellModeIntent extends Intent {
+  const ToggleShellModeIntent();
 }
 
 class DeleteIntent extends Intent {

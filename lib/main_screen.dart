@@ -22,25 +22,41 @@ class MainScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey,
-      body: MultiSplitViewTheme(
-        data: MultiSplitViewThemeData(
-          dividerPainter: DividerPainters.grooved1(
-            animationEnabled: true,
-            backgroundColor: Colors.grey.shade600,
-            highlightedBackgroundColor: Colors.blue,
-            color: Colors.grey.shade800,
-            thickness: 6,
-            highlightedThickness: 8,
-            strokeCap: StrokeCap.round,
-          ),
-        ),
-        child: (appModel.deviceSizeSmall)
-            ? _buildMobilePhoneLayout(appModel)
-            : _buildMidToLargeDevices(appModel),
-      ),
+      body: appModel.shellMode == ShellMode.hidden
+          ? _buildMainContent(appModel)
+          : MultiSplitViewTheme(
+              data: MultiSplitViewThemeData(
+                dividerPainter: DividerPainters.grooved1(
+                  animationEnabled: true,
+                  backgroundColor: Colors.grey.shade600,
+                  highlightedBackgroundColor: Colors.blue,
+                  color: Colors.grey.shade800,
+                  thickness: 6,
+                  highlightedThickness: 8,
+                  strokeCap: StrokeCap.round,
+                ),
+              ),
+              child: _buildMainContent(appModel),
+            ),
       // Undo/Redo
-      floatingActionButton: floatingActionButtons(appModel),
+      floatingActionButton: appModel.shellMode == ShellMode.hidden
+          ? null
+          : floatingActionButtons(appModel),
     );
+  }
+
+  Widget _buildMainContent(final AppModel appModel) {
+    if (appModel.shellMode == ShellMode.hidden) {
+      return CanvasWidget(
+        canvasWidth: appModel.canvas.width,
+        canvasHeight: appModel.canvas.height,
+      );
+    }
+
+    if (appModel.deviceSizeSmall) {
+      return _buildMobilePhoneLayout(appModel);
+    }
+    return _buildMidToLargeDevices(appModel);
   }
 
   Widget _buildMobilePhoneLayout(final AppModel appModel) {

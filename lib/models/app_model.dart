@@ -41,6 +41,11 @@ export 'package:fpaint/models/layers.dart';
 /// the `topColors` property accordingly.
 ///
 /// The `update` method notifies all listeners that the model has been updated.
+enum ShellMode {
+  hidden,
+  minimal,
+  full,
+}
 
 class AppModel extends ChangeNotifier {
   /// Gets the [AppModel] instance from the provided [BuildContext].
@@ -197,6 +202,8 @@ class AppModel extends ChangeNotifier {
 
   //----------------------------------------------------------------
   // SidePanel Expanded/Collapsed
+  ShellMode shellMode = ShellMode.full;
+
   bool _isSidePanelExpanded = true;
 
   bool get isSidePanelExpanded => _isSidePanelExpanded;
