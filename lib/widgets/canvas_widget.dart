@@ -37,20 +37,12 @@ class CanvasWidget extends StatefulWidget {
 
 class CanvasWidgetState extends State<CanvasWidget> {
   int _activePointerId = -1;
-  double _scale = 1.0;
   Offset? _lastFocalPoint;
   double _lastScale = 1.0;
   Offset? _panStartFocalPoint;
 
   bool get isPanningOrScaling =>
       _panStartFocalPoint != null || _lastFocalPoint != null;
-
-  @override
-  void initState() {
-    super.initState();
-    final appModel = AppModel.of(context);
-    _scale = appModel.canvas.scale;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +53,8 @@ class CanvasWidgetState extends State<CanvasWidget> {
         final double viewportWidth = constraints.maxWidth;
         final double viewportHeight = constraints.maxHeight;
 
-        final double scaledWidth = widget.canvasWidth * _scale;
-        final double scaledHeight = widget.canvasHeight * _scale;
+        final double scaledWidth = widget.canvasWidth * appModel.canvas.scale;
+        final double scaledHeight = widget.canvasHeight * appModel.canvas.scale;
 
         final double centerX = max(0, (viewportWidth - scaledWidth) / 2);
         final double centerY = max(0, (viewportHeight - scaledHeight) / 2);
@@ -75,7 +67,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
           appModel.selectorAdjusterRect = appModel.selector.getAdjustedRect(
             topLeftTranslated,
             topTopTranslated,
-            _scale,
+            appModel.canvas.scale,
           );
           selectionRect = appModel.selectorAdjusterRect;
         }
@@ -86,7 +78,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
             if (details.pointerCount == 2) {
               _activePointerId = -1; // cancel any drawing
               _lastFocalPoint = details.focalPoint;
-              _lastScale = _scale;
+              _lastScale = appModel.canvas.scale;
               _panStartFocalPoint =
                   details.focalPoint; //Initialize PanStart on 2 finger
             }
@@ -107,25 +99,21 @@ class CanvasWidgetState extends State<CanvasWidget> {
                 } else {
                   // debugPrint('+++ Scale by $scaleDelta');
                   // Scaling
-                  _scale = (_lastScale * details.scale).clamp(0.5, 4.0);
+                  appModel.canvas.scale =
+                      (_lastScale * details.scale).clamp(0.5, 4.0);
                   final Offset focalPointDelta =
                       details.focalPoint - _lastFocalPoint!;
-                  appModel.offset +=
-                      focalPointDelta - focalPointDelta * (_scale / _lastScale);
+                  appModel.offset += focalPointDelta -
+                      focalPointDelta * (appModel.canvas.scale / _lastScale);
                   _lastFocalPoint = details.focalPoint;
                 }
               }
 
-              if (appModel.canvas.scale != _scale) {
-                setState(
-                  () {
-                    // Update appModel with the new scale and offset
-                    // debugPrint('setState > Scale $_scale  offset $_offset');
-                    appModel.canvas.scale = _scale;
-                    appModel.offset = appModel.offset;
-                  },
-                );
-              }
+              setState(
+                () {
+                  // udpate
+                },
+              );
             }
           },
           onScaleEnd: (final ScaleEndDetails details) {
@@ -142,7 +130,7 @@ class CanvasWidgetState extends State<CanvasWidget> {
                     topLeftTranslated,
                     topTopTranslated,
                   )
-                  ..scale(_scale),
+                  ..scale(appModel.canvas.scale),
                 child: SizedBox(
                   width: max(widget.canvasWidth, viewportWidth),
                   height: max(widget.canvasHeight, viewportHeight),
