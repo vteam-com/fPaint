@@ -26,7 +26,7 @@ class LayerThumbnail extends StatelessWidget {
           width: size.toDouble(),
           height: size.toDouble(),
           child: FutureBuilder<ui.Image>(
-            future: layer.getThumbnail(appModel.canvas.canvasSize),
+            future: layer.getThumbnail(appModel.canvas.size),
             builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot) {
               if (snapshot.connectionState == ConnectionState.done &&
                   snapshot.hasData &&

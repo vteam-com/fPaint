@@ -60,7 +60,7 @@ Future<void> readOraFileFromBytes(
   //print(stackXml.toString());
 
   final XmlElement? rootImage = stackXml.getElement('image');
-  appModel.canvas.canvasSize = ui.Size(
+  appModel.canvas.size = ui.Size(
     double.parse(rootImage!.getAttribute('w')!),
     double.parse(rootImage.getAttribute('h')!),
   );
@@ -218,7 +218,7 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
 
     // Save layer image as PNG
     final ui.Image imageLayer =
-        await layer.toImageForStorage(appModel.canvas.canvasSize);
+        await layer.toImageForStorage(appModel.canvas.size);
 
     final ByteData? bytes =
         await imageLayer.toByteData(format: ui.ImageByteFormat.png);
@@ -249,11 +249,11 @@ Future<List<int>> createOraAchive(AppModel appModel) async {
       builder.attribute('version', '0.0.1');
       builder.attribute(
         'w',
-        appModel.canvas.canvasSize.width.toInt().toString(),
+        appModel.canvas.size.width.toInt().toString(),
       );
       builder.attribute(
         'h',
-        appModel.canvas.canvasSize.height.toInt().toString(),
+        appModel.canvas.size.height.toInt().toString(),
       );
 
       builder.element(

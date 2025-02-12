@@ -62,7 +62,7 @@ class AppModel extends ChangeNotifier {
   String loadedFileName = '';
 
   CanvasModel canvas = CanvasModel();
-  late Layers layers = Layers(canvas.canvasSize);
+  late Layers layers = Layers(canvas.size);
 
   // Selected Tool
   ActionType _selectedTool = ActionType.brush;
@@ -150,9 +150,9 @@ class AppModel extends ChangeNotifier {
   } // center
 
   void resizeCanvas(final int newWidth, final int newHeight) {
-    final Size oldSize = canvas.canvasSize;
+    final Size oldSize = canvas.size;
     final Size newSize = Size(newWidth.toDouble(), newHeight.toDouble());
-    canvas.canvasSize = newSize;
+    canvas.size = newSize;
 
     // Scale layers only when shrinking
     if (newWidth < oldSize.width || newHeight < oldSize.height) {
@@ -428,6 +428,6 @@ class AppModel extends ChangeNotifier {
   }
 
   Future<ui.Image> getImageForCurrentSelectedLayer() async {
-    return await selectedLayer.toImageForStorage(canvas.canvasSize);
+    return await selectedLayer.toImageForStorage(canvas.size);
   }
 }

@@ -69,7 +69,7 @@ Widget floatingActionButtons(final AppModel appModel) {
         foregroundColor: colorForegound,
         onPressed: () => appModel.resetCanvasSizeAndPlacement(),
         child: Text(
-          '${(appModel.canvas.scale * 100).toInt()}%\n${appModel.canvas.canvasSize.width.toInt()}\n${appModel.canvas.canvasSize.height.toInt()}',
+          '${(appModel.canvas.scale * 100).toInt()}%\n${appModel.canvas.size.width.toInt()}\n${appModel.canvas.size.height.toInt()}',
           textAlign: TextAlign.right,
           style: TextStyle(
             color: colorForegound,

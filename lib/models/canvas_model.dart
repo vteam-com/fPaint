@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 export 'package:fpaint/models/layers.dart';
 
 class CanvasModel extends ChangeNotifier {
-  Size canvasSize = const Size(800, 600); // Default canvas size
-
-  double get width => this.canvasSize.width * this.scale;
-  double get height => this.canvasSize.height * this.scale;
-  Size get canvasSizeScaled => Size(width, height);
+  ///-------------------------------------------
+  /// Default canvas size
+  Size size = const Size(800, 600);
+  double get width => this.size.width * this.scale;
+  double get height => this.size.height * this.scale;
 
   ///-------------------------------------------
   /// canvasResizeLockAspectRatio
