@@ -92,7 +92,7 @@ class MainViewState extends State<MainView> {
                     ),
                   ),
                   enableMoveAndResize:
-                      appModel.selectedTool == ActionType.selector,
+                      appModel.selectedAction == ActionType.selector,
                   onDrag: (Offset offset) {
                     appModel.selector.translate(offset);
                     appModel.update();
@@ -123,7 +123,7 @@ class MainViewState extends State<MainView> {
       _activePointerId = event.pointer;
 
       // deal with Selector
-      if (appModel.selectedTool == ActionType.selector) {
+      if (appModel.selectedAction == ActionType.selector) {
         appModel.selectorStart(adjustedPosition);
         return;
       }
@@ -146,7 +146,7 @@ class MainViewState extends State<MainView> {
       //
       // Special case, one clik flood fill does not need to be tracked
       //
-      if (appModel.selectedTool == ActionType.fill) {
+      if (appModel.selectedAction == ActionType.fill) {
         // Create a flattened image from the current layer
         final ui.Image img = await appModel.getImageForCurrentSelectedLayer();
 
@@ -165,7 +165,7 @@ class MainViewState extends State<MainView> {
       }
 
       appModel.currentUserAction = UserAction(
-        tool: appModel.selectedTool,
+        tool: appModel.selectedAction,
         positions: [fillPosition, fillPosition],
         brush: MyBrush(
           color: appModel.brushColor,
@@ -194,23 +194,23 @@ class MainViewState extends State<MainView> {
 
     if (event.buttons == 1 && _activePointerId == event.pointer) {
       // Update the Selector
-      if (appModel.selectedTool == ActionType.selector) {
+      if (appModel.selectedAction == ActionType.selector) {
         appModel.selectorMove(adjustedPosition);
         return;
       }
 
-      if (appModel.selectedTool == ActionType.fill) {
+      if (appModel.selectedAction == ActionType.fill) {
         // ignore fill movement
         return;
       }
 
-      if (appModel.selectedTool == ActionType.pencil) {
+      if (appModel.selectedAction == ActionType.pencil) {
         // Add the pixel
         appModel.appendLineFromLastUserAction(adjustedPosition);
-      } else if (appModel.selectedTool == ActionType.eraser) {
+      } else if (appModel.selectedAction == ActionType.eraser) {
         // Eraser implementation
         appModel.appendLineFromLastUserAction(adjustedPosition);
-      } else if (appModel.selectedTool == ActionType.brush) {
+      } else if (appModel.selectedAction == ActionType.brush) {
         // Cumulate more points in the draw path on the selected layer
         appModel.selectedLayer
             .appPositionToLastAction(position: adjustedPosition);
@@ -230,7 +230,7 @@ class MainViewState extends State<MainView> {
     // debugPrint('UP ${details.buttons}');
 
     if (_activePointerId == event.pointer) {
-      if (appModel.selectedTool == ActionType.selector) {
+      if (appModel.selectedAction == ActionType.selector) {
         appModel.selectorEnd();
       }
 

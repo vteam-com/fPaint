@@ -64,9 +64,11 @@ class AppModel extends ChangeNotifier {
   bool deviceSizeSmall = false;
   bool centerImageInViewPort = true;
 
-  //----------------------------------------------------
+  //=============================================================================
   // All things Canvas
   CanvasModel canvas = CanvasModel();
+
+  Offset offset = Offset.zero;
 
   int get canvasResizePosition => canvas.resizePosition;
   set canvasResizePosition(int value) {
@@ -179,66 +181,40 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
-  Offset offset = Offset.zero;
-  Offset? lastFocalPoint;
-
-  /// Stores the starting position of a pan gesture for drawing operations.
-  UserAction? currentUserAction;
-
-  // Color for Stroke
-  Color _colorForStroke = Colors.black;
-
-  Color get brushColor => _colorForStroke;
-
-  //----------------------------------------------------------------
+  //=============================================================================
   // SidePanel Expanded/Collapsed
   bool _showMenu = false;
-
   bool get showMenu => _showMenu;
-
   set showMenu(final bool value) {
     _showMenu = value;
     update();
   }
 
   void resetView() {
-    lastFocalPoint = null;
     offset = Offset.zero;
     canvas.scale = 1;
     centerImageInViewPort = true;
     update();
   }
 
-  //----------------------------------------------------------------
-  // SidePanel Expanded/Collapsed
+  //=============================================================================
+  // Shell
   ShellMode shellMode = ShellMode.full;
 
   bool _isSidePanelExpanded = true;
-
   bool get isSidePanelExpanded => _isSidePanelExpanded;
-
   set isSidePanelExpanded(final bool value) {
     _isSidePanelExpanded = value;
     update();
   }
 
-  //----------------------------------------------------
+  //=============================================================================
   // All things Layers
   late Layers layers = Layers(canvas.size);
+  Layer get selectedLayer => layers.get(selectedLayerIndex);
+
   int _selectedLayerIndex = 0;
   int get selectedLayerIndex => _selectedLayerIndex;
-  Layer get selectedLayer => layers.get(selectedLayerIndex);
-  bool get isCurrentSelectionReadyForAction => selectedLayer.isVisible;
-
-  /// Sets the index of the currently selected layer.
-  ///
-  /// If the provided `index` is within the range of the `layers` list, this method will:
-  /// - Update the `id` property of each layer to reflect its position in the list (from bottom to top).
-  /// - Set the `isSelected` property of the layer at the provided `index` to `true`.
-  /// - Set the `_selectedLayerIndex` private field to the provided `index`.
-  /// - Call the `update()` method to notify any listeners of the change.
-  ///
-  /// If the provided `index` is not within the range of the `layers` list, this method will do nothing.
   set selectedLayerIndex(final int index) {
     if (layers.isIndexInRange(index)) {
       for (int i = 0; i < layers.length; i++) {
@@ -252,8 +228,12 @@ class AppModel extends ChangeNotifier {
     }
   }
 
+  bool get isCurrentSelectionReadyForAction => selectedLayer.isVisible;
+
   Layer layersAddTop([String? name]) => layerInsertAt(0, name);
+
   Layer layersAddBottom([String? name]) => layerInsertAt(layers.length, name);
+
   Layer layerInsertAt(final int index, [String? name]) {
     name ??= 'Layer${layers.length}';
     final Layer layer = Layer(name: name);
@@ -266,13 +246,6 @@ class AppModel extends ChangeNotifier {
   void layersRemove(final Layer layer) {
     layers.remove(layer);
     selectedLayerIndex = (selectedLayerIndex > 0 ? selectedLayerIndex - 1 : 0);
-  }
-
-  bool layersIsLayerVisible(final int layerIndex) {
-    if (layers.isIndexInRange(layerIndex)) {
-      return layers.get(layerIndex).isVisible;
-    }
-    return false;
   }
 
   void layersAddActionToSelectedLayer({
@@ -301,35 +274,21 @@ class AppModel extends ChangeNotifier {
     return await selectedLayer.toImageForStorage(canvas.size);
   }
 
-  //----------------------------------------------------
+  //=============================================================================
   // All things Tools/UserActions
+
+  // Stores the starting position of a pan gesture for drawing operations.
+  UserAction? currentUserAction;
 
   //-------------------------
   // Selected Tool
-  ActionType _selectedTool = ActionType.brush;
-
-  set selectedTool(ActionType value) {
-    _selectedTool = value;
+  ActionType _selectedAction = ActionType.brush;
+  set selectedAction(ActionType value) {
+    _selectedAction = value;
     update();
   }
 
-  ActionType get selectedTool => _selectedTool;
-
-  //-------------------------
-  // Brush
-  set brushColor(Color value) {
-    _colorForStroke = value;
-    update();
-  }
-
-  //-------------------------
-  // Brush Style
-  BrushStyle _brush = BrushStyle.solid;
-  BrushStyle get brushStyle => _brush;
-  set brushStyle(BrushStyle value) {
-    _brush = value;
-    update();
-  }
+  ActionType get selectedAction => _selectedAction;
 
   //-------------------------
   // Line Weight
@@ -341,12 +300,27 @@ class AppModel extends ChangeNotifier {
   }
 
   //-------------------------
+  // Brush Style
+  BrushStyle _brushStyle = BrushStyle.solid;
+  BrushStyle get brushStyle => _brushStyle;
+  set brushStyle(BrushStyle value) {
+    _brushStyle = value;
+    update();
+  }
+
+  //-------------------------
+  // Brush Color
+  Color _brushColor = Colors.black;
+  Color get brushColor => _brushColor;
+  set brushColor(Color value) {
+    _brushColor = value;
+    update();
+  }
+
+  //-------------------------
   // Color for Fill
   Color _fillColor = Colors.lightBlue;
-
-  /// The color used to fill the canvas.
   Color get fillColor => _fillColor;
-
   set fillColor(Color value) {
     _fillColor = value;
     update();
@@ -429,7 +403,7 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
-  //----------------------------------------------------
+  //-------------------------
   // Top Colors used
   List<ColorUsage> topColors = [
     ColorUsage(Colors.white, 1),
@@ -443,7 +417,7 @@ class AppModel extends ChangeNotifier {
     });
   }
 
-  //----------------------------------------------------
+  //=============================================================================
   /// Notifies all listeners that the model has been updated.
   /// This method should be called whenever the state of the model changes
   /// to ensure that any UI components observing the model are updated.

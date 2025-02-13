@@ -58,7 +58,7 @@ class ToolsPanel extends StatelessWidget {
     BuildContext context,
     final AppModel appModel,
   ) {
-    final ActionType selectedTool = appModel.selectedTool;
+    final ActionType selectedTool = appModel.selectedAction;
 
     final List<Widget> tools = [
       // Pencil
@@ -72,7 +72,7 @@ class ToolsPanel extends StatelessWidget {
         ),
         isSelected: selectedTool == ActionType.pencil,
         onPressed: () {
-          appModel.selectedTool = ActionType.pencil;
+          appModel.selectedAction = ActionType.pencil;
         },
       ),
 
@@ -87,7 +87,7 @@ class ToolsPanel extends StatelessWidget {
         ),
         isSelected: selectedTool == ActionType.brush,
         onPressed: () {
-          appModel.selectedTool = ActionType.brush;
+          appModel.selectedAction = ActionType.brush;
         },
       ),
 
@@ -102,7 +102,7 @@ class ToolsPanel extends StatelessWidget {
         ),
         isSelected: selectedTool == ActionType.line,
         onPressed: () {
-          appModel.selectedTool = ActionType.line;
+          appModel.selectedAction = ActionType.line;
         },
       ),
 
@@ -117,7 +117,7 @@ class ToolsPanel extends StatelessWidget {
         ),
         isSelected: selectedTool == ActionType.rectangle,
         onPressed: () {
-          appModel.selectedTool = ActionType.rectangle;
+          appModel.selectedAction = ActionType.rectangle;
         },
       ),
 
@@ -132,7 +132,7 @@ class ToolsPanel extends StatelessWidget {
         ),
         isSelected: selectedTool == ActionType.circle,
         onPressed: () {
-          appModel.selectedTool = ActionType.circle;
+          appModel.selectedAction = ActionType.circle;
         },
       ),
 
@@ -147,7 +147,7 @@ class ToolsPanel extends StatelessWidget {
         ),
         isSelected: selectedTool == ActionType.fill,
         onPressed: () {
-          appModel.selectedTool = ActionType.fill;
+          appModel.selectedAction = ActionType.fill;
         },
       ),
 
@@ -162,7 +162,7 @@ class ToolsPanel extends StatelessWidget {
         ),
         isSelected: selectedTool == ActionType.eraser,
         onPressed: () {
-          appModel.selectedTool = ActionType.eraser;
+          appModel.selectedAction = ActionType.eraser;
         },
       ),
 
@@ -176,7 +176,7 @@ class ToolsPanel extends StatelessWidget {
         ),
         isSelected: selectedTool == ActionType.selector,
         onPressed: () {
-          appModel.selectedTool = ActionType.selector;
+          appModel.selectedAction = ActionType.selector;
         },
       ),
     ];
@@ -188,11 +188,11 @@ class ToolsPanel extends StatelessWidget {
   }) {
     List<Widget> widgets = [];
     final appModel = AppModel.of(context, listen: true);
-    final selectedTool = appModel.selectedTool;
-    final String title = appModel.selectedTool == ActionType.pencil
+    final selectedTool = appModel.selectedAction;
+    final String title = appModel.selectedAction == ActionType.pencil
         ? 'Pencil Size'
         : 'Brush Size';
-    final double min = appModel.selectedTool == ActionType.pencil ? 1 : 0.1;
+    final double min = appModel.selectedAction == ActionType.pencil ? 1 : 0.1;
     final double max = 100;
 
     // Stroke Weight
@@ -349,9 +349,9 @@ class ToolsPanel extends StatelessWidget {
           colorUsages: appModel.topColors,
           onRefresh: () => appModel.evaluatTopColor(),
           onColorPicked: (color) {
-            (appModel.selectedTool == ActionType.rectangle ||
-                    appModel.selectedTool == ActionType.circle ||
-                    appModel.selectedTool == ActionType.fill)
+            (appModel.selectedAction == ActionType.rectangle ||
+                    appModel.selectedAction == ActionType.circle ||
+                    appModel.selectedAction == ActionType.fill)
                 ? appModel.fillColor = color
                 : appModel.brushColor = color;
           },
