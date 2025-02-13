@@ -35,6 +35,7 @@ dependencies:
     sdk: flutter
   flutter_svg: ^2.0.17
   image: ^4.5.2
+  material_symbols_icons: ^4.2805.1
   multi_split_view: ^3.6.0
   pasteboard: ^0.3.0
   path_provider: ^2.0.7

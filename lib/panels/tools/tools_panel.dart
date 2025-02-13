@@ -8,6 +8,7 @@ import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/top_colors.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// Represents a panel that displays tools for the application.
 /// The ToolsPanel is a stateless widget that displays a set of tools
@@ -172,7 +173,7 @@ class ToolsPanel extends StatelessWidget {
         image: iconAndColor(
           context,
           selectedTool == ActionType.selector,
-          Icons.highlight_alt,
+          Symbols.select,
         ),
         isSelected: selectedTool == ActionType.selector,
         onPressed: () {

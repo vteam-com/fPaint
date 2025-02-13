@@ -46,6 +46,9 @@ class MainViewState extends State<MainView> {
         }
 
         return Listener(
+          //
+          // PAN and SCALE
+          //
           onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
             // Panning
             appModel.offset += event.panDelta;
@@ -69,14 +72,30 @@ class MainViewState extends State<MainView> {
             }
             appModel.update();
           },
+
+          //
+          // Pointer DOWN
+          //
           onPointerDown: (final PointerDownEvent event) =>
               _handlePointerStart(appModel, event),
+
+          //
+          // Pointer MOVE
+          //
           onPointerMove: (final PointerEvent event) =>
               _handlePointerMove(appModel, event),
+
+          //
+          // Pointer UP/CANCEL/END
+          //
           onPointerUp: (PointerUpEvent event) =>
               _handPointerEnd(appModel, event),
           onPointerCancel: (final PointerCancelEvent event) =>
               _handPointerEnd(appModel, event),
+
+          //
+          // Canvas and Selector
+          //
           child: Stack(
             children: [
               Transform(
