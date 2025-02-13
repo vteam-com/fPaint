@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
 import 'package:fpaint/panels/tools/tool_selector.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
@@ -195,6 +196,91 @@ class ToolsPanel extends StatelessWidget {
         : 'Brush Size';
     final double min = appModel.selectedAction == ActionType.pencil ? 1 : 0.1;
     final double max = 100;
+
+    // Selector options
+    if (selectedTool.isSupported(ActionOptions.selectorOptions)) {
+      widgets.add(
+        ToolAttributeWidget(
+          minimal: minimal,
+          name: 'Selector',
+          childRight: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              //
+              // Selection using Rectangle
+              //
+              ToolSelector(
+                minimal: minimal,
+                name: 'Rectangle',
+                image: iconAndColor(
+                  context,
+                  appModel.selector.mode == SelectorMode.rectangle,
+                  Icons.highlight_alt,
+                ),
+                isSelected: appModel.selector.mode == SelectorMode.rectangle,
+                onPressed: () {
+                  appModel.selector.mode = SelectorMode.rectangle;
+                  appModel.update();
+                },
+              ),
+              //
+              // Selection using Circle
+              //
+              ToolSelector(
+                minimal: minimal,
+                name: 'Circle',
+                image: iconAndColor(
+                  context,
+                  appModel.selector.mode == SelectorMode.circle,
+                  Symbols.lasso_select,
+                ),
+                isSelected: appModel.selector.mode == SelectorMode.circle,
+                onPressed: () {
+                  appModel.selector.mode = SelectorMode.circle;
+                  appModel.update();
+                },
+              ),
+              //
+              // Selection using magic wand
+              //
+              ToolSelector(
+                minimal: minimal,
+                name: 'Detect',
+                image: iconAndColor(
+                  context,
+                  appModel.selector.mode == SelectorMode.wand,
+                  Icons.auto_fix_high_outlined,
+                ),
+                isSelected: appModel.selector.mode == SelectorMode.wand,
+                onPressed: () {
+                  appModel.selector.mode = SelectorMode.wand;
+                  appModel.update();
+                },
+              ),
+
+              //
+              // Cancel/Hide Selection tool
+              //
+              if (appModel.selector.isVisible)
+                ToolSelector(
+                  minimal: minimal,
+                  name: 'Cancel',
+                  image: iconAndColor(
+                    context,
+                    false,
+                    Symbols.remove_selection,
+                  ),
+                  isSelected: false,
+                  onPressed: () {
+                    appModel.selector.clear();
+                    appModel.update();
+                  },
+                ),
+            ],
+          ),
+        ),
+      );
+    }
 
     // Stroke Weight
     if (selectedTool.isSupported(ActionOptions.strokeSize)) {

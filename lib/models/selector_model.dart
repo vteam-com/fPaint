@@ -14,8 +14,15 @@ enum SelectorHandlePosition {
   bottom,
 }
 
+enum SelectorMode {
+  rectangle,
+  circle,
+  wand,
+}
+
 class SelectorModel {
   bool isVisible = false;
+  SelectorMode mode = SelectorMode.rectangle;
   Path path = Path();
   bool userIsCreatingTheSelector = false;
 

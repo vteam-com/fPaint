@@ -59,6 +59,7 @@ enum ActionOptions {
   colorFill,
   tolerance,
   topColors,
+  selectorOptions,
 }
 
 final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = {
@@ -105,6 +106,6 @@ final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = {
     // nothing to support yet
   },
   ActionType.selector: {
-    // nothing to support yet
+    ActionOptions.selectorOptions,
   },
 };
