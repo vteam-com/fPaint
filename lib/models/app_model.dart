@@ -9,6 +9,7 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/canvas_model.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:provider/provider.dart';
 
 // Exports
@@ -377,6 +378,21 @@ class AppModel extends ChangeNotifier {
       ),
     );
 
+    update();
+  }
+
+  void floodFillAction(final Offset position) async {
+    final ui.Image img = await getImageForCurrentSelectedLayer();
+
+    // Perform flood fill at the clicked position
+    final ui.Image filledImage = await applyFloodFill(
+      image: img,
+      x: position.dx.toInt(),
+      y: position.dy.toInt(),
+      newColor: this.fillColor,
+      tolerance: this.tolerance,
+    );
+    selectedLayer.addImage(imageToAdd: filledImage, tool: ActionType.fill);
     update();
   }
 

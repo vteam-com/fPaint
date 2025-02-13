@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
-import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
 /// The `MainView` widget is a stateful widget that represents the main view of the application.
@@ -156,20 +155,7 @@ class MainViewState extends State<MainView> {
       // Special case, one clik flood fill does not need to be tracked
       //
       if (appModel.selectedAction == ActionType.fill) {
-        // Create a flattened image from the current layer
-        final ui.Image img = await appModel.getImageForCurrentSelectedLayer();
-
-        // Perform flood fill at the clicked position
-        final ui.Image filledImage = await applyFloodFill(
-          image: img,
-          x: fillPosition.dx.toInt(),
-          y: fillPosition.dy.toInt(),
-          newColor: appModel.fillColor,
-          tolerance: appModel.tolerance,
-        );
-        appModel.selectedLayer
-            .addImage(imageToAdd: filledImage, tool: ActionType.fill);
-        appModel.update();
+        appModel.floodFillAction(fillPosition);
         return;
       }
 
@@ -207,7 +193,7 @@ class MainViewState extends State<MainView> {
       }
 
       if (appModel.selectedAction == ActionType.fill) {
-        // ignore fill movement
+        // ignore fill movement, flood fill is performed on the PointerStart event
         return;
       }
 

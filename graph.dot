@@ -222,6 +222,7 @@ digraph "" {
   "/lib/models/app_model.dart" -> "/lib/models/canvas_model.dart";
   "/lib/models/app_model.dart" -> "/lib/models/canvas_resize.dart";
   "/lib/models/app_model.dart" -> "/lib/models/selector_model.dart";
+  "/lib/models/app_model.dart" -> "/lib/panels/tools/flood_fill.dart";
   "/lib/models/app_model.dart" -> "/lib/models/layers.dart" [style=dashed];
   "/lib/models/layer.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/models/layer.dart" -> "/lib/helpers/image_helper.dart";
@@ -273,7 +274,6 @@ digraph "" {
   "/lib/widgets/main_view.dart" -> "/lib/models/app_model.dart";
   "/lib/widgets/main_view.dart" -> "/lib/models/selector_model.dart";
   "/lib/widgets/main_view.dart" -> "/lib/panels/canvas_panel.dart";
-  "/lib/widgets/main_view.dart" -> "/lib/panels/tools/flood_fill.dart";
   "/lib/widgets/main_view.dart" -> "/lib/widgets/selector_widget.dart";
   "/lib/widgets/selector_widget.dart" -> "/lib/models/selector_model.dart";
   "/lib/widgets/selector_widget.dart" -> "/lib/widgets/marching_ants_rect.dart";
