@@ -371,9 +371,29 @@ class Layer {
     return path;
   }
 
-  List<String> actionHistory([final int? numberOfHistoryAction]) {
-    return _actionStack
-        .take(numberOfHistoryAction ?? _actionStack.length)
+  String getHistoryStringForUndo() {
+    return getHistoryString(_actionStack);
+  }
+
+  String getHistoryStringForRedo() {
+    return getHistoryString(redoStack);
+  }
+
+  String getHistoryString(List<UserAction> list) {
+    try {
+      return this.getActionsAsStrings(list, 20).join('\n');
+    } catch (error) {
+      debugPrint(error.toString());
+      return 'error';
+    }
+  }
+
+  List<String> getActionsAsStrings(
+    List<UserAction> list, [
+    final int? numberOfHistoryAction,
+  ]) {
+    return list
+        .take(numberOfHistoryAction ?? list.length)
         .map((final UserAction action) => action.toString())
         .toList()
         .reversed
