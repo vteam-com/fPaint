@@ -26,7 +26,7 @@ export 'package:fpaint/models/layers.dart';
 /// `Tools` enum values. The `brushColor` and `fillColor` properties represent the current
 /// stroke and fill colors, respectively.
 ///
-/// The `resizeCanvas` method allows resizing the canvas and scaling the layers accordingly.
+/// The `canvasReset` method allows resizing the canvas and scaling the layers accordingly.
 /// The `setCanvasScale` method allows setting the scale of the canvas.
 ///
 /// The `selectedLayerIndex` property represents the index of the currently selected layer,
@@ -61,38 +61,57 @@ class AppModel extends ChangeNotifier {
 
   String loadedFileName = '';
 
-  CanvasModel canvas = CanvasModel();
-  late Layers layers = Layers(canvas.size);
-
-  // Selected Tool
-  ActionType _selectedTool = ActionType.brush;
-
-  ActionType get selectedTool => _selectedTool;
-
   bool deviceSizeSmall = false;
   bool centerImageInViewPort = true;
 
-  SelectorModel selector = SelectorModel();
-  Rect selectorAdjusterRect = Rect.zero;
+  //----------------------------------------------------
+  // All things Canvas
+  CanvasModel canvas = CanvasModel();
 
-  void newCanvas(final Size size) {
-    this.canvas.size = size;
-    this.centerImageInViewPort = true;
-    this.layers.clear();
-    this.layers.addWhiteBackgroundLayer(size);
-    this.resetCanvasSizeAndPlacement();
+  int get canvasResizePosition => canvas.resizePosition;
+  set canvasResizePosition(int value) {
+    canvas.resizePosition = value;
+    update();
+  } // center
+
+  void canvasReset(final Size size) {
+    canvas.size = size;
+    centerImageInViewPort = true;
+    layers.clear();
+    layers.addWhiteBackgroundLayer(size);
+    resetView();
   }
 
-  Offset inputPointToCanvasPoint(Offset point) {
-    point = point - offset;
-    point = point / canvas.scale;
-    return point;
+  void canvasResize(final int width, final int height) {
+    final Size oldSize = canvas.size;
+    final Size newSize = Size(width.toDouble(), height.toDouble());
+    canvas.size = newSize;
+
+    if (width < oldSize.width || height < oldSize.height) {
+      final double scale = min(width / oldSize.width, height / oldSize.height);
+      layers.scale(scale);
+    }
+
+    Offset offset = CanvasResizePosition.anchorTranslate(
+      canvas.resizePosition,
+      oldSize,
+      newSize,
+    );
+    layers.offset(offset);
+    update();
   }
 
-  Offset inputPointToCanvasPointInverse(Offset point) {
-    point = point * canvas.scale;
-    point = point + offset;
-    return point;
+  void canvasSetScale(final double value) {
+    canvas.scale = value;
+    update();
+  }
+
+  Offset toCanvas(Offset point) {
+    return (point - offset) / canvas.scale;
+  }
+
+  Offset fromCanvas(Offset point) {
+    return (point * canvas.scale) + offset;
   }
 
   void regionErase() {
@@ -103,22 +122,6 @@ class AppModel extends ChangeNotifier {
   Future<void> regionCut() async {
     regionCopy();
     regionErase();
-  }
-
-  Future<void> paste() async {
-    final ui.Image? image = await getImageFromClipboard();
-    if (image == null) {
-      return;
-    }
-
-    final Layer newLayerForPatedImage = addLayerTop('Pasted');
-    newLayerForPatedImage.addImage(
-      imageToAdd: image,
-      offset: const Offset(0, 0),
-    );
-
-    // Add the pasted image to the selected layer
-    update();
   }
 
   Future<void> regionCopy() async {
@@ -154,47 +157,25 @@ class AppModel extends ChangeNotifier {
     await copyImageToClipboard(clippedImage);
   }
 
-  //-------------------------------------------
+  Future<void> paste() async {
+    final ui.Image? image = await getImageFromClipboard();
+    if (image == null) {
+      return;
+    }
+
+    final Layer newLayerForPatedImage = layersAddTop('Pasted');
+    newLayerForPatedImage.addImage(
+      imageToAdd: image,
+      offset: const Offset(0, 0),
+    );
+
+    // Add the pasted image to the selected layer
+    update();
+  }
+
   bool get canvasResizeLockAspectRatio => canvas.canvasResizeLockAspectRatio;
   set canvasResizeLockAspectRatio(bool value) {
     canvas.canvasResizeLockAspectRatio = value;
-    update();
-  }
-
-  //-------------------------------------------
-  // Canvas Resize position
-
-  int get canvasResizePosition => canvas.resizePosition;
-  set canvasResizePosition(int value) {
-    canvas.resizePosition = value;
-    update();
-  } // center
-
-  void resizeCanvas(final int newWidth, final int newHeight) {
-    final Size oldSize = canvas.size;
-    final Size newSize = Size(newWidth.toDouble(), newHeight.toDouble());
-    canvas.size = newSize;
-
-    // Scale layers only when shrinking
-    if (newWidth < oldSize.width || newHeight < oldSize.height) {
-      final double scaleX = newWidth / oldSize.width;
-      final double scaleY = newHeight / oldSize.height;
-      final double scale = min(scaleX, scaleY);
-      layers.scale(scale);
-    }
-
-    // Calculate the offset adjustment based on resize position
-    Offset offset = CanvasResizePosition.anchorTranslate(
-      canvas.resizePosition,
-      oldSize,
-      newSize,
-    );
-    layers.offset(offset);
-    update();
-  }
-
-  set selectedTool(ActionType value) {
-    _selectedTool = value;
     update();
   }
 
@@ -220,6 +201,14 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
+  void resetView() {
+    lastFocalPoint = null;
+    offset = Offset.zero;
+    canvas.scale = 1;
+    centerImageInViewPort = true;
+    update();
+  }
+
   //----------------------------------------------------------------
   // SidePanel Expanded/Collapsed
   ShellMode shellMode = ShellMode.full;
@@ -233,65 +222,13 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
-  void resetCanvasSizeAndPlacement() {
-    this.lastFocalPoint = null;
-    this.offset = Offset.zero;
-    this.canvas.scale = 1;
-    this.centerImageInViewPort = true;
-    update();
-  }
-
-  /// Sets the scale of the canvas.
-  ///
-  /// The scale value is clamped between 10% and 400% to ensure a valid range.
-  /// Calling this method will notify any listeners of the [AppModel] that the scale has changed.
-  void setCanvasScale(final double value) {
-    canvas.scale = value;
-    update();
-  }
-
-  set brushColor(Color value) {
-    _colorForStroke = value;
-    update();
-  }
-
-  // Color for Fill
-  Color _colorForFill = Colors.lightBlue;
-
-  /// The color used to fill the canvas.
-  Color get fillColor => _colorForFill;
-
-  set fillColor(Color value) {
-    _colorForFill = value;
-    update();
-  }
-
-  // Line Weight
-  double _lineWeight = 5;
-  double get brusSize => _lineWeight;
-  set brusSize(double value) {
-    _lineWeight = value;
-    update();
-  }
-
-  // Brush Style
-  BrushStyle _brush = BrushStyle.solid;
-  BrushStyle get brushStyle => _brush;
-  set brushStyle(BrushStyle value) {
-    _brush = value;
-    update();
-  }
-
-  // Tolerance
-  int _tolarance = 50; // Mid point 0..100
-  int get tolerance => _tolarance;
-  set tolerance(int value) {
-    _tolarance = max(1, min(100, value));
-    update();
-  }
-
+  //----------------------------------------------------
+  // All things Layers
+  late Layers layers = Layers(canvas.size);
   int _selectedLayerIndex = 0;
   int get selectedLayerIndex => _selectedLayerIndex;
+  Layer get selectedLayer => layers.get(selectedLayerIndex);
+  bool get isCurrentSelectionReadyForAction => selectedLayer.isVisible;
 
   /// Sets the index of the currently selected layer.
   ///
@@ -315,56 +252,116 @@ class AppModel extends ChangeNotifier {
     }
   }
 
-  Layer get selectedLayer => layers.get(selectedLayerIndex);
-  bool get isCurrentSelectionReadyForAction => selectedLayer.isVisible;
-  Layer addLayerTop([String? name]) {
-    return insertLayer(0, name);
-  }
-
-  Layer addLayerBottom([String? name]) {
-    return insertLayer(layers.length, name);
-  }
-
-  /// Inserts a new [Layer] at the specified [index] in the [layers] list.
-  ///
-  /// If [name] is not provided, a default name will be generated in the format `'Layer{layers.length}'`.
-  ///
-  /// This method will:
-  /// - Create a new [Layer] instance with the provided or generated name.
-  /// - Insert the new layer at the specified [index] in the [layers] list.
-  /// - Set the [selectedLayerIndex] to the index of the newly inserted layer.
-  /// - Call the [update()] method to notify any listeners of the change.
-  ///
-  /// Returns the newly inserted [Layer] instance.
-  Layer insertLayer(final int index, [String? name]) {
+  Layer layersAddTop([String? name]) => layerInsertAt(0, name);
+  Layer layersAddBottom([String? name]) => layerInsertAt(layers.length, name);
+  Layer layerInsertAt(final int index, [String? name]) {
     name ??= 'Layer${layers.length}';
-    final Layer newLayer = Layer(name: name);
-    layers.insert(index, newLayer);
-    selectedLayerIndex = layers.getLayerIndex(newLayer);
+    final Layer layer = Layer(name: name);
+    layers.insert(index, layer);
+    selectedLayerIndex = layers.getLayerIndex(layer);
     update();
-    return newLayer;
+    return layer;
   }
 
-  void removeLayer(final Layer layer) {
+  void layersRemove(final Layer layer) {
     layers.remove(layer);
     selectedLayerIndex = (selectedLayerIndex > 0 ? selectedLayerIndex - 1 : 0);
   }
 
-  bool isVisible(final int layerIndex) {
+  bool layersIsLayerVisible(final int layerIndex) {
     if (layers.isIndexInRange(layerIndex)) {
       return layers.get(layerIndex).isVisible;
     }
     return false;
   }
 
-  void addUserAction({
+  void layersAddActionToSelectedLayer({
     required UserAction action,
   }) {
     selectedLayer.addUserAction(action);
     update();
   }
 
-  void updateLastUserAction({
+  void layersToggleVisibility(final Layer layer) {
+    layer.isVisible = !layer.isVisible;
+    update();
+  }
+
+  void layersUndo() {
+    selectedLayer.undo();
+    update();
+  }
+
+  void layersRedo() {
+    selectedLayer.redo();
+    update();
+  }
+
+  Future<ui.Image> getImageForCurrentSelectedLayer() async {
+    return await selectedLayer.toImageForStorage(canvas.size);
+  }
+
+  //----------------------------------------------------
+  // All things Tools/UserActions
+
+  //-------------------------
+  // Selected Tool
+  ActionType _selectedTool = ActionType.brush;
+
+  set selectedTool(ActionType value) {
+    _selectedTool = value;
+    update();
+  }
+
+  ActionType get selectedTool => _selectedTool;
+
+  //-------------------------
+  // Brush
+  set brushColor(Color value) {
+    _colorForStroke = value;
+    update();
+  }
+
+  //-------------------------
+  // Brush Style
+  BrushStyle _brush = BrushStyle.solid;
+  BrushStyle get brushStyle => _brush;
+  set brushStyle(BrushStyle value) {
+    _brush = value;
+    update();
+  }
+
+  //-------------------------
+  // Line Weight
+  double _lineWeight = 5;
+  double get brusSize => _lineWeight;
+  set brusSize(double value) {
+    _lineWeight = value;
+    update();
+  }
+
+  //-------------------------
+  // Color for Fill
+  Color _fillColor = Colors.lightBlue;
+
+  /// The color used to fill the canvas.
+  Color get fillColor => _fillColor;
+
+  set fillColor(Color value) {
+    _fillColor = value;
+    update();
+  }
+
+  //-------------------------
+  // Tolerance
+  int _tolarance = 50; // Mid point 0..100
+  int get tolerance => _tolarance;
+  set tolerance(int value) {
+    _tolarance = max(1, min(100, value));
+    update();
+  }
+
+  void updateAction({
     Offset? start,
     required final Offset end,
     ActionType? type,
@@ -387,12 +384,12 @@ class AppModel extends ChangeNotifier {
         ),
       );
     } else {
-      updateLastUserActionEndPosition(end);
+      updateActionEnd(end);
     }
     update();
   }
 
-  void updateLastUserActionEndPosition(final Offset position) {
+  void updateActionEnd(final Offset position) {
     selectedLayer.lastUserAction!.positions.last = position;
   }
 
@@ -411,28 +408,29 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
+  //-------------------------
+  // Selector
+  SelectorModel selector = SelectorModel();
+
   void selectorStart(final Offset position) {
-    // debugPrint('Selector start: $position');
-    if (this.selector.isVisible) {
-      // Alreay have a Selectpr
-    } else {
-      this.selector.addP1(position);
+    if (!selector.isVisible) {
+      selector.addP1(position);
       update();
     }
   }
 
   void selectorMove(final Offset position) {
-    // debugPrint('Selector MOVE: $position');
-    this.selector.addP2(position);
+    selector.addP2(position);
     update();
   }
 
-  void selectorEndMovement() {
-    // debugPrint('Selector END');
-    this.selector.p1 = null;
+  void selectorEnd() {
+    selector.p1 = null;
     update();
   }
 
+  //----------------------------------------------------
+  // Top Colors used
   List<ColorUsage> topColors = [
     ColorUsage(Colors.white, 1),
     ColorUsage(Colors.black, 1),
@@ -445,34 +443,11 @@ class AppModel extends ChangeNotifier {
     });
   }
 
+  //----------------------------------------------------
   /// Notifies all listeners that the model has been updated.
   /// This method should be called whenever the state of the model changes
   /// to ensure that any UI components observing the model are updated.
   void update() {
     notifyListeners();
-  }
-
-  /// Toggles the visibility of the specified [Layer].
-  ///
-  /// This method updates the `isVisible` property of the given [Layer] to the
-  /// opposite of its current value, and then calls the `update()` method to
-  /// notify any observers of the change.
-  void toggleLayerVisibility(final Layer layer) {
-    layer.isVisible = !layer.isVisible;
-    update();
-  }
-
-  void undo() {
-    selectedLayer.undo();
-    update();
-  }
-
-  void redo() {
-    selectedLayer.redo();
-    update();
-  }
-
-  Future<ui.Image> getImageForCurrentSelectedLayer() async {
-    return await selectedLayer.toImageForStorage(canvas.size);
   }
 }

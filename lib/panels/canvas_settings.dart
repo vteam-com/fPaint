@@ -122,7 +122,7 @@ void showCanvasSettings(final BuildContext context) {
                         ),
                       );
                     } else {
-                      appModel.resizeCanvas(width.toInt(), height.toInt());
+                      appModel.canvasResize(width.toInt(), height.toInt());
                       Navigator.pop(context);
                     }
                   },

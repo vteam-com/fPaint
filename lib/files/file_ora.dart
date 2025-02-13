@@ -76,7 +76,7 @@ Future<void> readOraFileFromBytes(
     final bool preserveAlpha =
         xmlLayer.getAttribute('alpha-preserve') == 'true';
 
-    final Layer newLayer = appModel.addLayerBottom(name);
+    final Layer newLayer = appModel.layersAddBottom(name);
     newLayer.isVisible = visibleAsText == 'true';
     newLayer.opacity = double.parse(opacityAsText);
 

@@ -139,7 +139,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                     index: index,
                     child: GestureDetector(
                       onTap: () => appModel.selectedLayerIndex = index,
-                      onDoubleTap: () => appModel.toggleLayerVisibility(layer),
+                      onDoubleTap: () => appModel.layersToggleVisibility(layer),
                       child: LayerSelector(
                         key: Key(layer.id),
                         context: context,

@@ -208,7 +208,7 @@ class LayerSelector extends StatelessWidget {
         break;
       case 'delete':
         if (allowRemoveLayer) {
-          appModel.removeLayer(layer);
+          appModel.layersRemove(layer);
         }
         break;
       case 'merge':
@@ -227,7 +227,7 @@ class LayerSelector extends StatelessWidget {
         );
         break;
       case 'visibility':
-        appModel.toggleLayerVisibility(layer);
+        appModel.layersToggleVisibility(layer);
         break;
       case 'allHide':
         appModel.layers.hideShowAllExcept(layer, false);
@@ -322,7 +322,7 @@ class LayerSelector extends StatelessWidget {
           tooltip: 'Delete this layer',
           icon: const Icon(Icons.playlist_remove),
           onPressed:
-              allowRemoveLayer ? () => appModel.removeLayer(layer) : null,
+              allowRemoveLayer ? () => appModel.layersRemove(layer) : null,
         ),
         IconButton(
           tooltip: 'Merge to below layer',
@@ -356,7 +356,7 @@ class LayerSelector extends StatelessWidget {
                 ? Colors.blue
                 : const ui.Color.fromARGB(255, 135, 9, 9),
           ),
-          onPressed: () => appModel.toggleLayerVisibility(layer),
+          onPressed: () => appModel.layersToggleVisibility(layer),
         ),
       ],
     );
@@ -365,7 +365,7 @@ class LayerSelector extends StatelessWidget {
   // Method to insert a new layer above the currently selected one
   void _onAddLayer(final AppModel appModel) {
     final int currentIndex = appModel.selectedLayerIndex;
-    final Layer newLayer = appModel.insertLayer(currentIndex);
+    final Layer newLayer = appModel.layerInsertAt(currentIndex);
     appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
   }
 
@@ -379,7 +379,7 @@ class LayerSelector extends StatelessWidget {
     final Layer receivingLayer = appModel.layers.get(layerIndexToMergIn);
 
     receivingLayer.mergeFrom(layerToMege);
-    appModel.removeLayer(layerToMege);
+    appModel.layersRemove(layerToMege);
     if (layerIndexToMergIn > layerIndexToMerge) {
       appModel.selectedLayerIndex = layerIndexToMergIn - 1;
     } else {

@@ -102,10 +102,10 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
     child: Actions(
       actions: {
         UndoIntent: CallbackAction<UndoIntent>(
-          onInvoke: (UndoIntent intent) => appModel.undo(),
+          onInvoke: (UndoIntent intent) => appModel.layersUndo(),
         ),
         RedoIntent: CallbackAction<RedoIntent>(
-          onInvoke: (RedoIntent intent) => appModel.redo(),
+          onInvoke: (RedoIntent intent) => appModel.layersRedo(),
         ),
         SaveIntent: CallbackAction<SaveIntent>(
           onInvoke: (SaveIntent intent) async => await saveFile(appModel),

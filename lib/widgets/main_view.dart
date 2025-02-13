@@ -84,10 +84,10 @@ class MainViewState extends State<MainView> {
               if (appModel.selector.isVisible)
                 SelectionHandleWidget(
                   selectionRect: Rect.fromPoints(
-                    appModel.inputPointToCanvasPointInverse(
+                    appModel.fromCanvas(
                       appModel.selector.boundingRect.topLeft,
                     ),
-                    appModel.inputPointToCanvasPointInverse(
+                    appModel.fromCanvas(
                       appModel.selector.boundingRect.bottomRight,
                     ),
                   ),
@@ -113,8 +113,7 @@ class MainViewState extends State<MainView> {
     final AppModel appModel,
     final PointerDownEvent event,
   ) async {
-    final ui.Offset adjustedPosition =
-        appModel.inputPointToCanvasPoint(event.localPosition);
+    final ui.Offset adjustedPosition = appModel.toCanvas(event.localPosition);
 
     // debugPrint('DOWN ${details.buttons} P:${details.pointer}');
     if (event.buttons == 1 && _activePointerId == -1) {
@@ -142,8 +141,7 @@ class MainViewState extends State<MainView> {
         return;
       }
 
-      final fillPosition =
-          appModel.inputPointToCanvasPoint(event.localPosition);
+      final fillPosition = appModel.toCanvas(event.localPosition);
 
       //
       // Special case, one clik flood fill does not need to be tracked
@@ -177,7 +175,9 @@ class MainViewState extends State<MainView> {
         fillColor: appModel.fillColor,
       );
 
-      appModel.addUserAction(action: appModel.currentUserAction!);
+      appModel.layersAddActionToSelectedLayer(
+        action: appModel.currentUserAction!,
+      );
     }
   }
 
@@ -188,8 +188,7 @@ class MainViewState extends State<MainView> {
     //
     // Translate the input position to the canvas position and scale
     //
-    final Offset adjustedPosition =
-        appModel.inputPointToCanvasPoint(event.localPosition);
+    final Offset adjustedPosition = appModel.toCanvas(event.localPosition);
 
     // debugPrint('DRAW MOVE ${details.buttons} P:${details.pointer}');
 
@@ -218,7 +217,7 @@ class MainViewState extends State<MainView> {
         appModel.update();
       } else {
         // Existing shape logic
-        appModel.updateLastUserAction(end: adjustedPosition);
+        appModel.updateAction(end: adjustedPosition);
         appModel.update();
       }
     }
@@ -232,7 +231,7 @@ class MainViewState extends State<MainView> {
 
     if (_activePointerId == event.pointer) {
       if (appModel.selectedTool == ActionType.selector) {
-        appModel.selectorEndMovement();
+        appModel.selectorEnd();
       }
 
       _activePointerId = -1;

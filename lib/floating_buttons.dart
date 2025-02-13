@@ -9,14 +9,14 @@ Widget floatingActionButtons(final AppModel appModel) {
     backgroundColor: Colors.grey.shade600,
     foregroundColor: Colors.white,
     tooltip: appModel.selectedLayer.actionHistory(20).join('\n'),
-    onPressed: () => appModel.undo(),
+    onPressed: () => appModel.layersUndo(),
     child: const Icon(Icons.undo),
   );
 
   final redo = FloatingActionButton(
     backgroundColor: Colors.grey.shade600,
     foregroundColor: Colors.white,
-    onPressed: () => appModel.redo(),
+    onPressed: () => appModel.layersRedo(),
     child: const Icon(Icons.redo),
   );
 
@@ -63,14 +63,14 @@ Widget floatingActionButtons(final AppModel appModel) {
         onPressed: () {
           appModel.centerImageInViewPort = true;
           appModel
-              .setCanvasScale(((appModel.canvas.scale * 10).ceil() + 1) / 10);
+              .canvasSetScale(((appModel.canvas.scale * 10).ceil() + 1) / 10);
         },
         child: const Icon(Icons.zoom_in),
       ),
       FloatingActionButton(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
-        onPressed: () => appModel.resetCanvasSizeAndPlacement(),
+        onPressed: () => appModel.resetView(),
         child: Text(
           '${(appModel.canvas.scale * 100).toInt()}%\n${appModel.canvas.size.width.toInt()}\n${appModel.canvas.size.height.toInt()}',
           textAlign: TextAlign.right,
@@ -87,7 +87,7 @@ Widget floatingActionButtons(final AppModel appModel) {
         onPressed: () {
           appModel.centerImageInViewPort = true;
           appModel
-              .setCanvasScale(((appModel.canvas.scale * 10).floor() - 1) / 10);
+              .canvasSetScale(((appModel.canvas.scale * 10).floor() - 1) / 10);
         },
         child: const Icon(Icons.zoom_out),
       ),

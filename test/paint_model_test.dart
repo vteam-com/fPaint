@@ -32,7 +32,7 @@ void main() {
         ),
         fillColor: Colors.black,
       );
-      paintModel.addUserAction(action: shape);
+      paintModel.layersAddActionToSelectedLayer(action: shape);
       expect(
         paintModel.selectedLayer.count,
         2,
@@ -41,7 +41,7 @@ void main() {
     });
 
     test('add UserAction with parameters should create and add new shape', () {
-      paintModel.updateLastUserAction(
+      paintModel.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: ActionType.circle,
@@ -65,13 +65,13 @@ void main() {
     });
 
     test('updateLastShape should modify end position of last shape', () {
-      paintModel.updateLastUserAction(
+      paintModel.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: ActionType.rectangle,
         colorFill: Colors.blue,
       );
-      paintModel.updateLastUserAction(end: const Offset(20, 20));
+      paintModel.updateAction(end: const Offset(20, 20));
       expect(
         paintModel.selectedLayer.lastUserAction!.positions.last,
         const Offset(20, 20),
@@ -79,12 +79,12 @@ void main() {
     });
 
     test('updateLastShape should do nothing if no shapes exist', () {
-      paintModel.updateLastUserAction(end: const Offset(20, 20));
+      paintModel.updateAction(end: const Offset(20, 20));
       expect(paintModel.selectedLayer.count, 1);
     });
 
     test('undo should remove last shape', () {
-      paintModel.updateLastUserAction(
+      paintModel.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: ActionType.brush,
@@ -92,25 +92,25 @@ void main() {
         colorStroke: Colors.black,
       );
       expect(paintModel.selectedLayer.count, 2);
-      paintModel.undo();
+      paintModel.layersUndo();
       expect(paintModel.selectedLayer.count, 1);
-      paintModel.undo();
+      paintModel.layersUndo();
       expect(paintModel.selectedLayer.isEmpty, true);
 
       // opne more time to check if undo work when there is nothing to undo
-      paintModel.undo();
+      paintModel.layersUndo();
       expect(paintModel.selectedLayer.isEmpty, true);
     });
 
     test('multiple shapes should be added and managed correctly', () {
-      paintModel.updateLastUserAction(
+      paintModel.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
         type: ActionType.brush,
         colorFill: Colors.blue,
         colorStroke: Colors.black,
       );
-      paintModel.updateLastUserAction(
+      paintModel.updateAction(
         start: const Offset(20, 20),
         end: const Offset(30, 30),
         type: ActionType.circle,
@@ -118,7 +118,7 @@ void main() {
         colorStroke: Colors.black,
       );
       expect(paintModel.selectedLayer.count, 3);
-      paintModel.undo();
+      paintModel.layersUndo();
       expect(paintModel.selectedLayer.count, 2);
       expect(paintModel.selectedLayer.lastUserAction!.tool, ActionType.brush);
     });
