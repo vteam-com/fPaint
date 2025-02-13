@@ -141,7 +141,7 @@ class Layer {
     final ActionType tool = ActionType.image,
   }) {
     final UserAction newAction = UserAction(
-      tool: tool,
+      action: tool,
       positions: [
         offset,
         Offset(
@@ -188,7 +188,7 @@ class Layer {
 
   void regionCut(final ui.Path path) {
     addUserAction(
-      UserAction(tool: ActionType.cut, positions: [], path: path),
+      UserAction(action: ActionType.cut, positions: [], path: path),
     );
     clearCache();
   }
@@ -244,7 +244,7 @@ class Layer {
 
     // Render all actions within the saved layer
     for (final UserAction userAction in _actionStack) {
-      switch (userAction.tool) {
+      switch (userAction.action) {
         case ActionType.pencil:
           renderPencil(
             canvas,

@@ -161,7 +161,7 @@ class MainViewState extends State<MainView> {
 
       appModel.layersAddActionToSelectedLayer(
         action: UserAction(
-          tool: appModel.selectedAction,
+          action: appModel.selectedAction,
           positions: [fillPosition, fillPosition],
           brush: MyBrush(
             color: appModel.brushColor,

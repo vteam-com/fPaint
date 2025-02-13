@@ -25,7 +25,7 @@ void main() {
           const Offset(0, 0),
           const Offset(10, 10),
         ],
-        tool: ActionType.brush,
+        action: ActionType.brush,
         brush: MyBrush(
           color: Colors.black,
           size: 1,
@@ -60,7 +60,10 @@ void main() {
         paintModel.selectedLayer.lastUserAction!.positions.last,
         const Offset(10, 10),
       );
-      expect(paintModel.selectedLayer.lastUserAction!.tool, ActionType.circle);
+      expect(
+        paintModel.selectedLayer.lastUserAction!.action,
+        ActionType.circle,
+      );
       expect(paintModel.selectedLayer.lastUserAction!.fillColor, Colors.red);
     });
 
@@ -120,7 +123,7 @@ void main() {
       expect(paintModel.selectedLayer.count, 3);
       paintModel.layersUndo();
       expect(paintModel.selectedLayer.count, 2);
-      expect(paintModel.selectedLayer.lastUserAction!.tool, ActionType.brush);
+      expect(paintModel.selectedLayer.lastUserAction!.action, ActionType.brush);
     });
   });
 }

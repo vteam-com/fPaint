@@ -31,7 +31,7 @@ class Layers {
           const Offset(0, 0),
           Offset(size.width, size.height),
         ],
-        tool: ActionType.rectangle,
+        action: ActionType.rectangle,
         fillColor: Colors.white,
         brush: MyBrush(color: Colors.white, size: 0),
       ),

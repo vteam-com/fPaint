@@ -4,6 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 export 'package:fpaint/widgets/brush_style_picker.dart';
 
+class UserAction {
+  UserAction({
+    required this.action,
+    required this.positions,
+    // optionals
+    this.brush,
+    this.fillColor,
+    this.path,
+    this.image,
+  });
+
+  final ActionType action;
+  final List<Offset> positions;
+
+  // optional used  based on the action type
+  final MyBrush? brush;
+  final Color? fillColor;
+  final ui.Path? path;
+  final ui.Image? image;
+
+  @override
+  String toString() {
+    return '$action';
+  }
+}
+
 enum ActionType {
   pencil,
   brush,
@@ -82,29 +108,3 @@ final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = {
     // nothing to support yet
   },
 };
-
-class UserAction {
-  UserAction({
-    required this.tool,
-    required this.positions,
-    // optionals
-    this.brush,
-    this.fillColor,
-    this.path,
-    this.image,
-  });
-
-  final ActionType tool;
-  final List<Offset> positions;
-
-  // optional used  based on the action type
-  final MyBrush? brush;
-  final Color? fillColor;
-  final ui.Path? path;
-  final ui.Image? image;
-
-  @override
-  String toString() {
-    return '$tool';
-  }
-}

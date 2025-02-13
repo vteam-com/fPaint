@@ -348,7 +348,7 @@ class AppModel extends ChangeNotifier {
       selectedLayer.addUserAction(
         UserAction(
           positions: [start, end],
-          tool: type,
+          action: type,
           brush: MyBrush(
             color: colorStroke,
             size: this.brusSize,
@@ -373,7 +373,7 @@ class AppModel extends ChangeNotifier {
           selectedLayer.lastUserAction!.positions.last,
           positionEndOfNewLine,
         ],
-        tool: selectedLayer.lastUserAction!.tool,
+        action: selectedLayer.lastUserAction!.action,
         brush: selectedLayer.lastUserAction!.brush,
       ),
     );
