@@ -18,6 +18,11 @@ export 'package:fpaint/models/layer.dart';
 
 class Layers {
   Layers(final Size size) {
+    addWhiteBackgroundLayer(size);
+    clearHasChanged();
+  }
+
+  Layer addWhiteBackgroundLayer(Size size) {
     final Layer firstLayer = Layer(name: 'Background');
 
     firstLayer.addUserAction(
@@ -31,9 +36,8 @@ class Layers {
         brush: MyBrush(color: Colors.white, size: 0),
       ),
     );
-
     _list.add(firstLayer);
-    clearHasChanged();
+    return firstLayer;
   }
 
   final List<Layer> _list = [];

@@ -70,9 +70,18 @@ class AppModel extends ChangeNotifier {
   ActionType get selectedTool => _selectedTool;
 
   bool deviceSizeSmall = false;
+  bool centerImageInViewPort = true;
 
   SelectorModel selector = SelectorModel();
   Rect selectorAdjusterRect = Rect.zero;
+
+  void newCanvas(final Size size) {
+    this.canvas.size = size;
+    this.centerImageInViewPort = true;
+    this.layers.clear();
+    this.layers.addWhiteBackgroundLayer(size);
+    this.resetCanvasSizeAndPlacement();
+  }
 
   Offset inputPointToCanvasPoint(Offset point) {
     point = point - offset;
@@ -102,7 +111,7 @@ class AppModel extends ChangeNotifier {
       return;
     }
 
-    final newLayerForPatedImage = addLayerTop('Pasted');
+    final Layer newLayerForPatedImage = addLayerTop('Pasted');
     newLayerForPatedImage.addImage(
       imageToAdd: image,
       offset: const Offset(0, 0),
@@ -225,9 +234,11 @@ class AppModel extends ChangeNotifier {
   }
 
   void resetCanvasSizeAndPlacement() {
-    this.offset = Offset.zero;
     this.lastFocalPoint = null;
-    this.setCanvasScale(1); // this will notify
+    this.offset = Offset.zero;
+    this.canvas.scale = 1;
+    this.centerImageInViewPort = true;
+    update();
   }
 
   /// Sets the scale of the canvas.

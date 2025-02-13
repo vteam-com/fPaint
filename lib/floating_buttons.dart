@@ -60,8 +60,11 @@ Widget floatingActionButtons(final AppModel appModel) {
       FloatingActionButton(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
-        onPressed: () => appModel
-            .setCanvasScale(((appModel.canvas.scale * 10).ceil() + 1) / 10),
+        onPressed: () {
+          appModel.centerImageInViewPort = true;
+          appModel
+              .setCanvasScale(((appModel.canvas.scale * 10).ceil() + 1) / 10);
+        },
         child: const Icon(Icons.zoom_in),
       ),
       FloatingActionButton(
@@ -81,8 +84,11 @@ Widget floatingActionButtons(final AppModel appModel) {
       FloatingActionButton(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
-        onPressed: () => appModel
-            .setCanvasScale(((appModel.canvas.scale * 10).floor() - 1) / 10),
+        onPressed: () {
+          appModel.centerImageInViewPort = true;
+          appModel
+              .setCanvasScale(((appModel.canvas.scale * 10).floor() - 1) / 10);
+        },
         child: const Icon(Icons.zoom_out),
       ),
     ],

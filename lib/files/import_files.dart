@@ -70,9 +70,7 @@ Future<void> onFileNew(final BuildContext context) async {
     );
 
     if (canvasSize != null) {
-      appModel.layers.clear();
-      appModel.canvas.size = canvasSize;
-      appModel.addLayerTop();
+      appModel.newCanvas(canvasSize);
     }
   }
 }

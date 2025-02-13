@@ -43,6 +43,11 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
+        if (appModel.centerImageInViewPort) {
+          appModel.centerImageInViewPort = false;
+          centerCanvas(appModel, constraints.maxWidth, constraints.maxHeight);
+        }
+
         return Listener(
           onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
             // Panning
@@ -239,18 +244,20 @@ class CanvasWidgetState extends State<CanvasWidget> {
     }
   }
 
-  void centerCanvas() {
-    // TODO
-    //     final double viewportWidth = constraints.maxWidth;
-    // final double viewportHeight = constraints.maxHeight;
+  void centerCanvas(
+    final AppModel appModel,
+    final double parentViewPortWidth,
+    final double parentViewPortHeight,
+  ) {
+    final double scaledWidth = appModel.canvas.width * appModel.canvas.scale;
+    final double scaledHeight = appModel.canvas.height * appModel.canvas.scale;
 
-    // final double scaledWidth = widget.canvasWidth * appModel.canvas.scale;
-    // final double scaledHeight = widget.canvasHeight * appModel.canvas.scale;
+    final double centerX = parentViewPortWidth / 2;
+    final double centerY = parentViewPortHeight / 2;
 
-    // final double centerX = max(0, (viewportWidth - scaledWidth) / 2);
-    // final double centerY = max(0, (viewportHeight - scaledHeight) / 2);
-
-    // // final double topLeftTranslated = appModel.offset.dx + centerX;
-    // // final double topTopTranslated = appModel.offset.dy + centerY;
+    appModel.offset = Offset(
+      centerX - (scaledWidth / 2),
+      centerY - (scaledHeight / 2),
+    );
   }
 }
