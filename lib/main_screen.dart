@@ -15,9 +15,11 @@ class MainScreen extends StatelessWidget {
   Widget build(final BuildContext context) {
     // Hide status bar and use full screen
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+
     // Ensure that AppModel is provided above this widget in the widget tree and listening
     final AppModel appModel = AppModel.of(context, listen: true);
 
+    // Establish the UX experienc base on the device size
     appModel.deviceSizeSmall = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
@@ -47,10 +49,7 @@ class MainScreen extends StatelessWidget {
 
   Widget _buildMainContent(final AppModel appModel) {
     if (appModel.shellMode == ShellMode.hidden) {
-      return MainView(
-        canvasWidth: appModel.canvas.width,
-        canvasHeight: appModel.canvas.height,
-      );
+      return const MainView();
     }
 
     if (appModel.deviceSizeSmall) {
@@ -64,10 +63,7 @@ class MainScreen extends StatelessWidget {
     if (appModel.showMenu) {
       return const SidePanel();
     } else {
-      return MainView(
-        canvasWidth: appModel.canvas.width,
-        canvasHeight: appModel.canvas.height,
-      );
+      return const MainView();
     }
   }
 
@@ -87,10 +83,8 @@ class MainScreen extends StatelessWidget {
               const SidePanel(),
         ),
         Area(
-          builder: (final BuildContext context, final Area area) => MainView(
-            canvasWidth: appModel.canvas.width,
-            canvasHeight: appModel.canvas.height,
-          ),
+          builder: (final BuildContext context, final Area area) =>
+              const MainView(),
         ),
       ],
     );
