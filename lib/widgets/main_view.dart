@@ -53,11 +53,20 @@ class MainViewState extends State<MainView> {
 
             // Scaling
             if (event.scale != 1) {
-              if (event.scale > 1) {
-                appModel.canvas.scale = appModel.canvas.scale * 1.01;
-              } else {
-                appModel.canvas.scale = appModel.canvas.scale * 0.99;
-              }
+              // Step 1: Convert screen coordinates to canvas coordinates
+              final Offset before = appModel.toCanvas(event.localPosition);
+
+              // Step 2: Apply the scale change
+              final double scaleDelta = event.scale > 1 ? 1.01 : 0.99;
+              appModel.canvas.scale *= scaleDelta;
+
+              // Step 3: Calculate the new position on the canvas
+              final Offset after = appModel.toCanvas(event.localPosition);
+
+              // Step 4: Adjust the offset to keep the cursor anchored
+              // No need to multiply by scale
+              final Offset adjustment = (before - after);
+              appModel.offset -= adjustment * appModel.canvas.scale;
             }
             appModel.update();
           },
