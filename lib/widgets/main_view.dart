@@ -164,19 +164,17 @@ class MainViewState extends State<MainView> {
         return;
       }
 
-      appModel.currentUserAction = UserAction(
-        tool: appModel.selectedAction,
-        positions: [fillPosition, fillPosition],
-        brush: MyBrush(
-          color: appModel.brushColor,
-          size: appModel.brusSize,
-          style: appModel.brushStyle,
-        ),
-        fillColor: appModel.fillColor,
-      );
-
       appModel.layersAddActionToSelectedLayer(
-        action: appModel.currentUserAction!,
+        action: UserAction(
+          tool: appModel.selectedAction,
+          positions: [fillPosition, fillPosition],
+          brush: MyBrush(
+            color: appModel.brushColor,
+            size: appModel.brusSize,
+            style: appModel.brushStyle,
+          ),
+          fillColor: appModel.fillColor,
+        ),
       );
     }
   }
@@ -235,7 +233,6 @@ class MainViewState extends State<MainView> {
       }
 
       _activePointerId = -1;
-      appModel.currentUserAction = null;
       appModel.selectedLayer.clearCache();
       appModel.update();
     }

@@ -277,9 +277,6 @@ class AppModel extends ChangeNotifier {
   //=============================================================================
   // All things Tools/UserActions
 
-  // Stores the starting position of a pan gesture for drawing operations.
-  UserAction? currentUserAction;
-
   //-------------------------
   // Selected Tool
   ActionType _selectedAction = ActionType.brush;
