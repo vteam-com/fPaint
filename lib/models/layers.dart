@@ -44,7 +44,6 @@ class Layers {
 
   void clear() {
     _list.clear();
-    clearHasChanged();
   }
 
   int get length => _list.length;

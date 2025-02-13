@@ -9,7 +9,6 @@ import 'package:fpaint/panels/about.dart';
 import 'package:fpaint/panels/canvas_settings.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
-import 'package:provider/provider.dart';
 
 class TopMenuAndLayersPanel extends StatelessWidget {
   const TopMenuAndLayersPanel({super.key});
@@ -118,39 +117,35 @@ class TopMenuAndLayersPanel extends StatelessWidget {
         ),
 
         Expanded(
-          child: Consumer<AppModel>(
-            builder: (context, appModel, child) {
-              return ReorderableListView.builder(
-                itemCount: appModel.layers.length,
-                buildDefaultDragHandles: false,
-                onReorder: (oldIndex, newIndex) {
-                  if (newIndex > oldIndex) {
-                    newIndex -= 1;
-                  }
-                  final Layer layer = appModel.layers.get(oldIndex);
-                  appModel.layers.removeByIndex(oldIndex);
-                  appModel.layers.insert(newIndex, layer);
-                  appModel.selectedLayerIndex = newIndex;
-                },
-                itemBuilder: (context, index) {
-                  final Layer layer = appModel.layers.get(index);
-                  return ReorderableDragStartListener(
-                    key: Key('$index'),
-                    index: index,
-                    child: GestureDetector(
-                      onTap: () => appModel.selectedLayerIndex = index,
-                      onDoubleTap: () => appModel.layersToggleVisibility(layer),
-                      child: LayerSelector(
-                        key: Key(layer.id),
-                        context: context,
-                        layer: layer,
-                        minimal: !appModel.isSidePanelExpanded,
-                        isSelected: appModel.selectedLayerIndex == index,
-                        allowRemoveLayer: appModel.layers.length > 1,
-                      ),
-                    ),
-                  );
-                },
+          child: ReorderableListView.builder(
+            itemCount: appModel.layers.length,
+            buildDefaultDragHandles: false,
+            onReorder: (oldIndex, newIndex) {
+              if (newIndex > oldIndex) {
+                newIndex -= 1;
+              }
+              final Layer layer = appModel.layers.get(oldIndex);
+              appModel.layers.removeByIndex(oldIndex);
+              appModel.layers.insert(newIndex, layer);
+              appModel.selectedLayerIndex = newIndex;
+            },
+            itemBuilder: (context, index) {
+              final Layer layer = appModel.layers.get(index);
+              return ReorderableDragStartListener(
+                key: Key('$index'),
+                index: index,
+                child: GestureDetector(
+                  onTap: () => appModel.selectedLayerIndex = index,
+                  onDoubleTap: () => appModel.layersToggleVisibility(layer),
+                  child: LayerSelector(
+                    key: Key(layer.id),
+                    context: context,
+                    layer: layer,
+                    minimal: !appModel.isSidePanelExpanded,
+                    isSelected: appModel.selectedLayerIndex == index,
+                    allowRemoveLayer: appModel.layers.length > 1,
+                  ),
+                ),
               );
             },
           ),

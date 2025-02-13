@@ -80,6 +80,7 @@ class AppModel extends ChangeNotifier {
     canvas.size = size;
     centerImageInViewPort = true;
     layers.clear();
+    _selectedLayerIndex = 0;
     layers.addWhiteBackgroundLayer(size);
     resetView();
   }
