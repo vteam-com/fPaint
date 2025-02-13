@@ -74,6 +74,18 @@ class AppModel extends ChangeNotifier {
   SelectorModel selector = SelectorModel();
   Rect selectorAdjusterRect = Rect.zero;
 
+  Offset inputPointToCanvasPoint(Offset point) {
+    point = point - offset;
+    point = point / canvas.scale;
+    return point;
+  }
+
+  Offset inputPointToCanvasPointInverse(Offset point) {
+    point = point * canvas.scale;
+    point = point + offset;
+    return point;
+  }
+
   void regionErase() {
     selectedLayer.regionCut(selector.path);
     update();
@@ -182,7 +194,6 @@ class AppModel extends ChangeNotifier {
 
   /// Stores the starting position of a pan gesture for drawing operations.
   UserAction? currentUserAction;
-  Offset? userActionStartingOffset;
 
   // Color for Stroke
   Color _colorForStroke = Colors.black;
@@ -343,11 +354,11 @@ class AppModel extends ChangeNotifier {
   }
 
   void updateLastUserAction({
+    Offset? start,
     required final Offset end,
     ActionType? type,
     Color? colorFill,
     Color? colorStroke,
-    Offset? start,
   }) {
     if (start != null &&
         type != null &&
@@ -365,26 +376,49 @@ class AppModel extends ChangeNotifier {
         ),
       );
     } else {
-      selectedLayer.lastActionUpdatePositionEnd(end: end);
+      updateLastUserActionEndPosition(end);
     }
+    update();
+  }
+
+  void updateLastUserActionEndPosition(final Offset position) {
+    selectedLayer.lastUserAction!.positions.last = position;
+  }
+
+  void appendLineFromLastUserAction(final Offset positionEndOfNewLine) {
+    selectedLayer.addUserAction(
+      UserAction(
+        positions: [
+          selectedLayer.lastUserAction!.positions.last,
+          positionEndOfNewLine,
+        ],
+        tool: selectedLayer.lastUserAction!.tool,
+        brush: selectedLayer.lastUserAction!.brush,
+      ),
+    );
+
     update();
   }
 
   void selectorStart(final Offset position) {
     // debugPrint('Selector start: $position');
-    this.selector.addPosition(position);
-    update();
+    if (this.selector.isVisible) {
+      // Alreay have a Selectpr
+    } else {
+      this.selector.addP1(position);
+      update();
+    }
   }
 
   void selectorMove(final Offset position) {
     // debugPrint('Selector MOVE: $position');
-    this.selector.addPosition(position);
+    this.selector.addP2(position);
     update();
   }
 
   void selectorEndMovement() {
     // debugPrint('Selector END');
-    this.selector.userIsCreatingTheSelector = false;
+    this.selector.p1 = null;
     update();
   }
 

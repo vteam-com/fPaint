@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -37,12 +36,6 @@ class CanvasWidget extends StatefulWidget {
 
 class CanvasWidgetState extends State<CanvasWidget> {
   int _activePointerId = -1;
-  Offset? _lastFocalPoint;
-  double _lastScale = 1.0;
-  Offset? _panStartFocalPoint;
-
-  bool get isPanningOrScaling =>
-      _panStartFocalPoint != null || _lastFocalPoint != null;
 
   @override
   Widget build(BuildContext context) {
@@ -50,137 +43,51 @@ class CanvasWidgetState extends State<CanvasWidget> {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final double viewportWidth = constraints.maxWidth;
-        final double viewportHeight = constraints.maxHeight;
+        return Listener(
+          onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
+            // Panning
+            appModel.offset += event.panDelta;
 
-        final double scaledWidth = widget.canvasWidth * appModel.canvas.scale;
-        final double scaledHeight = widget.canvasHeight * appModel.canvas.scale;
-
-        final double centerX = max(0, (viewportWidth - scaledWidth) / 2);
-        final double centerY = max(0, (viewportHeight - scaledHeight) / 2);
-
-        final double topLeftTranslated = appModel.offset.dx + centerX;
-        final double topTopTranslated = appModel.offset.dy + centerY;
-
-        Rect? selectionRect;
-        if (appModel.selector.isVisible) {
-          appModel.selectorAdjusterRect = appModel.selector.getAdjustedRect(
-            topLeftTranslated,
-            topTopTranslated,
-            appModel.canvas.scale,
-          );
-          selectionRect = appModel.selectorAdjusterRect;
-        }
-
-        return GestureDetector(
-          onScaleStart: (final ScaleStartDetails details) {
-            // debugPrint('SSS onScaleStart {$details.pointerCount}');
-            if (details.pointerCount == 2) {
-              _activePointerId = -1; // cancel any drawing
-              _lastFocalPoint = details.focalPoint;
-              _lastScale = appModel.canvas.scale;
-              _panStartFocalPoint =
-                  details.focalPoint; //Initialize PanStart on 2 finger
-            }
-          },
-          onScaleUpdate: (final ScaleUpdateDetails details) {
-            if (details.pointerCount == 2) {
-              // debugPrint(
-              //   'onScaleUpdate P2 ${details.scale}',
-              // );
-              if (isPanningOrScaling) {
-                if (details.scale < 1.1 && details.scale > 0.9) {
-                  // debugPrint('>>> PAN');
-                  // Panning
-                  final Offset delta =
-                      details.focalPoint - _panStartFocalPoint!;
-                  appModel.offset += delta;
-                  _panStartFocalPoint = details.focalPoint;
-                } else {
-                  // debugPrint('+++ Scale by $scaleDelta');
-                  // Scaling
-                  appModel.canvas.scale =
-                      (_lastScale * details.scale).clamp(0.5, 4.0);
-                  final Offset focalPointDelta =
-                      details.focalPoint - _lastFocalPoint!;
-                  appModel.offset += focalPointDelta -
-                      focalPointDelta * (appModel.canvas.scale / _lastScale);
-                  _lastFocalPoint = details.focalPoint;
-                }
+            // Scaling
+            if (event.scale != 1) {
+              if (event.scale > 1) {
+                appModel.canvas.scale = appModel.canvas.scale * 1.01;
+              } else {
+                appModel.canvas.scale = appModel.canvas.scale * 0.99;
               }
-
-              setState(
-                () {
-                  // udpate
-                },
-              );
             }
+            appModel.update();
           },
-          onScaleEnd: (final ScaleEndDetails details) {
-            _activePointerId = -1;
-            _lastFocalPoint = null;
-            _panStartFocalPoint = null;
-          },
+          onPointerDown: (final PointerDownEvent event) =>
+              _handlePointerStart(appModel, event),
+          onPointerMove: (final PointerEvent event) =>
+              _handlePointerMove(appModel, event),
+          onPointerUp: (PointerUpEvent event) =>
+              _handPointerEnd(appModel, event),
+          onPointerCancel: (final PointerCancelEvent event) =>
+              _handPointerEnd(appModel, event),
           child: Stack(
             children: [
               Transform(
                 alignment: Alignment.topLeft,
                 transform: Matrix4.identity()
                   ..translate(
-                    topLeftTranslated,
-                    topTopTranslated,
+                    appModel.offset.dx,
+                    appModel.offset.dy,
                   )
                   ..scale(appModel.canvas.scale),
-                child: SizedBox(
-                  width: max(widget.canvasWidth, viewportWidth),
-                  height: max(widget.canvasHeight, viewportHeight),
-                  child: Listener(
-                    //----------------------------------------------------------------
-                    // Pinch/Zoom scaling for WEB
-                    onPointerSignal: (final PointerSignalEvent event) {
-                      if (event is PointerScaleEvent) {
-                        appModel.setCanvasScale(
-                          appModel.canvas.scale * event.scale,
-                        );
-                      }
-                    },
-
-                    //----------------------------------------------------------------
-                    // Pinch/Zoom scaling for Desktop
-                    onPointerPanZoomUpdate:
-                        (final PointerPanZoomUpdateEvent event) {
-                      _scaleCanvas(appModel, event.scale, event.position);
-                    },
-
-                    //----------------------------------------------------------------
-                    // Draw Start
-                    onPointerDown: (final PointerDownEvent event) =>
-                        _handlePointerStart(appModel, event),
-
-                    //----------------------------------------------------------------
-                    // Draw Update
-                    onPointerMove: (final PointerEvent event) =>
-                        _handlePointerMove(appModel, event),
-
-                    //----------------------------------------------------------------
-                    // Draw End
-                    onPointerUp: (PointerUpEvent event) =>
-                        _handPointerEnd(appModel, event),
-
-                    //----------------------------------------------------------------
-                    // Draw End
-                    onPointerCancel: (final PointerCancelEvent event) =>
-                        _handPointerEnd(appModel, event),
-
-                    //----------------------------------------------------------------
-                    // Main content
-                    child: CanvasPanel(appModel: appModel),
-                  ),
-                ),
+                child: CanvasPanel(appModel: appModel),
               ),
-              if (appModel.selector.isVisible && selectionRect != null)
+              if (appModel.selector.isVisible)
                 SelectionHandleWidget(
-                  selectionRect: selectionRect,
+                  selectionRect: Rect.fromPoints(
+                    appModel.inputPointToCanvasPointInverse(
+                      appModel.selector.boundingRect.topLeft,
+                    ),
+                    appModel.inputPointToCanvasPointInverse(
+                      appModel.selector.boundingRect.bottomRight,
+                    ),
+                  ),
                   enableMoveAndResize:
                       appModel.selectedTool == ActionType.selector,
                   onDrag: (Offset offset) {
@@ -203,27 +110,71 @@ class CanvasWidgetState extends State<CanvasWidget> {
     final AppModel appModel,
     final PointerDownEvent event,
   ) async {
-    // only draw when not panning or scalling
-    if (isPanningOrScaling) {
-      // debugPrint('currently panning or scaling ignore pointer down event');
-    } else {
-      // debugPrint('DOWN ${details.buttons} P:${details.pointer}');
-      if (event.buttons == 1 && _activePointerId == -1) {
-        if (appModel.isCurrentSelectionReadyForAction) {
-          _activePointerId = event.pointer;
+    final ui.Offset adjustedPosition =
+        appModel.inputPointToCanvasPoint(event.localPosition);
 
-          if (appModel.selectedTool == ActionType.selector) {
-            appModel.selectorStart(event.localPosition / appModel.canvas.scale);
-            return;
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Selection is hidden.'),
-            ),
-          );
-        }
+    // debugPrint('DOWN ${details.buttons} P:${details.pointer}');
+    if (event.buttons == 1 && _activePointerId == -1) {
+      //
+      // Remember what pointer/button the drawing started on
+      //
+      _activePointerId = event.pointer;
+
+      // deal with Selector
+      if (appModel.selectedTool == ActionType.selector) {
+        appModel.selectorStart(adjustedPosition);
+        return;
       }
+
+      // Make sure we can draw on this layer
+      if (appModel.isCurrentSelectionReadyForAction == false) {
+        //
+        // Inform the user that they are attempting to draw on a layer that is hidden
+        //
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Selection is hidden.'),
+          ),
+        );
+        return;
+      }
+
+      final fillPosition =
+          appModel.inputPointToCanvasPoint(event.localPosition);
+
+      //
+      // Special case, one clik flood fill does not need to be tracked
+      //
+      if (appModel.selectedTool == ActionType.fill) {
+        // Create a flattened image from the current layer
+        final ui.Image img = await appModel.getImageForCurrentSelectedLayer();
+
+        // Perform flood fill at the clicked position
+        final ui.Image filledImage = await applyFloodFill(
+          image: img,
+          x: fillPosition.dx.toInt(),
+          y: fillPosition.dy.toInt(),
+          newColor: appModel.fillColor,
+          tolerance: appModel.tolerance,
+        );
+        appModel.selectedLayer
+            .addImage(imageToAdd: filledImage, tool: ActionType.fill);
+        appModel.update();
+        return;
+      }
+
+      appModel.currentUserAction = UserAction(
+        tool: appModel.selectedTool,
+        positions: [fillPosition, fillPosition],
+        brush: MyBrush(
+          color: appModel.brushColor,
+          size: appModel.brusSize,
+          style: appModel.brushStyle,
+        ),
+        fillColor: appModel.fillColor,
+      );
+
+      appModel.addUserAction(action: appModel.currentUserAction!);
     }
   }
 
@@ -231,30 +182,41 @@ class CanvasWidgetState extends State<CanvasWidget> {
     final AppModel appModel,
     final PointerEvent event,
   ) async {
-    final Offset position = event.localPosition / appModel.canvas.scale;
-    if (isPanningOrScaling) {
-      // Currently panning or scaling so don't draw
-      // debugPrint('DRAW MOVE PANNING IS ON');
-    } else {
-      // debugPrint('DRAW MOVE ${details.buttons} P:${details.pointer}');
-      if (event.buttons == 1 && _activePointerId == event.pointer) {
-        if (appModel.selectedTool == ActionType.selector) {
-          appModel.selectorMove(position);
-          return;
-        }
+    //
+    // Translate the input position to the canvas position and scale
+    //
+    final Offset adjustedPosition =
+        appModel.inputPointToCanvasPoint(event.localPosition);
 
-        // the other tools
-        if (appModel.userActionStartingOffset == null) {
-          await _onUserActionStart(
-            appModel: appModel,
-            position: position,
-          );
-        } else {
-          _onUserActionMove(
-            appModel: appModel,
-            position: event.localPosition / appModel.canvas.scale,
-          );
-        }
+    // debugPrint('DRAW MOVE ${details.buttons} P:${details.pointer}');
+
+    if (event.buttons == 1 && _activePointerId == event.pointer) {
+      // Update the Selector
+      if (appModel.selectedTool == ActionType.selector) {
+        appModel.selectorMove(adjustedPosition);
+        return;
+      }
+
+      if (appModel.selectedTool == ActionType.fill) {
+        // ignore fill movement
+        return;
+      }
+
+      if (appModel.selectedTool == ActionType.pencil) {
+        // Add the pixel
+        appModel.appendLineFromLastUserAction(adjustedPosition);
+      } else if (appModel.selectedTool == ActionType.eraser) {
+        // Eraser implementation
+        appModel.appendLineFromLastUserAction(adjustedPosition);
+      } else if (appModel.selectedTool == ActionType.brush) {
+        // Cumulate more points in the draw path on the selected layer
+        appModel.selectedLayer
+            .appPositionToLastAction(position: adjustedPosition);
+        appModel.update();
+      } else {
+        // Existing shape logic
+        appModel.updateLastUserAction(end: adjustedPosition);
+        appModel.update();
       }
     }
   }
@@ -263,143 +225,32 @@ class CanvasWidgetState extends State<CanvasWidget> {
     final AppModel appModel,
     final PointerEvent event,
   ) async {
-    if (!isPanningOrScaling) {
-      if (_activePointerId == event.pointer) {
-        // debugPrint('UP ${details.buttons}');
-        // handle the case that the user click and release the mouse withou moving
-        if (appModel.selectedTool == ActionType.selector) {
-          appModel.selectorEndMovement();
-          return;
-        }
+    // debugPrint('UP ${details.buttons}');
 
-        if (appModel.userActionStartingOffset == null &&
-            (appModel.selectedTool == ActionType.pencil ||
-                appModel.selectedTool == ActionType.fill ||
-                appModel.selectedTool == ActionType.eraser)) {
-          await _onUserActionStart(
-            appModel: appModel,
-            position: event.localPosition / appModel.canvas.scale,
-          );
-        }
-
-        _onUserActionEnded(appModel);
-      }
-    }
-  }
-
-  Future<bool> _onUserActionStart({
-    required final AppModel appModel,
-    required final Offset position,
-  }) async {
-    appModel.userActionStartingOffset = position;
-
-    if (appModel.selectedTool == ActionType.fill) {
-      // Create a flattened image from the current layer
-      final ui.Image img = await appModel.getImageForCurrentSelectedLayer();
-
-      // Perform flood fill at the clicked position
-      final ui.Image filledImage = await applyFloodFill(
-        image: img,
-        x: position.dx.toInt(),
-        y: position.dy.toInt(),
-        newColor: appModel.fillColor,
-        tolerance: appModel.tolerance,
-      );
-      appModel.selectedLayer
-          .addImage(imageToAdd: filledImage, tool: ActionType.fill);
-      appModel.update();
-      return true;
-    }
-
-    appModel.currentUserAction = UserAction(
-      tool: appModel.selectedTool,
-      positions: [position, position],
-      brush: MyBrush(
-        color: appModel.brushColor,
-        size: appModel.brusSize,
-        style: appModel.brushStyle,
-      ),
-      fillColor: appModel.fillColor,
-    );
-
-    appModel.addUserAction(action: appModel.currentUserAction!);
-    return false;
-  }
-
-  void _onUserActionMove({
-    required final AppModel appModel,
-    required final Offset position,
-  }) {
-    if (appModel.userActionStartingOffset != null) {
+    if (_activePointerId == event.pointer) {
       if (appModel.selectedTool == ActionType.selector) {
-        appModel.selectorMove(position);
-        return;
+        appModel.selectorEndMovement();
       }
 
-      if (appModel.selectedTool == ActionType.pencil) {
-        // Add the pixel
-        appModel.updateLastUserAction(
-          start: appModel.userActionStartingOffset!,
-          end: position,
-          type: appModel.selectedTool,
-          colorStroke: appModel.brushColor,
-          colorFill: appModel.brushColor,
-        );
-        appModel.userActionStartingOffset = position;
-      } else if (appModel.selectedTool == ActionType.eraser) {
-        // Eraser implementation
-        appModel.updateLastUserAction(
-          start: appModel.userActionStartingOffset!,
-          end: position,
-          type: appModel.selectedTool,
-          colorStroke: Colors.transparent,
-          colorFill: Colors.transparent,
-        );
-        appModel.userActionStartingOffset = position;
-      } else if (appModel.selectedTool == ActionType.brush) {
-        // Cumulate more points in the draw path on the selected layer
-        appModel.layers.list[appModel.selectedLayerIndex]
-            .lastActionAddPosition(position: position);
-        appModel.update();
-      } else {
-        // Existing shape logic
-        appModel.updateLastUserAction(end: position);
-        appModel.update();
-      }
+      _activePointerId = -1;
+      appModel.currentUserAction = null;
+      appModel.selectedLayer.clearCache();
+      appModel.update();
     }
   }
 
-  void _onUserActionEnded(
-    final AppModel appModel,
-  ) {
-    if (appModel.selectedTool == ActionType.selector) {
-      appModel.selectorEndMovement();
-      return;
-    }
-    //debugPrint('End gesture $_activePointerId now -1');
-    _activePointerId = -1;
-    appModel.currentUserAction = null;
-    appModel.userActionStartingOffset = null;
-    appModel.selectedLayer.clearCache();
-    appModel.update();
-  }
+  void centerCanvas() {
+    // TODO
+    //     final double viewportWidth = constraints.maxWidth;
+    // final double viewportHeight = constraints.maxHeight;
 
-  void _scaleCanvas(AppModel appModel, double scaleDelta, Offset focalPoint) {
-    final double newScale = appModel.canvas.scale * scaleDelta;
+    // final double scaledWidth = widget.canvasWidth * appModel.canvas.scale;
+    // final double scaledHeight = widget.canvasHeight * appModel.canvas.scale;
 
-    // Ensure scale remains within reasonable limits
-    final double minScale = 0.1;
-    final double maxScale = 5.0;
-    if (newScale < minScale || newScale > maxScale) {
-      return;
-    }
+    // final double centerX = max(0, (viewportWidth - scaledWidth) / 2);
+    // final double centerY = max(0, (viewportHeight - scaledHeight) / 2);
 
-    // Adjust canvas offset so that focalPoint remains at the same screen position
-    final Offset beforeFocalCanvas =
-        (focalPoint - appModel.offset) / appModel.canvas.scale;
-    final Offset newOffset = focalPoint - (beforeFocalCanvas * newScale);
-
-    appModel.offset = newOffset;
-    appModel.setCanvasScale(newScale);
+    // // final double topLeftTranslated = appModel.offset.dx + centerX;
+    // // final double topTopTranslated = appModel.offset.dy + centerY;
   }
 }

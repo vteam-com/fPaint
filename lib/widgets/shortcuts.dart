@@ -139,7 +139,7 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         //-------------------------------------------------------------
         EscapeIntent: CallbackAction<EscapeIntent>(
           onInvoke: (EscapeIntent intent) async {
-            appModel.selector.isVisible = false;
+            appModel.selector.clear();
             appModel.update();
             return null;
           },

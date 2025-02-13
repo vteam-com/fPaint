@@ -26,13 +26,17 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final width = widget.selectionRect.left +
+        widget.selectionRect.width +
+        defaultHandleSize;
+
+    final height = widget.selectionRect.bottom +
+        widget.selectionRect.height +
+        defaultHandleSize;
+
     return SizedBox(
-      width: widget.selectionRect.left +
-          widget.selectionRect.width +
-          defaultHandleSize,
-      height: widget.selectionRect.bottom +
-          widget.selectionRect.height +
-          defaultHandleSize,
+      width: width < 0 ? 0 : width,
+      height: height < 0 ? 0 : height,
       child: widget.enableMoveAndResize
           ? Stack(
               children: [

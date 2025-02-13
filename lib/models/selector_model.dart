@@ -21,6 +21,14 @@ class SelectorModel {
 
   Rect get boundingRect => path.getBounds();
 
+  Offset? p1;
+
+  void clear() {
+    this.isVisible = false;
+    this.path.reset();
+    this.userIsCreatingTheSelector = false;
+  }
+
   void translate(final Offset offset) {
     final Rect bounds = path.getBounds();
 
@@ -130,46 +138,17 @@ class SelectorModel {
     }
   }
 
-  void addPosition(final Offset position) {
+  void addP1(Offset p1) {
     isVisible = true;
-    if (userIsCreatingTheSelector) {
-      // debugPrint('Selector isMoving - addPosition ${path.getBounds().topLeft}');
-      final r =
-          path.getBounds().expandToInclude(Rect.fromPoints(position, position));
-      path = Path();
-      path.addRect(r);
-    } else {
-      // debugPrint('Selector start from $position');
-      path = Path();
-      path.addRect(Rect.fromPoints(position, position));
-      userIsCreatingTheSelector = true;
-    }
+    path = Path();
+    this.p1 = p1;
+    path.addRect(Rect.fromPoints(p1, p1));
   }
 
-  Rect getAdjustedRect(
-    double topLeftTranslated,
-    double topTopTranslated,
-    double scale,
-  ) {
-    final Rect bounds = this.boundingRect;
-    final double scaledFactor = scale * scale;
-
-    final double left = topLeftTranslated + bounds.left * scaledFactor;
-    final double top = topTopTranslated + bounds.top * scaledFactor;
-    final double right = topLeftTranslated + bounds.right * scaledFactor;
-    final double bottom = topTopTranslated + bounds.bottom * scaledFactor;
-
-    // Normalize the rectangle
-    final double normalizedLeft = left < right ? left : right;
-    final double normalizedRight = left > right ? left : right;
-    final double normalizedTop = top < bottom ? top : bottom;
-    final double normalizedBottom = top > bottom ? top : bottom;
-
-    return Rect.fromLTRB(
-      normalizedLeft,
-      normalizedTop,
-      normalizedRight,
-      normalizedBottom,
-    );
+  void addP2(Offset p2) {
+    if (p1 != null) {
+      path = Path();
+      path.addRect(Rect.fromPoints(p1!, p2));
+    }
   }
 }

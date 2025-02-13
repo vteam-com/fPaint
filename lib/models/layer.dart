@@ -162,14 +162,12 @@ class Layer {
     return newAction;
   }
 
-  void lastActionAddPosition({required final Offset position}) {
+  void appPositionToLastAction({required final Offset position}) {
     _actionStack.last.positions.add(position);
   }
 
-  void lastActionUpdatePositionEnd({required final Offset end}) {
-    if (_actionStack.isNotEmpty && _actionStack.last.positions.length >= 2) {
-      _actionStack.last.positions.last = end;
-    }
+  void lastActionUpdatePosition(final Offset position) {
+    _actionStack.last.positions.last = position;
   }
 
   void undo() {

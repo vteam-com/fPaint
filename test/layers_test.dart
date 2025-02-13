@@ -79,7 +79,7 @@ void main() {
         fillColor: Colors.transparent,
       );
       layer.addUserAction(userAction);
-      layer.lastActionUpdatePositionEnd(end: const Offset(2, 2));
+      layer.lastActionUpdatePosition(const Offset(2, 2));
       expect(layer.lastUserAction?.positions.last, const Offset(2, 2));
     });
 
