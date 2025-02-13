@@ -47,7 +47,6 @@ digraph "" {
   "/lib/helpers/list_helper.dart" [label="list_helper"];
   "/lib/helpers/color_helper.dart" [label="color_helper"];
   "/lib/widgets/color_picker_dialog.dart" [label="color_picker_dialog"];
-  "/lib/widgets/canvas_widget.dart" [label="canvas_widget"];
   "/lib/widgets/svg_icon.dart" [label="svg_icon"];
   "/lib/widgets/truncated_text.dart" [label="truncated_text"];
   "/lib/widgets/container_slider.dart" [label="container_slider"];
@@ -62,6 +61,7 @@ digraph "" {
   "/lib/widgets/brush_style_picker.dart" [label="brush_style_picker"];
   "/lib/widgets/color_selector.dart" [label="color_selector"];
   "/lib/widgets/nine_grid_selector.dart" [label="nine_grid_selector"];
+  "/lib/widgets/main_view.dart" [label="main_view"];
   "/lib/widgets/selector_widget.dart" [label="selector_widget"];
   subgraph "cluster~" {
     label="fpaint";
@@ -144,7 +144,6 @@ digraph "" {
       subgraph "cluster~/lib/widgets" {
         label="widgets";
         "/lib/widgets/color_picker_dialog.dart";
-        "/lib/widgets/canvas_widget.dart";
         "/lib/widgets/svg_icon.dart";
         "/lib/widgets/truncated_text.dart";
         "/lib/widgets/container_slider.dart";
@@ -159,6 +158,7 @@ digraph "" {
         "/lib/widgets/brush_style_picker.dart";
         "/lib/widgets/color_selector.dart";
         "/lib/widgets/nine_grid_selector.dart";
+        "/lib/widgets/main_view.dart";
         "/lib/widgets/selector_widget.dart";
       }
     }
@@ -247,7 +247,7 @@ digraph "" {
   "/lib/files/import_files.dart" -> "/lib/models/app_model.dart";
   "/lib/main_screen.dart" -> "/lib/floating_buttons.dart";
   "/lib/main_screen.dart" -> "/lib/panels/side_panel.dart";
-  "/lib/main_screen.dart" -> "/lib/widgets/canvas_widget.dart";
+  "/lib/main_screen.dart" -> "/lib/widgets/main_view.dart";
   "/lib/main_screen.dart" -> "/lib/models/app_model.dart";
   "/lib/helpers/image_helper.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/helpers/color_helper.dart" -> "/lib/helpers/list_helper.dart";
@@ -257,11 +257,6 @@ digraph "" {
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/color_selector.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/top_colors.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/transparent_background.dart";
-  "/lib/widgets/canvas_widget.dart" -> "/lib/models/app_model.dart";
-  "/lib/widgets/canvas_widget.dart" -> "/lib/models/selector_model.dart";
-  "/lib/widgets/canvas_widget.dart" -> "/lib/panels/canvas_panel.dart";
-  "/lib/widgets/canvas_widget.dart" -> "/lib/panels/tools/flood_fill.dart";
-  "/lib/widgets/canvas_widget.dart" -> "/lib/widgets/selector_widget.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/shortcuts.dart" -> "/lib/files/save.dart";
@@ -275,6 +270,11 @@ digraph "" {
   "/lib/widgets/color_selector.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/color_picker_dialog.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/transparent_background.dart";
+  "/lib/widgets/main_view.dart" -> "/lib/models/app_model.dart";
+  "/lib/widgets/main_view.dart" -> "/lib/models/selector_model.dart";
+  "/lib/widgets/main_view.dart" -> "/lib/panels/canvas_panel.dart";
+  "/lib/widgets/main_view.dart" -> "/lib/panels/tools/flood_fill.dart";
+  "/lib/widgets/main_view.dart" -> "/lib/widgets/selector_widget.dart";
   "/lib/widgets/selector_widget.dart" -> "/lib/models/selector_model.dart";
   "/lib/widgets/selector_widget.dart" -> "/lib/widgets/marching_ants_rect.dart";
 }

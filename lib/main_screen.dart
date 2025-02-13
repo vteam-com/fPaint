@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/floating_buttons.dart';
 import 'package:fpaint/panels/side_panel.dart';
-import 'package:fpaint/widgets/canvas_widget.dart';
+import 'package:fpaint/widgets/main_view.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
 import 'models/app_model.dart';
@@ -47,7 +47,7 @@ class MainScreen extends StatelessWidget {
 
   Widget _buildMainContent(final AppModel appModel) {
     if (appModel.shellMode == ShellMode.hidden) {
-      return CanvasWidget(
+      return MainView(
         canvasWidth: appModel.canvas.width,
         canvasHeight: appModel.canvas.height,
       );
@@ -64,7 +64,7 @@ class MainScreen extends StatelessWidget {
     if (appModel.showMenu) {
       return const SidePanel();
     } else {
-      return CanvasWidget(
+      return MainView(
         canvasWidth: appModel.canvas.width,
         canvasHeight: appModel.canvas.height,
       );
@@ -87,8 +87,7 @@ class MainScreen extends StatelessWidget {
               const SidePanel(),
         ),
         Area(
-          builder: (final BuildContext context, final Area area) =>
-              CanvasWidget(
+          builder: (final BuildContext context, final Area area) => MainView(
             canvasWidth: appModel.canvas.width,
             canvasHeight: appModel.canvas.height,
           ),

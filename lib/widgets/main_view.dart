@@ -9,11 +9,11 @@ import 'package:fpaint/widgets/selector_widget.dart';
 
 /// Provides a canvas widget that supports scaling and panning.
 ///
-/// The [CanvasWidget] is a stateful widget that allows the user to scale and pan the content
+/// The [MainView] is a stateful widget that allows the user to scale and pan the content
 /// within a bounded canvas area. It manages the scaling and panning state, and updates the
 /// [AppModel] with the current scale and offset values.
 ///
-/// The [CanvasWidget] takes in the [canvasWidth], [canvasHeight], and [child] widgets to be
+/// The [MainView] takes in the [canvasWidth], [canvasHeight], and [child] widgets to be
 /// displayed within the canvas. The [child] widget is transformed based on the current scale
 /// and offset values.
 ///
@@ -21,8 +21,8 @@ import 'package:fpaint/widgets/selector_widget.dart';
 /// listens for scale and pan gestures from the user. The scale and offset values are updated
 /// accordingly, and the [AppModel] is updated to persist the changes.
 
-class CanvasWidget extends StatefulWidget {
-  const CanvasWidget({
+class MainView extends StatefulWidget {
+  const MainView({
     super.key,
     required this.canvasWidth,
     required this.canvasHeight,
@@ -31,10 +31,10 @@ class CanvasWidget extends StatefulWidget {
   final double canvasHeight;
 
   @override
-  CanvasWidgetState createState() => CanvasWidgetState();
+  MainViewState createState() => MainViewState();
 }
 
-class CanvasWidgetState extends State<CanvasWidget> {
+class MainViewState extends State<MainView> {
   int _activePointerId = -1;
 
   @override
