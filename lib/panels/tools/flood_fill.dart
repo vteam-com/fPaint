@@ -93,7 +93,7 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   final double tolerance255 = 255 * (tolerance / 100);
 
   // Visited set and stack for region growing
-  final Set<String> visited = {};
+  final Set<int> visited = {};
   final List<Point> stack = [Point(x, y)];
 
   while (stack.isNotEmpty) {
@@ -107,7 +107,7 @@ Future<Region> extractRegionByColorEdgeAndOffset({
     }
 
     // Skip if already visited
-    final String key = '$px,$py';
+    final int key = px + py * width;
     if (visited.contains(key)) {
       continue;
     }
@@ -144,8 +144,7 @@ Future<Region> extractRegionByColorEdgeAndOffset({
           ui.Path.combine(ui.PathOperation.union, region.path, pixelPath);
     }
 
-    // Add neighboring pixels to the stack
-    // Directions for 4-connected neighbors
+    // Add 4-connected neighbors pixels to the stack
     stack.add(Point(px + 1, py));
     stack.add(Point(px - 1, py));
     stack.add(Point(px, py + 1));
