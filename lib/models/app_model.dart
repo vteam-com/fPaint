@@ -382,26 +382,27 @@ class AppModel extends ChangeNotifier {
   }
 
   void floodFillAction(final Offset position) async {
-    ui.Path path = await getRegionPathFromLayerImage(position);
+    final Region region = await getRegionPathFromLayerImage(position);
 
     selectedLayer.addRegion(
-      path: path,
+      path: region.path
+          .shift(Offset(region.left.toDouble(), region.top.toDouble())),
       color: this.fillColor,
     );
     update();
   }
 
-  Future<ui.Path> getRegionPathFromLayerImage(ui.Offset position) async {
+  Future<Region> getRegionPathFromLayerImage(ui.Offset position) async {
     final ui.Image img = await getImageForCurrentSelectedLayer();
 
     // Perform flood fill at the clicked position
-    final ui.Path path = await extractFloodFillPath(
+    final Region region = await extractRegionByColorEdgeAndOffset(
       image: img,
       x: position.dx.toInt(),
       y: position.dy.toInt(),
       tolerance: this.tolerance,
     );
-    return path;
+    return region;
   }
 
   //-------------------------
@@ -411,9 +412,9 @@ class AppModel extends ChangeNotifier {
   void selectorStart(final Offset position) {
     if (!selector.isVisible) {
       if (selector.mode == SelectorMode.wand) {
-        getRegionPathFromLayerImage(position).then((final ui.Path path) {
+        getRegionPathFromLayerImage(position).then((final Region region) {
           selector.isVisible = true;
-          selector.path = path;
+          selector.path = region.path.shift(region.offset);
           update();
         });
       } else {
@@ -446,7 +447,11 @@ class AppModel extends ChangeNotifier {
         return Path()..addOval(Rect.fromPoints(p1, p2));
 
       case SelectorMode.wand:
-        return this.selector.path;
+        if (this.selector.p1 == null) {
+          return this.selector.path;
+        } else {
+          return this.selector.path.shift(toCanvas(this.selector.p1!));
+        }
     }
   }
 

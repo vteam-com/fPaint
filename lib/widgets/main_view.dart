@@ -151,8 +151,6 @@ class MainViewState extends State<MainView> {
     final PointerDownEvent event,
   ) async {
     final ui.Offset adjustedPosition = appModel.toCanvas(event.localPosition);
-
-    // debugPrint('DOWN ${details.buttons} P:${details.pointer}');
     if (event.buttons == 1 && _activePointerId == -1) {
       //
       // Remember what pointer/button the drawing started on

@@ -70,6 +70,11 @@ Future<Uint8List?> convertImageToUint8List(final ui.Image image) async {
   return byteData!.buffer.asUint8List();
 }
 
+Future<List<String>> imageToListToString(final ui.Image image) async {
+  final Uint8List? data = await convertImageToUint8List(image);
+  return imageBytesListToString(data!, image.width);
+}
+
 List<String> imageBytesListToString(Uint8List bytes, int width) {
   final int length = bytes.length;
   final List<String> rows = [];
