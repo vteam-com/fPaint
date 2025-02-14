@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -94,10 +95,11 @@ Future<Region> extractRegionByColorEdgeAndOffset({
 
   // Visited set and stack for region growing
   final Set<int> visited = {};
-  final List<Point> stack = [Point(x, y)];
+  Queue<Point> queue = Queue();
+  queue.add(Point(x, y));
 
-  while (stack.isNotEmpty) {
-    final Point p = stack.removeLast();
+  while (queue.isNotEmpty) {
+    final Point p = queue.removeLast();
     final int px = p.x;
     final int py = p.y;
 
@@ -145,10 +147,10 @@ Future<Region> extractRegionByColorEdgeAndOffset({
     }
 
     // Add 4-connected neighbors pixels to the stack
-    stack.add(Point(px + 1, py));
-    stack.add(Point(px - 1, py));
-    stack.add(Point(px, py + 1));
-    stack.add(Point(px, py - 1));
+    queue.add(Point(px + 1, py));
+    queue.add(Point(px - 1, py));
+    queue.add(Point(px, py + 1));
+    queue.add(Point(px, py - 1));
   }
 
   // Normalize the path
@@ -188,7 +190,8 @@ Future<ui.Image> applyColorRegionToImage({
 
 class Point {
   Point(this.x, this.y);
-  final int x, y;
+  int x;
+  int y;
 }
 
 void printPathCoordinates(ui.Path path) {
