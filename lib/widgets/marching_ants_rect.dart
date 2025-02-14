@@ -18,7 +18,7 @@ class MarchingAntsSelectionState extends State<MarchingAntsSelection>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(seconds: 10),
     )..repeat();
   }
 
@@ -62,7 +62,7 @@ class MarchingAntsPainter extends CustomPainter {
     // Now, draw the black dashes on top
 
     paint.color = Colors.black;
-    paint.strokeCap = StrokeCap.square;
+    paint.strokeCap = StrokeCap.round;
 
     final Path dashPath = Path();
     const double dashWidth = 4;

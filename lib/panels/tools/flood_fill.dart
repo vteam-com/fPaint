@@ -26,7 +26,7 @@ Future<ui.Image> applyFloodFill({
   return newImage;
 }
 
-// Function to extract the flood fill region as a ui.Path
+// Function to extract the region as a ui.Path
 Future<ui.Path> extractFloodFillPath({
   required final ui.Image image,
   required final int x,
@@ -46,10 +46,12 @@ Future<ui.Path> extractFloodFillPath({
     return (y * width + x) * bytesPerPixel;
   }
 
+  // Check if the starting point is within bounds
   if (x < 0 || x >= width || y < 0 || y >= height) {
     return ui.Path();
   }
 
+  // Get the target color at the starting point
   final int targetIndex = index(x, y);
   final int targetR = pixels[targetIndex];
   final int targetG = pixels[targetIndex + 1];
@@ -63,16 +65,26 @@ Future<ui.Path> extractFloodFillPath({
   ///
   final double tolerance255 = 255 * (tolerance / 100);
 
+  // Visited set and stack for region growing
   final Set<String> visited = {};
   final List<Point> stack = [Point(x, y)];
-  final ui.Path path = ui.Path();
+
+  ui.Path regionPath = ui.Path(); // Initialize an empty path
+
+  // Directions for 4-connected neighbors
+  final List<Point> directions = [
+    Point(1, 0),
+    Point(-1, 0),
+    Point(0, 1),
+    Point(0, -1),
+  ];
 
   while (stack.isNotEmpty) {
     final Point p = stack.removeLast();
     final int px = p.x;
     final int py = p.y;
 
-    // Skip if out of bounds
+    // Check bounds
     if (px < 0 || px >= width || py < 0 || py >= height) {
       continue;
     }
@@ -90,7 +102,7 @@ Future<ui.Path> extractFloodFillPath({
     final int b = pixels[pixelIndex + 2];
     final int a = pixels[pixelIndex + 3];
 
-    // Skip if color doesn't match target within tolerance
+    // Skip if the pixel doesn't match the target color within the tolerance
     if ((r - targetR).abs() > tolerance255 ||
         (g - targetG).abs() > tolerance255 ||
         (b - targetB).abs() > tolerance255 ||
@@ -98,16 +110,24 @@ Future<ui.Path> extractFloodFillPath({
       continue;
     }
 
-    // Set new color
-    path.addRect(Rect.fromLTWH(px.toDouble(), py.toDouble(), 1, 1));
+    // Create a small rectangle for the current pixel
+    ui.Path pixelPath = ui.Path();
+    pixelPath.addRect(Rect.fromLTWH(px.toDouble(), py.toDouble(), 1, 1));
 
-    stack.add(Point(px + 1, py));
-    stack.add(Point(px - 1, py));
-    stack.add(Point(px, py + 1));
-    stack.add(Point(px, py - 1));
+    // Combine the current pixel's path with the growing region path
+    regionPath = ui.Path.combine(ui.PathOperation.union, regionPath, pixelPath);
+
+    // Add neighboring pixels to the stack
+    for (final Point direction in directions) {
+      stack.add(Point(px + direction.x, py + direction.y));
+    }
   }
 
-  return path;
+  // Normalize the path
+  final Rect bounds = regionPath.getBounds();
+  final Matrix4 matrix = Matrix4.identity()
+    ..translate(-bounds.left, -bounds.top);
+  return regionPath.transform(matrix.storage);
 }
 
 // Function to apply color to the extracted path

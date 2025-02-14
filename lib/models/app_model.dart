@@ -382,6 +382,16 @@ class AppModel extends ChangeNotifier {
   }
 
   void floodFillAction(final Offset position) async {
+    ui.Path path = await getRegionPathFromLayerImage(position);
+
+    selectedLayer.addRegion(
+      path: path,
+      color: this.fillColor,
+    );
+    update();
+  }
+
+  Future<ui.Path> getRegionPathFromLayerImage(ui.Offset position) async {
     final ui.Image img = await getImageForCurrentSelectedLayer();
 
     // Perform flood fill at the clicked position
@@ -391,11 +401,7 @@ class AppModel extends ChangeNotifier {
       y: position.dy.toInt(),
       tolerance: this.tolerance,
     );
-    selectedLayer.addRegion(
-      path: path,
-      color: this.fillColor,
-    );
-    update();
+    return path;
   }
 
   //-------------------------
@@ -404,14 +410,26 @@ class AppModel extends ChangeNotifier {
 
   void selectorStart(final Offset position) {
     if (!selector.isVisible) {
-      selector.addP1(position);
-      update();
+      if (selector.mode == SelectorMode.wand) {
+        getRegionPathFromLayerImage(position).then((final ui.Path path) {
+          selector.isVisible = true;
+          selector.path = path;
+          update();
+        });
+      } else {
+        selector.addP1(position);
+        update();
+      }
     }
   }
 
   void selectorMove(final Offset position) {
-    selector.addP2(position);
-    update();
+    if (selector.mode == SelectorMode.wand) {
+      // Ignore since the PointerDown already did the job of drawing the shape of the selector
+    } else {
+      selector.addP2(position);
+      update();
+    }
   }
 
   void selectorEnd() {
@@ -428,12 +446,7 @@ class AppModel extends ChangeNotifier {
         return Path()..addOval(Rect.fromPoints(p1, p2));
 
       case SelectorMode.wand:
-        final fakePath = Path();
-        fakePath.moveTo(p1.dx, p1.dy); // Start at the initial point
-        fakePath.lineTo(p2.dx, p2.dy - 100); // Draw to the right
-        fakePath.lineTo(p1.dx, p2.dy); // Draw down
-        fakePath.close();
-        return fakePath;
+        return this.selector.path;
     }
   }
 
