@@ -37,12 +37,18 @@ class MainViewState extends State<MainView> {
   @override
   Widget build(BuildContext context) {
     final AppModel appModel = AppModel.of(context, listen: true);
-
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         if (appModel.centerImageInViewPort) {
           appModel.centerImageInViewPort = false;
           centerCanvas(appModel, constraints.maxWidth, constraints.maxHeight);
+        }
+
+        if (appModel.selector.isVisible) {
+          appModel.selector.path = appModel.pathFromSelectorMode(
+            appModel.selector.boundingRect.topLeft,
+            appModel.selector.boundingRect.bottomRight,
+          );
         }
 
         return Listener(

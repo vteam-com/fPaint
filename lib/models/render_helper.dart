@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:fpaint/widgets/brush_style_picker.dart';
 
 void renderPencil(
@@ -160,6 +159,7 @@ void renderRegion(final Canvas canvas, Path path, Color fillColor) {
 
 void renderRegionErase(final Canvas canvas, Path path) {
   final Paint paint = Paint();
+  paint.color = const Color(0x00000000);
   paint.blendMode = BlendMode.clear;
   paint.style = PaintingStyle.fill;
   canvas.drawPath(path, paint);
@@ -195,7 +195,7 @@ void drawPathWithBrushStyle(
   final double brushSize,
 ) {
   if (brushStyle == BrushStyle.dash) {
-    drawPath(
+    drawPathDash(
       path,
       canvas,
       paint,
@@ -207,7 +207,7 @@ void drawPathWithBrushStyle(
   }
 }
 
-void drawPath(
+void drawPathDash(
   final Path path,
   final Canvas canvas,
   final Paint paint,

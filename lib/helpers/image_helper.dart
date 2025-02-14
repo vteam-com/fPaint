@@ -151,6 +151,7 @@ void printPathCoordinates(ui.Path path) {
   print('---------------------------------');
   for (final metric in pathMetrics) {
     for (double t = 0.0; t <= 1.0; t += 0.1) {
+      // Sample points along the path
       final position = metric.getTangentForOffset(metric.length * t)?.position;
       if (position != null) {
         // ignore: avoid_print
