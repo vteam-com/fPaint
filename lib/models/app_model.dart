@@ -417,6 +417,24 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
+  Path pathFromSelectorMode(final Offset p1, final Offset p2) {
+    switch (this.selector.mode) {
+      case SelectorMode.rectangle:
+        return Path()..addRect(Rect.fromPoints(p1, p2));
+
+      case SelectorMode.circle:
+        return Path()..addOval(Rect.fromPoints(p1, p2));
+
+      case SelectorMode.wand:
+        final fakePath = Path();
+        fakePath.moveTo(p1.dx, p1.dy); // Start at the initial point
+        fakePath.lineTo(p2.dx, p2.dy - 100); // Draw to the right
+        fakePath.lineTo(p1.dx, p2.dy); // Draw down
+        fakePath.close();
+        return fakePath;
+    }
+  }
+
   //-------------------------
   // Top Colors used
   List<ColorUsage> topColors = [

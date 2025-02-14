@@ -2,8 +2,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 class MarchingAntsSelection extends StatefulWidget {
-  const MarchingAntsSelection({super.key, required this.rect});
-  final Rect rect;
+  const MarchingAntsSelection({super.key, required this.path});
+  final Path path;
 
   @override
   MarchingAntsSelectionState createState() => MarchingAntsSelectionState();
@@ -35,7 +35,7 @@ class MarchingAntsSelectionState extends State<MarchingAntsSelection>
       builder: (context, child) {
         return CustomPaint(
           painter: MarchingAntsPainter(
-            rect: widget.rect,
+            path: widget.path,
             phase: _controller.value * 10,
           ),
         );
@@ -45,9 +45,9 @@ class MarchingAntsSelectionState extends State<MarchingAntsSelection>
 }
 
 class MarchingAntsPainter extends CustomPainter {
-  MarchingAntsPainter({required this.rect, required this.phase});
+  MarchingAntsPainter({required this.path, required this.phase});
 
-  final Rect rect;
+  final Path path;
   final double phase;
 
   @override
@@ -57,14 +57,13 @@ class MarchingAntsPainter extends CustomPainter {
       ..color = Colors.white
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
-    canvas.drawRect(rect, paint);
+    canvas.drawPath(path, paint);
 
     // Now, draw the black dashes on top
 
     paint.color = Colors.black;
     paint.strokeCap = StrokeCap.square;
 
-    final Path path = Path()..addRect(rect);
     final Path dashPath = Path();
     const double dashWidth = 4;
     const double dashSpace = 6;

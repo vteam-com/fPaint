@@ -140,18 +140,15 @@ void renderLine(
 
 void renderEraser(
   final Canvas canvas,
-  final Offset p1,
-  final Offset p2,
-  final double brushSize,
+  final Path path,
 ) {
   final Paint paint = Paint();
 
   paint.blendMode = BlendMode.clear;
   paint.style = PaintingStyle.stroke;
-  paint.strokeWidth = brushSize;
   paint.strokeCap = StrokeCap.round;
 
-  canvas.drawLine(p1, p2, paint);
+  canvas.drawPath(path, paint);
 }
 
 void renderRegion(final Canvas canvas, Path path, Color fillColor) {

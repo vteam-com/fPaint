@@ -154,7 +154,9 @@ void printPathCoordinates(ui.Path path) {
       final position = metric.getTangentForOffset(metric.length * t)?.position;
       if (position != null) {
         // ignore: avoid_print
-        print('path: ${position.dx}, ${position.dy}');
+        print(
+          'path: ${position.dx.toStringAsFixed(0)}, ${position.dy.toStringAsFixed(0)}',
+        );
       }
     }
   }

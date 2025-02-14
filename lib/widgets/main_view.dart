@@ -108,9 +108,13 @@ class MainViewState extends State<MainView> {
                   ..scale(appModel.canvas.scale),
                 child: CanvasPanel(appModel: appModel),
               ),
+
+              //
+              // Selection Widget
+              //
               if (appModel.selector.isVisible)
                 SelectionHandleWidget(
-                  selectionRect: Rect.fromPoints(
+                  path: appModel.pathFromSelectorMode(
                     appModel.fromCanvas(
                       appModel.selector.boundingRect.topLeft,
                     ),

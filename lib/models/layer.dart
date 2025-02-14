@@ -296,9 +296,7 @@ class Layer {
         case ActionType.eraser:
           renderEraser(
             canvas,
-            userAction.positions.first,
-            userAction.positions.last,
-            userAction.brush!.size,
+            userAction.path!,
           );
           break;
 

@@ -1,25 +1,5 @@
 import 'package:flutter/material.dart';
 
-enum SelectorHandlePosition {
-  topLeft,
-  topRight,
-  //
-  bottomLeft,
-  bottomRight,
-  //
-  left,
-  right,
-  //
-  top,
-  bottom,
-}
-
-enum SelectorMode {
-  rectangle,
-  circle,
-  wand,
-}
-
 class SelectorModel {
   bool isVisible = false;
   SelectorMode mode = SelectorMode.rectangle;
@@ -158,4 +138,24 @@ class SelectorModel {
       path.addRect(Rect.fromPoints(p1!, p2));
     }
   }
+}
+
+enum SelectorHandlePosition {
+  topLeft,
+  topRight,
+  //
+  bottomLeft,
+  bottomRight,
+  //
+  left,
+  right,
+  //
+  top,
+  bottom,
+}
+
+enum SelectorMode {
+  rectangle,
+  circle,
+  wand,
 }

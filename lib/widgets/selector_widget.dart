@@ -5,12 +5,12 @@ import 'package:fpaint/widgets/marching_ants_rect.dart';
 class SelectionHandleWidget extends StatefulWidget {
   const SelectionHandleWidget({
     super.key,
-    required this.selectionRect,
+    required this.path,
     required this.onDrag,
     required this.onResize,
     this.enableMoveAndResize = true,
   });
-  final Rect selectionRect;
+  final Path path;
   final bool enableMoveAndResize;
   final Function(Offset) onDrag;
   final Function(SelectorHandlePosition, Offset) onResize;
@@ -26,125 +26,124 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final width = widget.selectionRect.left +
-        widget.selectionRect.width +
-        defaultHandleSize;
+    final bounds = widget.path.getBounds();
+    final width = bounds.left + bounds.width + defaultHandleSize;
 
-    final height = widget.selectionRect.bottom +
-        widget.selectionRect.height +
-        defaultHandleSize;
+    final height = bounds.bottom + bounds.height + defaultHandleSize;
+
+    List<Widget> stackChildren = [
+      MarchingAntsSelection(path: widget.path),
+    ];
+
+    if (widget.enableMoveAndResize) {
+      stackChildren.addAll([
+        // Center handle for moving
+        _buildHandle(
+          position: bounds.center,
+          cursor: SystemMouseCursors.move,
+          onPanUpdate: (details) => widget.onDrag(
+            details.delta,
+          ),
+        ),
+
+        // Top Left
+        _buildHandle(
+          position: bounds.topLeft,
+          cursor: SystemMouseCursors.resizeUpLeft,
+          onPanUpdate: (details) => widget.onResize(
+            SelectorHandlePosition.topLeft,
+            details.delta,
+          ),
+        ),
+
+        // Top Right
+        _buildHandle(
+          position: bounds.topRight,
+          cursor: SystemMouseCursors.resizeUpRight,
+          onPanUpdate: (details) => widget.onResize(
+            SelectorHandlePosition.topRight,
+            details.delta,
+          ),
+        ),
+
+        // Bottom Left
+        _buildHandle(
+          position: bounds.bottomLeft,
+          cursor: SystemMouseCursors.resizeDownLeft,
+          onPanUpdate: (details) => widget.onResize(
+            SelectorHandlePosition.bottomLeft,
+            details.delta,
+          ),
+        ),
+
+        // Bottom right
+        _buildHandle(
+          position: bounds.bottomRight,
+          cursor: SystemMouseCursors.resizeDownRight,
+          onPanUpdate: (details) => widget.onResize(
+            SelectorHandlePosition.bottomRight,
+            details.delta,
+          ),
+        ),
+
+        // Side Left
+        _buildHandle(
+          position: Offset(
+            bounds.left,
+            bounds.center.dy,
+          ),
+          cursor: SystemMouseCursors.resizeLeft,
+          onPanUpdate: (details) => widget.onResize(
+            SelectorHandlePosition.left,
+            details.delta,
+          ),
+        ),
+
+        // Side Right
+        _buildHandle(
+          position: Offset(
+            bounds.right,
+            bounds.center.dy,
+          ),
+          cursor: SystemMouseCursors.resizeRight,
+          onPanUpdate: (details) => widget.onResize(
+            SelectorHandlePosition.right,
+            details.delta,
+          ),
+        ),
+
+        // Center Top
+        _buildHandle(
+          position: Offset(
+            bounds.center.dx,
+            bounds.top,
+          ),
+          cursor: SystemMouseCursors.resizeUp,
+          onPanUpdate: (details) => widget.onResize(
+            SelectorHandlePosition.top,
+            details.delta,
+          ),
+        ),
+
+        // Center Bottom
+        _buildHandle(
+          position: Offset(
+            bounds.center.dx,
+            bounds.bottom,
+          ),
+          cursor: SystemMouseCursors.resizeDown,
+          onPanUpdate: (details) => widget.onResize(
+            SelectorHandlePosition.bottom,
+            details.delta,
+          ),
+        ),
+      ]);
+    }
 
     return SizedBox(
       width: width < 0 ? 0 : width,
       height: height < 0 ? 0 : height,
-      child: widget.enableMoveAndResize
-          ? Stack(
-              children: [
-                MarchingAntsSelection(rect: widget.selectionRect),
-
-                // Center handle for moving
-                _buildHandle(
-                  position: widget.selectionRect.center,
-                  cursor: SystemMouseCursors.move,
-                  onPanUpdate: (details) => widget.onDrag(
-                    details.delta,
-                  ),
-                ),
-
-                // Top Left
-                _buildHandle(
-                  position: widget.selectionRect.topLeft,
-                  cursor: SystemMouseCursors.resizeUpLeft,
-                  onPanUpdate: (details) => widget.onResize(
-                    SelectorHandlePosition.topLeft,
-                    details.delta,
-                  ),
-                ),
-
-                // Top Right
-                _buildHandle(
-                  position: widget.selectionRect.topRight,
-                  cursor: SystemMouseCursors.resizeUpRight,
-                  onPanUpdate: (details) => widget.onResize(
-                    SelectorHandlePosition.topRight,
-                    details.delta,
-                  ),
-                ),
-
-                // Bottom Left
-                _buildHandle(
-                  position: widget.selectionRect.bottomLeft,
-                  cursor: SystemMouseCursors.resizeDownLeft,
-                  onPanUpdate: (details) => widget.onResize(
-                    SelectorHandlePosition.bottomLeft,
-                    details.delta,
-                  ),
-                ),
-
-                // Bottom right
-                _buildHandle(
-                  position: widget.selectionRect.bottomRight,
-                  cursor: SystemMouseCursors.resizeDownRight,
-                  onPanUpdate: (details) => widget.onResize(
-                    SelectorHandlePosition.bottomRight,
-                    details.delta,
-                  ),
-                ),
-
-                // Side Left
-                _buildHandle(
-                  position: Offset(
-                    widget.selectionRect.left,
-                    widget.selectionRect.center.dy,
-                  ),
-                  cursor: SystemMouseCursors.resizeLeft,
-                  onPanUpdate: (details) => widget.onResize(
-                    SelectorHandlePosition.left,
-                    details.delta,
-                  ),
-                ),
-
-                // Side Right
-                _buildHandle(
-                  position: Offset(
-                    widget.selectionRect.right,
-                    widget.selectionRect.center.dy,
-                  ),
-                  cursor: SystemMouseCursors.resizeRight,
-                  onPanUpdate: (details) => widget.onResize(
-                    SelectorHandlePosition.right,
-                    details.delta,
-                  ),
-                ),
-
-                // Center Top
-                _buildHandle(
-                  position: Offset(
-                    widget.selectionRect.center.dx,
-                    widget.selectionRect.top,
-                  ),
-                  cursor: SystemMouseCursors.resizeUp,
-                  onPanUpdate: (details) => widget.onResize(
-                    SelectorHandlePosition.top,
-                    details.delta,
-                  ),
-                ),
-
-                // Center Bottom
-                _buildHandle(
-                  position: Offset(
-                    widget.selectionRect.center.dx,
-                    widget.selectionRect.bottom,
-                  ),
-                  cursor: SystemMouseCursors.resizeDown,
-                  onPanUpdate: (details) => widget.onResize(
-                    SelectorHandlePosition.bottom,
-                    details.delta,
-                  ),
-                ),
-              ],
-            )
-          : MarchingAntsSelection(rect: widget.selectionRect),
+      child: Stack(children: stackChildren),
     );
   }
 
