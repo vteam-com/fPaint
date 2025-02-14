@@ -385,14 +385,16 @@ class AppModel extends ChangeNotifier {
     final ui.Image img = await getImageForCurrentSelectedLayer();
 
     // Perform flood fill at the clicked position
-    final ui.Image filledImage = await applyFloodFill(
+    final ui.Path path = await extractFloodFillPath(
       image: img,
       x: position.dx.toInt(),
       y: position.dy.toInt(),
-      newColor: this.fillColor,
       tolerance: this.tolerance,
     );
-    selectedLayer.addImage(imageToAdd: filledImage, tool: ActionType.fill);
+    selectedLayer.addRegion(
+      path: path,
+      color: this.fillColor,
+    );
     update();
   }
 

@@ -36,6 +36,7 @@ enum ActionType {
   line,
   circle,
   rectangle,
+  region,
   fill,
   eraser,
   image,

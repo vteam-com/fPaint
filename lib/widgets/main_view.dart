@@ -178,20 +178,18 @@ class MainViewState extends State<MainView> {
         return;
       }
 
-      final fillPosition = appModel.toCanvas(event.localPosition);
-
       //
       // Special case, one clik flood fill does not need to be tracked
       //
       if (appModel.selectedAction == ActionType.fill) {
-        appModel.floodFillAction(fillPosition);
+        appModel.floodFillAction(adjustedPosition);
         return;
       }
 
       appModel.layersAddActionToSelectedLayer(
         action: UserAction(
           action: appModel.selectedAction,
-          positions: [fillPosition, fillPosition],
+          positions: [adjustedPosition, adjustedPosition],
           brush: MyBrush(
             color: appModel.brushColor,
             size: appModel.brusSize,

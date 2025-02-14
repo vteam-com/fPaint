@@ -144,21 +144,3 @@ Future<ui.Image?> getImageFromClipboard() async {
   }
   return null;
 }
-
-void printPathCoordinates(ui.Path path) {
-  final ui.PathMetrics pathMetrics = path.computeMetrics();
-  // ignore: avoid_print
-  print('---------------------------------');
-  for (final metric in pathMetrics) {
-    for (double t = 0.0; t <= 1.0; t += 0.1) {
-      // Sample points along the path
-      final position = metric.getTangentForOffset(metric.length * t)?.position;
-      if (position != null) {
-        // ignore: avoid_print
-        print(
-          'path: ${position.dx.toStringAsFixed(0)}, ${position.dy.toStringAsFixed(0)}',
-        );
-      }
-    }
-  }
-}

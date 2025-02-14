@@ -8,48 +8,64 @@ Future<ui.Image> applyFloodFill({
   required final ui.Image image,
   required final int x,
   required final int y,
+  required final int tolerance,
   required final Color newColor,
+}) async {
+  final ui.Path floodFillPath = await extractFloodFillPath(
+    image: image,
+    x: x,
+    y: y,
+    tolerance: 10,
+  );
+
+  final ui.Image newImage = await getImageFromColoredPath(
+    image: image,
+    path: floodFillPath,
+    newColor: newColor,
+  );
+  return newImage;
+}
+
+// Function to extract the flood fill region as a ui.Path
+Future<ui.Path> extractFloodFillPath({
+  required final ui.Image image,
+  required final int x,
+  required final int y,
   required final int tolerance,
 }) async {
-  // ARGB
   final Uint8List? pixels = await convertImageToUint8List(image);
   if (pixels == null) {
-    return image;
+    return ui.Path();
   }
 
   final int width = image.width;
   final int height = image.height;
-  final int bytesPerPixel = 4; // ARGB format
+  final int bytesPerPixel = 4;
 
   int index(final int x, final int y) {
     return (y * width + x) * bytesPerPixel;
   }
 
-  // Check bounds
   if (x < 0 || x >= width || y < 0 || y >= height) {
-    return image;
+    return ui.Path();
   }
 
-  // Extract target color
   final int targetIndex = index(x, y);
   final int targetR = pixels[targetIndex];
   final int targetG = pixels[targetIndex + 1];
   final int targetB = pixels[targetIndex + 2];
   final int targetA = pixels[targetIndex + 3];
 
-  // Extract new color
-  // ignore: deprecated_member_use
-  final int fillR = newColor.red;
-  // ignore: deprecated_member_use
-  final int fillG = newColor.green;
-  // ignore: deprecated_member_use
-  final int fillB = newColor.blue;
-  // ignore: deprecated_member_use
-  final int fillA = newColor.alpha;
+  /// Converts the given tolerance percentage to a value out of 255.
+  ///
+  /// The tolerance is expected to be a percentage (0-100). This value is then
+  /// converted to a scale of 0-255, which is commonly used in color calculations.
+  ///
+  final double tolerance255 = 255 * (tolerance / 100);
 
-  // Stack-based flood fill with visited tracking
   final Set<String> visited = {};
   final List<Point> stack = [Point(x, y)];
+  final ui.Path path = ui.Path();
 
   while (stack.isNotEmpty) {
     final Point p = stack.removeLast();
@@ -74,13 +90,6 @@ Future<ui.Image> applyFloodFill({
     final int b = pixels[pixelIndex + 2];
     final int a = pixels[pixelIndex + 3];
 
-    /// Converts the given tolerance percentage to a value out of 255.
-    ///
-    /// The tolerance is expected to be a percentage (0-100). This value is then
-    /// converted to a scale of 0-255, which is commonly used in color calculations.
-    ///
-    final double tolerance255 = 255 * (tolerance / 100);
-
     // Skip if color doesn't match target within tolerance
     if ((r - targetR).abs() > tolerance255 ||
         (g - targetG).abs() > tolerance255 ||
@@ -90,27 +99,85 @@ Future<ui.Image> applyFloodFill({
     }
 
     // Set new color
-    pixels[pixelIndex] = fillR;
-    pixels[pixelIndex + 1] = fillG;
-    pixels[pixelIndex + 2] = fillB;
-    pixels[pixelIndex + 3] = fillA;
+    path.addRect(Rect.fromLTWH(px.toDouble(), py.toDouble(), 1, 1));
 
-    // Push neighboring pixels
     stack.add(Point(px + 1, py));
     stack.add(Point(px - 1, py));
     stack.add(Point(px, py + 1));
     stack.add(Point(px, py - 1));
   }
 
-  // Convert back to ui.Image
-  return await createImageFromBytes(
-    bytes: pixels,
-    width: width,
-    height: height,
-  );
+  return path;
+}
+
+// Function to apply color to the extracted path
+Future<ui.Image> getImageFromColoredPath({
+  required final ui.Image image,
+  required final ui.Path path,
+  required final Color newColor,
+}) async {
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder);
+
+  // Draw the original image
+  final paint = Paint();
+  canvas.drawImage(image, Offset.zero, paint);
+
+  // Apply color to the path
+  final fillPaint = Paint()
+    ..style = PaintingStyle.fill
+    ..color = newColor;
+
+  canvas.drawPath(path, fillPaint);
+
+  final ui.Picture picture = recorder.endRecording();
+
+  return await picture.toImage(image.width.toInt(), image.height.toInt());
 }
 
 class Point {
   Point(this.x, this.y);
   final int x, y;
+}
+
+void printPathCoordinates(ui.Path path) {
+  final ui.PathMetrics pathMetrics = path.computeMetrics();
+  // ignore: avoid_print
+  print('---------------------------------');
+  List<Offset> positionsSampling = [];
+
+  for (final ui.PathMetric metric in pathMetrics) {
+    for (double t = 0.0; t <= 1.0; t += 0.5) {
+      // Sample points along the path
+      final ui.Offset? position =
+          metric.getTangentForOffset(metric.length * t)?.position;
+      if (position != null) {
+        positionsSampling.add(
+          Offset(
+            position.dx.floor().toDouble(),
+            position.dy.floor().toDouble(),
+          ),
+        );
+      }
+    }
+  }
+
+  // Reduce redundant values
+  List<Offset> reducedPositions = [];
+  for (int i = 0; i < positionsSampling.length; i++) {
+    if (i == 0 ||
+        i == positionsSampling.length - 1 ||
+        (positionsSampling[i] != positionsSampling[i - 1] &&
+            positionsSampling[i] != positionsSampling[i + 1])) {
+      reducedPositions.add(positionsSampling[i]);
+    }
+  }
+  List<String> strings = [];
+
+  for (final position in reducedPositions) {
+    strings.add(
+      '[${position.dx.toStringAsFixed(0)}|${position.dy.toStringAsFixed(0)}]',
+    );
+  }
+  debugPrint(strings.join());
 }

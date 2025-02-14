@@ -135,6 +135,26 @@ class Layer {
   UserAction? get lastUserAction =>
       _actionStack.isEmpty ? null : _actionStack.last;
 
+  UserAction addRegion({
+    required ui.Path path,
+    required Color color,
+  }) {
+    final bounds = path.getBounds();
+    final UserAction newAction = UserAction(
+      action: ActionType.region,
+      path: path,
+      positions: [
+        bounds.topLeft,
+        bounds.bottomRight,
+      ],
+      fillColor: color,
+    );
+
+    _actionStack.add(newAction);
+    clearCache();
+    return newAction;
+  }
+
   UserAction addImage({
     required final ui.Image imageToAdd,
     final ui.Offset offset = Offset.zero,
@@ -289,6 +309,14 @@ class Layer {
             userAction.positions.first,
             userAction.positions.last,
             userAction.brush!,
+            userAction.fillColor!,
+          );
+          break;
+
+        case ActionType.region:
+          renderRegion(
+            canvas,
+            userAction.path!,
             userAction.fillColor!,
           );
           break;
