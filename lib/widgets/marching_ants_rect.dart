@@ -18,7 +18,7 @@ class MarchingAntsSelectionState extends State<MarchingAntsSelection>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10),
+      duration: const Duration(seconds: 1),
     )..repeat();
   }
 
