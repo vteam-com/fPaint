@@ -51,6 +51,12 @@ class Region {
   Path path = Path();
 }
 
+class Point {
+  Point(this.x, this.y);
+  int x;
+  int y;
+}
+
 final int bytesPerPixel = 4;
 
 int index(final int x, final int y, int width) {
@@ -186,12 +192,6 @@ Future<ui.Image> applyColorRegionToImage({
   final ui.Picture picture = recorder.endRecording();
 
   return await picture.toImage(image.width.toInt(), image.height.toInt());
-}
-
-class Point {
-  Point(this.x, this.y);
-  int x;
-  int y;
 }
 
 void printPathCoordinates(ui.Path path) {
