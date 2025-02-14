@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/marching_ants_rect.dart';
 
@@ -13,7 +14,7 @@ class SelectionHandleWidget extends StatefulWidget {
   final Path path;
   final bool enableMoveAndResize;
   final Function(Offset) onDrag;
-  final Function(SelectorHandlePosition, Offset) onResize;
+  final Function(NineGridHandle, Offset) onResize;
 
   @override
   State<SelectionHandleWidget> createState() => _SelectionHandleWidgetState();
@@ -51,7 +52,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
           position: bounds.topLeft,
           cursor: SystemMouseCursors.resizeUpLeft,
           onPanUpdate: (details) => widget.onResize(
-            SelectorHandlePosition.topLeft,
+            NineGridHandle.topLeft,
             details.delta,
           ),
         ),
@@ -61,7 +62,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
           position: bounds.topRight,
           cursor: SystemMouseCursors.resizeUpRight,
           onPanUpdate: (details) => widget.onResize(
-            SelectorHandlePosition.topRight,
+            NineGridHandle.topRight,
             details.delta,
           ),
         ),
@@ -71,7 +72,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
           position: bounds.bottomLeft,
           cursor: SystemMouseCursors.resizeDownLeft,
           onPanUpdate: (details) => widget.onResize(
-            SelectorHandlePosition.bottomLeft,
+            NineGridHandle.bottomLeft,
             details.delta,
           ),
         ),
@@ -81,7 +82,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
           position: bounds.bottomRight,
           cursor: SystemMouseCursors.resizeDownRight,
           onPanUpdate: (details) => widget.onResize(
-            SelectorHandlePosition.bottomRight,
+            NineGridHandle.bottomRight,
             details.delta,
           ),
         ),
@@ -94,7 +95,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
           ),
           cursor: SystemMouseCursors.resizeLeft,
           onPanUpdate: (details) => widget.onResize(
-            SelectorHandlePosition.left,
+            NineGridHandle.left,
             details.delta,
           ),
         ),
@@ -107,7 +108,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
           ),
           cursor: SystemMouseCursors.resizeRight,
           onPanUpdate: (details) => widget.onResize(
-            SelectorHandlePosition.right,
+            NineGridHandle.right,
             details.delta,
           ),
         ),
@@ -120,7 +121,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
           ),
           cursor: SystemMouseCursors.resizeUp,
           onPanUpdate: (details) => widget.onResize(
-            SelectorHandlePosition.top,
+            NineGridHandle.top,
             details.delta,
           ),
         ),
@@ -133,7 +134,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
           ),
           cursor: SystemMouseCursors.resizeDown,
           onPanUpdate: (details) => widget.onResize(
-            SelectorHandlePosition.bottom,
+            NineGridHandle.bottom,
             details.delta,
           ),
         ),

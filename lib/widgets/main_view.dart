@@ -1,8 +1,8 @@
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
@@ -114,22 +114,15 @@ class MainViewState extends State<MainView> {
               //
               if (appModel.selector.isVisible)
                 SelectionHandleWidget(
-                  path: appModel.pathFromSelectorMode(
-                    appModel.fromCanvas(
-                      appModel.selector.boundingRect.topLeft,
-                    ),
-                    appModel.fromCanvas(
-                      appModel.selector.boundingRect.bottomRight,
-                    ),
-                  ),
+                  path: appModel.getPathAdjustToCanvasSizeAndPosition(),
                   enableMoveAndResize:
                       appModel.selectedAction == ActionType.selector,
                   onDrag: (Offset offset) {
                     appModel.selector.translate(offset);
                     appModel.update();
                   },
-                  onResize: (SelectorHandlePosition handle, Offset offset) {
-                    appModel.selector.resizeFromSides(handle, offset);
+                  onResize: (NineGridHandle handle, Offset offset) {
+                    appModel.selector.nindeGridResize(handle, offset);
                     appModel.update();
                   },
                 ),

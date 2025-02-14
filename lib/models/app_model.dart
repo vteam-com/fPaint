@@ -426,7 +426,7 @@ class AppModel extends ChangeNotifier {
 
   void selectorMove(final Offset position) {
     if (selector.mode == SelectorMode.wand) {
-      // Ignore since the PointerDown already did the job of drawing the shape of the selector
+      // Ignore since the PointerDown it already did the job of drawing the shape of the selector
     } else {
       selector.addP2(position);
       update();
@@ -438,31 +438,11 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
-  Path pathFromSelectorMode(
-    final Offset viewPortPoint1,
-    final Offset viewPortPoint2,
-  ) {
-    switch (this.selector.mode) {
-      case SelectorMode.rectangle:
-        return Path()..addRect(Rect.fromPoints(viewPortPoint1, viewPortPoint2));
-
-      case SelectorMode.circle:
-        return Path()..addOval(Rect.fromPoints(viewPortPoint1, viewPortPoint2));
-
-      case SelectorMode.wand:
-        final Rect bounds = selector.path.getBounds();
-
-        // Step 2: Calculate the offset
-        final Offset offset = Offset(
-          min(viewPortPoint1.dx, viewPortPoint2.dx) - bounds.left,
-          min(viewPortPoint1.dy, viewPortPoint2.dy) - bounds.top,
-        );
-
-        // Step 3: Shift the path to align with p1 and p2
-        var alignedPath = selector.path.shift(offset);
-
-        return alignedPath;
-    }
+  Path getPathAdjustToCanvasSizeAndPosition() {
+    final Matrix4 matrix = Matrix4.identity()
+      ..translate(offset.dx, offset.dy)
+      ..scale(canvas.scale);
+    return selector.path.transform(matrix.storage);
   }
 
   //-------------------------

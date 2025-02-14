@@ -2,6 +2,7 @@ digraph "" {
   graph [style=rounded fontname="Arial Black" fontsize=13 penwidth=2.6];
   node [shape=rect style="filled,rounded" fontname=Arial fontsize=15 fillcolor=Lavender penwidth=1.3];
   edge [penwidth=1.3];
+  "/test/draw_path_helper_test.dart" [label="draw_path_helper_test"];
   "/test/paint_model_test.dart" [label="paint_model_test"];
   "/test/panels/tools/flood_fill_test.dart" [label="flood_fill_test"];
   "/test/panels/image_test.dart" [label="image_test"];
@@ -45,6 +46,7 @@ digraph "" {
   "/lib/main_screen.dart" [label="main_screen"];
   "/lib/helpers/image_helper.dart" [label="image_helper"];
   "/lib/helpers/list_helper.dart" [label="list_helper"];
+  "/lib/helpers/draw_path_helper.dart" [label="draw_path_helper"];
   "/lib/helpers/color_helper.dart" [label="color_helper"];
   "/lib/widgets/color_picker_dialog.dart" [label="color_picker_dialog"];
   "/lib/widgets/svg_icon.dart" [label="svg_icon"];
@@ -67,6 +69,7 @@ digraph "" {
     label="fpaint";
     subgraph "cluster~/test" {
       label="test";
+      "/test/draw_path_helper_test.dart";
       "/test/paint_model_test.dart";
       "/test/widget_test.dart";
       "/test/file_xcf_test.dart";
@@ -139,6 +142,7 @@ digraph "" {
         label="helpers";
         "/lib/helpers/image_helper.dart";
         "/lib/helpers/list_helper.dart";
+        "/lib/helpers/draw_path_helper.dart";
         "/lib/helpers/color_helper.dart";
       }
       subgraph "cluster~/lib/widgets" {
@@ -163,6 +167,7 @@ digraph "" {
       }
     }
   }
+  "/test/draw_path_helper_test.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/test/paint_model_test.dart" -> "/lib/models/app_model.dart";
   "/test/panels/tools/flood_fill_test.dart" -> "/lib/helpers/image_helper.dart";
   "/test/panels/tools/flood_fill_test.dart" -> "/lib/panels/tools/flood_fill.dart";
@@ -214,6 +219,8 @@ digraph "" {
   "/lib/models/layers.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart";
   "/lib/models/layers.dart" -> "/lib/models/layer.dart" [style=dashed];
+  "/lib/models/selector_model.dart" -> "/lib/helpers/draw_path_helper.dart";
+  "/lib/models/selector_model.dart" -> "/lib/helpers/draw_path_helper.dart" [style=dashed];
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart" [style=dashed];
   "/lib/models/render_helper.dart" -> "/lib/widgets/brush_style_picker.dart";
@@ -272,10 +279,11 @@ digraph "" {
   "/lib/widgets/color_selector.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/color_picker_dialog.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/transparent_background.dart";
+  "/lib/widgets/main_view.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/lib/widgets/main_view.dart" -> "/lib/models/app_model.dart";
-  "/lib/widgets/main_view.dart" -> "/lib/models/selector_model.dart";
   "/lib/widgets/main_view.dart" -> "/lib/panels/canvas_panel.dart";
   "/lib/widgets/main_view.dart" -> "/lib/widgets/selector_widget.dart";
+  "/lib/widgets/selector_widget.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/lib/widgets/selector_widget.dart" -> "/lib/models/selector_model.dart";
   "/lib/widgets/selector_widget.dart" -> "/lib/widgets/marching_ants_rect.dart";
 }
