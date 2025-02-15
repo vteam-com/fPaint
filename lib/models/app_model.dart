@@ -25,7 +25,7 @@ export 'package:fpaint/models/layers.dart';
 ///
 /// The `selectedTool` property represents the currently selected tool, which can be one of the
 /// `Tools` enum values. The `brushColor` and `fillColor` properties represent the current
-/// stroke and fill colors, respectively.
+/// brush and fill colors, respectively.
 ///
 /// The `canvasReset` method allows resizing the canvas and scaling the layers accordingly.
 /// The `setCanvasScale` method allows setting the scale of the canvas.
@@ -339,18 +339,18 @@ class AppModel extends ChangeNotifier {
     required final Offset end,
     ActionType? type,
     Color? colorFill,
-    Color? colorStroke,
+    Color? colorBrush,
   }) {
     if (start != null &&
         type != null &&
         colorFill != null &&
-        colorStroke != null) {
+        colorBrush != null) {
       selectedLayer.addUserAction(
         UserAction(
           positions: [start, end],
           action: type,
           brush: MyBrush(
-            color: colorStroke,
+            color: colorBrush,
             size: this.brusSize,
           ),
           fillColor: colorFill,

@@ -282,8 +282,8 @@ class ToolsPanel extends StatelessWidget {
       );
     }
 
-    // Stroke Weight
-    if (selectedTool.isSupported(ActionOptions.strokeSize)) {
+    // Brush Size
+    if (selectedTool.isSupported(ActionOptions.brushSize)) {
       widgets.add(
         ToolAttributeWidget(
           minimal: minimal,
@@ -344,7 +344,7 @@ class ToolsPanel extends StatelessWidget {
     }
 
     // Brush color
-    if (selectedTool.isSupported(ActionOptions.colorOutline)) {
+    if (selectedTool.isSupported(ActionOptions.brushColor)) {
       widgets.add(
         ToolAttributeWidget(
           minimal: minimal,

@@ -46,7 +46,7 @@ void main() {
         end: const Offset(10, 10),
         type: ActionType.circle,
         colorFill: Colors.red,
-        colorStroke: Colors.yellow,
+        colorBrush: Colors.yellow,
       );
       expect(
         paintModel.selectedLayer.count,
@@ -92,7 +92,7 @@ void main() {
         end: const Offset(10, 10),
         type: ActionType.brush,
         colorFill: Colors.green,
-        colorStroke: Colors.black,
+        colorBrush: Colors.black,
       );
       expect(paintModel.selectedLayer.count, 2);
       paintModel.layersUndo();
@@ -111,14 +111,14 @@ void main() {
         end: const Offset(10, 10),
         type: ActionType.brush,
         colorFill: Colors.blue,
-        colorStroke: Colors.black,
+        colorBrush: Colors.black,
       );
       paintModel.updateAction(
         start: const Offset(20, 20),
         end: const Offset(30, 30),
         type: ActionType.circle,
         colorFill: Colors.red,
-        colorStroke: Colors.black,
+        colorBrush: Colors.black,
       );
       expect(paintModel.selectedLayer.count, 3);
       paintModel.layersUndo();

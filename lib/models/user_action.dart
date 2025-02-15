@@ -54,9 +54,9 @@ enum ActionType {
 }
 
 enum ActionOptions {
-  strokeSize,
+  brushSize,
   brushStyle,
-  colorOutline,
+  brushColor,
   colorFill,
   tolerance,
   topColors,
@@ -65,33 +65,33 @@ enum ActionOptions {
 
 final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = {
   ActionType.pencil: {
-    ActionOptions.strokeSize,
-    ActionOptions.colorOutline,
+    ActionOptions.brushSize,
+    ActionOptions.brushColor,
     ActionOptions.topColors,
   },
   ActionType.brush: {
-    ActionOptions.strokeSize,
+    ActionOptions.brushSize,
     ActionOptions.brushStyle,
-    ActionOptions.colorOutline,
+    ActionOptions.brushColor,
     ActionOptions.topColors,
   },
   ActionType.line: {
-    ActionOptions.colorOutline,
-    ActionOptions.strokeSize,
+    ActionOptions.brushColor,
+    ActionOptions.brushSize,
     ActionOptions.brushStyle,
     ActionOptions.topColors,
   },
   ActionType.circle: {
-    ActionOptions.strokeSize,
+    ActionOptions.brushSize,
     ActionOptions.brushStyle,
-    ActionOptions.colorOutline,
+    ActionOptions.brushColor,
     ActionOptions.colorFill,
     ActionOptions.topColors,
   },
   ActionType.rectangle: {
-    ActionOptions.strokeSize,
+    ActionOptions.brushSize,
     ActionOptions.brushStyle,
-    ActionOptions.colorOutline,
+    ActionOptions.brushColor,
     ActionOptions.colorFill,
     ActionOptions.topColors,
   },
@@ -101,7 +101,7 @@ final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = {
     ActionOptions.topColors,
   },
   ActionType.eraser: {
-    ActionOptions.strokeSize,
+    ActionOptions.brushSize,
   },
   ActionType.cut: {
     // nothing to support yet
