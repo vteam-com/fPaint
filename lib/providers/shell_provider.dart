@@ -8,12 +8,12 @@ enum ShellMode {
   full,
 }
 
-class ShellModel extends ChangeNotifier {
-  static ShellModel of(
+class ShellProvider extends ChangeNotifier {
+  static ShellProvider of(
     final BuildContext context, {
     final bool listen = false,
   }) =>
-      Provider.of<ShellModel>(context, listen: listen);
+      Provider.of<ShellProvider>(context, listen: listen);
 
   //=============================================================================
   /// Notifies all listeners that the model has been updated.

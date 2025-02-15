@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/shell_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 
 /// Builds a column of floating action buttons for the paint application,
 /// including buttons for undo, redo, zoom in, zoom out,
 ///  and a button that displays the current zoom level and canvas size.
 Widget floatingActionButtons(
-  final ShellModel shellModel,
-  final AppModel appModel,
+  final ShellProvider shellModel,
+  final AppProvider appModel,
 ) {
   final undoButton = FloatingActionButton(
     backgroundColor: Colors.grey.shade600,

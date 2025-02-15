@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/helpers/color_helper.dart';
-import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/shell_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/top_colors.dart';
@@ -43,8 +43,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final appModel = AppModel.of(context);
-    final shellModel = ShellModel.of(context);
+    final appModel = AppProvider.of(context);
+    final shellModel = ShellProvider.of(context);
 
     // ignore: deprecated_member_use
     return WillPopScope(
@@ -81,7 +81,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     );
   }
 
-  Widget _buildContent(final AppModel appModel) {
+  Widget _buildContent(final AppProvider appModel) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(

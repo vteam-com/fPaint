@@ -5,11 +5,11 @@ import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/helpers/list_helper.dart';
-import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/shell_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:xml/xml.dart';
 
-/// Reads an ORA file and updates the provided [AppModel] with its contents.
+/// Reads an ORA file and updates the provided [AppProvider] with its contents.
 ///
 /// This function asynchronously reads the ORA file located at the given [filePath]
 /// and updates the [shellModel] with the data extracted from the file.
@@ -20,8 +20,8 @@ import 'package:xml/xml.dart';
 ///
 /// - Returns: A [Future] that completes when the file has been read and the model updated.
 Future<void> readOraFile(
-  final ShellModel shellModel,
-  final AppModel appModel,
+  final ShellProvider shellModel,
+  final AppProvider appModel,
   String filePath,
 ) async {
   try {
@@ -46,8 +46,8 @@ Future<void> readOraFile(
 
 /// Read the file from  bytes
 Future<void> readOraFileFromBytes(
-  ShellModel shellModel,
-  AppModel appModel,
+  ShellProvider shellModel,
+  AppProvider appModel,
   Uint8List bytes,
 ) async {
   // Extract the ZIP contents
@@ -146,7 +146,7 @@ ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
 ///
 Future<void> addImageToLayer({
   required final Archive archive,
-  required final AppModel appModel,
+  required final AppProvider appModel,
   required final Layer layer,
   required final String imageName,
   required final ui.Offset offset,
@@ -193,7 +193,7 @@ Future<ui.Image> decodeImage(List<int> bytes) async {
 
 ///
 Future<void> saveToORA({
-  required final AppModel appModel,
+  required final AppProvider appModel,
   required final String filePath,
 }) async {
   List<int> encodedData = await createOraAchive(appModel);
@@ -202,7 +202,7 @@ Future<void> saveToORA({
 }
 
 ///
-Future<List<int>> createOraAchive(AppModel appModel) async {
+Future<List<int>> createOraAchive(AppProvider appModel) async {
   final Archive archive = Archive();
   final XmlBuilder builder = XmlBuilder();
 

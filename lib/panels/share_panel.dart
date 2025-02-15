@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
-import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 Widget textAction(final String fileName) {
@@ -17,7 +17,7 @@ Widget textAction(final String fileName) {
 }
 
 void sharePanel(final BuildContext context) {
-  final AppModel appModel = AppModel.of(context);
+  final AppProvider appModel = AppProvider.of(context);
   showModalBottomSheet(
     context: context,
     builder: (final BuildContext context) {
@@ -71,7 +71,7 @@ void _onExportToClipboard(final BuildContext context) async {
   final clipboard = SystemClipboard.instance;
   if (clipboard != null) {
     final Uint8List image =
-        await capturePainterToImageBytes(AppModel.of(context));
+        await capturePainterToImageBytes(AppProvider.of(context));
     final DataWriterItem item = DataWriterItem(suggestedName: 'fPaint.png');
     item.add(Formats.png(image));
     await clipboard.write([item]);
@@ -80,7 +80,7 @@ void _onExportToClipboard(final BuildContext context) async {
   }
 }
 
-Future<Uint8List> capturePainterToImageBytes(final AppModel appModel) async {
+Future<Uint8List> capturePainterToImageBytes(final AppProvider appModel) async {
   final PictureRecorder recorder = PictureRecorder();
   final Canvas canvas = Canvas(recorder);
 

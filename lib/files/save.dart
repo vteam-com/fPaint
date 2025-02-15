@@ -1,11 +1,11 @@
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
-import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/shell_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 
 Future<void> saveFile(
-  final ShellModel shellModel,
-  final AppModel appModel,
+  final ShellProvider shellModel,
+  final AppProvider appModel,
 ) async {
   final String fileName = shellModel.loadedFileName;
   final String extension = fileName.split('.').last.toLowerCase();

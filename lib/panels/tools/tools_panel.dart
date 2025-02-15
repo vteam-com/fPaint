@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
 import 'package:fpaint/panels/tools/tool_selector.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
@@ -26,7 +26,7 @@ class ToolsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppModel appModel = AppModel.of(context, listen: true);
+    AppProvider appModel = AppProvider.of(context, listen: true);
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
@@ -58,7 +58,7 @@ class ToolsPanel extends StatelessWidget {
 
   List<Widget> getListOfTools(
     BuildContext context,
-    final AppModel appModel,
+    final AppProvider appModel,
   ) {
     final ActionType selectedTool = appModel.selectedAction;
 
@@ -189,7 +189,7 @@ class ToolsPanel extends StatelessWidget {
     required BuildContext context,
   }) {
     List<Widget> widgets = [];
-    final appModel = AppModel.of(context, listen: true);
+    final appModel = AppProvider.of(context, listen: true);
     final selectedTool = appModel.selectedAction;
     final String title = appModel.selectedAction == ActionType.pencil
         ? 'Pencil Size'
