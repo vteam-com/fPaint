@@ -23,11 +23,14 @@ jobs:
       - name: Build Windows App
         run: flutter build windows
 
+      - name: List build directory
+        run: dir /s build
+
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: flutter-windows-app
-          path: build\windows\runner\x64\Release\**
+          path: build/windows/runner/x64/Release/**
 
   build-linux:
     name: Build Linux
