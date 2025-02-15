@@ -76,22 +76,43 @@ class MainViewState extends State<MainView> {
           //
           // Pointer DOWN
           //
-          onPointerDown: (final PointerDownEvent event) =>
-              _handlePointerStart(appModel, event),
+          onPointerDown: (final PointerDownEvent event) {
+            if (event.kind == PointerDeviceKind.touch) {
+              // ignore touch when drawing
+            } else {
+              _handlePointerStart(appModel, event);
+            }
+          },
 
           //
           // Pointer MOVE
           //
-          onPointerMove: (final PointerEvent event) =>
-              _handlePointerMove(appModel, event),
+          onPointerMove: (final PointerEvent event) {
+            if (event.kind == PointerDeviceKind.touch) {
+              // ignore touch when drawing
+            } else {
+              _handlePointerMove(appModel, event);
+            }
+          },
 
           //
           // Pointer UP/CANCEL/END
           //
-          onPointerUp: (PointerUpEvent event) =>
-              _handPointerEnd(appModel, event),
-          onPointerCancel: (final PointerCancelEvent event) =>
-              _handPointerEnd(appModel, event),
+          onPointerUp: (PointerUpEvent event) {
+            if (event.kind == PointerDeviceKind.touch) {
+              // ignore touch when drawing
+            } else {
+              _handPointerEnd(appModel, event);
+            }
+          },
+
+          onPointerCancel: (final PointerCancelEvent event) {
+            if (event.kind == PointerDeviceKind.touch) {
+              // ignore touch when drawing
+            } else {
+              _handPointerEnd(appModel, event);
+            }
+          },
 
           //
           // Canvas and Selector
