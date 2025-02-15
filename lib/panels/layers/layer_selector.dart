@@ -243,6 +243,12 @@ class LayerSelector extends StatelessWidget {
   Widget _buildLayerName(final AppModel appModel) {
     return Row(
       children: [
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          itemBuilder: (context) => _buildPopupMenuItems(AppModel.of(context)),
+          onSelected: (value) =>
+              _handlePopupMenuSelection(value, AppModel.of(context)),
+        ),
         Expanded(
           child: GestureDetector(
             onLongPress: () async {
@@ -258,11 +264,15 @@ class LayerSelector extends StatelessWidget {
             ),
           ),
         ),
-        PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert),
-          itemBuilder: (context) => _buildPopupMenuItems(AppModel.of(context)),
-          onSelected: (value) =>
-              _handlePopupMenuSelection(value, AppModel.of(context)),
+        IconButton(
+          tooltip: 'Hide/Show this layer',
+          icon: Icon(
+            layer.isVisible ? Icons.visibility : Icons.visibility_off,
+            color: layer.isVisible
+                ? Colors.blue
+                : const ui.Color.fromARGB(255, 135, 9, 9),
+          ),
+          onPressed: () => appModel.layersToggleVisibility(layer),
         ),
       ],
     );
@@ -345,19 +355,6 @@ class LayerSelector extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(
-          width: 20,
-        ),
-        IconButton(
-          tooltip: 'Hide/Show this layer',
-          icon: Icon(
-            layer.isVisible ? Icons.visibility : Icons.visibility_off,
-            color: layer.isVisible
-                ? Colors.blue
-                : const ui.Color.fromARGB(255, 135, 9, 9),
-          ),
-          onPressed: () => appModel.layersToggleVisibility(layer),
-        ),
       ],
     );
   }
@@ -408,7 +405,7 @@ class LayerSelector extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: [
           _buildThumbnailPreview(appModel, layer),
-          if (!layer.isVisible)
+          if (!appModel.isSidePanelExpanded && !layer.isVisible)
             const Icon(Icons.visibility_off, color: Colors.red),
         ],
       ),
