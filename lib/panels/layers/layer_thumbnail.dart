@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/image_painter.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
@@ -15,7 +15,7 @@ class LayerThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appModel = AppModel.of(context);
+    final appModel = AppProvider.of(context);
     const int patternSize = 4;
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {

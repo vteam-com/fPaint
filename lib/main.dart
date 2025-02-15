@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/main_screen.dart';
-import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/shell_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/provider.dart';
 
@@ -19,8 +19,8 @@ void main() {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-  final shellModel = ShellModel();
-  final appModel = AppModel();
+  final shellModel = ShellProvider();
+  final appModel = AppProvider();
   @override
   Widget build(BuildContext context) {
     return MultiProvider(

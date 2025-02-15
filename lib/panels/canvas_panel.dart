@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 class CanvasPanel extends StatelessWidget {
   const CanvasPanel({super.key, required this.appModel});
-  final AppModel appModel;
+  final AppProvider appModel;
 
   @override
   Widget build(final BuildContext context) {
@@ -20,7 +20,7 @@ class CanvasPanelPainter extends CustomPainter {
     this._appModel, {
     this.includeTransparentBackground = false,
   });
-  final AppModel _appModel;
+  final AppProvider _appModel;
   final bool includeTransparentBackground;
 
   @override

@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
-import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/share_panel.dart';
+import 'package:fpaint/providers/app_provider.dart';
 
 /// Exports the current painter content as a PNG image file.
 ///
@@ -25,7 +25,7 @@ import 'package:fpaint/panels/share_panel.dart';
 /// Returns:
 /// - A `Future<void>` that completes when the image has been successfully saved.
 Future<void> onExportAsPng(
-  final AppModel appModel, [
+  final AppProvider appModel, [
   final fileName = 'image.png',
 ]) async {
   final String? filePath = await FilePicker.platform.saveFile(
@@ -42,7 +42,7 @@ Future<void> onExportAsPng(
 }
 
 Future<void> saveAsPng(
-  final AppModel appModel,
+  final AppProvider appModel,
   final String filePath,
 ) async {
   // Capture the image bytes
@@ -68,7 +68,7 @@ Future<void> saveAsPng(
 /// Returns:
 /// - A `Future<void>` that completes when the image has been successfully saved.
 Future<void> onExportAsJpeg(
-  final AppModel appModel, [
+  final AppProvider appModel, [
   final fileName = 'image.jpg',
 ]) async {
   final String? filePath = await FilePicker.platform.saveFile(
@@ -81,7 +81,7 @@ Future<void> onExportAsJpeg(
 }
 
 Future<void> saveAsJpeg(
-  final AppModel appModel,
+  final AppProvider appModel,
   final String? filePath,
 ) async {
   if (filePath != null) {
@@ -104,7 +104,7 @@ Future<void> saveAsJpeg(
 ///
 /// Throws an [Exception] if the export process fails.
 Future<void> onExportAsOra(
-  final AppModel appModel, [
+  final AppProvider appModel, [
   final fileName = 'image.jpg',
 ]) async {
   final String? filePath = await FilePicker.platform.saveFile(
@@ -117,7 +117,7 @@ Future<void> onExportAsOra(
 }
 
 Future<void> saveAsOra(
-  final AppModel appModel,
+  final AppProvider appModel,
   final String? filePath,
 ) async {
   if (filePath != null) {

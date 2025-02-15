@@ -4,11 +4,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_ora.dart';
-import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/shell_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 
 Future<void> onFileNew(final BuildContext context) async {
-  final AppModel appModel = AppModel.of(context);
+  final AppProvider appModel = AppProvider.of(context);
 
   if (appModel.layers.hasChanged &&
       await confirmDiscardCurrentWork(context) == false) {
@@ -87,8 +87,8 @@ Future<void> onFileNew(final BuildContext context) async {
 /// Returns:
 /// - A `Future<void>` indicating the completion of the file open operation.
 Future<void> onFileOpen(final BuildContext context) async {
-  final ShellModel shellModel = ShellModel.of(context);
-  final AppModel appModel = AppModel.of(context);
+  final ShellProvider shellModel = ShellProvider.of(context);
+  final AppProvider appModel = AppProvider.of(context);
 
   if (appModel.layers.hasChanged &&
       await confirmDiscardCurrentWork(context) == false) {
@@ -155,7 +155,7 @@ bool isFileExtensionSupported(String extension) {
 }
 
 Future<void> _readImageFile(
-  AppModel appModel,
+  AppProvider appModel,
   Future<Uint8List> bytesFuture,
 ) async {
   final image = await decodeImageFromList(await bytesFuture);
@@ -166,14 +166,14 @@ Future<void> _readImageFile(
 }
 
 Future<void> readImageFilePath(
-  AppModel appModel,
+  AppProvider appModel,
   String path,
 ) async {
   await _readImageFile(appModel, File(path).readAsBytes());
 }
 
 Future<void> readImageFileFromBytes(
-  AppModel appModel,
+  AppProvider appModel,
   Uint8List bytes,
 ) async {
   await _readImageFile(appModel, Future.value(bytes));

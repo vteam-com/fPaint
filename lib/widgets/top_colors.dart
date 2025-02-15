@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
-import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 /// Displays a row of color previews at the top of the screen, allowing the user to select a color for the current tool.
 ///
 /// The [TopColors] widget displays a row of [ColorPreview] widgets, each representing a [ColorUsage] in the provided [colorUsages] list.
-/// When a color preview is tapped, the [AppModel]'s [fillColor] or [brushColor] is updated based on the current selected tool.
+/// When a color preview is tapped, the [AppProvider]'s [fillColor] or [brushColor] is updated based on the current selected tool.
 /// The widget also includes a refresh button to trigger the [onRefresh] callback.
 ///
 /// Example usage:

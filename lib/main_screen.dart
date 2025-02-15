@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/floating_buttons.dart';
-import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/panels/side_panel.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
-import 'models/app_model.dart';
+import 'providers/app_provider.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -16,8 +16,8 @@ class MainScreen extends StatelessWidget {
   Widget build(final BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-    final AppModel appModel = AppModel.of(context, listen: true);
-    final ShellModel shellModel = ShellModel.of(context, listen: true);
+    final AppProvider appModel = AppProvider.of(context, listen: true);
+    final ShellProvider shellModel = ShellProvider.of(context, listen: true);
     final shellMode = shellModel.shellMode;
 
     shellModel.deviceSizeSmall = MediaQuery.of(context).size.width < 600;
@@ -46,7 +46,7 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMainContent(final ShellModel shellModel) {
+  Widget _buildMainContent(final ShellProvider shellModel) {
     if (shellModel.shellMode == ShellMode.hidden) {
       return const MainView();
     }
@@ -57,7 +57,7 @@ class MainScreen extends StatelessWidget {
     return _buildMidToLargeDevices(shellModel);
   }
 
-  Widget _buildMobilePhoneLayout(final ShellModel shellModel) {
+  Widget _buildMobilePhoneLayout(final ShellProvider shellModel) {
     if (shellModel.showMenu) {
       return const SidePanel();
     } else {
@@ -65,7 +65,7 @@ class MainScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildMidToLargeDevices(final ShellModel shellModel) {
+  Widget _buildMidToLargeDevices(final ShellProvider shellModel) {
     return MultiSplitView(
       key: Key('key_side_panel_size_${shellModel.isSidePanelExpanded}'),
       axis: Axis.horizontal,

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
 
 void main() {
   group('PaintModel Tests', () {
-    late AppModel paintModel;
+    late AppProvider paintModel;
 
     setUp(() {
-      paintModel = AppModel();
+      paintModel = AppProvider();
     });
 
     test('initial state should have one empty layer', () {

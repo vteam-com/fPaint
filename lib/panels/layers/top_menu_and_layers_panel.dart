@@ -2,22 +2,22 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
-import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/models/localized_strings.dart';
 import 'package:fpaint/models/menu_model.dart';
-import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/panels/about.dart';
 import 'package:fpaint/panels/canvas_settings.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 
 class TopMenuAndLayersPanel extends StatelessWidget {
   const TopMenuAndLayersPanel({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final shellModel = ShellModel.of(context, listen: true);
-    final appModel = AppModel.of(context, listen: true);
+    final shellModel = ShellProvider.of(context, listen: true);
+    final appModel = AppProvider.of(context, listen: true);
 
     return Column(
       children: [
@@ -126,7 +126,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
   Widget mainMenu(
     final BuildContext context,
   ) {
-    final shellModel = ShellModel.of(context);
+    final shellModel = ShellProvider.of(context);
 
     return PopupMenuButton<int>(
       tooltip: strings[StringId.menuTooltip],
@@ -172,8 +172,8 @@ class TopMenuAndLayersPanel extends StatelessWidget {
     final BuildContext context,
     int result,
   ) {
-    final ShellModel shellModel = ShellModel.of(context);
-    final AppModel appModel = AppModel.of(context);
+    final ShellProvider shellModel = ShellProvider.of(context);
+    final AppProvider appModel = AppProvider.of(context);
 
     switch (result) {
       case MenuIds.newFile:

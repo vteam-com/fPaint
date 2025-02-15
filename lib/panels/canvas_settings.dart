@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 
 final TextEditingController widthController = TextEditingController();
@@ -11,7 +11,7 @@ void showCanvasSettings(final BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (final BuildContext context) {
-      AppModel appModel = AppModel.of(context, listen: true);
+      AppProvider appModel = AppProvider.of(context, listen: true);
       if (initOnce) {
         widthController.text = appModel.canvas.size.width.toInt().toString();
         heightController.text = appModel.canvas.size.height.toInt().toString();

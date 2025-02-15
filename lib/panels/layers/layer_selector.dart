@@ -1,9 +1,10 @@
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/container_slider.dart';
 import 'package:fpaint/widgets/truncated_text.dart';
 
@@ -25,8 +26,8 @@ class LayerSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shellModel = ShellModel.of(context);
-    final appModel = AppModel.of(context);
+    final shellModel = ShellProvider.of(context);
+    final appModel = AppProvider.of(context);
     return Container(
       margin: EdgeInsets.all(minimal ? 2 : 4),
       padding: EdgeInsets.all(minimal ? 2 : 8),
@@ -58,8 +59,8 @@ class LayerSelector extends StatelessWidget {
 
   Widget _buildForSmallSurface(
     BuildContext context,
-    ShellModel shellModel,
-    AppModel appModel,
+    ShellProvider shellModel,
+    AppProvider appModel,
     Layer layer,
     bool allowRemoveLayer,
   ) {
@@ -88,8 +89,8 @@ class LayerSelector extends StatelessWidget {
 
   Widget _buildForLargeSurface(
     BuildContext context,
-    ShellModel shellModel,
-    AppModel appModel,
+    ShellProvider shellModel,
+    AppProvider appModel,
     Layer layer,
     bool allowRemoveLayer,
   ) {
@@ -109,7 +110,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  List<PopupMenuItem<String>> _buildPopupMenuItems(AppModel appModel) {
+  List<PopupMenuItem<String>> _buildPopupMenuItems(AppProvider appModel) {
     return [
       const PopupMenuItem(
         value: 'rename',
@@ -213,7 +214,7 @@ class LayerSelector extends StatelessWidget {
 
   Future<void> _handlePopupMenuSelection(
     String value,
-    AppModel appModel,
+    AppProvider appModel,
   ) async {
     switch (value) {
       case 'rename':
@@ -256,14 +257,15 @@ class LayerSelector extends StatelessWidget {
     }
   }
 
-  Widget _buildLayerName(final AppModel appModel) {
+  Widget _buildLayerName(final AppProvider appModel) {
     return Row(
       children: [
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
-          itemBuilder: (context) => _buildPopupMenuItems(AppModel.of(context)),
+          itemBuilder: (context) =>
+              _buildPopupMenuItems(AppProvider.of(context)),
           onSelected: (value) =>
-              _handlePopupMenuSelection(value, AppModel.of(context)),
+              _handlePopupMenuSelection(value, AppProvider.of(context)),
         ),
         Expanded(
           child: GestureDetector(
@@ -294,7 +296,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  Future<void> renameLayer(AppModel appModel) async {
+  Future<void> renameLayer(AppProvider appModel) async {
     final TextEditingController controller =
         TextEditingController(text: layer.name);
 
@@ -332,7 +334,7 @@ class LayerSelector extends StatelessWidget {
 
   Widget _buildLayerControls(
     BuildContext context,
-    AppModel appModel,
+    AppProvider appModel,
     Layer layer,
     bool allowRemoveLayer,
   ) {
@@ -376,7 +378,7 @@ class LayerSelector extends StatelessWidget {
   }
 
   // Method to insert a new layer above the currently selected one
-  void _onAddLayer(final AppModel appModel) {
+  void _onAddLayer(final AppProvider appModel) {
     final int currentIndex = appModel.selectedLayerIndex;
     final Layer newLayer = appModel.layerInsertAt(currentIndex);
     appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
@@ -384,7 +386,7 @@ class LayerSelector extends StatelessWidget {
 
   // Method to flatten all layers
   void _onFlattenLayers(
-    final AppModel appModel,
+    final AppProvider appModel,
     final int layerIndexToMerge,
     final int layerIndexToMergIn,
   ) {
@@ -401,8 +403,8 @@ class LayerSelector extends StatelessWidget {
   }
 
   Widget _buildThumbnailPreviewAndVisibility(
-    final ShellModel shellModel,
-    final AppModel appModel,
+    final ShellProvider shellModel,
+    final AppProvider appModel,
     final Layer layer,
   ) {
     return GestureDetector(
@@ -429,7 +431,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  Widget _buildThumbnailPreview(final AppModel appModel, final Layer layer) {
+  Widget _buildThumbnailPreview(final AppProvider appModel, final Layer layer) {
     return SizedBox(
       height: 60,
       width: 60,

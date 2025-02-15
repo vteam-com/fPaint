@@ -42,17 +42,17 @@ export 'package:fpaint/models/layers.dart';
 /// the `topColors` property accordingly.
 ///
 /// The `update` method notifies all listeners that the model has been updated.
-class AppModel extends ChangeNotifier {
-  /// Gets the [AppModel] instance from the provided [BuildContext].
+class AppProvider extends ChangeNotifier {
+  /// Gets the [AppProvider] instance from the provided [BuildContext].
   ///
-  /// If [listen] is true, the returned [AppModel] instance will notify listeners
+  /// If [listen] is true, the returned [AppProvider] instance will notify listeners
   /// when its state changes. Otherwise, the returned instance will not notify
   /// listeners.
-  static AppModel of(
+  static AppProvider of(
     final BuildContext context, {
     final bool listen = false,
   }) =>
-      Provider.of<AppModel>(context, listen: listen);
+      Provider.of<AppProvider>(context, listen: listen);
 
   //=============================================================================
   // All things Canvas

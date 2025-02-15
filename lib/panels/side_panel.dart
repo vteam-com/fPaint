@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/panels/layers/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
 /// The `SidePanel` widget is a stateful widget that represents the side panel of the application.
@@ -19,7 +19,7 @@ class SidePanel extends StatefulWidget {
 class _SidePanelState extends State<SidePanel> {
   @override
   Widget build(BuildContext context) {
-    final ShellModel shellModel = ShellModel.of(context);
+    final ShellProvider shellModel = ShellProvider.of(context);
 
     return Material(
       color: Colors.grey.shade800,

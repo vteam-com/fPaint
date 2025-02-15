@@ -1,10 +1,11 @@
 import 'dart:ui' as ui;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
-import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
 /// The `MainView` widget is a stateful widget that represents the main view of the application.
@@ -41,8 +42,8 @@ class MainViewState extends State<MainView> {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         // print('LayoutBuilder ${constraints.maxWidth} ${constraints.maxHeight}');
-        final ShellModel shellModel = ShellModel.of(context);
-        final AppModel appModel = AppModel.of(context, listen: true);
+        final ShellProvider shellModel = ShellProvider.of(context);
+        final AppProvider appModel = AppProvider.of(context, listen: true);
 
         // Center canvas if requested
         if (shellModel.centerImageInViewPort ||
@@ -54,7 +55,7 @@ class MainViewState extends State<MainView> {
           // );
           shellModel.centerImageInViewPort = false;
           centerCanvas(
-            AppModel.of(context),
+            AppProvider.of(context),
             constraints.maxWidth,
             constraints.maxHeight,
           );
@@ -176,7 +177,7 @@ class MainViewState extends State<MainView> {
   /// to initialize the interaction.
   ///
   void _handlePointerStart(
-    final AppModel appModel,
+    final AppProvider appModel,
     final PointerDownEvent event,
   ) async {
     final ui.Offset adjustedPosition = appModel.toCanvas(event.localPosition);
@@ -234,7 +235,7 @@ class MainViewState extends State<MainView> {
   /// It performs necessary actions based on the pointer's movement.
   ///
   void _handlePointerMove(
-    final AppModel appModel,
+    final AppProvider appModel,
     final PointerEvent event,
   ) {
     //
@@ -281,7 +282,7 @@ class MainViewState extends State<MainView> {
   /// with the screen is lifted off. It is typically used to finalize any
   /// interactions that were started during the pointer down or move events.
   void _handPointerEnd(
-    final AppModel appModel,
+    final AppProvider appModel,
     final PointerEvent event,
   ) async {
     // debugPrint('UP ${details.buttons}');
@@ -303,7 +304,7 @@ class MainViewState extends State<MainView> {
   /// within the available space. It ensures that the canvas is properly
   /// aligned and visible to the user.
   void centerCanvas(
-    final AppModel appModel,
+    final AppProvider appModel,
     final double parentViewPortWidth,
     final double parentViewPortHeight,
   ) {

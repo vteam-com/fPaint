@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
 
 enum BrushStyle {
   solid,
@@ -20,7 +20,7 @@ class MyBrush {
   double size;
 }
 
-Widget brushStyleSelection(final AppModel appModel) {
+Widget brushStyleSelection(final AppProvider appModel) {
   return DropdownButton<int>(
     value: appModel.brushStyle.index,
     items: BrushStyle.values.map<DropdownMenuItem<int>>((BrushStyle value) {
@@ -44,7 +44,7 @@ void showBrushStylePicker(
       return AlertDialog(
         title: const Text('Select Line Style'),
         content: IntrinsicHeight(
-          child: brushStyleSelection(AppModel.of(context)),
+          child: brushStyleSelection(AppProvider.of(context)),
         ),
       );
     },

@@ -4,8 +4,8 @@ import 'dart:typed_data';
 
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
-import 'package:fpaint/models/app_model.dart';
 import 'package:fpaint/panels/share_panel.dart';
+import 'package:fpaint/providers/app_provider.dart';
 
 /// Exports the current painter as a PNG image and triggers a download.
 ///
@@ -14,14 +14,14 @@ import 'package:fpaint/panels/share_panel.dart';
 ///
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsPng(
-  final AppModel appModel, [
+  final AppProvider appModel, [
   final fileName = 'image.png',
 ]) async {
   await saveAsPng(appModel, fileName);
 }
 
 Future<void> saveAsPng(
-  final AppModel appModel,
+  final AppProvider appModel,
   final String filePath,
 ) async {
   final Uint8List imageBytes = await capturePainterToImageBytes(appModel);
@@ -37,14 +37,14 @@ Future<void> saveAsPng(
 ///
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsJpeg(
-  final AppModel appModel, [
+  final AppProvider appModel, [
   final fileName = 'image.jpg',
 ]) async {
   await saveAsJpeg(appModel, fileName);
 }
 
 Future<void> saveAsJpeg(
-  final AppModel appModel,
+  final AppProvider appModel,
   final String filePath,
 ) async {
   final Uint8List imageBytes = await capturePainterToImageBytes(appModel);
@@ -63,14 +63,14 @@ Future<void> saveAsJpeg(
 ///
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsOra(
-  final AppModel appModel, [
+  final AppProvider appModel, [
   final fileName = 'image.ora',
 ]) async {
   await saveAsOra(appModel, fileName);
 }
 
 Future<void> saveAsOra(
-  final AppModel appModel,
+  final AppProvider appModel,
   final String filePath,
 ) async {
   List<int> image = await createOraAchive(appModel);

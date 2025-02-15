@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/files/save.dart';
-import 'package:fpaint/models/app_model.dart';
-import 'package:fpaint/models/shell_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 
 Widget shortCutsForMainApp(
-  final ShellModel shellModel,
-  final AppModel appModel,
+  final ShellProvider shellModel,
+  final AppProvider appModel,
   final Widget child,
 ) {
   return Shortcuts(
