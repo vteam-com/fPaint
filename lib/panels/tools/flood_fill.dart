@@ -103,6 +103,7 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   final Set<int> visited = {};
   Queue<Point> queue = Queue();
   queue.add(Point(x, y));
+  bool isFirst = true;
 
   while (queue.isNotEmpty) {
     final Point p = queue.removeLast();
@@ -141,9 +142,11 @@ Future<Region> extractRegionByColorEdgeAndOffset({
     final ui.Rect pixel = Rect.fromLTWH(px.toDouble(), py.toDouble(), 1, 1);
 
     // Move to the starting point if the regionPath is empty
-    if (region.path.getBounds().isEmpty) {
+
+    if (isFirst) {
       region.path.moveTo(px.toDouble(), py.toDouble());
       region.path.addRect(pixel);
+      isFirst = false;
     } else {
       ui.Path pixelPath = ui.Path();
       pixelPath.addRect(pixel);
@@ -157,7 +160,7 @@ Future<Region> extractRegionByColorEdgeAndOffset({
     queue.add(Point(px - 1, py));
     queue.add(Point(px, py + 1));
     queue.add(Point(px, py - 1));
-  }
+  } // while...loop
 
   // Normalize the path
   final Rect bounds = region.path.getBounds();
