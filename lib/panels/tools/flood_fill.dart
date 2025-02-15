@@ -99,14 +99,20 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   ///
   final double tolerance255 = 255 * (tolerance / 100);
 
-  // Visited set and stack for region growing
+  // Visited set and queue for region growing
   final Set<int> visited = {};
-  Queue<Point> queue = Queue();
+  final Queue<Point> queue = Queue();
   queue.add(Point(x, y));
-  bool isFirst = true;
+
+  // Accumulate all points in the region
+  List<Point> points = [];
+
+  // Track the region's bounds
+  region.left = x.toDouble();
+  region.top = y.toDouble();
 
   while (queue.isNotEmpty) {
-    final Point p = queue.removeLast();
+    final Point p = queue.removeFirst();
     final int px = p.x;
     final int py = p.y;
 
@@ -117,18 +123,18 @@ Future<Region> extractRegionByColorEdgeAndOffset({
 
     // Skip if already visited
     final int key = px + py * width;
-    if (visited.contains(key)) {
+    if (!visited.add(key)) {
       continue;
     }
-    visited.add(key);
 
+    // Get the pixel color
     final int pixelIndex = index(px, py, width);
     final int r = pixels[pixelIndex];
     final int g = pixels[pixelIndex + 1];
     final int b = pixels[pixelIndex + 2];
     final int a = pixels[pixelIndex + 3];
 
-    // Skip if the pixel doesn't match the target color within the tolerance
+    // Check color tolerance
     if ((r - targetR).abs() > tolerance255 ||
         (g - targetG).abs() > tolerance255 ||
         (b - targetB).abs() > tolerance255 ||
@@ -136,37 +142,81 @@ Future<Region> extractRegionByColorEdgeAndOffset({
       continue;
     }
 
-    // Create a small rectangle for the current pixel
+    // Add the point to the region
+    points.add(p);
+
+    // Track the region bounds
     region.left = min(region.left, px.toDouble());
     region.top = min(region.top, py.toDouble());
-    final ui.Rect pixel = Rect.fromLTWH(px.toDouble(), py.toDouble(), 1, 1);
 
-    // Move to the starting point if the regionPath is empty
-
-    if (isFirst) {
-      region.path.moveTo(px.toDouble(), py.toDouble());
-      region.path.addRect(pixel);
-      isFirst = false;
-    } else {
-      ui.Path pixelPath = ui.Path();
-      pixelPath.addRect(pixel);
-      // Combine the current pixel's path with the growing region path
-      region.path =
-          ui.Path.combine(ui.PathOperation.union, region.path, pixelPath);
-    }
-
-    // Add 4-connected neighbors pixels to the stack
+    // Add 4-connected neighbors
     queue.add(Point(px + 1, py));
     queue.add(Point(px - 1, py));
     queue.add(Point(px, py + 1));
     queue.add(Point(px, py - 1));
-  } // while...loop
+  } // main detection loop
 
+  //------------------------------------------------------------------
+  // Optimize and combine the points(pixels)
+  //
+  final linePaths = Path();
+
+  final Map<int, List<Point>> rows = {};
+
+  // Group points by rows
+  for (final Point p in points) {
+    rows.putIfAbsent(p.y, () => []).add(p);
+  }
+
+  // Sort each row by X to detect runs
+  for (final int y in rows.keys) {
+    final List<Point> rowPoints = rows[y] ?? [];
+    rowPoints.sort((a, b) => a.x.compareTo(b.x));
+
+    int startX = rowPoints[0].x;
+    int endX = rowPoints[0].x;
+
+    for (int i = 1; i < rowPoints.length; i++) {
+      final int currentX = rowPoints[i].x;
+
+      if (currentX == endX + 1) {
+        // Continue the current run
+        endX = currentX;
+      } else {
+        // Close the current run and start a new one
+        linePaths.addRect(
+          Rect.fromLTWH(
+            startX.toDouble(),
+            y.toDouble(),
+            (endX - startX + 1).toDouble(),
+            1,
+          ),
+        );
+        startX = currentX;
+        endX = currentX;
+      }
+    }
+
+    // Add the last run for the row
+    linePaths.addRect(
+      Rect.fromLTWH(
+        startX.toDouble(),
+        y.toDouble(),
+        (endX - startX + 1).toDouble(),
+        1,
+      ),
+    );
+  }
+
+  region.path = ui.Path.combine(ui.PathOperation.union, region.path, linePaths);
+
+  //------------------------------------------------------------------
   // Normalize the path
   final Rect bounds = region.path.getBounds();
   final Matrix4 matrix = Matrix4.identity()
     ..translate(-bounds.left, -bounds.top);
   region.path = region.path.transform(matrix.storage);
+
   return region;
 }
 
