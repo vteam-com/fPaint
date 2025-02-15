@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/shell_model.dart';
 
 Future<void> onFileNew(final BuildContext context) async {
   final AppModel appModel = AppModel.of(context);
@@ -86,6 +87,7 @@ Future<void> onFileNew(final BuildContext context) async {
 /// Returns:
 /// - A `Future<void>` indicating the completion of the file open operation.
 Future<void> onFileOpen(final BuildContext context) async {
+  final ShellModel shellModel = ShellModel.of(context);
   final AppModel appModel = AppModel.of(context);
 
   if (appModel.layers.hasChanged &&
@@ -109,7 +111,7 @@ Future<void> onFileOpen(final BuildContext context) async {
       if (kIsWeb) {
         final Uint8List bytes = result.files.single.bytes!;
         if (result.files.single.extension == 'ora') {
-          await readOraFileFromBytes(appModel, bytes);
+          await readOraFileFromBytes(shellModel, appModel, bytes);
         } else if (isFileExtensionSupported(
           result.files.single.extension ?? '',
         )) {
@@ -117,11 +119,11 @@ Future<void> onFileOpen(final BuildContext context) async {
         }
       } else {
         final path = result.files.single.path!;
-        appModel.loadedFileName = path;
+        shellModel.loadedFileName = path;
         if (result.files.single.extension == 'xcf') {
           // TODO
         } else if (result.files.single.extension == 'ora') {
-          await readOraFile(appModel, path);
+          await readOraFile(shellModel, appModel, path);
         } else if (isFileExtensionSupported(
           result.files.single.extension ?? '',
         )) {

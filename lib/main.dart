@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/main_screen.dart';
+import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/provider.dart';
-import 'models/app_model.dart';
 
 /// The main entry point for the Flutter Paint App.
 ///
@@ -18,11 +19,15 @@ void main() {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
+  final shellModel = ShellModel();
   final appModel = AppModel();
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => appModel,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => shellModel),
+        ChangeNotifierProvider(create: (_) => appModel),
+      ],
       child: MaterialApp(
         title: 'Flutter Paint App',
         theme: ThemeData.dark().copyWith(
@@ -38,6 +43,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
         home: shortCutsForMainApp(
+          shellModel,
           appModel,
           const MainScreen(),
         ),

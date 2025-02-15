@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/top_colors.dart';
@@ -43,6 +44,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   @override
   Widget build(BuildContext context) {
     final appModel = AppModel.of(context);
+    final shellModel = ShellModel.of(context);
 
     // ignore: deprecated_member_use
     return WillPopScope(
@@ -50,7 +52,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
         widget.onColorChanged(_currentColor);
         return true;
       },
-      child: appModel.deviceSizeSmall
+      child: shellModel.deviceSizeSmall
           ? Dialog.fullscreen(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

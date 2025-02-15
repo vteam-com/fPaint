@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/widgets/container_slider.dart';
@@ -24,6 +25,7 @@ class LayerSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shellModel = ShellModel.of(context);
     final appModel = AppModel.of(context);
     return Container(
       margin: EdgeInsets.all(minimal ? 2 : 4),
@@ -37,13 +39,26 @@ class LayerSelector extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: minimal
-          ? _buildForSmallSurface(context, appModel, layer, allowRemoveLayer)
-          : _buildForLargeSurface(context, appModel, layer, allowRemoveLayer),
+          ? _buildForSmallSurface(
+              context,
+              shellModel,
+              appModel,
+              layer,
+              allowRemoveLayer,
+            )
+          : _buildForLargeSurface(
+              context,
+              shellModel,
+              appModel,
+              layer,
+              allowRemoveLayer,
+            ),
     );
   }
 
   Widget _buildForSmallSurface(
     BuildContext context,
+    ShellModel shellModel,
     AppModel appModel,
     Layer layer,
     bool allowRemoveLayer,
@@ -54,7 +69,7 @@ class LayerSelector extends StatelessWidget {
       child: Column(
         children: [
           TruncatedTextWidget(text: layer.name, maxLength: 10),
-          _buildThumbnailPreviewAndVisibility(appModel, layer),
+          _buildThumbnailPreviewAndVisibility(shellModel, appModel, layer),
         ],
       ),
     );
@@ -73,6 +88,7 @@ class LayerSelector extends StatelessWidget {
 
   Widget _buildForLargeSurface(
     BuildContext context,
+    ShellModel shellModel,
     AppModel appModel,
     Layer layer,
     bool allowRemoveLayer,
@@ -88,7 +104,7 @@ class LayerSelector extends StatelessWidget {
             ],
           ),
         ),
-        _buildThumbnailPreviewAndVisibility(appModel, layer),
+        _buildThumbnailPreviewAndVisibility(shellModel, appModel, layer),
       ],
     );
   }
@@ -385,6 +401,7 @@ class LayerSelector extends StatelessWidget {
   }
 
   Widget _buildThumbnailPreviewAndVisibility(
+    final ShellModel shellModel,
     final AppModel appModel,
     final Layer layer,
   ) {
@@ -405,7 +422,7 @@ class LayerSelector extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: [
           _buildThumbnailPreview(appModel, layer),
-          if (!appModel.isSidePanelExpanded && !layer.isVisible)
+          if (!shellModel.isSidePanelExpanded && !layer.isVisible)
             const Icon(Icons.visibility_off, color: Colors.red),
         ],
       ),

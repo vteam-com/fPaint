@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/panels/layers/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:multi_split_view/multi_split_view.dart';
@@ -19,7 +19,7 @@ class SidePanel extends StatefulWidget {
 class _SidePanelState extends State<SidePanel> {
   @override
   Widget build(BuildContext context) {
-    final AppModel appModel = AppModel.of(context);
+    final ShellModel shellModel = ShellModel.of(context);
 
     return Material(
       color: Colors.grey.shade800,
@@ -49,7 +49,7 @@ class _SidePanelState extends State<SidePanel> {
               builder: (context, area) => Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ToolsPanel(
-                  minimal: !appModel.isSidePanelExpanded,
+                  minimal: !shellModel.isSidePanelExpanded,
                 ),
               ),
             ),

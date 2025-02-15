@@ -42,12 +42,6 @@ export 'package:fpaint/models/layers.dart';
 /// the `topColors` property accordingly.
 ///
 /// The `update` method notifies all listeners that the model has been updated.
-enum ShellMode {
-  hidden,
-  minimal,
-  full,
-}
-
 class AppModel extends ChangeNotifier {
   /// Gets the [AppModel] instance from the provided [BuildContext].
   ///
@@ -59,11 +53,6 @@ class AppModel extends ChangeNotifier {
     final bool listen = false,
   }) =>
       Provider.of<AppModel>(context, listen: listen);
-
-  String loadedFileName = '';
-
-  bool deviceSizeSmall = false;
-  bool centerImageInViewPort = true;
 
   //=============================================================================
   // All things Canvas
@@ -79,7 +68,6 @@ class AppModel extends ChangeNotifier {
 
   void canvasReset(final Size size) {
     canvas.size = size;
-    centerImageInViewPort = true;
     layers.clear();
     _selectedLayerIndex = 0;
     layers.addWhiteBackgroundLayer(size);
@@ -195,18 +183,8 @@ class AppModel extends ChangeNotifier {
   void resetView() {
     offset = Offset.zero;
     canvas.scale = 1;
-    centerImageInViewPort = true;
-    update();
-  }
-
-  //=============================================================================
-  // Shell
-  ShellMode shellMode = ShellMode.full;
-
-  bool _isSidePanelExpanded = true;
-  bool get isSidePanelExpanded => _isSidePanelExpanded;
-  set isSidePanelExpanded(final bool value) {
-    _isSidePanelExpanded = value;
+    // TODO
+    // centerImageInViewPort = true;
     update();
   }
 
