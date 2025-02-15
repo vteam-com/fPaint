@@ -42,6 +42,14 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                 icon: Icons.ios_share_outlined,
                 onPressed: () => sharePanel(context),
               ),
+            buildIconButton(
+              tooltip: strings[StringId.exportTooltip]!,
+              icon: appModel.isSidePanelExpanded
+                  ? Icons.keyboard_double_arrow_left
+                  : Icons.keyboard_double_arrow_right,
+              onPressed: () =>
+                  appModel.isSidePanelExpanded = !appModel.isSidePanelExpanded,
+            ),
           ],
         ),
 
