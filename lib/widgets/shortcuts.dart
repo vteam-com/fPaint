@@ -84,6 +84,17 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
       ): const ToggleShellModeIntent(),
 
       //-------------------------------------------------
+      // Select All
+      LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.keyA,
+      ): const SelectAllIntent(),
+      LogicalKeySet(
+        LogicalKeyboardKey.meta,
+        LogicalKeyboardKey.keyA,
+      ): const SelectAllIntent(),
+
+      //-------------------------------------------------
       // Escape
       LogicalKeySet(
         LogicalKeyboardKey.escape,
@@ -137,6 +148,17 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         ),
 
         //-------------------------------------------------------------
+        // Select all
+        SelectAllIntent: CallbackAction<SelectAllIntent>(
+          onInvoke: (SelectAllIntent intent) async {
+            appModel.selectAll();
+            appModel.selectedAction = ActionType.selector;
+            return null;
+          },
+        ),
+
+        //-------------------------------------------------------------
+        // Escape current action
         EscapeIntent: CallbackAction<EscapeIntent>(
           onInvoke: (EscapeIntent intent) async {
             appModel.selector.clear();
@@ -144,6 +166,9 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
             return null;
           },
         ),
+
+        //-------------------------------------------------------------
+        // Delete/Erase
         DeleteIntent: CallbackAction<DeleteIntent>(
           onInvoke: (DeleteIntent intent) async {
             appModel.regionErase();
@@ -170,6 +195,10 @@ class RedoIntent extends Intent {
 
 class SaveIntent extends Intent {
   const SaveIntent();
+}
+
+class SelectAllIntent extends Intent {
+  const SelectAllIntent();
 }
 
 class CutIntent extends Intent {

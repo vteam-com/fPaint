@@ -438,6 +438,15 @@ class AppModel extends ChangeNotifier {
     update();
   }
 
+  void selectAll() {
+    selector.isVisible = true;
+    selectorStart(Offset.zero);
+    selector.path = Path();
+    selector.path.addRect(
+      Rect.fromPoints(Offset.zero, Offset(canvas.width, canvas.height)),
+    );
+  }
+
   Path getPathAdjustToCanvasSizeAndPosition() {
     final Matrix4 matrix = Matrix4.identity()
       ..translate(offset.dx, offset.dy)
