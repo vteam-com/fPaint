@@ -208,7 +208,7 @@ class Layer {
 
   void regionCut(final ui.Path path) {
     addUserAction(
-      UserAction(action: ActionType.cut, positions: [], path: path),
+      UserAction(action: ActionType.cut, positions: [], path: Path.from(path)),
     );
     clearCache();
   }
