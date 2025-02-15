@@ -20,6 +20,24 @@ void renderPencil(
   );
 }
 
+void renderPencilEraser(
+  final Canvas canvas,
+  final Offset p1,
+  final Offset p2,
+  final MyBrush brush,
+) {
+  final Paint paint = Paint();
+  paint.strokeWidth = brush.size;
+  paint.style = PaintingStyle.stroke;
+  paint.strokeCap = StrokeCap.round;
+  paint.blendMode = BlendMode.clear;
+  canvas.drawLine(
+    p1,
+    p2,
+    paint,
+  );
+}
+
 void renderRectangle(
   final Canvas canvas,
   final Offset p1,
@@ -135,19 +153,6 @@ void renderLine(
     brush.style,
     brush.size,
   );
-}
-
-void renderEraser(
-  final Canvas canvas,
-  final Path path,
-) {
-  final Paint paint = Paint();
-
-  paint.blendMode = BlendMode.clear;
-  paint.style = PaintingStyle.stroke;
-  paint.strokeCap = StrokeCap.round;
-
-  canvas.drawPath(path, paint);
 }
 
 void renderRegion(final Canvas canvas, Path path, Color fillColor) {
