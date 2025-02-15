@@ -203,8 +203,8 @@ class ToolsPanel extends StatelessWidget {
         ToolAttributeWidget(
           minimal: minimal,
           name: 'Selector',
-          childRight: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          childRight: Wrap(
+            alignment: WrapAlignment.center,
             children: [
               //
               // Selection using Rectangle
