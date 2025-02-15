@@ -23,78 +23,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            PopupMenuButton<int>(
-              tooltip: strings[StringId.menuTooltip],
-              icon: const Icon(Icons.menu),
-              onSelected: (int result) {
-                switch (result) {
-                  case MenuIds.newFile:
-                    onFileNew(context);
-                    break;
-                  case MenuIds.openFile:
-                    onFileOpen(context);
-                    break;
-                  case MenuIds.save:
-                    saveFile(appModel).then(
-                        // ignore: use_build_context_synchronously
-                        (_) {
-                      appModel.layers.clearHasChanged();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${strings[StringId.savedMessage]}${appModel.loadedFileName}',
-                            ),
-                          ),
-                        );
-                      }
-                    });
-                    break;
-                  case MenuIds.export:
-                    sharePanel(context);
-                    break;
-                  case MenuIds.canvasSize:
-                    showCanvasSettings(context);
-                    break;
-                  case MenuIds.about:
-                    showAboutBox(context);
-                    break;
-                }
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-                buildMenuItem(
-                  value: MenuIds.newFile,
-                  text: strings[StringId.startOver]!,
-                  icon: Icons.power_settings_new_outlined,
-                ),
-                buildMenuItem(
-                  value: MenuIds.openFile,
-                  text: strings[StringId.import]!,
-                  icon: Icons.file_download_outlined,
-                ),
-                buildMenuItem(
-                  value: MenuIds.export,
-                  text: strings[StringId.export]!,
-                  icon: Icons.ios_share_outlined,
-                ),
-                if (!kIsWeb && appModel.loadedFileName.isNotEmpty)
-                  buildMenuItem(
-                    value: MenuIds.save,
-                    text: 'Save "${appModel.loadedFileName}"',
-                    icon: Icons.check_circle_outline,
-                  ),
-                buildMenuItem(
-                  value: MenuIds.canvasSize,
-                  text: strings[StringId.canvas]!,
-                  icon: Icons.edit,
-                ),
-                buildMenuItem(
-                  value: MenuIds.about,
-                  text: strings[StringId.about]!,
-                  icon: Icons.info_outline,
-                ),
-              ],
-            ),
+            mainMenu(context, appModel),
             if (appModel.isSidePanelExpanded)
               buildIconButton(
                 tooltip: strings[StringId.startOverTooltip]!,
@@ -182,5 +111,87 @@ class TopMenuAndLayersPanel extends StatelessWidget {
       icon: Icon(icon),
       onPressed: onPressed,
     );
+  }
+
+  Widget mainMenu(final BuildContext context, final AppModel appModel) {
+    return PopupMenuButton<int>(
+      tooltip: strings[StringId.menuTooltip],
+      icon: const Icon(Icons.menu),
+      onSelected: (int result) =>
+          onDropDownMenuSelection(context, appModel, result),
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+        buildMenuItem(
+          value: MenuIds.newFile,
+          text: strings[StringId.startOver]!,
+          icon: Icons.power_settings_new_outlined,
+        ),
+        buildMenuItem(
+          value: MenuIds.openFile,
+          text: strings[StringId.import]!,
+          icon: Icons.file_download_outlined,
+        ),
+        buildMenuItem(
+          value: MenuIds.export,
+          text: strings[StringId.export]!,
+          icon: Icons.ios_share_outlined,
+        ),
+        if (!kIsWeb && appModel.loadedFileName.isNotEmpty)
+          buildMenuItem(
+            value: MenuIds.save,
+            text: 'Save "${appModel.loadedFileName}"',
+            icon: Icons.check_circle_outline,
+          ),
+        buildMenuItem(
+          value: MenuIds.canvasSize,
+          text: strings[StringId.canvas]!,
+          icon: Icons.edit,
+        ),
+        buildMenuItem(
+          value: MenuIds.about,
+          text: strings[StringId.about]!,
+          icon: Icons.info_outline,
+        ),
+      ],
+    );
+  }
+
+  void onDropDownMenuSelection(
+    final BuildContext context,
+    final AppModel appModel,
+    int result,
+  ) {
+    switch (result) {
+      case MenuIds.newFile:
+        onFileNew(context);
+        break;
+      case MenuIds.openFile:
+        onFileOpen(context);
+        break;
+      case MenuIds.save:
+        saveFile(appModel).then(
+            // ignore: use_build_context_synchronously
+            (_) {
+          appModel.layers.clearHasChanged();
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${strings[StringId.savedMessage]}${appModel.loadedFileName}',
+                ),
+              ),
+            );
+          }
+        });
+        break;
+      case MenuIds.export:
+        sharePanel(context);
+        break;
+      case MenuIds.canvasSize:
+        showCanvasSettings(context);
+        break;
+      case MenuIds.about:
+        showAboutBox(context);
+        break;
+    }
   }
 }
