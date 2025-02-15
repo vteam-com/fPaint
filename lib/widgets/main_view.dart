@@ -133,7 +133,13 @@ class MainViewState extends State<MainView> {
     );
   }
 
-  Future<void> _handlePointerStart(
+  /// Handles the start of a pointer event.
+  ///
+  /// This method is called when a pointer (such as a finger or stylus)
+  /// starts interacting with the widget. It performs necessary actions
+  /// to initialize the interaction.
+  ///
+  void _handlePointerStart(
     final AppModel appModel,
     final PointerDownEvent event,
   ) async {
@@ -186,10 +192,15 @@ class MainViewState extends State<MainView> {
     }
   }
 
-  Future<void> _handlePointerMove(
+  /// Handles the pointer move event.
+  ///
+  /// This method is called when a pointer moves within the widget's bounds.
+  /// It performs necessary actions based on the pointer's movement.
+  ///
+  void _handlePointerMove(
     final AppModel appModel,
     final PointerEvent event,
-  ) async {
+  ) {
     //
     // Translate the input position to the canvas position and scale
     //
@@ -228,7 +239,12 @@ class MainViewState extends State<MainView> {
     }
   }
 
-  Future<void> _handPointerEnd(
+  /// Handles the end of a pointer event.
+  ///
+  /// This method is called when a pointer that was previously in contact
+  /// with the screen is lifted off. It is typically used to finalize any
+  /// interactions that were started during the pointer down or move events.
+  void _handPointerEnd(
     final AppModel appModel,
     final PointerEvent event,
   ) async {
@@ -245,6 +261,11 @@ class MainViewState extends State<MainView> {
     }
   }
 
+  /// Centers the canvas within the view.
+  ///
+  /// This method adjusts the position of the canvas so that it is centered
+  /// within the available space. It ensures that the canvas is properly
+  /// aligned and visible to the user.
   void centerCanvas(
     final AppModel appModel,
     final double parentViewPortWidth,
