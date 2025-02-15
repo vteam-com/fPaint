@@ -6,19 +6,24 @@ import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/shell_model.dart';
 import 'package:xml/xml.dart';
 
 /// Reads an ORA file and updates the provided [AppModel] with its contents.
 ///
 /// This function asynchronously reads the ORA file located at the given [filePath]
-/// and updates the [appModel] with the data extracted from the file.
+/// and updates the [shellModel] with the data extracted from the file.
 ///
 /// - Parameters:
 ///   - appModel: The application model to be updated with the ORA file's contents.
 ///   - filePath: The path to the ORA file to be read.
 ///
 /// - Returns: A [Future] that completes when the file has been read and the model updated.
-Future<void> readOraFile(final AppModel appModel, String filePath) async {
+Future<void> readOraFile(
+  final ShellModel shellModel,
+  final AppModel appModel,
+  String filePath,
+) async {
   try {
     final File oraFile = File(filePath);
     if (!await oraFile.exists()) {
@@ -26,10 +31,11 @@ Future<void> readOraFile(final AppModel appModel, String filePath) async {
       return;
     }
 
-    appModel.loadedFileName = filePath;
+    shellModel.loadedFileName = filePath;
 
     // Read the file as bytes
     await readOraFileFromBytes(
+      shellModel,
       appModel,
       await oraFile.readAsBytes(),
     );
@@ -40,6 +46,7 @@ Future<void> readOraFile(final AppModel appModel, String filePath) async {
 
 /// Read the file from  bytes
 Future<void> readOraFileFromBytes(
+  ShellModel shellModel,
   AppModel appModel,
   Uint8List bytes,
 ) async {

@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/shell_model.dart';
 
-Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
+Widget shortCutsForMainApp(
+  final ShellModel shellModel,
+  final AppModel appModel,
+  final Widget child,
+) {
   return Shortcuts(
     shortcuts: {
       // Undo
@@ -119,7 +124,8 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
           onInvoke: (RedoIntent intent) => appModel.layersRedo(),
         ),
         SaveIntent: CallbackAction<SaveIntent>(
-          onInvoke: (SaveIntent intent) async => await saveFile(appModel),
+          onInvoke: (SaveIntent intent) async =>
+              await saveFile(shellModel, appModel),
         ),
         CutIntent: CallbackAction<CutIntent>(
           onInvoke: (CutIntent intent) async => appModel.regionCut(),
@@ -135,12 +141,12 @@ Widget shortCutsForMainApp(final AppModel appModel, final Widget child) {
         // toggle shell mode aka the tools
         ToggleShellModeIntent: CallbackAction<ToggleShellModeIntent>(
           onInvoke: (ToggleShellModeIntent intent) async {
-            switch (appModel.shellMode) {
+            switch (shellModel.shellMode) {
               case ShellMode.hidden:
-                appModel.shellMode = ShellMode.full;
+                shellModel.shellMode = ShellMode.full;
                 break;
               default:
-                appModel.shellMode = ShellMode.hidden;
+                shellModel.shellMode = ShellMode.hidden;
             }
             appModel.update();
             return null;

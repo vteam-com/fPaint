@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/floating_buttons.dart';
+import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/panels/side_panel.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:multi_split_view/multi_split_view.dart';
@@ -13,19 +14,18 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    // Hide status bar and use full screen
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-    // Ensure that AppModel is provided above this widget in the widget tree and listening
     final AppModel appModel = AppModel.of(context, listen: true);
+    final ShellModel shellModel = ShellModel.of(context, listen: true);
+    final shellMode = shellModel.shellMode;
 
-    // Establish the UX experienc base on the device size
-    appModel.deviceSizeSmall = MediaQuery.of(context).size.width < 600;
+    shellModel.deviceSizeSmall = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
       backgroundColor: Colors.grey,
-      body: appModel.shellMode == ShellMode.hidden
-          ? _buildMainContent(appModel)
+      body: shellMode == ShellMode.hidden
+          ? _buildMainContent(shellModel)
           : MultiSplitViewTheme(
               data: MultiSplitViewThemeData(
                 dividerPainter: DividerPainters.grooved1(
@@ -38,47 +38,45 @@ class MainScreen extends StatelessWidget {
                   strokeCap: StrokeCap.round,
                 ),
               ),
-              child: _buildMainContent(appModel),
+              child: _buildMainContent(shellModel),
             ),
-      // Undo/Redo
-      floatingActionButton: appModel.shellMode == ShellMode.hidden
+      floatingActionButton: shellMode == ShellMode.hidden
           ? null
-          : floatingActionButtons(appModel),
+          : floatingActionButtons(shellModel, appModel),
     );
   }
 
-  Widget _buildMainContent(final AppModel appModel) {
-    if (appModel.shellMode == ShellMode.hidden) {
+  Widget _buildMainContent(final ShellModel shellModel) {
+    if (shellModel.shellMode == ShellMode.hidden) {
       return const MainView();
     }
 
-    if (appModel.deviceSizeSmall) {
-      return _buildMobilePhoneLayout(appModel);
+    if (shellModel.deviceSizeSmall) {
+      return _buildMobilePhoneLayout(shellModel);
     }
-    return _buildMidToLargeDevices(appModel);
+    return _buildMidToLargeDevices(shellModel);
   }
 
-  Widget _buildMobilePhoneLayout(final AppModel appModel) {
-    // On small device we either show the full screen canvas with a few floating action buttons
-    if (appModel.showMenu) {
+  Widget _buildMobilePhoneLayout(final ShellModel shellModel) {
+    if (shellModel.showMenu) {
       return const SidePanel();
     } else {
       return const MainView();
     }
   }
 
-  Widget _buildMidToLargeDevices(final AppModel appModel) {
+  Widget _buildMidToLargeDevices(final ShellModel shellModel) {
     return MultiSplitView(
-      key: Key('key_side_panel_size_${appModel.isSidePanelExpanded}'),
+      key: Key('key_side_panel_size_${shellModel.isSidePanelExpanded}'),
       axis: Axis.horizontal,
       onDividerDoubleTap: (dividerIndex) {
-        appModel.isSidePanelExpanded = !appModel.isSidePanelExpanded;
+        shellModel.isSidePanelExpanded = !shellModel.isSidePanelExpanded;
       },
       initialAreas: [
         Area(
-          size: appModel.isSidePanelExpanded ? 400 : minSidePanelSize,
-          min: appModel.isSidePanelExpanded ? 350 : minSidePanelSize,
-          max: appModel.isSidePanelExpanded ? 600 : minSidePanelSize,
+          size: shellModel.isSidePanelExpanded ? 400 : minSidePanelSize,
+          min: shellModel.isSidePanelExpanded ? 350 : minSidePanelSize,
+          max: shellModel.isSidePanelExpanded ? 600 : minSidePanelSize,
           builder: (final BuildContext context, final Area area) =>
               const SidePanel(),
         ),

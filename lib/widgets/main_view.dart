@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/models/app_model.dart';
+import 'package:fpaint/models/shell_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
@@ -33,16 +34,30 @@ class MainView extends StatefulWidget {
 
 class MainViewState extends State<MainView> {
   int _activePointerId = -1;
+  Size lastViewPortSize = const Size(0, 0);
 
   @override
   Widget build(BuildContext context) {
-    final AppModel appModel = AppModel.of(context, listen: true);
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
+        // print('LayoutBuilder ${constraints.maxWidth} ${constraints.maxHeight}');
+        final ShellModel shellModel = ShellModel.of(context);
+        final AppModel appModel = AppModel.of(context, listen: true);
+
         // Center canvas if requested
-        if (appModel.centerImageInViewPort) {
-          appModel.centerImageInViewPort = false;
-          centerCanvas(appModel, constraints.maxWidth, constraints.maxHeight);
+        if (shellModel.centerImageInViewPort ||
+            lastViewPortSize.width != constraints.maxWidth ||
+            lastViewPortSize.height != constraints.maxHeight) {
+          lastViewPortSize = Size(constraints.maxWidth, constraints.maxHeight);
+          // print(
+          //   'Center ${constraints.maxWidth} ${constraints.maxHeight}',
+          // );
+          shellModel.centerImageInViewPort = false;
+          centerCanvas(
+            AppModel.of(context),
+            constraints.maxWidth,
+            constraints.maxHeight,
+          );
         }
 
         return Listener(
