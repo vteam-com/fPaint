@@ -63,13 +63,13 @@ class TopMenuAndLayersPanel extends StatelessWidget {
               if (newIndex > oldIndex) {
                 newIndex -= 1;
               }
-              final Layer layer = appModel.layers.get(oldIndex);
+              final LayerProvider layer = appModel.layers.get(oldIndex);
               appModel.layers.removeByIndex(oldIndex);
               appModel.layers.insert(newIndex, layer);
               appModel.selectedLayerIndex = newIndex;
             },
             itemBuilder: (context, index) {
-              final Layer layer = appModel.layers.get(index);
+              final LayerProvider layer = appModel.layers.get(index);
               return ReorderableDragStartListener(
                 key: Key('$index'),
                 index: index,
