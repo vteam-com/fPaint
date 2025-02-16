@@ -36,14 +36,6 @@ class LayerProvider extends ChangeNotifier {
   }) =>
       Provider.of<LayerProvider>(context, listen: listen);
 
-  //=============================================================================
-  /// Notifies all listeners that the model has been updated.
-  /// This method should be called whenever the state of the model changes
-  /// to ensure that any UI components observing the model are updated.
-  void update() {
-    notifyListeners();
-  }
-
   String name;
   String id;
   final List<UserAction> _actionStack = [];
@@ -237,6 +229,7 @@ class LayerProvider extends ChangeNotifier {
 
   void clearCache() {
     cachedThumnailImage = null; // reset cache
+    notifyListeners();
   }
 
   Future<ui.Image> toImageForStorage(final Size size) async {
