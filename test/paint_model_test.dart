@@ -7,7 +7,7 @@ void main() {
     test('initial state should have one empty layer', () {
       final paintModel = AppProvider();
       expect(paintModel.layers.length, 1);
-      expect(paintModel.selectedLayerIndex, 0);
+      expect(paintModel.layers.selectedLayerIndex, 0);
       expect(
         paintModel.selectedLayer.count,
         1,
