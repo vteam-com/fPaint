@@ -28,11 +28,15 @@ class LayersProvider extends ChangeNotifier {
   }
   static final LayersProvider _instance = LayersProvider._internal();
 
-  static LayerProvider of(
+  static LayersProvider of(
     final BuildContext context, {
     final bool listen = false,
   }) =>
-      Provider.of<LayerProvider>(context, listen: listen);
+      Provider.of<LayersProvider>(context, listen: listen);
+
+  void update() {
+    notifyListeners();
+  }
 
   Size _size = const Size(0, 0);
 

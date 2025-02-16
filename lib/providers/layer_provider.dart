@@ -22,13 +22,13 @@ export 'package:fpaint/models/user_action.dart';
 
 class LayerProvider extends ChangeNotifier {
   LayerProvider({
-    required this.name,
+    required String name,
     required Size size,
     this.id = '',
     this.isSelected = false,
     bool isVisible = true,
     opacity = 1.0,
-  }) {
+  }) : _name = name {
     _size = size;
     _isVisible = isVisible;
     _opacity = opacity;
@@ -40,7 +40,19 @@ class LayerProvider extends ChangeNotifier {
   }) =>
       Provider.of<LayerProvider>(context, listen: listen);
 
-  String name;
+  void update() {
+    notifyListeners();
+  }
+
+  //-----------------------------------------------
+  // name
+  String _name;
+  String get name => _name;
+  set name(String value) {
+    _name = value;
+    notifyListeners();
+  }
+
   String id;
   final List<UserAction> _actionStack = [];
   final List<UserAction> redoStack = [];

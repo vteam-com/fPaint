@@ -214,7 +214,7 @@ class LayerSelector extends StatelessWidget {
   ) async {
     switch (value) {
       case 'rename':
-        await renameLayer(appModel);
+        await renameLayer();
         break;
       case 'add':
         _onAddLayer(appModel);
@@ -265,7 +265,7 @@ class LayerSelector extends StatelessWidget {
         Expanded(
           child: GestureDetector(
             onLongPress: () async {
-              await renameLayer(appModel);
+              await renameLayer();
             },
             child: Text(
               layer.name,
@@ -291,7 +291,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  Future<void> renameLayer(AppProvider appModel) async {
+  Future<void> renameLayer() async {
     final TextEditingController controller =
         TextEditingController(text: layer.name);
 
@@ -314,7 +314,7 @@ class LayerSelector extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context, controller.text);
-              appModel.update();
+              LayersProvider.of(context).update();
             },
             child: const Text('Apply'),
           ),

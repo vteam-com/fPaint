@@ -56,7 +56,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
         ),
 
         Consumer<LayersProvider>(
-          builder: (context, layers, child) {
+          builder: (context2, layers, child) {
             return Expanded(
               child: ReorderableListView.builder(
                 itemCount: layers.length,
@@ -79,8 +79,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                       onTap: () => layers.selectedLayerIndex = index,
                       onDoubleTap: () => layers.layersToggleVisibility(layer),
                       child: LayerSelector(
-                        key: Key(layer.id),
-                        context: context,
+                        context: context2,
                         layer: layer,
                         minimal: !shellModel.isSidePanelExpanded,
                         isSelected: layers.selectedLayerIndex == index,
