@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/models/layer.dart';
+import 'package:fpaint/providers/layer.dart';
 
 void main() {
   group('Layer Tests', () {
