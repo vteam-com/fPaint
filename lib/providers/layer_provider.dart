@@ -442,47 +442,4 @@ class LayerProvider extends ChangeNotifier {
         .reversed
         .toList();
   }
-
-  Future<ui.Image> blendWithPreserveAlpha({
-    required ui.Image baseImage,
-    required ui.Image topImage,
-    required BlendMode blendMode,
-  }) async {
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-
-    // Draw the base layer
-    canvas.drawImage(baseImage, Offset.zero, Paint());
-
-    // Create a paint object with the blend mode
-    Paint paint = Paint()..blendMode = blendMode;
-
-    // Save the alpha channel of the base image
-    final alphaRecorder = ui.PictureRecorder();
-    final alphaCanvas = Canvas(alphaRecorder);
-    alphaCanvas.drawImage(
-      baseImage,
-      Offset.zero,
-      Paint()
-        ..colorFilter =
-            const ui.ColorFilter.mode(Colors.black, BlendMode.srcIn),
-    );
-    final alphaPicture = alphaRecorder.endRecording();
-    final alphaImage =
-        await alphaPicture.toImage(baseImage.width, baseImage.height);
-
-    // Apply the blend mode
-    canvas.drawImage(topImage, Offset.zero, paint);
-
-    // Restore the original alpha
-    canvas.drawImage(
-      alphaImage,
-      Offset.zero,
-      Paint()..blendMode = BlendMode.dstIn,
-    );
-
-    // Convert the picture to an image
-    final picture = recorder.endRecording();
-    return picture.toImage(baseImage.width, baseImage.height);
-  }
 }
