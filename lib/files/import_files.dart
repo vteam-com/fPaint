@@ -160,9 +160,9 @@ Future<void> _readImageFile(
 ) async {
   final image = await decodeImageFromList(await bytesFuture);
   appModel.layers.clear();
-  appModel.layersAddTop();
+  appModel.layers.addTop();
   appModel.canvas.size = Size(image.width.toDouble(), image.height.toDouble());
-  appModel.selectedLayer.addImage(imageToAdd: image);
+  appModel.layers.selectedLayer.addImage(imageToAdd: image);
 }
 
 Future<void> readImageFilePath(

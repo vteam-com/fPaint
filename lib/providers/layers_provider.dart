@@ -90,6 +90,8 @@ class LayersProvider extends ChangeNotifier {
     }
   }
 
+  LayerProvider get selectedLayer => this.get(this.selectedLayerIndex);
+
   void layersToggleVisibility(final LayerProvider layer) {
     layer.isVisible = !layer.isVisible;
     notifyListeners();
@@ -127,9 +129,9 @@ class LayersProvider extends ChangeNotifier {
     return _list.findFirstMatch((layer) => layer.name == name);
   }
 
-  void add(final LayerProvider layerToAdd) {
-    _list.insert(0, layerToAdd);
-  }
+  LayerProvider addTop([String? name]) => this.insertAt(0, name);
+
+  LayerProvider addBottom([String? name]) => this.insertAt(this.length, name);
 
   void insert(final index, final LayerProvider layerToInsert) {
     if (isIndexInRange(index)) {
@@ -137,6 +139,15 @@ class LayersProvider extends ChangeNotifier {
     } else {
       _list.add(layerToInsert);
     }
+  }
+
+  LayerProvider insertAt(final int index, [String? name]) {
+    name ??= 'Layer${this.length}';
+    final LayerProvider layer = LayerProvider(name: name, size: _size);
+    this.insert(index, layer);
+    this.selectedLayerIndex = this.getLayerIndex(layer);
+    update();
+    return layer;
   }
 
   bool remove(final LayerProvider layer) {

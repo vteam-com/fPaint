@@ -83,7 +83,7 @@ Future<void> readOraFileFromBytes(
     final bool preserveAlpha =
         xmlLayer.getAttribute('alpha-preserve') == 'true';
 
-    final LayerProvider newLayer = appModel.layersAddBottom(name);
+    final LayerProvider newLayer = appModel.layers.addBottom(name);
     newLayer.isVisible = visibleAsText == 'true';
     newLayer.opacity = double.parse(opacityAsText);
 
@@ -224,8 +224,7 @@ Future<List<int>> createOraAchive(AppProvider appModel) async {
     final String imageName = 'data/layer-$i.png';
 
     // Save layer image as PNG
-    final ui.Image imageLayer =
-        await layer.toImageForStorage(appModel.canvas.size);
+    final ui.Image imageLayer = layer.toImageForStorage(appModel.canvas.size);
 
     final ByteData? bytes =
         await imageLayer.toByteData(format: ui.ImageByteFormat.png);
