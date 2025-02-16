@@ -149,3 +149,21 @@ Future<ui.Image?> getImageFromClipboard() async {
   }
   return null;
 }
+
+Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+  final paint = ui.Paint()
+    ..filterQuality = ui.FilterQuality.high
+    ..isAntiAlias = true;
+
+  canvas.drawImageRect(
+    image,
+    Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+    Rect.fromLTWH(0, 0, newSize.width, newSize.height),
+    paint,
+  );
+
+  final picture = recorder.endRecording();
+  return picture.toImage(newSize.width.toInt(), newSize.height.toInt());
+}
