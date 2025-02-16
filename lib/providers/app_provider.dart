@@ -13,7 +13,7 @@ import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:provider/provider.dart';
 
 // Exports
-export 'package:fpaint/models/layers.dart';
+export 'package:fpaint/providers/layers.dart';
 
 /// The `AppModel` class is a `ChangeNotifier` that manages the state of a painting application.
 /// It provides methods and properties for managing the canvas, layers, tools, colors, and other
