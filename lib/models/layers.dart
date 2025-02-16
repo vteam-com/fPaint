@@ -2,12 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
-import 'package:fpaint/providers/layer.dart';
+import 'package:fpaint/providers/layer_provider.dart';
 
 // Exports
-export 'package:fpaint/providers/layer.dart';
+export 'package:fpaint/providers/layer_provider.dart';
 
-/// Manages a collection of [Layer] objects, providing methods to interact with and manipulate the layers.
+/// Manages a collection of [LayerProvider] objects, providing methods to interact with and manipulate the layers.
 ///
 /// The [Layers] class is responsible for maintaining the list of layers, providing methods to add, remove, and
 /// access individual layers. It also includes utility methods for performing common operations on the layers,
@@ -22,8 +22,8 @@ class Layers {
     clearHasChanged();
   }
 
-  Layer addWhiteBackgroundLayer(Size size) {
-    final Layer firstLayer = Layer(name: 'Background');
+  LayerProvider addWhiteBackgroundLayer(Size size) {
+    final LayerProvider firstLayer = LayerProvider(name: 'Background');
 
     firstLayer.addUserAction(
       UserAction(
@@ -40,7 +40,7 @@ class Layers {
     return firstLayer;
   }
 
-  final List<Layer> _list = [];
+  final List<LayerProvider> _list = [];
 
   void clear() {
     _list.clear();
@@ -52,37 +52,37 @@ class Layers {
   bool get hasChanged => _list.any((layer) => layer.hasChanged);
 
   void clearHasChanged() {
-    for (final Layer layer in _list) {
+    for (final LayerProvider layer in _list) {
       layer.hasChanged = false;
     }
   }
 
   bool isIndexInRange(final int indexLayer) =>
       indexLayer >= 0 && indexLayer < _list.length;
-  int getLayerIndex(final Layer layer) {
+  int getLayerIndex(final LayerProvider layer) {
     return _list.indexOf(layer);
   }
 
-  Layer get(final int index) {
+  LayerProvider get(final int index) {
     ensureLayerAtIndex(index);
     return _list[index];
   }
 
   void ensureLayerAtIndex(final int index) {
     while (_list.length <= index) {
-      _list.add(Layer(name: 'Layer ${_list.length + 1}'));
+      _list.add(LayerProvider(name: 'Layer ${_list.length + 1}'));
     }
   }
 
-  Layer? getByName(final String name) {
+  LayerProvider? getByName(final String name) {
     return _list.findFirstMatch((layer) => layer.name == name);
   }
 
-  void add(final Layer layerToAdd) {
+  void add(final LayerProvider layerToAdd) {
     _list.insert(0, layerToAdd);
   }
 
-  void insert(final index, final Layer layerToInsert) {
+  void insert(final index, final LayerProvider layerToInsert) {
     if (isIndexInRange(index)) {
       _list.insert(index, layerToInsert);
     } else {
@@ -90,7 +90,7 @@ class Layers {
     }
   }
 
-  bool remove(final Layer layer) {
+  bool remove(final LayerProvider layer) {
     return _list.remove(layer);
   }
 
@@ -100,22 +100,22 @@ class Layers {
     }
   }
 
-  List<Layer> get list => _list;
+  List<LayerProvider> get list => _list;
 
   void offset(final Offset offset) {
-    for (final Layer layer in _list) {
+    for (final LayerProvider layer in _list) {
       layer.offset(offset);
     }
   }
 
   void scale(final double scale) {
-    for (final Layer layer in _list) {
+    for (final LayerProvider layer in _list) {
       layer.scale(scale);
     }
   }
 
-  void hideShowAllExcept(final Layer exceptLayer, final bool show) {
-    for (final Layer layer in _list) {
+  void hideShowAllExcept(final LayerProvider exceptLayer, final bool show) {
+    for (final LayerProvider layer in _list) {
       if (layer == exceptLayer) {
         layer.isVisible = true;
       } else {
@@ -136,7 +136,7 @@ class Layers {
     List<ColorUsage> topColors = [];
     int totalLayers = _list.length;
 
-    for (final Layer layer in _list) {
+    for (final LayerProvider layer in _list) {
       for (final ColorUsage colorUsed in layer.topColorsUsed) {
         final existingColor = topColors.firstWhere(
           (c) => c.color == colorUsed.color,

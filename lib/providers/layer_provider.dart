@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:provider/provider.dart';
 
 // Exports
 export 'package:fpaint/models/user_action.dart';
@@ -17,8 +18,8 @@ export 'package:fpaint/models/user_action.dart';
 /// The layer also provides methods for rendering the layer to an image, managing the undo/redo stack,
 /// and merging layers.
 
-class Layer {
-  Layer({
+class LayerProvider extends ChangeNotifier {
+  LayerProvider({
     required this.name,
     this.id = '',
     this.isSelected = false,
@@ -27,6 +28,20 @@ class Layer {
   }) {
     _isVisible = isVisible;
     _opacity = opacity;
+  }
+
+  static LayerProvider of(
+    final BuildContext context, {
+    final bool listen = false,
+  }) =>
+      Provider.of<LayerProvider>(context, listen: listen);
+
+  //=============================================================================
+  /// Notifies all listeners that the model has been updated.
+  /// This method should be called whenever the state of the model changes
+  /// to ensure that any UI components observing the model are updated.
+  void update() {
+    notifyListeners();
   }
 
   String name;
@@ -213,7 +228,7 @@ class Layer {
     clearCache();
   }
 
-  void mergeFrom(final Layer layerToMerge) {
+  void mergeFrom(final LayerProvider layerToMerge) {
     _actionStack.addAll(layerToMerge._actionStack);
     clearCache();
   }

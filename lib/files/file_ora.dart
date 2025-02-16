@@ -83,7 +83,7 @@ Future<void> readOraFileFromBytes(
     final bool preserveAlpha =
         xmlLayer.getAttribute('alpha-preserve') == 'true';
 
-    final Layer newLayer = appModel.layersAddBottom(name);
+    final LayerProvider newLayer = appModel.layersAddBottom(name);
     newLayer.isVisible = visibleAsText == 'true';
     newLayer.opacity = double.parse(opacityAsText);
 
@@ -147,7 +147,7 @@ ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
 Future<void> addImageToLayer({
   required final Archive archive,
   required final AppProvider appModel,
-  required final Layer layer,
+  required final LayerProvider layer,
   required final String imageName,
   required final ui.Offset offset,
 }) async {
@@ -220,7 +220,7 @@ Future<List<int>> createOraAchive(AppProvider appModel) async {
 
   // Generate PNG files and add them to the archive
   for (int i = 0; i < appModel.layers.length; i++) {
-    final Layer layer = appModel.layers.get(i);
+    final LayerProvider layer = appModel.layers.get(i);
     final String imageName = 'data/layer-$i.png';
 
     // Save layer image as PNG

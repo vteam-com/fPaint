@@ -1,14 +1,14 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/providers/layer.dart';
+import 'package:fpaint/providers/layer_provider.dart';
 
 void main() {
   group('Layer Tests', () {
-    late Layer layer;
+    late LayerProvider layer;
 
     setUp(() {
-      layer = Layer(name: 'Test Layer');
+      layer = LayerProvider(name: 'Test Layer');
     });
 
     test('Initial values are correct', () {

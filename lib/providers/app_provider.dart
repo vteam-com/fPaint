@@ -155,7 +155,7 @@ class AppProvider extends ChangeNotifier {
       return;
     }
 
-    final Layer newLayerForPatedImage = layersAddTop('Pasted');
+    final LayerProvider newLayerForPatedImage = layersAddTop('Pasted');
     newLayerForPatedImage.addImage(
       imageToAdd: image,
       offset: const Offset(0, 0),
@@ -191,14 +191,14 @@ class AppProvider extends ChangeNotifier {
   //=============================================================================
   // All things Layers
   late Layers layers = Layers(canvas.size);
-  Layer get selectedLayer => layers.get(selectedLayerIndex);
+  LayerProvider get selectedLayer => layers.get(selectedLayerIndex);
 
   int _selectedLayerIndex = 0;
   int get selectedLayerIndex => _selectedLayerIndex;
   set selectedLayerIndex(final int index) {
     if (layers.isIndexInRange(index)) {
       for (int i = 0; i < layers.length; i++) {
-        final Layer layer = layers.get(i);
+        final LayerProvider layer = layers.get(i);
         layer.id = (layers.length - i).toString();
         layer.isSelected = i == index;
       }
@@ -210,20 +210,21 @@ class AppProvider extends ChangeNotifier {
 
   bool get isCurrentSelectionReadyForAction => selectedLayer.isVisible;
 
-  Layer layersAddTop([String? name]) => layerInsertAt(0, name);
+  LayerProvider layersAddTop([String? name]) => layerInsertAt(0, name);
 
-  Layer layersAddBottom([String? name]) => layerInsertAt(layers.length, name);
+  LayerProvider layersAddBottom([String? name]) =>
+      layerInsertAt(layers.length, name);
 
-  Layer layerInsertAt(final int index, [String? name]) {
+  LayerProvider layerInsertAt(final int index, [String? name]) {
     name ??= 'Layer${layers.length}';
-    final Layer layer = Layer(name: name);
+    final LayerProvider layer = LayerProvider(name: name);
     layers.insert(index, layer);
     selectedLayerIndex = layers.getLayerIndex(layer);
     update();
     return layer;
   }
 
-  void layersRemove(final Layer layer) {
+  void layersRemove(final LayerProvider layer) {
     layers.remove(layer);
     selectedLayerIndex = (selectedLayerIndex > 0 ? selectedLayerIndex - 1 : 0);
   }
@@ -235,7 +236,7 @@ class AppProvider extends ChangeNotifier {
     update();
   }
 
-  void layersToggleVisibility(final Layer layer) {
+  void layersToggleVisibility(final LayerProvider layer) {
     layer.isVisible = !layer.isVisible;
     update();
   }

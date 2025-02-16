@@ -11,7 +11,7 @@ class LayerThumbnail extends StatelessWidget {
     required this.layer,
   });
 
-  final Layer layer;
+  final LayerProvider layer;
 
   @override
   Widget build(BuildContext context) {

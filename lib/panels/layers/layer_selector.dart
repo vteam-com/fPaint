@@ -19,7 +19,7 @@ class LayerSelector extends StatelessWidget {
   });
 
   final BuildContext context;
-  final Layer layer;
+  final LayerProvider layer;
   final bool minimal;
   final bool isSelected;
   final bool allowRemoveLayer;
@@ -61,7 +61,7 @@ class LayerSelector extends StatelessWidget {
     BuildContext context,
     ShellProvider shellModel,
     AppProvider appModel,
-    Layer layer,
+    LayerProvider layer,
     bool allowRemoveLayer,
   ) {
     return Tooltip(
@@ -91,7 +91,7 @@ class LayerSelector extends StatelessWidget {
     BuildContext context,
     ShellProvider shellModel,
     AppProvider appModel,
-    Layer layer,
+    LayerProvider layer,
     bool allowRemoveLayer,
   ) {
     return Row(
@@ -335,7 +335,7 @@ class LayerSelector extends StatelessWidget {
   Widget _buildLayerControls(
     BuildContext context,
     AppProvider appModel,
-    Layer layer,
+    LayerProvider layer,
     bool allowRemoveLayer,
   ) {
     return Wrap(
@@ -380,7 +380,7 @@ class LayerSelector extends StatelessWidget {
   // Method to insert a new layer above the currently selected one
   void _onAddLayer(final AppProvider appModel) {
     final int currentIndex = appModel.selectedLayerIndex;
-    final Layer newLayer = appModel.layerInsertAt(currentIndex);
+    final LayerProvider newLayer = appModel.layerInsertAt(currentIndex);
     appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
   }
 
@@ -390,8 +390,9 @@ class LayerSelector extends StatelessWidget {
     final int layerIndexToMerge,
     final int layerIndexToMergIn,
   ) {
-    final Layer layerToMege = appModel.layers.get(layerIndexToMerge);
-    final Layer receivingLayer = appModel.layers.get(layerIndexToMergIn);
+    final LayerProvider layerToMege = appModel.layers.get(layerIndexToMerge);
+    final LayerProvider receivingLayer =
+        appModel.layers.get(layerIndexToMergIn);
 
     receivingLayer.mergeFrom(layerToMege);
     appModel.layersRemove(layerToMege);
@@ -405,7 +406,7 @@ class LayerSelector extends StatelessWidget {
   Widget _buildThumbnailPreviewAndVisibility(
     final ShellProvider shellModel,
     final AppProvider appModel,
-    final Layer layer,
+    final LayerProvider layer,
   ) {
     return GestureDetector(
       onLongPress: () {
@@ -431,7 +432,10 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  Widget _buildThumbnailPreview(final AppProvider appModel, final Layer layer) {
+  Widget _buildThumbnailPreview(
+    final AppProvider appModel,
+    final LayerProvider layer,
+  ) {
     return SizedBox(
       height: 60,
       width: 60,
