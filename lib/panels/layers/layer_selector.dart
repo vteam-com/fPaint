@@ -26,8 +26,6 @@ class LayerSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shellModel = ShellProvider.of(context);
-    final appModel = AppProvider.of(context);
     return Container(
       margin: EdgeInsets.all(minimal ? 2 : 4),
       padding: EdgeInsets.all(minimal ? 2 : 8),
@@ -42,15 +40,11 @@ class LayerSelector extends StatelessWidget {
       child: minimal
           ? _buildForSmallSurface(
               context,
-              shellModel,
-              appModel,
               layer,
               allowRemoveLayer,
             )
           : _buildForLargeSurface(
               context,
-              shellModel,
-              appModel,
               layer,
               allowRemoveLayer,
             ),
@@ -59,11 +53,12 @@ class LayerSelector extends StatelessWidget {
 
   Widget _buildForSmallSurface(
     BuildContext context,
-    ShellProvider shellModel,
-    AppProvider appModel,
     LayerProvider layer,
     bool allowRemoveLayer,
   ) {
+    final shellModel = ShellProvider.of(context);
+    final appModel = AppProvider.of(context);
+
     return Tooltip(
       margin: const EdgeInsets.only(left: 50),
       message: information(),
@@ -89,11 +84,12 @@ class LayerSelector extends StatelessWidget {
 
   Widget _buildForLargeSurface(
     BuildContext context,
-    ShellProvider shellModel,
-    AppProvider appModel,
     LayerProvider layer,
     bool allowRemoveLayer,
   ) {
+    final shellModel = ShellProvider.of(context);
+    final appModel = AppProvider.of(context);
+
     return Row(
       children: [
         Expanded(
@@ -110,7 +106,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  List<PopupMenuItem<String>> _buildPopupMenuItems(AppProvider appModel) {
+  List<PopupMenuItem<String>> _buildPopupMenuItems() {
     return [
       const PopupMenuItem(
         value: 'rename',
@@ -147,7 +143,7 @@ class LayerSelector extends StatelessWidget {
       ),
       PopupMenuItem(
         value: 'merge',
-        enabled: layer != appModel.layers.list.last,
+        enabled: allowRemoveLayer,
         child: const Row(
           children: [
             Icon(Icons.layers_outlined),
@@ -262,8 +258,7 @@ class LayerSelector extends StatelessWidget {
       children: [
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
-          itemBuilder: (context) =>
-              _buildPopupMenuItems(AppProvider.of(context)),
+          itemBuilder: (context) => _buildPopupMenuItems(),
           onSelected: (value) =>
               _handlePopupMenuSelection(value, AppProvider.of(context)),
         ),
@@ -413,7 +408,7 @@ class LayerSelector extends StatelessWidget {
         showMenu(
           context: context,
           position: const RelativeRect.fromLTRB(0, 0, 0, 0),
-          items: _buildPopupMenuItems(appModel),
+          items: _buildPopupMenuItems(),
           elevation: 8,
         ).then((value) {
           if (value != null) {

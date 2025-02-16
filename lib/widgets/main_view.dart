@@ -291,9 +291,7 @@ class MainViewState extends State<MainView> {
       if (appModel.selectedAction == ActionType.selector) {
         appModel.selectorEnd();
       }
-
       _activePointerId = -1;
-      appModel.selectedLayer.clearCache();
       appModel.update();
     }
   }

@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => shellModel),
         ChangeNotifierProvider(create: (_) => appModel),
+        ChangeNotifierProvider(create: (_) => appModel),
       ],
       child: MaterialApp(
         title: 'Flutter Paint App',

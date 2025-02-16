@@ -18,18 +18,21 @@ export 'package:fpaint/providers/layer_provider.dart';
 
 class Layers {
   Layers(final Size size) {
-    addWhiteBackgroundLayer(size);
+    _size = size;
+    addWhiteBackgroundLayer();
     clearHasChanged();
   }
+  Size _size = const Size(0, 0);
 
-  LayerProvider addWhiteBackgroundLayer(Size size) {
-    final LayerProvider firstLayer = LayerProvider(name: 'Background');
+  LayerProvider addWhiteBackgroundLayer() {
+    final LayerProvider firstLayer =
+        LayerProvider(name: 'Background', size: _size);
 
     firstLayer.addUserAction(
       UserAction(
         positions: [
           const Offset(0, 0),
-          Offset(size.width, size.height),
+          Offset(_size.width, _size.height),
         ],
         action: ActionType.rectangle,
         fillColor: Colors.white,
@@ -44,6 +47,10 @@ class Layers {
 
   void clear() {
     _list.clear();
+  }
+
+  void setSize(Size size) {
+    _list.forEach((layer) => layer.size = size);
   }
 
   int get length => _list.length;
@@ -70,7 +77,12 @@ class Layers {
 
   void ensureLayerAtIndex(final int index) {
     while (_list.length <= index) {
-      _list.add(LayerProvider(name: 'Layer ${_list.length + 1}'));
+      _list.add(
+        LayerProvider(
+          name: 'Layer ${_list.length + 1}',
+          size: _size,
+        ),
+      );
     }
   }
 

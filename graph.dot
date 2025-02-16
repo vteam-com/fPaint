@@ -183,6 +183,7 @@ digraph "" {
   "/test/file_xcf_test.dart" -> "/lib/files/xcf_reader.dart";
   "/test/layers_test.dart" -> "/lib/providers/layer_provider.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/providers/layer_provider.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/models/render_helper.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/providers/app_provider.dart";
@@ -223,7 +224,7 @@ digraph "" {
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/panels/share_panel.dart";
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/providers/app_provider.dart";
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/providers/shell_provider.dart";
-  "/lib/panels/layers/layer_thumbnail.dart" -> "/lib/providers/app_provider.dart";
+  "/lib/panels/layers/layer_thumbnail.dart" -> "/lib/providers/layer_provider.dart";
   "/lib/panels/layers/layer_thumbnail.dart" -> "/lib/widgets/image_painter.dart";
   "/lib/panels/layers/layer_thumbnail.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/panels/side_panel.dart" -> "/lib/panels/layers/top_menu_and_layers_panel.dart";

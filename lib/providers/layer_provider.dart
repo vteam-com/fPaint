@@ -1,8 +1,10 @@
 // Imports
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -21,11 +23,13 @@ export 'package:fpaint/models/user_action.dart';
 class LayerProvider extends ChangeNotifier {
   LayerProvider({
     required this.name,
+    required Size size,
     this.id = '',
     this.isSelected = false,
     bool isVisible = true,
     opacity = 1.0,
   }) {
+    _size = size;
     _isVisible = isVisible;
     _opacity = opacity;
   }
@@ -47,14 +51,26 @@ class LayerProvider extends ChangeNotifier {
   ///-------------------------------------------
   /// Modifed state
   bool hasChanged = true;
+  Timer? _debounceTimer;
+
+  //---------------------------------------------
+  // Size
+  Size _size = const Size(0, 0);
+
+  Size get size => _size;
+
+  set size(Size value) {
+    _size = value;
+    clearCache();
+  }
 
   List<ColorUsage> topColorsUsed = [];
 
   void _cacheTopColorUsed() async {
     topColorsUsed = [];
-    if (cachedThumnailImage != null) {
+    if (_cachedThumnailImage != null) {
       final List<ColorUsage> imageColors =
-          await getImageColors(cachedThumnailImage!);
+          await getImageColors(_cachedThumnailImage!);
 
       for (final ColorUsage colorUsage in imageColors) {
         if (!topColorsUsed.any((c) => c.color == colorUsage.color)) {
@@ -225,34 +241,47 @@ class LayerProvider extends ChangeNotifier {
     clearCache();
   }
 
-  ui.Image? cachedThumnailImage;
+  //------------------------------------------------------
+  // Thumbnail image
+  //
+  ui.Image? _cachedThumnailImage;
+  ui.Image? get thumbnailImage => _cachedThumnailImage;
+
+  Future<void> updateThumbnail() async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = Canvas(recorder);
+    renderLayer(canvas);
+    final ui.Picture picture = recorder.endRecording();
+
+    _cachedThumnailImage = await picture.toImage(
+      size.width.toInt(),
+      size.height.toInt(),
+    );
+
+    _cachedThumnailImage = await resizeImage(
+      _cachedThumnailImage!,
+      scaleSizeTo(size, maxHeight: 64),
+    );
+
+    _cacheTopColorUsed();
+  }
 
   void clearCache() {
-    cachedThumnailImage = null; // reset cache
-    notifyListeners();
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(seconds: 1), () async {
+      await updateThumbnail();
+      notifyListeners();
+    });
   }
 
   Future<ui.Image> toImageForStorage(final Size size) async {
-    return await renderImageWH(
+    return renderImageWH(
       size.width.toInt(),
       size.height.toInt(),
     );
   }
 
-  Future<ui.Image> getThumbnail(final Size size) async {
-    if (cachedThumnailImage == null) {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = Canvas(recorder);
-      renderLayer(canvas);
-      final picture = recorder.endRecording();
-      cachedThumnailImage =
-          await picture.toImage(size.width.toInt(), size.height.toInt());
-      _cacheTopColorUsed();
-    }
-    return cachedThumnailImage!;
-  }
-
-  Future<ui.Image> renderImageWH(final int width, final int height) async {
+  ui.Image renderImageWH(final int width, final int height) {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = Canvas(recorder);
 
@@ -260,7 +289,7 @@ class LayerProvider extends ChangeNotifier {
     renderLayer(canvas);
 
     final ui.Picture picture = recorder.endRecording();
-    return await picture.toImage(width, height);
+    return picture.toImageSync(width, height);
   }
 
   void renderLayer(final Canvas canvas) {

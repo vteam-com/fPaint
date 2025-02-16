@@ -69,8 +69,9 @@ class AppProvider extends ChangeNotifier {
   void canvasReset(final Size size) {
     canvas.size = size;
     layers.clear();
+    layers.setSize(size);
     _selectedLayerIndex = 0;
-    layers.addWhiteBackgroundLayer(size);
+    layers.addWhiteBackgroundLayer();
     resetView();
   }
 
@@ -217,7 +218,7 @@ class AppProvider extends ChangeNotifier {
 
   LayerProvider layerInsertAt(final int index, [String? name]) {
     name ??= 'Layer${layers.length}';
-    final LayerProvider layer = LayerProvider(name: name);
+    final LayerProvider layer = LayerProvider(name: name, size: canvas.size);
     layers.insert(index, layer);
     selectedLayerIndex = layers.getLayerIndex(layer);
     update();

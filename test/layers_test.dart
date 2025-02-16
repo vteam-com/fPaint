@@ -8,7 +8,7 @@ void main() {
     late LayerProvider layer;
 
     setUp(() {
-      layer = LayerProvider(name: 'Test Layer');
+      layer = LayerProvider(name: 'Test Layer', size: const Size(100, 100));
     });
 
     test('Initial values are correct', () {
@@ -85,7 +85,7 @@ void main() {
 
     test('Clear cache', () {
       layer.clearCache();
-      expect(layer.cachedThumnailImage, null);
+      expect(layer.thumbnailImage, null);
     });
   });
 }
