@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 
 // Exports
-export 'package:fpaint/models/layers.dart';
+export 'package:fpaint/providers/layers.dart';
 
 class CanvasModel extends ChangeNotifier {
   ///-------------------------------------------
