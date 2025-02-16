@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
-import 'package:fpaint/models/layer.dart';
+import 'package:fpaint/providers/layer.dart';
 
 // Exports
-export 'package:fpaint/models/layer.dart';
+export 'package:fpaint/providers/layer.dart';
 
 /// Manages a collection of [Layer] objects, providing methods to interact with and manipulate the layers.
 ///
