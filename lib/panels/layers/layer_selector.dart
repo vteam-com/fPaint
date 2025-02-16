@@ -3,8 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
-import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/container_slider.dart';
 import 'package:fpaint/widgets/truncated_text.dart';
 
@@ -26,6 +25,7 @@ class LayerSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final layers = LayersProvider.of(context);
     return Container(
       margin: EdgeInsets.all(minimal ? 2 : 4),
       padding: EdgeInsets.all(minimal ? 2 : 8),
@@ -45,6 +45,7 @@ class LayerSelector extends StatelessWidget {
             )
           : _buildForLargeSurface(
               context,
+              layers,
               layer,
               allowRemoveLayer,
             ),
@@ -56,8 +57,7 @@ class LayerSelector extends StatelessWidget {
     LayerProvider layer,
     bool allowRemoveLayer,
   ) {
-    final shellModel = ShellProvider.of(context);
-    final appModel = AppProvider.of(context);
+    final layers = LayersProvider.of(context);
 
     return Tooltip(
       margin: const EdgeInsets.only(left: 50),
@@ -65,7 +65,10 @@ class LayerSelector extends StatelessWidget {
       child: Column(
         children: [
           TruncatedTextWidget(text: layer.name, maxLength: 10),
-          _buildThumbnailPreviewAndVisibility(shellModel, appModel, layer),
+          _buildThumbnailPreviewAndVisibility(
+            layers,
+            layer,
+          ),
         ],
       ),
     );
@@ -84,24 +87,25 @@ class LayerSelector extends StatelessWidget {
 
   Widget _buildForLargeSurface(
     BuildContext context,
+    LayersProvider layers,
     LayerProvider layer,
     bool allowRemoveLayer,
   ) {
-    final shellModel = ShellProvider.of(context);
-    final appModel = AppProvider.of(context);
-
     return Row(
       children: [
         Expanded(
           child: Column(
             children: [
-              _buildLayerName(appModel),
+              _buildLayerName(layers),
               if (isSelected)
-                _buildLayerControls(context, appModel, layer, allowRemoveLayer),
+                _buildLayerControls(context, layers, layer, allowRemoveLayer),
             ],
           ),
         ),
-        _buildThumbnailPreviewAndVisibility(shellModel, appModel, layer),
+        _buildThumbnailPreviewAndVisibility(
+          layers,
+          layer,
+        ),
       ],
     );
   }
@@ -210,26 +214,26 @@ class LayerSelector extends StatelessWidget {
 
   Future<void> _handlePopupMenuSelection(
     String value,
-    AppProvider appModel,
+    LayersProvider layers,
   ) async {
     switch (value) {
       case 'rename':
         await renameLayer();
         break;
       case 'add':
-        _onAddLayer(appModel);
+        _onAddLayer(layers);
         break;
       case 'delete':
         if (allowRemoveLayer) {
-          appModel.layers.remove(layer);
+          layers.remove(layer);
         }
         break;
       case 'merge':
-        if (layer != appModel.layers.list.last) {
+        if (layer != layers.list.last) {
           _onFlattenLayers(
-            appModel,
-            appModel.layers.selectedLayerIndex,
-            appModel.layers.selectedLayerIndex + 1,
+            layers,
+            layers.selectedLayerIndex,
+            layers.selectedLayerIndex + 1,
           );
         }
         break;
@@ -240,27 +244,26 @@ class LayerSelector extends StatelessWidget {
         );
         break;
       case 'visibility':
-        appModel.layers.layersToggleVisibility(layer);
+        layers.layersToggleVisibility(layer);
         break;
       case 'allHide':
-        appModel.layers.hideShowAllExcept(layer, false);
-        appModel.update();
+        layers.hideShowAllExcept(layer, false);
+        layers.update();
         break;
       case 'allShow':
-        appModel.layers.hideShowAllExcept(layer, true);
-        appModel.update();
+        layers.hideShowAllExcept(layer, true);
+        layers.update();
         break;
     }
   }
 
-  Widget _buildLayerName(final AppProvider appModel) {
+  Widget _buildLayerName(final LayersProvider layers) {
     return Row(
       children: [
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
           itemBuilder: (context) => _buildPopupMenuItems(),
-          onSelected: (value) =>
-              _handlePopupMenuSelection(value, AppProvider.of(context)),
+          onSelected: (value) => _handlePopupMenuSelection(value, layers),
         ),
         Expanded(
           child: GestureDetector(
@@ -285,7 +288,7 @@ class LayerSelector extends StatelessWidget {
                 ? Colors.blue
                 : const ui.Color.fromARGB(255, 135, 9, 9),
           ),
-          onPressed: () => appModel.layers.layersToggleVisibility(layer),
+          onPressed: () => layers.layersToggleVisibility(layer),
         ),
       ],
     );
@@ -329,7 +332,7 @@ class LayerSelector extends StatelessWidget {
 
   Widget _buildLayerControls(
     BuildContext context,
-    AppProvider appModel,
+    LayersProvider layers,
     LayerProvider layer,
     bool allowRemoveLayer,
   ) {
@@ -339,23 +342,22 @@ class LayerSelector extends StatelessWidget {
         IconButton(
           tooltip: 'Add a layer above',
           icon: const Icon(Icons.playlist_add),
-          onPressed: () => _onAddLayer(appModel),
+          onPressed: () => _onAddLayer(layers),
         ),
         IconButton(
           tooltip: 'Delete this layer',
           icon: const Icon(Icons.playlist_remove),
-          onPressed:
-              allowRemoveLayer ? () => appModel.layers.remove(layer) : null,
+          onPressed: allowRemoveLayer ? () => layers.remove(layer) : null,
         ),
         IconButton(
           tooltip: 'Merge to below layer',
           icon: const Icon(Icons.layers_outlined),
-          onPressed: layer == appModel.layers.list.last
+          onPressed: layer == layers.list.last
               ? null
               : () => _onFlattenLayers(
-                    appModel,
-                    appModel.layers.selectedLayerIndex,
-                    appModel.layers.selectedLayerIndex + 1,
+                    layers,
+                    layers.selectedLayerIndex,
+                    layers.selectedLayerIndex + 1,
                   ),
         ),
         IconButton(
@@ -373,35 +375,32 @@ class LayerSelector extends StatelessWidget {
   }
 
   // Method to insert a new layer above the currently selected one
-  void _onAddLayer(final AppProvider appModel) {
-    final int currentIndex = appModel.layers.selectedLayerIndex;
-    final LayerProvider newLayer = appModel.layerInsertAt(currentIndex);
-    appModel.layers.selectedLayerIndex =
-        appModel.layers.getLayerIndex(newLayer);
+  void _onAddLayer(final LayersProvider layers) {
+    final int currentIndex = layers.selectedLayerIndex;
+    final LayerProvider newLayer = layers.insertAt(currentIndex);
+    layers.selectedLayerIndex = layers.getLayerIndex(newLayer);
   }
 
   // Method to flatten all layers
   void _onFlattenLayers(
-    final AppProvider appModel,
+    final LayersProvider layers,
     final int layerIndexToMerge,
     final int layerIndexToMergIn,
   ) {
-    final LayerProvider layerToMege = appModel.layers.get(layerIndexToMerge);
-    final LayerProvider receivingLayer =
-        appModel.layers.get(layerIndexToMergIn);
+    final LayerProvider layerToMege = layers.get(layerIndexToMerge);
+    final LayerProvider receivingLayer = layers.get(layerIndexToMergIn);
 
     receivingLayer.mergeFrom(layerToMege);
-    appModel.layers.remove(layerToMege);
+    layers.remove(layerToMege);
     if (layerIndexToMergIn > layerIndexToMerge) {
-      appModel.layers.selectedLayerIndex = layerIndexToMergIn - 1;
+      layers.selectedLayerIndex = layerIndexToMergIn - 1;
     } else {
-      appModel.layers.selectedLayerIndex = layerIndexToMergIn;
+      layers.selectedLayerIndex = layerIndexToMergIn;
     }
   }
 
   Widget _buildThumbnailPreviewAndVisibility(
-    final ShellProvider shellModel,
-    final AppProvider appModel,
+    final LayersProvider layers,
     final LayerProvider layer,
   ) {
     return GestureDetector(
@@ -413,15 +412,15 @@ class LayerSelector extends StatelessWidget {
           elevation: 8,
         ).then((value) {
           if (value != null) {
-            _handlePopupMenuSelection(value, appModel);
+            _handlePopupMenuSelection(value, layers);
           }
         });
       },
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
-          _buildThumbnailPreview(appModel, layer),
-          if (!shellModel.isSidePanelExpanded && !layer.isVisible)
+          _buildThumbnailPreview(layers, layer),
+          if (minimal && !layer.isVisible)
             const Icon(Icons.visibility_off, color: Colors.red),
         ],
       ),
@@ -429,7 +428,7 @@ class LayerSelector extends StatelessWidget {
   }
 
   Widget _buildThumbnailPreview(
-    final AppProvider appModel,
+    final LayersProvider layers,
     final LayerProvider layer,
   ) {
     return SizedBox(
@@ -446,9 +445,9 @@ class LayerSelector extends StatelessWidget {
         onChanged: (value) => layer.opacity = value,
         onChangeEnd: (value) {
           layer.opacity = value;
-          appModel.update();
+          layers.update();
         },
-        onSlideEnd: () => appModel.update(),
+        onSlideEnd: () => layers.update(),
         child: LayerThumbnail(layer: layer),
       ),
     );
