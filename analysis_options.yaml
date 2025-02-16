@@ -21,11 +21,6 @@ linter:
     avoid_type_to_string: true
     cancel_subscriptions: true
     close_sinks: true
-
-    # Documentation
-    package_api_docs: true
-    # public_member_api_docs: true
-
     prefer_single_quotes: true
     require_trailing_commas: true
     always_declare_return_types: true

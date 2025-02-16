@@ -1,11 +1,12 @@
 // ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
+import 'dart:js_interop'; // For JS interop utilities
 import 'dart:typed_data';
 
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:web/web.dart' as web; // Add
 
 /// Exports the current painter as a PNG image and triggers a download.
 ///
@@ -87,20 +88,27 @@ Future<void> saveAsOra(
 /// [image] The image bytes to be downloaded.
 /// [fileName] The name of the file to be downloaded.
 void downloadBlob(final Uint8List image, final String fileName) {
-  // Create a Blob from the image bytes
-  final blob = html.Blob([image]);
+  // Convert Uint8List to a JS-compatible ArrayBuffer
+  final jsArrayBuffer = image.buffer.toJS;
+
+  // Create a Blob from the ArrayBuffer
+  final blob = web.Blob(
+    [jsArrayBuffer].toJS,
+    web.BlobPropertyBag(type: 'application/octet-stream'),
+  );
 
   // Generate an object URL for the Blob
-  final url = html.Url.createObjectUrlFromBlob(blob);
+  final String url = web.URL.createObjectURL(blob);
 
   // Create an anchor element for downloading the file
-  final anchor = html.AnchorElement(href: url)
-    ..target = 'blank' // Opens in a new tab if needed
-    ..download = fileName; // Name of the downloaded file
+  final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
+  anchor.href = url;
+  anchor.target = '_blank';
+  anchor.download = fileName;
 
   // Trigger the download
   anchor.click();
 
   // Revoke the object URL after the download
-  html.Url.revokeObjectUrl(url);
+  web.URL.revokeObjectURL(url);
 }
