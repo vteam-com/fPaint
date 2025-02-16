@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/providers/layer_provider.dart';
+import 'package:provider/provider.dart';
 
 // Exports
 export 'package:fpaint/providers/layer_provider.dart';
@@ -16,12 +17,19 @@ export 'package:fpaint/providers/layer_provider.dart';
 /// The class also provides methods for performing transformations on the layers, such as offsetting and scaling
 /// the layers, as well as a method to get the top color usage across all layers.
 
-class LayersProvider {
+class LayersProvider extends ChangeNotifier {
   LayersProvider(final Size size) {
     _size = size;
     addWhiteBackgroundLayer();
     clearHasChanged();
   }
+
+  static LayerProvider of(
+    final BuildContext context, {
+    final bool listen = false,
+  }) =>
+      Provider.of<LayerProvider>(context, listen: listen);
+
   Size _size = const Size(0, 0);
 
   LayerProvider addWhiteBackgroundLayer() {
