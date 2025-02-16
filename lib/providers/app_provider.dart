@@ -43,6 +43,10 @@ export 'package:fpaint/providers/layers_provider.dart';
 ///
 /// The `update` method notifies all listeners that the model has been updated.
 class AppProvider extends ChangeNotifier {
+  AppProvider() {
+    canvasReset(canvas.size);
+  }
+
   /// Gets the [AppProvider] instance from the provided [BuildContext].
   ///
   /// If [listen] is true, the returned [AppProvider] instance will notify listeners
@@ -191,7 +195,7 @@ class AppProvider extends ChangeNotifier {
 
   //=============================================================================
   // All things Layers
-  late LayersProvider layers = LayersProvider(canvas.size);
+  LayersProvider layers = LayersProvider(); // this is a singleton
   LayerProvider get selectedLayer => layers.get(selectedLayerIndex);
 
   int _selectedLayerIndex = 0;
