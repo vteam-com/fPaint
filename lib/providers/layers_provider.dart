@@ -9,15 +9,15 @@ export 'package:fpaint/providers/layer_provider.dart';
 
 /// Manages a collection of [LayerProvider] objects, providing methods to interact with and manipulate the layers.
 ///
-/// The [Layers] class is responsible for maintaining the list of layers, providing methods to add, remove, and
+/// The [LayersProvider] class is responsible for maintaining the list of layers, providing methods to add, remove, and
 /// access individual layers. It also includes utility methods for performing common operations on the layers,
 /// such as clearing the layer list, checking for changes, and managing the visibility of layers.
 ///
 /// The class also provides methods for performing transformations on the layers, such as offsetting and scaling
 /// the layers, as well as a method to get the top color usage across all layers.
 
-class Layers {
-  Layers(final Size size) {
+class LayersProvider {
+  LayersProvider(final Size size) {
     _size = size;
     addWhiteBackgroundLayer();
     clearHasChanged();

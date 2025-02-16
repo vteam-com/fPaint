@@ -13,7 +13,7 @@ import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:provider/provider.dart';
 
 // Exports
-export 'package:fpaint/providers/layers.dart';
+export 'package:fpaint/providers/layers_provider.dart';
 
 /// The `AppModel` class is a `ChangeNotifier` that manages the state of a painting application.
 /// It provides methods and properties for managing the canvas, layers, tools, colors, and other
@@ -191,7 +191,7 @@ class AppProvider extends ChangeNotifier {
 
   //=============================================================================
   // All things Layers
-  late Layers layers = Layers(canvas.size);
+  late LayersProvider layers = LayersProvider(canvas.size);
   LayerProvider get selectedLayer => layers.get(selectedLayerIndex);
 
   int _selectedLayerIndex = 0;
