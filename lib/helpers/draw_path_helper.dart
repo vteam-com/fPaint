@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 enum NineGridHandle {
@@ -99,4 +101,33 @@ Path expandPathInDirectionWithOffset(
   // Apply translation and scaling
   Path adjustedPath = path.transform(transformMatrix.storage);
   return adjustedPath.transform(scaleMatrix.storage);
+}
+
+Size scaleSizeTo(
+  final Size inputSize, {
+  final double? maxWith,
+  final double? maxHeight,
+}) {
+  if (maxWith == null && maxHeight == null) {
+    return inputSize;
+  }
+
+  double scaleWidth = 1.0;
+  double scaleHeight = 1.0;
+
+  if (maxWith != null) {
+    scaleWidth = maxWith / inputSize.width;
+  }
+
+  if (maxHeight != null) {
+    scaleHeight = maxHeight / inputSize.height;
+  }
+
+  // Use the smaller scale to maintain aspect ratio
+  double scale = min(scaleWidth, scaleHeight);
+
+  return Size(
+    inputSize.width * scale,
+    inputSize.height * scale,
+  );
 }
