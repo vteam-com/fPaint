@@ -21,13 +21,14 @@ class MyApp extends StatelessWidget {
   MyApp({super.key});
   final shellModel = ShellProvider();
   final appModel = AppProvider();
+  final layersProvider = LayersProvider();
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => shellModel),
         ChangeNotifierProvider(create: (_) => appModel),
-        ChangeNotifierProvider(create: (_) => appModel),
+        ChangeNotifierProvider(create: (_) => layersProvider),
       ],
       child: MaterialApp(
         title: 'Flutter Paint App',

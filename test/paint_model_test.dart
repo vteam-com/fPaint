@@ -4,13 +4,8 @@ import 'package:fpaint/providers/app_provider.dart';
 
 void main() {
   group('PaintModel Tests', () {
-    late AppProvider paintModel;
-
-    setUp(() {
-      paintModel = AppProvider();
-    });
-
     test('initial state should have one empty layer', () {
+      final paintModel = AppProvider();
       expect(paintModel.layers.length, 1);
       expect(paintModel.selectedLayerIndex, 0);
       expect(
@@ -20,6 +15,7 @@ void main() {
     });
 
     test('addShape with Shape object should add to current layer', () {
+      final paintModel = AppProvider();
       final shape = UserAction(
         positions: [
           const Offset(0, 0),
@@ -41,6 +37,7 @@ void main() {
     });
 
     test('add UserAction with parameters should create and add new shape', () {
+      final paintModel = AppProvider();
       paintModel.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
@@ -68,6 +65,7 @@ void main() {
     });
 
     test('updateLastShape should modify end position of last shape', () {
+      final paintModel = AppProvider();
       paintModel.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
@@ -82,11 +80,13 @@ void main() {
     });
 
     test('updateLastShape should do nothing if no shapes exist', () {
+      final paintModel = AppProvider();
       paintModel.updateAction(end: const Offset(20, 20));
       expect(paintModel.selectedLayer.count, 1);
     });
 
     test('undo should remove last shape', () {
+      final paintModel = AppProvider();
       paintModel.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
@@ -106,6 +106,7 @@ void main() {
     });
 
     test('multiple shapes should be added and managed correctly', () {
+      final paintModel = AppProvider();
       paintModel.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),

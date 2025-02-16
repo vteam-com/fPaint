@@ -18,11 +18,15 @@ export 'package:fpaint/providers/layer_provider.dart';
 /// the layers, as well as a method to get the top color usage across all layers.
 
 class LayersProvider extends ChangeNotifier {
-  LayersProvider(final Size size) {
-    _size = size;
+  factory LayersProvider() {
+    return _instance;
+  }
+
+  LayersProvider._internal() {
     addWhiteBackgroundLayer();
     clearHasChanged();
   }
+  static final LayersProvider _instance = LayersProvider._internal();
 
   static LayerProvider of(
     final BuildContext context, {
@@ -31,6 +35,11 @@ class LayersProvider extends ChangeNotifier {
       Provider.of<LayerProvider>(context, listen: listen);
 
   Size _size = const Size(0, 0);
+
+  void setSize(final Size size) {
+    _size = size;
+    _list.forEach((layer) => layer.size = size);
+  }
 
   LayerProvider addWhiteBackgroundLayer() {
     final LayerProvider firstLayer =
@@ -55,10 +64,6 @@ class LayersProvider extends ChangeNotifier {
 
   void clear() {
     _list.clear();
-  }
-
-  void setSize(Size size) {
-    _list.forEach((layer) => layer.size = size);
   }
 
   int get length => _list.length;
