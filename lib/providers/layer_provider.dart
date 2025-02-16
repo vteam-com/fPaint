@@ -286,7 +286,7 @@ class LayerProvider extends ChangeNotifier {
     });
   }
 
-  Future<ui.Image> toImageForStorage(final Size size) async {
+  ui.Image toImageForStorage(final Size size) {
     return renderImageWH(
       size.width.toInt(),
       size.height.toInt(),

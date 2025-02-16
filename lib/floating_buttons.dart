@@ -12,7 +12,7 @@ Widget floatingActionButtons(
   final undoButton = FloatingActionButton(
     backgroundColor: Colors.grey.shade600,
     foregroundColor: Colors.white,
-    tooltip: appModel.selectedLayer.getHistoryStringForUndo(),
+    tooltip: appModel.layers.selectedLayer.getHistoryStringForUndo(),
     onPressed: () => appModel.layersUndo(),
     child: const Icon(Icons.undo),
   );
@@ -20,7 +20,7 @@ Widget floatingActionButtons(
   final redo = FloatingActionButton(
     backgroundColor: Colors.grey.shade600,
     foregroundColor: Colors.white,
-    tooltip: appModel.selectedLayer.getHistoryStringForRedo(),
+    tooltip: appModel.layers.selectedLayer.getHistoryStringForRedo(),
     onPressed: () => appModel.layersRedo(),
     child: const Icon(Icons.redo),
   );

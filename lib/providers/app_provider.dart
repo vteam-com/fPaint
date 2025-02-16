@@ -112,7 +112,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   void regionErase() {
-    selectedLayer.regionCut(selector.path);
+    layers.selectedLayer.regionCut(selector.path);
     update();
   }
 
@@ -127,7 +127,8 @@ class AppProvider extends ChangeNotifier {
       return;
     }
 
-    final ui.Image image = await getImageForCurrentSelectedLayer();
+    final ui.Image image =
+        layers.selectedLayer.toImageForStorage(this.canvas.size);
 
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder);
@@ -160,7 +161,7 @@ class AppProvider extends ChangeNotifier {
       return;
     }
 
-    final LayerProvider newLayerForPatedImage = layersAddTop('Pasted');
+    final LayerProvider newLayerForPatedImage = layers.addTop('Pasted');
     newLayerForPatedImage.addImage(
       imageToAdd: image,
       offset: const Offset(0, 0),
@@ -196,43 +197,22 @@ class AppProvider extends ChangeNotifier {
   //=============================================================================
   // All things Layers
   LayersProvider layers = LayersProvider(); // this is a singleton
-  LayerProvider get selectedLayer => layers.get(layers.selectedLayerIndex);
 
-  bool get isCurrentSelectionReadyForAction => selectedLayer.isVisible;
-
-  LayerProvider layersAddTop([String? name]) => layerInsertAt(0, name);
-
-  LayerProvider layersAddBottom([String? name]) =>
-      layerInsertAt(layers.length, name);
-
-  LayerProvider layerInsertAt(final int index, [String? name]) {
-    name ??= 'Layer${layers.length}';
-    final LayerProvider layer = LayerProvider(name: name, size: canvas.size);
-    layers.insert(index, layer);
-    layers.selectedLayerIndex = layers.getLayerIndex(layer);
-    update();
-    return layer;
-  }
-
-  void layersAddActionToSelectedLayer({
+  void addActionToSelectedLayer({
     required UserAction action,
   }) {
-    selectedLayer.addUserAction(action);
+    layers.selectedLayer.addUserAction(action);
     update();
   }
 
   void layersUndo() {
-    selectedLayer.undo();
+    layers.selectedLayer.undo();
     update();
   }
 
   void layersRedo() {
-    selectedLayer.redo();
+    layers.selectedLayer.redo();
     update();
-  }
-
-  Future<ui.Image> getImageForCurrentSelectedLayer() async {
-    return await selectedLayer.toImageForStorage(canvas.size);
   }
 
   //=============================================================================
@@ -304,7 +284,7 @@ class AppProvider extends ChangeNotifier {
         type != null &&
         colorFill != null &&
         colorBrush != null) {
-      selectedLayer.addUserAction(
+      layers.selectedLayer.addUserAction(
         UserAction(
           positions: [start, end],
           action: type,
@@ -322,18 +302,18 @@ class AppProvider extends ChangeNotifier {
   }
 
   void updateActionEnd(final Offset position) {
-    selectedLayer.lastUserAction!.positions.last = position;
+    layers.selectedLayer.lastUserAction!.positions.last = position;
   }
 
   void appendLineFromLastUserAction(final Offset positionEndOfNewLine) {
-    selectedLayer.addUserAction(
+    layers.selectedLayer.addUserAction(
       UserAction(
         positions: [
-          selectedLayer.lastUserAction!.positions.last,
+          layers.selectedLayer.lastUserAction!.positions.last,
           positionEndOfNewLine,
         ],
-        action: selectedLayer.lastUserAction!.action,
-        brush: selectedLayer.lastUserAction!.brush,
+        action: layers.selectedLayer.lastUserAction!.action,
+        brush: layers.selectedLayer.lastUserAction!.brush,
       ),
     );
 
@@ -343,7 +323,7 @@ class AppProvider extends ChangeNotifier {
   void floodFillAction(final Offset position) async {
     final Region region = await getRegionPathFromLayerImage(position);
 
-    selectedLayer.addRegion(
+    layers.selectedLayer.addRegion(
       path: region.path
           .shift(Offset(region.left.toDouble(), region.top.toDouble())),
       color: this.fillColor,
@@ -352,7 +332,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<Region> getRegionPathFromLayerImage(ui.Offset position) async {
-    final ui.Image img = await getImageForCurrentSelectedLayer();
+    final ui.Image img = layers.selectedLayer.toImageForStorage(canvas.size);
 
     // Perform flood fill at the clicked position
     final Region region = await extractRegionByColorEdgeAndOffset(

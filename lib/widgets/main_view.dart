@@ -194,7 +194,7 @@ class MainViewState extends State<MainView> {
       }
 
       // Make sure we can draw on this layer
-      if (appModel.isCurrentSelectionReadyForAction == false) {
+      if (appModel.layers.selectedLayer.isVisible == false) {
         //
         // Inform the user that they are attempting to draw on a layer that is hidden
         //
@@ -214,7 +214,7 @@ class MainViewState extends State<MainView> {
         return;
       }
 
-      appModel.layersAddActionToSelectedLayer(
+      appModel.addActionToSelectedLayer(
         action: UserAction(
           action: appModel.selectedAction,
           positions: [adjustedPosition, adjustedPosition],
@@ -265,7 +265,7 @@ class MainViewState extends State<MainView> {
         appModel.appendLineFromLastUserAction(adjustedPosition);
       } else if (appModel.selectedAction == ActionType.brush) {
         // Cumulate more points in the draw path on the selected layer
-        appModel.selectedLayer
+        appModel.layers.selectedLayer
             .appPositionToLastAction(position: adjustedPosition);
         appModel.update();
       } else {
