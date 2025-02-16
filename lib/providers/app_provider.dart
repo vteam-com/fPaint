@@ -74,8 +74,8 @@ class AppProvider extends ChangeNotifier {
     canvas.size = size;
     layers.clear();
     layers.setSize(size);
-    _selectedLayerIndex = 0;
     layers.addWhiteBackgroundLayer();
+    layers.selectedLayerIndex = 0;
     resetView();
   }
 
@@ -196,22 +196,7 @@ class AppProvider extends ChangeNotifier {
   //=============================================================================
   // All things Layers
   LayersProvider layers = LayersProvider(); // this is a singleton
-  LayerProvider get selectedLayer => layers.get(selectedLayerIndex);
-
-  int _selectedLayerIndex = 0;
-  int get selectedLayerIndex => _selectedLayerIndex;
-  set selectedLayerIndex(final int index) {
-    if (layers.isIndexInRange(index)) {
-      for (int i = 0; i < layers.length; i++) {
-        final LayerProvider layer = layers.get(i);
-        layer.id = (layers.length - i).toString();
-        layer.isSelected = i == index;
-      }
-      _selectedLayerIndex = index;
-      layers.get(_selectedLayerIndex).isSelected = true;
-      update();
-    }
-  }
+  LayerProvider get selectedLayer => layers.get(layers.selectedLayerIndex);
 
   bool get isCurrentSelectionReadyForAction => selectedLayer.isVisible;
 
@@ -224,25 +209,15 @@ class AppProvider extends ChangeNotifier {
     name ??= 'Layer${layers.length}';
     final LayerProvider layer = LayerProvider(name: name, size: canvas.size);
     layers.insert(index, layer);
-    selectedLayerIndex = layers.getLayerIndex(layer);
+    layers.selectedLayerIndex = layers.getLayerIndex(layer);
     update();
     return layer;
-  }
-
-  void layersRemove(final LayerProvider layer) {
-    layers.remove(layer);
-    selectedLayerIndex = (selectedLayerIndex > 0 ? selectedLayerIndex - 1 : 0);
   }
 
   void layersAddActionToSelectedLayer({
     required UserAction action,
   }) {
     selectedLayer.addUserAction(action);
-    update();
-  }
-
-  void layersToggleVisibility(final LayerProvider layer) {
-    layer.isVisible = !layer.isVisible;
     update();
   }
 

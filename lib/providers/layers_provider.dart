@@ -71,6 +71,26 @@ class LayersProvider extends ChangeNotifier {
   bool get isNotEmpty => _list.isNotEmpty;
   bool get hasChanged => _list.any((layer) => layer.hasChanged);
 
+  int _selectedLayerIndex = 0;
+  int get selectedLayerIndex => _selectedLayerIndex;
+  set selectedLayerIndex(final int index) {
+    if (this.isIndexInRange(index)) {
+      for (int i = 0; i < this.length; i++) {
+        final LayerProvider layer = this.get(i);
+        layer.id = (this.length - i).toString();
+        layer.isSelected = i == index;
+      }
+      _selectedLayerIndex = index;
+      this.get(_selectedLayerIndex).isSelected = true;
+      notifyListeners();
+    }
+  }
+
+  void layersToggleVisibility(final LayerProvider layer) {
+    layer.isVisible = !layer.isVisible;
+    notifyListeners();
+  }
+
   void clearHasChanged() {
     for (final LayerProvider layer in _list) {
       layer.hasChanged = false;
@@ -116,7 +136,10 @@ class LayersProvider extends ChangeNotifier {
   }
 
   bool remove(final LayerProvider layer) {
-    return _list.remove(layer);
+    final wasRemoved = _list.remove(layer);
+    this.selectedLayerIndex =
+        (this.selectedLayerIndex > 0 ? this.selectedLayerIndex - 1 : 0);
+    return wasRemoved;
   }
 
   void removeByIndex(final int index) {

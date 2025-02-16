@@ -221,15 +221,15 @@ class LayerSelector extends StatelessWidget {
         break;
       case 'delete':
         if (allowRemoveLayer) {
-          appModel.layersRemove(layer);
+          appModel.layers.remove(layer);
         }
         break;
       case 'merge':
         if (layer != appModel.layers.list.last) {
           _onFlattenLayers(
             appModel,
-            appModel.selectedLayerIndex,
-            appModel.selectedLayerIndex + 1,
+            appModel.layers.selectedLayerIndex,
+            appModel.layers.selectedLayerIndex + 1,
           );
         }
         break;
@@ -240,7 +240,7 @@ class LayerSelector extends StatelessWidget {
         );
         break;
       case 'visibility':
-        appModel.layersToggleVisibility(layer);
+        appModel.layers.layersToggleVisibility(layer);
         break;
       case 'allHide':
         appModel.layers.hideShowAllExcept(layer, false);
@@ -285,7 +285,7 @@ class LayerSelector extends StatelessWidget {
                 ? Colors.blue
                 : const ui.Color.fromARGB(255, 135, 9, 9),
           ),
-          onPressed: () => appModel.layersToggleVisibility(layer),
+          onPressed: () => appModel.layers.layersToggleVisibility(layer),
         ),
       ],
     );
@@ -345,7 +345,7 @@ class LayerSelector extends StatelessWidget {
           tooltip: 'Delete this layer',
           icon: const Icon(Icons.playlist_remove),
           onPressed:
-              allowRemoveLayer ? () => appModel.layersRemove(layer) : null,
+              allowRemoveLayer ? () => appModel.layers.remove(layer) : null,
         ),
         IconButton(
           tooltip: 'Merge to below layer',
@@ -354,8 +354,8 @@ class LayerSelector extends StatelessWidget {
               ? null
               : () => _onFlattenLayers(
                     appModel,
-                    appModel.selectedLayerIndex,
-                    appModel.selectedLayerIndex + 1,
+                    appModel.layers.selectedLayerIndex,
+                    appModel.layers.selectedLayerIndex + 1,
                   ),
         ),
         IconButton(
@@ -374,9 +374,10 @@ class LayerSelector extends StatelessWidget {
 
   // Method to insert a new layer above the currently selected one
   void _onAddLayer(final AppProvider appModel) {
-    final int currentIndex = appModel.selectedLayerIndex;
+    final int currentIndex = appModel.layers.selectedLayerIndex;
     final LayerProvider newLayer = appModel.layerInsertAt(currentIndex);
-    appModel.selectedLayerIndex = appModel.layers.getLayerIndex(newLayer);
+    appModel.layers.selectedLayerIndex =
+        appModel.layers.getLayerIndex(newLayer);
   }
 
   // Method to flatten all layers
@@ -390,11 +391,11 @@ class LayerSelector extends StatelessWidget {
         appModel.layers.get(layerIndexToMergIn);
 
     receivingLayer.mergeFrom(layerToMege);
-    appModel.layersRemove(layerToMege);
+    appModel.layers.remove(layerToMege);
     if (layerIndexToMergIn > layerIndexToMerge) {
-      appModel.selectedLayerIndex = layerIndexToMergIn - 1;
+      appModel.layers.selectedLayerIndex = layerIndexToMergIn - 1;
     } else {
-      appModel.selectedLayerIndex = layerIndexToMergIn;
+      appModel.layers.selectedLayerIndex = layerIndexToMergIn;
     }
   }
 
