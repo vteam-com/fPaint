@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 class CanvasPanel extends StatelessWidget {

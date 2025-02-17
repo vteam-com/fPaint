@@ -5,7 +5,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/image_helper.dart';
-import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:fpaint/providers/layers_provider.dart';
@@ -61,37 +60,12 @@ class AppProvider extends ChangeNotifier {
   // All things Canvas
   Offset offset = Offset.zero;
 
-  int get canvasResizePosition => layers.resizePosition;
-  set canvasResizePosition(int value) {
-    layers.resizePosition = value;
-    update();
-  } // center
-
   void canvasReset(final Size size) {
     layers.clear();
     layers.size = size;
     layers.addWhiteBackgroundLayer();
     layers.selectedLayerIndex = 0;
     resetView();
-  }
-
-  void canvasResize(final int width, final int height) {
-    final Size oldSize = layers.size;
-    final Size newSize = Size(width.toDouble(), height.toDouble());
-    layers.size = newSize;
-
-    if (width < oldSize.width || height < oldSize.height) {
-      final double scale = min(width / oldSize.width, height / oldSize.height);
-      layers.scale = scale;
-    }
-
-    Offset offset = CanvasResizePosition.anchorTranslate(
-      layers.resizePosition,
-      oldSize,
-      newSize,
-    );
-    layers.offset(offset);
-    update();
   }
 
   void canvasSetScale(final double value) {

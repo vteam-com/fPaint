@@ -1,7 +1,10 @@
 // Imports
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
+import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -86,6 +89,31 @@ class LayersProvider extends ChangeNotifier {
     _resizePosition = value;
     notifyListeners();
   } // center
+
+  int get canvasResizePosition => resizePosition;
+  set canvasResizePosition(int value) {
+    resizePosition = value;
+    notifyListeners();
+  } // center
+
+  void canvasResize(final int width, final int height) {
+    final Size oldSize = size;
+    final Size newSize = Size(width.toDouble(), height.toDouble());
+    size = newSize;
+
+    if (width < oldSize.width || height < oldSize.height) {
+      final double scale = min(width / oldSize.width, height / oldSize.height);
+      this.scale = scale;
+    }
+
+    Offset offset = CanvasResizePosition.anchorTranslate(
+      this.resizePosition,
+      oldSize,
+      newSize,
+    );
+    this.offset(offset);
+    update();
+  }
 
   LayerProvider addWhiteBackgroundLayer() {
     final LayerProvider firstLayer =

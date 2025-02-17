@@ -7,7 +7,7 @@ import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/render_helper.dart';
-import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/models/user_action.dart';
 import 'package:provider/provider.dart';
 
 // Exports
