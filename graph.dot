@@ -188,7 +188,6 @@ digraph "" {
   "/lib/providers/layer_provider.dart" -> "/lib/models/render_helper.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/providers/app_provider.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/models/user_action.dart" [style=dashed];
-  "/lib/providers/app_provider.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/providers/app_provider.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/providers/app_provider.dart" -> "/lib/models/canvas_model.dart";
   "/lib/providers/app_provider.dart" -> "/lib/models/canvas_resize.dart";
@@ -262,7 +261,7 @@ digraph "" {
   "/lib/files/export_download_non_web.dart" -> "/lib/files/file_jpeg.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/panels/share_panel.dart";
-  "/lib/files/export_download_non_web.dart" -> "/lib/providers/app_provider.dart";
+  "/lib/files/export_download_non_web.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/files/import_files.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/import_files.dart" -> "/lib/providers/app_provider.dart";
   "/lib/files/import_files.dart" -> "/lib/providers/shell_provider.dart";
@@ -274,7 +273,7 @@ digraph "" {
   "/lib/helpers/image_helper.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/helpers/color_helper.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/helpers/color_helper.dart";
-  "/lib/widgets/color_picker_dialog.dart" -> "/lib/providers/app_provider.dart";
+  "/lib/widgets/color_picker_dialog.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/providers/shell_provider.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/color_preview.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/color_selector.dart";
@@ -286,7 +285,6 @@ digraph "" {
   "/lib/widgets/shortcuts.dart" -> "/lib/providers/app_provider.dart";
   "/lib/widgets/shortcuts.dart" -> "/lib/providers/shell_provider.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/helpers/color_helper.dart";
-  "/lib/widgets/top_colors.dart" -> "/lib/providers/app_provider.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/color_preview.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/brush_style_picker.dart" -> "/lib/providers/app_provider.dart";

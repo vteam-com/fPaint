@@ -193,16 +193,16 @@ Future<ui.Image> decodeImage(List<int> bytes) async {
 
 ///
 Future<void> saveToORA({
-  required final AppProvider appModel,
+  required final LayersProvider layers,
   required final String filePath,
 }) async {
-  List<int> encodedData = await createOraAchive(appModel);
+  List<int> encodedData = await createOraAchive(layers);
 
   await File(filePath).writeAsBytes(encodedData);
 }
 
 ///
-Future<List<int>> createOraAchive(AppProvider appModel) async {
+Future<List<int>> createOraAchive(final LayersProvider layers) async {
   final Archive archive = Archive();
   final XmlBuilder builder = XmlBuilder();
 
@@ -219,12 +219,12 @@ Future<List<int>> createOraAchive(AppProvider appModel) async {
   final List<Map<String, dynamic>> layersData = [];
 
   // Generate PNG files and add them to the archive
-  for (int i = 0; i < appModel.layers.length; i++) {
-    final LayerProvider layer = appModel.layers.get(i);
+  for (int i = 0; i < layers.length; i++) {
+    final LayerProvider layer = layers.get(i);
     final String imageName = 'data/layer-$i.png';
 
     // Save layer image as PNG
-    final ui.Image imageLayer = layer.toImageForStorage(appModel.canvas.size);
+    final ui.Image imageLayer = layer.toImageForStorage(layers.size);
 
     final ByteData? bytes =
         await imageLayer.toByteData(format: ui.ImageByteFormat.png);
@@ -255,11 +255,11 @@ Future<List<int>> createOraAchive(AppProvider appModel) async {
       builder.attribute('version', '0.0.1');
       builder.attribute(
         'w',
-        appModel.canvas.size.width.toInt().toString(),
+        layers.size.width.toInt().toString(),
       );
       builder.attribute(
         'h',
-        appModel.canvas.size.height.toInt().toString(),
+        layers.size.height.toInt().toString(),
       );
 
       builder.element(

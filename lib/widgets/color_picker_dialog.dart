@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/helpers/color_helper.dart';
-import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
@@ -43,8 +43,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final appModel = AppProvider.of(context);
     final shellModel = ShellProvider.of(context);
+    final layersModel = LayersProvider.of(context);
 
     // ignore: deprecated_member_use
     return WillPopScope(
@@ -66,7 +66,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
-                  _buildContent(appModel),
+                  _buildContent(layersModel),
                 ],
               ),
             )
@@ -75,13 +75,13 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               contentPadding: const EdgeInsets.all(2),
               content: SizedBox(
                 width: 600,
-                child: _buildContent(appModel),
+                child: _buildContent(layersModel),
               ),
             ),
     );
   }
 
-  Widget _buildContent(final AppProvider appModel) {
+  Widget _buildContent(final LayersProvider layers) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -160,10 +160,10 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           //----------------------------
           // Top colors used in the image
           TopColors(
-            colorUsages: appModel.topColors,
+            colorUsages: layers.topColors,
             onRefresh: () {
               setState(() {
-                appModel.evaluatTopColor();
+                layers.evaluatTopColor();
               });
             },
             onColorPicked: (color) {

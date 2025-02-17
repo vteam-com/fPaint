@@ -125,7 +125,7 @@ Widget shortCutsForMainApp(
         ),
         SaveIntent: CallbackAction<SaveIntent>(
           onInvoke: (SaveIntent intent) async =>
-              await saveFile(shellModel, appModel),
+              await saveFile(shellModel, appModel.layers),
         ),
         CutIntent: CallbackAction<CutIntent>(
           onInvoke: (CutIntent intent) async => appModel.regionCut(),
