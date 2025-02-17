@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
@@ -39,6 +41,8 @@ class MainViewState extends State<MainView> {
 
   @override
   Widget build(BuildContext context) {
+    const double scaleTolerance = 0.2;
+
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         // print('LayoutBuilder ${constraints.maxWidth} ${constraints.maxHeight}');
@@ -62,39 +66,42 @@ class MainViewState extends State<MainView> {
         }
 
         return Listener(
-          //
-          // PAN and SCALE
-          //
-          onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
-            // Scaling
-            if (event.scale == 1) {
-              // Panning
-              appModel.offset += event.panDelta;
-            } else {
-              // Step 1: Convert screen coordinates to canvas coordinates
-              final Offset before = appModel.toCanvas(event.localPosition);
-
-              // Step 2: Apply the scale change
-              final double scaleDelta = event.scale > 1 ? 1.01 : 0.99;
-              appModel.layers.scale = appModel.layers.scale * scaleDelta;
-
-              // Step 3: Calculate the new position on the canvas
-              final Offset after = appModel.toCanvas(event.localPosition);
-
-              // Step 4: Adjust the offset to keep the cursor anchored
-              // No need to multiply by scale
-              final Offset adjustment = (before - after);
-              appModel.offset -= adjustment * appModel.layers.scale;
+          onPointerSignal: (PointerSignalEvent event) {
+            // Needed for WEB PANNING
+            if (event is PointerScrollEvent) {
+              appModel.offset +=
+                  Offset(-event.scrollDelta.dx, -event.scrollDelta.dy);
+              appModel.update();
             }
-            appModel.update();
           },
+          //
+          // PAN and SCALE for Web, Linux & Windows
+          // this is not invoked for Touch devices and we skip MacOS, since trackpad behavior are received the same way as Touch devices
+          //
+          onPointerPanZoomUpdate: !kIsWeb && Platform.isMacOS
+              ? null
+              : (final PointerPanZoomUpdateEvent event) {
+                  // print('Listener onPointerPanZoomUpdate');
+                  if (event.scale == 1) {
+                    // Panning
+                    appModel.offset += event.panDelta;
+                    appModel.update();
+                  } else {
+                    // Scaling
+                    _handleScaling(
+                      appModel,
+                      event.localPosition,
+                      event.scale,
+                    );
+                  }
+                },
 
           //
           // Pointer DOWN
           //
           onPointerDown: (final PointerDownEvent event) {
             if (event.kind == PointerDeviceKind.touch) {
-              // ignore touch when drawing
+              // ignore touch when drawing, must use the stylus
             } else {
               _handlePointerStart(appModel, event);
             }
@@ -105,7 +112,7 @@ class MainViewState extends State<MainView> {
           //
           onPointerMove: (final PointerEvent event) {
             if (event.kind == PointerDeviceKind.touch) {
-              // ignore touch when drawing
+              // ignore touch when drawing, must use the stylus
             } else {
               _handlePointerMove(appModel, event);
             }
@@ -116,7 +123,7 @@ class MainViewState extends State<MainView> {
           //
           onPointerUp: (PointerUpEvent event) {
             if (event.kind == PointerDeviceKind.touch) {
-              // ignore touch when drawing
+              // ignore touch when drawing, must use the stylus
             } else {
               _handPointerEnd(appModel, event);
             }
@@ -124,50 +131,103 @@ class MainViewState extends State<MainView> {
 
           onPointerCancel: (final PointerCancelEvent event) {
             if (event.kind == PointerDeviceKind.touch) {
-              // ignore touch when drawing
+              // ignore touch when drawing, must use the stylus
             } else {
               _handPointerEnd(appModel, event);
             }
           },
 
           //
-          // Canvas and Selector
+          // Handle Touch Device Gesture iOS, Android, TouchScreen laptops
           //
-          child: Stack(
-            children: [
-              Transform(
-                alignment: Alignment.topLeft,
-                transform: Matrix4.identity()
-                  ..translate(
-                    appModel.offset.dx,
-                    appModel.offset.dy,
-                  )
-                  ..scale(appModel.layers.scale),
-                child: const CanvasPanel(),
-              ),
-
-              //
-              // Selection Widget
-              //
-              if (appModel.selector.isVisible)
-                SelectionHandleWidget(
-                  path: appModel.getPathAdjustToCanvasSizeAndPosition(),
-                  enableMoveAndResize:
-                      appModel.selectedAction == ActionType.selector,
-                  onDrag: (Offset offset) {
-                    appModel.selector.translate(offset);
+          child: GestureDetector(
+            // Handle two-fingers Panning and Scaling
+            onScaleUpdate: (final ScaleUpdateDetails details) {
+              // supported by iOS, Android, macOS
+              if (!Platform.isLinux && !Platform.isWindows) {
+                // print('GestureDetector onScaleUpdate');
+                double scaleAttempt = (details.scale - 1.0).abs();
+                // print('${details.scale} $scaleAttempt');
+                if (scaleAttempt < scaleTolerance) {
+                  // No scaling, apply panning if using 2 fingers
+                  if (details.pointerCount == 2) {
+                    appModel.offset += details.focalPointDelta;
                     appModel.update();
-                  },
-                  onResize: (NineGridHandle handle, Offset offset) {
-                    appModel.selector.nindeGridResize(handle, offset);
-                    appModel.update();
-                  },
-                ),
-            ],
+                  }
+                } else {
+                  // Handle zooming/scaling
+                  _handleScaling(
+                    appModel,
+                    details.localFocalPoint,
+                    details.scale,
+                  );
+                }
+              }
+            },
+            child: _displayCanvasAnSelector(appModel),
           ),
         );
       },
     );
+  }
+
+  Widget _displayCanvasAnSelector(final AppProvider appProvider) {
+    return Stack(
+      children: [
+        Transform(
+          alignment: Alignment.topLeft,
+          transform: Matrix4.identity()
+            ..translate(
+              appProvider.offset.dx,
+              appProvider.offset.dy,
+            )
+            ..scale(appProvider.layers.scale),
+          child: const CanvasPanel(),
+        ),
+
+        //
+        // Selection Widget
+        //
+        if (appProvider.selector.isVisible)
+          SelectionHandleWidget(
+            path: appProvider.getPathAdjustToCanvasSizeAndPosition(),
+            enableMoveAndResize:
+                appProvider.selectedAction == ActionType.selector,
+            onDrag: (Offset offset) {
+              appProvider.selector.translate(offset);
+              appProvider.update();
+            },
+            onResize: (NineGridHandle handle, Offset offset) {
+              appProvider.selector.nindeGridResize(handle, offset);
+              appProvider.update();
+            },
+          ),
+      ],
+    );
+  }
+
+  void _handleScaling(
+    final AppProvider appModel,
+    final Offset anchorPoint,
+    final double scaleDelta,
+  ) {
+    // Handle zooming/scaling
+
+    // Step 1: Convert screen coordinates to canvas coordinates
+    final Offset before = appModel.toCanvas(anchorPoint);
+
+    // Step 2: Apply the scale change
+    final double scaleDeltaResult = scaleDelta > 1 ? 1.01 : 0.99;
+    appModel.layers.scale *= scaleDeltaResult;
+
+    // Step 3: Calculate the new position on the canvas
+    final Offset after = appModel.toCanvas(anchorPoint);
+
+    // Step 4: Adjust the offset to keep the cursor anchored
+    // No need to multiply by scale
+    final Offset adjustment = (before - after);
+    appModel.offset -= adjustment * appModel.layers.scale;
+    appModel.update();
   }
 
   /// Handles the start of a pointer event.
