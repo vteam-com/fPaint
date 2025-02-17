@@ -260,6 +260,7 @@ class LayerProvider extends ChangeNotifier {
   //------------------------------------------------------
   // Thumbnail image
   //
+  ui.Image? _cachedImage;
   ui.Image? _cachedThumnailImage;
   ui.Image? get thumbnailImage => _cachedThumnailImage;
 
@@ -269,13 +270,15 @@ class LayerProvider extends ChangeNotifier {
     renderLayer(canvas);
     final ui.Picture picture = recorder.endRecording();
 
-    _cachedThumnailImage = await picture.toImage(
+    // Cache the full size image of this layer
+    _cachedImage = await picture.toImage(
       size.width.toInt(),
       size.height.toInt(),
     );
 
+    // Cache the thumbnail version
     _cachedThumnailImage = await resizeImage(
-      _cachedThumnailImage!,
+      _cachedImage!,
       scaleSizeTo(size, maxHeight: 64),
     );
 
@@ -286,6 +289,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   void clearCache() {
+    _cachedImage = null;
     _debounceTimer.run(() async {
       await updateThumbnail();
       notifyListeners();
@@ -311,6 +315,12 @@ class LayerProvider extends ChangeNotifier {
   }
 
   void renderLayer(final Canvas canvas) {
+    if (_cachedImage != null) {
+      //print('RenderLayer "$name" USE CACHE ');
+      return canvas.drawImage(_cachedImage!, Offset.zero, Paint());
+    }
+
+    //print('RenderLayer "$name" FULL RENDER');
     // Save a layer with opacity applied
     final Paint layerPaint = Paint()
       ..color = Colors.black.withAlpha((255 * opacity).toInt())
