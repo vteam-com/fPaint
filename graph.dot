@@ -284,7 +284,6 @@ digraph "" {
   "/lib/widgets/top_colors.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/color_preview.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/transparent_background.dart";
-  "/lib/widgets/brush_style_picker.dart" -> "/lib/providers/app_provider.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/color_picker_dialog.dart";

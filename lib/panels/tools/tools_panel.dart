@@ -324,10 +324,19 @@ class ToolsPanel extends StatelessWidget {
             onPressed: () {
               showBrushStylePicker(
                 context,
+                appModel.brushStyle,
+                (final BrushStyle selectedBrushStyle) =>
+                    appModel.brushStyle = selectedBrushStyle,
               );
             },
           ),
-          childRight: minimal ? null : brushStyleSelection(appModel),
+          childRight: minimal
+              ? null
+              : brushStyleDropDown(
+                  appModel.brushStyle,
+                  (final BrushStyle selectedBrushStyle) =>
+                      appModel.brushStyle = selectedBrushStyle,
+                ),
         ),
       );
     }

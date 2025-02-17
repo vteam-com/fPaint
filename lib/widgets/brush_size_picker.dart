@@ -43,6 +43,8 @@ class BrushSizePickerState extends State<BrushSizePicker> {
   @override
   Widget build(final BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 20,
       children: [
         Text('${widget.title}: ${_value.toStringAsFixed(1)}'),
         Slider(
