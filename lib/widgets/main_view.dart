@@ -143,7 +143,7 @@ class MainViewState extends State<MainView> {
                     appModel.offset.dy,
                   )
                   ..scale(appModel.canvas.scale),
-                child: CanvasPanel(appModel: appModel),
+                child: const CanvasPanel(),
               ),
 
               //

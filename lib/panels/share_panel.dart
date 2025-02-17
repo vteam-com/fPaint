@@ -17,7 +17,7 @@ Widget textAction(final String fileName) {
 }
 
 void sharePanel(final BuildContext context) {
-  final AppProvider appModel = AppProvider.of(context);
+  final LayersProvider layers = LayersProvider.of(context);
   showModalBottomSheet(
     context: context,
     builder: (final BuildContext context) {
@@ -40,7 +40,7 @@ void sharePanel(final BuildContext context) {
                 title: textAction('image.PNG'),
                 onTap: () {
                   Navigator.pop(context);
-                  onExportAsPng(appModel);
+                  onExportAsPng(layers);
                 },
               ),
               ListTile(
@@ -48,7 +48,7 @@ void sharePanel(final BuildContext context) {
                 title: textAction('image.JPG'),
                 onTap: () {
                   Navigator.pop(context);
-                  onExportAsJpeg(appModel);
+                  onExportAsJpeg(layers);
                 },
               ),
               ListTile(
@@ -56,7 +56,7 @@ void sharePanel(final BuildContext context) {
                 title: textAction('image.ORA'),
                 onTap: () {
                   Navigator.pop(context);
-                  onExportAsOra(appModel);
+                  onExportAsOra(layers);
                 },
               ),
             ],
@@ -71,7 +71,7 @@ void _onExportToClipboard(final BuildContext context) async {
   final clipboard = SystemClipboard.instance;
   if (clipboard != null) {
     final Uint8List image =
-        await capturePainterToImageBytes(AppProvider.of(context));
+        await capturePainterToImageBytes(LayersProvider.of(context));
     final DataWriterItem item = DataWriterItem(suggestedName: 'fPaint.png');
     item.add(Formats.png(image));
     await clipboard.write([item]);
@@ -80,22 +80,24 @@ void _onExportToClipboard(final BuildContext context) async {
   }
 }
 
-Future<Uint8List> capturePainterToImageBytes(final AppProvider appModel) async {
+Future<Uint8List> capturePainterToImageBytes(
+  final LayersProvider layers,
+) async {
   final PictureRecorder recorder = PictureRecorder();
   final Canvas canvas = Canvas(recorder);
 
   // Draw the custom painter on the canvas
-  final CanvasPanelPainter painter = CanvasPanelPainter(appModel);
+  final CanvasPanelPainter painter = CanvasPanelPainter(layers);
 
-  painter.paint(canvas, appModel.canvas.size);
+  painter.paint(canvas, layers.size);
 
   // End the recording and get the picture
   final Picture picture = recorder.endRecording();
 
   // Convert the picture to an image
   final ui.Image image = await picture.toImage(
-    appModel.canvas.size.width.toInt(),
-    appModel.canvas.size.height.toInt(),
+    layers.size.width.toInt(),
+    layers.size.height.toInt(),
   );
 
   // Convert the image to byte data (e.g., PNG)

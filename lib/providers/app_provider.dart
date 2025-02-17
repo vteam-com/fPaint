@@ -4,7 +4,6 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/canvas_model.dart';
 import 'package:fpaint/models/canvas_resize.dart';
@@ -391,20 +390,6 @@ class AppProvider extends ChangeNotifier {
       ..translate(offset.dx, offset.dy)
       ..scale(canvas.scale);
     return selector.path.transform(matrix.storage);
-  }
-
-  //-------------------------
-  // Top Colors used
-  List<ColorUsage> topColors = [
-    ColorUsage(Colors.white, 1),
-    ColorUsage(Colors.black, 1),
-  ];
-
-  void evaluatTopColor() {
-    this.layers.getTopColorUsed().then((topColorsFound) {
-      topColors = topColorsFound;
-      update();
-    });
   }
 
   //=============================================================================

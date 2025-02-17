@@ -3,24 +3,24 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 class CanvasPanel extends StatelessWidget {
-  const CanvasPanel({super.key, required this.appModel});
-  final AppProvider appModel;
+  const CanvasPanel({super.key});
 
   @override
   Widget build(final BuildContext context) {
+    final layers = LayersProvider.of(context);
     return CustomPaint(
       size: Size.infinite,
-      painter: CanvasPanelPainter(appModel, includeTransparentBackground: true),
+      painter: CanvasPanelPainter(layers, includeTransparentBackground: true),
     );
   }
 }
 
 class CanvasPanelPainter extends CustomPainter {
   CanvasPanelPainter(
-    this._appModel, {
+    this._layers, {
     this.includeTransparentBackground = false,
   });
-  final AppProvider _appModel;
+  final LayersProvider _layers;
   final bool includeTransparentBackground;
 
   @override
@@ -30,11 +30,11 @@ class CanvasPanelPainter extends CustomPainter {
       drawTransaparentBackgroundOffsetAndSize(
         canvas,
         Offset.zero,
-        _appModel.canvas.size,
+        _layers.size,
       );
     }
 
-    for (final LayerProvider layer in _appModel.layers.list.reversed) {
+    for (final LayerProvider layer in _layers.list.reversed) {
       if (layer.isVisible) {
         layer.renderLayer(canvas);
       }

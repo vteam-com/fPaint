@@ -39,7 +39,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   Size _size = const Size(0, 0);
-
+  Size get size => _size;
   void setSize(final Size size) {
     _size = size;
     _list.forEach((layer) => layer.size = size);
@@ -185,6 +185,18 @@ class LayersProvider extends ChangeNotifier {
         layer.isVisible = show;
       }
     }
+  }
+
+  //-------------------------
+  // Top Colors used
+  List<ColorUsage> topColors = [
+    ColorUsage(Colors.white, 1),
+    ColorUsage(Colors.black, 1),
+  ];
+  void evaluatTopColor() {
+    this.getTopColorUsed().then((topColorsFound) {
+      topColors = topColorsFound;
+    });
   }
 
   /// Retrieves the top most used colors across all layers.

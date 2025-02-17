@@ -8,7 +8,7 @@ import 'package:fpaint/panels/about.dart';
 import 'package:fpaint/panels/canvas_settings.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/panels/share_panel.dart';
-import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -176,7 +176,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
     int result,
   ) {
     final ShellProvider shellModel = ShellProvider.of(context);
-    final AppProvider appModel = AppProvider.of(context);
+    final LayersProvider layers = LayersProvider.of(context);
 
     switch (result) {
       case MenuIds.newFile:
@@ -188,11 +188,11 @@ class TopMenuAndLayersPanel extends StatelessWidget {
       case MenuIds.save:
         saveFile(
           shellModel,
-          appModel,
+          layers,
         ).then(
             // ignore: use_build_context_synchronously
             (_) {
-          appModel.layers.clearHasChanged();
+          layers.clearHasChanged();
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

@@ -1,23 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
-import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
-/// Displays a row of color previews at the top of the screen, allowing the user to select a color for the current tool.
+/// A widget that displays the top colors used in the application.
 ///
-/// The [TopColors] widget displays a row of [ColorPreview] widgets, each representing a [ColorUsage] in the provided [colorUsages] list.
-/// When a color preview is tapped, the [AppProvider]'s [fillColor] or [brushColor] is updated based on the current selected tool.
-/// The widget also includes a refresh button to trigger the [onRefresh] callback.
+/// This widget takes a list of [ColorUsage] objects, which represent the
+/// colors used in the application and their popularity. It then displays
+/// these colors in a grid, sorted by hue and popularity. The user can
+/// refresh the list of colors or select a color to trigger a callback.
 ///
-/// Example usage:
-///
-/// TopColors(
-///   colors: appModel.topColors,
-///   onRefresh: () => appModel.refreshTopColors(),
-/// )
-///
-
+/// The widget can be displayed in a minimal mode, which removes some
+/// of the UI elements.
 class TopColors extends StatelessWidget {
   const TopColors({
     super.key,

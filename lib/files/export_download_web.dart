@@ -15,17 +15,17 @@ import 'package:web/web.dart' as web; // Add
 ///
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsPng(
-  final AppProvider appModel, [
+  final LayersProvider layers, [
   final fileName = 'image.png',
 ]) async {
-  await saveAsPng(appModel, fileName);
+  await saveAsPng(layers, fileName);
 }
 
 Future<void> saveAsPng(
-  final AppProvider appModel,
+  final LayersProvider layers,
   final String filePath,
 ) async {
-  final Uint8List imageBytes = await capturePainterToImageBytes(appModel);
+  final Uint8List imageBytes = await capturePainterToImageBytes(layers);
 
   // Create a Blob from the image bytes
   downloadBlob(imageBytes, filePath);
@@ -48,7 +48,8 @@ Future<void> saveAsJpeg(
   final AppProvider appModel,
   final String filePath,
 ) async {
-  final Uint8List imageBytes = await capturePainterToImageBytes(appModel);
+  final Uint8List imageBytes =
+      await capturePainterToImageBytes(appModel.layers);
 
   // Convert the image bytes to JPG format
   final Uint8List outputBytes = await convertToJpg(imageBytes);
@@ -64,17 +65,17 @@ Future<void> saveAsJpeg(
 ///
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsOra(
-  final AppProvider appModel, [
+  final LayersProvider layers, [
   final fileName = 'image.ora',
 ]) async {
-  await saveAsOra(appModel, fileName);
+  await saveAsOra(layers, fileName);
 }
 
 Future<void> saveAsOra(
-  final AppProvider appModel,
+  final LayersProvider layers,
   final String filePath,
 ) async {
-  List<int> image = await createOraAchive(appModel);
+  List<int> image = await createOraAchive(layers);
   // Create a Blob from the image bytes
   downloadBlob(Uint8List.fromList(image), filePath);
 }

@@ -5,21 +5,21 @@ import 'package:fpaint/providers/shell_provider.dart';
 
 Future<void> saveFile(
   final ShellProvider shellModel,
-  final AppProvider appModel,
+  final LayersProvider layers,
 ) async {
   final String fileName = shellModel.loadedFileName;
   final String extension = fileName.split('.').last.toLowerCase();
 
   switch (extension) {
     case 'png':
-      await saveAsPng(appModel, fileName);
+      await saveAsPng(layers, fileName);
       break;
     case 'jpg':
     case 'jpeg':
-      await saveAsJpeg(appModel, fileName);
+      await saveAsJpeg(layers, fileName);
       break;
     case 'ora':
-      await saveAsOra(appModel, fileName);
+      await saveAsOra(layers, fileName);
       break;
   }
 }
