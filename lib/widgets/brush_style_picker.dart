@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/providers/app_provider.dart';
 
 enum BrushStyle {
   solid,
@@ -20,31 +19,77 @@ class MyBrush {
   double size;
 }
 
-Widget brushStyleSelection(final AppProvider appModel) {
+class BrushStylePicker extends StatefulWidget {
+  const BrushStylePicker({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
+  final BrushStyle value;
+  final ValueChanged<BrushStyle> onChanged;
+
+  @override
+  BrushStylePickerState createState() => BrushStylePickerState();
+}
+
+class BrushStylePickerState extends State<BrushStylePicker> {
+  late BrushStyle _value;
+  @override
+  void initState() {
+    super.initState();
+    _value = widget.value;
+  }
+
+  @override
+  Widget build(final BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 20,
+      children: [
+        brushStyleDropDown(_value, (BrushStyle selectedBrush) {
+          setState(() {
+            _value = selectedBrush;
+            widget.onChanged(selectedBrush);
+          });
+        }),
+      ],
+    );
+  }
+}
+
+Widget brushStyleDropDown(
+  final BrushStyle value,
+  final Function(BrushStyle) onChanged,
+) {
   return DropdownButton<int>(
-    value: appModel.brushStyle.index,
+    value: value.index,
     items: BrushStyle.values.map<DropdownMenuItem<int>>((BrushStyle value) {
       return DropdownMenuItem<int>(
         value: value.index,
         child: Text(value.name),
       );
     }).toList(),
-    onChanged: (int? selectedBrush) {
-      appModel.brushStyle = BrushStyle.values[selectedBrush!];
+    onChanged: (int? index) {
+      onChanged(BrushStyle.values[index!]);
     },
   );
 }
 
 void showBrushStylePicker(
   final BuildContext context,
+  final BrushStyle brushStyle,
+  final Function(BrushStyle) onChanged,
 ) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Select Line Style'),
+        title: const Text('Brush'),
         content: IntrinsicHeight(
-          child: brushStyleSelection(AppProvider.of(context)),
+          child: BrushStylePicker(
+            value: brushStyle,
+            onChanged: onChanged,
+          ),
         ),
       );
     },
