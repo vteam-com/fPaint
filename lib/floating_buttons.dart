@@ -68,7 +68,7 @@ Widget floatingActionButtons(
         onPressed: () {
           shellModel.centerImageInViewPort = true;
           appModel
-              .canvasSetScale(((appModel.canvas.scale * 10).ceil() + 1) / 10);
+              .canvasSetScale(((appModel.layers.scale * 10).ceil() + 1) / 10);
         },
         child: const Icon(Icons.zoom_in),
       ),
@@ -77,7 +77,7 @@ Widget floatingActionButtons(
         foregroundColor: colorForegound,
         onPressed: () => appModel.resetView(),
         child: Text(
-          '${(appModel.canvas.scale * 100).toInt()}%\n${appModel.canvas.size.width.toInt()}\n${appModel.canvas.size.height.toInt()}',
+          '${(appModel.layers.scale * 100).toInt()}%\n${appModel.layers.size.width.toInt()}\n${appModel.layers.size.height.toInt()}',
           textAlign: TextAlign.right,
           style: TextStyle(
             color: colorForegound,
@@ -92,7 +92,7 @@ Widget floatingActionButtons(
         onPressed: () {
           shellModel.centerImageInViewPort = true;
           appModel
-              .canvasSetScale(((appModel.canvas.scale * 10).floor() - 1) / 10);
+              .canvasSetScale(((appModel.layers.scale * 10).floor() - 1) / 10);
         },
         child: const Icon(Icons.zoom_out),
       ),

@@ -167,3 +167,26 @@ Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
   final picture = recorder.endRecording();
   return picture.toImage(newSize.width.toInt(), newSize.height.toInt());
 }
+
+class Debouncer {
+  /// Creates a [Debouncer] with an optional [duration].
+  /// Defaults to 1 second if no duration is provided.
+  Debouncer([this.duration = const Duration(seconds: 1)]);
+
+  final Duration duration;
+  Timer? _timer;
+
+  /// Calls the [callback] after the specified [duration].
+  /// If the method is called again before the duration elapses,
+  /// the previous timer is canceled and a new one is started.
+  void run(VoidCallback callback) {
+    _timer?.cancel(); // Cancel any existing timer
+    _timer = Timer(duration, callback); // Start a new timer
+  }
+
+  /// Cancels the current timer if it is active.
+  void cancel() {
+    _timer?.cancel();
+    _timer = null;
+  }
+}

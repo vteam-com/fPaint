@@ -76,7 +76,7 @@ class MainViewState extends State<MainView> {
 
               // Step 2: Apply the scale change
               final double scaleDelta = event.scale > 1 ? 1.01 : 0.99;
-              appModel.canvas.scale *= scaleDelta;
+              appModel.layers.scale = appModel.layers.scale * scaleDelta;
 
               // Step 3: Calculate the new position on the canvas
               final Offset after = appModel.toCanvas(event.localPosition);
@@ -84,7 +84,7 @@ class MainViewState extends State<MainView> {
               // Step 4: Adjust the offset to keep the cursor anchored
               // No need to multiply by scale
               final Offset adjustment = (before - after);
-              appModel.offset -= adjustment * appModel.canvas.scale;
+              appModel.offset -= adjustment * appModel.layers.scale;
             }
             appModel.update();
           },
@@ -142,7 +142,7 @@ class MainViewState extends State<MainView> {
                     appModel.offset.dx,
                     appModel.offset.dy,
                   )
-                  ..scale(appModel.canvas.scale),
+                  ..scale(appModel.layers.scale),
                 child: const CanvasPanel(),
               ),
 
@@ -306,8 +306,8 @@ class MainViewState extends State<MainView> {
     final double parentViewPortWidth,
     final double parentViewPortHeight,
   ) {
-    final double scaledWidth = appModel.canvas.width * appModel.canvas.scale;
-    final double scaledHeight = appModel.canvas.height * appModel.canvas.scale;
+    final double scaledWidth = appModel.layers.width * appModel.layers.scale;
+    final double scaledHeight = appModel.layers.height * appModel.layers.scale;
 
     final double centerX = parentViewPortWidth / 2;
     final double centerY = parentViewPortHeight / 2;

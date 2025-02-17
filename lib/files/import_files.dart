@@ -88,10 +88,9 @@ Future<void> onFileNew(final BuildContext context) async {
 /// - A `Future<void>` indicating the completion of the file open operation.
 Future<void> onFileOpen(final BuildContext context) async {
   final ShellProvider shellModel = ShellProvider.of(context);
-  final AppProvider appModel = AppProvider.of(context);
+  final LayersProvider layers = LayersProvider.of(context);
 
-  if (appModel.layers.hasChanged &&
-      await confirmDiscardCurrentWork(context) == false) {
+  if (layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
     return;
   }
 
@@ -106,16 +105,16 @@ Future<void> onFileOpen(final BuildContext context) async {
     );
 
     if (result != null) {
-      appModel.layers.clear();
+      layers.clear();
 
       if (kIsWeb) {
         final Uint8List bytes = result.files.single.bytes!;
         if (result.files.single.extension == 'ora') {
-          await readOraFileFromBytes(shellModel, appModel, bytes);
+          await readOraFileFromBytes(shellModel, layers, bytes);
         } else if (isFileExtensionSupported(
           result.files.single.extension ?? '',
         )) {
-          await readImageFileFromBytes(appModel, bytes);
+          await readImageFileFromBytes(layers, bytes);
         }
       } else {
         final path = result.files.single.path!;
@@ -123,14 +122,14 @@ Future<void> onFileOpen(final BuildContext context) async {
         if (result.files.single.extension == 'xcf') {
           // TODO
         } else if (result.files.single.extension == 'ora') {
-          await readOraFile(shellModel, appModel, path);
+          await readOraFile(shellModel, layers, path);
         } else if (isFileExtensionSupported(
           result.files.single.extension ?? '',
         )) {
-          await readImageFilePath(appModel, path);
+          await readImageFilePath(layers, path);
         }
       }
-      appModel.layers.clearHasChanged();
+      layers.clearHasChanged();
     }
   } catch (e) {
     // Handle any errors that occur during file picking/loading
@@ -155,28 +154,28 @@ bool isFileExtensionSupported(String extension) {
 }
 
 Future<void> _readImageFile(
-  AppProvider appModel,
+  LayersProvider layers,
   Future<Uint8List> bytesFuture,
 ) async {
   final image = await decodeImageFromList(await bytesFuture);
-  appModel.layers.clear();
-  appModel.layers.addTop();
-  appModel.canvas.size = Size(image.width.toDouble(), image.height.toDouble());
-  appModel.layers.selectedLayer.addImage(imageToAdd: image);
+  layers.clear();
+  layers.addTop();
+  layers.size = Size(image.width.toDouble(), image.height.toDouble());
+  layers.selectedLayer.addImage(imageToAdd: image);
 }
 
 Future<void> readImageFilePath(
-  AppProvider appModel,
+  LayersProvider layers,
   String path,
 ) async {
-  await _readImageFile(appModel, File(path).readAsBytes());
+  await _readImageFile(layers, File(path).readAsBytes());
 }
 
 Future<void> readImageFileFromBytes(
-  AppProvider appModel,
+  LayersProvider layers,
   Uint8List bytes,
 ) async {
-  await _readImageFile(appModel, Future.value(bytes));
+  await _readImageFile(layers, Future.value(bytes));
 }
 
 Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {

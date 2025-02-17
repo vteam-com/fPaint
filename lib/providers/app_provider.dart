@@ -5,10 +5,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/image_helper.dart';
-import 'package:fpaint/models/canvas_model.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:provider/provider.dart';
 
 // Exports
@@ -43,7 +43,7 @@ export 'package:fpaint/providers/layers_provider.dart';
 /// The `update` method notifies all listeners that the model has been updated.
 class AppProvider extends ChangeNotifier {
   AppProvider() {
-    canvasReset(canvas.size);
+    this.canvasReset(layers.size);
   }
 
   /// Gets the [AppProvider] instance from the provided [BuildContext].
@@ -59,37 +59,34 @@ class AppProvider extends ChangeNotifier {
 
   //=============================================================================
   // All things Canvas
-  CanvasModel canvas = CanvasModel();
-
   Offset offset = Offset.zero;
 
-  int get canvasResizePosition => canvas.resizePosition;
+  int get canvasResizePosition => layers.resizePosition;
   set canvasResizePosition(int value) {
-    canvas.resizePosition = value;
+    layers.resizePosition = value;
     update();
   } // center
 
   void canvasReset(final Size size) {
-    canvas.size = size;
     layers.clear();
-    layers.setSize(size);
+    layers.size = size;
     layers.addWhiteBackgroundLayer();
     layers.selectedLayerIndex = 0;
     resetView();
   }
 
   void canvasResize(final int width, final int height) {
-    final Size oldSize = canvas.size;
+    final Size oldSize = layers.size;
     final Size newSize = Size(width.toDouble(), height.toDouble());
-    canvas.size = newSize;
+    layers.size = newSize;
 
     if (width < oldSize.width || height < oldSize.height) {
       final double scale = min(width / oldSize.width, height / oldSize.height);
-      layers.scale(scale);
+      layers.scale = scale;
     }
 
     Offset offset = CanvasResizePosition.anchorTranslate(
-      canvas.resizePosition,
+      layers.resizePosition,
       oldSize,
       newSize,
     );
@@ -98,16 +95,16 @@ class AppProvider extends ChangeNotifier {
   }
 
   void canvasSetScale(final double value) {
-    canvas.scale = value;
+    layers.scale = value;
     update();
   }
 
   Offset toCanvas(Offset point) {
-    return (point - offset) / canvas.scale;
+    return (point - offset) / layers.scale;
   }
 
   Offset fromCanvas(Offset point) {
-    return (point * canvas.scale) + offset;
+    return (point * layers.scale) + offset;
   }
 
   void regionErase() {
@@ -127,7 +124,7 @@ class AppProvider extends ChangeNotifier {
     }
 
     final ui.Image image =
-        layers.selectedLayer.toImageForStorage(this.canvas.size);
+        layers.selectedLayer.toImageForStorage(this.layers.size);
 
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder);
@@ -170,9 +167,9 @@ class AppProvider extends ChangeNotifier {
     update();
   }
 
-  bool get canvasResizeLockAspectRatio => canvas.canvasResizeLockAspectRatio;
+  bool get canvasResizeLockAspectRatio => layers.canvasResizeLockAspectRatio;
   set canvasResizeLockAspectRatio(bool value) {
-    canvas.canvasResizeLockAspectRatio = value;
+    layers.canvasResizeLockAspectRatio = value;
     update();
   }
 
@@ -187,10 +184,10 @@ class AppProvider extends ChangeNotifier {
 
   void resetView() {
     offset = Offset.zero;
-    canvas.scale = 1;
+    layers.scale = 1;
     // TODO
     // centerImageInViewPort = true;
-    update();
+    // update();
   }
 
   //=============================================================================
@@ -331,7 +328,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<Region> getRegionPathFromLayerImage(ui.Offset position) async {
-    final ui.Image img = layers.selectedLayer.toImageForStorage(canvas.size);
+    final ui.Image img = layers.selectedLayer.toImageForStorage(layers.size);
 
     // Perform flood fill at the clicked position
     final Region region = await extractRegionByColorEdgeAndOffset(
@@ -381,14 +378,14 @@ class AppProvider extends ChangeNotifier {
     selectorStart(Offset.zero);
     selector.path = Path();
     selector.path.addRect(
-      Rect.fromPoints(Offset.zero, Offset(canvas.width, canvas.height)),
+      Rect.fromPoints(Offset.zero, Offset(layers.width, layers.height)),
     );
   }
 
   Path getPathAdjustToCanvasSizeAndPosition() {
     final Matrix4 matrix = Matrix4.identity()
       ..translate(offset.dx, offset.dy)
-      ..scale(canvas.scale);
+      ..scale(layers.scale);
     return selector.path.transform(matrix.storage);
   }
 

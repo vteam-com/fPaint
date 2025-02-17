@@ -13,13 +13,13 @@ void showCanvasSettings(final BuildContext context) {
     builder: (final BuildContext context) {
       AppProvider appModel = AppProvider.of(context, listen: true);
       if (initOnce) {
-        widthController.text = appModel.canvas.size.width.toInt().toString();
-        heightController.text = appModel.canvas.size.height.toInt().toString();
+        widthController.text = appModel.layers.size.width.toInt().toString();
+        heightController.text = appModel.layers.size.height.toInt().toString();
         initOnce = false;
       }
 
       double initialAspectRatio =
-          appModel.canvas.size.width / appModel.canvas.size.height;
+          appModel.layers.size.width / appModel.layers.size.height;
 
       return SafeArea(
         child: Padding(

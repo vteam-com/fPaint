@@ -33,7 +33,6 @@ digraph "" {
   "/lib/models/user_action.dart" [label="user_action"];
   "/lib/models/canvas_resize.dart" [label="canvas_resize"];
   "/lib/models/render_helper.dart" [label="render_helper"];
-  "/lib/models/canvas_model.dart" [label="canvas_model"];
   "/lib/models/localized_strings.dart" [label="localized_strings"];
   "/lib/main.dart" [label="main"];
   "/lib/files/xcf_reader.dart" [label="xcf_reader"];
@@ -129,7 +128,6 @@ digraph "" {
         "/lib/models/user_action.dart";
         "/lib/models/canvas_resize.dart";
         "/lib/models/render_helper.dart";
-        "/lib/models/canvas_model.dart";
         "/lib/models/localized_strings.dart";
       }
       subgraph "cluster~/lib/files" {
@@ -189,10 +187,10 @@ digraph "" {
   "/lib/providers/layer_provider.dart" -> "/lib/providers/app_provider.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/models/user_action.dart" [style=dashed];
   "/lib/providers/app_provider.dart" -> "/lib/helpers/image_helper.dart";
-  "/lib/providers/app_provider.dart" -> "/lib/models/canvas_model.dart";
   "/lib/providers/app_provider.dart" -> "/lib/models/canvas_resize.dart";
   "/lib/providers/app_provider.dart" -> "/lib/models/selector_model.dart";
   "/lib/providers/app_provider.dart" -> "/lib/panels/tools/flood_fill.dart";
+  "/lib/providers/app_provider.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/providers/app_provider.dart" -> "/lib/providers/layers_provider.dart" [style=dashed];
   "/lib/providers/layers_provider.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/providers/layers_provider.dart" -> "/lib/helpers/list_helper.dart";
@@ -224,7 +222,7 @@ digraph "" {
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/panels/canvas_settings.dart";
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/panels/layers/layer_selector.dart";
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/panels/share_panel.dart";
-  "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/providers/app_provider.dart";
+  "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/panels/layers/top_menu_and_layers_panel.dart" -> "/lib/providers/shell_provider.dart";
   "/lib/panels/layers/layer_thumbnail.dart" -> "/lib/providers/layer_provider.dart";
   "/lib/panels/layers/layer_thumbnail.dart" -> "/lib/widgets/image_painter.dart";
@@ -243,7 +241,6 @@ digraph "" {
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/user_action.dart" -> "/lib/widgets/brush_style_picker.dart" [style=dashed];
   "/lib/models/render_helper.dart" -> "/lib/widgets/brush_style_picker.dart";
-  "/lib/models/canvas_model.dart" -> "/lib/providers/layers_provider.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/main_screen.dart";
   "/lib/main.dart" -> "/lib/providers/app_provider.dart";
   "/lib/main.dart" -> "/lib/providers/shell_provider.dart";
@@ -252,9 +249,9 @@ digraph "" {
   "/lib/files/export_download_web.dart" -> "/lib/files/file_jpeg.dart";
   "/lib/files/export_download_web.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/export_download_web.dart" -> "/lib/panels/share_panel.dart";
-  "/lib/files/export_download_web.dart" -> "/lib/providers/app_provider.dart";
+  "/lib/files/export_download_web.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/files/file_ora.dart" -> "/lib/helpers/list_helper.dart";
-  "/lib/files/file_ora.dart" -> "/lib/providers/app_provider.dart";
+  "/lib/files/file_ora.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/files/file_ora.dart" -> "/lib/providers/shell_provider.dart";
   "/lib/files/save.dart" -> "/lib/providers/app_provider.dart";
   "/lib/files/save.dart" -> "/lib/providers/shell_provider.dart";

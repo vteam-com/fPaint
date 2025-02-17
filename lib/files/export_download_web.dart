@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/panels/share_panel.dart';
-import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:web/web.dart' as web; // Add
 
 /// Exports the current painter as a PNG image and triggers a download.
@@ -38,18 +38,17 @@ Future<void> saveAsPng(
 ///
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsJpeg(
-  final AppProvider appModel, [
+  final LayersProvider layers, [
   final fileName = 'image.jpg',
 ]) async {
-  await saveAsJpeg(appModel, fileName);
+  await saveAsJpeg(layers, fileName);
 }
 
 Future<void> saveAsJpeg(
-  final AppProvider appModel,
+  final LayersProvider layers,
   final String filePath,
 ) async {
-  final Uint8List imageBytes =
-      await capturePainterToImageBytes(appModel.layers);
+  final Uint8List imageBytes = await capturePainterToImageBytes(layers);
 
   // Convert the image bytes to JPG format
   final Uint8List outputBytes = await convertToJpg(imageBytes);
