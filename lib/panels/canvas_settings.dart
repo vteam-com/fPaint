@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 
 final TextEditingController widthController = TextEditingController();
@@ -11,15 +11,14 @@ void showCanvasSettings(final BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (final BuildContext context) {
-      AppProvider appModel = AppProvider.of(context, listen: true);
+      LayersProvider layers = LayersProvider.of(context, listen: true);
       if (initOnce) {
-        widthController.text = appModel.layers.size.width.toInt().toString();
-        heightController.text = appModel.layers.size.height.toInt().toString();
+        widthController.text = layers.size.width.toInt().toString();
+        heightController.text = layers.size.height.toInt().toString();
         initOnce = false;
       }
 
-      double initialAspectRatio =
-          appModel.layers.size.width / appModel.layers.size.height;
+      double initialAspectRatio = layers.size.width / layers.size.height;
 
       return SafeArea(
         child: Padding(
@@ -49,7 +48,7 @@ void showCanvasSettings(final BuildContext context) {
                       keyboardType: TextInputType.number,
                       controller: widthController,
                       onChanged: (value) {
-                        if (appModel.canvasResizeLockAspectRatio) {
+                        if (layers.canvasResizeLockAspectRatio) {
                           double width = double.tryParse(value) ??
                               double.tryParse(widthController.text)!;
                           double height = width / initialAspectRatio;
@@ -61,13 +60,13 @@ void showCanvasSettings(final BuildContext context) {
                   ),
                   IconButton(
                     icon: Icon(
-                      appModel.canvasResizeLockAspectRatio
+                      layers.canvasResizeLockAspectRatio
                           ? Icons.link
                           : Icons.link_off,
                     ),
                     onPressed: () {
-                      appModel.canvasResizeLockAspectRatio =
-                          !appModel.canvasResizeLockAspectRatio;
+                      layers.canvasResizeLockAspectRatio =
+                          !layers.canvasResizeLockAspectRatio;
                     },
                   ),
                   SizedBox(
@@ -81,7 +80,7 @@ void showCanvasSettings(final BuildContext context) {
                       keyboardType: TextInputType.number,
                       controller: heightController,
                       onChanged: (value) {
-                        if (appModel.canvasResizeLockAspectRatio) {
+                        if (layers.canvasResizeLockAspectRatio) {
                           double height = double.tryParse(value) ??
                               double.tryParse(heightController.text)!;
                           double width = height * initialAspectRatio;
@@ -100,9 +99,9 @@ void showCanvasSettings(final BuildContext context) {
                 children: [
                   const Text('Content Alignment'),
                   NineGridSelector(
-                    selectedPosition: appModel.canvasResizePosition,
+                    selectedPosition: layers.canvasResizePosition,
                     onPositionSelected: (final int newPosition) {
-                      appModel.canvasResizePosition = newPosition;
+                      layers.canvasResizePosition = newPosition;
                     },
                   ),
                 ],
@@ -122,7 +121,7 @@ void showCanvasSettings(final BuildContext context) {
                         ),
                       );
                     } else {
-                      appModel.canvasResize(width.toInt(), height.toInt());
+                      layers.canvasResize(width.toInt(), height.toInt());
                       Navigator.pop(context);
                     }
                   },
