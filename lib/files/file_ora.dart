@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/helpers/list_helper.dart';
-import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:xml/xml.dart';
 
@@ -21,7 +21,7 @@ import 'package:xml/xml.dart';
 /// - Returns: A [Future] that completes when the file has been read and the model updated.
 Future<void> readOraFile(
   final ShellProvider shellModel,
-  final AppProvider appModel,
+  final LayersProvider layers,
   String filePath,
 ) async {
   try {
@@ -36,7 +36,7 @@ Future<void> readOraFile(
     // Read the file as bytes
     await readOraFileFromBytes(
       shellModel,
-      appModel,
+      layers,
       await oraFile.readAsBytes(),
     );
   } catch (e) {
@@ -47,7 +47,7 @@ Future<void> readOraFile(
 /// Read the file from  bytes
 Future<void> readOraFileFromBytes(
   ShellProvider shellModel,
-  AppProvider appModel,
+  LayersProvider layers,
   Uint8List bytes,
 ) async {
   // Extract the ZIP contents
@@ -67,7 +67,7 @@ Future<void> readOraFileFromBytes(
   //print(stackXml.toString());
 
   final XmlElement? rootImage = stackXml.getElement('image');
-  appModel.canvas.size = ui.Size(
+  layers.size = ui.Size(
     double.parse(rootImage!.getAttribute('w')!),
     double.parse(rootImage.getAttribute('h')!),
   );
@@ -83,7 +83,7 @@ Future<void> readOraFileFromBytes(
     final bool preserveAlpha =
         xmlLayer.getAttribute('alpha-preserve') == 'true';
 
-    final LayerProvider newLayer = appModel.layers.addBottom(name);
+    final LayerProvider newLayer = layers.addBottom(name);
     newLayer.isVisible = visibleAsText == 'true';
     newLayer.opacity = double.parse(opacityAsText);
 
@@ -102,7 +102,7 @@ Future<void> readOraFileFromBytes(
       newLayer.preserveAlpha = preserveAlpha;
 
       await addImageToLayer(
-        appModel: appModel,
+        layers: layers,
         layer: newLayer,
         archive: archive,
         imageName: src,
@@ -146,7 +146,7 @@ ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
 ///
 Future<void> addImageToLayer({
   required final Archive archive,
-  required final AppProvider appModel,
+  required final LayersProvider layers,
   required final LayerProvider layer,
   required final String imageName,
   required final ui.Offset offset,

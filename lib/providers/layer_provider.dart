@@ -63,7 +63,7 @@ class LayerProvider extends ChangeNotifier {
   ///-------------------------------------------
   /// Modifed state
   bool hasChanged = true;
-  Timer? _debounceTimer;
+  final Debouncer _debounceTimer = Debouncer();
 
   //---------------------------------------------
   // Size
@@ -279,8 +279,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   void clearCache() {
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(seconds: 1), () async {
+    _debounceTimer.run(() async {
       await updateThumbnail();
       notifyListeners();
     });

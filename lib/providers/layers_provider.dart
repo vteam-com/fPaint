@@ -38,12 +38,54 @@ class LayersProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Size _size = const Size(0, 0);
+  Size _size = const Size(800, 600);
   Size get size => _size;
-  void setSize(final Size size) {
+  set size(final Size size) {
     _size = size;
     _list.forEach((layer) => layer.size = size);
   }
+
+  ///-------------------------------------------
+  /// Default canvas size
+  double get width => this.size.width * this.scale;
+  double get height => this.size.height * this.scale;
+
+  ///-------------------------------------------
+  /// canvasResizeLockAspectRatio
+  bool _resizeLockAspectRatio = true;
+  bool get canvasResizeLockAspectRatio => _resizeLockAspectRatio;
+
+  set canvasResizeLockAspectRatio(bool value) {
+    _resizeLockAspectRatio = value;
+    notifyListeners();
+  }
+
+  ///-------------------------------------------
+  /// Scale
+  /// Sets the scale of the canvas.
+  ///
+  /// The scale value is clamped between 10% and 400% to ensure a valid range.
+  /// Calling this method will notify any listeners of the [AppModel] that the scale has changed.
+  double _scale = 1;
+  double get scale => _scale;
+  set scale(final double value) {
+    _scale = value.clamp(10 / 100, 400 / 100);
+    for (final LayerProvider layer in _list) {
+      layer.scale(_scale);
+    }
+    notifyListeners();
+  }
+
+  //-------------------------------------------
+  // Canvas Resize position
+  int _resizePosition = 4; // Center
+
+  int get resizePosition => _resizePosition;
+
+  set resizePosition(int value) {
+    _resizePosition = value;
+    notifyListeners();
+  } // center
 
   LayerProvider addWhiteBackgroundLayer() {
     final LayerProvider firstLayer =
@@ -168,12 +210,6 @@ class LayersProvider extends ChangeNotifier {
   void offset(final Offset offset) {
     for (final LayerProvider layer in _list) {
       layer.offset(offset);
-    }
-  }
-
-  void scale(final double scale) {
-    for (final LayerProvider layer in _list) {
-      layer.scale(scale);
     }
   }
 
