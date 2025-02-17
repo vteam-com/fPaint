@@ -8,7 +8,13 @@ void main() {
     late LayerProvider layer;
 
     setUp(() {
-      layer = LayerProvider(name: 'Test Layer', size: const Size(100, 100));
+      layer = LayerProvider(
+        name: 'Test Layer',
+        size: const Size(100, 100),
+        onThumnailChanged: () {
+          //
+        },
+      );
     });
 
     test('Initial values are correct', () {

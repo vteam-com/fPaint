@@ -266,7 +266,7 @@ class MainViewState extends State<MainView> {
       } else if (appModel.selectedAction == ActionType.brush) {
         // Cumulate more points in the draw path on the selected layer
         appModel.layers.selectedLayer
-            .appPositionToLastAction(position: adjustedPosition);
+            .lastActionAppendPosition(position: adjustedPosition);
         appModel.update();
       } else {
         // Existing shape logic

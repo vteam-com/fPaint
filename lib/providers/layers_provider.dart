@@ -116,8 +116,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   LayerProvider addWhiteBackgroundLayer() {
-    final LayerProvider firstLayer =
-        LayerProvider(name: 'Background', size: _size);
+    final LayerProvider firstLayer = newLayer('Background');
 
     firstLayer.addUserAction(
       UserAction(
@@ -184,14 +183,17 @@ class LayersProvider extends ChangeNotifier {
     return _list[index];
   }
 
+  LayerProvider newLayer(final String name) {
+    return LayerProvider(
+      name: name,
+      size: _size,
+      onThumnailChanged: () => notifyListeners(),
+    );
+  }
+
   void ensureLayerAtIndex(final int index) {
     while (_list.length <= index) {
-      _list.add(
-        LayerProvider(
-          name: 'Layer ${_list.length + 1}',
-          size: _size,
-        ),
-      );
+      _list.add(newLayer('Layer ${_list.length + 1}'));
     }
   }
 
@@ -213,7 +215,7 @@ class LayersProvider extends ChangeNotifier {
 
   LayerProvider insertAt(final int index, [String? name]) {
     name ??= 'Layer${this.length}';
-    final LayerProvider layer = LayerProvider(name: name, size: _size);
+    final LayerProvider layer = newLayer(name);
     this.insert(index, layer);
     this.selectedLayerIndex = this.getLayerIndex(layer);
     update();
