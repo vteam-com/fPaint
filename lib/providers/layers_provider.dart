@@ -72,10 +72,7 @@ class LayersProvider extends ChangeNotifier {
   double _scale = 1;
   double get scale => _scale;
   set scale(final double value) {
-    _scale = value.clamp(10 / 100, 400 / 100);
-    for (final LayerProvider layer in _list) {
-      layer.scale(_scale);
-    }
+    _scale = value.clamp(10 / 100, 1000 / 100);
     notifyListeners();
   }
 
@@ -111,7 +108,7 @@ class LayersProvider extends ChangeNotifier {
       oldSize,
       newSize,
     );
-    this.offset(offset);
+    this.offsetContent(offset);
     update();
   }
 
@@ -237,7 +234,7 @@ class LayersProvider extends ChangeNotifier {
 
   List<LayerProvider> get list => _list;
 
-  void offset(final Offset offset) {
+  void offsetContent(final Offset offset) {
     for (final LayerProvider layer in _list) {
       layer.offset(offset);
     }

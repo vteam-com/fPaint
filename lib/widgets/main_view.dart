@@ -66,11 +66,11 @@ class MainViewState extends State<MainView> {
           // PAN and SCALE
           //
           onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
-            // Panning
-            appModel.offset += event.panDelta;
-
             // Scaling
-            if (event.scale != 1) {
+            if (event.scale == 1) {
+              // Panning
+              appModel.offset += event.panDelta;
+            } else {
               // Step 1: Convert screen coordinates to canvas coordinates
               final Offset before = appModel.toCanvas(event.localPosition);
 
