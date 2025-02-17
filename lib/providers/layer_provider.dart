@@ -24,6 +24,7 @@ class LayerProvider extends ChangeNotifier {
   LayerProvider({
     required String name,
     required Size size,
+    required this.onThumnailChanged,
     this.id = '',
     this.isSelected = false,
     bool isVisible = true,
@@ -64,7 +65,7 @@ class LayerProvider extends ChangeNotifier {
   /// Modifed state
   bool hasChanged = true;
   final Debouncer _debounceTimer = Debouncer();
-
+  final Function onThumnailChanged;
   //---------------------------------------------
   // Size
   Size _size = const Size(0, 0);
@@ -78,7 +79,7 @@ class LayerProvider extends ChangeNotifier {
 
   List<ColorUsage> topColorsUsed = [];
 
-  void _cacheTopColorUsed() async {
+  void _cacheTopColorsUsed() async {
     topColorsUsed = [];
     if (_cachedThumnailImage != null) {
       final List<ColorUsage> imageColors =
@@ -143,6 +144,7 @@ class LayerProvider extends ChangeNotifier {
   void addUserAction(UserAction userAction) {
     _actionStack.add(userAction);
     hasChanged = true;
+    clearCache();
   }
 
   void offset(final Offset offset) {
@@ -217,12 +219,14 @@ class LayerProvider extends ChangeNotifier {
     return newAction;
   }
 
-  void appPositionToLastAction({required final Offset position}) {
+  void lastActionAppendPosition({required final Offset position}) {
     _actionStack.last.positions.add(position);
+    clearCache();
   }
 
   void lastActionUpdatePosition(final Offset position) {
     _actionStack.last.positions.last = position;
+    clearCache();
   }
 
   void undo() {
@@ -275,7 +279,10 @@ class LayerProvider extends ChangeNotifier {
       scaleSizeTo(size, maxHeight: 64),
     );
 
-    _cacheTopColorUsed();
+    _cacheTopColorsUsed();
+
+    // the latest thumbnail is ready
+    this.onThumnailChanged();
   }
 
   void clearCache() {
