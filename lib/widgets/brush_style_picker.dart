@@ -59,7 +59,7 @@ class BrushStylePickerState extends State<BrushStylePicker> {
 
 Widget brushStyleDropDown(
   final BrushStyle value,
-  final Function(BrushStyle) onChanged,
+  final void Function(BrushStyle) onChanged,
 ) {
   return DropdownButton<int>(
     value: value.index,
@@ -78,9 +78,9 @@ Widget brushStyleDropDown(
 void showBrushStylePicker(
   final BuildContext context,
   final BrushStyle brushStyle,
-  final Function(BrushStyle) onChanged,
+  final void Function(BrushStyle) onChanged,
 ) {
-  showDialog(
+  showDialog<dynamic>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(

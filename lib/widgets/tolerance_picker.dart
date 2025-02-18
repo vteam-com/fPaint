@@ -60,7 +60,7 @@ void showTolerancePicker(
   final int value,
   final ValueChanged<int> onChanged,
 ) {
-  showDialog(
+  showDialog<dynamic>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(

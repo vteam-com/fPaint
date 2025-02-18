@@ -18,7 +18,7 @@ Widget textAction(final String fileName) {
 
 void sharePanel(final BuildContext context) {
   final LayersProvider layers = LayersProvider.of(context);
-  showModalBottomSheet(
+  showModalBottomSheet<dynamic>(
     context: context,
     builder: (final BuildContext context) {
       return SafeArea(

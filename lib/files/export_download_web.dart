@@ -16,7 +16,7 @@ import 'package:web/web.dart' as web; // Add
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsPng(
   final LayersProvider layers, [
-  final fileName = 'image.png',
+  final String fileName = 'image.png',
 ]) async {
   await saveAsPng(layers, fileName);
 }
@@ -39,7 +39,7 @@ Future<void> saveAsPng(
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsJpeg(
   final LayersProvider layers, [
-  final fileName = 'image.jpg',
+  final String fileName = 'image.jpg',
 ]) async {
   await saveAsJpeg(layers, fileName);
 }
@@ -65,7 +65,7 @@ Future<void> saveAsJpeg(
 /// [context] The BuildContext to access the current AppModel.
 Future<void> onExportAsOra(
   final LayersProvider layers, [
-  final fileName = 'image.ora',
+  final String fileName = 'image.ora',
 ]) async {
   await saveAsOra(layers, fileName);
 }

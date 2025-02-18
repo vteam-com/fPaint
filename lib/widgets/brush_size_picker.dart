@@ -73,7 +73,7 @@ void showBrushSizePicker({
   required final double max,
   required final ValueChanged<double> onChanged,
 }) {
-  showDialog(
+  showDialog<dynamic>(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(

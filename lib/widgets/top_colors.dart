@@ -23,7 +23,7 @@ class TopColors extends StatelessWidget {
 
   final List<ColorUsage> colorUsages;
   final VoidCallback onRefresh;
-  final Function(Color) onColorPicked;
+  final void Function(Color) onColorPicked;
   final bool minimal;
 
   @override

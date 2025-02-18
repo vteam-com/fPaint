@@ -27,8 +27,8 @@ class LayerProvider extends ChangeNotifier {
     required this.onThumnailChanged,
     this.id = '',
     this.isSelected = false,
-    bool isVisible = true,
-    opacity = 1.0,
+    final bool isVisible = true,
+    final double opacity = 1.0,
   }) : _name = name {
     _size = size;
     _isVisible = isVisible;

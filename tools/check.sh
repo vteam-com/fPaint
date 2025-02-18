@@ -6,7 +6,7 @@ dart fix --apply
 
 flutter analyze
 
-dart format .
+dart format . l 120
 
 flutter test
 

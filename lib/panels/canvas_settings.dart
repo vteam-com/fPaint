@@ -8,7 +8,7 @@ bool initOnce = false;
 
 void showCanvasSettings(final BuildContext context) {
   initOnce = true;
-  showModalBottomSheet(
+  showModalBottomSheet<dynamic>(
     context: context,
     builder: (final BuildContext context) {
       LayersProvider layers = LayersProvider.of(context, listen: true);

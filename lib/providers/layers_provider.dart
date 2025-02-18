@@ -202,7 +202,7 @@ class LayersProvider extends ChangeNotifier {
 
   LayerProvider addBottom([String? name]) => this.insertAt(this.length, name);
 
-  void insert(final index, final LayerProvider layerToInsert) {
+  void insert(final int index, final LayerProvider layerToInsert) {
     if (isIndexInRange(index)) {
       _list.insert(index, layerToInsert);
     } else {

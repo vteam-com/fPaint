@@ -12,7 +12,7 @@ class ColorSelector extends StatefulWidget {
   });
 
   final Color color;
-  final Function(Color) onColorChanged;
+  final void Function(Color) onColorChanged;
 
   @override
   State<ColorSelector> createState() => _ColorSelectorState();
@@ -250,7 +250,7 @@ void showColorPicker({
   required final Color color,
   required final ValueChanged<Color> onSelectedColor,
 }) {
-  showDialog(
+  showDialog<dynamic>(
     context: context,
     builder: (BuildContext context) {
       return ColorPickerDialog(

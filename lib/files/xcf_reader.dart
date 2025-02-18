@@ -215,8 +215,8 @@ class FileXcf {
               wrote n+4 instead of 3*n+4 into the length word (but still actually
               followed it by 3*n+4 bytes of payload).          
           */
-          final numColors = _readUint32();
-          final colorMap = [];
+          final int numColors = _readUint32();
+          final List<Color> colorMap = [];
 
           for (var i = 0; i < numColors; i++) {
             final r = _readBytes(1)[0];

@@ -13,8 +13,8 @@ class SelectionHandleWidget extends StatefulWidget {
   });
   final Path path;
   final bool enableMoveAndResize;
-  final Function(Offset) onDrag;
-  final Function(NineGridHandle, Offset) onResize;
+  final void Function(Offset) onDrag;
+  final void Function(NineGridHandle, Offset) onResize;
 
   @override
   State<SelectionHandleWidget> createState() => _SelectionHandleWidgetState();
@@ -151,7 +151,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
   Widget _buildHandle({
     required Offset position,
     required MouseCursor cursor,
-    required Function(DragUpdateDetails) onPanUpdate,
+    required void Function(DragUpdateDetails) onPanUpdate,
   }) {
     final int handleSize =
         (showCoordinate ? (defaultHandleSize * 1.5) : defaultHandleSize)

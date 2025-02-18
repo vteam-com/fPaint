@@ -46,94 +46,6 @@ List<double> calculateSpread(double start, double end, int numEntries) {
   return spread;
 }
 
-/// Converts a Map to a List of Pair objects.
-///
-/// This function takes a Map and converts it to a List of Pair objects,
-/// where each Pair object contains a key-value pair from the input Map.
-///
-/// The function is generic and can handle any type of key and value in the
-/// input Map. The types of the key and value are specified using the type
-/// parameters `T` and `U`, respectively.
-///
-/// Example usage:
-///
-/// ```dart
-/// Map<String, int> myMap = {'apple': 1, 'banana': 2, 'orange': 3};
-/// List<Pair<String, int>> pairList = convertMapToListOfPair<String, int>(myMap);
-/// print(pairList); // Output: [(apple, 1), (banana, 2), (orange, 3)]
-/// ```
-///
-/// Parameters:
-///   map (```Map<dynamic, dynamic>```): The input Map to be converted.
-///
-/// Type Parameters:
-///   T: The type of the keys in the input Map.
-///   U: The type of the values in the input Map.
-///
-/// Returns:
-///   A List of Pair objects, where each Pair contains a key-value pair
-///   from the input Map.
-List<Pair<T, U>> convertMapToListOfPair<T, U>(Map<dynamic, dynamic> map) {
-  // Initialize an empty list to store the Pair objects
-  List<Pair<T, U>> list = [];
-
-  // Iterate over the entries in the input Map
-  map.forEach((key, value) {
-    // Create a Pair object with the current key and value
-    list.add(Pair(key, value));
-  });
-
-  // Return the list of Pair objects
-  return list;
-}
-
-/// Converts a list of key-value pairs to a list of percentages.
-///
-/// This function takes a list of `KeyValue` objects, where each object
-/// represents a key-value pair. The function calculates the total sum of
-/// all values and then converts each value to a percentage of the total sum.
-/// The resulting list contains `KeyValue` objects with the same keys as the
-/// input list, but with the values representing the corresponding percentages.
-///
-/// If the total sum of values is zero, all percentages are set to 0.0.
-///
-/// Example usage:
-///
-/// ```dart
-/// List<KeyValue> keyValuePairs = [
-///   KeyValue(key: 'A', value: 10.0),
-///   KeyValue(key: 'B', value: 20.0),
-///   KeyValue(key: 'C', value: 30.0),
-/// ];
-///
-/// List<KeyValue> percentages = convertToPercentages(keyValuePairs);
-/// print(percentages); // Output: [KeyValue(key: 'A', value: 16.67), KeyValue(key: 'B', value: 33.33), KeyValue(key: 'C', value: 50.0)]
-/// ```
-///
-/// Parameters:
-///   keyValuePairs (```List<KeyValue>```): The input list of `KeyValue` objects.
-///
-/// Returns:
-///   A list of `KeyValue` objects, where each object contains a key from the
-///   input list and a value representing the corresponding percentage of the
-///   total sum of values.
-List<KeyValue> convertToPercentages(List<KeyValue> keyValuePairs) {
-  // Calculate total amount
-  double totalAmount =
-      keyValuePairs.fold(0, (prev, entry) => prev + entry.value);
-
-  // Convert each amount to a percentage and retain key association
-  List<KeyValue> percentages = keyValuePairs.map((entry) {
-    double percentage = (entry.value / totalAmount) * 100;
-    return KeyValue(
-      key: entry.key,
-      value: percentage.isNaN ? 0.0 : percentage,
-    ); // Handle division by zero
-  }).toList();
-
-  return percentages;
-}
-
 List<num> getMinMaxValues(final List<double> list) {
   if (list.isEmpty) {
     return <num>[0, 0];
@@ -159,7 +71,7 @@ List<num> getMinMaxValues(final List<double> list) {
   return <num>[valueMin, valueMax];
 }
 
-bool isIndexInRange(List array, int index) {
+bool isIndexInRange(List<dynamic> array, int index) {
   return index >= 0 && index < array.length;
 }
 

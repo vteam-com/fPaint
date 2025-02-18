@@ -26,7 +26,7 @@ import 'package:fpaint/providers/layers_provider.dart';
 /// - A `Future<void>` that completes when the image has been successfully saved.
 Future<void> onExportAsPng(
   final LayersProvider layers, [
-  final fileName = 'image.png',
+  final String fileName = 'image.png',
 ]) async {
   final String? filePath = await FilePicker.platform.saveFile(
     dialogTitle: 'fPaint Save Image',
@@ -69,7 +69,7 @@ Future<void> saveAsPng(
 /// - A `Future<void>` that completes when the image has been successfully saved.
 Future<void> onExportAsJpeg(
   final LayersProvider layers, [
-  final fileName = 'image.jpg',
+  final String fileName = 'image.jpg',
 ]) async {
   final String? filePath = await FilePicker.platform.saveFile(
     dialogTitle: 'Save image',
@@ -105,7 +105,7 @@ Future<void> saveAsJpeg(
 /// Throws an [Exception] if the export process fails.
 Future<void> onExportAsOra(
   final LayersProvider layers, [
-  final fileName = 'image.jpg',
+  final String fileName = 'image.jpg',
 ]) async {
   final String? filePath = await FilePicker.platform.saveFile(
     dialogTitle: 'Save image',

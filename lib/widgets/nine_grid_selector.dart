@@ -8,7 +8,7 @@ class NineGridSelector extends StatelessWidget {
     required this.onPositionSelected,
   });
   final int selectedPosition;
-  final Function(int) onPositionSelected;
+  final void Function(int) onPositionSelected;
 
   @override
   Widget build(BuildContext context) {

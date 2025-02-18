@@ -50,7 +50,7 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  Icon iconAndColor(isSelected, tool) {
+  Icon iconAndColor(final bool isSelected, final IconData tool) {
     Color? color = isSelected ? Colors.blue : null;
     return Icon(tool, color: color);
   }
