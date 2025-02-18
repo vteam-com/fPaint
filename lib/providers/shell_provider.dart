@@ -26,6 +26,7 @@ class ShellProvider extends ChangeNotifier {
   String loadedFileName = '';
   bool deviceSizeSmall = false;
   bool centerImageInViewPort = true;
+  bool fitCanvasIntoScreen = true;
 
 //=============================================================================
   // Shell
@@ -44,11 +45,6 @@ class ShellProvider extends ChangeNotifier {
   bool get showMenu => _showMenu;
   set showMenu(final bool value) {
     _showMenu = value;
-    update();
-  }
-
-  void resetView() {
-    centerImageInViewPort = true;
     update();
   }
 }

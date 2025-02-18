@@ -42,7 +42,7 @@ export 'package:fpaint/providers/layers_provider.dart';
 /// The `update` method notifies all listeners that the model has been updated.
 class AppProvider extends ChangeNotifier {
   AppProvider() {
-    this.canvasReset(layers.size);
+    this.canvasClear(layers.size);
   }
 
   /// Gets the [AppProvider] instance from the provided [BuildContext].
@@ -60,17 +60,12 @@ class AppProvider extends ChangeNotifier {
   // All things Canvas
   Offset offset = Offset.zero;
 
-  void canvasReset(final Size size) {
+  void canvasClear(final Size size) {
     layers.clear();
     layers.size = size;
     layers.addWhiteBackgroundLayer();
     layers.selectedLayerIndex = 0;
     resetView();
-  }
-
-  void canvasSetScale(final double value) {
-    layers.scale = value;
-    update();
   }
 
   Offset toCanvas(Offset point) {
@@ -159,9 +154,7 @@ class AppProvider extends ChangeNotifier {
   void resetView() {
     offset = Offset.zero;
     layers.scale = 1;
-    // TODO
-    // centerImageInViewPort = true;
-    // update();
+    update();
   }
 
   //=============================================================================

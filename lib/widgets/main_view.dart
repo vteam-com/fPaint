@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -38,11 +39,10 @@ class MainView extends StatefulWidget {
 class MainViewState extends State<MainView> {
   int _activePointerId = -1;
   Size lastViewPortSize = const Size(0, 0);
+  final double scaleTolerance = 0.2;
 
   @override
   Widget build(BuildContext context) {
-    const double scaleTolerance = 0.2;
-
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         // print('LayoutBuilder ${constraints.maxWidth} ${constraints.maxHeight}');
@@ -50,19 +50,17 @@ class MainViewState extends State<MainView> {
         final AppProvider appModel = AppProvider.of(context, listen: true);
 
         // Center canvas if requested
-        if (shellModel.centerImageInViewPort ||
-            lastViewPortSize.width != constraints.maxWidth ||
-            lastViewPortSize.height != constraints.maxHeight) {
-          lastViewPortSize = Size(constraints.maxWidth, constraints.maxHeight);
-          // print(
-          //   'Center ${constraints.maxWidth} ${constraints.maxHeight}',
-          // );
+        // scale the canvas to fit the current viewport
+        if (shellModel.centerImageInViewPort) {
           shellModel.centerImageInViewPort = false;
-          centerCanvas(
-            AppProvider.of(context),
-            constraints.maxWidth,
-            constraints.maxHeight,
+          canvasCenterAndFit(
+            appProvider: appModel,
+            containerWidth: constraints.maxWidth,
+            containerHeight: constraints.maxHeight,
+            scaleToContainer: shellModel.fitCanvasIntoScreen,
+            notifyListener: false,
           );
+          shellModel.fitCanvasIntoScreen = false;
         }
 
         return Listener(
@@ -361,20 +359,30 @@ class MainViewState extends State<MainView> {
   /// This method adjusts the position of the canvas so that it is centered
   /// within the available space. It ensures that the canvas is properly
   /// aligned and visible to the user.
-  void centerCanvas(
-    final AppProvider appModel,
-    final double parentViewPortWidth,
-    final double parentViewPortHeight,
-  ) {
-    final double scaledWidth = appModel.layers.width * appModel.layers.scale;
-    final double scaledHeight = appModel.layers.height * appModel.layers.scale;
+  void canvasCenterAndFit({
+    required final AppProvider appProvider,
+    required final double containerWidth,
+    required final double containerHeight,
+    required final bool scaleToContainer,
+    required final bool notifyListener,
+  }) {
+    double adjustedScale = appProvider.layers.scale;
+    if (scaleToContainer) {
+      final double scaleX = containerWidth / appProvider.layers.width;
+      final double scaleY = containerHeight / appProvider.layers.height;
+      adjustedScale = (min(scaleX, scaleY) * 10).floor() / 10;
+    }
 
-    final double centerX = parentViewPortWidth / 2;
-    final double centerY = parentViewPortHeight / 2;
+    final double scaledWidth = (appProvider.layers.width * adjustedScale);
+    final double scaledHeight = (appProvider.layers.height * adjustedScale);
 
-    appModel.offset = Offset(
+    final double centerX = containerWidth / 2;
+    final double centerY = containerHeight / 2;
+
+    appProvider.offset = Offset(
       centerX - (scaledWidth / 2),
       centerY - (scaledHeight / 2),
     );
+    appProvider.layers.scale = adjustedScale;
   }
 }

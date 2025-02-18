@@ -72,7 +72,7 @@ Future<void> onFileNew(final BuildContext context) async {
     );
 
     if (canvasSize != null) {
-      appModel.canvasReset(canvasSize);
+      appModel.canvasClear(canvasSize);
     }
   }
 }

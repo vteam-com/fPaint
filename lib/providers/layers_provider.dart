@@ -50,8 +50,8 @@ class LayersProvider extends ChangeNotifier {
 
   ///-------------------------------------------
   /// Default canvas size
-  double get width => this.size.width * this.scale;
-  double get height => this.size.height * this.scale;
+  double get width => this.size.width;
+  double get height => this.size.height;
 
   ///-------------------------------------------
   /// canvasResizeLockAspectRatio
@@ -72,8 +72,9 @@ class LayersProvider extends ChangeNotifier {
   double _scale = 1;
   double get scale => _scale;
   set scale(final double value) {
-    _scale = value.clamp(10 / 100, 1000 / 100);
-    notifyListeners();
+    if (_scale != value) {
+      _scale = value.clamp(10 / 100, 1000 / 100);
+    }
   }
 
   //-------------------------------------------

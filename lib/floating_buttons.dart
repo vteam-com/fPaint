@@ -62,20 +62,28 @@ Widget floatingActionButtons(
       undoButton,
       redo,
       const SizedBox(height: 8),
+      // Zooom in
       FloatingActionButton(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
         onPressed: () {
           shellModel.centerImageInViewPort = true;
-          appModel
-              .canvasSetScale(((appModel.layers.scale * 10).ceil() + 1) / 10);
+          appModel.layers.scale =
+              ((appModel.layers.scale * 10).ceil() + 1) / 10;
+          appModel.update();
         },
         child: const Icon(Icons.zoom_in),
       ),
+
+      /// Center and fit image
       FloatingActionButton(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
-        onPressed: () => appModel.resetView(),
+        onPressed: () {
+          shellModel.centerImageInViewPort = true;
+          shellModel.fitCanvasIntoScreen = true;
+          appModel.update();
+        },
         child: Text(
           '${(appModel.layers.scale * 100).toInt()}%\n${appModel.layers.size.width.toInt()}\n${appModel.layers.size.height.toInt()}',
           textAlign: TextAlign.right,
@@ -86,13 +94,16 @@ Widget floatingActionButtons(
           ),
         ),
       ),
+
+      /// Zoom out
       FloatingActionButton(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
         onPressed: () {
           shellModel.centerImageInViewPort = true;
-          appModel
-              .canvasSetScale(((appModel.layers.scale * 10).floor() - 1) / 10);
+          appModel.layers.scale =
+              ((appModel.layers.scale * 10).floor() - 1) / 10;
+          appModel.update();
         },
         child: const Icon(Icons.zoom_out),
       ),
