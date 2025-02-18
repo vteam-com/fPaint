@@ -13,6 +13,7 @@ class UserAction {
     this.fillColor,
     this.path,
     this.image,
+    this.clipPath,
   });
 
   final ActionType action;
@@ -23,6 +24,7 @@ class UserAction {
   final Color? fillColor;
   final ui.Path? path;
   final ui.Image? image;
+  ui.Path? clipPath;
 
   @override
   String toString() {

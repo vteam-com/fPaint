@@ -186,9 +186,6 @@ void renderFill(
 ) {
   final Paint paint = Paint();
   paint.color = fillColor;
-  // paint.strokeCap = StrokeCap.round;
-  // paint.strokeWidth = brushSize;
-  // paint.style = PaintingStyle.stroke;
   renderImage(canvas, position, image);
 }
 

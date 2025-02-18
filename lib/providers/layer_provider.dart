@@ -141,12 +141,6 @@ class LayerProvider extends ChangeNotifier {
   int get count => _actionStack.length;
   bool get isEmpty => _actionStack.isEmpty;
 
-  void addUserAction(UserAction userAction) {
-    _actionStack.add(userAction);
-    hasChanged = true;
-    clearCache();
-  }
-
   void offset(final Offset offset) {
     for (final UserAction action in _actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
@@ -172,24 +166,10 @@ class LayerProvider extends ChangeNotifier {
   UserAction? get lastUserAction =>
       _actionStack.isEmpty ? null : _actionStack.last;
 
-  UserAction addRegion({
-    required ui.Path path,
-    required Color color,
-  }) {
-    final bounds = path.getBounds();
-    final UserAction newAction = UserAction(
-      action: ActionType.region,
-      path: path,
-      positions: [
-        bounds.topLeft,
-        bounds.bottomRight,
-      ],
-      fillColor: color,
-    );
-
-    _actionStack.add(newAction);
+  void addUserAction(UserAction userAction) {
+    _actionStack.add(userAction);
+    hasChanged = true;
     clearCache();
-    return newAction;
   }
 
   UserAction addImage({
@@ -214,8 +194,7 @@ class LayerProvider extends ChangeNotifier {
       image: imageToAdd,
     );
 
-    _actionStack.add(newAction);
-    clearCache();
+    this.addUserAction(newAction);
     return newAction;
   }
 
@@ -314,6 +293,26 @@ class LayerProvider extends ChangeNotifier {
     return picture.toImageSync(width, height);
   }
 
+  void applyAction(
+    final Canvas canvas,
+    final ui.Path? clipPath,
+    void Function(
+      Canvas theCanvasToUse,
+    ) actionFunction,
+  ) {
+    if (clipPath != null) {
+      canvas.save();
+      // Apply the clip path to restrict rendering to this area
+      canvas.clipPath(clipPath, doAntiAlias: true);
+    }
+
+    actionFunction(canvas);
+
+    if (clipPath != null) {
+      canvas.restore();
+    }
+  }
+
   void renderLayer(final Canvas canvas) {
     if (_cachedImage != null) {
       //print('RenderLayer "$name" USE CACHE ');
@@ -321,6 +320,7 @@ class LayerProvider extends ChangeNotifier {
     }
 
     //print('RenderLayer "$name" FULL RENDER');
+
     // Save a layer with opacity applied
     final Paint layerPaint = Paint()
       ..color = Colors.black.withAlpha((255 * opacity).toInt())
@@ -331,81 +331,106 @@ class LayerProvider extends ChangeNotifier {
     for (final UserAction userAction in _actionStack) {
       switch (userAction.action) {
         case ActionType.pencil:
-          renderPencil(
+          applyAction(
             canvas,
-            userAction.positions.first,
-            userAction.positions.last,
-            userAction.brush!,
+            userAction.clipPath,
+            (final Canvas theCanvasToUse) => renderPencil(
+              theCanvasToUse,
+              userAction.positions.first,
+              userAction.positions.last,
+              userAction.brush!,
+            ),
           );
           break;
 
         case ActionType.brush:
-          renderPath(
+          applyAction(
             canvas,
-            userAction.positions,
-            userAction.brush!,
-            userAction.fillColor!,
+            userAction.clipPath,
+            (final Canvas theCanvasToUse) => renderPath(
+              theCanvasToUse,
+              userAction.positions,
+              userAction.brush!,
+              userAction.fillColor!,
+            ),
           );
           break;
 
         case ActionType.line:
-          renderLine(
+          applyAction(
             canvas,
-            userAction.positions.first,
-            userAction.positions.last,
-            userAction.brush!,
-            userAction.fillColor!,
+            userAction.clipPath,
+            (final Canvas theCanvasToUse) => renderLine(
+              theCanvasToUse,
+              userAction.positions.first,
+              userAction.positions.last,
+              userAction.brush!,
+              userAction.fillColor!,
+            ),
           );
+
           break;
 
         case ActionType.circle:
-          renderCircle(
+          applyAction(
             canvas,
-            userAction.positions.first,
-            userAction.positions.last,
-            userAction.brush!,
-            userAction.fillColor!,
+            userAction.clipPath,
+            (final Canvas theCanvasToUse) => renderCircle(
+              theCanvasToUse,
+              userAction.positions.first,
+              userAction.positions.last,
+              userAction.brush!,
+              userAction.fillColor!,
+            ),
           );
           break;
 
         case ActionType.rectangle:
-          renderRectangle(
+          applyAction(
             canvas,
-            userAction.positions.first,
-            userAction.positions.last,
-            userAction.brush!,
-            userAction.fillColor!,
+            userAction.clipPath,
+            (final Canvas theCanvasToUse) => renderRectangle(
+              theCanvasToUse,
+              userAction.positions.first,
+              userAction.positions.last,
+              userAction.brush!,
+              userAction.fillColor!,
+            ),
           );
           break;
 
+        case ActionType.fill:
+          // the fill action is added to the layer
+          // as a ActionType.region
+          break;
+
         case ActionType.region:
-          renderRegion(
+          applyAction(
             canvas,
-            userAction.path!,
-            userAction.fillColor!,
+            userAction.clipPath,
+            (final Canvas theCanvasToUse) => renderRegion(
+              theCanvasToUse,
+              userAction.path!,
+              userAction.fillColor!,
+            ),
           );
           break;
 
         case ActionType.eraser:
-          renderPencilEraser(
+          applyAction(
             canvas,
-            userAction.positions.first,
-            userAction.positions.last,
-            userAction.brush!,
+            userAction.clipPath,
+            (final Canvas theCanvasToUse) => renderPencilEraser(
+              theCanvasToUse,
+              userAction.positions.first,
+              userAction.positions.last,
+              userAction.brush!,
+            ),
           );
           break;
 
         case ActionType.cut:
           renderRegionErase(canvas, userAction.path!);
-          break;
-
-        case ActionType.fill:
-          renderFill(
-            canvas,
-            userAction.positions.first,
-            userAction.fillColor!,
-            userAction.image!,
-          );
           break;
 
         case ActionType.image:

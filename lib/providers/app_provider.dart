@@ -171,6 +171,9 @@ class AppProvider extends ChangeNotifier {
   void addActionToSelectedLayer({
     required UserAction action,
   }) {
+    if (selector.isVisible) {
+      action.clipPath = selector.path;
+    }
     layers.selectedLayer.addUserAction(action);
     update();
   }
@@ -284,6 +287,7 @@ class AppProvider extends ChangeNotifier {
         ],
         action: layers.selectedLayer.lastUserAction!.action,
         brush: layers.selectedLayer.lastUserAction!.brush,
+        clipPath: selector.isVisible ? selector.path : null,
       ),
     );
 
@@ -293,11 +297,24 @@ class AppProvider extends ChangeNotifier {
   void floodFillAction(final Offset position) async {
     final Region region = await getRegionPathFromLayerImage(position);
 
-    layers.selectedLayer.addRegion(
-      path: region.path
-          .shift(Offset(region.left.toDouble(), region.top.toDouble())),
-      color: this.fillColor,
-    );
+    final ui.Path path = region.path
+        .shift(Offset(region.left.toDouble(), region.top.toDouble()));
+
+    final ui.Rect bounds = path.getBounds();
+
+    this.layers.selectedLayer.addUserAction(
+          UserAction(
+            action: ActionType.region,
+            path: path,
+            positions: [
+              bounds.topLeft,
+              bounds.bottomRight,
+            ],
+            fillColor: this.fillColor,
+            clipPath: selector.isVisible ? selector.path : null,
+          ),
+        );
+
     update();
   }
 
