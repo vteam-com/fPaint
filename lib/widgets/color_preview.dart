@@ -61,7 +61,7 @@ class ColorPreview extends StatelessWidget {
     if (colorUsed.percentage < 1) {
       usageNumber = '\nUsage ${colorUsed.toStringPercentage(1)}';
     }
-    double size = minimal ? 40 : 50;
+    final double size = minimal ? 40 : 50;
 
     return Tooltip(
       message: '${colorToHexString(colorUsed.color)}$usageNumber',

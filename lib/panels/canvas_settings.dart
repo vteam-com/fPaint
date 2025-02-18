@@ -11,14 +11,14 @@ void showCanvasSettings(final BuildContext context) {
   showModalBottomSheet<dynamic>(
     context: context,
     builder: (final BuildContext context) {
-      LayersProvider layers = LayersProvider.of(context, listen: true);
+      final LayersProvider layers = LayersProvider.of(context, listen: true);
       if (initOnce) {
         widthController.text = layers.size.width.toInt().toString();
         heightController.text = layers.size.height.toInt().toString();
         initOnce = false;
       }
 
-      double initialAspectRatio = layers.size.width / layers.size.height;
+      final double initialAspectRatio = layers.size.width / layers.size.height;
 
       return SafeArea(
         child: Padding(
@@ -49,9 +49,9 @@ void showCanvasSettings(final BuildContext context) {
                       controller: widthController,
                       onChanged: (String value) {
                         if (layers.canvasResizeLockAspectRatio) {
-                          double width = double.tryParse(value) ??
+                          final double width = double.tryParse(value) ??
                               double.tryParse(widthController.text)!;
-                          double height = width / initialAspectRatio;
+                          final double height = width / initialAspectRatio;
                           heightController.value =
                               TextEditingValue(text: height.toInt().toString());
                         }
@@ -81,9 +81,9 @@ void showCanvasSettings(final BuildContext context) {
                       controller: heightController,
                       onChanged: (String value) {
                         if (layers.canvasResizeLockAspectRatio) {
-                          double height = double.tryParse(value) ??
+                          final double height = double.tryParse(value) ??
                               double.tryParse(heightController.text)!;
-                          double width = height * initialAspectRatio;
+                          final double width = height * initialAspectRatio;
                           widthController.text = width.toInt().toString();
                         }
                       },

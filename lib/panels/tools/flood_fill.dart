@@ -70,7 +70,7 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   required final int y,
   required final int tolerance,
 }) async {
-  Region region = Region();
+  final Region region = Region();
 
   final Uint8List? pixels = await convertImageToUint8List(image);
   if (pixels == null) {
@@ -105,7 +105,7 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   queue.add(Point(x, y));
 
   // Accumulate all points in the region
-  List<Point> points = <Point>[];
+  final List<Point> points = <Point>[];
 
   // Track the region's bounds
   region.left = x.toDouble();
@@ -251,7 +251,7 @@ void printPathCoordinates(ui.Path path) {
   final ui.PathMetrics pathMetrics = path.computeMetrics();
   // ignore: avoid_print
   print('---------------------------------');
-  List<Offset> positionsSampling = <ui.Offset>[];
+  final List<Offset> positionsSampling = <ui.Offset>[];
 
   for (final ui.PathMetric metric in pathMetrics) {
     for (double t = 0.0; t <= 1.0; t += 0.5) {
@@ -270,7 +270,7 @@ void printPathCoordinates(ui.Path path) {
   }
 
   // Reduce redundant values
-  List<Offset> reducedPositions = <ui.Offset>[];
+  final List<Offset> reducedPositions = <ui.Offset>[];
   for (int i = 0; i < positionsSampling.length; i++) {
     if (i == 0 ||
         i == positionsSampling.length - 1 ||
@@ -279,7 +279,7 @@ void printPathCoordinates(ui.Path path) {
       reducedPositions.add(positionsSampling[i]);
     }
   }
-  List<String> strings = <String>[];
+  final List<String> strings = <String>[];
 
   for (final ui.Offset position in reducedPositions) {
     strings.add(

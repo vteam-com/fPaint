@@ -270,7 +270,7 @@ class FileXcf {
     }
 
     // Read layer pointers
-    List<int> layerPointers = <int>[];
+    final List<int> layerPointers = <int>[];
     while (true) {
       final int pointer = _readUint32();
       if (pointer == 0) break;
@@ -358,11 +358,11 @@ class FileXcf {
   }
 
   String _readNullTerminatedString() {
-    List<int> chars = <int>[];
+    final List<int> chars = <int>[];
     final int startOffset = _offset; // Track starting position
 
     while (_offset < _data.lengthInBytes) {
-      int byte = _data.getUint8(_offset++);
+      final int byte = _data.getUint8(_offset++);
       if (byte == 0) {
         break; // Stop at null terminator
       }
@@ -381,7 +381,7 @@ class FileXcf {
   Future<XcfPath?> readPropPath(dynamic propData) async {
     try {
       // Read the length of PROP_PATH data
-      int length = _readUint32();
+      final int length = _readUint32();
       _offset += length;
       return XcfPath(name: '', strokes: <Stroke>[]);
 

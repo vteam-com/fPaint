@@ -32,7 +32,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
 
     final double height = bounds.bottom + bounds.height + defaultHandleSize;
 
-    List<Widget> stackChildren = <Widget>[
+    final List<Widget> stackChildren = <Widget>[
       MarchingAntsSelection(path: widget.path),
     ];
 

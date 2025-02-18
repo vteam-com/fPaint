@@ -104,7 +104,7 @@ class LayersProvider extends ChangeNotifier {
       this.scale = scale;
     }
 
-    Offset offset = CanvasResizePosition.anchorTranslate(
+    final Offset offset = CanvasResizePosition.anchorTranslate(
       this.resizePosition,
       oldSize,
       newSize,
@@ -273,7 +273,7 @@ class LayersProvider extends ChangeNotifier {
   ///   A list of [ColorUsage] objects representing the top 10 most used colors.
   Future<List<ColorUsage>> getTopColorUsed() async {
     List<ColorUsage> topColors = <ColorUsage>[];
-    int totalLayers = _list.length;
+    final int totalLayers = _list.length;
 
     for (final LayerProvider layer in _list) {
       for (final ColorUsage colorUsed in layer.topColorsUsed) {

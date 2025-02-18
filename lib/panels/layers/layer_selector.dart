@@ -75,7 +75,7 @@ class LayerSelector extends StatelessWidget {
   }
 
   String information() {
-    List<String> texts = <String>[
+    final List<String> texts = <String>[
       '[${layer.id}]',
       layer.name,
       if (!layer.isVisible) 'Hidden',

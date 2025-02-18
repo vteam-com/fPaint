@@ -144,7 +144,7 @@ class MainViewState extends State<MainView> {
               // supported by iOS, Android, macOS
               if (!Platform.isLinux && !Platform.isWindows) {
                 // print('GestureDetector onScaleUpdate');
-                double scaleAttempt = (details.scale - 1.0).abs();
+                final double scaleAttempt = (details.scale - 1.0).abs();
                 // print('${details.scale} $scaleAttempt');
                 if (scaleAttempt < scaleTolerance) {
                   // No scaling, apply panning if using 2 fingers

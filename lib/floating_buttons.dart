@@ -26,7 +26,7 @@ Widget floatingActionButtons(
   );
 
   Color colorBackground = Colors.grey.shade600;
-  Color colorForegound = Colors.white;
+  final Color colorForegound = Colors.white;
   if (shellModel.deviceSizeSmall) {
     if (appModel.showMenu) {
       colorBackground = Colors.blue;

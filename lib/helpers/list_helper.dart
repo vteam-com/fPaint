@@ -33,10 +33,10 @@ List<double> calculateSpread(double start, double end, int numEntries) {
   }
 
   // Calculate the step size between each value
-  double step = (end - start) / (numEntries - 1);
+  final double step = (end - start) / (numEntries - 1);
 
   // Initialize an empty list to store the spread values
-  List<double> spread = <double>[];
+  final List<double> spread = <double>[];
 
   // Generate the spread values and add them to the list
   for (int i = 0; i < numEntries; i++) {
@@ -79,7 +79,7 @@ List<String> padList(List<String> list, int length, String padding) {
   if (list.length >= length) {
     return list;
   }
-  List<String> paddedList = List<String>.from(list);
+  final List<String> paddedList = List<String>.from(list);
   for (int i = list.length; i < length; i++) {
     paddedList.add(padding);
   }
@@ -236,7 +236,7 @@ extension FirWheresOrNull<T> on List<T> {
 }
 
 String uint8ListToHex(Uint8List list) {
-  StringBuffer hexString = StringBuffer();
+  final StringBuffer hexString = StringBuffer();
   for (int byte in list) {
     hexString.write(byte.toRadixString(16).padLeft(2, '0'));
   }

@@ -51,7 +51,7 @@ class ToolsPanel extends StatelessWidget {
   }
 
   Icon iconAndColor(final bool isSelected, final IconData tool) {
-    Color? color = isSelected ? Colors.blue : null;
+    final Color? color = isSelected ? Colors.blue : null;
     return Icon(tool, color: color);
   }
 
@@ -180,7 +180,7 @@ class ToolsPanel extends StatelessWidget {
   List<Widget> getWidgetForSelectedTool({
     required BuildContext context,
   }) {
-    List<Widget> widgets = <Widget>[];
+    final List<Widget> widgets = <Widget>[];
     final AppProvider appModel = AppProvider.of(context, listen: true);
     final LayersProvider layers = LayersProvider.of(context);
     final ActionType selectedTool = appModel.selectedAction;
@@ -446,7 +446,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Add a separator between each element
       if (!minimal) {
-        List<Widget> separatedWidgets = <Widget>[];
+        final List<Widget> separatedWidgets = <Widget>[];
         for (int i = 0; i < widgets.length; i++) {
           separatedWidgets.add(widgets[i]);
           separatedWidgets.add(separator());

@@ -67,7 +67,7 @@ Future<ui.Image> fromBytesToImage(final Uint8List list) async {
 }
 
 Future<Uint8List?> convertImageToUint8List(final ui.Image image) async {
-  ByteData? byteData =
+  final ByteData? byteData =
       await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
   return byteData!.buffer.asUint8List();
 }

@@ -30,7 +30,7 @@ class TopColors extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<ColorUsage> sortedColors = sortColorByHueAndPopularity();
 
-    List<Widget> colorPreviews = sortedColors
+    final List<Widget> colorPreviews = sortedColors
         .map(
           (final ColorUsage colorUsed) => ColorPreview(
             colorUsed: colorUsed,
@@ -78,12 +78,12 @@ class TopColors extends StatelessWidget {
   ///
   /// The resulting list of `ColorUsage` objects is sorted by hue and popularity, with the most popular colors appearing first.
   List<ColorUsage> sortColorByHueAndPopularity() {
-    Map<int, List<ColorUsage>> groupedByHue = <int, List<ColorUsage>>{};
+    final Map<int, List<ColorUsage>> groupedByHue = <int, List<ColorUsage>>{};
 
     // Group colors by hue similarity (using a 15-degree threshold)
     for (final ColorUsage usage in colorUsages) {
-      double hue = HSVColor.fromColor(usage.color).hue;
-      int hueKey = (hue / 15).round() * 15; // Grouping by 15-degree steps
+      final double hue = HSVColor.fromColor(usage.color).hue;
+      final int hueKey = (hue / 15).round() * 15; // Grouping by 15-degree steps
 
       groupedByHue.putIfAbsent(hueKey, () => <ColorUsage>[]);
       groupedByHue[hueKey]!.add(usage);
@@ -92,23 +92,23 @@ class TopColors extends StatelessWidget {
     // Sort each hue group by percentage (descending), then by hue (ascending)
     for (final List<ColorUsage> group in groupedByHue.values) {
       group.sort((ColorUsage a, ColorUsage b) {
-        int percentageComparison = b.percentage.compareTo(a.percentage);
+        final int percentageComparison = b.percentage.compareTo(a.percentage);
         if (percentageComparison != 0) {
           return percentageComparison;
         }
-        double saturationA = HSVColor.fromColor(a.color).saturation;
-        double saturationB = HSVColor.fromColor(b.color).saturation;
+        final double saturationA = HSVColor.fromColor(a.color).saturation;
+        final double saturationB = HSVColor.fromColor(b.color).saturation;
         return saturationB
             .compareTo(saturationA); // Secondary sort by saturation
       });
     }
 
     // Sort hue groups by total percentage usage (descending)
-    List<List<ColorUsage>> sortedGroups = groupedByHue.values.toList();
+    final List<List<ColorUsage>> sortedGroups = groupedByHue.values.toList();
     sortedGroups.sort((List<ColorUsage> a, List<ColorUsage> b) {
-      double totalA =
+      final double totalA =
           a.fold(0, (double sum, ColorUsage item) => sum + item.percentage);
-      double totalB =
+      final double totalB =
           b.fold(0, (double sum, ColorUsage item) => sum + item.percentage);
       return totalB.compareTo(totalA);
     });

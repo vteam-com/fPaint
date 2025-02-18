@@ -21,8 +21,8 @@ Path expandPathInDirectionWithOffset(
 ) {
   final Rect bounds = path.getBounds();
 
-  Matrix4 transformMatrix = Matrix4.identity();
-  Matrix4 scaleMatrix = Matrix4.identity();
+  final Matrix4 transformMatrix = Matrix4.identity();
+  final Matrix4 scaleMatrix = Matrix4.identity();
 
   switch (anchorPosition) {
     case NineGridHandle.left:
@@ -99,7 +99,7 @@ Path expandPathInDirectionWithOffset(
   }
 
   // Apply translation and scaling
-  Path adjustedPath = path.transform(transformMatrix.storage);
+  final Path adjustedPath = path.transform(transformMatrix.storage);
   return adjustedPath.transform(scaleMatrix.storage);
 }
 
@@ -124,7 +124,7 @@ Size scaleSizeTo(
   }
 
   // Use the smaller scale to maintain aspect ratio
-  double scale = min(scaleWidth, scaleHeight);
+  final double scale = min(scaleWidth, scaleHeight);
 
   return Size(
     inputSize.width * scale,

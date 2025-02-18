@@ -197,7 +197,7 @@ Future<void> saveToORA({
   required final LayersProvider layers,
   required final String filePath,
 }) async {
-  List<int> encodedData = await createOraAchive(layers);
+  final List<int> encodedData = await createOraAchive(layers);
 
   await File(filePath).writeAsBytes(encodedData);
 }

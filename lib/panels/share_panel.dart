@@ -10,8 +10,8 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 Widget textAction(final String fileName) {
-  String action = kIsWeb ? 'Download' : 'Save';
-  String text = '$action as "$fileName"';
+  final String action = kIsWeb ? 'Download' : 'Save';
+  final String text = '$action as "$fileName"';
 
   return Text(text);
 }
