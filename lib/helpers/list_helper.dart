@@ -29,14 +29,14 @@ import 'dart:typed_data';
 List<double> calculateSpread(double start, double end, int numEntries) {
   // Check if numEntries is valid
   if (numEntries <= 1) {
-    return [];
+    return <double>[];
   }
 
   // Calculate the step size between each value
   double step = (end - start) / (numEntries - 1);
 
   // Initialize an empty list to store the spread values
-  List<double> spread = [];
+  List<double> spread = <double>[];
 
   // Generate the spread values and add them to the list
   for (int i = 0; i < numEntries; i++) {
@@ -138,7 +138,7 @@ class KeyValue {
       return false;
     }
 
-    final otherKeyValue = other;
+    final KeyValue otherKeyValue = other;
     return key == otherKeyValue.key && value == otherKeyValue.value;
   }
 
@@ -200,12 +200,12 @@ class Triple<F, S, T> {
 }
 
 List<String> enumToStringList<T>(List<T> enumValues) {
-  return enumValues.map((e) => e.toString().split('.').last).toList();
+  return enumValues.map((T e) => e.toString().split('.').last).toList();
 }
 
 extension RandomItemExtension<T> on List<T> {
   T getRandomItem() {
-    final random = Random();
+    final Random random = Random();
     if (isEmpty) {
       throw Exception('Cannot get random item from an empty list');
     }
@@ -215,7 +215,7 @@ extension RandomItemExtension<T> on List<T> {
 
 extension FindFirstMatchExtension<T> on Iterable<T> {
   T? findFirstMatch(bool Function(T) test) {
-    for (final item in this) {
+    for (final T item in this) {
       if (test(item)) {
         return item;
       }
@@ -226,7 +226,7 @@ extension FindFirstMatchExtension<T> on Iterable<T> {
 
 extension FirWheresOrNull<T> on List<T> {
   T? firstWhereOrNull(bool Function(T) test) {
-    for (final item in this) {
+    for (final T item in this) {
       if (test(item)) {
         return item;
       }

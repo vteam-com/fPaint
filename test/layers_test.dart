@@ -27,9 +27,9 @@ void main() {
     });
 
     test('Add user action', () {
-      final userAction = UserAction(
+      final UserAction userAction = UserAction(
         action: ActionType.brush,
-        positions: [Offset.zero],
+        positions: <ui.Offset>[Offset.zero],
         brush: MyBrush(
           color: Colors.black,
           size: 1,
@@ -43,9 +43,9 @@ void main() {
     });
 
     test('Undo and redo actions', () {
-      final userAction = UserAction(
+      final UserAction userAction = UserAction(
         action: ActionType.brush,
-        positions: [Offset.zero],
+        positions: <ui.Offset>[Offset.zero],
         brush: MyBrush(
           color: Colors.black,
           size: 1,
@@ -62,12 +62,12 @@ void main() {
     });
 
     test('Add image', () async {
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      final paint = Paint()..color = Colors.red;
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = Canvas(recorder);
+      final ui.Paint paint = Paint()..color = Colors.red;
       canvas.drawRect(const Rect.fromLTWH(0, 0, 10, 10), paint);
-      final picture = recorder.endRecording();
-      final image = await picture.toImage(10, 10);
+      final ui.Picture picture = recorder.endRecording();
+      final ui.Image image = await picture.toImage(10, 10);
 
       layer.addImage(imageToAdd: image);
       expect(layer.count, 1);
@@ -75,9 +75,9 @@ void main() {
     });
 
     test('Update last user action end position', () {
-      final userAction = UserAction(
+      final UserAction userAction = UserAction(
         action: ActionType.brush,
-        positions: [Offset.zero, const Offset(1, 1)],
+        positions: <ui.Offset>[Offset.zero, const Offset(1, 1)],
         brush: MyBrush(
           color: Colors.black,
           size: 1,

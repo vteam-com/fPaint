@@ -33,7 +33,7 @@ Future<void> onExportAsPng(
     initialDirectory: '.',
     fileName: fileName,
     type: FileType.custom,
-    allowedExtensions: ['png'],
+    allowedExtensions: <String>['png'],
     lockParentWindow: true,
   );
   if (filePath != null && filePath.isNotEmpty) {
@@ -74,7 +74,7 @@ Future<void> onExportAsJpeg(
   final String? filePath = await FilePicker.platform.saveFile(
     dialogTitle: 'Save image',
     fileName: fileName,
-    allowedExtensions: ['jpg', 'jpeg'],
+    allowedExtensions: <String>['jpg', 'jpeg'],
     type: FileType.custom,
   );
   await saveAsJpeg(layers, filePath);
@@ -110,7 +110,7 @@ Future<void> onExportAsOra(
   final String? filePath = await FilePicker.platform.saveFile(
     dialogTitle: 'Save image',
     fileName: fileName,
-    allowedExtensions: ['ora'],
+    allowedExtensions: <String>['ora'],
     type: FileType.custom,
   );
   await saveAsOra(layers, filePath);

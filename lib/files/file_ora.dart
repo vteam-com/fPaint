@@ -55,7 +55,7 @@ Future<void> readOraFileFromBytes(
 
   // Find the stack.xml file
   final ArchiveFile stackFile = archive.files.firstWhere(
-    (file) => file.name == 'stack.xml',
+    (ArchiveFile file) => file.name == 'stack.xml',
     orElse: () => throw Exception('stack.xml not found in ORA file'),
   );
 
@@ -152,8 +152,9 @@ Future<void> addImageToLayer({
   required final ui.Offset offset,
 }) async {
   try {
-    final ArchiveFile? file =
-        archive.files.toList().findFirstMatch((f) => f.name == imageName);
+    final ArchiveFile? file = archive.files
+        .toList()
+        .findFirstMatch((ArchiveFile f) => f.name == imageName);
     if (file != null) {
       final List<int> bytes = file.content as List<int>;
       final ui.Image image = await decodeImage(bytes);
@@ -186,7 +187,7 @@ Future<void> addImageToLayer({
 /// ui.Image image = await decodeImage(imageData);
 /// ```
 Future<ui.Image> decodeImage(List<int> bytes) async {
-  final completer = Completer<ui.Image>();
+  final Completer<ui.Image> completer = Completer<ui.Image>();
   ui.decodeImageFromList(Uint8List.fromList(bytes), completer.complete);
   return completer.future;
 }
@@ -216,7 +217,7 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
   );
 
   // Placeholder for layer image names
-  final List<Map<String, dynamic>> layersData = [];
+  final List<Map<String, dynamic>> layersData = <Map<String, dynamic>>[];
 
   // Generate PNG files and add them to the archive
   for (int i = 0; i < layers.length; i++) {
@@ -237,7 +238,7 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
       ),
     );
 
-    layersData.add({
+    layersData.add(<String, dynamic>{
       'name': layer.name,
       'visibility': layer.isVisible ? 'visible' : 'hidden',
       'opacity': layer.opacity.toStringAsFixed(5),
@@ -265,7 +266,7 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
       builder.element(
         'stack',
         nest: () {
-          for (final layerData in layersData) {
+          for (final Map<String, dynamic> layerData in layersData) {
             builder.element(
               'layer',
               nest: () {

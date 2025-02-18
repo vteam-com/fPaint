@@ -42,7 +42,7 @@ class _ColorSelectorState extends State<ColorSelector> {
 
   @override
   Widget build(BuildContext context) {
-    const maxHue = 359.7;
+    const double maxHue = 359.7;
 
     if (hue > maxHue) {
       hue = maxHue;
@@ -62,7 +62,7 @@ class _ColorSelectorState extends State<ColorSelector> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+            children: <Widget>[
               SizedBox(
                 height: 30,
                 child: CustomPaint(
@@ -110,7 +110,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                 height: 30,
                 child: Stack(
                   alignment: AlignmentDirectional.center,
-                  children: [
+                  children: <Widget>[
                     const TransparentPaper(patternSize: 4),
                     CustomPaint(
                       painter: AlphaGradientPainter(
@@ -144,7 +144,8 @@ class _ColorSelectorState extends State<ColorSelector> {
   }
 
   void fromInputColorToHueBrightnessAndAlpha() {
-    final bothValues = getHueAndBrightnessFromColor(widget.color);
+    final Pair<double, double> bothValues =
+        getHueAndBrightnessFromColor(widget.color);
     hue = bothValues.first;
     brightness = bothValues.second;
     alpha = widget.color.a.toDouble();
@@ -154,7 +155,7 @@ class _ColorSelectorState extends State<ColorSelector> {
 class HueGradientPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    const List<Color> colors = [
+    const List<Color> colors = <Color>[
       Color.fromRGBO(255, 0, 0, 1), // 1 Red
       Color.fromRGBO(255, 255, 0, 1), // 2 Yellow
       Color.fromRGBO(0, 255, 0, 1), // 3 Green
@@ -191,7 +192,7 @@ class BrightnessGradientPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Rect rect = Offset.zero & size;
     final Gradient gradient = LinearGradient(
-      colors: [
+      colors: <Color>[
         HSLColor.fromAHSL(1.0, hue, 1.0, 0.0).toColor(), // Black
         HSLColor.fromAHSL(1.0, hue, 1.0, 0.5).toColor(), // Middle lightness
         HSLColor.fromAHSL(1.0, hue, 1.0, 1.0).toColor(), // White
@@ -218,7 +219,7 @@ class AlphaGradientPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Rect rect = Offset.zero & size;
     final Gradient gradient = LinearGradient(
-      colors: [
+      colors: <Color>[
         hsvToColor(hue, brightness, 0.0), // Transparent
         hsvToColor(hue, brightness, 1.0), // Opaque
       ],
@@ -269,6 +270,6 @@ Color hsvToColor(
   final double brightness,
   final double alpha,
 ) {
-  final hslColor = HSLColor.fromAHSL(alpha, hue, 1.0, brightness);
+  final HSLColor hslColor = HSLColor.fromAHSL(alpha, hue, 1.0, brightness);
   return hslColor.toColor();
 }

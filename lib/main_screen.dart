@@ -18,7 +18,7 @@ class MainScreen extends StatelessWidget {
 
     final AppProvider appModel = AppProvider.of(context, listen: true);
     final ShellProvider shellModel = ShellProvider.of(context, listen: true);
-    final shellMode = shellModel.shellMode;
+    final ShellMode shellMode = shellModel.shellMode;
 
     shellModel.deviceSizeSmall = MediaQuery.of(context).size.width < 600;
 
@@ -69,10 +69,10 @@ class MainScreen extends StatelessWidget {
     return MultiSplitView(
       key: Key('key_side_panel_size_${shellModel.isSidePanelExpanded}'),
       axis: Axis.horizontal,
-      onDividerDoubleTap: (dividerIndex) {
+      onDividerDoubleTap: (int dividerIndex) {
         shellModel.isSidePanelExpanded = !shellModel.isSidePanelExpanded;
       },
-      initialAreas: [
+      initialAreas: <Area>[
         Area(
           size: shellModel.isSidePanelExpanded ? 400 : minSidePanelSize,
           min: shellModel.isSidePanelExpanded ? 350 : minSidePanelSize,

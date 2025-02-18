@@ -5,7 +5,7 @@ import 'package:fpaint/models/canvas_resize.dart';
 void main() {
   group('CanvasResizePosition', () {
     test('anchorTranslate should handle same source and destination sizes', () {
-      final result = CanvasResizePosition.anchorTranslate(
+      final Offset result = CanvasResizePosition.anchorTranslate(
         CanvasResizePosition.bottomRight,
         const Size(100, 100),
         const Size(100, 100),
@@ -14,7 +14,7 @@ void main() {
     });
 
     test('anchorTranslate should return zero offset for topLeft position', () {
-      final result = CanvasResizePosition.anchorTranslate(
+      final Offset result = CanvasResizePosition.anchorTranslate(
         CanvasResizePosition.topLeft,
         const Size(100, 100),
         const Size(200, 200),
@@ -24,7 +24,7 @@ void main() {
 
     test('anchorTranslate should return correct offset for center position',
         () {
-      final result = CanvasResizePosition.anchorTranslate(
+      final Offset result = CanvasResizePosition.anchorTranslate(
         CanvasResizePosition.center,
         const Size(100, 100),
         const Size(200, 200),
@@ -33,7 +33,7 @@ void main() {
     });
 
     test('anchorTranslate should handle negative size differences', () {
-      final result = CanvasResizePosition.anchorTranslate(
+      final Offset result = CanvasResizePosition.anchorTranslate(
         CanvasResizePosition.right,
         const Size(200, 200),
         const Size(100, 100),
@@ -43,10 +43,10 @@ void main() {
 
     test('anchorTranslate should calculate correct offset for all positions',
         () {
-      const sourceSize = Size(100, 100);
-      const destSize = Size(200, 200);
-      final dx = destSize.width - sourceSize.width;
-      final dy = destSize.height - sourceSize.height;
+      const Size sourceSize = Size(100, 100);
+      const Size destSize = Size(200, 200);
+      final double dx = destSize.width - sourceSize.width;
+      final double dy = destSize.height - sourceSize.height;
 
       expect(
         CanvasResizePosition.anchorTranslate(

@@ -17,14 +17,14 @@ class TopMenuAndLayersPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shellModel = ShellProvider.of(context, listen: true);
+    final ShellProvider shellModel = ShellProvider.of(context, listen: true);
 
     return Column(
-      children: [
+      children: <Widget>[
         // toolbar
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
+          children: <Widget>[
             mainMenu(context),
             if (shellModel.isSidePanelExpanded)
               buildIconButton(
@@ -56,12 +56,13 @@ class TopMenuAndLayersPanel extends StatelessWidget {
         ),
 
         Consumer<LayersProvider>(
-          builder: (context2, layers, child) {
+          builder:
+              (BuildContext context2, LayersProvider layers, Widget? child) {
             return Expanded(
               child: ReorderableListView.builder(
                 itemCount: layers.length,
                 buildDefaultDragHandles: false,
-                onReorder: (oldIndex, newIndex) {
+                onReorder: (int oldIndex, int newIndex) {
                   if (newIndex > oldIndex) {
                     newIndex -= 1;
                   }
@@ -70,7 +71,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                   layers.insert(newIndex, layer);
                   layers.selectedLayerIndex = newIndex;
                 },
-                itemBuilder: (context, index) {
+                itemBuilder: (BuildContext context, int index) {
                   final LayerProvider layer = layers.get(index);
                   return ReorderableDragStartListener(
                     key: Key('$index'),
@@ -105,7 +106,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
     return PopupMenuItem<int>(
       value: value,
       child: Row(
-        children: [
+        children: <Widget>[
           if (icon != null) Icon(icon, size: 18),
           if (icon != null) const SizedBox(width: 8),
           Text(text),
@@ -129,7 +130,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
   Widget mainMenu(
     final BuildContext context,
   ) {
-    final shellModel = ShellProvider.of(context);
+    final ShellProvider shellModel = ShellProvider.of(context);
 
     return PopupMenuButton<int>(
       tooltip: strings[StringId.menuTooltip],

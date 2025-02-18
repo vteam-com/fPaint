@@ -7,26 +7,26 @@ import 'package:fpaint/panels/tools/flood_fill.dart';
 const int testImageSize = 5;
 
 Future<ui.Image> createInputImage() async {
-  final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder);
-  final paint = Paint()..color = Colors.white;
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = Canvas(recorder);
+  final ui.Paint paint = Paint()..color = Colors.white;
   canvas.drawRect(
     const Rect.fromLTWH(1, 1, testImageSize - 2, testImageSize - 2),
     paint,
   );
-  final picture = recorder.endRecording();
+  final ui.Picture picture = recorder.endRecording();
   return await picture.toImage(testImageSize, testImageSize);
 }
 
 void main() {
   group('Flood Fill Tests', () {
     test('Input image', () async {
-      final inputImage = await createInputImage();
+      final ui.Image inputImage = await createInputImage();
       expect(inputImage.width, 5);
       expect(inputImage.height, 5);
       expect(
         await imageToListToString(inputImage),
-        [
+        <String>[
           '00000000|00000000|00000000|00000000|00000000',
           '00000000|ffffffff|ffffffff|ffffffff|00000000',
           '00000000|ffffffff|ffffffff|ffffffff|00000000',
@@ -37,8 +37,8 @@ void main() {
     });
 
     test('Fill with same color returns unchanged image', () async {
-      final inputImage = await createInputImage();
-      final resultImage = await applyFloodFill(
+      final ui.Image inputImage = await createInputImage();
+      final ui.Image resultImage = await applyFloodFill(
         image: inputImage,
         x: 2,
         y: 2,
@@ -51,7 +51,7 @@ void main() {
 
       expect(
         await imageToListToString(resultImage),
-        [
+        <String>[
           '00000000|00000000|00000000|00000000|00000000',
           '00000000|9e9e9eff|9e9e9eff|9e9e9eff|00000000',
           '00000000|9e9e9eff|9e9e9eff|9e9e9eff|00000000',
@@ -63,7 +63,7 @@ void main() {
 
     test('Fill with out of bounds coordinates returns original image',
         () async {
-      final testImage = await createInputImage();
+      final ui.Image testImage = await createInputImage();
       // Flood fill top left corner
       ui.Image resultImage = await applyFloodFill(
         image: testImage,
@@ -78,7 +78,7 @@ void main() {
 
       expect(
         await imageToListToString(resultImage),
-        [
+        <String>[
           'f44336ff|f44336ff|f44336ff|f44336ff|f44336ff',
           'f44336ff|ffffffff|ffffffff|ffffffff|f44336ff',
           'f44336ff|ffffffff|ffffffff|ffffffff|f44336ff',
@@ -98,7 +98,7 @@ void main() {
 
       expect(
         await imageToListToString(resultImage),
-        [
+        <String>[
           'f44336ff|f44336ff|f44336ff|f44336ff|f44336ff',
           'f44336ff|f44336ff|f44336ff|f44336ff|f44336ff',
           'f44336ff|f44336ff|f44336ff|f44336ff|f44336ff',

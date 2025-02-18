@@ -55,8 +55,8 @@ class LayerProvider extends ChangeNotifier {
   }
 
   String id;
-  final List<UserAction> _actionStack = [];
-  final List<UserAction> redoStack = [];
+  final List<UserAction> _actionStack = <UserAction>[];
+  final List<UserAction> redoStack = <UserAction>[];
   bool isSelected;
   bool preserveAlpha = true;
   ui.BlendMode blendMode = ui.BlendMode.srcOver;
@@ -65,7 +65,7 @@ class LayerProvider extends ChangeNotifier {
   /// Modifed state
   bool hasChanged = true;
   final Debouncer _debounceTimer = Debouncer();
-  final Function onThumnailChanged;
+  final void Function() onThumnailChanged;
   //---------------------------------------------
   // Size
   Size _size = const Size(0, 0);
@@ -77,16 +77,16 @@ class LayerProvider extends ChangeNotifier {
     clearCache();
   }
 
-  List<ColorUsage> topColorsUsed = [];
+  List<ColorUsage> topColorsUsed = <ColorUsage>[];
 
   void _cacheTopColorsUsed() async {
-    topColorsUsed = [];
+    topColorsUsed = <ColorUsage>[];
     if (_cachedThumnailImage != null) {
       final List<ColorUsage> imageColors =
           await getImageColors(_cachedThumnailImage!);
 
       for (final ColorUsage colorUsage in imageColors) {
-        if (!topColorsUsed.any((c) => c.color == colorUsage.color)) {
+        if (!topColorsUsed.any((ColorUsage c) => c.color == colorUsage.color)) {
           topColorsUsed.add(colorUsage);
         }
       }
@@ -179,7 +179,7 @@ class LayerProvider extends ChangeNotifier {
   }) {
     final UserAction newAction = UserAction(
       action: tool,
-      positions: [
+      positions: <ui.Offset>[
         offset,
         Offset(
           offset.dx + imageToAdd.width.toDouble(),
@@ -226,7 +226,11 @@ class LayerProvider extends ChangeNotifier {
 
   void regionCut(final ui.Path path) {
     addUserAction(
-      UserAction(action: ActionType.cut, positions: [], path: Path.from(path)),
+      UserAction(
+        action: ActionType.cut,
+        positions: <ui.Offset>[],
+        path: Path.from(path),
+      ),
     );
     clearCache();
   }
@@ -452,20 +456,20 @@ class LayerProvider extends ChangeNotifier {
     required final Offset position,
     final int tolerance = 1,
   }) {
-    final path = Path();
+    final ui.Path path = Path();
     final int width = image.width;
     final int height = image.height;
 
-    final visited = List.generate(
+    final List<List<bool>> visited = List<List<bool>>.generate(
       height,
-      (y) => List.filled(width, false),
+      (int y) => List<bool>.filled(width, false),
     );
 
-    final queue = <Offset>[];
+    final List<ui.Offset> queue = <Offset>[];
     queue.add(position);
 
     while (queue.isNotEmpty) {
-      final current = queue.removeAt(0);
+      final ui.Offset current = queue.removeAt(0);
       final int x = current.dx.round();
       final int y = current.dy.round();
 

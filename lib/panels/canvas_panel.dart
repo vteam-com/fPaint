@@ -7,7 +7,7 @@ class CanvasPanel extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final layers = LayersProvider.of(context);
+    final LayersProvider layers = LayersProvider.of(context);
     return CustomPaint(
       size: Size.infinite,
       painter: CanvasPanelPainter(layers, includeTransparentBackground: true),

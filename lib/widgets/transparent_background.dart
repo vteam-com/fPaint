@@ -9,7 +9,7 @@ Widget transparentPaperContainer(
     child: Padding(
       padding: const EdgeInsets.all(1.0),
       child: Stack(
-        children: [
+        children: <Widget>[
           const TransparentPaper(patternSize: 4),
           Container(
             alignment: Alignment.center,
@@ -64,7 +64,7 @@ void drawTransaparentBackgroundLTWH(
   final double top,
   final double width,
   final double height, {
-  patternSize = 10,
+  int patternSize = 10,
 }) {
   drawTransaparentBackgroundOffsetAndSize(
     canvas,

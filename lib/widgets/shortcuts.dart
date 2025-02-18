@@ -10,7 +10,7 @@ Widget shortCutsForMainApp(
   final Widget child,
 ) {
   return Shortcuts(
-    shortcuts: {
+    shortcuts: <ShortcutActivator, Intent>{
       // Undo
       LogicalKeySet(
         LogicalKeyboardKey.control,
@@ -116,7 +116,7 @@ Widget shortCutsForMainApp(
       ): const DeleteIntent(),
     },
     child: Actions(
-      actions: {
+      actions: <Type, Action<Intent>>{
         UndoIntent: CallbackAction<UndoIntent>(
           onInvoke: (UndoIntent intent) => appModel.layersUndo(),
         ),

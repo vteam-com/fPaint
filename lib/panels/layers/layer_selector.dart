@@ -25,7 +25,7 @@ class LayerSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final layers = LayersProvider.of(context);
+    final LayersProvider layers = LayersProvider.of(context);
     return Container(
       margin: EdgeInsets.all(minimal ? 2 : 4),
       padding: EdgeInsets.all(minimal ? 2 : 8),
@@ -57,13 +57,13 @@ class LayerSelector extends StatelessWidget {
     LayerProvider layer,
     bool allowRemoveLayer,
   ) {
-    final layers = LayersProvider.of(context);
+    final LayersProvider layers = LayersProvider.of(context);
 
     return Tooltip(
       margin: const EdgeInsets.only(left: 50),
       message: information(),
       child: Column(
-        children: [
+        children: <Widget>[
           TruncatedTextWidget(text: layer.name, maxLength: 10),
           _buildThumbnailPreviewAndVisibility(
             layers,
@@ -75,7 +75,7 @@ class LayerSelector extends StatelessWidget {
   }
 
   String information() {
-    List<String> texts = [
+    List<String> texts = <String>[
       '[${layer.id}]',
       layer.name,
       if (!layer.isVisible) 'Hidden',
@@ -92,10 +92,10 @@ class LayerSelector extends StatelessWidget {
     bool allowRemoveLayer,
   ) {
     return Row(
-      children: [
+      children: <Widget>[
         Expanded(
           child: Column(
-            children: [
+            children: <Widget>[
               _buildLayerName(layers),
               if (isSelected)
                 _buildLayerControls(context, layers, layer, allowRemoveLayer),
@@ -111,67 +111,67 @@ class LayerSelector extends StatelessWidget {
   }
 
   List<PopupMenuItem<String>> _buildPopupMenuItems() {
-    return [
-      const PopupMenuItem(
+    return <PopupMenuItem<String>>[
+      const PopupMenuItem<String>(
         value: 'rename',
         enabled: true,
         child: Row(
-          children: [
+          children: <Widget>[
             Icon(Icons.edit),
             SizedBox(width: 8),
             Text('Rename layer'),
           ],
         ),
       ),
-      const PopupMenuItem(
+      const PopupMenuItem<String>(
         value: 'add',
         enabled: true,
         child: Row(
-          children: [
+          children: <Widget>[
             Icon(Icons.playlist_add),
             SizedBox(width: 8),
             Text('Add a layer above'),
           ],
         ),
       ),
-      PopupMenuItem(
+      PopupMenuItem<String>(
         value: 'delete',
         enabled: allowRemoveLayer,
         child: const Row(
-          children: [
+          children: <Widget>[
             Icon(Icons.playlist_remove),
             SizedBox(width: 8),
             Text('Delete this layer'),
           ],
         ),
       ),
-      PopupMenuItem(
+      PopupMenuItem<String>(
         value: 'merge',
         enabled: allowRemoveLayer,
         child: const Row(
-          children: [
+          children: <Widget>[
             Icon(Icons.layers_outlined),
             SizedBox(width: 8),
             Text('Merge to below layer'),
           ],
         ),
       ),
-      const PopupMenuItem(
+      const PopupMenuItem<String>(
         value: 'blend',
         enabled: true,
         child: Row(
-          children: [
+          children: <Widget>[
             Icon(Icons.blender_outlined),
             SizedBox(width: 8),
             Text('Change Blend Mode'),
           ],
         ),
       ),
-      PopupMenuItem(
+      PopupMenuItem<String>(
         value: 'visibility',
         enabled: true,
         child: Row(
-          children: [
+          children: <Widget>[
             Icon(
               layer.isVisible ? Icons.visibility : Icons.visibility_off,
               color: layer.isVisible
@@ -183,11 +183,11 @@ class LayerSelector extends StatelessWidget {
           ],
         ),
       ),
-      const PopupMenuItem(
+      const PopupMenuItem<String>(
         value: 'allHide',
         enabled: true,
         child: Row(
-          children: [
+          children: <Widget>[
             Icon(
               Icons.visibility_off,
             ),
@@ -196,11 +196,11 @@ class LayerSelector extends StatelessWidget {
           ],
         ),
       ),
-      const PopupMenuItem(
+      const PopupMenuItem<String>(
         value: 'allShow',
         enabled: true,
         child: Row(
-          children: [
+          children: <Widget>[
             Icon(
               Icons.visibility,
             ),
@@ -259,11 +259,12 @@ class LayerSelector extends StatelessWidget {
 
   Widget _buildLayerName(final LayersProvider layers) {
     return Row(
-      children: [
+      children: <Widget>[
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
-          itemBuilder: (context) => _buildPopupMenuItems(),
-          onSelected: (value) => _handlePopupMenuSelection(value, layers),
+          itemBuilder: (BuildContext context) => _buildPopupMenuItems(),
+          onSelected: (String value) =>
+              _handlePopupMenuSelection(value, layers),
         ),
         Expanded(
           child: GestureDetector(
@@ -309,7 +310,7 @@ class LayerSelector extends StatelessWidget {
             labelText: 'Layer Name',
           ),
         ),
-        actions: [
+        actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
@@ -338,7 +339,7 @@ class LayerSelector extends StatelessWidget {
   ) {
     return Wrap(
       alignment: WrapAlignment.center,
-      children: [
+      children: <Widget>[
         IconButton(
           tooltip: 'Add a layer above',
           icon: const Icon(Icons.playlist_add),
@@ -410,7 +411,7 @@ class LayerSelector extends StatelessWidget {
           position: const RelativeRect.fromLTRB(0, 0, 0, 0),
           items: _buildPopupMenuItems(),
           elevation: 8,
-        ).then((value) {
+        ).then((String? value) {
           if (value != null) {
             _handlePopupMenuSelection(value, layers);
           }
@@ -418,7 +419,7 @@ class LayerSelector extends StatelessWidget {
       },
       child: Stack(
         alignment: Alignment.topCenter,
-        children: [
+        children: <Widget>[
           _buildThumbnailPreview(layers, layer),
           if (minimal && !layer.isVisible)
             const Icon(Icons.visibility_off, color: Colors.red),
@@ -435,15 +436,15 @@ class LayerSelector extends StatelessWidget {
       height: 60,
       width: 60,
       child: ContainerSlider(
-        key: ValueKey(layer.name + layer.id),
+        key: ValueKey<String>(layer.name + layer.id),
         minValue: 0.0,
         maxValue: 1.0,
         initialValue: layer.opacity,
         onSlideStart: () {
           // appModel.update();
         },
-        onChanged: (value) => layer.opacity = value,
-        onChangeEnd: (value) {
+        onChanged: (double value) => layer.opacity = value,
+        onChangeEnd: (double value) {
           layer.opacity = value;
           layers.update();
         },

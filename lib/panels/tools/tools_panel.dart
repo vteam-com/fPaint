@@ -30,7 +30,7 @@ class ToolsPanel extends StatelessWidget {
       scrollDirection: Axis.vertical,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
+        children: <Widget>[
           Wrap(
             spacing: minimal ? 2.0 : 4,
             runSpacing: minimal ? 2.0 : 4,
@@ -58,10 +58,10 @@ class ToolsPanel extends StatelessWidget {
   List<Widget> getListOfTools(
     BuildContext context,
   ) {
-    final appProvider = AppProvider.of(context);
+    final AppProvider appProvider = AppProvider.of(context);
     final ActionType selectedTool = appProvider.selectedAction;
 
-    final List<Widget> tools = [
+    final List<Widget> tools = <Widget>[
       // Pencil
       ToolSelector(
         minimal: minimal,
@@ -180,10 +180,10 @@ class ToolsPanel extends StatelessWidget {
   List<Widget> getWidgetForSelectedTool({
     required BuildContext context,
   }) {
-    List<Widget> widgets = [];
-    final appModel = AppProvider.of(context, listen: true);
-    final layers = LayersProvider.of(context);
-    final selectedTool = appModel.selectedAction;
+    List<Widget> widgets = <Widget>[];
+    final AppProvider appModel = AppProvider.of(context, listen: true);
+    final LayersProvider layers = LayersProvider.of(context);
+    final ActionType selectedTool = appModel.selectedAction;
     final String title = appModel.selectedAction == ActionType.pencil
         ? 'Pencil Size'
         : 'Brush Size';
@@ -198,7 +198,7 @@ class ToolsPanel extends StatelessWidget {
           name: 'Selector',
           childRight: Wrap(
             alignment: WrapAlignment.center,
-            children: [
+            children: <Widget>[
               //
               // Selection using Rectangle
               //
@@ -302,7 +302,7 @@ class ToolsPanel extends StatelessWidget {
                   value: appModel.brusSize,
                   min: min,
                   max: max,
-                  onChanged: (value) {
+                  onChanged: (double value) {
                     appModel.brusSize = value;
                   },
                 ),
@@ -419,7 +419,7 @@ class ToolsPanel extends StatelessWidget {
               ? null
               : TolerancePicker(
                   value: appModel.tolerance,
-                  onChanged: (value) {
+                  onChanged: (int value) {
                     appModel.tolerance = value;
                   },
                 ),
@@ -433,7 +433,7 @@ class ToolsPanel extends StatelessWidget {
         TopColors(
           colorUsages: layers.topColors,
           onRefresh: () => layers.evaluatTopColor(),
-          onColorPicked: (color) {
+          onColorPicked: (Color color) {
             (appModel.selectedAction == ActionType.rectangle ||
                     appModel.selectedAction == ActionType.circle ||
                     appModel.selectedAction == ActionType.fill)
@@ -446,7 +446,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Add a separator between each element
       if (!minimal) {
-        List<Widget> separatedWidgets = [];
+        List<Widget> separatedWidgets = <Widget>[];
         for (int i = 0; i < widgets.length; i++) {
           separatedWidgets.add(widgets[i]);
           separatedWidgets.add(separator());

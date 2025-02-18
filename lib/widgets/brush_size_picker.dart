@@ -45,7 +45,7 @@ class BrushSizePickerState extends State<BrushSizePicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 20,
-      children: [
+      children: <Widget>[
         Text('${widget.title}: ${_value.toStringAsFixed(1)}'),
         Slider(
           value: _value,

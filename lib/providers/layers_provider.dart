@@ -45,7 +45,7 @@ class LayersProvider extends ChangeNotifier {
   Size get size => _size;
   set size(final Size size) {
     _size = size;
-    _list.forEach((layer) => layer.size = size);
+    _list.forEach((LayerProvider layer) => layer.size = size);
   }
 
   ///-------------------------------------------
@@ -117,7 +117,7 @@ class LayersProvider extends ChangeNotifier {
 
     firstLayer.addUserAction(
       UserAction(
-        positions: [
+        positions: <Offset>[
           const Offset(0, 0),
           Offset(_size.width, _size.height),
         ],
@@ -130,7 +130,7 @@ class LayersProvider extends ChangeNotifier {
     return firstLayer;
   }
 
-  final List<LayerProvider> _list = [];
+  final List<LayerProvider> _list = <LayerProvider>[];
 
   void clear() {
     _list.clear();
@@ -139,7 +139,7 @@ class LayersProvider extends ChangeNotifier {
   int get length => _list.length;
   bool get isEmpty => _list.isEmpty;
   bool get isNotEmpty => _list.isNotEmpty;
-  bool get hasChanged => _list.any((layer) => layer.hasChanged);
+  bool get hasChanged => _list.any((LayerProvider layer) => layer.hasChanged);
 
   int _selectedLayerIndex = 0;
   int get selectedLayerIndex => _selectedLayerIndex;
@@ -195,7 +195,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   LayerProvider? getByName(final String name) {
-    return _list.findFirstMatch((layer) => layer.name == name);
+    return _list.findFirstMatch((LayerProvider layer) => layer.name == name);
   }
 
   LayerProvider addTop([String? name]) => this.insertAt(0, name);
@@ -220,7 +220,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   bool remove(final LayerProvider layer) {
-    final wasRemoved = _list.remove(layer);
+    final bool wasRemoved = _list.remove(layer);
     this.selectedLayerIndex =
         (this.selectedLayerIndex > 0 ? this.selectedLayerIndex - 1 : 0);
     return wasRemoved;
@@ -252,12 +252,12 @@ class LayersProvider extends ChangeNotifier {
 
   //-------------------------
   // Top Colors used
-  List<ColorUsage> topColors = [
+  List<ColorUsage> topColors = <ColorUsage>[
     ColorUsage(Colors.white, 1),
     ColorUsage(Colors.black, 1),
   ];
   void evaluatTopColor() {
-    this.getTopColorUsed().then((topColorsFound) {
+    this.getTopColorUsed().then((List<ColorUsage> topColorsFound) {
       topColors = topColorsFound;
     });
   }
@@ -271,13 +271,13 @@ class LayersProvider extends ChangeNotifier {
   /// Returns:
   ///   A list of [ColorUsage] objects representing the top 10 most used colors.
   Future<List<ColorUsage>> getTopColorUsed() async {
-    List<ColorUsage> topColors = [];
+    List<ColorUsage> topColors = <ColorUsage>[];
     int totalLayers = _list.length;
 
     for (final LayerProvider layer in _list) {
       for (final ColorUsage colorUsed in layer.topColorsUsed) {
-        final existingColor = topColors.firstWhere(
-          (c) => c.color == colorUsed.color,
+        final ColorUsage existingColor = topColors.firstWhere(
+          (ColorUsage c) => c.color == colorUsed.color,
           orElse: () => colorUsed,
         );
         if (existingColor == colorUsed) {
@@ -288,7 +288,9 @@ class LayersProvider extends ChangeNotifier {
       }
     }
 
-    topColors.sort((a, b) => b.percentage.compareTo(a.percentage));
+    topColors.sort(
+      (ColorUsage a, ColorUsage b) => b.percentage.compareTo(a.percentage),
+    );
     topColors = topColors.take(20).toList();
     return topColors;
   }

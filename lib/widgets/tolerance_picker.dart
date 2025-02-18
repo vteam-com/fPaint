@@ -35,7 +35,7 @@ class TolerancePickerState extends State<TolerancePicker> {
   @override
   Widget build(final BuildContext context) {
     return Column(
-      children: [
+      children: <Widget>[
         Text('Tolerance: ${_value.toStringAsFixed(0)}'),
         Slider(
           value: _value.toDouble(),

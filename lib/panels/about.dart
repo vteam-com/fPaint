@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 void showAboutBox(BuildContext context) {
-  final mediaQuery = MediaQuery.of(context);
-  final screenResolution =
+  final MediaQueryData mediaQuery = MediaQuery.of(context);
+  final String screenResolution =
       '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';
 
   showAboutDialog(
@@ -16,7 +16,7 @@ void showAboutBox(BuildContext context) {
       width: 100,
       height: 100,
     ),
-    children: [
+    children: <Widget>[
       const SizedBox(height: 20),
       Text('Device Screen Resolution: $screenResolution'),
       const SizedBox(height: 20),

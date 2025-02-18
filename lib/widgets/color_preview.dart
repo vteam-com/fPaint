@@ -72,7 +72,7 @@ class ColorPreview extends StatelessWidget {
           height: size,
           child: Stack(
             alignment: AlignmentDirectional.center,
-            children: [
+            children: <Widget>[
               //--------------------------------
               // Rectangle of the final color
               //

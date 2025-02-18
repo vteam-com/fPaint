@@ -37,16 +37,17 @@ class _SidePanelState extends State<SidePanel> {
         ),
         child: MultiSplitView(
           axis: Axis.vertical,
-          initialAreas: [
+          initialAreas: <Area>[
             Area(
               size: 400,
               min: 100,
-              builder: (context, area) => const TopMenuAndLayersPanel(),
+              builder: (BuildContext context, Area area) =>
+                  const TopMenuAndLayersPanel(),
             ),
             Area(
               size: 400,
               min: 100,
-              builder: (context, area) => Padding(
+              builder: (BuildContext context, Area area) => Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ToolsPanel(
                   minimal: !shellModel.isSidePanelExpanded,

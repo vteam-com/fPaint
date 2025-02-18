@@ -100,12 +100,12 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   final double tolerance255 = 255 * (tolerance / 100);
 
   // Visited set and queue for region growing
-  final Set<int> visited = {};
-  final Queue<Point> queue = Queue();
+  final Set<int> visited = <int>{};
+  final Queue<Point> queue = Queue<Point>();
   queue.add(Point(x, y));
 
   // Accumulate all points in the region
-  List<Point> points = [];
+  List<Point> points = <Point>[];
 
   // Track the region's bounds
   region.left = x.toDouble();
@@ -159,19 +159,19 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   //------------------------------------------------------------------
   // Optimize and combine the points(pixels)
   //
-  final linePaths = Path();
+  final ui.Path linePaths = Path();
 
-  final Map<int, List<Point>> rows = {};
+  final Map<int, List<Point>> rows = <int, List<Point>>{};
 
   // Group points by rows
   for (final Point p in points) {
-    rows.putIfAbsent(p.y, () => []).add(p);
+    rows.putIfAbsent(p.y, () => <Point>[]).add(p);
   }
 
   // Sort each row by X to detect runs
   for (final int y in rows.keys) {
-    final List<Point> rowPoints = rows[y] ?? [];
-    rowPoints.sort((a, b) => a.x.compareTo(b.x));
+    final List<Point> rowPoints = rows[y] ?? <Point>[];
+    rowPoints.sort((Point a, Point b) => a.x.compareTo(b.x));
 
     int startX = rowPoints[0].x;
     int endX = rowPoints[0].x;
@@ -227,19 +227,19 @@ Future<ui.Image> applyColorRegionToImage({
   required final Path path,
   required final Color newColor,
 }) async {
-  final recorder = ui.PictureRecorder();
-  final canvas = Canvas(recorder);
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = Canvas(recorder);
 
   // Draw the original image
-  final paint = Paint();
+  final ui.Paint paint = Paint();
   canvas.drawImage(image, Offset.zero, paint);
 
   // Apply color to the path
-  final fillPaint = Paint()
+  final ui.Paint fillPaint = Paint()
     ..style = PaintingStyle.fill
     ..color = newColor;
 
-  final shiftedPath = path.shift(offset);
+  final ui.Path shiftedPath = path.shift(offset);
   canvas.drawPath(shiftedPath, fillPaint);
 
   final ui.Picture picture = recorder.endRecording();
@@ -251,7 +251,7 @@ void printPathCoordinates(ui.Path path) {
   final ui.PathMetrics pathMetrics = path.computeMetrics();
   // ignore: avoid_print
   print('---------------------------------');
-  List<Offset> positionsSampling = [];
+  List<Offset> positionsSampling = <ui.Offset>[];
 
   for (final ui.PathMetric metric in pathMetrics) {
     for (double t = 0.0; t <= 1.0; t += 0.5) {
@@ -270,7 +270,7 @@ void printPathCoordinates(ui.Path path) {
   }
 
   // Reduce redundant values
-  List<Offset> reducedPositions = [];
+  List<Offset> reducedPositions = <ui.Offset>[];
   for (int i = 0; i < positionsSampling.length; i++) {
     if (i == 0 ||
         i == positionsSampling.length - 1 ||
@@ -279,9 +279,9 @@ void printPathCoordinates(ui.Path path) {
       reducedPositions.add(positionsSampling[i]);
     }
   }
-  List<String> strings = [];
+  List<String> strings = <String>[];
 
-  for (final position in reducedPositions) {
+  for (final ui.Offset position in reducedPositions) {
     strings.add(
       '[${position.dx.toStringAsFixed(0)}|${position.dy.toStringAsFixed(0)}]',
     );

@@ -9,7 +9,7 @@ Widget floatingActionButtons(
   final ShellProvider shellModel,
   final AppProvider appModel,
 ) {
-  final undoButton = FloatingActionButton(
+  final FloatingActionButton undoButton = FloatingActionButton(
     backgroundColor: Colors.grey.shade600,
     foregroundColor: Colors.white,
     tooltip: appModel.layers.selectedLayer.getHistoryStringForUndo(),
@@ -17,7 +17,7 @@ Widget floatingActionButtons(
     child: const Icon(Icons.undo),
   );
 
-  final redo = FloatingActionButton(
+  final FloatingActionButton redo = FloatingActionButton(
     backgroundColor: Colors.grey.shade600,
     foregroundColor: Colors.white,
     tooltip: appModel.layers.selectedLayer.getHistoryStringForRedo(),
@@ -35,7 +35,7 @@ Widget floatingActionButtons(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
       spacing: 5,
-      children: [
+      children: <Widget>[
         if (!appModel.showMenu) undoButton,
         if (!appModel.showMenu) redo,
         FloatingActionButton(
@@ -58,7 +58,7 @@ Widget floatingActionButtons(
 
   return Column(
     mainAxisAlignment: MainAxisAlignment.end,
-    children: [
+    children: <Widget>[
       undoButton,
       redo,
       const SizedBox(height: 8),

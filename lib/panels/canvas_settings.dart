@@ -26,7 +26,7 @@ void showCanvasSettings(final BuildContext context) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               Text(
                 'Canvas Size',
                 style: Theme.of(context).textTheme.titleMedium,
@@ -36,7 +36,7 @@ void showCanvasSettings(final BuildContext context) {
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: <Widget>[
                   SizedBox(
                     width: 150,
                     child: TextField(
@@ -47,7 +47,7 @@ void showCanvasSettings(final BuildContext context) {
                       ),
                       keyboardType: TextInputType.number,
                       controller: widthController,
-                      onChanged: (value) {
+                      onChanged: (String value) {
                         if (layers.canvasResizeLockAspectRatio) {
                           double width = double.tryParse(value) ??
                               double.tryParse(widthController.text)!;
@@ -79,7 +79,7 @@ void showCanvasSettings(final BuildContext context) {
                       ),
                       keyboardType: TextInputType.number,
                       controller: heightController,
-                      onChanged: (value) {
+                      onChanged: (String value) {
                         if (layers.canvasResizeLockAspectRatio) {
                           double height = double.tryParse(value) ??
                               double.tryParse(heightController.text)!;
@@ -96,7 +96,7 @@ void showCanvasSettings(final BuildContext context) {
               ),
               Column(
                 spacing: 10,
-                children: [
+                children: <Widget>[
                   const Text('Content Alignment'),
                   NineGridSelector(
                     selectedPosition: layers.canvasResizePosition,

@@ -42,11 +42,11 @@ class TopColors extends StatelessWidget {
         )
         .toList();
     return Column(
-      children: [
+      children: <Widget>[
         if (minimal) const Divider(color: Colors.black),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: <Widget>[
             if (!minimal) Text('Top ${colorUsages.length} colors'),
             IconButton(
               icon: const Icon(Icons.refresh),
@@ -78,20 +78,20 @@ class TopColors extends StatelessWidget {
   ///
   /// The resulting list of `ColorUsage` objects is sorted by hue and popularity, with the most popular colors appearing first.
   List<ColorUsage> sortColorByHueAndPopularity() {
-    Map<int, List<ColorUsage>> groupedByHue = {};
+    Map<int, List<ColorUsage>> groupedByHue = <int, List<ColorUsage>>{};
 
     // Group colors by hue similarity (using a 15-degree threshold)
     for (final ColorUsage usage in colorUsages) {
       double hue = HSVColor.fromColor(usage.color).hue;
       int hueKey = (hue / 15).round() * 15; // Grouping by 15-degree steps
 
-      groupedByHue.putIfAbsent(hueKey, () => []);
+      groupedByHue.putIfAbsent(hueKey, () => <ColorUsage>[]);
       groupedByHue[hueKey]!.add(usage);
     }
 
     // Sort each hue group by percentage (descending), then by hue (ascending)
     for (final List<ColorUsage> group in groupedByHue.values) {
-      group.sort((a, b) {
+      group.sort((ColorUsage a, ColorUsage b) {
         int percentageComparison = b.percentage.compareTo(a.percentage);
         if (percentageComparison != 0) {
           return percentageComparison;
@@ -105,13 +105,15 @@ class TopColors extends StatelessWidget {
 
     // Sort hue groups by total percentage usage (descending)
     List<List<ColorUsage>> sortedGroups = groupedByHue.values.toList();
-    sortedGroups.sort((a, b) {
-      double totalA = a.fold(0, (sum, item) => sum + item.percentage);
-      double totalB = b.fold(0, (sum, item) => sum + item.percentage);
+    sortedGroups.sort((List<ColorUsage> a, List<ColorUsage> b) {
+      double totalA =
+          a.fold(0, (double sum, ColorUsage item) => sum + item.percentage);
+      double totalB =
+          b.fold(0, (double sum, ColorUsage item) => sum + item.percentage);
       return totalB.compareTo(totalA);
     });
 
     // Flatten the sorted groups into a final sorted list
-    return sortedGroups.expand((group) => group).toList();
+    return sortedGroups.expand((List<ColorUsage> group) => group).toList();
   }
 }

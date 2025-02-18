@@ -47,16 +47,16 @@ class _ContainerSliderState extends State<ContainerSlider> {
   @override
   Widget build(BuildContext context) {
     return RawGestureDetector(
-      gestures: {
+      gestures: <Type, GestureRecognizerFactory<GestureRecognizer>>{
         _HorizontalDragRecognizer:
             GestureRecognizerFactoryWithHandlers<_HorizontalDragRecognizer>(
           () => _HorizontalDragRecognizer(),
-          (instance) {
+          (_HorizontalDragRecognizer instance) {
             instance
               ..onStart = (_) {
                 widget.onSlideStart(); // Pause reordering.
               }
-              ..onUpdate = (details) {
+              ..onUpdate = (DragUpdateDetails details) {
                 _adjustValue(
                   details.primaryDelta! * 0.01,
                 ); // Adjust sensitivity.
@@ -75,7 +75,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
         ),
         child: Stack(
           alignment: Alignment.center,
-          children: [
+          children: <Widget>[
             widget.child,
             Positioned(
               bottom: 0,

@@ -26,7 +26,7 @@ void sharePanel(final BuildContext context) {
           padding: const EdgeInsets.only(top: 18.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
+            children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.copy),
                 title: const Text('Copy to clipboard'),
@@ -68,13 +68,13 @@ void sharePanel(final BuildContext context) {
 }
 
 void _onExportToClipboard(final BuildContext context) async {
-  final clipboard = SystemClipboard.instance;
+  final SystemClipboard? clipboard = SystemClipboard.instance;
   if (clipboard != null) {
     final Uint8List image =
         await capturePainterToImageBytes(LayersProvider.of(context));
     final DataWriterItem item = DataWriterItem(suggestedName: 'fPaint.png');
     item.add(Formats.png(image));
-    await clipboard.write([item]);
+    await clipboard.write(<DataWriterItem>[item]);
   } else {
     //
   }

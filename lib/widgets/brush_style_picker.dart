@@ -45,7 +45,7 @@ class BrushStylePickerState extends State<BrushStylePicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 20,
-      children: [
+      children: <Widget>[
         brushStyleDropDown(_value, (BrushStyle selectedBrush) {
           setState(() {
             _value = selectedBrush;

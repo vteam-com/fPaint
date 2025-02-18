@@ -11,19 +11,20 @@ void main() {
       const int testImageHeight = 4;
 
       // Create an image
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-      final paint = Paint()..color = Colors.blue;
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final ui.Canvas canvas = Canvas(recorder);
+      final ui.Paint paint = Paint()..color = Colors.blue;
       canvas.drawRect(const Rect.fromLTWH(1, 1, 2, 2), paint);
-      final picture = recorder.endRecording();
-      final testImage = await picture.toImage(testImageWidth, testImageHeight);
+      final ui.Picture picture = recorder.endRecording();
+      final ui.Image testImage =
+          await picture.toImage(testImageWidth, testImageHeight);
 
       // Convert to bytes
       final Uint8List? data = await convertImageToUint8List(testImage);
 
       expect(
         imageBytesListToString(data!, testImageWidth),
-        [
+        <String>[
           '00000000|00000000|00000000|00000000',
           '00000000|2196f3ff|2196f3ff|00000000',
           '00000000|2196f3ff|2196f3ff|00000000',
@@ -33,7 +34,7 @@ void main() {
 
       // recreate the same image from the bytes
       {
-        final restored = await createImageFromBytes(
+        final ui.Image restored = await createImageFromBytes(
           bytes: data,
           width: testImageWidth,
           height: testImageHeight,
@@ -43,7 +44,7 @@ void main() {
         final Uint8List? data2 = await convertImageToUint8List(restored);
         expect(
           imageBytesListToString(data2!, testImageWidth),
-          [
+          <String>[
             '00000000|00000000|00000000|00000000',
             '00000000|2196f3ff|2196f3ff|00000000',
             '00000000|2196f3ff|2196f3ff|00000000',

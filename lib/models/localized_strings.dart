@@ -11,7 +11,7 @@ enum StringId {
   exportTooltip,
 }
 
-const Map<StringId, String> strings = {
+const Map<StringId, String> strings = <StringId, String>{
   StringId.menuTooltip: 'Menu',
   StringId.savedMessage: 'Saved ',
   StringId.startOver: 'Start over...',

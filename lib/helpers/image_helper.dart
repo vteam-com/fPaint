@@ -13,11 +13,11 @@ Future<List<ColorUsage>> getImageColors(ui.Image image) async {
   final ByteData? byteData =
       await image.toByteData(format: ui.ImageByteFormat.rawRgba);
   if (byteData == null) {
-    return [];
+    return <ColorUsage>[];
   }
 
   final Uint8List pixels = byteData.buffer.asUint8List();
-  final Map<int, int> colorCount = {};
+  final Map<int, int> colorCount = <int, int>{};
   final int length = pixels.length;
   final int totalPixels = length ~/ 4;
 
@@ -34,19 +34,21 @@ Future<List<ColorUsage>> getImageColors(ui.Image image) async {
   }
 
   // Convert to ColorUsage list with pre-allocated capacity
-  final List<ColorUsage> colorUsages = List.filled(
+  final List<ColorUsage> colorUsages = List<ColorUsage>.filled(
     colorCount.length,
     ColorUsage(const ui.Color(0x00000000), 0),
   );
 
   int index = 0;
-  colorCount.forEach((final int packedColor, count) {
+  colorCount.forEach((final int packedColor, int count) {
     final ui.Color color = ui.Color(packedColor);
     colorUsages[index++] = ColorUsage(color, count / totalPixels);
   });
 
   // Sort in-place
-  colorUsages.sort((a, b) => b.percentage.compareTo(a.percentage));
+  colorUsages.sort(
+    (ColorUsage a, ColorUsage b) => b.percentage.compareTo(a.percentage),
+  );
 
   if (colorUsages.length <= 20) {
     return colorUsages;
@@ -77,10 +79,10 @@ Future<List<String>> imageToListToString(final ui.Image image) async {
 
 List<String> imageBytesListToString(Uint8List bytes, int width) {
   final int length = bytes.length;
-  final List<String> rows = [];
+  final List<String> rows = <String>[];
 
   for (int i = 0; i < length; i += 4 * width) {
-    final List<String> row = [];
+    final List<String> row = <String>[];
     for (int j = 0; j < width * 4; j += 4) {
       final int index = i + j;
       if (index + 3 < length) {
@@ -105,7 +107,7 @@ Future<ui.Image> createImageFromBytes({
   required final int width,
   required final int height,
 }) async {
-  final Completer<ui.Image> completer = Completer();
+  final Completer<ui.Image> completer = Completer<ui.Image>();
   ui.decodeImageFromPixels(
     bytes,
     width,
@@ -119,8 +121,8 @@ Future<ui.Image> createImageFromBytes({
 }
 
 Future<void> copyImageBase64(Uint8List imageBytes) async {
-  final base64String = base64Encode(imageBytes);
-  final clipboardData =
+  final String base64String = base64Encode(imageBytes);
+  final ClipboardData clipboardData =
       ClipboardData(text: 'data:image/png;base64,$base64String');
   await Clipboard.setData(clipboardData);
 }
@@ -132,7 +134,7 @@ Future<void> copyImageToClipboard(ui.Image image) async {
     final ByteData? data =
         await image.toByteData(format: ui.ImageByteFormat.png);
     item.add(Formats.png(data!.buffer.asUint8List()));
-    await clipboard.write([item]);
+    await clipboard.write(<DataWriterItem>[item]);
   } else {
     // showMessage(_notAvailableMessage);
   }
@@ -151,9 +153,9 @@ Future<ui.Image?> getImageFromClipboard() async {
 }
 
 Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
-  final recorder = ui.PictureRecorder();
-  final canvas = ui.Canvas(recorder);
-  final paint = ui.Paint()
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+  final ui.Paint paint = ui.Paint()
     ..filterQuality = ui.FilterQuality.high
     ..isAntiAlias = true;
 
@@ -164,7 +166,7 @@ Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
     paint,
   );
 
-  final picture = recorder.endRecording();
+  final ui.Picture picture = recorder.endRecording();
   return picture.toImage(newSize.width.toInt(), newSize.height.toInt());
 }
 

@@ -5,7 +5,7 @@ import 'package:fpaint/providers/app_provider.dart';
 void main() {
   group('appProvider Tests', () {
     test('initial state should have one empty layer', () {
-      final appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider();
       expect(appProvider.layers.length, 1);
       expect(appProvider.layers.selectedLayerIndex, 0);
       expect(
@@ -15,9 +15,9 @@ void main() {
     });
 
     test('addShape with Shape object should add to current layer', () {
-      final appProvider = AppProvider();
-      final shape = UserAction(
-        positions: [
+      final AppProvider appProvider = AppProvider();
+      final UserAction shape = UserAction(
+        positions: <Offset>[
           const Offset(0, 0),
           const Offset(10, 10),
         ],
@@ -37,7 +37,7 @@ void main() {
     });
 
     test('add UserAction with parameters should create and add new shape', () {
-      final appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider();
       appProvider.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('updateLastShape should modify end position of last shape', () {
-      final appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider();
       appProvider.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
@@ -83,13 +83,13 @@ void main() {
     });
 
     test('updateLastShape should do nothing if no shapes exist', () {
-      final appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider();
       appProvider.updateAction(end: const Offset(20, 20));
       expect(appProvider.layers.selectedLayer.count, 1);
     });
 
     test('undo should remove last shape', () {
-      final appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider();
       appProvider.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
@@ -109,7 +109,7 @@ void main() {
     });
 
     test('multiple shapes should be added and managed correctly', () {
-      final appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider();
       appProvider.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),

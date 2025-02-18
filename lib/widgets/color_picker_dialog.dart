@@ -43,8 +43,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final shellModel = ShellProvider.of(context);
-    final layersModel = LayersProvider.of(context);
+    final ShellProvider shellModel = ShellProvider.of(context);
+    final LayersProvider layersModel = LayersProvider.of(context);
 
     // ignore: deprecated_member_use
     return WillPopScope(
@@ -57,7 +57,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: 20,
-                children: [
+                children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
@@ -88,12 +88,12 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         spacing: 30,
-        children: [
+        children: <Widget>[
           //----------------------------
           // Color preview and selection sliders
           Row(
             spacing: 10,
-            children: [
+            children: <Widget>[
               SizedBox(
                 height: 60,
                 width: 60,
@@ -112,7 +112,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               Expanded(
                 child: ColorSelector(
                   color: _currentColor,
-                  onColorChanged: (color) {
+                  onColorChanged: (Color color) {
                     setState(() {
                       _currentColor = color;
                       _hexController.text = colorToHexString(color);
@@ -125,8 +125,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              for (Color color in [
+            children: <Widget>[
+              for (Color color in <Color>[
                 Colors.red,
                 Colors.orange,
                 Colors.yellow,
@@ -166,7 +166,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 layers.evaluatTopColor();
               });
             },
-            onColorPicked: (color) {
+            onColorPicked: (Color color) {
               setState(() {
                 _currentColor = color;
                 _hexController.text = colorToHexString(color);
@@ -178,14 +178,15 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           // Hex value edit copy/paste
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+            children: <Widget>[
               IconButton(
                 icon: const Icon(Icons.paste),
                 onPressed: () async {
-                  final data = await Clipboard.getData('text/plain');
+                  final ClipboardData? data =
+                      await Clipboard.getData('text/plain');
 
                   try {
-                    final color = getColorFromString(
+                    final Color color = getColorFromString(
                       data?.text! as String,
                     ); // #FF00FF00
                     setState(() {
@@ -205,9 +206,9 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                     labelText: 'Hex Color',
                     border: OutlineInputBorder(),
                   ),
-                  onChanged: (value) {
+                  onChanged: (String value) {
                     try {
-                      final color = getColorFromString(value);
+                      final Color color = getColorFromString(value);
                       setState(() {
                         _currentColor = color;
                       });
@@ -239,7 +240,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: [
+            children: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: const Text('Cancel'),

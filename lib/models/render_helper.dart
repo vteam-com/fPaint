@@ -51,13 +51,13 @@ void renderRectangle(
   paint.strokeCap = StrokeCap.round;
   paint.strokeWidth = brush.size;
   paint.style = PaintingStyle.fill;
-  final rect = Rect.fromPoints(p1, p2);
+  final Rect rect = Rect.fromPoints(p1, p2);
   canvas.drawRect(rect, paint);
 
   // Draw the path arround the rectangle
   paint.style = PaintingStyle.stroke;
   paint.color = brush.color;
-  final path = Path()..addRect(rect);
+  final Path path = Path()..addRect(rect);
   drawPathWithBrushStyle(
     canvas,
     paint,
@@ -88,7 +88,7 @@ void renderCircle(
   canvas.drawCircle(center, radius, paint);
   paint.style = PaintingStyle.stroke;
   paint.color = brush.color;
-  final path = Path()
+  final Path path = Path()
     ..addOval(
       Rect.fromCircle(
         center: center,

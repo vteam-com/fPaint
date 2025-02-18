@@ -89,11 +89,11 @@ Future<void> saveAsOra(
 /// [fileName] The name of the file to be downloaded.
 void downloadBlob(final Uint8List image, final String fileName) {
   // Convert Uint8List to a JS-compatible ArrayBuffer
-  final jsArrayBuffer = image.buffer.toJS;
+  final JSArrayBuffer jsArrayBuffer = image.buffer.toJS;
 
   // Create a Blob from the ArrayBuffer
-  final blob = web.Blob(
-    [jsArrayBuffer].toJS,
+  final web.Blob blob = web.Blob(
+    <JSArrayBuffer>[jsArrayBuffer].toJS,
     web.BlobPropertyBag(type: 'application/octet-stream'),
   );
 
@@ -101,7 +101,8 @@ void downloadBlob(final Uint8List image, final String fileName) {
   final String url = web.URL.createObjectURL(blob);
 
   // Create an anchor element for downloading the file
-  final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
+  final web.HTMLAnchorElement anchor =
+      web.document.createElement('a') as web.HTMLAnchorElement;
   anchor.href = url;
   anchor.target = '_blank';
   anchor.download = fileName;

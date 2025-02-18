@@ -8,7 +8,7 @@ class ImagePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint();
+    final ui.Paint paint = Paint();
 
     // Calculate the scale factors to fit the image into the destination rectangle
     final double scaleX = size.width / image.width;
@@ -23,9 +23,9 @@ class ImagePainter extends CustomPainter {
     final double dx = (size.width - scaledWidth) / 2;
     final double dy = (size.height - scaledHeight) / 2;
 
-    final src =
+    final ui.Rect src =
         Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
-    final dst = Rect.fromLTWH(dx, dy, scaledWidth, scaledHeight);
+    final ui.Rect dst = Rect.fromLTWH(dx, dy, scaledWidth, scaledHeight);
 
     // Draw the image
     canvas.drawImageRect(image, src, dst, paint);

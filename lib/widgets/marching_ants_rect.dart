@@ -32,7 +32,7 @@ class MarchingAntsSelectionState extends State<MarchingAntsSelection>
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) {
+      builder: (BuildContext context, Widget? child) {
         return CustomPaint(
           painter: MarchingAntsPainter(
             path: widget.path,

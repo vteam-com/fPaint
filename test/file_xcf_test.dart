@@ -16,13 +16,13 @@ import 'package:fpaint/files/xcf_reader.dart';
 void main() {
   testWidgets('Simply Run the app', (WidgetTester tester) async {
     try {
-      final inputImageXcf =
+      final ByteData inputImageXcf =
           await loadBinaryFromAssets('assets/test/sample.xcf');
 
       // ignore: unused_local_variable
       final Uint8List bytes = inputImageXcf.buffer.asUint8List();
       // ignore: unused_local_variable
-      final fileXcf = FileXcf();
+      final FileXcf fileXcf = FileXcf();
 
       // DISABLE TEST UNTIL XCF is complted
       // final xfcFile = await fileXcf.readXcf(bytes);

@@ -134,7 +134,7 @@ enum PropType {
   const PropType(this.value);
   final int value;
   static PropType? fromValue(int value) {
-    return PropType.values.findFirstMatch((e) => e.value == value);
+    return PropType.values.findFirstMatch((PropType e) => e.value == value);
   }
 }
 
@@ -216,12 +216,12 @@ class FileXcf {
               followed it by 3*n+4 bytes of payload).          
           */
           final int numColors = _readUint32();
-          final List<Color> colorMap = [];
+          final List<Color> colorMap = <Color>[];
 
-          for (var i = 0; i < numColors; i++) {
-            final r = _readBytes(1)[0];
-            final g = _readBytes(1)[0];
-            final b = _readBytes(1)[0];
+          for (int i = 0; i < numColors; i++) {
+            final int r = _readBytes(1)[0];
+            final int g = _readBytes(1)[0];
+            final int b = _readBytes(1)[0];
             colorMap.add(Color.fromRGBO(r, g, b, 1.0));
           }
 
@@ -270,18 +270,18 @@ class FileXcf {
     }
 
     // Read layer pointers
-    List<int> layerPointers = [];
+    List<int> layerPointers = <int>[];
     while (true) {
-      final pointer = _readUint32();
+      final int pointer = _readUint32();
       if (pointer == 0) break;
       layerPointers.add(pointer);
     }
 
     // Read layers
-    for (final pointer in layerPointers) {
-      final savedOffset = _offset;
+    for (final int pointer in layerPointers) {
+      final int savedOffset = _offset;
       _offset = pointer;
-      final layer = await _readLayer(_data, _offset);
+      final XcfLayer layer = await _readLayer(_data, _offset);
       xcfFile.layers.add(layer);
       _offset = savedOffset;
     }
@@ -290,13 +290,13 @@ class FileXcf {
   }
 
   String _readString(int length) {
-    final bytes = _readBytes(length);
+    final Uint8List bytes = _readBytes(length);
     return String.fromCharCodes(bytes);
   }
 
   Uint8List _readBytes(int length) {
-    final bytes = Uint8List(length);
-    for (var i = 0; i < length; i++) {
+    final Uint8List bytes = Uint8List(length);
+    for (int i = 0; i < length; i++) {
       bytes[i] = _data.getUint8(_offset + i);
     }
     _offset += length;
@@ -304,27 +304,27 @@ class FileXcf {
   }
 
   int _readUint32() {
-    final value = _data.getUint32(_offset, Endian.big);
+    final int value = _data.getUint32(_offset, Endian.big);
     _offset += 4;
     return value;
   }
 
   // ignore: unused_element
   double _readFloat() {
-    final value = _data.getFloat32(_offset, Endian.big);
+    final double value = _data.getFloat32(_offset, Endian.big);
     _offset += 4;
     return value;
   }
 
   List<Map<String, dynamic>> _parseParasites(int totalSize) {
-    final parasites = <Map<String, dynamic>>[];
-    final endOffset = _offset + totalSize;
+    final List<Map<String, dynamic>> parasites = <Map<String, dynamic>>[];
+    final int endOffset = _offset + totalSize;
 
     print('Parsing parasites at offset $_offset');
 
     while (_offset < endOffset) {
       // Read parasite name (null-terminated string)
-      final name = _readNullTerminatedString();
+      final String name = _readNullTerminatedString();
       if (name.isEmpty) {
         break; // Avoid infinite loops if parsing fails
       }
@@ -346,7 +346,7 @@ class FileXcf {
       if (_offset + size > endOffset) break; // Safety check
       final Uint8List data = _readBytes(size);
 
-      parasites.add({
+      parasites.add(<String, dynamic>{
         'name': name,
         'flags': flags,
         'size': size,
@@ -358,8 +358,8 @@ class FileXcf {
   }
 
   String _readNullTerminatedString() {
-    List<int> chars = [];
-    final startOffset = _offset; // Track starting position
+    List<int> chars = <int>[];
+    final int startOffset = _offset; // Track starting position
 
     while (_offset < _data.lengthInBytes) {
       int byte = _data.getUint8(_offset++);
@@ -369,7 +369,7 @@ class FileXcf {
       chars.add(byte);
     }
 
-    final name = String.fromCharCodes(chars);
+    final String name = String.fromCharCodes(chars);
 
     if (name.isEmpty) {
       print('Warning: Exepected a non Empty string at offset $startOffset');
@@ -378,12 +378,12 @@ class FileXcf {
     return name;
   }
 
-  Future<XcfPath?> readPropPath(propData) async {
+  Future<XcfPath?> readPropPath(dynamic propData) async {
     try {
       // Read the length of PROP_PATH data
       int length = _readUint32();
       _offset += length;
-      return XcfPath(name: '', strokes: []);
+      return XcfPath(name: '', strokes: <Stroke>[]);
 
       // int startOffset = _offset; // Store the start position
 
@@ -447,7 +447,7 @@ class XcfFile {
   int height = 0;
   int baseType = 0;
   int precision = 0;
-  List<XcfLayer> layers = [];
+  List<XcfLayer> layers = <XcfLayer>[];
 
   String get baseTypeString {
     switch (baseType) {
@@ -475,8 +475,9 @@ class XcfFile {
 }
 
 Future<String> readProperty(ByteData buffer, int offset) async {
-  final length = buffer.getUint32(offset + 4, Endian.big);
-  final bytes = Uint8List.sublistView(buffer, offset + 8, offset + 8 + length);
+  final int length = buffer.getUint32(offset + 4, Endian.big);
+  final Uint8List bytes =
+      Uint8List.sublistView(buffer, offset + 8, offset + 8 + length);
   return String.fromCharCodes(bytes).replaceAll('\x00', '');
 }
 
@@ -491,8 +492,8 @@ Future<XcfLayer> _readLayer(
   );
 
   // Skip layer name length (4 bytes)
-  final nameLength = buffer.getUint32(offset + 12, Endian.big);
-  final nameBytes =
+  final int nameLength = buffer.getUint32(offset + 12, Endian.big);
+  final Uint8List nameBytes =
       Uint8List.sublistView(buffer, offset + 16, offset + 16 + nameLength);
   layer.name = String.fromCharCodes(nameBytes).replaceAll('\x00', '');
 
@@ -503,7 +504,7 @@ Future<XcfLayer> _readLayer(
   // Read properties
   int propOffset = offset + 16 + nameLength;
   while (true) {
-    final propType = buffer.getUint32(propOffset, Endian.big);
+    final int propType = buffer.getUint32(propOffset, Endian.big);
     if (propType == 0) {
       break;
     } // End of properties
@@ -517,7 +518,7 @@ Future<XcfLayer> _readLayer(
         break;
     }
 
-    final propLength = buffer.getUint32(propOffset + 4, Endian.big);
+    final int propLength = buffer.getUint32(propOffset + 4, Endian.big);
     propOffset += 8 + propLength;
   }
 
@@ -566,7 +567,7 @@ class XcfLayer {
     this.width = 0,
     this.height = 0,
     this.layerType = 0,
-    this.properties = const {},
+    this.properties = const <String, dynamic>{},
     this.hierarchy,
   });
   String name;

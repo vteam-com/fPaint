@@ -24,7 +24,7 @@ class LayerThumbnail extends StatelessWidget {
           width: size.toDouble(),
           height: size.toDouble(),
           child: Stack(
-            children: [
+            children: <Widget>[
               const TransparentPaper(patternSize: patternSize),
               if (layer.thumbnailImage != null)
                 SizedBox(

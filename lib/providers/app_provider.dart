@@ -259,7 +259,7 @@ class AppProvider extends ChangeNotifier {
         colorBrush != null) {
       layers.selectedLayer.addUserAction(
         UserAction(
-          positions: [start, end],
+          positions: <ui.Offset>[start, end],
           action: type,
           brush: MyBrush(
             color: colorBrush,
@@ -281,7 +281,7 @@ class AppProvider extends ChangeNotifier {
   void appendLineFromLastUserAction(final Offset positionEndOfNewLine) {
     layers.selectedLayer.addUserAction(
       UserAction(
-        positions: [
+        positions: <ui.Offset>[
           layers.selectedLayer.lastUserAction!.positions.last,
           positionEndOfNewLine,
         ],
@@ -306,7 +306,7 @@ class AppProvider extends ChangeNotifier {
           UserAction(
             action: ActionType.region,
             path: path,
-            positions: [
+            positions: <ui.Offset>[
               bounds.topLeft,
               bounds.bottomRight,
             ],

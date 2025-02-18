@@ -19,15 +19,19 @@ void main() {
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-  final shellModel = ShellProvider();
-  final appModel = AppProvider();
-  final layersProvider = LayersProvider();
+  final ShellProvider shellModel = ShellProvider();
+  final AppProvider appModel = AppProvider();
+  final LayersProvider layersProvider = LayersProvider();
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
+      // ignore: always_specify_types
       providers: [
+        // ignore: always_specify_types
         ChangeNotifierProvider(create: (_) => shellModel),
+        // ignore: always_specify_types
         ChangeNotifierProvider(create: (_) => appModel),
+        // ignore: always_specify_types
         ChangeNotifierProvider(create: (_) => layersProvider),
       ],
       child: MaterialApp(

@@ -161,7 +161,8 @@ String colorToHexString(
   bool includeAlpha = true,
   String seperator = '',
 }) {
-  final components = getColorComponentsAsHex(color, includeAlpha, alphaFirst);
+  final List<String> components =
+      getColorComponentsAsHex(color, includeAlpha, alphaFirst);
   return '#${components.join(seperator)}';
 }
 
@@ -185,14 +186,14 @@ List<String> getColorComponentsAsHex(
   final String blue =
       (color.b * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
   if (alphaIsFirst) {
-    return [
+    return <String>[
       if (includeAlpha) alpha,
       red,
       green,
       blue,
     ];
   } else {}
-  return [
+  return <String>[
     red,
     green,
     blue,
@@ -201,7 +202,7 @@ List<String> getColorComponentsAsHex(
 }
 
 String getHexOnMultiline(final Color color) {
-  final list = getColorComponentsAsHex(color);
+  final List<String> list = getColorComponentsAsHex(color);
   return list.join('\n');
 }
 
@@ -215,14 +216,14 @@ String getHexOnMultiline(final Color color) {
 ///
 Color contrastColor(Color color) {
   // Calculate the luminance of the color including alpha
-  final luminance = (0.299 * (color.r * 255) +
+  final double luminance = (0.299 * (color.r * 255) +
           0.587 * (color.g * 255) +
           0.114 * (color.b * 255)) /
       255;
-  final alphaFactor = color.a;
+  final double alphaFactor = color.a;
 
   // Determine whether to make the contrast color black or white based on the luminance and alpha
-  final contrastColor =
+  final Color contrastColor =
       (luminance * alphaFactor) > 0.5 ? Colors.black : Colors.white;
 
   return contrastColor;
@@ -264,7 +265,7 @@ ColorScheme getColorTheme(final BuildContext context) {
 ///
 Pair<double, double> getHueAndBrightness(Color color) {
   HSLColor hslColor = HSLColor.fromColor(color);
-  return Pair(hslColor.hue, 1 - hslColor.lightness);
+  return Pair<double, double>(hslColor.hue, 1 - hslColor.lightness);
 }
 
 /// Retrieves the hue and brightness values from the given Color object in the HSL color space.

@@ -173,7 +173,7 @@ class MainViewState extends State<MainView> {
 
   Widget _displayCanvasAnSelector(final AppProvider appProvider) {
     return Stack(
-      children: [
+      children: <Widget>[
         Transform(
           alignment: Alignment.topLeft,
           transform: Matrix4.identity()
@@ -277,7 +277,7 @@ class MainViewState extends State<MainView> {
       appModel.addActionToSelectedLayer(
         action: UserAction(
           action: appModel.selectedAction,
-          positions: [adjustedPosition, adjustedPosition],
+          positions: <ui.Offset>[adjustedPosition, adjustedPosition],
           brush: MyBrush(
             color: appModel.brushColor,
             size: appModel.brusSize,

@@ -65,50 +65,51 @@ enum ActionOptions {
   selectorOptions,
 }
 
-final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = {
-  ActionType.pencil: {
+final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes =
+    <ActionType, Set<ActionOptions>>{
+  ActionType.pencil: <ActionOptions>{
     ActionOptions.brushSize,
     ActionOptions.brushColor,
     ActionOptions.topColors,
   },
-  ActionType.brush: {
-    ActionOptions.brushSize,
-    ActionOptions.brushStyle,
-    ActionOptions.brushColor,
-    ActionOptions.topColors,
-  },
-  ActionType.line: {
-    ActionOptions.brushColor,
-    ActionOptions.brushSize,
-    ActionOptions.brushStyle,
-    ActionOptions.topColors,
-  },
-  ActionType.circle: {
+  ActionType.brush: <ActionOptions>{
     ActionOptions.brushSize,
     ActionOptions.brushStyle,
     ActionOptions.brushColor,
-    ActionOptions.colorFill,
     ActionOptions.topColors,
   },
-  ActionType.rectangle: {
+  ActionType.line: <ActionOptions>{
+    ActionOptions.brushColor,
+    ActionOptions.brushSize,
+    ActionOptions.brushStyle,
+    ActionOptions.topColors,
+  },
+  ActionType.circle: <ActionOptions>{
     ActionOptions.brushSize,
     ActionOptions.brushStyle,
     ActionOptions.brushColor,
     ActionOptions.colorFill,
     ActionOptions.topColors,
   },
-  ActionType.fill: {
+  ActionType.rectangle: <ActionOptions>{
+    ActionOptions.brushSize,
+    ActionOptions.brushStyle,
+    ActionOptions.brushColor,
+    ActionOptions.colorFill,
+    ActionOptions.topColors,
+  },
+  ActionType.fill: <ActionOptions>{
     ActionOptions.colorFill,
     ActionOptions.tolerance,
     ActionOptions.topColors,
   },
-  ActionType.eraser: {
+  ActionType.eraser: <ActionOptions>{
     ActionOptions.brushSize,
   },
-  ActionType.cut: {
+  ActionType.cut: <ActionOptions>{
     // nothing to support yet
   },
-  ActionType.selector: {
+  ActionType.selector: <ActionOptions>{
     ActionOptions.selectorOptions,
   },
 };

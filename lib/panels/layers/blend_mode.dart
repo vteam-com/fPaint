@@ -1,76 +1,77 @@
 import 'package:flutter/material.dart';
 
-final supportedBlendModes = {
-  'Normal': {
+final Map<String, Map<String, Object>> supportedBlendModes =
+    <String, Map<String, Object>>{
+  'Normal': <String, Object>{
     'flutterBlendMode': BlendMode.srcOver,
     'description':
         'Places the source image over the destination without blending.',
   },
-  'Darken': {
+  'Darken': <String, Object>{
     'flutterBlendMode': BlendMode.darken,
     'description':
         'Keeps the darker color of the source and destination pixels.',
   },
-  'Multiply': {
+  'Multiply': <String, Object>{
     'flutterBlendMode': BlendMode.multiply,
     'description':
         'Multiplies the source and destination colors, resulting in a darker output.',
   },
-  'Color Burn': {
+  'Color Burn': <String, Object>{
     'flutterBlendMode': BlendMode.colorBurn,
     'description':
         'Darkens the destination by increasing contrast based on the source color.',
   },
-  'Lighten': {
+  'Lighten': <String, Object>{
     'flutterBlendMode': BlendMode.lighten,
     'description':
         'Keeps the lighter color of the source and destination pixels.',
   },
-  'Screen': {
+  'Screen': <String, Object>{
     'flutterBlendMode': BlendMode.screen,
     'description':
         'Multiplies the inverses of the source and destination, resulting in a lighter output.',
   },
-  'Color Dodge': {
+  'Color Dodge': <String, Object>{
     'flutterBlendMode': BlendMode.colorDodge,
     'description':
         'Brightens the destination by reducing contrast based on the source color.',
   },
-  'Linear Dodge (Add)': {
+  'Linear Dodge (Add)': <String, Object>{
     'flutterBlendMode': BlendMode.plus,
     'description': 'Adds the source and destination colors, clamping at white.',
   },
-  'Overlay': {
+  'Overlay': <String, Object>{
     'flutterBlendMode': BlendMode.overlay,
     'description':
         'Combines multiply and screen modes: darkens dark areas, and lightens light areas.',
   },
-  'Soft Light': {
+  'Soft Light': <String, Object>{
     'flutterBlendMode': BlendMode.softLight,
     'description':
         'Softens the contrast by darkening or lightening the destination depending on the source.',
   },
-  'Hard Light': {
+  'Hard Light': <String, Object>{
     'flutterBlendMode': BlendMode.hardLight,
     'description':
         'Applies multiply or screen based on the source color’s intensity, creating a strong contrast.',
   },
-  'Hue': {
+  'Hue': <String, Object>{
     'flutterBlendMode': BlendMode.hue,
     'description':
         'Uses the source’s hue and the destination’s saturation and luminance.',
   },
-  'Saturation': {
+  'Saturation': <String, Object>{
     'flutterBlendMode': BlendMode.saturation,
     'description':
         'Uses the source’s saturation and the destination’s hue and luminance.',
   },
-  'Color': {
+  'Color': <String, Object>{
     'flutterBlendMode': BlendMode.color,
     'description':
         'Uses the source’s hue and saturation, but keeps the destination’s luminance.',
   },
-  'Luminosity': {
+  'Luminosity': <String, Object>{
     'flutterBlendMode': BlendMode.luminosity,
     'description':
         'Uses the source’s luminance and the destination’s hue and saturation.',
@@ -103,8 +104,9 @@ Future<BlendMode> showBlendModeMenu({
           position.dx + 1,
           position.dy + 1,
         ),
-        items: supportedBlendModes.entries.map((entry) {
-          final menuFlutterBlendMode =
+        items: supportedBlendModes.entries
+            .map((MapEntry<String, Map<String, Object>> entry) {
+          final BlendMode menuFlutterBlendMode =
               (entry.value['flutterBlendMode'] as BlendMode?) ??
                   BlendMode.srcOver;
 
@@ -112,7 +114,7 @@ Future<BlendMode> showBlendModeMenu({
             value: menuFlutterBlendMode,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 ListTile(
                   selected: selectedBlendMode == menuFlutterBlendMode,
                   selectedColor: Colors.blue,

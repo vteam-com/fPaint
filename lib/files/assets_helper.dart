@@ -17,10 +17,12 @@ import 'package:flutter/services.dart';
 /// final image = await loadImage('assets/my_image.png');
 ///
 Future<ui.Image> loadImageFromAssets(String assetPath) async {
-  final assetImage = AssetImage(assetPath);
-  final completer = Completer<ui.Image>();
+  final AssetImage assetImage = AssetImage(assetPath);
+  final Completer<ui.Image> completer = Completer<ui.Image>();
   assetImage.resolve(ImageConfiguration.empty).addListener(
-        ImageStreamListener((info, _) => completer.complete(info.image)),
+        ImageStreamListener(
+          (ImageInfo info, _) => completer.complete(info.image),
+        ),
       );
   return completer.future;
 }

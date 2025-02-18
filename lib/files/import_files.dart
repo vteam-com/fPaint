@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -117,7 +118,7 @@ Future<void> onFileOpen(final BuildContext context) async {
           await readImageFileFromBytes(layers, bytes);
         }
       } else {
-        final path = result.files.single.path!;
+        final String path = result.files.single.path!;
         shellModel.loadedFileName = path;
         if (result.files.single.extension == 'xcf') {
           // TODO
@@ -137,7 +138,7 @@ Future<void> onFileOpen(final BuildContext context) async {
   }
 }
 
-final List<String> supportedImageFileExtensions = [
+final List<String> supportedImageFileExtensions = <String>[
   'ora',
   'png',
   'psd',
@@ -157,7 +158,7 @@ Future<void> _readImageFile(
   LayersProvider layers,
   Future<Uint8List> bytesFuture,
 ) async {
-  final image = await decodeImageFromList(await bytesFuture);
+  final ui.Image image = await decodeImageFromList(await bytesFuture);
   layers.clear();
   layers.addTop();
   layers.size = Size(image.width.toDouble(), image.height.toDouble());
@@ -175,6 +176,7 @@ Future<void> readImageFileFromBytes(
   LayersProvider layers,
   Uint8List bytes,
 ) async {
+  // ignore: always_specify_types
   await _readImageFile(layers, Future.value(bytes));
 }
 
