@@ -16,7 +16,7 @@ void main() {
 
     test('addShape with Shape object should add to current layer', () {
       final AppProvider appProvider = AppProvider();
-      final UserAction shape = UserAction(
+      final UserActionDrawing shape = UserActionDrawing(
         positions: <Offset>[
           const Offset(0, 0),
           const Offset(10, 10),

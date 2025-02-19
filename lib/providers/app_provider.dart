@@ -141,7 +141,7 @@ class AppProvider extends ChangeNotifier {
   LayersProvider layers = LayersProvider(); // this is a singleton
 
   void addActionToSelectedLayer({
-    required final UserAction action,
+    required final UserActionDrawing action,
   }) {
     if (selector.isVisible) {
       action.clipPath = selector.path1;
@@ -230,7 +230,7 @@ class AppProvider extends ChangeNotifier {
         colorFill != null &&
         colorBrush != null) {
       layers.selectedLayer.addUserAction(
-        UserAction(
+        UserActionDrawing(
           positions: <ui.Offset>[start, end],
           action: type,
           brush: MyBrush(
@@ -252,7 +252,7 @@ class AppProvider extends ChangeNotifier {
 
   void appendLineFromLastUserAction(final Offset positionEndOfNewLine) {
     layers.selectedLayer.addUserAction(
-      UserAction(
+      UserActionDrawing(
         positions: <ui.Offset>[
           layers.selectedLayer.lastUserAction!.positions.last,
           positionEndOfNewLine,
@@ -275,7 +275,7 @@ class AppProvider extends ChangeNotifier {
     final ui.Rect bounds = path.getBounds();
 
     this.layers.selectedLayer.addUserAction(
-          UserAction(
+          UserActionDrawing(
             action: ActionType.region,
             path: path,
             positions: <ui.Offset>[

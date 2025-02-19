@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 export 'package:fpaint/widgets/brush_style_picker.dart';
 
-class UserAction {
-  UserAction({
+class UserActionDrawing {
+  UserActionDrawing({
     required this.action,
     required this.positions,
     // optionals

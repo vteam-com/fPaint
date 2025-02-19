@@ -27,7 +27,7 @@ void main() {
     });
 
     test('Add user action', () {
-      final UserAction userAction = UserAction(
+      final UserActionDrawing userAction = UserActionDrawing(
         action: ActionType.brush,
         positions: <ui.Offset>[Offset.zero],
         brush: MyBrush(
@@ -43,7 +43,7 @@ void main() {
     });
 
     test('Undo and redo actions', () {
-      final UserAction userAction = UserAction(
+      final UserActionDrawing userAction = UserActionDrawing(
         action: ActionType.brush,
         positions: <ui.Offset>[Offset.zero],
         brush: MyBrush(
@@ -75,7 +75,7 @@ void main() {
     });
 
     test('Update last user action end position', () {
-      final UserAction userAction = UserAction(
+      final UserActionDrawing userAction = UserActionDrawing(
         action: ActionType.brush,
         positions: <ui.Offset>[Offset.zero, const Offset(1, 1)],
         brush: MyBrush(

@@ -7,11 +7,11 @@ import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/render_helper.dart';
-import 'package:fpaint/models/user_action.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:provider/provider.dart';
 
 // Exports
-export 'package:fpaint/models/user_action.dart';
+export 'package:fpaint/models/user_action_drawing.dart';
 
 /// Represents a layer in the painting application.
 ///
@@ -55,8 +55,8 @@ class LayerProvider extends ChangeNotifier {
   }
 
   String id;
-  final List<UserAction> _actionStack = <UserAction>[];
-  final List<UserAction> redoStack = <UserAction>[];
+  final List<UserActionDrawing> _actionStack = <UserActionDrawing>[];
+  final List<UserActionDrawing> redoStack = <UserActionDrawing>[];
   bool isSelected;
   bool preserveAlpha = true;
   Color? backgroundColor;
@@ -105,7 +105,7 @@ class LayerProvider extends ChangeNotifier {
     double maxX = double.negativeInfinity;
     double maxY = double.negativeInfinity;
 
-    for (final UserAction action in _actionStack) {
+    for (final UserActionDrawing action in _actionStack) {
       for (final ui.Offset position in action.positions) {
         minX = minX < position.dx ? minX : position.dx;
         minY = minY < position.dy ? minY : position.dy;
@@ -144,7 +144,7 @@ class LayerProvider extends ChangeNotifier {
   bool get isEmpty => _actionStack.isEmpty;
 
   void offset(final Offset offset) {
-    for (final UserAction action in _actionStack) {
+    for (final UserActionDrawing action in _actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
         action.positions[i] =
             action.positions[i].translate(offset.dx, offset.dy);
@@ -154,7 +154,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   void scale(final double scale) {
-    for (final UserAction action in _actionStack) {
+    for (final UserActionDrawing action in _actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
         action.positions[i] = Offset(
           action.positions[i].dx * scale,
@@ -165,21 +165,21 @@ class LayerProvider extends ChangeNotifier {
     clearCache();
   }
 
-  UserAction? get lastUserAction =>
+  UserActionDrawing? get lastUserAction =>
       _actionStack.isEmpty ? null : _actionStack.last;
 
-  void addUserAction(final UserAction userAction) {
+  void addUserAction(final UserActionDrawing userAction) {
     _actionStack.add(userAction);
     hasChanged = true;
     clearCache();
   }
 
-  UserAction addImage({
+  UserActionDrawing addImage({
     required final ui.Image imageToAdd,
     final ui.Offset offset = Offset.zero,
     final ActionType tool = ActionType.image,
   }) {
-    final UserAction newAction = UserAction(
+    final UserActionDrawing newAction = UserActionDrawing(
       action: tool,
       positions: <ui.Offset>[
         offset,
@@ -228,7 +228,7 @@ class LayerProvider extends ChangeNotifier {
 
   void regionCut(final ui.Path path) {
     addUserAction(
-      UserAction(
+      UserActionDrawing(
         action: ActionType.cut,
         positions: <ui.Offset>[],
         path: Path.from(path),
@@ -343,7 +343,7 @@ class LayerProvider extends ChangeNotifier {
     }
 
     // Render all actions within the saved layer
-    for (final UserAction userAction in _actionStack) {
+    for (final UserActionDrawing userAction in _actionStack) {
       switch (userAction.action) {
         case ActionType.pencil:
           applyAction(
@@ -512,7 +512,7 @@ class LayerProvider extends ChangeNotifier {
     return getHistoryString(redoStack);
   }
 
-  String getHistoryString(final List<UserAction> list) {
+  String getHistoryString(final List<UserActionDrawing> list) {
     try {
       return this.getActionsAsStrings(list, 20).join('\n');
     } catch (error) {
@@ -522,12 +522,12 @@ class LayerProvider extends ChangeNotifier {
   }
 
   List<String> getActionsAsStrings(
-    final List<UserAction> list, [
+    final List<UserActionDrawing> list, [
     final int? numberOfHistoryAction,
   ]) {
     return list
         .take(numberOfHistoryAction ?? list.length)
-        .map((final UserAction action) => action.toString())
+        .map((final UserActionDrawing action) => action.toString())
         .toList()
         .reversed
         .toList();

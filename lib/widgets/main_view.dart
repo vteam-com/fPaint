@@ -271,7 +271,7 @@ class MainViewState extends State<MainView> {
       }
 
       appModel.addActionToSelectedLayer(
-        action: UserAction(
+        action: UserActionDrawing(
           action: appModel.selectedAction,
           positions: <ui.Offset>[adjustedPosition, adjustedPosition],
           brush: MyBrush(
