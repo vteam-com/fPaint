@@ -55,7 +55,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   String id;
-  final List<UserActionDrawing> _actionStack = <UserActionDrawing>[];
+  final List<UserActionDrawing> actionStack = <UserActionDrawing>[];
   final List<UserActionDrawing> redoStack = <UserActionDrawing>[];
   bool isSelected;
   bool preserveAlpha = true;
@@ -96,7 +96,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   Rect getArea() {
-    if (_actionStack.isEmpty) {
+    if (actionStack.isEmpty) {
       return Rect.zero;
     }
 
@@ -105,7 +105,7 @@ class LayerProvider extends ChangeNotifier {
     double maxX = double.negativeInfinity;
     double maxY = double.negativeInfinity;
 
-    for (final UserActionDrawing action in _actionStack) {
+    for (final UserActionDrawing action in actionStack) {
       for (final ui.Offset position in action.positions) {
         minX = minX < position.dx ? minX : position.dx;
         minY = minY < position.dy ? minY : position.dy;
@@ -140,11 +140,11 @@ class LayerProvider extends ChangeNotifier {
     clearCache();
   }
 
-  int get count => _actionStack.length;
-  bool get isEmpty => _actionStack.isEmpty;
+  int get count => actionStack.length;
+  bool get isEmpty => actionStack.isEmpty;
 
   void offset(final Offset offset) {
-    for (final UserActionDrawing action in _actionStack) {
+    for (final UserActionDrawing action in actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
         action.positions[i] =
             action.positions[i].translate(offset.dx, offset.dy);
@@ -154,7 +154,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   void scale(final double scale) {
-    for (final UserActionDrawing action in _actionStack) {
+    for (final UserActionDrawing action in actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
         action.positions[i] = Offset(
           action.positions[i].dx * scale,
@@ -166,10 +166,10 @@ class LayerProvider extends ChangeNotifier {
   }
 
   UserActionDrawing? get lastUserAction =>
-      _actionStack.isEmpty ? null : _actionStack.last;
+      actionStack.isEmpty ? null : actionStack.last;
 
   void addUserAction(final UserActionDrawing userAction) {
-    _actionStack.add(userAction);
+    actionStack.add(userAction);
     hasChanged = true;
     clearCache();
   }
@@ -201,18 +201,18 @@ class LayerProvider extends ChangeNotifier {
   }
 
   void lastActionAppendPosition({required final Offset position}) {
-    _actionStack.last.positions.add(position);
+    actionStack.last.positions.add(position);
     clearCache();
   }
 
   void lastActionUpdatePosition(final Offset position) {
-    _actionStack.last.positions.last = position;
+    actionStack.last.positions.last = position;
     clearCache();
   }
 
   void undo() {
-    if (_actionStack.isNotEmpty) {
-      redoStack.add(_actionStack.removeLast());
+    if (actionStack.isNotEmpty) {
+      redoStack.add(actionStack.removeLast());
       hasChanged = true;
       clearCache();
     }
@@ -220,7 +220,7 @@ class LayerProvider extends ChangeNotifier {
 
   void redo() {
     if (redoStack.isNotEmpty) {
-      _actionStack.add(this.redoStack.removeLast());
+      actionStack.add(this.redoStack.removeLast());
       hasChanged = true;
       clearCache();
     }
@@ -238,7 +238,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   void mergeFrom(final LayerProvider layerToMerge) {
-    _actionStack.addAll(layerToMerge._actionStack);
+    actionStack.addAll(layerToMerge.actionStack);
     clearCache();
   }
 
@@ -343,7 +343,7 @@ class LayerProvider extends ChangeNotifier {
     }
 
     // Render all actions within the saved layer
-    for (final UserActionDrawing userAction in _actionStack) {
+    for (final UserActionDrawing userAction in actionStack) {
       switch (userAction.action) {
         case ActionType.pencil:
           applyAction(
@@ -505,7 +505,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   String getHistoryStringForUndo() {
-    return getHistoryString(_actionStack);
+    return getHistoryString(actionStack);
   }
 
   String getHistoryStringForRedo() {
