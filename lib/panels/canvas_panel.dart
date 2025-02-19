@@ -28,9 +28,8 @@ class CanvasPanelPainter extends CustomPainter {
     /// Render the transparent grid
     if (includeTransparentBackground) {
       drawTransaparentBackgroundOffsetAndSize(
-        canvas,
-        Offset.zero,
-        _layers.size,
+        canvas: canvas,
+        size: _layers.size,
       );
     }
 
