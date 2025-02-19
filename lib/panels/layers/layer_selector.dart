@@ -136,39 +136,42 @@ class LayerSelector extends StatelessWidget {
           ],
         ),
       ),
-      PopupMenuItem<String>(
-        value: 'delete',
-        enabled: allowRemoveLayer,
-        child: const Row(
-          children: <Widget>[
-            Icon(Icons.playlist_remove),
-            SizedBox(width: 8),
-            Text('Delete this layer'),
-          ],
+      if (allowRemoveLayer)
+        PopupMenuItem<String>(
+          value: 'delete',
+          enabled: allowRemoveLayer,
+          child: const Row(
+            children: <Widget>[
+              Icon(Icons.playlist_remove),
+              SizedBox(width: 8),
+              Text('Delete this layer'),
+            ],
+          ),
         ),
-      ),
-      PopupMenuItem<String>(
-        value: 'merge',
-        enabled: allowRemoveLayer,
-        child: const Row(
-          children: <Widget>[
-            Icon(Icons.layers_outlined),
-            SizedBox(width: 8),
-            Text('Merge to below layer'),
-          ],
+      if (allowRemoveLayer)
+        PopupMenuItem<String>(
+          value: 'merge',
+          enabled: allowRemoveLayer,
+          child: const Row(
+            children: <Widget>[
+              Icon(Icons.layers_outlined),
+              SizedBox(width: 8),
+              Text('Merge to below layer'),
+            ],
+          ),
         ),
-      ),
-      const PopupMenuItem<String>(
-        value: 'blend',
-        enabled: true,
-        child: Row(
-          children: <Widget>[
-            Icon(Icons.blender_outlined),
-            SizedBox(width: 8),
-            Text('Change Blend Mode'),
-          ],
+      if (allowRemoveLayer)
+        const PopupMenuItem<String>(
+          value: 'blend',
+          enabled: true,
+          child: Row(
+            children: <Widget>[
+              Icon(Icons.blender_outlined),
+              SizedBox(width: 8),
+              Text('Change Blend Mode'),
+            ],
+          ),
         ),
-      ),
       PopupMenuItem<String>(
         value: 'visibility',
         enabled: true,
@@ -347,47 +350,53 @@ class LayerSelector extends StatelessWidget {
           icon: const Icon(Icons.playlist_add),
           onPressed: () => _onAddLayer(layers),
         ),
-        IconButton(
-          tooltip: 'Delete this layer',
-          icon: const Icon(Icons.playlist_remove),
-          onPressed: allowRemoveLayer ? () => layers.remove(layer) : null,
-        ),
-        IconButton(
-          tooltip: 'Merge to below layer',
-          icon: const Icon(Icons.layers_outlined),
-          onPressed: layer == layers.list.last
-              ? null
-              : () => _onMergeLayer(
-                    layers,
-                    layers.selectedLayerIndex,
-                    layers.selectedLayerIndex + 1,
-                  ),
-        ),
-        IconButton(
-          tooltip: 'Blend Mode\n"${blendModeToText(layer.blendMode)}"',
-          icon: const Icon(Icons.blender_outlined),
-          onPressed: () async {
-            layer.blendMode = await showBlendModeMenu(
-              context: context,
-              selectedBlendMode: layer.blendMode,
-            );
-          },
-        ),
-        if (this.layer.backgroundColor != null)
-          ColorPreview(
-            color: this.layer.backgroundColor ?? Colors.transparent,
-            onPressed: () {
-              showColorPicker(
+        if (allowRemoveLayer)
+          IconButton(
+            tooltip: 'Delete this layer',
+            icon: const Icon(Icons.playlist_remove),
+            onPressed: allowRemoveLayer ? () => layers.remove(layer) : null,
+          ),
+        if (allowRemoveLayer)
+          IconButton(
+            tooltip: 'Merge to below layer',
+            icon: const Icon(Icons.layers_outlined),
+            onPressed: layer == layers.list.last
+                ? null
+                : () => _onMergeLayer(
+                      layers,
+                      layers.selectedLayerIndex,
+                      layers.selectedLayerIndex + 1,
+                    ),
+          ),
+        if (allowRemoveLayer)
+          IconButton(
+            tooltip: 'Blend Mode\n"${blendModeToText(layer.blendMode)}"',
+            icon: const Icon(Icons.blender_outlined),
+            onPressed: () async {
+              layer.blendMode = await showBlendModeMenu(
                 context: context,
-                title: 'Background Color',
-                color: this.layer.backgroundColor ?? Colors.transparent,
-                onSelectedColor: (final Color color) {
-                  this.layer.backgroundColor = color;
-                  layer.clearCache();
-                  layers.update();
-                },
+                selectedBlendMode: layer.blendMode,
               );
             },
+          ),
+        if (this.layer.backgroundColor != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 50),
+            child: ColorPreview(
+              color: this.layer.backgroundColor ?? Colors.transparent,
+              onPressed: () {
+                showColorPicker(
+                  context: context,
+                  title: 'Background Color',
+                  color: this.layer.backgroundColor ?? Colors.transparent,
+                  onSelectedColor: (final Color color) {
+                    this.layer.backgroundColor = color;
+                    layer.clearCache();
+                    layers.update();
+                  },
+                );
+              },
+            ),
           ),
       ],
     );

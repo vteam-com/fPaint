@@ -87,7 +87,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                         layer: layer,
                         minimal: !shellModel.isSidePanelExpanded,
                         isSelected: layers.selectedLayerIndex == index,
-                        allowRemoveLayer: layers.length > 1,
+                        allowRemoveLayer: index != layers.length - 1,
                       ),
                     ),
                   );
