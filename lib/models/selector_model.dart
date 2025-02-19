@@ -21,6 +21,13 @@ class SelectorModel {
     this.points.clear();
   }
 
+  void invert(final Rect containerRect) {
+    if (path1 != null) {
+      final Path outerPath = Path()..addRect(containerRect);
+      path1 = Path.combine(PathOperation.difference, outerPath, path1!);
+    }
+  }
+
   void translate(final Offset offset) {
     final Rect bounds = boundingRect;
 

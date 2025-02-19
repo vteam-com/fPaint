@@ -297,6 +297,27 @@ class ToolsPanel extends StatelessWidget {
                     appModel.update();
                   },
                 ),
+              if (appModel.selector.isVisible) const Divider(),
+              if (appModel.selector.isVisible)
+                ToolSelector(
+                  minimal: minimal,
+                  name: 'Invert',
+                  image: iconFromSvgAssetSelected(
+                    'assets/icons/selector_invert.svg',
+                    false,
+                  ),
+                  onPressed: () {
+                    appModel.selector.invert(
+                      Rect.fromLTWH(
+                        0,
+                        0,
+                        layers.size.width,
+                        layers.size.height,
+                      ),
+                    );
+                    appModel.update();
+                  },
+                ),
               if (appModel.selector.isVisible)
                 ToolSelector(
                   minimal: minimal,
