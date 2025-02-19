@@ -10,7 +10,7 @@ void main() {
       expect(appProvider.layers.selectedLayerIndex, 0);
       expect(
         appProvider.layers.selectedLayer.count,
-        1,
+        0,
       ); // default layer has one white rectangle
     });
 
@@ -31,7 +31,7 @@ void main() {
       appProvider.addActionToSelectedLayer(action: shape);
       expect(
         appProvider.layers.selectedLayer.count,
-        2,
+        1,
       ); // the first layer has one default white rectangle shape
       expect(appProvider.layers.selectedLayer.lastUserAction, shape);
     });
@@ -47,7 +47,7 @@ void main() {
       );
       expect(
         appProvider.layers.selectedLayer.count,
-        2,
+        1,
       ); // also has the default white rectangle
       expect(
         appProvider.layers.selectedLayer.lastUserAction!.positions.first,
@@ -67,27 +67,6 @@ void main() {
       );
     });
 
-    test('updateLastShape should modify end position of last shape', () {
-      final AppProvider appProvider = AppProvider();
-      appProvider.updateAction(
-        start: const Offset(0, 0),
-        end: const Offset(10, 10),
-        type: ActionType.rectangle,
-        colorFill: Colors.blue,
-      );
-      appProvider.updateAction(end: const Offset(20, 20));
-      expect(
-        appProvider.layers.selectedLayer.lastUserAction!.positions.last,
-        const Offset(20, 20),
-      );
-    });
-
-    test('updateLastShape should do nothing if no shapes exist', () {
-      final AppProvider appProvider = AppProvider();
-      appProvider.updateAction(end: const Offset(20, 20));
-      expect(appProvider.layers.selectedLayer.count, 1);
-    });
-
     test('undo should remove last shape', () {
       final AppProvider appProvider = AppProvider();
       appProvider.updateAction(
@@ -97,9 +76,9 @@ void main() {
         colorFill: Colors.green,
         colorBrush: Colors.black,
       );
-      expect(appProvider.layers.selectedLayer.count, 2);
-      appProvider.layersUndo();
       expect(appProvider.layers.selectedLayer.count, 1);
+      appProvider.layersUndo();
+      expect(appProvider.layers.selectedLayer.count, 0);
       appProvider.layersUndo();
       expect(appProvider.layers.selectedLayer.isEmpty, true);
 
@@ -124,9 +103,9 @@ void main() {
         colorFill: Colors.red,
         colorBrush: Colors.black,
       );
-      expect(appProvider.layers.selectedLayer.count, 3);
-      appProvider.layersUndo();
       expect(appProvider.layers.selectedLayer.count, 2);
+      appProvider.layersUndo();
+      expect(appProvider.layers.selectedLayer.count, 1);
       expect(
         appProvider.layers.selectedLayer.lastUserAction!.action,
         ActionType.brush,

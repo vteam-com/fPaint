@@ -101,7 +101,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: ColorPreview(
-                      colorUsed: ColorUsage(_currentColor, 1),
+                      color: _currentColor,
                       border: false,
                       minimal: false,
                       onPressed: () {},

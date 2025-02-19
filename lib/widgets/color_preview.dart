@@ -15,7 +15,7 @@ Widget colorPreviewWithTransparentPaper({
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: ColorPreview(
-          colorUsed: ColorUsage(color, 1),
+          color: color,
           onPressed: onPressed,
           border: false,
           minimal: minimal,
@@ -35,36 +35,31 @@ Widget colorPreviewWithTransparentPaper({
 /// The widget can be tapped to trigger the provided [onPressed] callback.
 /// The tooltip displays the full hexadecimal color code and the usage percentage
 /// (if the color usage is less than 100%).
-
 class ColorPreview extends StatelessWidget {
   const ColorPreview({
     super.key,
-    required this.colorUsed,
+    required this.color,
     required this.onPressed,
     this.border = true,
     this.minimal = true,
+    this.text,
+    this.tooltipText,
   });
-  final ColorUsage colorUsed;
+  final Color color;
   final GestureTapCallback onPressed;
   final bool border;
   final bool minimal;
+  final String? text;
+  final String? tooltipText;
 
   @override
   Widget build(final BuildContext context) {
-    final List<String> components = getColorComponentsAsHex(colorUsed.color);
-    final String alpha = components[0];
-    final String red = components[1];
-    final String green = components[2];
-    final String blue = components[3];
-
-    String usageNumber = '';
-    if (colorUsed.percentage < 1) {
-      usageNumber = '\nUsage ${colorUsed.toStringPercentage(1)}';
-    }
     final double size = minimal ? 40 : 50;
 
+    final String text = this.text ?? colorToHexString(color);
+
     return Tooltip(
-      message: '${colorToHexString(colorUsed.color)}$usageNumber',
+      message: tooltipText ?? text,
       child: InkWell(
         onTap: onPressed,
         child: SizedBox(
@@ -79,7 +74,7 @@ class ColorPreview extends StatelessWidget {
               Positioned(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: colorUsed.color,
+                    color: color,
                     border: border ? Border.all(color: Colors.grey) : null,
                     borderRadius: const BorderRadius.all(Radius.circular(4)),
                   ),
@@ -93,11 +88,11 @@ class ColorPreview extends StatelessWidget {
                 Center(
                   child: Text(
                     textAlign: TextAlign.center,
-                    '$red$green$blue\n$alpha',
+                    text,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 9,
-                      color: colorUsed.color.computeLuminance() > 0.5
+                      color: color.computeLuminance() > 0.5
                           ? Colors.black
                           : Colors.white,
                     ),

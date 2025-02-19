@@ -59,6 +59,7 @@ class LayerProvider extends ChangeNotifier {
   final List<UserAction> redoStack = <UserAction>[];
   bool isSelected;
   bool preserveAlpha = true;
+  Color? backgroundColor;
   ui.BlendMode blendMode = ui.BlendMode.srcOver;
 
   ///-------------------------------------------
@@ -327,10 +328,19 @@ class LayerProvider extends ChangeNotifier {
     //print('RenderLayer "$name" FULL RENDER');
 
     // Save a layer with opacity applied
-    final Paint layerPaint = Paint()
-      ..color = Colors.black.withAlpha((255 * opacity).toInt())
-      ..blendMode = blendMode;
+    final Paint layerPaint = Paint();
+    layerPaint.color = Colors.black.withAlpha((255 * opacity).toInt());
+    layerPaint.blendMode = blendMode;
+
     canvas.saveLayer(null, layerPaint);
+
+    if (backgroundColor != null) {
+      layerPaint.color = backgroundColor!;
+      canvas.drawRect(
+        Rect.fromPoints(const Offset(0, 0), Offset(size.width, size.height)),
+        layerPaint,
+      );
+    }
 
     // Render all actions within the saved layer
     for (final UserAction userAction in _actionStack) {

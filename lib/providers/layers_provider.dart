@@ -115,18 +115,7 @@ class LayersProvider extends ChangeNotifier {
 
   LayerProvider addWhiteBackgroundLayer() {
     final LayerProvider firstLayer = newLayer('Background');
-
-    firstLayer.addUserAction(
-      UserAction(
-        positions: <Offset>[
-          const Offset(0, 0),
-          Offset(_size.width, _size.height),
-        ],
-        action: ActionType.rectangle,
-        fillColor: Colors.white,
-        brush: MyBrush(color: Colors.white, size: 0),
-      ),
-    );
+    firstLayer.backgroundColor = Colors.white;
     _list.add(firstLayer);
     return firstLayer;
   }

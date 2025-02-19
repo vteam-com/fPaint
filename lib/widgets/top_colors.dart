@@ -30,17 +30,30 @@ class TopColors extends StatelessWidget {
   Widget build(final BuildContext context) {
     final List<ColorUsage> sortedColors = sortColorByHueAndPopularity();
 
-    final List<Widget> colorPreviews = sortedColors
-        .map(
-          (final ColorUsage colorUsed) => ColorPreview(
-            colorUsed: colorUsed,
-            minimal: minimal,
-            onPressed: () {
-              onColorPicked(colorUsed.color);
-            },
-          ),
-        )
-        .toList();
+    final List<Widget> colorPreviews =
+        sortedColors.map((final ColorUsage colorUsed) {
+      final List<String> components = getColorComponentsAsHex(colorUsed.color);
+      final String alpha = components[0];
+      final String red = components[1];
+      final String green = components[2];
+      final String blue = components[3];
+      final String colorAsHex = '$red$green$blue\n$alpha';
+      String tooltipText = '';
+      if (colorUsed.percentage < 1) {
+        tooltipText = '\nUsage ${colorUsed.toStringPercentage(1)}';
+      }
+
+      return ColorPreview(
+        color: colorUsed.color,
+        minimal: minimal,
+        text: colorAsHex,
+        tooltipText: tooltipText,
+        onPressed: () {
+          onColorPicked(colorUsed.color);
+        },
+      );
+    }).toList();
+
     return Column(
       children: <Widget>[
         if (minimal) const Divider(color: Colors.black),
