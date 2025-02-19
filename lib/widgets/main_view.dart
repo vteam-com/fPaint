@@ -11,22 +11,9 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
-/// The `MainView` widget is a stateful widget that represents the main view of the application.
-/// It handles user interactions such as panning, zooming, and drawing on the canvas.
-///
-/// The `MainViewState` class manages the state of the `MainView` widget. It includes methods
-/// for handling pointer events, centering the canvas, and updating the application model.
-///
-/// Methods:
-/// - `build`: Builds the widget tree for the main view.
-/// - `_handlePointerStart`: Handles the start of a pointer event (e.g., touch down).
-/// - `_handlePointerMove`: Handles the movement of a pointer event (e.g., touch move).
-/// - `_handPointerEnd`: Handles the end of a pointer event (e.g., touch up).
-/// - `centerCanvas`: Centers the canvas within the viewport.
-///
-/// The widget tree includes a `Listener` widget to capture pointer events and a `Stack` widget
-/// to overlay the canvas and selection handles. The canvas is transformed based on the current
-/// offset and scale from the application model.
+/// The main view of the application, which is a stateful widget.
+/// This widget is responsible for managing the state of the main view,
+/// including handling pointer events and scaling/centering the canvas.
 class MainView extends StatefulWidget {
   const MainView({
     super.key,

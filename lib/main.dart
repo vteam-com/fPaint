@@ -10,13 +10,16 @@ import 'package:provider/provider.dart';
 ///
 /// This class sets up the app's theme, keyboard shortcuts, and actions for undo, redo, and saving the file.
 /// The [MainScreen] widget is the root of the app's UI.
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(MyApp());
 }
 
+/// The main entry point for the Flutter Paint App.
+///
+/// This class sets up the app's theme, keyboard shortcuts, and actions for undo, redo, and saving the file.
+/// The [MainScreen] widget is the root of the app's UI.
 class MyApp extends StatelessWidget {
   MyApp({super.key});
   final ShellProvider shellModel = ShellProvider();

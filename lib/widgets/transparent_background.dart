@@ -1,3 +1,18 @@
+/// Wraps a [Widget] in a transparent paper-like container with a rounded border.
+///
+/// The [transparentPaperContainer] function takes a [Widget] and returns a new [Widget] that is wrapped in a transparent paper-like container with a rounded border. The container has a transparent background with a subtle grid pattern, and the child [Widget] is centered within the container.
+///
+/// The [radius] parameter can be used to adjust the border radius of the container.
+///
+/// Example usage:
+///
+/// transparentPaperContainer(
+///   Text('Hello, World!'),
+///   radius: 16.0,
+/// )
+///
+library;
+
 import 'package:flutter/material.dart';
 
 Widget transparentPaperContainer(

@@ -230,7 +230,7 @@ class LayerSelector extends StatelessWidget {
         break;
       case 'merge':
         if (layer != layers.list.last) {
-          _onFlattenLayers(
+          _onMergeLayer(
             layers,
             layers.selectedLayerIndex,
             layers.selectedLayerIndex + 1,
@@ -355,7 +355,7 @@ class LayerSelector extends StatelessWidget {
           icon: const Icon(Icons.layers_outlined),
           onPressed: layer == layers.list.last
               ? null
-              : () => _onFlattenLayers(
+              : () => _onMergeLayer(
                     layers,
                     layers.selectedLayerIndex,
                     layers.selectedLayerIndex + 1,
@@ -383,7 +383,7 @@ class LayerSelector extends StatelessWidget {
   }
 
   // Method to flatten all layers
-  void _onFlattenLayers(
+  void _onMergeLayer(
     final LayersProvider layers,
     final int layerIndexToMerge,
     final int layerIndexToMergIn,

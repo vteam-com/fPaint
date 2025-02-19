@@ -13,30 +13,12 @@ import 'package:provider/provider.dart';
 // Exports
 export 'package:fpaint/providers/layers_provider.dart';
 
-/// The `AppModel` class is a `ChangeNotifier` that manages the state of a painting application.
-/// It provides methods and properties for managing the canvas, layers, tools, colors, and other
-/// aspects of the application.
-///
-/// The `get` method is a static method that retrieves an instance of the `AppModel` from the
-/// provided `BuildContext`. If `listen` is `true`, the returned instance will notify listeners
-/// when its state changes.
-///
-/// The `selectedTool` property represents the currently selected tool, which can be one of the
-/// `Tools` enum values. The `brushColor` and `fillColor` properties represent the current
-/// brush and fill colors, respectively.
-///
-/// The `canvasReset` method allows resizing the canvas and scaling the layers accordingly.
-/// The `setCanvasScale` method allows setting the scale of the canvas.
-///
-/// The `selectedLayerIndex` property represents the index of the currently selected layer,
-/// and the `selectedLayer` property returns the currently selected layer.
-/// The `addLayerTop`, `addLayerBottom`, and `insertLayer` methods allow adding and inserting
-/// new layers.
-///
-/// The `addUserAction` and `updateLastUserAction` methods allow adding and updating user
-/// actions on the currently selected layer.
-///
-/// The `update` method notifies all listeners that the model has been updated.
+class UserLayerAction {}
+
+/// The `AppProvider` class is a `ChangeNotifier` that manages the state of the application,
+/// including the canvas, layers, and selection tools. It provides methods for interacting
+/// with the canvas, such as clearing the canvas, converting between canvas and screen
+/// coordinates, and performing region-based operations like erasing and cutting.
 class AppProvider extends ChangeNotifier {
   AppProvider() {
     this.canvasClear(layers.size);

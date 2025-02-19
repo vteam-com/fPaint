@@ -8,6 +8,9 @@ import 'package:multi_split_view/multi_split_view.dart';
 
 import 'providers/app_provider.dart';
 
+/// The main screen of the application, which extends the `StatelessWidget` class.
+/// This screen is responsible for rendering the main content of the app, including
+/// the side panel, main view, and floating action buttons.
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
   final double minSidePanelSize = 100.0;
