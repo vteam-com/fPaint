@@ -36,9 +36,6 @@ export 'package:fpaint/providers/layers_provider.dart';
 /// The `addUserAction` and `updateLastUserAction` methods allow adding and updating user
 /// actions on the currently selected layer.
 ///
-/// The `evaluatTopColor` method calculates the top colors used in the painting and updates
-/// the `topColors` property accordingly.
-///
 /// The `update` method notifies all listeners that the model has been updated.
 class AppProvider extends ChangeNotifier {
   AppProvider() {

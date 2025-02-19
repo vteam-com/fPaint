@@ -260,6 +260,7 @@ class LayersProvider extends ChangeNotifier {
     ColorUsage(Colors.white, 1),
     ColorUsage(Colors.black, 1),
   ];
+
   void evaluatTopColor() {
     this.getTopColorUsed().then((final List<ColorUsage> topColorsFound) {
       topColors = topColorsFound;
@@ -279,15 +280,17 @@ class LayersProvider extends ChangeNotifier {
     final int totalLayers = _list.length;
 
     for (final LayerProvider layer in _list) {
-      for (final ColorUsage colorUsed in layer.topColorsUsed) {
-        final ColorUsage existingColor = topColors.firstWhere(
-          (final ColorUsage c) => c.color == colorUsed.color,
-          orElse: () => colorUsed,
-        );
-        if (existingColor == colorUsed) {
-          topColors.add(colorUsed);
-        } else {
-          existingColor.percentage += colorUsed.percentage / totalLayers;
+      if (layer.isVisible) {
+        for (final ColorUsage colorUsed in layer.topColorsUsed) {
+          final ColorUsage existingColor = topColors.firstWhere(
+            (final ColorUsage c) => c.color == colorUsed.color,
+            orElse: () => colorUsed,
+          );
+          if (existingColor == colorUsed) {
+            topColors.add(colorUsed);
+          } else {
+            existingColor.percentage += colorUsed.percentage / totalLayers;
+          }
         }
       }
     }

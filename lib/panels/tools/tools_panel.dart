@@ -500,7 +500,10 @@ class ToolsPanel extends StatelessWidget {
       widgets.add(
         TopColors(
           colorUsages: layers.topColors,
-          onRefresh: () => layers.evaluatTopColor(),
+          onRefresh: () {
+            layers.evaluatTopColor();
+            appModel.update();
+          },
           onColorPicked: (final Color color) {
             (appModel.selectedAction == ActionType.rectangle ||
                     appModel.selectedAction == ActionType.circle ||
