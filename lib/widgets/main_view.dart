@@ -39,7 +39,7 @@ class MainView extends StatefulWidget {
 class MainViewState extends State<MainView> {
   int _activePointerId = -1;
   Size lastViewPortSize = const Size(0, 0);
-  final double scaleTolerance = 0.2;
+  final double scaleTolerance = 0.01;
 
   @override
   Widget build(final BuildContext context) {
@@ -146,17 +146,19 @@ class MainViewState extends State<MainView> {
                 onScaleUpdate: (final ScaleUpdateDetails details) {
                   // supported by iOS, Android, macOS
                   if (!Platform.isLinux && !Platform.isWindows) {
-                    // print('GestureDetector onScaleUpdate');
                     final double scaleAttempt = (details.scale - 1.0).abs();
-                    // print('${details.scale} $scaleAttempt');
                     if (scaleAttempt < scaleTolerance) {
-                      // No scaling, apply panning if using 2 fingers
+                      //
+                      // PANNING
+                      //
                       if (details.pointerCount == 2) {
                         appProvider.offset += details.focalPointDelta;
                         appProvider.update();
                       }
                     } else {
-                      // Handle zooming/scaling
+                      //
+                      // SCALING
+                      //
                       _handleScaling(
                         appProvider,
                         details.localFocalPoint,
@@ -210,27 +212,30 @@ class MainViewState extends State<MainView> {
     );
   }
 
+  /// Handle zooming/scaling
   void _handleScaling(
     final AppProvider appModel,
     final Offset anchorPoint,
     final double scaleDelta,
   ) {
-    // Handle zooming/scaling
+    if (scaleDelta == 1) {
+      // nothing to scale
+      return;
+    }
 
     // Step 1: Convert screen coordinates to canvas coordinates
     final Offset before = appModel.toCanvas(anchorPoint);
 
     // Step 2: Apply the scale change
-    final double scaleDeltaResult = scaleDelta > 1 ? 1.01 : 0.99;
-    appModel.layers.scale *= scaleDeltaResult;
+    appModel.layers.scale = appModel.layers.scale * scaleDelta;
 
     // Step 3: Calculate the new position on the canvas
     final Offset after = appModel.toCanvas(anchorPoint);
 
     // Step 4: Adjust the offset to keep the cursor anchored
-    // No need to multiply by scale
     final Offset adjustment = (before - after);
     appModel.offset -= adjustment * appModel.layers.scale;
+
     appModel.update();
   }
 
