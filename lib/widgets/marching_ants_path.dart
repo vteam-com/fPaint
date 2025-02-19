@@ -1,15 +1,16 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
-class MarchingAntsSelection extends StatefulWidget {
-  const MarchingAntsSelection({super.key, required this.path});
+class AnimatedMarchingAntsPath extends StatefulWidget {
+  const AnimatedMarchingAntsPath({super.key, required this.path});
   final Path path;
 
   @override
-  MarchingAntsSelectionState createState() => MarchingAntsSelectionState();
+  AnimatedMarchingAntsPathState createState() =>
+      AnimatedMarchingAntsPathState();
 }
 
-class MarchingAntsSelectionState extends State<MarchingAntsSelection>
+class AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
@@ -56,7 +57,9 @@ class MarchingAntsPainter extends CustomPainter {
     final Paint paint = Paint()
       ..color = Colors.white
       ..strokeWidth = 2
+      // ..blendMode = BlendMode.difference
       ..style = PaintingStyle.stroke;
+
     canvas.drawPath(path, paint);
 
     // Now, draw the black dashes on top
@@ -67,16 +70,17 @@ class MarchingAntsPainter extends CustomPainter {
     final Path dashPath = Path();
     const double dashWidth = 4;
     const double dashSpace = 6;
-    double distance = phase;
+    final double distance = phase;
 
     for (final ui.PathMetric pathMetric in path.computeMetrics()) {
-      while (distance < pathMetric.length) {
-        final double nextDistance = distance + dashWidth;
+      double segmentDistance = distance;
+      while (segmentDistance < pathMetric.length) {
+        final double nextDistance = segmentDistance + dashWidth;
         dashPath.addPath(
-          pathMetric.extractPath(distance, nextDistance),
+          pathMetric.extractPath(segmentDistance, nextDistance),
           Offset.zero,
         );
-        distance = nextDistance + dashSpace;
+        segmentDistance = nextDistance + dashSpace;
       }
     }
 

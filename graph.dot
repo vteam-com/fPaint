@@ -49,11 +49,11 @@ digraph "" {
   "/lib/helpers/draw_path_helper.dart" [label="draw_path_helper"];
   "/lib/helpers/color_helper.dart" [label="color_helper"];
   "/lib/widgets/color_picker_dialog.dart" [label="color_picker_dialog"];
+  "/lib/widgets/marching_ants_path.dart" [label="marching_ants_path"];
   "/lib/widgets/svg_icon.dart" [label="svg_icon"];
   "/lib/widgets/truncated_text.dart" [label="truncated_text"];
   "/lib/widgets/container_slider.dart" [label="container_slider"];
   "/lib/widgets/brush_size_picker.dart" [label="brush_size_picker"];
-  "/lib/widgets/marching_ants_rect.dart" [label="marching_ants_rect"];
   "/lib/widgets/transparent_background.dart" [label="transparent_background"];
   "/lib/widgets/tolerance_picker.dart" [label="tolerance_picker"];
   "/lib/widgets/image_painter.dart" [label="image_painter"];
@@ -151,11 +151,11 @@ digraph "" {
       subgraph "cluster~/lib/widgets" {
         label="widgets";
         "/lib/widgets/color_picker_dialog.dart";
+        "/lib/widgets/marching_ants_path.dart";
         "/lib/widgets/svg_icon.dart";
         "/lib/widgets/truncated_text.dart";
         "/lib/widgets/container_slider.dart";
         "/lib/widgets/brush_size_picker.dart";
-        "/lib/widgets/marching_ants_rect.dart";
         "/lib/widgets/transparent_background.dart";
         "/lib/widgets/tolerance_picker.dart";
         "/lib/widgets/image_painter.dart";
@@ -295,5 +295,5 @@ digraph "" {
   "/lib/widgets/main_view.dart" -> "/lib/widgets/selector_widget.dart";
   "/lib/widgets/selector_widget.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/lib/widgets/selector_widget.dart" -> "/lib/models/selector_model.dart";
-  "/lib/widgets/selector_widget.dart" -> "/lib/widgets/marching_ants_rect.dart";
+  "/lib/widgets/selector_widget.dart" -> "/lib/widgets/marching_ants_path.dart";
 }

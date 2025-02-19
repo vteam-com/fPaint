@@ -433,7 +433,7 @@
 <polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="2247.77,-300.28 2237.82,-296.65 2243.33,-305.7 2247.77,-300.28"/>
 </g>
 <!-- /lib/widgets/svg_icon.dart -->
-<g id="node48" class="node">
+<g id="node49" class="node">
 <title>/lib/widgets/svg_icon.dart</title>
 <path fill="Lavender" stroke="black" stroke-width="1.3" d="M718.25,-525C718.25,-525 667.75,-525 667.75,-525 661.75,-525 655.75,-519 655.75,-513 655.75,-513 655.75,-501 655.75,-501 655.75,-495 661.75,-489 667.75,-489 667.75,-489 718.25,-489 718.25,-489 724.25,-489 730.25,-495 730.25,-501 730.25,-501 730.25,-513 730.25,-513 730.25,-519 724.25,-525 718.25,-525"/>
 <text text-anchor="middle" x="693" y="-501.75" font-family="Arial" font-size="15.00">svg_icon</text>
@@ -445,7 +445,7 @@
 <polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="714.2,-532.34 705.21,-526.72 708.73,-536.72 714.2,-532.34"/>
 </g>
 <!-- /lib/widgets/brush_size_picker.dart -->
-<g id="node51" class="node">
+<g id="node52" class="node">
 <title>/lib/widgets/brush_size_picker.dart</title>
 <path fill="Lavender" stroke="black" stroke-width="1.3" d="M872,-525C872,-525 760,-525 760,-525 754,-525 748,-519 748,-513 748,-513 748,-501 748,-501 748,-495 754,-489 760,-489 760,-489 872,-489 872,-489 878,-489 884,-495 884,-501 884,-501 884,-513 884,-513 884,-519 878,-525 872,-525"/>
 <text text-anchor="middle" x="816" y="-501.75" font-family="Arial" font-size="15.00">brush_size_picker</text>
@@ -565,7 +565,7 @@
 <polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="3157.8,-453 3162.95,-443.74 3153.15,-447.78 3157.8,-453"/>
 </g>
 <!-- /lib/widgets/truncated_text.dart -->
-<g id="node49" class="node">
+<g id="node50" class="node">
 <title>/lib/widgets/truncated_text.dart</title>
 <path fill="Lavender" stroke="black" stroke-width="1.3" d="M1285,-525C1285,-525 1197,-525 1197,-525 1191,-525 1185,-519 1185,-513 1185,-513 1185,-501 1185,-501 1185,-495 1191,-489 1197,-489 1197,-489 1285,-489 1285,-489 1291,-489 1297,-495 1297,-501 1297,-501 1297,-513 1297,-513 1297,-519 1291,-525 1285,-525"/>
 <text text-anchor="middle" x="1241" y="-501.75" font-family="Arial" font-size="15.00">truncated_text</text>
@@ -577,7 +577,7 @@
 <polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="1268.94,-530.79 1259.2,-526.62 1264.21,-535.96 1268.94,-530.79"/>
 </g>
 <!-- /lib/widgets/container_slider.dart -->
-<g id="node50" class="node">
+<g id="node51" class="node">
 <title>/lib/widgets/container_slider.dart</title>
 <path fill="Lavender" stroke="black" stroke-width="1.3" d="M1154.5,-525C1154.5,-525 1057.5,-525 1057.5,-525 1051.5,-525 1045.5,-519 1045.5,-513 1045.5,-513 1045.5,-501 1045.5,-501 1045.5,-495 1051.5,-489 1057.5,-489 1057.5,-489 1154.5,-489 1154.5,-489 1160.5,-489 1166.5,-495 1166.5,-501 1166.5,-501 1166.5,-513 1166.5,-513 1166.5,-519 1160.5,-525 1154.5,-525"/>
 <text text-anchor="middle" x="1106" y="-501.75" font-family="Arial" font-size="15.00">container_slider</text>
@@ -807,19 +807,19 @@
 <!-- /lib/models/user_action.dart&#45;&gt;/lib/widgets/brush_style_picker.dart -->
 <g id="edge69" class="edge">
 <title>/lib/models/user_action.dart&#45;&gt;/lib/widgets/brush_style_picker.dart</title>
-<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M1686.8,-295.44C1651.81,-336.02 1569.11,-436.1 1472,-473 1445.15,-483.2 466.37,-476.51 438,-481 431.26,-482.07 424.31,-483.6 417.52,-485.38"/>
+<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M1686.73,-295.45C1651.56,-336.03 1568.4,-436.11 1471,-473 1444.16,-483.16 466.34,-476.51 438,-481 431.26,-482.07 424.31,-483.6 417.52,-485.38"/>
 <polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="416.84,-481.93 408.18,-488.04 418.76,-488.67 416.84,-481.93"/>
 </g>
 <!-- /lib/models/user_action.dart&#45;&gt;/lib/widgets/brush_style_picker.dart -->
 <g id="edge70" class="edge">
 <title>/lib/models/user_action.dart&#45;&gt;/lib/widgets/brush_style_picker.dart</title>
-<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-dasharray="5,2" stroke-opacity="0.533333" d="M1695.96,-295.44C1669.81,-336.02 1587.11,-436.1 1490,-473 1463.15,-483.2 484.37,-476.51 456,-481 449.18,-482.08 442.14,-483.63 435.15,-485.45"/>
+<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-dasharray="5,2" stroke-opacity="0.533333" d="M1695.88,-295.45C1669.56,-336.03 1586.4,-436.11 1489,-473 1462.16,-483.16 484.34,-476.51 456,-481 449.18,-482.08 442.14,-483.63 435.15,-485.45"/>
 <polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="434.45,-482.01 425.75,-488.06 436.32,-488.75 434.45,-482.01"/>
 </g>
 <!-- /lib/models/render_helper.dart&#45;&gt;/lib/widgets/brush_style_picker.dart -->
 <g id="edge71" class="edge">
 <title>/lib/models/render_helper.dart&#45;&gt;/lib/widgets/brush_style_picker.dart</title>
-<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M1806.79,-295.3C1767.29,-336.03 1660.99,-437.21 1548,-473 1518.84,-482.24 477.21,-476.22 447,-481 440.26,-482.07 433.31,-483.59 426.46,-485.38"/>
+<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M1806.72,-295.31C1767.05,-336.04 1660.3,-437.25 1547,-473 1517.86,-482.2 477.18,-476.23 447,-481 440.26,-482.07 433.31,-483.59 426.46,-485.38"/>
 <polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="425.64,-481.97 416.96,-488.05 427.54,-488.71 425.64,-481.97"/>
 </g>
 <!-- /lib/main.dart&#45;&gt;/lib/providers/shell_provider.dart -->
@@ -1047,8 +1047,8 @@
 <!-- /lib/widgets/color_picker_dialog.dart&#45;&gt;/lib/providers/layers_provider.dart -->
 <g id="edge101" class="edge">
 <title>/lib/widgets/color_picker_dialog.dart&#45;&gt;/lib/providers/layers_provider.dart</title>
-<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M256.29,-488.58C266.93,-485.45 278.24,-482.66 289,-481 354.45,-470.9 1414.88,-476.75 1481,-473 1878.94,-450.4 2353.17,-387.72 2529.97,-363.11"/>
-<polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="2530.31,-366.6 2539.73,-361.75 2529.34,-359.66 2530.31,-366.6"/>
+<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M256.29,-488.58C266.93,-485.45 278.24,-482.66 289,-481 354.39,-470.91 1413.94,-476.75 1480,-473 1878.29,-450.4 2352.94,-387.72 2529.9,-363.11"/>
+<polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="2530.25,-366.59 2539.67,-361.75 2529.29,-359.66 2530.25,-366.59"/>
 </g>
 <!-- /lib/widgets/color_picker_dialog.dart&#45;&gt;/lib/helpers/color_helper.dart -->
 <g id="edge100" class="edge">
@@ -1080,11 +1080,11 @@
 <path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M248.84,-488.58C258.9,-485.58 269.71,-482.84 280,-481 312.2,-475.24 396.3,-484.3 427,-473 440.71,-467.95 453.89,-458.83 465.27,-449.88"/>
 <polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="467.28,-452.75 472.84,-443.73 462.87,-447.32 467.28,-452.75"/>
 </g>
-<!-- /lib/widgets/marching_ants_rect.dart -->
-<g id="node52" class="node">
-<title>/lib/widgets/marching_ants_rect.dart</title>
-<path fill="Lavender" stroke="black" stroke-width="1.3" d="M1428,-370C1428,-370 1304,-370 1304,-370 1298,-370 1292,-364 1292,-358 1292,-358 1292,-346 1292,-346 1292,-340 1298,-334 1304,-334 1304,-334 1428,-334 1428,-334 1434,-334 1440,-340 1440,-346 1440,-346 1440,-358 1440,-358 1440,-364 1434,-370 1428,-370"/>
-<text text-anchor="middle" x="1366" y="-346.75" font-family="Arial" font-size="15.00">marching_ants_rect</text>
+<!-- /lib/widgets/marching_ants_path.dart -->
+<g id="node48" class="node">
+<title>/lib/widgets/marching_ants_path.dart</title>
+<path fill="Lavender" stroke="black" stroke-width="1.3" d="M1427.88,-370C1427.88,-370 1300.12,-370 1300.12,-370 1294.12,-370 1288.12,-364 1288.12,-358 1288.12,-358 1288.12,-346 1288.12,-346 1288.12,-340 1294.12,-334 1300.12,-334 1300.12,-334 1427.88,-334 1427.88,-334 1433.88,-334 1439.88,-340 1439.88,-346 1439.88,-346 1439.88,-358 1439.88,-358 1439.88,-364 1433.88,-370 1427.88,-370"/>
+<text text-anchor="middle" x="1364" y="-346.75" font-family="Arial" font-size="15.00">marching_ants_path</text>
 </g>
 <!-- /lib/widgets/color_preview.dart&#45;&gt;/lib/helpers/color_helper.dart -->
 <g id="edge107" class="edge">
@@ -1185,32 +1185,32 @@
 <!-- /lib/widgets/selector_widget.dart -->
 <g id="node63" class="node">
 <title>/lib/widgets/selector_widget.dart</title>
-<path fill="Lavender" stroke="black" stroke-width="1.3" d="M1459.75,-442C1459.75,-442 1364.25,-442 1364.25,-442 1358.25,-442 1352.25,-436 1352.25,-430 1352.25,-430 1352.25,-418 1352.25,-418 1352.25,-412 1358.25,-406 1364.25,-406 1364.25,-406 1459.75,-406 1459.75,-406 1465.75,-406 1471.75,-412 1471.75,-418 1471.75,-418 1471.75,-430 1471.75,-430 1471.75,-436 1465.75,-442 1459.75,-442"/>
-<text text-anchor="middle" x="1412" y="-418.75" font-family="Arial" font-size="15.00">selector_widget</text>
+<path fill="Lavender" stroke="black" stroke-width="1.3" d="M1458.75,-442C1458.75,-442 1363.25,-442 1363.25,-442 1357.25,-442 1351.25,-436 1351.25,-430 1351.25,-430 1351.25,-418 1351.25,-418 1351.25,-412 1357.25,-406 1363.25,-406 1363.25,-406 1458.75,-406 1458.75,-406 1464.75,-406 1470.75,-412 1470.75,-418 1470.75,-418 1470.75,-430 1470.75,-430 1470.75,-436 1464.75,-442 1458.75,-442"/>
+<text text-anchor="middle" x="1411" y="-418.75" font-family="Arial" font-size="15.00">selector_widget</text>
 </g>
 <!-- /lib/widgets/main_view.dart&#45;&gt;/lib/widgets/selector_widget.dart -->
 <g id="edge123" class="edge">
 <title>/lib/widgets/main_view.dart&#45;&gt;/lib/widgets/selector_widget.dart</title>
-<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M530.44,-488.53C537.06,-485.53 544.12,-482.8 551,-481 588.89,-471.06 1139.96,-439.96 1340.07,-428.93"/>
-<polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="1340.13,-432.43 1349.92,-428.39 1339.74,-425.44 1340.13,-432.43"/>
+<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M530.44,-488.53C537.06,-485.53 544.12,-482.8 551,-481 588.85,-471.07 1139.28,-439.97 1339.15,-428.93"/>
+<polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="1339.2,-432.43 1348.99,-428.39 1338.81,-425.44 1339.2,-432.43"/>
 </g>
 <!-- /lib/widgets/selector_widget.dart&#45;&gt;/lib/models/selector_model.dart -->
 <g id="edge125" class="edge">
 <title>/lib/widgets/selector_widget.dart&#45;&gt;/lib/models/selector_model.dart</title>
-<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M1472.21,-418.89C1625.52,-407.81 2027.26,-374.86 2151,-326 2165.04,-320.46 2178.88,-311.33 2190.31,-302.52"/>
+<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M1471.01,-418.91C1624.32,-407.87 2027.02,-374.95 2151,-326 2165.04,-320.46 2178.88,-311.34 2190.31,-302.52"/>
 <polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="2192.17,-305.52 2197.76,-296.51 2187.77,-300.07 2192.17,-305.52"/>
 </g>
 <!-- /lib/widgets/selector_widget.dart&#45;&gt;/lib/helpers/draw_path_helper.dart -->
 <g id="edge124" class="edge">
 <title>/lib/widgets/selector_widget.dart&#45;&gt;/lib/helpers/draw_path_helper.dart</title>
-<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M1427.74,-405.75C1435.62,-396 1444.45,-383.15 1449,-370 1465.93,-321.08 1464.78,-259.9 1462.1,-224.36"/>
-<polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="1465.59,-224.12 1461.24,-214.45 1458.62,-224.72 1465.59,-224.12"/>
+<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M1427.16,-405.82C1435.26,-396.09 1444.32,-383.24 1449,-370 1466.29,-321.06 1464.98,-259.66 1462.18,-224.12"/>
+<polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="1465.67,-223.87 1461.29,-214.22 1458.7,-224.5 1465.67,-223.87"/>
 </g>
-<!-- /lib/widgets/selector_widget.dart&#45;&gt;/lib/widgets/marching_ants_rect.dart -->
+<!-- /lib/widgets/selector_widget.dart&#45;&gt;/lib/widgets/marching_ants_path.dart -->
 <g id="edge126" class="edge">
-<title>/lib/widgets/selector_widget.dart&#45;&gt;/lib/widgets/marching_ants_rect.dart</title>
-<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M1400.63,-405.7C1395.5,-397.9 1389.33,-388.51 1383.63,-379.83"/>
-<polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="1386.74,-378.18 1378.32,-371.75 1380.89,-382.03 1386.74,-378.18"/>
+<title>/lib/widgets/selector_widget.dart&#45;&gt;/lib/widgets/marching_ants_path.dart</title>
+<path fill="none" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" d="M1399.38,-405.7C1394.15,-397.9 1387.84,-388.51 1382.01,-379.83"/>
+<polygon fill="#aabbaa" fill-opacity="0.533333" stroke="#aabbaa" stroke-width="1.3" stroke-opacity="0.533333" points="1385.06,-378.09 1376.58,-371.74 1379.25,-381.99 1385.06,-378.09"/>
 </g>
 </g>
 </svg>

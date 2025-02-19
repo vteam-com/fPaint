@@ -77,8 +77,10 @@ class AppProvider extends ChangeNotifier {
   }
 
   void regionErase() {
-    layers.selectedLayer.regionCut(selector.path);
-    update();
+    if (selector.path1 != null) {
+      layers.selectedLayer.regionCut(selector.path1!);
+      update();
+    }
   }
 
   Future<void> regionCut() async {
@@ -87,7 +89,8 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> regionCopy() async {
-    if (selector.path.getBounds().isEmpty) {
+    final ui.Rect bounds = selector.path1!.getBounds();
+    if (bounds.isEmpty) {
       // nothing to copy
       return;
     }
@@ -98,14 +101,11 @@ class AppProvider extends ChangeNotifier {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder);
 
-    // Get the bounds of the selected path
-    final Rect bounds = selector.path.getBounds();
-
     // Translate canvas so the clipped area is positioned at (0,0)
     canvas.translate(-bounds.left, -bounds.top);
 
     // Clip the canvas with the selected path
-    canvas.clipPath(selector.path);
+    canvas.clipPath(selector.path1!);
 
     // Draw the image, making sure to align it properly
     canvas.drawImage(image, Offset.zero, Paint());
@@ -165,7 +165,7 @@ class AppProvider extends ChangeNotifier {
     required final UserAction action,
   }) {
     if (selector.isVisible) {
-      action.clipPath = selector.path;
+      action.clipPath = selector.path1;
     }
     layers.selectedLayer.addUserAction(action);
     update();
@@ -280,7 +280,7 @@ class AppProvider extends ChangeNotifier {
         ],
         action: layers.selectedLayer.lastUserAction!.action,
         brush: layers.selectedLayer.lastUserAction!.brush,
-        clipPath: selector.isVisible ? selector.path : null,
+        clipPath: selector.isVisible ? selector.path1 : null,
       ),
     );
 
@@ -304,7 +304,7 @@ class AppProvider extends ChangeNotifier {
               bounds.bottomRight,
             ],
             fillColor: this.fillColor,
-            clipPath: selector.isVisible ? selector.path : null,
+            clipPath: selector.isVisible ? selector.path1 : null,
           ),
         );
 
@@ -328,18 +328,27 @@ class AppProvider extends ChangeNotifier {
   // Selector
   SelectorModel selector = SelectorModel();
 
+  bool isReadyForDrawing() {
+    if (selectedAction == ActionType.selector) {
+      return false;
+    }
+    return true;
+  }
+
   void selectorCreationStart(final Offset position) {
-    if (!selector.isVisible) {
-      if (selector.mode == SelectorMode.wand) {
-        getRegionPathFromLayerImage(position).then((final Region region) {
-          selector.isVisible = true;
-          selector.path = region.path.shift(region.offset);
-          update();
-        });
-      } else {
-        selector.addP1(position);
+    if (selector.mode == SelectorMode.wand) {
+      getRegionPathFromLayerImage(position).then((final Region region) {
+        selector.isVisible = true;
+        if (selector.math == SelectorMath.replace) {
+          selector.path1 = region.path.shift(region.offset);
+        } else {
+          selector.path2 = region.path.shift(region.offset);
+        }
         update();
-      }
+      });
+    } else {
+      selector.addP1(position);
+      update();
     }
   }
 
@@ -353,23 +362,27 @@ class AppProvider extends ChangeNotifier {
   }
 
   void selectorCreationEnd() {
+    selector.applyMath();
     update();
   }
 
   void selectAll() {
     selector.isVisible = true;
     selectorCreationStart(Offset.zero);
-    selector.path = Path();
-    selector.path.addRect(
-      Rect.fromPoints(Offset.zero, Offset(layers.width, layers.height)),
-    );
+    selector.path1 = Path()
+      ..addRect(
+        Rect.fromPoints(Offset.zero, Offset(layers.width, layers.height)),
+      );
   }
 
-  Path getPathAdjustToCanvasSizeAndPosition() {
-    final Matrix4 matrix = Matrix4.identity()
-      ..translate(offset.dx, offset.dy)
-      ..scale(layers.scale);
-    return selector.path.transform(matrix.storage);
+  Path? getPathAdjustToCanvasSizeAndPosition(final Path? path) {
+    if (path != null) {
+      final Matrix4 matrix = Matrix4.identity()
+        ..translate(offset.dx, offset.dy)
+        ..scale(layers.scale);
+      return path.transform(matrix.storage);
+    }
+    return null;
   }
 
   //=============================================================================

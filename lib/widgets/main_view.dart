@@ -43,144 +43,132 @@ class MainViewState extends State<MainView> {
 
   @override
   Widget build(final BuildContext context) {
-    return LayoutBuilder(
-      builder: (final BuildContext context, final BoxConstraints constraints) {
-        // print('LayoutBuilder ${constraints.maxWidth} ${constraints.maxHeight}');
-        final ShellProvider shellModel = ShellProvider.of(context);
-        final AppProvider appModel = AppProvider.of(context, listen: true);
-
-        // Center canvas if requested
-        // scale the canvas to fit the current viewport
-        if (shellModel.centerImageInViewPort) {
-          shellModel.centerImageInViewPort = false;
-          canvasCenterAndFit(
-            appProvider: appModel,
-            containerWidth: constraints.maxWidth,
-            containerHeight: constraints.maxHeight,
-            scaleToContainer: shellModel.fitCanvasIntoScreen,
-            notifyListener: false,
-          );
-          shellModel.fitCanvasIntoScreen = false;
-        }
-
-        return Listener(
-          onPointerSignal: (final PointerSignalEvent event) {
-            // Needed for WEB PANNING
-            if (event is PointerScrollEvent) {
-              appModel.offset +=
-                  Offset(-event.scrollDelta.dx, -event.scrollDelta.dy);
-              appModel.update();
-            }
-          },
-          //
-          // PAN and SCALE for Web, Linux & Windows
-          // this is not invoked for Touch devices and we skip MacOS, since trackpad behavior are received the same way as Touch devices
-          //
-          onPointerPanZoomUpdate: !kIsWeb && Platform.isMacOS
-              ? null
-              : (final PointerPanZoomUpdateEvent event) {
-                  // print('Listener onPointerPanZoomUpdate');
-                  if (event.scale == 1) {
-                    // Panning
-                    appModel.offset += event.panDelta;
-                    appModel.update();
-                  } else {
-                    // Scaling
-                    _handleScaling(
-                      appModel,
-                      event.localPosition,
-                      event.scale,
-                    );
-                  }
-                },
-
-          //
-          // Pointer DOWN
-          //
-          onPointerDown: (final PointerDownEvent event) {
-            if (event.kind == PointerDeviceKind.touch) {
-              // ignore touch when drawing, must use the stylus
-            } else {
-              _handlePointerStart(appModel, event);
-            }
-          },
-
-          //
-          // Pointer MOVE
-          //
-          onPointerMove: (final PointerEvent event) {
-            if (event.kind == PointerDeviceKind.touch) {
-              // ignore touch when drawing, must use the stylus
-            } else {
-              _handlePointerMove(appModel, event);
-            }
-          },
-
-          //
-          // Pointer UP/CANCEL/END
-          //
-          onPointerUp: (final PointerUpEvent event) {
-            if (event.kind == PointerDeviceKind.touch) {
-              // ignore touch when drawing, must use the stylus
-            } else {
-              _handPointerEnd(appModel, event);
-            }
-          },
-
-          onPointerCancel: (final PointerCancelEvent event) {
-            if (event.kind == PointerDeviceKind.touch) {
-              // ignore touch when drawing, must use the stylus
-            } else {
-              _handPointerEnd(appModel, event);
-            }
-          },
-
-          //
-          // Handle Touch Device Gesture iOS, Android, TouchScreen laptops
-          //
-          child: GestureDetector(
-            // Handle two-fingers Panning and Scaling
-            onScaleUpdate: (final ScaleUpdateDetails details) {
-              // supported by iOS, Android, macOS
-              if (!Platform.isLinux && !Platform.isWindows) {
-                // print('GestureDetector onScaleUpdate');
-                final double scaleAttempt = (details.scale - 1.0).abs();
-                // print('${details.scale} $scaleAttempt');
-                if (scaleAttempt < scaleTolerance) {
-                  // No scaling, apply panning if using 2 fingers
-                  if (details.pointerCount == 2) {
-                    appModel.offset += details.focalPointDelta;
-                    appModel.update();
-                  }
-                } else {
-                  // Handle zooming/scaling
-                  _handleScaling(
-                    appModel,
-                    details.localFocalPoint,
-                    details.scale,
-                  );
-                }
-              }
-            },
-            child: _displayCanvasAnSelector(appModel),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _displayCanvasAnSelector(final AppProvider appProvider) {
+    final AppProvider appProvider = AppProvider.of(context, listen: true);
     return Stack(
       children: <Widget>[
-        Transform(
-          alignment: Alignment.topLeft,
-          transform: Matrix4.identity()
-            ..translate(
-              appProvider.offset.dx,
-              appProvider.offset.dy,
-            )
-            ..scale(appProvider.layers.scale),
-          child: const CanvasPanel(),
+        LayoutBuilder(
+          builder:
+              (final BuildContext context, final BoxConstraints constraints) {
+            // print('LayoutBuilder ${constraints.maxWidth} ${constraints.maxHeight}');
+            final ShellProvider shellModel = ShellProvider.of(context);
+
+            // Center canvas if requested
+            // scale the canvas to fit the current viewport
+            if (shellModel.centerImageInViewPort) {
+              shellModel.centerImageInViewPort = false;
+              canvasCenterAndFit(
+                appProvider: appProvider,
+                containerWidth: constraints.maxWidth,
+                containerHeight: constraints.maxHeight,
+                scaleToContainer: shellModel.fitCanvasIntoScreen,
+                notifyListener: false,
+              );
+              shellModel.fitCanvasIntoScreen = false;
+            }
+
+            return Listener(
+              onPointerSignal: (final PointerSignalEvent event) {
+                // Needed for WEB PANNING
+                if (event is PointerScrollEvent) {
+                  appProvider.offset +=
+                      Offset(-event.scrollDelta.dx, -event.scrollDelta.dy);
+                  appProvider.update();
+                }
+              },
+              //
+              // PAN and SCALE for Web, Linux & Windows
+              // this is not invoked for Touch devices and we skip MacOS, since trackpad behavior are received the same way as Touch devices
+              //
+              onPointerPanZoomUpdate: !kIsWeb && Platform.isMacOS
+                  ? null
+                  : (final PointerPanZoomUpdateEvent event) {
+                      // print('Listener onPointerPanZoomUpdate');
+                      if (event.scale == 1) {
+                        // Panning
+                        appProvider.offset += event.panDelta;
+                        appProvider.update();
+                      } else {
+                        // Scaling
+                        _handleScaling(
+                          appProvider,
+                          event.localPosition,
+                          event.scale,
+                        );
+                      }
+                    },
+
+              //
+              // Pointer DOWN
+              //
+              onPointerDown: (final PointerDownEvent event) {
+                if (event.kind == PointerDeviceKind.touch) {
+                  // ignore touch when drawing, must use the stylus
+                } else {
+                  _handlePointerStart(appProvider, event);
+                }
+              },
+
+              //
+              // Pointer MOVE
+              //
+              onPointerMove: (final PointerEvent event) {
+                if (event.kind == PointerDeviceKind.touch) {
+                  // ignore touch when drawing, must use the stylus
+                } else {
+                  _handlePointerMove(appProvider, event);
+                }
+              },
+
+              //
+              // Pointer UP/CANCEL/END
+              //
+              onPointerUp: (final PointerUpEvent event) {
+                if (event.kind == PointerDeviceKind.touch) {
+                  // ignore touch when drawing, must use the stylus
+                } else {
+                  _handPointerEnd(appProvider, event);
+                }
+              },
+
+              onPointerCancel: (final PointerCancelEvent event) {
+                if (event.kind == PointerDeviceKind.touch) {
+                  // ignore touch when drawing, must use the stylus
+                } else {
+                  _handPointerEnd(appProvider, event);
+                }
+              },
+
+              //
+              // Handle Touch Device Gesture iOS, Android, TouchScreen laptops
+              //
+              child: GestureDetector(
+                // Handle two-fingers Panning and Scaling
+                onScaleUpdate: (final ScaleUpdateDetails details) {
+                  // supported by iOS, Android, macOS
+                  if (!Platform.isLinux && !Platform.isWindows) {
+                    // print('GestureDetector onScaleUpdate');
+                    final double scaleAttempt = (details.scale - 1.0).abs();
+                    // print('${details.scale} $scaleAttempt');
+                    if (scaleAttempt < scaleTolerance) {
+                      // No scaling, apply panning if using 2 fingers
+                      if (details.pointerCount == 2) {
+                        appProvider.offset += details.focalPointDelta;
+                        appProvider.update();
+                      }
+                    } else {
+                      // Handle zooming/scaling
+                      _handleScaling(
+                        appProvider,
+                        details.localFocalPoint,
+                        details.scale,
+                      );
+                    }
+                  }
+                },
+                child: _displayCanvas(appProvider),
+              ),
+            );
+          },
         ),
 
         //
@@ -188,7 +176,12 @@ class MainViewState extends State<MainView> {
         //
         if (appProvider.selector.isVisible)
           SelectionHandleWidget(
-            path: appProvider.getPathAdjustToCanvasSizeAndPosition(),
+            path1: appProvider.getPathAdjustToCanvasSizeAndPosition(
+              appProvider.selector.path1,
+            ),
+            path2: appProvider.getPathAdjustToCanvasSizeAndPosition(
+              appProvider.selector.path2,
+            ),
             enableMoveAndResize:
                 appProvider.selectedAction == ActionType.selector,
             onDrag: (final Offset offset) {
@@ -201,6 +194,19 @@ class MainViewState extends State<MainView> {
             },
           ),
       ],
+    );
+  }
+
+  Widget _displayCanvas(final AppProvider appProvider) {
+    return Transform(
+      alignment: Alignment.topLeft,
+      transform: Matrix4.identity()
+        ..translate(
+          appProvider.offset.dx,
+          appProvider.offset.dy,
+        )
+        ..scale(appProvider.layers.scale),
+      child: const CanvasPanel(),
     );
   }
 

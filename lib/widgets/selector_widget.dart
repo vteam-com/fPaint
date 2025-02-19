@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/models/selector_model.dart';
-import 'package:fpaint/widgets/marching_ants_rect.dart';
+import 'package:fpaint/widgets/marching_ants_path.dart';
 
 class SelectionHandleWidget extends StatefulWidget {
   const SelectionHandleWidget({
     super.key,
-    required this.path,
+    required this.path1,
+    required this.path2,
     required this.onDrag,
     required this.onResize,
     this.enableMoveAndResize = true,
   });
-  final Path path;
+  final Path? path1;
+  final Path? path2;
   final bool enableMoveAndResize;
   final void Function(Offset) onDrag;
   final void Function(NineGridHandle, Offset) onResize;
@@ -27,13 +29,17 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
 
   @override
   Widget build(final BuildContext context) {
-    final Rect bounds = widget.path.getBounds();
+    if (widget.path1 == null) {
+      return const SizedBox();
+    }
+    final Rect bounds = widget.path1!.getBounds();
     final double width = bounds.left + bounds.width + defaultHandleSize;
 
     final double height = bounds.bottom + bounds.height + defaultHandleSize;
 
     final List<Widget> stackChildren = <Widget>[
-      MarchingAntsSelection(path: widget.path),
+      AnimatedMarchingAntsPath(path: widget.path1!),
+      if (widget.path2 != null) AnimatedMarchingAntsPath(path: widget.path2!),
     ];
 
     if (widget.enableMoveAndResize) {
