@@ -7,6 +7,8 @@ export 'package:fpaint/helpers/draw_path_helper.dart';
 class SelectorModel {
   bool isVisible = false;
   SelectorMode mode = SelectorMode.rectangle;
+  SelectorMath math = SelectorMath.replace;
+
   List<Offset> points = <Offset>[];
   Path path = Path();
 
@@ -98,4 +100,10 @@ enum SelectorMode {
   circle,
   lasso,
   wand,
+}
+
+enum SelectorMath {
+  replace,
+  add,
+  remove,
 }

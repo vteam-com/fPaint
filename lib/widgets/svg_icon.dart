@@ -12,3 +12,13 @@ Widget iconFromSvgAsset(
     colorFilter: ColorFilter.mode(color, BlendMode.srcATop),
   );
 }
+
+Widget iconFromSvgAssetSelected(
+  final String assetsPathToImage,
+  final bool isSelected,
+) {
+  return iconFromSvgAsset(
+    assetsPathToImage,
+    isSelected ? Colors.blue : Colors.white,
+  );
+}

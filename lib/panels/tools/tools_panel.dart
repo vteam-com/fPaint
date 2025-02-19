@@ -254,9 +254,49 @@ class ToolsPanel extends StatelessWidget {
                 },
               ),
 
+              if (appModel.selector.isVisible) const Divider(),
               //
               // Cancel/Hide Selection tool
               //
+              if (appModel.selector.isVisible)
+                ToolSelector(
+                  minimal: minimal,
+                  name: 'Replace',
+                  image: iconFromSvgAssetSelected(
+                    'assets/icons/selector_replace.svg',
+                    appModel.selector.math == SelectorMath.replace,
+                  ),
+                  onPressed: () {
+                    appModel.selector.math = SelectorMath.replace;
+                    appModel.update();
+                  },
+                ),
+              if (appModel.selector.isVisible)
+                ToolSelector(
+                  minimal: minimal,
+                  name: 'Add',
+                  image: iconFromSvgAssetSelected(
+                    'assets/icons/selector_add.svg',
+                    appModel.selector.math == SelectorMath.add,
+                  ),
+                  onPressed: () {
+                    appModel.selector.math = SelectorMath.add;
+                    appModel.update();
+                  },
+                ),
+              if (appModel.selector.isVisible)
+                ToolSelector(
+                  minimal: minimal,
+                  name: 'Remove',
+                  image: iconFromSvgAssetSelected(
+                    'assets/icons/selector_remove.svg',
+                    appModel.selector.math == SelectorMath.remove,
+                  ),
+                  onPressed: () {
+                    appModel.selector.math = SelectorMath.remove;
+                    appModel.update();
+                  },
+                ),
               if (appModel.selector.isVisible)
                 ToolSelector(
                   minimal: minimal,
