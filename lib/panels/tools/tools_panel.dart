@@ -70,7 +70,6 @@ class ToolsPanel extends StatelessWidget {
           selectedTool == ActionType.pencil,
           Icons.draw,
         ),
-        isSelected: selectedTool == ActionType.pencil,
         onPressed: () {
           appProvider.selectedAction = ActionType.pencil;
         },
@@ -84,7 +83,6 @@ class ToolsPanel extends StatelessWidget {
           selectedTool == ActionType.brush,
           Icons.brush,
         ),
-        isSelected: selectedTool == ActionType.brush,
         onPressed: () {
           appProvider.selectedAction = ActionType.brush;
         },
@@ -98,7 +96,6 @@ class ToolsPanel extends StatelessWidget {
           selectedTool == ActionType.line,
           Icons.line_axis,
         ),
-        isSelected: selectedTool == ActionType.line,
         onPressed: () {
           appProvider.selectedAction = ActionType.line;
         },
@@ -112,7 +109,6 @@ class ToolsPanel extends StatelessWidget {
           selectedTool == ActionType.rectangle,
           Icons.crop_square,
         ),
-        isSelected: selectedTool == ActionType.rectangle,
         onPressed: () {
           appProvider.selectedAction = ActionType.rectangle;
         },
@@ -126,7 +122,6 @@ class ToolsPanel extends StatelessWidget {
           selectedTool == ActionType.circle,
           Icons.circle_outlined,
         ),
-        isSelected: selectedTool == ActionType.circle,
         onPressed: () {
           appProvider.selectedAction = ActionType.circle;
         },
@@ -140,7 +135,6 @@ class ToolsPanel extends StatelessWidget {
           selectedTool == ActionType.fill,
           Icons.format_color_fill,
         ),
-        isSelected: selectedTool == ActionType.fill,
         onPressed: () {
           appProvider.selectedAction = ActionType.fill;
         },
@@ -155,7 +149,6 @@ class ToolsPanel extends StatelessWidget {
               ? Colors.blue
               : IconTheme.of(context).color!,
         ),
-        isSelected: selectedTool == ActionType.eraser,
         onPressed: () {
           appProvider.selectedAction = ActionType.eraser;
         },
@@ -168,7 +161,6 @@ class ToolsPanel extends StatelessWidget {
           selectedTool == ActionType.selector,
           Symbols.select,
         ),
-        isSelected: selectedTool == ActionType.selector,
         onPressed: () {
           appProvider.selectedAction = ActionType.selector;
         },
@@ -209,7 +201,6 @@ class ToolsPanel extends StatelessWidget {
                   appModel.selector.mode == SelectorMode.rectangle,
                   Icons.highlight_alt,
                 ),
-                isSelected: appModel.selector.mode == SelectorMode.rectangle,
                 onPressed: () {
                   appModel.selector.mode = SelectorMode.rectangle;
                   appModel.update();
@@ -225,7 +216,6 @@ class ToolsPanel extends StatelessWidget {
                   appModel.selector.mode == SelectorMode.circle,
                   Symbols.lasso_select,
                 ),
-                isSelected: appModel.selector.mode == SelectorMode.circle,
                 onPressed: () {
                   appModel.selector.mode = SelectorMode.circle;
                   appModel.update();
@@ -243,7 +233,6 @@ class ToolsPanel extends StatelessWidget {
                       ? Colors.blue
                       : IconTheme.of(context).color!,
                 ),
-                isSelected: appModel.selector.mode == SelectorMode.lasso,
                 onPressed: () {
                   appModel.selector.mode = SelectorMode.lasso;
                   appModel.update();
@@ -259,7 +248,6 @@ class ToolsPanel extends StatelessWidget {
                   appModel.selector.mode == SelectorMode.wand,
                   Icons.auto_fix_high_outlined,
                 ),
-                isSelected: appModel.selector.mode == SelectorMode.wand,
                 onPressed: () {
                   appModel.selector.mode = SelectorMode.wand;
                   appModel.update();
@@ -277,7 +265,6 @@ class ToolsPanel extends StatelessWidget {
                     false,
                     Symbols.remove_selection,
                   ),
-                  isSelected: false,
                   onPressed: () {
                     appModel.selector.clear();
                     appModel.update();
