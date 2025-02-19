@@ -68,11 +68,11 @@ class AppProvider extends ChangeNotifier {
     resetView();
   }
 
-  Offset toCanvas(Offset point) {
+  Offset toCanvas(final Offset point) {
     return (point - offset) / layers.scale;
   }
 
-  Offset fromCanvas(Offset point) {
+  Offset fromCanvas(final Offset point) {
     return (point * layers.scale) + offset;
   }
 
@@ -137,7 +137,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   bool get canvasResizeLockAspectRatio => layers.canvasResizeLockAspectRatio;
-  set canvasResizeLockAspectRatio(bool value) {
+  set canvasResizeLockAspectRatio(final bool value) {
     layers.canvasResizeLockAspectRatio = value;
     update();
   }
@@ -162,7 +162,7 @@ class AppProvider extends ChangeNotifier {
   LayersProvider layers = LayersProvider(); // this is a singleton
 
   void addActionToSelectedLayer({
-    required UserAction action,
+    required final UserAction action,
   }) {
     if (selector.isVisible) {
       action.clipPath = selector.path;
@@ -187,7 +187,7 @@ class AppProvider extends ChangeNotifier {
   //-------------------------
   // Selected Tool
   ActionType _selectedAction = ActionType.brush;
-  set selectedAction(ActionType value) {
+  set selectedAction(final ActionType value) {
     _selectedAction = value;
     update();
   }
@@ -198,7 +198,7 @@ class AppProvider extends ChangeNotifier {
   // Line Weight
   double _lineWeight = 5;
   double get brusSize => _lineWeight;
-  set brusSize(double value) {
+  set brusSize(final double value) {
     _lineWeight = value;
     update();
   }
@@ -207,7 +207,7 @@ class AppProvider extends ChangeNotifier {
   // Brush Style
   BrushStyle _brushStyle = BrushStyle.solid;
   BrushStyle get brushStyle => _brushStyle;
-  set brushStyle(BrushStyle value) {
+  set brushStyle(final BrushStyle value) {
     _brushStyle = value;
     update();
   }
@@ -216,7 +216,7 @@ class AppProvider extends ChangeNotifier {
   // Brush Color
   Color _brushColor = Colors.black;
   Color get brushColor => _brushColor;
-  set brushColor(Color value) {
+  set brushColor(final Color value) {
     _brushColor = value;
     update();
   }
@@ -225,7 +225,7 @@ class AppProvider extends ChangeNotifier {
   // Color for Fill
   Color _fillColor = Colors.lightBlue;
   Color get fillColor => _fillColor;
-  set fillColor(Color value) {
+  set fillColor(final Color value) {
     _fillColor = value;
     update();
   }
@@ -234,17 +234,17 @@ class AppProvider extends ChangeNotifier {
   // Tolerance
   int _tolarance = 50; // Mid point 0..100
   int get tolerance => _tolarance;
-  set tolerance(int value) {
+  set tolerance(final int value) {
     _tolarance = max(1, min(100, value));
     update();
   }
 
   void updateAction({
-    Offset? start,
+    final Offset? start,
     required final Offset end,
-    ActionType? type,
-    Color? colorFill,
-    Color? colorBrush,
+    final ActionType? type,
+    final Color? colorFill,
+    final Color? colorBrush,
   }) {
     if (start != null &&
         type != null &&
@@ -311,7 +311,7 @@ class AppProvider extends ChangeNotifier {
     update();
   }
 
-  Future<Region> getRegionPathFromLayerImage(ui.Offset position) async {
+  Future<Region> getRegionPathFromLayerImage(final ui.Offset position) async {
     final ui.Image img = layers.selectedLayer.toImageForStorage(layers.size);
 
     // Perform flood fill at the clicked position

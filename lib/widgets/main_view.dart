@@ -42,9 +42,9 @@ class MainViewState extends State<MainView> {
   final double scaleTolerance = 0.2;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (final BuildContext context, final BoxConstraints constraints) {
         // print('LayoutBuilder ${constraints.maxWidth} ${constraints.maxHeight}');
         final ShellProvider shellModel = ShellProvider.of(context);
         final AppProvider appModel = AppProvider.of(context, listen: true);
@@ -64,7 +64,7 @@ class MainViewState extends State<MainView> {
         }
 
         return Listener(
-          onPointerSignal: (PointerSignalEvent event) {
+          onPointerSignal: (final PointerSignalEvent event) {
             // Needed for WEB PANNING
             if (event is PointerScrollEvent) {
               appModel.offset +=
@@ -119,7 +119,7 @@ class MainViewState extends State<MainView> {
           //
           // Pointer UP/CANCEL/END
           //
-          onPointerUp: (PointerUpEvent event) {
+          onPointerUp: (final PointerUpEvent event) {
             if (event.kind == PointerDeviceKind.touch) {
               // ignore touch when drawing, must use the stylus
             } else {
@@ -191,11 +191,11 @@ class MainViewState extends State<MainView> {
             path: appProvider.getPathAdjustToCanvasSizeAndPosition(),
             enableMoveAndResize:
                 appProvider.selectedAction == ActionType.selector,
-            onDrag: (Offset offset) {
+            onDrag: (final Offset offset) {
               appProvider.selector.translate(offset);
               appProvider.update();
             },
-            onResize: (NineGridHandle handle, Offset offset) {
+            onResize: (final NineGridHandle handle, final Offset offset) {
               appProvider.selector.nindeGridResize(handle, offset);
               appProvider.update();
             },

@@ -11,7 +11,7 @@ class NineGridSelector extends StatelessWidget {
   final void Function(int) onPositionSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return Container(
       width: 120,
       height: 120,
@@ -27,7 +27,7 @@ class NineGridSelector extends StatelessWidget {
           mainAxisSpacing: 4,
         ),
         itemCount: 9,
-        itemBuilder: (BuildContext context, int index) {
+        itemBuilder: (final BuildContext context, final int index) {
           return GestureDetector(
             onTap: () => onPositionSelected(index),
             child: DecoratedBox(
@@ -49,7 +49,7 @@ class NineGridSelector extends StatelessWidget {
     );
   }
 
-  IconData getDirectionIcon(int direction) {
+  IconData getDirectionIcon(final int direction) {
     switch (direction) {
       case 0:
         return CupertinoIcons.arrow_up_left;

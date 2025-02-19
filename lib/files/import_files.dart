@@ -20,7 +20,7 @@ Future<void> onFileNew(final BuildContext context) async {
   if (context.mounted) {
     final Size? canvasSize = await showDialog<Size>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (final BuildContext context) {
         final TextEditingController widthController =
             TextEditingController(text: '800');
         final TextEditingController heightController =
@@ -150,13 +150,13 @@ final List<String> supportedImageFileExtensions = <String>[
   // 'xcf',
 ];
 
-bool isFileExtensionSupported(String extension) {
+bool isFileExtensionSupported(final String extension) {
   return supportedImageFileExtensions.contains(extension.toLowerCase());
 }
 
 Future<void> _readImageFile(
-  LayersProvider layers,
-  Future<Uint8List> bytesFuture,
+  final LayersProvider layers,
+  final Future<Uint8List> bytesFuture,
 ) async {
   final ui.Image image = await decodeImageFromList(await bytesFuture);
   layers.clear();
@@ -166,15 +166,15 @@ Future<void> _readImageFile(
 }
 
 Future<void> readImageFilePath(
-  LayersProvider layers,
-  String path,
+  final LayersProvider layers,
+  final String path,
 ) async {
   await _readImageFile(layers, File(path).readAsBytes());
 }
 
 Future<void> readImageFileFromBytes(
-  LayersProvider layers,
-  Uint8List bytes,
+  final LayersProvider layers,
+  final Uint8List bytes,
 ) async {
   // ignore: always_specify_types
   await _readImageFile(layers, Future.value(bytes));
@@ -183,7 +183,7 @@ Future<void> readImageFileFromBytes(
 Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
   final bool? discardCurrentFile = await showDialog<bool>(
     context: context,
-    builder: (BuildContext context) {
+    builder: (final BuildContext context) {
       return AlertDialog(
         title: const Text('Discard current document?'),
         actions: <Widget>[

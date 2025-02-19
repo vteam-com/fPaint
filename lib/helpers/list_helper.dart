@@ -26,7 +26,11 @@ import 'dart:typed_data';
 /// Returns:
 ///   A list of evenly spaced values between the start and end values.
 ///   If numEntries is less than or equal to 1, an empty list is returned.
-List<double> calculateSpread(double start, double end, int numEntries) {
+List<double> calculateSpread(
+  final double start,
+  final double end,
+  final int numEntries,
+) {
   // Check if numEntries is valid
   if (numEntries <= 1) {
     return <double>[];
@@ -71,11 +75,15 @@ List<num> getMinMaxValues(final List<double> list) {
   return <num>[valueMin, valueMax];
 }
 
-bool isIndexInRange(List<dynamic> array, int index) {
+bool isIndexInRange(final List<dynamic> array, final int index) {
   return index >= 0 && index < array.length;
 }
 
-List<String> padList(List<String> list, int length, String padding) {
+List<String> padList(
+  final List<String> list,
+  final int length,
+  final String padding,
+) {
   if (list.length >= length) {
     return list;
   }
@@ -129,7 +137,7 @@ class KeyValue {
   dynamic value;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -158,7 +166,7 @@ class Pair<F, S> {
   S second;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -182,7 +190,7 @@ class Triple<F, S, T> {
   T third;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -199,8 +207,8 @@ class Triple<F, S, T> {
   String toString() => '($first, $second, $third)';
 }
 
-List<String> enumToStringList<T>(List<T> enumValues) {
-  return enumValues.map((T e) => e.toString().split('.').last).toList();
+List<String> enumToStringList<T>(final List<T> enumValues) {
+  return enumValues.map((final T e) => e.toString().split('.').last).toList();
 }
 
 extension RandomItemExtension<T> on List<T> {
@@ -214,7 +222,7 @@ extension RandomItemExtension<T> on List<T> {
 }
 
 extension FindFirstMatchExtension<T> on Iterable<T> {
-  T? findFirstMatch(bool Function(T) test) {
+  T? findFirstMatch(final bool Function(T) test) {
     for (final T item in this) {
       if (test(item)) {
         return item;
@@ -225,7 +233,7 @@ extension FindFirstMatchExtension<T> on Iterable<T> {
 }
 
 extension FirWheresOrNull<T> on List<T> {
-  T? firstWhereOrNull(bool Function(T) test) {
+  T? firstWhereOrNull(final bool Function(T) test) {
     for (final T item in this) {
       if (test(item)) {
         return item;
@@ -235,7 +243,7 @@ extension FirWheresOrNull<T> on List<T> {
   }
 }
 
-String uint8ListToHex(Uint8List list) {
+String uint8ListToHex(final Uint8List list) {
   final StringBuffer hexString = StringBuffer();
   for (int byte in list) {
     hexString.write(byte.toRadixString(16).padLeft(2, '0'));

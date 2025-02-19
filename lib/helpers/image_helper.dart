@@ -9,7 +9,7 @@ import 'package:super_clipboard/super_clipboard.dart';
 
 import 'color_helper.dart';
 
-Future<List<ColorUsage>> getImageColors(ui.Image image) async {
+Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
   final ByteData? byteData =
       await image.toByteData(format: ui.ImageByteFormat.rawRgba);
   if (byteData == null) {
@@ -40,14 +40,15 @@ Future<List<ColorUsage>> getImageColors(ui.Image image) async {
   );
 
   int index = 0;
-  colorCount.forEach((final int packedColor, int count) {
+  colorCount.forEach((final int packedColor, final int count) {
     final ui.Color color = ui.Color(packedColor);
     colorUsages[index++] = ColorUsage(color, count / totalPixels);
   });
 
   // Sort in-place
   colorUsages.sort(
-    (ColorUsage a, ColorUsage b) => b.percentage.compareTo(a.percentage),
+    (final ColorUsage a, final ColorUsage b) =>
+        b.percentage.compareTo(a.percentage),
   );
 
   if (colorUsages.length <= 20) {
@@ -77,7 +78,7 @@ Future<List<String>> imageToListToString(final ui.Image image) async {
   return imageBytesListToString(data!, image.width);
 }
 
-List<String> imageBytesListToString(Uint8List bytes, int width) {
+List<String> imageBytesListToString(final Uint8List bytes, final int width) {
   final int length = bytes.length;
   final List<String> rows = <String>[];
 
@@ -113,21 +114,21 @@ Future<ui.Image> createImageFromBytes({
     width,
     height,
     ui.PixelFormat.rgba8888,
-    (ui.Image img) {
+    (final ui.Image img) {
       completer.complete(img);
     },
   );
   return completer.future;
 }
 
-Future<void> copyImageBase64(Uint8List imageBytes) async {
+Future<void> copyImageBase64(final Uint8List imageBytes) async {
   final String base64String = base64Encode(imageBytes);
   final ClipboardData clipboardData =
       ClipboardData(text: 'data:image/png;base64,$base64String');
   await Clipboard.setData(clipboardData);
 }
 
-Future<void> copyImageToClipboard(ui.Image image) async {
+Future<void> copyImageToClipboard(final ui.Image image) async {
   final SystemClipboard? clipboard = SystemClipboard.instance;
   if (clipboard != null) {
     final DataWriterItem item = DataWriterItem(suggestedName: 'fpaint.png');
@@ -181,7 +182,7 @@ class Debouncer {
   /// Calls the [callback] after the specified [duration].
   /// If the method is called again before the duration elapses,
   /// the previous timer is canceled and a new one is started.
-  void run(VoidCallback callback) {
+  void run(final VoidCallback callback) {
     _timer?.cancel(); // Cancel any existing timer
     _timer = Timer(duration, callback); // Start a new timer
   }

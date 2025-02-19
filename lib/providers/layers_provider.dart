@@ -45,7 +45,7 @@ class LayersProvider extends ChangeNotifier {
   Size get size => _size;
   set size(final Size size) {
     _size = size;
-    _list.forEach((LayerProvider layer) => layer.size = size);
+    _list.forEach((final LayerProvider layer) => layer.size = size);
   }
 
   ///-------------------------------------------
@@ -58,7 +58,7 @@ class LayersProvider extends ChangeNotifier {
   bool _resizeLockAspectRatio = true;
   bool get canvasResizeLockAspectRatio => _resizeLockAspectRatio;
 
-  set canvasResizeLockAspectRatio(bool value) {
+  set canvasResizeLockAspectRatio(final bool value) {
     _resizeLockAspectRatio = value;
     notifyListeners();
   }
@@ -83,13 +83,13 @@ class LayersProvider extends ChangeNotifier {
 
   int get resizePosition => _resizePosition;
 
-  set resizePosition(int value) {
+  set resizePosition(final int value) {
     _resizePosition = value;
     notifyListeners();
   } // center
 
   int get canvasResizePosition => resizePosition;
-  set canvasResizePosition(int value) {
+  set canvasResizePosition(final int value) {
     resizePosition = value;
     notifyListeners();
   } // center
@@ -140,7 +140,8 @@ class LayersProvider extends ChangeNotifier {
   int get length => _list.length;
   bool get isEmpty => _list.isEmpty;
   bool get isNotEmpty => _list.isNotEmpty;
-  bool get hasChanged => _list.any((LayerProvider layer) => layer.hasChanged);
+  bool get hasChanged =>
+      _list.any((final LayerProvider layer) => layer.hasChanged);
 
   int _selectedLayerIndex = 0;
   int get selectedLayerIndex => _selectedLayerIndex;
@@ -196,12 +197,14 @@ class LayersProvider extends ChangeNotifier {
   }
 
   LayerProvider? getByName(final String name) {
-    return _list.findFirstMatch((LayerProvider layer) => layer.name == name);
+    return _list
+        .findFirstMatch((final LayerProvider layer) => layer.name == name);
   }
 
-  LayerProvider addTop([String? name]) => this.insertAt(0, name);
+  LayerProvider addTop([final String? name]) => this.insertAt(0, name);
 
-  LayerProvider addBottom([String? name]) => this.insertAt(this.length, name);
+  LayerProvider addBottom([final String? name]) =>
+      this.insertAt(this.length, name);
 
   void insert(final int index, final LayerProvider layerToInsert) {
     if (isIndexInRange(index)) {
@@ -258,7 +261,7 @@ class LayersProvider extends ChangeNotifier {
     ColorUsage(Colors.black, 1),
   ];
   void evaluatTopColor() {
-    this.getTopColorUsed().then((List<ColorUsage> topColorsFound) {
+    this.getTopColorUsed().then((final List<ColorUsage> topColorsFound) {
       topColors = topColorsFound;
     });
   }
@@ -278,7 +281,7 @@ class LayersProvider extends ChangeNotifier {
     for (final LayerProvider layer in _list) {
       for (final ColorUsage colorUsed in layer.topColorsUsed) {
         final ColorUsage existingColor = topColors.firstWhere(
-          (ColorUsage c) => c.color == colorUsed.color,
+          (final ColorUsage c) => c.color == colorUsed.color,
           orElse: () => colorUsed,
         );
         if (existingColor == colorUsed) {
@@ -290,7 +293,8 @@ class LayersProvider extends ChangeNotifier {
     }
 
     topColors.sort(
-      (ColorUsage a, ColorUsage b) => b.percentage.compareTo(a.percentage),
+      (final ColorUsage a, final ColorUsage b) =>
+          b.percentage.compareTo(a.percentage),
     );
     topColors = topColors.take(20).toList();
     return topColors;

@@ -29,7 +29,7 @@ class BrushSizePickerState extends State<BrushSizePicker> {
   }
 
   @override
-  void didUpdateWidget(covariant BrushSizePicker oldWidget) {
+  void didUpdateWidget(covariant final BrushSizePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value ||
         oldWidget.min != widget.min ||
@@ -53,7 +53,7 @@ class BrushSizePickerState extends State<BrushSizePicker> {
           max: widget.max,
           divisions: (widget.max * 10).toInt(),
           label: _value.toStringAsFixed(1),
-          onChanged: (double value) {
+          onChanged: (final double value) {
             setState(() {
               _value = value;
             });
@@ -75,7 +75,7 @@ void showBrushSizePicker({
 }) {
   showDialog<dynamic>(
     context: context,
-    builder: (BuildContext context) {
+    builder: (final BuildContext context) {
       return AlertDialog(
         title: Text('Select $title'),
         content: IntrinsicHeight(

@@ -23,7 +23,7 @@ class TolerancePickerState extends State<TolerancePicker> {
   }
 
   @override
-  void didUpdateWidget(covariant TolerancePicker oldWidget) {
+  void didUpdateWidget(covariant final TolerancePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value) {
       setState(() {
@@ -43,7 +43,7 @@ class TolerancePickerState extends State<TolerancePicker> {
           max: 100,
           divisions: 100,
           label: _value.toStringAsFixed(0),
-          onChanged: (double value) {
+          onChanged: (final double value) {
             setState(() {
               _value = value.toInt();
             });
@@ -62,7 +62,7 @@ void showTolerancePicker(
 ) {
   showDialog<dynamic>(
     context: context,
-    builder: (BuildContext context) {
+    builder: (final BuildContext context) {
       return AlertDialog(
         title: const Text('Color Tolerance'),
         content: IntrinsicHeight(

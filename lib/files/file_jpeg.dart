@@ -9,7 +9,7 @@ import 'package:image/image.dart' as img;
 /// [inputBytes] The image bytes in PNG format.
 /// Returns the image bytes in JPG format.
 
-Future<Uint8List> convertToJpg(Uint8List inputBytes) async {
+Future<Uint8List> convertToJpg(final Uint8List inputBytes) async {
   // Decode the PNG image
   final img.Image? image = img.decodeImage(inputBytes);
   if (image == null) {

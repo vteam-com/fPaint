@@ -69,7 +69,7 @@ class MainScreen extends StatelessWidget {
     return MultiSplitView(
       key: Key('key_side_panel_size_${shellModel.isSidePanelExpanded}'),
       axis: Axis.horizontal,
-      onDividerDoubleTap: (int dividerIndex) {
+      onDividerDoubleTap: (final int dividerIndex) {
         shellModel.isSidePanelExpanded = !shellModel.isSidePanelExpanded;
       },
       initialAreas: <Area>[

@@ -15,9 +15,9 @@ enum NineGridHandle {
 }
 
 Path expandPathInDirectionWithOffset(
-  Path path,
-  Offset expansionOffset,
-  NineGridHandle anchorPosition,
+  final Path path,
+  final Offset expansionOffset,
+  final NineGridHandle anchorPosition,
 ) {
   final Rect bounds = path.getBounds();
 

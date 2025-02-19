@@ -47,7 +47,7 @@ void showCanvasSettings(final BuildContext context) {
                       ),
                       keyboardType: TextInputType.number,
                       controller: widthController,
-                      onChanged: (String value) {
+                      onChanged: (final String value) {
                         if (layers.canvasResizeLockAspectRatio) {
                           final double width = double.tryParse(value) ??
                               double.tryParse(widthController.text)!;
@@ -79,7 +79,7 @@ void showCanvasSettings(final BuildContext context) {
                       ),
                       keyboardType: TextInputType.number,
                       controller: heightController,
-                      onChanged: (String value) {
+                      onChanged: (final String value) {
                         if (layers.canvasResizeLockAspectRatio) {
                           final double height = double.tryParse(value) ??
                               double.tryParse(heightController.text)!;

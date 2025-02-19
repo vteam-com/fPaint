@@ -22,7 +22,7 @@ import 'package:xml/xml.dart';
 Future<void> readOraFile(
   final ShellProvider shellModel,
   final LayersProvider layers,
-  String filePath,
+  final String filePath,
 ) async {
   try {
     final File oraFile = File(filePath);
@@ -46,16 +46,16 @@ Future<void> readOraFile(
 
 /// Read the file from  bytes
 Future<void> readOraFileFromBytes(
-  ShellProvider shellModel,
-  LayersProvider layers,
-  Uint8List bytes,
+  final ShellProvider shellModel,
+  final LayersProvider layers,
+  final Uint8List bytes,
 ) async {
   // Extract the ZIP contents
   final Archive archive = ZipDecoder().decodeBytes(bytes);
 
   // Find the stack.xml file
   final ArchiveFile stackFile = archive.files.firstWhere(
-    (ArchiveFile file) => file.name == 'stack.xml',
+    (final ArchiveFile file) => file.name == 'stack.xml',
     orElse: () => throw Exception('stack.xml not found in ORA file'),
   );
 
@@ -154,7 +154,7 @@ Future<void> addImageToLayer({
   try {
     final ArchiveFile? file = archive.files
         .toList()
-        .findFirstMatch((ArchiveFile f) => f.name == imageName);
+        .findFirstMatch((final ArchiveFile f) => f.name == imageName);
     if (file != null) {
       final List<int> bytes = file.content as List<int>;
       final ui.Image image = await decodeImage(bytes);
@@ -186,7 +186,7 @@ Future<void> addImageToLayer({
 /// List<int> imageData = ...; // your image data here
 /// ui.Image image = await decodeImage(imageData);
 /// ```
-Future<ui.Image> decodeImage(List<int> bytes) async {
+Future<ui.Image> decodeImage(final List<int> bytes) async {
   final Completer<ui.Image> completer = Completer<ui.Image>();
   ui.decodeImageFromList(Uint8List.fromList(bytes), completer.complete);
   return completer.future;

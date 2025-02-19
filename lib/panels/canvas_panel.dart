@@ -42,5 +42,5 @@ class CanvasPanelPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CanvasPanelPainter oldDelegate) => true;
+  bool shouldRepaint(final CanvasPanelPainter oldDelegate) => true;
 }

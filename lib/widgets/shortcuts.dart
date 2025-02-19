@@ -118,29 +118,30 @@ Widget shortCutsForMainApp(
     child: Actions(
       actions: <Type, Action<Intent>>{
         UndoIntent: CallbackAction<UndoIntent>(
-          onInvoke: (UndoIntent intent) => appModel.layersUndo(),
+          onInvoke: (final UndoIntent intent) => appModel.layersUndo(),
         ),
         RedoIntent: CallbackAction<RedoIntent>(
-          onInvoke: (RedoIntent intent) => appModel.layersRedo(),
+          onInvoke: (final RedoIntent intent) => appModel.layersRedo(),
         ),
         SaveIntent: CallbackAction<SaveIntent>(
-          onInvoke: (SaveIntent intent) async =>
+          onInvoke: (final SaveIntent intent) async =>
               await saveFile(shellModel, appModel.layers),
         ),
         CutIntent: CallbackAction<CutIntent>(
-          onInvoke: (CutIntent intent) async => appModel.regionCut(),
+          onInvoke: (final CutIntent intent) async => appModel.regionCut(),
         ),
         CopyIntent: CallbackAction<CopyIntent>(
-          onInvoke: (CopyIntent intent) async => await appModel.regionCopy(),
+          onInvoke: (final CopyIntent intent) async =>
+              await appModel.regionCopy(),
         ),
         PasteIntent: CallbackAction<PasteIntent>(
-          onInvoke: (PasteIntent intent) async => await appModel.paste(),
+          onInvoke: (final PasteIntent intent) async => await appModel.paste(),
         ),
 
         //-------------------------------------------------------------
         // toggle shell mode aka the tools
         ToggleShellModeIntent: CallbackAction<ToggleShellModeIntent>(
-          onInvoke: (ToggleShellModeIntent intent) async {
+          onInvoke: (final ToggleShellModeIntent intent) async {
             switch (shellModel.shellMode) {
               case ShellMode.hidden:
                 shellModel.shellMode = ShellMode.full;
@@ -156,7 +157,7 @@ Widget shortCutsForMainApp(
         //-------------------------------------------------------------
         // Select all
         SelectAllIntent: CallbackAction<SelectAllIntent>(
-          onInvoke: (SelectAllIntent intent) async {
+          onInvoke: (final SelectAllIntent intent) async {
             appModel.selectAll();
             appModel.selectedAction = ActionType.selector;
             return null;
@@ -166,7 +167,7 @@ Widget shortCutsForMainApp(
         //-------------------------------------------------------------
         // Escape current action
         EscapeIntent: CallbackAction<EscapeIntent>(
-          onInvoke: (EscapeIntent intent) async {
+          onInvoke: (final EscapeIntent intent) async {
             appModel.selector.clear();
             appModel.update();
             return null;
@@ -176,7 +177,7 @@ Widget shortCutsForMainApp(
         //-------------------------------------------------------------
         // Delete/Erase
         DeleteIntent: CallbackAction<DeleteIntent>(
-          onInvoke: (DeleteIntent intent) async {
+          onInvoke: (final DeleteIntent intent) async {
             appModel.regionErase();
             return null;
           },

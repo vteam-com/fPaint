@@ -14,7 +14,7 @@ import 'package:fpaint/files/assets_helper.dart';
 import 'package:fpaint/files/xcf_reader.dart';
 
 void main() {
-  testWidgets('Simply Run the app', (WidgetTester tester) async {
+  testWidgets('Simply Run the app', (final WidgetTester tester) async {
     try {
       final ByteData inputImageXcf =
           await loadBinaryFromAssets('assets/test/sample.xcf');

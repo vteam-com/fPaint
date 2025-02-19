@@ -3,9 +3,9 @@ import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 Widget colorPreviewWithTransparentPaper({
-  required bool minimal,
-  required Color color,
-  required GestureTapCallback onPressed,
+  required final bool minimal,
+  required final Color color,
+  required final GestureTapCallback onPressed,
 }) {
   return SizedBox(
     height: minimal ? 50 : 60,
@@ -50,7 +50,7 @@ class ColorPreview extends StatelessWidget {
   final bool minimal;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<String> components = getColorComponentsAsHex(colorUsed.color);
     final String alpha = components[0];
     final String red = components[1];

@@ -27,7 +27,7 @@ class TopColors extends StatelessWidget {
   final bool minimal;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final List<ColorUsage> sortedColors = sortColorByHueAndPopularity();
 
     final List<Widget> colorPreviews = sortedColors
@@ -91,7 +91,7 @@ class TopColors extends StatelessWidget {
 
     // Sort each hue group by percentage (descending), then by hue (ascending)
     for (final List<ColorUsage> group in groupedByHue.values) {
-      group.sort((ColorUsage a, ColorUsage b) {
+      group.sort((final ColorUsage a, final ColorUsage b) {
         final int percentageComparison = b.percentage.compareTo(a.percentage);
         if (percentageComparison != 0) {
           return percentageComparison;
@@ -105,15 +105,21 @@ class TopColors extends StatelessWidget {
 
     // Sort hue groups by total percentage usage (descending)
     final List<List<ColorUsage>> sortedGroups = groupedByHue.values.toList();
-    sortedGroups.sort((List<ColorUsage> a, List<ColorUsage> b) {
-      final double totalA =
-          a.fold(0, (double sum, ColorUsage item) => sum + item.percentage);
-      final double totalB =
-          b.fold(0, (double sum, ColorUsage item) => sum + item.percentage);
+    sortedGroups.sort((final List<ColorUsage> a, final List<ColorUsage> b) {
+      final double totalA = a.fold(
+        0,
+        (final double sum, final ColorUsage item) => sum + item.percentage,
+      );
+      final double totalB = b.fold(
+        0,
+        (final double sum, final ColorUsage item) => sum + item.percentage,
+      );
       return totalB.compareTo(totalA);
     });
 
     // Flatten the sorted groups into a final sorted list
-    return sortedGroups.expand((List<ColorUsage> group) => group).toList();
+    return sortedGroups
+        .expand((final List<ColorUsage> group) => group)
+        .toList();
   }
 }

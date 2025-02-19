@@ -36,7 +36,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
     currentValue = widget.initialValue.clamp(widget.minValue, widget.maxValue);
   }
 
-  void _adjustValue(double delta) {
+  void _adjustValue(final double delta) {
     setState(() {
       currentValue =
           (currentValue + delta).clamp(widget.minValue, widget.maxValue);
@@ -45,23 +45,23 @@ class _ContainerSliderState extends State<ContainerSlider> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return RawGestureDetector(
       gestures: <Type, GestureRecognizerFactory<GestureRecognizer>>{
         _HorizontalDragRecognizer:
             GestureRecognizerFactoryWithHandlers<_HorizontalDragRecognizer>(
           () => _HorizontalDragRecognizer(),
-          (_HorizontalDragRecognizer instance) {
+          (final _HorizontalDragRecognizer instance) {
             instance
-              ..onStart = (_) {
+              ..onStart = (final _) {
                 widget.onSlideStart(); // Pause reordering.
               }
-              ..onUpdate = (DragUpdateDetails details) {
+              ..onUpdate = (final DragUpdateDetails details) {
                 _adjustValue(
                   details.primaryDelta! * 0.01,
                 ); // Adjust sensitivity.
               }
-              ..onEnd = (_) {
+              ..onEnd = (final _) {
                 widget.onSlideEnd(); // Resume reordering.
                 widget.onChangeEnd(currentValue);
               };
@@ -103,7 +103,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
 
 class _HorizontalDragRecognizer extends HorizontalDragGestureRecognizer {
   @override
-  void rejectGesture(int pointer) {
+  void rejectGesture(final int pointer) {
     // Accept gesture even if it's competing with other gestures.
     acceptGesture(pointer);
   }

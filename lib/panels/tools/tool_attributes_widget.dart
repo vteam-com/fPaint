@@ -15,7 +15,7 @@ class ToolAttributeWidget extends StatelessWidget {
   final Widget? childRight;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     if (minimal && childRight == null) {
       return SizedBox(
         width: 50,

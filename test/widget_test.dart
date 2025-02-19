@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/main.dart';
 
 void main() {
-  testWidgets('Simply Run the app', (WidgetTester tester) async {
+  testWidgets('Simply Run the app', (final WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(MyApp());
     await tester.pumpAndSettle(const Duration(milliseconds: 2000));

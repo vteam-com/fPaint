@@ -59,7 +59,7 @@ class Point {
 
 final int bytesPerPixel = 4;
 
-int index(final int x, final int y, int width) {
+int index(final int x, final int y, final int width) {
   return (y * width + x) * bytesPerPixel;
 }
 
@@ -171,7 +171,7 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   // Sort each row by X to detect runs
   for (final int y in rows.keys) {
     final List<Point> rowPoints = rows[y] ?? <Point>[];
-    rowPoints.sort((Point a, Point b) => a.x.compareTo(b.x));
+    rowPoints.sort((final Point a, final Point b) => a.x.compareTo(b.x));
 
     int startX = rowPoints[0].x;
     int endX = rowPoints[0].x;
@@ -247,7 +247,7 @@ Future<ui.Image> applyColorRegionToImage({
   return await picture.toImage(image.width.toInt(), image.height.toInt());
 }
 
-void printPathCoordinates(ui.Path path) {
+void printPathCoordinates(final ui.Path path) {
   final ui.PathMetrics pathMetrics = path.computeMetrics();
   // ignore: avoid_print
   print('---------------------------------');

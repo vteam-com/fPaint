@@ -26,7 +26,7 @@ class ToolSelector extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return IconButton(
       icon: image,
       onPressed: onPressed,

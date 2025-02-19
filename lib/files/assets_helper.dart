@@ -16,17 +16,17 @@ import 'package:flutter/services.dart';
 ///
 /// final image = await loadImage('assets/my_image.png');
 ///
-Future<ui.Image> loadImageFromAssets(String assetPath) async {
+Future<ui.Image> loadImageFromAssets(final String assetPath) async {
   final AssetImage assetImage = AssetImage(assetPath);
   final Completer<ui.Image> completer = Completer<ui.Image>();
   assetImage.resolve(ImageConfiguration.empty).addListener(
         ImageStreamListener(
-          (ImageInfo info, _) => completer.complete(info.image),
+          (final ImageInfo info, final _) => completer.complete(info.image),
         ),
       );
   return completer.future;
 }
 
-Future<ByteData> loadBinaryFromAssets(String assetPath) async {
+Future<ByteData> loadBinaryFromAssets(final String assetPath) async {
   return await rootBundle.load(assetPath);
 }

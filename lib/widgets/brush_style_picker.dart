@@ -46,7 +46,7 @@ class BrushStylePickerState extends State<BrushStylePicker> {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 20,
       children: <Widget>[
-        brushStyleDropDown(_value, (BrushStyle selectedBrush) {
+        brushStyleDropDown(_value, (final BrushStyle selectedBrush) {
           setState(() {
             _value = selectedBrush;
             widget.onChanged(selectedBrush);
@@ -63,13 +63,14 @@ Widget brushStyleDropDown(
 ) {
   return DropdownButton<int>(
     value: value.index,
-    items: BrushStyle.values.map<DropdownMenuItem<int>>((BrushStyle value) {
+    items:
+        BrushStyle.values.map<DropdownMenuItem<int>>((final BrushStyle value) {
       return DropdownMenuItem<int>(
         value: value.index,
         child: Text(value.name),
       );
     }).toList(),
-    onChanged: (int? index) {
+    onChanged: (final int? index) {
       onChanged(BrushStyle.values[index!]);
     },
   );
@@ -82,7 +83,7 @@ void showBrushStylePicker(
 ) {
   showDialog<dynamic>(
     context: context,
-    builder: (BuildContext context) {
+    builder: (final BuildContext context) {
       return AlertDialog(
         title: const Text('Brush'),
         content: IntrinsicHeight(

@@ -24,7 +24,7 @@ class LayerSelector extends StatelessWidget {
   final bool allowRemoveLayer;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final LayersProvider layers = LayersProvider.of(context);
     return Container(
       margin: EdgeInsets.all(minimal ? 2 : 4),
@@ -53,9 +53,9 @@ class LayerSelector extends StatelessWidget {
   }
 
   Widget _buildForSmallSurface(
-    BuildContext context,
-    LayerProvider layer,
-    bool allowRemoveLayer,
+    final BuildContext context,
+    final LayerProvider layer,
+    final bool allowRemoveLayer,
   ) {
     final LayersProvider layers = LayersProvider.of(context);
 
@@ -86,10 +86,10 @@ class LayerSelector extends StatelessWidget {
   }
 
   Widget _buildForLargeSurface(
-    BuildContext context,
-    LayersProvider layers,
-    LayerProvider layer,
-    bool allowRemoveLayer,
+    final BuildContext context,
+    final LayersProvider layers,
+    final LayerProvider layer,
+    final bool allowRemoveLayer,
   ) {
     return Row(
       children: <Widget>[
@@ -213,8 +213,8 @@ class LayerSelector extends StatelessWidget {
   }
 
   Future<void> _handlePopupMenuSelection(
-    String value,
-    LayersProvider layers,
+    final String value,
+    final LayersProvider layers,
   ) async {
     switch (value) {
       case 'rename':
@@ -262,8 +262,8 @@ class LayerSelector extends StatelessWidget {
       children: <Widget>[
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
-          itemBuilder: (BuildContext context) => _buildPopupMenuItems(),
-          onSelected: (String value) =>
+          itemBuilder: (final BuildContext context) => _buildPopupMenuItems(),
+          onSelected: (final String value) =>
               _handlePopupMenuSelection(value, layers),
         ),
         Expanded(
@@ -301,7 +301,7 @@ class LayerSelector extends StatelessWidget {
 
     final String? newName = await showDialog<String>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
+      builder: (final BuildContext context) => AlertDialog(
         title: const Text('Layer Name'),
         content: TextField(
           controller: controller,
@@ -332,10 +332,10 @@ class LayerSelector extends StatelessWidget {
   }
 
   Widget _buildLayerControls(
-    BuildContext context,
-    LayersProvider layers,
-    LayerProvider layer,
-    bool allowRemoveLayer,
+    final BuildContext context,
+    final LayersProvider layers,
+    final LayerProvider layer,
+    final bool allowRemoveLayer,
   ) {
     return Wrap(
       alignment: WrapAlignment.center,
@@ -411,7 +411,7 @@ class LayerSelector extends StatelessWidget {
           position: const RelativeRect.fromLTRB(0, 0, 0, 0),
           items: _buildPopupMenuItems(),
           elevation: 8,
-        ).then((String? value) {
+        ).then((final String? value) {
           if (value != null) {
             _handlePopupMenuSelection(value, layers);
           }
@@ -443,8 +443,8 @@ class LayerSelector extends StatelessWidget {
         onSlideStart: () {
           // appModel.update();
         },
-        onChanged: (double value) => layer.opacity = value,
-        onChangeEnd: (double value) {
+        onChanged: (final double value) => layer.opacity = value,
+        onChangeEnd: (final double value) {
           layer.opacity = value;
           layers.update();
         },

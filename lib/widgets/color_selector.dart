@@ -29,7 +29,7 @@ class _ColorSelectorState extends State<ColorSelector> {
   late double alpha;
 
   @override
-  void didUpdateWidget(covariant ColorSelector oldWidget) {
+  void didUpdateWidget(covariant final ColorSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
     fromInputColorToHueBrightnessAndAlpha();
   }
@@ -41,7 +41,7 @@ class _ColorSelectorState extends State<ColorSelector> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const double maxHue = 359.7;
 
     if (hue > maxHue) {
@@ -73,7 +73,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                     max: maxHue,
                     divisions: 360 * 2,
                     label: hue.floor().toString(),
-                    onChanged: (double value) {
+                    onChanged: (final double value) {
                       setState(() {
                         hue = value;
                         if (brightness == 0 || brightness == 1) {
@@ -96,7 +96,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                     max: 1,
                     divisions: 100,
                     label: (brightness * 100).round().toString(),
-                    onChanged: (double value) {
+                    onChanged: (final double value) {
                       setState(() {
                         brightness = value;
                         widget
@@ -123,7 +123,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                         max: 1,
                         divisions: 100,
                         label: (alpha * 100).round().toString(),
-                        onChanged: (double value) {
+                        onChanged: (final double value) {
                           setState(() {
                             alpha = value;
                             widget.onColorChanged(
@@ -154,7 +154,7 @@ class _ColorSelectorState extends State<ColorSelector> {
 
 class HueGradientPainter extends CustomPainter {
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     const List<Color> colors = <Color>[
       Color.fromRGBO(255, 0, 0, 1), // 1 Red
       Color.fromRGBO(255, 255, 0, 1), // 2 Yellow
@@ -178,7 +178,7 @@ class HueGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  bool shouldRepaint(covariant final CustomPainter oldDelegate) {
     return false;
   }
 }
@@ -189,7 +189,7 @@ class BrightnessGradientPainter extends CustomPainter {
   final double hue;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Rect rect = Offset.zero & size;
     final Gradient gradient = LinearGradient(
       colors: <Color>[
@@ -204,7 +204,7 @@ class BrightnessGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  bool shouldRepaint(covariant final CustomPainter oldDelegate) {
     return true; // We want to repaint when the hue changes
   }
 }
@@ -216,7 +216,7 @@ class AlphaGradientPainter extends CustomPainter {
   final double brightness;
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(final Canvas canvas, final Size size) {
     final Rect rect = Offset.zero & size;
     final Gradient gradient = LinearGradient(
       colors: <Color>[
@@ -230,7 +230,7 @@ class AlphaGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+  bool shouldRepaint(covariant final CustomPainter oldDelegate) {
     return true; // We want to repaint when the hue or brightness changes
   }
 }
@@ -253,11 +253,11 @@ void showColorPicker({
 }) {
   showDialog<dynamic>(
     context: context,
-    builder: (BuildContext context) {
+    builder: (final BuildContext context) {
       return ColorPickerDialog(
         title: title,
         color: color,
-        onColorChanged: (Color color) {
+        onColorChanged: (final Color color) {
           onSelectedColor(color);
         },
       );

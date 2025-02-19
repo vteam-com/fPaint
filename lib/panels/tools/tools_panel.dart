@@ -25,7 +25,7 @@ class ToolsPanel extends StatelessWidget {
   final bool minimal;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
@@ -56,7 +56,7 @@ class ToolsPanel extends StatelessWidget {
   }
 
   List<Widget> getListOfTools(
-    BuildContext context,
+    final BuildContext context,
   ) {
     final AppProvider appProvider = AppProvider.of(context);
     final ActionType selectedTool = appProvider.selectedAction;
@@ -178,7 +178,7 @@ class ToolsPanel extends StatelessWidget {
   }
 
   List<Widget> getWidgetForSelectedTool({
-    required BuildContext context,
+    required final BuildContext context,
   }) {
     final List<Widget> widgets = <Widget>[];
     final AppProvider appModel = AppProvider.of(context, listen: true);
@@ -320,7 +320,7 @@ class ToolsPanel extends StatelessWidget {
                   value: appModel.brusSize,
                   min: min,
                   max: max,
-                  onChanged: (double value) {
+                  onChanged: (final double value) {
                     appModel.brusSize = value;
                   },
                 ),
@@ -382,7 +382,8 @@ class ToolsPanel extends StatelessWidget {
               ? null
               : ColorSelector(
                   color: appModel.brushColor,
-                  onColorChanged: (Color color) => appModel.brushColor = color,
+                  onColorChanged: (final Color color) =>
+                      appModel.brushColor = color,
                 ),
         ),
       );
@@ -411,7 +412,8 @@ class ToolsPanel extends StatelessWidget {
               ? null
               : ColorSelector(
                   color: appModel.fillColor,
-                  onColorChanged: (Color color) => appModel.fillColor = color,
+                  onColorChanged: (final Color color) =>
+                      appModel.fillColor = color,
                 ),
         ),
       );
@@ -437,7 +439,7 @@ class ToolsPanel extends StatelessWidget {
               ? null
               : TolerancePicker(
                   value: appModel.tolerance,
-                  onChanged: (int value) {
+                  onChanged: (final int value) {
                     appModel.tolerance = value;
                   },
                 ),
@@ -451,7 +453,7 @@ class ToolsPanel extends StatelessWidget {
         TopColors(
           colorUsages: layers.topColors,
           onRefresh: () => layers.evaluatTopColor(),
-          onColorPicked: (Color color) {
+          onColorPicked: (final Color color) {
             (appModel.selectedAction == ActionType.rectangle ||
                     appModel.selectedAction == ActionType.circle ||
                     appModel.selectedAction == ActionType.fill)

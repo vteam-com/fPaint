@@ -155,14 +155,14 @@ void renderLine(
   );
 }
 
-void renderRegion(final Canvas canvas, Path path, Color fillColor) {
+void renderRegion(final Canvas canvas, final Path path, final Color fillColor) {
   final Paint paint = Paint();
   paint.color = fillColor;
   paint.style = PaintingStyle.fill;
   canvas.drawPath(path, paint);
 }
 
-void renderRegionErase(final Canvas canvas, Path path) {
+void renderRegionErase(final Canvas canvas, final Path path) {
   final Paint paint = Paint();
   paint.color = const Color(0x00000000);
   paint.blendMode = BlendMode.clear;

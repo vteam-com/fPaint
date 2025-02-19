@@ -22,8 +22,8 @@ export 'package:fpaint/models/user_action.dart';
 
 class LayerProvider extends ChangeNotifier {
   LayerProvider({
-    required String name,
-    required Size size,
+    required final String name,
+    required final Size size,
     required this.onThumnailChanged,
     this.id = '',
     this.isSelected = false,
@@ -49,7 +49,7 @@ class LayerProvider extends ChangeNotifier {
   // name
   String _name;
   String get name => _name;
-  set name(String value) {
+  set name(final String value) {
     _name = value;
     notifyListeners();
   }
@@ -72,7 +72,7 @@ class LayerProvider extends ChangeNotifier {
 
   Size get size => _size;
 
-  set size(Size value) {
+  set size(final Size value) {
     _size = value;
     clearCache();
   }
@@ -86,7 +86,8 @@ class LayerProvider extends ChangeNotifier {
           await getImageColors(_cachedThumnailImage!);
 
       for (final ColorUsage colorUsage in imageColors) {
-        if (!topColorsUsed.any((ColorUsage c) => c.color == colorUsage.color)) {
+        if (!topColorsUsed
+            .any((final ColorUsage c) => c.color == colorUsage.color)) {
           topColorsUsed.add(colorUsage);
         }
       }
@@ -121,7 +122,7 @@ class LayerProvider extends ChangeNotifier {
   bool _isVisible = true;
   bool get isVisible => _isVisible;
 
-  set isVisible(bool value) {
+  set isVisible(final bool value) {
     _isVisible = value;
     clearCache();
   }
@@ -133,7 +134,7 @@ class LayerProvider extends ChangeNotifier {
 
   double get opacity => _opacity;
 
-  set opacity(double value) {
+  set opacity(final double value) {
     _opacity = value;
     clearCache();
   }
@@ -166,7 +167,7 @@ class LayerProvider extends ChangeNotifier {
   UserAction? get lastUserAction =>
       _actionStack.isEmpty ? null : _actionStack.last;
 
-  void addUserAction(UserAction userAction) {
+  void addUserAction(final UserAction userAction) {
     _actionStack.add(userAction);
     hasChanged = true;
     clearCache();
@@ -300,7 +301,7 @@ class LayerProvider extends ChangeNotifier {
   void applyAction(
     final Canvas canvas,
     final ui.Path? clipPath,
-    void Function(
+    final void Function(
       Canvas theCanvasToUse,
     ) actionFunction,
   ) {
@@ -462,7 +463,7 @@ class LayerProvider extends ChangeNotifier {
 
     final List<List<bool>> visited = List<List<bool>>.generate(
       height,
-      (int y) => List<bool>.filled(width, false),
+      (final int y) => List<bool>.filled(width, false),
     );
 
     final List<ui.Offset> queue = <Offset>[];
@@ -501,7 +502,7 @@ class LayerProvider extends ChangeNotifier {
     return getHistoryString(redoStack);
   }
 
-  String getHistoryString(List<UserAction> list) {
+  String getHistoryString(final List<UserAction> list) {
     try {
       return this.getActionsAsStrings(list, 20).join('\n');
     } catch (error) {
@@ -511,7 +512,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   List<String> getActionsAsStrings(
-    List<UserAction> list, [
+    final List<UserAction> list, [
     final int? numberOfHistoryAction,
   ]) {
     return list

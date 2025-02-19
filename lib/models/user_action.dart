@@ -45,7 +45,7 @@ enum ActionType {
   cut,
   selector;
 
-  bool isSupported(ActionOptions attribute) {
+  bool isSupported(final ActionOptions attribute) {
     return toolsSupportedAttributes[this]?.contains(attribute) ?? false;
   }
 

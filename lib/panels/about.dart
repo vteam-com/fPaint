@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-void showAboutBox(BuildContext context) {
+void showAboutBox(final BuildContext context) {
   final MediaQueryData mediaQuery = MediaQuery.of(context);
   final String screenResolution =
       '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';

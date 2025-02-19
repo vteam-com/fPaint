@@ -105,7 +105,7 @@ Future<BlendMode> showBlendModeMenu({
           position.dy + 1,
         ),
         items: supportedBlendModes.entries
-            .map((MapEntry<String, Map<String, Object>> entry) {
+            .map((final MapEntry<String, Map<String, Object>> entry) {
           final BlendMode menuFlutterBlendMode =
               (entry.value['flutterBlendMode'] as BlendMode?) ??
                   BlendMode.srcOver;
@@ -135,7 +135,7 @@ Future<BlendMode> showBlendModeMenu({
       BlendMode.srcOver;
 }
 
-String blendModeToText(BlendMode blendMode) {
+String blendModeToText(final BlendMode blendMode) {
   if (blendMode == BlendMode.srcOver) {
     return 'Normal';
   }

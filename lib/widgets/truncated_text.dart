@@ -10,7 +10,7 @@ class TruncatedTextWidget extends StatelessWidget {
   final int maxLength;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final String truncatedText = _truncateText(text);
 
     return SizedBox(
@@ -22,7 +22,7 @@ class TruncatedTextWidget extends StatelessWidget {
     );
   }
 
-  String _truncateText(String text) {
+  String _truncateText(final String text) {
     if (text.length <= maxLength) {
       return text; // No truncation needed for short texts
     }

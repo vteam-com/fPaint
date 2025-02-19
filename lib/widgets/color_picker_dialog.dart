@@ -42,7 +42,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ShellProvider shellModel = ShellProvider.of(context);
     final LayersProvider layersModel = LayersProvider.of(context);
 
@@ -112,7 +112,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               Expanded(
                 child: ColorSelector(
                   color: _currentColor,
-                  onColorChanged: (Color color) {
+                  onColorChanged: (final Color color) {
                     setState(() {
                       _currentColor = color;
                       _hexController.text = colorToHexString(color);
@@ -166,7 +166,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 layers.evaluatTopColor();
               });
             },
-            onColorPicked: (Color color) {
+            onColorPicked: (final Color color) {
               setState(() {
                 _currentColor = color;
                 _hexController.text = colorToHexString(color);
@@ -206,7 +206,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                     labelText: 'Hex Color',
                     border: OutlineInputBorder(),
                   ),
-                  onChanged: (String value) {
+                  onChanged: (final String value) {
                     try {
                       final Color color = getColorFromString(value);
                       setState(() {

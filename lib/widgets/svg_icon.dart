@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 Widget iconFromSvgAsset(
   final String assetsPathToImage, [
-  Color color = Colors.white,
+  final Color color = Colors.white,
 ]) {
   return SvgPicture.asset(
     assetsPathToImage,

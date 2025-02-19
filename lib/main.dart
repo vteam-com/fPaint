@@ -23,16 +23,16 @@ class MyApp extends StatelessWidget {
   final AppProvider appModel = AppProvider();
   final LayersProvider layersProvider = LayersProvider();
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     return MultiProvider(
       // ignore: always_specify_types
       providers: [
         // ignore: always_specify_types
-        ChangeNotifierProvider(create: (_) => shellModel),
+        ChangeNotifierProvider(create: (final _) => shellModel),
         // ignore: always_specify_types
-        ChangeNotifierProvider(create: (_) => appModel),
+        ChangeNotifierProvider(create: (final _) => appModel),
         // ignore: always_specify_types
-        ChangeNotifierProvider(create: (_) => layersProvider),
+        ChangeNotifierProvider(create: (final _) => layersProvider),
       ],
       child: MaterialApp(
         title: 'Flutter Paint App',

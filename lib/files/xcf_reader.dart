@@ -133,8 +133,9 @@ enum PropType {
 
   const PropType(this.value);
   final int value;
-  static PropType? fromValue(int value) {
-    return PropType.values.findFirstMatch((PropType e) => e.value == value);
+  static PropType? fromValue(final int value) {
+    return PropType.values
+        .findFirstMatch((final PropType e) => e.value == value);
   }
 }
 
@@ -146,7 +147,7 @@ class FileXcf {
   late final ByteData _data;
   final Map<String, dynamic> properties = <String, dynamic>{};
 
-  Future<XcfFile> readXcf(Uint8List bytes) async {
+  Future<XcfFile> readXcf(final Uint8List bytes) async {
     _data = ByteData.sublistView(bytes);
 
     // Verify XCF signature
@@ -289,12 +290,12 @@ class FileXcf {
     return xcfFile;
   }
 
-  String _readString(int length) {
+  String _readString(final int length) {
     final Uint8List bytes = _readBytes(length);
     return String.fromCharCodes(bytes);
   }
 
-  Uint8List _readBytes(int length) {
+  Uint8List _readBytes(final int length) {
     final Uint8List bytes = Uint8List(length);
     for (int i = 0; i < length; i++) {
       bytes[i] = _data.getUint8(_offset + i);
@@ -316,7 +317,7 @@ class FileXcf {
     return value;
   }
 
-  List<Map<String, dynamic>> _parseParasites(int totalSize) {
+  List<Map<String, dynamic>> _parseParasites(final int totalSize) {
     final List<Map<String, dynamic>> parasites = <Map<String, dynamic>>[];
     final int endOffset = _offset + totalSize;
 
@@ -378,7 +379,7 @@ class FileXcf {
     return name;
   }
 
-  Future<XcfPath?> readPropPath(dynamic propData) async {
+  Future<XcfPath?> readPropPath(final dynamic propData) async {
     try {
       // Read the length of PROP_PATH data
       final int length = _readUint32();
@@ -474,7 +475,7 @@ class XcfFile {
   }
 }
 
-Future<String> readProperty(ByteData buffer, int offset) async {
+Future<String> readProperty(final ByteData buffer, final int offset) async {
   final int length = buffer.getUint32(offset + 4, Endian.big);
   final Uint8List bytes =
       Uint8List.sublistView(buffer, offset + 8, offset + 8 + length);
@@ -482,8 +483,8 @@ Future<String> readProperty(ByteData buffer, int offset) async {
 }
 
 Future<XcfLayer> _readLayer(
-  ByteData buffer,
-  int offset,
+  final ByteData buffer,
+  final int offset,
 ) async {
   final XcfLayer layer = XcfLayer(
     width: buffer.getUint32(offset, Endian.big),

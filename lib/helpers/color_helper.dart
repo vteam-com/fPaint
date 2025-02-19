@@ -37,7 +37,7 @@ import 'package:fpaint/helpers/list_helper.dart';
 ///
 /// Returns:
 ///   A new `Color` object with the red component adjusted by the specified tint strength.
-Color addTintOfRed(Color originalColor, int tintStrength) {
+Color addTintOfRed(final Color originalColor, final int tintStrength) {
   // Add the tint strength to the red component
   int red = (originalColor.r * 255).toInt() + tintStrength;
 
@@ -60,7 +60,7 @@ Color addTintOfRed(Color originalColor, int tintStrength) {
 /// Returns a new [Color] object with the tint of blue added to the original color. The red and green values of the original color remain unchanged, while the blue value is increased by the [tintStrength] amount.
 /// If the resulting blue value exceeds 255, it will be clamped to 255 to ensure it stays within the valid range (0 to 255).
 ///
-Color addTintOfBlue(Color originalColor, int tintStrength) {
+Color addTintOfBlue(final Color originalColor, final int tintStrength) {
   final int red = (originalColor.r * 255).toInt();
   final int green = (originalColor.g * 255).toInt();
   int blue = (originalColor.b * 255).toInt() + tintStrength;
@@ -79,7 +79,7 @@ Color addTintOfBlue(Color originalColor, int tintStrength) {
 /// Returns a new [Color] object with the tint of green added to the original color. The red and blue values of the original color remain unchanged, while the blue value is increased by the [tintStrength] amount.
 /// If the resulting green value exceeds 255, it will be clamped to 255 to ensure it stays within the valid range (0 to 255).
 ///
-Color addTintOfGreen(Color originalColor, int tintStrength) {
+Color addTintOfGreen(final Color originalColor, final int tintStrength) {
   final int red = (originalColor.r * 255).toInt();
   int green = (originalColor.g * 255).toInt() + tintStrength;
   final int blue = (originalColor.b * 255).toInt();
@@ -91,7 +91,7 @@ Color addTintOfGreen(Color originalColor, int tintStrength) {
 }
 
 /// Adjusts the brightness of the input color to the specified value within the valid range (0.0 - 1.0).
-Color adjustBrightness(Color color, double brightness) {
+Color adjustBrightness(final Color color, double brightness) {
   // Ensure brightness is within valid range
   brightness = brightness.clamp(0.0, 1.0);
 
@@ -134,7 +134,7 @@ enum ColorState {
   quantityNegative,
 }
 
-Widget colorBox(Color color, Color colorText) {
+Widget colorBox(final Color color, final Color colorText) {
   return Container(
     color: color,
     width: 80,
@@ -157,9 +157,9 @@ Widget colorBox(Color color, Color colorText) {
 ///
 String colorToHexString(
   final Color color, {
-  bool alphaFirst = true,
-  bool includeAlpha = true,
-  String seperator = '',
+  final bool alphaFirst = true,
+  final bool includeAlpha = true,
+  final String seperator = '',
 }) {
   final List<String> components =
       getColorComponentsAsHex(color, includeAlpha, alphaFirst);
@@ -174,8 +174,8 @@ String colorToHexString(
 /// Returns an array of hexadecimal strings representing the color components.
 List<String> getColorComponentsAsHex(
   final Color color, [
-  bool includeAlpha = true,
-  bool alphaIsFirst = true,
+  final bool includeAlpha = true,
+  final bool alphaIsFirst = true,
 ]) {
   final String alpha =
       (color.a * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
@@ -214,7 +214,7 @@ String getHexOnMultiline(final Color color) {
 ///
 /// Returns the contrast color as a [Color] object.
 ///
-Color contrastColor(Color color) {
+Color contrastColor(final Color color) {
   // Calculate the luminance of the color including alpha
   final double luminance = (0.299 * (color.r * 255) +
           0.587 * (color.g * 255) +
@@ -263,13 +263,13 @@ ColorScheme getColorTheme(final BuildContext context) {
 /// @param color The color to extract the hue and brightness values from.
 /// @return A ```Pair<double, double>``` object containing the hue and brightness values.
 ///
-Pair<double, double> getHueAndBrightness(Color color) {
+Pair<double, double> getHueAndBrightness(final Color color) {
   final HSLColor hslColor = HSLColor.fromColor(color);
   return Pair<double, double>(hslColor.hue, 1 - hslColor.lightness);
 }
 
 /// Retrieves the hue and brightness values from the given Color object in the HSL color space.
-Pair<double, double> getHueAndBrightnessFromColor(Color color) {
+Pair<double, double> getHueAndBrightnessFromColor(final Color color) {
   // Convert color to HSL
   final HSLColor hslColor = HSLColor.fromColor(color);
 
@@ -281,7 +281,7 @@ Pair<double, double> getHueAndBrightnessFromColor(Color color) {
 }
 
 /// Retrieves the hue value from the given Color object in the HSL color space.
-double getHueFromColor(Color color) {
+double getHueFromColor(final Color color) {
   // Convert color to HSL
   final HSLColor hslColor = HSLColor.fromColor(color);
 
@@ -299,7 +299,7 @@ ThemeData getTheme(final BuildContext context) {
   return Theme.of(context);
 }
 
-Color hsvToColor(double hue, double brightness) {
+Color hsvToColor(final double hue, final double brightness) {
   final Color color = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor();
   return adjustBrightness(color, brightness);
 }
@@ -352,7 +352,7 @@ class ColorUsage {
   }
 }
 
-double colorDistance(Color a, Color b) {
+double colorDistance(final Color a, final Color b) {
   return sqrt(
     pow(a.r.toDouble() - b.r.toDouble(), 2) +
         pow(a.g.toDouble() - b.g.toDouble(), 2) +

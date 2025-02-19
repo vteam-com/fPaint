@@ -26,7 +26,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
   bool showCoordinate = false;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final Rect bounds = widget.path.getBounds();
     final double width = bounds.left + bounds.width + defaultHandleSize;
 
@@ -42,7 +42,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
         _buildHandle(
           position: bounds.center,
           cursor: SystemMouseCursors.move,
-          onPanUpdate: (DragUpdateDetails details) => widget.onDrag(
+          onPanUpdate: (final DragUpdateDetails details) => widget.onDrag(
             details.delta,
           ),
         ),
@@ -51,7 +51,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
         _buildHandle(
           position: bounds.topLeft,
           cursor: SystemMouseCursors.resizeUpLeft,
-          onPanUpdate: (DragUpdateDetails details) => widget.onResize(
+          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
             NineGridHandle.topLeft,
             details.delta,
           ),
@@ -61,7 +61,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
         _buildHandle(
           position: bounds.topRight,
           cursor: SystemMouseCursors.resizeUpRight,
-          onPanUpdate: (DragUpdateDetails details) => widget.onResize(
+          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
             NineGridHandle.topRight,
             details.delta,
           ),
@@ -71,7 +71,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
         _buildHandle(
           position: bounds.bottomLeft,
           cursor: SystemMouseCursors.resizeDownLeft,
-          onPanUpdate: (DragUpdateDetails details) => widget.onResize(
+          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
             NineGridHandle.bottomLeft,
             details.delta,
           ),
@@ -81,7 +81,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
         _buildHandle(
           position: bounds.bottomRight,
           cursor: SystemMouseCursors.resizeDownRight,
-          onPanUpdate: (DragUpdateDetails details) => widget.onResize(
+          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
             NineGridHandle.bottomRight,
             details.delta,
           ),
@@ -94,7 +94,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
             bounds.center.dy,
           ),
           cursor: SystemMouseCursors.resizeLeft,
-          onPanUpdate: (DragUpdateDetails details) => widget.onResize(
+          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
             NineGridHandle.left,
             details.delta,
           ),
@@ -107,7 +107,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
             bounds.center.dy,
           ),
           cursor: SystemMouseCursors.resizeRight,
-          onPanUpdate: (DragUpdateDetails details) => widget.onResize(
+          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
             NineGridHandle.right,
             details.delta,
           ),
@@ -120,7 +120,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
             bounds.top,
           ),
           cursor: SystemMouseCursors.resizeUp,
-          onPanUpdate: (DragUpdateDetails details) => widget.onResize(
+          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
             NineGridHandle.top,
             details.delta,
           ),
@@ -133,7 +133,7 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
             bounds.bottom,
           ),
           cursor: SystemMouseCursors.resizeDown,
-          onPanUpdate: (DragUpdateDetails details) => widget.onResize(
+          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
             NineGridHandle.bottom,
             details.delta,
           ),
@@ -149,9 +149,9 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
   }
 
   Widget _buildHandle({
-    required Offset position,
-    required MouseCursor cursor,
-    required void Function(DragUpdateDetails) onPanUpdate,
+    required final Offset position,
+    required final MouseCursor cursor,
+    required final void Function(DragUpdateDetails) onPanUpdate,
   }) {
     final int handleSize =
         (showCoordinate ? (defaultHandleSize * 1.5) : defaultHandleSize)
@@ -161,13 +161,13 @@ class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
       left: position.dx - (handleSize / 2),
       top: position.dy - (handleSize / 2),
       child: GestureDetector(
-        onPanUpdate: (DragUpdateDetails details) {
+        onPanUpdate: (final DragUpdateDetails details) {
           setState(() {
             showCoordinate = true;
           });
           onPanUpdate(details);
         },
-        onPanEnd: (DragEndDetails details) =>
+        onPanEnd: (final DragEndDetails details) =>
             setState(() => showCoordinate = false),
         child: MouseRegion(
           cursor: cursor,

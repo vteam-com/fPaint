@@ -16,7 +16,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
   const TopMenuAndLayersPanel({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     final ShellProvider shellModel = ShellProvider.of(context, listen: true);
 
     return Column(
@@ -56,13 +56,16 @@ class TopMenuAndLayersPanel extends StatelessWidget {
         ),
 
         Consumer<LayersProvider>(
-          builder:
-              (BuildContext context2, LayersProvider layers, Widget? child) {
+          builder: (
+            final BuildContext context2,
+            final LayersProvider layers,
+            final Widget? child,
+          ) {
             return Expanded(
               child: ReorderableListView.builder(
                 itemCount: layers.length,
                 buildDefaultDragHandles: false,
-                onReorder: (int oldIndex, int newIndex) {
+                onReorder: (final int oldIndex, int newIndex) {
                   if (newIndex > oldIndex) {
                     newIndex -= 1;
                   }
@@ -71,7 +74,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                   layers.insert(newIndex, layer);
                   layers.selectedLayerIndex = newIndex;
                 },
-                itemBuilder: (BuildContext context, int index) {
+                itemBuilder: (final BuildContext context, final int index) {
                   final LayerProvider layer = layers.get(index);
                   return ReorderableDragStartListener(
                     key: Key('$index'),
@@ -98,10 +101,10 @@ class TopMenuAndLayersPanel extends StatelessWidget {
   }
 
   PopupMenuEntry<int> buildMenuItem({
-    required int value,
-    required String text,
-    IconData? icon,
-    VoidCallback? onPressed,
+    required final int value,
+    required final String text,
+    final IconData? icon,
+    final VoidCallback? onPressed,
   }) {
     return PopupMenuItem<int>(
       value: value,
@@ -116,9 +119,9 @@ class TopMenuAndLayersPanel extends StatelessWidget {
   }
 
   Widget buildIconButton({
-    required String tooltip,
-    required IconData icon,
-    required VoidCallback onPressed,
+    required final String tooltip,
+    required final IconData icon,
+    required final VoidCallback onPressed,
   }) {
     return IconButton(
       tooltip: tooltip,
@@ -135,8 +138,9 @@ class TopMenuAndLayersPanel extends StatelessWidget {
     return PopupMenuButton<int>(
       tooltip: strings[StringId.menuTooltip],
       icon: const Icon(Icons.menu),
-      onSelected: (int result) => onDropDownMenuSelection(context, result),
-      itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
+      onSelected: (final int result) =>
+          onDropDownMenuSelection(context, result),
+      itemBuilder: (final BuildContext context) => <PopupMenuEntry<int>>[
         buildMenuItem(
           value: MenuIds.newFile,
           text: strings[StringId.startOver]!,
@@ -174,7 +178,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
 
   void onDropDownMenuSelection(
     final BuildContext context,
-    int result,
+    final int result,
   ) {
     final ShellProvider shellModel = ShellProvider.of(context);
     final LayersProvider layers = LayersProvider.of(context);
@@ -192,7 +196,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
           layers,
         ).then(
             // ignore: use_build_context_synchronously
-            (_) {
+            (final _) {
           layers.clearHasChanged();
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(

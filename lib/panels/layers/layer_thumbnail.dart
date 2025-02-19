@@ -12,10 +12,10 @@ class LayerThumbnail extends StatelessWidget {
   final LayerProvider layer;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(final BuildContext context) {
     const int patternSize = 4;
     return LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
+      builder: (final BuildContext context, final BoxConstraints constraints) {
         // Align to transparency pattern grid to ensure propre rendering of the transparency background
         final int size =
             (constraints.maxWidth / patternSize).floor() * patternSize;
