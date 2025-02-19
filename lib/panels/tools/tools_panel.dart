@@ -232,11 +232,29 @@ class ToolsPanel extends StatelessWidget {
                 },
               ),
               //
+              // Selection using Drawing
+              //
+              ToolSelector(
+                minimal: minimal,
+                name: 'Lasso',
+                image: iconFromSvgAsset(
+                  'assets/icons/lasso.svg',
+                  appModel.selector.mode == SelectorMode.lasso
+                      ? Colors.blue
+                      : IconTheme.of(context).color!,
+                ),
+                isSelected: appModel.selector.mode == SelectorMode.lasso,
+                onPressed: () {
+                  appModel.selector.mode = SelectorMode.lasso;
+                  appModel.update();
+                },
+              ),
+              //
               // Selection using magic wand
               //
               ToolSelector(
                 minimal: minimal,
-                name: 'Detect',
+                name: 'Magic',
                 image: iconAndColor(
                   appModel.selector.mode == SelectorMode.wand,
                   Icons.auto_fix_high_outlined,

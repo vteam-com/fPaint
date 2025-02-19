@@ -247,7 +247,7 @@ class MainViewState extends State<MainView> {
 
       // deal with Selector
       if (appModel.selectedAction == ActionType.selector) {
-        appModel.selectorStart(adjustedPosition);
+        appModel.selectorCreationStart(adjustedPosition);
         return;
       }
 
@@ -306,7 +306,7 @@ class MainViewState extends State<MainView> {
     if (event.buttons == 1 && _activePointerId == event.pointer) {
       // Update the Selector
       if (appModel.selectedAction == ActionType.selector) {
-        appModel.selectorMove(adjustedPosition);
+        appModel.selectorCreationAdditionalPoint(adjustedPosition);
         return;
       }
 
@@ -347,7 +347,7 @@ class MainViewState extends State<MainView> {
 
     if (_activePointerId == event.pointer) {
       if (appModel.selectedAction == ActionType.selector) {
-        appModel.selectorEnd();
+        appModel.selectorCreationEnd();
       }
       _activePointerId = -1;
       appModel.update();

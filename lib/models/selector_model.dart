@@ -7,17 +7,15 @@ export 'package:fpaint/helpers/draw_path_helper.dart';
 class SelectorModel {
   bool isVisible = false;
   SelectorMode mode = SelectorMode.rectangle;
+  List<Offset> points = <Offset>[];
   Path path = Path();
-  bool userIsCreatingTheSelector = false;
 
   Rect get boundingRect => path.getBounds();
-
-  Offset? p1;
 
   void clear() {
     this.isVisible = false;
     this.path.reset();
-    this.userIsCreatingTheSelector = false;
+    this.points.clear();
   }
 
   void translate(final Offset offset) {
@@ -38,27 +36,58 @@ class SelectorModel {
     this.path = expandPathInDirectionWithOffset(this.path, offset, handle);
   }
 
-  void addP1(Offset p1) {
+  void addP1(final Offset p1) {
     isVisible = true;
-    path = Path();
-    this.p1 = p1;
 
-    if (mode == SelectorMode.rectangle) {
-      path.addRect(Rect.fromPoints(p1, p1));
-    }
-    if (mode == SelectorMode.circle) {
-      path.addOval(Rect.fromPoints(p1, p1));
+    switch (mode) {
+      case SelectorMode.rectangle:
+        this.points.clear();
+        this.points.add(p1);
+        path = Path();
+        path.addRect(Rect.fromPoints(p1, p1));
+        break;
+
+      case SelectorMode.circle:
+        this.points.clear();
+        this.points.add(p1);
+        path = Path();
+        path.addOval(Rect.fromPoints(p1, p1));
+
+        break;
+
+      case SelectorMode.lasso:
+        points.add(p1);
+        break;
+
+      case SelectorMode.wand:
+        break;
     }
   }
 
-  void addP2(Offset p2) {
-    if (p1 != null) {
-      path = Path();
-      if (mode == SelectorMode.rectangle) {
-        path.addRect(Rect.fromPoints(p1!, p2));
-      }
-      if (mode == SelectorMode.circle) {
-        path.addOval(Rect.fromPoints(p1!, p2));
+  void addP2(final Offset p2) {
+    if (this.points.isNotEmpty) {
+      switch (mode) {
+        case SelectorMode.rectangle:
+          path = Path();
+          path.addRect(Rect.fromPoints(this.points.first, p2));
+          break;
+        case SelectorMode.circle:
+          path = Path();
+          path.addOval(Rect.fromPoints(this.points.first, p2));
+          break;
+        case SelectorMode.lasso:
+          points.add(p2);
+
+          path = Path();
+          path.moveTo(points.first.dx, points.first.dy);
+          for (final Offset point in points.skip(1)) {
+            path.lineTo(point.dx, point.dy);
+          }
+          path.close();
+          break;
+        case SelectorMode.wand:
+          // all handled on the first Touch/Click P1 gesture
+          break;
       }
     }
   }
@@ -67,5 +96,6 @@ class SelectorModel {
 enum SelectorMode {
   rectangle,
   circle,
+  lasso,
   wand,
 }

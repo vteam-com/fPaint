@@ -328,7 +328,7 @@ class AppProvider extends ChangeNotifier {
   // Selector
   SelectorModel selector = SelectorModel();
 
-  void selectorStart(final Offset position) {
+  void selectorCreationStart(final Offset position) {
     if (!selector.isVisible) {
       if (selector.mode == SelectorMode.wand) {
         getRegionPathFromLayerImage(position).then((final Region region) {
@@ -343,7 +343,7 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  void selectorMove(final Offset position) {
+  void selectorCreationAdditionalPoint(final Offset position) {
     if (selector.mode == SelectorMode.wand) {
       // Ignore since the PointerDown it already did the job of drawing the shape of the selector
     } else {
@@ -352,14 +352,13 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
-  void selectorEnd() {
-    selector.p1 = null;
+  void selectorCreationEnd() {
     update();
   }
 
   void selectAll() {
     selector.isVisible = true;
-    selectorStart(Offset.zero);
+    selectorCreationStart(Offset.zero);
     selector.path = Path();
     selector.path.addRect(
       Rect.fromPoints(Offset.zero, Offset(layers.width, layers.height)),

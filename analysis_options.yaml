@@ -34,9 +34,9 @@ linter:
     directives_ordering: true
     matching_super_parameters: true
     prefer_const_constructors: true
+    prefer_final_fields: true
     prefer_final_locals: true
     prefer_single_quotes: true
-    prefer_final_fields: true
     # public_member_api_docs: true
     require_trailing_commas: true
     sort_child_properties_last: true
