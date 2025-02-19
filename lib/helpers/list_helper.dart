@@ -67,7 +67,7 @@ List<num> getMinMaxValues(final List<double> list) {
     valueMin = list[1];
     valueMax = list[0];
 
-    for (double value in list) {
+    for (final double value in list) {
       valueMin = min(valueMin, value);
       valueMax = max(valueMax, value);
     }
@@ -245,7 +245,7 @@ extension FirWheresOrNull<T> on List<T> {
 
 String uint8ListToHex(final Uint8List list) {
   final StringBuffer hexString = StringBuffer();
-  for (int byte in list) {
+  for (final int byte in list) {
     hexString.write(byte.toRadixString(16).padLeft(2, '0'));
   }
   return hexString.toString();

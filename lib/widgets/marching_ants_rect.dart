@@ -69,7 +69,7 @@ class MarchingAntsPainter extends CustomPainter {
     const double dashSpace = 6;
     double distance = phase;
 
-    for (ui.PathMetric pathMetric in path.computeMetrics()) {
+    for (final ui.PathMetric pathMetric in path.computeMetrics()) {
       while (distance < pathMetric.length) {
         final double nextDistance = distance + dashWidth;
         dashPath.addPath(

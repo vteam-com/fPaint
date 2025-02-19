@@ -126,7 +126,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              for (Color color in <Color>[
+              for (final Color color in <Color>[
                 Colors.red,
                 Colors.orange,
                 Colors.yellow,
