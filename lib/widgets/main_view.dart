@@ -187,15 +187,27 @@ class MainViewState extends State<MainView> {
   }
 
   Widget _displayCanvas(final AppProvider appProvider) {
-    return Transform(
-      alignment: Alignment.topLeft,
-      transform: Matrix4.identity()
-        ..translate(
-          appProvider.offset.dx,
-          appProvider.offset.dy,
-        )
-        ..scale(appProvider.layers.scale),
-      child: const CanvasPanel(),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.topCenter,
+          colors: <ui.Color>[
+            Colors.grey.shade50,
+            Colors.grey.shade500,
+          ],
+          stops: <double>[0, 1],
+        ),
+      ),
+      child: Transform(
+        alignment: Alignment.topLeft,
+        transform: Matrix4.identity()
+          ..translate(
+            appProvider.offset.dx,
+            appProvider.offset.dy,
+          )
+          ..scale(appProvider.layers.scale),
+        child: const CanvasPanel(),
+      ),
     );
   }
 
