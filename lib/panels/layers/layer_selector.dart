@@ -272,6 +272,11 @@ class LayerSelector extends StatelessWidget {
           onSelected: (final String value) =>
               _handlePopupMenuSelection(value, layers),
         ),
+        if (layer.parentGroupName.isNotEmpty)
+          Opacity(
+            opacity: 0.5,
+            child: Text('${layer.parentGroupName}.'),
+          ),
         Expanded(
           child: GestureDetector(
             onLongPress: () async {

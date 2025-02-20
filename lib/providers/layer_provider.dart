@@ -25,6 +25,7 @@ class LayerProvider extends ChangeNotifier {
     required final String name,
     required final Size size,
     required this.onThumnailChanged,
+    this.parentGroupName = '',
     this.id = '',
     this.isSelected = false,
     final bool isVisible = true,
@@ -54,6 +55,7 @@ class LayerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  String parentGroupName;
   String id;
   final List<UserActionDrawing> actionStack = <UserActionDrawing>[];
   final List<UserActionDrawing> redoStack = <UserActionDrawing>[];

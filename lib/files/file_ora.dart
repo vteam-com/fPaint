@@ -27,8 +27,7 @@ Future<void> readOraFile(
   try {
     final File oraFile = File(filePath);
     if (!await oraFile.exists()) {
-      debugPrint('File not found: $filePath');
-      return;
+      throw Exception('File not found "$filePath"');
     }
 
     shellModel.loadedFileName = filePath;
@@ -50,66 +49,105 @@ Future<void> readOraFileFromBytes(
   final LayersProvider layers,
   final Uint8List bytes,
 ) async {
-  // Extract the ZIP contents
-  final Archive archive = ZipDecoder().decodeBytes(bytes);
+  try {
+    // Extract the ZIP contents
+    final Archive archive = ZipDecoder().decodeBytes(bytes);
 
-  // Find the stack.xml file
-  final ArchiveFile stackFile = archive.files.firstWhere(
-    (final ArchiveFile file) => file.name == 'stack.xml',
-    orElse: () => throw Exception('stack.xml not found in ORA file'),
-  );
+    // Find the stack.xml file
+    final ArchiveFile stackFile = archive.files.firstWhere(
+      (final ArchiveFile file) => file.name == 'stack.xml',
+      orElse: () => throw Exception('stack.xml not found in ORA file'),
+    );
 
-  // Parse the stack.xml content
-  final XmlDocument stackXml = XmlDocument.parse(
-    String.fromCharCodes(stackFile.content),
-  );
+    // Parse the stack.xml content
+    final XmlDocument xmlDoc = XmlDocument.parse(
+      String.fromCharCodes(stackFile.content),
+    );
 
-  //print(stackXml.toString());
+    // print(xmlDoc.toString());
 
-  final XmlElement? rootImage = stackXml.getElement('image');
+    await importFromOraXml(archive, layers, xmlDoc);
+  } catch (error) {
+    throw Exception('Failed to read ORA file: $error');
+  }
+}
+
+Future<void> importFromOraXml(
+  final Archive archive,
+  final LayersProvider layers,
+  final XmlDocument xmlDoc,
+) async {
+  final XmlElement? xmlElementImage = xmlDoc.getElement('image');
   layers.size = ui.Size(
-    double.parse(rootImage!.getAttribute('w')!),
-    double.parse(rootImage.getAttribute('h')!),
+    double.parse(xmlElementImage!.getAttribute('w')!),
+    double.parse(xmlElementImage.getAttribute('h')!),
   );
 
-  // Extract layers
-  for (final XmlElement xmlLayer in stackXml.findAllElements('layer')) {
-    final String name = xmlLayer.getAttribute('name') ?? 'Unnamed';
-    final String opacityAsText = xmlLayer.getAttribute('opacity') ?? '1';
-    final String visibleAsText = xmlLayer.getAttribute('visible') ?? 'true';
-    final String compositeOp =
-        xmlLayer.getAttribute('composite-op') ?? 'svg:src-over';
+  final XmlElement? xmlElementTopStack = xmlElementImage.getElement('stack');
+  await importStack(archive, layers, xmlElementTopStack);
+}
 
-    final bool preserveAlpha =
-        xmlLayer.getAttribute('alpha-preserve') == 'true';
-
-    final LayerProvider newLayer = layers.addBottom(name);
-    newLayer.isVisible = visibleAsText == 'true';
-    newLayer.opacity = double.parse(opacityAsText);
-
-    // is there an image on this layer?
-    final String? src = xmlLayer.getAttribute('src');
-    if (src != null) {
-      final String? xAsText = xmlLayer.getAttribute('x');
-      final String? yAsText = xmlLayer.getAttribute('y');
-
-      final ui.Offset offset = ui.Offset(
-        double.parse(xAsText ?? '0'),
-        double.parse(yAsText ?? '0'),
-      );
-
-      newLayer.blendMode = getBlendModeFromOraCompositOp(compositeOp);
-      newLayer.preserveAlpha = preserveAlpha;
-
-      await addImageToLayer(
-        layers: layers,
-        layer: newLayer,
-        archive: archive,
-        imageName: src,
-        offset: offset,
-      );
+Future<void> importStack(
+  final Archive archive,
+  final LayersProvider layers,
+  final XmlElement? xmlElementTopStack,
+) async {
+  if (xmlElementTopStack != null) {
+    final String stackName = xmlElementTopStack.getAttribute('name') ?? '';
+    for (final XmlElement xmlElementchild in xmlElementTopStack.childElements) {
+      if (xmlElementchild.localName == 'stack') {
+        await importStack(archive, layers, xmlElementchild);
+      } else {
+        if (xmlElementchild.localName == 'layer') {
+          await addLayer(archive, layers, stackName, xmlElementchild);
+        }
+      }
     }
   }
+}
+
+Future<void> addLayer(
+  final Archive archive,
+  final LayersProvider layers,
+  final String stackName,
+  final XmlElement xmlLayer,
+) async {
+  final String name = xmlLayer.getAttribute('name') ?? 'Unnamed';
+  final String opacityAsText = xmlLayer.getAttribute('opacity') ?? '1';
+  final String visibleAsText = xmlLayer.getAttribute('visible') ?? 'true';
+  final String compositeOp =
+      xmlLayer.getAttribute('composite-op') ?? 'svg:src-over';
+
+  final bool preserveAlpha = xmlLayer.getAttribute('alpha-preserve') == 'true';
+
+  final LayerProvider newLayer = layers.addBottom(name);
+  newLayer.parentGroupName = stackName;
+  newLayer.isVisible = visibleAsText == 'true';
+  newLayer.opacity = double.parse(opacityAsText);
+
+  // is there an image on this layer?
+  final String? src = xmlLayer.getAttribute('src');
+  if (src != null) {
+    final String? xAsText = xmlLayer.getAttribute('x');
+    final String? yAsText = xmlLayer.getAttribute('y');
+
+    final ui.Offset offset = ui.Offset(
+      double.parse(xAsText ?? '0'),
+      double.parse(yAsText ?? '0'),
+    );
+
+    newLayer.blendMode = getBlendModeFromOraCompositOp(compositeOp);
+    newLayer.preserveAlpha = preserveAlpha;
+
+    await addImageToLayer(
+      archive: archive,
+      layers: layers,
+      layer: newLayer,
+      imageName: src,
+      offset: offset,
+    );
+  }
+  return;
 }
 
 ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
@@ -239,6 +277,7 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
     );
 
     layersData.add(<String, dynamic>{
+      'parentGroupName': layer.parentGroupName,
       'name': layer.name,
       'visibility': layer.isVisible ? 'visible' : 'hidden',
       'opacity': layer.opacity.toStringAsFixed(5),
@@ -266,19 +305,38 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
       builder.element(
         'stack',
         nest: () {
+          final Map<String, List<Map<String, dynamic>>> groupedLayers =
+              <String, List<Map<String, dynamic>>>{};
+          final List<Map<String, dynamic>> ungroupedLayers =
+              <Map<String, dynamic>>[];
+
           for (final Map<String, dynamic> layerData in layersData) {
+            final String parentGroupNameOfLayer =
+                layerData['parentGroupName'] as String? ?? '';
+
+            if (parentGroupNameOfLayer.isNotEmpty) {
+              groupedLayers
+                  .putIfAbsent(
+                    parentGroupNameOfLayer,
+                    () => <Map<String, dynamic>>[],
+                  )
+                  .add(layerData);
+            } else {
+              ungroupedLayers.add(layerData);
+            }
+          }
+
+          for (final String groupName in groupedLayers.keys) {
             builder.element(
-              'layer',
+              'stack',
               nest: () {
-                builder.attribute('name', layerData['name']);
-                builder.attribute('visibility', layerData['visibility']);
-                builder.attribute('opacity', layerData['opacity']);
-                builder.attribute('src', layerData['src']);
-                builder.attribute('x', layerData['x']);
-                builder.attribute('y', layerData['y']);
+                builder.attribute('name', groupName);
+                buildLayers(builder, groupedLayers[groupName]!);
               },
             );
           }
+
+          buildLayers(builder, ungroupedLayers);
         },
       );
     },
@@ -297,4 +355,23 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
   // Write archive to file
   final List<int> encodedData = ZipEncoder().encode(archive);
   return encodedData;
+}
+
+void buildLayers(
+  final XmlBuilder builder,
+  final List<Map<String, dynamic>> layersData,
+) {
+  for (final Map<String, dynamic> layerData in layersData) {
+    builder.element(
+      'layer',
+      nest: () {
+        builder.attribute('name', layerData['name']);
+        builder.attribute('visibility', layerData['visibility']);
+        builder.attribute('opacity', layerData['opacity']);
+        builder.attribute('src', layerData['src']);
+        builder.attribute('x', layerData['x']);
+        builder.attribute('y', layerData['y']);
+      },
+    );
+  }
 }
