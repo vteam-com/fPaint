@@ -98,8 +98,8 @@ Future<void> onFileOpen(final BuildContext context) async {
   try {
     final FilePickerResult? result = await FilePicker.platform.pickFiles(
       dialogTitle: 'fPaint Load Image',
-      type: FileType.custom,
-      allowedExtensions: supportedImageFileExtensions,
+      // type: FileType.custom,
+      // allowedExtensions: supportedImageFileExtensions,
       allowMultiple: false,
       withData: true,
       lockParentWindow: true,
