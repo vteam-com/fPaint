@@ -270,7 +270,7 @@ class MainViewState extends State<MainView> {
         return;
       }
 
-      appModel.addActionToSelectedLayer(
+      appModel.recordExecuteDrawingActionToSelectedLayer(
         action: UserActionDrawing(
           action: appModel.selectedAction,
           positions: <ui.Offset>[adjustedPosition, adjustedPosition],

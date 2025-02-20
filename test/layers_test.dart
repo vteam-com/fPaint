@@ -36,7 +36,7 @@ void main() {
         ),
         fillColor: Colors.transparent,
       );
-      layer.addUserAction(userAction);
+      layer.appendDrawingAction(userAction);
       expect(layer.count, 1);
       expect(layer.isEmpty, false);
       expect(layer.lastUserAction, userAction);
@@ -52,7 +52,7 @@ void main() {
         ),
         fillColor: Colors.transparent,
       );
-      layer.addUserAction(userAction);
+      layer.appendDrawingAction(userAction);
       layer.undo();
       expect(layer.count, 0);
       expect(layer.redoStack.length, 1);
@@ -84,7 +84,7 @@ void main() {
         ),
         fillColor: Colors.transparent,
       );
-      layer.addUserAction(userAction);
+      layer.appendDrawingAction(userAction);
       layer.lastActionUpdatePosition(const Offset(2, 2));
       expect(layer.lastUserAction?.positions.last, const Offset(2, 2));
     });

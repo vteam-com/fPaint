@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/layer_provider.dart';
+import 'package:fpaint/providers/undo_provider.dart';
 import 'package:provider/provider.dart';
 
 // Exports
@@ -223,6 +224,56 @@ class LayersProvider extends ChangeNotifier {
     if (isIndexInRange(index)) {
       _list.removeAt(index);
     }
+  }
+
+  void mergeLayers(final int indexFrom, final int indexTo) {
+    if (indexFrom == indexTo) {
+      // nothing to merge
+      return;
+    }
+
+    final UndoProvider undoProvider = UndoProvider();
+
+    final int currentSelectedIndex = this.selectedLayerIndex;
+    final LayerProvider layerFrom = this.get(indexFrom);
+
+    final LayerProvider layerTo = this.get(indexTo);
+
+    final List<UserActionDrawing> actionsToAppend =
+        List<UserActionDrawing>.from(layerFrom.actionStack);
+
+    final int numberOfActionAdded = actionsToAppend.length;
+
+    undoProvider.executeAction(
+      name: 'Merge Layer',
+      forward: () {
+        // Step 1 - Merge 2 layers
+        layerTo.actionStack.addAll(actionsToAppend);
+        layerTo.hasChanged = true;
+
+        // Step 2 - Remove Layer
+        this.remove(layerFrom);
+
+        layerTo.clearCache();
+      },
+      backward: () {
+        // Step 1 - restore the delete layer that was merged
+        this.insert(currentSelectedIndex, layerFrom);
+
+        // Step 2 -
+        for (int i = 0; i < numberOfActionAdded; i++) {
+          layerTo.actionStack.removeLast();
+        }
+        // Step 3 - restore original selected layer
+        this.selectedLayerIndex = currentSelectedIndex;
+
+        layerFrom.clearCache();
+        layerFrom.hasChanged = true;
+
+        layerTo.clearCache();
+        layerTo.hasChanged = true;
+      },
+    );
   }
 
   List<LayerProvider> get list => _list;

@@ -118,10 +118,10 @@ Widget shortCutsForMainApp(
     child: Actions(
       actions: <Type, Action<Intent>>{
         UndoIntent: CallbackAction<UndoIntent>(
-          onInvoke: (final UndoIntent intent) => appModel.layersUndo(),
+          onInvoke: (final UndoIntent intent) => appModel.undoAction(),
         ),
         RedoIntent: CallbackAction<RedoIntent>(
-          onInvoke: (final RedoIntent intent) => appModel.layersRedo(),
+          onInvoke: (final RedoIntent intent) => appModel.redoAction(),
         ),
         SaveIntent: CallbackAction<SaveIntent>(
           onInvoke: (final SaveIntent intent) async =>

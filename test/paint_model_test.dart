@@ -28,7 +28,7 @@ void main() {
         ),
         fillColor: Colors.black,
       );
-      appProvider.addActionToSelectedLayer(action: shape);
+      appProvider.recordExecuteDrawingActionToSelectedLayer(action: shape);
       expect(
         appProvider.layers.selectedLayer.count,
         1,
@@ -77,13 +77,14 @@ void main() {
         colorBrush: Colors.black,
       );
       expect(appProvider.layers.selectedLayer.count, 1);
-      appProvider.layersUndo();
+      appProvider.undoAction();
       expect(appProvider.layers.selectedLayer.count, 0);
-      appProvider.layersUndo();
+
+      appProvider.undoAction();
       expect(appProvider.layers.selectedLayer.isEmpty, true);
 
       // opne more time to check if undo work when there is nothing to undo
-      appProvider.layersUndo();
+      appProvider.undoAction();
       expect(appProvider.layers.selectedLayer.isEmpty, true);
     });
 
@@ -104,7 +105,7 @@ void main() {
         colorBrush: Colors.black,
       );
       expect(appProvider.layers.selectedLayer.count, 2);
-      appProvider.layersUndo();
+      appProvider.undoAction();
       expect(appProvider.layers.selectedLayer.count, 1);
       expect(
         appProvider.layers.selectedLayer.lastUserAction!.action,

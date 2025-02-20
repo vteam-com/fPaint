@@ -11,6 +11,7 @@ digraph "" {
   "/test/file_xcf_test.dart" [label="file_xcf_test"];
   "/test/layers_test.dart" [label="layers_test"];
   "/lib/providers/layer_provider.dart" [label="layer_provider"];
+  "/lib/providers/undo_provider.dart" [label="undo_provider"];
   "/lib/providers/shell_provider.dart" [label="shell_provider"];
   "/lib/providers/app_provider.dart" [label="app_provider"];
   "/lib/providers/layers_provider.dart" [label="layers_provider"];
@@ -95,6 +96,7 @@ digraph "" {
       subgraph "cluster~/lib/providers" {
         label="providers";
         "/lib/providers/layer_provider.dart";
+        "/lib/providers/undo_provider.dart";
         "/lib/providers/shell_provider.dart";
         "/lib/providers/app_provider.dart";
         "/lib/providers/layers_provider.dart";
@@ -190,11 +192,13 @@ digraph "" {
   "/lib/providers/app_provider.dart" -> "/lib/models/selector_model.dart";
   "/lib/providers/app_provider.dart" -> "/lib/panels/tools/flood_fill.dart";
   "/lib/providers/app_provider.dart" -> "/lib/providers/layers_provider.dart";
+  "/lib/providers/app_provider.dart" -> "/lib/providers/undo_provider.dart";
   "/lib/providers/app_provider.dart" -> "/lib/providers/layers_provider.dart" [style=dashed];
   "/lib/providers/layers_provider.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/providers/layers_provider.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/providers/layers_provider.dart" -> "/lib/models/canvas_resize.dart";
   "/lib/providers/layers_provider.dart" -> "/lib/providers/layer_provider.dart";
+  "/lib/providers/layers_provider.dart" -> "/lib/providers/undo_provider.dart";
   "/lib/providers/layers_provider.dart" -> "/lib/providers/layer_provider.dart" [style=dashed];
   "/lib/panels/tools/flood_fill.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/models/selector_model.dart";
@@ -212,6 +216,7 @@ digraph "" {
   "/lib/panels/layers/layer_selector.dart" -> "/lib/panels/layers/blend_mode.dart";
   "/lib/panels/layers/layer_selector.dart" -> "/lib/panels/layers/layer_thumbnail.dart";
   "/lib/panels/layers/layer_selector.dart" -> "/lib/providers/layers_provider.dart";
+  "/lib/panels/layers/layer_selector.dart" -> "/lib/providers/undo_provider.dart";
   "/lib/panels/layers/layer_selector.dart" -> "/lib/widgets/color_preview.dart";
   "/lib/panels/layers/layer_selector.dart" -> "/lib/widgets/color_selector.dart";
   "/lib/panels/layers/layer_selector.dart" -> "/lib/widgets/container_slider.dart";
@@ -246,6 +251,7 @@ digraph "" {
   "/lib/main.dart" -> "/lib/main_screen.dart";
   "/lib/main.dart" -> "/lib/providers/app_provider.dart";
   "/lib/main.dart" -> "/lib/providers/shell_provider.dart";
+  "/lib/main.dart" -> "/lib/providers/undo_provider.dart";
   "/lib/main.dart" -> "/lib/widgets/shortcuts.dart";
   "/lib/files/xcf_reader.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/files/export_download_web.dart" -> "/lib/files/file_jpeg.dart";

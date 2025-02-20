@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/provider.dart';
 
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
   final ShellProvider shellModel = ShellProvider();
   final AppProvider appModel = AppProvider();
   final LayersProvider layersProvider = LayersProvider();
+  final UndoProvider undoProvider = UndoProvider();
   @override
   Widget build(final BuildContext context) {
     return MultiProvider(
@@ -36,6 +38,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (final _) => appModel),
         // ignore: always_specify_types
         ChangeNotifierProvider(create: (final _) => layersProvider),
+        // ignore: always_specify_types
+        ChangeNotifierProvider(create: (final _) => undoProvider),
       ],
       child: MaterialApp(
         title: 'Flutter Paint App',

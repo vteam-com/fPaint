@@ -64,7 +64,7 @@ class LayerProvider extends ChangeNotifier {
 
   ///-------------------------------------------
   /// Modifed state
-  bool hasChanged = true;
+  bool hasChanged = false;
   final Debouncer _debounceTimer = Debouncer();
   final void Function() onThumnailChanged;
   //---------------------------------------------
@@ -168,7 +168,7 @@ class LayerProvider extends ChangeNotifier {
   UserActionDrawing? get lastUserAction =>
       actionStack.isEmpty ? null : actionStack.last;
 
-  void addUserAction(final UserActionDrawing userAction) {
+  void appendDrawingAction(final UserActionDrawing userAction) {
     actionStack.add(userAction);
     hasChanged = true;
     clearCache();
@@ -196,7 +196,8 @@ class LayerProvider extends ChangeNotifier {
       image: imageToAdd,
     );
 
-    this.addUserAction(newAction);
+    this.appendDrawingAction(newAction);
+
     return newAction;
   }
 
@@ -224,22 +225,6 @@ class LayerProvider extends ChangeNotifier {
       hasChanged = true;
       clearCache();
     }
-  }
-
-  void regionCut(final ui.Path path) {
-    addUserAction(
-      UserActionDrawing(
-        action: ActionType.cut,
-        positions: <ui.Offset>[],
-        path: Path.from(path),
-      ),
-    );
-    clearCache();
-  }
-
-  void mergeFrom(final LayerProvider layerToMerge) {
-    actionStack.addAll(layerToMerge.actionStack);
-    clearCache();
   }
 
   //------------------------------------------------------
@@ -502,34 +487,5 @@ class LayerProvider extends ChangeNotifier {
     }
 
     return path;
-  }
-
-  String getHistoryStringForUndo() {
-    return getHistoryString(actionStack);
-  }
-
-  String getHistoryStringForRedo() {
-    return getHistoryString(redoStack);
-  }
-
-  String getHistoryString(final List<UserActionDrawing> list) {
-    try {
-      return this.getActionsAsStrings(list, 20).join('\n');
-    } catch (error) {
-      debugPrint(error.toString());
-      return 'error';
-    }
-  }
-
-  List<String> getActionsAsStrings(
-    final List<UserActionDrawing> list, [
-    final int? numberOfHistoryAction,
-  ]) {
-    return list
-        .take(numberOfHistoryAction ?? list.length)
-        .map((final UserActionDrawing action) => action.toString())
-        .toList()
-        .reversed
-        .toList();
   }
 }

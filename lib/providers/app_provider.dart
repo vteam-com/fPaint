@@ -8,6 +8,7 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/providers/undo_provider.dart';
 import 'package:provider/provider.dart';
 
 // Exports
@@ -23,6 +24,10 @@ class AppProvider extends ChangeNotifier {
   AppProvider() {
     this.canvasClear(layers.size);
   }
+
+  final UndoProvider _undoProvider = UndoProvider();
+
+  UndoProvider get undoProvider => _undoProvider;
 
   /// Gets the [AppProvider] instance from the provided [BuildContext].
   ///
@@ -57,8 +62,13 @@ class AppProvider extends ChangeNotifier {
 
   void regionErase() {
     if (selector.path1 != null) {
-      layers.selectedLayer.regionCut(selector.path1!);
-      update();
+      recordExecuteDrawingActionToSelectedLayer(
+        action: UserActionDrawing(
+          action: ActionType.cut,
+          positions: <ui.Offset>[],
+          path: Path.from(selector.path1!),
+        ),
+      );
     }
   }
 
@@ -104,15 +114,30 @@ class AppProvider extends ChangeNotifier {
     if (image == null) {
       return;
     }
+    final int currentIndex = layers.selectedLayerIndex;
+    int newLayerIndex = -1;
 
-    final LayerProvider newLayerForPatedImage = layers.addTop('Pasted');
-    newLayerForPatedImage.addImage(
-      imageToAdd: image,
-      offset: const Offset(0, 0),
+    _undoProvider.executeAction(
+      name: 'Paste',
+      forward: () {
+        final LayerProvider newLayerForPatedImage = layers.addTop('Pasted');
+        newLayerIndex = layers.getLayerIndex(newLayerForPatedImage);
+        newLayerForPatedImage.addImage(
+          imageToAdd: image,
+          offset: const Offset(0, 0),
+        );
+        // Add the pasted image to the selected layer
+        update();
+      },
+      backward: () {
+        // Step 1
+        layers.removeByIndex(newLayerIndex);
+
+        // Step 2 -restore the selected layer
+        layers.selectedLayerIndex = currentIndex;
+        update();
+      },
     );
-
-    // Add the pasted image to the selected layer
-    update();
   }
 
   bool get canvasResizeLockAspectRatio => layers.canvasResizeLockAspectRatio;
@@ -140,23 +165,29 @@ class AppProvider extends ChangeNotifier {
   // All things Layers
   LayersProvider layers = LayersProvider(); // this is a singleton
 
-  void addActionToSelectedLayer({
+  void recordExecuteDrawingActionToSelectedLayer({
     required final UserActionDrawing action,
   }) {
     if (selector.isVisible) {
       action.clipPath = selector.path1;
     }
-    layers.selectedLayer.addUserAction(action);
+
+    _undoProvider.executeAction(
+      name: action.action.name,
+      forward: () => layers.selectedLayer.appendDrawingAction(action),
+      backward: () => layers.selectedLayer.undo(),
+    );
+
     update();
   }
 
-  void layersUndo() {
-    layers.selectedLayer.undo();
+  void undoAction() {
+    _undoProvider.undo();
     update();
   }
 
-  void layersRedo() {
-    layers.selectedLayer.redo();
+  void redoAction() {
+    _undoProvider.redo();
     update();
   }
 
@@ -229,8 +260,8 @@ class AppProvider extends ChangeNotifier {
         type != null &&
         colorFill != null &&
         colorBrush != null) {
-      layers.selectedLayer.addUserAction(
-        UserActionDrawing(
+      recordExecuteDrawingActionToSelectedLayer(
+        action: UserActionDrawing(
           positions: <ui.Offset>[start, end],
           action: type,
           brush: MyBrush(
@@ -251,8 +282,8 @@ class AppProvider extends ChangeNotifier {
   }
 
   void appendLineFromLastUserAction(final Offset positionEndOfNewLine) {
-    layers.selectedLayer.addUserAction(
-      UserActionDrawing(
+    recordExecuteDrawingActionToSelectedLayer(
+      action: UserActionDrawing(
         positions: <ui.Offset>[
           layers.selectedLayer.lastUserAction!.positions.last,
           positionEndOfNewLine,
@@ -274,18 +305,18 @@ class AppProvider extends ChangeNotifier {
 
     final ui.Rect bounds = path.getBounds();
 
-    this.layers.selectedLayer.addUserAction(
-          UserActionDrawing(
-            action: ActionType.region,
-            path: path,
-            positions: <ui.Offset>[
-              bounds.topLeft,
-              bounds.bottomRight,
-            ],
-            fillColor: this.fillColor,
-            clipPath: selector.isVisible ? selector.path1 : null,
-          ),
-        );
+    recordExecuteDrawingActionToSelectedLayer(
+      action: UserActionDrawing(
+        action: ActionType.region,
+        path: path,
+        positions: <ui.Offset>[
+          bounds.topLeft,
+          bounds.bottomRight,
+        ],
+        fillColor: this.fillColor,
+        clipPath: selector.isVisible ? selector.path1 : null,
+      ),
+    );
 
     update();
   }

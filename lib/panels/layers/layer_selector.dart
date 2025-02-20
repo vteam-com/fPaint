@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/container_slider.dart';
@@ -404,27 +405,32 @@ class LayerSelector extends StatelessWidget {
 
   // Method to insert a new layer above the currently selected one
   void _onAddLayer(final LayersProvider layers) {
+    final UndoProvider undoProvider = UndoProvider();
+
     final int currentIndex = layers.selectedLayerIndex;
-    final LayerProvider newLayer = layers.insertAt(currentIndex);
-    layers.selectedLayerIndex = layers.getLayerIndex(newLayer);
+
+    undoProvider.executeAction(
+      name: 'Add Layer',
+      forward: () {
+        // Add
+        final LayerProvider newLayer = layers.insertAt(currentIndex);
+        // Change selected layer to the new added layer
+        layers.selectedLayerIndex = layers.getLayerIndex(newLayer);
+      },
+      backward: () {
+        layers.removeByIndex(currentIndex);
+        layers.selectedLayerIndex = currentIndex;
+      },
+    );
   }
 
   // Method to flatten all layers
   void _onMergeLayer(
     final LayersProvider layers,
-    final int layerIndexToMerge,
-    final int layerIndexToMergIn,
+    final int indexFrom,
+    final int indexTo,
   ) {
-    final LayerProvider layerToMege = layers.get(layerIndexToMerge);
-    final LayerProvider receivingLayer = layers.get(layerIndexToMergIn);
-
-    receivingLayer.mergeFrom(layerToMege);
-    layers.remove(layerToMege);
-    if (layerIndexToMergIn > layerIndexToMerge) {
-      layers.selectedLayerIndex = layerIndexToMergIn - 1;
-    } else {
-      layers.selectedLayerIndex = layerIndexToMergIn;
-    }
+    layers.mergeLayers(indexFrom, indexTo);
   }
 
   Widget _buildThumbnailPreviewAndVisibility(
