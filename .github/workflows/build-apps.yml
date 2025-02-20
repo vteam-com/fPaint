@@ -84,7 +84,10 @@ jobs:
           path: build/macos/Build/Products/Release/
 
   cleanup_artifacts:
-    needs: build
+    needs:
+      - build_windows
+      - build_linux
+      - build_macos
     runs-on: ubuntu-latest
     steps:
       - name: List Artifacts
