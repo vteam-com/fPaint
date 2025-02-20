@@ -85,9 +85,9 @@ jobs:
 
   cleanup_artifacts:
     needs:
-      - build_windows
-      - build_linux
-      - build_macos
+      - build-windows
+      - build-linux
+      - build-macos
     runs-on: ubuntu-latest
     steps:
       - name: List Artifacts
