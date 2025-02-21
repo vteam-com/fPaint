@@ -6,15 +6,15 @@ import 'package:fpaint/providers/shell_provider.dart';
 /// including buttons for undo, redo, zoom in, zoom out,
 ///  and a button that displays the current zoom level and canvas size.
 Widget floatingActionButtons(
-  final ShellProvider shellModel,
-  final AppProvider appModel,
+  final ShellProvider shellProvider,
+  final AppProvider appProvider,
 ) {
   final FloatingActionButton undoButton = FloatingActionButton(
     backgroundColor: Colors.grey.shade600,
     foregroundColor: Colors.white,
-    tooltip: appModel.undoProvider.getHistoryStringForUndo(),
+    tooltip: appProvider.undoProvider.getHistoryStringForUndo(),
     onPressed: () {
-      Future<void>.microtask(() => appModel.undoAction());
+      Future<void>.microtask(() => appProvider.undoAction());
     },
     child: const Icon(Icons.undo),
   );
@@ -22,17 +22,17 @@ Widget floatingActionButtons(
   final FloatingActionButton redo = FloatingActionButton(
     backgroundColor: Colors.grey.shade600,
     foregroundColor: Colors.white,
-    tooltip: appModel.undoProvider.getHistoryStringForRedo(),
+    tooltip: appProvider.undoProvider.getHistoryStringForRedo(),
     onPressed: () {
-      Future<void>.microtask(() => appModel.redoAction());
+      Future<void>.microtask(() => appProvider.redoAction());
     },
     child: const Icon(Icons.redo),
   );
 
   Color colorBackground = Colors.grey.shade600;
   final Color colorForegound = Colors.white;
-  if (shellModel.deviceSizeSmall) {
-    if (appModel.showMenu) {
+  if (shellProvider.deviceSizeSmall) {
+    if (appProvider.showMenu) {
       colorBackground = Colors.blue;
     }
     return Row(
@@ -40,18 +40,18 @@ Widget floatingActionButtons(
       crossAxisAlignment: CrossAxisAlignment.end,
       spacing: 5,
       children: <Widget>[
-        if (!appModel.showMenu) undoButton,
-        if (!appModel.showMenu) redo,
+        if (!appProvider.showMenu) undoButton,
+        if (!appProvider.showMenu) redo,
         FloatingActionButton(
           backgroundColor: colorBackground,
           foregroundColor: colorForegound,
           tooltip: 'Menu',
           onPressed: () {
-            shellModel.showMenu = !shellModel.showMenu;
-            shellModel.isSidePanelExpanded = true;
+            shellProvider.showMenu = !shellProvider.showMenu;
+            shellProvider.isSidePanelExpanded = true;
           },
           child: Icon(
-            appModel.showMenu
+            appProvider.showMenu
                 ? Icons.double_arrow_rounded
                 : Icons.more_vert_outlined,
           ),
@@ -71,9 +71,9 @@ Widget floatingActionButtons(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
         onPressed: () {
-          appModel.layers.scale =
-              ((appModel.layers.scale * 10).ceil() + 1) / 10;
-          appModel.update();
+          appProvider.layers.scale =
+              ((appProvider.layers.scale * 10).ceil() + 1) / 10;
+          appProvider.update();
         },
         child: const Icon(Icons.zoom_in),
       ),
@@ -83,11 +83,11 @@ Widget floatingActionButtons(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
         onPressed: () {
-          shellModel.canvasPlacement = CanvasAutoPlacement.fit;
-          appModel.update();
+          shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
+          appProvider.update();
         },
         child: Text(
-          '${(appModel.layers.scale * 100).toInt()}%\n${appModel.layers.size.width.toInt()}\n${appModel.layers.size.height.toInt()}',
+          '${(appProvider.layers.scale * 100).toInt()}%\n${appProvider.layers.size.width.toInt()}\n${appProvider.layers.size.height.toInt()}',
           textAlign: TextAlign.right,
           style: TextStyle(
             color: colorForegound,
@@ -102,9 +102,9 @@ Widget floatingActionButtons(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
         onPressed: () {
-          appModel.layers.scale =
-              ((appModel.layers.scale * 10).floor() - 1) / 10;
-          appModel.update();
+          appProvider.layers.scale =
+              ((appProvider.layers.scale * 10).floor() - 1) / 10;
+          appProvider.update();
         },
         child: const Icon(Icons.zoom_out),
       ),

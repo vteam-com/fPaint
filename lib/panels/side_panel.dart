@@ -19,7 +19,7 @@ class SidePanel extends StatefulWidget {
 class _SidePanelState extends State<SidePanel> {
   @override
   Widget build(final BuildContext context) {
-    final ShellProvider shellModel = ShellProvider.of(context);
+    final ShellProvider shellProvider = ShellProvider.of(context);
 
     return Material(
       color: Colors.grey.shade800,
@@ -50,7 +50,7 @@ class _SidePanelState extends State<SidePanel> {
               builder: (final BuildContext context, final Area area) => Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ToolsPanel(
-                  minimal: !shellModel.isSidePanelExpanded,
+                  minimal: !shellProvider.isSidePanelExpanded,
                 ),
               ),
             ),

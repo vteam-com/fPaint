@@ -9,9 +9,9 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
 Future<void> onFileNew(final BuildContext context) async {
-  final AppProvider appModel = AppProvider.of(context);
+  final AppProvider appProvider = AppProvider.of(context);
 
-  if (appModel.layers.hasChanged &&
+  if (appProvider.layers.hasChanged &&
       await confirmDiscardCurrentWork(context) == false) {
     return;
   }
@@ -72,7 +72,7 @@ Future<void> onFileNew(final BuildContext context) async {
     );
 
     if (canvasSize != null) {
-      appModel.canvasClear(canvasSize);
+      appProvider.canvasClear(canvasSize);
     }
   }
 }
@@ -88,7 +88,7 @@ Future<void> onFileNew(final BuildContext context) async {
 /// Returns:
 /// - A `Future<void>` indicating the completion of the file open operation.
 Future<void> onFileOpen(final BuildContext context) async {
-  final ShellProvider shellModel = ShellProvider.of(context);
+  final ShellProvider shellProvider = ShellProvider.of(context);
   final LayersProvider layers = LayersProvider.of(context);
 
   if (layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
@@ -111,7 +111,7 @@ Future<void> onFileOpen(final BuildContext context) async {
       if (kIsWeb) {
         final Uint8List bytes = result.files.single.bytes!;
         if (result.files.single.extension == 'ora') {
-          await readOraFileFromBytes(shellModel, layers, bytes);
+          await readOraFileFromBytes(shellProvider, layers, bytes);
         } else if (isFileExtensionSupported(
           result.files.single.extension ?? '',
         )) {
@@ -119,11 +119,11 @@ Future<void> onFileOpen(final BuildContext context) async {
         }
       } else {
         final String path = result.files.single.path!;
-        shellModel.loadedFileName = path;
+        shellProvider.loadedFileName = path;
         if (result.files.single.extension == 'xcf') {
           // TODO
         } else if (result.files.single.extension == 'ora') {
-          await readOraFile(shellModel, layers, path);
+          await readOraFile(shellProvider, layers, path);
         } else if (isFileExtensionSupported(
           result.files.single.extension ?? '',
         )) {

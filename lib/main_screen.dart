@@ -19,16 +19,16 @@ class MainScreen extends StatelessWidget {
   Widget build(final BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-    final AppProvider appModel = AppProvider.of(context, listen: true);
-    final ShellProvider shellModel = ShellProvider.of(context, listen: true);
-    final ShellMode shellMode = shellModel.shellMode;
+    final AppProvider appProvider = AppProvider.of(context, listen: true);
+    final ShellProvider shellProvider = ShellProvider.of(context, listen: true);
+    final ShellMode shellMode = shellProvider.shellMode;
 
-    shellModel.deviceSizeSmall = MediaQuery.of(context).size.width < 600;
+    shellProvider.deviceSizeSmall = MediaQuery.of(context).size.width < 600;
 
     return Scaffold(
       backgroundColor: Colors.grey,
       body: shellMode == ShellMode.hidden
-          ? _buildMainContent(shellModel)
+          ? _buildMainContent(shellProvider)
           : MultiSplitViewTheme(
               data: MultiSplitViewThemeData(
                 dividerPainter: DividerPainters.grooved1(
@@ -41,45 +41,45 @@ class MainScreen extends StatelessWidget {
                   strokeCap: StrokeCap.round,
                 ),
               ),
-              child: _buildMainContent(shellModel),
+              child: _buildMainContent(shellProvider),
             ),
       floatingActionButton: shellMode == ShellMode.hidden
           ? null
-          : floatingActionButtons(shellModel, appModel),
+          : floatingActionButtons(shellProvider, appProvider),
     );
   }
 
-  Widget _buildMainContent(final ShellProvider shellModel) {
-    if (shellModel.shellMode == ShellMode.hidden) {
+  Widget _buildMainContent(final ShellProvider shellProvider) {
+    if (shellProvider.shellMode == ShellMode.hidden) {
       return const MainView();
     }
 
-    if (shellModel.deviceSizeSmall) {
-      return _buildMobilePhoneLayout(shellModel);
+    if (shellProvider.deviceSizeSmall) {
+      return _buildMobilePhoneLayout(shellProvider);
     }
-    return _buildMidToLargeDevices(shellModel);
+    return _buildMidToLargeDevices(shellProvider);
   }
 
-  Widget _buildMobilePhoneLayout(final ShellProvider shellModel) {
-    if (shellModel.showMenu) {
+  Widget _buildMobilePhoneLayout(final ShellProvider shellProvider) {
+    if (shellProvider.showMenu) {
       return const SidePanel();
     } else {
       return const MainView();
     }
   }
 
-  Widget _buildMidToLargeDevices(final ShellProvider shellModel) {
+  Widget _buildMidToLargeDevices(final ShellProvider shellProvider) {
     return MultiSplitView(
-      key: Key('key_side_panel_size_${shellModel.isSidePanelExpanded}'),
+      key: Key('key_side_panel_size_${shellProvider.isSidePanelExpanded}'),
       axis: Axis.horizontal,
       onDividerDoubleTap: (final int dividerIndex) {
-        shellModel.isSidePanelExpanded = !shellModel.isSidePanelExpanded;
+        shellProvider.isSidePanelExpanded = !shellProvider.isSidePanelExpanded;
       },
       initialAreas: <Area>[
         Area(
-          size: shellModel.isSidePanelExpanded ? 400 : minSidePanelSize,
-          min: shellModel.isSidePanelExpanded ? 350 : minSidePanelSize,
-          max: shellModel.isSidePanelExpanded ? 600 : minSidePanelSize,
+          size: shellProvider.isSidePanelExpanded ? 400 : minSidePanelSize,
+          min: shellProvider.isSidePanelExpanded ? 350 : minSidePanelSize,
+          max: shellProvider.isSidePanelExpanded ? 600 : minSidePanelSize,
           builder: (final BuildContext context, final Area area) =>
               const SidePanel(),
         ),

@@ -13,7 +13,7 @@ import 'package:web/web.dart' as web; // Add
 /// This function captures the current painter's image bytes and creates a PNG
 /// file that is then downloaded to the user's device.
 ///
-/// [context] The BuildContext to access the current AppModel.
+/// [context] The BuildContext to access the current AppProvider.
 Future<void> onExportAsPng(
   final LayersProvider layers, [
   final String fileName = 'image.png',
@@ -36,7 +36,7 @@ Future<void> saveAsPng(
 /// This function captures the current painter's image bytes, converts it to JPG,
 /// and creates a JPG file that is then downloaded to the user's device.
 ///
-/// [context] The BuildContext to access the current AppModel.
+/// [context] The BuildContext to access the current AppProvider.
 Future<void> onExportAsJpeg(
   final LayersProvider layers, [
   final String fileName = 'image.jpg',
@@ -62,7 +62,7 @@ Future<void> saveAsJpeg(
 /// This function captures the current painter's image bytes, creates an ORA
 /// archive, and then downloads the file to the user's device.
 ///
-/// [context] The BuildContext to access the current AppModel.
+/// [context] The BuildContext to access the current AppProvider.
 Future<void> onExportAsOra(
   final LayersProvider layers, [
   final String fileName = 'image.ora',

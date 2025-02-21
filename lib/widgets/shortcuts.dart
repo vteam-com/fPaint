@@ -5,8 +5,8 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
 Widget shortCutsForMainApp(
-  final ShellProvider shellModel,
-  final AppProvider appModel,
+  final ShellProvider shellProvider,
+  final AppProvider appProvider,
   final Widget child,
 ) {
   return Shortcuts(
@@ -118,38 +118,39 @@ Widget shortCutsForMainApp(
     child: Actions(
       actions: <Type, Action<Intent>>{
         UndoIntent: CallbackAction<UndoIntent>(
-          onInvoke: (final UndoIntent intent) => appModel.undoAction(),
+          onInvoke: (final UndoIntent intent) => appProvider.undoAction(),
         ),
         RedoIntent: CallbackAction<RedoIntent>(
-          onInvoke: (final RedoIntent intent) => appModel.redoAction(),
+          onInvoke: (final RedoIntent intent) => appProvider.redoAction(),
         ),
         SaveIntent: CallbackAction<SaveIntent>(
           onInvoke: (final SaveIntent intent) async =>
-              await saveFile(shellModel, appModel.layers),
+              await saveFile(shellProvider, appProvider.layers),
         ),
         CutIntent: CallbackAction<CutIntent>(
-          onInvoke: (final CutIntent intent) async => appModel.regionCut(),
+          onInvoke: (final CutIntent intent) async => appProvider.regionCut(),
         ),
         CopyIntent: CallbackAction<CopyIntent>(
           onInvoke: (final CopyIntent intent) async =>
-              await appModel.regionCopy(),
+              await appProvider.regionCopy(),
         ),
         PasteIntent: CallbackAction<PasteIntent>(
-          onInvoke: (final PasteIntent intent) async => await appModel.paste(),
+          onInvoke: (final PasteIntent intent) async =>
+              await appProvider.paste(),
         ),
 
         //-------------------------------------------------------------
         // toggle shell mode aka the tools
         ToggleShellModeIntent: CallbackAction<ToggleShellModeIntent>(
           onInvoke: (final ToggleShellModeIntent intent) async {
-            switch (shellModel.shellMode) {
+            switch (shellProvider.shellMode) {
               case ShellMode.hidden:
-                shellModel.shellMode = ShellMode.full;
+                shellProvider.shellMode = ShellMode.full;
                 break;
               default:
-                shellModel.shellMode = ShellMode.hidden;
+                shellProvider.shellMode = ShellMode.hidden;
             }
-            appModel.update();
+            appProvider.update();
             return null;
           },
         ),
@@ -158,8 +159,8 @@ Widget shortCutsForMainApp(
         // Select all
         SelectAllIntent: CallbackAction<SelectAllIntent>(
           onInvoke: (final SelectAllIntent intent) async {
-            appModel.selectAll();
-            appModel.selectedAction = ActionType.selector;
+            appProvider.selectAll();
+            appProvider.selectedAction = ActionType.selector;
             return null;
           },
         ),
@@ -168,8 +169,8 @@ Widget shortCutsForMainApp(
         // Escape current action
         EscapeIntent: CallbackAction<EscapeIntent>(
           onInvoke: (final EscapeIntent intent) async {
-            appModel.selector.clear();
-            appModel.update();
+            appProvider.selector.clear();
+            appProvider.update();
             return null;
           },
         ),
@@ -178,7 +179,7 @@ Widget shortCutsForMainApp(
         // Delete/Erase
         DeleteIntent: CallbackAction<DeleteIntent>(
           onInvoke: (final DeleteIntent intent) async {
-            appModel.regionErase();
+            appProvider.regionErase();
             return null;
           },
         ),

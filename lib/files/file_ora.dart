@@ -12,15 +12,15 @@ import 'package:xml/xml.dart';
 /// Reads an ORA file and updates the provided [AppProvider] with its contents.
 ///
 /// This function asynchronously reads the ORA file located at the given [filePath]
-/// and updates the [shellModel] with the data extracted from the file.
+/// and updates the [shellProvider] with the data extracted from the file.
 ///
 /// - Parameters:
-///   - appModel: The application model to be updated with the ORA file's contents.
+///   - appProvider: The application model to be updated with the ORA file's contents.
 ///   - filePath: The path to the ORA file to be read.
 ///
 /// - Returns: A [Future] that completes when the file has been read and the model updated.
 Future<void> readOraFile(
-  final ShellProvider shellModel,
+  final ShellProvider shellProvider,
   final LayersProvider layers,
   final String filePath,
 ) async {
@@ -30,11 +30,11 @@ Future<void> readOraFile(
       throw Exception('File not found "$filePath"');
     }
 
-    shellModel.loadedFileName = filePath;
+    shellProvider.loadedFileName = filePath;
 
     // Read the file as bytes
     await readOraFileFromBytes(
-      shellModel,
+      shellProvider,
       layers,
       await oraFile.readAsBytes(),
     );
@@ -45,7 +45,7 @@ Future<void> readOraFile(
 
 /// Read the file from  bytes
 Future<void> readOraFileFromBytes(
-  final ShellProvider shellModel,
+  final ShellProvider shellProvider,
   final LayersProvider layers,
   final Uint8List bytes,
 ) async {

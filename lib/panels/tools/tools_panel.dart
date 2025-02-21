@@ -173,13 +173,14 @@ class ToolsPanel extends StatelessWidget {
     required final BuildContext context,
   }) {
     final List<Widget> widgets = <Widget>[];
-    final AppProvider appModel = AppProvider.of(context, listen: true);
+    final AppProvider appProvider = AppProvider.of(context, listen: true);
     final LayersProvider layers = LayersProvider.of(context);
-    final ActionType selectedTool = appModel.selectedAction;
-    final String title = appModel.selectedAction == ActionType.pencil
+    final ActionType selectedTool = appProvider.selectedAction;
+    final String title = appProvider.selectedAction == ActionType.pencil
         ? 'Pencil Size'
         : 'Brush Size';
-    final double min = appModel.selectedAction == ActionType.pencil ? 1 : 0.1;
+    final double min =
+        appProvider.selectedAction == ActionType.pencil ? 1 : 0.1;
     final double max = 100;
 
     // Selector options
@@ -198,12 +199,12 @@ class ToolsPanel extends StatelessWidget {
                 minimal: minimal,
                 name: 'Rectangle',
                 image: iconAndColor(
-                  appModel.selector.mode == SelectorMode.rectangle,
+                  appProvider.selector.mode == SelectorMode.rectangle,
                   Icons.highlight_alt,
                 ),
                 onPressed: () {
-                  appModel.selector.mode = SelectorMode.rectangle;
-                  appModel.update();
+                  appProvider.selector.mode = SelectorMode.rectangle;
+                  appProvider.update();
                 },
               ),
               //
@@ -213,12 +214,12 @@ class ToolsPanel extends StatelessWidget {
                 minimal: minimal,
                 name: 'Circle',
                 image: iconAndColor(
-                  appModel.selector.mode == SelectorMode.circle,
+                  appProvider.selector.mode == SelectorMode.circle,
                   Symbols.lasso_select,
                 ),
                 onPressed: () {
-                  appModel.selector.mode = SelectorMode.circle;
-                  appModel.update();
+                  appProvider.selector.mode = SelectorMode.circle;
+                  appProvider.update();
                 },
               ),
               //
@@ -229,13 +230,13 @@ class ToolsPanel extends StatelessWidget {
                 name: 'Lasso',
                 image: iconFromSvgAsset(
                   'assets/icons/lasso.svg',
-                  appModel.selector.mode == SelectorMode.lasso
+                  appProvider.selector.mode == SelectorMode.lasso
                       ? Colors.blue
                       : IconTheme.of(context).color!,
                 ),
                 onPressed: () {
-                  appModel.selector.mode = SelectorMode.lasso;
-                  appModel.update();
+                  appProvider.selector.mode = SelectorMode.lasso;
+                  appProvider.update();
                 },
               ),
               //
@@ -245,60 +246,60 @@ class ToolsPanel extends StatelessWidget {
                 minimal: minimal,
                 name: 'Magic',
                 image: iconAndColor(
-                  appModel.selector.mode == SelectorMode.wand,
+                  appProvider.selector.mode == SelectorMode.wand,
                   Icons.auto_fix_high_outlined,
                 ),
                 onPressed: () {
-                  appModel.selector.mode = SelectorMode.wand;
-                  appModel.update();
+                  appProvider.selector.mode = SelectorMode.wand;
+                  appProvider.update();
                 },
               ),
 
-              if (appModel.selector.isVisible) const Divider(),
+              if (appProvider.selector.isVisible) const Divider(),
               //
               // Cancel/Hide Selection tool
               //
-              if (appModel.selector.isVisible)
+              if (appProvider.selector.isVisible)
                 ToolSelector(
                   minimal: minimal,
                   name: 'Replace',
                   image: iconFromSvgAssetSelected(
                     'assets/icons/selector_replace.svg',
-                    appModel.selector.math == SelectorMath.replace,
+                    appProvider.selector.math == SelectorMath.replace,
                   ),
                   onPressed: () {
-                    appModel.selector.math = SelectorMath.replace;
-                    appModel.update();
+                    appProvider.selector.math = SelectorMath.replace;
+                    appProvider.update();
                   },
                 ),
-              if (appModel.selector.isVisible)
+              if (appProvider.selector.isVisible)
                 ToolSelector(
                   minimal: minimal,
                   name: 'Add',
                   image: iconFromSvgAssetSelected(
                     'assets/icons/selector_add.svg',
-                    appModel.selector.math == SelectorMath.add,
+                    appProvider.selector.math == SelectorMath.add,
                   ),
                   onPressed: () {
-                    appModel.selector.math = SelectorMath.add;
-                    appModel.update();
+                    appProvider.selector.math = SelectorMath.add;
+                    appProvider.update();
                   },
                 ),
-              if (appModel.selector.isVisible)
+              if (appProvider.selector.isVisible)
                 ToolSelector(
                   minimal: minimal,
                   name: 'Remove',
                   image: iconFromSvgAssetSelected(
                     'assets/icons/selector_remove.svg',
-                    appModel.selector.math == SelectorMath.remove,
+                    appProvider.selector.math == SelectorMath.remove,
                   ),
                   onPressed: () {
-                    appModel.selector.math = SelectorMath.remove;
-                    appModel.update();
+                    appProvider.selector.math = SelectorMath.remove;
+                    appProvider.update();
                   },
                 ),
-              if (appModel.selector.isVisible) const Divider(),
-              if (appModel.selector.isVisible)
+              if (appProvider.selector.isVisible) const Divider(),
+              if (appProvider.selector.isVisible)
                 ToolSelector(
                   minimal: minimal,
                   name: 'Invert',
@@ -307,7 +308,7 @@ class ToolsPanel extends StatelessWidget {
                     false,
                   ),
                   onPressed: () {
-                    appModel.selector.invert(
+                    appProvider.selector.invert(
                       Rect.fromLTWH(
                         0,
                         0,
@@ -315,10 +316,10 @@ class ToolsPanel extends StatelessWidget {
                         layers.size.height,
                       ),
                     );
-                    appModel.update();
+                    appProvider.update();
                   },
                 ),
-              if (appModel.selector.isVisible)
+              if (appProvider.selector.isVisible)
                 ToolSelector(
                   minimal: minimal,
                   name: 'Cancel',
@@ -327,8 +328,8 @@ class ToolsPanel extends StatelessWidget {
                     Symbols.remove_selection,
                   ),
                   onPressed: () {
-                    appModel.selector.clear();
-                    appModel.update();
+                    appProvider.selector.clear();
+                    appProvider.update();
                   },
                 ),
             ],
@@ -352,11 +353,11 @@ class ToolsPanel extends StatelessWidget {
               showBrushSizePicker(
                 context: context,
                 title: title,
-                value: appModel.brusSize,
+                value: appProvider.brusSize,
                 min: min,
                 max: max,
                 onChanged: (final double newValue) {
-                  appModel.brusSize = newValue;
+                  appProvider.brusSize = newValue;
                 },
               );
             },
@@ -365,11 +366,11 @@ class ToolsPanel extends StatelessWidget {
               ? null
               : BrushSizePicker(
                   title: title,
-                  value: appModel.brusSize,
+                  value: appProvider.brusSize,
                   min: min,
                   max: max,
                   onChanged: (final double value) {
-                    appModel.brusSize = value;
+                    appProvider.brusSize = value;
                   },
                 ),
         ),
@@ -390,18 +391,18 @@ class ToolsPanel extends StatelessWidget {
             onPressed: () {
               showBrushStylePicker(
                 context,
-                appModel.brushStyle,
+                appProvider.brushStyle,
                 (final BrushStyle selectedBrushStyle) =>
-                    appModel.brushStyle = selectedBrushStyle,
+                    appProvider.brushStyle = selectedBrushStyle,
               );
             },
           ),
           childRight: minimal
               ? null
               : brushStyleDropDown(
-                  appModel.brushStyle,
+                  appProvider.brushStyle,
                   (final BrushStyle selectedBrushStyle) =>
-                      appModel.brushStyle = selectedBrushStyle,
+                      appProvider.brushStyle = selectedBrushStyle,
                 ),
         ),
       );
@@ -415,23 +416,23 @@ class ToolsPanel extends StatelessWidget {
           name: 'Brush Color',
           childLeft: colorPreviewWithTransparentPaper(
             minimal: minimal,
-            color: appModel.brushColor,
+            color: appProvider.brushColor,
             onPressed: () {
               showColorPicker(
                 context: context,
                 title: 'Brush Color',
-                color: appModel.brushColor,
+                color: appProvider.brushColor,
                 onSelectedColor: (final Color color) =>
-                    appModel.brushColor = color,
+                    appProvider.brushColor = color,
               );
             },
           ),
           childRight: minimal
               ? null
               : ColorSelector(
-                  color: appModel.brushColor,
+                  color: appProvider.brushColor,
                   onColorChanged: (final Color color) =>
-                      appModel.brushColor = color,
+                      appProvider.brushColor = color,
                 ),
         ),
       );
@@ -445,23 +446,23 @@ class ToolsPanel extends StatelessWidget {
           name: 'Fill Color',
           childLeft: colorPreviewWithTransparentPaper(
             minimal: minimal,
-            color: appModel.fillColor,
+            color: appProvider.fillColor,
             onPressed: () {
               showColorPicker(
                 context: context,
                 title: 'Fill Color',
-                color: appModel.fillColor,
+                color: appProvider.fillColor,
                 onSelectedColor: (final Color color) =>
-                    appModel.fillColor = color,
+                    appProvider.fillColor = color,
               );
             },
           ),
           childRight: minimal
               ? null
               : ColorSelector(
-                  color: appModel.fillColor,
+                  color: appProvider.fillColor,
                   onColorChanged: (final Color color) =>
-                      appModel.fillColor = color,
+                      appProvider.fillColor = color,
                 ),
         ),
       );
@@ -477,18 +478,18 @@ class ToolsPanel extends StatelessWidget {
             icon: const Icon(Icons.support),
             color: Colors.grey.shade500,
             onPressed: () {
-              showTolerancePicker(context, appModel.tolerance,
+              showTolerancePicker(context, appProvider.tolerance,
                   (final int newValue) {
-                appModel.tolerance = newValue;
+                appProvider.tolerance = newValue;
               });
             },
           ),
           childRight: minimal
               ? null
               : TolerancePicker(
-                  value: appModel.tolerance,
+                  value: appProvider.tolerance,
                   onChanged: (final int value) {
-                    appModel.tolerance = value;
+                    appProvider.tolerance = value;
                   },
                 ),
         ),
@@ -502,14 +503,14 @@ class ToolsPanel extends StatelessWidget {
           colorUsages: layers.topColors,
           onRefresh: () {
             layers.evaluatTopColor();
-            appModel.update();
+            appProvider.update();
           },
           onColorPicked: (final Color color) {
-            (appModel.selectedAction == ActionType.rectangle ||
-                    appModel.selectedAction == ActionType.circle ||
-                    appModel.selectedAction == ActionType.fill)
-                ? appModel.fillColor = color
-                : appModel.brushColor = color;
+            (appProvider.selectedAction == ActionType.rectangle ||
+                    appProvider.selectedAction == ActionType.circle ||
+                    appProvider.selectedAction == ActionType.fill)
+                ? appProvider.fillColor = color
+                : appProvider.brushColor = color;
           },
           minimal: minimal,
         ),

@@ -17,7 +17,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final ShellProvider shellModel = ShellProvider.of(context, listen: true);
+    final ShellProvider shellProvider = ShellProvider.of(context, listen: true);
 
     return Column(
       children: <Widget>[
@@ -26,19 +26,19 @@ class TopMenuAndLayersPanel extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             mainMenu(context),
-            if (shellModel.isSidePanelExpanded)
+            if (shellProvider.isSidePanelExpanded)
               buildIconButton(
                 tooltip: strings[StringId.startOverTooltip]!,
                 icon: Icons.power_settings_new_outlined,
                 onPressed: () => onFileNew(context),
               ),
-            if (shellModel.isSidePanelExpanded)
+            if (shellProvider.isSidePanelExpanded)
               buildIconButton(
                 tooltip: strings[StringId.importTooltip]!,
                 icon: Icons.file_download_outlined,
                 onPressed: () => onFileOpen(context),
               ),
-            if (shellModel.isSidePanelExpanded)
+            if (shellProvider.isSidePanelExpanded)
               buildIconButton(
                 tooltip: strings[StringId.exportTooltip]!,
                 icon: Icons.ios_share_outlined,
@@ -46,11 +46,11 @@ class TopMenuAndLayersPanel extends StatelessWidget {
               ),
             buildIconButton(
               tooltip: strings[StringId.exportTooltip]!,
-              icon: shellModel.isSidePanelExpanded
+              icon: shellProvider.isSidePanelExpanded
                   ? Icons.keyboard_double_arrow_left
                   : Icons.keyboard_double_arrow_right,
-              onPressed: () => shellModel.isSidePanelExpanded =
-                  !shellModel.isSidePanelExpanded,
+              onPressed: () => shellProvider.isSidePanelExpanded =
+                  !shellProvider.isSidePanelExpanded,
             ),
           ],
         ),
@@ -85,7 +85,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                       child: LayerSelector(
                         context: context2,
                         layer: layer,
-                        minimal: !shellModel.isSidePanelExpanded,
+                        minimal: !shellProvider.isSidePanelExpanded,
                         isSelected: layers.selectedLayerIndex == index,
                         allowRemoveLayer: index != layers.length - 1,
                       ),
@@ -133,7 +133,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
   Widget mainMenu(
     final BuildContext context,
   ) {
-    final ShellProvider shellModel = ShellProvider.of(context);
+    final ShellProvider shellProvider = ShellProvider.of(context);
 
     return PopupMenuButton<int>(
       tooltip: strings[StringId.menuTooltip],
@@ -156,10 +156,10 @@ class TopMenuAndLayersPanel extends StatelessWidget {
           text: strings[StringId.export]!,
           icon: Icons.ios_share_outlined,
         ),
-        if (!kIsWeb && shellModel.loadedFileName.isNotEmpty)
+        if (!kIsWeb && shellProvider.loadedFileName.isNotEmpty)
           buildMenuItem(
             value: MenuIds.save,
-            text: 'Save "${shellModel.loadedFileName}"',
+            text: 'Save "${shellProvider.loadedFileName}"',
             icon: Icons.check_circle_outline,
           ),
         buildMenuItem(
@@ -180,7 +180,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
     final BuildContext context,
     final int result,
   ) {
-    final ShellProvider shellModel = ShellProvider.of(context);
+    final ShellProvider shellProvider = ShellProvider.of(context);
     final LayersProvider layers = LayersProvider.of(context);
 
     switch (result) {
@@ -192,7 +192,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
         break;
       case MenuIds.save:
         saveFile(
-          shellModel,
+          shellProvider,
           layers,
         ).then(
             // ignore: use_build_context_synchronously
@@ -202,7 +202,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  '${strings[StringId.savedMessage]}${shellModel.loadedFileName}',
+                  '${strings[StringId.savedMessage]}${shellProvider.loadedFileName}',
                 ),
               ),
             );

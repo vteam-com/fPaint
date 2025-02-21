@@ -43,7 +43,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
   @override
   Widget build(final BuildContext context) {
-    final ShellProvider shellModel = ShellProvider.of(context);
+    final ShellProvider shellProvider = ShellProvider.of(context);
     final LayersProvider layersModel = LayersProvider.of(context);
 
     // ignore: deprecated_member_use
@@ -52,7 +52,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
         widget.onColorChanged(_currentColor);
         return true;
       },
-      child: shellModel.deviceSizeSmall
+      child: shellProvider.deviceSizeSmall
           ? Dialog.fullscreen(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

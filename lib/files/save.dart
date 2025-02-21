@@ -4,10 +4,10 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
 Future<void> saveFile(
-  final ShellProvider shellModel,
+  final ShellProvider shellProvider,
   final LayersProvider layers,
 ) async {
-  final String fileName = shellModel.loadedFileName;
+  final String fileName = shellProvider.loadedFileName;
   final String extension = fileName.split('.').last.toLowerCase();
 
   switch (extension) {

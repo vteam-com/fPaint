@@ -69,7 +69,7 @@ class LayersProvider extends ChangeNotifier {
   /// Sets the scale of the canvas.
   ///
   /// The scale value is clamped between 10% and 400% to ensure a valid range.
-  /// Calling this method will notify any listeners of the [AppModel] that the scale has changed.
+  /// Calling this method will notify any listeners of the [AppProvider] that the scale has changed.
   double _scale = 1;
   double get scale => _scale;
   set scale(final double value) {

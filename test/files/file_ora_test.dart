@@ -24,11 +24,11 @@ void main() {
   });
 
   test('readOraFile throws exception for non-existent file', () async {
-    final ShellProvider shellModel = ShellProvider();
+    final ShellProvider shellProvider = ShellProvider();
     final LayersProvider layers = LayersProvider();
 
     expect(
-      () => readOraFile(shellModel, layers, 'nonexistent.ora'),
+      () => readOraFile(shellProvider, layers, 'nonexistent.ora'),
       throwsException,
     );
   });
@@ -56,12 +56,12 @@ void main() {
   });
 
   test('readOraFileFromBytes throws exception for invalid archive', () async {
-    final ShellProvider shellModel = ShellProvider();
+    final ShellProvider shellProvider = ShellProvider();
     final LayersProvider layers = LayersProvider();
     final Uint8List invalidBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
 
     expect(
-      () => readOraFileFromBytes(shellModel, layers, invalidBytes),
+      () => readOraFileFromBytes(shellProvider, layers, invalidBytes),
       throwsException,
     );
   });

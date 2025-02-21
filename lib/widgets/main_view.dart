@@ -41,10 +41,10 @@ class MainViewState extends State<MainView> {
             final BuildContext context,
             final BoxConstraints constraints,
           ) {
-            final ShellProvider shellModel = ShellProvider.of(context);
+            final ShellProvider shellProvider = ShellProvider.of(context);
 
             _applyAutoPlacementOfCanvasIfNeeded(
-              shellModel,
+              shellProvider,
               appProvider,
               constraints,
             );
@@ -54,14 +54,14 @@ class MainViewState extends State<MainView> {
                 // print('onPointerSignal $event');
                 if (event is PointerScrollEvent) {
                   _handleUserPanningTheCanvas(
-                    shellModel,
+                    shellProvider,
                     appProvider,
                     Offset(-event.scrollDelta.dx, -event.scrollDelta.dy),
                   );
                 } else {
                   if (event is PointerScaleEvent) {
                     _handleUserScalingTheCanvas(
-                      shellModel,
+                      shellProvider,
                       appProvider,
                       event.localPosition,
                       event.scale,
@@ -90,14 +90,14 @@ class MainViewState extends State<MainView> {
                 if (event.scale == 1) {
                   // Panning
                   _handleUserPanningTheCanvas(
-                    shellModel,
+                    shellProvider,
                     appProvider,
                     event.panDelta,
                   );
                 } else {
                   // Scaling
                   _handleUserScalingTheCanvas(
-                    shellModel,
+                    shellProvider,
                     appProvider,
                     event.localPosition,
                     event.scale,
@@ -139,7 +139,7 @@ class MainViewState extends State<MainView> {
                   _calculateDistance();
 
                   if (_activePointers.length == 2) {
-                    _handleMultiTouchUpdate(event, appProvider, shellModel);
+                    _handleMultiTouchUpdate(event, appProvider, shellProvider);
                   }
                 } else {
                   _handlePointerMove(appProvider, event);
@@ -208,7 +208,7 @@ class MainViewState extends State<MainView> {
   void _handleMultiTouchUpdate(
     final PointerMoveEvent event,
     final AppProvider appProvider,
-    final ShellProvider shellModel,
+    final ShellProvider shellProvider,
   ) {
     final Offset currentFocalPoint = event.localPosition;
 
@@ -238,7 +238,7 @@ class MainViewState extends State<MainView> {
       final Offset adjustment = (before - after);
       appProvider.offset -= adjustment * appProvider.layers.scale;
     }
-    shellModel.canvasPlacement = CanvasAutoPlacement.manual;
+    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
     // Update canvas after scaling and panning
     appProvider.update();
   }
@@ -246,18 +246,19 @@ class MainViewState extends State<MainView> {
   /// Center canvas if requested
   /// scale the canvas to fit the current viewport
   void _applyAutoPlacementOfCanvasIfNeeded(
-    final ShellProvider shellModel,
+    final ShellProvider shellProvider,
     final AppProvider appProvider,
     final BoxConstraints constraints,
   ) {
     // Center canvas if requested
     // scale the canvas to fit the current viewport
-    if (shellModel.canvasPlacement == CanvasAutoPlacement.center ||
-        shellModel.canvasPlacement == CanvasAutoPlacement.fit) {
+    if (shellProvider.canvasPlacement == CanvasAutoPlacement.center ||
+        shellProvider.canvasPlacement == CanvasAutoPlacement.fit) {
       appProvider.canvasCenterAndFit(
         containerWidth: constraints.maxWidth,
         containerHeight: constraints.maxHeight,
-        scaleToContainer: shellModel.canvasPlacement == CanvasAutoPlacement.fit,
+        scaleToContainer:
+            shellProvider.canvasPlacement == CanvasAutoPlacement.fit,
         notifyListener: false,
       );
     }
@@ -277,20 +278,20 @@ class MainViewState extends State<MainView> {
   }
 
   void _handleUserPanningTheCanvas(
-    final ShellProvider shellModel,
+    final ShellProvider shellProvider,
     final AppProvider appProvider,
     final Offset offsetDelta,
   ) {
     appProvider.offset += offsetDelta;
 
-    shellModel.canvasPlacement = CanvasAutoPlacement.manual;
+    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
     appProvider.update();
   }
 
   /// Handle zooming/scaling
   void _handleUserScalingTheCanvas(
-    final ShellProvider shellModel,
-    final AppProvider appModel,
+    final ShellProvider shellProvider,
+    final AppProvider appProvider,
     final Offset anchorPoint,
     final double scaleDelta,
   ) {
@@ -300,21 +301,21 @@ class MainViewState extends State<MainView> {
     }
 
     // Step 1: Convert screen coordinates to canvas coordinates
-    final Offset before = appModel.toCanvas(anchorPoint);
+    final Offset before = appProvider.toCanvas(anchorPoint);
 
     // Step 2: Apply the scale change
-    appModel.layers.scale = appModel.layers.scale * scaleDelta;
+    appProvider.layers.scale = appProvider.layers.scale * scaleDelta;
 
     // Step 3: Calculate the new position on the canvas
-    final Offset after = appModel.toCanvas(anchorPoint);
+    final Offset after = appProvider.toCanvas(anchorPoint);
 
     // Step 4: Adjust the offset to keep the cursor anchored
     final Offset adjustment = (before - after);
-    appModel.offset -= adjustment * appModel.layers.scale;
+    appProvider.offset -= adjustment * appProvider.layers.scale;
 
     // Step 5: We are now in manual user placement of the canvas
-    shellModel.canvasPlacement = CanvasAutoPlacement.manual;
-    appModel.update();
+    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+    appProvider.update();
   }
 
   Widget _displayCanvas(final AppProvider appProvider) {
@@ -351,10 +352,11 @@ class MainViewState extends State<MainView> {
   /// to initialize the interaction.
   ///
   void _handlePointerStart(
-    final AppProvider appModel,
+    final AppProvider appProvider,
     final PointerDownEvent event,
   ) async {
-    final ui.Offset adjustedPosition = appModel.toCanvas(event.localPosition);
+    final ui.Offset adjustedPosition =
+        appProvider.toCanvas(event.localPosition);
     if (event.buttons == 1 && _activePointerId == -1) {
       //
       // Remember what pointer/button the drawing started on
@@ -362,13 +364,13 @@ class MainViewState extends State<MainView> {
       _activePointerId = event.pointer;
 
       // deal with Selector
-      if (appModel.selectedAction == ActionType.selector) {
-        appModel.selectorCreationStart(adjustedPosition);
+      if (appProvider.selectedAction == ActionType.selector) {
+        appProvider.selectorCreationStart(adjustedPosition);
         return;
       }
 
       // Make sure we can draw on this layer
-      if (appModel.layers.selectedLayer.isVisible == false) {
+      if (appProvider.layers.selectedLayer.isVisible == false) {
         //
         // Inform the user that they are attempting to draw on a layer that is hidden
         //
@@ -383,21 +385,21 @@ class MainViewState extends State<MainView> {
       //
       // Special case, one clik flood fill does not need to be tracked
       //
-      if (appModel.selectedAction == ActionType.fill) {
-        appModel.floodFillAction(adjustedPosition);
+      if (appProvider.selectedAction == ActionType.fill) {
+        appProvider.floodFillAction(adjustedPosition);
         return;
       }
 
-      appModel.recordExecuteDrawingActionToSelectedLayer(
+      appProvider.recordExecuteDrawingActionToSelectedLayer(
         action: UserActionDrawing(
-          action: appModel.selectedAction,
+          action: appProvider.selectedAction,
           positions: <ui.Offset>[adjustedPosition, adjustedPosition],
           brush: MyBrush(
-            color: appModel.brushColor,
-            size: appModel.brusSize,
-            style: appModel.brushStyle,
+            color: appProvider.brushColor,
+            size: appProvider.brusSize,
+            style: appProvider.brushStyle,
           ),
-          fillColor: appModel.fillColor,
+          fillColor: appProvider.fillColor,
         ),
       );
     }
@@ -409,43 +411,43 @@ class MainViewState extends State<MainView> {
   /// It performs necessary actions based on the pointer's movement.
   ///
   void _handlePointerMove(
-    final AppProvider appModel,
+    final AppProvider appProvider,
     final PointerEvent event,
   ) {
     //
     // Translate the input position to the canvas position and scale
     //
-    final Offset adjustedPosition = appModel.toCanvas(event.localPosition);
+    final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
 
     // debugPrint('DRAW MOVE ${details.buttons} P:${details.pointer}');
 
     if (event.buttons == 1 && _activePointerId == event.pointer) {
       // Update the Selector
-      if (appModel.selectedAction == ActionType.selector) {
-        appModel.selectorCreationAdditionalPoint(adjustedPosition);
+      if (appProvider.selectedAction == ActionType.selector) {
+        appProvider.selectorCreationAdditionalPoint(adjustedPosition);
         return;
       }
 
-      if (appModel.selectedAction == ActionType.fill) {
+      if (appProvider.selectedAction == ActionType.fill) {
         // ignore fill movement, flood fill is performed on the PointerStart event
         return;
       }
 
-      if (appModel.selectedAction == ActionType.pencil) {
+      if (appProvider.selectedAction == ActionType.pencil) {
         // Add the pixel
-        appModel.appendLineFromLastUserAction(adjustedPosition);
-      } else if (appModel.selectedAction == ActionType.eraser) {
+        appProvider.appendLineFromLastUserAction(adjustedPosition);
+      } else if (appProvider.selectedAction == ActionType.eraser) {
         // Eraser implementation
-        appModel.appendLineFromLastUserAction(adjustedPosition);
-      } else if (appModel.selectedAction == ActionType.brush) {
+        appProvider.appendLineFromLastUserAction(adjustedPosition);
+      } else if (appProvider.selectedAction == ActionType.brush) {
         // Cumulate more points in the draw path on the selected layer
-        appModel.layers.selectedLayer
+        appProvider.layers.selectedLayer
             .lastActionAppendPosition(position: adjustedPosition);
-        appModel.update();
+        appProvider.update();
       } else {
         // Existing shape logic
-        appModel.updateAction(end: adjustedPosition);
-        appModel.update();
+        appProvider.updateAction(end: adjustedPosition);
+        appProvider.update();
       }
     }
   }
@@ -456,17 +458,17 @@ class MainViewState extends State<MainView> {
   /// with the screen is lifted off. It is typically used to finalize any
   /// interactions that were started during the pointer down or move events.
   void _handlePointerEnd(
-    final AppProvider appModel,
+    final AppProvider appProvider,
     final PointerEvent event,
   ) async {
     // debugPrint('UP ${details.buttons}');
 
     if (_activePointerId == event.pointer) {
-      if (appModel.selectedAction == ActionType.selector) {
-        appModel.selectorCreationEnd();
+      if (appProvider.selectedAction == ActionType.selector) {
+        appProvider.selectorCreationEnd();
       }
       _activePointerId = -1;
-      appModel.update();
+      appProvider.update();
     }
   }
 }

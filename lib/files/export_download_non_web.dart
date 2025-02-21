@@ -14,13 +14,13 @@ import 'package:fpaint/providers/layers_provider.dart';
 /// with a file save dialog to choose the location and name of the file.
 ///
 /// The function performs the following steps:
-/// 1. Retrieves the current `AppModel` from the provided `BuildContext`.
+/// 1. Retrieves the current `AppProvider` from the provided `BuildContext`.
 /// 2. Opens a file save dialog for the user to specify the file path and name.
 /// 3. Captures the painter content as image bytes.
 /// 4. Writes the image bytes to the specified file path.
 ///
 /// Parameters:
-/// - `context`: The `BuildContext` used to retrieve the `AppModel`.
+/// - `context`: The `BuildContext` used to retrieve the `AppProvider`.
 ///
 /// Returns:
 /// - A `Future<void>` that completes when the image has been successfully saved.
@@ -57,13 +57,13 @@ Future<void> saveAsPng(
 /// with a file save dialog to choose the location and name of the file.
 ///
 /// The function performs the following steps:
-/// 1. Retrieves the current `AppModel` from the provided `BuildContext`.
+/// 1. Retrieves the current `AppProvider` from the provided `BuildContext`.
 /// 2. Opens a file save dialog for the user to specify the file path and name.
 /// 3. Captures the painter content as image bytes.
 /// 4. Writes the image bytes to the specified file path.
 ///
 /// Parameters:
-/// - `context`: The `BuildContext` used to retrieve the `AppModel`.
+/// - `context`: The `BuildContext` used to retrieve the `AppProvider`.
 ///
 /// Returns:
 /// - A `Future<void>` that completes when the image has been successfully saved.

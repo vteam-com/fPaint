@@ -23,8 +23,8 @@ void main() {
 /// The [MainScreen] widget is the root of the app's UI.
 class MyApp extends StatelessWidget {
   MyApp({super.key});
-  final ShellProvider shellModel = ShellProvider();
-  final AppProvider appModel = AppProvider();
+  final ShellProvider shellProvider = ShellProvider();
+  final AppProvider appProvider = AppProvider();
   final LayersProvider layersProvider = LayersProvider();
   final UndoProvider undoProvider = UndoProvider();
   @override
@@ -33,9 +33,9 @@ class MyApp extends StatelessWidget {
       // ignore: always_specify_types
       providers: [
         // ignore: always_specify_types
-        ChangeNotifierProvider(create: (final _) => shellModel),
+        ChangeNotifierProvider(create: (final _) => shellProvider),
         // ignore: always_specify_types
-        ChangeNotifierProvider(create: (final _) => appModel),
+        ChangeNotifierProvider(create: (final _) => appProvider),
         // ignore: always_specify_types
         ChangeNotifierProvider(create: (final _) => layersProvider),
         // ignore: always_specify_types
@@ -56,8 +56,8 @@ class MyApp extends StatelessWidget {
           ),
         ),
         home: shortCutsForMainApp(
-          shellModel,
-          appModel,
+          shellProvider,
+          appProvider,
           const MainScreen(),
         ),
       ),
