@@ -378,12 +378,14 @@ class MainViewState extends State<MainView> {
       }
 
       //
-      // Special case, one clik flood fill does not need to be tracked
+      // Special case, one clik action flood fill does not need to be tracked
       //
       if (appProvider.selectedAction == ActionType.fill) {
         appProvider.floodFillAction(adjustedPosition);
         return;
       }
+
+      appProvider.layers.selectedLayer.isUserDrawing = true;
 
       appProvider.recordExecuteDrawingActionToSelectedLayer(
         action: UserActionDrawing(
@@ -442,7 +444,6 @@ class MainViewState extends State<MainView> {
       } else {
         // Existing shape logic
         appProvider.updateAction(end: adjustedPosition);
-        appProvider.update();
       }
     }
   }
@@ -457,12 +458,15 @@ class MainViewState extends State<MainView> {
     final PointerEvent event,
   ) async {
     // debugPrint('UP ${details.buttons}');
+    appProvider.layers.selectedLayer.isUserDrawing = false;
 
     if (_activePointerId == event.pointer) {
       if (appProvider.selectedAction == ActionType.selector) {
         appProvider.selectorCreationEnd();
       }
       _activePointerId = -1;
+      // trigger a Thumbnail update
+      appProvider.layers.selectedLayer.clearCache();
       appProvider.update();
     }
   }

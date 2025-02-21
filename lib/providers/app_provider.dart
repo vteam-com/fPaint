@@ -172,7 +172,7 @@ class AppProvider extends ChangeNotifier {
       backward: () => layers.selectedLayer.undo(),
     );
 
-    update();
+    layers.update();
   }
 
   void undoAction() {
@@ -299,7 +299,6 @@ class AppProvider extends ChangeNotifier {
     } else {
       updateActionEnd(end);
     }
-    update();
   }
 
   void updateActionEnd(final Offset position) {
@@ -318,8 +317,6 @@ class AppProvider extends ChangeNotifier {
         clipPath: selector.isVisible ? selector.path1 : null,
       ),
     );
-
-    update();
   }
 
   void floodFillAction(final Offset position) async {
@@ -342,8 +339,6 @@ class AppProvider extends ChangeNotifier {
         clipPath: selector.isVisible ? selector.path1 : null,
       ),
     );
-
-    update();
   }
 
   Future<Region> getRegionPathFromLayerImage(final ui.Offset position) async {

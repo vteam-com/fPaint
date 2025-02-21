@@ -66,7 +66,9 @@ class LayerProvider extends ChangeNotifier {
 
   ///-------------------------------------------
   /// Modifed state
+
   bool hasChanged = false;
+  bool isUserDrawing = false;
   final Debouncer _debounceTimer = Debouncer();
   final void Function() onThumnailChanged;
   //---------------------------------------------
@@ -173,7 +175,6 @@ class LayerProvider extends ChangeNotifier {
   void appendDrawingAction(final UserActionDrawing userAction) {
     actionStack.add(userAction);
     hasChanged = true;
-    clearCache();
   }
 
   UserActionDrawing addImage({
@@ -205,12 +206,10 @@ class LayerProvider extends ChangeNotifier {
 
   void lastActionAppendPosition({required final Offset position}) {
     actionStack.last.positions.add(position);
-    clearCache();
   }
 
   void lastActionUpdatePosition(final Offset position) {
     actionStack.last.positions.last = position;
-    clearCache();
   }
 
   void undo() {
@@ -307,7 +306,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   void renderLayer(final Canvas canvas) {
-    if (_cachedImage != null) {
+    if (_cachedImage != null && isUserDrawing == false) {
       //print('RenderLayer "$name" USE CACHE ');
       return canvas.drawImage(_cachedImage!, Offset.zero, Paint());
     }
