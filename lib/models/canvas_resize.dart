@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+enum CanvasAutoPlacement {
+  center,
+  fit,
+  manual,
+}
+
 class CanvasResizePosition {
   static const int topLeft = 0;
   static const int top = 1;

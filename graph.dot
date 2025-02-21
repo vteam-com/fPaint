@@ -196,6 +196,8 @@ digraph "" {
   "/lib/providers/layer_provider.dart" -> "/lib/models/render_helper.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/models/user_action_drawing.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/models/user_action_drawing.dart" [style=dashed];
+  "/lib/providers/shell_provider.dart" -> "/lib/models/canvas_resize.dart";
+  "/lib/providers/shell_provider.dart" -> "/lib/models/canvas_resize.dart" [style=dashed];
   "/lib/providers/app_provider.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/providers/app_provider.dart" -> "/lib/models/selector_model.dart";
   "/lib/providers/app_provider.dart" -> "/lib/panels/tools/flood_fill.dart";

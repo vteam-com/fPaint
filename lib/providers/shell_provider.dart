@@ -1,6 +1,12 @@
 // Imports
+import 'dart:core';
+
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/canvas_resize.dart';
 import 'package:provider/provider.dart';
+
+// Exports
+export 'package:fpaint/models/canvas_resize.dart';
 
 enum ShellMode {
   hidden,
@@ -25,8 +31,7 @@ class ShellProvider extends ChangeNotifier {
 
   String loadedFileName = '';
   bool deviceSizeSmall = false;
-  bool centerImageInViewPort = true;
-  bool fitCanvasIntoScreen = true;
+  CanvasAutoPlacement canvasPlacement = CanvasAutoPlacement.fit;
 
 //=============================================================================
   // Shell

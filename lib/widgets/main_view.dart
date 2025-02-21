@@ -37,40 +37,35 @@ class MainViewState extends State<MainView> {
     return Stack(
       children: <Widget>[
         LayoutBuilder(
-          builder:
-              (final BuildContext context, final BoxConstraints constraints) {
+          builder: (
+            final BuildContext context,
+            final BoxConstraints constraints,
+          ) {
             final ShellProvider shellModel = ShellProvider.of(context);
 
-            // Center canvas if requested
-            // scale the canvas to fit the current viewport
-            if (shellModel.centerImageInViewPort) {
-              shellModel.centerImageInViewPort = false;
-              canvasCenterAndFit(
-                appProvider: appProvider,
-                containerWidth: constraints.maxWidth,
-                containerHeight: constraints.maxHeight,
-                scaleToContainer: shellModel.fitCanvasIntoScreen,
-                notifyListener: false,
-              );
-              shellModel.fitCanvasIntoScreen = false;
-            }
+            _applyAutoPlacementOfCanvasIfNeeded(
+              shellModel,
+              appProvider,
+              constraints,
+            );
 
             return Listener(
               onPointerSignal: (final PointerSignalEvent event) {
                 // print('onPointerSignal $event');
-                // Needed for WEB PANNING
                 if (event is PointerScrollEvent) {
-                  appProvider.offset +=
-                      Offset(-event.scrollDelta.dx, -event.scrollDelta.dy);
-                  appProvider.update();
+                  _handleUserPanningTheCanvas(
+                    shellModel,
+                    appProvider,
+                    Offset(-event.scrollDelta.dx, -event.scrollDelta.dy),
+                  );
                 } else {
                   if (event is PointerScaleEvent) {
-                    _handleScaling(
+                    _handleUserScalingTheCanvas(
+                      shellModel,
                       appProvider,
                       event.localPosition,
                       event.scale,
                     );
-                    appProvider.update();
                   }
                 }
               },
@@ -94,16 +89,20 @@ class MainViewState extends State<MainView> {
 
                 if (event.scale == 1) {
                   // Panning
-                  appProvider.offset += event.panDelta;
+                  _handleUserPanningTheCanvas(
+                    shellModel,
+                    appProvider,
+                    event.panDelta,
+                  );
                 } else {
                   // Scaling
-                  _handleScaling(
+                  _handleUserScalingTheCanvas(
+                    shellModel,
                     appProvider,
                     event.localPosition,
                     event.scale,
                   );
                 }
-                appProvider.update();
               },
 
               onPointerPanZoomEnd: (final PointerPanZoomEndEvent event) {
@@ -140,43 +139,7 @@ class MainViewState extends State<MainView> {
                   _calculateDistance();
 
                   if (_activePointers.length == 2) {
-                    final Offset currentFocalPoint = event.localPosition;
-
-                    // Calculate the panning offset - Always pan when two fingers are down and moving
-                    if (_lastFocalPoint != null) {
-                      final Offset panDelta =
-                          currentFocalPoint - _lastFocalPoint!;
-                      appProvider.offset += panDelta;
-                      _lastFocalPoint =
-                          currentFocalPoint; // Update the focal point
-                    }
-
-                    // Handle scaling - Always handle scaling if two fingers are down and moving
-                    if (_baseDistance > 0) {
-                      _scaleFactor = _distanceBetweenFingers / _baseDistance;
-                      // Limit scaling factor if needed
-                      _scaleFactor = max(0.1, min(_scaleFactor, 10.0));
-
-                      // Step 1: Convert screen coordinates to canvas coordinates
-                      final Offset before =
-                          appProvider.toCanvas(_lastFocalPoint!);
-
-                      // Step 2: Apply the scale change
-                      appProvider.layers.scale =
-                          _scaleFactor; // Use _scaleFactor directly
-
-                      // Step 3: Calculate the new position on the canvas
-                      final Offset after =
-                          appProvider.toCanvas(_lastFocalPoint!);
-
-                      // Step 4: Adjust the offset to keep the focal point anchored during zoom
-                      final Offset adjustment = (before - after);
-                      appProvider.offset -=
-                          adjustment * appProvider.layers.scale;
-                    }
-
-                    // Update canvas after scaling and panning
-                    appProvider.update();
+                    _handleMultiTouchUpdate(event, appProvider, shellModel);
                   }
                 } else {
                   _handlePointerMove(appProvider, event);
@@ -242,6 +205,64 @@ class MainViewState extends State<MainView> {
     );
   }
 
+  void _handleMultiTouchUpdate(
+    final PointerMoveEvent event,
+    final AppProvider appProvider,
+    final ShellProvider shellModel,
+  ) {
+    final Offset currentFocalPoint = event.localPosition;
+
+    // Calculate the panning offset - Always pan when two fingers are down and moving
+    if (_lastFocalPoint != null) {
+      final Offset panDelta = currentFocalPoint - _lastFocalPoint!;
+      appProvider.offset += panDelta;
+      _lastFocalPoint = currentFocalPoint; // Update the focal point
+    }
+
+    // Handle scaling - Always handle scaling if two fingers are down and moving
+    if (_baseDistance > 0) {
+      _scaleFactor = _distanceBetweenFingers / _baseDistance;
+      // Limit scaling factor if needed
+      _scaleFactor = max(0.1, min(_scaleFactor, 10.0));
+
+      // Step 1: Convert screen coordinates to canvas coordinates
+      final Offset before = appProvider.toCanvas(_lastFocalPoint!);
+
+      // Step 2: Apply the scale change
+      appProvider.layers.scale = _scaleFactor; // Use _scaleFactor directly
+
+      // Step 3: Calculate the new position on the canvas
+      final Offset after = appProvider.toCanvas(_lastFocalPoint!);
+
+      // Step 4: Adjust the offset to keep the focal point anchored during zoom
+      final Offset adjustment = (before - after);
+      appProvider.offset -= adjustment * appProvider.layers.scale;
+    }
+    shellModel.canvasPlacement = CanvasAutoPlacement.manual;
+    // Update canvas after scaling and panning
+    appProvider.update();
+  }
+
+  /// Center canvas if requested
+  /// scale the canvas to fit the current viewport
+  void _applyAutoPlacementOfCanvasIfNeeded(
+    final ShellProvider shellModel,
+    final AppProvider appProvider,
+    final BoxConstraints constraints,
+  ) {
+    // Center canvas if requested
+    // scale the canvas to fit the current viewport
+    if (shellModel.canvasPlacement == CanvasAutoPlacement.center ||
+        shellModel.canvasPlacement == CanvasAutoPlacement.fit) {
+      appProvider.canvasCenterAndFit(
+        containerWidth: constraints.maxWidth,
+        containerHeight: constraints.maxHeight,
+        scaleToContainer: shellModel.canvasPlacement == CanvasAutoPlacement.fit,
+        notifyListener: false,
+      );
+    }
+  }
+
   double _calculateDistance() {
     if (_pointerPositions.length >= 2) {
       final List<Offset> positions = _pointerPositions.values.toList();
@@ -255,8 +276,20 @@ class MainViewState extends State<MainView> {
     return _distanceBetweenFingers;
   }
 
+  void _handleUserPanningTheCanvas(
+    final ShellProvider shellModel,
+    final AppProvider appProvider,
+    final Offset offsetDelta,
+  ) {
+    appProvider.offset += offsetDelta;
+
+    shellModel.canvasPlacement = CanvasAutoPlacement.manual;
+    appProvider.update();
+  }
+
   /// Handle zooming/scaling
-  void _handleScaling(
+  void _handleUserScalingTheCanvas(
+    final ShellProvider shellModel,
     final AppProvider appModel,
     final Offset anchorPoint,
     final double scaleDelta,
@@ -278,6 +311,10 @@ class MainViewState extends State<MainView> {
     // Step 4: Adjust the offset to keep the cursor anchored
     final Offset adjustment = (before - after);
     appModel.offset -= adjustment * appModel.layers.scale;
+
+    // Step 5: We are now in manual user placement of the canvas
+    shellModel.canvasPlacement = CanvasAutoPlacement.manual;
+    appModel.update();
   }
 
   Widget _displayCanvas(final AppProvider appProvider) {
@@ -431,37 +468,5 @@ class MainViewState extends State<MainView> {
       _activePointerId = -1;
       appModel.update();
     }
-  }
-
-  /// Centers the canvas within the view.
-  ///
-  /// This method adjusts the position of the canvas so that it is centered
-  /// within the available space. It ensures that the canvas is properly
-  /// aligned and visible to the user.
-  void canvasCenterAndFit({
-    required final AppProvider appProvider,
-    required final double containerWidth,
-    required final double containerHeight,
-    required final bool scaleToContainer,
-    required final bool notifyListener,
-  }) {
-    double adjustedScale = appProvider.layers.scale;
-    if (scaleToContainer) {
-      final double scaleX = containerWidth / appProvider.layers.width;
-      final double scaleY = containerHeight / appProvider.layers.height;
-      adjustedScale = (min(scaleX, scaleY) * 10).floor() / 10;
-    }
-
-    final double scaledWidth = (appProvider.layers.width * adjustedScale);
-    final double scaledHeight = (appProvider.layers.height * adjustedScale);
-
-    final double centerX = containerWidth / 2;
-    final double centerY = containerHeight / 2;
-
-    appProvider.offset = Offset(
-      centerX - (scaledWidth / 2),
-      centerY - (scaledHeight / 2),
-    );
-    appProvider.layers.scale = adjustedScale;
   }
 }

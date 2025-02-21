@@ -191,6 +191,37 @@ class AppProvider extends ChangeNotifier {
     update();
   }
 
+  /// Centers the canvas within the view.
+  ///
+  /// This method adjusts the position of the canvas so that it is centered
+  /// within the available space. It ensures that the canvas is properly
+  /// aligned and visible to the user.
+  void canvasCenterAndFit({
+    required final double containerWidth,
+    required final double containerHeight,
+    required final bool scaleToContainer,
+    required final bool notifyListener,
+  }) {
+    double adjustedScale = this.layers.scale;
+    if (scaleToContainer) {
+      final double scaleX = containerWidth / this.layers.width;
+      final double scaleY = containerHeight / this.layers.height;
+      adjustedScale = (min(scaleX, scaleY) * 10).floor() / 10;
+    }
+
+    final double scaledWidth = (this.layers.width * adjustedScale);
+    final double scaledHeight = (this.layers.height * adjustedScale);
+
+    final double centerX = containerWidth / 2;
+    final double centerY = containerHeight / 2;
+
+    this.offset = Offset(
+      centerX - (scaledWidth / 2),
+      centerY - (scaledHeight / 2),
+    );
+    this.layers.scale = adjustedScale;
+  }
+
   //=============================================================================
   // All things Tools/UserActions
 

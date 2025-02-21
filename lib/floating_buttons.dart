@@ -71,7 +71,6 @@ Widget floatingActionButtons(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
         onPressed: () {
-          shellModel.centerImageInViewPort = true;
           appModel.layers.scale =
               ((appModel.layers.scale * 10).ceil() + 1) / 10;
           appModel.update();
@@ -84,8 +83,7 @@ Widget floatingActionButtons(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
         onPressed: () {
-          shellModel.centerImageInViewPort = true;
-          shellModel.fitCanvasIntoScreen = true;
+          shellModel.canvasPlacement = CanvasAutoPlacement.fit;
           appModel.update();
         },
         child: Text(
@@ -104,7 +102,6 @@ Widget floatingActionButtons(
         backgroundColor: colorBackground,
         foregroundColor: colorForegound,
         onPressed: () {
-          shellModel.centerImageInViewPort = true;
           appModel.layers.scale =
               ((appModel.layers.scale * 10).floor() - 1) / 10;
           appModel.update();
