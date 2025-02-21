@@ -35,6 +35,7 @@ digraph "" {
   "/lib/models/canvas_resize.dart" [label="canvas_resize"];
   "/lib/models/render_helper.dart" [label="render_helper"];
   "/lib/models/localized_strings.dart" [label="localized_strings"];
+  "/lib/models/constants.dart" [label="constants"];
   "/lib/models/user_action_drawing.dart" [label="user_action_drawing"];
   "/lib/main.dart" [label="main"];
   "/lib/files/xcf_reader.dart" [label="xcf_reader"];
@@ -135,6 +136,7 @@ digraph "" {
         "/lib/models/canvas_resize.dart";
         "/lib/models/render_helper.dart";
         "/lib/models/localized_strings.dart";
+        "/lib/models/constants.dart";
         "/lib/models/user_action_drawing.dart";
       }
       subgraph "cluster~/lib/files" {
@@ -251,6 +253,7 @@ digraph "" {
   "/lib/panels/share_panel.dart" -> "/lib/providers/app_provider.dart";
   "/lib/panels/canvas_settings.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/panels/canvas_settings.dart" -> "/lib/widgets/nine_grid_selector.dart";
+  "/lib/floating_buttons.dart" -> "/lib/models/constants.dart";
   "/lib/floating_buttons.dart" -> "/lib/providers/app_provider.dart";
   "/lib/floating_buttons.dart" -> "/lib/providers/shell_provider.dart";
   "/lib/models/selector_model.dart" -> "/lib/helpers/draw_path_helper.dart";

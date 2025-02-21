@@ -148,12 +148,6 @@ class AppProvider extends ChangeNotifier {
 
   //=============================================================================
   // SidePanel Expanded/Collapsed
-  bool _showMenu = false;
-  bool get showMenu => _showMenu;
-  set showMenu(final bool value) {
-    _showMenu = value;
-    update();
-  }
 
   void resetView() {
     offset = Offset.zero;

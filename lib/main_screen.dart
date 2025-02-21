@@ -44,7 +44,15 @@ class MainScreen extends StatelessWidget {
               child: _buildMainContent(shellProvider),
             ),
       floatingActionButton: shellMode == ShellMode.hidden
-          ? null
+          ? myFloatButton(
+              icon: Icons.more_vert,
+              onPressed: () {
+                Future<void>.microtask(() {
+                  shellProvider.shellMode = ShellMode.full;
+                  shellProvider.update();
+                });
+              },
+            )
           : floatingActionButtons(shellProvider, appProvider),
     );
   }

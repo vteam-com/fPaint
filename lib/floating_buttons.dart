@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
@@ -9,52 +10,35 @@ Widget floatingActionButtons(
   final ShellProvider shellProvider,
   final AppProvider appProvider,
 ) {
-  final FloatingActionButton undoButton = FloatingActionButton(
-    backgroundColor: Colors.grey.shade600,
-    foregroundColor: Colors.white,
+  final Widget undoButton = myFloatButton(
+    icon: Icons.undo,
     tooltip: appProvider.undoProvider.getHistoryStringForUndo(),
     onPressed: () {
       Future<void>.microtask(() => appProvider.undoAction());
     },
-    child: const Icon(Icons.undo),
   );
 
-  final FloatingActionButton redo = FloatingActionButton(
-    backgroundColor: Colors.grey.shade600,
-    foregroundColor: Colors.white,
+  final Widget redo = myFloatButton(
+    icon: Icons.redo,
     tooltip: appProvider.undoProvider.getHistoryStringForRedo(),
     onPressed: () {
       Future<void>.microtask(() => appProvider.redoAction());
     },
-    child: const Icon(Icons.redo),
   );
 
-  Color colorBackground = Colors.grey.shade600;
-  final Color colorForegound = Colors.white;
   if (shellProvider.deviceSizeSmall) {
-    if (appProvider.showMenu) {
-      colorBackground = Colors.blue;
-    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
       spacing: 5,
       children: <Widget>[
-        if (!appProvider.showMenu) undoButton,
-        if (!appProvider.showMenu) redo,
-        FloatingActionButton(
-          backgroundColor: colorBackground,
-          foregroundColor: colorForegound,
-          tooltip: 'Menu',
+        if (!shellProvider.showMenu) undoButton,
+        if (!shellProvider.showMenu) redo,
+        myFloatButton(
+          icon: shellProvider.showMenu ? Icons.close : Icons.more_vert_outlined,
           onPressed: () {
             shellProvider.showMenu = !shellProvider.showMenu;
-            shellProvider.isSidePanelExpanded = true;
           },
-          child: Icon(
-            appProvider.showMenu
-                ? Icons.double_arrow_rounded
-                : Icons.more_vert_outlined,
-          ),
         ),
       ],
     );
@@ -62,26 +46,23 @@ Widget floatingActionButtons(
 
   return Column(
     mainAxisAlignment: MainAxisAlignment.end,
+    spacing: 4,
     children: <Widget>[
       undoButton,
       redo,
-      const SizedBox(height: 8),
+
       // Zooom in
-      FloatingActionButton(
-        backgroundColor: colorBackground,
-        foregroundColor: colorForegound,
+      myFloatButton(
+        icon: Icons.zoom_in,
         onPressed: () {
           appProvider.layers.scale =
               ((appProvider.layers.scale * 10).ceil() + 1) / 10;
           appProvider.update();
         },
-        child: const Icon(Icons.zoom_in),
       ),
 
       /// Center and fit image
-      FloatingActionButton(
-        backgroundColor: colorBackground,
-        foregroundColor: colorForegound,
+      myFloatButton(
         onPressed: () {
           shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
           appProvider.update();
@@ -89,8 +70,8 @@ Widget floatingActionButtons(
         child: Text(
           '${(appProvider.layers.scale * 100).toInt()}%\n${appProvider.layers.size.width.toInt()}\n${appProvider.layers.size.height.toInt()}',
           textAlign: TextAlign.right,
-          style: TextStyle(
-            color: colorForegound,
+          style: const TextStyle(
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 10,
           ),
@@ -98,16 +79,38 @@ Widget floatingActionButtons(
       ),
 
       /// Zoom out
-      FloatingActionButton(
-        backgroundColor: colorBackground,
-        foregroundColor: colorForegound,
+      myFloatButton(
+        icon: Icons.zoom_out,
         onPressed: () {
           appProvider.layers.scale =
               ((appProvider.layers.scale * 10).floor() - 1) / 10;
           appProvider.update();
         },
-        child: const Icon(Icons.zoom_out),
+      ),
+      myFloatButton(
+        icon: Icons.arrow_drop_down,
+        onPressed: () {
+          shellProvider.shellMode = ShellMode.hidden;
+          shellProvider.update();
+        },
       ),
     ],
+  );
+}
+
+Widget myFloatButton({
+  final IconData? icon,
+  final String? tooltip,
+  required final void Function() onPressed,
+  final Widget? child,
+}) {
+  return FloatingActionButton(
+    backgroundColor: AppColors.colorFloatButtonBackground,
+    foregroundColor: Colors.white,
+    tooltip: tooltip,
+    onPressed: () {
+      Future<void>.microtask(() => onPressed());
+    },
+    child: child ?? Icon(icon!),
   );
 }
