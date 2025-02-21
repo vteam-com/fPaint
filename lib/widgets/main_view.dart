@@ -1,8 +1,5 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:ui' as ui;
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
@@ -26,7 +23,13 @@ class MainView extends StatefulWidget {
 class MainViewState extends State<MainView> {
   int _activePointerId = -1;
   Size lastViewPortSize = const Size(0, 0);
-  final double scaleTolerance = 0.01;
+  double scaleTolerance = 0.01;
+  final List<int> _activePointers = <int>[];
+  Offset? _lastFocalPoint;
+  final Map<int, Offset> _pointerPositions = <int, ui.Offset>{};
+  double _distanceBetweenFingers = 0.0;
+  double _scaleFactor = 1.0; // Initialize scale factor for pinch zoom
+  double _baseDistance = 0.0; // Store the initial distance when pinch starts
 
   @override
   Widget build(final BuildContext context) {
@@ -36,7 +39,6 @@ class MainViewState extends State<MainView> {
         LayoutBuilder(
           builder:
               (final BuildContext context, final BoxConstraints constraints) {
-            // print('LayoutBuilder ${constraints.maxWidth} ${constraints.maxHeight}');
             final ShellProvider shellModel = ShellProvider.of(context);
 
             // Center canvas if requested
@@ -55,107 +57,161 @@ class MainViewState extends State<MainView> {
 
             return Listener(
               onPointerSignal: (final PointerSignalEvent event) {
+                // print('onPointerSignal $event');
                 // Needed for WEB PANNING
                 if (event is PointerScrollEvent) {
                   appProvider.offset +=
                       Offset(-event.scrollDelta.dx, -event.scrollDelta.dy);
                   appProvider.update();
+                } else {
+                  if (event is PointerScaleEvent) {
+                    _handleScaling(
+                      appProvider,
+                      event.localPosition,
+                      event.scale,
+                    );
+                    appProvider.update();
+                  }
                 }
               },
-              //
-              // PAN and SCALE for Web, Linux & Windows
-              // this is not invoked for Touch devices and we skip MacOS, since trackpad behavior are received the same way as Touch devices
-              //
-              onPointerPanZoomUpdate: !kIsWeb && Platform.isMacOS
-                  ? null
-                  : (final PointerPanZoomUpdateEvent event) {
-                      // print('Listener onPointerPanZoomUpdate');
-                      if (event.scale == 1) {
-                        // Panning
-                        appProvider.offset += event.panDelta;
-                        appProvider.update();
-                      } else {
-                        // Scaling
-                        _handleScaling(
-                          appProvider,
-                          event.localPosition,
-                          event.scale,
-                        );
-                      }
-                    },
+
+              // Not call on touch screen device like iOS
+              // instead onPointerDown is used
+              onPointerPanZoomStart: (final PointerPanZoomStartEvent event) {
+                // print(
+                //   'Listener-onPointerPanZoomStart ${event.toString()}',
+                // );
+              },
 
               //
-              // Pointer DOWN
+              // PAN and SCALE for Web, Linux & Windows
+              // this is not invoked for Touch devices and we skip MacOS, since trackpad behavior are received inthe onPointerSignal: event
               //
+              onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
+                // print(
+                //   'Listener-onPointerPanZoomUpdate ${event.toString()}',
+                // );
+
+                if (event.scale == 1) {
+                  // Panning
+                  appProvider.offset += event.panDelta;
+                } else {
+                  // Scaling
+                  _handleScaling(
+                    appProvider,
+                    event.localPosition,
+                    event.scale,
+                  );
+                }
+                appProvider.update();
+              },
+
+              onPointerPanZoomEnd: (final PointerPanZoomEndEvent event) {
+                // print(
+                //   'Listener-onPointerPanZoomEnd ${event.toString()}',
+                // );
+              },
+
+              // Pointer DOWN
               onPointerDown: (final PointerDownEvent event) {
+                // print('onPointerDown');
                 if (event.kind == PointerDeviceKind.touch) {
-                  // ignore touch when drawing, must use the stylus
+                  _pointerPositions[event.pointer] = event.localPosition;
+                  _calculateDistance();
+
+                  _activePointers.add(event.pointer);
+
+                  if (_activePointers.length == 2) {
+                    // Set the initial focal point between two fingers
+                    _lastFocalPoint = event.localPosition;
+                    _baseDistance =
+                        _distanceBetweenFingers; // Record initial distance for scaling
+                  }
                 } else {
                   _handlePointerStart(appProvider, event);
                 }
               },
 
-              //
               // Pointer MOVE
-              //
-              onPointerMove: (final PointerEvent event) {
+              onPointerMove: (final PointerMoveEvent event) {
+                // print('Move');
                 if (event.kind == PointerDeviceKind.touch) {
-                  // ignore touch when drawing, must use the stylus
+                  _pointerPositions[event.pointer] = event.localPosition;
+                  _calculateDistance();
+
+                  if (_activePointers.length == 2) {
+                    final Offset currentFocalPoint = event.localPosition;
+
+                    // Calculate the panning offset - Always pan when two fingers are down and moving
+                    if (_lastFocalPoint != null) {
+                      final Offset panDelta =
+                          currentFocalPoint - _lastFocalPoint!;
+                      appProvider.offset += panDelta;
+                      _lastFocalPoint =
+                          currentFocalPoint; // Update the focal point
+                    }
+
+                    // Handle scaling - Always handle scaling if two fingers are down and moving
+                    if (_baseDistance > 0) {
+                      _scaleFactor = _distanceBetweenFingers / _baseDistance;
+                      // Limit scaling factor if needed
+                      _scaleFactor = max(0.1, min(_scaleFactor, 10.0));
+
+                      // Step 1: Convert screen coordinates to canvas coordinates
+                      final Offset before =
+                          appProvider.toCanvas(_lastFocalPoint!);
+
+                      // Step 2: Apply the scale change
+                      appProvider.layers.scale =
+                          _scaleFactor; // Use _scaleFactor directly
+
+                      // Step 3: Calculate the new position on the canvas
+                      final Offset after =
+                          appProvider.toCanvas(_lastFocalPoint!);
+
+                      // Step 4: Adjust the offset to keep the focal point anchored during zoom
+                      final Offset adjustment = (before - after);
+                      appProvider.offset -=
+                          adjustment * appProvider.layers.scale;
+                    }
+
+                    // Update canvas after scaling and panning
+                    appProvider.update();
+                  }
                 } else {
                   _handlePointerMove(appProvider, event);
                 }
               },
 
-              //
               // Pointer UP/CANCEL/END
-              //
               onPointerUp: (final PointerUpEvent event) {
                 if (event.kind == PointerDeviceKind.touch) {
-                  // ignore touch when drawing, must use the stylus
+                  _pointerPositions.remove(event.pointer);
+                  _calculateDistance(); // Recalculate distance
+                  _activePointers.remove(event.pointer);
+                  if (_activePointers.length < 2) {
+                    _lastFocalPoint = null;
+                    _baseDistance = 0.0; // Reset base distance
+                  }
                 } else {
-                  _handPointerEnd(appProvider, event);
+                  _handlePointerEnd(appProvider, event);
                 }
               },
 
               onPointerCancel: (final PointerCancelEvent event) {
                 if (event.kind == PointerDeviceKind.touch) {
-                  // ignore touch when drawing, must use the stylus
+                  _pointerPositions.remove(event.pointer);
+                  _calculateDistance(); // Recalculate distance
+                  _activePointers.remove(event.pointer);
+                  if (_activePointers.length < 2) {
+                    _lastFocalPoint = null;
+                    _baseDistance = 0.0; // Reset base distance
+                  }
                 } else {
-                  _handPointerEnd(appProvider, event);
+                  _handlePointerEnd(appProvider, event);
                 }
               },
-
-              //
-              // Handle Touch Device Gesture iOS, Android, TouchScreen laptops
-              //
-              child: GestureDetector(
-                // Handle two-fingers Panning and Scaling
-                onScaleUpdate: (final ScaleUpdateDetails details) {
-                  // supported by iOS, Android, macOS
-                  if (!Platform.isLinux && !Platform.isWindows) {
-                    final double scaleAttempt = (details.scale - 1.0).abs();
-                    if (scaleAttempt < scaleTolerance) {
-                      //
-                      // PANNING
-                      //
-                      if (details.pointerCount == 2) {
-                        appProvider.offset += details.focalPointDelta;
-                        appProvider.update();
-                      }
-                    } else {
-                      //
-                      // SCALING
-                      //
-                      _handleScaling(
-                        appProvider,
-                        details.localFocalPoint,
-                        details.scale,
-                      );
-                    }
-                  }
-                },
-                child: _displayCanvas(appProvider),
-              ),
+              child: _displayCanvas(appProvider),
             );
           },
         ),
@@ -186,29 +242,17 @@ class MainViewState extends State<MainView> {
     );
   }
 
-  Widget _displayCanvas(final AppProvider appProvider) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment.topCenter,
-          colors: <ui.Color>[
-            Colors.grey.shade50,
-            Colors.grey.shade500,
-          ],
-          stops: <double>[0, 1],
-        ),
-      ),
-      child: Transform(
-        alignment: Alignment.topLeft,
-        transform: Matrix4.identity()
-          ..translate(
-            appProvider.offset.dx,
-            appProvider.offset.dy,
-          )
-          ..scale(appProvider.layers.scale),
-        child: const CanvasPanel(),
-      ),
-    );
+  double _calculateDistance() {
+    if (_pointerPositions.length >= 2) {
+      final List<Offset> positions = _pointerPositions.values.toList();
+      final Offset pos1 = positions[0];
+      final Offset pos2 = positions[1];
+      _distanceBetweenFingers = (pos2 - pos1).distance;
+    } else {
+      _distanceBetweenFingers = 0.0;
+    }
+    // print('_calculateDistance $_distanceBetweenFingers');
+    return _distanceBetweenFingers;
   }
 
   /// Handle zooming/scaling
@@ -234,8 +278,33 @@ class MainViewState extends State<MainView> {
     // Step 4: Adjust the offset to keep the cursor anchored
     final Offset adjustment = (before - after);
     appModel.offset -= adjustment * appModel.layers.scale;
+  }
 
-    appModel.update();
+  Widget _displayCanvas(final AppProvider appProvider) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.topCenter,
+          colors: <ui.Color>[
+            Colors.grey.shade50,
+            Colors.grey.shade500,
+          ],
+          stops: <double>[0, 1],
+        ),
+      ),
+      child: Transform(
+        alignment: Alignment.topLeft,
+        transform: Matrix4.identity()
+          ..translate(
+            appProvider.offset.dx,
+            appProvider.offset.dy,
+          )
+          ..scale(
+            appProvider.layers.scale,
+          ), // Use appProvider.layers.scale here
+        child: const CanvasPanel(),
+      ),
+    );
   }
 
   /// Handles the start of a pointer event.
@@ -349,7 +418,7 @@ class MainViewState extends State<MainView> {
   /// This method is called when a pointer that was previously in contact
   /// with the screen is lifted off. It is typically used to finalize any
   /// interactions that were started during the pointer down or move events.
-  void _handPointerEnd(
+  void _handlePointerEnd(
     final AppProvider appModel,
     final PointerEvent event,
   ) async {
