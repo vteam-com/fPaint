@@ -68,7 +68,7 @@ digraph "" {
   "/lib/widgets/main_view.dart" [label="main_view"];
   "/lib/widgets/selector_widget.dart" [label="selector_widget"];
   subgraph "cluster~" {
-    label="fpaint";
+    label="fPaint";
     subgraph "cluster~/test" {
       label="test";
       "/test/draw_path_helper_test.dart";

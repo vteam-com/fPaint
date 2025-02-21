@@ -25,9 +25,7 @@ class MainViewState extends State<MainView> {
   Size lastViewPortSize = const Size(0, 0);
   double scaleTolerance = 0.01;
   final List<int> _activePointers = <int>[];
-  Offset? _lastFocalPoint;
   final Map<int, Offset> _pointerPositions = <int, ui.Offset>{};
-  double _distanceBetweenFingers = 0.0;
   double _scaleFactor = 1.0; // Initialize scale factor for pinch zoom
   double _baseDistance = 0.0; // Store the initial distance when pinch starts
 
@@ -116,15 +114,13 @@ class MainViewState extends State<MainView> {
                 // print('onPointerDown');
                 if (event.kind == PointerDeviceKind.touch) {
                   _pointerPositions[event.pointer] = event.localPosition;
-                  _calculateDistance();
+                  _getDistanceBetweenTouchPoints();
 
                   _activePointers.add(event.pointer);
 
                   if (_activePointers.length == 2) {
                     // Set the initial focal point between two fingers
-                    _lastFocalPoint = event.localPosition;
-                    _baseDistance =
-                        _distanceBetweenFingers; // Record initial distance for scaling
+                    _baseDistance = _getDistanceBetweenTouchPoints();
                   }
                 } else {
                   _handlePointerStart(appProvider, event);
@@ -136,7 +132,7 @@ class MainViewState extends State<MainView> {
                 // print('Move');
                 if (event.kind == PointerDeviceKind.touch) {
                   _pointerPositions[event.pointer] = event.localPosition;
-                  _calculateDistance();
+                  _getDistanceBetweenTouchPoints();
 
                   if (_activePointers.length == 2) {
                     _handleMultiTouchUpdate(event, appProvider, shellProvider);
@@ -150,10 +146,9 @@ class MainViewState extends State<MainView> {
               onPointerUp: (final PointerUpEvent event) {
                 if (event.kind == PointerDeviceKind.touch) {
                   _pointerPositions.remove(event.pointer);
-                  _calculateDistance(); // Recalculate distance
+                  _getDistanceBetweenTouchPoints(); // Recalculate distance
                   _activePointers.remove(event.pointer);
                   if (_activePointers.length < 2) {
-                    _lastFocalPoint = null;
                     _baseDistance = 0.0; // Reset base distance
                   }
                 } else {
@@ -164,10 +159,9 @@ class MainViewState extends State<MainView> {
               onPointerCancel: (final PointerCancelEvent event) {
                 if (event.kind == PointerDeviceKind.touch) {
                   _pointerPositions.remove(event.pointer);
-                  _calculateDistance(); // Recalculate distance
+                  _getDistanceBetweenTouchPoints(); // Recalculate distance
                   _activePointers.remove(event.pointer);
                   if (_activePointers.length < 2) {
-                    _lastFocalPoint = null;
                     _baseDistance = 0.0; // Reset base distance
                   }
                 } else {
@@ -210,34 +204,37 @@ class MainViewState extends State<MainView> {
     final AppProvider appProvider,
     final ShellProvider shellProvider,
   ) {
-    final Offset currentFocalPoint = event.localPosition;
+    // print('_handleMultiTouchUpdate $event');
 
     // Calculate the panning offset - Always pan when two fingers are down and moving
-    if (_lastFocalPoint != null) {
-      final Offset panDelta = currentFocalPoint - _lastFocalPoint!;
-      appProvider.offset += panDelta;
-      _lastFocalPoint = currentFocalPoint; // Update the focal point
-    }
+    appProvider.offset += event.delta;
+    final double newDistance = _getDistanceBetweenTouchPoints();
+    final double distanceDelta = _baseDistance - newDistance;
+    // print(
+    //   'last ${event.localPosition} eventDelta ${event.delta} _baseDistance $_baseDistance  $newDistance $distanceDelta',
+    // );
 
     // Handle scaling - Always handle scaling if two fingers are down and moving
-    if (_baseDistance > 0) {
-      _scaleFactor = _distanceBetweenFingers / _baseDistance;
+    if (distanceDelta.abs() > 50) {
+      // print(distanceDelta.abs().toString());
+      _scaleFactor = _getDistanceBetweenTouchPoints() / _baseDistance;
       // Limit scaling factor if needed
       _scaleFactor = max(0.1, min(_scaleFactor, 10.0));
 
       // Step 1: Convert screen coordinates to canvas coordinates
-      final Offset before = appProvider.toCanvas(_lastFocalPoint!);
+      final Offset before = appProvider.toCanvas(event.localPosition);
 
       // Step 2: Apply the scale change
       appProvider.layers.scale = _scaleFactor; // Use _scaleFactor directly
 
       // Step 3: Calculate the new position on the canvas
-      final Offset after = appProvider.toCanvas(_lastFocalPoint!);
+      final Offset after = appProvider.toCanvas(event.localPosition);
 
       // Step 4: Adjust the offset to keep the focal point anchored during zoom
-      final Offset adjustment = (before - after);
-      appProvider.offset -= adjustment * appProvider.layers.scale;
+      final Offset adjustment = after - before;
+      appProvider.offset += adjustment * appProvider.layers.scale;
     }
+
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
     // Update canvas after scaling and panning
     appProvider.update();
@@ -264,17 +261,15 @@ class MainViewState extends State<MainView> {
     }
   }
 
-  double _calculateDistance() {
+  double _getDistanceBetweenTouchPoints() {
     if (_pointerPositions.length >= 2) {
       final List<Offset> positions = _pointerPositions.values.toList();
       final Offset pos1 = positions[0];
       final Offset pos2 = positions[1];
-      _distanceBetweenFingers = (pos2 - pos1).distance;
+      return (pos2 - pos1).distance;
     } else {
-      _distanceBetweenFingers = 0.0;
+      return 0.0;
     }
-    // print('_calculateDistance $_distanceBetweenFingers');
-    return _distanceBetweenFingers;
   }
 
   void _handleUserPanningTheCanvas(
