@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/panels/layers/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
-import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
 /// The `SidePanel` widget is a stateful widget that represents the side panel of the application.
@@ -10,17 +10,64 @@ import 'package:multi_split_view/multi_split_view.dart';
 /// The `MultiSplitViewTheme` is used to customize the appearance of the divider between the two panels.
 
 class SidePanel extends StatefulWidget {
-  const SidePanel({super.key});
+  const SidePanel({
+    super.key,
+    required this.minimal,
+    required this.preferences,
+  });
+  final bool minimal;
+  final AppPreferences preferences;
 
   @override
   State<SidePanel> createState() => _SidePanelState();
 }
 
 class _SidePanelState extends State<SidePanel> {
+  final MultiSplitViewController _splitController = MultiSplitViewController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    final double hightOfTopPanel = widget.preferences.sidePanelDistance;
+
+    _splitController.areas = <Area>[
+      Area(
+        size: hightOfTopPanel,
+        min: 100,
+        builder: (final BuildContext context, final Area area) =>
+            const TopMenuAndLayersPanel(),
+      ),
+      Area(
+        min: 100,
+        builder: (final BuildContext context, final Area area) => Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: ToolsPanel(
+            minimal: widget.minimal,
+          ),
+        ),
+      ),
+    ];
+
+    // start listening to user change
+    _splitController.addListener(_rebuild);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _splitController.removeListener(_rebuild);
+  }
+
+  void _rebuild() async {
+    final double? heightOfTopSection = _splitController.areas[0].size;
+    if (heightOfTopSection != null) {
+      await widget.preferences.setSidePanelDistance(heightOfTopSection);
+    }
+  }
+
   @override
   Widget build(final BuildContext context) {
-    final ShellProvider shellProvider = ShellProvider.of(context);
-
     return Material(
       color: Colors.grey.shade800,
       child: MultiSplitViewTheme(
@@ -36,6 +83,7 @@ class _SidePanelState extends State<SidePanel> {
           ),
         ),
         child: MultiSplitView(
+          controller: _splitController,
           axis: Axis.vertical,
           initialAreas: <Area>[
             Area(
@@ -50,7 +98,7 @@ class _SidePanelState extends State<SidePanel> {
               builder: (final BuildContext context, final Area area) => Padding(
                 padding: const EdgeInsets.only(top: 8.0),
                 child: ToolsPanel(
-                  minimal: !shellProvider.isSidePanelExpanded,
+                  minimal: widget.minimal,
                 ),
               ),
             ),

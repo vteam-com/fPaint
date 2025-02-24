@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
-import 'package:provider/provider.dart';
 
 // Exports
 export 'package:fpaint/providers/layers_provider.dart';
@@ -23,7 +23,21 @@ class UserLayerAction {}
 class AppProvider extends ChangeNotifier {
   AppProvider() {
     this.canvasClear(layers.size);
+
+    // this will initialize and load the preferencefor the first time
+    try {
+      this.preferences.getPref().then(
+        (final _) {
+          update();
+        },
+      );
+    } catch (error) {
+      // TODO
+    }
   }
+
+  final AppPreferences preferences = AppPreferences();
+  bool get isPreferencesLoaded => preferences.isLoaded;
 
   final UndoProvider _undoProvider = UndoProvider();
 

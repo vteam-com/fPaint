@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   group('CanvasResizePosition', () {
     test('anchorTranslate should handle same source and destination sizes', () {
       final Offset result = CanvasResizePosition.anchorTranslate(

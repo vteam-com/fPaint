@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/floating_buttons.dart';
@@ -18,8 +19,17 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-
     final AppProvider appProvider = AppProvider.of(context, listen: true);
+
+    if (appProvider.isPreferencesLoaded == false) {
+      return const Scaffold(
+        backgroundColor: Colors.grey,
+        body: Center(
+          child: CupertinoActivityIndicator(color: Colors.black, radius: 40),
+        ),
+      );
+    }
+
     final ShellProvider shellProvider = ShellProvider.of(context, listen: true);
     final ShellMode shellMode = shellProvider.shellMode;
 
@@ -28,7 +38,7 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey,
       body: shellMode == ShellMode.hidden
-          ? _buildMainContent(shellProvider)
+          ? _buildMainContent(shellProvider, appProvider)
           : MultiSplitViewTheme(
               data: MultiSplitViewThemeData(
                 dividerPainter: DividerPainters.grooved1(
@@ -41,7 +51,7 @@ class MainScreen extends StatelessWidget {
                   strokeCap: StrokeCap.round,
                 ),
               ),
-              child: _buildMainContent(shellProvider),
+              child: _buildMainContent(shellProvider, appProvider),
             ),
       floatingActionButton: shellMode == ShellMode.hidden
           ? myFloatButton(
@@ -57,26 +67,38 @@ class MainScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMainContent(final ShellProvider shellProvider) {
+  Widget _buildMainContent(
+    final ShellProvider shellProvider,
+    final AppProvider appProvider,
+  ) {
     if (shellProvider.shellMode == ShellMode.hidden) {
       return const MainView();
     }
 
     if (shellProvider.deviceSizeSmall) {
-      return _buildMobilePhoneLayout(shellProvider);
+      return _buildMobilePhoneLayout(shellProvider, appProvider);
     }
-    return _buildMidToLargeDevices(shellProvider);
+    return _buildMidToLargeDevices(shellProvider, appProvider);
   }
 
-  Widget _buildMobilePhoneLayout(final ShellProvider shellProvider) {
+  Widget _buildMobilePhoneLayout(
+    final ShellProvider shellProvider,
+    final AppProvider appProvider,
+  ) {
     if (shellProvider.showMenu) {
-      return const SidePanel();
+      return SidePanel(
+        minimal: !shellProvider.isSidePanelExpanded,
+        preferences: appProvider.preferences,
+      );
     } else {
       return const MainView();
     }
   }
 
-  Widget _buildMidToLargeDevices(final ShellProvider shellProvider) {
+  Widget _buildMidToLargeDevices(
+    final ShellProvider shellProvider,
+    final AppProvider appProvider,
+  ) {
     return MultiSplitView(
       key: Key('key_side_panel_size_${shellProvider.isSidePanelExpanded}'),
       axis: Axis.horizontal,
@@ -88,8 +110,10 @@ class MainScreen extends StatelessWidget {
           size: shellProvider.isSidePanelExpanded ? 400 : minSidePanelSize,
           min: shellProvider.isSidePanelExpanded ? 350 : minSidePanelSize,
           max: shellProvider.isSidePanelExpanded ? 600 : minSidePanelSize,
-          builder: (final BuildContext context, final Area area) =>
-              const SidePanel(),
+          builder: (final BuildContext context, final Area area) => SidePanel(
+            minimal: !shellProvider.isSidePanelExpanded,
+            preferences: appProvider.preferences,
+          ),
         ),
         Area(
           builder: (final BuildContext context, final Area area) =>

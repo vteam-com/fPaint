@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  SharedPreferences.setMockInitialValues(<String, Object>{});
+
   group('appProvider Tests', () {
     test('initial state should have one empty layer', () {
       final AppProvider appProvider = AppProvider();
