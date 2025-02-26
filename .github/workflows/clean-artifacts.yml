@@ -1,7 +1,6 @@
 name: Clean Artifacts
 on:
-  schedule:
-    - cron: "0 0 1 1 *"
+  workflow_dispatch:
 
 jobs:
   cleanup_artifacts:
@@ -12,12 +11,16 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const artifacts = await github.rest.actions.listArtifactsForRepo({
+            const artifactResponse = await github.rest.actions.listArtifactsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 100,
             });
-            return artifacts.data.artifacts;
+            // Sort artifacts by creation date (most recent first)
+            const sortedArtifacts = artifactResponse.data.artifacts.sort(
+              (a, b) => new Date(b.created_at) - new Date(a.created_at)
+            );
+            return sortedArtifacts;
 
       - name: Delete Old Artifacts
         uses: actions/github-script@v6
