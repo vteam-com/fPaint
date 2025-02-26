@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
-import 'package:fpaint/panels/tools/tool_selector.dart';
+import 'package:fpaint/panels/tools/tool_panel_picker.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_preview.dart';
@@ -63,7 +63,7 @@ class ToolsPanel extends StatelessWidget {
 
     final List<Widget> tools = <Widget>[
       // Pencil
-      ToolSelector(
+      ToolPanelPicker(
         minimal: minimal,
         name: 'Pencil',
         image: iconAndColor(
@@ -76,7 +76,7 @@ class ToolsPanel extends StatelessWidget {
       ),
 
       // Brush
-      ToolSelector(
+      ToolPanelPicker(
         minimal: minimal,
         name: 'Brush',
         image: iconAndColor(
@@ -89,7 +89,7 @@ class ToolsPanel extends StatelessWidget {
       ),
 
       // Line
-      ToolSelector(
+      ToolPanelPicker(
         minimal: minimal,
         name: 'Line',
         image: iconAndColor(
@@ -102,7 +102,7 @@ class ToolsPanel extends StatelessWidget {
       ),
 
       // Rectangle
-      ToolSelector(
+      ToolPanelPicker(
         minimal: minimal,
         name: 'Rectangle',
         image: iconAndColor(
@@ -115,7 +115,7 @@ class ToolsPanel extends StatelessWidget {
       ),
 
       // Circle
-      ToolSelector(
+      ToolPanelPicker(
         minimal: minimal,
         name: 'Circle',
         image: iconAndColor(
@@ -128,7 +128,7 @@ class ToolsPanel extends StatelessWidget {
       ),
 
       // Paint Bucket
-      ToolSelector(
+      ToolPanelPicker(
         minimal: minimal,
         name: 'Paint Bucket',
         image: iconAndColor(
@@ -140,7 +140,7 @@ class ToolsPanel extends StatelessWidget {
         },
       ),
 
-      ToolSelector(
+      ToolPanelPicker(
         minimal: minimal,
         name: 'Eraser',
         image: iconFromSvgAsset(
@@ -154,7 +154,7 @@ class ToolsPanel extends StatelessWidget {
         },
       ),
 
-      ToolSelector(
+      ToolPanelPicker(
         minimal: minimal,
         name: 'Selector',
         image: iconAndColor(
@@ -195,7 +195,7 @@ class ToolsPanel extends StatelessWidget {
               //
               // Selection using Rectangle
               //
-              ToolSelector(
+              ToolPanelPicker(
                 minimal: minimal,
                 name: 'Rectangle',
                 image: iconAndColor(
@@ -210,7 +210,7 @@ class ToolsPanel extends StatelessWidget {
               //
               // Selection using Circle
               //
-              ToolSelector(
+              ToolPanelPicker(
                 minimal: minimal,
                 name: 'Circle',
                 image: iconAndColor(
@@ -225,7 +225,7 @@ class ToolsPanel extends StatelessWidget {
               //
               // Selection using Drawing
               //
-              ToolSelector(
+              ToolPanelPicker(
                 minimal: minimal,
                 name: 'Lasso',
                 image: iconFromSvgAsset(
@@ -242,7 +242,7 @@ class ToolsPanel extends StatelessWidget {
               //
               // Selection using magic wand
               //
-              ToolSelector(
+              ToolPanelPicker(
                 minimal: minimal,
                 name: 'Magic',
                 image: iconAndColor(
@@ -254,13 +254,36 @@ class ToolsPanel extends StatelessWidget {
                   appProvider.update();
                 },
               ),
+              if (appProvider.selector.mode == SelectorMode.wand)
+                ToolAttributeWidget(
+                  minimal: minimal,
+                  name: 'Color Tolerance',
+                  childLeft: IconButton(
+                    icon: const Icon(Icons.support),
+                    color: Colors.grey.shade500,
+                    onPressed: () {
+                      showTolerancePicker(context, appProvider.tolerance,
+                          (final int newValue) {
+                        appProvider.tolerance = newValue;
+                      });
+                    },
+                  ),
+                  childRight: minimal
+                      ? null
+                      : TolerancePicker(
+                          value: appProvider.tolerance,
+                          onChanged: (final int value) {
+                            appProvider.tolerance = value;
+                          },
+                        ),
+                ),
 
               if (appProvider.selector.isVisible) const Divider(),
               //
-              // Cancel/Hide Selection tool
+              // Sub=Selector options Repace/Add/Remove/Invert/Cancel
               //
               if (appProvider.selector.isVisible)
-                ToolSelector(
+                ToolPanelPicker(
                   minimal: minimal,
                   name: 'Replace',
                   image: iconFromSvgAssetSelected(
@@ -273,7 +296,7 @@ class ToolsPanel extends StatelessWidget {
                   },
                 ),
               if (appProvider.selector.isVisible)
-                ToolSelector(
+                ToolPanelPicker(
                   minimal: minimal,
                   name: 'Add',
                   image: iconFromSvgAssetSelected(
@@ -286,7 +309,7 @@ class ToolsPanel extends StatelessWidget {
                   },
                 ),
               if (appProvider.selector.isVisible)
-                ToolSelector(
+                ToolPanelPicker(
                   minimal: minimal,
                   name: 'Remove',
                   image: iconFromSvgAssetSelected(
@@ -300,7 +323,7 @@ class ToolsPanel extends StatelessWidget {
                 ),
               if (appProvider.selector.isVisible) const Divider(),
               if (appProvider.selector.isVisible)
-                ToolSelector(
+                ToolPanelPicker(
                   minimal: minimal,
                   name: 'Invert',
                   image: iconFromSvgAssetSelected(
@@ -320,7 +343,7 @@ class ToolsPanel extends StatelessWidget {
                   },
                 ),
               if (appProvider.selector.isVisible)
-                ToolSelector(
+                ToolPanelPicker(
                   minimal: minimal,
                   name: 'Cancel',
                   image: iconAndColor(
@@ -468,7 +491,7 @@ class ToolsPanel extends StatelessWidget {
       );
     }
 
-    // Fill Color Tolerance
+    // Color Tolerance used by Fill and Magic wand
     if (selectedTool.isSupported(ActionOptions.tolerance)) {
       widgets.add(
         ToolAttributeWidget(
