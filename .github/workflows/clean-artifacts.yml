@@ -1,9 +1,7 @@
-name: Flutter Desktop Build
-
+name: Clean Artifacts
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: 0 0 1 1
 
 jobs:
   cleanup_artifacts:
