@@ -26,11 +26,11 @@ jobs:
       - name: List build directory
         run: Get-ChildItem -Recurse -Path build
 
-      - name: Upload Windows Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: flutter-windows-app
-          path: build/windows/x64/runner/Release/**
+      # - name: Upload Windows Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: flutter-windows-app
+      #     path: build/windows/x64/runner/Release/**
 
   build-linux:
     name: Build Linux
@@ -54,11 +54,11 @@ jobs:
       - name: Build Linux App
         run: flutter build linux
 
-      - name: Upload Linux Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: flutter-linux-app
-          path: build/linux/
+      # - name: Upload Linux Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: flutter-linux-app
+      #     path: build/linux/
 
   build-macos:
     name: Build macOS
@@ -77,11 +77,11 @@ jobs:
       - name: Build macOS App
         run: flutter build macos
 
-      - name: Upload macOS Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: flutter-macos-app
-          path: build/macos/Build/Products/Release/
+      # - name: Upload macOS Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: flutter-macos-app
+      #     path: build/macos/Build/Products/Release/
 
   cleanup_artifacts:
     needs:
