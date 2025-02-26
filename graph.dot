@@ -18,7 +18,7 @@ digraph "" {
   "/lib/providers/app_provider.dart" [label="app_provider"];
   "/lib/providers/layers_provider.dart" [label="layers_provider"];
   "/lib/panels/about.dart" [label="about"];
-  "/lib/panels/tools/tool_selector.dart" [label="tool_selector"];
+  "/lib/panels/tools/tool_panel_picker.dart" [label="tool_panel_picker"];
   "/lib/panels/tools/flood_fill.dart" [label="flood_fill"];
   "/lib/panels/tools/tools_panel.dart" [label="tools_panel"];
   "/lib/panels/tools/tool_attributes_widget.dart" [label="tool_attributes_widget"];
@@ -118,7 +118,7 @@ digraph "" {
         "/lib/panels/canvas_settings.dart";
         subgraph "cluster~/lib/panels/tools" {
           label="tools";
-          "/lib/panels/tools/tool_selector.dart";
+          "/lib/panels/tools/tool_panel_picker.dart";
           "/lib/panels/tools/flood_fill.dart";
           "/lib/panels/tools/tools_panel.dart";
           "/lib/panels/tools/tool_attributes_widget.dart";
@@ -218,7 +218,7 @@ digraph "" {
   "/lib/panels/tools/flood_fill.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/models/selector_model.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/panels/tools/tool_attributes_widget.dart";
-  "/lib/panels/tools/tools_panel.dart" -> "/lib/panels/tools/tool_selector.dart";
+  "/lib/panels/tools/tools_panel.dart" -> "/lib/panels/tools/tool_panel_picker.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/providers/app_provider.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/brush_size_picker.dart";
   "/lib/panels/tools/tools_panel.dart" -> "/lib/widgets/color_preview.dart";
