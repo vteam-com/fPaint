@@ -1,0 +1,43 @@
+name: Flutter Desktop Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  cleanup_artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: List Artifacts
+        id: list_artifacts
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const artifacts = await github.rest.actions.listArtifactsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+            return artifacts.data.artifacts;
+
+      - name: Delete Old Artifacts
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const artifacts = ${{ steps.list_artifacts.outputs.result }};
+            const artifactsToKeep = 6;
+
+            if (artifacts.length > artifactsToKeep) {
+              const oldArtifacts = artifacts.slice(artifactsToKeep);
+              for (const artifact of oldArtifacts) {
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+                console.log(`Deleted artifact: ${artifact.name}`);
+              }
+            } else {
+              console.log("No artifacts to delete.");
+            }
