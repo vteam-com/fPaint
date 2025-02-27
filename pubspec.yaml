@@ -69,6 +69,7 @@ flutter:
   assets:
     - assets/app_icon.png
     - assets/icons/
+    - assets/images/platforms/
     - assets/test/
 
 # dart run flutter_launcher_icons
