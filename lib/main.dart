@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/main_screen.dart';
+import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
@@ -27,6 +28,7 @@ class MyApp extends StatelessWidget {
   final AppProvider appProvider = AppProvider();
   final LayersProvider layersProvider = LayersProvider();
   final UndoProvider undoProvider = UndoProvider();
+
   @override
   Widget build(final BuildContext context) {
     return MultiProvider(
@@ -55,11 +57,15 @@ class MyApp extends StatelessWidget {
             overlayColor: Colors.blue.withAlpha(100),
           ),
         ),
-        home: shortCutsForMainApp(
-          shellProvider,
-          appProvider,
-          const MainScreen(),
-        ),
+        // Define routes with a PlatformsPage route added.
+        routes: <String, WidgetBuilder>{
+          '/': (final BuildContext context) => shortCutsForMainApp(
+                shellProvider,
+                appProvider,
+                const MainScreen(),
+              ),
+          '/platforms': (final _) => const PlatformsPage(),
+        },
       ),
     );
   }

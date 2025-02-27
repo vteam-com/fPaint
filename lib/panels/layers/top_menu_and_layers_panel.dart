@@ -171,6 +171,11 @@ class TopMenuAndLayersPanel extends StatelessWidget {
           icon: Icons.edit,
         ),
         buildMenuItem(
+          value: MenuIds.platforms,
+          text: strings[StringId.platforms]!,
+          icon: Icons.outbound_sharp,
+        ),
+        buildMenuItem(
           value: MenuIds.about,
           text: strings[StringId.about]!,
           icon: Icons.info_outline,
@@ -212,12 +217,19 @@ class TopMenuAndLayersPanel extends StatelessWidget {
           }
         });
         break;
+
       case MenuIds.export:
         sharePanel(context);
         break;
+
       case MenuIds.canvasSize:
         showCanvasSettings(context);
         break;
+
+      case MenuIds.platforms:
+        Navigator.pushNamed(context, '/platforms');
+        break;
+
       case MenuIds.about:
         showAboutBox(context);
         break;
