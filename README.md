@@ -1,61 +1,76 @@
+# fPaint
 
-# FPaint
+## Flutter Raster Drawing App
 
-## Flutter Drawing App
-
-A feature-rich drawing and painting application built with Flutter that allows users to create digital artwork on any platform iOS,Android,macOS,Windows,Linux, and Web.
+A feature-rich drawing and painting application built with Flutter that allows users to create digital artwork on any platform – iOS, Android, macOS, Windows, Linux, and Web – from a single code base.
 
 ## Features
 
-- Free-hand drawing and sketching
-- Multiple brush sizes and styles
-- Color picker with custom color palette
-- Undo/Redo functionality
-- Save drawings to device/Dowload folder for Web
-- Responsive design for different screen sizes
+- Free-hand drawing and sketching with multiple brush sizes and styles
+- Advanced layers functionality for organized artwork management
+- Enhanced selection tools including Magic Wand selection for precise edits
+- Powerful color picker with a customizable auto palette
+- Undo/Redo functionality for effortless corrections
+- Save drawings directly to your device or Download on Web
+- Responsive design optimized for different screen sizes
+- One code base for all platforms ensuring consistent performance and updates
+- Open and work with OpenRaster ORA file format
+
+This app is 100% free with no ads or nagging. We invite all Flutter enthusiasts to contribute and support the project.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Flutter SDK (2.0 or higher)
+- Flutter SDK (3.2 or higher)
 - Dart SDK
-- Android Studio / VS Code
+- Edit and build on MacOS,Windows, or Linux
+- IDE VS Code or Android Studio
 - iOS Simulator / Android Emulator
 
 ### Installation
 
 1. Clone the repository
 
-    ```git clone <https://github.com/vteam-com/fPaint.git>```
+    ```bash
+    git clone https://github.com/vteam-com/fPaint.git
+    ```
 
-1. Navigate to project directory
+2. Navigate to the project directory
 
-    ```cd flutter-drawing-app```
+    ```bash
+    cd fPaint
+    ```
 
-1. Install dependencies
+3. Install dependencies
 
-    ```flutter pub get```
+    ```bash
+    flutter pub get
+    ```
 
-1. Run the app
+4. Run the app
 
-    ```flutter run```
+    ```bash
+    flutter run
+    ```
 
 ## Usage
 
 1. Launch the app
-2. Select your preferred brush size and color
+2. Choose your preferred brush size and color
 3. Start drawing on the canvas
-4. Use the toolbar to:
+4. Use the SidePanel to:
    - Change colors
    - Adjust brush size
+   - Use advanced selection tools such as Magic Wand selection
+   - Manage layers efficiently
    - Undo/Redo actions
-   - Clear canvas
+   - Clear the canvas
    - Save your artwork
 
 ## License
 
-This project is licensed under the **MIT** License
+This project is licensed under the **MIT** License.
 
 ## Screenshots
 
@@ -79,15 +94,15 @@ This project is licensed under the **MIT** License
 
 ## Graph Dependencies
 
-- install **Lakos**
+- Install **Lakos**
 
     ```bash
     dart pub global activate lakos
     ```
 
-- install **GraphViz**
+- Install **GraphViz**
 
-  - on macOS
+  - On macOS
 
     ```bash
     brew install graphviz
