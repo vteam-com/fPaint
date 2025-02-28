@@ -408,7 +408,7 @@ class MainViewState extends State<MainView> {
           positions: <ui.Offset>[adjustedPosition, adjustedPosition],
           brush: MyBrush(
             color: appProvider.brushColor,
-            size: appProvider.brusSize,
+            size: appProvider.brushSize,
             style: appProvider.brushStyle,
           ),
           fillColor: appProvider.fillColor,
