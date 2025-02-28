@@ -9,24 +9,24 @@ class AppPreferences {
   bool get isLoaded => _prefs != null;
 
   // Keys for preferences
-  static const String themeModeKey = 'theme_mode';
-  static const String brushSizeKey = 'brush_size';
-  static const String lastColorKey = 'last_color';
+  static const String keyBrushSize = 'keyBrushSize';
+  static const String keyLastBrushColor = 'keyLastBrushColor';
+  static const String keyLastFillColor = 'keyLastFillColor';
   static const String keySidePanelDistance = 'keySidePanelDistance';
   static const String keyUseApplePencil = 'keyUseApplePencil';
 
   // Default values
-  ThemeMode _themeMode = ThemeMode.system;
-  double _brushSize = 5.0;
   double _sidePanelDistance = 200;
-  Color _lastColor = Colors.black;
+  double _brushSize = 5.0;
+  Color _brushColor = Colors.black;
+  Color _fillColor = Colors.blue;
   bool _useApplePencil = true;
 
   // Getters
-  ThemeMode get themeMode => _themeMode;
-  double get brushSize => _brushSize;
   double get sidePanelDistance => _sidePanelDistance;
-  Color get lastColor => _lastColor;
+  double get brushSize => _brushSize;
+  Color get brushColor => _brushColor;
+  Color get fillColor => _fillColor;
   bool get useApplePencil => _useApplePencil;
 
   Future<SharedPreferences> getPref() async {
@@ -36,41 +36,6 @@ class AppPreferences {
     return _prefs!;
   }
 
-  Future<void> _loadPreferences() async {
-    _prefs = await SharedPreferences.getInstance();
-
-    // Load theme mode
-    final int themeModeIndex = _prefs!.getInt(themeModeKey) ?? 0;
-    _themeMode = ThemeMode.values[themeModeIndex];
-
-    // Load brush size
-    _brushSize = _prefs!.getDouble(brushSizeKey) ?? 5.0;
-
-    // Load last used color
-    // ignore: deprecated_member_use
-    _lastColor = Color(_prefs!.getInt(lastColorKey) ?? Colors.black.value);
-
-    _sidePanelDistance = _prefs!.getDouble(keySidePanelDistance) ?? 200.0;
-
-    _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? true;
-  }
-
-  Future<void> setThemeMode(final ThemeMode mode) async {
-    _themeMode = mode;
-    (await getPref()).setInt(themeModeKey, mode.index);
-  }
-
-  Future<void> setBrushSize(final double size) async {
-    _brushSize = size;
-    (await getPref()).setDouble(brushSizeKey, size);
-  }
-
-  Future<void> setLastColor(final Color color) async {
-    _lastColor = color;
-    // ignore: deprecated_member_use
-    (await getPref()).setInt(lastColorKey, color.value);
-  }
-
   Future<void> setSidePanelDistance(
     final double value,
   ) async {
@@ -78,10 +43,43 @@ class AppPreferences {
     (await getPref()).setDouble(keySidePanelDistance, value);
   }
 
+  Future<void> setBrushSize(final double size) async {
+    _brushSize = size;
+    (await getPref()).setDouble(keyBrushSize, size);
+  }
+
+  Future<void> setBrushColor(final Color color) async {
+    _brushColor = color;
+    (await getPref()).setInt(keyLastBrushColor, color.toARGB32());
+  }
+
+  Future<void> setFillColor(final Color color) async {
+    _fillColor = color;
+    (await getPref()).setInt(keyLastFillColor, color.toARGB32());
+  }
+
   Future<void> setUseApplePencil(
     final bool value,
   ) async {
     _useApplePencil = value;
     (await getPref()).setBool(keyUseApplePencil, value);
+  }
+
+  Future<void> _loadPreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+
+    _sidePanelDistance = _prefs!.getDouble(keySidePanelDistance) ?? 200.0;
+
+    // Load brush size
+    _brushSize = _prefs!.getDouble(keyBrushSize) ?? 5.0;
+
+    // Load last used color
+    _brushColor =
+        Color(_prefs!.getInt(keyLastBrushColor) ?? Colors.black.toARGB32());
+
+    _fillColor =
+        Color(_prefs!.getInt(keyLastFillColor) ?? Colors.blue.toARGB32());
+
+    _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? true;
   }
 }
