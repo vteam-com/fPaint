@@ -48,6 +48,7 @@ digraph "" {
   "/lib/files/export_download_non_web.dart" [label="export_download_non_web"];
   "/lib/files/import_files.dart" [label="import_files"];
   "/lib/pages/platforms_page.dart" [label="platforms_page"];
+  "/lib/pages/settings_page.dart" [label="settings_page"];
   "/lib/main_screen.dart" [label="main_screen"];
   "/lib/helpers/image_helper.dart" [label="image_helper"];
   "/lib/helpers/list_helper.dart" [label="list_helper"];
@@ -156,6 +157,7 @@ digraph "" {
       subgraph "cluster~/lib/pages" {
         label="pages";
         "/lib/pages/platforms_page.dart";
+        "/lib/pages/settings_page.dart";
       }
       subgraph "cluster~/lib/helpers" {
         label="helpers";
@@ -271,6 +273,7 @@ digraph "" {
   "/lib/models/user_action_drawing.dart" -> "/lib/widgets/brush_style_picker.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/main_screen.dart";
   "/lib/main.dart" -> "/lib/pages/platforms_page.dart";
+  "/lib/main.dart" -> "/lib/pages/settings_page.dart";
   "/lib/main.dart" -> "/lib/providers/app_provider.dart";
   "/lib/main.dart" -> "/lib/providers/shell_provider.dart";
   "/lib/main.dart" -> "/lib/providers/undo_provider.dart";
@@ -292,6 +295,7 @@ digraph "" {
   "/lib/files/import_files.dart" -> "/lib/files/file_ora.dart";
   "/lib/files/import_files.dart" -> "/lib/providers/app_provider.dart";
   "/lib/files/import_files.dart" -> "/lib/providers/shell_provider.dart";
+  "/lib/pages/settings_page.dart" -> "/lib/providers/app_provider.dart";
   "/lib/main_screen.dart" -> "/lib/floating_buttons.dart";
   "/lib/main_screen.dart" -> "/lib/panels/side_panel.dart";
   "/lib/main_screen.dart" -> "/lib/providers/shell_provider.dart";

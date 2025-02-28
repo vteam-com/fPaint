@@ -121,6 +121,11 @@ class MainViewState extends State<MainView> {
                   if (_activePointers.length == 2) {
                     // Set the initial focal point between two fingers
                     _baseDistance = _getDistanceBetweenTouchPoints();
+                  } else {
+                    if (event.buttons == 1 &&
+                        !appProvider.preferences.useApplePencil) {
+                      _handlePointerStart(appProvider, event);
+                    }
                   }
                 } else {
                   _handlePointerStart(appProvider, event);
@@ -136,6 +141,11 @@ class MainViewState extends State<MainView> {
 
                   if (_activePointers.length == 2) {
                     _handleMultiTouchUpdate(event, appProvider, shellProvider);
+                  } else {
+                    if (event.buttons == 1 &&
+                        !appProvider.preferences.useApplePencil) {
+                      _handlePointerMove(appProvider, event);
+                    }
                   }
                 } else {
                   _handlePointerMove(appProvider, event);
@@ -150,6 +160,11 @@ class MainViewState extends State<MainView> {
                   _activePointers.remove(event.pointer);
                   if (_activePointers.length < 2) {
                     _baseDistance = 0.0; // Reset base distance
+                  } else {
+                    if (event.buttons == 1 &&
+                        !appProvider.preferences.useApplePencil) {
+                      _handlePointerEnd(appProvider, event);
+                    }
                   }
                 } else {
                   _handlePointerEnd(appProvider, event);

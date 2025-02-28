@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/pages/platforms_page.dart';
+import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
@@ -64,6 +65,7 @@ class MyApp extends StatelessWidget {
                 appProvider,
                 const MainScreen(),
               ),
+          '/settings': (final _) => const SettingsPage(),
           '/platforms': (final _) => const PlatformsPage(),
         },
       ),

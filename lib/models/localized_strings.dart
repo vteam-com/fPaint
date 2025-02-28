@@ -10,6 +10,7 @@ enum StringId {
   importTooltip,
   exportTooltip,
   platforms,
+  settings,
 }
 
 const Map<StringId, String> strings = <StringId, String>{
@@ -23,5 +24,6 @@ const Map<StringId, String> strings = <StringId, String>{
   StringId.startOverTooltip: 'Start over...',
   StringId.importTooltip: 'Import...',
   StringId.exportTooltip: 'Export...',
+  StringId.settings: 'Settings...',
   StringId.platforms: 'Available on...',
 };
