@@ -76,7 +76,7 @@ This project is licensed under the **MIT** License.
 
 ![fPaint Screenshot](fPaint.png)
 
-## OpenRaster ORA file
+## The OpenRaster (ORA) file format
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -94,16 +94,15 @@ This project is licensed under the **MIT** License.
 
 ## Graph Dependencies
 
-- Install **Lakos**
+![Call Graph](graph.svg)
 
-    ```bash
-    dart pub global activate lakos
-    ```
+*How to generate the above graph. Run these commands on macOS .*
 
-- Install **GraphViz**
+```bash
+dart pub global activate lakos
+brew install graphviz
+./tools/graph.sh
+```
 
-  - On macOS
-
-    ```bash
-    brew install graphviz
-    ```
+Please contribute and report issues on the GitHub repository.
+<https://github.com/vteam-com/fPaint>
