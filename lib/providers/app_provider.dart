@@ -245,10 +245,10 @@ class AppProvider extends ChangeNotifier {
 
   //-------------------------
   // Line Weight
-  double _lineWeight = 5;
-  double get brusSize => _lineWeight;
-  set brusSize(final double value) {
-    _lineWeight = value;
+
+  double get brushSize => preferences.brushSize;
+  set brushSize(final double value) {
+    preferences.setBrushSize(value);
     update();
   }
 
@@ -263,19 +263,17 @@ class AppProvider extends ChangeNotifier {
 
   //-------------------------
   // Brush Color
-  Color _brushColor = Colors.black;
-  Color get brushColor => _brushColor;
+  Color get brushColor => preferences.brushColor;
   set brushColor(final Color value) {
-    _brushColor = value;
+    preferences.setBrushColor(value);
     update();
   }
 
   //-------------------------
   // Color for Fill
-  Color _fillColor = Colors.lightBlue;
-  Color get fillColor => _fillColor;
+  Color get fillColor => preferences.fillColor;
   set fillColor(final Color value) {
-    _fillColor = value;
+    preferences.setFillColor(value);
     update();
   }
 
@@ -305,7 +303,7 @@ class AppProvider extends ChangeNotifier {
           action: type,
           brush: MyBrush(
             color: colorBrush,
-            size: this.brusSize,
+            size: this.brushSize,
           ),
           fillColor: colorFill,
         ),

@@ -376,11 +376,11 @@ class ToolsPanel extends StatelessWidget {
               showBrushSizePicker(
                 context: context,
                 title: title,
-                value: appProvider.brusSize,
+                value: appProvider.brushSize,
                 min: min,
                 max: max,
                 onChanged: (final double newValue) {
-                  appProvider.brusSize = newValue;
+                  appProvider.brushSize = newValue;
                 },
               );
             },
@@ -389,11 +389,11 @@ class ToolsPanel extends StatelessWidget {
               ? null
               : BrushSizePicker(
                   title: title,
-                  value: appProvider.brusSize,
+                  value: appProvider.brushSize,
                   min: min,
                   max: max,
                   onChanged: (final double value) {
-                    appProvider.brusSize = value;
+                    appProvider.brushSize = value;
                   },
                 ),
         ),
