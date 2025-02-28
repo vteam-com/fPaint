@@ -13,18 +13,21 @@ class AppPreferences {
   static const String brushSizeKey = 'brush_size';
   static const String lastColorKey = 'last_color';
   static const String keySidePanelDistance = 'keySidePanelDistance';
+  static const String keyUseApplePencil = 'keyUseApplePencil';
 
   // Default values
   ThemeMode _themeMode = ThemeMode.system;
   double _brushSize = 5.0;
   double _sidePanelDistance = 200;
   Color _lastColor = Colors.black;
+  bool _useApplePencil = true;
 
   // Getters
   ThemeMode get themeMode => _themeMode;
   double get brushSize => _brushSize;
   double get sidePanelDistance => _sidePanelDistance;
   Color get lastColor => _lastColor;
+  bool get useApplePencil => _useApplePencil;
 
   Future<SharedPreferences> getPref() async {
     if (_prefs == null) {
@@ -48,6 +51,8 @@ class AppPreferences {
     _lastColor = Color(_prefs!.getInt(lastColorKey) ?? Colors.black.value);
 
     _sidePanelDistance = _prefs!.getDouble(keySidePanelDistance) ?? 200.0;
+
+    _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? true;
   }
 
   Future<void> setThemeMode(final ThemeMode mode) async {
@@ -71,5 +76,12 @@ class AppPreferences {
   ) async {
     _sidePanelDistance = value;
     (await getPref()).setDouble(keySidePanelDistance, value);
+  }
+
+  Future<void> setUseApplePencil(
+    final bool value,
+  ) async {
+    _useApplePencil = value;
+    (await getPref()).setBool(keyUseApplePencil, value);
   }
 }

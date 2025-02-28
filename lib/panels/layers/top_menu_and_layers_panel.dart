@@ -171,6 +171,11 @@ class TopMenuAndLayersPanel extends StatelessWidget {
           icon: Icons.edit,
         ),
         buildMenuItem(
+          value: MenuIds.settings,
+          text: strings[StringId.settings]!,
+          icon: Icons.settings,
+        ),
+        buildMenuItem(
           value: MenuIds.platforms,
           text: strings[StringId.platforms]!,
           icon: Icons.outbound_sharp,
@@ -224,6 +229,10 @@ class TopMenuAndLayersPanel extends StatelessWidget {
 
       case MenuIds.canvasSize:
         showCanvasSettings(context);
+        break;
+
+      case MenuIds.settings:
+        Navigator.pushNamed(context, '/settings');
         break;
 
       case MenuIds.platforms:
