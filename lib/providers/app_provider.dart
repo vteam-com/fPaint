@@ -83,6 +83,7 @@ class AppProvider extends ChangeNotifier {
           path: Path.from(selector.path1!),
         ),
       );
+      this.update();
     }
   }
 

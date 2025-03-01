@@ -11,7 +11,7 @@
 <g id="clust1" class="cluster">
 <title>cluster~</title>
 <path fill="none" stroke="lightgray" stroke-width="2.6" d="M84.11,-8C84.11,-8 5257.11,-8 5257.11,-8 5263.11,-8 5269.11,-14 5269.11,-20 5269.11,-20 5269.11,-969 5269.11,-969 5269.11,-975 5263.11,-981 5257.11,-981 5257.11,-981 84.11,-981 84.11,-981 78.11,-981 72.11,-975 72.11,-969 72.11,-969 72.11,-20 72.11,-20 72.11,-14 78.11,-8 84.11,-8"/>
-<text text-anchor="middle" x="2670.61" y="-964.65" font-family="Arial Black" font-size="13.00">fPaint</text>
+<text text-anchor="middle" x="2670.61" y="-964.65" font-family="Arial Black" font-size="13.00">fpaint</text>
 </g>
 <g id="clust2" class="cluster">
 <title>cluster~/test</title>
