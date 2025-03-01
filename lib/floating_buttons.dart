@@ -105,6 +105,7 @@ Widget myFloatButton({
   final Widget? child,
 }) {
   return FloatingActionButton(
+    heroTag: null,
     backgroundColor: AppColors.colorFloatButtonBackground,
     foregroundColor: Colors.white,
     tooltip: tooltip,
