@@ -34,6 +34,7 @@ Widget shortCutsForMainApp(
         LogicalKeyboardKey.keyZ,
         LogicalKeyboardKey.shift,
       ): const RedoIntent(),
+
       //-------------------------------------------------
       // Save
       LogicalKeySet(
@@ -180,6 +181,7 @@ Widget shortCutsForMainApp(
         DeleteIntent: CallbackAction<DeleteIntent>(
           onInvoke: (final DeleteIntent intent) async {
             appProvider.regionErase();
+            appProvider.update();
             return null;
           },
         ),
