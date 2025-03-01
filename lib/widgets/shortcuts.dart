@@ -181,7 +181,6 @@ Widget shortCutsForMainApp(
         DeleteIntent: CallbackAction<DeleteIntent>(
           onInvoke: (final DeleteIntent intent) async {
             appProvider.regionErase();
-            appProvider.update();
             return null;
           },
         ),
