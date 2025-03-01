@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PlatformsPage extends StatelessWidget {
   const PlatformsPage({super.key});
@@ -17,16 +18,19 @@ class PlatformsPage extends StatelessWidget {
                   'macOS',
                   'assets/images/platforms/platformDesktopMacOS.png',
                   'Desktop Software.',
+                  'https://paint.vteam.com/downloads/fpaint-macos.zip',
                 ),
                 paltformItem(
                   'Windows',
                   'assets/images/platforms/platformDesktopWindows.png',
                   'Desktop Software.',
+                  'https://paint.vteam.com/downloads/fpaint-windows.zip',
                 ),
                 paltformItem(
                   'Linux',
                   'assets/images/platforms/platformDesktopLinux.png',
                   'Desktop Software.',
+                  'https://paint.vteam.com/downloads/fpaint-linux.zip',
                 ),
                 const SizedBox(
                   height: 40,
@@ -35,11 +39,13 @@ class PlatformsPage extends StatelessWidget {
                   'iOS',
                   'assets/images/platforms/platformMobileIOS.png',
                   'Mobile app.',
+                  'https://apps.apple.com/us/app/cooking-timer-by-vteam/id1188460815',
                 ),
                 paltformItem(
                   'Android',
                   'assets/images/platforms/platformMobileAndroid.png',
                   'Mobile app.',
+                  'https://play.google.com/store/apps/details?id=com.vteam.cookingtimerflutter',
                 ),
                 const SizedBox(
                   height: 40,
@@ -48,6 +54,7 @@ class PlatformsPage extends StatelessWidget {
                   'Web Browser',
                   'assets/images/platforms/platformWeb.png',
                   'Run on any OS with most browsers.',
+                  'https://paint.vteam.com',
                 ),
               ],
             ),
@@ -61,11 +68,15 @@ class PlatformsPage extends StatelessWidget {
     final String name,
     final String image,
     final String description,
+    final String url,
   ) {
     return MaterialButton(
+      key: ValueKey<String>(name),
       elevation: 9,
       padding: const EdgeInsets.all(20),
-      onPressed: () {},
+      onPressed: () {
+        launchUrl(Uri.parse(url));
+      },
       child: Row(
         spacing: 20,
         children: <Widget>[
