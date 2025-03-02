@@ -459,6 +459,7 @@ class MainViewState extends State<MainView> {
       } else {
         // Existing shape logic
         appProvider.updateAction(end: adjustedPosition);
+        appProvider.update();
       }
     }
   }
