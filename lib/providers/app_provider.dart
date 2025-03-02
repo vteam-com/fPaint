@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -426,6 +427,40 @@ class AppProvider extends ChangeNotifier {
       return path.transform(matrix.storage);
     }
     return null;
+  }
+
+  void crop() async {
+    final Rect bounds = selector.path1!.getBounds();
+    final Offset selectionOffset = Offset(-bounds.left, -bounds.top);
+    final Size originalSize = layers.size;
+
+    _undoProvider.executeAction(
+      name: 'Crop',
+      forward: () {
+        this.layers.offsetContent(selectionOffset);
+
+        // Resize each layer and its content to crop to the bounds
+        this.layers.canvasResize(
+              bounds.width.toInt(),
+              bounds.height.toInt(),
+              CanvasResizePosition.topLeft,
+            );
+
+        // Clear the selector
+        selector.clear();
+        update();
+      },
+      backward: () {
+        // Uncrop: restore the original size and offset
+        this.layers.canvasResize(
+              originalSize.width.toInt(),
+              originalSize.height.toInt(),
+              CanvasResizePosition.topLeft,
+            );
+        this.layers.offsetContent(-selectionOffset);
+        update();
+      },
+    );
   }
 
   //=============================================================================

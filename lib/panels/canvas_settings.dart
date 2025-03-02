@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 
@@ -100,7 +101,8 @@ void showCanvasSettings(final BuildContext context) {
                   const Text('Content Alignment'),
                   NineGridSelector(
                     selectedPosition: layers.canvasResizePosition,
-                    onPositionSelected: (final int newPosition) {
+                    onPositionSelected:
+                        (final CanvasResizePosition newPosition) {
                       layers.canvasResizePosition = newPosition;
                     },
                   ),
@@ -121,7 +123,11 @@ void showCanvasSettings(final BuildContext context) {
                         ),
                       );
                     } else {
-                      layers.canvasResize(width.toInt(), height.toInt());
+                      layers.canvasResize(
+                        width.toInt(),
+                        height.toInt(),
+                        layers.canvasResizePosition,
+                      );
                       Navigator.pop(context);
                     }
                   },
