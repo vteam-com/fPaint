@@ -80,22 +80,19 @@ class LayersProvider extends ChangeNotifier {
 
   //-------------------------------------------
   // Canvas Resize position
-  int _resizePosition = 4; // Center
+  CanvasResizePosition _canvasResizePosition = CanvasResizePosition.center;
 
-  int get resizePosition => _resizePosition;
-
-  set resizePosition(final int value) {
-    _resizePosition = value;
+  CanvasResizePosition get canvasResizePosition => _canvasResizePosition;
+  set canvasResizePosition(final CanvasResizePosition value) {
+    _canvasResizePosition = value;
     notifyListeners();
   } // center
 
-  int get canvasResizePosition => resizePosition;
-  set canvasResizePosition(final int value) {
-    resizePosition = value;
-    notifyListeners();
-  } // center
-
-  void canvasResize(final int width, final int height) {
+  void canvasResize(
+    final int width,
+    final int height,
+    final CanvasResizePosition position,
+  ) {
     final Size oldSize = size;
     final Size newSize = Size(width.toDouble(), height.toDouble());
     size = newSize;
@@ -105,8 +102,8 @@ class LayersProvider extends ChangeNotifier {
       this.scale = scale;
     }
 
-    final Offset offset = CanvasResizePosition.anchorTranslate(
-      this.resizePosition,
+    final Offset offset = anchorTranslate(
+      position,
       oldSize,
       newSize,
     );

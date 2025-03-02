@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/canvas_resize.dart';
 
 class NineGridSelector extends StatelessWidget {
   const NineGridSelector({
@@ -7,8 +8,8 @@ class NineGridSelector extends StatelessWidget {
     required this.selectedPosition,
     required this.onPositionSelected,
   });
-  final int selectedPosition;
-  final void Function(int) onPositionSelected;
+  final CanvasResizePosition selectedPosition;
+  final void Function(CanvasResizePosition) onPositionSelected;
 
   @override
   Widget build(final BuildContext context) {
@@ -29,16 +30,16 @@ class NineGridSelector extends StatelessWidget {
         itemCount: 9,
         itemBuilder: (final BuildContext context, final int index) {
           return GestureDetector(
-            onTap: () => onPositionSelected(index),
+            onTap: () => onPositionSelected(CanvasResizePosition.values[index]),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: selectedPosition == index
+                color: selectedPosition == CanvasResizePosition.values[index]
                     ? Colors.blue
                     : Colors.grey.shade800,
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Icon(
-                selectedPosition == index
+                selectedPosition == CanvasResizePosition.values[index]
                     ? Icons.image
                     : getDirectionIcon(index),
               ),

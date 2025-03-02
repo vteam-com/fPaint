@@ -176,380 +176,415 @@ class ToolsPanel extends StatelessWidget {
     final AppProvider appProvider = AppProvider.of(context, listen: true);
     final LayersProvider layers = LayersProvider.of(context);
     final ActionType selectedTool = appProvider.selectedAction;
-    final String title = appProvider.selectedAction == ActionType.pencil
-        ? 'Pencil Size'
-        : 'Brush Size';
-    final double min =
-        appProvider.selectedAction == ActionType.pencil ? 1 : 0.1;
-    final double max = 100;
 
-    // Selector options
-    if (selectedTool.isSupported(ActionOptions.selectorOptions)) {
-      widgets.add(
-        ToolAttributeWidget(
-          minimal: minimal,
-          name: 'Selector',
-          childRight: Wrap(
-            alignment: WrapAlignment.center,
-            children: <Widget>[
-              //
-              // Selection using Rectangle
-              //
-              ToolPanelPicker(
-                minimal: minimal,
-                name: 'Rectangle',
-                image: iconAndColor(
-                  appProvider.selector.mode == SelectorMode.rectangle,
-                  Icons.highlight_alt,
-                ),
-                onPressed: () {
-                  appProvider.selector.mode = SelectorMode.rectangle;
-                  appProvider.update();
-                },
-              ),
-              //
-              // Selection using Circle
-              //
-              ToolPanelPicker(
-                minimal: minimal,
-                name: 'Circle',
-                image: iconAndColor(
-                  appProvider.selector.mode == SelectorMode.circle,
-                  Symbols.lasso_select,
-                ),
-                onPressed: () {
-                  appProvider.selector.mode = SelectorMode.circle;
-                  appProvider.update();
-                },
-              ),
-              //
-              // Selection using Drawing
-              //
-              ToolPanelPicker(
-                minimal: minimal,
-                name: 'Lasso',
-                image: iconFromSvgAsset(
-                  'assets/icons/lasso.svg',
-                  appProvider.selector.mode == SelectorMode.lasso
-                      ? Colors.blue
-                      : IconTheme.of(context).color!,
-                ),
-                onPressed: () {
-                  appProvider.selector.mode = SelectorMode.lasso;
-                  appProvider.update();
-                },
-              ),
-              //
-              // Selection using magic wand
-              //
-              ToolPanelPicker(
-                minimal: minimal,
-                name: 'Magic',
-                image: iconAndColor(
-                  appProvider.selector.mode == SelectorMode.wand,
-                  Icons.auto_fix_high_outlined,
-                ),
-                onPressed: () {
-                  appProvider.selector.mode = SelectorMode.wand;
-                  appProvider.update();
-                },
-              ),
-              if (appProvider.selector.mode == SelectorMode.wand)
-                ToolAttributeWidget(
+    switch (selectedTool) {
+      case ActionType.fill:
+        addToolOptionFillColor(widgets, appProvider, context);
+        addToolOptionTolerance(widgets, context, appProvider);
+        addToolOptionTopColors(widgets, layers, appProvider, minimal);
+
+        break;
+
+      case ActionType.selector:
+        widgets.add(
+          ToolAttributeWidget(
+            minimal: minimal,
+            name: 'Selector',
+            childRight: Wrap(
+              alignment: WrapAlignment.center,
+              children: <Widget>[
+                //
+                // Selection using Rectangle
+                //
+                ToolPanelPicker(
                   minimal: minimal,
-                  name: 'Color Tolerance',
-                  childLeft: IconButton(
-                    icon: const Icon(Icons.support),
-                    color: Colors.grey.shade500,
+                  name: 'Rectangle',
+                  image: iconAndColor(
+                    appProvider.selector.mode == SelectorMode.rectangle,
+                    Icons.highlight_alt,
+                  ),
+                  onPressed: () {
+                    appProvider.selector.mode = SelectorMode.rectangle;
+                    appProvider.update();
+                  },
+                ),
+                //
+                // Selection using Circle
+                //
+                ToolPanelPicker(
+                  minimal: minimal,
+                  name: 'Circle',
+                  image: iconAndColor(
+                    appProvider.selector.mode == SelectorMode.circle,
+                    Symbols.lasso_select,
+                  ),
+                  onPressed: () {
+                    appProvider.selector.mode = SelectorMode.circle;
+                    appProvider.update();
+                  },
+                ),
+                //
+                // Selection using Drawing
+                //
+                ToolPanelPicker(
+                  minimal: minimal,
+                  name: 'Lasso',
+                  image: iconFromSvgAsset(
+                    'assets/icons/lasso.svg',
+                    appProvider.selector.mode == SelectorMode.lasso
+                        ? Colors.blue
+                        : IconTheme.of(context).color!,
+                  ),
+                  onPressed: () {
+                    appProvider.selector.mode = SelectorMode.lasso;
+                    appProvider.update();
+                  },
+                ),
+                //
+                // Selection using magic wand
+                //
+                ToolPanelPicker(
+                  minimal: minimal,
+                  name: 'Magic',
+                  image: iconAndColor(
+                    appProvider.selector.mode == SelectorMode.wand,
+                    Icons.auto_fix_high_outlined,
+                  ),
+                  onPressed: () {
+                    appProvider.selector.mode = SelectorMode.wand;
+                    appProvider.update();
+                  },
+                ),
+
+                if (appProvider.selector.isVisible) const Divider(),
+
+                //
+                // Sub=Selector options Repace/Add/Remove/Invert/Cancel
+                //
+                if (appProvider.selector.isVisible)
+                  ToolPanelPicker(
+                    minimal: minimal,
+                    name: 'Replace',
+                    image: iconFromSvgAssetSelected(
+                      'assets/icons/selector_replace.svg',
+                      appProvider.selector.math == SelectorMath.replace,
+                    ),
                     onPressed: () {
-                      showTolerancePicker(context, appProvider.tolerance,
-                          (final int newValue) {
-                        appProvider.tolerance = newValue;
-                      });
+                      appProvider.selector.math = SelectorMath.replace;
+                      appProvider.update();
                     },
                   ),
-                  childRight: minimal
-                      ? null
-                      : TolerancePicker(
-                          value: appProvider.tolerance,
-                          onChanged: (final int value) {
-                            appProvider.tolerance = value;
-                          },
+
+                if (appProvider.selector.isVisible)
+                  ToolPanelPicker(
+                    minimal: minimal,
+                    name: 'Add',
+                    image: iconFromSvgAssetSelected(
+                      'assets/icons/selector_add.svg',
+                      appProvider.selector.math == SelectorMath.add,
+                    ),
+                    onPressed: () {
+                      appProvider.selector.math = SelectorMath.add;
+                      appProvider.update();
+                    },
+                  ),
+
+                if (appProvider.selector.isVisible)
+                  ToolPanelPicker(
+                    minimal: minimal,
+                    name: 'Remove',
+                    image: iconFromSvgAssetSelected(
+                      'assets/icons/selector_remove.svg',
+                      appProvider.selector.math == SelectorMath.remove,
+                    ),
+                    onPressed: () {
+                      appProvider.selector.math = SelectorMath.remove;
+                      appProvider.update();
+                    },
+                  ),
+
+                if (appProvider.selector.isVisible) const Divider(),
+
+                if (appProvider.selector.isVisible)
+                  ToolPanelPicker(
+                    minimal: minimal,
+                    name: 'Invert',
+                    image: iconFromSvgAssetSelected(
+                      'assets/icons/selector_invert.svg',
+                      false,
+                    ),
+                    onPressed: () {
+                      appProvider.selector.invert(
+                        Rect.fromLTWH(
+                          0,
+                          0,
+                          layers.size.width,
+                          layers.size.height,
                         ),
-                ),
-
-              if (appProvider.selector.isVisible) const Divider(),
-              //
-              // Sub=Selector options Repace/Add/Remove/Invert/Cancel
-              //
-              if (appProvider.selector.isVisible)
-                ToolPanelPicker(
-                  minimal: minimal,
-                  name: 'Replace',
-                  image: iconFromSvgAssetSelected(
-                    'assets/icons/selector_replace.svg',
-                    appProvider.selector.math == SelectorMath.replace,
+                      );
+                      appProvider.update();
+                    },
                   ),
-                  onPressed: () {
-                    appProvider.selector.math = SelectorMath.replace;
-                    appProvider.update();
-                  },
-                ),
-              if (appProvider.selector.isVisible)
-                ToolPanelPicker(
-                  minimal: minimal,
-                  name: 'Add',
-                  image: iconFromSvgAssetSelected(
-                    'assets/icons/selector_add.svg',
-                    appProvider.selector.math == SelectorMath.add,
+
+                if (appProvider.selector.isVisible)
+                  ToolPanelPicker(
+                    minimal: minimal,
+                    name: 'Crop',
+                    image: iconAndColor(
+                      false,
+                      Icons.crop,
+                    ),
+                    onPressed: () {
+                      appProvider.crop();
+                      appProvider.update();
+                    },
                   ),
-                  onPressed: () {
-                    appProvider.selector.math = SelectorMath.add;
-                    appProvider.update();
-                  },
-                ),
-              if (appProvider.selector.isVisible)
-                ToolPanelPicker(
-                  minimal: minimal,
-                  name: 'Remove',
-                  image: iconFromSvgAssetSelected(
-                    'assets/icons/selector_remove.svg',
-                    appProvider.selector.math == SelectorMath.remove,
+
+                if (appProvider.selector.isVisible)
+                  ToolPanelPicker(
+                    minimal: minimal,
+                    name: 'Cancel',
+                    image: iconAndColor(
+                      false,
+                      Symbols.remove_selection,
+                    ),
+                    onPressed: () {
+                      appProvider.selector.clear();
+                      appProvider.update();
+                    },
                   ),
-                  onPressed: () {
-                    appProvider.selector.math = SelectorMath.remove;
-                    appProvider.update();
-                  },
-                ),
-              if (appProvider.selector.isVisible) const Divider(),
-              if (appProvider.selector.isVisible)
-                ToolPanelPicker(
-                  minimal: minimal,
-                  name: 'Invert',
-                  image: iconFromSvgAssetSelected(
-                    'assets/icons/selector_invert.svg',
-                    false,
-                  ),
-                  onPressed: () {
-                    appProvider.selector.invert(
-                      Rect.fromLTWH(
-                        0,
-                        0,
-                        layers.size.width,
-                        layers.size.height,
-                      ),
-                    );
-                    appProvider.update();
-                  },
-                ),
-              if (appProvider.selector.isVisible)
-                ToolPanelPicker(
-                  minimal: minimal,
-                  name: 'Cancel',
-                  image: iconAndColor(
-                    false,
-                    Symbols.remove_selection,
-                  ),
-                  onPressed: () {
-                    appProvider.selector.clear();
-                    appProvider.update();
-                  },
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
-    }
+        );
 
-    // Brush Size
-    if (selectedTool.isSupported(ActionOptions.brushSize)) {
-      widgets.add(
-        ToolAttributeWidget(
-          minimal: minimal,
-          name: title,
-          childLeft: IconButton(
-            icon: const Icon(Icons.line_weight),
-            color: Colors.grey.shade500,
-            constraints: minimal ? const BoxConstraints() : null,
-            padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
-            onPressed: () {
-              showBrushSizePicker(
-                context: context,
-                title: title,
-                value: appProvider.brushSize,
-                min: min,
-                max: max,
-                onChanged: (final double newValue) {
-                  appProvider.brushSize = newValue;
-                },
-              );
-            },
-          ),
-          childRight: minimal
-              ? null
-              : BrushSizePicker(
-                  title: title,
-                  value: appProvider.brushSize,
-                  min: min,
-                  max: max,
-                  onChanged: (final double value) {
-                    appProvider.brushSize = value;
-                  },
-                ),
-        ),
-      );
-    }
-
-    // Brush Style
-    if (selectedTool.isSupported(ActionOptions.brushStyle)) {
-      widgets.add(
-        ToolAttributeWidget(
-          minimal: minimal,
-          name: 'Brush Style',
-          childLeft: IconButton(
-            icon: const Icon(Icons.line_style_outlined),
-            color: Colors.grey.shade500,
-            constraints: minimal ? const BoxConstraints() : null,
-            padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
-            onPressed: () {
-              showBrushStylePicker(
-                context,
-                appProvider.brushStyle,
-                (final BrushStyle selectedBrushStyle) =>
-                    appProvider.brushStyle = selectedBrushStyle,
-              );
-            },
-          ),
-          childRight: minimal
-              ? null
-              : brushStyleDropDown(
-                  appProvider.brushStyle,
-                  (final BrushStyle selectedBrushStyle) =>
-                      appProvider.brushStyle = selectedBrushStyle,
-                ),
-        ),
-      );
-    }
-
-    // Brush color
-    if (selectedTool.isSupported(ActionOptions.brushColor)) {
-      widgets.add(
-        ToolAttributeWidget(
-          minimal: minimal,
-          name: 'Brush Color',
-          childLeft: colorPreviewWithTransparentPaper(
-            minimal: minimal,
-            color: appProvider.brushColor,
-            onPressed: () {
-              showColorPicker(
-                context: context,
-                title: 'Brush Color',
-                color: appProvider.brushColor,
-                onSelectedColor: (final Color color) =>
-                    appProvider.brushColor = color,
-              );
-            },
-          ),
-          childRight: minimal
-              ? null
-              : ColorSelector(
-                  color: appProvider.brushColor,
-                  onColorChanged: (final Color color) =>
-                      appProvider.brushColor = color,
-                ),
-        ),
-      );
-    }
-
-    // Fill Color
-    if (selectedTool.isSupported(ActionOptions.colorFill)) {
-      widgets.add(
-        ToolAttributeWidget(
-          minimal: minimal,
-          name: 'Fill Color',
-          childLeft: colorPreviewWithTransparentPaper(
-            minimal: minimal,
-            color: appProvider.fillColor,
-            onPressed: () {
-              showColorPicker(
-                context: context,
-                title: 'Fill Color',
-                color: appProvider.fillColor,
-                onSelectedColor: (final Color color) =>
-                    appProvider.fillColor = color,
-              );
-            },
-          ),
-          childRight: minimal
-              ? null
-              : ColorSelector(
-                  color: appProvider.fillColor,
-                  onColorChanged: (final Color color) =>
-                      appProvider.fillColor = color,
-                ),
-        ),
-      );
-    }
-
-    // Color Tolerance used by Fill and Magic wand
-    if (selectedTool.isSupported(ActionOptions.tolerance)) {
-      widgets.add(
-        ToolAttributeWidget(
-          minimal: minimal,
-          name: 'Color Tolerance',
-          childLeft: IconButton(
-            icon: const Icon(Icons.support),
-            color: Colors.grey.shade500,
-            onPressed: () {
-              showTolerancePicker(context, appProvider.tolerance,
-                  (final int newValue) {
-                appProvider.tolerance = newValue;
-              });
-            },
-          ),
-          childRight: minimal
-              ? null
-              : TolerancePicker(
-                  value: appProvider.tolerance,
-                  onChanged: (final int value) {
-                    appProvider.tolerance = value;
-                  },
-                ),
-        ),
-      );
-    }
-
-    // Top colors
-    if (selectedTool.isSupported(ActionOptions.topColors)) {
-      widgets.add(
-        TopColors(
-          colorUsages: layers.topColors,
-          onRefresh: () {
-            layers.evaluatTopColor();
-            appProvider.update();
-          },
-          onColorPicked: (final Color color) {
-            (appProvider.selectedAction == ActionType.rectangle ||
-                    appProvider.selectedAction == ActionType.circle ||
-                    appProvider.selectedAction == ActionType.fill)
-                ? appProvider.fillColor = color
-                : appProvider.brushColor = color;
-          },
-          minimal: minimal,
-        ),
-      );
-
-      // Add a separator between each element
-      if (!minimal) {
-        final List<Widget> separatedWidgets = <Widget>[];
-        for (int i = 0; i < widgets.length; i++) {
-          separatedWidgets.add(widgets[i]);
-          separatedWidgets.add(separator());
+        if (appProvider.selector.mode == SelectorMode.wand) {
+          addToolOptionTolerance(widgets, context, appProvider);
         }
-        return separatedWidgets;
-      }
+
+      default:
+        final String title = appProvider.selectedAction == ActionType.pencil
+            ? 'Pencil Size'
+            : 'Brush Size';
+        final double min =
+            appProvider.selectedAction == ActionType.pencil ? 1 : 0.1;
+        final double max = 100;
+
+        // Brush Size
+        if (selectedTool.isSupported(ActionOptions.brushSize)) {
+          widgets.add(
+            ToolAttributeWidget(
+              minimal: minimal,
+              name: title,
+              childLeft: IconButton(
+                icon: const Icon(Icons.line_weight),
+                color: Colors.grey.shade500,
+                constraints: minimal ? const BoxConstraints() : null,
+                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
+                onPressed: () {
+                  showBrushSizePicker(
+                    context: context,
+                    title: title,
+                    value: appProvider.brushSize,
+                    min: min,
+                    max: max,
+                    onChanged: (final double newValue) {
+                      appProvider.brushSize = newValue;
+                    },
+                  );
+                },
+              ),
+              childRight: minimal
+                  ? null
+                  : BrushSizePicker(
+                      title: title,
+                      value: appProvider.brushSize,
+                      min: min,
+                      max: max,
+                      onChanged: (final double value) {
+                        appProvider.brushSize = value;
+                      },
+                    ),
+            ),
+          );
+        }
+
+        // Brush Style
+        if (selectedTool.isSupported(ActionOptions.brushStyle)) {
+          widgets.add(
+            ToolAttributeWidget(
+              minimal: minimal,
+              name: 'Brush Style',
+              childLeft: IconButton(
+                icon: const Icon(Icons.line_style_outlined),
+                color: Colors.grey.shade500,
+                constraints: minimal ? const BoxConstraints() : null,
+                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
+                onPressed: () {
+                  showBrushStylePicker(
+                    context,
+                    appProvider.brushStyle,
+                    (final BrushStyle selectedBrushStyle) =>
+                        appProvider.brushStyle = selectedBrushStyle,
+                  );
+                },
+              ),
+              childRight: minimal
+                  ? null
+                  : brushStyleDropDown(
+                      appProvider.brushStyle,
+                      (final BrushStyle selectedBrushStyle) =>
+                          appProvider.brushStyle = selectedBrushStyle,
+                    ),
+            ),
+          );
+        }
+
+        // Brush color
+        if (selectedTool.isSupported(ActionOptions.brushColor)) {
+          widgets.add(
+            ToolAttributeWidget(
+              minimal: minimal,
+              name: 'Brush Color',
+              childLeft: colorPreviewWithTransparentPaper(
+                minimal: minimal,
+                color: appProvider.brushColor,
+                onPressed: () {
+                  showColorPicker(
+                    context: context,
+                    title: 'Brush Color',
+                    color: appProvider.brushColor,
+                    onSelectedColor: (final Color color) =>
+                        appProvider.brushColor = color,
+                  );
+                },
+              ),
+              childRight: minimal
+                  ? null
+                  : ColorSelector(
+                      color: appProvider.brushColor,
+                      onColorChanged: (final Color color) =>
+                          appProvider.brushColor = color,
+                    ),
+            ),
+          );
+        }
+
+        // Fill Color
+        if (selectedTool.isSupported(ActionOptions.colorFill)) {
+          addToolOptionFillColor(widgets, appProvider, context);
+        }
+
+        // Color Tolerance used by Fill and Magic wand
+        if (selectedTool.isSupported(ActionOptions.tolerance)) {
+          addToolOptionTolerance(widgets, context, appProvider);
+        }
+
+        // Top colors
+        if (selectedTool.isSupported(ActionOptions.topColors)) {
+          addToolOptionTopColors(widgets, layers, appProvider, minimal);
+        }
     }
+    // Add a separator between each element
+    if (!minimal) {
+      final List<Widget> separatedWidgets = <Widget>[];
+      for (int i = 0; i < widgets.length; i++) {
+        separatedWidgets.add(widgets[i]);
+        separatedWidgets.add(separator());
+      }
+      return separatedWidgets;
+    }
+
     return widgets;
+  }
+
+  void addToolOptionTolerance(
+    final List<Widget> widgets,
+    final BuildContext context,
+    final AppProvider appProvider,
+  ) {
+    widgets.add(
+      ToolAttributeWidget(
+        minimal: minimal,
+        name: 'Color Tolerance',
+        childLeft: IconButton(
+          icon: const Icon(Icons.support),
+          color: Colors.grey.shade500,
+          onPressed: () {
+            showTolerancePicker(context, appProvider.tolerance,
+                (final int newValue) {
+              appProvider.tolerance = newValue;
+            });
+          },
+        ),
+        childRight: minimal
+            ? null
+            : TolerancePicker(
+                value: appProvider.tolerance,
+                onChanged: (final int value) {
+                  appProvider.tolerance = value;
+                },
+              ),
+      ),
+    );
+  }
+
+  void addToolOptionFillColor(
+    final List<Widget> widgets,
+    final AppProvider appProvider,
+    final BuildContext context,
+  ) {
+    widgets.add(
+      ToolAttributeWidget(
+        minimal: minimal,
+        name: 'Fill Color',
+        childLeft: colorPreviewWithTransparentPaper(
+          minimal: minimal,
+          color: appProvider.fillColor,
+          onPressed: () {
+            showColorPicker(
+              context: context,
+              title: 'Fill Color',
+              color: appProvider.fillColor,
+              onSelectedColor: (final Color color) =>
+                  appProvider.fillColor = color,
+            );
+          },
+        ),
+        childRight: minimal
+            ? null
+            : ColorSelector(
+                color: appProvider.fillColor,
+                onColorChanged: (final Color color) =>
+                    appProvider.fillColor = color,
+              ),
+      ),
+    );
+  }
+
+  void addToolOptionTopColors(
+    final List<Widget> widgets,
+    final LayersProvider layers,
+    final AppProvider appProvider,
+    final bool minimal,
+  ) {
+    widgets.add(
+      TopColors(
+        colorUsages: layers.topColors,
+        onRefresh: () {
+          layers.evaluatTopColor();
+          appProvider.update();
+        },
+        onColorPicked: (final Color color) {
+          (appProvider.selectedAction == ActionType.rectangle ||
+                  appProvider.selectedAction == ActionType.circle ||
+                  appProvider.selectedAction == ActionType.fill)
+              ? appProvider.fillColor = color
+              : appProvider.brushColor = color;
+        },
+        minimal: minimal,
+      ),
+    );
   }
 }
 

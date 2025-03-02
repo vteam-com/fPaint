@@ -6,7 +6,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   group('CanvasResizePosition', () {
     test('anchorTranslate should handle same source and destination sizes', () {
-      final Offset result = CanvasResizePosition.anchorTranslate(
+      final Offset result = anchorTranslate(
         CanvasResizePosition.bottomRight,
         const Size(100, 100),
         const Size(100, 100),
@@ -15,7 +15,7 @@ void main() {
     });
 
     test('anchorTranslate should return zero offset for topLeft position', () {
-      final Offset result = CanvasResizePosition.anchorTranslate(
+      final Offset result = anchorTranslate(
         CanvasResizePosition.topLeft,
         const Size(100, 100),
         const Size(200, 200),
@@ -25,7 +25,7 @@ void main() {
 
     test('anchorTranslate should return correct offset for center position',
         () {
-      final Offset result = CanvasResizePosition.anchorTranslate(
+      final Offset result = anchorTranslate(
         CanvasResizePosition.center,
         const Size(100, 100),
         const Size(200, 200),
@@ -34,7 +34,7 @@ void main() {
     });
 
     test('anchorTranslate should handle negative size differences', () {
-      final Offset result = CanvasResizePosition.anchorTranslate(
+      final Offset result = anchorTranslate(
         CanvasResizePosition.right,
         const Size(200, 200),
         const Size(100, 100),
@@ -50,7 +50,7 @@ void main() {
       final double dy = destSize.height - sourceSize.height;
 
       expect(
-        CanvasResizePosition.anchorTranslate(
+        anchorTranslate(
           CanvasResizePosition.top,
           sourceSize,
           destSize,
@@ -58,7 +58,7 @@ void main() {
         equals(Offset(dx / 2, 0)),
       );
       expect(
-        CanvasResizePosition.anchorTranslate(
+        anchorTranslate(
           CanvasResizePosition.topRight,
           sourceSize,
           destSize,
@@ -66,7 +66,7 @@ void main() {
         equals(Offset(dx, 0)),
       );
       expect(
-        CanvasResizePosition.anchorTranslate(
+        anchorTranslate(
           CanvasResizePosition.right,
           sourceSize,
           destSize,
@@ -74,7 +74,7 @@ void main() {
         equals(Offset(dx, dy / 2)),
       );
       expect(
-        CanvasResizePosition.anchorTranslate(
+        anchorTranslate(
           CanvasResizePosition.left,
           sourceSize,
           destSize,
@@ -82,7 +82,7 @@ void main() {
         equals(Offset(0, dy / 2)),
       );
       expect(
-        CanvasResizePosition.anchorTranslate(
+        anchorTranslate(
           CanvasResizePosition.bottomLeft,
           sourceSize,
           destSize,
@@ -90,7 +90,7 @@ void main() {
         equals(Offset(0, dy)),
       );
       expect(
-        CanvasResizePosition.anchorTranslate(
+        anchorTranslate(
           CanvasResizePosition.bottom,
           sourceSize,
           destSize,
@@ -98,7 +98,7 @@ void main() {
         equals(Offset(dx / 2, dy)),
       );
       expect(
-        CanvasResizePosition.anchorTranslate(
+        anchorTranslate(
           CanvasResizePosition.bottomRight,
           sourceSize,
           destSize,
