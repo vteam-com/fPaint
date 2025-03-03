@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/panels/layers/top_menu_and_layers_panel.dart';
+import 'package:fpaint/panels/side_panel/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:multi_split_view/multi_split_view.dart';

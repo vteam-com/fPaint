@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/files/import_files.dart';
-import 'package:fpaint/models/localized_strings.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
-import 'package:fpaint/panels/layers/menu.dart';
-import 'package:fpaint/panels/share_panel.dart';
+import 'package:fpaint/panels/side_panel/side_panel_top_menu.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:provider/provider.dart';
@@ -18,41 +15,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
     return Column(
       children: <Widget>[
         // toolbar
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            const MainMenu(),
-            if (shellProvider.isSidePanelExpanded)
-              buildIconButton(
-                tooltip: strings[StringId.startOverTooltip]!,
-                icon: Icons.power_settings_new_outlined,
-                onPressed: () => onFileNew(context),
-              ),
-            if (shellProvider.isSidePanelExpanded)
-              buildIconButton(
-                tooltip: strings[StringId.importTooltip]!,
-                icon: Icons.file_download_outlined,
-                onPressed: () => onFileOpen(context),
-              ),
-            if (shellProvider.isSidePanelExpanded)
-              buildIconButton(
-                tooltip: strings[StringId.exportTooltip]!,
-                icon: Icons.ios_share_outlined,
-                onPressed: () => sharePanel(context),
-              ),
-            if (!shellProvider.showMenu)
-              buildIconButton(
-                tooltip: strings[StringId.exportTooltip]!,
-                icon: shellProvider.isSidePanelExpanded
-                    ? Icons.keyboard_double_arrow_left
-                    : Icons.keyboard_double_arrow_right,
-                onPressed: () {
-                  shellProvider.isSidePanelExpanded =
-                      !shellProvider.isSidePanelExpanded;
-                },
-              ),
-          ],
-        ),
+        SidePanelTopMenu(shellProvider: shellProvider),
 
         Consumer<LayersProvider>(
           builder: (
@@ -96,18 +59,6 @@ class TopMenuAndLayersPanel extends StatelessWidget {
           },
         ),
       ],
-    );
-  }
-
-  Widget buildIconButton({
-    required final String tooltip,
-    required final IconData icon,
-    required final VoidCallback onPressed,
-  }) {
-    return IconButton(
-      tooltip: tooltip,
-      icon: Icon(icon),
-      onPressed: onPressed,
     );
   }
 }
