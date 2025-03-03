@@ -1,0 +1,77 @@
+import 'package:flutter/material.dart';
+import 'package:fpaint/files/import_files.dart';
+import 'package:fpaint/models/localized_strings.dart';
+import 'package:fpaint/panels/share_panel.dart';
+import 'package:fpaint/panels/side_panel/menu.dart';
+import 'package:fpaint/providers/shell_provider.dart';
+
+class SidePanelTopMenu extends StatelessWidget {
+  const SidePanelTopMenu({
+    super.key,
+    required this.shellProvider,
+  });
+  final ShellProvider shellProvider;
+
+  Widget buildIconButton({
+    required final String tooltip,
+    required final IconData icon,
+    required final VoidCallback onPressed,
+  }) {
+    return IconButton(
+      tooltip: tooltip,
+      icon: Icon(icon),
+      onPressed: onPressed,
+    );
+  }
+
+  @override
+  Widget build(final BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        const MainMenu(),
+        if (shellProvider.isSidePanelExpanded)
+          buildIconButton(
+            tooltip: strings[StringId.startOverTooltip]!,
+            icon: Icons.power_settings_new_outlined,
+            onPressed: () => onFileNew(context),
+          ),
+        if (shellProvider.isSidePanelExpanded)
+          buildIconButton(
+            tooltip: strings[StringId.importTooltip]!,
+            icon: Icons.file_download_outlined,
+            onPressed: () => onFileOpen(context),
+          ),
+        if (shellProvider.isSidePanelExpanded)
+          buildIconButton(
+            tooltip: strings[StringId.exportTooltip]!,
+            icon: Icons.ios_share_outlined,
+            onPressed: () => sharePanel(context),
+          ),
+        if (!shellProvider.showMenu)
+          buildIconButton(
+            tooltip: strings[StringId.exportTooltip]!,
+            icon: shellProvider.isSidePanelExpanded
+                ? Icons.keyboard_double_arrow_left
+                : Icons.keyboard_double_arrow_right,
+            onPressed: () {
+              shellProvider.isSidePanelExpanded =
+                  !shellProvider.isSidePanelExpanded;
+            },
+          ),
+      ],
+    );
+  }
+}
+
+Widget buildIconButton({
+  required final String tooltip,
+  required final IconData icon,
+  required final VoidCallback onPressed,
+}) {
+  return IconButton(
+    tooltip: tooltip,
+    icon: Icon(icon),
+    onPressed: onPressed,
+  );
+}
