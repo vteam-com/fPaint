@@ -3,8 +3,8 @@ import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 
-class SelectionHandleWidget extends StatefulWidget {
-  const SelectionHandleWidget({
+class SelectionRectWidget extends StatefulWidget {
+  const SelectionRectWidget({
     super.key,
     required this.path1,
     required this.path2,
@@ -19,12 +19,12 @@ class SelectionHandleWidget extends StatefulWidget {
   final void Function(NineGridHandle, Offset) onResize;
 
   @override
-  State<SelectionHandleWidget> createState() => _SelectionHandleWidgetState();
+  State<SelectionRectWidget> createState() => _SelectionRectWidgetState();
 }
 
 const int defaultHandleSize = 20;
 
-class _SelectionHandleWidgetState extends State<SelectionHandleWidget> {
+class _SelectionRectWidgetState extends State<SelectionRectWidget> {
   bool showCoordinate = false;
 
   @override

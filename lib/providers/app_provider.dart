@@ -76,12 +76,12 @@ class AppProvider extends ChangeNotifier {
   }
 
   void regionErase() {
-    if (selector.path1 != null) {
+    if (selectorModel.path1 != null) {
       recordExecuteDrawingActionToSelectedLayer(
         action: UserActionDrawing(
           action: ActionType.cut,
           positions: <ui.Offset>[],
-          path: Path.from(selector.path1!),
+          path: Path.from(selectorModel.path1!),
         ),
       );
       this.update();
@@ -94,7 +94,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   Future<void> regionCopy() async {
-    final ui.Rect bounds = selector.path1!.getBounds();
+    final ui.Rect bounds = selectorModel.path1!.getBounds();
     if (bounds.isEmpty) {
       // nothing to copy
       return;
@@ -110,7 +110,7 @@ class AppProvider extends ChangeNotifier {
     canvas.translate(-bounds.left, -bounds.top);
 
     // Clip the canvas with the selected path
-    canvas.clipPath(selector.path1!);
+    canvas.clipPath(selectorModel.path1!);
 
     // Draw the image, making sure to align it properly
     canvas.drawImage(image, Offset.zero, Paint());
@@ -178,8 +178,8 @@ class AppProvider extends ChangeNotifier {
   void recordExecuteDrawingActionToSelectedLayer({
     required final UserActionDrawing action,
   }) {
-    if (selector.isVisible) {
-      action.clipPath = selector.path1;
+    if (selectorModel.isVisible) {
+      action.clipPath = selectorModel.path1;
     }
 
     _undoProvider.executeAction(
@@ -328,7 +328,7 @@ class AppProvider extends ChangeNotifier {
         ],
         action: layers.selectedLayer.lastUserAction!.action,
         brush: layers.selectedLayer.lastUserAction!.brush,
-        clipPath: selector.isVisible ? selector.path1 : null,
+        clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
       ),
     );
   }
@@ -350,7 +350,7 @@ class AppProvider extends ChangeNotifier {
           bounds.bottomRight,
         ],
         fillColor: this.fillColor,
-        clipPath: selector.isVisible ? selector.path1 : null,
+        clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
       ),
     );
   }
@@ -370,7 +370,7 @@ class AppProvider extends ChangeNotifier {
 
   //-------------------------
   // Selector
-  SelectorModel selector = SelectorModel();
+  SelectorModel selectorModel = SelectorModel();
 
   bool isReadyForDrawing() {
     if (selectedAction == ActionType.selector) {
@@ -380,40 +380,40 @@ class AppProvider extends ChangeNotifier {
   }
 
   void selectorCreationStart(final Offset position) {
-    if (selector.mode == SelectorMode.wand) {
+    if (selectorModel.mode == SelectorMode.wand) {
       getRegionPathFromLayerImage(position).then((final Region region) {
-        selector.isVisible = true;
-        if (selector.math == SelectorMath.replace) {
-          selector.path1 = region.path.shift(region.offset);
+        selectorModel.isVisible = true;
+        if (selectorModel.math == SelectorMath.replace) {
+          selectorModel.path1 = region.path.shift(region.offset);
         } else {
-          selector.path2 = region.path.shift(region.offset);
+          selectorModel.path2 = region.path.shift(region.offset);
         }
         update();
       });
     } else {
-      selector.addP1(position);
+      selectorModel.addP1(position);
       update();
     }
   }
 
   void selectorCreationAdditionalPoint(final Offset position) {
-    if (selector.mode == SelectorMode.wand) {
+    if (selectorModel.mode == SelectorMode.wand) {
       // Ignore since the PointerDown it already did the job of drawing the shape of the selector
     } else {
-      selector.addP2(position);
+      selectorModel.addP2(position);
       update();
     }
   }
 
   void selectorCreationEnd() {
-    selector.applyMath();
+    selectorModel.applyMath();
     update();
   }
 
   void selectAll() {
-    selector.isVisible = true;
+    selectorModel.isVisible = true;
     selectorCreationStart(Offset.zero);
-    selector.path1 = Path()
+    selectorModel.path1 = Path()
       ..addRect(
         Rect.fromPoints(Offset.zero, Offset(layers.width, layers.height)),
       );
@@ -430,7 +430,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   void crop() async {
-    final Rect bounds = selector.path1!.getBounds();
+    final Rect bounds = selectorModel.path1!.getBounds();
     final Offset selectionOffset = Offset(-bounds.left, -bounds.top);
     final Size originalSize = layers.size;
 
@@ -447,7 +447,7 @@ class AppProvider extends ChangeNotifier {
             );
 
         // Clear the selector
-        selector.clear();
+        selectorModel.clear();
         update();
       },
       backward: () {
