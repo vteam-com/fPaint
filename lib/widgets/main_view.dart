@@ -191,22 +191,22 @@ class MainViewState extends State<MainView> {
         //
         // Selection Widget
         //
-        if (appProvider.selector.isVisible)
-          SelectionHandleWidget(
+        if (appProvider.selectorModel.isVisible)
+          SelectionRectWidget(
             path1: appProvider.getPathAdjustToCanvasSizeAndPosition(
-              appProvider.selector.path1,
+              appProvider.selectorModel.path1,
             ),
             path2: appProvider.getPathAdjustToCanvasSizeAndPosition(
-              appProvider.selector.path2,
+              appProvider.selectorModel.path2,
             ),
             enableMoveAndResize:
                 appProvider.selectedAction == ActionType.selector,
             onDrag: (final Offset offset) {
-              appProvider.selector.translate(offset);
+              appProvider.selectorModel.translate(offset);
               appProvider.update();
             },
             onResize: (final NineGridHandle handle, final Offset offset) {
-              appProvider.selector.nindeGridResize(handle, offset);
+              appProvider.selectorModel.nindeGridResize(handle, offset);
               appProvider.update();
             },
           ),

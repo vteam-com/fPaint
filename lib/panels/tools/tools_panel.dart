@@ -200,11 +200,11 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Rectangle',
                   image: iconAndColor(
-                    appProvider.selector.mode == SelectorMode.rectangle,
+                    appProvider.selectorModel.mode == SelectorMode.rectangle,
                     Icons.highlight_alt,
                   ),
                   onPressed: () {
-                    appProvider.selector.mode = SelectorMode.rectangle;
+                    appProvider.selectorModel.mode = SelectorMode.rectangle;
                     appProvider.update();
                   },
                 ),
@@ -215,11 +215,11 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Circle',
                   image: iconAndColor(
-                    appProvider.selector.mode == SelectorMode.circle,
+                    appProvider.selectorModel.mode == SelectorMode.circle,
                     Symbols.lasso_select,
                   ),
                   onPressed: () {
-                    appProvider.selector.mode = SelectorMode.circle;
+                    appProvider.selectorModel.mode = SelectorMode.circle;
                     appProvider.update();
                   },
                 ),
@@ -231,12 +231,12 @@ class ToolsPanel extends StatelessWidget {
                   name: 'Lasso',
                   image: iconFromSvgAsset(
                     'assets/icons/lasso.svg',
-                    appProvider.selector.mode == SelectorMode.lasso
+                    appProvider.selectorModel.mode == SelectorMode.lasso
                         ? Colors.blue
                         : IconTheme.of(context).color!,
                   ),
                   onPressed: () {
-                    appProvider.selector.mode = SelectorMode.lasso;
+                    appProvider.selectorModel.mode = SelectorMode.lasso;
                     appProvider.update();
                   },
                 ),
@@ -247,65 +247,65 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Magic',
                   image: iconAndColor(
-                    appProvider.selector.mode == SelectorMode.wand,
+                    appProvider.selectorModel.mode == SelectorMode.wand,
                     Icons.auto_fix_high_outlined,
                   ),
                   onPressed: () {
-                    appProvider.selector.mode = SelectorMode.wand;
+                    appProvider.selectorModel.mode = SelectorMode.wand;
                     appProvider.update();
                   },
                 ),
 
-                if (appProvider.selector.isVisible) const Divider(),
+                if (appProvider.selectorModel.isVisible) const Divider(),
 
                 //
                 // Sub=Selector options Repace/Add/Remove/Invert/Cancel
                 //
-                if (appProvider.selector.isVisible)
+                if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
                     name: 'Replace',
                     image: iconFromSvgAssetSelected(
                       'assets/icons/selector_replace.svg',
-                      appProvider.selector.math == SelectorMath.replace,
+                      appProvider.selectorModel.math == SelectorMath.replace,
                     ),
                     onPressed: () {
-                      appProvider.selector.math = SelectorMath.replace;
+                      appProvider.selectorModel.math = SelectorMath.replace;
                       appProvider.update();
                     },
                   ),
 
-                if (appProvider.selector.isVisible)
+                if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
                     name: 'Add',
                     image: iconFromSvgAssetSelected(
                       'assets/icons/selector_add.svg',
-                      appProvider.selector.math == SelectorMath.add,
+                      appProvider.selectorModel.math == SelectorMath.add,
                     ),
                     onPressed: () {
-                      appProvider.selector.math = SelectorMath.add;
+                      appProvider.selectorModel.math = SelectorMath.add;
                       appProvider.update();
                     },
                   ),
 
-                if (appProvider.selector.isVisible)
+                if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
                     name: 'Remove',
                     image: iconFromSvgAssetSelected(
                       'assets/icons/selector_remove.svg',
-                      appProvider.selector.math == SelectorMath.remove,
+                      appProvider.selectorModel.math == SelectorMath.remove,
                     ),
                     onPressed: () {
-                      appProvider.selector.math = SelectorMath.remove;
+                      appProvider.selectorModel.math = SelectorMath.remove;
                       appProvider.update();
                     },
                   ),
 
-                if (appProvider.selector.isVisible) const Divider(),
+                if (appProvider.selectorModel.isVisible) const Divider(),
 
-                if (appProvider.selector.isVisible)
+                if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
                     name: 'Invert',
@@ -314,7 +314,7 @@ class ToolsPanel extends StatelessWidget {
                       false,
                     ),
                     onPressed: () {
-                      appProvider.selector.invert(
+                      appProvider.selectorModel.invert(
                         Rect.fromLTWH(
                           0,
                           0,
@@ -326,7 +326,7 @@ class ToolsPanel extends StatelessWidget {
                     },
                   ),
 
-                if (appProvider.selector.isVisible)
+                if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
                     name: 'Crop',
@@ -340,7 +340,7 @@ class ToolsPanel extends StatelessWidget {
                     },
                   ),
 
-                if (appProvider.selector.isVisible)
+                if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
                     name: 'Cancel',
@@ -349,7 +349,7 @@ class ToolsPanel extends StatelessWidget {
                       Symbols.remove_selection,
                     ),
                     onPressed: () {
-                      appProvider.selector.clear();
+                      appProvider.selectorModel.clear();
                       appProvider.update();
                     },
                   ),
@@ -358,7 +358,7 @@ class ToolsPanel extends StatelessWidget {
           ),
         );
 
-        if (appProvider.selector.mode == SelectorMode.wand) {
+        if (appProvider.selectorModel.mode == SelectorMode.wand) {
           addToolOptionTolerance(widgets, context, appProvider);
         }
 
