@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -367,6 +368,10 @@ class AppProvider extends ChangeNotifier {
     );
     return region;
   }
+
+  //-------------------------
+  // Fill Widget
+  FillModel fillModel = FillModel();
 
   //-------------------------
   // Selector

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
 import 'package:fpaint/panels/tools/tool_panel_picker.dart';
@@ -179,10 +180,69 @@ class ToolsPanel extends StatelessWidget {
 
     switch (selectedTool) {
       case ActionType.fill:
+        widgets.add(
+          ToolAttributeWidget(
+            minimal: minimal,
+            name: 'Fill',
+            childRight: Wrap(
+              alignment: WrapAlignment.center,
+              children: <Widget>[
+                //
+                // Selection using Rectangle
+                //
+                ToolPanelPicker(
+                  minimal: minimal,
+                  name: 'Solid',
+                  image: iconAndColor(
+                    appProvider.fillModel.mode == FillMode.solid,
+                    Icons.square,
+                  ),
+                  onPressed: () {
+                    appProvider.fillModel.mode = FillMode.solid;
+                    appProvider.update();
+                  },
+                ),
+                //
+                // Linear Gradient
+                //
+                ToolPanelPicker(
+                  minimal: minimal,
+                  name: 'Linear Gradient',
+                  image: iconFromSvgAsset(
+                    'assets/icons/fill_linear.svg',
+                    appProvider.fillModel.mode == FillMode.linear
+                        ? Colors.blue
+                        : IconTheme.of(context).color!,
+                  ),
+                  onPressed: () {
+                    appProvider.fillModel.mode = FillMode.linear;
+                    appProvider.update();
+                  },
+                ),
+                //
+                // Radial Gradient
+                //
+                ToolPanelPicker(
+                  minimal: minimal,
+                  name: 'Radial Gradient',
+                  image: iconFromSvgAsset(
+                    'assets/icons/fill_radial.svg',
+                    appProvider.fillModel.mode == FillMode.radial
+                        ? Colors.blue
+                        : IconTheme.of(context).color!,
+                  ),
+                  onPressed: () {
+                    appProvider.fillModel.mode = FillMode.radial;
+                    appProvider.update();
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
         addToolOptionFillColor(widgets, appProvider, context);
         addToolOptionTolerance(widgets, context, appProvider);
         addToolOptionTopColors(widgets, layers, appProvider, minimal);
-
         break;
 
       case ActionType.selector:
@@ -525,6 +585,20 @@ class ToolsPanel extends StatelessWidget {
                   appProvider.tolerance = value;
                 },
               ),
+      ),
+    );
+  }
+
+  void addToolOptionFillMode(
+    final List<Widget> widgets,
+    final AppProvider appProvider,
+    final BuildContext context,
+  ) {
+    widgets.add(
+      ToolAttributeWidget(
+        minimal: minimal,
+        name: 'Solid',
+        childLeft: const Text('S'),
       ),
     );
   }
