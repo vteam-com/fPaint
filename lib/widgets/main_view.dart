@@ -222,7 +222,7 @@ class MainViewState extends State<MainView> {
     // print('_handleMultiTouchUpdate $event');
 
     // Calculate the panning offset - Always pan when two fingers are down and moving
-    appProvider.offset += event.delta;
+    appProvider.canvasOffset += event.delta;
     final double newDistance = _getDistanceBetweenTouchPoints();
     final double distanceDelta = _baseDistance - newDistance;
     // print(
@@ -247,7 +247,7 @@ class MainViewState extends State<MainView> {
 
       // Step 4: Adjust the offset to keep the focal point anchored during zoom
       final Offset adjustment = after - before;
-      appProvider.offset += adjustment * appProvider.layers.scale;
+      appProvider.canvasOffset += adjustment * appProvider.layers.scale;
     }
 
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
@@ -292,7 +292,7 @@ class MainViewState extends State<MainView> {
     final AppProvider appProvider,
     final Offset offsetDelta,
   ) {
-    appProvider.offset += offsetDelta;
+    appProvider.canvasOffset += offsetDelta;
 
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
     appProvider.update();
@@ -321,7 +321,7 @@ class MainViewState extends State<MainView> {
 
     // Step 4: Adjust the offset to keep the cursor anchored
     final Offset adjustment = (before - after);
-    appProvider.offset -= adjustment * appProvider.layers.scale;
+    appProvider.canvasOffset -= adjustment * appProvider.layers.scale;
 
     // Step 5: We are now in manual user placement of the canvas
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
@@ -344,8 +344,8 @@ class MainViewState extends State<MainView> {
         alignment: Alignment.topLeft,
         transform: Matrix4.identity()
           ..translate(
-            appProvider.offset.dx,
-            appProvider.offset.dy,
+            appProvider.canvasOffset.dx,
+            appProvider.canvasOffset.dy,
           )
           ..scale(
             appProvider.layers.scale,
