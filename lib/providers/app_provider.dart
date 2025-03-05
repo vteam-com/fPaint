@@ -58,7 +58,7 @@ class AppProvider extends ChangeNotifier {
 
   //=============================================================================
   // All things Canvas
-  Offset offset = Offset.zero;
+  Offset canvasOffset = Offset.zero;
 
   void canvasClear(final Size size) {
     layers.clear();
@@ -69,11 +69,11 @@ class AppProvider extends ChangeNotifier {
   }
 
   Offset toCanvas(final Offset point) {
-    return (point - offset) / layers.scale;
+    return (point - canvasOffset) / layers.scale;
   }
 
   Offset fromCanvas(final Offset point) {
-    return (point * layers.scale) + offset;
+    return (point * layers.scale) + canvasOffset;
   }
 
   void regionErase() {
@@ -167,7 +167,7 @@ class AppProvider extends ChangeNotifier {
   // SidePanel Expanded/Collapsed
 
   void resetView() {
-    offset = Offset.zero;
+    canvasOffset = Offset.zero;
     layers.scale = 1;
     update();
   }
@@ -226,7 +226,7 @@ class AppProvider extends ChangeNotifier {
     final double centerX = containerWidth / 2;
     final double centerY = containerHeight / 2;
 
-    this.offset = Offset(
+    this.canvasOffset = Offset(
       centerX - (scaledWidth / 2),
       centerY - (scaledHeight / 2),
     );
@@ -427,7 +427,7 @@ class AppProvider extends ChangeNotifier {
   Path? getPathAdjustToCanvasSizeAndPosition(final Path? path) {
     if (path != null) {
       final Matrix4 matrix = Matrix4.identity()
-        ..translate(offset.dx, offset.dy)
+        ..translate(canvasOffset.dx, canvasOffset.dy)
         ..scale(layers.scale);
       return path.transform(matrix.storage);
     }
