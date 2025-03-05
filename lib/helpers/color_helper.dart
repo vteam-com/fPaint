@@ -90,7 +90,7 @@ Color addTintOfGreen(final Color originalColor, final int tintStrength) {
   return Color.fromARGB((originalColor.a * 255).toInt(), red, green, blue);
 }
 
-/// Adjusts the brightness of the input color to the specified value within the valid range (0.0 - 1.0).
+/// Adjusts the brightness of the input color to the specified value within the valid range (0.0 to 1.0).
 Color adjustBrightness(final Color color, double brightness) {
   // Ensure brightness is within valid range
   brightness = brightness.clamp(0.0, 1.0);

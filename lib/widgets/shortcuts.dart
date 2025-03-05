@@ -171,6 +171,7 @@ Widget shortCutsForMainApp(
         EscapeIntent: CallbackAction<EscapeIntent>(
           onInvoke: (final EscapeIntent intent) async {
             appProvider.selectorModel.clear();
+            appProvider.fillModel.clear();
             appProvider.update();
             return null;
           },
