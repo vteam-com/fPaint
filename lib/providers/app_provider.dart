@@ -394,7 +394,7 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
-  void floodFillAction(final Offset position) async {
+  void floodFillSolidAction(final Offset position) async {
     final Region region = await getRegionPathFromLayerImage(position);
 
     final ui.Path path = region.path
@@ -411,6 +411,32 @@ class AppProvider extends ChangeNotifier {
           bounds.bottomRight,
         ],
         fillColor: this.fillColor,
+        clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
+      ),
+    );
+  }
+
+  void floodFillGradientAction(final FillModel fillModel) async {
+    final Region region = await getRegionPathFromLayerImage(
+      fillModel.mode == FillMode.solid
+          ? fillModel.centerPoint
+          : toCanvas(fillModel.centerPoint),
+    );
+
+    final ui.Path path = region.path
+        .shift(Offset(region.left.toDouble(), region.top.toDouble()));
+
+    final ui.Rect bounds = path.getBounds();
+
+    recordExecuteDrawingActionToSelectedLayer(
+      action: UserActionDrawing(
+        action: ActionType.region,
+        path: path,
+        positions: <ui.Offset>[
+          bounds.topLeft,
+          bounds.bottomRight,
+        ],
+        fillColor: fillModel.gradientPoints.first.color,
         clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
       ),
     );

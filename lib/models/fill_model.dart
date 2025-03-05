@@ -7,19 +7,43 @@ enum FillMode { solid, linear, radial }
 
 class FillModel {
   bool isVisible = false;
-  FillMode mode = FillMode.solid;
+
+  ///-------------------------------------------
+  /// Mode
+  FillMode _mode = FillMode.solid;
+  FillMode get mode => _mode;
+  set mode(final FillMode newMode) {
+    _mode = newMode;
+    if (_mode == FillMode.solid) {
+      clear();
+    }
+  }
 
   List<GradientPoint> gradientPoints = <GradientPoint>[];
 
   void clear() {
-    this.isVisible = false;
     this.gradientPoints.clear();
+    this.isVisible = false;
   }
 
   void addPoint(final GradientPoint pointToAdd) {
-    isVisible = true;
     this.gradientPoints.add(pointToAdd);
   }
+
+  Offset get centerPoint => Offset(
+        gradientPoints.fold<double>(
+              0.0,
+              (final double sum, final GradientPoint point) =>
+                  sum + point.offset.dx,
+            ) /
+            gradientPoints.length,
+        gradientPoints.fold<double>(
+              0.0,
+              (final double sum, final GradientPoint point) =>
+                  sum + point.offset.dy,
+            ) /
+            gradientPoints.length,
+      );
 }
 
 class GradientPoint {

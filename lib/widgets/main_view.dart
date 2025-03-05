@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -225,7 +226,9 @@ class MainViewState extends State<MainView> {
             child: FillWidget(
               fillModel: appProvider.fillModel,
               onUpdate: (final GradientPoint point) {
-                appProvider.update();
+                // appProvider.undoProvider.undo(); // Remove the last fill action
+                // appProvider.floodFillAction(appProvider.fillModel);
+                // appProvider.update();
               },
             ),
           ),
@@ -384,23 +387,30 @@ class MainViewState extends State<MainView> {
       //
       if (appProvider.selectedAction == ActionType.fill) {
         if (appProvider.fillModel.mode == FillMode.solid) {
+          //
+          // Fill Solid
+          //
           appProvider.fillModel.gradientPoints.clear();
-          appProvider.floodFillAction(adjustedPosition);
+          appProvider.floodFillSolidAction(adjustedPosition);
         } else {
+          //
+          // Fill Gradient
+          //
           if (appProvider.fillModel.gradientPoints.isEmpty) {
             appProvider.fillModel.addPoint(
               GradientPoint(
-                offset: adjustedPosition + const Offset(100, 100),
-                color: Colors.red,
+                offset: event.localPosition + const Offset(-10, -10),
+                color: adjustBrightness(appProvider.fillColor, 0.3),
               ),
             );
             appProvider.fillModel.addPoint(
               GradientPoint(
-                offset: adjustedPosition + const Offset(-100, -100),
-                color: Colors.blue,
+                offset: event.localPosition + const Offset(10, 10),
+                color: adjustBrightness(appProvider.fillColor, 0.7),
               ),
             );
-            appProvider.update();
+            appProvider.fillModel.isVisible = true;
+            appProvider.floodFillGradientAction(appProvider.fillModel);
           }
         }
         return;
