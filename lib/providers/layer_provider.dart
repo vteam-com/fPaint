@@ -412,7 +412,8 @@ class LayerProvider extends ChangeNotifier {
             (final Canvas theCanvasToUse) => renderRegion(
               theCanvasToUse,
               userAction.path!,
-              userAction.fillColor!,
+              userAction.fillColor,
+              userAction.gradient,
             ),
           );
           break;

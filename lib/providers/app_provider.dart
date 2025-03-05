@@ -428,6 +428,23 @@ class AppProvider extends ChangeNotifier {
 
     final ui.Rect bounds = path.getBounds();
 
+    final Gradient gradient;
+    if (fillModel.mode == FillMode.radial) {
+      gradient = RadialGradient(
+        colors: <ui.Color>[
+          fillModel.gradientPoints.first.color,
+          fillModel.gradientPoints.last.color,
+        ],
+      );
+    } else {
+      gradient = LinearGradient(
+        colors: <ui.Color>[
+          fillModel.gradientPoints.first.color,
+          fillModel.gradientPoints.last.color,
+        ],
+      );
+    }
+
     recordExecuteDrawingActionToSelectedLayer(
       action: UserActionDrawing(
         action: ActionType.region,
@@ -436,7 +453,7 @@ class AppProvider extends ChangeNotifier {
           bounds.topLeft,
           bounds.bottomRight,
         ],
-        fillColor: fillModel.gradientPoints.first.color,
+        gradient: gradient,
         clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
       ),
     );
