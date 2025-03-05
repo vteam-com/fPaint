@@ -45,6 +45,8 @@ class AppProvider extends ChangeNotifier {
 
   UndoProvider get undoProvider => _undoProvider;
 
+  final Debouncer _debounceGradientFill = Debouncer();
+
   /// Gets the [AppProvider] instance from the provided [BuildContext].
   ///
   /// If [listen] is true, the returned [AppProvider] instance will notify listeners
@@ -457,6 +459,18 @@ class AppProvider extends ChangeNotifier {
         clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
       ),
     );
+  }
+
+  void updateGradientFill() {
+    if (this.fillModel.isVisible) {
+      _debounceGradientFill.run(
+        () {
+          this.undoProvider.undo();
+          this.floodFillGradientAction(this.fillModel);
+          this.update();
+        },
+      );
+    }
   }
 
   Future<Region> getRegionPathFromLayerImage(final ui.Offset position) async {

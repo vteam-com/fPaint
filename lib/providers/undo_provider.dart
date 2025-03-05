@@ -102,6 +102,13 @@ class UndoProvider extends ChangeNotifier {
         .reversed
         .toList();
   }
+
+  RecordAction? getLastAction() {
+    if (_undoStack.isNotEmpty) {
+      return _undoStack.last;
+    }
+    return null;
+  }
 }
 
 class RecordAction {
