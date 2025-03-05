@@ -11,6 +11,7 @@ class UserActionDrawing {
     // optionals
     this.brush,
     this.fillColor,
+    this.gradient,
     this.path,
     this.image,
     this.clipPath,
@@ -22,6 +23,7 @@ class UserActionDrawing {
   // optional used  based on the action type
   final MyBrush? brush;
   final Color? fillColor;
+  final Gradient? gradient;
   final ui.Path? path;
   final ui.Image? image;
   ui.Path? clipPath;

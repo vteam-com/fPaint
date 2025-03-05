@@ -1,4 +1,5 @@
-import 'dart:ui';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 
 void renderPencil(
@@ -155,9 +156,18 @@ void renderLine(
   );
 }
 
-void renderRegion(final Canvas canvas, final Path path, final Color fillColor) {
+void renderRegion(
+  final Canvas canvas,
+  final Path path,
+  final Color? fillColor,
+  final Gradient? gradient,
+) {
   final Paint paint = Paint();
-  paint.color = fillColor;
+  if (gradient != null) {
+    paint.shader = gradient.createShader(path.getBounds());
+  } else {
+    paint.color = fillColor!;
+  }
   paint.style = PaintingStyle.fill;
   canvas.drawPath(path, paint);
 }
@@ -173,7 +183,7 @@ void renderRegionErase(final Canvas canvas, final Path path) {
 void renderImage(
   final Canvas canvas,
   final Offset topLeftPosition,
-  final Image image,
+  final ui.Image image,
 ) {
   canvas.drawImage(image, topLeftPosition, Paint());
 }
@@ -182,7 +192,7 @@ void renderFill(
   final Canvas canvas,
   final Offset position,
   final Color fillColor,
-  final Image image,
+  final ui.Image image,
 ) {
   final Paint paint = Paint();
   paint.color = fillColor;
@@ -230,7 +240,7 @@ Path createDashedPath(
   required final double dashGap,
 }) {
   final Path dashedPath = Path();
-  for (final PathMetric pathMetric in source.computeMetrics()) {
+  for (final ui.PathMetric pathMetric in source.computeMetrics()) {
     double distance = 0.0;
     while (distance < pathMetric.length) {
       final double nextDashLength = distance + dashWidth;
