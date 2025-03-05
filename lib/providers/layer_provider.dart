@@ -175,6 +175,7 @@ class LayerProvider extends ChangeNotifier {
   void appendDrawingAction(final UserActionDrawing userAction) {
     actionStack.add(userAction);
     hasChanged = true;
+    clearCache();
   }
 
   UserActionDrawing addImage({
