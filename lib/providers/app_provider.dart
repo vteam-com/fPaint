@@ -432,18 +432,35 @@ class AppProvider extends ChangeNotifier {
 
     final Gradient gradient;
     if (fillModel.mode == FillMode.radial) {
+      final ui.Offset centerPoint = toCanvas(fillModel.centerPoint);
+
       gradient = RadialGradient(
-        colors: <ui.Color>[
-          fillModel.gradientPoints.first.color,
-          fillModel.gradientPoints.last.color,
-        ],
+        colors: fillModel.gradientPoints
+            .map((final GradientPoint point) => point.color)
+            .toList(),
+        center: Alignment(
+          ((centerPoint.dx - bounds.left) / bounds.width) * 2 - 1,
+          ((centerPoint.dy - bounds.top) / bounds.height) * 2 - 1,
+        ),
+        radius: (fillModel.gradientPoints.last.offset -
+                    fillModel.gradientPoints.first.offset)
+                .distance /
+            bounds.width,
       );
     } else {
       gradient = LinearGradient(
-        colors: <ui.Color>[
-          fillModel.gradientPoints.first.color,
-          fillModel.gradientPoints.last.color,
-        ],
+        colors: fillModel.gradientPoints
+            .map((final GradientPoint point) => point.color)
+            .toList(),
+        // stops: <double>[0, 1],
+        begin: Alignment(
+          (fillModel.gradientPoints.first.offset.dx / bounds.width) * 2 - 1,
+          (fillModel.gradientPoints.first.offset.dy / bounds.height) * 2 - 1,
+        ),
+        end: Alignment(
+          (fillModel.gradientPoints.last.offset.dx / bounds.width) * 2 - 1,
+          (fillModel.gradientPoints.last.offset.dy / bounds.height) * 2 - 1,
+        ),
       );
     }
 

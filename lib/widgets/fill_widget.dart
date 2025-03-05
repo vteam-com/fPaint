@@ -41,12 +41,24 @@ class _FillWidgetState extends State<FillWidget> {
         ),
       );
     }
-
-    // stackChildren.add(
-    //   CustomPaint(
-    //     painter: _LinePainter(points),
-    //   ),
-    // );
+    final Offset midPoint = widget.fillModel.centerPoint;
+    final double centerDot = 8;
+    stackChildren.add(
+      Positioned(
+        left: midPoint.dx - (centerDot / 2),
+        top: midPoint.dy - (centerDot / 2),
+        child: Container(
+          width: centerDot,
+          height: centerDot,
+          decoration: BoxDecoration(
+            color: Colors.black,
+            shape: BoxShape.rectangle,
+            border: Border.all(color: Colors.white, width: 1),
+            borderRadius: BorderRadius.circular(centerDot),
+          ),
+        ),
+      ),
+    );
 
     return Stack(
       children: stackChildren,
