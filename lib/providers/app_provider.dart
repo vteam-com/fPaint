@@ -76,6 +76,44 @@ class AppProvider extends ChangeNotifier {
     return (point * layers.scale) + canvasOffset;
   }
 
+  void applyScaleToCanvas({
+    required final double scaleDelta,
+    final ui.Offset? anchorPoint, // optional anchoer point
+    final bool notifyListener = true,
+  }) {
+    // Step 1: Convert screen coordinates to canvas coordinates
+    final Offset before =
+        anchorPoint == null ? Offset.zero : this.toCanvas(anchorPoint);
+
+    for (final GradientPoint point in this.fillModel.gradientPoints) {
+      point.offset = this.toCanvas(point.offset);
+    }
+
+    // Step 2: Apply the scale change
+    this.layers.scale = this.layers.scale * scaleDelta;
+
+    // Step 3: Calculate the new position on the canvas
+    final Offset after =
+        anchorPoint == null ? Offset.zero : this.toCanvas(anchorPoint);
+
+    // Step 4: Adjust the offset to keep the cursor anchored
+    final Offset offsetDelta = (before - after);
+
+    this.canvasOffset -= offsetDelta * this.layers.scale;
+
+    for (final GradientPoint point in this.fillModel.gradientPoints) {
+      point.offset = this.fromCanvas(point.offset);
+    }
+    if (notifyListener) {
+      update();
+    }
+  }
+
+  Offset get canvasCenter => Offset(
+        this.canvasOffset.dx + (this.layers.width / 2) * this.layers.scale,
+        this.canvasOffset.dy + (this.layers.height / 2) * this.layers.scale,
+      );
+
   void regionErase() {
     if (selectorModel.path1 != null) {
       recordExecuteDrawingActionToSelectedLayer(
@@ -202,35 +240,57 @@ class AppProvider extends ChangeNotifier {
     update();
   }
 
+  void canvasPan({
+    required final Offset offsetDelta,
+    final bool notifyListener = true,
+  }) {
+    this.canvasOffset += offsetDelta;
+
+    if (this.fillModel.isVisible) {
+      this.fillModel.gradientPoints.forEach(
+            (final GradientPoint point) => point.offset += offsetDelta,
+          );
+    }
+    if (notifyListener) {
+      update();
+    }
+  }
+
   /// Centers the canvas within the view.
   ///
   /// This method adjusts the position of the canvas so that it is centered
   /// within the available space. It ensures that the canvas is properly
   /// aligned and visible to the user.
-  void canvasCenterAndFit({
+  void canvasFitToContainer({
     required final double containerWidth,
     required final double containerHeight,
-    required final bool scaleToContainer,
-    required final bool notifyListener,
   }) {
-    double adjustedScale = this.layers.scale;
-    if (scaleToContainer) {
-      final double scaleX = containerWidth / this.layers.width;
-      final double scaleY = containerHeight / this.layers.height;
-      adjustedScale = (min(scaleX, scaleY) * 10).floor() / 10;
-    }
+    //
+    // Step 1 Scale
+    //
+    final double scaleX = containerWidth / this.layers.width;
+    final double scaleY = containerHeight / this.layers.height;
+    final double targetScale = min(scaleX, scaleY) * 0.95;
+    final double adjustedScale = targetScale / this.layers.scale;
 
-    final double scaledWidth = (this.layers.width * adjustedScale);
-    final double scaledHeight = (this.layers.height * adjustedScale);
-
-    final double centerX = containerWidth / 2;
-    final double centerY = containerHeight / 2;
-
-    this.canvasOffset = Offset(
-      centerX - (scaledWidth / 2),
-      centerY - (scaledHeight / 2),
+    applyScaleToCanvas(
+      scaleDelta: adjustedScale,
+      anchorPoint: canvasOffset,
+      notifyListener: false,
     );
-    this.layers.scale = adjustedScale;
+
+    //
+    // Step 2 Pan
+    //
+    final double offsetX =
+        ((containerWidth - (this.layers.width * this.layers.scale)) / 2) -
+            this.canvasOffset.dx;
+    final double offsetY =
+        ((containerHeight - (this.layers.height * this.layers.scale)) / 2) -
+            this.canvasOffset.dy;
+    final Offset offsetDelta = Offset(offsetX, offsetY);
+
+    this.canvasPan(offsetDelta: offsetDelta, notifyListener: false);
   }
 
   //=============================================================================
