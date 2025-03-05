@@ -335,6 +335,7 @@ digraph "" {
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/top_colors.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/fill_widget.dart" -> "/lib/models/fill_model.dart";
+  "/lib/widgets/fill_widget.dart" -> "/lib/widgets/color_selector.dart";
   "/lib/widgets/fill_widget.dart" -> "/lib/widgets/marching_ants_path.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/widgets/transparent_background.dart";

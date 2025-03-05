@@ -224,7 +224,7 @@ class MainViewState extends State<MainView> {
             height: double.infinity,
             child: FillWidget(
               fillModel: appProvider.fillModel,
-              onDrag: (final GradientPoint point) {
+              onUpdate: (final GradientPoint point) {
                 appProvider.update();
               },
             ),

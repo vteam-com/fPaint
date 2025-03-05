@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 
 class FillWidget extends StatefulWidget {
   const FillWidget({
     super.key,
     required this.fillModel,
-    required this.onDrag,
+    required this.onUpdate,
   });
   final FillModel fillModel;
 
-  final void Function(GradientPoint) onDrag;
+  final void Function(GradientPoint) onUpdate;
 
   @override
   State<FillWidget> createState() => _FillWidgetState();
@@ -19,7 +20,7 @@ class FillWidget extends StatefulWidget {
 const int defaultHandleSize = 20;
 
 class _FillWidgetState extends State<FillWidget> {
-  bool showCoordinate = false;
+  bool showDetails = false;
 
   @override
   Widget build(final BuildContext context) {
@@ -35,13 +36,8 @@ class _FillWidgetState extends State<FillWidget> {
     for (final GradientPoint gp in widget.fillModel.gradientPoints) {
       stackChildren.add(
         _builFillKnob(
+          context: context,
           point: gp,
-          onPanUpdate: (final DragUpdateDetails details) {
-            setState(() {
-              gp.offset += details.delta;
-              widget.onDrag(gp);
-            });
-          },
         ),
       );
     }
@@ -58,12 +54,11 @@ class _FillWidgetState extends State<FillWidget> {
   }
 
   Widget _builFillKnob({
+    required final BuildContext context,
     required final GradientPoint point,
-    required final void Function(DragUpdateDetails) onPanUpdate,
   }) {
     final int handleSize =
-        (showCoordinate ? (defaultHandleSize * 1.5) : defaultHandleSize)
-            .toInt();
+        (showDetails ? (defaultHandleSize * 1.5) : defaultHandleSize).toInt();
 
     return Positioned(
       left: point.offset.dx - (handleSize / 2),
@@ -71,12 +66,41 @@ class _FillWidgetState extends State<FillWidget> {
       child: GestureDetector(
         onPanUpdate: (final DragUpdateDetails details) {
           setState(() {
-            showCoordinate = true;
+            showDetails = true;
+            point.offset += details.delta;
+            widget.onUpdate(point);
           });
-          onPanUpdate(details);
         },
         onPanEnd: (final DragEndDetails details) =>
-            setState(() => showCoordinate = false),
+            setState(() => showDetails = false),
+        onTapDown: (final TapDownDetails details) {
+          setState(() {
+            showDetails = true;
+          });
+        },
+        onTapUp: (final TapUpDetails details) {
+          setState(() {
+            showDetails = false;
+          });
+        },
+        onTapCancel: () {
+          setState(() {
+            showDetails = false;
+          });
+        },
+        onLongPress: () {
+          showColorPicker(
+            context: context,
+            title: 'Gradient Point Color',
+            color: point.color,
+            onSelectedColor: (final Color color) {
+              setState(() {
+                point.color = color;
+                widget.onUpdate(point);
+              });
+            },
+          );
+        },
         child: MouseRegion(
           cursor: SystemMouseCursors.move,
           child: Container(
@@ -84,8 +108,14 @@ class _FillWidgetState extends State<FillWidget> {
             height: handleSize.toDouble(),
             decoration: BoxDecoration(
               color: point.color,
-              border: Border.all(color: Colors.white, width: 2),
+              border: Border.all(color: Colors.white, width: 1),
               borderRadius: BorderRadius.circular(10),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 1),
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           ),
         ),
