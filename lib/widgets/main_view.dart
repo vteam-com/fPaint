@@ -226,9 +226,7 @@ class MainViewState extends State<MainView> {
             child: FillWidget(
               fillModel: appProvider.fillModel,
               onUpdate: (final GradientPoint point) {
-                // appProvider.undoProvider.undo(); // Remove the last fill action
-                // appProvider.floodFillAction(appProvider.fillModel);
-                // appProvider.update();
+                appProvider.updateGradientFill();
               },
             ),
           ),

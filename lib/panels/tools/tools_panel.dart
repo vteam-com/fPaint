@@ -217,6 +217,7 @@ class ToolsPanel extends StatelessWidget {
                   onPressed: () {
                     appProvider.fillModel.mode = FillMode.linear;
                     appProvider.update();
+                    appProvider.updateGradientFill();
                   },
                 ),
                 //
@@ -234,6 +235,7 @@ class ToolsPanel extends StatelessWidget {
                   onPressed: () {
                     appProvider.fillModel.mode = FillMode.radial;
                     appProvider.update();
+                    appProvider.updateGradientFill();
                   },
                 ),
               ],
