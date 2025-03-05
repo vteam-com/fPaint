@@ -9,22 +9,24 @@ class FillModel {
   bool isVisible = false;
   FillMode mode = FillMode.solid;
 
-  List<Offset> points = <Offset>[];
+  List<GradientPoint> gradientPoints = <GradientPoint>[];
 
   void clear() {
     this.isVisible = false;
-    this.points.clear();
+    this.gradientPoints.clear();
   }
 
-  void translate(final Offset offset) {
-    final Matrix4 matrix = Matrix4.identity()..translate(offset.dx, offset.dy);
-    for (int i = 0; i < points.length; i++) {
-      points[i] = MatrixUtils.transformPoint(matrix, points[i]);
-    }
-  }
-
-  void addPoint(final Offset pointToAdd) {
+  void addPoint(final GradientPoint pointToAdd) {
     isVisible = true;
-    this.points.add(pointToAdd);
+    this.gradientPoints.add(pointToAdd);
   }
+}
+
+class GradientPoint {
+  GradientPoint({
+    required this.offset,
+    required this.color,
+  });
+  Offset offset;
+  Color color;
 }

@@ -2,8 +2,15 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 class AnimatedMarchingAntsPath extends StatefulWidget {
-  const AnimatedMarchingAntsPath({super.key, required this.path});
-  final Path path;
+  const AnimatedMarchingAntsPath({
+    super.key,
+    this.path,
+    this.linePointStart,
+    this.linePointEnd,
+  });
+  final Path? path;
+  final Offset? linePointStart;
+  final Offset? linePointEnd;
 
   @override
   AnimatedMarchingAntsPathState createState() =>
@@ -37,6 +44,8 @@ class AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath>
         return CustomPaint(
           painter: MarchingAntsPainter(
             path: widget.path,
+            linePointStart: widget.linePointStart,
+            linePointEnd: widget.linePointEnd,
             phase: _controller.value * 10,
           ),
         );
@@ -46,9 +55,17 @@ class AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath>
 }
 
 class MarchingAntsPainter extends CustomPainter {
-  MarchingAntsPainter({required this.path, required this.phase});
+  MarchingAntsPainter({
+    required this.path,
+    required this.phase,
+    required this.linePointStart,
+    required this.linePointEnd,
+  });
 
-  final Path path;
+  final Path? path;
+  final Offset? linePointStart;
+  final Offset? linePointEnd;
+
   final double phase;
 
   @override
@@ -60,32 +77,65 @@ class MarchingAntsPainter extends CustomPainter {
       // ..blendMode = BlendMode.difference
       ..style = PaintingStyle.stroke;
 
-    canvas.drawPath(path, paint);
+    if (path != null) {
+      canvas.drawPath(path!, paint);
 
-    // Now, draw the black dashes on top
+      // Now, draw the black dashes on top
 
-    paint.color = Colors.black;
-    paint.strokeCap = StrokeCap.round;
+      paint.color = Colors.black;
+      paint.strokeCap = StrokeCap.round;
 
-    final Path dashPath = Path();
-    const double dashWidth = 4;
-    const double dashSpace = 6;
-    final double distance = phase;
+      final Path dashPath = Path();
+      const double dashWidth = 4;
+      const double dashSpace = 6;
+      final double distance = phase;
 
-    for (final ui.PathMetric pathMetric in path.computeMetrics()) {
+      for (final ui.PathMetric pathMetric in path!.computeMetrics()) {
+        double segmentDistance = distance;
+        while (segmentDistance < pathMetric.length) {
+          final double nextDistance = segmentDistance + dashWidth;
+          dashPath.addPath(
+            pathMetric.extractPath(segmentDistance, nextDistance),
+            Offset.zero,
+          );
+          segmentDistance = nextDistance + dashSpace;
+        }
+      }
+
+      // Draw black dashes over the white border
+      canvas.drawPath(dashPath, paint);
+    }
+
+    if (linePointStart != null && linePointEnd != null) {
+      paint.color = Colors.white;
+      paint.strokeWidth = 2;
+      canvas.drawLine(linePointStart!, linePointEnd!, paint);
+
+      paint.color = Colors.black;
+      paint.strokeWidth = 1;
+
+      final double totalLength = (linePointEnd! - linePointStart!).distance;
+      const double dashWidth = 4;
+      const double dashSpace = 6;
+      final double distance = phase;
+
       double segmentDistance = distance;
-      while (segmentDistance < pathMetric.length) {
+      while (segmentDistance < totalLength) {
         final double nextDistance = segmentDistance + dashWidth;
-        dashPath.addPath(
-          pathMetric.extractPath(segmentDistance, nextDistance),
-          Offset.zero,
-        );
+        final Offset start = Offset.lerp(
+          linePointStart!,
+          linePointEnd!,
+          segmentDistance / totalLength,
+        )!;
+        final Offset end = Offset.lerp(
+          linePointStart!,
+          linePointEnd!,
+          nextDistance / totalLength,
+        )!;
+        canvas.drawLine(start, end, paint);
         segmentDistance = nextDistance + dashSpace;
       }
     }
-
-    // Draw black dashes over the white border
-    canvas.drawPath(dashPath, paint);
   }
 
   @override

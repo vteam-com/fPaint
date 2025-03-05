@@ -2,10 +2,11 @@ import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:fpaint/helpers/draw_path_helper.dart';
+import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/fill_widget.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
 /// The main view of the application, which is a stateful widget.
@@ -32,6 +33,7 @@ class MainViewState extends State<MainView> {
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: true);
+
     return Stack(
       children: <Widget>[
         LayoutBuilder(
@@ -41,11 +43,13 @@ class MainViewState extends State<MainView> {
           ) {
             final ShellProvider shellProvider = ShellProvider.of(context);
 
-            _applyAutoPlacementOfCanvasIfNeeded(
-              shellProvider,
-              appProvider,
-              constraints,
-            );
+            // Fit/Center the canvas if requested
+            if (shellProvider.canvasPlacement == CanvasAutoPlacement.fit) {
+              appProvider.canvasFitToContainer(
+                containerWidth: constraints.maxWidth,
+                containerHeight: constraints.maxHeight,
+              );
+            }
 
             return Listener(
               onPointerSignal: (final PointerSignalEvent event) {
@@ -210,6 +214,21 @@ class MainViewState extends State<MainView> {
               appProvider.update();
             },
           ),
+
+        //
+        // Fill Widget
+        //
+        if (appProvider.fillModel.isVisible)
+          SizedBox(
+            width: double.infinity,
+            height: double.infinity,
+            child: FillWidget(
+              fillModel: appProvider.fillModel,
+              onDrag: (final GradientPoint point) {
+                appProvider.update();
+              },
+            ),
+          ),
       ],
     );
   }
@@ -255,27 +274,6 @@ class MainViewState extends State<MainView> {
     appProvider.update();
   }
 
-  /// Center canvas if requested
-  /// scale the canvas to fit the current viewport
-  void _applyAutoPlacementOfCanvasIfNeeded(
-    final ShellProvider shellProvider,
-    final AppProvider appProvider,
-    final BoxConstraints constraints,
-  ) {
-    // Center canvas if requested
-    // scale the canvas to fit the current viewport
-    if (shellProvider.canvasPlacement == CanvasAutoPlacement.center ||
-        shellProvider.canvasPlacement == CanvasAutoPlacement.fit) {
-      appProvider.canvasCenterAndFit(
-        containerWidth: constraints.maxWidth,
-        containerHeight: constraints.maxHeight,
-        scaleToContainer:
-            shellProvider.canvasPlacement == CanvasAutoPlacement.fit,
-        notifyListener: false,
-      );
-    }
-  }
-
   double _getDistanceBetweenTouchPoints() {
     if (_pointerPositions.length >= 2) {
       final List<Offset> positions = _pointerPositions.values.toList();
@@ -292,10 +290,8 @@ class MainViewState extends State<MainView> {
     final AppProvider appProvider,
     final Offset offsetDelta,
   ) {
-    appProvider.canvasOffset += offsetDelta;
-
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-    appProvider.update();
+    appProvider.canvasPan(offsetDelta: offsetDelta);
   }
 
   /// Handle zooming/scaling
@@ -310,22 +306,13 @@ class MainViewState extends State<MainView> {
       return;
     }
 
-    // Step 1: Convert screen coordinates to canvas coordinates
-    final Offset before = appProvider.toCanvas(anchorPoint);
-
-    // Step 2: Apply the scale change
-    appProvider.layers.scale = appProvider.layers.scale * scaleDelta;
-
-    // Step 3: Calculate the new position on the canvas
-    final Offset after = appProvider.toCanvas(anchorPoint);
-
-    // Step 4: Adjust the offset to keep the cursor anchored
-    final Offset adjustment = (before - after);
-    appProvider.canvasOffset -= adjustment * appProvider.layers.scale;
-
-    // Step 5: We are now in manual user placement of the canvas
+    // Step 0: We are now in manual user placement of the canvas
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-    appProvider.update();
+
+    appProvider.applyScaleToCanvas(
+      scaleDelta: scaleDelta,
+      anchorPoint: anchorPoint,
+    );
   }
 
   Widget _displayCanvas(final AppProvider appProvider) {
@@ -396,7 +383,26 @@ class MainViewState extends State<MainView> {
       // Special case, one clik action flood fill does not need to be tracked
       //
       if (appProvider.selectedAction == ActionType.fill) {
-        appProvider.floodFillAction(adjustedPosition);
+        if (appProvider.fillModel.mode == FillMode.solid) {
+          appProvider.fillModel.gradientPoints.clear();
+          appProvider.floodFillAction(adjustedPosition);
+        } else {
+          if (appProvider.fillModel.gradientPoints.isEmpty) {
+            appProvider.fillModel.addPoint(
+              GradientPoint(
+                offset: adjustedPosition + const Offset(100, 100),
+                color: Colors.red,
+              ),
+            );
+            appProvider.fillModel.addPoint(
+              GradientPoint(
+                offset: adjustedPosition + const Offset(-100, -100),
+                color: Colors.blue,
+              ),
+            );
+            appProvider.update();
+          }
+        }
         return;
       }
 

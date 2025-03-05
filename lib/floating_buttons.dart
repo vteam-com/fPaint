@@ -53,12 +53,14 @@ Widget floatingActionButtons(
 
       // Zooom in
       myFloatButton(
-        icon: Icons.zoom_in,
         onPressed: () {
-          appProvider.layers.scale =
-              ((appProvider.layers.scale * 10).ceil() + 1) / 10;
-          appProvider.update();
+          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+          appProvider.applyScaleToCanvas(
+            scaleDelta: 1.10,
+            anchorPoint: appProvider.canvasCenter,
+          );
         },
+        icon: Icons.zoom_in,
       ),
 
       /// Center and fit image
@@ -66,6 +68,10 @@ Widget floatingActionButtons(
         onPressed: () {
           shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
           appProvider.update();
+          // Its still unclear why but this is needed to update the canvas and the Selectors/Fill widget correctly
+          Future<void>.delayed(const Duration(milliseconds: 100), () {
+            appProvider.update();
+          });
         },
         child: Text(
           '${(appProvider.layers.scale * 100).toInt()}%\n${appProvider.layers.size.width.toInt()}\n${appProvider.layers.size.height.toInt()}',
@@ -80,19 +86,21 @@ Widget floatingActionButtons(
 
       /// Zoom out
       myFloatButton(
-        icon: Icons.zoom_out,
         onPressed: () {
-          appProvider.layers.scale =
-              ((appProvider.layers.scale * 10).floor() - 1) / 10;
-          appProvider.update();
+          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+          appProvider.applyScaleToCanvas(
+            scaleDelta: 0.90,
+            anchorPoint: appProvider.canvasCenter,
+          );
         },
+        icon: Icons.zoom_out,
       ),
       myFloatButton(
-        icon: Icons.arrow_drop_down,
         onPressed: () {
           shellProvider.shellMode = ShellMode.hidden;
           shellProvider.update();
         },
+        icon: Icons.arrow_drop_down,
       ),
     ],
   );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 enum CanvasAutoPlacement {
-  center,
   fit,
   manual,
 }
