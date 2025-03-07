@@ -153,6 +153,11 @@ Future<ui.Image?> getImageFromClipboard() async {
   return null;
 }
 
+Future<bool> clipboardHasImage() async {
+  final Uint8List? bytes = await Pasteboard.image;
+  return bytes != null;
+}
+
 Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);

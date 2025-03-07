@@ -32,7 +32,7 @@ class SidePanelTopMenu extends StatelessWidget {
         const MainMenu(),
         if (shellProvider.isSidePanelExpanded)
           buildIconButton(
-            tooltip: strings[StringId.startOverTooltip]!,
+            tooltip: strings[StringId.startOver]!,
             icon: Icons.power_settings_new_outlined,
             onPressed: () => onFileNew(context),
           ),

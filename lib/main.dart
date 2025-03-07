@@ -61,6 +61,7 @@ class MyApp extends StatelessWidget {
         // Define routes with a PlatformsPage route added.
         routes: <String, WidgetBuilder>{
           '/': (final BuildContext context) => shortCutsForMainApp(
+                context,
                 shellProvider,
                 appProvider,
                 const MainScreen(),
