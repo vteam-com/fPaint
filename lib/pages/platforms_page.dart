@@ -81,7 +81,8 @@ class PlatformsPage extends StatelessWidget {
         spacing: 20,
         children: <Widget>[
           CircleAvatar(
-            backgroundImage: AssetImage(image),
+            backgroundColor: Colors.white,
+            foregroundImage: AssetImage(image),
           ),
           Expanded(child: Text(name, style: const TextStyle(fontSize: 20))),
           Expanded(
