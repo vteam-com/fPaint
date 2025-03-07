@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
 Widget shortCutsForMainApp(
+  final BuildContext context,
   final ShellProvider shellProvider,
   final AppProvider appProvider,
   final Widget child,
@@ -101,6 +103,13 @@ Widget shortCutsForMainApp(
       ): const SelectAllIntent(),
 
       //-------------------------------------------------
+      // New document from Clipboard
+      LogicalKeySet(
+        LogicalKeyboardKey.meta,
+        LogicalKeyboardKey.keyN,
+      ): const NewDocumentFromClipboardImage(),
+
+      //-------------------------------------------------
       // Escape
       LogicalKeySet(
         LogicalKeyboardKey.escape,
@@ -134,6 +143,17 @@ Widget shortCutsForMainApp(
         CopyIntent: CallbackAction<CopyIntent>(
           onInvoke: (final CopyIntent intent) async =>
               await appProvider.regionCopy(),
+        ),
+        NewDocumentFromClipboardImage:
+            CallbackAction<NewDocumentFromClipboardImage>(
+          onInvoke: (final NewDocumentFromClipboardImage intent) async {
+            if (appProvider.layers.hasChanged &&
+                await confirmDiscardCurrentWork(context) == false) {
+              return;
+            }
+            appProvider.newDocumentFromClipboardImage();
+            return null;
+          },
         ),
         PasteIntent: CallbackAction<PasteIntent>(
           onInvoke: (final PasteIntent intent) async =>
@@ -209,6 +229,10 @@ class SaveIntent extends Intent {
 
 class SelectAllIntent extends Intent {
   const SelectAllIntent();
+}
+
+class NewDocumentFromClipboardImage extends Intent {
+  const NewDocumentFromClipboardImage();
 }
 
 class CutIntent extends Intent {

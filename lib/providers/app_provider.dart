@@ -602,6 +602,17 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
+  void newDocumentFromClipboardImage() async {
+    final ui.Image? clipboardImage = await getImageFromClipboard();
+    if (clipboardImage != null) {
+      final double width = clipboardImage.width.toDouble();
+      final double height = clipboardImage.height.toDouble();
+      this.canvasClear(Size(width, height));
+      this.layers.selectedLayer.addImage(imageToAdd: clipboardImage);
+      this.update();
+    }
+  }
+
   //=============================================================================
   /// Notifies all listeners that the model has been updated.
   /// This method should be called whenever the state of the model changes

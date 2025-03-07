@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
@@ -17,8 +18,10 @@ Future<void> onFileNew(final BuildContext context) async {
   }
 
   // Dialog to get desired canvas size
+  final bool offNewDocFromClipboard = await clipboardHasImage();
+
   if (context.mounted) {
-    final Size? canvasSize = await showDialog<Size>(
+    await showDialog<Size>(
       context: context,
       builder: (final BuildContext context) {
         final TextEditingController widthController =
@@ -45,6 +48,18 @@ Future<void> onFileNew(final BuildContext context) async {
             ],
           ),
           actions: <Widget>[
+            if (offNewDocFromClipboard)
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Handle creating new document from clipboard image
+                    appProvider.newDocumentFromClipboardImage();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('New from Clipboard'),
+                ),
+              ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(null);
@@ -56,7 +71,8 @@ Future<void> onFileNew(final BuildContext context) async {
                 final double? width = double.tryParse(widthController.text);
                 final double? height = double.tryParse(heightController.text);
                 if (width != null && height != null) {
-                  Navigator.of(context).pop(Size(width, height));
+                  appProvider.canvasClear(Size(width, height));
+                  Navigator.of(context).pop();
                 } else {
                   // Show error message if input is invalid
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -70,10 +86,6 @@ Future<void> onFileNew(final BuildContext context) async {
         );
       },
     );
-
-    if (canvasSize != null) {
-      appProvider.canvasClear(canvasSize);
-    }
   }
 }
 

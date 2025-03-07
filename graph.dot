@@ -317,6 +317,7 @@ digraph "" {
   "/lib/files/export_download_non_web.dart" -> "/lib/panels/share_panel.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/files/import_files.dart" -> "/lib/files/file_ora.dart";
+  "/lib/files/import_files.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/files/import_files.dart" -> "/lib/providers/app_provider.dart";
   "/lib/files/import_files.dart" -> "/lib/providers/shell_provider.dart";
   "/lib/pages/settings_page.dart" -> "/lib/providers/app_provider.dart";
@@ -339,6 +340,7 @@ digraph "" {
   "/lib/widgets/fill_widget.dart" -> "/lib/widgets/marching_ants_path.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/widgets/transparent_background.dart";
+  "/lib/widgets/shortcuts.dart" -> "/lib/files/import_files.dart";
   "/lib/widgets/shortcuts.dart" -> "/lib/files/save.dart";
   "/lib/widgets/shortcuts.dart" -> "/lib/providers/app_provider.dart";
   "/lib/widgets/shortcuts.dart" -> "/lib/providers/shell_provider.dart";
