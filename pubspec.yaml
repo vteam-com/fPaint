@@ -31,7 +31,7 @@ environment:
 dependencies:
   archive: ^4.0.4
   cupertino_icons: ^1.0.8
-  file_picker: ^9.0.2
+  file_picker: ^9.2.1
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.17
