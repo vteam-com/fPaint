@@ -80,6 +80,6 @@ class AppPreferences {
     _fillColor =
         Color(_prefs!.getInt(keyLastFillColor) ?? Colors.blue.toARGB32());
 
-    _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? true;
+    _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? false;
   }
 }
