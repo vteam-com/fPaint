@@ -4,6 +4,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] - 2025-03-20
+
+### Update
+
+- Better experience on mobile phone
+
 ## [1.0.3] - 2025-03-05
 
 ### Add
