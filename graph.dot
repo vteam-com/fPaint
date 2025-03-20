@@ -289,11 +289,13 @@ digraph "" {
   "/lib/floating_buttons.dart" -> "/lib/models/constants.dart";
   "/lib/floating_buttons.dart" -> "/lib/providers/app_provider.dart";
   "/lib/floating_buttons.dart" -> "/lib/providers/shell_provider.dart";
+  "/lib/floating_buttons.dart" -> "/lib/widgets/color_selector.dart";
   "/lib/models/selector_model.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/lib/models/selector_model.dart" -> "/lib/helpers/draw_path_helper.dart" [style=dashed];
   "/lib/models/fill_model.dart" -> "/lib/helpers/draw_path_helper.dart" [style=dashed];
   "/lib/models/render_helper.dart" -> "/lib/widgets/brush_style_picker.dart";
   "/lib/models/user_action_drawing.dart" -> "/lib/widgets/brush_style_picker.dart";
+  "/lib/models/user_action_drawing.dart" -> "/lib/widgets/svg_icon.dart";
   "/lib/models/user_action_drawing.dart" -> "/lib/widgets/brush_style_picker.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/main_screen.dart";
   "/lib/main.dart" -> "/lib/pages/platforms_page.dart";

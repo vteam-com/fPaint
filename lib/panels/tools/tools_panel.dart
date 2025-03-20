@@ -51,11 +51,6 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  Icon iconAndColor(final bool isSelected, final IconData tool) {
-    final Color? color = isSelected ? Colors.blue : null;
-    return Icon(tool, color: color);
-  }
-
   List<Widget> getListOfTools(
     final BuildContext context,
   ) {
@@ -67,9 +62,9 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Pencil',
-        image: iconAndColor(
+        image: iconFromaActionType(
+          ActionType.pencil,
           selectedTool == ActionType.pencil,
-          Icons.draw,
         ),
         onPressed: () {
           appProvider.selectedAction = ActionType.pencil;
@@ -80,9 +75,9 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Brush',
-        image: iconAndColor(
+        image: iconFromaActionType(
+          ActionType.brush,
           selectedTool == ActionType.brush,
-          Icons.brush,
         ),
         onPressed: () {
           appProvider.selectedAction = ActionType.brush;
@@ -93,9 +88,9 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Line',
-        image: iconAndColor(
+        image: iconFromaActionType(
+          ActionType.line,
           selectedTool == ActionType.line,
-          Icons.line_axis,
         ),
         onPressed: () {
           appProvider.selectedAction = ActionType.line;
@@ -106,9 +101,9 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Rectangle',
-        image: iconAndColor(
+        image: iconFromaActionType(
+          ActionType.rectangle,
           selectedTool == ActionType.rectangle,
-          Icons.crop_square,
         ),
         onPressed: () {
           appProvider.selectedAction = ActionType.rectangle;
@@ -119,9 +114,9 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Circle',
-        image: iconAndColor(
+        image: iconFromaActionType(
+          ActionType.circle,
           selectedTool == ActionType.circle,
-          Icons.circle_outlined,
         ),
         onPressed: () {
           appProvider.selectedAction = ActionType.circle;
@@ -132,9 +127,9 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Paint Bucket',
-        image: iconAndColor(
+        image: iconFromaActionType(
+          ActionType.fill,
           selectedTool == ActionType.fill,
-          Icons.format_color_fill,
         ),
         onPressed: () {
           appProvider.selectedAction = ActionType.fill;
@@ -158,9 +153,9 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Selector',
-        image: iconAndColor(
+        image: iconFromaActionType(
+          ActionType.selector,
           selectedTool == ActionType.selector,
-          Symbols.select,
         ),
         onPressed: () {
           appProvider.selectedAction = ActionType.selector;
@@ -194,8 +189,8 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Solid',
                   image: iconAndColor(
-                    appProvider.fillModel.mode == FillMode.solid,
                     Icons.square,
+                    appProvider.fillModel.mode == FillMode.solid,
                   ),
                   onPressed: () {
                     appProvider.fillModel.mode = FillMode.solid;
@@ -262,8 +257,8 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Rectangle',
                   image: iconAndColor(
-                    appProvider.selectorModel.mode == SelectorMode.rectangle,
                     Icons.highlight_alt,
+                    appProvider.selectorModel.mode == SelectorMode.rectangle,
                   ),
                   onPressed: () {
                     appProvider.selectorModel.mode = SelectorMode.rectangle;
@@ -277,8 +272,8 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Circle',
                   image: iconAndColor(
-                    appProvider.selectorModel.mode == SelectorMode.circle,
                     Symbols.lasso_select,
+                    appProvider.selectorModel.mode == SelectorMode.circle,
                   ),
                   onPressed: () {
                     appProvider.selectorModel.mode = SelectorMode.circle;
@@ -309,8 +304,8 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Magic',
                   image: iconAndColor(
-                    appProvider.selectorModel.mode == SelectorMode.wand,
                     Icons.auto_fix_high_outlined,
+                    appProvider.selectorModel.mode == SelectorMode.wand,
                   ),
                   onPressed: () {
                     appProvider.selectorModel.mode = SelectorMode.wand;
@@ -393,8 +388,8 @@ class ToolsPanel extends StatelessWidget {
                     minimal: minimal,
                     name: 'Crop',
                     image: iconAndColor(
-                      false,
                       Icons.crop,
+                      false,
                     ),
                     onPressed: () {
                       appProvider.crop();
@@ -407,8 +402,8 @@ class ToolsPanel extends StatelessWidget {
                     minimal: minimal,
                     name: 'Cancel',
                     image: iconAndColor(
-                      false,
                       Symbols.remove_selection,
+                      false,
                     ),
                     onPressed: () {
                       appProvider.selectorModel.clear();

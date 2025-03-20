@@ -63,7 +63,7 @@ class MainScreen extends StatelessWidget {
                 });
               },
             )
-          : floatingActionButtons(shellProvider, appProvider),
+          : floatingActionButtons(context, shellProvider, appProvider),
     );
   }
 
