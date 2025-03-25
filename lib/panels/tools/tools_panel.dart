@@ -149,7 +149,6 @@ class ToolsPanel extends StatelessWidget {
           appProvider.selectedAction = ActionType.eraser;
         },
       ),
-
       ToolPanelPicker(
         minimal: minimal,
         name: 'Selector',
@@ -418,6 +417,7 @@ class ToolsPanel extends StatelessWidget {
         if (appProvider.selectorModel.mode == SelectorMode.wand) {
           addToolOptionTolerance(widgets, context, appProvider);
         }
+        break;
 
       default:
         final String title = appProvider.selectedAction == ActionType.pencil
@@ -503,18 +503,31 @@ class ToolsPanel extends StatelessWidget {
             ToolAttributeWidget(
               minimal: minimal,
               name: 'Brush Color',
-              childLeft: colorPreviewWithTransparentPaper(
-                minimal: minimal,
-                color: appProvider.brushColor,
-                onPressed: () {
-                  showColorPicker(
-                    context: context,
-                    title: 'Brush Color',
+              childLeft: Column(
+                children: <Widget>[
+                  colorPreviewWithTransparentPaper(
+                    minimal: minimal,
                     color: appProvider.brushColor,
-                    onSelectedColor: (final Color color) =>
-                        appProvider.brushColor = color,
-                  );
-                },
+                    onPressed: () {
+                      showColorPicker(
+                        context: context,
+                        title: 'Brush Color',
+                        color: appProvider.brushColor,
+                        onSelectedColor: (final Color color) =>
+                            appProvider.brushColor = color,
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.colorize_outlined),
+                    onPressed: () {
+                      //
+                      appProvider.eyeDropPositionForBrush =
+                          appProvider.fromCanvas(appProvider.canvasCenter);
+                      appProvider.update();
+                    },
+                  ),
+                ],
               ),
               childRight: minimal
                   ? null
@@ -609,18 +622,31 @@ class ToolsPanel extends StatelessWidget {
       ToolAttributeWidget(
         minimal: minimal,
         name: 'Fill Color',
-        childLeft: colorPreviewWithTransparentPaper(
-          minimal: minimal,
-          color: appProvider.fillColor,
-          onPressed: () {
-            showColorPicker(
-              context: context,
-              title: 'Fill Color',
+        childLeft: Column(
+          children: <Widget>[
+            colorPreviewWithTransparentPaper(
+              minimal: minimal,
               color: appProvider.fillColor,
-              onSelectedColor: (final Color color) =>
-                  appProvider.fillColor = color,
-            );
-          },
+              onPressed: () {
+                showColorPicker(
+                  context: context,
+                  title: 'Fill Color',
+                  color: appProvider.fillColor,
+                  onSelectedColor: (final Color color) =>
+                      appProvider.fillColor = color,
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.colorize_outlined),
+              onPressed: () {
+                //
+                appProvider.eyeDropPositionForFill =
+                    appProvider.fromCanvas(appProvider.canvasCenter);
+                appProvider.update();
+              },
+            ),
+          ],
         ),
         childRight: minimal
             ? null

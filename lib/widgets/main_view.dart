@@ -2,12 +2,14 @@ import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as ui;
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
+import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
 /// The main view of the application, which is a stateful widget.
@@ -145,7 +147,11 @@ class MainViewState extends State<MainView> {
                   _getDistanceBetweenTouchPoints();
 
                   if (_activePointers.length == 2) {
-                    _handleMultiTouchUpdate(event, appProvider, shellProvider);
+                    _handleMultiTouchUpdate(
+                      event,
+                      appProvider,
+                      shellProvider,
+                    );
                   } else {
                     if (event.buttons == 1 &&
                         !appProvider.preferences.useApplePencil) {
@@ -192,6 +198,43 @@ class MainViewState extends State<MainView> {
             );
           },
         ),
+
+        //
+        // Color selection from image
+        //
+        if (appProvider.eyeDropPositionForBrush != null)
+          MagnifyingEyeDropper(
+            layers: appProvider.layers,
+            pointerPosition: appProvider.eyeDropPositionForBrush!,
+            pixelPosition:
+                appProvider.toCanvas(appProvider.eyeDropPositionForBrush!),
+            onColorPicked: (final Color color) async {
+              appProvider.brushColor = color;
+              appProvider.eyeDropPositionForBrush = null;
+              appProvider.update();
+            },
+            onClosed: () {
+              appProvider.eyeDropPositionForBrush = null;
+              appProvider.update();
+            },
+          ),
+
+        if (appProvider.eyeDropPositionForFill != null)
+          MagnifyingEyeDropper(
+            layers: appProvider.layers,
+            pointerPosition: appProvider.eyeDropPositionForFill!,
+            pixelPosition:
+                appProvider.toCanvas(appProvider.eyeDropPositionForFill!),
+            onColorPicked: (final Color color) async {
+              appProvider.fillColor = color;
+              appProvider.eyeDropPositionForFill = null;
+              appProvider.update();
+            },
+            onClosed: () {
+              appProvider.eyeDropPositionForFill = null;
+              appProvider.update();
+            },
+          ),
 
         //
         // Selection Widget
@@ -355,7 +398,26 @@ class MainViewState extends State<MainView> {
   ) async {
     final ui.Offset adjustedPosition =
         appProvider.toCanvas(event.localPosition);
+
     if (event.buttons == 1 && _activePointerId == -1) {
+      //
+      // Pick Color for Brush
+      //
+      if (appProvider.eyeDropPositionForBrush != null) {
+        appProvider.layers.capturePainterToImage();
+        appProvider.eyeDropPositionForBrush = adjustedPosition;
+        return;
+      }
+
+      //
+      // Pick Color for Fill
+      //
+      if (appProvider.eyeDropPositionForFill != null) {
+        appProvider.layers.capturePainterToImage();
+        appProvider.eyeDropPositionForFill = adjustedPosition;
+        return;
+      }
+
       //
       // Remember what pointer/button the drawing started on
       //
@@ -446,6 +508,16 @@ class MainViewState extends State<MainView> {
     final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
 
     // debugPrint('DRAW MOVE ${details.buttons} P:${details.pointer}');
+    if (appProvider.eyeDropPositionForBrush != null) {
+      appProvider.eyeDropPositionForBrush = event.localPosition;
+      appProvider.update();
+      return;
+    }
+    if (appProvider.eyeDropPositionForFill != null) {
+      appProvider.eyeDropPositionForFill = event.localPosition;
+      appProvider.update();
+      return;
+    }
 
     if (event.buttons == 1 && _activePointerId == event.pointer) {
       // Update the Selector

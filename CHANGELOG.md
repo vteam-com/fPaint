@@ -4,6 +4,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2025-03-26
+
+### Add
+
+- Color-EyeDrop feature
+
 ## [1.0.4] - 2025-03-20
 
 ### Update

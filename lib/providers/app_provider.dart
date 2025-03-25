@@ -508,6 +508,12 @@ class AppProvider extends ChangeNotifier {
   FillModel fillModel = FillModel();
 
   //-------------------------
+  Offset? eyeDropPositionForBrush;
+
+  //-------------------------
+  Offset? eyeDropPositionForFill;
+
+  //-------------------------
   // Selector
   SelectorModel selectorModel = SelectorModel();
 

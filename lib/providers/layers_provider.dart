@@ -1,10 +1,13 @@
 // Imports
 import 'dart:math';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:provider/provider.dart';
@@ -77,6 +80,8 @@ class LayersProvider extends ChangeNotifier {
       _scale = value.clamp(10 / 100, 1000 / 100);
     }
   }
+
+  ui.Image? cachedImage;
 
   //-------------------------------------------
   // Canvas Resize position
@@ -338,5 +343,65 @@ class LayersProvider extends ChangeNotifier {
     );
     topColors = topColors.take(20).toList();
     return topColors;
+  }
+
+  Future<ui.Image> capturePainterToImage() async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    // Draw the custom painter on the canvas
+    final CanvasPanelPainter painter = CanvasPanelPainter(this);
+
+    painter.paint(canvas, this.size);
+
+    // End the recording and get the picture
+    final ui.Picture picture = recorder.endRecording();
+
+    // Convert the picture to an image
+    this.cachedImage = await picture.toImage(
+      this.size.width.toInt(),
+      this.size.height.toInt(),
+    );
+
+    return this.cachedImage!;
+  }
+
+  Future<Uint8List> capturePainterToImageBytes() async {
+    final ui.Image image = await capturePainterToImage();
+    // Convert the image to byte data (e.g., PNG)
+    final ByteData? byteData = await image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+
+    return byteData!.buffer.asUint8List();
+  }
+
+  Future<Color?> getColorAtOffset(final Offset offset) async {
+    final ui.Image image = await capturePainterToImage();
+
+    // Ensure coordinates are within bounds
+    final int x = offset.dx.toInt();
+    final int y = offset.dy.toInt();
+    if (x < 0 || y < 0 || x >= image.width || y >= image.height) {
+      return null; // Return null for out-of-bounds coordinates
+    }
+
+    // Convert the image to ByteData in the correct format
+    final ByteData? byteData =
+        await image.toByteData(format: ui.ImageByteFormat.rawUnmodified);
+    if (byteData == null) {
+      return null;
+    }
+
+    // Calculate pixel index (4 bytes per pixel: RGBA)
+    final int pixelIndex = (y * image.width + x) * 4;
+
+    // Extract RGBA values
+    final int r = byteData.getUint8(pixelIndex);
+    final int g = byteData.getUint8(pixelIndex + 1);
+    final int b = byteData.getUint8(pixelIndex + 2);
+    final int a = byteData.getUint8(pixelIndex + 3);
+
+    return Color.fromARGB(a, r, g, b);
   }
 }
