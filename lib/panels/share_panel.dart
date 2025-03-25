@@ -1,11 +1,7 @@
-import 'dart:ui' as ui;
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
-import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
@@ -83,26 +79,5 @@ void _onExportToClipboard(final BuildContext context) async {
 Future<Uint8List> capturePainterToImageBytes(
   final LayersProvider layers,
 ) async {
-  final PictureRecorder recorder = PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-
-  // Draw the custom painter on the canvas
-  final CanvasPanelPainter painter = CanvasPanelPainter(layers);
-
-  painter.paint(canvas, layers.size);
-
-  // End the recording and get the picture
-  final Picture picture = recorder.endRecording();
-
-  // Convert the picture to an image
-  final ui.Image image = await picture.toImage(
-    layers.size.width.toInt(),
-    layers.size.height.toInt(),
-  );
-
-  // Convert the image to byte data (e.g., PNG)
-  final ByteData? byteData = await image.toByteData(
-    format: ImageByteFormat.png,
-  );
-  return byteData!.buffer.asUint8List();
+  return await layers.capturePainterToImageBytes();
 }

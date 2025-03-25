@@ -176,6 +176,25 @@ Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
   return picture.toImage(newSize.width.toInt(), newSize.height.toInt());
 }
 
+ui.Image cropImage(final ui.Image image, final Rect rect) {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+
+  final ui.Rect srcRect = Rect.fromLTWH(
+    rect.left,
+    rect.top,
+    rect.width,
+    rect.height,
+  );
+
+  final ui.Rect dstRect = Rect.fromLTWH(0, 0, rect.width, rect.height);
+
+  canvas.drawImageRect(image, srcRect, dstRect, ui.Paint());
+
+  final ui.Picture picture = recorder.endRecording();
+  return picture.toImageSync(rect.width.toInt(), rect.height.toInt());
+}
+
 class Debouncer {
   /// Creates a [Debouncer] with an optional [duration].
   /// Defaults to 1 second if no duration is provided.
