@@ -377,31 +377,33 @@ class LayersProvider extends ChangeNotifier {
   }
 
   Future<Color?> getColorAtOffset(final Offset offset) async {
-    final ui.Image image = await capturePainterToImage();
+    try {
+      final ui.Image image = await capturePainterToImage();
 
-    // Ensure coordinates are within bounds
-    final int x = offset.dx.toInt();
-    final int y = offset.dy.toInt();
-    if (x < 0 || y < 0 || x >= image.width || y >= image.height) {
-      return null; // Return null for out-of-bounds coordinates
-    }
+      // Ensure coordinates are within bounds
+      final int x = offset.dx.clamp(0, image.width - 1).toInt();
+      final int y = offset.dy.clamp(0, image.height - 1).toInt();
 
-    // Convert the image to ByteData in the correct format
-    final ByteData? byteData =
-        await image.toByteData(format: ui.ImageByteFormat.rawUnmodified);
-    if (byteData == null) {
+      // Convert the image to ByteData in the correct format
+      final ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+
+      if (byteData == null) {
+        return null;
+      }
+
+      // Calculate pixel index (4 bytes per pixel: RGBA)
+      final int pixelIndex = (y * image.width + x) * 4;
+
+      // Extract RGBA values
+      final int r = byteData.getUint8(pixelIndex);
+      final int g = byteData.getUint8(pixelIndex + 1);
+      final int b = byteData.getUint8(pixelIndex + 2);
+      final int a = byteData.getUint8(pixelIndex + 3);
+
+      return Color.fromARGB(a, r, g, b);
+    } catch (error) {
       return null;
     }
-
-    // Calculate pixel index (4 bytes per pixel: RGBA)
-    final int pixelIndex = (y * image.width + x) * 4;
-
-    // Extract RGBA values
-    final int r = byteData.getUint8(pixelIndex);
-    final int g = byteData.getUint8(pixelIndex + 1);
-    final int b = byteData.getUint8(pixelIndex + 2);
-    final int a = byteData.getUint8(pixelIndex + 3);
-
-    return Color.fromARGB(a, r, g, b);
   }
 }
