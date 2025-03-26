@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/widgets/draw_rect.dart';
 
 class MagnifyingEyeDropper extends StatefulWidget {
   const MagnifyingEyeDropper({
@@ -29,6 +30,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   final double spacer = 4;
   final double regionSize = 100;
   final double widgewidgetWidth = 50;
+  final double magnifyFactor = 6;
   late final double totalHeightOfTheWidget =
       buttonSize + spacer + regionSize + spacer + buttonSize;
 
@@ -45,21 +47,24 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
 
     _updateColor();
 
+    final double offsetFromCenter = (widgewidgetWidth / 2) / magnifyFactor;
+
     final ui.Rect region = Rect.fromLTWH(
-      widget.pixelPosition.dx - (widgewidgetWidth / 2),
-      widget.pixelPosition.dy - (widgewidgetWidth / 2),
-      regionSize / 2,
-      regionSize / 2,
+      widget.pixelPosition.dx - offsetFromCenter,
+      widget.pixelPosition.dy - offsetFromCenter,
+      offsetFromCenter,
+      offsetFromCenter,
     );
 
     final ui.Image croppedImage = cropImage(widget.layers.cachedImage!, region);
 
     // Magnifying Glass Effect
     return Positioned(
-      left: widget.pointerPosition.dx - (widgewidgetWidth / 2),
+      left: widget.pointerPosition.dx - (widgewidgetWidth),
       top: widget.pointerPosition.dy - (totalHeightOfTheWidget / 2),
       child: Column(
         spacing: spacer.toDouble(),
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           //
           // Cancel 'X'
@@ -87,11 +92,25 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
           SizedBox(
             width: regionSize,
             height: regionSize,
-            child: CustomPaint(
-              painter: MagnifyingGlassPainter(
-                croppedImage: croppedImage,
-                color: _selectedColor ?? Colors.black,
-              ),
+            child: Stack(
+              alignment: AlignmentDirectional.center,
+              children: <Widget>[
+                SizedBox(
+                  width: regionSize,
+                  height: regionSize,
+                  child: CustomPaint(
+                    painter: MagnifyingGlassPainter(
+                      croppedImage: croppedImage,
+                      color: _selectedColor ?? Colors.black,
+                    ),
+                  ),
+                ),
+                DashedRectangle(
+                  fillColor: _selectedColor ?? Colors.transparent,
+                  width: 30,
+                  height: 30,
+                ),
+              ],
             ),
           ),
 
@@ -159,12 +178,14 @@ class MagnifyingGlassPainter extends CustomPainter {
 
   @override
   void paint(final Canvas canvas, final Size size) {
+    final double scaleFactor = 8.0;
+
     final Paint paint = Paint()
       ..shader = ImageShader(
         croppedImage,
         TileMode.clamp,
         TileMode.clamp,
-        Matrix4.identity().scaled(2.0).storage,
+        Matrix4.identity().scaled(scaleFactor).storage,
       );
 
     canvas.drawCircle(
@@ -181,30 +202,13 @@ class MagnifyingGlassPainter extends CustomPainter {
         ..strokeWidth = 2
         ..color = Colors.black,
     );
-
-    final double squareSize = size.width / 4;
-
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(size.width / 2, size.height / 2),
-        width: squareSize,
-        height: squareSize,
-      ),
-      Paint()
-        ..style = PaintingStyle.fill
-        ..color = color,
-    );
-
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(size.width / 2, size.height / 2),
-        width: squareSize,
-        height: squareSize,
-      ),
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      (size.width / 2) - 1,
       Paint()
         ..style = PaintingStyle.stroke
-        ..color = Colors.black
-        ..strokeWidth = 4,
+        ..strokeWidth = 2
+        ..color = Colors.white,
     );
   }
 
