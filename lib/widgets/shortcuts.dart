@@ -192,6 +192,8 @@ Widget shortCutsForMainApp(
           onInvoke: (final EscapeIntent intent) async {
             appProvider.selectorModel.clear();
             appProvider.fillModel.clear();
+            appProvider.eyeDropPositionForBrush = null;
+            appProvider.eyeDropPositionForFill = null;
             appProvider.update();
             return null;
           },
