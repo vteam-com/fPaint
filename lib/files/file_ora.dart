@@ -6,7 +6,6 @@ import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:fpaint/providers/shell_provider.dart';
 import 'package:xml/xml.dart';
 
 /// Reads an ORA file and updates the provided [AppProvider] with its contents.
@@ -19,8 +18,7 @@ import 'package:xml/xml.dart';
 ///   - filePath: The path to the ORA file to be read.
 ///
 /// - Returns: A [Future] that completes when the file has been read and the model updated.
-Future<void> readOraFile(
-  final ShellProvider shellProvider,
+Future<void> readImageFromFilePathOra(
   final LayersProvider layers,
   final String filePath,
 ) async {
@@ -30,11 +28,8 @@ Future<void> readOraFile(
       throw Exception('File not found "$filePath"');
     }
 
-    shellProvider.loadedFileName = filePath;
-
     // Read the file as bytes
     await readOraFileFromBytes(
-      shellProvider,
       layers,
       await oraFile.readAsBytes(),
     );
@@ -45,7 +40,6 @@ Future<void> readOraFile(
 
 /// Read the file from  bytes
 Future<void> readOraFileFromBytes(
-  final ShellProvider shellProvider,
   final LayersProvider layers,
   final Uint8List bytes,
 ) async {
