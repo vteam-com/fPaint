@@ -177,7 +177,8 @@ class AppProvider extends ChangeNotifier {
     _undoProvider.executeAction(
       name: 'Paste',
       forward: () {
-        final LayerProvider newLayerForPatedImage = layers.addTop('Pasted');
+        final LayerProvider newLayerForPatedImage =
+            layers.addTop(name: 'Pasted');
         newLayerIndex = layers.getLayerIndex(newLayerForPatedImage);
         newLayerForPatedImage.addImage(
           imageToAdd: image,

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:fpaint/providers/shell_provider.dart';
 import 'package:xml/xml.dart';
 
 void main() {
@@ -24,11 +23,10 @@ void main() {
   });
 
   test('readOraFile throws exception for non-existent file', () async {
-    final ShellProvider shellProvider = ShellProvider();
     final LayersProvider layers = LayersProvider();
 
     expect(
-      () => readOraFile(shellProvider, layers, 'nonexistent.ora'),
+      () => readImageFromFilePathOra(layers, 'nonexistent.ora'),
       throwsException,
     );
   });
@@ -56,12 +54,11 @@ void main() {
   });
 
   test('readOraFileFromBytes throws exception for invalid archive', () async {
-    final ShellProvider shellProvider = ShellProvider();
     final LayersProvider layers = LayersProvider();
     final Uint8List invalidBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
 
     expect(
-      () => readOraFileFromBytes(shellProvider, layers, invalidBytes),
+      () => readOraFileFromBytes(layers, invalidBytes),
       throwsException,
     );
   });

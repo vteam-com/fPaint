@@ -123,7 +123,7 @@ Future<void> onFileOpen(final BuildContext context) async {
       if (kIsWeb) {
         final Uint8List bytes = result.files.single.bytes!;
         if (result.files.single.extension == 'ora') {
-          await readOraFileFromBytes(shellProvider, layers, bytes);
+          await readOraFileFromBytes(layers, bytes);
         } else if (isFileExtensionSupported(
           result.files.single.extension ?? '',
         )) {
@@ -132,15 +132,8 @@ Future<void> onFileOpen(final BuildContext context) async {
       } else {
         final String path = result.files.single.path!;
         shellProvider.loadedFileName = path;
-        if (result.files.single.extension == 'xcf') {
-          // TODO
-        } else if (result.files.single.extension == 'ora') {
-          await readOraFile(shellProvider, layers, path);
-        } else if (isFileExtensionSupported(
-          result.files.single.extension ?? '',
-        )) {
-          await readImageFilePath(layers, path);
-        }
+        await openFileFromPath(layers, path);
+        shellProvider.loadedFileName = path;
       }
       layers.clearHasChanged();
     }
@@ -150,10 +143,32 @@ Future<void> onFileOpen(final BuildContext context) async {
   }
 }
 
+Future<void> openFileFromPath(
+  final LayersProvider layers,
+  final String path,
+) async {
+  final String extension = path.split('.').last.toLowerCase();
+
+  if (extension == 'xcf') {
+    // TODO - No Currently supported
+    return;
+  }
+
+  if (isFileExtensionSupported(extension)) {
+    if (extension == 'ora') {
+      // File with support for layers
+      await readImageFromFilePathOra(layers, path);
+    } else {
+      // PNG, JPG, WEBP
+      await readImageFromFilePath(layers, path);
+    }
+  }
+}
+
 final List<String> supportedImageFileExtensions = <String>[
   'ora',
   'png',
-  'psd',
+  // 'psd',
   // 'tif',
   // 'tiff',
   'webp',
@@ -177,7 +192,7 @@ Future<void> _readImageFile(
   layers.selectedLayer.addImage(imageToAdd: image);
 }
 
-Future<void> readImageFilePath(
+Future<void> readImageFromFilePath(
   final LayersProvider layers,
   final String path,
 ) async {

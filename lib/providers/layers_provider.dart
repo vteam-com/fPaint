@@ -193,7 +193,7 @@ class LayersProvider extends ChangeNotifier {
         .findFirstMatch((final LayerProvider layer) => layer.name == name);
   }
 
-  LayerProvider addTop([final String? name]) => this.insertAt(0, name);
+  LayerProvider addTop({final String? name}) => this.insertAt(0, name);
 
   LayerProvider addBottom([final String? name]) =>
       this.insertAt(this.length, name);
