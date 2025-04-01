@@ -41,6 +41,17 @@ Future<void> onExportAsPng(
   }
 }
 
+/// Saves the current painter content as a PNG image file.
+///
+/// Captures the painter's current state as image bytes and writes them
+/// to the specified file path.
+///
+/// Parameters:
+/// - `layers`: The `LayersProvider` containing the current painter state.
+/// - `filePath`: The destination file path where the PNG image will be saved.
+///
+/// Returns:
+/// - A `Future<void>` that completes when the image has been written to disk.
 Future<void> saveAsPng(
   final LayersProvider layers,
   final String filePath,
@@ -80,6 +91,18 @@ Future<void> onExportAsJpeg(
   await saveAsJpeg(layers, filePath);
 }
 
+/// Saves the current painter content as a JPEG image file.
+///
+/// Captures the painter's current state as image bytes, converts them to JPEG format,
+/// and writes the resulting bytes to the specified file path.
+///
+/// Parameters:
+/// - `layers`: The `LayersProvider` containing the current painter state.
+/// - `filePath`: The destination file path where the JPEG image will be saved.
+///
+/// Returns:
+/// - A `Future<void>` that completes when the image has been written to disk.
+/// Only saves the file if a valid file path is provided.
 Future<void> saveAsJpeg(
   final LayersProvider layers,
   final String? filePath,
@@ -116,6 +139,18 @@ Future<void> onExportAsOra(
   await saveAsOra(layers, filePath);
 }
 
+/// Saves the current project as an ORA (OpenRaster) file.
+///
+/// Converts the current project layers into an ORA file format and writes
+/// the encoded data to the specified file path.
+///
+/// Parameters:
+/// - `layers`: The `LayersProvider` containing the current project layers.
+/// - `filePath`: The destination file path where the ORA file will be saved.
+///
+/// Returns:
+/// - A `Future<void>` that completes when the ORA file has been written to disk.
+/// Only saves the file if a valid file path is provided.
 Future<void> saveAsOra(
   final LayersProvider layers,
   final String? filePath,

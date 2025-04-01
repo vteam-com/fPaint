@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// Wraps a [Widget] in a transparent paper-like container with a rounded border.
 ///
 /// The [transparentPaperContainer] function takes a [Widget] and returns a new [Widget] that is wrapped in a transparent paper-like container with a rounded border. The container has a transparent background with a subtle grid pattern, and the child [Widget] is centered within the container.
@@ -10,11 +12,6 @@
 ///   Text('Hello, World!'),
 ///   radius: 16.0,
 /// )
-///
-library;
-
-import 'package:flutter/material.dart';
-
 Widget transparentPaperContainer(
   final Widget child, {
   final double radius = 8,
@@ -36,8 +33,12 @@ Widget transparentPaperContainer(
   );
 }
 
+/// A widget that displays a transparent background with a grid pattern.
 class TransparentPaper extends StatelessWidget {
+  /// Creates a [TransparentPaper].
   const TransparentPaper({super.key, this.patternSize = 10});
+
+  /// The size of the grid pattern.
   final int patternSize;
 
   @override
@@ -49,8 +50,12 @@ class TransparentPaper extends StatelessWidget {
   }
 }
 
+/// A custom painter that draws a transparent background with a grid pattern.
 class TransparentBackgroundPainter extends CustomPainter {
+  /// Creates a [TransparentBackgroundPainter].
   TransparentBackgroundPainter([this.patternSize = 10]);
+
+  /// The size of the grid pattern.
   final int patternSize;
 
   @override

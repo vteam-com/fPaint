@@ -1,5 +1,6 @@
 // Imports
 
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -38,11 +39,15 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// The application preferences.
   final AppPreferences preferences = AppPreferences();
+
+  /// Whether the preferences are loaded.
   bool get isPreferencesLoaded => preferences.isLoaded;
 
   final UndoProvider _undoProvider = UndoProvider();
 
+  /// Gets the undo provider.
   UndoProvider get undoProvider => _undoProvider;
 
   final Debouncer _debounceGradientFill = Debouncer();
@@ -60,8 +65,11 @@ class AppProvider extends ChangeNotifier {
 
   //=============================================================================
   // All things Canvas
+
+  /// The offset of the canvas.
   Offset canvasOffset = Offset.zero;
 
+  /// Clears the canvas.
   void canvasClear(final Size size) {
     layers.clear();
     layers.size = size;
@@ -70,14 +78,17 @@ class AppProvider extends ChangeNotifier {
     resetView();
   }
 
+  /// Converts a screen point to a canvas point.
   Offset toCanvas(final Offset point) {
     return (point - canvasOffset) / layers.scale;
   }
 
+  /// Converts a canvas point to a screen point.
   Offset fromCanvas(final Offset point) {
     return (point * layers.scale) + canvasOffset;
   }
 
+  /// Applies a scale to the canvas.
   void applyScaleToCanvas({
     required final double scaleDelta,
     final ui.Offset? anchorPoint, // optional anchoer point
@@ -111,11 +122,13 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Gets the center of the canvas.
   Offset get canvasCenter => Offset(
         this.canvasOffset.dx + (this.layers.width / 2) * this.layers.scale,
         this.canvasOffset.dy + (this.layers.height / 2) * this.layers.scale,
       );
 
+  /// Erases a region on the canvas.
   void regionErase() {
     if (selectorModel.path1 != null) {
       recordExecuteDrawingActionToSelectedLayer(
@@ -129,11 +142,13 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Cuts a region on the canvas.
   Future<void> regionCut() async {
     regionCopy();
     regionErase();
   }
 
+  /// Copies a region on the canvas.
   Future<void> regionCopy() async {
     final ui.Rect bounds = selectorModel.path1!.getBounds();
     if (bounds.isEmpty) {
@@ -166,6 +181,7 @@ class AppProvider extends ChangeNotifier {
     await copyImageToClipboard(clippedImage);
   }
 
+  /// Pastes an image from the clipboard onto the canvas.
   Future<void> paste() async {
     final ui.Image? image = await getImageFromClipboard();
     if (image == null) {
@@ -198,7 +214,10 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
+  /// Gets whether the canvas resize lock aspect ratio is enabled.
   bool get canvasResizeLockAspectRatio => layers.canvasResizeLockAspectRatio;
+
+  /// Sets whether the canvas resize lock aspect ratio is enabled.
   set canvasResizeLockAspectRatio(final bool value) {
     layers.canvasResizeLockAspectRatio = value;
     update();
@@ -207,6 +226,7 @@ class AppProvider extends ChangeNotifier {
   //=============================================================================
   // SidePanel Expanded/Collapsed
 
+  /// Resets the view.
   void resetView() {
     canvasOffset = Offset.zero;
     layers.scale = 1;
@@ -215,8 +235,11 @@ class AppProvider extends ChangeNotifier {
 
   //=============================================================================
   // All things Layers
+
+  /// The layers provider.
   LayersProvider layers = LayersProvider(); // this is a singleton
 
+  /// Records and executes a drawing action to the selected layer.
   void recordExecuteDrawingActionToSelectedLayer({
     required final UserActionDrawing action,
   }) {
@@ -233,16 +256,19 @@ class AppProvider extends ChangeNotifier {
     layers.update();
   }
 
+  /// Undoes an action.
   void undoAction() {
     _undoProvider.undo();
     update();
   }
 
+  /// Redoes an action.
   void redoAction() {
     _undoProvider.redo();
     update();
   }
 
+  /// Pans the canvas.
   void canvasPan({
     required final Offset offsetDelta,
     final bool notifyListener = true,
@@ -302,17 +328,23 @@ class AppProvider extends ChangeNotifier {
   //-------------------------
   // Selected Tool
   ActionType _selectedAction = ActionType.brush;
+
+  /// Sets the selected action.
   set selectedAction(final ActionType value) {
     _selectedAction = value;
     update();
   }
 
+  /// Gets the selected action.
   ActionType get selectedAction => _selectedAction;
 
   //-------------------------
   // Line Weight
 
+  /// Gets the brush size.
   double get brushSize => preferences.brushSize;
+
+  /// Sets the brush size.
   set brushSize(final double value) {
     preferences.setBrushSize(value);
     update();
@@ -321,7 +353,11 @@ class AppProvider extends ChangeNotifier {
   //-------------------------
   // Brush Style
   BrushStyle _brushStyle = BrushStyle.solid;
+
+  /// Gets the brush style.
   BrushStyle get brushStyle => _brushStyle;
+
+  /// Sets the brush style.
   set brushStyle(final BrushStyle value) {
     _brushStyle = value;
     update();
@@ -329,7 +365,11 @@ class AppProvider extends ChangeNotifier {
 
   //-------------------------
   // Brush Color
+
+  /// Gets the brush color.
   Color get brushColor => preferences.brushColor;
+
+  /// Sets the brush color.
   set brushColor(final Color value) {
     preferences.setBrushColor(value);
     update();
@@ -337,7 +377,11 @@ class AppProvider extends ChangeNotifier {
 
   //-------------------------
   // Color for Fill
+
+  /// Gets the fill color.
   Color get fillColor => preferences.fillColor;
+
+  /// Sets the fill color.
   set fillColor(final Color value) {
     preferences.setFillColor(value);
     update();
@@ -346,12 +390,17 @@ class AppProvider extends ChangeNotifier {
   //-------------------------
   // Tolerance
   int _tolarance = 50; // Mid point 0..100
+
+  /// Gets the tolerance.
   int get tolerance => _tolarance;
+
+  /// Sets the tolerance.
   set tolerance(final int value) {
     _tolarance = max(1, min(100, value));
     update();
   }
 
+  /// Updates an action.
   void updateAction({
     final Offset? start,
     required final Offset end,
@@ -379,10 +428,12 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Updates the end of an action.
   void updateActionEnd(final Offset position) {
     layers.selectedLayer.lastUserAction!.positions.last = position;
   }
 
+  /// Appends a line from the last user action.
   void appendLineFromLastUserAction(final Offset positionEndOfNewLine) {
     recordExecuteDrawingActionToSelectedLayer(
       action: UserActionDrawing(
@@ -397,6 +448,7 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
+  /// Performs a flood fill with a solid color.
   void floodFillSolidAction(final Offset position) async {
     final Region region = await getRegionPathFromLayerImage(position);
 
@@ -419,6 +471,7 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
+  /// Performs a flood fill with a gradient.
   void floodFillGradientAction(final FillModel fillModel) async {
     final Region region = await getRegionPathFromLayerImage(
       fillModel.mode == FillMode.solid
@@ -479,6 +532,7 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
+  /// Updates the gradient fill.
   void updateGradientFill() {
     if (this.fillModel.isVisible) {
       _debounceGradientFill.run(
@@ -491,6 +545,7 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Gets the region path from a layer image.
   Future<Region> getRegionPathFromLayerImage(final ui.Offset position) async {
     final ui.Image img = layers.selectedLayer.toImageForStorage(layers.size);
 
@@ -506,18 +561,25 @@ class AppProvider extends ChangeNotifier {
 
   //-------------------------
   // Fill Widget
+
+  /// The fill model.
   FillModel fillModel = FillModel();
 
   //-------------------------
+  /// The eye drop position for the brush.
   Offset? eyeDropPositionForBrush;
 
   //-------------------------
+  /// The eye drop position for the fill.
   Offset? eyeDropPositionForFill;
 
   //-------------------------
   // Selector
+
+  /// The selector model.
   SelectorModel selectorModel = SelectorModel();
 
+  /// Checks if the app is ready for drawing.
   bool isReadyForDrawing() {
     if (selectedAction == ActionType.selector) {
       return false;
@@ -525,6 +587,7 @@ class AppProvider extends ChangeNotifier {
     return true;
   }
 
+  /// Starts a selector creation.
   void selectorCreationStart(final Offset position) {
     if (selectorModel.mode == SelectorMode.wand) {
       getRegionPathFromLayerImage(position).then((final Region region) {
@@ -542,6 +605,7 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Adds an additional point to the selector creation.
   void selectorCreationAdditionalPoint(final Offset position) {
     if (selectorModel.mode == SelectorMode.wand) {
       // Ignore since the PointerDown it already did the job of drawing the shape of the selector
@@ -551,11 +615,13 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Ends the selector creation.
   void selectorCreationEnd() {
     selectorModel.applyMath();
     update();
   }
 
+  /// Selects all.
   void selectAll() {
     selectorModel.isVisible = true;
     selectorCreationStart(Offset.zero);
@@ -565,6 +631,7 @@ class AppProvider extends ChangeNotifier {
       );
   }
 
+  /// Gets the path adjusted to the canvas size and position.
   Path? getPathAdjustToCanvasSizeAndPosition(final Path? path) {
     if (path != null) {
       final Matrix4 matrix = Matrix4.identity()
@@ -575,6 +642,7 @@ class AppProvider extends ChangeNotifier {
     return null;
   }
 
+  /// Crops the canvas.
   void crop() async {
     final Rect bounds = selectorModel.path1!.getBounds();
     final Offset selectionOffset = Offset(-bounds.left, -bounds.top);
@@ -609,6 +677,7 @@ class AppProvider extends ChangeNotifier {
     );
   }
 
+  /// Creates a new document from an image in the clipboard.
   void newDocumentFromClipboardImage() async {
     final ui.Image? clipboardImage = await getImageFromClipboard();
     if (clipboardImage != null) {

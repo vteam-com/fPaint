@@ -12,12 +12,15 @@ import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
-/// The main entry point for the Flutter Paint App.
+/// The global instance of the [MyApp] widget.
 ///
-/// This class sets up the app's theme, keyboard shortcuts, and actions for undo, redo, and saving the file.
-/// The [MainScreen] widget is the root of the app's UI.
-
+/// This variable is initialized in the [main] function and used to access the app's providers.
 late MyApp mainApp;
+
+/// The main function is the entry point of the Flutter application.
+///
+/// It initializes the Flutter widgets, sets up the system UI mode,
+/// handles file opening events, and runs the app.
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -47,10 +50,19 @@ void main() {
 /// This class sets up the app's theme, keyboard shortcuts, and actions for undo, redo, and saving the file.
 /// The [MainScreen] widget is the root of the app's UI.
 class MyApp extends StatelessWidget {
+  /// Creates a [MyApp] widget.
   MyApp({super.key});
+
+  /// Provides shell-level functionalities and states.
   final ShellProvider shellProvider = ShellProvider();
+
+  /// Provides application-level functionalities and states.
   final AppProvider appProvider = AppProvider();
+
+  /// Provides functionalities and states for managing layers.
   final LayersProvider layersProvider = LayersProvider();
+
+  /// Provides functionalities for undo and redo operations.
   final UndoProvider undoProvider = UndoProvider();
 
   @override

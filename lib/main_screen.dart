@@ -13,7 +13,10 @@ import 'providers/app_provider.dart';
 /// This screen is responsible for rendering the main content of the app, including
 /// the side panel, main view, and floating action buttons.
 class MainScreen extends StatelessWidget {
+  /// Creates a [MainScreen] widget.
   const MainScreen({super.key});
+
+  /// The minimum size of the side panel.
   final double minSidePanelSize = 100.0;
 
   @override
@@ -67,6 +70,10 @@ class MainScreen extends StatelessWidget {
     );
   }
 
+  /// Builds the main content of the application based on the current shell mode.
+  ///
+  /// If the shell mode is hidden, the main view is returned. Otherwise, a multi-split view
+  /// is returned, which contains the side panel and main view.
   Widget _buildMainContent(
     final ShellProvider shellProvider,
     final AppProvider appProvider,
@@ -81,6 +88,9 @@ class MainScreen extends StatelessWidget {
     return _buildMidToLargeDevices(shellProvider, appProvider);
   }
 
+  /// Builds the layout for mobile phone devices.
+  ///
+  /// If the side panel is visible, it is returned. Otherwise, the main view is returned.
   Widget _buildMobilePhoneLayout(
     final ShellProvider shellProvider,
     final AppProvider appProvider,
@@ -95,6 +105,9 @@ class MainScreen extends StatelessWidget {
     }
   }
 
+  /// Builds the layout for mid-to-large devices.
+  ///
+  /// A multi-split view is returned, which contains the side panel and main view.
   Widget _buildMidToLargeDevices(
     final ShellProvider shellProvider,
     final AppProvider appProvider,

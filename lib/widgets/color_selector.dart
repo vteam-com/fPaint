@@ -4,14 +4,19 @@ import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
+/// A widget that allows the user to select a color using HSV sliders.
 class ColorSelector extends StatefulWidget {
+  /// Creates a [ColorSelector].
   const ColorSelector({
     required this.color,
     required this.onColorChanged,
     super.key,
   });
 
+  /// The current color.
   final Color color;
+
+  /// A callback that is called when the selected color changes.
   final void Function(Color) onColorChanged;
 
   @override
@@ -143,6 +148,7 @@ class _ColorSelectorState extends State<ColorSelector> {
     );
   }
 
+  /// Converts the input color to HSV values.
   void fromInputColorToHueBrightnessAndAlpha() {
     final Pair<double, double> bothValues =
         getHueAndBrightnessFromColor(widget.color);
@@ -152,6 +158,7 @@ class _ColorSelectorState extends State<ColorSelector> {
   }
 }
 
+/// Paints a hue gradient on a canvas.
 class HueGradientPainter extends CustomPainter {
   @override
   void paint(final Canvas canvas, final Size size) {
@@ -183,9 +190,12 @@ class HueGradientPainter extends CustomPainter {
   }
 }
 
+/// Paints a brightness gradient on a canvas.
 class BrightnessGradientPainter extends CustomPainter {
+  /// Creates a [BrightnessGradientPainter].
   BrightnessGradientPainter({required this.hue});
 
+  /// The hue of the gradient.
   final double hue;
 
   @override
@@ -209,10 +219,15 @@ class BrightnessGradientPainter extends CustomPainter {
   }
 }
 
+/// Paints an alpha gradient on a canvas.
 class AlphaGradientPainter extends CustomPainter {
+  /// Creates an [AlphaGradientPainter].
   AlphaGradientPainter({required this.hue, required this.brightness});
 
+  /// The hue of the gradient.
   final double hue;
+
+  /// The brightness of the gradient.
   final double brightness;
 
   @override
@@ -265,6 +280,7 @@ void showColorPicker({
   );
 }
 
+/// Converts HSV values to a Color.
 Color hsvToColor(
   final double hue,
   final double brightness,

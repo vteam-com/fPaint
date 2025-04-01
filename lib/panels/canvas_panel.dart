@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
+/// A widget that displays the canvas panel.
 class CanvasPanel extends StatelessWidget {
   const CanvasPanel({super.key});
 
@@ -18,12 +19,17 @@ class CanvasPanel extends StatelessWidget {
   }
 }
 
+/// A custom painter that paints the canvas panel.
 class CanvasPanelPainter extends CustomPainter {
   CanvasPanelPainter(
     this._layers, {
     this.includeTransparentBackground = false,
   });
+
+  /// The layers to paint.
   final LayersProvider _layers;
+
+  /// Whether to include the transparent background.
   final bool includeTransparentBackground;
 
   @override

@@ -10,6 +10,7 @@ import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
+/// A widget that displays the main menu.
 class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
 
@@ -69,6 +70,7 @@ class MainMenu extends StatelessWidget {
   }
 }
 
+/// Handles the selection of a dropdown menu item.
 void onDropDownMenuSelection(
   final BuildContext context,
   final int result,
@@ -125,6 +127,7 @@ void onDropDownMenuSelection(
   }
 }
 
+/// Builds a menu item.
 PopupMenuEntry<int> buildMenuItem({
   required final int value,
   required final String text,

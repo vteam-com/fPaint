@@ -23,6 +23,7 @@ class ToolsPanel extends StatelessWidget {
     required this.minimal,
   });
 
+  /// A boolean indicating whether the panel is in minimal mode.
   final bool minimal;
 
   @override
@@ -51,6 +52,7 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
+  /// Returns a list of widgets representing the available tools.
   List<Widget> getListOfTools(
     final BuildContext context,
   ) {
@@ -164,6 +166,7 @@ class ToolsPanel extends StatelessWidget {
     return tools;
   }
 
+  /// Returns a list of widgets representing the attributes for the selected tool.
   List<Widget> getWidgetForSelectedTool({
     required final BuildContext context,
   }) {
@@ -530,6 +533,7 @@ class ToolsPanel extends StatelessWidget {
     return widgets;
   }
 
+  /// Adds a tool option for color tolerance.
   void addToolOptionTolerance(
     final List<Widget> widgets,
     final BuildContext context,
@@ -561,6 +565,7 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
+  /// Adds a tool option for fill mode.
   void addToolOptionFillMode(
     final List<Widget> widgets,
     final AppProvider appProvider,
@@ -575,6 +580,7 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
+  /// Adds a tool option for brush color.
   void addToolOptionColorForBrush(
     final List<Widget> widgets,
     final AppProvider appProvider,
@@ -622,6 +628,7 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
+  /// Adds a tool option for fill color.
   void addToolOptionColorForFill(
     final List<Widget> widgets,
     final AppProvider appProvider,
@@ -670,6 +677,7 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
+  /// Adds a tool option for top colors.
   void addToolOptionTopColors(
     final List<Widget> widgets,
     final LayersProvider layers,
@@ -696,6 +704,7 @@ class ToolsPanel extends StatelessWidget {
   }
 }
 
+/// Returns a widget that displays a separator.
 Widget separator() {
   return const Divider(
     thickness: 1,

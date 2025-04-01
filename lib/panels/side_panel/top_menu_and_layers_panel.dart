@@ -5,6 +5,7 @@ import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:provider/provider.dart';
 
+/// A widget that displays the top menu and layers panel.
 class TopMenuAndLayersPanel extends StatelessWidget {
   const TopMenuAndLayersPanel({super.key});
 

@@ -2,6 +2,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 
+/// Renders a pencil stroke on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [p1] parameter is the starting point of the stroke.
+/// The [p2] parameter is the ending point of the stroke.
+/// The [brush] parameter is the brush to use for the stroke.
 void renderPencil(
   final Canvas canvas,
   final Offset p1,
@@ -21,6 +27,12 @@ void renderPencil(
   );
 }
 
+/// Renders a pencil eraser stroke on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [p1] parameter is the starting point of the stroke.
+/// The [p2] parameter is the ending point of the stroke.
+/// The [brush] parameter is the brush to use for the stroke.
 void renderPencilEraser(
   final Canvas canvas,
   final Offset p1,
@@ -39,6 +51,13 @@ void renderPencilEraser(
   );
 }
 
+/// Renders a rectangle on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [p1] parameter is the top-left point of the rectangle.
+/// The [p2] parameter is the bottom-right point of the rectangle.
+/// The [brush] parameter is the brush to use for the stroke.
+/// The [fillColor] parameter is the fill color of the rectangle.
 void renderRectangle(
   final Canvas canvas,
   final Offset p1,
@@ -68,6 +87,13 @@ void renderRectangle(
   );
 }
 
+/// Renders a circle on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [p1] parameter is one point on the circle.
+/// The [p2] parameter is another point on the circle.
+/// The [brush] parameter is the brush to use for the stroke.
+/// The [fillColor] parameter is the fill color of the circle.
 void renderCircle(
   final Canvas canvas,
   final Offset p1,
@@ -105,6 +131,12 @@ void renderCircle(
   );
 }
 
+/// Renders a path on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [positions] parameter is the list of points that make up the path.
+/// The [brush] parameter is the brush to use for the stroke.
+/// The [fillColor] parameter is the fill color of the path.
 void renderPath(
   final Canvas canvas,
   final List<Offset> positions,
@@ -130,6 +162,13 @@ void renderPath(
   drawPathWithBrushStyle(canvas, paint, path, brush.style, brush.size);
 }
 
+/// Renders a line on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [p1] parameter is the starting point of the line.
+/// The [p2] parameter is the ending point of the line.
+/// The [brush] parameter is the brush to use for the stroke.
+/// The [fillColor] parameter is the fill color of the line.
 void renderLine(
   final Canvas canvas,
   final Offset p1,
@@ -156,6 +195,12 @@ void renderLine(
   );
 }
 
+/// Renders a region on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [path] parameter is the path to render.
+/// The [fillColor] parameter is the fill color of the region.
+/// The [gradient] parameter is the gradient to use for the fill.
 void renderRegion(
   final Canvas canvas,
   final Path path,
@@ -172,6 +217,10 @@ void renderRegion(
   canvas.drawPath(path, paint);
 }
 
+/// Renders a region erase on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [path] parameter is the path to render.
 void renderRegionErase(final Canvas canvas, final Path path) {
   final Paint paint = Paint();
   paint.color = const Color(0x00000000);
@@ -180,6 +229,11 @@ void renderRegionErase(final Canvas canvas, final Path path) {
   canvas.drawPath(path, paint);
 }
 
+/// Renders an image on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [topLeftPosition] parameter is the top-left position of the image.
+/// The [image] parameter is the image to render.
 void renderImage(
   final Canvas canvas,
   final Offset topLeftPosition,
@@ -188,6 +242,12 @@ void renderImage(
   canvas.drawImage(image, topLeftPosition, Paint());
 }
 
+/// Renders a fill on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [position] parameter is the position of the fill.
+/// The [fillColor] parameter is the fill color.
+/// The [image] parameter is the image to use for the fill.
 void renderFill(
   final Canvas canvas,
   final Offset position,
@@ -199,6 +259,13 @@ void renderFill(
   renderImage(canvas, position, image);
 }
 
+/// Draws a path with a brush style.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [paint] parameter is the paint to use for the stroke.
+/// The [path] parameter is the path to draw.
+/// The [brushStyle] parameter is the brush style to use.
+/// The [brushSize] parameter is the brush size to use.
 void drawPathWithBrushStyle(
   final Canvas canvas,
   final Paint paint,
@@ -219,6 +286,13 @@ void drawPathWithBrushStyle(
   }
 }
 
+/// Draws a dashed path.
+///
+/// The [path] parameter is the path to draw.
+/// The [canvas] parameter is the canvas to draw on.
+/// The [paint] parameter is the paint to use for the stroke.
+/// The [dashWidth] parameter is the width of the dashes.
+/// The [dashGap] parameter is the gap between the dashes.
 void drawPathDash(
   final Path path,
   final Canvas canvas,
@@ -234,6 +308,11 @@ void drawPathDash(
   canvas.drawPath(dashedPath, paint);
 }
 
+/// Creates a dashed path from a source path.
+///
+/// The [source] parameter is the path to create the dashed path from.
+/// The [dashWidth] parameter is the width of the dashes.
+/// The [dashGap] parameter is the gap between the dashes.
 Path createDashedPath(
   final Path source, {
   required final double dashWidth,

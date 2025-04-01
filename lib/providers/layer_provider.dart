@@ -19,7 +19,6 @@ export 'package:fpaint/models/user_action_drawing.dart';
 /// Layers can be made visible or invisible, and their opacity can be adjusted.
 /// The layer also provides methods for rendering the layer to an image, managing the undo/redo stack,
 /// and merging layers.
-
 class LayerProvider extends ChangeNotifier {
   LayerProvider({
     required final String name,
@@ -36,12 +35,17 @@ class LayerProvider extends ChangeNotifier {
     _opacity = opacity;
   }
 
+  /// Retrieves the [LayerProvider] instance from the given [BuildContext].
+  ///
+  /// The [listen] parameter determines whether the widget should rebuild when the
+  /// [LayerProvider]'s state changes.
   static LayerProvider of(
     final BuildContext context, {
     final bool listen = false,
   }) =>
       Provider.of<LayerProvider>(context, listen: listen);
 
+  /// Notifies listeners that the layer has been updated.
   void update() {
     notifyListeners();
   }
@@ -49,41 +53,71 @@ class LayerProvider extends ChangeNotifier {
   //-----------------------------------------------
   // name
   String _name;
+
+  /// Gets the name of the layer.
   String get name => _name;
+
+  /// Sets the name of the layer.
   set name(final String value) {
     _name = value;
     notifyListeners();
   }
 
+  /// The parent group name of the layer.
   String parentGroupName;
+
+  /// The ID of the layer.
   String id;
+
+  /// The stack of user actions performed on the layer.
   final List<UserActionDrawing> actionStack = <UserActionDrawing>[];
+
+  /// The stack of user actions that have been undone.
   final List<UserActionDrawing> redoStack = <UserActionDrawing>[];
+
+  /// Whether the layer is selected.
   bool isSelected;
+
+  /// Whether to preserve the alpha channel when rendering the layer.
   bool preserveAlpha = true;
+
+  /// The background color of the layer.
   Color? backgroundColor;
+
+  /// The blend mode to use when rendering the layer.
   ui.BlendMode blendMode = ui.BlendMode.srcOver;
 
   ///-------------------------------------------
   /// Modifed state
 
+  /// Whether the layer has been modified.
   bool hasChanged = false;
+
+  /// Whether the user is currently drawing on the layer.
   bool isUserDrawing = false;
+
+  /// A debouncer to prevent excessive thumbnail updates.
   final Debouncer _debounceTimer = Debouncer();
+
+  /// A callback function that is called when the thumbnail image changes.
   final void Function() onThumnailChanged;
   //---------------------------------------------
   // Size
   Size _size = const Size(0, 0);
 
+  /// Gets the size of the layer.
   Size get size => _size;
 
+  /// Sets the size of the layer.
   set size(final Size value) {
     _size = value;
     clearCache();
   }
 
+  /// The list of top colors used in the layer.
   List<ColorUsage> topColorsUsed = <ColorUsage>[];
 
+  /// Caches the top colors used in the layer.
   void _cacheTopColorsUsed() async {
     topColorsUsed = <ColorUsage>[];
     if (_cachedThumnailImage != null) {
@@ -99,6 +133,7 @@ class LayerProvider extends ChangeNotifier {
     }
   }
 
+  /// Gets the area of the layer that contains content.
   Rect getArea() {
     if (actionStack.isEmpty) {
       return Rect.zero;
@@ -125,8 +160,11 @@ class LayerProvider extends ChangeNotifier {
   // Visibility
   //
   bool _isVisible = true;
+
+  /// Gets whether the layer is visible.
   bool get isVisible => _isVisible;
 
+  /// Sets whether the layer is visible.
   set isVisible(final bool value) {
     _isVisible = value;
     clearCache();
@@ -137,16 +175,22 @@ class LayerProvider extends ChangeNotifier {
   //
   double _opacity = 1; // 0.0 to 1.0=100%
 
+  /// Gets the opacity of the layer.
   double get opacity => _opacity;
 
+  /// Sets the opacity of the layer.
   set opacity(final double value) {
     _opacity = value;
     clearCache();
   }
 
+  /// Gets the number of actions in the action stack.
   int get count => actionStack.length;
+
+  /// Gets whether the action stack is empty.
   bool get isEmpty => actionStack.isEmpty;
 
+  /// Offsets all actions in the layer by the given offset.
   void offset(final Offset offset) {
     for (final UserActionDrawing action in actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
@@ -157,6 +201,7 @@ class LayerProvider extends ChangeNotifier {
     clearCache();
   }
 
+  /// Scales all actions in the layer by the given scale factor.
   void scale(final double scale) {
     for (final UserActionDrawing action in actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
@@ -169,15 +214,18 @@ class LayerProvider extends ChangeNotifier {
     clearCache();
   }
 
+  /// Gets the last user action performed on the layer.
   UserActionDrawing? get lastUserAction =>
       actionStack.isEmpty ? null : actionStack.last;
 
+  /// Appends a drawing action to the action stack.
   void appendDrawingAction(final UserActionDrawing userAction) {
     actionStack.add(userAction);
     hasChanged = true;
     clearCache();
   }
 
+  /// Adds an image to the layer.
   UserActionDrawing addImage({
     required final ui.Image imageToAdd,
     final ui.Offset offset = Offset.zero,
@@ -205,14 +253,17 @@ class LayerProvider extends ChangeNotifier {
     return newAction;
   }
 
+  /// Appends a position to the last action.
   void lastActionAppendPosition({required final Offset position}) {
     actionStack.last.positions.add(position);
   }
 
+  /// Updates the last position of the last action.
   void lastActionUpdatePosition(final Offset position) {
     actionStack.last.positions.last = position;
   }
 
+  /// Undoes the last action performed on the layer.
   void undo() {
     if (actionStack.isNotEmpty) {
       redoStack.add(actionStack.removeLast());
@@ -221,6 +272,7 @@ class LayerProvider extends ChangeNotifier {
     }
   }
 
+  /// Redoes the last action that was undone.
   void redo() {
     if (redoStack.isNotEmpty) {
       actionStack.add(this.redoStack.removeLast());
@@ -233,9 +285,14 @@ class LayerProvider extends ChangeNotifier {
   // Thumbnail image
   //
   ui.Image? _cachedImage;
+
+  /// The cached thumbnail image of the layer.
   ui.Image? _cachedThumnailImage;
+
+  /// Gets the thumbnail image of the layer.
   ui.Image? get thumbnailImage => _cachedThumnailImage;
 
+  /// Updates the thumbnail image of the layer.
   Future<void> updateThumbnail() async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = Canvas(recorder);
@@ -260,14 +317,17 @@ class LayerProvider extends ChangeNotifier {
     this.onThumnailChanged();
   }
 
+  /// Clears the cached image and thumbnail, and updates the thumbnail.
   void clearCache() {
     _cachedImage = null;
+    _cachedThumnailImage = null;
     _debounceTimer.run(() async {
       await updateThumbnail();
       notifyListeners();
     });
   }
 
+  /// Converts the layer to an image for storage.
   ui.Image toImageForStorage(final Size size) {
     return renderImageWH(
       size.width.toInt(),
@@ -275,6 +335,7 @@ class LayerProvider extends ChangeNotifier {
     );
   }
 
+  /// Renders the layer to an image with the given width and height.
   ui.Image renderImageWH(final int width, final int height) {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = Canvas(recorder);
@@ -286,6 +347,7 @@ class LayerProvider extends ChangeNotifier {
     return picture.toImageSync(width, height);
   }
 
+  /// Applies an action to the canvas, clipping it if necessary.
   void applyAction(
     final Canvas canvas,
     final ui.Path? clipPath,
@@ -306,6 +368,7 @@ class LayerProvider extends ChangeNotifier {
     }
   }
 
+  /// Renders the layer to the given canvas.
   void renderLayer(final Canvas canvas) {
     if (_cachedImage != null && isUserDrawing == false) {
       //print('RenderLayer "$name" USE CACHE ');
@@ -450,6 +513,7 @@ class LayerProvider extends ChangeNotifier {
     canvas.restore();
   }
 
+  /// Gets a path using flood fill.
   Path getPathUsingFloodFill({
     required final ui.Image image,
     required final Offset position,

@@ -13,6 +13,12 @@ import 'package:fpaint/widgets/transparent_background.dart';
 /// The widget can be displayed in a minimal mode, which removes some
 /// of the UI elements.
 class TopColors extends StatelessWidget {
+  /// Creates a [TopColors] widget.
+  ///
+  /// The [colorUsages] parameter specifies the list of [ColorUsage] objects to display.
+  /// The [onRefresh] parameter specifies a callback that is called when the user refreshes the list of colors.
+  /// The [onColorPicked] parameter specifies a callback that is called when the user selects a color.
+  /// The [minimal] parameter specifies whether to display the widget in minimal mode.
   const TopColors({
     super.key,
     required this.colorUsages,
@@ -21,9 +27,16 @@ class TopColors extends StatelessWidget {
     this.minimal = false,
   });
 
+  /// The list of [ColorUsage] objects to display.
   final List<ColorUsage> colorUsages;
+
+  /// A callback that is called when the user refreshes the list of colors.
   final VoidCallback onRefresh;
+
+  /// A callback that is called when the user selects a color.
   final void Function(Color) onColorPicked;
+
+  /// Whether to display the widget in minimal mode.
   final bool minimal;
 
   @override

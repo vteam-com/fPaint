@@ -3,6 +3,12 @@ import 'package:fpaint/files/export_download_non_web.dart'
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
+/// Saves a file asynchronously.
+///
+/// This function handles the process of saving a file to the desired location.
+/// It performs the necessary operations to ensure the file is saved correctly.
+///
+/// Returns a [Future] that completes when the file has been successfully saved.
 Future<void> saveFile(
   final ShellProvider shellProvider,
   final LayersProvider layers,

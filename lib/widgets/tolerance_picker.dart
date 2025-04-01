@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 
+/// A widget that allows the user to pick a tolerance value using a slider.
 class TolerancePicker extends StatefulWidget {
+  /// Creates a [TolerancePicker].
   const TolerancePicker({
     super.key,
     required this.value,
     required this.onChanged,
   });
+
+  /// The current tolerance value.
   final int value;
+
+  /// A callback that is called when the tolerance value changes.
   final ValueChanged<int> onChanged;
 
   @override
   TolerancePickerState createState() => TolerancePickerState();
 }
 
+/// The state for [TolerancePicker].
 class TolerancePickerState extends State<TolerancePicker> {
   late int _value;
 
@@ -55,6 +62,7 @@ class TolerancePickerState extends State<TolerancePicker> {
   }
 }
 
+/// Shows a dialog containing a [TolerancePicker].
 void showTolerancePicker(
   final BuildContext context,
   final int value,

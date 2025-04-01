@@ -139,6 +139,13 @@ enum PropType {
   }
 }
 
+/// TODO - Not Yet In Production
+///
+/// A class representing an XCF (eXperimental Computing Facility) file.
+///
+/// This class is used to handle and process XCF files, which are the native
+/// file format for GIMP (GNU Image Manipulation Program). It provides
+/// functionality to read and manipulate the data contained within these files.
 class FileXcf {
   static const String XCF_SIGNATURE = 'gimp xcf ';
 

@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
 
+/// A widget that displays a truncated version of a given text.
+///
+/// The text is truncated to a maximum length specified by [maxLength].
+/// If the text is shorter than or equal to [maxLength], it is displayed as is.
+/// If the text is longer than [maxLength], it is truncated to show the first and last few characters,
+/// with an ellipsis in the middle.
 class TruncatedTextWidget extends StatelessWidget {
+  /// Creates a [TruncatedTextWidget].
+  ///
+  /// The [text] parameter specifies the text to display.
+  /// The [maxLength] parameter specifies the maximum length of the truncated text.
   const TruncatedTextWidget({
     super.key,
     required this.text,
     this.maxLength = 6,
   });
+
+  /// The text to display.
   final String text;
+
+  /// The maximum length of the truncated text.
   final int maxLength;
 
   @override
@@ -22,6 +36,11 @@ class TruncatedTextWidget extends StatelessWidget {
     );
   }
 
+  /// Truncates the given text to a maximum length.
+  ///
+  /// If the text is shorter than or equal to [maxLength], it is returned as is.
+  /// If the text is longer than [maxLength], it is truncated to show the first and last few characters,
+  /// with an ellipsis in the middle.
   String _truncateText(final String text) {
     if (text.length <= maxLength) {
       return text; // No truncation needed for short texts

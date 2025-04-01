@@ -144,6 +144,14 @@ Future<void> addLayer(
   return;
 }
 
+/// Returns a [ui.BlendMode] corresponding to the given OpenRaster (ORA)
+/// composite operation string.
+///
+/// The function maps ORA composite operation strings (prefixed with "svg:")
+/// to their respective [ui.BlendMode] values. If the provided composite
+/// operation string does not match any known mapping, the default
+/// [ui.BlendMode.srcOver] is returned.
+///
 ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
   switch (compositeOp) {
     case 'svg:source-over':
@@ -175,7 +183,14 @@ ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
   }
 }
 
+/// Adds an image to a specified layer from an archive.
 ///
+/// This function retrieves an image file from the provided [archive] using the
+/// specified [imageName]. If the image is found, it decodes the image bytes
+/// into a [ui.Image] and adds it to the given [layer] at the specified [offset].
+///
+/// If the image is not found in the archive, a debug message is printed.
+/// Any errors during the process are caught and logged.
 Future<void> addImageToLayer({
   required final Archive archive,
   required final LayersProvider layers,
@@ -203,27 +218,36 @@ Future<void> addImageToLayer({
   }
 }
 
-/// Decodes a list of bytes into a [ui.Image].
 ///
-/// This function takes a list of bytes representing an image and decodes it
-/// into a [ui.Image] object asynchronously.
+/// Parameters:
+/// - [archive]: The archive containing the image files.
+/// - [layers]: The provider managing all layers (not directly used in this function).
+/// - [layer]: The specific layer to which the image will be added.
+/// - [imageName]: The name of the image file to retrieve from the archive.
+/// - [offset]: The position where the image will be added on the layer.
 ///
-/// - Parameters:
-///   - bytes: A list of integers representing the image data.
-///
-/// - Returns: A [Future] that completes with the decoded [ui.Image].
+/// Throws:
+/// - This function does not throw errors but logs them using [debugPrint].
 ///
 /// Example:
 /// ```dart
-/// List<int> imageData = ...; // your image data here
-/// ui.Image image = await decodeImage(imageData);
+/// await addImageToLayer(
+///   archive: myArchive,
+///   layers: myLayersProvider,
+///   layer: myLayerProvider,
+///   imageName: 'example.png',
+///   offset: ui.Offset(10, 20),
+/// );
 /// ```
+
 Future<ui.Image> decodeImage(final List<int> bytes) async {
   final Completer<ui.Image> completer = Completer<ui.Image>();
   ui.decodeImageFromList(Uint8List.fromList(bytes), completer.complete);
   return completer.future;
 }
 
+///
+/// Persist to ORA type file
 ///
 Future<void> saveToORA({
   required final LayersProvider layers,
@@ -234,7 +258,21 @@ Future<void> saveToORA({
   await File(filePath).writeAsBytes(encodedData);
 }
 
+/// Creates an ORA (OpenRaster) archive from the provided layers.
 ///
+/// This function takes a [LayersProvider] object, which contains the layers
+/// to be included in the ORA archive, and returns a `Future` that resolves
+/// to a list of integers representing the binary data of the created archive.
+///
+/// ORA is a file format commonly used for storing layered images in a
+/// non-proprietary format.
+///
+/// - Parameters:
+///   - layers: A [LayersProvider] instance containing the layers to be
+///     included in the ORA archive.
+///
+/// - Returns: A `Future` that resolves to a `List<int>` representing the
+///   binary data of the created ORA archive.
 Future<List<int>> createOraAchive(final LayersProvider layers) async {
   final Archive archive = Archive();
   final XmlBuilder builder = XmlBuilder();
@@ -351,6 +389,15 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
   return encodedData;
 }
 
+/// Builds the layers for the specified file or canvas.
+///
+/// This function is responsible for constructing and organizing
+/// the layers that make up the structure of the file or canvas.
+/// It may involve parsing data, initializing layer properties,
+/// and ensuring the correct hierarchy of layers.
+///
+/// Make sure to provide the necessary input data or context
+/// required for the layer construction process.
 void buildLayers(
   final XmlBuilder builder,
   final List<Map<String, dynamic>> layersData,

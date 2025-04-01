@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// A widget that displays a tool attribute with a label and a child widget.
 class ToolAttributeWidget extends StatelessWidget {
   const ToolAttributeWidget({
     super.key,
@@ -9,9 +10,16 @@ class ToolAttributeWidget extends StatelessWidget {
     this.childRight,
   });
 
+  /// Whether the widget is in minimal mode.
   final bool minimal;
+
+  /// The name of the tool attribute.
   final String name;
+
+  /// The widget to display on the left side of the tool attribute.
   final Widget? childLeft;
+
+  /// The widget to display on the right side of the tool attribute.
   final Widget? childRight;
 
   @override

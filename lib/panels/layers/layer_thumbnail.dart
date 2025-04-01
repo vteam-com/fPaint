@@ -3,12 +3,14 @@ import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/widgets/image_painter.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
+/// A widget that displays a thumbnail of a layer.
 class LayerThumbnail extends StatelessWidget {
   const LayerThumbnail({
     super.key,
     required this.layer,
   });
 
+  /// The layer to display a thumbnail of.
   final LayerProvider layer;
 
   @override

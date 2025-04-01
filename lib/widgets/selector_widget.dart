@@ -3,7 +3,15 @@ import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 
+/// A widget that displays a selection rectangle with handles for resizing and moving.
 class SelectionRectWidget extends StatefulWidget {
+  /// Creates a [SelectionRectWidget].
+  ///
+  /// The [path1] parameter specifies the primary path of the selection rectangle.
+  /// The [path2] parameter specifies an optional secondary path for the selection rectangle.
+  /// The [onDrag] parameter is a callback that is called when the selection rectangle is dragged.
+  /// The [onResize] parameter is a callback that is called when the selection rectangle is resized.
+  /// The [enableMoveAndResize] parameter specifies whether the selection rectangle can be moved and resized.
   const SelectionRectWidget({
     super.key,
     required this.path1,
@@ -12,10 +20,20 @@ class SelectionRectWidget extends StatefulWidget {
     required this.onResize,
     this.enableMoveAndResize = true,
   });
+
+  /// The primary path of the selection rectangle.
   final Path? path1;
+
+  /// An optional secondary path for the selection rectangle.
   final Path? path2;
+
+  /// Whether the selection rectangle can be moved and resized.
   final bool enableMoveAndResize;
+
+  /// A callback that is called when the selection rectangle is dragged.
   final void Function(Offset) onDrag;
+
+  /// A callback that is called when the selection rectangle is resized.
   final void Function(NineGridHandle, Offset) onResize;
 
   @override
@@ -154,6 +172,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     );
   }
 
+  /// Builds a handle for resizing or moving the selection rectangle.
+  ///
+  /// The [position] parameter specifies the position of the handle.
+  /// The [cursor] parameter specifies the cursor to display when the mouse is over the handle.
+  /// The [onPanUpdate] parameter is a callback that is called when the handle is dragged.
   Widget _buildHandle({
     required final Offset position,
     required final MouseCursor cursor,

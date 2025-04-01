@@ -44,6 +44,13 @@ Future<void> onExportAsJpeg(
   await saveAsJpeg(layers, fileName);
 }
 
+/// Saves the current content as a JPEG file.
+///
+/// This function allows exporting the current content in JPEG format,
+/// suitable for downloading or sharing on the web.
+///
+/// Throws:
+/// - An exception if the saving process fails.
 Future<void> saveAsJpeg(
   final LayersProvider layers,
   final String filePath,
@@ -70,6 +77,18 @@ Future<void> onExportAsOra(
   await saveAsOra(layers, fileName);
 }
 
+/// Saves the current project as an ORA (OpenRaster) file.
+///
+/// This function handles the process of exporting the project data
+/// into the ORA format, which is commonly used for layered image files.
+/// It ensures that the file is properly structured and ready for download
+/// in a web environment.
+///
+/// Throws:
+/// - `Exception` if the export process fails.
+///
+/// Returns:
+/// A `Future` that completes when the file has been successfully saved.
 Future<void> saveAsOra(
   final LayersProvider layers,
   final String filePath,

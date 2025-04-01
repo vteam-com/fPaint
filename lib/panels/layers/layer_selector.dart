@@ -10,6 +10,7 @@ import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/container_slider.dart';
 import 'package:fpaint/widgets/truncated_text.dart';
 
+/// A widget that displays a layer in the layer selector panel.
 class LayerSelector extends StatelessWidget {
   const LayerSelector({
     super.key,
@@ -20,10 +21,19 @@ class LayerSelector extends StatelessWidget {
     required this.allowRemoveLayer,
   });
 
+  /// The build context.
   final BuildContext context;
+
+  /// The layer to display.
   final LayerProvider layer;
+
+  /// Whether to display the layer in minimal mode.
   final bool minimal;
+
+  /// Whether the layer is selected.
   final bool isSelected;
+
+  /// Whether to allow removing the layer.
   final bool allowRemoveLayer;
 
   @override
@@ -55,6 +65,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
+  /// Builds the layer selector for a small surface.
   Widget _buildForSmallSurface(
     final BuildContext context,
     final LayerProvider layer,
@@ -77,6 +88,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
+  /// Returns information about the layer.
   String information() {
     final List<String> texts = <String>[
       '[${layer.id}]',
@@ -88,6 +100,7 @@ class LayerSelector extends StatelessWidget {
     return texts.join('\n');
   }
 
+  /// Builds the layer selector for a large surface.
   Widget _buildForLargeSurface(
     final BuildContext context,
     final LayersProvider layers,
@@ -113,6 +126,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
+  /// Builds the popup menu items for the layer selector.
   List<PopupMenuItem<String>> _buildPopupMenuItems() {
     return <PopupMenuItem<String>>[
       const PopupMenuItem<String>(
@@ -218,6 +232,7 @@ class LayerSelector extends StatelessWidget {
     ];
   }
 
+  /// Handles the selection of a popup menu item.
   Future<void> _handlePopupMenuSelection(
     final String value,
     final LayersProvider layers,
@@ -263,6 +278,7 @@ class LayerSelector extends StatelessWidget {
     }
   }
 
+  /// Builds the layer name widget.
   Widget _buildLayerName(final LayersProvider layers) {
     return Row(
       children: <Widget>[
@@ -306,6 +322,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
+  /// Renames the layer.
   Future<void> renameLayer() async {
     final TextEditingController controller =
         TextEditingController(text: layer.name);
@@ -342,6 +359,7 @@ class LayerSelector extends StatelessWidget {
     }
   }
 
+  /// Builds the layer controls widget.
   Widget _buildLayerControls(
     final BuildContext context,
     final LayersProvider layers,
@@ -408,7 +426,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  // Method to insert a new layer above the currently selected one
+  /// Method to insert a new layer above the currently selected one
   void _onAddLayer(final LayersProvider layers) {
     final UndoProvider undoProvider = UndoProvider();
 
@@ -429,7 +447,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  // Method to flatten all layers
+  /// Method to flatten all layers
   void _onMergeLayer(
     final LayersProvider layers,
     final int indexFrom,
@@ -438,6 +456,7 @@ class LayerSelector extends StatelessWidget {
     layers.mergeLayers(indexFrom, indexTo);
   }
 
+  /// Builds the thumbnail preview and visibility widget.
   Widget _buildThumbnailPreviewAndVisibility(
     final LayersProvider layers,
     final LayerProvider layer,
@@ -466,6 +485,7 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
+  /// Builds the thumbnail preview widget.
   Widget _buildThumbnailPreview(
     final LayersProvider layers,
     final LayerProvider layer,
@@ -484,6 +504,7 @@ class LayerSelector extends StatelessWidget {
         onChanged: (final double value) => layer.opacity = value,
         onChangeEnd: (final double value) {
           layer.opacity = value;
+          layer.clearCache();
           layers.update();
         },
         onSlideEnd: () => layers.update(),
