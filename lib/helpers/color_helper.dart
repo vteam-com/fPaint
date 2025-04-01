@@ -124,7 +124,7 @@ TextStyle adjustOpacityOfTextStyle(
   );
 }
 
-///
+/// Possible states
 enum ColorState {
   success,
   warning,
@@ -134,6 +134,12 @@ enum ColorState {
   quantityNegative,
 }
 
+/// Creates a widget that displays a colored box with a specified text color.
+///
+/// The [color] parameter specifies the background color of the box.
+/// The [colorText] parameter specifies the color of the text displayed inside the box.
+///
+/// Returns a [Widget] representing the colored box.
 Widget colorBox(final Color color, final Color colorText) {
   return Container(
     color: color,
@@ -201,6 +207,26 @@ List<String> getColorComponentsAsHex(
   ];
 }
 
+/// Converts a [Color] object to its hexadecimal string representation
+/// formatted across multiple lines.
+///
+/// The returned string will represent the color in ARGB (Alpha, Red, Green, Blue)
+/// format, with each component on a separate line.
+///
+/// Example:
+/// ```dart
+/// Color color = Color(0xFF123456);
+/// String hex = getHexOnMultiline(color);
+/// // hex will be:
+/// // "FF
+/// //  12
+/// //  34
+/// //  56"
+/// ```
+///
+/// - [color]: The [Color] object to be converted.
+///
+/// Returns a multiline string representation of the color in hexadecimal format.
 String getHexOnMultiline(final Color color) {
   final List<String> list = getColorComponentsAsHex(color);
   return list.join('\n');
@@ -250,10 +276,6 @@ Color getColorFromString(final String hexColor) {
   return Colors.transparent;
 }
 
-ColorScheme getColorTheme(final BuildContext context) {
-  return getTheme(context).colorScheme;
-}
-
 /// Returns a Pair object containing the hue and brightness values of the given color.
 ///
 /// The color is first converted to HSL using the HSLColor.fromColor() method.
@@ -291,14 +313,13 @@ double getHueFromColor(final Color color) {
   return hue;
 }
 
-TextTheme getTextTheme(final BuildContext context) {
-  return getTheme(context).textTheme;
-}
-
-ThemeData getTheme(final BuildContext context) {
-  return Theme.of(context);
-}
-
+/// Converts HSV (Hue, Saturation, Value) color representation to a [Color] object.
+///
+/// The [hue] parameter represents the hue of the color in degrees (0.0 to 360.0).
+/// The [brightness] parameter represents the brightness (value) of the color as a
+/// percentage (0.0 to 1.0).
+///
+/// Returns a [Color] object corresponding to the given HSV values.
 Color hsvToColor(final double hue, final double brightness) {
   final Color color = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor();
   return adjustBrightness(color, brightness);

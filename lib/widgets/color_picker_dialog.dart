@@ -8,15 +8,23 @@ import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/top_colors.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
+/// A dialog that allows the user to pick a color.
 class ColorPickerDialog extends StatefulWidget {
+  /// Creates a [ColorPickerDialog].
   const ColorPickerDialog({
     super.key,
     this.title = 'Choose a Color',
     required this.color,
     required this.onColorChanged,
   });
+
+  /// The title of the dialog.
   final String title;
+
+  /// The initial color to display in the picker.
   final Color color;
+
+  /// A callback that is called when the user picks a color.
   final ValueChanged<Color> onColorChanged;
 
   @override
@@ -81,6 +89,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     );
   }
 
+  /// Builds the content of the dialog.
   Widget _buildContent(final LayersProvider layers) {
     return Padding(
       padding: const EdgeInsets.all(16.0),

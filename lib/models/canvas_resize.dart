@@ -17,6 +17,11 @@ enum CanvasResizePosition {
   bottomRight,
 }
 
+/// Calculates the offset required to keep the anchor point in the same position after a resize.
+///
+/// The [anchor] parameter specifies the anchor point to use for the calculation.
+/// The [source] parameter specifies the original size of the canvas.
+/// The [destination] parameter specifies the new size of the canvas.
 Offset anchorTranslate(
   final CanvasResizePosition anchor,
   final Size source,

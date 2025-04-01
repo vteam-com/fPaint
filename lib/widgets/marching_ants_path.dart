@@ -1,15 +1,30 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
+/// A widget that displays an animated "marching ants" path.
+///
+/// The "marching ants" effect is a visual effect used to indicate a selection
+/// or boundary, typically consisting of a dashed line that appears to be
+/// moving or "marching" along the path.
 class AnimatedMarchingAntsPath extends StatefulWidget {
+  /// Creates an [AnimatedMarchingAntsPath].
+  ///
+  /// The [path] parameter specifies the path to draw.
+  /// The [linePointStart] and [linePointEnd] parameters specify the start and end points of a line to draw.
   const AnimatedMarchingAntsPath({
     super.key,
     this.path,
     this.linePointStart,
     this.linePointEnd,
   });
+
+  /// The path to draw.
   final Path? path;
+
+  /// The start point of a line to draw.
   final Offset? linePointStart;
+
+  /// The end point of a line to draw.
   final Offset? linePointEnd;
 
   @override
@@ -17,6 +32,7 @@ class AnimatedMarchingAntsPath extends StatefulWidget {
       AnimatedMarchingAntsPathState();
 }
 
+/// The state for [AnimatedMarchingAntsPath].
 class AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
@@ -54,7 +70,13 @@ class AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath>
   }
 }
 
+/// A custom painter that draws a "marching ants" path.
 class MarchingAntsPainter extends CustomPainter {
+  /// Creates a [MarchingAntsPainter].
+  ///
+  /// The [path] parameter specifies the path to draw.
+  /// The [phase] parameter specifies the animation phase.
+  /// The [linePointStart] and [linePointEnd] parameters specify the start and end points of a line to draw.
   MarchingAntsPainter({
     required this.path,
     required this.phase,
@@ -62,10 +84,16 @@ class MarchingAntsPainter extends CustomPainter {
     required this.linePointEnd,
   });
 
+  /// The path to draw.
   final Path? path;
+
+  /// The start point of a line to draw.
   final Offset? linePointStart;
+
+  /// The end point of a line to draw.
   final Offset? linePointEnd;
 
+  /// The animation phase.
   final double phase;
 
   @override

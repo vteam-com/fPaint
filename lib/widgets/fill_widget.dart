@@ -3,14 +3,22 @@ import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 
+/// A widget that displays the fill controls for a gradient or solid color fill.
 class FillWidget extends StatefulWidget {
+  /// Creates a [FillWidget].
+  ///
+  /// The [fillModel] parameter specifies the fill model to use.
+  /// The [onUpdate] parameter is a callback that is called when a gradient point is updated.
   const FillWidget({
     super.key,
     required this.fillModel,
     required this.onUpdate,
   });
+
+  /// The fill model to use.
   final FillModel fillModel;
 
+  /// A callback that is called when a gradient point is updated.
   final void Function(GradientPoint) onUpdate;
 
   @override
@@ -65,6 +73,7 @@ class _FillWidgetState extends State<FillWidget> {
     );
   }
 
+  /// Builds a fill knob for the given gradient point.
   Widget _builFillKnob({
     required final BuildContext context,
     required final GradientPoint point,

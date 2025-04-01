@@ -7,6 +7,10 @@ import 'package:fpaint/widgets/color_selector.dart';
 /// Builds a column of floating action buttons for the paint application,
 /// including buttons for undo, redo, zoom in, zoom out,
 ///  and a button that displays the current zoom level and canvas size.
+///
+/// The [context] parameter is the [BuildContext] used to access the application's providers.
+/// The [shellProvider] parameter is the [ShellProvider] instance used to manage the application's shell.
+/// The [appProvider] parameter is the [AppProvider] instance used to manage the application's state.
 Widget floatingActionButtons(
   final BuildContext context,
   final ShellProvider shellProvider,
@@ -136,6 +140,13 @@ Widget floatingActionButtons(
   );
 }
 
+/// Creates a customized floating action button with specified properties.
+///
+/// The [icon] parameter specifies the icon to display on the button.
+/// The [foregroundColor] parameter specifies the color of the icon.
+/// The [tooltip] parameter specifies the text to display when the button is hovered over.
+/// The [onPressed] parameter specifies the callback function to execute when the button is pressed.
+/// The [child] parameter specifies an optional widget to display on the button instead of an icon.
 Widget myFloatButton({
   final IconData? icon,
   final Color foregroundColor = Colors.white,

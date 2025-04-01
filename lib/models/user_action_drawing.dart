@@ -6,6 +6,7 @@ import 'package:fpaint/widgets/svg_icon.dart';
 import 'package:material_symbols_icons/symbols.dart';
 export 'package:fpaint/widgets/brush_style_picker.dart';
 
+/// Represents a drawing action performed by the user.
 class UserActionDrawing {
   UserActionDrawing({
     required this.action,
@@ -19,15 +20,28 @@ class UserActionDrawing {
     this.clipPath,
   });
 
+  /// The type of action performed.
   final ActionType action;
+
+  /// The list of positions where the action was performed.
   final List<Offset> positions;
 
-  // optional used  based on the action type
+  /// Optional brush used for the action.
   final MyBrush? brush;
+
+  /// Optional fill color used for the action.
   final Color? fillColor;
+
+  /// Optional gradient used for the action.
   final Gradient? gradient;
+
+  /// Optional path used for the action.
   final ui.Path? path;
+
+  /// Optional image used for the action.
   final ui.Image? image;
+
+  /// Optional clip path used for the action.
   ui.Path? clipPath;
 
   @override
@@ -36,6 +50,7 @@ class UserActionDrawing {
   }
 }
 
+/// Enum representing the different types of drawing actions.
 enum ActionType {
   pencil,
   brush,
@@ -49,6 +64,7 @@ enum ActionType {
   cut,
   selector;
 
+  /// Checks if the action type supports the given attribute.
   bool isSupported(final ActionOptions attribute) {
     return toolsSupportedAttributes[this]?.contains(attribute) ?? false;
   }
@@ -59,6 +75,7 @@ enum ActionType {
   }
 }
 
+/// Returns an icon widget for the given action type.
 Widget iconFromaActionType(
   final ActionType type,
   final bool isSelected,
@@ -92,11 +109,13 @@ Widget iconFromaActionType(
   }
 }
 
+/// Returns an icon widget with the given icon data and color.
 Icon iconAndColor(final IconData tool, [final bool isSelected = false]) {
   final Color? color = isSelected ? Colors.blue : null;
   return Icon(tool, color: color);
 }
 
+/// Enum representing the different options for drawing actions.
 enum ActionOptions {
   brushSize,
   brushStyle,
@@ -107,6 +126,7 @@ enum ActionOptions {
   selectorOptions,
 }
 
+/// Map of action types to the set of action options they support.
 final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes =
     <ActionType, Set<ActionOptions>>{
   ActionType.pencil: <ActionOptions>{

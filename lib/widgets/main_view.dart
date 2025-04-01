@@ -16,6 +16,7 @@ import 'package:fpaint/widgets/selector_widget.dart';
 /// This widget is responsible for managing the state of the main view,
 /// including handling pointer events and scaling/centering the canvas.
 class MainView extends StatefulWidget {
+  /// Creates a [MainView].
   const MainView({
     super.key,
   });
@@ -277,6 +278,11 @@ class MainViewState extends State<MainView> {
     );
   }
 
+  /// Handles multi-touch events for scaling and panning.
+  ///
+  /// This method is called when multiple touch points are detected on the screen.
+  /// It calculates the scaling factor and panning offset based on the touch points
+  /// and updates the canvas accordingly.
   void _handleMultiTouchUpdate(
     final PointerMoveEvent event,
     final AppProvider appProvider,
@@ -318,6 +324,10 @@ class MainViewState extends State<MainView> {
     appProvider.update();
   }
 
+  /// Calculates the distance between two touch points.
+  ///
+  /// This method is called when multi-touch is active to determine the
+  /// distance between the two touch points.
   double _getDistanceBetweenTouchPoints() {
     if (_pointerPositions.length >= 2) {
       final List<Offset> positions = _pointerPositions.values.toList();
@@ -329,6 +339,10 @@ class MainViewState extends State<MainView> {
     }
   }
 
+  /// Handles user panning of the canvas.
+  ///
+  /// This method is called when the user pans the canvas using a mouse or
+  /// touch gesture. It updates the canvas offset based on the input delta.
   void _handleUserPanningTheCanvas(
     final ShellProvider shellProvider,
     final AppProvider appProvider,
@@ -359,6 +373,10 @@ class MainViewState extends State<MainView> {
     );
   }
 
+  /// Builds the canvas display widget.
+  ///
+  /// This method is responsible for creating the widget that displays the
+  /// canvas, applying the necessary transformations for panning and scaling.
   Widget _displayCanvas(final AppProvider appProvider) {
     return DecoratedBox(
       decoration: BoxDecoration(

@@ -3,10 +3,23 @@ import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 
+/// TextEditingController for the width input field.
 final TextEditingController widthController = TextEditingController();
+
+/// TextEditingController for the height input field.
 final TextEditingController heightController = TextEditingController();
+
+/// Flag to ensure initialization logic is executed only once.
 bool initOnce = false;
 
+/// Displays a modal bottom sheet for adjusting canvas settings.
+///
+/// This function presents a user interface for modifying the canvas size,
+/// including width and height inputs, aspect ratio locking, and content alignment
+/// options. It allows users to resize the canvas while maintaining the content's
+/// positioning within the new dimensions.
+///
+/// The [context] parameter is the [BuildContext] used to display the modal.
 void showCanvasSettings(final BuildContext context) {
   initOnce = true;
   showModalBottomSheet<dynamic>(

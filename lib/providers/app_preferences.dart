@@ -3,9 +3,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 export 'package:provider/provider.dart';
 
+/// Manages the application's persistent settings using SharedPreferences.
 class AppPreferences {
   SharedPreferences? _prefs;
 
+  /// Indicates whether the preferences have been loaded.
   bool get isLoaded => _prefs != null;
 
   // Keys for preferences
@@ -23,12 +25,23 @@ class AppPreferences {
   bool _useApplePencil = true;
 
   // Getters
+
+  /// Gets the side panel distance.
   double get sidePanelDistance => _sidePanelDistance;
+
+  /// Gets the brush size.
   double get brushSize => _brushSize;
+
+  /// Gets the brush color.
   Color get brushColor => _brushColor;
+
+  /// Gets the fill color.
   Color get fillColor => _fillColor;
+
+  /// Gets whether to use Apple Pencil only.
   bool get useApplePencil => _useApplePencil;
 
+  /// Gets the SharedPreferences instance.
   Future<SharedPreferences> getPref() async {
     if (_prefs == null) {
       await _loadPreferences();
@@ -36,6 +49,7 @@ class AppPreferences {
     return _prefs!;
   }
 
+  /// Sets the side panel distance.
   Future<void> setSidePanelDistance(
     final double value,
   ) async {
@@ -43,21 +57,25 @@ class AppPreferences {
     (await getPref()).setDouble(keySidePanelDistance, value);
   }
 
+  /// Sets the brush size.
   Future<void> setBrushSize(final double size) async {
     _brushSize = size;
     (await getPref()).setDouble(keyBrushSize, size);
   }
 
+  /// Sets the brush color.
   Future<void> setBrushColor(final Color color) async {
     _brushColor = color;
     (await getPref()).setInt(keyLastBrushColor, color.toARGB32());
   }
 
+  /// Sets the fill color.
   Future<void> setFillColor(final Color color) async {
     _fillColor = color;
     (await getPref()).setInt(keyLastFillColor, color.toARGB32());
   }
 
+  /// Sets whether to use Apple Pencil only.
   Future<void> setUseApplePencil(
     final bool value,
   ) async {
@@ -65,6 +83,7 @@ class AppPreferences {
     (await getPref()).setBool(keyUseApplePencil, value);
   }
 
+  /// Loads the preferences from SharedPreferences.
   Future<void> _loadPreferences() async {
     _prefs = await SharedPreferences.getInstance();
 

@@ -4,6 +4,7 @@ import 'package:fpaint/helpers/draw_path_helper.dart';
 // Exports
 export 'package:fpaint/helpers/draw_path_helper.dart';
 
+/// A class that represents the selector model.
 class SelectorModel {
   bool isVisible = false;
   SelectorMode mode = SelectorMode.rectangle;
@@ -13,14 +14,17 @@ class SelectorModel {
   Path? path1;
   Path? path2; // use when Selector.math is not Selector.replace
 
+  /// Returns the bounding rectangle of the path.
   Rect get boundingRect => path1?.getBounds() ?? Rect.zero;
 
+  /// Clears the selector.
   void clear() {
     this.isVisible = false;
     this.path1 = null;
     this.points.clear();
   }
 
+  /// Inverts the selection.
   void invert(final Rect containerRect) {
     if (path1 != null) {
       final Path outerPath = Path()..addRect(containerRect);
@@ -28,6 +32,7 @@ class SelectorModel {
     }
   }
 
+  /// Translates the selection.
   void translate(final Offset offset) {
     final Rect bounds = boundingRect;
 
@@ -39,6 +44,7 @@ class SelectorModel {
     path1 = path1!.transform(matrix.storage);
   }
 
+  /// Resizes the selection using a nine grid handle.
   void nindeGridResize(
     final NineGridHandle handle,
     final Offset offset,
@@ -48,6 +54,7 @@ class SelectorModel {
     }
   }
 
+  /// Adds the first point to the selection.
   void addP1(final Offset p1) {
     isVisible = true;
 
@@ -78,6 +85,7 @@ class SelectorModel {
     }
   }
 
+  /// Adds the second point to the selection.
   void addP2(final Offset p2) {
     if (points.isNotEmpty) {
       switch (mode) {
@@ -124,6 +132,7 @@ class SelectorModel {
     }
   }
 
+  /// Applies the math operation to the selection.
   void applyMath() {
     if (path1 == null) {
       return;
@@ -150,6 +159,7 @@ class SelectorModel {
   }
 }
 
+/// Enum that represents the selector mode.
 enum SelectorMode {
   rectangle,
   circle,
@@ -157,6 +167,7 @@ enum SelectorMode {
   wand,
 }
 
+/// Enum that represents the selector math.
 enum SelectorMath {
   replace,
   add,

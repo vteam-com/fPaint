@@ -4,7 +4,15 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/draw_rect.dart';
 
+/// A widget that displays a magnifying eye dropper for selecting colors from an image.
 class MagnifyingEyeDropper extends StatefulWidget {
+  /// Creates a [MagnifyingEyeDropper].
+  ///
+  /// The [layers] parameter specifies the layers provider.
+  /// The [pointerPosition] parameter specifies the position of the pointer.
+  /// The [pixelPosition] parameter specifies the position of the pixel to sample.
+  /// The [onColorPicked] parameter is a callback that is called when a color is picked.
+  /// The [onClosed] parameter is a callback that is called when the eye dropper is closed.
   const MagnifyingEyeDropper({
     required this.layers,
     required this.pointerPosition,
@@ -13,24 +21,47 @@ class MagnifyingEyeDropper extends StatefulWidget {
     required this.onClosed,
     super.key,
   });
+
+  /// The layers provider.
   final LayersProvider layers;
+
+  /// The position of the pointer.
   final Offset pointerPosition;
+
+  /// The position of the pixel to sample.
   final Offset pixelPosition;
+
+  /// A callback that is called when a color is picked.
   final void Function(Color color) onColorPicked;
+
+  /// A callback that is called when the eye dropper is closed.
   final void Function() onClosed;
 
   @override
   MagnifyingEyeDropperState createState() => MagnifyingEyeDropperState();
 }
 
+/// The state for [MagnifyingEyeDropper].
 class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
+  /// The selected color.
   Color? _selectedColor;
 
+  /// The size of the button.
   final double buttonSize = 40;
+
+  /// The size of the spacer.
   final double spacer = 4;
+
+  /// The size of the region.
   final double regionSize = 100;
+
+  /// The width of the widget.
   final double widgewidgetWidth = 50;
+
+  /// The magnification factor.
   final double magnifyFactor = 6;
+
+  /// The total height of the widget.
   late final double totalHeightOfTheWidget =
       buttonSize + spacer + regionSize + spacer + buttonSize;
 
@@ -138,6 +169,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
     );
   }
 
+  /// Updates the selected color.
   void _updateColor() async {
     if (widget.layers.cachedImage == null) {
       return;
@@ -152,9 +184,12 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   }
 }
 
-// 🖼 Paint the Image
+/// Paints the image.
 class ImagePainter extends CustomPainter {
+  /// Creates an [ImagePainter].
   ImagePainter(this.image);
+
+  /// The image to paint.
   final ui.Image image;
 
   @override
@@ -166,14 +201,18 @@ class ImagePainter extends CustomPainter {
   bool shouldRepaint(covariant final CustomPainter oldDelegate) => false;
 }
 
-// 🔍 Draw the Magnifying Glass
+/// Draws the magnifying glass.
 class MagnifyingGlassPainter extends CustomPainter {
+  /// Creates a [MagnifyingGlassPainter].
   MagnifyingGlassPainter({
     required this.croppedImage,
     required this.color,
   });
 
+  /// The cropped image.
   final ui.Image croppedImage;
+
+  /// The color.
   final Color color;
 
   @override

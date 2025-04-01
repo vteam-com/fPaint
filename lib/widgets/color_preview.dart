@@ -2,6 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
+/// Creates a color preview with a transparent paper background.
+///
+/// This widget combines a [ColorPreview] with a transparent paper background
+/// for a visually appealing color selection interface.
+///
+/// Parameters:
+///   [minimal]   Whether to display a minimal version of the color preview.
+///   [color]     The color to preview.
+///   [onPressed] A callback that is called when the color preview is tapped.
 Widget colorPreviewWithTransparentPaper({
   required final bool minimal,
   required final Color color,
@@ -45,11 +54,23 @@ class ColorPreview extends StatelessWidget {
     this.text,
     this.tooltipText,
   });
+
+  /// The color to preview.
   final Color color;
+
+  /// A callback that is called when the color preview is tapped.
   final GestureTapCallback onPressed;
+
+  /// Whether to display a border around the color preview.
   final bool border;
+
+  /// Whether to display a minimal version of the color preview.
   final bool minimal;
+
+  /// The text to display in the color preview.
   final String? text;
+
+  /// The text to display in the tooltip.
   final String? tooltipText;
 
   @override

@@ -9,6 +9,13 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
+/// Handles the creation of a new file within the application.
+///
+/// This asynchronous function is triggered when the user opts to create a
+/// new file. It performs necessary operations to initialize the new file
+/// and integrates it into the application's context.
+///
+/// [context] The BuildContext of the widget that invokes this function.
 Future<void> onFileNew(final BuildContext context) async {
   final AppProvider appProvider = AppProvider.of(context);
 
@@ -143,6 +150,24 @@ Future<void> onFileOpen(final BuildContext context) async {
   }
 }
 
+/// Opens a file from the specified file path.
+///
+/// This function takes a file path as input and performs the necessary
+/// operations to open the file. It is asynchronous and returns a `Future`
+/// that completes when the file has been successfully opened or an error
+/// occurs.
+///
+/// Throws:
+/// - `FileSystemException` if the file cannot be found or accessed.
+/// - Any other exceptions related to file handling.
+///
+/// Parameters:
+/// - `filePath`: A string representing the path to the file to be opened.
+///
+/// Example:
+/// ```dart
+/// await openFileFromPath('/path/to/file.txt');
+/// ```
 Future<void> openFileFromPath(
   final LayersProvider layers,
   final String path,
@@ -177,10 +202,27 @@ final List<String> supportedImageFileExtensions = <String>[
   // 'xcf',
 ];
 
+/// Checks if the given file extension is supported.
+///
+/// This function takes a file extension as input and determines whether
+/// it is supported by the application.
+///
+/// [extension] The file extension to check (e.g., "jpg", "png").
+///
+/// Returns `true` if the file extension is supported, otherwise `false`.
 bool isFileExtensionSupported(final String extension) {
   return supportedImageFileExtensions.contains(extension.toLowerCase());
 }
 
+/// Reads an image file asynchronously.
+///
+/// This function is responsible for handling the process of reading
+/// an image file. It performs the necessary operations to load the
+/// image data into memory for further processing or display.
+///
+/// Throws:
+/// - An exception if the file cannot be read or if an error occurs
+///   during the file reading process.
 Future<void> _readImageFile(
   final LayersProvider layers,
   final Future<Uint8List> bytesFuture,
@@ -192,6 +234,17 @@ Future<void> _readImageFile(
   layers.selectedLayer.addImage(imageToAdd: image);
 }
 
+/// Reads an image from the specified file path.
+///
+/// This function asynchronously processes the file located at the given
+/// file path and attempts to read it as an image. It can be used to load
+/// image files for further processing or display.
+///
+/// Throws:
+/// - An exception if the file cannot be read or is not a valid image.
+///
+/// Returns:
+/// - A `Future` that completes when the image has been successfully read.
 Future<void> readImageFromFilePath(
   final LayersProvider layers,
   final String path,
@@ -199,6 +252,15 @@ Future<void> readImageFromFilePath(
   await _readImageFile(layers, File(path).readAsBytes());
 }
 
+/// Reads an image file from a byte array.
+///
+/// This function processes the provided byte data to extract and handle
+/// image information. It is typically used when the image data is already
+/// available in memory as a byte array, such as when loading images from
+/// a network or other non-file-based sources.
+///
+/// Returns a [Future] that completes when the image file has been
+/// successfully read and processed.
 Future<void> readImageFileFromBytes(
   final LayersProvider layers,
   final Uint8List bytes,
@@ -207,6 +269,18 @@ Future<void> readImageFileFromBytes(
   await _readImageFile(layers, Future.value(bytes));
 }
 
+/// Displays a confirmation dialog to the user asking if they want to discard
+/// their current work.
+///
+/// This function is typically used when there are unsaved changes, and the user
+/// attempts to navigate away or perform an action that would result in losing
+/// their progress.
+///
+/// Returns a [Future] that resolves to `true` if the user confirms they want to
+/// discard their work, or `false` if they cancel.
+///
+/// - Parameters:
+///   - context: The [BuildContext] used to display the dialog.
 Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
   final bool? discardCurrentFile = await showDialog<bool>(
     context: context,

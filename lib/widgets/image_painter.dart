@@ -2,8 +2,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
+/// A custom painter that displays an image, scaling and centering it to fit within the available space.
 class ImagePainter extends CustomPainter {
+  /// Creates an [ImagePainter] with the given image.
   ImagePainter(this.image);
+
+  /// The image to paint.
   final ui.Image image;
 
   @override

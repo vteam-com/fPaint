@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/providers/app_provider.dart';
 
+/// A page that allows the user to modify application settings.
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
