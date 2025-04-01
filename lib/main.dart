@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/files/import_files.dart';
@@ -25,10 +24,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Only enable system UI mode for iOS/Android.
-  if (Platform.isAndroid || Platform.isIOS) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  }
-
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   // Platform channel for file opening.
   const MethodChannel('com.vteam.fpaint/file')
       .setMethodCallHandler((final MethodCall call) async {
