@@ -29,19 +29,19 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  archive: ^4.0.4
+  archive: ^4.0.5
   cupertino_icons: ^1.0.8
-  file_picker: ^9.2.1
+  file_picker: ^10.0.0
   flutter:
     sdk: flutter
   flutter_svg: ^2.0.17
-  image: ^4.5.3
-  material_symbols_icons: ^4.2810.1
+  image: ^4.5.4
+  material_symbols_icons: ^4.2811.0
   multi_split_view: ^3.6.0
   pasteboard: ^0.3.0
   path_provider: ^2.0.7
-  provider: ^6.0.0
-  shared_preferences: ^2.5.2
+  provider: ^6.1.4
+  shared_preferences: ^2.5.3
   super_clipboard: ^0.8.24
   url_launcher: ^6.3.1
   web: ^1.1.0
