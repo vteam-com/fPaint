@@ -30,7 +30,35 @@ void main() {
       .setMethodCallHandler((final MethodCall call) async {
     if (call.method == 'fileOpened') {
       final String filePath = call.arguments as String;
-      // Clear and load  - TODO confirm with user before loosing existing work
+
+      // Check if there are unsaved changes before clearing
+      if (mainApp.appProvider.layers.hasChanged) {
+        final bool shouldProceed = await showDialog<bool>(
+              context: mainApp.navigatorKey.currentContext!,
+              builder: (final BuildContext context) => AlertDialog(
+                title: const Text('Unsaved Changes'),
+                content: const Text(
+                  'You have unsaved changes. Do you want to discard them and open the new file?',
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Discard and Open'),
+                  ),
+                ],
+              ),
+            ) ??
+            false;
+
+        if (!shouldProceed) {
+          return;
+        }
+      }
+
       mainApp.appProvider.layers.clear();
       await openFileFromPath(mainApp.appProvider.layers, filePath);
     }
@@ -48,6 +76,9 @@ void main() {
 class MyApp extends StatelessWidget {
   /// Creates a [MyApp] widget.
   MyApp({super.key});
+
+  /// Global navigator key to access context from outside of the widget tree
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   /// Provides shell-level functionalities and states.
   final ShellProvider shellProvider = ShellProvider();
@@ -77,6 +108,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (final BuildContext _) => undoProvider),
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,
         title: 'Flutter Paint App',
         theme: ThemeData.dark().copyWith(
           colorScheme: const ColorScheme.dark(
