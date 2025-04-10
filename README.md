@@ -101,7 +101,7 @@ This project is licensed under the **MIT** License.
 ```bash
 dart pub global activate lakos
 brew install graphviz
-./tools/graph.sh
+./tool/graph.sh
 ```
 
 Please contribute and report issues on the GitHub repository.
