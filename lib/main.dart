@@ -60,7 +60,16 @@ void main() {
       }
 
       mainApp.appProvider.layers.clear();
-      await openFileFromPath(mainApp.appProvider.layers, filePath);
+      final bool success = await openFileFromPath(
+        context: mainApp.navigatorKey.currentContext!,
+        layers: mainApp.appProvider.layers,
+        path: filePath,
+      );
+
+      // Update the shell provider with the file name if successful
+      if (success) {
+        mainApp.shellProvider.loadedFileName = filePath;
+      }
     }
   });
 

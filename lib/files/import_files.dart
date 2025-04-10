@@ -139,7 +139,13 @@ Future<void> onFileOpen(final BuildContext context) async {
       } else {
         final String path = result.files.single.path!;
         shellProvider.loadedFileName = path;
-        await openFileFromPath(layers, path);
+        if (context.mounted) {
+          await openFileFromPath(
+            context: context,
+            layers: layers,
+            path: path,
+          );
+        }
         shellProvider.loadedFileName = path;
       }
       layers.clearHasChanged();
@@ -153,40 +159,69 @@ Future<void> onFileOpen(final BuildContext context) async {
 /// Opens a file from the specified file path.
 ///
 /// This function takes a file path as input and performs the necessary
-/// operations to open the file. It is asynchronous and returns a `Future`
-/// that completes when the file has been successfully opened or an error
-/// occurs.
-///
-/// Throws:
-/// - `FileSystemException` if the file cannot be found or accessed.
-/// - Any other exceptions related to file handling.
+/// operations to open the file. It provides feedback when unsupported file types
+/// are encountered.
 ///
 /// Parameters:
-/// - `filePath`: A string representing the path to the file to be opened.
+/// - `layers`: The LayersProvider to load the file into
+/// - `path`: A string representing the path to the file to be opened.
 ///
-/// Example:
-/// ```dart
-/// await openFileFromPath('/path/to/file.txt');
-/// ```
-Future<void> openFileFromPath(
-  final LayersProvider layers,
-  final String path,
-) async {
+/// Returns:
+/// - A `Future<bool>` that completes with true if the file was successfully opened,
+///   or false if the file type is not supported.
+Future<bool> openFileFromPath({
+  required final BuildContext context,
+  required final LayersProvider layers,
+  required final String path,
+}) async {
+  if (!context.mounted) {
+    return false;
+  }
+
   final String extension = path.split('.').last.toLowerCase();
 
   if (extension == 'xcf') {
-    // TODO - No Currently supported
-    return;
+    // Show unsupported format message
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('XCF format is not currently supported'),
+        duration: Duration(seconds: 3),
+      ),
+    );
+
+    return false;
   }
 
   if (isFileExtensionSupported(extension)) {
-    if (extension == 'ora') {
-      // File with support for layers
-      await readImageFromFilePathOra(layers, path);
-    } else {
-      // PNG, JPG, WEBP
-      await readImageFromFilePath(layers, path);
+    try {
+      if (extension == 'ora') {
+        // File with support for layers
+        await readImageFromFilePathOra(layers, path);
+      } else {
+        // PNG, JPG, WEBP
+        await readImageFromFilePath(layers, path);
+      }
+      return true;
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error opening file: ${e.toString()}'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return false;
     }
+  } else {
+    // Show unsupported format message
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('File format .$extension is not supported'),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+
+    return false;
   }
 }
 
