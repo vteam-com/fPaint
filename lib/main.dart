@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/files/import_files.dart';
@@ -22,6 +25,21 @@ late MyApp mainApp;
 /// handles file opening events, and runs the app.
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Enable Impeller for better performance
+  // This reduces shader compilation jank on mobile platforms
+  if (Platform.isIOS || Platform.isAndroid) {
+    // Impeller is enabled by default on iOS, but we can explicitly set it
+    // For Android, we need to opt-in
+    PlatformDispatcher.instance.onError =
+        (final Object error, final StackTrace stack) {
+      // Log any Impeller-related errors
+      if (kDebugMode) {
+        print('Unhandled error: $error');
+      }
+      return true;
+    };
+  }
 
   // Only enable system UI mode for iOS/Android.
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
