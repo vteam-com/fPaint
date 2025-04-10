@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/widgets/shortcuts.dart';
 
 /// A page that allows the user to modify application settings.
 class SettingsPage extends StatefulWidget {
@@ -21,6 +22,8 @@ class _SettingsPageState extends State<SettingsPage> {
           width: 400,
           child: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 40,
               children: <Widget>[
                 SwitchListTile(
                   title: const Text('Use Apple Pencil Only'),
@@ -33,6 +36,13 @@ class _SettingsPageState extends State<SettingsPage> {
                       appProvider.preferences.setUseApplePencil(value);
                     });
                   },
+                ),
+                const Divider(),
+                OutlinedButton(
+                  onPressed: () {
+                    showShortcutsHelp(context);
+                  },
+                  child: const Text('Keyboard Shortcuts'),
                 ),
               ],
             ),
