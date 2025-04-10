@@ -32,11 +32,11 @@ class _SidePanelState extends State<SidePanel> {
   void initState() {
     super.initState();
 
-    final double hightOfTopPanel = widget.preferences.sidePanelDistance;
+    final double topPanelHeight = widget.preferences.sidePanelDistance;
 
     _splitController.areas = <Area>[
       Area(
-        size: hightOfTopPanel,
+        size: topPanelHeight,
         min: 100,
         builder: (final BuildContext context, final Area area) =>
             const TopMenuAndLayersPanel(),
@@ -89,24 +89,6 @@ class _SidePanelState extends State<SidePanel> {
         child: MultiSplitView(
           controller: _splitController,
           axis: Axis.vertical,
-          initialAreas: <Area>[
-            Area(
-              size: 400,
-              min: 100,
-              builder: (final BuildContext context, final Area area) =>
-                  const TopMenuAndLayersPanel(),
-            ),
-            Area(
-              size: 400,
-              min: 100,
-              builder: (final BuildContext context, final Area area) => Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: ToolsPanel(
-                  minimal: widget.minimal,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );
