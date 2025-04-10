@@ -77,6 +77,7 @@ digraph "" {
   "/lib/widgets/main_view.dart" [label="main_view"];
   "/lib/widgets/magnifying_eye_dropper.dart" [label="magnifying_eye_dropper"];
   "/lib/widgets/selector_widget.dart" [label="selector_widget"];
+  "/lib/widgets/shortcuts_help.dart" [label="shortcuts_help"];
   subgraph "cluster~" {
     label="fpaint";
     subgraph "cluster~/test" {
@@ -200,6 +201,7 @@ digraph "" {
         "/lib/widgets/main_view.dart";
         "/lib/widgets/magnifying_eye_dropper.dart";
         "/lib/widgets/selector_widget.dart";
+        "/lib/widgets/shortcuts_help.dart";
       }
     }
   }
@@ -326,6 +328,7 @@ digraph "" {
   "/lib/files/import_files.dart" -> "/lib/providers/app_provider.dart";
   "/lib/files/import_files.dart" -> "/lib/providers/shell_provider.dart";
   "/lib/pages/settings_page.dart" -> "/lib/providers/app_provider.dart";
+  "/lib/pages/settings_page.dart" -> "/lib/widgets/shortcuts.dart";
   "/lib/main_screen.dart" -> "/lib/floating_buttons.dart";
   "/lib/main_screen.dart" -> "/lib/panels/side_panel/side_panel.dart";
   "/lib/main_screen.dart" -> "/lib/providers/shell_provider.dart";
@@ -349,6 +352,7 @@ digraph "" {
   "/lib/widgets/shortcuts.dart" -> "/lib/files/save.dart";
   "/lib/widgets/shortcuts.dart" -> "/lib/providers/app_provider.dart";
   "/lib/widgets/shortcuts.dart" -> "/lib/providers/shell_provider.dart";
+  "/lib/widgets/shortcuts.dart" -> "/lib/widgets/shortcuts_help.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/color_preview.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/transparent_background.dart";

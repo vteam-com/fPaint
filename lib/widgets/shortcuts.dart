@@ -4,6 +4,7 @@ import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/shortcuts_help.dart';
 
 /// Wraps the given [child] widget with [Shortcuts] and [Actions] to provide keyboard shortcuts for the main application.
 ///
@@ -133,6 +134,10 @@ Widget shortCutsForMainApp(
       LogicalKeySet(
         LogicalKeyboardKey.backspace,
       ): const DeleteIntent(),
+
+      // Add a help shortcut
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.slash):
+          const HelpIntent(),
     },
     child: Actions(
       actions: <Type, Action<Intent>>{
@@ -216,6 +221,14 @@ Widget shortCutsForMainApp(
             return null;
           },
         ),
+
+        // Add a help action
+        HelpIntent: CallbackAction<HelpIntent>(
+          onInvoke: (final HelpIntent intent) {
+            showShortcutsHelp(context);
+            return null;
+          },
+        ),
       },
       child: Focus(
         // Ensure the widget can receive keyboard focus
@@ -290,4 +303,18 @@ class ToggleShellModeIntent extends Intent {
 class DeleteIntent extends Intent {
   /// Creates a [DeleteIntent].
   const DeleteIntent();
+}
+
+/// An [Intent] that triggers the help action.
+class HelpIntent extends Intent {
+  /// Creates a [HelpIntent].
+  const HelpIntent();
+}
+
+// Add a method to show the shortcuts help dialog
+void showShortcutsHelp(final BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (final BuildContext context) => const ShortcutsHelpDialog(),
+  );
 }
