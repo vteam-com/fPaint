@@ -21,6 +21,9 @@ class MenuIds {
   /// The ID for the platforms menu item.
   static const int platforms = 6;
 
+  /// The ID for the new from clipboard menu item.
+  static const int newFromClipboard = 7;
+
   /// The ID for the about menu item.
   static const int about = 10;
 }
