@@ -399,7 +399,11 @@ class MainViewState extends State<MainView> {
           ..scale(
             appProvider.layers.scale,
           ), // Use appProvider.layers.scale here
-        child: const CanvasPanel(),
+        child: SizedBox(
+          width: appProvider.layers.width,
+          height: appProvider.layers.height,
+          child: const CanvasPanel(),
+        ),
       ),
     );
   }
