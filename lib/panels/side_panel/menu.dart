@@ -4,6 +4,7 @@ import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/models/localized_strings.dart';
 import 'package:fpaint/models/menu_model.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/panels/about.dart';
 import 'package:fpaint/panels/canvas_settings.dart';
 import 'package:fpaint/panels/share_panel.dart';
@@ -33,6 +34,11 @@ class MainMenu extends StatelessWidget {
           value: MenuIds.openFile,
           text: strings[StringId.import]!,
           icon: Icons.file_download_outlined,
+        ),
+        buildMenuItem(
+          value: MenuIds.newFromClipboard,
+          text: "New from Clipboard", // TODO(you): localize this string
+          icon: Icons.content_paste_go,
         ),
         buildMenuItem(
           value: MenuIds.export,
@@ -84,6 +90,9 @@ void onDropDownMenuSelection(
       break;
     case MenuIds.openFile:
       onFileOpen(context);
+      break;
+    case MenuIds.newFromClipboard:
+      AppProvider.of(context).newDocumentFromClipboardImage();
       break;
     case MenuIds.save:
       saveFile(
