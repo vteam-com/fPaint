@@ -58,6 +58,7 @@ class LayersProvider extends ChangeNotifier {
   set size(final Size size) {
     _size = size;
     _list.forEach((final LayerProvider layer) => layer.size = size);
+      notifyListeners(); // Add this line
   }
 
   ///-------------------------------------------
