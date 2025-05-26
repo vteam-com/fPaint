@@ -679,37 +679,16 @@ class AppProvider extends ChangeNotifier {
 
   /// Creates a new document from an image in the clipboard.
   void newDocumentFromClipboardImage() async {
-    // Ensure image_helper.dart is imported if not already.
-    // e.g., import 'package:fpaint/helpers/image_helper.dart'; 
-    // (The worker should verify existing imports or add it if missing)
-
-    final ui.Image? originalClipboardImage = await getImageFromClipboard(); // Renamed for clarity
-    if (originalClipboardImage != null) {
-      final double reportedWidth = originalClipboardImage.width.toDouble();
-      final double reportedHeight = originalClipboardImage.height.toDouble();
-      final Size reportedSize = Size(reportedWidth, reportedHeight);
-
-      // ---- START JULES_DEBUG LOGGING ----
-      print('JULES_DEBUG: Original clipboard image reported dims: $reportedWidth x $reportedHeight');
-      // ---- END JULES_DEBUG LOGGING ----
-
-      // ---- START SELF-RESIZE TEST ----
-      // Attempt to "normalize" or "correct" the image by resizing it to its own reported dimensions.
-      final ui.Image imageToUse = await resizeImage(originalClipboardImage, reportedSize); 
-      // ---- END SELF-RESIZE TEST ----
-
-      // ---- START JULES_DEBUG LOGGING ----
-      print('JULES_DEBUG: Image after self-resize reported dims: ${imageToUse.width} x ${imageToUse.height}');
-      // ---- END JULES_DEBUG LOGGING ----
-
-      // Use dimensions from the potentially corrected imageToUse for clearing the canvas
-      this.canvasClear(Size(imageToUse.width.toDouble(), imageToUse.height.toDouble())); 
-      this.layers.selectedLayer.addImage(imageToAdd: imageToUse);
+    final ui.Image? clipboardImage = await getImageFromClipboard();
+    if (clipboardImage != null) {
+      final double width = clipboardImage.width.toDouble();
+      final double height = clipboardImage.height.toDouble();
+      final Size newCanvasSize = Size(width, height);
+      this.canvasClear(newCanvasSize); 
+      this.layers.selectedLayer.addImage(imageToAdd: clipboardImage);
       this.update();
     } else {
-      // ---- START JULES_DEBUG LOGGING ----
-      print('JULES_DEBUG: getImageFromClipboard() returned null.');
-      // ---- END JULES_DEBUG LOGGING ----
+      // Ensure this else block is empty or also has its JULES_DEBUG print statement removed.
     }
   }
 
