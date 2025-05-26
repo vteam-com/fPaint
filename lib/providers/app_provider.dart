@@ -683,9 +683,18 @@ class AppProvider extends ChangeNotifier {
     if (clipboardImage != null) {
       final double width = clipboardImage.width.toDouble();
       final double height = clipboardImage.height.toDouble();
-      this.canvasClear(Size(width, height));
+      // ---- START LOGGING ----
+      print('JULES_DEBUG: Clipboard image fetched. Width: $width, Height: $height');
+      final Size newCanvasSize = Size(width, height);
+      print('JULES_DEBUG: New canvas size determined: $newCanvasSize');
+      // ---- END LOGGING ----
+      this.canvasClear(newCanvasSize); // Use the newCanvasSize variable
       this.layers.selectedLayer.addImage(imageToAdd: clipboardImage);
       this.update();
+    } else {
+      // ---- START LOGGING ----
+      print('JULES_DEBUG: getImageFromClipboard() returned null.');
+      // ---- END LOGGING ----
     }
   }
 
