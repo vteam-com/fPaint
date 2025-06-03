@@ -60,8 +60,7 @@ class AppProvider extends ChangeNotifier {
   static AppProvider of(
     final BuildContext context, {
     final bool listen = false,
-  }) =>
-      Provider.of<AppProvider>(context, listen: listen);
+  }) => Provider.of<AppProvider>(context, listen: listen);
 
   //=============================================================================
   // All things Canvas
@@ -95,8 +94,7 @@ class AppProvider extends ChangeNotifier {
     final bool notifyListener = true,
   }) {
     // Step 1: Convert screen coordinates to canvas coordinates
-    final Offset before =
-        anchorPoint == null ? Offset.zero : this.toCanvas(anchorPoint);
+    final Offset before = anchorPoint == null ? Offset.zero : this.toCanvas(anchorPoint);
 
     for (final GradientPoint point in this.fillModel.gradientPoints) {
       point.offset = this.toCanvas(point.offset);
@@ -106,8 +104,7 @@ class AppProvider extends ChangeNotifier {
     this.layers.scale = this.layers.scale * scaleDelta;
 
     // Step 3: Calculate the new position on the canvas
-    final Offset after =
-        anchorPoint == null ? Offset.zero : this.toCanvas(anchorPoint);
+    final Offset after = anchorPoint == null ? Offset.zero : this.toCanvas(anchorPoint);
 
     // Step 4: Adjust the offset to keep the cursor anchored
     final Offset offsetDelta = (before - after);
@@ -124,9 +121,9 @@ class AppProvider extends ChangeNotifier {
 
   /// Gets the center of the canvas.
   Offset get canvasCenter => Offset(
-        this.canvasOffset.dx + (this.layers.width / 2) * this.layers.scale,
-        this.canvasOffset.dy + (this.layers.height / 2) * this.layers.scale,
-      );
+    this.canvasOffset.dx + (this.layers.width / 2) * this.layers.scale,
+    this.canvasOffset.dy + (this.layers.height / 2) * this.layers.scale,
+  );
 
   /// Erases a region on the canvas.
   void regionErase() {
@@ -156,8 +153,7 @@ class AppProvider extends ChangeNotifier {
       return;
     }
 
-    final ui.Image image =
-        layers.selectedLayer.toImageForStorage(this.layers.size);
+    final ui.Image image = layers.selectedLayer.toImageForStorage(this.layers.size);
 
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder);
@@ -173,9 +169,9 @@ class AppProvider extends ChangeNotifier {
 
     // Convert the recorded drawing into an image
     final ui.Image clippedImage = await recorder.endRecording().toImage(
-          bounds.width.toInt(),
-          bounds.height.toInt(),
-        );
+      bounds.width.toInt(),
+      bounds.height.toInt(),
+    );
 
     // Copy the image to the clipboard
     await copyImageToClipboard(clippedImage);
@@ -193,8 +189,7 @@ class AppProvider extends ChangeNotifier {
     _undoProvider.executeAction(
       name: 'Paste',
       forward: () {
-        final LayerProvider newLayerForPatedImage =
-            layers.addTop(name: 'Pasted');
+        final LayerProvider newLayerForPatedImage = layers.addTop(name: 'Pasted');
         newLayerIndex = layers.getLayerIndex(newLayerForPatedImage);
         newLayerForPatedImage.addImage(
           imageToAdd: image,
@@ -277,8 +272,8 @@ class AppProvider extends ChangeNotifier {
 
     if (this.fillModel.isVisible) {
       this.fillModel.gradientPoints.forEach(
-            (final GradientPoint point) => point.offset += offsetDelta,
-          );
+        (final GradientPoint point) => point.offset += offsetDelta,
+      );
     }
     if (notifyListener) {
       update();
@@ -311,12 +306,8 @@ class AppProvider extends ChangeNotifier {
     //
     // Step 2 Pan
     //
-    final double offsetX =
-        ((containerWidth - (this.layers.width * this.layers.scale)) / 2) -
-            this.canvasOffset.dx;
-    final double offsetY =
-        ((containerHeight - (this.layers.height * this.layers.scale)) / 2) -
-            this.canvasOffset.dy;
+    final double offsetX = ((containerWidth - (this.layers.width * this.layers.scale)) / 2) - this.canvasOffset.dx;
+    final double offsetY = ((containerHeight - (this.layers.height * this.layers.scale)) / 2) - this.canvasOffset.dy;
     final Offset offsetDelta = Offset(offsetX, offsetY);
 
     this.canvasPan(offsetDelta: offsetDelta, notifyListener: false);
@@ -408,10 +399,7 @@ class AppProvider extends ChangeNotifier {
     final Color? colorFill,
     final Color? colorBrush,
   }) {
-    if (start != null &&
-        type != null &&
-        colorFill != null &&
-        colorBrush != null) {
+    if (start != null && type != null && colorFill != null && colorBrush != null) {
       recordExecuteDrawingActionToSelectedLayer(
         action: UserActionDrawing(
           positions: <ui.Offset>[start, end],
@@ -452,8 +440,7 @@ class AppProvider extends ChangeNotifier {
   void floodFillSolidAction(final Offset position) async {
     final Region region = await getRegionPathFromLayerImage(position);
 
-    final ui.Path path = region.path
-        .shift(Offset(region.left.toDouble(), region.top.toDouble()));
+    final ui.Path path = region.path.shift(Offset(region.left.toDouble(), region.top.toDouble()));
 
     final ui.Rect bounds = path.getBounds();
 
@@ -474,13 +461,10 @@ class AppProvider extends ChangeNotifier {
   /// Performs a flood fill with a gradient.
   void floodFillGradientAction(final FillModel fillModel) async {
     final Region region = await getRegionPathFromLayerImage(
-      fillModel.mode == FillMode.solid
-          ? fillModel.centerPoint
-          : toCanvas(fillModel.centerPoint),
+      fillModel.mode == FillMode.solid ? fillModel.centerPoint : toCanvas(fillModel.centerPoint),
     );
 
-    final ui.Path path = region.path
-        .shift(Offset(region.left.toDouble(), region.top.toDouble()));
+    final ui.Path path = region.path.shift(Offset(region.left.toDouble(), region.top.toDouble()));
 
     final ui.Rect bounds = path.getBounds();
 
@@ -489,23 +473,16 @@ class AppProvider extends ChangeNotifier {
       final ui.Offset centerPoint = toCanvas(fillModel.centerPoint);
 
       gradient = RadialGradient(
-        colors: fillModel.gradientPoints
-            .map((final GradientPoint point) => point.color)
-            .toList(),
+        colors: fillModel.gradientPoints.map((final GradientPoint point) => point.color).toList(),
         center: Alignment(
           ((centerPoint.dx - bounds.left) / bounds.width) * 2 - 1,
           ((centerPoint.dy - bounds.top) / bounds.height) * 2 - 1,
         ),
-        radius: (fillModel.gradientPoints.last.offset -
-                    fillModel.gradientPoints.first.offset)
-                .distance /
-            bounds.width,
+        radius: (fillModel.gradientPoints.last.offset - fillModel.gradientPoints.first.offset).distance / bounds.width,
       );
     } else {
       gradient = LinearGradient(
-        colors: fillModel.gradientPoints
-            .map((final GradientPoint point) => point.color)
-            .toList(),
+        colors: fillModel.gradientPoints.map((final GradientPoint point) => point.color).toList(),
         // stops: <double>[0, 1],
         begin: Alignment(
           (fillModel.gradientPoints.first.offset.dx / bounds.width) * 2 - 1,
@@ -655,10 +632,10 @@ class AppProvider extends ChangeNotifier {
 
         // Resize each layer and its content to crop to the bounds
         this.layers.canvasResize(
-              bounds.width.toInt(),
-              bounds.height.toInt(),
-              CanvasResizePosition.topLeft,
-            );
+          bounds.width.toInt(),
+          bounds.height.toInt(),
+          CanvasResizePosition.topLeft,
+        );
 
         // Clear the selector
         selectorModel.clear();
@@ -667,10 +644,10 @@ class AppProvider extends ChangeNotifier {
       backward: () {
         // Uncrop: restore the original size and offset
         this.layers.canvasResize(
-              originalSize.width.toInt(),
-              originalSize.height.toInt(),
-              CanvasResizePosition.topLeft,
-            );
+          originalSize.width.toInt(),
+          originalSize.height.toInt(),
+          CanvasResizePosition.topLeft,
+        );
         this.layers.offsetContent(-selectionOffset);
         update();
       },
@@ -684,7 +661,7 @@ class AppProvider extends ChangeNotifier {
       final double width = clipboardImage.width.toDouble();
       final double height = clipboardImage.height.toDouble();
       final Size newCanvasSize = Size(width, height);
-      this.canvasClear(newCanvasSize); 
+      this.canvasClear(newCanvasSize);
       this.layers.selectedLayer.addImage(imageToAdd: clipboardImage);
       this.update();
     } else {

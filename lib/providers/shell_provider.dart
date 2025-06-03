@@ -34,8 +34,7 @@ class ShellProvider extends ChangeNotifier {
   static ShellProvider of(
     final BuildContext context, {
     final bool listen = false,
-  }) =>
-      Provider.of<ShellProvider>(context, listen: listen);
+  }) => Provider.of<ShellProvider>(context, listen: listen);
 
   //=============================================================================
   /// Notifies all listeners that the model has been updated.
@@ -54,7 +53,7 @@ class ShellProvider extends ChangeNotifier {
   /// The canvas auto placement setting.
   CanvasAutoPlacement canvasPlacement = CanvasAutoPlacement.fit;
 
-//=============================================================================
+  //=============================================================================
   // Shell
   /// The current shell mode.
   ShellMode shellMode = ShellMode.full;

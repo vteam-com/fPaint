@@ -143,9 +143,7 @@ class ToolsPanel extends StatelessWidget {
         name: 'Eraser',
         image: iconFromSvgAsset(
           'assets/icons/eraser.svg',
-          selectedTool == ActionType.eraser
-              ? Colors.blue
-              : IconTheme.of(context).color!,
+          selectedTool == ActionType.eraser ? Colors.blue : IconTheme.of(context).color!,
         ),
         onPressed: () {
           appProvider.selectedAction = ActionType.eraser;
@@ -207,9 +205,7 @@ class ToolsPanel extends StatelessWidget {
                   name: 'Linear Gradient',
                   image: iconFromSvgAsset(
                     'assets/icons/fill_linear.svg',
-                    appProvider.fillModel.mode == FillMode.linear
-                        ? Colors.blue
-                        : IconTheme.of(context).color!,
+                    appProvider.fillModel.mode == FillMode.linear ? Colors.blue : IconTheme.of(context).color!,
                   ),
                   onPressed: () {
                     appProvider.fillModel.mode = FillMode.linear;
@@ -225,9 +221,7 @@ class ToolsPanel extends StatelessWidget {
                   name: 'Radial Gradient',
                   image: iconFromSvgAsset(
                     'assets/icons/fill_radial.svg',
-                    appProvider.fillModel.mode == FillMode.radial
-                        ? Colors.blue
-                        : IconTheme.of(context).color!,
+                    appProvider.fillModel.mode == FillMode.radial ? Colors.blue : IconTheme.of(context).color!,
                   ),
                   onPressed: () {
                     appProvider.fillModel.mode = FillMode.radial;
@@ -290,9 +284,7 @@ class ToolsPanel extends StatelessWidget {
                   name: 'Lasso',
                   image: iconFromSvgAsset(
                     'assets/icons/lasso.svg',
-                    appProvider.selectorModel.mode == SelectorMode.lasso
-                        ? Colors.blue
-                        : IconTheme.of(context).color!,
+                    appProvider.selectorModel.mode == SelectorMode.lasso ? Colors.blue : IconTheme.of(context).color!,
                   ),
                   onPressed: () {
                     appProvider.selectorModel.mode = SelectorMode.lasso;
@@ -423,11 +415,8 @@ class ToolsPanel extends StatelessWidget {
         break;
 
       default:
-        final String title = appProvider.selectedAction == ActionType.pencil
-            ? 'Pencil Size'
-            : 'Brush Size';
-        final double min =
-            appProvider.selectedAction == ActionType.pencil ? 1 : 0.1;
+        final String title = appProvider.selectedAction == ActionType.pencil ? 'Pencil Size' : 'Brush Size';
+        final double min = appProvider.selectedAction == ActionType.pencil ? 1 : 0.1;
         final double max = 100;
 
         // Brush Size
@@ -484,8 +473,7 @@ class ToolsPanel extends StatelessWidget {
                   showBrushStylePicker(
                     context,
                     appProvider.brushStyle,
-                    (final BrushStyle selectedBrushStyle) =>
-                        appProvider.brushStyle = selectedBrushStyle,
+                    (final BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
                   );
                 },
               ),
@@ -493,8 +481,7 @@ class ToolsPanel extends StatelessWidget {
                   ? null
                   : brushStyleDropDown(
                       appProvider.brushStyle,
-                      (final BrushStyle selectedBrushStyle) =>
-                          appProvider.brushStyle = selectedBrushStyle,
+                      (final BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
                     ),
             ),
           );
@@ -547,8 +534,7 @@ class ToolsPanel extends StatelessWidget {
           icon: const Icon(Icons.support),
           color: Colors.grey.shade500,
           onPressed: () {
-            showTolerancePicker(context, appProvider.tolerance,
-                (final int newValue) {
+            showTolerancePicker(context, appProvider.tolerance, (final int newValue) {
               appProvider.tolerance = newValue;
             });
           },
@@ -600,8 +586,7 @@ class ToolsPanel extends StatelessWidget {
                   context: context,
                   title: 'Brush Color',
                   color: appProvider.brushColor,
-                  onSelectedColor: (final Color color) =>
-                      appProvider.brushColor = color,
+                  onSelectedColor: (final Color color) => appProvider.brushColor = color,
                 );
               },
             ),
@@ -609,8 +594,7 @@ class ToolsPanel extends StatelessWidget {
               icon: const Icon(Icons.colorize_outlined),
               onPressed: () {
                 //
-                appProvider.eyeDropPositionForFill =
-                    null; // remove the possibly active
+                appProvider.eyeDropPositionForFill = null; // remove the possibly active
                 appProvider.eyeDropPositionForBrush = appProvider.canvasCenter;
                 appProvider.update();
               },
@@ -621,8 +605,7 @@ class ToolsPanel extends StatelessWidget {
             ? null
             : ColorSelector(
                 color: appProvider.brushColor,
-                onColorChanged: (final Color color) =>
-                    appProvider.brushColor = color,
+                onColorChanged: (final Color color) => appProvider.brushColor = color,
               ),
       ),
     );
@@ -648,8 +631,7 @@ class ToolsPanel extends StatelessWidget {
                   context: context,
                   title: 'Fill Color',
                   color: appProvider.fillColor,
-                  onSelectedColor: (final Color color) =>
-                      appProvider.fillColor = color,
+                  onSelectedColor: (final Color color) => appProvider.fillColor = color,
                 );
               },
             ),
@@ -657,8 +639,7 @@ class ToolsPanel extends StatelessWidget {
               icon: const Icon(Icons.colorize_outlined),
               onPressed: () {
                 //
-                appProvider.eyeDropPositionForBrush =
-                    null; // just in case remove the other eyedrop
+                appProvider.eyeDropPositionForBrush = null; // just in case remove the other eyedrop
 
                 appProvider.eyeDropPositionForFill = appProvider.canvasCenter;
                 appProvider.update();
@@ -670,8 +651,7 @@ class ToolsPanel extends StatelessWidget {
             ? null
             : ColorSelector(
                 color: appProvider.fillColor,
-                onColorChanged: (final Color color) =>
-                    appProvider.fillColor = color,
+                onColorChanged: (final Color color) => appProvider.fillColor = color,
               ),
       ),
     );

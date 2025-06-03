@@ -136,8 +136,7 @@ Widget shortCutsForMainApp(
       ): const DeleteIntent(),
 
       // Add a help shortcut
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.slash):
-          const HelpIntent(),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.slash): const HelpIntent(),
     },
     child: Actions(
       actions: <Type, Action<Intent>>{
@@ -148,21 +147,17 @@ Widget shortCutsForMainApp(
           onInvoke: (final RedoIntent intent) => appProvider.redoAction(),
         ),
         SaveIntent: CallbackAction<SaveIntent>(
-          onInvoke: (final SaveIntent intent) async =>
-              await saveFile(shellProvider, appProvider.layers),
+          onInvoke: (final SaveIntent intent) async => await saveFile(shellProvider, appProvider.layers),
         ),
         CutIntent: CallbackAction<CutIntent>(
           onInvoke: (final CutIntent intent) async => appProvider.regionCut(),
         ),
         CopyIntent: CallbackAction<CopyIntent>(
-          onInvoke: (final CopyIntent intent) async =>
-              await appProvider.regionCopy(),
+          onInvoke: (final CopyIntent intent) async => await appProvider.regionCopy(),
         ),
-        NewDocumentFromClipboardImage:
-            CallbackAction<NewDocumentFromClipboardImage>(
+        NewDocumentFromClipboardImage: CallbackAction<NewDocumentFromClipboardImage>(
           onInvoke: (final NewDocumentFromClipboardImage intent) async {
-            if (appProvider.layers.hasChanged &&
-                await confirmDiscardCurrentWork(context) == false) {
+            if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
               return;
             }
             appProvider.newDocumentFromClipboardImage();
@@ -170,8 +165,7 @@ Widget shortCutsForMainApp(
           },
         ),
         PasteIntent: CallbackAction<PasteIntent>(
-          onInvoke: (final PasteIntent intent) async =>
-              await appProvider.paste(),
+          onInvoke: (final PasteIntent intent) async => await appProvider.paste(),
         ),
 
         //-------------------------------------------------------------

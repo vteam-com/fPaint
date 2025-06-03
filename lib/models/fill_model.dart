@@ -40,19 +40,17 @@ class FillModel {
 
   /// Calculates the center point of the gradient based on the gradient points.
   Offset get centerPoint => Offset(
-        gradientPoints.fold<double>(
-              0.0,
-              (final double sum, final GradientPoint point) =>
-                  sum + point.offset.dx,
-            ) /
-            gradientPoints.length,
-        gradientPoints.fold<double>(
-              0.0,
-              (final double sum, final GradientPoint point) =>
-                  sum + point.offset.dy,
-            ) /
-            gradientPoints.length,
-      );
+    gradientPoints.fold<double>(
+          0.0,
+          (final double sum, final GradientPoint point) => sum + point.offset.dx,
+        ) /
+        gradientPoints.length,
+    gradientPoints.fold<double>(
+          0.0,
+          (final double sum, final GradientPoint point) => sum + point.offset.dy,
+        ) /
+        gradientPoints.length,
+  );
 }
 
 /// Represents a point in a gradient with an offset and a color.

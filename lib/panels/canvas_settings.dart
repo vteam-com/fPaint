@@ -63,24 +63,19 @@ void showCanvasSettings(final BuildContext context) {
                       controller: widthController,
                       onChanged: (final String value) {
                         if (layers.canvasResizeLockAspectRatio) {
-                          final double width = double.tryParse(value) ??
-                              double.tryParse(widthController.text)!;
+                          final double width = double.tryParse(value) ?? double.tryParse(widthController.text)!;
                           final double height = width / initialAspectRatio;
-                          heightController.value =
-                              TextEditingValue(text: height.toInt().toString());
+                          heightController.value = TextEditingValue(text: height.toInt().toString());
                         }
                       },
                     ),
                   ),
                   IconButton(
                     icon: Icon(
-                      layers.canvasResizeLockAspectRatio
-                          ? Icons.link
-                          : Icons.link_off,
+                      layers.canvasResizeLockAspectRatio ? Icons.link : Icons.link_off,
                     ),
                     onPressed: () {
-                      layers.canvasResizeLockAspectRatio =
-                          !layers.canvasResizeLockAspectRatio;
+                      layers.canvasResizeLockAspectRatio = !layers.canvasResizeLockAspectRatio;
                     },
                   ),
                   SizedBox(
@@ -95,8 +90,7 @@ void showCanvasSettings(final BuildContext context) {
                       controller: heightController,
                       onChanged: (final String value) {
                         if (layers.canvasResizeLockAspectRatio) {
-                          final double height = double.tryParse(value) ??
-                              double.tryParse(heightController.text)!;
+                          final double height = double.tryParse(value) ?? double.tryParse(heightController.text)!;
                           final double width = height * initialAspectRatio;
                           widthController.text = width.toInt().toString();
                         }
@@ -114,8 +108,7 @@ void showCanvasSettings(final BuildContext context) {
                   const Text('Content Alignment'),
                   NineGridSelector(
                     selectedPosition: layers.canvasResizePosition,
-                    onPositionSelected:
-                        (final CanvasResizePosition newPosition) {
+                    onPositionSelected: (final CanvasResizePosition newPosition) {
                       layers.canvasResizePosition = newPosition;
                     },
                   ),
@@ -125,10 +118,8 @@ void showCanvasSettings(final BuildContext context) {
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
                   onPressed: () {
-                    final double width =
-                        double.tryParse(widthController.text) ?? -1;
-                    final double height =
-                        double.tryParse(heightController.text) ?? -1;
+                    final double width = double.tryParse(widthController.text) ?? -1;
+                    final double height = double.tryParse(heightController.text) ?? -1;
                     if (width == -1 || height == -1) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

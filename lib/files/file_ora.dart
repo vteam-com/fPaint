@@ -109,8 +109,7 @@ Future<void> addLayer(
   final String name = xmlLayer.getAttribute('name') ?? 'Unnamed';
   final String opacityAsText = xmlLayer.getAttribute('opacity') ?? '1';
   final String visibleAsText = xmlLayer.getAttribute('visible') ?? 'true';
-  final String compositeOp =
-      xmlLayer.getAttribute('composite-op') ?? 'svg:src-over';
+  final String compositeOp = xmlLayer.getAttribute('composite-op') ?? 'svg:src-over';
 
   final bool preserveAlpha = xmlLayer.getAttribute('alpha-preserve') == 'true';
 
@@ -199,9 +198,7 @@ Future<void> addImageToLayer({
   required final ui.Offset offset,
 }) async {
   try {
-    final ArchiveFile? file = archive.files
-        .toList()
-        .findFirstMatch((final ArchiveFile f) => f.name == imageName);
+    final ArchiveFile? file = archive.files.toList().findFirstMatch((final ArchiveFile f) => f.name == imageName);
     if (file != null) {
       final List<int> bytes = file.content as List<int>;
       final ui.Image image = await decodeImage(bytes);
@@ -297,8 +294,7 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
     // Save layer image as PNG
     final ui.Image imageLayer = layer.toImageForStorage(layers.size);
 
-    final ByteData? bytes =
-        await imageLayer.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? bytes = await imageLayer.toByteData(format: ui.ImageByteFormat.png);
 
     archive.addFile(
       ArchiveFile(
@@ -337,14 +333,11 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
       builder.element(
         'stack',
         nest: () {
-          final Map<String, List<Map<String, dynamic>>> groupedLayers =
-              <String, List<Map<String, dynamic>>>{};
-          final List<Map<String, dynamic>> ungroupedLayers =
-              <Map<String, dynamic>>[];
+          final Map<String, List<Map<String, dynamic>>> groupedLayers = <String, List<Map<String, dynamic>>>{};
+          final List<Map<String, dynamic>> ungroupedLayers = <Map<String, dynamic>>[];
 
           for (final Map<String, dynamic> layerData in layersData) {
-            final String parentGroupNameOfLayer =
-                layerData['parentGroupName'] as String? ?? '';
+            final String parentGroupNameOfLayer = layerData['parentGroupName'] as String? ?? '';
 
             if (parentGroupNameOfLayer.isNotEmpty) {
               groupedLayers

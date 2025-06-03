@@ -182,9 +182,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     required final MouseCursor cursor,
     required final void Function(DragUpdateDetails) onPanUpdate,
   }) {
-    final int handleSize =
-        (showCoordinate ? (defaultHandleSize * 1.5) : defaultHandleSize)
-            .toInt();
+    final int handleSize = (showCoordinate ? (defaultHandleSize * 1.5) : defaultHandleSize).toInt();
 
     return Positioned(
       left: position.dx - (handleSize / 2),
@@ -196,8 +194,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
           });
           onPanUpdate(details);
         },
-        onPanEnd: (final DragEndDetails details) =>
-            setState(() => showCoordinate = false),
+        onPanEnd: (final DragEndDetails details) => setState(() => showCoordinate = false),
         child: MouseRegion(
           cursor: cursor,
           child: Container(

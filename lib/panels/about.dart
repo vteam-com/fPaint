@@ -10,8 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 /// The [context] parameter is the [BuildContext] used to show the dialog.
 void showAboutBox(final BuildContext context) {
   final MediaQueryData mediaQuery = MediaQuery.of(context);
-  final String screenResolution =
-      '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';
+  final String screenResolution = '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';
 
   showAboutDialog(
     context: context,

@@ -120,8 +120,7 @@ void downloadBlob(final Uint8List image, final String fileName) {
   final String url = web.URL.createObjectURL(blob);
 
   // Create an anchor element for downloading the file
-  final web.HTMLAnchorElement anchor =
-      web.document.createElement('a') as web.HTMLAnchorElement;
+  final web.HTMLAnchorElement anchor = web.document.createElement('a') as web.HTMLAnchorElement;
   anchor.href = url;
   anchor.target = '_blank';
   anchor.download = fileName;

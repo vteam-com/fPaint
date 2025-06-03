@@ -19,8 +19,7 @@ class LayerThumbnail extends StatelessWidget {
     return LayoutBuilder(
       builder: (final BuildContext context, final BoxConstraints constraints) {
         // Align to transparency pattern grid to ensure propre rendering of the transparency background
-        final int size =
-            (constraints.maxWidth / patternSize).floor() * patternSize;
+        final int size = (constraints.maxWidth / patternSize).floor() * patternSize;
 
         return SizedBox(
           width: size.toDouble(),

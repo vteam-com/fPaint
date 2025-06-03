@@ -93,11 +93,9 @@ class AppPreferences {
     _brushSize = _prefs!.getDouble(keyBrushSize) ?? 5.0;
 
     // Load last used color
-    _brushColor =
-        Color(_prefs!.getInt(keyLastBrushColor) ?? Colors.black.toARGB32());
+    _brushColor = Color(_prefs!.getInt(keyLastBrushColor) ?? Colors.black.toARGB32());
 
-    _fillColor =
-        Color(_prefs!.getInt(keyLastFillColor) ?? Colors.blue.toARGB32());
+    _fillColor = Color(_prefs!.getInt(keyLastFillColor) ?? Colors.blue.toARGB32());
 
     _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? false;
   }

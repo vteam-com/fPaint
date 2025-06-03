@@ -127,8 +127,7 @@ enum ActionOptions {
 }
 
 /// Map of action types to the set of action options they support.
-final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes =
-    <ActionType, Set<ActionOptions>>{
+final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = <ActionType, Set<ActionOptions>>{
   ActionType.pencil: <ActionOptions>{
     ActionOptions.brushSize,
     ActionOptions.brushColor,

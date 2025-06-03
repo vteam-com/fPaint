@@ -58,8 +58,7 @@ class CanvasPanelPainter extends CustomPainter {
 
     // End recording and create an image
     final ui.Picture picture = recorder.endRecording();
-    final ui.Image uiImage =
-        picture.toImageSync(size.width.toInt(), size.height.toInt());
+    final ui.Image uiImage = picture.toImageSync(size.width.toInt(), size.height.toInt());
 
     // Draw the cached image on the original canvas
     canvas.drawImage(uiImage, Offset.zero, Paint());

@@ -14,8 +14,7 @@ import 'color_helper.dart';
 /// Returns a list of [ColorUsage] objects, each representing a color and its
 /// usage percentage in the image.
 Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
-  final ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
   if (byteData == null) {
     return <ColorUsage>[];
   }
@@ -29,10 +28,7 @@ Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
   for (int i = 0; i < length; i += 4) {
     final int alpha = pixels[i + 3];
     if (alpha > 0) {
-      final int packedColor = (alpha << 24) |
-          (pixels[i] << 16) |
-          (pixels[i + 1] << 8) |
-          pixels[i + 2];
+      final int packedColor = (alpha << 24) | (pixels[i] << 16) | (pixels[i + 1] << 8) | pixels[i + 2];
       colorCount[packedColor] = (colorCount[packedColor] ?? 0) + 1;
     }
   }
@@ -51,8 +47,7 @@ Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
 
   // Sort in-place
   colorUsages.sort(
-    (final ColorUsage a, final ColorUsage b) =>
-        b.percentage.compareTo(a.percentage),
+    (final ColorUsage a, final ColorUsage b) => b.percentage.compareTo(a.percentage),
   );
 
   if (colorUsages.length <= 20) {
@@ -76,8 +71,7 @@ Future<ui.Image> fromBytesToImage(final Uint8List list) async {
 
 /// Converts a [ui.Image] to a [Uint8List] of raw RGBA data.
 Future<Uint8List?> convertImageToUint8List(final ui.Image image) async {
-  final ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
   return byteData!.buffer.asUint8List();
 }
 
@@ -105,10 +99,12 @@ List<String> imageBytesListToString(final Uint8List bytes, final int width) {
         final int red = bytes[index];
         final int green = bytes[index + 1];
         final int blue = bytes[index + 2];
-        row.add('${red.toRadixString(16).padLeft(2, '0')}'
-            '${green.toRadixString(16).padLeft(2, '0')}'
-            '${blue.toRadixString(16).padLeft(2, '0')}'
-            '${alpha.toRadixString(16).padLeft(2, '0')}');
+        row.add(
+          '${red.toRadixString(16).padLeft(2, '0')}'
+          '${green.toRadixString(16).padLeft(2, '0')}'
+          '${blue.toRadixString(16).padLeft(2, '0')}'
+          '${alpha.toRadixString(16).padLeft(2, '0')}',
+        );
       }
     }
     rows.add(row.join('|'));
@@ -142,8 +138,7 @@ Future<ui.Image> createImageFromBytes({
 /// Copies an image to the clipboard as a base64 encoded string.
 Future<void> copyImageBase64(final Uint8List imageBytes) async {
   final String base64String = base64Encode(imageBytes);
-  final ClipboardData clipboardData =
-      ClipboardData(text: 'data:image/png;base64,$base64String');
+  final ClipboardData clipboardData = ClipboardData(text: 'data:image/png;base64,$base64String');
   await Clipboard.setData(clipboardData);
 }
 
@@ -152,8 +147,7 @@ Future<void> copyImageToClipboard(final ui.Image image) async {
   final SystemClipboard? clipboard = SystemClipboard.instance;
   if (clipboard != null) {
     final DataWriterItem item = DataWriterItem(suggestedName: 'fpaint.png');
-    final ByteData? data =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
     item.add(Formats.png(data!.buffer.asUint8List()));
     await clipboard.write(<DataWriterItem>[item]);
   } else {

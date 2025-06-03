@@ -87,8 +87,7 @@ void sharePanel(final BuildContext context) {
 Future<void> _onExportToClipboard(final BuildContext context) async {
   final SystemClipboard? clipboard = SystemClipboard.instance;
   if (clipboard != null) {
-    final Uint8List image =
-        await capturePainterToImageBytes(LayersProvider.of(context));
+    final Uint8List image = await capturePainterToImageBytes(LayersProvider.of(context));
     final DataWriterItem item = DataWriterItem(suggestedName: 'fPaint.png');
     item.add(Formats.png(image));
     await clipboard.write(<DataWriterItem>[item]);

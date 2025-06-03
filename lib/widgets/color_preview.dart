@@ -113,9 +113,7 @@ class ColorPreview extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 9,
-                      color: color.computeLuminance() > 0.5
-                          ? Colors.black
-                          : Colors.white,
+                      color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
                     ),
                   ),
                 ),

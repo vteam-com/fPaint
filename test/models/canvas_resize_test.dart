@@ -23,8 +23,7 @@ void main() {
       expect(result, equals(Offset.zero));
     });
 
-    test('anchorTranslate should return correct offset for center position',
-        () {
+    test('anchorTranslate should return correct offset for center position', () {
       final Offset result = anchorTranslate(
         CanvasResizePosition.center,
         const Size(100, 100),
@@ -42,8 +41,7 @@ void main() {
       expect(result, equals(const Offset(-100, -50)));
     });
 
-    test('anchorTranslate should calculate correct offset for all positions',
-        () {
+    test('anchorTranslate should calculate correct offset for all positions', () {
       const Size sourceSize = Size(100, 100);
       const Size destSize = Size(200, 200);
       final double dx = destSize.width - sourceSize.width;

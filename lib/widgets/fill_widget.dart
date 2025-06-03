@@ -78,8 +78,7 @@ class _FillWidgetState extends State<FillWidget> {
     required final BuildContext context,
     required final GradientPoint point,
   }) {
-    final int handleSize =
-        (showDetails ? (defaultHandleSize * 1.5) : defaultHandleSize).toInt();
+    final int handleSize = (showDetails ? (defaultHandleSize * 1.5) : defaultHandleSize).toInt();
 
     return Positioned(
       left: point.offset.dx - (handleSize / 2),
@@ -92,8 +91,7 @@ class _FillWidgetState extends State<FillWidget> {
             widget.onUpdate(point);
           });
         },
-        onPanEnd: (final DragEndDetails details) =>
-            setState(() => showDetails = false),
+        onPanEnd: (final DragEndDetails details) => setState(() => showDetails = false),
         onTapDown: (final TapDownDetails details) {
           setState(() {
             showDetails = true;

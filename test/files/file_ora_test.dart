@@ -47,8 +47,7 @@ void main() {
       true,
     );
 
-    final ArchiveFile mimetypeFile =
-        archive.files.firstWhere((final ArchiveFile f) => f.name == 'mimetype');
+    final ArchiveFile mimetypeFile = archive.files.firstWhere((final ArchiveFile f) => f.name == 'mimetype');
     final String mimetype = String.fromCharCodes(mimetypeFile.content);
     expect(mimetype, 'image/openraster');
   });
@@ -73,7 +72,7 @@ void main() {
         'src': 'data/layer-0.png',
         'x': 0,
         'y': 0,
-      }
+      },
     ];
 
     builder.element(
@@ -114,8 +113,7 @@ void main() {
 
     final ui.Picture picture = recorder.endRecording();
     final ui.Image image = await picture.toImage(1, 1);
-    final ByteData? byteData =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List mockPngFileAsBytes = byteData!.buffer.asUint8List();
 
     final Archive archive = Archive()

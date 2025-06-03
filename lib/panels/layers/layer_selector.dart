@@ -113,8 +113,7 @@ class LayerSelector extends StatelessWidget {
           child: Column(
             children: <Widget>[
               _buildLayerName(layers),
-              if (isSelected)
-                _buildLayerControls(context, layers, layer, allowRemoveLayer),
+              if (isSelected) _buildLayerControls(context, layers, layer, allowRemoveLayer),
             ],
           ),
         ),
@@ -194,9 +193,7 @@ class LayerSelector extends StatelessWidget {
           children: <Widget>[
             Icon(
               layer.isVisible ? Icons.visibility : Icons.visibility_off,
-              color: layer.isVisible
-                  ? Colors.blue
-                  : const ui.Color.fromARGB(255, 135, 9, 9),
+              color: layer.isVisible ? Colors.blue : const ui.Color.fromARGB(255, 135, 9, 9),
             ),
             const SizedBox(width: 8),
             Text(layer.isVisible ? 'Hide layer' : 'Show layer'),
@@ -285,8 +282,7 @@ class LayerSelector extends StatelessWidget {
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
           itemBuilder: (final BuildContext context) => _buildPopupMenuItems(),
-          onSelected: (final String value) =>
-              _handlePopupMenuSelection(value, layers),
+          onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
         ),
         if (layer.parentGroupName.isNotEmpty)
           Opacity(
@@ -312,9 +308,7 @@ class LayerSelector extends StatelessWidget {
           tooltip: 'Hide/Show this layer',
           icon: Icon(
             layer.isVisible ? Icons.visibility : Icons.visibility_off,
-            color: layer.isVisible
-                ? Colors.blue
-                : const ui.Color.fromARGB(255, 135, 9, 9),
+            color: layer.isVisible ? Colors.blue : const ui.Color.fromARGB(255, 135, 9, 9),
           ),
           onPressed: () => layers.layersToggleVisibility(layer),
         ),
@@ -324,8 +318,7 @@ class LayerSelector extends StatelessWidget {
 
   /// Renames the layer.
   Future<void> renameLayer() async {
-    final TextEditingController controller =
-        TextEditingController(text: layer.name);
+    final TextEditingController controller = TextEditingController(text: layer.name);
 
     final String? newName = await showDialog<String>(
       context: context,
@@ -387,10 +380,10 @@ class LayerSelector extends StatelessWidget {
             onPressed: layer == layers.list.last
                 ? null
                 : () => _onMergeLayer(
-                      layers,
-                      layers.selectedLayerIndex,
-                      layers.selectedLayerIndex + 1,
-                    ),
+                    layers,
+                    layers.selectedLayerIndex,
+                    layers.selectedLayerIndex + 1,
+                  ),
           ),
         if (allowRemoveLayer)
           IconButton(
@@ -478,8 +471,7 @@ class LayerSelector extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: <Widget>[
           _buildThumbnailPreview(layers, layer),
-          if (minimal && !layer.isVisible)
-            const Icon(Icons.visibility_off, color: Colors.red),
+          if (minimal && !layer.isVisible) const Icon(Icons.visibility_off, color: Colors.red),
         ],
       ),
     );

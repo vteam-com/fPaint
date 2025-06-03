@@ -167,8 +167,7 @@ String colorToHexString(
   final bool includeAlpha = true,
   final String seperator = '',
 }) {
-  final List<String> components =
-      getColorComponentsAsHex(color, includeAlpha, alphaFirst);
+  final List<String> components = getColorComponentsAsHex(color, includeAlpha, alphaFirst);
   return '#${components.join(seperator)}';
 }
 
@@ -183,14 +182,10 @@ List<String> getColorComponentsAsHex(
   final bool includeAlpha = true,
   final bool alphaIsFirst = true,
 ]) {
-  final String alpha =
-      (color.a * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
-  final String red =
-      (color.r * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
-  final String green =
-      (color.g * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
-  final String blue =
-      (color.b * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String alpha = (color.a * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String red = (color.r * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String green = (color.g * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String blue = (color.b * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
   if (alphaIsFirst) {
     return <String>[
       if (includeAlpha) alpha,
@@ -242,15 +237,11 @@ String getHexOnMultiline(final Color color) {
 ///
 Color contrastColor(final Color color) {
   // Calculate the luminance of the color including alpha
-  final double luminance = (0.299 * (color.r * 255) +
-          0.587 * (color.g * 255) +
-          0.114 * (color.b * 255)) /
-      255;
+  final double luminance = (0.299 * (color.r * 255) + 0.587 * (color.g * 255) + 0.114 * (color.b * 255)) / 255;
   final double alphaFactor = color.a;
 
   // Determine whether to make the contrast color black or white based on the luminance and alpha
-  final Color contrastColor =
-      (luminance * alphaFactor) > 0.5 ? Colors.black : Colors.white;
+  final Color contrastColor = (luminance * alphaFactor) > 0.5 ? Colors.black : Colors.white;
 
   return contrastColor;
 }
