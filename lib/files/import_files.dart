@@ -19,8 +19,7 @@ import 'package:fpaint/providers/shell_provider.dart';
 Future<void> onFileNew(final BuildContext context) async {
   final AppProvider appProvider = AppProvider.of(context);
 
-  if (appProvider.layers.hasChanged &&
-      await confirmDiscardCurrentWork(context) == false) {
+  if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
     return;
   }
 
@@ -31,10 +30,8 @@ Future<void> onFileNew(final BuildContext context) async {
     await showDialog<Size>(
       context: context,
       builder: (final BuildContext context) {
-        final TextEditingController widthController =
-            TextEditingController(text: '800');
-        final TextEditingController heightController =
-            TextEditingController(text: '800');
+        final TextEditingController widthController = TextEditingController(text: '800');
+        final TextEditingController heightController = TextEditingController(text: '800');
 
         return AlertDialog(
           title: const Text('New Canvas Size'),

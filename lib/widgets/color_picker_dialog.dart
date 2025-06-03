@@ -39,8 +39,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   void initState() {
     super.initState();
     _currentColor = widget.color;
-    _hexController =
-        TextEditingController(text: colorToHexString(_currentColor));
+    _hexController = TextEditingController(text: colorToHexString(_currentColor));
   }
 
   @override
@@ -191,8 +190,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               IconButton(
                 icon: const Icon(Icons.paste),
                 onPressed: () async {
-                  final ClipboardData? data =
-                      await Clipboard.getData('text/plain');
+                  final ClipboardData? data = await Clipboard.getData('text/plain');
 
                   try {
                     final Color color = getColorFromString(

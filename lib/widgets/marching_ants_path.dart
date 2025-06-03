@@ -28,13 +28,11 @@ class AnimatedMarchingAntsPath extends StatefulWidget {
   final Offset? linePointEnd;
 
   @override
-  AnimatedMarchingAntsPathState createState() =>
-      AnimatedMarchingAntsPathState();
+  AnimatedMarchingAntsPathState createState() => AnimatedMarchingAntsPathState();
 }
 
 /// The state for [AnimatedMarchingAntsPath].
-class AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath>
-    with SingleTickerProviderStateMixin {
+class AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override

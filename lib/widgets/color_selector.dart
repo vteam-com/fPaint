@@ -84,8 +84,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                         if (brightness == 0 || brightness == 1) {
                           brightness = 0.5;
                         }
-                        widget
-                            .onColorChanged(hsvToColor(hue, brightness, alpha));
+                        widget.onColorChanged(hsvToColor(hue, brightness, alpha));
                       });
                     },
                   ),
@@ -104,8 +103,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                     onChanged: (final double value) {
                       setState(() {
                         brightness = value;
-                        widget
-                            .onColorChanged(hsvToColor(hue, brightness, alpha));
+                        widget.onColorChanged(hsvToColor(hue, brightness, alpha));
                       });
                     },
                   ),
@@ -150,8 +148,7 @@ class _ColorSelectorState extends State<ColorSelector> {
 
   /// Converts the input color to HSV values.
   void fromInputColorToHueBrightnessAndAlpha() {
-    final Pair<double, double> bothValues =
-        getHueAndBrightnessFromColor(widget.color);
+    final Pair<double, double> bothValues = getHueAndBrightnessFromColor(widget.color);
     hue = bothValues.first;
     brightness = bothValues.second;
     alpha = widget.color.a.toDouble();

@@ -44,9 +44,7 @@ class BrushSizePickerState extends State<BrushSizePicker> {
   @override
   void didUpdateWidget(covariant final BrushSizePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value ||
-        oldWidget.min != widget.min ||
-        oldWidget.max != widget.max) {
+    if (oldWidget.value != widget.value || oldWidget.min != widget.min || oldWidget.max != widget.max) {
       setState(() {
         _value = widget.value.clamp(widget.min, widget.max);
       });

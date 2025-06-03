@@ -21,8 +21,7 @@ class UndoProvider extends ChangeNotifier {
   static UndoProvider of(
     final BuildContext context, {
     final bool listen = false,
-  }) =>
-      Provider.of<UndoProvider>(context, listen: listen);
+  }) => Provider.of<UndoProvider>(context, listen: listen);
 
   final List<RecordAction> _undoStack = <RecordAction>[];
   final List<RecordAction> _redoStack = <RecordAction>[];

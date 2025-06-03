@@ -129,8 +129,7 @@ class MainScreen extends StatelessWidget {
           ),
         ),
         Area(
-          builder: (final BuildContext context, final Area area) =>
-              const MainView(),
+          builder: (final BuildContext context, final Area area) => const MainView(),
         ),
       ],
     );

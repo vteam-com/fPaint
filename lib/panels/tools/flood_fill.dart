@@ -285,8 +285,7 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   //------------------------------------------------------------------
   // Normalize the path
   final Rect bounds = region.path.getBounds();
-  final Matrix4 matrix = Matrix4.identity()
-    ..translate(-bounds.left, -bounds.top);
+  final Matrix4 matrix = Matrix4.identity()..translate(-bounds.left, -bounds.top);
   region.path = region.path.transform(matrix.storage);
 
   return region;
@@ -349,8 +348,7 @@ void printPathCoordinates(final ui.Path path) {
   for (final ui.PathMetric metric in pathMetrics) {
     for (double t = 0.0; t <= 1.0; t += 0.5) {
       // Sample points along the path
-      final ui.Offset? position =
-          metric.getTangentForOffset(metric.length * t)?.position;
+      final ui.Offset? position = metric.getTangentForOffset(metric.length * t)?.position;
       if (position != null) {
         positionsSampling.add(
           Offset(
@@ -367,8 +365,7 @@ void printPathCoordinates(final ui.Path path) {
   for (int i = 0; i < positionsSampling.length; i++) {
     if (i == 0 ||
         i == positionsSampling.length - 1 ||
-        (positionsSampling[i] != positionsSampling[i - 1] &&
-            positionsSampling[i] != positionsSampling[i + 1])) {
+        (positionsSampling[i] != positionsSampling[i - 1] && positionsSampling[i] != positionsSampling[i + 1])) {
       reducedPositions.add(positionsSampling[i]);
     }
   }

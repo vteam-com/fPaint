@@ -42,8 +42,7 @@ class LayerProvider extends ChangeNotifier {
   static LayerProvider of(
     final BuildContext context, {
     final bool listen = false,
-  }) =>
-      Provider.of<LayerProvider>(context, listen: listen);
+  }) => Provider.of<LayerProvider>(context, listen: listen);
 
   /// Notifies listeners that the layer has been updated.
   void update() {
@@ -121,12 +120,10 @@ class LayerProvider extends ChangeNotifier {
   void _cacheTopColorsUsed() async {
     topColorsUsed = <ColorUsage>[];
     if (_cachedThumnailImage != null) {
-      final List<ColorUsage> imageColors =
-          await getImageColors(_cachedThumnailImage!);
+      final List<ColorUsage> imageColors = await getImageColors(_cachedThumnailImage!);
 
       for (final ColorUsage colorUsage in imageColors) {
-        if (!topColorsUsed
-            .any((final ColorUsage c) => c.color == colorUsage.color)) {
+        if (!topColorsUsed.any((final ColorUsage c) => c.color == colorUsage.color)) {
           topColorsUsed.add(colorUsage);
         }
       }
@@ -194,8 +191,7 @@ class LayerProvider extends ChangeNotifier {
   void offset(final Offset offset) {
     for (final UserActionDrawing action in actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
-        action.positions[i] =
-            action.positions[i].translate(offset.dx, offset.dy);
+        action.positions[i] = action.positions[i].translate(offset.dx, offset.dy);
       }
     }
     clearCache();
@@ -215,8 +211,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   /// Gets the last user action performed on the layer.
-  UserActionDrawing? get lastUserAction =>
-      actionStack.isEmpty ? null : actionStack.last;
+  UserActionDrawing? get lastUserAction => actionStack.isEmpty ? null : actionStack.last;
 
   /// Appends a drawing action to the action stack.
   void appendDrawingAction(final UserActionDrawing userAction) {
@@ -353,7 +348,8 @@ class LayerProvider extends ChangeNotifier {
     final ui.Path? clipPath,
     final void Function(
       Canvas theCanvasToUse,
-    ) actionFunction,
+    )
+    actionFunction,
   ) {
     if (clipPath != null) {
       canvas.save();

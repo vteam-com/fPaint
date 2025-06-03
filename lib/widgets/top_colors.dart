@@ -43,8 +43,7 @@ class TopColors extends StatelessWidget {
   Widget build(final BuildContext context) {
     final List<ColorUsage> sortedColors = sortColorByHueAndPopularity();
 
-    final List<Widget> colorPreviews =
-        sortedColors.map((final ColorUsage colorUsed) {
+    final List<Widget> colorPreviews = sortedColors.map((final ColorUsage colorUsed) {
       final List<String> components = getColorComponentsAsHex(colorUsed.color);
       final String alpha = components[0];
       final String red = components[1];
@@ -124,8 +123,7 @@ class TopColors extends StatelessWidget {
         }
         final double saturationA = HSVColor.fromColor(a.color).saturation;
         final double saturationB = HSVColor.fromColor(b.color).saturation;
-        return saturationB
-            .compareTo(saturationA); // Secondary sort by saturation
+        return saturationB.compareTo(saturationA); // Secondary sort by saturation
       });
     }
 
@@ -144,8 +142,6 @@ class TopColors extends StatelessWidget {
     });
 
     // Flatten the sorted groups into a final sorted list
-    return sortedGroups
-        .expand((final List<ColorUsage> group) => group)
-        .toList();
+    return sortedGroups.expand((final List<ColorUsage> group) => group).toList();
   }
 }

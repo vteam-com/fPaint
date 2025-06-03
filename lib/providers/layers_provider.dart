@@ -41,8 +41,7 @@ class LayersProvider extends ChangeNotifier {
   static LayersProvider of(
     final BuildContext context, {
     final bool listen = false,
-  }) =>
-      Provider.of<LayersProvider>(context, listen: listen);
+  }) => Provider.of<LayersProvider>(context, listen: listen);
 
   /// Notifies listeners that the layers have been updated.
   void update() {
@@ -58,7 +57,7 @@ class LayersProvider extends ChangeNotifier {
   set size(final Size size) {
     _size = size;
     _list.forEach((final LayerProvider layer) => layer.size = size);
-      notifyListeners(); // Add this line
+    notifyListeners(); // Add this line
   }
 
   ///-------------------------------------------
@@ -166,8 +165,7 @@ class LayersProvider extends ChangeNotifier {
   bool get isNotEmpty => _list.isNotEmpty;
 
   /// Gets whether any of the layers have changed.
-  bool get hasChanged =>
-      _list.any((final LayerProvider layer) => layer.hasChanged);
+  bool get hasChanged => _list.any((final LayerProvider layer) => layer.hasChanged);
 
   int _selectedLayerIndex = 0;
 
@@ -205,8 +203,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Checks if the given index is within the range of the layer list.
-  bool isIndexInRange(final int indexLayer) =>
-      indexLayer >= 0 && indexLayer < _list.length;
+  bool isIndexInRange(final int indexLayer) => indexLayer >= 0 && indexLayer < _list.length;
 
   /// Gets the index of the given layer.
   int getLayerIndex(final LayerProvider layer) {
@@ -237,16 +234,14 @@ class LayersProvider extends ChangeNotifier {
 
   /// Gets a layer by its name.
   LayerProvider? getByName(final String name) {
-    return _list
-        .findFirstMatch((final LayerProvider layer) => layer.name == name);
+    return _list.findFirstMatch((final LayerProvider layer) => layer.name == name);
   }
 
   /// Adds a layer to the top of the canvas.
   LayerProvider addTop({final String? name}) => this.insertAt(0, name);
 
   /// Adds a layer to the bottom of the canvas.
-  LayerProvider addBottom([final String? name]) =>
-      this.insertAt(this.length, name);
+  LayerProvider addBottom([final String? name]) => this.insertAt(this.length, name);
 
   /// Inserts a layer at the given index.
   void insert(final int index, final LayerProvider layerToInsert) {
@@ -270,8 +265,7 @@ class LayersProvider extends ChangeNotifier {
   /// Removes a layer from the canvas.
   bool remove(final LayerProvider layer) {
     final bool wasRemoved = _list.remove(layer);
-    this.selectedLayerIndex =
-        (this.selectedLayerIndex > 0 ? this.selectedLayerIndex - 1 : 0);
+    this.selectedLayerIndex = (this.selectedLayerIndex > 0 ? this.selectedLayerIndex - 1 : 0);
     return wasRemoved;
   }
 
@@ -296,8 +290,7 @@ class LayersProvider extends ChangeNotifier {
 
     final LayerProvider layerTo = this.get(indexTo);
 
-    final List<UserActionDrawing> actionsToAppend =
-        List<UserActionDrawing>.from(layerFrom.actionStack);
+    final List<UserActionDrawing> actionsToAppend = List<UserActionDrawing>.from(layerFrom.actionStack);
 
     final int numberOfActionAdded = actionsToAppend.length;
 
@@ -398,8 +391,7 @@ class LayersProvider extends ChangeNotifier {
     }
 
     topColors.sort(
-      (final ColorUsage a, final ColorUsage b) =>
-          b.percentage.compareTo(a.percentage),
+      (final ColorUsage a, final ColorUsage b) => b.percentage.compareTo(a.percentage),
     );
     topColors = topColors.take(20).toList();
     return topColors;
@@ -448,8 +440,7 @@ class LayersProvider extends ChangeNotifier {
       final int y = offset.dy.clamp(0, image.height - 1).toInt();
 
       // Convert the image to ByteData in the correct format
-      final ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
       if (byteData == null) {
         return null;

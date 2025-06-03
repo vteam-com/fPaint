@@ -85,8 +85,7 @@ Widget brushStyleDropDown(
 ) {
   return DropdownButton<int>(
     value: value.index,
-    items:
-        BrushStyle.values.map<DropdownMenuItem<int>>((final BrushStyle value) {
+    items: BrushStyle.values.map<DropdownMenuItem<int>>((final BrushStyle value) {
       return DropdownMenuItem<int>(
         value: value.index,
         child: Text(value.name),

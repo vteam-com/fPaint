@@ -65,8 +65,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
   /// Adjusts the value of the slider by the given delta.
   void _adjustValue(final double delta) {
     setState(() {
-      currentValue =
-          (currentValue + delta).clamp(widget.minValue, widget.maxValue);
+      currentValue = (currentValue + delta).clamp(widget.minValue, widget.maxValue);
     });
     widget.onChanged(currentValue);
   }
@@ -75,8 +74,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
   Widget build(final BuildContext context) {
     return RawGestureDetector(
       gestures: <Type, GestureRecognizerFactory<GestureRecognizer>>{
-        _HorizontalDragRecognizer:
-            GestureRecognizerFactoryWithHandlers<_HorizontalDragRecognizer>(
+        _HorizontalDragRecognizer: GestureRecognizerFactoryWithHandlers<_HorizontalDragRecognizer>(
           () => _HorizontalDragRecognizer(),
           (final _HorizontalDragRecognizer instance) {
             instance

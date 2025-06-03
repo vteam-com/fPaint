@@ -134,8 +134,7 @@ enum PropType {
   const PropType(this.value);
   final int value;
   static PropType? fromValue(final int value) {
-    return PropType.values
-        .findFirstMatch((final PropType e) => e.value == value);
+    return PropType.values.findFirstMatch((final PropType e) => e.value == value);
   }
 }
 
@@ -472,10 +471,7 @@ class XcfFile {
 
   bool get isNewVersion {
     // Version v004 and later use a different layer structure
-    if (version == 'file' ||
-        version == 'v001' ||
-        version == 'v002' ||
-        version == 'v003') {
+    if (version == 'file' || version == 'v001' || version == 'v002' || version == 'v003') {
       return false;
     }
     return true;
@@ -484,8 +480,7 @@ class XcfFile {
 
 Future<String> readProperty(final ByteData buffer, final int offset) async {
   final int length = buffer.getUint32(offset + 4, Endian.big);
-  final Uint8List bytes =
-      Uint8List.sublistView(buffer, offset + 8, offset + 8 + length);
+  final Uint8List bytes = Uint8List.sublistView(buffer, offset + 8, offset + 8 + length);
   return String.fromCharCodes(bytes).replaceAll('\x00', '');
 }
 
@@ -501,8 +496,7 @@ Future<XcfLayer> _readLayer(
 
   // Skip layer name length (4 bytes)
   final int nameLength = buffer.getUint32(offset + 12, Endian.big);
-  final Uint8List nameBytes =
-      Uint8List.sublistView(buffer, offset + 16, offset + 16 + nameLength);
+  final Uint8List nameBytes = Uint8List.sublistView(buffer, offset + 16, offset + 16 + nameLength);
   layer.name = String.fromCharCodes(nameBytes).replaceAll('\x00', '');
 
   // Initialize defaults

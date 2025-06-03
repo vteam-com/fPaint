@@ -280,7 +280,7 @@ digraph "" {
   "/lib/panels/side_panel/menu.dart" -> "/lib/panels/about.dart";
   "/lib/panels/side_panel/menu.dart" -> "/lib/panels/canvas_settings.dart";
   "/lib/panels/side_panel/menu.dart" -> "/lib/panels/share_panel.dart";
-  "/lib/panels/side_panel/menu.dart" -> "/lib/providers/layers_provider.dart";
+  "/lib/panels/side_panel/menu.dart" -> "/lib/providers/app_provider.dart";
   "/lib/panels/side_panel/menu.dart" -> "/lib/providers/shell_provider.dart";
   "/lib/panels/side_panel/top_menu_and_layers_panel.dart" -> "/lib/panels/layers/layer_selector.dart";
   "/lib/panels/side_panel/top_menu_and_layers_panel.dart" -> "/lib/panels/side_panel/side_panel_top_menu.dart";

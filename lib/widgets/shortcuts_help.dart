@@ -4,8 +4,8 @@ class ShortcutsHelpDialog extends StatelessWidget {
   const ShortcutsHelpDialog({super.key});
 
   String _getPlatformModifier(final BuildContext context) {
-    final bool isMacOS = Theme.of(context).platform == TargetPlatform.macOS ||
-        Theme.of(context).platform == TargetPlatform.iOS;
+    final bool isMacOS =
+        Theme.of(context).platform == TargetPlatform.macOS || Theme.of(context).platform == TargetPlatform.iOS;
     return isMacOS ? 'Cmd' : 'Ctrl';
   }
 
@@ -136,8 +136,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
         children: <Widget>[
           _buildShortcutCategory(title),
           ...shortcuts.map(
-            (final Map<String, String> shortcut) =>
-                _buildShortcut(shortcut['keys']!, shortcut['description']!),
+            (final Map<String, String> shortcut) => _buildShortcut(shortcut['keys']!, shortcut['description']!),
           ),
         ],
       ),

@@ -31,8 +31,7 @@ void main() {
   if (Platform.isIOS || Platform.isAndroid) {
     // Impeller is enabled by default on iOS, but we can explicitly set it
     // For Android, we need to opt-in
-    PlatformDispatcher.instance.onError =
-        (final Object error, final StackTrace stack) {
+    PlatformDispatcher.instance.onError = (final Object error, final StackTrace stack) {
       // Log any Impeller-related errors
       if (kDebugMode) {
         print('Unhandled error: $error');
@@ -44,14 +43,14 @@ void main() {
   // Only enable system UI mode for iOS/Android.
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   // Platform channel for file opening.
-  const MethodChannel('com.vteam.fpaint/file')
-      .setMethodCallHandler((final MethodCall call) async {
+  const MethodChannel('com.vteam.fpaint/file').setMethodCallHandler((final MethodCall call) async {
     if (call.method == 'fileOpened') {
       final String filePath = call.arguments as String;
 
       // Check if there are unsaved changes before clearing
       if (mainApp.appProvider.layers.hasChanged) {
-        final bool shouldProceed = await showDialog<bool>(
+        final bool shouldProceed =
+            await showDialog<bool>(
               context: mainApp.navigatorKey.currentContext!,
               builder: (final BuildContext context) => AlertDialog(
                 title: const Text('Unsaved Changes'),
@@ -151,11 +150,11 @@ class MyApp extends StatelessWidget {
         ),
         routes: <String, WidgetBuilder>{
           '/': (final BuildContext context) => shortCutsForMainApp(
-                context,
-                shellProvider,
-                appProvider,
-                const MainScreen(),
-              ),
+            context,
+            shellProvider,
+            appProvider,
+            const MainScreen(),
+          ),
           '/settings': (final _) => const SettingsPage(),
           '/platforms': (final _) => const PlatformsPage(),
         },

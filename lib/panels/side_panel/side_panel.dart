@@ -38,8 +38,7 @@ class _SidePanelState extends State<SidePanel> {
       Area(
         size: topPanelHeight,
         min: 100,
-        builder: (final BuildContext context, final Area area) =>
-            const TopMenuAndLayersPanel(),
+        builder: (final BuildContext context, final Area area) => const TopMenuAndLayersPanel(),
       ),
       Area(
         min: 100,

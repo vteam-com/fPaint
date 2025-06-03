@@ -4,11 +4,10 @@ import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/models/localized_strings.dart';
 import 'package:fpaint/models/menu_model.dart';
-import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/panels/about.dart';
 import 'package:fpaint/panels/canvas_settings.dart';
 import 'package:fpaint/panels/share_panel.dart';
-import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
 /// A widget that displays the main menu.
@@ -22,8 +21,7 @@ class MainMenu extends StatelessWidget {
     return PopupMenuButton<int>(
       tooltip: strings[StringId.menuTooltip],
       icon: const Icon(Icons.menu),
-      onSelected: (final int result) =>
-          onDropDownMenuSelection(context, result),
+      onSelected: (final int result) => onDropDownMenuSelection(context, result),
       itemBuilder: (final BuildContext context) => <PopupMenuEntry<int>>[
         buildMenuItem(
           value: MenuIds.newFile,
@@ -37,7 +35,7 @@ class MainMenu extends StatelessWidget {
         ),
         buildMenuItem(
           value: MenuIds.newFromClipboard,
-          text: "New from Clipboard", // TODO(you): localize this string
+          text: 'New from Clipboard', // TODO(you): localize this string
           icon: Icons.content_paste_go,
         ),
         buildMenuItem(
@@ -99,19 +97,20 @@ void onDropDownMenuSelection(
         shellProvider,
         layers,
       ).then(
-          // ignore: use_build_context_synchronously
-          (final _) {
-        layers.clearHasChanged();
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${strings[StringId.savedMessage]}${shellProvider.loadedFileName}',
+        // ignore: use_build_context_synchronously
+        (final _) {
+          layers.clearHasChanged();
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${strings[StringId.savedMessage]}${shellProvider.loadedFileName}',
+                ),
               ),
-            ),
-          );
-        }
-      });
+            );
+          }
+        },
+      );
       break;
 
     case MenuIds.export:

@@ -27,8 +27,7 @@ class ImagePainter extends CustomPainter {
     final double dx = (size.width - scaledWidth) / 2;
     final double dy = (size.height - scaledHeight) / 2;
 
-    final ui.Rect src =
-        Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+    final ui.Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
     final ui.Rect dst = Rect.fromLTWH(dx, dy, scaledWidth, scaledHeight);
 
     // Draw the image

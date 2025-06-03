@@ -19,45 +19,46 @@ class TopMenuAndLayersPanel extends StatelessWidget {
         SidePanelTopMenu(shellProvider: shellProvider),
 
         Consumer<LayersProvider>(
-          builder: (
-            final BuildContext context2,
-            final LayersProvider layers,
-            final Widget? child,
-          ) {
-            return Expanded(
-              child: ReorderableListView.builder(
-                itemCount: layers.length,
-                buildDefaultDragHandles: false,
-                onReorder: (final int oldIndex, int newIndex) {
-                  if (newIndex > oldIndex) {
-                    newIndex -= 1;
-                  }
-                  final LayerProvider layer = layers.get(oldIndex);
-                  layers.removeByIndex(oldIndex);
-                  layers.insert(newIndex, layer);
-                  layers.selectedLayerIndex = newIndex;
-                },
-                itemBuilder: (final BuildContext context, final int index) {
-                  final LayerProvider layer = layers.get(index);
-                  return ReorderableDragStartListener(
-                    key: Key('$index'),
-                    index: index,
-                    child: GestureDetector(
-                      onTap: () => layers.selectedLayerIndex = index,
-                      onDoubleTap: () => layers.layersToggleVisibility(layer),
-                      child: LayerSelector(
-                        context: context2,
-                        layer: layer,
-                        minimal: !shellProvider.isSidePanelExpanded,
-                        isSelected: layers.selectedLayerIndex == index,
-                        allowRemoveLayer: index != layers.length - 1,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          },
+          builder:
+              (
+                final BuildContext context2,
+                final LayersProvider layers,
+                final Widget? child,
+              ) {
+                return Expanded(
+                  child: ReorderableListView.builder(
+                    itemCount: layers.length,
+                    buildDefaultDragHandles: false,
+                    onReorder: (final int oldIndex, int newIndex) {
+                      if (newIndex > oldIndex) {
+                        newIndex -= 1;
+                      }
+                      final LayerProvider layer = layers.get(oldIndex);
+                      layers.removeByIndex(oldIndex);
+                      layers.insert(newIndex, layer);
+                      layers.selectedLayerIndex = newIndex;
+                    },
+                    itemBuilder: (final BuildContext context, final int index) {
+                      final LayerProvider layer = layers.get(index);
+                      return ReorderableDragStartListener(
+                        key: Key('$index'),
+                        index: index,
+                        child: GestureDetector(
+                          onTap: () => layers.selectedLayerIndex = index,
+                          onDoubleTap: () => layers.layersToggleVisibility(layer),
+                          child: LayerSelector(
+                            context: context2,
+                            layer: layer,
+                            minimal: !shellProvider.isSidePanelExpanded,
+                            isSelected: layers.selectedLayerIndex == index,
+                            allowRemoveLayer: index != layers.length - 1,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
         ),
       ],
     );

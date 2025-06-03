@@ -62,8 +62,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   final double magnifyFactor = 6;
 
   /// The total height of the widget.
-  late final double totalHeightOfTheWidget =
-      buttonSize + spacer + regionSize + spacer + buttonSize;
+  late final double totalHeightOfTheWidget = buttonSize + spacer + regionSize + spacer + buttonSize;
 
   @override
   void initState() {
@@ -175,8 +174,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
       return;
     }
 
-    final Color? color =
-        await widget.layers.getColorAtOffset(widget.pixelPosition);
+    final Color? color = await widget.layers.getColorAtOffset(widget.pixelPosition);
 
     setState(() {
       _selectedColor = color;

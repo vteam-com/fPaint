@@ -59,8 +59,7 @@ class SidePanelTopMenu extends StatelessWidget {
                 ? Icons.keyboard_double_arrow_left
                 : Icons.keyboard_double_arrow_right,
             onPressed: () {
-              shellProvider.isSidePanelExpanded =
-                  !shellProvider.isSidePanelExpanded;
+              shellProvider.isSidePanelExpanded = !shellProvider.isSidePanelExpanded;
             },
           ),
       ],
