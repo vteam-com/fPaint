@@ -34,34 +34,36 @@ class CanvasPanelPainter extends CustomPainter {
 
   @override
   void paint(final Canvas canvas, final Size size) {
-    // Create a PictureRecorder to record the painting commands
-    final PictureRecorder recorder = PictureRecorder();
-    final Canvas recordingCanvas = Canvas(
-      recorder,
-      Rect.fromPoints(Offset.zero, Offset(size.width, size.height)),
-    );
-
-    // Render the transparent grid on the recording canvas
-    if (includeTransparentBackground) {
-      drawTransaparentBackgroundOffsetAndSize(
-        canvas: recordingCanvas,
-        size: _layers.size,
+    if (size.width > 0 && size.height > 0) {
+      // Create a PictureRecorder to record the painting commands
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas recordingCanvas = Canvas(
+        recorder,
+        Rect.fromPoints(Offset.zero, Offset(size.width, size.height)),
       );
-    }
 
-    // Render the layers on the recording canvas
-    for (final LayerProvider layer in _layers.list.reversed) {
-      if (layer.isVisible) {
-        layer.renderLayer(recordingCanvas);
+      // Render the transparent grid on the recording canvas
+      if (includeTransparentBackground) {
+        drawTransaparentBackgroundOffsetAndSize(
+          canvas: recordingCanvas,
+          size: _layers.size,
+        );
       }
+
+      // Render the layers on the recording canvas
+      for (final LayerProvider layer in _layers.list.reversed) {
+        if (layer.isVisible) {
+          layer.renderLayer(recordingCanvas);
+        }
+      }
+
+      // End recording and create an image
+      final ui.Picture picture = recorder.endRecording();
+      final ui.Image uiImage = picture.toImageSync(size.width.toInt(), size.height.toInt());
+
+      // Draw the cached image on the original canvas
+      canvas.drawImage(uiImage, Offset.zero, Paint());
     }
-
-    // End recording and create an image
-    final ui.Picture picture = recorder.endRecording();
-    final ui.Image uiImage = picture.toImageSync(size.width.toInt(), size.height.toInt());
-
-    // Draw the cached image on the original canvas
-    canvas.drawImage(uiImage, Offset.zero, Paint());
   }
 
   @override
