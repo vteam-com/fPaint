@@ -20,7 +20,7 @@ version: 1.0.7
 
 environment:
   sdk: ">=3.8.0"
-  flutter: ">=3.32.0"
+  flutter: ">=3.32.1"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -50,11 +50,6 @@ dependencies:
 
 dev_dependencies:
   flutter_launcher_icons:
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
