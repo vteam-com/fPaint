@@ -62,18 +62,26 @@ List<num> getMinMaxValues(final List<double> list) {
     return <num>[list[0], list[0]];
   }
 
-  double valueMin = 0.0;
-  double valueMax = 0.0;
+  double valueMin;
+  double valueMax;
+
+  // Initialize with the first two elements to handle lists of length >= 2
   if (list[0] < list[1]) {
     valueMin = list[0];
     valueMax = list[1];
   } else {
     valueMin = list[1];
     valueMax = list[0];
+  }
 
-    for (final double value in list) {
-      valueMin = min(valueMin, value);
-      valueMax = max(valueMax, value);
+  // Iterate through the rest of the list (if any)
+  for (int i = 2; i < list.length; i++) {
+    final double value = list[i];
+    if (value < valueMin) {
+      valueMin = value;
+    }
+    if (value > valueMax) {
+      valueMax = value;
     }
   }
   return <num>[valueMin, valueMax];

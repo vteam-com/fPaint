@@ -120,7 +120,8 @@ TextStyle adjustOpacityOfTextStyle(
   final double opacity = 0.7,
 ]) {
   return textStyle.copyWith(
-    color: textStyle.color!.withValues(alpha: opacity),
+    // ignore: deprecated_member_use
+    color: textStyle.color!.withOpacity(opacity),
   );
 }
 
