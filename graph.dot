@@ -236,7 +236,6 @@ digraph "" {
   "/test/paint_model_test.dart" -> "/lib/providers/app_provider.dart";
   "/test/providers/layers_provider_test.dart" -> "/lib/providers/layers_provider.dart";
   "/test/providers/app_provider_test.dart" -> "/lib/providers/app_provider.dart";
-  "/test/providers/app_provider_test.dart" -> "/test/providers/app_provider_test.mocks.dart";
   "/test/panels/tools/flood_fill_test.dart" -> "/lib/helpers/image_helper.dart";
   "/test/panels/tools/flood_fill_test.dart" -> "/lib/panels/tools/flood_fill.dart";
   "/test/panels/image_test.dart" -> "/lib/helpers/image_helper.dart";
