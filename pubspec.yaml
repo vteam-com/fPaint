@@ -49,15 +49,19 @@ dependencies:
   xml: ^6.3.0
 
 dev_dependencies:
+  build_runner: ^2.4.10 # Use a recent version
+  coverage: ^1.8.0
   flutter_launcher_icons:
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
+  mockito: ^5.4.4 # Use a recent version
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
+  # For information on the generic Dart part of this file, see the
+  # following page: https://dart.dev/tools/pub/pubspec
 
-# The following section is specific to Flutter packages.
+  # The following section is specific to Flutter packages.
+  nested: any
 flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

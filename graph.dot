@@ -4,6 +4,9 @@ digraph "" {
   edge [penwidth=1.3];
   "/test/draw_path_helper_test.dart" [label="draw_path_helper_test"];
   "/test/paint_model_test.dart" [label="paint_model_test"];
+  "/test/providers/app_provider_test.mocks.dart" [label="app_provider_test.mocks"];
+  "/test/providers/layers_provider_test.dart" [label="layers_provider_test"];
+  "/test/providers/app_provider_test.dart" [label="app_provider_test"];
   "/test/panels/tools/flood_fill_test.dart" [label="flood_fill_test"];
   "/test/panels/image_test.dart" [label="image_test"];
   "/test/models/canvas_resize_test.dart" [label="canvas_resize_test"];
@@ -11,6 +14,11 @@ digraph "" {
   "/test/file_xcf_test.dart" [label="file_xcf_test"];
   "/test/files/file_ora_test.dart" [label="file_ora_test"];
   "/test/layers_test.dart" [label="layers_test"];
+  "/test/helpers/color_helper_test.dart" [label="color_helper_test"];
+  "/test/helpers/list_helper_test.dart" [label="list_helper_test"];
+  "/test/widgets/color_selector_test.dart" [label="color_selector_test"];
+  "/test/widgets/color_selector_test.mocks.dart" [label="color_selector_test.mocks"];
+  "/test/widgets/brush_size_picker_test.dart" [label="brush_size_picker_test"];
   "/lib/providers/app_preferences.dart" [label="app_preferences"];
   "/lib/providers/layer_provider.dart" [label="layer_provider"];
   "/lib/providers/undo_provider.dart" [label="undo_provider"];
@@ -88,6 +96,12 @@ digraph "" {
       "/test/widget_test.dart";
       "/test/file_xcf_test.dart";
       "/test/layers_test.dart";
+      subgraph "cluster~/test/providers" {
+        label="providers";
+        "/test/providers/app_provider_test.mocks.dart";
+        "/test/providers/layers_provider_test.dart";
+        "/test/providers/app_provider_test.dart";
+      }
       subgraph "cluster~/test/panels" {
         label="panels";
         "/test/panels/image_test.dart";
@@ -103,6 +117,17 @@ digraph "" {
       subgraph "cluster~/test/files" {
         label="files";
         "/test/files/file_ora_test.dart";
+      }
+      subgraph "cluster~/test/helpers" {
+        label="helpers";
+        "/test/helpers/color_helper_test.dart";
+        "/test/helpers/list_helper_test.dart";
+      }
+      subgraph "cluster~/test/widgets" {
+        label="widgets";
+        "/test/widgets/color_selector_test.dart";
+        "/test/widgets/color_selector_test.mocks.dart";
+        "/test/widgets/brush_size_picker_test.dart";
       }
     }
     subgraph "cluster~/lib" {
@@ -209,6 +234,9 @@ digraph "" {
   }
   "/test/draw_path_helper_test.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/test/paint_model_test.dart" -> "/lib/providers/app_provider.dart";
+  "/test/providers/layers_provider_test.dart" -> "/lib/providers/layers_provider.dart";
+  "/test/providers/app_provider_test.dart" -> "/lib/providers/app_provider.dart";
+  "/test/providers/app_provider_test.dart" -> "/test/providers/app_provider_test.mocks.dart";
   "/test/panels/tools/flood_fill_test.dart" -> "/lib/helpers/image_helper.dart";
   "/test/panels/tools/flood_fill_test.dart" -> "/lib/panels/tools/flood_fill.dart";
   "/test/panels/image_test.dart" -> "/lib/helpers/image_helper.dart";
@@ -219,6 +247,26 @@ digraph "" {
   "/test/files/file_ora_test.dart" -> "/lib/files/file_ora.dart";
   "/test/files/file_ora_test.dart" -> "/lib/providers/layers_provider.dart";
   "/test/layers_test.dart" -> "/lib/providers/layer_provider.dart";
+  "/test/helpers/color_helper_test.dart" -> "/lib/helpers/color_helper.dart";
+  "/test/helpers/list_helper_test.dart" -> "/lib/helpers/list_helper.dart";
+  "/test/widgets/color_selector_test.dart" -> "/lib/helpers/color_helper.dart";
+  "/test/widgets/color_selector_test.dart" -> "/lib/providers/app_preferences.dart";
+  "/test/widgets/color_selector_test.dart" -> "/lib/providers/app_provider.dart";
+  "/test/widgets/color_selector_test.dart" -> "/lib/providers/shell_provider.dart";
+  "/test/widgets/color_selector_test.dart" -> "/lib/widgets/color_picker_dialog.dart";
+  "/test/widgets/color_selector_test.dart" -> "/lib/widgets/color_selector.dart";
+  "/test/widgets/color_selector_test.dart" -> "/test/widgets/color_selector_test.mocks.dart";
+  "/test/widgets/color_selector_test.mocks.dart" -> "/lib/helpers/color_helper.dart";
+  "/test/widgets/color_selector_test.mocks.dart" -> "/lib/models/canvas_resize.dart";
+  "/test/widgets/color_selector_test.mocks.dart" -> "/lib/models/fill_model.dart";
+  "/test/widgets/color_selector_test.mocks.dart" -> "/lib/models/selector_model.dart";
+  "/test/widgets/color_selector_test.mocks.dart" -> "/lib/panels/tools/flood_fill.dart";
+  "/test/widgets/color_selector_test.mocks.dart" -> "/lib/providers/app_preferences.dart";
+  "/test/widgets/color_selector_test.mocks.dart" -> "/lib/providers/app_provider.dart";
+  "/test/widgets/color_selector_test.mocks.dart" -> "/lib/providers/layers_provider.dart";
+  "/test/widgets/color_selector_test.mocks.dart" -> "/lib/providers/shell_provider.dart";
+  "/test/widgets/color_selector_test.mocks.dart" -> "/lib/providers/undo_provider.dart";
+  "/test/widgets/brush_size_picker_test.dart" -> "/lib/widgets/brush_size_picker.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/lib/providers/layer_provider.dart" -> "/lib/helpers/image_helper.dart";
