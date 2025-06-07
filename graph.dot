@@ -49,6 +49,7 @@ digraph "" {
   "/lib/models/localized_strings.dart" [label="localized_strings"];
   "/lib/models/constants.dart" [label="constants"];
   "/lib/models/user_action_drawing.dart" [label="user_action_drawing"];
+  "/lib/my_window_manager.dart" [label="my_window_manager"];
   "/lib/main.dart" [label="main"];
   "/lib/files/xcf_reader.dart" [label="xcf_reader"];
   "/lib/files/assets_helper.dart" [label="assets_helper"];
@@ -132,6 +133,7 @@ digraph "" {
     subgraph "cluster~/lib" {
       label="lib";
       "/lib/floating_buttons.dart";
+      "/lib/my_window_manager.dart";
       "/lib/main.dart";
       "/lib/main_screen.dart";
       subgraph "cluster~/lib/providers" {
@@ -352,6 +354,7 @@ digraph "" {
   "/lib/models/user_action_drawing.dart" -> "/lib/widgets/brush_style_picker.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/files/import_files.dart";
   "/lib/main.dart" -> "/lib/main_screen.dart";
+  "/lib/main.dart" -> "/lib/my_window_manager.dart";
   "/lib/main.dart" -> "/lib/pages/platforms_page.dart";
   "/lib/main.dart" -> "/lib/pages/settings_page.dart";
   "/lib/main.dart" -> "/lib/providers/app_provider.dart";
