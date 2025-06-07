@@ -4,12 +4,11 @@ import 'package:fpaint/widgets/brush_size_picker.dart';
 
 void main() {
   group('BrushSizePicker Widget Tests', () {
-    testWidgets('Initial rendering reflects input properties', (WidgetTester tester) async {
+    testWidgets('Initial rendering reflects input properties', (final WidgetTester tester) async {
       const String title = 'Test Brush Size';
       const double initialValue = 15.0;
       const double minValue = 1.0;
       const double maxValue = 100.0;
-      double changedValue = 0;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -19,9 +18,7 @@ void main() {
               value: initialValue,
               min: minValue,
               max: maxValue,
-              onChanged: (value) {
-                changedValue = value;
-              },
+              onChanged: (final double value) {},
             ),
           ),
         ),
@@ -29,7 +26,7 @@ void main() {
 
       expect(find.text('$title: ${initialValue.toStringAsFixed(1)}'), findsOneWidget);
 
-      final slider = find.byType(Slider);
+      final Finder slider = find.byType(Slider);
       expect(slider, findsOneWidget);
       final Slider sliderWidget = tester.widget(slider);
       expect(sliderWidget.value, initialValue);
@@ -37,14 +34,14 @@ void main() {
       expect(sliderWidget.max, maxValue);
     });
 
-    testWidgets('Slider interaction calls onChanged and updates UI', (WidgetTester tester) async {
+    testWidgets('Slider interaction calls onChanged and updates UI', (final WidgetTester tester) async {
       const String title = 'My Size';
       double currentValue = 20.0;
       double? reportedValue;
 
       await tester.pumpWidget(
         StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (final BuildContext context, final StateSetter setState) {
             return MaterialApp(
               home: Scaffold(
                 body: BrushSizePicker(
@@ -52,7 +49,7 @@ void main() {
                   value: currentValue,
                   min: 5.0,
                   max: 50.0,
-                  onChanged: (value) {
+                  onChanged: (final double value) {
                     setState(() {
                       currentValue = value; // Simulate parent updating the state
                       reportedValue = value;
@@ -65,7 +62,7 @@ void main() {
         ),
       );
 
-      final sliderFinder = find.byType(Slider);
+      final Finder sliderFinder = find.byType(Slider);
       expect(sliderFinder, findsOneWidget);
 
       // Drag slider to a new value
@@ -77,7 +74,6 @@ void main() {
       expect(find.text('$title: ${currentValue.toStringAsFixed(1)}'), findsOneWidget);
       final Slider updatedSliderWidget = tester.widget(sliderFinder);
       expect(updatedSliderWidget.value, currentValue);
-
 
       // More precise value setting using onChanged directly
       final Slider sliderWidget = tester.widget(sliderFinder);
@@ -91,7 +87,7 @@ void main() {
       expect(finalSliderWidget.value, 35.5);
     });
 
-    testWidgets('didUpdateWidget updates slider if value changes', (WidgetTester tester) async {
+    testWidgets('didUpdateWidget updates slider if value changes', (final WidgetTester tester) async {
       double value = 10.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -101,7 +97,7 @@ void main() {
               value: value,
               min: 1.0,
               max: 50.0,
-              onChanged: (v) {},
+              onChanged: (final double v) {},
             ),
           ),
         ),
@@ -121,7 +117,7 @@ void main() {
               value: value,
               min: 1.0,
               max: 50.0,
-              onChanged: (v) {},
+              onChanged: (final double v) {},
             ),
           ),
         ),
@@ -132,7 +128,7 @@ void main() {
       expect(find.text('Test: 25.0'), findsOneWidget);
     });
 
-    testWidgets('Value is clamped to min/max on init and update', (WidgetTester tester) async {
+    testWidgets('Value is clamped to min/max on init and update', (final WidgetTester tester) async {
       // Test clamping on initial build
       await tester.pumpWidget(
         MaterialApp(
@@ -142,7 +138,7 @@ void main() {
               value: 0.0, // Below min
               min: 5.0,
               max: 20.0,
-              onChanged: (v) {},
+              onChanged: (final double v) {},
             ),
           ),
         ),
@@ -159,7 +155,7 @@ void main() {
               value: 30.0, // Above max
               min: 5.0,
               max: 20.0,
-              onChanged: (v) {},
+              onChanged: (final double v) {},
             ),
           ),
         ),
@@ -177,7 +173,7 @@ void main() {
               value: 10.0,
               min: 5.0,
               max: 20.0,
-              onChanged: (v) {},
+              onChanged: (final double v) {},
             ),
           ),
         ),
@@ -186,7 +182,7 @@ void main() {
       expect(sliderWidget.value, 10.0);
 
       // Update with value below new min
-       await tester.pumpWidget(
+      await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: BrushSizePicker(
@@ -194,7 +190,7 @@ void main() {
               value: 3.0,
               min: 4.0, // New min
               max: 20.0,
-              onChanged: (v) {},
+              onChanged: (final double v) {},
             ),
           ),
         ),
@@ -206,14 +202,14 @@ void main() {
   });
 
   group('showBrushSizePicker Utility', () {
-    testWidgets('showBrushSizePicker calls showDialog with BrushSizePicker', (WidgetTester tester) async {
+    testWidgets('showBrushSizePicker calls showDialog with BrushSizePicker', (final WidgetTester tester) async {
       double changedValue = 0;
 
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             body: Builder(
-              builder: (context) {
+              builder: (final BuildContext context) {
                 return ElevatedButton(
                   onPressed: () {
                     showBrushSizePicker(
@@ -222,7 +218,7 @@ void main() {
                       value: 25.0,
                       min: 1.0,
                       max: 50.0,
-                      onChanged: (value) {
+                      onChanged: (final double value) {
                         changedValue = value;
                       },
                     );
@@ -248,7 +244,7 @@ void main() {
       expect(pickerInDialog.value, 25.0);
 
       // Simulate changing value in the dialog's picker
-      final sliderInDialog = find.descendant(of: find.byType(AlertDialog), matching: find.byType(Slider));
+      final Finder sliderInDialog = find.descendant(of: find.byType(AlertDialog), matching: find.byType(Slider));
       expect(sliderInDialog, findsOneWidget);
 
       // Directly call onChanged on the slider inside the dialog

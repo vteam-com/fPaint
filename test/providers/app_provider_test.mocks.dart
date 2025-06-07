@@ -39,24 +39,19 @@ class MockSharedPreferences extends _i1.Mock implements _i2.SharedPreferences {
           as Set<String>);
 
   @override
-  Object? get(String? key) =>
-      (super.noSuchMethod(Invocation.method(#get, [key])) as Object?);
+  Object? get(String? key) => (super.noSuchMethod(Invocation.method(#get, [key])) as Object?);
 
   @override
-  bool? getBool(String? key) =>
-      (super.noSuchMethod(Invocation.method(#getBool, [key])) as bool?);
+  bool? getBool(String? key) => (super.noSuchMethod(Invocation.method(#getBool, [key])) as bool?);
 
   @override
-  int? getInt(String? key) =>
-      (super.noSuchMethod(Invocation.method(#getInt, [key])) as int?);
+  int? getInt(String? key) => (super.noSuchMethod(Invocation.method(#getInt, [key])) as int?);
 
   @override
-  double? getDouble(String? key) =>
-      (super.noSuchMethod(Invocation.method(#getDouble, [key])) as double?);
+  double? getDouble(String? key) => (super.noSuchMethod(Invocation.method(#getDouble, [key])) as double?);
 
   @override
-  String? getString(String? key) =>
-      (super.noSuchMethod(Invocation.method(#getString, [key])) as String?);
+  String? getString(String? key) => (super.noSuchMethod(Invocation.method(#getString, [key])) as String?);
 
   @override
   bool containsKey(String? key) =>
@@ -68,8 +63,7 @@ class MockSharedPreferences extends _i1.Mock implements _i2.SharedPreferences {
 
   @override
   List<String>? getStringList(String? key) =>
-      (super.noSuchMethod(Invocation.method(#getStringList, [key]))
-          as List<String>?);
+      (super.noSuchMethod(Invocation.method(#getStringList, [key])) as List<String>?);
 
   @override
   _i3.Future<bool> setBool(String? key, bool? value) =>

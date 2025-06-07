@@ -151,6 +151,7 @@ class _ColorSelectorState extends State<ColorSelector> {
     final Pair<double, double> bothValues = getHueAndBrightnessFromColor(widget.color);
     hue = bothValues.first;
     brightness = bothValues.second;
+    // ignore: deprecated_member_use
     alpha = widget.color.alpha / 255.0; // Corrected: alpha should be 0.0-1.0
   }
 }
@@ -182,7 +183,7 @@ class HueGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant HueGradientPainter oldDelegate) {
+  bool shouldRepaint(covariant final HueGradientPainter oldDelegate) {
     return false; // Hue gradient is static, never needs repaint based on properties.
   }
 }
@@ -211,7 +212,7 @@ class BrightnessGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant BrightnessGradientPainter oldDelegate) {
+  bool shouldRepaint(covariant final BrightnessGradientPainter oldDelegate) {
     return oldDelegate.hue != hue;
   }
 }
@@ -242,7 +243,7 @@ class AlphaGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant AlphaGradientPainter oldDelegate) {
+  bool shouldRepaint(covariant final AlphaGradientPainter oldDelegate) {
     return oldDelegate.hue != hue || oldDelegate.brightness != brightness;
   }
 }

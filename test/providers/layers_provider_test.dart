@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/providers/layers_provider.dart';
-import 'package:fpaint/providers/layer_provider.dart'; // For LayerProvider itself
 import 'package:fpaint/models/canvas_resize.dart'; // Added for CanvasResizePosition
-import 'dart:ui' as ui; // For ui.Image if needed for mocks or layer operations
+import 'package:fpaint/providers/layers_provider.dart';
 
 // Mock LayerProvider if its methods are too complex or have external deps for these tests.
 // For now, we'll use real LayerProvider instances, assuming their basic state changes are testable.
@@ -23,7 +21,7 @@ void main() {
 
     // Reset properties to their initial default values as defined in LayersProvider
     layersProvider.size = const Size(800, 600); // Default size
-    layersProvider.scale = 1.0;                 // Default scale
+    layersProvider.scale = 1.0; // Default scale
     layersProvider.canvasResizeLockAspectRatio = true; // Default
     layersProvider.canvasResizePosition = CanvasResizePosition.center; // Default
 
@@ -58,8 +56,8 @@ void main() {
 
   group('Layer Operations: Adding', () {
     test('addTop creates a new layer at the top and selects it', () {
-      final initialLength = layersProvider.length;
-      final newLayer = layersProvider.addTop(name: 'TopLayer');
+      final int initialLength = layersProvider.length;
+      final LayerProvider newLayer = layersProvider.addTop(name: 'TopLayer');
       expect(layersProvider.length, initialLength + 1);
       expect(layersProvider.get(0), newLayer);
       expect(layersProvider.selectedLayerIndex, 0);
@@ -67,9 +65,9 @@ void main() {
     });
 
     test('addBottom creates a new layer at the bottom and selects it', () {
-      final initialLength = layersProvider.length;
-      final firstLayer = layersProvider.get(0);
-      final newLayer = layersProvider.addBottom('BottomLayer');
+      final int initialLength = layersProvider.length;
+      final LayerProvider firstLayer = layersProvider.get(0);
+      final LayerProvider newLayer = layersProvider.addBottom('BottomLayer');
 
       expect(layersProvider.length, initialLength + 1);
       // The new layer is added at the end, but selection might change.
@@ -84,7 +82,7 @@ void main() {
       layersProvider.addTop(name: 'Layer2'); // Now: [Layer2, Background]
       layersProvider.addTop(name: 'Layer3'); // Now: [Layer3, Layer2, Background]
 
-      final newLayer = layersProvider.insertAt(1, 'InsertedLayer'); // Insert between Layer3 and Layer2
+      final LayerProvider newLayer = layersProvider.insertAt(1, 'InsertedLayer'); // Insert between Layer3 and Layer2
       expect(layersProvider.length, 4);
       expect(layersProvider.get(1), newLayer);
       expect(layersProvider.selectedLayer, newLayer);
@@ -96,8 +94,8 @@ void main() {
 
   group('Layer Operations: Removing', () {
     test('remove a layer by instance', () {
-      final layerToRemove = layersProvider.addTop(name: 'ToRemove');
-      final initialLength = layersProvider.length;
+      final LayerProvider layerToRemove = layersProvider.addTop(name: 'ToRemove');
+      final int initialLength = layersProvider.length;
 
       final bool wasRemoved = layersProvider.remove(layerToRemove);
       expect(wasRemoved, isTrue);
@@ -109,20 +107,20 @@ void main() {
 
     test('removeByIndex removes a layer at specified index', () {
       layersProvider.addTop(name: 'Layer2');
-      final layerToKeep = layersProvider.addTop(name: 'LayerToKeep'); // This will be index 0
-      final initialLength = layersProvider.length;
+      final LayerProvider layerToKeep = layersProvider.addTop(name: 'LayerToKeep'); // This will be index 0
+      final int initialLength = layersProvider.length;
 
       layersProvider.removeByIndex(1); // Remove 'Layer2' which is now at index 1
 
       expect(layersProvider.length, initialLength - 1);
       expect(layersProvider.get(0), layerToKeep); // LayerToKeep should remain
-      expect(layersProvider.list.any((l) => l.name == 'Layer2'), isFalse);
+      expect(layersProvider.list.any((final LayerProvider l) => l.name == 'Layer2'), isFalse);
     });
 
-     test('remove last layer adjusts selection to new last layer', () {
+    test('remove last layer adjusts selection to new last layer', () {
       layersProvider.addTop(name: 'L1'); // Index 0
       layersProvider.addTop(name: 'L2'); // Index 0, L1 is 1
-      final layerToRemove = layersProvider.get(0); // L2
+      final LayerProvider layerToRemove = layersProvider.get(0); // L2
       layersProvider.remove(layerToRemove);
       expect(layersProvider.selectedLayerIndex, 0); // L1 is now 0
       expect(layersProvider.selectedLayer.name, 'L1');
@@ -144,7 +142,7 @@ void main() {
     });
 
     test('selectedLayerIndex setter handles out of bounds gracefully', () {
-      final initialIndex = layersProvider.selectedLayerIndex;
+      final int initialIndex = layersProvider.selectedLayerIndex;
       layersProvider.selectedLayerIndex = -1; // Invalid
       expect(layersProvider.selectedLayerIndex, initialIndex);
       layersProvider.selectedLayerIndex = layersProvider.length + 5; // Invalid
@@ -154,8 +152,8 @@ void main() {
 
   group('Layer Properties', () {
     test('layersToggleVisibility changes layer visibility', () {
-      final layer = layersProvider.selectedLayer;
-      final initialVisibility = layer.isVisible;
+      final LayerProvider layer = layersProvider.selectedLayer;
+      final bool initialVisibility = layer.isVisible;
       layersProvider.layersToggleVisibility(layer);
       expect(layer.isVisible, !initialVisibility);
     });
@@ -163,7 +161,7 @@ void main() {
     // Direct opacity, blend mode, name changes are on LayerProvider, not LayersProvider.
     // LayersProvider would trigger updates if these change on selectedLayer.
     test('Modifying selectedLayer name is reflected (test LayerProvider itself)', () {
-      final layer = layersProvider.selectedLayer;
+      final LayerProvider layer = layersProvider.selectedLayer;
       layer.name = 'New Name';
       // This doesn't automatically notify LayersProvider unless LayerProvider.name setter calls a callback
       // that LayersProvider listens to. Assuming LayerProvider.onThumnailChanged or similar might be it.
@@ -177,15 +175,14 @@ void main() {
     // These tests will be high-level, checking layer count and content if possible.
     // Proper testing of merge content would require image comparison or mock drawing actions.
     test('mergeLayers (mergeDown implies indexFrom > indexTo typically)', () {
-      final bottomLayer = layersProvider.get(0); // Background
-      final middleLayer = layersProvider.addTop(name: 'Middle'); // Index 0, Background is 1
-      final topLayer = layersProvider.addTop(name: 'Top');    // Index 0, Middle is 1, Background is 2
+      final LayerProvider middleLayer = layersProvider.addTop(name: 'Middle'); // Index 0, Background is 1
+      final LayerProvider topLayer = layersProvider.addTop(name: 'Top'); // Index 0, Middle is 1, Background is 2
 
       // Simulate some actions
-      topLayer.actionStack.add(UserActionDrawing(action: ActionType.brush, positions: [Offset.zero]));
-      middleLayer.actionStack.add(UserActionDrawing(action: ActionType.brush, positions: [Offset.zero]));
+      topLayer.actionStack.add(UserActionDrawing(action: ActionType.brush, positions: <Offset>[Offset.zero]));
+      middleLayer.actionStack.add(UserActionDrawing(action: ActionType.brush, positions: <Offset>[Offset.zero]));
 
-      final initialLength = layersProvider.length; // 3
+      final int initialLength = layersProvider.length; // 3
 
       // Merge 'Top' (index 0) down into 'Middle' (index 1)
       layersProvider.mergeLayers(0, 1);
@@ -202,9 +199,12 @@ void main() {
 
   group('Canvas Resizing', () {
     test('canvasResize updates size and offsets content', () {
-      final layer = layersProvider.selectedLayer;
+      final LayerProvider layer = layersProvider.selectedLayer;
       // Add a dummy action to check its offset later
-      final action = UserActionDrawing(action: ActionType.brush, positions: [const Offset(10,10), const Offset(20,20)]);
+      final UserActionDrawing action = UserActionDrawing(
+        action: ActionType.brush,
+        positions: <Offset>[const Offset(10, 10), const Offset(20, 20)],
+      );
       layer.appendDrawingAction(action);
 
       layersProvider.size = const Size(100, 100);
@@ -228,21 +228,27 @@ void main() {
       layersProvider.addTop(name: 'AnotherLayer').hasChanged = true;
 
       layersProvider.clearHasChanged();
-      for (final layer in layersProvider.list) {
+      for (final LayerProvider layer in layersProvider.list) {
         expect(layer.hasChanged, isFalse);
       }
     });
 
     test('offsetContent updates positions in all layers', () {
-      final layer1 = layersProvider.get(0);
-      final action1 = UserActionDrawing(action: ActionType.brush, positions: [const Offset(10,10)]);
+      final LayerProvider layer1 = layersProvider.get(0);
+      final UserActionDrawing action1 = UserActionDrawing(
+        action: ActionType.brush,
+        positions: <Offset>[const Offset(10, 10)],
+      );
       layer1.appendDrawingAction(action1);
 
-      final layer2 = layersProvider.addTop();
-      final action2 = UserActionDrawing(action: ActionType.brush, positions: [const Offset(20,20)]);
+      final LayerProvider layer2 = layersProvider.addTop();
+      final UserActionDrawing action2 = UserActionDrawing(
+        action: ActionType.brush,
+        positions: <Offset>[const Offset(20, 20)],
+      );
       layer2.appendDrawingAction(action2);
 
-      const offset = Offset(5, -5);
+      const Offset offset = Offset(5, -5);
       layersProvider.offsetContent(offset);
 
       expect(layer1.actionStack.first.positions.first, const Offset(10 + 5, 10 - 5));

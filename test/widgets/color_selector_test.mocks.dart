@@ -35,67 +35,52 @@ import 'package:shared_preferences/shared_preferences.dart' as _i9;
 // ignore_for_file: camel_case_types
 // ignore_for_file: subtype_of_sealed_class
 
-class _FakeAppPreferences_0 extends _i1.SmartFake
-    implements _i2.AppPreferences {
-  _FakeAppPreferences_0(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+class _FakeAppPreferences_0 extends _i1.SmartFake implements _i2.AppPreferences {
+  _FakeAppPreferences_0(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeOffset_1 extends _i1.SmartFake implements _i3.Offset {
-  _FakeOffset_1(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeOffset_1(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
-class _FakeLayersProvider_2 extends _i1.SmartFake
-    implements _i4.LayersProvider {
-  _FakeLayersProvider_2(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+class _FakeLayersProvider_2 extends _i1.SmartFake implements _i4.LayersProvider {
+  _FakeLayersProvider_2(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeFillModel_3 extends _i1.SmartFake implements _i5.FillModel {
-  _FakeFillModel_3(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeFillModel_3(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeSelectorModel_4 extends _i1.SmartFake implements _i6.SelectorModel {
-  _FakeSelectorModel_4(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeSelectorModel_4(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeUndoProvider_5 extends _i1.SmartFake implements _i7.UndoProvider {
-  _FakeUndoProvider_5(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeUndoProvider_5(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeColor_6 extends _i1.SmartFake implements _i3.Color {
-  _FakeColor_6(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeColor_6(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeRegion_7 extends _i1.SmartFake implements _i8.Region {
-  _FakeRegion_7(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeRegion_7(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
-class _FakeSharedPreferences_8 extends _i1.SmartFake
-    implements _i9.SharedPreferences {
-  _FakeSharedPreferences_8(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+class _FakeSharedPreferences_8 extends _i1.SmartFake implements _i9.SharedPreferences {
+  _FakeSharedPreferences_8(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeSize_9 extends _i1.SmartFake implements _i3.Size {
-  _FakeSize_9(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeSize_9(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeLayerProvider_10 extends _i1.SmartFake implements _i4.LayerProvider {
-  _FakeLayerProvider_10(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeLayerProvider_10(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeImage_11 extends _i1.SmartFake implements _i3.Image {
-  _FakeImage_11(Object parent, Invocation parentInvocation)
-    : super(parent, parentInvocation);
+  _FakeImage_11(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 /// A class which mocks [AppProvider].
@@ -199,9 +184,7 @@ class MockAppProvider extends _i1.Mock implements _i10.AppProvider {
           as _i4.ActionType);
 
   @override
-  double get brushSize =>
-      (super.noSuchMethod(Invocation.getter(#brushSize), returnValue: 0.0)
-          as double);
+  double get brushSize => (super.noSuchMethod(Invocation.getter(#brushSize), returnValue: 0.0) as double);
 
   @override
   _i4.BrushStyle get brushStyle =>
@@ -228,9 +211,7 @@ class MockAppProvider extends _i1.Mock implements _i10.AppProvider {
           as _i3.Color);
 
   @override
-  int get tolerance =>
-      (super.noSuchMethod(Invocation.getter(#tolerance), returnValue: 0)
-          as int);
+  int get tolerance => (super.noSuchMethod(Invocation.getter(#tolerance), returnValue: 0) as int);
 
   @override
   set canvasOffset(_i3.Offset? _canvasOffset) => super.noSuchMethod(
@@ -251,18 +232,16 @@ class MockAppProvider extends _i1.Mock implements _i10.AppProvider {
   );
 
   @override
-  set eyeDropPositionForBrush(_i3.Offset? _eyeDropPositionForBrush) =>
-      super.noSuchMethod(
-        Invocation.setter(#eyeDropPositionForBrush, _eyeDropPositionForBrush),
-        returnValueForMissingStub: null,
-      );
+  set eyeDropPositionForBrush(_i3.Offset? _eyeDropPositionForBrush) => super.noSuchMethod(
+    Invocation.setter(#eyeDropPositionForBrush, _eyeDropPositionForBrush),
+    returnValueForMissingStub: null,
+  );
 
   @override
-  set eyeDropPositionForFill(_i3.Offset? _eyeDropPositionForFill) =>
-      super.noSuchMethod(
-        Invocation.setter(#eyeDropPositionForFill, _eyeDropPositionForFill),
-        returnValueForMissingStub: null,
-      );
+  set eyeDropPositionForFill(_i3.Offset? _eyeDropPositionForFill) => super.noSuchMethod(
+    Invocation.setter(#eyeDropPositionForFill, _eyeDropPositionForFill),
+    returnValueForMissingStub: null,
+  );
 
   @override
   set selectorModel(_i6.SelectorModel? _selectorModel) => super.noSuchMethod(
@@ -313,9 +292,7 @@ class MockAppProvider extends _i1.Mock implements _i10.AppProvider {
   );
 
   @override
-  bool get hasListeners =>
-      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
-          as bool);
+  bool get hasListeners => (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false) as bool);
 
   @override
   void canvasClear(_i3.Size? size) => super.noSuchMethod(
@@ -469,13 +446,12 @@ class MockAppProvider extends _i1.Mock implements _i10.AppProvider {
   );
 
   @override
-  void appendLineFromLastUserAction(_i3.Offset? positionEndOfNewLine) =>
-      super.noSuchMethod(
-        Invocation.method(#appendLineFromLastUserAction, [
-          positionEndOfNewLine,
-        ]),
-        returnValueForMissingStub: null,
-      );
+  void appendLineFromLastUserAction(_i3.Offset? positionEndOfNewLine) => super.noSuchMethod(
+    Invocation.method(#appendLineFromLastUserAction, [
+      positionEndOfNewLine,
+    ]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void floodFillSolidAction(_i3.Offset? position) => super.noSuchMethod(
@@ -523,11 +499,10 @@ class MockAppProvider extends _i1.Mock implements _i10.AppProvider {
   );
 
   @override
-  void selectorCreationAdditionalPoint(_i3.Offset? position) =>
-      super.noSuchMethod(
-        Invocation.method(#selectorCreationAdditionalPoint, [position]),
-        returnValueForMissingStub: null,
-      );
+  void selectorCreationAdditionalPoint(_i3.Offset? position) => super.noSuchMethod(
+    Invocation.method(#selectorCreationAdditionalPoint, [position]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void selectorCreationEnd() => super.noSuchMethod(
@@ -636,9 +611,7 @@ class MockShellProvider extends _i1.Mock implements _i12.ShellProvider {
           as bool);
 
   @override
-  bool get showMenu =>
-      (super.noSuchMethod(Invocation.getter(#showMenu), returnValue: false)
-          as bool);
+  bool get showMenu => (super.noSuchMethod(Invocation.getter(#showMenu), returnValue: false) as bool);
 
   @override
   set loadedFileName(String? _loadedFileName) => super.noSuchMethod(
@@ -653,11 +626,10 @@ class MockShellProvider extends _i1.Mock implements _i12.ShellProvider {
   );
 
   @override
-  set canvasPlacement(_i14.CanvasAutoPlacement? _canvasPlacement) =>
-      super.noSuchMethod(
-        Invocation.setter(#canvasPlacement, _canvasPlacement),
-        returnValueForMissingStub: null,
-      );
+  set canvasPlacement(_i14.CanvasAutoPlacement? _canvasPlacement) => super.noSuchMethod(
+    Invocation.setter(#canvasPlacement, _canvasPlacement),
+    returnValueForMissingStub: null,
+  );
 
   @override
   set shellMode(_i12.ShellMode? _shellMode) => super.noSuchMethod(
@@ -678,9 +650,7 @@ class MockShellProvider extends _i1.Mock implements _i12.ShellProvider {
   );
 
   @override
-  bool get hasListeners =>
-      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
-          as bool);
+  bool get hasListeners => (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false) as bool);
 
   @override
   void update() => super.noSuchMethod(
@@ -722,9 +692,7 @@ class MockAppPreferences extends _i1.Mock implements _i2.AppPreferences {
   }
 
   @override
-  bool get isLoaded =>
-      (super.noSuchMethod(Invocation.getter(#isLoaded), returnValue: false)
-          as bool);
+  bool get isLoaded => (super.noSuchMethod(Invocation.getter(#isLoaded), returnValue: false) as bool);
 
   @override
   double get sidePanelDistance =>
@@ -735,9 +703,7 @@ class MockAppPreferences extends _i1.Mock implements _i2.AppPreferences {
           as double);
 
   @override
-  double get brushSize =>
-      (super.noSuchMethod(Invocation.getter(#brushSize), returnValue: 0.0)
-          as double);
+  double get brushSize => (super.noSuchMethod(Invocation.getter(#brushSize), returnValue: 0.0) as double);
 
   @override
   _i3.Color get brushColor =>
@@ -836,24 +802,19 @@ class MockSharedPreferences extends _i1.Mock implements _i9.SharedPreferences {
           as Set<String>);
 
   @override
-  Object? get(String? key) =>
-      (super.noSuchMethod(Invocation.method(#get, [key])) as Object?);
+  Object? get(String? key) => (super.noSuchMethod(Invocation.method(#get, [key])) as Object?);
 
   @override
-  bool? getBool(String? key) =>
-      (super.noSuchMethod(Invocation.method(#getBool, [key])) as bool?);
+  bool? getBool(String? key) => (super.noSuchMethod(Invocation.method(#getBool, [key])) as bool?);
 
   @override
-  int? getInt(String? key) =>
-      (super.noSuchMethod(Invocation.method(#getInt, [key])) as int?);
+  int? getInt(String? key) => (super.noSuchMethod(Invocation.method(#getInt, [key])) as int?);
 
   @override
-  double? getDouble(String? key) =>
-      (super.noSuchMethod(Invocation.method(#getDouble, [key])) as double?);
+  double? getDouble(String? key) => (super.noSuchMethod(Invocation.method(#getDouble, [key])) as double?);
 
   @override
-  String? getString(String? key) =>
-      (super.noSuchMethod(Invocation.method(#getString, [key])) as String?);
+  String? getString(String? key) => (super.noSuchMethod(Invocation.method(#getString, [key])) as String?);
 
   @override
   bool containsKey(String? key) =>
@@ -865,8 +826,7 @@ class MockSharedPreferences extends _i1.Mock implements _i9.SharedPreferences {
 
   @override
   List<String>? getStringList(String? key) =>
-      (super.noSuchMethod(Invocation.method(#getStringList, [key]))
-          as List<String>?);
+      (super.noSuchMethod(Invocation.method(#getStringList, [key])) as List<String>?);
 
   @override
   _i11.Future<bool> setBool(String? key, bool? value) =>
@@ -967,14 +927,10 @@ class MockLayersProvider extends _i1.Mock implements _i4.LayersProvider {
           as _i3.Size);
 
   @override
-  double get width =>
-      (super.noSuchMethod(Invocation.getter(#width), returnValue: 0.0)
-          as double);
+  double get width => (super.noSuchMethod(Invocation.getter(#width), returnValue: 0.0) as double);
 
   @override
-  double get height =>
-      (super.noSuchMethod(Invocation.getter(#height), returnValue: 0.0)
-          as double);
+  double get height => (super.noSuchMethod(Invocation.getter(#height), returnValue: 0.0) as double);
 
   @override
   bool get canvasResizeLockAspectRatio =>
@@ -985,9 +941,7 @@ class MockLayersProvider extends _i1.Mock implements _i4.LayersProvider {
           as bool);
 
   @override
-  double get scale =>
-      (super.noSuchMethod(Invocation.getter(#scale), returnValue: 0.0)
-          as double);
+  double get scale => (super.noSuchMethod(Invocation.getter(#scale), returnValue: 0.0) as double);
 
   @override
   _i14.CanvasResizePosition get canvasResizePosition =>
@@ -998,23 +952,16 @@ class MockLayersProvider extends _i1.Mock implements _i4.LayersProvider {
           as _i14.CanvasResizePosition);
 
   @override
-  int get length =>
-      (super.noSuchMethod(Invocation.getter(#length), returnValue: 0) as int);
+  int get length => (super.noSuchMethod(Invocation.getter(#length), returnValue: 0) as int);
 
   @override
-  bool get isEmpty =>
-      (super.noSuchMethod(Invocation.getter(#isEmpty), returnValue: false)
-          as bool);
+  bool get isEmpty => (super.noSuchMethod(Invocation.getter(#isEmpty), returnValue: false) as bool);
 
   @override
-  bool get isNotEmpty =>
-      (super.noSuchMethod(Invocation.getter(#isNotEmpty), returnValue: false)
-          as bool);
+  bool get isNotEmpty => (super.noSuchMethod(Invocation.getter(#isNotEmpty), returnValue: false) as bool);
 
   @override
-  bool get hasChanged =>
-      (super.noSuchMethod(Invocation.getter(#hasChanged), returnValue: false)
-          as bool);
+  bool get hasChanged => (super.noSuchMethod(Invocation.getter(#hasChanged), returnValue: false) as bool);
 
   @override
   int get selectedLayerIndex =>
@@ -1074,11 +1021,10 @@ class MockLayersProvider extends _i1.Mock implements _i4.LayersProvider {
   );
 
   @override
-  set canvasResizePosition(_i14.CanvasResizePosition? value) =>
-      super.noSuchMethod(
-        Invocation.setter(#canvasResizePosition, value),
-        returnValueForMissingStub: null,
-      );
+  set canvasResizePosition(_i14.CanvasResizePosition? value) => super.noSuchMethod(
+    Invocation.setter(#canvasResizePosition, value),
+    returnValueForMissingStub: null,
+  );
 
   @override
   set selectedLayerIndex(int? index) => super.noSuchMethod(
@@ -1087,9 +1033,7 @@ class MockLayersProvider extends _i1.Mock implements _i4.LayersProvider {
   );
 
   @override
-  bool get hasListeners =>
-      (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false)
-          as bool);
+  bool get hasListeners => (super.noSuchMethod(Invocation.getter(#hasListeners), returnValue: false) as bool);
 
   @override
   void update() => super.noSuchMethod(
@@ -1182,8 +1126,7 @@ class MockLayersProvider extends _i1.Mock implements _i4.LayersProvider {
 
   @override
   _i4.LayerProvider? getByName(String? name) =>
-      (super.noSuchMethod(Invocation.method(#getByName, [name]))
-          as _i4.LayerProvider?);
+      (super.noSuchMethod(Invocation.method(#getByName, [name])) as _i4.LayerProvider?);
 
   @override
   _i4.LayerProvider addTop({String? name}) =>
@@ -1208,11 +1151,10 @@ class MockLayersProvider extends _i1.Mock implements _i4.LayersProvider {
           as _i4.LayerProvider);
 
   @override
-  void insert(int? index, _i4.LayerProvider? layerToInsert) =>
-      super.noSuchMethod(
-        Invocation.method(#insert, [index, layerToInsert]),
-        returnValueForMissingStub: null,
-      );
+  void insert(int? index, _i4.LayerProvider? layerToInsert) => super.noSuchMethod(
+    Invocation.method(#insert, [index, layerToInsert]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   _i4.LayerProvider insertAt(int? index, [String? name]) =>
@@ -1252,11 +1194,10 @@ class MockLayersProvider extends _i1.Mock implements _i4.LayersProvider {
   );
 
   @override
-  void hideShowAllExcept(_i4.LayerProvider? exceptLayer, bool? show) =>
-      super.noSuchMethod(
-        Invocation.method(#hideShowAllExcept, [exceptLayer, show]),
-        returnValueForMissingStub: null,
-      );
+  void hideShowAllExcept(_i4.LayerProvider? exceptLayer, bool? show) => super.noSuchMethod(
+    Invocation.method(#hideShowAllExcept, [exceptLayer, show]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void evaluatTopColor() => super.noSuchMethod(
