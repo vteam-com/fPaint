@@ -4,9 +4,10 @@ import 'dart:typed_data';
 
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:web/web.dart' as web; // Add
+import 'package:web/web.dart' as web;
 
 /// Exports the current painter as a PNG image and triggers a download.
 ///
@@ -96,6 +97,19 @@ Future<void> saveAsOra(
   final List<int> image = await createOraAchive(layers);
   // Create a Blob from the image bytes
   downloadBlob(Uint8List.fromList(image), filePath);
+}
+
+Future<void> onExportAsTiff(
+  final LayersProvider layers, [
+  final String fileName = 'image.tiff',
+]) async {
+  final Uint8List pngBytes = await layers.capturePainterToImageBytes();
+  if (pngBytes.isEmpty) {
+    throw Exception('Failed to capture image bytes for TIFF export.');
+  }
+  final Uint8List tiffBytes = await convertToTiff(pngBytes);
+  downloadBlob(tiffBytes, fileName); // Use downloadBlob directly
+  layers.clearHasChanged();
 }
 
 /// Downloads a file represented by the given image bytes and file name.

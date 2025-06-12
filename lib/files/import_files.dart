@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -126,11 +127,12 @@ Future<void> onFileOpen(final BuildContext context) async {
 
       if (kIsWeb) {
         final Uint8List bytes = result.files.single.bytes!;
-        if (result.files.single.extension == 'ora') {
+        final String extension = result.files.single.extension?.toLowerCase() ?? '';
+        if (extension == 'ora') {
           await readOraFileFromBytes(layers, bytes);
-        } else if (isFileExtensionSupported(
-          result.files.single.extension ?? '',
-        )) {
+        } else if (extension == 'tif' || extension == 'tiff') {
+          await readTiffFileFromBytes(layers, bytes);
+        } else if (isFileExtensionSupported(extension)) {
           await readImageFileFromBytes(layers, bytes);
         }
       } else {
@@ -194,6 +196,8 @@ Future<bool> openFileFromPath({
       if (extension == 'ora') {
         // File with support for layers
         await readImageFromFilePathOra(layers, path);
+      } else if (extension == 'tif' || extension == 'tiff') {
+        await readTiffFromFilePath(layers, path);
       } else {
         // PNG, JPG, WEBP
         await readImageFromFilePath(layers, path);
@@ -226,8 +230,8 @@ final List<String> supportedImageFileExtensions = <String>[
   'ora',
   'png',
   // 'psd',
-  // 'tif',
-  // 'tiff',
+  'tif',
+  'tiff',
   'webp',
   'jpg',
   'jpeg',
