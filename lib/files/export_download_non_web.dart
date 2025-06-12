@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
@@ -158,5 +159,37 @@ Future<void> saveAsOra(
   if (filePath != null) {
     final List<int> encodedData = await createOraAchive(layers);
     await File(filePath).writeAsBytes(encodedData);
+  }
+}
+
+Future<void> onExportAsTiff(
+  final LayersProvider layers, [
+  final String fileName = 'image.tiff',
+]) async {
+  final String? filePath = await FilePicker.platform.saveFile(
+    dialogTitle: 'fPaint Save Image as TIFF',
+    initialDirectory: '.',
+    fileName: fileName,
+    type: FileType.custom,
+    allowedExtensions: <String>['tif', 'tiff'],
+    lockParentWindow: true,
+  );
+  if (filePath != null && filePath.isNotEmpty) {
+    await saveAsTiff(layers, filePath);
+  }
+}
+
+Future<void> saveAsTiff(
+  final LayersProvider layers,
+  final String? filePath,
+) async {
+  if (filePath != null) {
+    final Uint8List pngBytes = await layers.capturePainterToImageBytes();
+    if (pngBytes.isEmpty) {
+      throw Exception('Failed to capture image bytes for TIFF export.');
+    }
+    final Uint8List tiffBytes = await convertToTiff(pngBytes);
+    await File(filePath).writeAsBytes(tiffBytes);
+    layers.clearHasChanged();
   }
 }

@@ -59,6 +59,7 @@ digraph "" {
   "/lib/files/save.dart" [label="save"];
   "/lib/files/export_download_non_web.dart" [label="export_download_non_web"];
   "/lib/files/import_files.dart" [label="import_files"];
+  "/lib/files/file_tiff.dart" [label="file_tiff"];
   "/lib/pages/platforms_page.dart" [label="platforms_page"];
   "/lib/pages/settings_page.dart" [label="settings_page"];
   "/lib/main_screen.dart" [label="main_screen"];
@@ -193,6 +194,7 @@ digraph "" {
         "/lib/files/save.dart";
         "/lib/files/export_download_non_web.dart";
         "/lib/files/import_files.dart";
+        "/lib/files/file_tiff.dart";
       }
       subgraph "cluster~/lib/pages" {
         label="pages";
@@ -363,17 +365,21 @@ digraph "" {
   "/lib/files/xcf_reader.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/files/export_download_web.dart" -> "/lib/files/file_jpeg.dart";
   "/lib/files/export_download_web.dart" -> "/lib/files/file_ora.dart";
+  "/lib/files/export_download_web.dart" -> "/lib/files/file_tiff.dart";
   "/lib/files/export_download_web.dart" -> "/lib/panels/share_panel.dart";
   "/lib/files/export_download_web.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/files/file_ora.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/files/file_ora.dart" -> "/lib/providers/layers_provider.dart";
+  "/lib/files/save.dart" -> "/lib/files/file_tiff.dart";
   "/lib/files/save.dart" -> "/lib/providers/app_provider.dart";
   "/lib/files/save.dart" -> "/lib/providers/shell_provider.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/files/file_jpeg.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/files/file_ora.dart";
+  "/lib/files/export_download_non_web.dart" -> "/lib/files/file_tiff.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/panels/share_panel.dart";
   "/lib/files/export_download_non_web.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/files/import_files.dart" -> "/lib/files/file_ora.dart";
+  "/lib/files/import_files.dart" -> "/lib/files/file_tiff.dart";
   "/lib/files/import_files.dart" -> "/lib/helpers/image_helper.dart";
   "/lib/files/import_files.dart" -> "/lib/providers/app_provider.dart";
   "/lib/files/import_files.dart" -> "/lib/providers/shell_provider.dart";

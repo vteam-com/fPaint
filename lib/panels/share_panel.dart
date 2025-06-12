@@ -68,6 +68,14 @@ void sharePanel(final BuildContext context) {
                   onExportAsOra(layers);
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.download), // Or a more specific icon if available
+                title: textAction('image.TIFF'), // textAction is defined in this file
+                onTap: () {
+                  Navigator.pop(context);
+                  onExportAsTiff(layers); // This calls the function from the conditionally imported file
+                },
+              ),
             ],
           ),
         ),
