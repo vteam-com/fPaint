@@ -183,7 +183,7 @@ Future<bool> openFileFromPath({
     // Show unsupported format message
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('XCF format is not currently supported'),
+        content: Text('XCF files are not currently supported. Canvas will not be changed.'),
         duration: Duration(seconds: 3),
       ),
     );

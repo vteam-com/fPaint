@@ -48,7 +48,7 @@ class LayersProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Size _size = const Size(800, 600);
+  Size _size = const Size(1024, 768);
 
   /// Gets the size of the canvas.
   Size get size => _size;
