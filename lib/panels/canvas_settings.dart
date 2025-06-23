@@ -3,10 +3,23 @@ import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 
+/// TextEditingController for the width input field.
 final TextEditingController widthController = TextEditingController();
+
+/// TextEditingController for the height input field.
 final TextEditingController heightController = TextEditingController();
+
+/// Flag to ensure initialization logic is executed only once.
 bool initOnce = false;
 
+/// Displays a modal bottom sheet for adjusting canvas settings.
+///
+/// This function presents a user interface for modifying the canvas size,
+/// including width and height inputs, aspect ratio locking, and content alignment
+/// options. It allows users to resize the canvas while maintaining the content's
+/// positioning within the new dimensions.
+///
+/// The [context] parameter is the [BuildContext] used to display the modal.
 void showCanvasSettings(final BuildContext context) {
   initOnce = true;
   showModalBottomSheet<dynamic>(
@@ -50,24 +63,19 @@ void showCanvasSettings(final BuildContext context) {
                       controller: widthController,
                       onChanged: (final String value) {
                         if (layers.canvasResizeLockAspectRatio) {
-                          final double width = double.tryParse(value) ??
-                              double.tryParse(widthController.text)!;
+                          final double width = double.tryParse(value) ?? double.tryParse(widthController.text)!;
                           final double height = width / initialAspectRatio;
-                          heightController.value =
-                              TextEditingValue(text: height.toInt().toString());
+                          heightController.value = TextEditingValue(text: height.toInt().toString());
                         }
                       },
                     ),
                   ),
                   IconButton(
                     icon: Icon(
-                      layers.canvasResizeLockAspectRatio
-                          ? Icons.link
-                          : Icons.link_off,
+                      layers.canvasResizeLockAspectRatio ? Icons.link : Icons.link_off,
                     ),
                     onPressed: () {
-                      layers.canvasResizeLockAspectRatio =
-                          !layers.canvasResizeLockAspectRatio;
+                      layers.canvasResizeLockAspectRatio = !layers.canvasResizeLockAspectRatio;
                     },
                   ),
                   SizedBox(
@@ -82,8 +90,7 @@ void showCanvasSettings(final BuildContext context) {
                       controller: heightController,
                       onChanged: (final String value) {
                         if (layers.canvasResizeLockAspectRatio) {
-                          final double height = double.tryParse(value) ??
-                              double.tryParse(heightController.text)!;
+                          final double height = double.tryParse(value) ?? double.tryParse(heightController.text)!;
                           final double width = height * initialAspectRatio;
                           widthController.text = width.toInt().toString();
                         }
@@ -101,8 +108,7 @@ void showCanvasSettings(final BuildContext context) {
                   const Text('Content Alignment'),
                   NineGridSelector(
                     selectedPosition: layers.canvasResizePosition,
-                    onPositionSelected:
-                        (final CanvasResizePosition newPosition) {
+                    onPositionSelected: (final CanvasResizePosition newPosition) {
                       layers.canvasResizePosition = newPosition;
                     },
                   ),
@@ -112,10 +118,8 @@ void showCanvasSettings(final BuildContext context) {
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
                   onPressed: () {
-                    final double width =
-                        double.tryParse(widthController.text) ?? -1;
-                    final double height =
-                        double.tryParse(heightController.text) ?? -1;
+                    final double width = double.tryParse(widthController.text) ?? -1;
+                    final double height = double.tryParse(heightController.text) ?? -1;
                     if (width == -1 || height == -1) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

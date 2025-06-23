@@ -16,11 +16,11 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.3
+version: 1.1.0
 
 environment:
-  sdk: ">=3.6.1 <4.0.0"
-  flutter: ">=3.29.0"
+  sdk: ">=3.8.0"
+  flutter: ">=3.32.1"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -29,39 +29,39 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  archive: ^4.0.4
+  archive: ^4.0.7
   cupertino_icons: ^1.0.8
-  file_picker: ^9.2.1
+  file_picker: ^10.1.9
   flutter:
     sdk: flutter
-  flutter_svg: ^2.0.17
-  image: ^4.5.3
-  material_symbols_icons: ^4.2805.1
+  flutter_svg: ^2.1.0
+  image: ^4.5.4
+  material_symbols_icons: ^4.2815.0
   multi_split_view: ^3.6.0
-  pasteboard: ^0.3.0
+  pasteboard: ^0.4.0
   path_provider: ^2.0.7
-  provider: ^6.0.0
-  shared_preferences: ^2.5.2
+  provider: ^6.1.5
+  shared_preferences: ^2.5.3
   super_clipboard: ^0.8.24
   url_launcher: ^6.3.1
   web: ^1.1.0
+  window_manager: ^0.5.0
   xml: ^6.3.0
 
 dev_dependencies:
+  build_runner: ^2.4.10 # Use a recent version
+  coverage: ^1.8.0
   flutter_launcher_icons:
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
+  mockito: ^5.4.4 # Use a recent version
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
+  # For information on the generic Dart part of this file, see the
+  # following page: https://dart.dev/tools/pub/pubspec
 
-# The following section is specific to Flutter packages.
+  # The following section is specific to Flutter packages.
+  nested: any
 flutter:
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

@@ -23,11 +23,11 @@
         },
     },
     "files.exclude": {
-        "android/": true,
+        "android/": false,
         "ios/": false,
         "macos/": false,
         "windows/": true,
-        "linux/": true,
+        "linux/": false,
         "web/": false,
         "node_modules/": true,
         "build/": true,

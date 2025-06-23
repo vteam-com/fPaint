@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 ///
 /// The [name] parameter provides a tooltip for the button, and the [image]
 /// parameter specifies the icon to be displayed.
-
 class ToolPanelPicker extends StatelessWidget {
   const ToolPanelPicker({
     super.key,
@@ -18,9 +17,16 @@ class ToolPanelPicker extends StatelessWidget {
     required this.onPressed,
   });
 
+  /// The name of the tool, used for the tooltip.
   final String name;
+
+  /// The widget to display as the tool's icon.
   final Widget image;
+
+  /// A boolean indicating whether the tool panel is in minimal mode.
   final bool minimal;
+
+  /// The callback function to be executed when the tool is pressed.
   final VoidCallback onPressed;
 
   @override

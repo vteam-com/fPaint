@@ -61,8 +61,7 @@ void main() {
       );
     });
 
-    test('Fill with out of bounds coordinates returns original image',
-        () async {
+    test('Fill with out of bounds coordinates returns original image', () async {
       final ui.Image testImage = await createInputImage();
       // Flood fill top left corner
       ui.Image resultImage = await applyFloodFill(

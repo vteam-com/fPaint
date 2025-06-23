@@ -9,9 +9,12 @@ import 'package:super_clipboard/super_clipboard.dart';
 
 import 'color_helper.dart';
 
+/// Extracts the dominant colors from a given [image].
+///
+/// Returns a list of [ColorUsage] objects, each representing a color and its
+/// usage percentage in the image.
 Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
-  final ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
   if (byteData == null) {
     return <ColorUsage>[];
   }
@@ -25,10 +28,7 @@ Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
   for (int i = 0; i < length; i += 4) {
     final int alpha = pixels[i + 3];
     if (alpha > 0) {
-      final int packedColor = (alpha << 24) |
-          (pixels[i] << 16) |
-          (pixels[i + 1] << 8) |
-          pixels[i + 2];
+      final int packedColor = (alpha << 24) | (pixels[i] << 16) | (pixels[i + 1] << 8) | pixels[i + 2];
       colorCount[packedColor] = (colorCount[packedColor] ?? 0) + 1;
     }
   }
@@ -47,8 +47,7 @@ Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
 
   // Sort in-place
   colorUsages.sort(
-    (final ColorUsage a, final ColorUsage b) =>
-        b.percentage.compareTo(a.percentage),
+    (final ColorUsage a, final ColorUsage b) => b.percentage.compareTo(a.percentage),
   );
 
   if (colorUsages.length <= 20) {
@@ -59,6 +58,9 @@ Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
   return colorUsages.sublist(0, 20);
 }
 
+/// Converts a [Uint8List] of image data to a [ui.Image].
+///
+/// The [Uint8List] should contain the raw bytes of the image.
 Future<ui.Image> fromBytesToImage(final Uint8List list) async {
   // Decode the image
   final ui.Codec codec = await ui.instantiateImageCodec(list);
@@ -67,17 +69,23 @@ Future<ui.Image> fromBytesToImage(final Uint8List list) async {
   return frameInfo.image;
 }
 
+/// Converts a [ui.Image] to a [Uint8List] of raw RGBA data.
 Future<Uint8List?> convertImageToUint8List(final ui.Image image) async {
-  final ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
   return byteData!.buffer.asUint8List();
 }
 
+/// Converts a [ui.Image] to a list of strings, where each string represents a row of pixels.
+///
+/// Each pixel is represented as a hexadecimal string of its RGBA values.
 Future<List<String>> imageToListToString(final ui.Image image) async {
   final Uint8List? data = await convertImageToUint8List(image);
   return imageBytesListToString(data!, image.width);
 }
 
+/// Converts a [Uint8List] of image bytes to a list of strings, where each string represents a row of pixels.
+///
+/// Each pixel is represented as a hexadecimal string of its RGBA values.
 List<String> imageBytesListToString(final Uint8List bytes, final int width) {
   final int length = bytes.length;
   final List<String> rows = <String>[];
@@ -91,10 +99,12 @@ List<String> imageBytesListToString(final Uint8List bytes, final int width) {
         final int red = bytes[index];
         final int green = bytes[index + 1];
         final int blue = bytes[index + 2];
-        row.add('${red.toRadixString(16).padLeft(2, '0')}'
-            '${green.toRadixString(16).padLeft(2, '0')}'
-            '${blue.toRadixString(16).padLeft(2, '0')}'
-            '${alpha.toRadixString(16).padLeft(2, '0')}');
+        row.add(
+          '${red.toRadixString(16).padLeft(2, '0')}'
+          '${green.toRadixString(16).padLeft(2, '0')}'
+          '${blue.toRadixString(16).padLeft(2, '0')}'
+          '${alpha.toRadixString(16).padLeft(2, '0')}',
+        );
       }
     }
     rows.add(row.join('|'));
@@ -103,6 +113,10 @@ List<String> imageBytesListToString(final Uint8List bytes, final int width) {
   return rows;
 }
 
+/// Creates a [ui.Image] from a [Uint8List] of pixel data.
+///
+/// The [bytes] parameter is the raw pixel data, [width] is the width of the image,
+/// and [height] is the height of the image.
 Future<ui.Image> createImageFromBytes({
   required final Uint8List bytes,
   required final int width,
@@ -121,19 +135,19 @@ Future<ui.Image> createImageFromBytes({
   return completer.future;
 }
 
+/// Copies an image to the clipboard as a base64 encoded string.
 Future<void> copyImageBase64(final Uint8List imageBytes) async {
   final String base64String = base64Encode(imageBytes);
-  final ClipboardData clipboardData =
-      ClipboardData(text: 'data:image/png;base64,$base64String');
+  final ClipboardData clipboardData = ClipboardData(text: 'data:image/png;base64,$base64String');
   await Clipboard.setData(clipboardData);
 }
 
+/// Copies a [ui.Image] to the system clipboard as a PNG.
 Future<void> copyImageToClipboard(final ui.Image image) async {
   final SystemClipboard? clipboard = SystemClipboard.instance;
   if (clipboard != null) {
     final DataWriterItem item = DataWriterItem(suggestedName: 'fpaint.png');
-    final ByteData? data =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
     item.add(Formats.png(data!.buffer.asUint8List()));
     await clipboard.write(<DataWriterItem>[item]);
   } else {
@@ -141,6 +155,9 @@ Future<void> copyImageToClipboard(final ui.Image image) async {
   }
 }
 
+/// Retrieves an image from the clipboard.
+///
+/// Returns a [ui.Image] if an image is found on the clipboard, otherwise returns null.
 Future<ui.Image?> getImageFromClipboard() async {
   final Uint8List? bytes = await Pasteboard.image;
   if (bytes != null) {
@@ -153,6 +170,17 @@ Future<ui.Image?> getImageFromClipboard() async {
   return null;
 }
 
+/// Checks if the clipboard contains an image.
+///
+/// Returns true if the clipboard contains an image, otherwise returns false.
+Future<bool> clipboardHasImage() async {
+  final Uint8List? bytes = await Pasteboard.image;
+  return bytes != null;
+}
+
+/// Resizes a [ui.Image] to a new [Size].
+///
+/// The [image] parameter is the image to resize, and [newSize] is the desired size.
 Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);
@@ -171,6 +199,29 @@ Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
   return picture.toImage(newSize.width.toInt(), newSize.height.toInt());
 }
 
+/// Crops a [ui.Image] to a specified [Rect].
+///
+/// The [image] parameter is the image to crop, and [rect] is the rectangle to crop to.
+ui.Image cropImage(final ui.Image image, final Rect rect) {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+
+  final ui.Rect srcRect = Rect.fromLTWH(
+    rect.left,
+    rect.top,
+    rect.width,
+    rect.height,
+  );
+
+  final ui.Rect dstRect = Rect.fromLTWH(0, 0, rect.width, rect.height);
+
+  canvas.drawImageRect(image, srcRect, dstRect, ui.Paint());
+
+  final ui.Picture picture = recorder.endRecording();
+  return picture.toImageSync(rect.width.toInt(), rect.height.toInt());
+}
+
+/// A utility class that debounces a function call.
 class Debouncer {
   /// Creates a [Debouncer] with an optional [duration].
   /// Defaults to 1 second if no duration is provided.

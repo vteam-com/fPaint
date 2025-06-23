@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:fpaint/providers/shell_provider.dart';
 import 'package:xml/xml.dart';
 
 void main() {
@@ -24,11 +23,10 @@ void main() {
   });
 
   test('readOraFile throws exception for non-existent file', () async {
-    final ShellProvider shellProvider = ShellProvider();
     final LayersProvider layers = LayersProvider();
 
     expect(
-      () => readOraFile(shellProvider, layers, 'nonexistent.ora'),
+      () => readImageFromFilePathOra(layers, 'nonexistent.ora'),
       throwsException,
     );
   });
@@ -49,19 +47,17 @@ void main() {
       true,
     );
 
-    final ArchiveFile mimetypeFile =
-        archive.files.firstWhere((final ArchiveFile f) => f.name == 'mimetype');
+    final ArchiveFile mimetypeFile = archive.files.firstWhere((final ArchiveFile f) => f.name == 'mimetype');
     final String mimetype = String.fromCharCodes(mimetypeFile.content);
     expect(mimetype, 'image/openraster');
   });
 
   test('readOraFileFromBytes throws exception for invalid archive', () async {
-    final ShellProvider shellProvider = ShellProvider();
     final LayersProvider layers = LayersProvider();
     final Uint8List invalidBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
 
     expect(
-      () => readOraFileFromBytes(shellProvider, layers, invalidBytes),
+      () => readOraFileFromBytes(layers, invalidBytes),
       throwsException,
     );
   });
@@ -76,7 +72,7 @@ void main() {
         'src': 'data/layer-0.png',
         'x': 0,
         'y': 0,
-      }
+      },
     ];
 
     builder.element(
@@ -117,8 +113,7 @@ void main() {
 
     final ui.Picture picture = recorder.endRecording();
     final ui.Image image = await picture.toImage(1, 1);
-    final ByteData? byteData =
-        await image.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List mockPngFileAsBytes = byteData!.buffer.asUint8List();
 
     final Archive archive = Archive()

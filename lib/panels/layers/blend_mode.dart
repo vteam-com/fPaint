@@ -1,41 +1,33 @@
 import 'package:flutter/material.dart';
 
-final Map<String, Map<String, Object>> supportedBlendModes =
-    <String, Map<String, Object>>{
+final Map<String, Map<String, Object>> supportedBlendModes = <String, Map<String, Object>>{
   'Normal': <String, Object>{
     'flutterBlendMode': BlendMode.srcOver,
-    'description':
-        'Places the source image over the destination without blending.',
+    'description': 'Places the source image over the destination without blending.',
   },
   'Darken': <String, Object>{
     'flutterBlendMode': BlendMode.darken,
-    'description':
-        'Keeps the darker color of the source and destination pixels.',
+    'description': 'Keeps the darker color of the source and destination pixels.',
   },
   'Multiply': <String, Object>{
     'flutterBlendMode': BlendMode.multiply,
-    'description':
-        'Multiplies the source and destination colors, resulting in a darker output.',
+    'description': 'Multiplies the source and destination colors, resulting in a darker output.',
   },
   'Color Burn': <String, Object>{
     'flutterBlendMode': BlendMode.colorBurn,
-    'description':
-        'Darkens the destination by increasing contrast based on the source color.',
+    'description': 'Darkens the destination by increasing contrast based on the source color.',
   },
   'Lighten': <String, Object>{
     'flutterBlendMode': BlendMode.lighten,
-    'description':
-        'Keeps the lighter color of the source and destination pixels.',
+    'description': 'Keeps the lighter color of the source and destination pixels.',
   },
   'Screen': <String, Object>{
     'flutterBlendMode': BlendMode.screen,
-    'description':
-        'Multiplies the inverses of the source and destination, resulting in a lighter output.',
+    'description': 'Multiplies the inverses of the source and destination, resulting in a lighter output.',
   },
   'Color Dodge': <String, Object>{
     'flutterBlendMode': BlendMode.colorDodge,
-    'description':
-        'Brightens the destination by reducing contrast based on the source color.',
+    'description': 'Brightens the destination by reducing contrast based on the source color.',
   },
   'Linear Dodge (Add)': <String, Object>{
     'flutterBlendMode': BlendMode.plus,
@@ -43,38 +35,31 @@ final Map<String, Map<String, Object>> supportedBlendModes =
   },
   'Overlay': <String, Object>{
     'flutterBlendMode': BlendMode.overlay,
-    'description':
-        'Combines multiply and screen modes: darkens dark areas, and lightens light areas.',
+    'description': 'Combines multiply and screen modes: darkens dark areas, and lightens light areas.',
   },
   'Soft Light': <String, Object>{
     'flutterBlendMode': BlendMode.softLight,
-    'description':
-        'Softens the contrast by darkening or lightening the destination depending on the source.',
+    'description': 'Softens the contrast by darkening or lightening the destination depending on the source.',
   },
   'Hard Light': <String, Object>{
     'flutterBlendMode': BlendMode.hardLight,
-    'description':
-        'Applies multiply or screen based on the source color’s intensity, creating a strong contrast.',
+    'description': 'Applies multiply or screen based on the source color’s intensity, creating a strong contrast.',
   },
   'Hue': <String, Object>{
     'flutterBlendMode': BlendMode.hue,
-    'description':
-        'Uses the source’s hue and the destination’s saturation and luminance.',
+    'description': 'Uses the source’s hue and the destination’s saturation and luminance.',
   },
   'Saturation': <String, Object>{
     'flutterBlendMode': BlendMode.saturation,
-    'description':
-        'Uses the source’s saturation and the destination’s hue and luminance.',
+    'description': 'Uses the source’s saturation and the destination’s hue and luminance.',
   },
   'Color': <String, Object>{
     'flutterBlendMode': BlendMode.color,
-    'description':
-        'Uses the source’s hue and saturation, but keeps the destination’s luminance.',
+    'description': 'Uses the source’s hue and saturation, but keeps the destination’s luminance.',
   },
   'Luminosity': <String, Object>{
     'flutterBlendMode': BlendMode.luminosity,
-    'description':
-        'Uses the source’s luminance and the destination’s hue and saturation.',
+    'description': 'Uses the source’s luminance and the destination’s hue and saturation.',
   },
   // TODO
   //   'Linear Burn': {
@@ -104,11 +89,8 @@ Future<BlendMode> showBlendModeMenu({
           position.dx + 1,
           position.dy + 1,
         ),
-        items: supportedBlendModes.entries
-            .map((final MapEntry<String, Map<String, Object>> entry) {
-          final BlendMode menuFlutterBlendMode =
-              (entry.value['flutterBlendMode'] as BlendMode?) ??
-                  BlendMode.srcOver;
+        items: supportedBlendModes.entries.map((final MapEntry<String, Map<String, Object>> entry) {
+          final BlendMode menuFlutterBlendMode = (entry.value['flutterBlendMode'] as BlendMode?) ?? BlendMode.srcOver;
 
           return PopupMenuItem<BlendMode>(
             value: menuFlutterBlendMode,

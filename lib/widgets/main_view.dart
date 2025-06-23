@@ -2,18 +2,21 @@ import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as ui;
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
+import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
 /// The main view of the application, which is a stateful widget.
 /// This widget is responsible for managing the state of the main view,
 /// including handling pointer events and scaling/centering the canvas.
 class MainView extends StatefulWidget {
+  /// Creates a [MainView].
   const MainView({
     super.key,
   });
@@ -38,160 +41,197 @@ class MainViewState extends State<MainView> {
     return Stack(
       children: <Widget>[
         LayoutBuilder(
-          builder: (
-            final BuildContext context,
-            final BoxConstraints constraints,
-          ) {
-            final ShellProvider shellProvider = ShellProvider.of(context);
+          builder:
+              (
+                final BuildContext context,
+                final BoxConstraints constraints,
+              ) {
+                final ShellProvider shellProvider = ShellProvider.of(context);
 
-            // Fit/Center the canvas if requested
-            if (shellProvider.canvasPlacement == CanvasAutoPlacement.fit) {
-              appProvider.canvasFitToContainer(
-                containerWidth: constraints.maxWidth,
-                containerHeight: constraints.maxHeight,
-              );
-            }
-
-            return Listener(
-              onPointerSignal: (final PointerSignalEvent event) {
-                // print('onPointerSignal $event');
-                if (event is PointerScrollEvent) {
-                  _handleUserPanningTheCanvas(
-                    shellProvider,
-                    appProvider,
-                    Offset(-event.scrollDelta.dx, -event.scrollDelta.dy),
-                  );
-                } else {
-                  if (event is PointerScaleEvent) {
-                    _handleUserScalingTheCanvas(
-                      shellProvider,
-                      appProvider,
-                      event.localPosition,
-                      event.scale,
-                    );
-                  }
-                }
-              },
-
-              // Not call on touch screen device like iOS
-              // instead onPointerDown is used
-              onPointerPanZoomStart: (final PointerPanZoomStartEvent event) {
-                // print(
-                //   'Listener-onPointerPanZoomStart ${event.toString()}',
-                // );
-              },
-
-              //
-              // PAN and SCALE for Web, Linux & Windows
-              // this is not invoked for Touch devices and we skip MacOS, since trackpad behavior are received inthe onPointerSignal: event
-              //
-              onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
-                // print(
-                //   'Listener-onPointerPanZoomUpdate ${event.toString()}',
-                // );
-
-                if (event.scale == 1) {
-                  // Panning
-                  _handleUserPanningTheCanvas(
-                    shellProvider,
-                    appProvider,
-                    event.panDelta,
-                  );
-                } else {
-                  // Scaling
-                  _handleUserScalingTheCanvas(
-                    shellProvider,
-                    appProvider,
-                    event.localPosition,
-                    event.scale,
+                // Fit/Center the canvas if requested
+                if (shellProvider.canvasPlacement == CanvasAutoPlacement.fit) {
+                  appProvider.canvasFitToContainer(
+                    containerWidth: constraints.maxWidth,
+                    containerHeight: constraints.maxHeight,
                   );
                 }
-              },
 
-              onPointerPanZoomEnd: (final PointerPanZoomEndEvent event) {
-                // print(
-                //   'Listener-onPointerPanZoomEnd ${event.toString()}',
-                // );
-              },
+                return Listener(
+                  onPointerSignal: (final PointerSignalEvent event) {
+                    // print('onPointerSignal $event');
+                    if (event is PointerScrollEvent) {
+                      _handleUserPanningTheCanvas(
+                        shellProvider,
+                        appProvider,
+                        Offset(-event.scrollDelta.dx, -event.scrollDelta.dy),
+                      );
+                    } else {
+                      if (event is PointerScaleEvent) {
+                        _handleUserScalingTheCanvas(
+                          shellProvider,
+                          appProvider,
+                          event.localPosition,
+                          event.scale,
+                        );
+                      }
+                    }
+                  },
 
-              // Pointer DOWN
-              onPointerDown: (final PointerDownEvent event) {
-                // print('onPointerDown');
-                if (event.kind == PointerDeviceKind.touch) {
-                  _pointerPositions[event.pointer] = event.localPosition;
-                  _getDistanceBetweenTouchPoints();
+                  // Not call on touch screen device like iOS
+                  // instead onPointerDown is used
+                  onPointerPanZoomStart: (final PointerPanZoomStartEvent event) {
+                    // print(
+                    //   'Listener-onPointerPanZoomStart ${event.toString()}',
+                    // );
+                  },
 
-                  _activePointers.add(event.pointer);
+                  //
+                  // PAN and SCALE for Web, Linux & Windows
+                  // this is not invoked for Touch devices and we skip MacOS, since trackpad behavior are received inthe onPointerSignal: event
+                  //
+                  onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
+                    // print(
+                    //   'Listener-onPointerPanZoomUpdate ${event.toString()}',
+                    // );
 
-                  if (_activePointers.length == 2) {
-                    // Set the initial focal point between two fingers
-                    _baseDistance = _getDistanceBetweenTouchPoints();
-                  } else {
-                    if (event.buttons == 1 &&
-                        !appProvider.preferences.useApplePencil) {
+                    if (event.scale == 1) {
+                      // Panning
+                      _handleUserPanningTheCanvas(
+                        shellProvider,
+                        appProvider,
+                        event.panDelta,
+                      );
+                    } else {
+                      // Scaling
+                      _handleUserScalingTheCanvas(
+                        shellProvider,
+                        appProvider,
+                        event.localPosition,
+                        event.scale,
+                      );
+                    }
+                  },
+
+                  onPointerPanZoomEnd: (final PointerPanZoomEndEvent event) {
+                    // print(
+                    //   'Listener-onPointerPanZoomEnd ${event.toString()}',
+                    // );
+                  },
+
+                  // Pointer DOWN
+                  onPointerDown: (final PointerDownEvent event) {
+                    // print('onPointerDown');
+                    if (event.kind == PointerDeviceKind.touch) {
+                      _pointerPositions[event.pointer] = event.localPosition;
+                      _getDistanceBetweenTouchPoints();
+
+                      _activePointers.add(event.pointer);
+
+                      if (_activePointers.length == 2) {
+                        // Set the initial focal point between two fingers
+                        _baseDistance = _getDistanceBetweenTouchPoints();
+                      } else {
+                        if (event.buttons == 1 && !appProvider.preferences.useApplePencil) {
+                          _handlePointerStart(appProvider, event);
+                        }
+                      }
+                    } else {
                       _handlePointerStart(appProvider, event);
                     }
-                  }
-                } else {
-                  _handlePointerStart(appProvider, event);
-                }
-              },
+                  },
 
-              // Pointer MOVE
-              onPointerMove: (final PointerMoveEvent event) {
-                // print('Move');
-                if (event.kind == PointerDeviceKind.touch) {
-                  _pointerPositions[event.pointer] = event.localPosition;
-                  _getDistanceBetweenTouchPoints();
+                  // Pointer MOVE
+                  onPointerMove: (final PointerMoveEvent event) {
+                    // print('Move');
+                    if (event.kind == PointerDeviceKind.touch) {
+                      _pointerPositions[event.pointer] = event.localPosition;
+                      _getDistanceBetweenTouchPoints();
 
-                  if (_activePointers.length == 2) {
-                    _handleMultiTouchUpdate(event, appProvider, shellProvider);
-                  } else {
-                    if (event.buttons == 1 &&
-                        !appProvider.preferences.useApplePencil) {
+                      if (_activePointers.length == 2) {
+                        _handleMultiTouchUpdate(
+                          event,
+                          appProvider,
+                          shellProvider,
+                        );
+                      } else {
+                        if (event.buttons == 1 && !appProvider.preferences.useApplePencil) {
+                          _handlePointerMove(appProvider, event);
+                        }
+                      }
+                    } else {
                       _handlePointerMove(appProvider, event);
                     }
-                  }
-                } else {
-                  _handlePointerMove(appProvider, event);
-                }
-              },
+                  },
 
-              // Pointer UP/CANCEL/END
-              onPointerUp: (final PointerUpEvent event) {
-                if (event.kind == PointerDeviceKind.touch) {
-                  _pointerPositions.remove(event.pointer);
-                  _getDistanceBetweenTouchPoints(); // Recalculate distance
-                  _activePointers.remove(event.pointer);
-                  if (_activePointers.length < 2) {
-                    _baseDistance = 0.0; // Reset base distance
-                  } else {
-                    if (event.buttons == 1 &&
-                        !appProvider.preferences.useApplePencil) {
+                  // Pointer UP/CANCEL/END
+                  onPointerUp: (final PointerUpEvent event) {
+                    if (event.kind == PointerDeviceKind.touch) {
+                      _pointerPositions.remove(event.pointer);
+                      _getDistanceBetweenTouchPoints(); // Recalculate distance
+                      _activePointers.remove(event.pointer);
+                      if (_activePointers.length < 2) {
+                        _baseDistance = 0.0; // Reset base distance
+                      } else {
+                        if (event.buttons == 1 && !appProvider.preferences.useApplePencil) {
+                          _handlePointerEnd(appProvider, event);
+                        }
+                      }
+                    } else {
                       _handlePointerEnd(appProvider, event);
                     }
-                  }
-                } else {
-                  _handlePointerEnd(appProvider, event);
-                }
-              },
+                  },
 
-              onPointerCancel: (final PointerCancelEvent event) {
-                if (event.kind == PointerDeviceKind.touch) {
-                  _pointerPositions.remove(event.pointer);
-                  _getDistanceBetweenTouchPoints(); // Recalculate distance
-                  _activePointers.remove(event.pointer);
-                  if (_activePointers.length < 2) {
-                    _baseDistance = 0.0; // Reset base distance
-                  }
-                } else {
-                  _handlePointerEnd(appProvider, event);
-                }
+                  onPointerCancel: (final PointerCancelEvent event) {
+                    if (event.kind == PointerDeviceKind.touch) {
+                      _pointerPositions.remove(event.pointer);
+                      _getDistanceBetweenTouchPoints(); // Recalculate distance
+                      _activePointers.remove(event.pointer);
+                      if (_activePointers.length < 2) {
+                        _baseDistance = 0.0; // Reset base distance
+                      }
+                    } else {
+                      _handlePointerEnd(appProvider, event);
+                    }
+                  },
+                  child: _displayCanvas(appProvider),
+                );
               },
-              child: _displayCanvas(appProvider),
-            );
-          },
         ),
+
+        //
+        // Color selection from image
+        //
+        if (appProvider.eyeDropPositionForBrush != null)
+          MagnifyingEyeDropper(
+            layers: appProvider.layers,
+            pointerPosition: appProvider.eyeDropPositionForBrush!,
+            pixelPosition: appProvider.toCanvas(appProvider.eyeDropPositionForBrush!),
+            onColorPicked: (final Color color) async {
+              appProvider.brushColor = color;
+              appProvider.eyeDropPositionForBrush = null;
+              appProvider.update();
+            },
+            onClosed: () {
+              appProvider.eyeDropPositionForBrush = null;
+              appProvider.update();
+            },
+          ),
+
+        if (appProvider.eyeDropPositionForFill != null)
+          MagnifyingEyeDropper(
+            layers: appProvider.layers,
+            pointerPosition: appProvider.eyeDropPositionForFill!,
+            pixelPosition: appProvider.toCanvas(appProvider.eyeDropPositionForFill!),
+            onColorPicked: (final Color color) async {
+              appProvider.fillColor = color;
+              appProvider.eyeDropPositionForFill = null;
+              appProvider.update();
+            },
+            onClosed: () {
+              appProvider.eyeDropPositionForFill = null;
+              appProvider.update();
+            },
+          ),
 
         //
         // Selection Widget
@@ -204,8 +244,7 @@ class MainViewState extends State<MainView> {
             path2: appProvider.getPathAdjustToCanvasSizeAndPosition(
               appProvider.selectorModel.path2,
             ),
-            enableMoveAndResize:
-                appProvider.selectedAction == ActionType.selector,
+            enableMoveAndResize: appProvider.selectedAction == ActionType.selector,
             onDrag: (final Offset offset) {
               appProvider.selectorModel.translate(offset);
               appProvider.update();
@@ -234,6 +273,11 @@ class MainViewState extends State<MainView> {
     );
   }
 
+  /// Handles multi-touch events for scaling and panning.
+  ///
+  /// This method is called when multiple touch points are detected on the screen.
+  /// It calculates the scaling factor and panning offset based on the touch points
+  /// and updates the canvas accordingly.
   void _handleMultiTouchUpdate(
     final PointerMoveEvent event,
     final AppProvider appProvider,
@@ -275,6 +319,10 @@ class MainViewState extends State<MainView> {
     appProvider.update();
   }
 
+  /// Calculates the distance between two touch points.
+  ///
+  /// This method is called when multi-touch is active to determine the
+  /// distance between the two touch points.
   double _getDistanceBetweenTouchPoints() {
     if (_pointerPositions.length >= 2) {
       final List<Offset> positions = _pointerPositions.values.toList();
@@ -286,6 +334,10 @@ class MainViewState extends State<MainView> {
     }
   }
 
+  /// Handles user panning of the canvas.
+  ///
+  /// This method is called when the user pans the canvas using a mouse or
+  /// touch gesture. It updates the canvas offset based on the input delta.
   void _handleUserPanningTheCanvas(
     final ShellProvider shellProvider,
     final AppProvider appProvider,
@@ -316,6 +368,10 @@ class MainViewState extends State<MainView> {
     );
   }
 
+  /// Builds the canvas display widget.
+  ///
+  /// This method is responsible for creating the widget that displays the
+  /// canvas, applying the necessary transformations for panning and scaling.
   Widget _displayCanvas(final AppProvider appProvider) {
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -338,7 +394,11 @@ class MainViewState extends State<MainView> {
           ..scale(
             appProvider.layers.scale,
           ), // Use appProvider.layers.scale here
-        child: const CanvasPanel(),
+        child: SizedBox(
+          width: appProvider.layers.width,
+          height: appProvider.layers.height,
+          child: const CanvasPanel(),
+        ),
       ),
     );
   }
@@ -353,9 +413,27 @@ class MainViewState extends State<MainView> {
     final AppProvider appProvider,
     final PointerDownEvent event,
   ) async {
-    final ui.Offset adjustedPosition =
-        appProvider.toCanvas(event.localPosition);
+    final ui.Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
+
     if (event.buttons == 1 && _activePointerId == -1) {
+      //
+      // Pick Color for Brush
+      //
+      if (appProvider.eyeDropPositionForBrush != null) {
+        appProvider.layers.capturePainterToImage();
+        appProvider.eyeDropPositionForBrush = adjustedPosition;
+        return;
+      }
+
+      //
+      // Pick Color for Fill
+      //
+      if (appProvider.eyeDropPositionForFill != null) {
+        appProvider.layers.capturePainterToImage();
+        appProvider.eyeDropPositionForFill = adjustedPosition;
+        return;
+      }
+
       //
       // Remember what pointer/button the drawing started on
       //
@@ -446,6 +524,16 @@ class MainViewState extends State<MainView> {
     final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
 
     // debugPrint('DRAW MOVE ${details.buttons} P:${details.pointer}');
+    if (appProvider.eyeDropPositionForBrush != null) {
+      appProvider.eyeDropPositionForBrush = event.localPosition;
+      appProvider.update();
+      return;
+    }
+    if (appProvider.eyeDropPositionForFill != null) {
+      appProvider.eyeDropPositionForFill = event.localPosition;
+      appProvider.update();
+      return;
+    }
 
     if (event.buttons == 1 && _activePointerId == event.pointer) {
       // Update the Selector
@@ -467,8 +555,7 @@ class MainViewState extends State<MainView> {
         appProvider.appendLineFromLastUserAction(adjustedPosition);
       } else if (appProvider.selectedAction == ActionType.brush) {
         // Cumulate more points in the draw path on the selected layer
-        appProvider.layers.selectedLayer
-            .lastActionAppendPosition(position: adjustedPosition);
+        appProvider.layers.selectedLayer.lastActionAppendPosition(position: adjustedPosition);
         appProvider.update();
       } else {
         // Existing shape logic

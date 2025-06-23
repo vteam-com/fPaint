@@ -1,10 +1,13 @@
 // Imports
 import 'dart:math';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +23,6 @@ export 'package:fpaint/providers/layer_provider.dart';
 ///
 /// The class also provides methods for performing transformations on the layers, such as offsetting and scaling
 /// the layers, as well as a method to get the top color usage across all layers.
-
 class LayersProvider extends ChangeNotifier {
   factory LayersProvider() {
     return _instance;
@@ -32,33 +34,49 @@ class LayersProvider extends ChangeNotifier {
   }
   static final LayersProvider _instance = LayersProvider._internal();
 
+  /// Retrieves the [LayersProvider] instance from the given [BuildContext].
+  ///
+  /// The [listen] parameter determines whether the widget should rebuild when the
+  /// [LayersProvider]'s state changes.
   static LayersProvider of(
     final BuildContext context, {
     final bool listen = false,
-  }) =>
-      Provider.of<LayersProvider>(context, listen: listen);
+  }) => Provider.of<LayersProvider>(context, listen: listen);
 
+  /// Notifies listeners that the layers have been updated.
   void update() {
     notifyListeners();
   }
 
   Size _size = const Size(800, 600);
+
+  /// Gets the size of the canvas.
   Size get size => _size;
+
+  /// Sets the size of the canvas.
   set size(final Size size) {
     _size = size;
     _list.forEach((final LayerProvider layer) => layer.size = size);
+    notifyListeners(); // Add this line
   }
 
   ///-------------------------------------------
   /// Default canvas size
+
+  /// Gets the width of the canvas.
   double get width => this.size.width;
+
+  /// Gets the height of the canvas.
   double get height => this.size.height;
 
   ///-------------------------------------------
   /// canvasResizeLockAspectRatio
   bool _resizeLockAspectRatio = true;
+
+  /// Gets whether the canvas resize lock aspect ratio is enabled.
   bool get canvasResizeLockAspectRatio => _resizeLockAspectRatio;
 
+  /// Sets whether the canvas resize lock aspect ratio is enabled.
   set canvasResizeLockAspectRatio(final bool value) {
     _resizeLockAspectRatio = value;
     notifyListeners();
@@ -71,23 +89,34 @@ class LayersProvider extends ChangeNotifier {
   /// The scale value is clamped between 10% and 400% to ensure a valid range.
   /// Calling this method will notify any listeners of the [AppProvider] that the scale has changed.
   double _scale = 1;
+
+  /// Gets the scale of the canvas.
   double get scale => _scale;
+
+  /// Sets the scale of the canvas.
   set scale(final double value) {
     if (_scale != value) {
       _scale = value.clamp(10 / 100, 1000 / 100);
     }
   }
 
+  /// The cached image of the canvas.
+  ui.Image? cachedImage;
+
   //-------------------------------------------
   // Canvas Resize position
   CanvasResizePosition _canvasResizePosition = CanvasResizePosition.center;
 
+  /// Gets the canvas resize position.
   CanvasResizePosition get canvasResizePosition => _canvasResizePosition;
+
+  /// Sets the canvas resize position.
   set canvasResizePosition(final CanvasResizePosition value) {
     _canvasResizePosition = value;
     notifyListeners();
   } // center
 
+  /// Resizes the canvas.
   void canvasResize(
     final int width,
     final int height,
@@ -111,6 +140,7 @@ class LayersProvider extends ChangeNotifier {
     update();
   }
 
+  /// Adds a white background layer to the canvas.
   LayerProvider addWhiteBackgroundLayer() {
     final LayerProvider firstLayer = newLayer('Background');
     firstLayer.backgroundColor = Colors.white;
@@ -120,18 +150,29 @@ class LayersProvider extends ChangeNotifier {
 
   final List<LayerProvider> _list = <LayerProvider>[];
 
+  /// Clears all layers from the canvas.
   void clear() {
     _list.clear();
   }
 
+  /// Gets the number of layers in the canvas.
   int get length => _list.length;
+
+  /// Gets whether the canvas is empty.
   bool get isEmpty => _list.isEmpty;
+
+  /// Gets whether the canvas is not empty.
   bool get isNotEmpty => _list.isNotEmpty;
-  bool get hasChanged =>
-      _list.any((final LayerProvider layer) => layer.hasChanged);
+
+  /// Gets whether any of the layers have changed.
+  bool get hasChanged => _list.any((final LayerProvider layer) => layer.hasChanged);
 
   int _selectedLayerIndex = 0;
+
+  /// Gets the index of the selected layer.
   int get selectedLayerIndex => _selectedLayerIndex;
+
+  /// Sets the index of the selected layer.
   set selectedLayerIndex(final int index) {
     if (this.isIndexInRange(index)) {
       for (int i = 0; i < this.length; i++) {
@@ -145,30 +186,37 @@ class LayersProvider extends ChangeNotifier {
     }
   }
 
+  /// Gets the selected layer.
   LayerProvider get selectedLayer => this.get(this.selectedLayerIndex);
 
+  /// Toggles the visibility of a layer.
   void layersToggleVisibility(final LayerProvider layer) {
     layer.isVisible = !layer.isVisible;
     notifyListeners();
   }
 
+  /// Clears the hasChanged flag for all layers.
   void clearHasChanged() {
     for (final LayerProvider layer in _list) {
       layer.hasChanged = false;
     }
   }
 
-  bool isIndexInRange(final int indexLayer) =>
-      indexLayer >= 0 && indexLayer < _list.length;
+  /// Checks if the given index is within the range of the layer list.
+  bool isIndexInRange(final int indexLayer) => indexLayer >= 0 && indexLayer < _list.length;
+
+  /// Gets the index of the given layer.
   int getLayerIndex(final LayerProvider layer) {
     return _list.indexOf(layer);
   }
 
+  /// Gets the layer at the given index.
   LayerProvider get(final int index) {
     ensureLayerAtIndex(index);
     return _list[index];
   }
 
+  /// Creates a new layer with the given name.
   LayerProvider newLayer(final String name) {
     return LayerProvider(
       name: name,
@@ -177,22 +225,25 @@ class LayersProvider extends ChangeNotifier {
     );
   }
 
+  /// Ensures that a layer exists at the given index.
   void ensureLayerAtIndex(final int index) {
     while (_list.length <= index) {
       _list.add(newLayer('Layer ${_list.length + 1}'));
     }
   }
 
+  /// Gets a layer by its name.
   LayerProvider? getByName(final String name) {
-    return _list
-        .findFirstMatch((final LayerProvider layer) => layer.name == name);
+    return _list.findFirstMatch((final LayerProvider layer) => layer.name == name);
   }
 
-  LayerProvider addTop([final String? name]) => this.insertAt(0, name);
+  /// Adds a layer to the top of the canvas.
+  LayerProvider addTop({final String? name}) => this.insertAt(0, name);
 
-  LayerProvider addBottom([final String? name]) =>
-      this.insertAt(this.length, name);
+  /// Adds a layer to the bottom of the canvas.
+  LayerProvider addBottom([final String? name]) => this.insertAt(this.length, name);
 
+  /// Inserts a layer at the given index.
   void insert(final int index, final LayerProvider layerToInsert) {
     if (isIndexInRange(index)) {
       _list.insert(index, layerToInsert);
@@ -201,6 +252,7 @@ class LayersProvider extends ChangeNotifier {
     }
   }
 
+  /// Inserts a new layer at the given index.
   LayerProvider insertAt(final int index, [String? name]) {
     name ??= 'Layer${this.length}';
     final LayerProvider layer = newLayer(name);
@@ -210,19 +262,21 @@ class LayersProvider extends ChangeNotifier {
     return layer;
   }
 
+  /// Removes a layer from the canvas.
   bool remove(final LayerProvider layer) {
     final bool wasRemoved = _list.remove(layer);
-    this.selectedLayerIndex =
-        (this.selectedLayerIndex > 0 ? this.selectedLayerIndex - 1 : 0);
+    this.selectedLayerIndex = (this.selectedLayerIndex > 0 ? this.selectedLayerIndex - 1 : 0);
     return wasRemoved;
   }
 
+  /// Removes a layer from the canvas by its index.
   void removeByIndex(final int index) {
     if (isIndexInRange(index)) {
       _list.removeAt(index);
     }
   }
 
+  /// Merges two layers together.
   void mergeLayers(final int indexFrom, final int indexTo) {
     if (indexFrom == indexTo) {
       // nothing to merge
@@ -236,8 +290,7 @@ class LayersProvider extends ChangeNotifier {
 
     final LayerProvider layerTo = this.get(indexTo);
 
-    final List<UserActionDrawing> actionsToAppend =
-        List<UserActionDrawing>.from(layerFrom.actionStack);
+    final List<UserActionDrawing> actionsToAppend = List<UserActionDrawing>.from(layerFrom.actionStack);
 
     final int numberOfActionAdded = actionsToAppend.length;
 
@@ -273,14 +326,17 @@ class LayersProvider extends ChangeNotifier {
     );
   }
 
+  /// Gets the list of layers.
   List<LayerProvider> get list => _list;
 
+  /// Offsets the content of all layers by the given offset.
   void offsetContent(final Offset offset) {
     for (final LayerProvider layer in _list) {
       layer.offset(offset);
     }
   }
 
+  /// Hides or shows all layers except the given layer.
   void hideShowAllExcept(final LayerProvider exceptLayer, final bool show) {
     for (final LayerProvider layer in _list) {
       if (layer == exceptLayer) {
@@ -293,11 +349,13 @@ class LayersProvider extends ChangeNotifier {
 
   //-------------------------
   // Top Colors used
+  /// The list of top colors used in the canvas.
   List<ColorUsage> topColors = <ColorUsage>[
     ColorUsage(Colors.white, 1),
     ColorUsage(Colors.black, 1),
   ];
 
+  /// Evaluates the top colors used in the canvas.
   void evaluatTopColor() {
     this.getTopColorUsed().then((final List<ColorUsage> topColorsFound) {
       topColors = topColorsFound;
@@ -333,10 +391,73 @@ class LayersProvider extends ChangeNotifier {
     }
 
     topColors.sort(
-      (final ColorUsage a, final ColorUsage b) =>
-          b.percentage.compareTo(a.percentage),
+      (final ColorUsage a, final ColorUsage b) => b.percentage.compareTo(a.percentage),
     );
     topColors = topColors.take(20).toList();
     return topColors;
+  }
+
+  /// Captures the canvas panel to an image.
+  Future<ui.Image> capturePainterToImage() async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    // Draw the custom painter on the canvas
+    final CanvasPanelPainter painter = CanvasPanelPainter(this);
+
+    painter.paint(canvas, this.size);
+
+    // End the recording and get the picture
+    final ui.Picture picture = recorder.endRecording();
+
+    // Convert the picture to an image
+    this.cachedImage = await picture.toImage(
+      this.size.width.toInt(),
+      this.size.height.toInt(),
+    );
+
+    return this.cachedImage!;
+  }
+
+  /// Captures the canvas panel to an image and returns the image bytes.
+  Future<Uint8List> capturePainterToImageBytes() async {
+    final ui.Image image = await capturePainterToImage();
+    // Convert the image to byte data (e.g., PNG)
+    final ByteData? byteData = await image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+
+    return byteData!.buffer.asUint8List();
+  }
+
+  /// Gets the color at the given offset.
+  Future<Color?> getColorAtOffset(final Offset offset) async {
+    try {
+      final ui.Image image = await capturePainterToImage();
+
+      // Ensure coordinates are within bounds
+      final int x = offset.dx.clamp(0, image.width - 1).toInt();
+      final int y = offset.dy.clamp(0, image.height - 1).toInt();
+
+      // Convert the image to ByteData in the correct format
+      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+
+      if (byteData == null) {
+        return null;
+      }
+
+      // Calculate pixel index (4 bytes per pixel: RGBA)
+      final int pixelIndex = (y * image.width + x) * 4;
+
+      // Extract RGBA values
+      final int r = byteData.getUint8(pixelIndex);
+      final int g = byteData.getUint8(pixelIndex + 1);
+      final int b = byteData.getUint8(pixelIndex + 2);
+      final int a = byteData.getUint8(pixelIndex + 3);
+
+      return Color.fromARGB(a, r, g, b);
+    } catch (error) {
+      return null;
+    }
   }
 }

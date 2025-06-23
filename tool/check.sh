@@ -1,13 +1,14 @@
 #!/bin/sh
 echo --- Analyze
 
+dart format .
+
 dart analyze 
 dart fix --apply
 
 flutter analyze
 
-dart format .
 
 flutter test
 
-tools/graph.sh
+tool/graph.sh

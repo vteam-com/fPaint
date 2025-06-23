@@ -4,14 +4,19 @@ import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
+/// A widget that allows the user to select a color using HSV sliders.
 class ColorSelector extends StatefulWidget {
+  /// Creates a [ColorSelector].
   const ColorSelector({
     required this.color,
     required this.onColorChanged,
     super.key,
   });
 
+  /// The current color.
   final Color color;
+
+  /// A callback that is called when the selected color changes.
   final void Function(Color) onColorChanged;
 
   @override
@@ -79,8 +84,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                         if (brightness == 0 || brightness == 1) {
                           brightness = 0.5;
                         }
-                        widget
-                            .onColorChanged(hsvToColor(hue, brightness, alpha));
+                        widget.onColorChanged(hsvToColor(hue, brightness, alpha));
                       });
                     },
                   ),
@@ -99,8 +103,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                     onChanged: (final double value) {
                       setState(() {
                         brightness = value;
-                        widget
-                            .onColorChanged(hsvToColor(hue, brightness, alpha));
+                        widget.onColorChanged(hsvToColor(hue, brightness, alpha));
                       });
                     },
                   ),
@@ -143,15 +146,17 @@ class _ColorSelectorState extends State<ColorSelector> {
     );
   }
 
+  /// Converts the input color to HSV values.
   void fromInputColorToHueBrightnessAndAlpha() {
-    final Pair<double, double> bothValues =
-        getHueAndBrightnessFromColor(widget.color);
+    final Pair<double, double> bothValues = getHueAndBrightnessFromColor(widget.color);
     hue = bothValues.first;
     brightness = bothValues.second;
-    alpha = widget.color.a.toDouble();
+    // ignore: deprecated_member_use
+    alpha = widget.color.alpha / 255.0; // Corrected: alpha should be 0.0-1.0
   }
 }
 
+/// Paints a hue gradient on a canvas.
 class HueGradientPainter extends CustomPainter {
   @override
   void paint(final Canvas canvas, final Size size) {
@@ -178,14 +183,17 @@ class HueGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final CustomPainter oldDelegate) {
-    return false;
+  bool shouldRepaint(covariant final HueGradientPainter oldDelegate) {
+    return false; // Hue gradient is static, never needs repaint based on properties.
   }
 }
 
+/// Paints a brightness gradient on a canvas.
 class BrightnessGradientPainter extends CustomPainter {
+  /// Creates a [BrightnessGradientPainter].
   BrightnessGradientPainter({required this.hue});
 
+  /// The hue of the gradient.
   final double hue;
 
   @override
@@ -204,15 +212,20 @@ class BrightnessGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final CustomPainter oldDelegate) {
-    return true; // We want to repaint when the hue changes
+  bool shouldRepaint(covariant final BrightnessGradientPainter oldDelegate) {
+    return oldDelegate.hue != hue;
   }
 }
 
+/// Paints an alpha gradient on a canvas.
 class AlphaGradientPainter extends CustomPainter {
+  /// Creates an [AlphaGradientPainter].
   AlphaGradientPainter({required this.hue, required this.brightness});
 
+  /// The hue of the gradient.
   final double hue;
+
+  /// The brightness of the gradient.
   final double brightness;
 
   @override
@@ -230,8 +243,8 @@ class AlphaGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final CustomPainter oldDelegate) {
-    return true; // We want to repaint when the hue or brightness changes
+  bool shouldRepaint(covariant final AlphaGradientPainter oldDelegate) {
+    return oldDelegate.hue != hue || oldDelegate.brightness != brightness;
   }
 }
 
@@ -265,6 +278,7 @@ void showColorPicker({
   );
 }
 
+/// Converts HSV values to a Color.
 Color hsvToColor(
   final double hue,
   final double brightness,

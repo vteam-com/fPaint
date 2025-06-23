@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
+/// Possition for anchor
 enum NineGridHandle {
   left,
   right,
@@ -14,6 +15,13 @@ enum NineGridHandle {
   center,
 }
 
+/// Expands the given [path] in the direction specified by [anchorPosition]
+/// by the amount specified in [expansionOffset].
+///
+/// The [anchorPosition] determines which point of the path's bounding box
+/// is used as the anchor for the expansion.
+///
+/// The [expansionOffset] specifies the amount to expand the path in the x and y directions.
 Path expandPathInDirectionWithOffset(
   final Path path,
   final Offset expansionOffset,
@@ -103,6 +111,11 @@ Path expandPathInDirectionWithOffset(
   return adjustedPath.transform(scaleMatrix.storage);
 }
 
+/// Scales the [inputSize] to fit within the specified [maxWith] and [maxHeight],
+/// while maintaining the aspect ratio.
+///
+/// If both [maxWith] and [maxHeight] are null, the original [inputSize] is returned.
+/// If only one of [maxWith] or [maxHeight] is provided, the size is scaled to fit within that dimension while maintaining aspect ratio.
 Size scaleSizeTo(
   final Size inputSize, {
   final double? maxWith,
