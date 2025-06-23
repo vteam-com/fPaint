@@ -32,7 +32,8 @@ void showCanvasSettings(final BuildContext context) {
         initOnce = false;
       }
 
-      final double initialAspectRatio = layers.size.width / layers.size.height;
+      // Use a mutable variable for initialAspectRatio, local to the builder
+      double initialAspectRatio = (layers.size.height != 0) ? (layers.size.width / layers.size.height) : 1.0;
 
       return SafeArea(
         child: Padding(
@@ -63,9 +64,10 @@ void showCanvasSettings(final BuildContext context) {
                       controller: widthController,
                       onChanged: (final String value) {
                         if (layers.canvasResizeLockAspectRatio) {
-                          final double width = double.tryParse(value) ?? double.tryParse(widthController.text)!;
-                          final double height = width / initialAspectRatio;
-                          heightController.value = TextEditingValue(text: height.toInt().toString());
+                          if (initialAspectRatio == 0) return; // Avoid division by zero
+                          final double currentParsedWidth = double.tryParse(value) ?? double.tryParse(widthController.text) ?? layers.size.width;
+                          final double newHeight = currentParsedWidth / initialAspectRatio;
+                          heightController.value = TextEditingValue(text: newHeight.toInt().toString());
                         }
                       },
                     ),
@@ -75,7 +77,17 @@ void showCanvasSettings(final BuildContext context) {
                       layers.canvasResizeLockAspectRatio ? Icons.link : Icons.link_off,
                     ),
                     onPressed: () {
-                      layers.canvasResizeLockAspectRatio = !layers.canvasResizeLockAspectRatio;
+                      final bool newLockState = !layers.canvasResizeLockAspectRatio;
+                      if (newLockState) {
+                        // Attempt to recalculate aspect ratio from current text field values when locking
+                        final double? currentWidthFromField = double.tryParse(widthController.text);
+                        final double? currentHeightFromField = double.tryParse(heightController.text);
+                        if (currentWidthFromField != null && currentHeightFromField != null && currentWidthFromField > 0 && currentHeightFromField > 0) {
+                          initialAspectRatio = currentWidthFromField / currentHeightFromField;
+                        }
+                        // If parsing fails or values are non-positive, initialAspectRatio remains as it was.
+                      }
+                      layers.canvasResizeLockAspectRatio = newLockState;
                     },
                   ),
                   SizedBox(
@@ -90,9 +102,9 @@ void showCanvasSettings(final BuildContext context) {
                       controller: heightController,
                       onChanged: (final String value) {
                         if (layers.canvasResizeLockAspectRatio) {
-                          final double height = double.tryParse(value) ?? double.tryParse(heightController.text)!;
-                          final double width = height * initialAspectRatio;
-                          widthController.text = width.toInt().toString();
+                          final double currentParsedHeight = double.tryParse(value) ?? double.tryParse(heightController.text) ?? layers.size.height;
+                          final double newWidth = currentParsedHeight * initialAspectRatio;
+                          widthController.text = newWidth.toInt().toString();
                         }
                       },
                     ),
@@ -123,10 +135,17 @@ void showCanvasSettings(final BuildContext context) {
                     if (width == -1 || height == -1) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Invalid image size'),
+                          content: Text('Invalid image size: Dimensions must be numbers.'),
                         ),
                       );
-                    } else {
+                    } else if (width <= 0 || height <= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Canvas dimensions must be positive.'),
+                        ),
+                      );
+                    }
+                    else {
                       layers.canvasResize(
                         width.toInt(),
                         height.toInt(),
