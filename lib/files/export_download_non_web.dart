@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
@@ -41,6 +42,17 @@ Future<void> onExportAsPng(
   }
 }
 
+/// Saves the current painter content as a PNG image file.
+///
+/// Captures the painter's current state as image bytes and writes them
+/// to the specified file path.
+///
+/// Parameters:
+/// - `layers`: The `LayersProvider` containing the current painter state.
+/// - `filePath`: The destination file path where the PNG image will be saved.
+///
+/// Returns:
+/// - A `Future<void>` that completes when the image has been written to disk.
 Future<void> saveAsPng(
   final LayersProvider layers,
   final String filePath,
@@ -80,6 +92,18 @@ Future<void> onExportAsJpeg(
   await saveAsJpeg(layers, filePath);
 }
 
+/// Saves the current painter content as a JPEG image file.
+///
+/// Captures the painter's current state as image bytes, converts them to JPEG format,
+/// and writes the resulting bytes to the specified file path.
+///
+/// Parameters:
+/// - `layers`: The `LayersProvider` containing the current painter state.
+/// - `filePath`: The destination file path where the JPEG image will be saved.
+///
+/// Returns:
+/// - A `Future<void>` that completes when the image has been written to disk.
+/// Only saves the file if a valid file path is provided.
 Future<void> saveAsJpeg(
   final LayersProvider layers,
   final String? filePath,
@@ -116,6 +140,18 @@ Future<void> onExportAsOra(
   await saveAsOra(layers, filePath);
 }
 
+/// Saves the current project as an ORA (OpenRaster) file.
+///
+/// Converts the current project layers into an ORA file format and writes
+/// the encoded data to the specified file path.
+///
+/// Parameters:
+/// - `layers`: The `LayersProvider` containing the current project layers.
+/// - `filePath`: The destination file path where the ORA file will be saved.
+///
+/// Returns:
+/// - A `Future<void>` that completes when the ORA file has been written to disk.
+/// Only saves the file if a valid file path is provided.
 Future<void> saveAsOra(
   final LayersProvider layers,
   final String? filePath,
@@ -123,5 +159,37 @@ Future<void> saveAsOra(
   if (filePath != null) {
     final List<int> encodedData = await createOraAchive(layers);
     await File(filePath).writeAsBytes(encodedData);
+  }
+}
+
+Future<void> onExportAsTiff(
+  final LayersProvider layers, [
+  final String fileName = 'image.tiff',
+]) async {
+  final String? filePath = await FilePicker.platform.saveFile(
+    dialogTitle: 'fPaint Save Image as TIFF',
+    initialDirectory: '.',
+    fileName: fileName,
+    type: FileType.custom,
+    allowedExtensions: <String>['tif', 'tiff'],
+    lockParentWindow: true,
+  );
+  if (filePath != null && filePath.isNotEmpty) {
+    await saveAsTiff(layers, filePath);
+  }
+}
+
+Future<void> saveAsTiff(
+  final LayersProvider layers,
+  final String? filePath,
+) async {
+  if (filePath != null) {
+    final Uint8List pngBytes = await layers.capturePainterToImageBytes();
+    if (pngBytes.isEmpty) {
+      throw Exception('Failed to capture image bytes for TIFF export.');
+    }
+    final Uint8List tiffBytes = await convertToTiff(pngBytes);
+    await File(filePath).writeAsBytes(tiffBytes);
+    layers.clearHasChanged();
   }
 }

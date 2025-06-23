@@ -6,6 +6,23 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 
+/// Applies a flood fill algorithm to an image, replacing a region of similar colors with a new color.
+///
+/// The flood fill starts at the specified coordinates (x, y) in the [image]. It identifies a
+/// connected region of pixels that are within the specified [tolerance] of the color at the
+/// starting point. This region is then filled with the [newColor].
+///
+/// Parameters:
+///   [image]     The image to apply the flood fill to.
+///   [x]         The x-coordinate of the starting point for the flood fill.
+///   [y]         The y-coordinate of the starting point for the flood fill.
+///   [tolerance] The tolerance (as a percentage) for color matching. A higher tolerance
+///               value means that colors further away from the starting color will be included
+///               in the flood fill region.
+///   [newColor]  The color to fill the flood fill region with.
+///
+/// Returns:
+///   A new [ui.Image] with the flood fill applied.
 Future<ui.Image> applyFloodFill({
   required final ui.Image image,
   required final int x,
@@ -29,6 +46,22 @@ Future<ui.Image> applyFloodFill({
   return newImage;
 }
 
+/// Extracts a region from an image based on color similarity, returning the region as a [ui.Path].
+///
+/// This function starts at the specified coordinates (x, y) in the [image] and identifies a
+/// connected region of pixels that are within the specified [tolerance] of the color at the
+/// starting point. The identified region is then converted into a [ui.Path].
+///
+/// Parameters:
+///   [image]     The image to extract the region from.
+///   [x]         The x-coordinate of the starting point for the region extraction.
+///   [y]         The y-coordinate of the starting point for the region extraction.
+///   [tolerance] The tolerance (as a percentage) for color matching. A higher tolerance
+///               value means that colors further away from the starting color will be included
+///               in the extracted region.
+///
+/// Returns:
+///   A [ui.Path] representing the extracted region.
 Future<ui.Path> extractRegionByColorEdge({
   required final ui.Image image,
   required final int x,
@@ -44,26 +77,65 @@ Future<ui.Path> extractRegionByColorEdge({
   return r.path;
 }
 
+/// Represents a region in an image, defined by its bounding box and a path.
 class Region {
   double left = double.infinity;
   double top = double.infinity;
+
+  /// Gets the offset of the region, which is the top-left corner of its bounding box.
   Offset get offset => Offset(left, top);
+
+  /// The path that defines the shape of the region.
   Path path = Path();
 }
 
+/// Represents a point in a 2D space with integer coordinates.
 class Point {
   Point(this.x, this.y);
+
+  /// The x-coordinate of the point.
   int x;
+
+  /// The y-coordinate of the point.
   int y;
 }
 
+/// The number of bytes per pixel in the image data (assumed to be 4 for RGBA).
 final int bytesPerPixel = 4;
 
+/// Calculates the index of a pixel in a byte array representing image data.
+///
+/// The index is calculated based on the x and y coordinates of the pixel, as well as the
+/// width of the image. The image data is assumed to be in RGBA format, with 4 bytes per pixel.
+///
+/// Parameters:
+///   [x]     The x-coordinate of the pixel.
+///   [y]     The y-coordinate of the pixel.
+///   [width] The width of the image.
+///
+/// Returns:
+///   The index of the pixel in the byte array.
 int index(final int x, final int y, final int width) {
   return (y * width + x) * bytesPerPixel;
 }
 
-// Function to extract the region as a ui.Path
+/// Extracts a region from an image based on color similarity, returning a [Region] object.
+///
+/// This function starts at the specified coordinates (x, y) in the [image] and identifies a
+/// connected region of pixels that are within the specified [tolerance] of the color at the
+/// starting point. The identified region is then converted into a [ui.Path] and stored in a
+/// [Region] object, along with the region's bounding box.
+///
+/// Parameters:
+///   [image]     The image to extract the region from.
+///   [x]         The x-coordinate of the starting point for the region extraction.
+///   [y]         The y-coordinate of the starting point for the region extraction.
+///   [tolerance] The tolerance (as a percentage) for color matching. A higher tolerance
+///               value means that colors further away from the starting color will be included
+///               in the extracted region.
+///
+/// Returns:
+///   A [Region] object containing the extracted region's bounding box and path.
 Future<Region> extractRegionByColorEdgeAndOffset({
   required final ui.Image image,
   required final int x,
@@ -213,14 +285,26 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   //------------------------------------------------------------------
   // Normalize the path
   final Rect bounds = region.path.getBounds();
-  final Matrix4 matrix = Matrix4.identity()
-    ..translate(-bounds.left, -bounds.top);
+  final Matrix4 matrix = Matrix4.identity()..translate(-bounds.left, -bounds.top);
   region.path = region.path.transform(matrix.storage);
 
   return region;
 }
 
-// Function to apply color to the extracted path
+/// Applies a color to a specified region in an image, returning a new [ui.Image] with the changes.
+///
+/// This function takes an [image] and applies a [newColor] to a specified region defined by a
+/// [path] and an [offset]. The [path] defines the shape of the region, and the [offset] specifies
+/// the position of the region within the image.
+///
+/// Parameters:
+///   [image]     The image to apply the color to.
+///   [offset]    The offset of the region within the image.
+///   [path]      The path that defines the shape of the region.
+///   [newColor]  The color to apply to the region.
+///
+/// Returns:
+///   A new [ui.Image] with the specified region filled with the new color.
 Future<ui.Image> applyColorRegionToImage({
   required final ui.Image image,
   required final Offset offset,
@@ -247,6 +331,14 @@ Future<ui.Image> applyColorRegionToImage({
   return await picture.toImage(image.width.toInt(), image.height.toInt());
 }
 
+/// Prints the coordinates of points along a [ui.Path] for debugging purposes.
+///
+/// This function computes metrics for the given [path], samples points along the path,
+/// and prints the coordinates of these points to the console. It is primarily used for
+/// debugging and understanding the structure of a [ui.Path].
+///
+/// Parameters:
+///   [path]  The [ui.Path] to print the coordinates for.
 void printPathCoordinates(final ui.Path path) {
   final ui.PathMetrics pathMetrics = path.computeMetrics();
   // ignore: avoid_print
@@ -256,8 +348,7 @@ void printPathCoordinates(final ui.Path path) {
   for (final ui.PathMetric metric in pathMetrics) {
     for (double t = 0.0; t <= 1.0; t += 0.5) {
       // Sample points along the path
-      final ui.Offset? position =
-          metric.getTangentForOffset(metric.length * t)?.position;
+      final ui.Offset? position = metric.getTangentForOffset(metric.length * t)?.position;
       if (position != null) {
         positionsSampling.add(
           Offset(
@@ -274,8 +365,7 @@ void printPathCoordinates(final ui.Path path) {
   for (int i = 0; i < positionsSampling.length; i++) {
     if (i == 0 ||
         i == positionsSampling.length - 1 ||
-        (positionsSampling[i] != positionsSampling[i - 1] &&
-            positionsSampling[i] != positionsSampling[i + 1])) {
+        (positionsSampling[i] != positionsSampling[i - 1] && positionsSampling[i] != positionsSampling[i + 1])) {
       reducedPositions.add(positionsSampling[i]);
     }
   }

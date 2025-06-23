@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// A page that displays the available platforms for the application.
 class PlatformsPage extends StatelessWidget {
   const PlatformsPage({super.key});
 
@@ -64,6 +65,7 @@ class PlatformsPage extends StatelessWidget {
     );
   }
 
+  /// A widget that displays a platform item with an image, name, description, and URL.
   Widget paltformItem(
     final String name,
     final String image,
@@ -81,7 +83,8 @@ class PlatformsPage extends StatelessWidget {
         spacing: 20,
         children: <Widget>[
           CircleAvatar(
-            backgroundImage: AssetImage(image),
+            backgroundColor: Colors.white,
+            foregroundImage: AssetImage(image),
           ),
           Expanded(child: Text(name, style: const TextStyle(fontSize: 20))),
           Expanded(

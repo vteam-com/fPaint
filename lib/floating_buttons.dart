@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/color_selector.dart';
 
 /// Builds a column of floating action buttons for the paint application,
 /// including buttons for undo, redo, zoom in, zoom out,
 ///  and a button that displays the current zoom level and canvas size.
+///
+/// The [context] parameter is the [BuildContext] used to access the application's providers.
+/// The [shellProvider] parameter is the [ShellProvider] instance used to manage the application's shell.
+/// The [appProvider] parameter is the [AppProvider] instance used to manage the application's state.
 Widget floatingActionButtons(
+  final BuildContext context,
   final ShellProvider shellProvider,
   final AppProvider appProvider,
 ) {
@@ -32,14 +38,42 @@ Widget floatingActionButtons(
       crossAxisAlignment: CrossAxisAlignment.end,
       spacing: 5,
       children: <Widget>[
+        if (!shellProvider.showMenu)
+          FloatingActionButton(
+            heroTag: null,
+            backgroundColor: AppColors.colorFloatButtonBackground,
+            foregroundColor: Colors.white,
+            tooltip: 'Active tool',
+            onPressed: () {
+              shellProvider.showMenu = !shellProvider.showMenu;
+            },
+            child: iconFromaActionType(appProvider.selectedAction, false),
+          ),
+        if (!shellProvider.showMenu)
+          myFloatButton(
+            icon: Icons.color_lens,
+            foregroundColor: appProvider.preferences.brushColor,
+            tooltip: 'Color',
+            onPressed: () {
+              showColorPicker(
+                context: context,
+                title: 'Color',
+                color: appProvider.preferences.brushColor,
+                onSelectedColor: (final Color color) {
+                  appProvider.preferences.setBrushColor(color);
+                },
+              );
+            },
+          ),
         if (!shellProvider.showMenu) undoButton,
         if (!shellProvider.showMenu) redo,
-        myFloatButton(
-          icon: shellProvider.showMenu ? Icons.close : Icons.more_vert_outlined,
-          onPressed: () {
-            shellProvider.showMenu = !shellProvider.showMenu;
-          },
-        ),
+        if (shellProvider.showMenu)
+          myFloatButton(
+            icon: Icons.close,
+            onPressed: () {
+              shellProvider.showMenu = !shellProvider.showMenu;
+            },
+          ),
       ],
     );
   }
@@ -106,8 +140,16 @@ Widget floatingActionButtons(
   );
 }
 
+/// Creates a customized floating action button with specified properties.
+///
+/// The [icon] parameter specifies the icon to display on the button.
+/// The [foregroundColor] parameter specifies the color of the icon.
+/// The [tooltip] parameter specifies the text to display when the button is hovered over.
+/// The [onPressed] parameter specifies the callback function to execute when the button is pressed.
+/// The [child] parameter specifies an optional widget to display on the button instead of an icon.
 Widget myFloatButton({
   final IconData? icon,
+  final Color foregroundColor = Colors.white,
   final String? tooltip,
   required final void Function() onPressed,
   final Widget? child,
@@ -115,7 +157,7 @@ Widget myFloatButton({
   return FloatingActionButton(
     heroTag: null,
     backgroundColor: AppColors.colorFloatButtonBackground,
-    foregroundColor: Colors.white,
+    foregroundColor: foregroundColor,
     tooltip: tooltip,
     onPressed: () {
       Future<void>.microtask(() => onPressed());

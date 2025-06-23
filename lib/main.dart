@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/main_screen.dart';
+import 'package:fpaint/my_window_manager.dart';
 import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -8,15 +10,72 @@ import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
-/// The main entry point for the Flutter Paint App.
+/// The global instance of the [MyApp] widget.
 ///
-/// This class sets up the app's theme, keyboard shortcuts, and actions for undo, redo, and saving the file.
-/// The [MainScreen] widget is the root of the app's UI.
-void main() {
+/// This variable is initialized in the [main] function and used to access the app's providers.
+late MyApp mainApp;
+
+/// The main function is the entry point of the Flutter application.
+///
+/// It initializes the Flutter widgets, sets up the system UI mode,
+/// handles file opening events, and runs the app.
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  runApp(MyApp());
+
+  MyWindowManager.setupMainWindow();
+  // Platform channel for file opening.
+  const MethodChannel('com.vteam.fpaint/file').setMethodCallHandler((final MethodCall call) async {
+    if (call.method == 'fileOpened') {
+      final String filePath = call.arguments as String;
+
+      // Check if there are unsaved changes before clearing
+      if (mainApp.appProvider.layers.hasChanged) {
+        final bool shouldProceed =
+            await showDialog<bool>(
+              context: mainApp.navigatorKey.currentContext!,
+              builder: (final BuildContext context) => AlertDialog(
+                title: const Text('Unsaved Changes'),
+                content: const Text(
+                  'You have unsaved changes. Do you want to discard them and open the new file?',
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text('Discard and Open'),
+                  ),
+                ],
+              ),
+            ) ??
+            false;
+
+        if (!shouldProceed) {
+          return;
+        }
+      }
+
+      mainApp.appProvider.layers.clear();
+      final bool success = await openFileFromPath(
+        context: mainApp.navigatorKey.currentContext!,
+        layers: mainApp.appProvider.layers,
+        path: filePath,
+      );
+
+      // Update the shell provider with the file name if successful
+      if (success) {
+        mainApp.shellProvider.loadedFileName = filePath;
+      }
+    }
+  });
+
+  mainApp = MyApp();
+
+  runApp(mainApp);
 }
 
 /// The main entry point for the Flutter Paint App.
@@ -24,27 +83,41 @@ void main() {
 /// This class sets up the app's theme, keyboard shortcuts, and actions for undo, redo, and saving the file.
 /// The [MainScreen] widget is the root of the app's UI.
 class MyApp extends StatelessWidget {
+  /// Creates a [MyApp] widget.
   MyApp({super.key});
+
+  /// Global navigator key to access context from outside of the widget tree
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  /// Provides shell-level functionalities and states.
   final ShellProvider shellProvider = ShellProvider();
+
+  /// Provides application-level functionalities and states.
   final AppProvider appProvider = AppProvider();
+
+  /// Provides functionalities and states for managing layers.
   final LayersProvider layersProvider = LayersProvider();
+
+  /// Provides functionalities for undo and redo operations.
   final UndoProvider undoProvider = UndoProvider();
 
   @override
   Widget build(final BuildContext context) {
     return MultiProvider(
-      // ignore: always_specify_types
-      providers: [
+      providers: <SingleChildWidget>[
         // ignore: always_specify_types
-        ChangeNotifierProvider(create: (final _) => shellProvider),
+        ChangeNotifierProvider(create: (final BuildContext _) => shellProvider),
         // ignore: always_specify_types
-        ChangeNotifierProvider(create: (final _) => appProvider),
+        ChangeNotifierProvider(create: (final BuildContext _) => appProvider),
         // ignore: always_specify_types
-        ChangeNotifierProvider(create: (final _) => layersProvider),
+        ChangeNotifierProvider(
+          create: (final BuildContext _) => layersProvider,
+        ),
         // ignore: always_specify_types
-        ChangeNotifierProvider(create: (final _) => undoProvider),
+        ChangeNotifierProvider(create: (final BuildContext _) => undoProvider),
       ],
       child: MaterialApp(
+        navigatorKey: navigatorKey,
         title: 'Flutter Paint App',
         theme: ThemeData.dark().copyWith(
           colorScheme: const ColorScheme.dark(
@@ -58,13 +131,13 @@ class MyApp extends StatelessWidget {
             overlayColor: Colors.blue.withAlpha(100),
           ),
         ),
-        // Define routes with a PlatformsPage route added.
         routes: <String, WidgetBuilder>{
           '/': (final BuildContext context) => shortCutsForMainApp(
-                shellProvider,
-                appProvider,
-                const MainScreen(),
-              ),
+            context,
+            shellProvider,
+            appProvider,
+            const MainScreen(),
+          ),
           '/settings': (final _) => const SettingsPage(),
           '/platforms': (final _) => const PlatformsPage(),
         },

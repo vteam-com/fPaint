@@ -120,11 +120,12 @@ TextStyle adjustOpacityOfTextStyle(
   final double opacity = 0.7,
 ]) {
   return textStyle.copyWith(
-    color: textStyle.color!.withValues(alpha: opacity),
+    // ignore: deprecated_member_use
+    color: textStyle.color!.withOpacity(opacity),
   );
 }
 
-///
+/// Possible states
 enum ColorState {
   success,
   warning,
@@ -134,6 +135,12 @@ enum ColorState {
   quantityNegative,
 }
 
+/// Creates a widget that displays a colored box with a specified text color.
+///
+/// The [color] parameter specifies the background color of the box.
+/// The [colorText] parameter specifies the color of the text displayed inside the box.
+///
+/// Returns a [Widget] representing the colored box.
 Widget colorBox(final Color color, final Color colorText) {
   return Container(
     color: color,
@@ -161,8 +168,7 @@ String colorToHexString(
   final bool includeAlpha = true,
   final String seperator = '',
 }) {
-  final List<String> components =
-      getColorComponentsAsHex(color, includeAlpha, alphaFirst);
+  final List<String> components = getColorComponentsAsHex(color, includeAlpha, alphaFirst);
   return '#${components.join(seperator)}';
 }
 
@@ -177,14 +183,10 @@ List<String> getColorComponentsAsHex(
   final bool includeAlpha = true,
   final bool alphaIsFirst = true,
 ]) {
-  final String alpha =
-      (color.a * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
-  final String red =
-      (color.r * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
-  final String green =
-      (color.g * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
-  final String blue =
-      (color.b * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String alpha = (color.a * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String red = (color.r * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String green = (color.g * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String blue = (color.b * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
   if (alphaIsFirst) {
     return <String>[
       if (includeAlpha) alpha,
@@ -201,6 +203,26 @@ List<String> getColorComponentsAsHex(
   ];
 }
 
+/// Converts a [Color] object to its hexadecimal string representation
+/// formatted across multiple lines.
+///
+/// The returned string will represent the color in ARGB (Alpha, Red, Green, Blue)
+/// format, with each component on a separate line.
+///
+/// Example:
+/// ```dart
+/// Color color = Color(0xFF123456);
+/// String hex = getHexOnMultiline(color);
+/// // hex will be:
+/// // "FF
+/// //  12
+/// //  34
+/// //  56"
+/// ```
+///
+/// - [color]: The [Color] object to be converted.
+///
+/// Returns a multiline string representation of the color in hexadecimal format.
 String getHexOnMultiline(final Color color) {
   final List<String> list = getColorComponentsAsHex(color);
   return list.join('\n');
@@ -216,15 +238,11 @@ String getHexOnMultiline(final Color color) {
 ///
 Color contrastColor(final Color color) {
   // Calculate the luminance of the color including alpha
-  final double luminance = (0.299 * (color.r * 255) +
-          0.587 * (color.g * 255) +
-          0.114 * (color.b * 255)) /
-      255;
+  final double luminance = (0.299 * (color.r * 255) + 0.587 * (color.g * 255) + 0.114 * (color.b * 255)) / 255;
   final double alphaFactor = color.a;
 
   // Determine whether to make the contrast color black or white based on the luminance and alpha
-  final Color contrastColor =
-      (luminance * alphaFactor) > 0.5 ? Colors.black : Colors.white;
+  final Color contrastColor = (luminance * alphaFactor) > 0.5 ? Colors.black : Colors.white;
 
   return contrastColor;
 }
@@ -248,10 +266,6 @@ Color getColorFromString(final String hexColor) {
     return Color(int.parse('0x$newHexColor'));
   }
   return Colors.transparent;
-}
-
-ColorScheme getColorTheme(final BuildContext context) {
-  return getTheme(context).colorScheme;
 }
 
 /// Returns a Pair object containing the hue and brightness values of the given color.
@@ -291,14 +305,13 @@ double getHueFromColor(final Color color) {
   return hue;
 }
 
-TextTheme getTextTheme(final BuildContext context) {
-  return getTheme(context).textTheme;
-}
-
-ThemeData getTheme(final BuildContext context) {
-  return Theme.of(context);
-}
-
+/// Converts HSV (Hue, Saturation, Value) color representation to a [Color] object.
+///
+/// The [hue] parameter represents the hue of the color in degrees (0.0 to 360.0).
+/// The [brightness] parameter represents the brightness (value) of the color as a
+/// percentage (0.0 to 1.0).
+///
+/// Returns a [Color] object corresponding to the given HSV values.
 Color hsvToColor(final double hue, final double brightness) {
   final Color color = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor();
   return adjustBrightness(color, brightness);

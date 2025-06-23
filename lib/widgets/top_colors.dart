@@ -13,6 +13,12 @@ import 'package:fpaint/widgets/transparent_background.dart';
 /// The widget can be displayed in a minimal mode, which removes some
 /// of the UI elements.
 class TopColors extends StatelessWidget {
+  /// Creates a [TopColors] widget.
+  ///
+  /// The [colorUsages] parameter specifies the list of [ColorUsage] objects to display.
+  /// The [onRefresh] parameter specifies a callback that is called when the user refreshes the list of colors.
+  /// The [onColorPicked] parameter specifies a callback that is called when the user selects a color.
+  /// The [minimal] parameter specifies whether to display the widget in minimal mode.
   const TopColors({
     super.key,
     required this.colorUsages,
@@ -21,17 +27,23 @@ class TopColors extends StatelessWidget {
     this.minimal = false,
   });
 
+  /// The list of [ColorUsage] objects to display.
   final List<ColorUsage> colorUsages;
+
+  /// A callback that is called when the user refreshes the list of colors.
   final VoidCallback onRefresh;
+
+  /// A callback that is called when the user selects a color.
   final void Function(Color) onColorPicked;
+
+  /// Whether to display the widget in minimal mode.
   final bool minimal;
 
   @override
   Widget build(final BuildContext context) {
     final List<ColorUsage> sortedColors = sortColorByHueAndPopularity();
 
-    final List<Widget> colorPreviews =
-        sortedColors.map((final ColorUsage colorUsed) {
+    final List<Widget> colorPreviews = sortedColors.map((final ColorUsage colorUsed) {
       final List<String> components = getColorComponentsAsHex(colorUsed.color);
       final String alpha = components[0];
       final String red = components[1];
@@ -111,8 +123,7 @@ class TopColors extends StatelessWidget {
         }
         final double saturationA = HSVColor.fromColor(a.color).saturation;
         final double saturationB = HSVColor.fromColor(b.color).saturation;
-        return saturationB
-            .compareTo(saturationA); // Secondary sort by saturation
+        return saturationB.compareTo(saturationA); // Secondary sort by saturation
       });
     }
 
@@ -131,8 +142,6 @@ class TopColors extends StatelessWidget {
     });
 
     // Flatten the sorted groups into a final sorted list
-    return sortedGroups
-        .expand((final List<ColorUsage> group) => group)
-        .toList();
+    return sortedGroups.expand((final List<ColorUsage> group) => group).toList();
   }
 }

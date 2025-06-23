@@ -3,12 +3,14 @@ import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/widgets/image_painter.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
+/// A widget that displays a thumbnail of a layer.
 class LayerThumbnail extends StatelessWidget {
   const LayerThumbnail({
     super.key,
     required this.layer,
   });
 
+  /// The layer to display a thumbnail of.
   final LayerProvider layer;
 
   @override
@@ -17,8 +19,7 @@ class LayerThumbnail extends StatelessWidget {
     return LayoutBuilder(
       builder: (final BuildContext context, final BoxConstraints constraints) {
         // Align to transparency pattern grid to ensure propre rendering of the transparency background
-        final int size =
-            (constraints.maxWidth / patternSize).floor() * patternSize;
+        final int size = (constraints.maxWidth / patternSize).floor() * patternSize;
 
         return SizedBox(
           width: size.toDouble(),

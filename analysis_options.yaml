@@ -1,5 +1,10 @@
 include: package:flutter_lints/flutter.yaml
 
+# analysis_options.yaml
+formatter:
+  page_width: 120
+  trailing_commas: preserve
+
 analyzer:
   exclude:
     - "**/*.g.dart"

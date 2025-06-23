@@ -50,6 +50,10 @@ List<double> calculateSpread(
   return spread;
 }
 
+/// Returns a list containing the minimum and maximum values from the input list.
+///
+/// If the list is empty, it returns a list with two 0.0 values.
+/// If the list contains only one element, it returns a list with that element as both the minimum and maximum.
 List<num> getMinMaxValues(final List<double> list) {
   if (list.isEmpty) {
     return <num>[0, 0];
@@ -58,27 +62,41 @@ List<num> getMinMaxValues(final List<double> list) {
     return <num>[list[0], list[0]];
   }
 
-  double valueMin = 0.0;
-  double valueMax = 0.0;
+  double valueMin;
+  double valueMax;
+
+  // Initialize with the first two elements to handle lists of length >= 2
   if (list[0] < list[1]) {
     valueMin = list[0];
     valueMax = list[1];
   } else {
     valueMin = list[1];
     valueMax = list[0];
+  }
 
-    for (final double value in list) {
-      valueMin = min(valueMin, value);
-      valueMax = max(valueMax, value);
+  // Iterate through the rest of the list (if any)
+  for (int i = 2; i < list.length; i++) {
+    final double value = list[i];
+    if (value < valueMin) {
+      valueMin = value;
+    }
+    if (value > valueMax) {
+      valueMax = value;
     }
   }
   return <num>[valueMin, valueMax];
 }
 
+/// Checks if an index is within the bounds of a list.
+///
+/// Returns true if the index is greater than or equal to 0 and less than the length of the list, otherwise returns false.
 bool isIndexInRange(final List<dynamic> array, final int index) {
   return index >= 0 && index < array.length;
 }
 
+/// Pads a list of strings to a specified length with a padding string.
+///
+/// If the list is already longer than or equal to the specified length, it is returned as is.
 List<String> padList(
   final List<String> list,
   final int length,
@@ -94,6 +112,10 @@ List<String> padList(
   return paddedList;
 }
 
+/// Sorts two DateTime objects.
+///
+/// Returns an integer indicating the sort order.
+/// Takes two optional parameters [ascending] which defaults to true.
 int sortByDate(
   final DateTime? a,
   final DateTime? b, [
@@ -122,6 +144,10 @@ int sortByDate(
   }
 }
 
+/// Sorts two num values.
+///
+/// Returns an integer indicating the sort order.
+/// Takes two optional parameters [ascending] which defaults to true.
 int sortByValue(final num a, final num b, final bool ascending) {
   if (ascending) {
     return a.compareTo(b);
@@ -130,6 +156,7 @@ int sortByValue(final num a, final num b, final bool ascending) {
   }
 }
 
+/// A class that represents a key-value pair.
 class KeyValue {
   KeyValue({required this.key, required this.value});
 
@@ -159,6 +186,7 @@ class KeyValue {
   }
 }
 
+/// A class that represents a pair of values.
 class Pair<F, S> {
   Pair(this.first, this.second);
 
@@ -170,9 +198,7 @@ class Pair<F, S> {
     if (identical(this, other)) {
       return true;
     }
-    return other is Pair<F, S> &&
-        other.first == first &&
-        other.second == second;
+    return other is Pair<F, S> && other.first == first && other.second == second;
   }
 
   @override
@@ -182,6 +208,7 @@ class Pair<F, S> {
   String toString() => '($first, $second)';
 }
 
+/// A class that represents a triple of values.
 class Triple<F, S, T> {
   Triple(this.first, this.second, this.third);
 
@@ -194,10 +221,7 @@ class Triple<F, S, T> {
     if (identical(this, other)) {
       return true;
     }
-    return other is Triple<F, S, T> &&
-        other.first == first &&
-        other.second == second &&
-        other.third == third;
+    return other is Triple<F, S, T> && other.first == first && other.second == second && other.third == third;
   }
 
   @override
@@ -207,11 +231,14 @@ class Triple<F, S, T> {
   String toString() => '($first, $second, $third)';
 }
 
+/// Converts a list of enum values to a list of strings.
 List<String> enumToStringList<T>(final List<T> enumValues) {
   return enumValues.map((final T e) => e.toString().split('.').last).toList();
 }
 
+/// Extension on List to get a random item.
 extension RandomItemExtension<T> on List<T> {
+  /// Returns a random item from the list.
   T getRandomItem() {
     final Random random = Random();
     if (isEmpty) {
@@ -221,7 +248,9 @@ extension RandomItemExtension<T> on List<T> {
   }
 }
 
+/// Extension on Iterable to find the first match.
 extension FindFirstMatchExtension<T> on Iterable<T> {
+  /// Returns the first element that satisfies the given test, or null if no such element is found.
   T? findFirstMatch(final bool Function(T) test) {
     for (final T item in this) {
       if (test(item)) {
@@ -232,7 +261,9 @@ extension FindFirstMatchExtension<T> on Iterable<T> {
   }
 }
 
+/// Extension on List to find the first match or null.
 extension FirWheresOrNull<T> on List<T> {
+  /// Returns the first element that satisfies the given test, or null if no such element is found.
   T? firstWhereOrNull(final bool Function(T) test) {
     for (final T item in this) {
       if (test(item)) {
@@ -243,6 +274,7 @@ extension FirWheresOrNull<T> on List<T> {
   }
 }
 
+/// Converts a Uint8List to a hexadecimal string.
 String uint8ListToHex(final Uint8List list) {
   final StringBuffer hexString = StringBuffer();
   for (final int byte in list) {

@@ -8,14 +8,17 @@ import 'package:multi_split_view/multi_split_view.dart';
 /// It uses the `MultiSplitView` widget to display the top menu and layers panel, as well as the tools panel.
 /// The side panel is styled with a material elevation and a rounded border on the top-right and bottom-right corners.
 /// The `MultiSplitViewTheme` is used to customize the appearance of the divider between the two panels.
-
 class SidePanel extends StatefulWidget {
   const SidePanel({
     super.key,
     required this.minimal,
     required this.preferences,
   });
+
+  /// A boolean indicating whether the side panel should be displayed in minimal mode.
   final bool minimal;
+
+  /// The app preferences.
   final AppPreferences preferences;
 
   @override
@@ -29,14 +32,13 @@ class _SidePanelState extends State<SidePanel> {
   void initState() {
     super.initState();
 
-    final double hightOfTopPanel = widget.preferences.sidePanelDistance;
+    final double topPanelHeight = widget.preferences.sidePanelDistance;
 
     _splitController.areas = <Area>[
       Area(
-        size: hightOfTopPanel,
+        size: topPanelHeight,
         min: 100,
-        builder: (final BuildContext context, final Area area) =>
-            const TopMenuAndLayersPanel(),
+        builder: (final BuildContext context, final Area area) => const TopMenuAndLayersPanel(),
       ),
       Area(
         min: 100,
@@ -59,6 +61,7 @@ class _SidePanelState extends State<SidePanel> {
     _splitController.removeListener(_rebuild);
   }
 
+  /// Rebuilds the widget when the split controller changes.
   void _rebuild() async {
     final double? heightOfTopSection = _splitController.areas[0].size;
     if (heightOfTopSection != null) {
@@ -85,24 +88,6 @@ class _SidePanelState extends State<SidePanel> {
         child: MultiSplitView(
           controller: _splitController,
           axis: Axis.vertical,
-          initialAreas: <Area>[
-            Area(
-              size: 400,
-              min: 100,
-              builder: (final BuildContext context, final Area area) =>
-                  const TopMenuAndLayersPanel(),
-            ),
-            Area(
-              size: 400,
-              min: 100,
-              builder: (final BuildContext context, final Area area) => Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: ToolsPanel(
-                  minimal: widget.minimal,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

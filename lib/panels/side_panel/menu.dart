@@ -7,9 +7,10 @@ import 'package:fpaint/models/menu_model.dart';
 import 'package:fpaint/panels/about.dart';
 import 'package:fpaint/panels/canvas_settings.dart';
 import 'package:fpaint/panels/share_panel.dart';
-import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
+/// A widget that displays the main menu.
 class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
 
@@ -20,8 +21,7 @@ class MainMenu extends StatelessWidget {
     return PopupMenuButton<int>(
       tooltip: strings[StringId.menuTooltip],
       icon: const Icon(Icons.menu),
-      onSelected: (final int result) =>
-          onDropDownMenuSelection(context, result),
+      onSelected: (final int result) => onDropDownMenuSelection(context, result),
       itemBuilder: (final BuildContext context) => <PopupMenuEntry<int>>[
         buildMenuItem(
           value: MenuIds.newFile,
@@ -32,6 +32,11 @@ class MainMenu extends StatelessWidget {
           value: MenuIds.openFile,
           text: strings[StringId.import]!,
           icon: Icons.file_download_outlined,
+        ),
+        buildMenuItem(
+          value: MenuIds.newFromClipboard,
+          text: 'New from Clipboard', // TODO(you): localize this string
+          icon: Icons.content_paste_go,
         ),
         buildMenuItem(
           value: MenuIds.export,
@@ -69,6 +74,7 @@ class MainMenu extends StatelessWidget {
   }
 }
 
+/// Handles the selection of a dropdown menu item.
 void onDropDownMenuSelection(
   final BuildContext context,
   final int result,
@@ -83,24 +89,28 @@ void onDropDownMenuSelection(
     case MenuIds.openFile:
       onFileOpen(context);
       break;
+    case MenuIds.newFromClipboard:
+      AppProvider.of(context).newDocumentFromClipboardImage();
+      break;
     case MenuIds.save:
       saveFile(
         shellProvider,
         layers,
       ).then(
-          // ignore: use_build_context_synchronously
-          (final _) {
-        layers.clearHasChanged();
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${strings[StringId.savedMessage]}${shellProvider.loadedFileName}',
+        // ignore: use_build_context_synchronously
+        (final _) {
+          layers.clearHasChanged();
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${strings[StringId.savedMessage]}${shellProvider.loadedFileName}',
+                ),
               ),
-            ),
-          );
-        }
-      });
+            );
+          }
+        },
+      );
       break;
 
     case MenuIds.export:
@@ -125,6 +135,7 @@ void onDropDownMenuSelection(
   }
 }
 
+/// Builds a menu item.
 PopupMenuEntry<int> buildMenuItem({
   required final int value,
   required final String text,

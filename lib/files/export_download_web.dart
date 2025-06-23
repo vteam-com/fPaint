@@ -4,9 +4,10 @@ import 'dart:typed_data';
 
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:web/web.dart' as web; // Add
+import 'package:web/web.dart' as web;
 
 /// Exports the current painter as a PNG image and triggers a download.
 ///
@@ -44,6 +45,13 @@ Future<void> onExportAsJpeg(
   await saveAsJpeg(layers, fileName);
 }
 
+/// Saves the current content as a JPEG file.
+///
+/// This function allows exporting the current content in JPEG format,
+/// suitable for downloading or sharing on the web.
+///
+/// Throws:
+/// - An exception if the saving process fails.
 Future<void> saveAsJpeg(
   final LayersProvider layers,
   final String filePath,
@@ -70,6 +78,18 @@ Future<void> onExportAsOra(
   await saveAsOra(layers, fileName);
 }
 
+/// Saves the current project as an ORA (OpenRaster) file.
+///
+/// This function handles the process of exporting the project data
+/// into the ORA format, which is commonly used for layered image files.
+/// It ensures that the file is properly structured and ready for download
+/// in a web environment.
+///
+/// Throws:
+/// - `Exception` if the export process fails.
+///
+/// Returns:
+/// A `Future` that completes when the file has been successfully saved.
 Future<void> saveAsOra(
   final LayersProvider layers,
   final String filePath,
@@ -77,6 +97,19 @@ Future<void> saveAsOra(
   final List<int> image = await createOraAchive(layers);
   // Create a Blob from the image bytes
   downloadBlob(Uint8List.fromList(image), filePath);
+}
+
+Future<void> onExportAsTiff(
+  final LayersProvider layers, [
+  final String fileName = 'image.tiff',
+]) async {
+  final Uint8List pngBytes = await layers.capturePainterToImageBytes();
+  if (pngBytes.isEmpty) {
+    throw Exception('Failed to capture image bytes for TIFF export.');
+  }
+  final Uint8List tiffBytes = await convertToTiff(pngBytes);
+  downloadBlob(tiffBytes, fileName); // Use downloadBlob directly
+  layers.clearHasChanged();
 }
 
 /// Downloads a file represented by the given image bytes and file name.
@@ -101,8 +134,7 @@ void downloadBlob(final Uint8List image, final String fileName) {
   final String url = web.URL.createObjectURL(blob);
 
   // Create an anchor element for downloading the file
-  final web.HTMLAnchorElement anchor =
-      web.document.createElement('a') as web.HTMLAnchorElement;
+  final web.HTMLAnchorElement anchor = web.document.createElement('a') as web.HTMLAnchorElement;
   anchor.href = url;
   anchor.target = '_blank';
   anchor.download = fileName;

@@ -19,7 +19,9 @@ import 'package:flutter/services.dart';
 Future<ui.Image> loadImageFromAssets(final String assetPath) async {
   final AssetImage assetImage = AssetImage(assetPath);
   final Completer<ui.Image> completer = Completer<ui.Image>();
-  assetImage.resolve(ImageConfiguration.empty).addListener(
+  assetImage
+      .resolve(ImageConfiguration.empty)
+      .addListener(
         ImageStreamListener(
           (final ImageInfo info, final _) => completer.complete(info.image),
         ),

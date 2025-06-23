@@ -1,3 +1,4 @@
+/// Enum to represent the different string IDs used in the application.
 enum StringId {
   menuTooltip,
   savedMessage,
@@ -13,15 +14,16 @@ enum StringId {
   settings,
 }
 
+/// Map containing the localized strings for each StringId.
 const Map<StringId, String> strings = <StringId, String>{
   StringId.menuTooltip: 'Menu',
   StringId.savedMessage: 'Saved ',
-  StringId.startOver: 'Start over...',
+  StringId.startOver: 'Start new...',
   StringId.import: 'Import...',
   StringId.export: 'Export...',
   StringId.canvas: 'Canvas...',
   StringId.about: 'About...',
-  StringId.startOverTooltip: 'Start over...',
+  StringId.startOverTooltip: 'Start new...',
   StringId.importTooltip: 'Import...',
   StringId.exportTooltip: 'Export...',
   StringId.settings: 'Settings...',

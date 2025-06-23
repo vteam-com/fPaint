@@ -16,8 +16,7 @@ void main() {
       final ui.Paint paint = Paint()..color = Colors.blue;
       canvas.drawRect(const Rect.fromLTWH(1, 1, 2, 2), paint);
       final ui.Picture picture = recorder.endRecording();
-      final ui.Image testImage =
-          await picture.toImage(testImageWidth, testImageHeight);
+      final ui.Image testImage = await picture.toImage(testImageWidth, testImageHeight);
 
       // Convert to bytes
       final Uint8List? data = await convertImageToUint8List(testImage);

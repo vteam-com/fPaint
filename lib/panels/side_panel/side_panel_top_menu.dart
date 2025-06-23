@@ -5,13 +5,17 @@ import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
+/// A widget that displays the top menu of the side panel.
 class SidePanelTopMenu extends StatelessWidget {
   const SidePanelTopMenu({
     super.key,
     required this.shellProvider,
   });
+
+  /// The shell provider.
   final ShellProvider shellProvider;
 
+  /// Builds an icon button.
   Widget buildIconButton({
     required final String tooltip,
     required final IconData icon,
@@ -32,7 +36,7 @@ class SidePanelTopMenu extends StatelessWidget {
         const MainMenu(),
         if (shellProvider.isSidePanelExpanded)
           buildIconButton(
-            tooltip: strings[StringId.startOverTooltip]!,
+            tooltip: strings[StringId.startOver]!,
             icon: Icons.power_settings_new_outlined,
             onPressed: () => onFileNew(context),
           ),
@@ -55,8 +59,7 @@ class SidePanelTopMenu extends StatelessWidget {
                 ? Icons.keyboard_double_arrow_left
                 : Icons.keyboard_double_arrow_right,
             onPressed: () {
-              shellProvider.isSidePanelExpanded =
-                  !shellProvider.isSidePanelExpanded;
+              shellProvider.isSidePanelExpanded = !shellProvider.isSidePanelExpanded;
             },
           ),
       ],
@@ -64,6 +67,7 @@ class SidePanelTopMenu extends StatelessWidget {
   }
 }
 
+/// Builds an icon button.
 Widget buildIconButton({
   required final String tooltip,
   required final IconData icon,

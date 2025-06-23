@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// Displays an about dialog with information about the application.
+///
+/// This function shows a dialog box that includes the application's name,
+/// version, legal information, and an icon. It also displays the device's
+/// screen resolution and a link to the application's GitHub repository.
+///
+/// The [context] parameter is the [BuildContext] used to show the dialog.
 void showAboutBox(final BuildContext context) {
   final MediaQueryData mediaQuery = MediaQuery.of(context);
-  final String screenResolution =
-      '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';
+  final String screenResolution = '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';
 
   showAboutDialog(
     context: context,

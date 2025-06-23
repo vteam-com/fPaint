@@ -6,7 +6,6 @@ import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:fpaint/providers/shell_provider.dart';
 import 'package:xml/xml.dart';
 
 /// Reads an ORA file and updates the provided [AppProvider] with its contents.
@@ -19,8 +18,7 @@ import 'package:xml/xml.dart';
 ///   - filePath: The path to the ORA file to be read.
 ///
 /// - Returns: A [Future] that completes when the file has been read and the model updated.
-Future<void> readOraFile(
-  final ShellProvider shellProvider,
+Future<void> readImageFromFilePathOra(
   final LayersProvider layers,
   final String filePath,
 ) async {
@@ -30,11 +28,8 @@ Future<void> readOraFile(
       throw Exception('File not found "$filePath"');
     }
 
-    shellProvider.loadedFileName = filePath;
-
     // Read the file as bytes
     await readOraFileFromBytes(
-      shellProvider,
       layers,
       await oraFile.readAsBytes(),
     );
@@ -45,7 +40,6 @@ Future<void> readOraFile(
 
 /// Read the file from  bytes
 Future<void> readOraFileFromBytes(
-  final ShellProvider shellProvider,
   final LayersProvider layers,
   final Uint8List bytes,
 ) async {
@@ -115,8 +109,7 @@ Future<void> addLayer(
   final String name = xmlLayer.getAttribute('name') ?? 'Unnamed';
   final String opacityAsText = xmlLayer.getAttribute('opacity') ?? '1';
   final String visibleAsText = xmlLayer.getAttribute('visible') ?? 'true';
-  final String compositeOp =
-      xmlLayer.getAttribute('composite-op') ?? 'svg:src-over';
+  final String compositeOp = xmlLayer.getAttribute('composite-op') ?? 'svg:src-over';
 
   final bool preserveAlpha = xmlLayer.getAttribute('alpha-preserve') == 'true';
 
@@ -150,6 +143,14 @@ Future<void> addLayer(
   return;
 }
 
+/// Returns a [ui.BlendMode] corresponding to the given OpenRaster (ORA)
+/// composite operation string.
+///
+/// The function maps ORA composite operation strings (prefixed with "svg:")
+/// to their respective [ui.BlendMode] values. If the provided composite
+/// operation string does not match any known mapping, the default
+/// [ui.BlendMode.srcOver] is returned.
+///
 ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
   switch (compositeOp) {
     case 'svg:source-over':
@@ -181,7 +182,14 @@ ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
   }
 }
 
+/// Adds an image to a specified layer from an archive.
 ///
+/// This function retrieves an image file from the provided [archive] using the
+/// specified [imageName]. If the image is found, it decodes the image bytes
+/// into a [ui.Image] and adds it to the given [layer] at the specified [offset].
+///
+/// If the image is not found in the archive, a debug message is printed.
+/// Any errors during the process are caught and logged.
 Future<void> addImageToLayer({
   required final Archive archive,
   required final LayersProvider layers,
@@ -190,9 +198,7 @@ Future<void> addImageToLayer({
   required final ui.Offset offset,
 }) async {
   try {
-    final ArchiveFile? file = archive.files
-        .toList()
-        .findFirstMatch((final ArchiveFile f) => f.name == imageName);
+    final ArchiveFile? file = archive.files.toList().findFirstMatch((final ArchiveFile f) => f.name == imageName);
     if (file != null) {
       final List<int> bytes = file.content as List<int>;
       final ui.Image image = await decodeImage(bytes);
@@ -209,27 +215,36 @@ Future<void> addImageToLayer({
   }
 }
 
-/// Decodes a list of bytes into a [ui.Image].
 ///
-/// This function takes a list of bytes representing an image and decodes it
-/// into a [ui.Image] object asynchronously.
+/// Parameters:
+/// - [archive]: The archive containing the image files.
+/// - [layers]: The provider managing all layers (not directly used in this function).
+/// - [layer]: The specific layer to which the image will be added.
+/// - [imageName]: The name of the image file to retrieve from the archive.
+/// - [offset]: The position where the image will be added on the layer.
 ///
-/// - Parameters:
-///   - bytes: A list of integers representing the image data.
-///
-/// - Returns: A [Future] that completes with the decoded [ui.Image].
+/// Throws:
+/// - This function does not throw errors but logs them using [debugPrint].
 ///
 /// Example:
 /// ```dart
-/// List<int> imageData = ...; // your image data here
-/// ui.Image image = await decodeImage(imageData);
+/// await addImageToLayer(
+///   archive: myArchive,
+///   layers: myLayersProvider,
+///   layer: myLayerProvider,
+///   imageName: 'example.png',
+///   offset: ui.Offset(10, 20),
+/// );
 /// ```
+
 Future<ui.Image> decodeImage(final List<int> bytes) async {
   final Completer<ui.Image> completer = Completer<ui.Image>();
   ui.decodeImageFromList(Uint8List.fromList(bytes), completer.complete);
   return completer.future;
 }
 
+///
+/// Persist to ORA type file
 ///
 Future<void> saveToORA({
   required final LayersProvider layers,
@@ -240,7 +255,21 @@ Future<void> saveToORA({
   await File(filePath).writeAsBytes(encodedData);
 }
 
+/// Creates an ORA (OpenRaster) archive from the provided layers.
 ///
+/// This function takes a [LayersProvider] object, which contains the layers
+/// to be included in the ORA archive, and returns a `Future` that resolves
+/// to a list of integers representing the binary data of the created archive.
+///
+/// ORA is a file format commonly used for storing layered images in a
+/// non-proprietary format.
+///
+/// - Parameters:
+///   - layers: A [LayersProvider] instance containing the layers to be
+///     included in the ORA archive.
+///
+/// - Returns: A `Future` that resolves to a `List<int>` representing the
+///   binary data of the created ORA archive.
 Future<List<int>> createOraAchive(final LayersProvider layers) async {
   final Archive archive = Archive();
   final XmlBuilder builder = XmlBuilder();
@@ -265,8 +294,7 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
     // Save layer image as PNG
     final ui.Image imageLayer = layer.toImageForStorage(layers.size);
 
-    final ByteData? bytes =
-        await imageLayer.toByteData(format: ui.ImageByteFormat.png);
+    final ByteData? bytes = await imageLayer.toByteData(format: ui.ImageByteFormat.png);
 
     archive.addFile(
       ArchiveFile(
@@ -305,14 +333,11 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
       builder.element(
         'stack',
         nest: () {
-          final Map<String, List<Map<String, dynamic>>> groupedLayers =
-              <String, List<Map<String, dynamic>>>{};
-          final List<Map<String, dynamic>> ungroupedLayers =
-              <Map<String, dynamic>>[];
+          final Map<String, List<Map<String, dynamic>>> groupedLayers = <String, List<Map<String, dynamic>>>{};
+          final List<Map<String, dynamic>> ungroupedLayers = <Map<String, dynamic>>[];
 
           for (final Map<String, dynamic> layerData in layersData) {
-            final String parentGroupNameOfLayer =
-                layerData['parentGroupName'] as String? ?? '';
+            final String parentGroupNameOfLayer = layerData['parentGroupName'] as String? ?? '';
 
             if (parentGroupNameOfLayer.isNotEmpty) {
               groupedLayers
@@ -357,6 +382,15 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
   return encodedData;
 }
 
+/// Builds the layers for the specified file or canvas.
+///
+/// This function is responsible for constructing and organizing
+/// the layers that make up the structure of the file or canvas.
+/// It may involve parsing data, initializing layer properties,
+/// and ensuring the correct hierarchy of layers.
+///
+/// Make sure to provide the necessary input data or context
+/// required for the layer construction process.
 void buildLayers(
   final XmlBuilder builder,
   final List<Map<String, dynamic>> layersData,
