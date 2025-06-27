@@ -234,19 +234,10 @@ Future<bool> openFileFromPath({
           duration: const Duration(seconds: 3),
         ),
       );
-      return false;
+      }
+      return false; // Return false regardless of context.mounted if format is not supported
     }
-  } else {
-    // Show unsupported format message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('File format .$extension is not supported'),
-        duration: const Duration(seconds: 3),
-      ),
-    );
-
-    return false;
-  }
+    // Removed duplicated else block
 }
 
 final List<String> supportedImageFileExtensions = <String>[
