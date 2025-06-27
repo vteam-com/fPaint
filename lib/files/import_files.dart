@@ -123,17 +123,21 @@ Future<void> onFileOpen(final BuildContext context) async {
     );
 
     if (result != null) {
-      layers.clear();
+      // layers.clear(); // Removed from here
 
       if (kIsWeb) {
         final Uint8List bytes = result.files.single.bytes!;
+        final String fileName = result.files.single.name; // Get filename for naming the layer
         final String extension = result.files.single.extension?.toLowerCase() ?? '';
         if (extension == 'ora') {
+          // Assuming readOraFileFromBytes handles its own clearing and sizing or needs similar refactor
           await readOraFileFromBytes(layers, bytes);
         } else if (extension == 'tif' || extension == 'tiff') {
+          // Assuming readTiffFileFromBytes handles its own clearing and sizing or needs similar refactor
           await readTiffFileFromBytes(layers, bytes);
         } else if (isFileExtensionSupported(extension)) {
-          await readImageFileFromBytes(layers, bytes);
+          // Pass context and filename
+          await readImageFileFromBytes(layers, bytes, context, imageName: fileName);
         }
       } else {
         final String path = result.files.single.path!;
@@ -195,19 +199,38 @@ Future<bool> openFileFromPath({
     try {
       if (extension == 'ora') {
         // File with support for layers
+        // Assuming readImageFromFilePathOra handles its own clearing and sizing or needs similar refactor
         await readImageFromFilePathOra(layers, path);
+        return true; // Assuming success if no error
       } else if (extension == 'tif' || extension == 'tiff') {
+        // Assuming readTiffFromFilePath handles its own clearing and sizing or needs similar refactor
         await readTiffFromFilePath(layers, path);
+        return true; // Assuming success if no error
       } else {
         // PNG, JPG, WEBP
-        await readImageFromFilePath(layers, path);
+        // Pass context, extract filename for layer name
+        final String fileName = path.split(Platform.pathSeparator).last;
+        return await readImageFromFilePath(layers, path, context, imageName: fileName);
       }
-      return true;
     } catch (e) {
+      // General error catch, readImageFromFilePath might have already shown a SnackBar for decode errors
       // ignore: use_build_context_synchronously
+      if (context.mounted) { // Check context validity
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error processing file: ${e.toString()}'),
+          ),
+        );
+      }
+      return false;
+    }
+  } else {
+    // Show unsupported format message
+    // ignore: use_build_context_synchronously
+    if (context.mounted) { // Check context validity
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error opening file: ${e.toString()}'),
+          content: Text('File format .$extension is not supported'),
           duration: const Duration(seconds: 3),
         ),
       );
@@ -254,55 +277,70 @@ bool isFileExtensionSupported(final String extension) {
 ///
 /// This function is responsible for handling the process of reading
 /// an image file. It performs the necessary operations to load the
-/// image data into memory for further processing or display.
-///
-/// Throws:
-/// - An exception if the file cannot be read or if an error occurs
-///   during the file reading process.
-Future<void> _readImageFile(
+/// Decodes image bytes, clears layers, sets canvas size, and adds the image.
+/// Handles decoding errors and shows a SnackBar.
+Future<bool> _decodeAndApplyImage(
   final LayersProvider layers,
-  final Future<Uint8List> bytesFuture,
-) async {
-  final ui.Image image = await decodeImageFromList(await bytesFuture);
-  layers.clear();
-  layers.addTop();
-  layers.size = Size(image.width.toDouble(), image.height.toDouble());
-  layers.selectedLayer.addImage(imageToAdd: image);
+  final Uint8List imageBytes,
+  final BuildContext context, {
+  final String imageName = 'Loaded Image',
+}) async {
+  try {
+    final ui.Image image = await decodeImageFromList(imageBytes);
+
+    layers.clear(); // Clear layers only after successful decoding
+    layers.size = Size(image.width.toDouble(), image.height.toDouble());
+    layers.addTop(name: imageName); // Add a new layer with the image name
+    layers.selectedLayer.addImage(imageToAdd: image);
+    layers.update(); // Notify listeners of all changes
+
+    return true; // Success
+  } catch (e) {
+    // ignore: use_build_context_synchronously
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load image: ${e.toString()}'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+    return false; // Failure
+  }
 }
 
 /// Reads an image from the specified file path.
-///
-/// This function asynchronously processes the file located at the given
-/// file path and attempts to read it as an image. It can be used to load
-/// image files for further processing or display.
-///
-/// Throws:
-/// - An exception if the file cannot be read or is not a valid image.
-///
-/// Returns:
-/// - A `Future` that completes when the image has been successfully read.
-Future<void> readImageFromFilePath(
+Future<bool> readImageFromFilePath(
   final LayersProvider layers,
   final String path,
-) async {
-  await _readImageFile(layers, File(path).readAsBytes());
+  final BuildContext context, {
+  final String imageName = 'Loaded Image',
+}) async {
+  try {
+    final Uint8List fileBytes = await File(path).readAsBytes();
+    return await _decodeAndApplyImage(layers, fileBytes, context, imageName: imageName);
+  } catch (e) {
+    // ignore: use_build_context_synchronously
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error reading file: ${e.toString()}'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+    return false;
+  }
 }
 
 /// Reads an image file from a byte array.
-///
-/// This function processes the provided byte data to extract and handle
-/// image information. It is typically used when the image data is already
-/// available in memory as a byte array, such as when loading images from
-/// a network or other non-file-based sources.
-///
-/// Returns a [Future] that completes when the image file has been
-/// successfully read and processed.
-Future<void> readImageFileFromBytes(
+Future<bool> readImageFileFromBytes(
   final LayersProvider layers,
   final Uint8List bytes,
-) async {
-  // ignore: always_specify_types
-  await _readImageFile(layers, Future.value(bytes));
+  final BuildContext context, {
+  final String imageName = 'Loaded Image',
+}) async {
+  return await _decodeAndApplyImage(layers, bytes, context, imageName: imageName);
 }
 
 /// Displays a confirmation dialog to the user asking if they want to discard
