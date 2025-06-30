@@ -48,7 +48,7 @@ class LayersProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Size _size = const Size(800, 600);
+  Size _size = const Size(1024, 768);
 
   /// Gets the size of the canvas.
   Size get size => _size;
@@ -118,26 +118,74 @@ class LayersProvider extends ChangeNotifier {
 
   /// Resizes the canvas.
   void canvasResize(
-    final int width,
-    final int height,
+    final int newWidth, // Renamed for clarity within this method
+    final int newHeight, // Renamed for clarity
     final CanvasResizePosition position,
   ) {
-    final Size oldSize = size;
-    final Size newSize = Size(width.toDouble(), height.toDouble());
-    size = newSize;
+    final UndoProvider undoProvider = UndoProvider();
 
-    if (width < oldSize.width || height < oldSize.height) {
-      final double scale = min(width / oldSize.width, height / oldSize.height);
-      this.scale = scale;
-    }
+    final Size oldSize = this.size;
+    final double oldViewScale = this.scale;
 
-    final Offset offset = anchorTranslate(
-      position,
-      oldSize,
-      newSize,
+    // The newSize is determined by the input parameters newWidth and newHeight
+    final Size newCurrentSize = Size(newWidth.toDouble(), newHeight.toDouble());
+
+    undoProvider.executeAction(
+      name: 'Resize Canvas',
+      forward: () {
+        // Apply new size
+        this.size = newCurrentSize; // Setter updates _size, layer.size, and notifies
+
+        // Adjust view scale if canvas became smaller (mimicking original logic)
+        // Note: this.scale refers to the view zoom, not image content scale
+        if (newWidth < oldSize.width || newHeight < oldSize.height) {
+          // Ensure oldSize dimensions are not zero to prevent division by zero or Infinity
+          double calculatedScale = 1.0; // Default scale
+          if (oldSize.width != 0 && oldSize.height != 0) {
+            // Check both to be safe for ratio
+            calculatedScale = min(newWidth / oldSize.width, newHeight / oldSize.height);
+          } else if (oldSize.width != 0) {
+            // Only width is non-zero
+            calculatedScale = newWidth / oldSize.width;
+          } else if (oldSize.height != 0) {
+            // Only height is non-zero
+            calculatedScale = newHeight / oldSize.height;
+          }
+          // If both oldSize.width and oldSize.height are zero, calculatedScale remains 1.0,
+          // which is a sensible default to avoid NaN/Infinity from division by zero.
+          this.scale = calculatedScale;
+        }
+        // If the canvas grew or stayed the same, the original logic didn't change this.scale,
+        // so we don't change it here either in that case.
+
+        // Calculate and apply content offset
+        final Offset forwardOffset = anchorTranslate(
+          position, // Anchor position
+          oldSize, // Size we are coming FROM
+          newCurrentSize, // Size we are going TO
+        );
+        this.offsetContent(forwardOffset);
+
+        this.update(); // Ensure all listeners are updated after all changes
+      },
+      backward: () {
+        // Revert to old size
+        this.size = oldSize; // Setter updates _size, layer.size, and notifies
+
+        // Restore old view scale
+        this.scale = oldViewScale;
+
+        // Calculate and apply reverse content offset
+        final Offset backwardOffset = anchorTranslate(
+          position, // Anchor position
+          newCurrentSize, // Size we are coming FROM (the size before undoing)
+          oldSize, // Size we are going TO
+        );
+        this.offsetContent(backwardOffset);
+
+        this.update(); // Ensure all listeners are updated after all changes
+      },
     );
-    this.offsetContent(offset);
-    update();
   }
 
   /// Adds a white background layer to the canvas.
