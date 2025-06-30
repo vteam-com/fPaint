@@ -215,13 +215,12 @@ class LayerProvider extends ChangeNotifier {
   ///
   /// [oldCanvasSize] is the size of the canvas *before* rotation (width, height will be swapped after this).
   Future<void> rotate90Clockwise(final Size oldCanvasSize) async {
-    final double oldCanvasWidth = oldCanvasSize.width;
     final double oldCanvasHeight = oldCanvasSize.height;
 
-    final List<UserActionDrawing> newActionStack = [];
+    final List<UserActionDrawing> newActionStack = <UserActionDrawing>[];
 
     for (final UserActionDrawing oldAction in actionStack) {
-      List<Offset> newPositions = List<Offset>.from(oldAction.positions);
+      final List<Offset> newPositions = List<Offset>.from(oldAction.positions);
       for (int i = 0; i < newPositions.length; i++) {
         final Offset oldPos = newPositions[i];
         // Clockwise: (x,y) -> (H_old - y, x)

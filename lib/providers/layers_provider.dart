@@ -476,7 +476,7 @@ class LayersProvider extends ChangeNotifier {
     // For now, the backward action will rotate 3 more times to get back to original.
 
     undoProvider.executeAction(
-      name: 'Rotate Canvas 90° CW',
+      name: 'Rotate Canvas 90° clock wise',
       forward: () async {
         for (final LayerProvider layer in _list) {
           await layer.rotate90Clockwise(oldSize);
@@ -489,7 +489,7 @@ class LayersProvider extends ChangeNotifier {
         // Rotate 3 times to get back to the original orientation.
         // Each rotation needs the "current" old size before that specific rotation.
         Size currentOldSize = newSize; // Size before the first CCW rotation
-        Size nextSize = oldSize;       // Size after the first CCW rotation
+        Size nextSize = oldSize; // Size after the first CCW rotation
 
         for (int i = 0; i < 3; i++) {
           for (final LayerProvider layer in _list) {
