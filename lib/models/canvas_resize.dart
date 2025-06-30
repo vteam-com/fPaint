@@ -20,48 +20,46 @@ enum CanvasResizePosition {
 /// Calculates the offset required to keep the anchor point in the same position after a resize.
 ///
 /// The [anchor] parameter specifies the anchor point to use for the calculation.
-/// The [source] parameter specifies the original size of the canvas.
-/// The [destination] parameter specifies the new size of the canvas.
-Offset anchorTranslate(
-  final CanvasResizePosition anchor,
-  final Size source,
-  final Size destination,
-) {
-  // Calculate the offset adjustment based on resize position
-  Offset offset = Offset.zero;
-
-  final double dx = (destination.width - source.width).toDouble();
-  final double dy = (destination.height - source.height).toDouble();
-
+Offset anchorFactors(final CanvasResizePosition anchor) {
   switch (anchor) {
     case CanvasResizePosition.topLeft:
-      offset = Offset.zero;
-      break;
+      return const Offset(0, 0);
     case CanvasResizePosition.top:
-      offset = Offset(dx / 2, 0);
-      break;
+      return const Offset(0.5, 0);
     case CanvasResizePosition.topRight:
-      offset = Offset(dx, 0);
-      break;
+      return const Offset(1, 0);
     case CanvasResizePosition.left:
-      offset = Offset(0, dy / 2);
-      break;
+      return const Offset(0, 0.5);
     case CanvasResizePosition.center:
-      offset = Offset(dx / 2, dy / 2);
-      break;
+      return const Offset(0.5, 0.5);
     case CanvasResizePosition.right:
-      offset = Offset(dx, dy / 2);
-      break;
+      return const Offset(1, 0.5);
     case CanvasResizePosition.bottomLeft:
-      offset = Offset(0, dy);
-      break;
+      return const Offset(0, 1);
     case CanvasResizePosition.bottom:
-      offset = Offset(dx / 2, dy);
-      break;
+      return const Offset(0.5, 1);
     case CanvasResizePosition.bottomRight:
-      offset = Offset(dx, dy);
-      break;
+      return const Offset(1, 1);
+  }
+}
+
+/// Calculates the translation offset for the given anchor position.
+Offset anchorTranslate(
+  final CanvasResizePosition anchor,
+  final Size fromSize,
+  final Size toSize,
+) {
+  final Offset factors = anchorFactors(anchor);
+
+  // Special handling for center anchor to maintain visual centering
+  if (anchor == CanvasResizePosition.center) {
+    final double dx = (toSize.width - fromSize.width) / 2;
+    final double dy = (toSize.height - fromSize.height) / 2;
+    return Offset(dx, dy);
   }
 
-  return offset;
+  // For other anchors, remove negative sign to fix inverse behavior
+  final double dx = (toSize.width - fromSize.width) * factors.dx;
+  final double dy = (toSize.height - fromSize.height) * factors.dy;
+  return Offset(dx, dy);
 }

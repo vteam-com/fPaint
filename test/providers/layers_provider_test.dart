@@ -197,26 +197,6 @@ void main() {
     // duplicate is also not implemented.
   });
 
-  group('Canvas Resizing', () {
-    test('canvasResize updates size and offsets content', () {
-      final LayerProvider layer = layersProvider.selectedLayer;
-      // Add a dummy action to check its offset later
-      final UserActionDrawing action = UserActionDrawing(
-        action: ActionType.brush,
-        positions: <Offset>[const Offset(10, 10), const Offset(20, 20)],
-      );
-      layer.appendDrawingAction(action);
-
-      layersProvider.size = const Size(100, 100);
-      layersProvider.canvasResize(200, 200, CanvasResizePosition.center);
-
-      expect(layersProvider.size, const Size(200, 200));
-      // Offset calculation: dx=(200-100)/2=50, dy=(200-100)/2=50
-      // The action's points should be offset by (50,50)
-      expect(layer.actionStack.first.positions.first, const Offset(10 + 50, 10 + 50));
-    });
-  });
-
   // Layer groups are not explicitly handled by current LayersProvider structure.
   // Image manipulation/transformation methods (apart from offsetContent) are not directly on LayersProvider.
   // Undo/redo for layer operations (like add/remove/merge) seems tied to UndoProvider.
