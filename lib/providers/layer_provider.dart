@@ -1,5 +1,6 @@
 // Imports
 import 'dart:async';
+import 'dart:math'; // Added for pi
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -207,6 +208,102 @@ class LayerProvider extends ChangeNotifier {
         );
       }
     }
+    clearCache();
+  }
+
+  /// Rotates all actions and content in the layer by 90 degrees clockwise.
+  ///
+  /// [oldCanvasSize] is the size of the canvas *before* rotation (width, height will be swapped after this).
+  Future<void> rotate90Clockwise(final Size oldCanvasSize) async {
+    final double oldCanvasWidth = oldCanvasSize.width;
+    final double oldCanvasHeight = oldCanvasSize.height;
+
+    // The new width of the canvas will be the old height, used for y-coordinate transformation
+    final double newCanvasWidth = oldCanvasHeight;
+
+    for (final UserActionDrawing action in actionStack) {
+      // 1. Transform positions
+      for (int i = 0; i < action.positions.length; i++) {
+        final Offset oldPos = action.positions[i];
+        // Rotation: (x, y) -> (oldCanvasHeight - y, x)
+        // This formula assumes y increases downwards and rotation is around (0,0)
+        // then adjusted for the new canvas coordinate system.
+        // Let's adjust to rotate around (0,0) then place in new frame:
+        // (x, y) -> (y, oldCanvasWidth - x) for counter-clockwise
+        // (x, y) -> (oldCanvasHeight - y, x) for clockwise if origin top-left
+        // For clockwise rotation: newX = oldY, newY = oldCanvasWidth - oldX
+        // Considering the canvas dimensions also swap:
+        // newX = oldY
+        // newY = oldCanvasWidth - oldX (if rotating into a frame of same dimensions then translating)
+        // If canvas itself swaps (W,H) -> (H,W):
+        // A point (x,y) on old canvas (W,H) becomes (y, W-x) on new canvas (H,W)
+        action.positions[i] = Offset(oldPos.dy, oldCanvasWidth - oldPos.dx);
+      }
+
+      // 2. Transform path (if it exists)
+      if (action.path != null) {
+        final Matrix4 transformMatrix = Matrix4.identity()
+          ..translate(0.0, oldCanvasWidth) // Translate for new coordinate system after rotation
+          ..rotateZ(-pi / 2); // Rotate 90 degrees clockwise (negative for Z is clockwise in Flutter)
+                                 // Note: Flutter's +Z is out of screen, +angle is CCW.
+                                 // So, -pi/2 should be CW.
+        // Or, more directly: translate to origin, rotate, translate to new position.
+        // For (x,y) -> (y, W-x):
+        // Matrix:
+        // [ 0  1  0 ]
+        // [ -1 0  W ]
+        // [ 0  0  1 ]
+        // This can be achieved by:
+        // 1. Rotate -90 deg around Z: results in (y, -x)
+        //    [ cos(-90) -sin(-90) 0 ] = [  0  1  0 ]
+        //    [ sin(-90)  cos(-90) 0 ] = [ -1  0  0 ]
+        //    [    0       0     1 ]   [  0  0  1 ]
+        // 2. Translate by (0, oldCanvasWidth): results in (y, oldCanvasWidth -x)
+        final Matrix4 matrix = Matrix4.identity();
+        matrix.setEntry(0, 0, 0);
+        matrix.setEntry(0, 1, 1);
+        matrix.setEntry(1, 0, -1);
+        matrix.setEntry(1, 1, 0);
+        matrix.setEntry(1, 3, oldCanvasWidth); // Translation in Y
+        action.path = action.path!.transform(matrix.storage);
+      }
+
+      // 3. Transform clipPath (if it exists)
+      if (action.clipPath != null) {
+        // Apply the same transformation as for action.path
+        final Matrix4 matrix = Matrix4.identity();
+        matrix.setEntry(0, 0, 0);
+        matrix.setEntry(0, 1, 1);
+        matrix.setEntry(1, 0, -1);
+        matrix.setEntry(1, 1, 0);
+        matrix.setEntry(1, 3, oldCanvasWidth);
+        action.clipPath = action.clipPath!.transform(matrix.storage);
+      }
+
+      // 4. Rotate image (if it exists)
+      if (action.image != null) {
+        final ui.Image originalImage = action.image!;
+        final ui.PictureRecorder recorder = ui.PictureRecorder();
+        final Canvas canvas = Canvas(recorder);
+        final double newImageWidth = originalImage.height.toDouble();
+        final double newImageHeight = originalImage.width.toDouble();
+
+        // Translate to the center of the new rotated image dimensions for rotation
+        canvas.translate(newImageWidth / 2, newImageHeight / 2);
+        canvas.rotate(pi / 2); // 90 degrees clockwise
+        // Draw the original image centered at the new origin
+        canvas.drawImage(
+          originalImage,
+          Offset(-originalImage.width / 2, -originalImage.height / 2),
+          Paint(),
+        );
+        action.image = await recorder.endRecording().toImage(
+          newImageWidth.toInt(),
+          newImageHeight.toInt(),
+        );
+      }
+    }
+    // The layer's own size will be updated by LayersProvider after all layers are processed.
     clearCache();
   }
 
