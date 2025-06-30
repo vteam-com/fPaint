@@ -258,7 +258,7 @@ class LayerProvider extends ChangeNotifier {
         final double newImageHeight = originalImage.width.toDouble();
 
         canvas.translate(newImageWidth / 2, newImageHeight / 2);
-        canvas.rotate(pi / 2); // 90 degrees clockwise
+        canvas.rotate(-pi / 2); // 90 degrees clockwise (Flutter canvas +angle is CCW)
         canvas.drawImage(
           originalImage,
           Offset(-originalImage.width / 2, -originalImage.height / 2),
