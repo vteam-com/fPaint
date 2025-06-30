@@ -71,6 +71,7 @@ class AppProvider extends ChangeNotifier {
   /// Clears the canvas.
   void canvasClear(final Size size) {
     layers.clear();
+    // Ensure layers.size is explicitly set from the size parameter
     layers.size = size;
     layers.addWhiteBackgroundLayer();
     layers.selectedLayerIndex = 0;
