@@ -464,6 +464,51 @@ class LayersProvider extends ChangeNotifier {
     return this.cachedImage!;
   }
 
+  /// Rotates the entire canvas and all its layers 90 degrees clockwise.
+  Future<void> rotateCanvas90Clockwise() async {
+    final UndoProvider undoProvider = UndoProvider();
+    final Size oldSize = Size(width, height);
+    final Size newSize = Size(height, width); // Swapped dimensions
+
+    // Need to capture the state of all layers for undo.
+    // This is tricky because layer.rotate90Clockwise modifies actions in place.
+    // For a true undo, we'd need to implement rotate90CounterClockwise or store/restore actionStacks.
+    // For now, the backward action will rotate 3 more times to get back to original.
+
+    undoProvider.executeAction(
+      name: 'Rotate Canvas 90° clock wise',
+      forward: () async {
+        for (final LayerProvider layer in _list) {
+          await layer.rotate90Clockwise(oldSize);
+          layer.size = newSize; // Update individual layer's understanding of canvas size
+        }
+        this.size = newSize; // Update LayersProvider's canvas size
+        this.update();
+      },
+      backward: () async {
+        // Rotate 3 times to get back to the original orientation.
+        // Each rotation needs the "current" old size before that specific rotation.
+        Size currentOldSize = newSize; // Size before the first CCW rotation
+        Size nextSize = oldSize; // Size after the first CCW rotation
+
+        for (int i = 0; i < 3; i++) {
+          for (final LayerProvider layer in _list) {
+            // Effectively rotating counter-clockwise by passing the "new" size as old,
+            // because rotate90Clockwise expects the size *before* its CW rotation.
+            await layer.rotate90Clockwise(currentOldSize);
+            layer.size = nextSize;
+          }
+          this.size = nextSize;
+
+          // Prepare for next rotation
+          currentOldSize = this.size;
+          nextSize = Size(currentOldSize.height, currentOldSize.width);
+        }
+        this.update();
+      },
+    );
+  }
+
   /// Captures the canvas panel to an image and returns the image bytes.
   Future<Uint8List> capturePainterToImageBytes() async {
     final ui.Image image = await capturePainterToImage();
