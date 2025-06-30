@@ -216,7 +216,7 @@ class LayerProvider extends ChangeNotifier {
   /// [oldCanvasSize] is the size of the canvas *before* rotation (width, height will be swapped after this).
   Future<void> rotate90Clockwise(final Size oldCanvasSize) async {
     final double oldCanvasWidth = oldCanvasSize.width;
-    // final double oldCanvasHeight = oldCanvasSize.height; // newCanvasWidth can be used instead if needed
+    final double oldCanvasHeight = oldCanvasSize.height;
 
     final List<UserActionDrawing> newActionStack = [];
 
@@ -224,28 +224,36 @@ class LayerProvider extends ChangeNotifier {
       List<Offset> newPositions = List<Offset>.from(oldAction.positions);
       for (int i = 0; i < newPositions.length; i++) {
         final Offset oldPos = newPositions[i];
-        newPositions[i] = Offset(oldPos.dy, oldCanvasWidth - oldPos.dx);
+        // Clockwise: (x,y) -> (H_old - y, x)
+        newPositions[i] = Offset(oldCanvasHeight - oldPos.dy, oldPos.dx);
       }
 
       ui.Path? newPath = oldAction.path;
       if (oldAction.path != null) {
+        // Matrix for: x' = H - y; y' = x
+        // [ 0 -1 H ]
+        // [ 1  0 0 ]
+        // [ 0  0 1 ]
         final Matrix4 matrix = Matrix4.identity();
-        matrix.setEntry(0, 0, 0);
-        matrix.setEntry(0, 1, 1);
-        matrix.setEntry(1, 0, -1);
-        matrix.setEntry(1, 1, 0);
-        matrix.setEntry(1, 3, oldCanvasWidth); // Translation in Y
+        matrix.setEntry(0, 0, 0.0);
+        matrix.setEntry(0, 1, -1.0);
+        matrix.setEntry(0, 3, oldCanvasHeight); // Translation for x' = H-y
+        matrix.setEntry(1, 0, 1.0);
+        matrix.setEntry(1, 1, 0.0);
+        matrix.setEntry(1, 3, 0.0); // No translation for y'
         newPath = oldAction.path!.transform(matrix.storage);
       }
 
       ui.Path? newClipPath = oldAction.clipPath;
       if (oldAction.clipPath != null) {
+        // Apply the same transformation
         final Matrix4 matrix = Matrix4.identity();
-        matrix.setEntry(0, 0, 0);
-        matrix.setEntry(0, 1, 1);
-        matrix.setEntry(1, 0, -1);
-        matrix.setEntry(1, 1, 0);
-        matrix.setEntry(1, 3, oldCanvasWidth);
+        matrix.setEntry(0, 0, 0.0);
+        matrix.setEntry(0, 1, -1.0);
+        matrix.setEntry(0, 3, oldCanvasHeight);
+        matrix.setEntry(1, 0, 1.0);
+        matrix.setEntry(1, 1, 0.0);
+        matrix.setEntry(1, 3, 0.0);
         newClipPath = oldAction.clipPath!.transform(matrix.storage);
       }
 
