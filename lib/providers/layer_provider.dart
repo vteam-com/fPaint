@@ -1,5 +1,6 @@
 // Imports
 import 'dart:async';
+import 'dart:math'; // Added for pi
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -207,6 +208,93 @@ class LayerProvider extends ChangeNotifier {
         );
       }
     }
+    clearCache();
+  }
+
+  /// Rotates all actions and content in the layer by 90 degrees clockwise.
+  ///
+  /// [oldCanvasSize] is the size of the canvas *before* rotation (width, height will be swapped after this).
+  Future<void> rotate90Clockwise(final Size oldCanvasSize) async {
+    final double oldCanvasHeight = oldCanvasSize.height;
+
+    final List<UserActionDrawing> newActionStack = <UserActionDrawing>[];
+
+    for (final UserActionDrawing oldAction in actionStack) {
+      final List<Offset> newPositions = List<Offset>.from(oldAction.positions);
+      for (int i = 0; i < newPositions.length; i++) {
+        final Offset oldPos = newPositions[i];
+        // Clockwise: (x,y) -> (H_old - y, x)
+        newPositions[i] = Offset(oldCanvasHeight - oldPos.dy, oldPos.dx);
+      }
+
+      ui.Path? newPath = oldAction.path;
+      if (oldAction.path != null) {
+        // Matrix for: x' = H - y; y' = x
+        // [ 0 -1 H ]
+        // [ 1  0 0 ]
+        // [ 0  0 1 ]
+        final Matrix4 matrix = Matrix4.identity();
+        matrix.setEntry(0, 0, 0.0);
+        matrix.setEntry(0, 1, -1.0);
+        matrix.setEntry(0, 3, oldCanvasHeight); // Translation for x' = H-y
+        matrix.setEntry(1, 0, 1.0);
+        matrix.setEntry(1, 1, 0.0);
+        matrix.setEntry(1, 3, 0.0); // No translation for y'
+        newPath = oldAction.path!.transform(matrix.storage);
+      }
+
+      ui.Path? newClipPath = oldAction.clipPath;
+      if (oldAction.clipPath != null) {
+        // Apply the same transformation
+        final Matrix4 matrix = Matrix4.identity();
+        matrix.setEntry(0, 0, 0.0);
+        matrix.setEntry(0, 1, -1.0);
+        matrix.setEntry(0, 3, oldCanvasHeight);
+        matrix.setEntry(1, 0, 1.0);
+        matrix.setEntry(1, 1, 0.0);
+        matrix.setEntry(1, 3, 0.0);
+        newClipPath = oldAction.clipPath!.transform(matrix.storage);
+      }
+
+      ui.Image? newImage = oldAction.image;
+      if (oldAction.image != null) {
+        final ui.Image originalImage = oldAction.image!;
+        final ui.PictureRecorder recorder = ui.PictureRecorder();
+        final Canvas canvas = Canvas(recorder);
+        final double newImageWidth = originalImage.height.toDouble();
+        final double newImageHeight = originalImage.width.toDouble();
+
+        canvas.translate(newImageWidth / 2, newImageHeight / 2);
+        canvas.rotate(-pi / 2); // 90 degrees clockwise (Flutter canvas +angle is CCW)
+        canvas.drawImage(
+          originalImage,
+          Offset(-originalImage.width / 2, -originalImage.height / 2),
+          Paint(),
+        );
+        newImage = await recorder.endRecording().toImage(
+          newImageWidth.toInt(),
+          newImageHeight.toInt(),
+        );
+      }
+
+      newActionStack.add(
+        UserActionDrawing(
+          action: oldAction.action,
+          positions: newPositions,
+          brush: oldAction.brush,
+          fillColor: oldAction.fillColor,
+          gradient: oldAction.gradient,
+          path: newPath,
+          image: newImage,
+          clipPath: newClipPath,
+        ),
+      );
+    }
+
+    actionStack.clear();
+    actionStack.addAll(newActionStack);
+
+    // The layer's own size will be updated by LayersProvider after all layers are processed.
     clearCache();
   }
 

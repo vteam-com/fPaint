@@ -3,6 +3,7 @@ import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/models/localized_strings.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
+import 'package:fpaint/providers/app_provider.dart'; // Added for AppProvider
 import 'package:fpaint/providers/shell_provider.dart';
 
 /// A widget that displays the top menu of the side panel.
@@ -51,6 +52,15 @@ class SidePanelTopMenu extends StatelessWidget {
             tooltip: strings[StringId.exportTooltip]!,
             icon: Icons.ios_share_outlined,
             onPressed: () => sharePanel(context),
+          ),
+        if (shellProvider.isSidePanelExpanded) // Show when panel is expanded
+          buildIconButton(
+            tooltip: 'Rotate Canvas 90° CW', // TODO: Localize this string
+            icon: Icons.rotate_90_degrees_cw_outlined,
+            onPressed: () async {
+              final AppProvider appProvider = AppProvider.of(context);
+              await appProvider.rotateCanvas90();
+            },
           ),
         if (!shellProvider.showMenu)
           buildIconButton(

@@ -670,6 +670,15 @@ class AppProvider extends ChangeNotifier {
     }
   }
 
+  /// Rotates the canvas 90 degrees clockwise.
+  Future<void> rotateCanvas90() async {
+    await layers.rotateCanvas90Clockwise();
+    // After rotation, the view might need to be reset or adjusted.
+    // For now, a simple resetView() will ensure it's centered and at 1.0 scale.
+    // A more sophisticated approach might try to maintain zoom or fit to screen.
+    resetView(); // This also calls update()
+  }
+
   //=============================================================================
   /// Notifies all listeners that the model has been updated.
   /// This method should be called whenever the state of the model changes
