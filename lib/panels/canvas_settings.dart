@@ -64,7 +64,9 @@ void showCanvasSettings(final BuildContext context) {
                       controller: widthController,
                       onChanged: (final String value) {
                         if (layers.canvasResizeLockAspectRatio) {
-                          if (initialAspectRatio == 0) return; // Avoid division by zero
+                          if (initialAspectRatio == 0) {
+                            return; // Avoid division by zero
+                          }
                           final double currentParsedWidth = double.tryParse(value) ?? double.tryParse(widthController.text) ?? layers.size.width;
                           final double newHeight = currentParsedWidth / initialAspectRatio;
                           heightController.value = TextEditingValue(text: newHeight.toInt().toString());
