@@ -377,7 +377,7 @@ class MainViewState extends State<MainView> {
       decoration: BoxDecoration(
         gradient: RadialGradient(
           center: Alignment.topCenter,
-          colors: <ui.Color>[
+          colors: <Color>[
             Colors.grey.shade50,
             Colors.grey.shade500,
           ],
@@ -391,9 +391,7 @@ class MainViewState extends State<MainView> {
             appProvider.canvasOffset.dx,
             appProvider.canvasOffset.dy,
           )
-          ..scale(
-            appProvider.layers.scale,
-          ), // Use appProvider.layers.scale here
+          ..scale(appProvider.layers.scale),
         child: SizedBox(
           width: appProvider.layers.width,
           height: appProvider.layers.height,

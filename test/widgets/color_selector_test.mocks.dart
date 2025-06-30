@@ -1043,11 +1043,11 @@ class MockLayersProvider extends _i1.Mock implements _i4.LayersProvider {
 
   @override
   void canvasResize(
-    int? width,
-    int? height,
-    _i14.CanvasResizePosition? position,
+    int newWidth,
+    int newHeight,
+    _i14.CanvasResizePosition anchor,
   ) => super.noSuchMethod(
-    Invocation.method(#canvasResize, [width, height, position]),
+    Invocation.method(#canvasResize, [newWidth, newHeight, anchor]),
     returnValueForMissingStub: null,
   );
 

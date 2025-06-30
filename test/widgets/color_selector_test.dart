@@ -344,6 +344,9 @@ void main() {
         hueSliderInDialog.onChanged!(120.0);
         await tester.pumpAndSettle();
 
+        await tester.tap(find.text('OK')); // or whatever the confirm button is labeled
+        await tester.pumpAndSettle();
+
         expect(selectedColorOut.value, expectedSelectedColor.value);
 
         // Close dialog
