@@ -141,12 +141,15 @@ class LayersProvider extends ChangeNotifier {
         if (newWidth < oldSize.width || newHeight < oldSize.height) {
           // Ensure oldSize dimensions are not zero to prevent division by zero or Infinity
           double calculatedScale = 1.0; // Default scale
-          if (oldSize.width != 0 && oldSize.height != 0) { // Check both to be safe for ratio
-             calculatedScale = min(newWidth / oldSize.width, newHeight / oldSize.height);
-          } else if (oldSize.width != 0) { // Only width is non-zero
-             calculatedScale = newWidth / oldSize.width;
-          } else if (oldSize.height != 0) { // Only height is non-zero
-             calculatedScale = newHeight / oldSize.height;
+          if (oldSize.width != 0 && oldSize.height != 0) {
+            // Check both to be safe for ratio
+            calculatedScale = min(newWidth / oldSize.width, newHeight / oldSize.height);
+          } else if (oldSize.width != 0) {
+            // Only width is non-zero
+            calculatedScale = newWidth / oldSize.width;
+          } else if (oldSize.height != 0) {
+            // Only height is non-zero
+            calculatedScale = newHeight / oldSize.height;
           }
           // If both oldSize.width and oldSize.height are zero, calculatedScale remains 1.0,
           // which is a sensible default to avoid NaN/Infinity from division by zero.
@@ -158,7 +161,7 @@ class LayersProvider extends ChangeNotifier {
         // Calculate and apply content offset
         final Offset forwardOffset = anchorTranslate(
           position, // Anchor position
-          oldSize,  // Size we are coming FROM
+          oldSize, // Size we are coming FROM
           newCurrentSize, // Size we are going TO
         );
         this.offsetContent(forwardOffset);
@@ -174,9 +177,9 @@ class LayersProvider extends ChangeNotifier {
 
         // Calculate and apply reverse content offset
         final Offset backwardOffset = anchorTranslate(
-          position,       // Anchor position
+          position, // Anchor position
           newCurrentSize, // Size we are coming FROM (the size before undoing)
-          oldSize,        // Size we are going TO
+          oldSize, // Size we are going TO
         );
         this.offsetContent(backwardOffset);
 

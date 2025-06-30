@@ -67,7 +67,8 @@ void showCanvasSettings(final BuildContext context) {
                           if (initialAspectRatio == 0) {
                             return; // Avoid division by zero
                           }
-                          final double currentParsedWidth = double.tryParse(value) ?? double.tryParse(widthController.text) ?? layers.size.width;
+                          final double currentParsedWidth =
+                              double.tryParse(value) ?? double.tryParse(widthController.text) ?? layers.size.width;
                           final double newHeight = currentParsedWidth / initialAspectRatio;
                           heightController.value = TextEditingValue(text: newHeight.toInt().toString());
                         }
@@ -84,7 +85,10 @@ void showCanvasSettings(final BuildContext context) {
                         // Attempt to recalculate aspect ratio from current text field values when locking
                         final double? currentWidthFromField = double.tryParse(widthController.text);
                         final double? currentHeightFromField = double.tryParse(heightController.text);
-                        if (currentWidthFromField != null && currentHeightFromField != null && currentWidthFromField > 0 && currentHeightFromField > 0) {
+                        if (currentWidthFromField != null &&
+                            currentHeightFromField != null &&
+                            currentWidthFromField > 0 &&
+                            currentHeightFromField > 0) {
                           initialAspectRatio = currentWidthFromField / currentHeightFromField;
                         }
                         // If parsing fails or values are non-positive, initialAspectRatio remains as it was.
@@ -104,7 +108,8 @@ void showCanvasSettings(final BuildContext context) {
                       controller: heightController,
                       onChanged: (final String value) {
                         if (layers.canvasResizeLockAspectRatio) {
-                          final double currentParsedHeight = double.tryParse(value) ?? double.tryParse(heightController.text) ?? layers.size.height;
+                          final double currentParsedHeight =
+                              double.tryParse(value) ?? double.tryParse(heightController.text) ?? layers.size.height;
                           final double newWidth = currentParsedHeight * initialAspectRatio;
                           widthController.text = newWidth.toInt().toString();
                         }
@@ -146,8 +151,7 @@ void showCanvasSettings(final BuildContext context) {
                           content: Text('Canvas dimensions must be positive.'),
                         ),
                       );
-                    }
-                    else {
+                    } else {
                       layers.canvasResize(
                         width.toInt(),
                         height.toInt(),

@@ -137,6 +137,7 @@ Future<void> onFileOpen(final BuildContext context) async {
           await readTiffFileFromBytes(layers, bytes);
         } else if (isFileExtensionSupported(extension)) {
           // Pass context and filename
+          // ignore: use_build_context_synchronously
           await readImageFileFromBytes(layers, bytes, context, imageName: fileName);
         }
       } else {
@@ -215,7 +216,8 @@ Future<bool> openFileFromPath({
     } catch (e) {
       // General error catch, readImageFromFilePath might have already shown a SnackBar for decode errors
       // ignore: use_build_context_synchronously
-      if (context.mounted) { // Check context validity
+      if (context.mounted) {
+        // Check context validity
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error processing file: ${e.toString()}'),
@@ -227,17 +229,18 @@ Future<bool> openFileFromPath({
   } else {
     // Show unsupported format message
     // ignore: use_build_context_synchronously
-    if (context.mounted) { // Check context validity
+    if (context.mounted) {
+      // Check context validity
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('File format .$extension is not supported'),
           duration: const Duration(seconds: 3),
         ),
       );
-      }
-      return false; // Return false regardless of context.mounted if format is not supported
     }
-    // Removed duplicated else block
+    return false; // Return false regardless of context.mounted if format is not supported
+  }
+  // Removed duplicated else block
 }
 
 final List<String> supportedImageFileExtensions = <String>[
@@ -309,6 +312,7 @@ Future<bool> readImageFromFilePath(
 }) async {
   try {
     final Uint8List fileBytes = await File(path).readAsBytes();
+    // ignore: use_build_context_synchronously
     return await _decodeAndApplyImage(layers, fileBytes, context, imageName: imageName);
   } catch (e) {
     // ignore: use_build_context_synchronously
