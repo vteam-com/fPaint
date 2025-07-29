@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -18,6 +19,7 @@ class UserActionDrawing {
     this.path,
     this.image,
     this.clipPath,
+    this.textObject,
   });
 
   /// The type of action performed.
@@ -44,6 +46,9 @@ class UserActionDrawing {
   /// Optional clip path used for the action.
   ui.Path? clipPath;
 
+  /// Optional text for the action.
+  final TextObject? textObject;
+
   @override
   String toString() {
     return '$action';
@@ -62,6 +67,7 @@ enum ActionType {
   eraser,
   image,
   cut,
+  text,
   selector;
 
   /// Checks if the action type supports the given attribute.
@@ -106,6 +112,8 @@ Widget iconFromaActionType(
       return iconAndColor(Icons.crop_free, isSelected);
     case ActionType.selector:
       return iconAndColor(Symbols.select, isSelected);
+    case ActionType.text:
+      return iconAndColor(Icons.font_download, isSelected);
   }
 }
 
@@ -172,5 +180,10 @@ final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = <ActionType
   },
   ActionType.selector: <ActionOptions>{
     ActionOptions.selectorOptions,
+  },
+  ActionType.text: <ActionOptions>{
+    ActionOptions.brushColor,
+    ActionOptions.brushSize,
+    ActionOptions.topColors,
   },
 };

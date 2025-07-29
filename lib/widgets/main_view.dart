@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/material.dart' as ui;
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
+import 'package:fpaint/widgets/text_editor.dart';
 
 /// The main view of the application, which is a stateful widget.
 /// This widget is responsible for managing the state of the main view,
@@ -269,6 +272,8 @@ class MainViewState extends State<MainView> {
               },
             ),
           ),
+
+        if (appProvider.selectedTextObject != null) const TextEditor(),
       ],
     );
   }
@@ -459,6 +464,27 @@ class MainViewState extends State<MainView> {
       //
       // Special case, one clik action flood fill does not need to be tracked
       //
+      if (appProvider.selectedAction == ActionType.text) {
+        // Find text object at the clicked position using accurate bounds
+        TextObject? selectedText;
+
+        for (final UserActionDrawing action in appProvider.layers.selectedLayer.actionStack) {
+          if (action.textObject != null && action.textObject!.containsPoint(adjustedPosition)) {
+            selectedText = action.textObject;
+            break;
+          }
+        }
+
+        if (selectedText != null) {
+          appProvider.selectedTextObject = selectedText;
+          appProvider.update();
+          return;
+        }
+
+        _showTextDialog(appProvider, adjustedPosition);
+        return;
+      }
+
       if (appProvider.selectedAction == ActionType.fill) {
         if (appProvider.fillModel.mode == FillMode.solid) {
           //
@@ -584,5 +610,162 @@ class MainViewState extends State<MainView> {
       appProvider.layers.selectedLayer.clearCache();
       appProvider.update();
     }
+  }
+
+  void _showTextDialog(final AppProvider appProvider, final Offset position) {
+    final TextEditingController controller = TextEditingController();
+    double fontSize = appProvider.brushSize;
+    Color textColor = appProvider.brushColor;
+    FontWeight fontWeight = FontWeight.normal;
+    FontStyle fontStyle = FontStyle.normal;
+
+    // Use a post frame callback to ensure the dialog shows after the current frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        showDialog<void>(
+          context: context,
+          builder: (final BuildContext context) {
+            return StatefulBuilder(
+              builder: (final BuildContext context, final StateSetter setState) {
+                return AlertDialog(
+                  title: const Text('Add Text'),
+                  content: SizedBox(
+                    width: 400,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        // Text input field
+                        TextField(
+                          controller: controller,
+                          autofocus: true,
+                          maxLines: null,
+                          keyboardType: TextInputType.multiline,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter your text here...',
+                            border: OutlineInputBorder(),
+                          ),
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            color: textColor,
+                            fontWeight: fontWeight,
+                            fontStyle: fontStyle,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Font size control
+                        Text('Font Size: ${fontSize.round()}'),
+                        Slider(
+                          value: fontSize,
+                          min: 8,
+                          max: 72,
+                          divisions: 32,
+                          onChanged: (final double value) {
+                            setState(() {
+                              fontSize = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Style controls
+                        Row(
+                          children: <Widget>[
+                            // Bold toggle
+                            IconButton(
+                              icon: Icon(
+                                Icons.format_bold,
+                                color: fontWeight == FontWeight.bold ? Colors.blue : Colors.grey,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  fontWeight = fontWeight == FontWeight.bold ? FontWeight.normal : FontWeight.bold;
+                                });
+                              },
+                            ),
+
+                            // Italic toggle
+                            IconButton(
+                              icon: Icon(
+                                Icons.format_italic,
+                                color: fontStyle == FontStyle.italic ? Colors.blue : Colors.grey,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  fontStyle = fontStyle == FontStyle.italic ? FontStyle.normal : FontStyle.italic;
+                                });
+                              },
+                            ),
+
+                            const Spacer(),
+
+                            // Color picker button
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: textColor,
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: IconButton(
+                                icon: const Icon(Icons.color_lens, color: Colors.white),
+                                onPressed: () async {
+                                  showColorPicker(
+                                    context: context,
+                                    title: 'Text Color',
+                                    color: textColor,
+                                    onSelectedColor: (final Color color) {
+                                      setState(() {
+                                        textColor = color;
+                                      });
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: const Text('Add Text'),
+                      onPressed: () {
+                        if (controller.text.isNotEmpty) {
+                          appProvider.recordExecuteDrawingActionToSelectedLayer(
+                            action: UserActionDrawing(
+                              action: ActionType.text,
+                              positions: <ui.Offset>[position],
+                              textObject: TextObject(
+                                text: controller.text,
+                                position: position,
+                                color: textColor,
+                                size: fontSize,
+                                fontWeight: fontWeight,
+                                fontStyle: fontStyle,
+                              ),
+                            ),
+                          );
+                        }
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        );
+      }
+    });
   }
 }

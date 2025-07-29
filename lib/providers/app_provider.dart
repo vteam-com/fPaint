@@ -9,6 +9,7 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
@@ -419,7 +420,9 @@ class AppProvider extends ChangeNotifier {
 
   /// Updates the end of an action.
   void updateActionEnd(final Offset position) {
-    layers.selectedLayer.lastUserAction!.positions.last = position;
+    if (layers.selectedLayer.lastUserAction != null) {
+      layers.selectedLayer.lastUserAction!.positions.last = position;
+    }
   }
 
   /// Appends a line from the last user action.
@@ -678,6 +681,8 @@ class AppProvider extends ChangeNotifier {
     // A more sophisticated approach might try to maintain zoom or fit to screen.
     resetView(); // This also calls update()
   }
+
+  TextObject? selectedTextObject;
 
   //=============================================================================
   /// Notifies all listeners that the model has been updated.
