@@ -8,6 +8,7 @@ import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
+import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/top_colors.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -160,6 +161,19 @@ class ToolsPanel extends StatelessWidget {
           appProvider.selectedAction = ActionType.selector;
         },
       ),
+
+      // Text
+      ToolPanelPicker(
+        minimal: minimal,
+        name: 'Text',
+        image: iconFromaActionType(
+          ActionType.text,
+          selectedTool == ActionType.text,
+        ),
+        onPressed: () {
+          appProvider.selectedAction = ActionType.text;
+        },
+      ),
     ];
     return tools;
   }
@@ -238,6 +252,13 @@ class ToolsPanel extends StatelessWidget {
         addToolOptionTopColors(widgets, layers, appProvider, minimal);
         break;
 
+      case ActionType.text:
+        widgets.add(
+          const TextAttributesWidget(
+            minimal: false,
+          ),
+        );
+        break;
       case ActionType.selector:
         widgets.add(
           ToolAttributeWidget(

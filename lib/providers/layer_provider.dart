@@ -590,6 +590,16 @@ class LayerProvider extends ChangeNotifier {
         case ActionType.selector:
           // the rendering for this tool is done below
           break;
+        case ActionType.text:
+          applyAction(
+            canvas,
+            userAction.clipPath,
+            (final Canvas theCanvasToUse) => renderText(
+              theCanvasToUse,
+              userAction.textObject!,
+            ),
+          );
+          break;
       }
     }
 

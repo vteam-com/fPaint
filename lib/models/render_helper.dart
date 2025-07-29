@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 
 /// Renders a pencil stroke on the canvas.
@@ -334,4 +335,43 @@ Path createDashedPath(
     }
   }
   return dashedPath;
+}
+
+/// Renders text on the canvas.
+///
+/// The [canvas] parameter is the canvas to draw on.
+/// The [textObject] parameter is the text object to render.
+void renderText(
+  final Canvas canvas,
+  final TextObject textObject,
+) {
+  if (textObject.text.isEmpty || textObject.text == 'Type here...') {
+    return; // Don't render empty or placeholder text
+  }
+
+  final ui.ParagraphBuilder paragraphBuilder =
+      ui.ParagraphBuilder(
+          ui.ParagraphStyle(
+            textAlign: TextAlign.left,
+            fontSize: textObject.size,
+            height: 1.2, // Better line height for readability
+          ),
+        )
+        ..pushStyle(
+          ui.TextStyle(
+            color: textObject.color,
+            fontWeight: textObject.fontWeight,
+            fontStyle: textObject.fontStyle,
+            fontSize: textObject.size,
+          ),
+        )
+        ..addText(textObject.text);
+
+  final ui.Paragraph paragraph = paragraphBuilder.build();
+
+  // Use a more reasonable max width for text layout
+  final double maxWidth = textObject.text.length > 50 ? 800 : 1000;
+  paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
+
+  canvas.drawParagraph(paragraph, textObject.position);
 }
