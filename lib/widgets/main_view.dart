@@ -389,18 +389,23 @@ class MainViewState extends State<MainView> {
           stops: <double>[0, 1],
         ),
       ),
-      child: Transform(
-        alignment: Alignment.topLeft,
-        transform: Matrix4.identity()
-          ..translate(
-            appProvider.canvasOffset.dx,
-            appProvider.canvasOffset.dy,
-          )
-          ..scale(appProvider.layers.scale),
-        child: SizedBox(
-          width: appProvider.layers.width,
-          height: appProvider.layers.height,
-          child: const CanvasPanel(),
+      child: SizedBox.expand(
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              left: appProvider.canvasOffset.dx,
+              top: appProvider.canvasOffset.dy,
+              child: Transform.scale(
+                scale: appProvider.layers.scale,
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: appProvider.layers.width,
+                  height: appProvider.layers.height,
+                  child: const CanvasPanel(),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
