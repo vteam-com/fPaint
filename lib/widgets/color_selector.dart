@@ -151,8 +151,7 @@ class _ColorSelectorState extends State<ColorSelector> {
     final Pair<double, double> bothValues = getHueAndBrightnessFromColor(widget.color);
     hue = bothValues.first;
     brightness = bothValues.second;
-    // ignore: deprecated_member_use
-    alpha = widget.color.alpha / 255.0; // Corrected: alpha should be 0.0-1.0
+    alpha = widget.color.a; // Corrected: alpha should be 0.0-1.0
   }
 }
 

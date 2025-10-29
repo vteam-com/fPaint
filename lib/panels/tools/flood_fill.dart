@@ -285,7 +285,7 @@ Future<Region> extractRegionByColorEdgeAndOffset({
   //------------------------------------------------------------------
   // Normalize the path
   final Rect bounds = region.path.getBounds();
-  final Matrix4 matrix = Matrix4.identity()..translate(-bounds.left, -bounds.top);
+  final Matrix4 matrix = Matrix4.translationValues(-bounds.left, -bounds.top, 0);
   region.path = region.path.transform(matrix.storage);
 
   return region;

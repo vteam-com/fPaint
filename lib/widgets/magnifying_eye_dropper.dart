@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/draw_rect.dart';
+import 'package:vector_math/vector_math_64.dart' as vm64;
 
 /// A widget that displays a magnifying eye dropper for selecting colors from an image.
 class MagnifyingEyeDropper extends StatefulWidget {
@@ -222,7 +223,7 @@ class MagnifyingGlassPainter extends CustomPainter {
         croppedImage,
         TileMode.clamp,
         TileMode.clamp,
-        Matrix4.identity().scaled(scaleFactor).storage,
+        (Matrix4.identity()..scaleByVector3(vm64.Vector3.all(scaleFactor))).storage,
       );
 
     canvas.drawCircle(

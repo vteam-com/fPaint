@@ -14,6 +14,7 @@ import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 // Exports
 export 'package:fpaint/providers/layers_provider.dart';
@@ -616,8 +617,8 @@ class AppProvider extends ChangeNotifier {
   Path? getPathAdjustToCanvasSizeAndPosition(final Path? path) {
     if (path != null) {
       final Matrix4 matrix = Matrix4.identity()
-        ..translate(canvasOffset.dx, canvasOffset.dy)
-        ..scale(layers.scale);
+        ..translateByVector3(Vector3(canvasOffset.dx, canvasOffset.dy, 0.0))
+        ..scaleByVector3(Vector3(layers.scale, layers.scale, layers.scale));
       return path.transform(matrix.storage);
     }
     return null;
