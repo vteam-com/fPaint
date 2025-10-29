@@ -1,4 +1,4 @@
-// ignore_for_file: unnecessary_import, deprecated_member_use
+// ignore_for_file: unnecessary_import
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -191,7 +191,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(newColorReported, isNotNull);
-      expect(newColorReported!.alpha, closeTo((0.5 * 255).round(), 1)); // Alpha is 0-255
+      expect((newColorReported!.a * 255.0).round(), closeTo((0.5 * 255).round(), 1)); // Alpha is 0-255
     });
 
     testWidgets(
@@ -216,7 +216,7 @@ void main() {
         Slider hueSliderWidget = tester.widget(sliders.at(0));
         expect(hueSliderWidget.value, closeTo(initialCyanHsl.hue, 0.1));
         expect(tester.widget<Slider>(sliders.at(1)).value, closeTo(initialCyanHsl.lightness, 0.01));
-        expect(tester.widget<Slider>(sliders.at(2)).value, closeTo(Colors.cyan.alpha / 255.0, 0.01));
+        expect(tester.widget<Slider>(sliders.at(2)).value, closeTo(Colors.cyan.a, 0.01));
 
         // Change color property and rebuild to Orange
         testColor = Colors.orange; // Orange: H~30-38, L~0.5, A=1.0
@@ -238,7 +238,7 @@ void main() {
         hueSliderWidget = tester.widget(sliders.at(0)); // Re-fetch slider
         expect(hueSliderWidget.value, closeTo(orangeHsl.hue, 0.1));
         expect(tester.widget<Slider>(sliders.at(1)).value, closeTo(orangeHsl.lightness, 0.01));
-        expect(tester.widget<Slider>(sliders.at(2)).value, closeTo(Colors.orange.alpha / 255.0, 0.01));
+        expect(tester.widget<Slider>(sliders.at(2)).value, closeTo(Colors.orange.a, 0.01));
       },
       skip: true /* Temporarily skipped due to hue initialization/dialog callback issues. */,
     );
@@ -347,7 +347,7 @@ void main() {
         await tester.tap(find.text('OK')); // or whatever the confirm button is labeled
         await tester.pumpAndSettle();
 
-        expect(selectedColorOut.value, expectedSelectedColor.value);
+        expect(selectedColorOut.toARGB32(), expectedSelectedColor.toARGB32());
 
         // Close dialog
         Navigator.of(tester.element(find.byType(ColorPickerDialog))).pop();

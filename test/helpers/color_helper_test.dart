@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use, duplicate_ignore
-
 import 'dart:math'; // Added for sqrt
 
 import 'package:flutter/material.dart';
@@ -18,9 +16,9 @@ void main() {
 
         const Color color2 = Color.fromRGBO(100, 100, 100, 1.0); // Opaque Grey
         final Color tinted2 = addTintOfRed(color2, 200); // 100 + 200 = 300, clamped to 255
-        expect(tinted2.red, 255);
-        expect(tinted2.green, 100);
-        expect(tinted2.blue, 100);
+        expect((tinted2.r * 255.0).round() & 0xff, 255);
+        expect((tinted2.g * 255.0).round() & 0xff, 100);
+        expect((tinted2.b * 255.0).round() & 0xff, 100);
       });
 
       test('addTintOfBlue', () {
@@ -50,16 +48,16 @@ void main() {
         expect(HSLColor.fromColor(darker).lightness, closeTo(0.2, 0.01));
 
         final Color same = adjustBrightness(color, HSLColor.fromColor(color).lightness);
-        expect(same.value, color.value); // Should be very close
+        expect(same.toARGB32(), color.toARGB32()); // Should be very close
       });
 
       test('adjustOpacityOfTextStyle', () {
         const TextStyle style = TextStyle(color: Colors.red);
         final TextStyle adjustedStyle = adjustOpacityOfTextStyle(style, 0.5);
-        expect(adjustedStyle.color, Colors.red.withOpacity(0.5));
+        expect(adjustedStyle.color, Colors.red.withAlpha((0.5 * 255).round()));
 
         final TextStyle defaultOpacityStyle = adjustOpacityOfTextStyle(style);
-        expect(defaultOpacityStyle.color, Colors.red.withOpacity(0.7));
+        expect(defaultOpacityStyle.color, Colors.red.withAlpha((0.7 * 255).round()));
       });
     });
 
@@ -126,14 +124,11 @@ void main() {
         // B = (1-0.6)*255 = 0.4*255 = 102
         final Color invertedF = invertColor(originalF);
 
-        expect(invertedF.red, 204);
-        // ignore: deprecated_member_use
-        expect(invertedF.green, 153);
-        // ignore: deprecated_member_use
-        expect(invertedF.blue, 102);
+        expect((invertedF.r * 255.0).round() & 0xff, 204);
+        expect((invertedF.g * 255.0).round() & 0xff, 153);
+        expect((invertedF.b * 255.0).round() & 0xff, 102);
         // The current invertColor in color_helper.dart sets alpha to 1.0 (opaque)
-        // ignore: deprecated_member_use
-        expect(invertedF.alpha, 255); // Alpha is forced to 1.0 by current implementation
+        expect((invertedF.a * 255.0).round() & 0xff, 255); // Alpha is forced to 1.0 by current implementation
 
         // Test with a color that has alpha != 1.0 if invertColor were to preserve it
         // However, current `invertColor` uses Color.fromRGBO(r,g,b,1.0) so alpha is always 1.0

@@ -37,8 +37,7 @@ void main() {
     });
 
     test('Initial fillColor is AppPreferences default (Colors.blue)', () {
-      // ignore: deprecated_member_use
-      expect(appProvider.fillColor.value, Colors.blue.value);
+      expect(appProvider.fillColor.toARGB32(), Colors.blue.toARGB32());
     });
 
     test('Initial brush size is AppPreferences default (5.0)', () {

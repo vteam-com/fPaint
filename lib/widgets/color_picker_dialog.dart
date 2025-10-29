@@ -53,11 +53,12 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     final ShellProvider shellProvider = ShellProvider.of(context);
     final LayersProvider layersModel = LayersProvider.of(context);
 
-    // ignore: deprecated_member_use
-    return WillPopScope(
-      onWillPop: () async {
-        widget.onColorChanged(_currentColor);
-        return true;
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (final bool didPop, _) {
+        if (didPop) {
+          widget.onColorChanged(_currentColor);
+        }
       },
       child: shellProvider.deviceSizeSmall
           ? Dialog.fullscreen(
