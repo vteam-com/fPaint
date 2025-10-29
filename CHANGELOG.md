@@ -4,6 +4,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2025-10-29
+
+### Add
+
+- Text feature
+- Canvas rotation
+- Tiff file support
+
+### Update
+
+- Remove dead code (getHueAndBrightness functions)
+- Upgrade packages
+- All deprecated SDK calls
+
+### Fix
+
+- Main canvas rendering
+- Resizing of Canvas
+- Canvas sizing feedback
+
 ## [1.0.6] - 2025-06-03
 
 ### Update - Flutter 3.32.1
