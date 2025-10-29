@@ -2,6 +2,7 @@ digraph "" {
   graph [style=rounded fontname="Arial Black" fontsize=13 penwidth=2.6];
   node [shape=rect style="filled,rounded" fontname=Arial fontsize=15 fillcolor=Lavender penwidth=1.3];
   edge [penwidth=1.3];
+  "/integration_test/app_integration_test.dart" [label="app_integration_test"];
   "/test/draw_path_helper_test.dart" [label="draw_path_helper_test"];
   "/test/paint_model_test.dart" [label="paint_model_test"];
   "/test/providers/app_provider_test.mocks.dart" [label="app_provider_test.mocks"];
@@ -103,6 +104,10 @@ digraph "" {
   "/lib/widgets/shortcuts_help.dart" [label="shortcuts_help"];
   subgraph "cluster~" {
     label="fpaint";
+    subgraph "cluster~/integration_test" {
+      label="integration_test";
+      "/integration_test/app_integration_test.dart";
+    }
     subgraph "cluster~/test" {
       label="test";
       "/test/draw_path_helper_test.dart";
@@ -260,6 +265,11 @@ digraph "" {
       }
     }
   }
+  "/integration_test/app_integration_test.dart" -> "/lib/files/export_download_non_web.dart";
+  "/integration_test/app_integration_test.dart" -> "/lib/main.dart";
+  "/integration_test/app_integration_test.dart" -> "/lib/main_screen.dart";
+  "/integration_test/app_integration_test.dart" -> "/lib/providers/app_provider.dart";
+  "/integration_test/app_integration_test.dart" -> "/lib/widgets/main_view.dart";
   "/test/draw_path_helper_test.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/test/paint_model_test.dart" -> "/lib/providers/app_provider.dart";
   "/test/providers/layers_provider_test.dart" -> "/lib/providers/layers_provider.dart";
