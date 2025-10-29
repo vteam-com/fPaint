@@ -22,7 +22,9 @@ class SelectorModel {
   void clear() {
     this.isVisible = false;
     this.path1 = null;
+    this.path2 = null;
     this.points.clear();
+    this.math = SelectorMath.replace;
   }
 
   /// Inverts the selection.

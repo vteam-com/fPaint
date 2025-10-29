@@ -13,8 +13,17 @@ digraph "" {
   "/test/widget_test.dart" [label="widget_test"];
   "/test/file_xcf_test.dart" [label="file_xcf_test"];
   "/test/files/file_ora_test.dart" [label="file_ora_test"];
+  "/test/files/export_download_web_test.dart" [label="export_download_web_test"];
+  "/test/files/save_test.dart" [label="save_test"];
+  "/test/files/export_download_non_web_test.dart" [label="export_download_non_web_test"];
+  "/test/files/file_jpeg_test.dart" [label="file_jpeg_test"];
+  "/test/files/import_files_test.dart" [label="import_files_test"];
+  "/test/files/xcf_reader_test.dart" [label="xcf_reader_test"];
+  "/test/files/file_tiff_test.dart" [label="file_tiff_test"];
+  "/test/files/assets_helper_test.dart" [label="assets_helper_test"];
   "/test/canvas_resize_test.dart" [label="canvas_resize_test"];
   "/test/layers_test.dart" [label="layers_test"];
+  "/test/helpers/image_helper_test.dart" [label="image_helper_test"];
   "/test/helpers/color_helper_test.dart" [label="color_helper_test"];
   "/test/helpers/list_helper_test.dart" [label="list_helper_test"];
   "/test/widgets/color_selector_test.dart" [label="color_selector_test"];
@@ -123,9 +132,18 @@ digraph "" {
       subgraph "cluster~/test/files" {
         label="files";
         "/test/files/file_ora_test.dart";
+        "/test/files/export_download_web_test.dart";
+        "/test/files/save_test.dart";
+        "/test/files/export_download_non_web_test.dart";
+        "/test/files/file_jpeg_test.dart";
+        "/test/files/import_files_test.dart";
+        "/test/files/xcf_reader_test.dart";
+        "/test/files/file_tiff_test.dart";
+        "/test/files/assets_helper_test.dart";
       }
       subgraph "cluster~/test/helpers" {
         label="helpers";
+        "/test/helpers/image_helper_test.dart";
         "/test/helpers/color_helper_test.dart";
         "/test/helpers/list_helper_test.dart";
       }
@@ -255,9 +273,17 @@ digraph "" {
   "/test/file_xcf_test.dart" -> "/lib/files/xcf_reader.dart";
   "/test/files/file_ora_test.dart" -> "/lib/files/file_ora.dart";
   "/test/files/file_ora_test.dart" -> "/lib/providers/layers_provider.dart";
+  "/test/files/save_test.dart" -> "/lib/files/save.dart";
+  "/test/files/export_download_non_web_test.dart" -> "/lib/files/export_download_non_web.dart";
+  "/test/files/file_jpeg_test.dart" -> "/lib/files/file_jpeg.dart";
+  "/test/files/import_files_test.dart" -> "/lib/files/import_files.dart";
+  "/test/files/xcf_reader_test.dart" -> "/lib/files/xcf_reader.dart";
+  "/test/files/file_tiff_test.dart" -> "/lib/files/file_tiff.dart";
+  "/test/files/assets_helper_test.dart" -> "/lib/files/assets_helper.dart";
   "/test/canvas_resize_test.dart" -> "/lib/models/canvas_resize.dart";
   "/test/canvas_resize_test.dart" -> "/lib/providers/layers_provider.dart";
   "/test/layers_test.dart" -> "/lib/providers/layer_provider.dart";
+  "/test/helpers/image_helper_test.dart" -> "/lib/helpers/image_helper.dart";
   "/test/helpers/color_helper_test.dart" -> "/lib/helpers/color_helper.dart";
   "/test/helpers/list_helper_test.dart" -> "/lib/helpers/list_helper.dart";
   "/test/widgets/color_selector_test.dart" -> "/lib/helpers/color_helper.dart";
