@@ -405,7 +405,6 @@ digraph "" {
   "/lib/main_screen.dart" -> "/lib/widgets/main_view.dart";
   "/lib/main_screen.dart" -> "/lib/providers/app_provider.dart";
   "/lib/helpers/image_helper.dart" -> "/lib/helpers/color_helper.dart";
-  "/lib/helpers/color_helper.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/providers/shell_provider.dart";
@@ -434,7 +433,6 @@ digraph "" {
   "/lib/widgets/top_colors.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/color_preview.dart";
   "/lib/widgets/top_colors.dart" -> "/lib/widgets/transparent_background.dart";
-  "/lib/widgets/color_selector.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/helpers/list_helper.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/color_picker_dialog.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/transparent_background.dart";

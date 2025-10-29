@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:fpaint/helpers/list_helper.dart';
 
 /// Collection of color utility functions for:
 /// - Color manipulation (tinting, brightness, opacity)
@@ -120,7 +119,7 @@ TextStyle adjustOpacityOfTextStyle(
   final double opacity = 0.7,
 ]) {
   return textStyle.copyWith(
-    color: textStyle.color!.withValues(alpha: opacity),
+    color: textStyle.color!.withAlpha((opacity * 255).round()),
   );
 }
 
@@ -265,32 +264,6 @@ Color getColorFromString(final String hexColor) {
     return Color(int.parse('0x$newHexColor'));
   }
   return Colors.transparent;
-}
-
-/// Returns a Pair object containing the hue and brightness values of the given color.
-///
-/// The color is first converted to HSL using the HSLColor.fromColor() method.
-/// The hue value is extracted from the HSLColor object using the hue property.
-/// The brightness value is calculated by subtracting the lightness value from 1.
-///
-/// @param color The color to extract the hue and brightness values from.
-/// @return A ```Pair<double, double>``` object containing the hue and brightness values.
-///
-Pair<double, double> getHueAndBrightness(final Color color) {
-  final HSLColor hslColor = HSLColor.fromColor(color);
-  return Pair<double, double>(hslColor.hue, 1 - hslColor.lightness);
-}
-
-/// Retrieves the hue and brightness values from the given Color object in the HSL color space.
-Pair<double, double> getHueAndBrightnessFromColor(final Color color) {
-  // Convert color to HSL
-  final HSLColor hslColor = HSLColor.fromColor(color);
-
-  // Extract hue and lightness values
-  final double hue = hslColor.hue;
-  final double brightness = hslColor.lightness;
-
-  return Pair<double, double>(hue, brightness);
 }
 
 /// Retrieves the hue value from the given Color object in the HSL color space.

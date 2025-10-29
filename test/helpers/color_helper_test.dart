@@ -5,7 +5,6 @@ import 'dart:math'; // Added for sqrt
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/color_helper.dart';
-import 'package:fpaint/helpers/list_helper.dart'; // For Pair
 
 void main() {
   group('ColorHelper Actual Tests', () {
@@ -99,19 +98,6 @@ void main() {
         expect(contrastColor(Colors.white), Colors.black);
         expect(contrastColor(Colors.yellow), Colors.black); // Yellow is light
         expect(contrastColor(Colors.blue.shade900), Colors.white); // Dark blue is dark
-      });
-
-      test('getHueAndBrightness (custom definition)', () {
-        // Note: This function calculates brightness as 1 - lightness
-        final Pair<double, double> hb = getHueAndBrightness(Colors.blue); // H:240, L:0.5 for pure blue
-        expect(hb.first, HSLColor.fromColor(Colors.blue).hue);
-        expect(hb.second, closeTo(1.0 - HSLColor.fromColor(Colors.blue).lightness, 0.01));
-      });
-
-      test('getHueAndBrightnessFromColor', () {
-        final Pair<double, double> hb = getHueAndBrightnessFromColor(Colors.green); // H:120, L:0.5
-        expect(hb.first, HSLColor.fromColor(Colors.green).hue);
-        expect(hb.second, HSLColor.fromColor(Colors.green).lightness);
       });
 
       test('getHueFromColor', () {
