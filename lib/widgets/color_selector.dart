@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
@@ -148,10 +147,12 @@ class _ColorSelectorState extends State<ColorSelector> {
 
   /// Converts the input color to HSV values.
   void fromInputColorToHueBrightnessAndAlpha() {
-    final Pair<double, double> bothValues = getHueAndBrightnessFromColor(widget.color);
-    hue = bothValues.first;
-    brightness = bothValues.second;
-    alpha = widget.color.a; // Corrected: alpha should be 0.0-1.0
+    final HSLColor hslColor = HSLColor.fromColor(widget.color);
+
+    // Extract hue, lightness, and alpha values
+    hue = hslColor.hue;
+    brightness = hslColor.lightness;
+    alpha = widget.color.a;
   }
 }
 
