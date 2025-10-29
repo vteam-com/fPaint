@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.6] - 2025-06-03
 
-### Update - Flutter 3.32.1
+### Update - Flutter 3.35.7
 
 ## [1.0.5] - 2025-03-26
 
