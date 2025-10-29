@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
+import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 // Exports
 export 'package:fpaint/helpers/draw_path_helper.dart';
@@ -40,7 +41,7 @@ class SelectorModel {
       return; // Prevent invalid transformations
     }
 
-    final Matrix4 matrix = Matrix4.identity()..translate(offset.dx, offset.dy);
+    final Matrix4 matrix = Matrix4.identity()..translateByVector3(Vector3(offset.dx, offset.dy, 0.0));
     path1 = path1!.transform(matrix.storage);
   }
 

@@ -94,20 +94,20 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
+  device_info_plus: 71ffc6ab7634ade6267c7a93088ed7e4f74e5896
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
-  file_picker: b159e0c068aef54932bb15dc9fd1571818edaf49
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  irondash_engine_context: 3458bf979b90d616ffb8ae03a150bafe2e860cc9
-  pasteboard: 982969ebaa7c78af3e6cc7761e8f5e77565d9ce0
-  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  file_picker: a0560bc09d61de87f12d246fc47d2119e6ef37be
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  irondash_engine_context: 8e58ca8e0212ee9d1c7dc6a42121849986c88486
+  pasteboard: 49088aeb6119d51f976a421db60d8e1ab079b63c
+  path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   SDWebImage: 73c6079366fea25fa4bb9640d5fb58f0893facd8
-  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
-  super_native_extensions: 4916b3c627a9c7fffdc48a23a9eca0b1ac228fa7
+  shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
+  super_native_extensions: b763c02dc3a8fd078389f410bf15149179020cb4
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
-  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+  url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
-PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
+PODFILE CHECKSUM: 4f1c12611da7338d21589c0b2ecd6bd20b109694
 
 COCOAPODS: 1.16.2

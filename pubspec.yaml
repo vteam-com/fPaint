@@ -19,8 +19,8 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.2.0+1
 
 environment:
-  sdk: ">=3.8.0"
-  flutter: ">=3.32.1"
+  sdk: ">=3.9.2"
+  flutter: ">=3.35.7"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -42,8 +42,9 @@ dependencies:
   path_provider: ^2.0.7
   provider: ^6.1.5
   shared_preferences: ^2.5.3
-  super_clipboard: ^0.8.24
+  super_clipboard: ^0.9.1
   url_launcher: ^6.3.1
+  vector_math: ^2.1.4
   web: ^1.1.0
   window_manager: ^0.5.0
   xml: ^6.3.0

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:vector_math/vector_math_64.dart' as vm;
 
 /// Possition for anchor
 enum NineGridHandle {
@@ -35,70 +36,82 @@ Path expandPathInDirectionWithOffset(
   switch (anchorPosition) {
     case NineGridHandle.left:
       scaleMatrix
-        ..translate(bounds.right, 0.0)
-        ..scale((bounds.width - expansionOffset.dx) / bounds.width, 1.0)
-        ..translate(-bounds.right, 0.0);
+        ..translateByVector3(vm.Vector3(bounds.right, 0.0, 0))
+        ..scaleByVector3(vm.Vector3((bounds.width - expansionOffset.dx) / bounds.width, 1.0, 1.0))
+        ..translateByVector3(vm.Vector3(-bounds.right, 0.0, 0));
       break;
 
     case NineGridHandle.right:
       scaleMatrix
-        ..translate(bounds.left, 0.0)
-        ..scale((bounds.width + expansionOffset.dx) / bounds.width, 1.0)
-        ..translate(-bounds.left, 0.0);
+        ..translateByVector3(vm.Vector3(bounds.left, 0.0, 0))
+        ..scaleByVector3(vm.Vector3((bounds.width + expansionOffset.dx) / bounds.width, 1.0, 1.0))
+        ..translateByVector3(vm.Vector3(-bounds.left, 0.0, 0));
       break;
 
     case NineGridHandle.top:
       scaleMatrix
-        ..translate(0.0, bounds.bottom)
-        ..scale(1.0, (bounds.height - expansionOffset.dy) / bounds.height)
-        ..translate(0.0, -bounds.bottom);
+        ..translateByVector3(vm.Vector3(0.0, bounds.bottom, 0))
+        ..scaleByVector3(vm.Vector3(1.0, (bounds.height - expansionOffset.dy) / bounds.height, 1.0))
+        ..translateByVector3(vm.Vector3(0.0, -bounds.bottom, 0));
       break;
 
     case NineGridHandle.bottom:
       scaleMatrix
-        ..translate(0.0, bounds.top)
-        ..scale(1.0, (bounds.height + expansionOffset.dy) / bounds.height)
-        ..translate(0.0, -bounds.top);
+        ..translateByVector3(vm.Vector3(0.0, bounds.top, 0))
+        ..scaleByVector3(vm.Vector3(1.0, (bounds.height + expansionOffset.dy) / bounds.height, 1.0))
+        ..translateByVector3(vm.Vector3(0.0, -bounds.top, 0));
       break;
 
     case NineGridHandle.topLeft:
       scaleMatrix
-        ..translate(bounds.right, bounds.bottom)
-        ..scale(
-          (bounds.width - expansionOffset.dx) / bounds.width,
-          (bounds.height - expansionOffset.dy) / bounds.height,
+        ..translateByVector3(vm.Vector3(bounds.right, bounds.bottom, 0))
+        ..scaleByVector3(
+          vm.Vector3(
+            (bounds.width - expansionOffset.dx) / bounds.width,
+            (bounds.height - expansionOffset.dy) / bounds.height,
+            1.0,
+          ),
         )
-        ..translate(-bounds.right, -bounds.bottom);
+        ..translateByVector3(vm.Vector3(-bounds.right, -bounds.bottom, 0));
       break;
 
     case NineGridHandle.topRight:
       scaleMatrix
-        ..translate(bounds.left, bounds.bottom)
-        ..scale(
-          (bounds.width + expansionOffset.dx) / bounds.width,
-          (bounds.height - expansionOffset.dy) / bounds.height,
+        ..translateByVector3(vm.Vector3(bounds.left, bounds.bottom, 0))
+        ..scaleByVector3(
+          vm.Vector3(
+            (bounds.width + expansionOffset.dx) / bounds.width,
+            (bounds.height - expansionOffset.dy) / bounds.height,
+            1.0,
+          ),
         )
-        ..translate(-bounds.left, -bounds.bottom);
+        ..translateByVector3(vm.Vector3(-bounds.left, -bounds.bottom, 0));
       break;
 
     case NineGridHandle.bottomLeft:
       scaleMatrix
-        ..translate(bounds.right, bounds.top)
-        ..scale(
-          (bounds.width - expansionOffset.dx) / bounds.width,
-          (bounds.height + expansionOffset.dy) / bounds.height,
+        ..translateByVector3(vm.Vector3(bounds.right, bounds.top, 0))
+        ..scaleByVector3(
+          vm.Vector3(
+            (bounds.width - expansionOffset.dx) / bounds.width,
+            (bounds.height + expansionOffset.dy) / bounds.height,
+            1.0,
+          ),
         )
-        ..translate(-bounds.right, -bounds.top);
+        ..translateByVector3(vm.Vector3(-bounds.right, -bounds.top, 0));
       break;
 
     case NineGridHandle.bottomRight:
       scaleMatrix
-        ..translate(bounds.left, bounds.top)
-        ..scale(
-          (bounds.width + expansionOffset.dx) / bounds.width,
-          (bounds.height + expansionOffset.dy) / bounds.height,
+        ..translateByVector3(vm.Vector3(bounds.left, bounds.top, 0))
+        ..scaleByVector3(
+          vm.Vector3(
+            (bounds.width + expansionOffset.dx) / bounds.width,
+            (bounds.height + expansionOffset.dy) / bounds.height,
+            1.0,
+          ),
         )
-        ..translate(-bounds.left, -bounds.top);
+        ..translateByVector3(vm.Vector3(-bounds.left, -bounds.top, 0));
       break;
 
     case NineGridHandle.center:
