@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/export_download_non_web.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/widgets/main_view.dart';
 
 /// Helper method to draw a rectangle with human-like gestures
 /// Includes automatic rectangle tool selection and natural timing
@@ -13,9 +14,27 @@ Future<void> drawRectangleWithHumanGestures(
   final WidgetTester tester, {
   required final Offset startPosition,
   required final Offset endPosition,
+  final double? brushSize,
+  final Color? brushColor,
+  final Color? fillColor,
 }) async {
+  // Get AppProvider to configure drawing properties
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppProvider appProvider = AppProvider.of(context);
+
+  // Apply optional drawing properties
+  if (brushSize != null) {
+    appProvider.brushSize = brushSize;
+  }
+  if (brushColor != null) {
+    appProvider.brushColor = brushColor;
+  }
+  if (fillColor != null) {
+    appProvider.fillColor = fillColor;
+  }
+
   // Select rectangle tool (always needed for rectangle drawing)
-  final Duration toolSelectionDelay = const Duration(milliseconds: 100);
+  const Duration toolSelectionDelay = Duration(milliseconds: 100);
   await tester.tap(find.byIcon(Icons.crop_square));
   await tester.pump();
   await Future.delayed(toolSelectionDelay);
@@ -55,7 +74,21 @@ Future<void> drawLineWithHumanGestures(
   final WidgetTester tester, {
   required final Offset startPosition,
   required final Offset endPosition,
+  final double? brushSize,
+  final Color? brushColor,
 }) async {
+  // Get AppProvider to configure drawing properties
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppProvider appProvider = AppProvider.of(context);
+
+  // Apply optional drawing properties
+  if (brushSize != null) {
+    appProvider.brushSize = brushSize;
+  }
+  if (brushColor != null) {
+    appProvider.brushColor = brushColor;
+  }
+
   // Select line tool
   const Duration toolSelectionDelay = Duration(milliseconds: 100);
   await tester.tap(find.byIcon(Icons.line_axis));

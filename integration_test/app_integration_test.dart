@@ -44,11 +44,14 @@ void main() {
 
       await Future.delayed(const Duration(milliseconds: 200));
 
-      // Third Rectangle: Window (30x25)
+      // Third Rectangle: Window (30x25) - Test optional color parameters
       await drawRectangleWithHumanGestures(
         tester,
         startPosition: canvasCenter + const Offset(20, 30),
         endPosition: canvasCenter + const Offset(80, 50),
+        brushSize: 8.0, // Thicker outline
+        brushColor: Colors.red, // Red outline
+        fillColor: Colors.blue, // Blue fill
       );
 
       await Future.delayed(const Duration(milliseconds: 200));
