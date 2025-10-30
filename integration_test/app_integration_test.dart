@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/main.dart' as app;
 import 'package:fpaint/main_screen.dart';
+import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:integration_test/integration_test.dart';
@@ -94,6 +95,48 @@ void main() {
         tester,
         startPosition: canvasCenter + const Offset(205, 0), // Top-right of house structure
         endPosition: canvasCenter + const Offset(100, -100), // Same peak point
+        brushSize: 2.0, // Thicker outline
+        brushColor: Colors.deepOrangeAccent, // Red outline
+      );
+
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      // Bottom roof line to close the triangular roof
+      await drawLineWithHumanGestures(
+        tester,
+        startPosition: canvasCenter + const Offset(-5, 0), // Left roof base (same as left roof start)
+        endPosition: canvasCenter + const Offset(205, 0), // Right roof base (same as right roof start)
+        brushSize: 2.0,
+        brushColor: Colors.deepOrangeAccent,
+      );
+
+      // Flood fill the closed triangular roof with linear gradient (white→pink→black, diagonal)
+      debugPrint('🎨 Flood filling roof triangle with diagonal gradient...');
+
+      // Create gradient points for white→pink→black diagonal using simpler coordinates
+      final List<GradientPoint> gradientPoints = <GradientPoint>[
+        GradientPoint(
+          offset: const Offset(0.0, 0.0), // Left start: White
+          color: Colors.white,
+        ),
+        GradientPoint(
+          offset: const Offset(0.5, 0.5), // Center: Pink
+          color: Colors.pink,
+        ),
+        GradientPoint(
+          offset: const Offset(1.0, 1.0), // Right end: Black
+          color: Colors.black,
+        ),
+      ];
+
+      // Apply flood fill to a point inside the triangular roof
+      final FillModel fillModel = FillModel();
+      fillModel.mode = FillMode.linear; // Set to linear gradient mode
+      await drawFloodFillGradient(
+        tester,
+        fillPosition: canvasCenter + const Offset(100, -30), // Point inside roof triangle area
+        gradientPoints: gradientPoints,
+        fillModel: fillModel,
       );
 
       // Validation: Verify complete scene is drawn (sun circle + 3 rectangles + 2 roof lines = 6 elements)
@@ -108,8 +151,9 @@ void main() {
 
       expect(
         appProvider.layers.selectedLayer.actionStack.length,
-        6,
-        reason: 'Complete scene: 1 sun circle + 3 rectangles (house) + 2 roof lines',
+        8,
+        reason:
+            'Complete scene: 1 sun circle + 3 rectangles (house, door, window) + 3 roof lines (closed triangle) + 1 flood fill',
       );
 
       // Save the artwork
