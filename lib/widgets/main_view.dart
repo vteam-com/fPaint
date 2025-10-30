@@ -504,13 +504,13 @@ class MainViewState extends State<MainView> {
           if (appProvider.fillModel.gradientPoints.isEmpty) {
             appProvider.fillModel.addPoint(
               GradientPoint(
-                offset: event.localPosition + const Offset(-10, -10),
+                offset: adjustedPosition + const Offset(-10, -10),
                 color: adjustBrightness(appProvider.fillColor, 0.3),
               ),
             );
             appProvider.fillModel.addPoint(
               GradientPoint(
-                offset: event.localPosition + const Offset(10, 10),
+                offset: adjustedPosition + const Offset(10, 10),
                 color: adjustBrightness(appProvider.fillColor, 0.7),
               ),
             );

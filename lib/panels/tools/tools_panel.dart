@@ -200,6 +200,7 @@ class ToolsPanel extends StatelessWidget {
                 // Selection using Rectangle
                 //
                 ToolPanelPicker(
+                  key: const Key('tool-fill-mode-solid'),
                   minimal: minimal,
                   name: 'Solid',
                   image: iconAndColor(
@@ -215,6 +216,7 @@ class ToolsPanel extends StatelessWidget {
                 // Linear Gradient
                 //
                 ToolPanelPicker(
+                  key: const Key('tool-fill-mode-linear'),
                   minimal: minimal,
                   name: 'Linear Gradient',
                   image: iconFromSvgAsset(
@@ -231,6 +233,7 @@ class ToolsPanel extends StatelessWidget {
                 // Radial Gradient
                 //
                 ToolPanelPicker(
+                  key: const Key('tool-fill-mode-radial'),
                   minimal: minimal,
                   name: 'Radial Gradient',
                   image: iconFromSvgAsset(
@@ -444,9 +447,11 @@ class ToolsPanel extends StatelessWidget {
         if (selectedTool.isSupported(ActionOptions.brushSize)) {
           widgets.add(
             ToolAttributeWidget(
+              key: const Key('tool_brush_size_tool'),
               minimal: minimal,
               name: title,
               childLeft: IconButton(
+                key: const Key('tool_brush_size_button'),
                 icon: const Icon(Icons.line_weight),
                 color: Colors.grey.shade500,
                 constraints: minimal ? const BoxConstraints() : null,
@@ -467,6 +472,7 @@ class ToolsPanel extends StatelessWidget {
               childRight: minimal
                   ? null
                   : BrushSizePicker(
+                      key: const Key('tool_brush_size_slider'),
                       title: title,
                       value: appProvider.brushSize,
                       min: min,

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -15,6 +16,11 @@ import 'package:window_manager/window_manager.dart';
 */
 
 class MyWindowManager extends WindowListener {
+  /// Checks if the app is running in integration test mode.
+  static bool _isIntegrationTest() {
+    return WidgetsBinding.instance.runtimeType.toString().contains('IntegrationTest');
+  }
+
   static void setupMainWindow() async {
     if (!kIsWeb) {
       // Enable Impeller for better performance
@@ -71,8 +77,13 @@ class MyWindowManager extends WindowListener {
 
       await windowManager.setBounds(Rect.fromLTWH(x, y, width, height));
     } else {
-      // Optional: set a default window size
-      await windowManager.setSize(const Size(800, 600));
+      // Set integration test window size if running integration tests
+      if (_isIntegrationTest()) {
+        await windowManager.setSize(const Size(1200, 900));
+      } else {
+        // Optional: set a default window size
+        // await windowManager.setSize(const Size(800, 600));
+      }
       await windowManager.center();
     }
 
