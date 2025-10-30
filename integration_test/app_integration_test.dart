@@ -23,14 +23,30 @@ void main() {
       final Finder canvasFinder = find.byType(MainView);
       final Offset canvasCenter = tester.getCenter(canvasFinder);
 
-      // Simulate natural human drawing of a house
+      // Simulate natural human drawing of a complete scene
       // sequence with realistic timing
+
+      // Sun: Bright yellow circle in a more visible position
+      debugPrint('☀️  Adding sun to brighten the scene...');
+      await drawCircleWithHumanGestures(
+        tester,
+        center: canvasCenter + const Offset(-200, -120), // Top area, visible position
+        radius: 50.0, // Size of the sun
+        brushSize: 6.0,
+        brushColor: Colors.orange, // Orange outline
+        fillColor: Colors.yellow, // Yellow fill for the sun
+      );
+
+      await Future.delayed(const Duration(milliseconds: 200));
 
       // First Rectangle: Main house structure (200x100)
       await drawRectangleWithHumanGestures(
         tester,
         startPosition: canvasCenter,
         endPosition: canvasCenter + const Offset(200, 100),
+        brushSize: 0.0, // Thicker outline
+        brushColor: Colors.black, // Red outline
+        fillColor: const Color.fromARGB(255, 199, 143, 162), // Blue fill
       );
 
       await Future.delayed(const Duration(milliseconds: 200));
@@ -40,6 +56,9 @@ void main() {
         tester,
         startPosition: canvasCenter + const Offset(130, 24),
         endPosition: canvasCenter + const Offset(180, 88),
+        brushSize: 8.0, // Thicker outline
+        brushColor: Colors.white, // Red outline
+        fillColor: Colors.deepOrange, // Blue fill
       );
 
       await Future.delayed(const Duration(milliseconds: 200));
@@ -50,8 +69,8 @@ void main() {
         startPosition: canvasCenter + const Offset(20, 30),
         endPosition: canvasCenter + const Offset(80, 50),
         brushSize: 8.0, // Thicker outline
-        brushColor: Colors.red, // Red outline
-        fillColor: Colors.blue, // Blue fill
+        brushColor: Colors.white, // Red outline
+        fillColor: const Color.fromARGB(255, 165, 181, 193),
       );
 
       await Future.delayed(const Duration(milliseconds: 200));
@@ -64,6 +83,8 @@ void main() {
         tester,
         startPosition: canvasCenter + const Offset(-5, 0), // Top-left of house structure
         endPosition: canvasCenter + const Offset(100, -100), // Peak point above center
+        brushSize: 2.0, // Thicker outline
+        brushColor: Colors.deepOrangeAccent, // Red outline
       );
 
       await Future.delayed(const Duration(milliseconds: 200));
@@ -75,14 +96,20 @@ void main() {
         endPosition: canvasCenter + const Offset(100, -100), // Same peak point
       );
 
-      // Validation: Verify complete house is drawn (3 rectangles + 2 roof lines = 5 elements)
+      // Validation: Verify complete scene is drawn (sun circle + 3 rectangles + 2 roof lines = 6 elements)
       final BuildContext context = tester.element(find.byType(MainScreen));
       final AppProvider appProvider = AppProvider.of(context);
 
+      debugPrint('🎨 Final drawing elements created: ${appProvider.layers.selectedLayer.actionStack.length}');
+      for (int i = 0; i < appProvider.layers.selectedLayer.actionStack.length; i++) {
+        final action = appProvider.layers.selectedLayer.actionStack[i];
+        debugPrint('  [$i] ${action.action}');
+      }
+
       expect(
         appProvider.layers.selectedLayer.actionStack.length,
-        5,
-        reason: 'Complete house: 3 rectangles (structure, door, window) + 2 roof lines',
+        6,
+        reason: 'Complete scene: 1 sun circle + 3 rectangles (house) + 2 roof lines',
       );
 
       // Save the artwork

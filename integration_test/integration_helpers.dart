@@ -68,6 +68,72 @@ Future<void> drawRectangleWithHumanGestures(
   await tester.pump();
 }
 
+/// Helper method to draw a circle with human-like gestures
+/// Circle is defined by center point and radius (drag from center to circumference)
+Future<void> drawCircleWithHumanGestures(
+  final WidgetTester tester, {
+  required final Offset center,
+  required final double radius,
+  final double? brushSize,
+  final Color? brushColor,
+  final Color? fillColor,
+}) async {
+  // Get AppProvider to configure drawing properties
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppProvider appProvider = AppProvider.of(context);
+
+  // Apply optional drawing properties
+  if (brushSize != null) {
+    appProvider.brushSize = brushSize;
+  }
+  if (brushColor != null) {
+    appProvider.brushColor = brushColor;
+  }
+  if (fillColor != null) {
+    appProvider.fillColor = fillColor;
+  }
+
+  // Select circle tool
+  const Duration toolSelectionDelay = Duration(milliseconds: 100);
+  await tester.tap(find.byIcon(Icons.circle_outlined));
+  await tester.pump();
+  await Future.delayed(toolSelectionDelay);
+
+  // Start drawing circle at center, then drag to define radius
+  final TestGesture gesture = await tester.startGesture(
+    center,
+    kind: PointerDeviceKind.mouse,
+    buttons: kPrimaryButton,
+  );
+
+  // Drag from center outward to define radius (rightward for simplicity)
+  final Offset circumferencePoint = center + Offset(radius, 0);
+
+  // Calculate total movement and divide into smooth human-like steps
+  final Offset totalOffset = circumferencePoint - center;
+  final Offset stepOffset = totalOffset / 5; // 5 steps for circle radius definition
+
+  // Human-like drag with natural timing for circle creation
+  const List<Duration> delays = <Duration>[
+    Duration(milliseconds: 100),
+    Duration(milliseconds: 120),
+    Duration(milliseconds: 140),
+    Duration(milliseconds: 100),
+    Duration(milliseconds: 80),
+  ];
+
+  for (int i = 0; i < 5; i++) {
+    await gesture.moveBy(stepOffset);
+    if (i < delays.length) {
+      await Future.delayed(delays[i]);
+    }
+    await tester.pump();
+  }
+
+  await gesture.up();
+  await tester.pump();
+}
+
 /// Helper method to draw a line with human-like gestures from point A to point B
 /// Includes automatic line tool selection and natural timing
 Future<void> drawLineWithHumanGestures(
