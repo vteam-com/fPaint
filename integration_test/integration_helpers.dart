@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/export_download_non_web.dart';
+import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
 
@@ -193,6 +194,36 @@ Future<void> drawLineWithHumanGestures(
 
   await gesture.up();
   await tester.pump();
+}
+
+/// Helper method to perform flood fill with gradient using UI interactions
+Future<void> drawFloodFillGradient(
+  final WidgetTester tester, {
+  required final Offset fillPosition,
+  required final List<GradientPoint> gradientPoints,
+  required final FillModel fillModel,
+}) async {
+  // Configure gradient in the fill model (this is usually set via UI panels)
+  fillModel.gradientPoints.clear();
+  fillModel.gradientPoints.addAll(gradientPoints);
+  fillModel.mode = FillMode.linear; // Set to gradient mode
+  fillModel.isVisible = true;
+
+  // Select the fill tool via UI
+  const Duration toolSelectionDelay = Duration(milliseconds: 100);
+  await tester.tap(find.byIcon(Icons.format_color_fill));
+  await tester.pump();
+  await Future.delayed(toolSelectionDelay);
+
+  // Click at the fill position to trigger flood fill with configured gradient
+  await tester.tapAt(fillPosition);
+  await tester.pump();
+
+  debugPrint('🎨 UI-based flood fill gradient at position: $fillPosition');
+
+  // Allow time for the fill operation to complete
+  await tester.pump();
+  await Future.delayed(const Duration(milliseconds: 300));
 }
 
 /// Integration test utilities for common operations
