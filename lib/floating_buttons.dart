@@ -87,6 +87,7 @@ Widget floatingActionButtons(
 
       // Zooom in
       myFloatButton(
+        key: Keys.floatActionZoomIn,
         onPressed: () {
           shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
           appProvider.applyScaleToCanvas(
@@ -99,6 +100,7 @@ Widget floatingActionButtons(
 
       /// Center and fit image
       myFloatButton(
+        key: Keys.floatActionCenter,
         onPressed: () {
           shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
           appProvider.update();
@@ -120,6 +122,7 @@ Widget floatingActionButtons(
 
       /// Zoom out
       myFloatButton(
+        key: Keys.floatActionZoomOut,
         onPressed: () {
           shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
           appProvider.applyScaleToCanvas(
@@ -129,7 +132,10 @@ Widget floatingActionButtons(
         },
         icon: Icons.zoom_out,
       ),
+
+      /// Show/Hide floating action panel
       myFloatButton(
+        key: Keys.floatActionToggle,
         onPressed: () {
           shellProvider.shellMode = ShellMode.hidden;
           shellProvider.update();
@@ -148,6 +154,7 @@ Widget floatingActionButtons(
 /// The [onPressed] parameter specifies the callback function to execute when the button is pressed.
 /// The [child] parameter specifies an optional widget to display on the button instead of an icon.
 Widget myFloatButton({
+  final Key? key,
   final IconData? icon,
   final Color foregroundColor = Colors.white,
   final String? tooltip,
@@ -155,6 +162,7 @@ Widget myFloatButton({
   final Widget? child,
 }) {
   return FloatingActionButton(
+    key: key,
     heroTag: null,
     backgroundColor: AppColors.colorFloatButtonBackground,
     foregroundColor: foregroundColor,
