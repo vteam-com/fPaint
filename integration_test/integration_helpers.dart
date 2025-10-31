@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -79,9 +80,9 @@ Future<void> drawRectangleWithHumanGestures(
 
   // Human-like drag with natural timing between steps
   const List<Duration> delays = <Duration>[
-    Duration(milliseconds: 200),
-    Duration(milliseconds: 250),
-    Duration(milliseconds: 150),
+    Duration(milliseconds: 100),
+    Duration(milliseconds: 100),
+    Duration(milliseconds: 100),
   ];
 
   for (int i = 0; i < 3; i++) {
@@ -149,10 +150,10 @@ Future<void> drawCircleWithHumanGestures(
 
   // Human-like drag with natural timing for circle creation
   const List<Duration> delays = <Duration>[
-    Duration(milliseconds: 100),
-    Duration(milliseconds: 120),
-    Duration(milliseconds: 140),
-    Duration(milliseconds: 100),
+    Duration(milliseconds: 80),
+    Duration(milliseconds: 80),
+    Duration(milliseconds: 80),
+    Duration(milliseconds: 80),
     Duration(milliseconds: 80),
   ];
 
@@ -206,6 +207,25 @@ Future<void> drawLineWithHumanGestures(
   await tester.pump();
   await Future.delayed(toolSelectionDelay);
 
+  await dragLikeHuman(tester, startPosition, endPosition);
+}
+
+Future<void> tapLikeHuman(final WidgetTester tester, final Offset position) async {
+  final TestGesture gesture = await tester.startGesture(
+    position,
+    kind: PointerDeviceKind.mouse,
+    buttons: kPrimaryButton,
+  );
+
+  await gesture.up();
+  await tester.pump();
+}
+
+Future<void> dragLikeHuman(
+  final WidgetTester tester,
+  final Offset startPosition,
+  final Offset endPosition,
+) async {
   final TestGesture gesture = await tester.startGesture(
     startPosition,
     kind: PointerDeviceKind.mouse,
@@ -218,13 +238,13 @@ Future<void> drawLineWithHumanGestures(
 
   // Human-like drag with natural timing (more steps, shorter delays for line drawing)
   const List<Duration> delays = <Duration>[
-    Duration(milliseconds: 50),
-    Duration(milliseconds: 60),
-    Duration(milliseconds: 70),
-    Duration(milliseconds: 80),
-    Duration(milliseconds: 50),
-    Duration(milliseconds: 60),
-    Duration(milliseconds: 40),
+    Duration(milliseconds: 10),
+    Duration(milliseconds: 10),
+    Duration(milliseconds: 10),
+    Duration(milliseconds: 10),
+    Duration(milliseconds: 10),
+    Duration(milliseconds: 10),
+    Duration(milliseconds: 10),
   ];
 
   for (int i = 0; i < 8; i++) {
@@ -244,100 +264,75 @@ Future<void> drawLineWithHumanGestures(
 /// Uses human-like gesture simulation for natural interaction
 Future<void> performFloodFill(
   final WidgetTester tester, {
-  required final Offset fillPosition,
   required final FillMode gradientMode, // FillMode.linear or FillMode.radial
-  final List<GradientPoint>? gradientPoints,
+  required final List<GradientPoint> gradientPoints,
 }) async {
-  debugPrint('🎨 Performing flood fill at: $fillPosition (gradient: $gradientMode)');
-
-  // Select the fill tool via UI
-  await tester.tap(find.byIcon(Icons.format_color_fill));
-  await tester.pump(const Duration(milliseconds: 300));
+  debugPrint('🎨 Performing flood fill  (mode:$gradientMode points: ${gradientPoints.join(',')}');
 
   // ================================
-  // SET FILL MODE, Solid, Linear, Radial
+  // SET FILL MODE: Solid, Linear, Radial
   // ================================
-  if (gradientMode != FillMode.solid && gradientPoints != null) {
-    await selectFillMode(tester, gradientMode, gradientPoints);
+
+  await tapByKey(tester, Keys.toolFill);
+
+  switch (gradientMode) {
+    case FillMode.solid:
+      await tapByKey(tester, Keys.toolFillModeSolid);
+    case FillMode.linear:
+      await tapByKey(tester, Keys.toolFillModeLinear);
+    case FillMode.radial:
+      await tapByKey(tester, Keys.toolFillModeRadial);
   }
+
+  // ================================
+  // TO START THE GRADIENT UX WE WILL TAP THE CENTER OF THE GRADIENT COLLECTION OF POSITION
+  // ================================
+
+  // Calculate center of gradient collection of positions
+  final Offset centerOfGradientPoints = Offset(
+    gradientPoints.fold<double>(
+          0.0,
+          (final double sum, final GradientPoint point) => sum + point.offset.dx,
+        ) /
+        gradientPoints.length,
+    gradientPoints.fold<double>(
+          0.0,
+          (final double sum, final GradientPoint point) => sum + point.offset.dy,
+        ) /
+        gradientPoints.length,
+  );
 
   // ================================
   // APPLY THE FILL WITH HUMAN GESTURE
   // ================================
-  // Use human-like gesture: press down at fill position and hold briefly
-  final TestGesture gesture = await tester.startGesture(
-    fillPosition,
-    kind: PointerDeviceKind.mouse,
-    buttons: kPrimaryButton,
-  );
+  await tapLikeHuman(tester, centerOfGradientPoints);
 
-  // Hold down for a brief moment to simulate human press
-  await Future.delayed(const Duration(milliseconds: 200));
-  await tester.pump();
+  // Give time for gradient mode UI to appear
+  await tester.pump(const Duration(milliseconds: 100));
 
-  // Release the gesture
-  await gesture.up();
-  await tester.pump(const Duration(milliseconds: 300));
+  // ================================
+  // PLACE GRADIENT HANDLES
+  // ================================
+  for (int handleIndex = 0; handleIndex < gradientPoints.length; handleIndex++) {
+    final Key handleKey = Key('${Keys.gradientHandleKeyPrefixText}$handleIndex');
+    final Offset targetOffset = gradientPoints[handleIndex].offset;
+
+    // Now drag the handle to the exact position
+    final Offset centerDragHandle = tester.getCenter(find.byKey(handleKey));
+    await tester.pump(const Duration(milliseconds: 10));
+    await dragLikeHuman(tester, centerDragHandle, targetOffset);
+    await tester.pump(const Duration(milliseconds: 10));
+  }
 
   // Allow time for the fill operation to complete and UI to update
   await tester.pump();
   await Future.delayed(const Duration(milliseconds: 1000));
 
   // Reset fill mode back to solid to terminate gradient gesture
-  final String solidModeKey = 'tool-fill-mode-solid';
-  final Finder solidModeButton = find.byKey(Key(solidModeKey));
-
-  if (solidModeButton.evaluate().isNotEmpty) {
-    debugPrint('🔄 Resetting fill mode to solid...');
-    await tester.tap(solidModeButton.first);
-    await tester.pumpAndSettle();
-    await Future.delayed(const Duration(milliseconds: 300));
-    debugPrint('✅ Fill mode reset to solid');
-  } else {
-    debugPrint('⚠️ Solid fill mode button not found, skipping reset');
-  }
+  await tapByKey(tester, Keys.toolFillModeSolid);
 
   await Future.delayed(const Duration(milliseconds: 200));
   await tester.pumpAndSettle();
-}
-
-/// Helper method to configure gradient fill via UI interactions
-/// Note: The actual gradient configuration happens through the FillWidget which shows gradient control points on the canvas
-Future<void> selectFillMode(
-  final WidgetTester tester,
-  final FillMode gradientMode,
-  final List<GradientPoint> gradientPoints,
-) async {
-  debugPrint('🎨 Configuring gradient via UI: mode=$gradientMode, points=${gradientPoints.length}');
-
-  // ================================
-  // STEP 1: Try to set gradient mode via UI button first
-  // ================================
-  String keyName = 'tool-fill-mode-solid';
-
-  if (gradientMode == FillMode.linear) {
-    keyName = 'tool-fill-mode-linear';
-  }
-  if (gradientMode == FillMode.radial) {
-    keyName = 'tool-fill-mode-radial';
-  }
-
-  final Finder gradientModeButton = find.byKey(Key(keyName));
-
-  if (gradientModeButton.evaluate().isNotEmpty) {
-    debugPrint('    Found gradient mode button, tapping to select $gradientMode');
-    await tester.tap(gradientModeButton.first);
-    await tester.pumpAndSettle();
-    await Future.delayed(const Duration(milliseconds: 300));
-  } else {
-    debugPrint('⚠️ Gradient mode button with key "$keyName" not found, using direct model access');
-  }
-
-  // Force UI update
-  await tester.pumpAndSettle();
-  await Future.delayed(const Duration(milliseconds: 300));
-
-  debugPrint('🎨 Gradient UI configuration completed');
 }
 
 /// Layer management helper methods for integration tests
@@ -528,9 +523,6 @@ class LayerTestHelpers {
     await Future.delayed(const Duration(milliseconds: 200));
     await tester.pumpAndSettle();
 
-    // Wait additional time for menu to render completely
-    await Future.delayed(const Duration(milliseconds: 1000));
-
     // Find the "Rename layer" menu item using descendant finder to be more specific
     final Finder popupMenu = find.byWidgetPredicate(
       (final Widget widget) => widget.runtimeType.toString().contains('PopupMenu'),
@@ -553,10 +545,6 @@ class LayerTestHelpers {
     // Try tapping with warnIfMissed disabled since popup menus often have positioning issues in tests
     await tester.tap(finalRenameFinder, warnIfMissed: false);
     await Future.delayed(const Duration(milliseconds: 300));
-    await tester.pumpAndSettle();
-
-    // Wait for the rename dialog to appear
-    await Future.delayed(const Duration(milliseconds: 1000));
     await tester.pumpAndSettle();
 
     // Verify dialog is open by looking for TextField
@@ -593,11 +581,10 @@ class IntegrationTestUtils {
 }
 
 Future<void> tapByKey(final WidgetTester tester, final Key key) async {
-  // Hide the Float Action panel
+  // Assert that the button exists
   final Finder buttonsFound = find.byKey(key);
+  expect(buttonsFound, findsOneWidget, reason: 'Should find button with key: $key');
 
-  if (buttonsFound.evaluate().isNotEmpty) {
-    await tester.tap(buttonsFound.first);
-    await tester.pumpAndSettle();
-  }
+  await tester.tap(buttonsFound.first);
+  await tester.pumpAndSettle();
 }

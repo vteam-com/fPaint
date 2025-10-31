@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
@@ -128,6 +129,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Paint Bucket
       ToolPanelPicker(
+        key: Keys.toolFill,
         minimal: minimal,
         name: 'Paint Bucket',
         image: iconFromaActionType(
@@ -200,7 +202,7 @@ class ToolsPanel extends StatelessWidget {
                 // Selection using Rectangle
                 //
                 ToolPanelPicker(
-                  key: const Key('tool-fill-mode-solid'),
+                  key: Keys.toolFillModeSolid,
                   minimal: minimal,
                   name: 'Solid',
                   image: iconAndColor(
@@ -216,7 +218,7 @@ class ToolsPanel extends StatelessWidget {
                 // Linear Gradient
                 //
                 ToolPanelPicker(
-                  key: const Key('tool-fill-mode-linear'),
+                  key: Keys.toolFillModeLinear,
                   minimal: minimal,
                   name: 'Linear Gradient',
                   image: iconFromSvgAsset(
@@ -233,7 +235,7 @@ class ToolsPanel extends StatelessWidget {
                 // Radial Gradient
                 //
                 ToolPanelPicker(
-                  key: const Key('tool-fill-mode-radial'),
+                  key: Keys.toolFillModeRadial,
                   minimal: minimal,
                   name: 'Radial Gradient',
                   image: iconFromSvgAsset(
