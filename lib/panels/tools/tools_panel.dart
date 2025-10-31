@@ -153,6 +153,7 @@ class ToolsPanel extends StatelessWidget {
         },
       ),
       ToolPanelPicker(
+        key: Keys.toolSelector,
         minimal: minimal,
         name: 'Selector',
         image: iconFromaActionType(
@@ -276,6 +277,7 @@ class ToolsPanel extends StatelessWidget {
                 // Selection using Rectangle
                 //
                 ToolPanelPicker(
+                  key: Keys.toolSelectorModeRectangle,
                   minimal: minimal,
                   name: 'Rectangle',
                   image: iconAndColor(
@@ -291,6 +293,7 @@ class ToolsPanel extends StatelessWidget {
                 // Selection using Circle
                 //
                 ToolPanelPicker(
+                  key: Keys.toolSelectorModeCircle,
                   minimal: minimal,
                   name: 'Circle',
                   image: iconAndColor(
@@ -306,6 +309,7 @@ class ToolsPanel extends StatelessWidget {
                 // Selection using Drawing
                 //
                 ToolPanelPicker(
+                  key: Keys.toolSelectorModeLasso,
                   minimal: minimal,
                   name: 'Lasso',
                   image: iconFromSvgAsset(
@@ -321,6 +325,7 @@ class ToolsPanel extends StatelessWidget {
                 // Selection using magic wand
                 //
                 ToolPanelPicker(
+                  key: Keys.toolSelectorModeWand,
                   minimal: minimal,
                   name: 'Magic',
                   image: iconAndColor(
