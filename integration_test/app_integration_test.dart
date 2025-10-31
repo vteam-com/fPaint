@@ -124,11 +124,11 @@ Future<void> _drawSky(final WidgetTester tester, final Offset canvasCenter) asyn
     gradientMode: FillMode.linear,
     gradientPoints: <GradientPoint>[
       GradientPoint(
-        color: Colors.red.shade200,
+        color: const Color.fromARGB(255, 34, 97, 168),
         offset: canvasCenter + const Offset(0, -240),
       ), // Light blue at top relative to center
       GradientPoint(
-        color: Colors.blue.shade800,
+        color: const Color.fromARGB(255, 110, 161, 219),
         offset: canvasCenter + const Offset(0, -20),
       ), // Dark blue at bottom relative to center
     ],
@@ -249,8 +249,14 @@ Future<void> _drawHouse(final WidgetTester tester, final Offset canvasCenter) as
     tester,
     gradientMode: FillMode.linear,
     gradientPoints: <GradientPoint>[
-      GradientPoint(color: Colors.orange, offset: canvasCenter + const Offset(20, -50)), // Top
-      GradientPoint(color: Colors.orange.shade800, offset: canvasCenter + const Offset(20, 10)), // Bottom
+      GradientPoint(
+        color: const Color.fromARGB(255, 242, 187, 105),
+        offset: canvasCenter + const Offset(20, -50),
+      ), // Top
+      GradientPoint(
+        color: const Color.fromARGB(255, 102, 100, 100),
+        offset: canvasCenter + const Offset(20, 10),
+      ), // Bottom
     ],
   );
 

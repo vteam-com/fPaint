@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
@@ -202,10 +203,9 @@ Future<void> drawLineWithHumanGestures(
   }
 
   // Select line tool via UI
-  const Duration toolSelectionDelay = Duration(milliseconds: 100);
   await tester.tap(find.byIcon(Icons.line_axis));
-  await tester.pump();
-  await Future.delayed(toolSelectionDelay);
+
+  await myWait(tester);
 
   await dragLikeHuman(tester, startPosition, endPosition);
 }
@@ -218,7 +218,9 @@ Future<void> tapLikeHuman(final WidgetTester tester, final Offset position) asyn
   );
 
   await gesture.up();
+  await Future.delayed(const Duration(milliseconds: 100));
   await tester.pump();
+  await Future.delayed(const Duration(milliseconds: 100));
 }
 
 Future<void> dragLikeHuman(
@@ -283,6 +285,7 @@ Future<void> performFloodFill(
     case FillMode.radial:
       await tapByKey(tester, Keys.toolFillModeRadial);
   }
+  await myWait(tester);
 
   // ================================
   // TO START THE GRADIENT UX WE WILL TAP THE CENTER OF THE GRADIENT COLLECTION OF POSITION
@@ -305,11 +308,23 @@ Future<void> performFloodFill(
   // ================================
   // APPLY THE FILL WITH HUMAN GESTURE
   // ================================
+  // await tester.tapAt(centerOfGradientPoints);
+  await myWait(tester);
   await tapLikeHuman(tester, centerOfGradientPoints);
+  await myWait(tester);
 
-  // Give time for gradient mode UI to appear
-  await tester.pump(const Duration(milliseconds: 100));
+  // ================================
+  // Change the colors
+  for (int handleIndex = 0; handleIndex < gradientPoints.length; handleIndex++) {
+    final Key handleKey = Key('${Keys.gradientHandleKeyPrefixText}$handleIndex');
+    final GradientPoint desiredPoint = gradientPoints[handleIndex];
 
+    // Set the color of the gradient point via long press and color picker dialog
+    await _setGradientPointColor(tester, handleKey, desiredPoint.color);
+
+    await myWait(tester);
+  }
+  // await tester.pumpAndSettle();
   // ================================
   // PLACE GRADIENT HANDLES
   // ================================
@@ -333,6 +348,16 @@ Future<void> performFloodFill(
 
   await Future.delayed(const Duration(milliseconds: 200));
   await tester.pumpAndSettle();
+}
+
+Future<void> myWait(
+  final WidgetTester tester,
+) async {
+  await Future.delayed(const Duration(milliseconds: 300));
+  // await tester.pump();
+  // await Future.delayed(const Duration(milliseconds: 300));
+  // await tester.pumpAndSettle();
+  // await Future.delayed(const Duration(milliseconds: 300));
 }
 
 /// Layer management helper methods for integration tests
@@ -578,6 +603,46 @@ class IntegrationTestUtils {
     await File(testFilePath).writeAsBytes(bytes);
     debugPrint('💾 Artwork saved: $testFilePath');
   }
+}
+
+/// Helper function to set the color of a gradient point via long press and color picker dialog
+Future<void> _setGradientPointColor(
+  final WidgetTester tester,
+  final Key handleKey,
+  final Color desiredColor,
+) async {
+  // Long press on the gradient handle to open color picker
+  await tester.longPress(
+    find.byKey(handleKey),
+  );
+
+  await myWait(tester);
+
+  // Find the hex color text field by its type and label (more robust)
+  final Finder dialogFinder = find.byType(AlertDialog);
+  final Finder hexFieldFinder = find.descendant(
+    of: dialogFinder,
+    matching: find.byWidgetPredicate(
+      (final Widget widget) => widget is TextField && widget.decoration?.labelText == 'Hex Color',
+    ),
+  );
+  await myWait(tester);
+
+  if (hexFieldFinder.evaluate().isEmpty) {
+    throw Exception('Hex Color text field not found in color picker dialog');
+  }
+
+  await tester.enterText(hexFieldFinder.first, colorToHexString(desiredColor));
+  await myWait(tester);
+
+  // Press the Apply button to confirm the color change
+  final Finder applyButtonFinder = find.widgetWithText(TextButton, 'Apply');
+  if (applyButtonFinder.evaluate().isEmpty) {
+    throw Exception('Apply button not found in color picker dialog');
+  }
+  await myWait(tester);
+  await tester.tap(applyButtonFinder);
+  await myWait(tester);
 }
 
 Future<void> tapByKey(final WidgetTester tester, final Key key) async {
