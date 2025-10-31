@@ -10,4 +10,10 @@ class Keys {
   static Key floatActionZoomOut = const Key('floating_action_zoom_out');
   static Key floatActionCenter = const Key('floating_action_center');
   static Key floatActionToggle = const Key('floating_action_toggle');
+  static String gradientHandleKeyPrefixText = 'gradient_handle_';
+
+  static Key toolFill = const Key('tool-fill');
+  static Key toolFillModeSolid = const Key('tool-fill-mode-solid');
+  static Key toolFillModeLinear = const Key('tool-fill-mode-linear');
+  static Key toolFillModeRadial = const Key('tool-fill-mode-radial');
 }

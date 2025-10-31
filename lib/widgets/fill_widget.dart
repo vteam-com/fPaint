@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
@@ -41,9 +42,11 @@ class _FillWidgetState extends State<FillWidget> {
       ),
     );
 
-    for (final GradientPoint gp in widget.fillModel.gradientPoints) {
+    for (int handleIndex = 0; handleIndex < widget.fillModel.gradientPoints.length; handleIndex++) {
+      final GradientPoint gp = widget.fillModel.gradientPoints[handleIndex];
       stackChildren.add(
         _builFillKnob(
+          key: Key('${Keys.gradientHandleKeyPrefixText}$handleIndex'),
           context: context,
           point: gp,
         ),
@@ -75,6 +78,7 @@ class _FillWidgetState extends State<FillWidget> {
 
   /// Builds a fill knob for the given gradient point.
   Widget _builFillKnob({
+    required final Key key,
     required final BuildContext context,
     required final GradientPoint point,
   }) {
@@ -84,6 +88,7 @@ class _FillWidgetState extends State<FillWidget> {
       left: point.offset.dx - (handleSize / 2),
       top: point.offset.dy - (handleSize / 2),
       child: GestureDetector(
+        key: key,
         onPanUpdate: (final DragUpdateDetails details) {
           setState(() {
             showDetails = true;

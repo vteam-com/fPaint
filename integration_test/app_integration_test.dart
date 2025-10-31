@@ -121,11 +121,16 @@ Future<void> _drawSky(final WidgetTester tester, final Offset canvasCenter) asyn
   // Apply gradient fill in the center of the canvas
   await performFloodFill(
     tester,
-    fillPosition: canvasCenter, // Center of canvas
     gradientMode: FillMode.linear,
     gradientPoints: <GradientPoint>[
-      GradientPoint(color: Colors.blue.shade200, offset: const Offset(0, -200)), // Light blue at top
-      GradientPoint(color: Colors.blue.shade800, offset: const Offset(0, 200)), // Dark blue at bottom
+      GradientPoint(
+        color: Colors.red.shade200,
+        offset: canvasCenter + const Offset(0, -240),
+      ), // Light blue at top relative to center
+      GradientPoint(
+        color: Colors.blue.shade800,
+        offset: canvasCenter + const Offset(0, -20),
+      ), // Dark blue at bottom relative to center
     ],
   );
 
@@ -163,7 +168,7 @@ Future<void> _drawLand(final WidgetTester tester, final Offset canvasCenter) asy
   await drawRectangleWithHumanGestures(
     tester,
     startPosition: canvasCenter + const Offset(-370, 10), // Bottom-left
-    endPosition: canvasCenter + const Offset(370, 210), // Bottom-right (full width, bottom quarter)
+    endPosition: canvasCenter + const Offset(370, 300), // Bottom-right (full width, bottom quarter)
     brushSize: 1,
     brushColor: Colors.greenAccent,
     fillColor: Colors.green,
@@ -185,7 +190,7 @@ Future<void> _drawHouse(final WidgetTester tester, final Offset canvasCenter) as
     endPosition: canvasCenter + const Offset(200, 100),
     brushSize: 1,
     brushColor: Colors.white,
-    fillColor: Colors.pinkAccent,
+    fillColor: const Color.fromARGB(255, 248, 163, 191),
   );
 
   // Door
@@ -242,11 +247,10 @@ Future<void> _drawHouse(final WidgetTester tester, final Offset canvasCenter) as
   debugPrint('🏠🎨 Filling roof with gradient...');
   await performFloodFill(
     tester,
-    fillPosition: canvasCenter + const Offset(20, -5), // Center of roof triangle
     gradientMode: FillMode.linear,
     gradientPoints: <GradientPoint>[
-      GradientPoint(color: Colors.orange, offset: const Offset(0, -50)), // Top
-      GradientPoint(color: Colors.orange.shade800, offset: const Offset(0, 10)), // Bottom
+      GradientPoint(color: Colors.orange, offset: canvasCenter + const Offset(20, -50)), // Top
+      GradientPoint(color: Colors.orange.shade800, offset: canvasCenter + const Offset(20, 10)), // Bottom
     ],
   );
 
