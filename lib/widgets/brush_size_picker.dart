@@ -1,78 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/widgets/base_picker.dart';
 
 /// A widget that allows the user to pick a brush size using a slider.
-class BrushSizePicker extends StatefulWidget {
+class BrushSizePicker extends BasePicker<double> {
   /// Creates a [BrushSizePicker].
-  const BrushSizePicker({
+  BrushSizePicker({
     super.key,
-    required this.title,
-    required this.value,
-    required this.min,
-    required this.max,
-    required this.onChanged,
-  });
-
-  /// The title of the picker.
-  final String title;
-
-  /// The current value of the picker.
-  final double value;
-
-  /// The minimum value of the picker.
-  final double min;
-
-  /// The maximum value of the picker.
-  final double max;
-
-  /// A callback that is called when the value of the picker changes.
-  final ValueChanged<double> onChanged;
+    required super.title,
+    required super.value,
+    required super.onChanged,
+    required final double min,
+    required final double max,
+  }) : super(min: min, max: max, divisions: (max * 10).toInt());
 
   @override
   BrushSizePickerState createState() => BrushSizePickerState();
 }
 
 /// The state for [BrushSizePicker].
-class BrushSizePickerState extends State<BrushSizePicker> {
-  late double _value;
-
+class BrushSizePickerState extends BasePickerState<double> {
   @override
-  void initState() {
-    super.initState();
-    _value = widget.value.clamp(widget.min, widget.max);
+  double clampValue(final double value) {
+    final double min = widget.min!;
+    final double max = widget.max!;
+    return value.clamp(min, max);
   }
 
   @override
-  void didUpdateWidget(covariant final BrushSizePicker oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value || oldWidget.min != widget.min || oldWidget.max != widget.max) {
-      setState(() {
-        _value = widget.value.clamp(widget.min, widget.max);
-      });
-    }
-  }
-
-  @override
-  Widget build(final BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 20,
-      children: <Widget>[
-        Text('${widget.title}: ${_value.toStringAsFixed(1)}'),
-        Slider(
-          value: _value,
-          min: widget.min,
-          max: widget.max,
-          divisions: (widget.max * 10).toInt(),
-          label: _value.toStringAsFixed(1),
-          onChanged: (final double value) {
-            setState(() {
-              _value = value;
-            });
-            widget.onChanged(_value);
-          },
-        ),
-      ],
+  Widget buildPickerWidget() {
+    return Slider(
+      value: currentValue,
+      min: widget.min!,
+      max: widget.max!,
+      divisions: widget.divisions,
+      label: currentValue.toStringAsFixed(1),
+      onChanged: updateValue,
     );
+  }
+
+  @override
+  String formatValue(final double value) {
+    return value.toStringAsFixed(1);
   }
 }
 

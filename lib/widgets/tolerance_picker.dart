@@ -1,64 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/widgets/base_picker.dart';
 
 /// A widget that allows the user to pick a tolerance value using a slider.
-class TolerancePicker extends StatefulWidget {
+class TolerancePicker extends BasePicker<int> {
   /// Creates a [TolerancePicker].
   const TolerancePicker({
     super.key,
-    required this.value,
-    required this.onChanged,
-  });
-
-  /// The current tolerance value.
-  final int value;
-
-  /// A callback that is called when the tolerance value changes.
-  final ValueChanged<int> onChanged;
+    required super.value,
+    required super.onChanged,
+  }) : super(title: 'Tolerance', min: 1, max: 100, divisions: 100);
 
   @override
   TolerancePickerState createState() => TolerancePickerState();
 }
 
 /// The state for [TolerancePicker].
-class TolerancePickerState extends State<TolerancePicker> {
-  late int _value;
-
+class TolerancePickerState extends BasePickerState<int> {
   @override
-  void initState() {
-    super.initState();
-    _value = widget.value;
+  int clampValue(final int value) {
+    return value.clamp(1, 100);
   }
 
   @override
-  void didUpdateWidget(covariant final TolerancePicker oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value) {
-      setState(() {
-        _value = widget.value;
-      });
-    }
-  }
-
-  @override
-  Widget build(final BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Text('Tolerance: ${_value.toStringAsFixed(0)}'),
-        Slider(
-          value: _value.toDouble(),
-          min: 1,
-          max: 100,
-          divisions: 100,
-          label: _value.toStringAsFixed(0),
-          onChanged: (final double value) {
-            setState(() {
-              _value = value.toInt();
-            });
-            widget.onChanged(_value);
-          },
-        ),
-      ],
+  Widget buildPickerWidget() {
+    return Slider(
+      value: currentValue.toDouble(),
+      min: 1,
+      max: 100,
+      divisions: 100,
+      label: currentValue.toStringAsFixed(0),
+      onChanged: (final double value) => updateValue(value.toInt()),
     );
+  }
+
+  @override
+  String formatValue(final int value) {
+    return value.toStringAsFixed(0);
   }
 }
 

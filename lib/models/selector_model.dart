@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
+import 'package:fpaint/models/visible_model.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 // Exports
 export 'package:fpaint/helpers/draw_path_helper.dart';
 
 /// A class that represents the selector model.
-class SelectorModel {
-  bool isVisible = false;
+class SelectorModel extends VisibleModel {
   SelectorMode mode = SelectorMode.rectangle;
   SelectorMath math = SelectorMath.replace;
 
@@ -19,6 +19,7 @@ class SelectorModel {
   Rect get boundingRect => path1?.getBounds() ?? Rect.zero;
 
   /// Clears the selector.
+  @override
   void clear() {
     this.isVisible = false;
     this.path1 = null;
