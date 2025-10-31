@@ -107,8 +107,7 @@ Future<void> _pause(
   final WidgetTester tester,
 ) async {
   // Give time for layer to stabilize
-  await Future.delayed(const Duration(milliseconds: 200));
-  await tester.pumpAndSettle(const Duration(milliseconds: 100));
+  await tester.pumpAndSettle();
 }
 
 /// Draws the sky background layer with a blue gradient
@@ -275,8 +274,6 @@ Future<void> _drawFence(final WidgetTester tester, final Offset canvasCenter) as
       brushColor: Colors.white,
     );
   }
-
-  await Future.delayed(const Duration(milliseconds: 200));
 
   // Draw horizontal rails
   await drawRectangleWithHumanGestures(

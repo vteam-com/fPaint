@@ -66,7 +66,7 @@ Future<void> drawRectangleWithHumanGestures(
   // Select rectangle tool via UI (always needed for rectangle drawing)
   const Duration toolSelectionDelay = Duration(milliseconds: 100);
   await tester.tap(find.byIcon(Icons.crop_square));
-  await tester.pump();
+
   await Future.delayed(toolSelectionDelay);
 
   final TestGesture gesture = await tester.startGesture(
@@ -91,7 +91,6 @@ Future<void> drawRectangleWithHumanGestures(
     if (i < delays.length) {
       await Future.delayed(delays[i]);
     }
-    await tester.pump();
   }
 
   await gesture.up();
@@ -218,9 +217,6 @@ Future<void> tapLikeHuman(final WidgetTester tester, final Offset position) asyn
   );
 
   await gesture.up();
-  await Future.delayed(const Duration(milliseconds: 100));
-  await tester.pump();
-  await Future.delayed(const Duration(milliseconds: 100));
 }
 
 Future<void> dragLikeHuman(
@@ -239,26 +235,12 @@ Future<void> dragLikeHuman(
   final Offset stepOffset = totalOffset / 8; // More steps for smoother line
 
   // Human-like drag with natural timing (more steps, shorter delays for line drawing)
-  const List<Duration> delays = <Duration>[
-    Duration(milliseconds: 10),
-    Duration(milliseconds: 10),
-    Duration(milliseconds: 10),
-    Duration(milliseconds: 10),
-    Duration(milliseconds: 10),
-    Duration(milliseconds: 10),
-    Duration(milliseconds: 10),
-  ];
 
   for (int i = 0; i < 8; i++) {
     await gesture.moveBy(stepOffset);
-    if (i < delays.length) {
-      await Future.delayed(delays[i]);
-    }
-    await tester.pump();
   }
 
   await gesture.up();
-  await tester.pump();
 }
 
 /// Helper method to perform flood fill with gradient configuration
@@ -378,10 +360,6 @@ Future<void> myWait(
   final WidgetTester tester,
 ) async {
   await Future.delayed(const Duration(milliseconds: 300));
-  // await tester.pump();
-  // await Future.delayed(const Duration(milliseconds: 300));
-  // await tester.pumpAndSettle();
-  // await Future.delayed(const Duration(milliseconds: 300));
 }
 
 /// Layer management helper methods for integration tests
@@ -403,8 +381,6 @@ class LayerTestHelpers {
 
     // Give time for UI to update and try to make layer visible
     await tester.pumpAndSettle();
-    await Future.delayed(const Duration(milliseconds: 250));
-    await tester.pumpAndSettle();
 
     // Try to select the layer via UI to ensure it's properly visible
     try {
@@ -416,7 +392,6 @@ class LayerTestHelpers {
     }
 
     // Give additional time for UI to settle before renaming
-    await Future.delayed(const Duration(milliseconds: 250));
     await tester.pumpAndSettle();
 
     // Rename the newly selected layer using context menu
