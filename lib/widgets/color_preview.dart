@@ -12,11 +12,13 @@ import 'package:fpaint/widgets/transparent_background.dart';
 ///   [color]     The color to preview.
 ///   [onPressed] A callback that is called when the color preview is tapped.
 Widget colorPreviewWithTransparentPaper({
+  required final Key key,
   required final bool minimal,
   required final Color color,
   required final GestureTapCallback onPressed,
 }) {
   return SizedBox(
+    key: key,
     height: minimal ? 50 : 60,
     width: minimal ? 50 : 60,
     child: transparentPaperContainer(
@@ -82,6 +84,7 @@ class ColorPreview extends StatelessWidget {
     return Tooltip(
       message: tooltipText ?? text,
       child: InkWell(
+        key: super.key,
         onTap: onPressed,
         child: SizedBox(
           width: size,
