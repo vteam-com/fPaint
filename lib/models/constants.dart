@@ -17,6 +17,12 @@ class Keys {
   static Key toolFillModeLinear = const Key('tool-fill-mode-linear');
   static Key toolFillModeRadial = const Key('tool-fill-mode-radial');
 
+  static Key toolSelector = const Key('tool-selector');
+  static Key toolSelectorModeRectangle = const Key('tool-selector-mode-rectangle');
+  static Key toolSelectorModeCircle = const Key('tool-selector-mode-circle');
+  static Key toolSelectorModeLasso = const Key('tool-selector-mode-lasso');
+  static Key toolSelectorModeWand = const Key('tool-selector-mode-wand');
+
   static Key toolPanelFillColor = const Key('toolPanelFillColor');
   static Key toolPanelBrushColor1 = const Key('toolPanelBrushColor1');
   static Key toolPanelFontColor = const Key('toolPanelFontColor');
