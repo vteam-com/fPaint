@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/visible_model.dart';
 
 // Exports
 export 'package:fpaint/helpers/draw_path_helper.dart';
@@ -7,9 +8,7 @@ export 'package:fpaint/helpers/draw_path_helper.dart';
 enum FillMode { solid, linear, radial }
 
 /// Represents the fill properties for a shape.
-class FillModel {
-  bool isVisible = false;
-
+class FillModel extends VisibleModel {
   ///-------------------------------------------
   /// Mode
   FillMode _mode = FillMode.solid;
@@ -28,6 +27,7 @@ class FillModel {
   List<GradientPoint> gradientPoints = <GradientPoint>[];
 
   /// Clears the gradient points and hides the fill.
+  @override
   void clear() {
     this.gradientPoints.clear();
     this.isVisible = false;

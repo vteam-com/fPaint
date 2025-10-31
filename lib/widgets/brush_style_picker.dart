@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/widgets/base_picker.dart';
 
 /// Defines the different styles for a brush.
 enum BrushStyle {
@@ -31,47 +32,46 @@ class MyBrush {
 }
 
 /// A widget that allows the user to pick a brush style from a dropdown menu.
-class BrushStylePicker extends StatefulWidget {
+class BrushStylePicker extends BasePicker<BrushStyle> {
   /// Creates a [BrushStylePicker].
   const BrushStylePicker({
     super.key,
-    required this.value,
-    required this.onChanged,
-  });
-
-  /// The current brush style value.
-  final BrushStyle value;
-
-  /// A callback that is called when the brush style changes.
-  final ValueChanged<BrushStyle> onChanged;
+    required super.value,
+    required super.onChanged,
+  }) : super(title: 'Brush Style');
 
   @override
   BrushStylePickerState createState() => BrushStylePickerState();
 }
 
 /// The state for [BrushStylePicker].
-class BrushStylePickerState extends State<BrushStylePicker> {
-  late BrushStyle _value;
+class BrushStylePickerState extends BasePickerState<BrushStyle> {
   @override
-  void initState() {
-    super.initState();
-    _value = widget.value;
+  BrushStyle clampValue(final BrushStyle value) {
+    return value; // No clamping needed for enums
   }
 
   @override
-  Widget build(final BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 20,
-      children: <Widget>[
-        brushStyleDropDown(_value, (final BrushStyle selectedBrush) {
-          setState(() {
-            _value = selectedBrush;
-            widget.onChanged(selectedBrush);
-          });
-        }),
-      ],
+  Widget buildPickerWidget() {
+    return DropdownButton<int>(
+      value: currentValue.index,
+      items: BrushStyle.values.map<DropdownMenuItem<int>>((final BrushStyle value) {
+        return DropdownMenuItem<int>(
+          value: value.index,
+          child: Text(value.name),
+        );
+      }).toList(),
+      onChanged: (final int? index) {
+        if (index != null) {
+          updateValue(BrushStyle.values[index]);
+        }
+      },
     );
+  }
+
+  @override
+  String formatValue(final BrushStyle value) {
+    return value.name;
   }
 }
 
@@ -92,7 +92,9 @@ Widget brushStyleDropDown(
       );
     }).toList(),
     onChanged: (final int? index) {
-      onChanged(BrushStyle.values[index!]);
+      if (index != null) {
+        onChanged(BrushStyle.values[index]);
+      }
     },
   );
 }
