@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
@@ -59,6 +60,7 @@ class TextAttributesWidget extends StatelessWidget {
           minimal: minimal,
           name: 'Font Color',
           childLeft: colorPreviewWithTransparentPaper(
+            key: Keys.toolPanelFontColor,
             minimal: minimal,
             color: appProvider.brushColor,
             onPressed: () {

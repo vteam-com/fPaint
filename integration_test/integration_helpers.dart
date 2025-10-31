@@ -264,7 +264,28 @@ Future<void> dragLikeHuman(
 /// Helper method to perform flood fill with gradient configuration
 /// Supports both solid color fills and gradient fills with UI configuration
 /// Uses human-like gesture simulation for natural interaction
-Future<void> performFloodFill(
+Future<void> performFloodFillSolid(
+  final WidgetTester tester, {
+  required final Offset position,
+  required final Color color,
+}) async {
+  debugPrint('🎨 performFloodFillSolid');
+
+  await tapByKey(tester, Keys.toolFill);
+  await tapByKey(tester, Keys.toolFillModeSolid);
+  await tapByKey(tester, Keys.toolPanelFillColor);
+  await _setGradientPointColor(tester, color);
+
+  // ================================
+  // APPLY THE FILL WITH HUMAN GESTURE
+  // ================================
+  await tapLikeHuman(tester, position);
+}
+
+/// Helper method to perform flood fill with gradient configuration
+/// Supports both solid color fills and gradient fills with UI configuration
+/// Uses human-like gesture simulation for natural interaction
+Future<void> performFloodFillGradient(
   final WidgetTester tester, {
   required final FillMode gradientMode, // FillMode.linear or FillMode.radial
   required final List<GradientPoint> gradientPoints,
@@ -274,12 +295,11 @@ Future<void> performFloodFill(
   // ================================
   // SET FILL MODE: Solid, Linear, Radial
   // ================================
-
   await tapByKey(tester, Keys.toolFill);
 
   switch (gradientMode) {
     case FillMode.solid:
-      await tapByKey(tester, Keys.toolFillModeSolid);
+      expect(gradientMode, isNot(FillMode.solid));
     case FillMode.linear:
       await tapByKey(tester, Keys.toolFillModeLinear);
     case FillMode.radial:
@@ -320,7 +340,11 @@ Future<void> performFloodFill(
     final GradientPoint desiredPoint = gradientPoints[handleIndex];
 
     // Set the color of the gradient point via long press and color picker dialog
-    await _setGradientPointColor(tester, handleKey, desiredPoint.color);
+    // Long press on the gradient handle to open color picker
+    await tester.longPress(
+      find.byKey(handleKey),
+    );
+    await _setGradientPointColor(tester, desiredPoint.color);
 
     await myWait(tester);
   }
@@ -608,14 +632,8 @@ class IntegrationTestUtils {
 /// Helper function to set the color of a gradient point via long press and color picker dialog
 Future<void> _setGradientPointColor(
   final WidgetTester tester,
-  final Key handleKey,
   final Color desiredColor,
 ) async {
-  // Long press on the gradient handle to open color picker
-  await tester.longPress(
-    find.byKey(handleKey),
-  );
-
   await myWait(tester);
 
   // Find the hex color text field by its type and label (more robust)
@@ -647,9 +665,9 @@ Future<void> _setGradientPointColor(
 
 Future<void> tapByKey(final WidgetTester tester, final Key key) async {
   // Assert that the button exists
-  final Finder buttonsFound = find.byKey(key);
-  expect(buttonsFound, findsOneWidget, reason: 'Should find button with key: $key');
+  final Finder elementFound = find.byKey(key);
+  expect(elementFound, findsOneWidget, reason: 'Should find button with key: $key');
 
-  await tester.tap(buttonsFound.first);
+  await tester.tap(elementFound.first);
   await tester.pumpAndSettle();
 }

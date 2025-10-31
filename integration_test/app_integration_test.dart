@@ -119,7 +119,7 @@ Future<void> _drawSky(final WidgetTester tester, final Offset canvasCenter) asyn
   await LayerTestHelpers.printLayerStructure(tester);
 
   // Apply gradient fill in the center of the canvas
-  await performFloodFill(
+  await performFloodFillGradient(
     tester,
     gradientMode: FillMode.linear,
     gradientPoints: <GradientPoint>[
@@ -245,19 +245,10 @@ Future<void> _drawHouse(final WidgetTester tester, final Offset canvasCenter) as
 
   // Fill the roof triangle with orange gradient
   debugPrint('🏠🎨 Filling roof with gradient...');
-  await performFloodFill(
+  await performFloodFillSolid(
     tester,
-    gradientMode: FillMode.linear,
-    gradientPoints: <GradientPoint>[
-      GradientPoint(
-        color: const Color.fromARGB(255, 242, 187, 105),
-        offset: canvasCenter + const Offset(20, -50),
-      ), // Top
-      GradientPoint(
-        color: const Color.fromARGB(255, 102, 100, 100),
-        offset: canvasCenter + const Offset(20, 10),
-      ), // Bottom
-    ],
+    position: canvasCenter + const Offset(50, -50),
+    color: const Color.fromARGB(255, 183, 104, 19),
   );
 
   debugPrint('🏠 House with roof completed!');

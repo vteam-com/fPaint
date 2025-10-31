@@ -608,6 +608,7 @@ class ToolsPanel extends StatelessWidget {
         childLeft: Column(
           children: <Widget>[
             colorPreviewWithTransparentPaper(
+              key: Keys.toolPanelBrushColor1,
               minimal: minimal,
               color: appProvider.brushColor,
               onPressed: () {
@@ -653,6 +654,7 @@ class ToolsPanel extends StatelessWidget {
         childLeft: Column(
           children: <Widget>[
             colorPreviewWithTransparentPaper(
+              key: Keys.toolPanelFillColor,
               minimal: minimal,
               color: appProvider.fillColor,
               onPressed: () {

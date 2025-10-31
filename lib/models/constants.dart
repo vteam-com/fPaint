@@ -16,4 +16,8 @@ class Keys {
   static Key toolFillModeSolid = const Key('tool-fill-mode-solid');
   static Key toolFillModeLinear = const Key('tool-fill-mode-linear');
   static Key toolFillModeRadial = const Key('tool-fill-mode-radial');
+
+  static Key toolPanelFillColor = const Key('toolPanelFillColor');
+  static Key toolPanelBrushColor1 = const Key('toolPanelBrushColor1');
+  static Key toolPanelFontColor = const Key('toolPanelFontColor');
 }
