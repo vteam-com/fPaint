@@ -37,9 +37,9 @@ To create a **free alternative to expensive commercial graphics software** throu
 ## 💝 100% Free, No Ads, No Paywalls
 
 Unlike commercial alternatives, fPaint will always remain completely free with:
-- ❌ No ads or monetization
-- ❌ No feature restrictions
-- ❌ No premium tiers
+- 🙅🏼 No ads or monetization
+- 🙅🏼 No feature restrictions
+- 🙅🏼 No premium tiers
 - ✅ Full source code transparency
 - ✅ Community-driven development
 - ✅ Cross-platform availability
@@ -60,17 +60,8 @@ We're building toward feature parity with commercial graphics editors. Current p
 ### Phase 2: Professional Features
 - [ ] Non-destructive filters and effects
 - [ ] Advanced typography and text-on-path
-- [ ] Vector tools integration
-- [ ] Plugin system for extensibility
-- [ ] HDR color support
-- [ ] GPU-accelerated rendering
-
-### Phase 3: Industry Standard
 - [ ] CMYK color management
-- [ ] Print preparation tools
-- [ ] Batch processing
 - [ ] Scripting/automation
-- [ ] Professional color correction
 
 **Your expertise in any of these areas would accelerate our progress tremendously!**
 
@@ -121,14 +112,11 @@ fPaint includes comprehensive integration tests that demonstrate advanced painti
 To run the integration tests:
 
 ```bash
-# Run all integration tests
-flutter test integration_test/
+# Run all unit test
+flutter test
 
-# Run a specific integration test
-flutter test integration_test/app_integration_test.dart
-
-# Run tests with a longer timeout for complex scenes
-flutter test integration_test/app_integration_test.dart --timeout=10m
+# Run integration test
+./tool/run_integration_test.sh
 ```
 
 #### Test Features
