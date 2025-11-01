@@ -74,21 +74,6 @@ void main() {
       final LayersProvider layersProvider = LayersProvider.of(context);
 
       debugPrint('🎨 Multi-Layer Scene Final Status:');
-      // expect(layersProvider.length, 6, reason: 'Should have 6 layers total');
-
-      // Count total drawing actions across all layers
-      // int totalActions = 0;
-      // for (int i = 0; i < layersProvider.length; i++) {
-      //   final layer = layersProvider.get(i);
-      //   totalActions += layer.actionStack.length;
-      //   final layerType = ['Background', 'Sky', 'Sun', 'Land', 'House', 'Fence'][i];
-      //   debugPrint('  $layerType Layer: ${layer.actionStack.length} actions');
-      // }
-
-      // debugPrint('📊 TOTAL: $totalActions drawing actions across ${layersProvider.length} layers');
-
-      // Multi-layer scene successfully demonstrates layer management
-      // expect(totalActions, greaterThan(5), reason: 'Multi-layer scene with distributed content across layers');
 
       // Save the multi-layer masterpiece!
       await IntegrationTestUtils.saveArtworkScreenshot(
