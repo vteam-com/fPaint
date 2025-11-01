@@ -651,7 +651,7 @@ Future<void> tapByKey(final WidgetTester tester, final Key key) async {
 /// Creates a circular selection around the specified center with given radius
 Future<void> selectCircleArea(
   final WidgetTester tester, {
-  required final Offset center,
+  required final Offset circleCenter,
   required final double radius,
 }) async {
   // Select circle selection tool
@@ -662,19 +662,21 @@ Future<void> selectCircleArea(
   await myWait(tester);
 
   // Create circle selection by dragging from center to circumference
-  final Offset startPoint = center;
-  final Offset endPoint = center + Offset(radius, radius); // Right edge of circle
+  final Offset startPoint = circleCenter - Offset(radius, radius);
+  final Offset endPoint = circleCenter + Offset(radius, radius); // Right edge of circle
 
   final TestGesture gesture = await tester.startGesture(
     startPoint,
     kind: PointerDeviceKind.mouse,
     buttons: kPrimaryButton,
   );
+  await tester.pump();
 
   await gesture.moveTo(endPoint);
+  await tester.pump();
 
   await gesture.up();
-  await tester.pumpAndSettle();
+  await tester.pump();
 }
 
 void debugPrintVisibleKeys() {
