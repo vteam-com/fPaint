@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
 
+/// A comprehensive mapping of blend modes supported by the fPaint application.
+///
+/// Each blend mode includes its Flutter BlendMode equivalent and a human-readable
+/// description explaining how the blend mode affects the compositing of layers.
+///
+/// Supported blend modes include:
+/// - Normal: Standard overlay without blending
+/// - Darken/Lighten: Color value comparisons
+/// - Multiply/Screen: Mathematical color operations
+/// - Overlay/Soft Light/Hard Light: Contrast adjustments
+/// - Color operations: Hue, Saturation, Color, Luminosity adjustments
+/// - Dodge/Burn: Contrast modifications
 final Map<String, Map<String, Object>> supportedBlendModes = <String, Map<String, Object>>{
   'Normal': <String, Object>{
     'flutterBlendMode': BlendMode.srcOver,
@@ -63,6 +75,16 @@ final Map<String, Map<String, Object>> supportedBlendModes = <String, Map<String
   },
 };
 
+/// Displays a popup menu for selecting blend modes.
+///
+/// Shows all supported blend modes in a contextual menu, allowing users to
+/// select how layers should be composited together. Each menu item displays
+/// the blend mode name and a description of its effect.
+///
+/// [context] The build context for displaying the menu.
+/// [position] The screen position where the menu should appear.
+/// [selectedBlendMode] The currently selected blend mode (for highlighting).
+/// Returns the selected BlendMode, or BlendMode.srcOver if cancelled.
 Future<BlendMode> showBlendModeMenu({
   required final BuildContext context,
   final Offset position = Offset.zero,
@@ -104,6 +126,14 @@ Future<BlendMode> showBlendModeMenu({
       BlendMode.srcOver;
 }
 
+/// Converts a BlendMode enum value to a human-readable string.
+///
+/// Special handling for BlendMode.srcOver which is displayed as "Normal"
+/// for better user understanding. Other blend modes are capitalized
+/// for proper display in UI elements.
+///
+/// [blendMode] The BlendMode to convert to text.
+/// Returns a capitalized string representation of the blend mode.
 String blendModeToText(final BlendMode blendMode) {
   if (blendMode == BlendMode.srcOver) {
     return 'Normal';

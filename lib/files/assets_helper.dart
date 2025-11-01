@@ -29,6 +29,16 @@ Future<ui.Image> loadImageFromAssets(final String assetPath) async {
   return completer.future;
 }
 
+/// Loads binary data from the specified asset path.
+///
+/// This function asynchronously loads binary data from the specified asset path
+/// and returns a [Future] that completes with the loaded [ByteData] instance.
+///
+/// This is useful for loading raw binary assets like fonts, data files, or
+/// other non-image assets that need to be accessed as raw bytes.
+///
+/// [assetPath] The path to the asset file.
+/// Returns a Future that completes with the loaded ByteData.
 Future<ByteData> loadBinaryFromAssets(final String assetPath) async {
   return await rootBundle.load(assetPath);
 }
