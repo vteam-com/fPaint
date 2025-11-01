@@ -54,6 +54,48 @@ This app is 100% free with no ads or nagging. We invite all Flutter enthusiasts 
     flutter run
     ```
 
+## Testing
+
+### Integration Testing
+
+fPaint includes comprehensive integration tests that demonstrate advanced painting features and multi-layer scene creation. The integration tests use human-like gestures to simulate real user interactions and create complete artwork scenes.
+
+#### Running Integration Tests
+
+To run the integration tests:
+
+```bash
+# Run all integration tests
+flutter test integration_test/
+
+# Run a specific integration test
+flutter test integration_test/app_integration_test.dart
+
+# Run tests with a longer timeout for complex scenes
+flutter test integration_test/app_integration_test.dart --timeout=10m
+```
+
+#### Test Features
+
+The integration tests demonstrate:
+
+- **Multi-layer scene creation**: Sky gradients, sun with radiating rays, land, houses, and fences
+- **Advanced drawing tools**: Circles, rectangles, lines with human-like gesture simulation
+- **Gradient fills**: Linear and radial gradients for backgrounds and effects
+- **Layer management**: Creating, switching, and organizing artwork layers
+- **Selection tools**: Circle selection for precise area targeting
+- **Color management**: Dynamic color palette and fill operations
+
+#### Test Helpers
+
+The `integration_test/integration_helpers.dart` file provides reusable helper functions for:
+
+- Human-like drawing gestures (circles, rectangles, lines)
+- Layer management operations
+- Gradient fill operations
+- Color picker interactions
+- UI element tapping and navigation
+
 ## Usage
 
 1. Launch the app
