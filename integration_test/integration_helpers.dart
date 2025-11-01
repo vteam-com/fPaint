@@ -136,34 +136,13 @@ Future<void> drawCircleWithHumanGestures(
   await Future.delayed(toolSelectionDelay);
 
   final TestGesture gesture = await tester.startGesture(
-    center,
+    center - Offset(radius / 2, 0),
     kind: PointerDeviceKind.mouse,
     buttons: kPrimaryButton,
   );
 
-  // Drag from center outward to define radius (rightward for simplicity)
-  final Offset circumferencePoint = center + Offset(radius, 0);
-
-  // Calculate total movement and divide into smooth human-like steps
-  final Offset totalOffset = circumferencePoint - center;
-  final Offset stepOffset = totalOffset / 5; // 5 steps for circle radius definition
-
-  // Human-like drag with natural timing for circle creation
-  const List<Duration> delays = <Duration>[
-    Duration(milliseconds: 80),
-    Duration(milliseconds: 80),
-    Duration(milliseconds: 80),
-    Duration(milliseconds: 80),
-    Duration(milliseconds: 80),
-  ];
-
-  for (int i = 0; i < 5; i++) {
-    await gesture.moveBy(stepOffset);
-    if (i < delays.length) {
-      await Future.delayed(delays[i]);
-    }
-    await tester.pump();
-  }
+  final Offset circumferencePoint = center + Offset(radius / 2, 0);
+  await gesture.moveTo(circumferencePoint);
 
   await gesture.up();
   await tester.pump();

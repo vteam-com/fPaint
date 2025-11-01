@@ -544,7 +544,7 @@ class MainViewState extends State<MainView> {
       if (appProvider.selectedAction == ActionType.fill) {
         if (appProvider.fillModel.mode == FillMode.solid) {
           //
-          // Fill Solid
+          // Fill Solid - first click is the center
           //
           appProvider.fillModel.gradientPoints.clear();
           appProvider.floodFillSolidAction(adjustedPosition);
@@ -553,18 +553,35 @@ class MainViewState extends State<MainView> {
           // Fill Gradient
           //
           if (appProvider.fillModel.gradientPoints.isEmpty) {
-            appProvider.fillModel.addPoint(
-              GradientPoint(
-                offset: adjustedPosition + const Offset(-10, -10),
-                color: adjustBrightness(appProvider.fillColor, 0.3),
-              ),
-            );
-            appProvider.fillModel.addPoint(
-              GradientPoint(
-                offset: adjustedPosition + const Offset(10, 10),
-                color: adjustBrightness(appProvider.fillColor, 0.7),
-              ),
-            );
+            if (appProvider.fillModel.mode == FillMode.linear) {
+              // For linear gradients, first click is the center between the two handles
+              appProvider.fillModel.addPoint(
+                GradientPoint(
+                  offset: appProvider.fromCanvas(adjustedPosition + const Offset(-40, 0)),
+                  color: adjustBrightness(appProvider.fillColor, 0.3),
+                ),
+              );
+              appProvider.fillModel.addPoint(
+                GradientPoint(
+                  offset: appProvider.fromCanvas(adjustedPosition + const Offset(40, 0)),
+                  color: adjustBrightness(appProvider.fillColor, 0.7),
+                ),
+              );
+            } else if (appProvider.fillModel.mode == FillMode.radial) {
+              // For radial gradients, first click is the location of the first handle
+              appProvider.fillModel.addPoint(
+                GradientPoint(
+                  offset: appProvider.fromCanvas(adjustedPosition),
+                  color: adjustBrightness(appProvider.fillColor, 0.3),
+                ),
+              );
+              appProvider.fillModel.addPoint(
+                GradientPoint(
+                  offset: appProvider.fromCanvas(adjustedPosition + const Offset(50, 50)),
+                  color: adjustBrightness(appProvider.fillColor, 0.7),
+                ),
+              );
+            }
             appProvider.fillModel.isVisible = true;
             appProvider.floodFillGradientAction(appProvider.fillModel);
           }
