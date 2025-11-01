@@ -35,7 +35,7 @@ class MainMenu extends StatelessWidget {
         ),
         buildMenuItem(
           value: MenuIds.newFromClipboard,
-          text: 'New from Clipboard', // TODO(you): localize this string
+          text: strings[StringId.newFromClipboard]!,
           icon: Icons.content_paste_go,
         ),
         buildMenuItem(

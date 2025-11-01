@@ -292,6 +292,7 @@ digraph "" {
   "/test/draw_path_helper_test.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/test/paint_model_test.dart" -> "/lib/providers/app_provider.dart";
   "/test/providers/layers_provider_test.dart" -> "/lib/providers/layers_provider.dart";
+  "/test/providers/app_provider_test.dart" -> "/lib/models/fill_model.dart";
   "/test/providers/app_provider_test.dart" -> "/lib/providers/app_provider.dart";
   "/test/panels/tools/flood_fill_test.dart" -> "/lib/helpers/image_helper.dart";
   "/test/panels/tools/flood_fill_test.dart" -> "/lib/panels/tools/flood_fill.dart";
@@ -389,6 +390,7 @@ digraph "" {
   "/lib/panels/canvas_settings.dart" -> "/lib/models/canvas_resize.dart";
   "/lib/panels/canvas_settings.dart" -> "/lib/providers/app_provider.dart";
   "/lib/panels/canvas_settings.dart" -> "/lib/widgets/nine_grid_selector.dart";
+  "/lib/panels/side_panel/side_panel.dart" -> "/lib/models/constants.dart";
   "/lib/panels/side_panel/side_panel.dart" -> "/lib/panels/side_panel/top_menu_and_layers_panel.dart";
   "/lib/panels/side_panel/side_panel.dart" -> "/lib/panels/tools/tools_panel.dart";
   "/lib/panels/side_panel/side_panel.dart" -> "/lib/providers/app_preferences.dart";
@@ -427,6 +429,7 @@ digraph "" {
   "/lib/models/user_action_drawing.dart" -> "/lib/widgets/brush_style_picker.dart" [style=dashed];
   "/lib/main.dart" -> "/lib/files/import_files.dart";
   "/lib/main.dart" -> "/lib/main_screen.dart";
+  "/lib/main.dart" -> "/lib/models/constants.dart";
   "/lib/main.dart" -> "/lib/my_window_manager.dart";
   "/lib/main.dart" -> "/lib/pages/platforms_page.dart";
   "/lib/main.dart" -> "/lib/pages/settings_page.dart";

@@ -41,7 +41,7 @@ Widget floatingActionButtons(
         if (!shellProvider.showMenu)
           FloatingActionButton(
             heroTag: null,
-            backgroundColor: AppColors.colorFloatButtonBackground,
+            backgroundColor: AppColors.floatingButtonBackground,
             foregroundColor: Colors.white,
             tooltip: 'Active tool',
             onPressed: () {
@@ -113,9 +113,9 @@ Widget floatingActionButtons(
           '${(appProvider.layers.scale * 100).toInt()}%\n${appProvider.layers.size.width.toInt()}\n${appProvider.layers.size.height.toInt()}',
           textAlign: TextAlign.right,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppColors.floatingButtonForeground,
             fontWeight: FontWeight.bold,
-            fontSize: 10,
+            fontSize: 12,
           ),
         ),
       ),
@@ -164,7 +164,7 @@ Widget myFloatButton({
   return FloatingActionButton(
     key: key,
     heroTag: null,
-    backgroundColor: AppColors.colorFloatButtonBackground,
+    backgroundColor: AppColors.floatingButtonBackground,
     foregroundColor: foregroundColor,
     tooltip: tooltip,
     onPressed: () {
