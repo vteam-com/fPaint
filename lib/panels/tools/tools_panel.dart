@@ -424,6 +424,7 @@ class ToolsPanel extends StatelessWidget {
 
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
+                    key: Keys.toolSelectorCancel,
                     minimal: minimal,
                     name: 'Cancel',
                     image: iconAndColor(
