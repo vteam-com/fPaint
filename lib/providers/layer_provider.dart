@@ -454,156 +454,157 @@ class LayerProvider extends ChangeNotifier {
 
   /// Renders the layer to the given canvas.
   void renderLayer(final Canvas canvas) {
-    if (_cachedImage != null && isUserDrawing == false) {
-      //print('RenderLayer "$name" USE CACHE ');
-      return canvas.drawImage(_cachedImage!, Offset.zero, Paint());
-    }
-
-    //print('RenderLayer "$name" FULL RENDER');
-
-    // Save a layer with opacity applied
+    // Save a layer with opacity and blend mode applied
     final Paint layerPaint = Paint();
     layerPaint.color = Colors.black.withAlpha((255 * opacity).toInt());
     layerPaint.blendMode = blendMode;
 
     canvas.saveLayer(null, layerPaint);
 
-    if (backgroundColor != null) {
-      layerPaint.color = backgroundColor!;
-      canvas.drawRect(
-        Rect.fromPoints(const Offset(0, 0), Offset(size.width, size.height)),
-        layerPaint,
-      );
-    }
+    if (_cachedImage != null && isUserDrawing == false) {
+      //print('RenderLayer "$name" USE CACHE ');
+      canvas.drawImage(_cachedImage!, Offset.zero, Paint());
+    } else {
+      //print('RenderLayer "$name" FULL RENDER');
 
-    // Render all actions within the saved layer
-    for (final UserActionDrawing userAction in actionStack) {
-      switch (userAction.action) {
-        case ActionType.pencil:
-          applyAction(
-            canvas,
-            userAction.clipPath,
-            (final Canvas theCanvasToUse) => renderPencil(
-              theCanvasToUse,
-              userAction.positions.first,
-              userAction.positions.last,
-              userAction.brush!,
-            ),
-          );
-          break;
+      if (backgroundColor != null) {
+        final Paint bgPaint = Paint();
+        bgPaint.color = backgroundColor!;
+        canvas.drawRect(
+          Rect.fromPoints(const Offset(0, 0), Offset(size.width, size.height)),
+          bgPaint,
+        );
+      }
 
-        case ActionType.brush:
-          applyAction(
-            canvas,
-            userAction.clipPath,
-            (final Canvas theCanvasToUse) => renderPath(
-              theCanvasToUse,
-              userAction.positions,
-              userAction.brush!,
-              userAction.fillColor!,
-            ),
-          );
-          break;
+      // Render all actions within the saved layer
+      for (final UserActionDrawing userAction in actionStack) {
+        switch (userAction.action) {
+          case ActionType.pencil:
+            applyAction(
+              canvas,
+              userAction.clipPath,
+              (final Canvas theCanvasToUse) => renderPencil(
+                theCanvasToUse,
+                userAction.positions.first,
+                userAction.positions.last,
+                userAction.brush!,
+              ),
+            );
+            break;
 
-        case ActionType.line:
-          applyAction(
-            canvas,
-            userAction.clipPath,
-            (final Canvas theCanvasToUse) => renderLine(
-              theCanvasToUse,
-              userAction.positions.first,
-              userAction.positions.last,
-              userAction.brush!,
-              userAction.fillColor!,
-            ),
-          );
+          case ActionType.brush:
+            applyAction(
+              canvas,
+              userAction.clipPath,
+              (final Canvas theCanvasToUse) => renderPath(
+                theCanvasToUse,
+                userAction.positions,
+                userAction.brush!,
+                userAction.fillColor!,
+              ),
+            );
+            break;
 
-          break;
+          case ActionType.line:
+            applyAction(
+              canvas,
+              userAction.clipPath,
+              (final Canvas theCanvasToUse) => renderLine(
+                theCanvasToUse,
+                userAction.positions.first,
+                userAction.positions.last,
+                userAction.brush!,
+                userAction.fillColor!,
+              ),
+            );
 
-        case ActionType.circle:
-          applyAction(
-            canvas,
-            userAction.clipPath,
-            (final Canvas theCanvasToUse) => renderCircle(
-              theCanvasToUse,
-              userAction.positions.first,
-              userAction.positions.last,
-              userAction.brush!,
-              userAction.fillColor!,
-            ),
-          );
-          break;
+            break;
 
-        case ActionType.rectangle:
-          applyAction(
-            canvas,
-            userAction.clipPath,
-            (final Canvas theCanvasToUse) => renderRectangle(
-              theCanvasToUse,
-              userAction.positions.first,
-              userAction.positions.last,
-              userAction.brush!,
-              userAction.fillColor!,
-            ),
-          );
-          break;
+          case ActionType.circle:
+            applyAction(
+              canvas,
+              userAction.clipPath,
+              (final Canvas theCanvasToUse) => renderCircle(
+                theCanvasToUse,
+                userAction.positions.first,
+                userAction.positions.last,
+                userAction.brush!,
+                userAction.fillColor!,
+              ),
+            );
+            break;
 
-        case ActionType.fill:
-          // the fill action is added to the layer
-          // as a ActionType.region
-          break;
+          case ActionType.rectangle:
+            applyAction(
+              canvas,
+              userAction.clipPath,
+              (final Canvas theCanvasToUse) => renderRectangle(
+                theCanvasToUse,
+                userAction.positions.first,
+                userAction.positions.last,
+                userAction.brush!,
+                userAction.fillColor!,
+              ),
+            );
+            break;
 
-        case ActionType.region:
-          applyAction(
-            canvas,
-            userAction.clipPath,
-            (final Canvas theCanvasToUse) => renderRegion(
-              theCanvasToUse,
-              userAction.path!,
-              userAction.fillColor,
-              userAction.gradient,
-            ),
-          );
-          break;
+          case ActionType.fill:
+            // the fill action is added to the layer
+            // as a ActionType.region
+            break;
 
-        case ActionType.eraser:
-          applyAction(
-            canvas,
-            userAction.clipPath,
-            (final Canvas theCanvasToUse) => renderPencilEraser(
-              theCanvasToUse,
-              userAction.positions.first,
-              userAction.positions.last,
-              userAction.brush!,
-            ),
-          );
-          break;
+          case ActionType.region:
+            applyAction(
+              canvas,
+              userAction.clipPath,
+              (final Canvas theCanvasToUse) => renderRegion(
+                theCanvasToUse,
+                userAction.path!,
+                userAction.fillColor,
+                userAction.gradient,
+              ),
+            );
+            break;
 
-        case ActionType.cut:
-          renderRegionErase(canvas, userAction.path!);
-          break;
+          case ActionType.eraser:
+            applyAction(
+              canvas,
+              userAction.clipPath,
+              (final Canvas theCanvasToUse) => renderPencilEraser(
+                theCanvasToUse,
+                userAction.positions.first,
+                userAction.positions.last,
+                userAction.brush!,
+              ),
+            );
+            break;
 
-        case ActionType.image:
-          renderImage(canvas, userAction.positions.first, userAction.image!);
-          break;
+          case ActionType.cut:
+            renderRegionErase(canvas, userAction.path!);
+            break;
 
-        case ActionType.selector:
-          // the rendering for this tool is done below
-          break;
-        case ActionType.text:
-          applyAction(
-            canvas,
-            userAction.clipPath,
-            (final Canvas theCanvasToUse) => renderText(
-              theCanvasToUse,
-              userAction.textObject!,
-            ),
-          );
-          break;
+          case ActionType.image:
+            renderImage(canvas, userAction.positions.first, userAction.image!);
+            break;
+
+          case ActionType.selector:
+            // the rendering for this tool is done below
+            break;
+          case ActionType.text:
+            applyAction(
+              canvas,
+              userAction.clipPath,
+              (final Canvas theCanvasToUse) => renderText(
+                theCanvasToUse,
+                userAction.textObject!,
+              ),
+            );
+            break;
+        }
       }
     }
 
-    // Restore the canvas to apply the opacity
+    // Restore the canvas to apply the opacity and blend mode
     canvas.restore();
   }
 
