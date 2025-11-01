@@ -43,37 +43,24 @@ final Map<String, Map<String, Object>> supportedBlendModes = <String, Map<String
   },
   'Hard Light': <String, Object>{
     'flutterBlendMode': BlendMode.hardLight,
-    'description': 'Applies multiply or screen based on the source color’s intensity, creating a strong contrast.',
+    'description': 'Applies multiply or screen based on the source color\'s intensity, creating a strong contrast.',
   },
   'Hue': <String, Object>{
     'flutterBlendMode': BlendMode.hue,
-    'description': 'Uses the source’s hue and the destination’s saturation and luminance.',
+    'description': 'Uses the source\'s hue and the destination\'s saturation and luminance.',
   },
   'Saturation': <String, Object>{
     'flutterBlendMode': BlendMode.saturation,
-    'description': 'Uses the source’s saturation and the destination’s hue and luminance.',
+    'description': 'Uses the source\'s saturation and the destination\'s hue and luminance.',
   },
   'Color': <String, Object>{
     'flutterBlendMode': BlendMode.color,
-    'description': 'Uses the source’s hue and saturation, but keeps the destination’s luminance.',
+    'description': 'Uses the source\'s hue and saturation, but keeps the destination\'s luminance.',
   },
   'Luminosity': <String, Object>{
     'flutterBlendMode': BlendMode.luminosity,
-    'description': 'Uses the source’s luminance and the destination’s hue and saturation.',
+    'description': 'Uses the source\'s luminance and the destination\'s hue and saturation.',
   },
-  // TODO
-  //   'Linear Burn': {
-  //   'flutterBlendMode': null,
-  //   'description': 'Subtracts the source from the destination, clamping at black.',
-  // },
-  // 'Glow': {
-  //   'flutterBlendMode': null,
-  //   'description': 'Simulates an outer glow effect by brightening colors and adding a soft blur.',
-  // },
-  // 'Soft Glow': {
-  //   'flutterBlendMode': null,
-  //   'description': 'Combines a subtle glow effect with color adjustments for a softened, luminous look.',
-  // },
 };
 
 Future<BlendMode> showBlendModeMenu({
