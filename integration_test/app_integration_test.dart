@@ -115,7 +115,7 @@ Future<void> _drawSun(final WidgetTester tester, final Offset canvasCenter) asyn
   final Offset sunCenter = canvasCenter + const Offset(-200, -120); // Top-left area
 
   // Add sun rays using circle selection and gradient fill
-  await _addSunRays(tester, sunCenter, 100);
+  await _addSunRays(tester, sunCenter, 400);
   await myWait(tester);
 
   // Draw the main sun circle
@@ -249,11 +249,11 @@ Future<void> _addSunRays(final WidgetTester tester, final Offset sunCenter, fina
     gradientPoints: <GradientPoint>[
       GradientPoint(
         color: const Color.fromARGB(255, 255, 242, 1),
-        offset: sunCenter - Offset(sunRadius, sunRadius),
+        offset: sunCenter,
       ), // Light blue at top relative to center
       GradientPoint(
         color: const Color.fromARGB(59, 0, 28, 242),
-        offset: sunCenter + Offset(sunRadius * 1.66, sunRadius),
+        offset: sunCenter + Offset(sunRadius, sunRadius),
       ), // Dark blue at bottom relative to center
     ],
   );

@@ -35,12 +35,28 @@ class _FillWidgetState extends State<FillWidget> {
   Widget build(final BuildContext context) {
     final List<Widget> stackChildren = <Widget>[];
 
-    stackChildren.add(
-      AnimatedMarchingAntsPath(
-        linePointStart: widget.fillModel.gradientPoints.first.offset,
-        linePointEnd: widget.fillModel.gradientPoints.last.offset,
-      ),
-    );
+    // For radial gradients, show a circular marching ants path
+    if (widget.fillModel.mode == FillMode.radial && widget.fillModel.gradientPoints.length >= 2) {
+      final Offset center = widget.fillModel.gradientPoints.first.offset;
+      final Offset outerPoint = widget.fillModel.gradientPoints.last.offset;
+      final double radius = (outerPoint - center).distance;
+
+      final Path circlePath = Path()..addOval(Rect.fromCircle(center: center, radius: radius));
+
+      stackChildren.add(
+        AnimatedMarchingAntsPath(
+          path: circlePath,
+        ),
+      );
+    } else {
+      // For linear gradients, show linear marching ants
+      stackChildren.add(
+        AnimatedMarchingAntsPath(
+          linePointStart: widget.fillModel.gradientPoints.first.offset,
+          linePointEnd: widget.fillModel.gradientPoints.last.offset,
+        ),
+      );
+    }
 
     for (int handleIndex = 0; handleIndex < widget.fillModel.gradientPoints.length; handleIndex++) {
       final GradientPoint gp = widget.fillModel.gradientPoints[handleIndex];
@@ -52,24 +68,29 @@ class _FillWidgetState extends State<FillWidget> {
         ),
       );
     }
-    final Offset midPoint = widget.fillModel.centerPoint;
-    final double centerDot = 8;
-    stackChildren.add(
-      Positioned(
-        left: midPoint.dx - (centerDot / 2),
-        top: midPoint.dy - (centerDot / 2),
-        child: Container(
-          width: centerDot,
-          height: centerDot,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            shape: BoxShape.rectangle,
-            border: Border.all(color: Colors.white, width: 1),
-            borderRadius: BorderRadius.circular(centerDot),
+
+    // For linear gradients, show center dot at midpoint
+    if (widget.fillModel.mode == FillMode.linear) {
+      final Offset midPoint = widget.fillModel.centerPoint;
+      final double centerDot = 8;
+      stackChildren.add(
+        Positioned(
+          left: midPoint.dx - (centerDot / 2),
+          top: midPoint.dy - (centerDot / 2),
+          child: Container(
+            width: centerDot,
+            height: centerDot,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              shape: BoxShape.rectangle,
+              border: Border.all(color: Colors.white, width: 1),
+              borderRadius: BorderRadius.circular(centerDot),
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
+    // For radial gradients, the center is already clearly indicated by the first handle
 
     return Stack(
       children: stackChildren,

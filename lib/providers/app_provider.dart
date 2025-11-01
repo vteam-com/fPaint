@@ -470,9 +470,13 @@ class AppProvider extends ChangeNotifier {
 
   /// Performs a flood fill with a gradient.
   void floodFillGradientAction(final FillModel fillModel) async {
-    final Region region = await getRegionPathFromLayerImage(
-      fillModel.mode == FillMode.solid ? fillModel.centerPoint : toCanvas(fillModel.centerPoint),
-    );
+    // For radial gradients, start flood fill at the first gradient handle position
+    // For linear gradients, start at the center between handles
+    final ui.Offset floodFillStartPoint = fillModel.mode == FillMode.radial
+        ? toCanvas(fillModel.gradientPoints.first.offset)
+        : toCanvas(fillModel.centerPoint);
+
+    final Region region = await getRegionPathFromLayerImage(floodFillStartPoint);
 
     final ui.Path path = region.path.shift(Offset(region.left.toDouble(), region.top.toDouble()));
 
@@ -480,7 +484,8 @@ class AppProvider extends ChangeNotifier {
 
     final Gradient gradient;
     if (fillModel.mode == FillMode.radial) {
-      final ui.Offset centerPoint = toCanvas(fillModel.centerPoint);
+      // For radial gradients, the center is the location of the first gradient handle
+      final ui.Offset centerPoint = toCanvas(fillModel.gradientPoints.first.offset);
 
       gradient = RadialGradient(
         colors: fillModel.gradientPoints.map((final GradientPoint point) => point.color).toList(),
