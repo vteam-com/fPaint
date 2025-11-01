@@ -30,12 +30,18 @@ class MainView extends StatefulWidget {
 
 class MainViewState extends State<MainView> {
   int _activePointerId = -1;
-  Size lastViewPortSize = const Size(0, 0);
-  double scaleTolerance = 0.01;
+
   final List<int> _activePointers = <int>[];
+
+  double _baseDistance = 0.0;
+
   final Map<int, Offset> _pointerPositions = <int, ui.Offset>{};
-  double _scaleFactor = 1.0; // Initialize scale factor for pinch zoom
-  double _baseDistance = 0.0; // Store the initial distance when pinch starts
+
+  double _scaleFactor = 1.0;
+
+  Size lastViewPortSize = const Size(0, 0);
+
+  double scaleTolerance = 0.01;
 
   @override
   Widget build(final BuildContext context) {
@@ -278,6 +284,59 @@ class MainViewState extends State<MainView> {
     );
   }
 
+  /// Builds the canvas display widget.
+  ///
+  /// This method is responsible for creating the widget that displays the
+  /// canvas, applying the necessary transformations for panning and scaling.
+  Widget _displayCanvas(final AppProvider appProvider) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.topCenter,
+          colors: <Color>[
+            Colors.grey.shade50,
+            Colors.grey.shade500,
+          ],
+          stops: <double>[0, 1],
+        ),
+      ),
+      child: SizedBox.expand(
+        child: Stack(
+          children: <Widget>[
+            Positioned(
+              left: appProvider.canvasOffset.dx,
+              top: appProvider.canvasOffset.dy,
+              child: Transform.scale(
+                scale: appProvider.layers.scale,
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: appProvider.layers.width,
+                  height: appProvider.layers.height,
+                  child: const CanvasPanel(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Calculates the distance between two touch points.
+  ///
+  /// This method is called when multi-touch is active to determine the
+  /// distance between the two touch points.
+  double _getDistanceBetweenTouchPoints() {
+    if (_pointerPositions.length >= 2) {
+      final List<Offset> positions = _pointerPositions.values.toList();
+      final Offset pos1 = positions[0];
+      final Offset pos2 = positions[1];
+      return (pos2 - pos1).distance;
+    } else {
+      return 0.0;
+    }
+  }
+
   /// Handles multi-touch events for scaling and panning.
   ///
   /// This method is called when multiple touch points are detected on the screen.
@@ -324,91 +383,83 @@ class MainViewState extends State<MainView> {
     appProvider.update();
   }
 
-  /// Calculates the distance between two touch points.
+  /// Handles the end of a pointer event.
   ///
-  /// This method is called when multi-touch is active to determine the
-  /// distance between the two touch points.
-  double _getDistanceBetweenTouchPoints() {
-    if (_pointerPositions.length >= 2) {
-      final List<Offset> positions = _pointerPositions.values.toList();
-      final Offset pos1 = positions[0];
-      final Offset pos2 = positions[1];
-      return (pos2 - pos1).distance;
-    } else {
-      return 0.0;
+  /// This method is called when a pointer that was previously in contact
+  /// with the screen is lifted off. It is typically used to finalize any
+  /// interactions that were started during the pointer down or move events.
+  void _handlePointerEnd(
+    final AppProvider appProvider,
+    final PointerEvent event,
+  ) async {
+    // debugPrint('UP ${details.buttons}');
+    appProvider.layers.selectedLayer.isUserDrawing = false;
+
+    if (_activePointerId == event.pointer) {
+      if (appProvider.selectedAction == ActionType.selector) {
+        appProvider.selectorCreationEnd();
+      }
+      _activePointerId = -1;
+      // trigger a Thumbnail update
+      appProvider.layers.selectedLayer.clearCache();
+      appProvider.update();
     }
   }
 
-  /// Handles user panning of the canvas.
+  /// Handles the pointer move event.
   ///
-  /// This method is called when the user pans the canvas using a mouse or
-  /// touch gesture. It updates the canvas offset based on the input delta.
-  void _handleUserPanningTheCanvas(
-    final ShellProvider shellProvider,
+  /// This method is called when a pointer moves within the widget's bounds.
+  /// It performs necessary actions based on the pointer's movement.
+  ///
+  void _handlePointerMove(
     final AppProvider appProvider,
-    final Offset offsetDelta,
+    final PointerEvent event,
   ) {
-    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-    appProvider.canvasPan(offsetDelta: offsetDelta);
-  }
+    //
+    // Translate the input position to the canvas position and scale
+    //
+    final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
 
-  /// Handle zooming/scaling
-  void _handleUserScalingTheCanvas(
-    final ShellProvider shellProvider,
-    final AppProvider appProvider,
-    final Offset anchorPoint,
-    final double scaleDelta,
-  ) {
-    if (scaleDelta == 1) {
-      // nothing to scale
+    // debugPrint('DRAW MOVE ${details.buttons} P:${details.pointer}');
+    if (appProvider.eyeDropPositionForBrush != null) {
+      appProvider.eyeDropPositionForBrush = event.localPosition;
+      appProvider.update();
+      return;
+    }
+    if (appProvider.eyeDropPositionForFill != null) {
+      appProvider.eyeDropPositionForFill = event.localPosition;
+      appProvider.update();
       return;
     }
 
-    // Step 0: We are now in manual user placement of the canvas
-    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+    if (event.buttons == 1 && _activePointerId == event.pointer) {
+      // Update the Selector
+      if (appProvider.selectedAction == ActionType.selector) {
+        appProvider.selectorCreationAdditionalPoint(adjustedPosition);
+        return;
+      }
 
-    appProvider.applyScaleToCanvas(
-      scaleDelta: scaleDelta,
-      anchorPoint: anchorPoint,
-    );
-  }
+      if (appProvider.selectedAction == ActionType.fill) {
+        // ignore fill movement, flood fill is performed on the PointerStart event
+        return;
+      }
 
-  /// Builds the canvas display widget.
-  ///
-  /// This method is responsible for creating the widget that displays the
-  /// canvas, applying the necessary transformations for panning and scaling.
-  Widget _displayCanvas(final AppProvider appProvider) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment.topCenter,
-          colors: <Color>[
-            Colors.grey.shade50,
-            Colors.grey.shade500,
-          ],
-          stops: <double>[0, 1],
-        ),
-      ),
-      child: SizedBox.expand(
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              left: appProvider.canvasOffset.dx,
-              top: appProvider.canvasOffset.dy,
-              child: Transform.scale(
-                scale: appProvider.layers.scale,
-                alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: appProvider.layers.width,
-                  height: appProvider.layers.height,
-                  child: const CanvasPanel(),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+      if (appProvider.selectedAction == ActionType.pencil) {
+        // Add the pixel
+        appProvider.appendLineFromLastUserAction(adjustedPosition);
+      } else if (appProvider.selectedAction == ActionType.eraser) {
+        // Eraser implementation
+        appProvider.appendLineFromLastUserAction(adjustedPosition);
+      } else if (appProvider.selectedAction == ActionType.brush) {
+        // Cumulate more points in the draw path on the selected layer
+        appProvider.layers.selectedLayer.lastActionAppendPosition(position: adjustedPosition);
+        appProvider.update();
+      } else {
+        // Existing shape logic
+        appProvider.updateAction(end: adjustedPosition);
+        appProvider.update();
+      }
+    }
   }
 
   /// Handles the start of a pointer event.
@@ -538,83 +589,38 @@ class MainViewState extends State<MainView> {
     }
   }
 
-  /// Handles the pointer move event.
+  /// Handles user panning of the canvas.
   ///
-  /// This method is called when a pointer moves within the widget's bounds.
-  /// It performs necessary actions based on the pointer's movement.
-  ///
-  void _handlePointerMove(
+  /// This method is called when the user pans the canvas using a mouse or
+  /// touch gesture. It updates the canvas offset based on the input delta.
+  void _handleUserPanningTheCanvas(
+    final ShellProvider shellProvider,
     final AppProvider appProvider,
-    final PointerEvent event,
+    final Offset offsetDelta,
   ) {
-    //
-    // Translate the input position to the canvas position and scale
-    //
-    final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
-
-    // debugPrint('DRAW MOVE ${details.buttons} P:${details.pointer}');
-    if (appProvider.eyeDropPositionForBrush != null) {
-      appProvider.eyeDropPositionForBrush = event.localPosition;
-      appProvider.update();
-      return;
-    }
-    if (appProvider.eyeDropPositionForFill != null) {
-      appProvider.eyeDropPositionForFill = event.localPosition;
-      appProvider.update();
-      return;
-    }
-
-    if (event.buttons == 1 && _activePointerId == event.pointer) {
-      // Update the Selector
-      if (appProvider.selectedAction == ActionType.selector) {
-        appProvider.selectorCreationAdditionalPoint(adjustedPosition);
-        return;
-      }
-
-      if (appProvider.selectedAction == ActionType.fill) {
-        // ignore fill movement, flood fill is performed on the PointerStart event
-        return;
-      }
-
-      if (appProvider.selectedAction == ActionType.pencil) {
-        // Add the pixel
-        appProvider.appendLineFromLastUserAction(adjustedPosition);
-      } else if (appProvider.selectedAction == ActionType.eraser) {
-        // Eraser implementation
-        appProvider.appendLineFromLastUserAction(adjustedPosition);
-      } else if (appProvider.selectedAction == ActionType.brush) {
-        // Cumulate more points in the draw path on the selected layer
-        appProvider.layers.selectedLayer.lastActionAppendPosition(position: adjustedPosition);
-        appProvider.update();
-      } else {
-        // Existing shape logic
-        appProvider.updateAction(end: adjustedPosition);
-        appProvider.update();
-      }
-    }
+    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+    appProvider.canvasPan(offsetDelta: offsetDelta);
   }
 
-  /// Handles the end of a pointer event.
-  ///
-  /// This method is called when a pointer that was previously in contact
-  /// with the screen is lifted off. It is typically used to finalize any
-  /// interactions that were started during the pointer down or move events.
-  void _handlePointerEnd(
+  /// Handle zooming/scaling
+  void _handleUserScalingTheCanvas(
+    final ShellProvider shellProvider,
     final AppProvider appProvider,
-    final PointerEvent event,
-  ) async {
-    // debugPrint('UP ${details.buttons}');
-    appProvider.layers.selectedLayer.isUserDrawing = false;
-
-    if (_activePointerId == event.pointer) {
-      if (appProvider.selectedAction == ActionType.selector) {
-        appProvider.selectorCreationEnd();
-      }
-      _activePointerId = -1;
-      // trigger a Thumbnail update
-      appProvider.layers.selectedLayer.clearCache();
-      appProvider.update();
+    final Offset anchorPoint,
+    final double scaleDelta,
+  ) {
+    if (scaleDelta == 1) {
+      // nothing to scale
+      return;
     }
+
+    // Step 0: We are now in manual user placement of the canvas
+    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+
+    appProvider.applyScaleToCanvas(
+      scaleDelta: scaleDelta,
+      anchorPoint: anchorPoint,
+    );
   }
 
   void _showTextDialog(final AppProvider appProvider, final Offset position) {

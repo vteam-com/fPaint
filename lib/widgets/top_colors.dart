@@ -30,14 +30,14 @@ class TopColors extends StatelessWidget {
   /// The list of [ColorUsage] objects to display.
   final List<ColorUsage> colorUsages;
 
-  /// A callback that is called when the user refreshes the list of colors.
-  final VoidCallback onRefresh;
+  /// Whether to display the widget in minimal mode.
+  final bool minimal;
 
   /// A callback that is called when the user selects a color.
   final void Function(Color) onColorPicked;
 
-  /// Whether to display the widget in minimal mode.
-  final bool minimal;
+  /// A callback that is called when the user refreshes the list of colors.
+  final VoidCallback onRefresh;
 
   @override
   Widget build(final BuildContext context) {

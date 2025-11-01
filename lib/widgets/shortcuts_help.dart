@@ -3,12 +3,6 @@ import 'package:flutter/material.dart';
 class ShortcutsHelpDialog extends StatelessWidget {
   const ShortcutsHelpDialog({super.key});
 
-  String _getPlatformModifier(final BuildContext context) {
-    final bool isMacOS =
-        Theme.of(context).platform == TargetPlatform.macOS || Theme.of(context).platform == TargetPlatform.iOS;
-    return isMacOS ? 'Cmd' : 'Ctrl';
-  }
-
   @override
   Widget build(final BuildContext context) {
     final String mod = _getPlatformModifier(context);
@@ -85,19 +79,6 @@ class ShortcutsHelpDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildShortcutCategory(final String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      ),
-    );
-  }
-
   Widget _buildShortcut(final String keys, final String description) {
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
@@ -125,6 +106,19 @@ class ShortcutsHelpDialog extends StatelessWidget {
     );
   }
 
+  Widget _buildShortcutCategory(final String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+
   Widget _buildShortcutGroup(
     final String title,
     final List<Map<String, String>> shortcuts,
@@ -141,5 +135,11 @@ class ShortcutsHelpDialog extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getPlatformModifier(final BuildContext context) {
+    final bool isMacOS =
+        Theme.of(context).platform == TargetPlatform.macOS || Theme.of(context).platform == TargetPlatform.iOS;
+    return isMacOS ? 'Cmd' : 'Ctrl';
   }
 }

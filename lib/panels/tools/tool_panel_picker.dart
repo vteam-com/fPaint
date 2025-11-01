@@ -17,14 +17,14 @@ class ToolPanelPicker extends StatelessWidget {
     required this.onPressed,
   });
 
-  /// The name of the tool, used for the tooltip.
-  final String name;
-
   /// The widget to display as the tool's icon.
   final Widget image;
 
   /// A boolean indicating whether the tool panel is in minimal mode.
   final bool minimal;
+
+  /// The name of the tool, used for the tooltip.
+  final String name;
 
   /// The callback function to be executed when the tool is pressed.
   final VoidCallback onPressed;

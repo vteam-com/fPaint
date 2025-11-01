@@ -23,24 +23,24 @@ class ColorSelector extends StatefulWidget {
 }
 
 class _ColorSelectorState extends State<ColorSelector> {
+  /// From 0.0 to 1.0
+  late double alpha;
+
   /// From 0.0% to 1.0% 0%=Black 100%=White
   late double brightness;
 
   /// From 0 to 360
   late double hue;
 
-  /// From 0.0 to 1.0
-  late double alpha;
-
   @override
-  void didUpdateWidget(covariant final ColorSelector oldWidget) {
-    super.didUpdateWidget(oldWidget);
+  void initState() {
+    super.initState();
     fromInputColorToHueBrightnessAndAlpha();
   }
 
   @override
-  void initState() {
-    super.initState();
+  void didUpdateWidget(covariant final ColorSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
     fromInputColorToHueBrightnessAndAlpha();
   }
 

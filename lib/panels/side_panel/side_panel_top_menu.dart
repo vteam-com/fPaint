@@ -16,19 +16,6 @@ class SidePanelTopMenu extends StatelessWidget {
   /// The shell provider.
   final ShellProvider shellProvider;
 
-  /// Builds an icon button.
-  Widget buildIconButton({
-    required final String tooltip,
-    required final IconData icon,
-    required final VoidCallback onPressed,
-  }) {
-    return IconButton(
-      tooltip: tooltip,
-      icon: Icon(icon),
-      onPressed: onPressed,
-    );
-  }
-
   @override
   Widget build(final BuildContext context) {
     return Row(
@@ -73,6 +60,19 @@ class SidePanelTopMenu extends StatelessWidget {
             },
           ),
       ],
+    );
+  }
+
+  /// Builds an icon button.
+  Widget buildIconButton({
+    required final String tooltip,
+    required final IconData icon,
+    required final VoidCallback onPressed,
+  }) {
+    return IconButton(
+      tooltip: tooltip,
+      icon: Icon(icon),
+      onPressed: onPressed,
     );
   }
 }

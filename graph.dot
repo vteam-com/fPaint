@@ -105,6 +105,7 @@ digraph "" {
   "/lib/widgets/magnifying_eye_dropper.dart" [label="magnifying_eye_dropper"];
   "/lib/widgets/selector_widget.dart" [label="selector_widget"];
   "/lib/widgets/shortcuts_help.dart" [label="shortcuts_help"];
+  "/tool/sort_source.dart" [label="sort_source"];
   subgraph "cluster~" {
     label="fpaint";
     subgraph "cluster~/integration_test" {
@@ -269,6 +270,10 @@ digraph "" {
         "/lib/widgets/selector_widget.dart";
         "/lib/widgets/shortcuts_help.dart";
       }
+    }
+    subgraph "cluster~/tool" {
+      label="tool";
+      "/tool/sort_source.dart";
     }
   }
   "/integration_test/integration_helpers.dart" -> "/lib/helpers/color_helper.dart";
