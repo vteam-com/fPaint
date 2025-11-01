@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, prefer_final_locals, always_specify_types, inference_failure_on_instance_creation
+// ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,31 +38,26 @@ void main() {
       // 1️⃣ BOTTOM LAYER: Sky Background
       // ================================
       await _drawSky(tester, canvasCenter);
-      await _pause(tester);
 
       // ================================
       // 2️⃣ SUN LAYER: Bright Yellow Circle
       // ================================
       await _drawSun(tester, canvasCenter);
-      await _pause(tester);
 
       // ================================
       // 3️⃣ LAND LAYER: Green Ground
       // ================================
       await _drawLand(tester, canvasCenter);
-      await _pause(tester);
 
       // ================================
       // 4️⃣ HOUSE LAYER: Complete House Structure
       // ================================
       await _drawHouse(tester, canvasCenter);
-      await _pause(tester);
 
       // ================================
       // 5️⃣ FENCE LAYER: Simple Fence in Front
       // ================================
       await _drawFence(tester, canvasCenter);
-      await _pause(tester);
 
       await LayerTestHelpers.printLayerStructure(tester);
 
@@ -80,19 +75,8 @@ void main() {
         layersProvider: layersProvider,
         filename: 'multi_layer_masterpiece.png',
       );
-
-      debugPrint('🎨🎭 SUCCESS: Multi-Layer Painting Mastery Achieved!');
-      debugPrint('🏗️  6 distinct layers meticulously crafted and composited!');
-      debugPrint('🖼️  Multi-layer image saved: multi_layer_masterpiece.png');
     });
   });
-}
-
-Future<void> _pause(
-  final WidgetTester tester,
-) async {
-  // Give time for layer to stabilize
-  await tester.pumpAndSettle();
 }
 
 /// Draws the sky background layer with a blue gradient
@@ -126,15 +110,24 @@ Future<void> _drawSun(final WidgetTester tester, final Offset canvasCenter) asyn
   debugPrint('☀️ Drawing bright sun circle...');
 
   await LayerTestHelpers.addNewLayer(tester, 'Sun');
+  await LayerTestHelpers.printLayerStructure(tester);
 
+  final Offset sunCenter = canvasCenter + const Offset(-200, -120); // Top-left area
+
+  // Add sun rays using circle selection and gradient fill
+  await _addSunRays(tester, sunCenter, 100);
+  await myWait(tester);
+
+  // Draw the main sun circle
   await drawCircleWithHumanGestures(
     tester,
-    center: canvasCenter + const Offset(-200, -120), // Top-left area
-    radius: 70.0, // Size of the sun
+    center: sunCenter,
+    radius: 70.0,
     brushSize: 0,
     brushColor: Colors.transparent,
-    fillColor: Colors.amber,
+    fillColor: const Color.fromARGB(179, 241, 226, 179),
   );
+  await myWait(tester);
 
   debugPrint('☀️ Sun circle completed!');
 }
@@ -236,6 +229,45 @@ Future<void> _drawHouse(final WidgetTester tester, final Offset canvasCenter) as
   );
 
   debugPrint('🏠 House with roof completed!');
+}
+
+/// Adds sun rays by drawing filled rectangles radiating from the sun
+Future<void> _addSunRays(final WidgetTester tester, final Offset sunCenter, final double sunRadius) async {
+  debugPrint('☀️ Adding sun rays by drawing filled rectangles...');
+
+  // Select circle
+  // await selectCircleArea(tester, circleCenter: sunCenter, radius: sunRadius);
+  // await myWait(tester);
+
+  // await tester.pumpAndSettle(const Duration(seconds: 2));
+  // debugPrintVisibleKeys();
+
+  // Flood fill
+  await performFloodFillGradient(
+    tester,
+    gradientMode: FillMode.radial,
+    gradientPoints: <GradientPoint>[
+      GradientPoint(
+        color: const Color.fromARGB(255, 255, 242, 1),
+        offset: sunCenter - Offset(sunRadius, sunRadius),
+      ), // Light blue at top relative to center
+      GradientPoint(
+        color: const Color.fromARGB(59, 0, 28, 242),
+        offset: sunCenter + Offset(sunRadius * 1.66, sunRadius),
+      ), // Dark blue at bottom relative to center
+    ],
+  );
+
+  // await myWait(tester);
+
+  // Cancel seletion
+  // await tapByKey(tester, Keys.toolSelector);
+  // await myWait(tester);
+
+  // await tapByKey(tester, Keys.toolSelectorCancel);
+  // await myWait(tester);
+
+  debugPrint('☀️ Sun rays completed!');
 }
 
 /// Draws a fence with vertical pickets and horizontal rails
