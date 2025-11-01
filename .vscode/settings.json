@@ -47,4 +47,5 @@
     ],
     "files.autoSave": "onFocusChange",
     "CodeGPT.apiKey": "Ollama",
+    "dart.testCoverageFile": "coverage/lcov.info",
 }
