@@ -1,8 +1,13 @@
 name: fpaint
-description: "Flutter Paint app."
+description: "A feature-rich drawing and painting application built with Flutter that allows users to create digital artwork on any platform – iOS, Android, macOS, Windows, Linux, and Web – from a single code base."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+# Repository information
+repository: https://github.com/vteam-com/fPaint
+homepage: https://github.com/vteam-com/fPaint
+issue_tracker: https://github.com/vteam-com/fPaint/issues
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43

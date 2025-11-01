@@ -1,22 +1,78 @@
 # fPaint
 
-## Flutter Raster Drawing App
+## Free, Open-Source Raster Graphics Editor
 
-A feature-rich drawing and painting application built with Flutter that allows users to create digital artwork on any platform – iOS, Android, macOS, Windows, Linux, and Web – from a single code base.
+**A community-driven Flutter app aiming to provide professional-grade drawing and painting tools that rival paid commercial software - completely free and open source.**
 
-## Features
+Built with Flutter for cross-platform excellence, fPaint empowers artists, designers, and creators with powerful raster graphics tools across iOS, Android, macOS, Windows, Linux, and Web from a single codebase.
 
-- Free-hand drawing and sketching with multiple brush sizes and styles
-- Advanced layers functionality for organized artwork management
-- Enhanced selection tools including Magic Wand selection for precise edits
-- Powerful color picker with a customizable auto palette
-- Undo/Redo functionality for effortless corrections
-- Save drawings directly to your device or Download on Web
-- Responsive design optimized for different screen sizes
-- One code base for all platforms ensuring consistent performance and updates
-- Open and work with OpenRaster ORA file format
+## 🎯 Our Mission
 
-This app is 100% free with no ads or nagging. We invite all Flutter enthusiasts to contribute and support the project.
+To create a **free alternative to expensive commercial graphics software** through community collaboration. We believe great tools should be accessible to everyone, and Flutter's cross-platform capabilities make this vision possible.
+
+## ✨ Features
+
+- **Professional Drawing Tools** - Advanced brushes, pressure sensitivity, and precision controls
+- **Layer Management** - Full layer system with blending modes, opacity, and organization
+- **Selection Tools** - Magic Wand, lasso, rectangle, and advanced selection capabilities
+- **Color Management** - Professional color picker with palettes, gradients, and color harmony
+- **File Format Support** - PNG, JPEG, TIFF, OpenRaster (ORA), and more
+- **Cross-Platform** - Consistent experience across all major platforms
+- **Undo/Redo** - Robust history system for creative freedom
+- **Responsive UI** - Optimized for touch, mouse, and stylus input
+
+## 🚀 Join the Revolution
+
+**This is more than an app - it's a movement.** We're building the future of free graphics software together. Whether you're a:
+
+- **Flutter Developer** - Help us push the boundaries of what's possible with Flutter
+- **Graphics Programmer** - Implement advanced algorithms and optimizations
+- **UI/UX Designer** - Create intuitive interfaces that inspire creativity
+- **Artist/Designer** - Provide feedback on tools and workflows
+- **Tester** - Help ensure quality across all platforms
+- **Documentation Writer** - Make our project accessible to newcomers
+
+**Your contribution matters.** Every line of code, every bug report, every feature suggestion brings us closer to replacing paid commercial software with a truly free alternative.
+
+## 💝 100% Free, No Ads, No Paywalls
+
+Unlike commercial alternatives, fPaint will always remain completely free with:
+- ❌ No ads or monetization
+- ❌ No feature restrictions
+- ❌ No premium tiers
+- ✅ Full source code transparency
+- ✅ Community-driven development
+- ✅ Cross-platform availability
+
+## 🗺️ Roadmap to Professional Graphics Software
+
+We're building toward feature parity with commercial graphics editors. Current priorities include:
+
+### Phase 1: Core Enhancement (Current)
+- [x] Multi-layer system with blending modes
+- [x] Advanced selection tools (Magic Wand, Lasso)
+- [x] Professional color management
+- [x] Multiple file format support
+- [ ] **Advanced brush engines** (contributions needed!)
+- [ ] **Text tool improvements** (contributions needed!)
+- [ ] **Performance optimizations** (contributions needed!)
+
+### Phase 2: Professional Features
+- [ ] Non-destructive filters and effects
+- [ ] Advanced typography and text-on-path
+- [ ] Vector tools integration
+- [ ] Plugin system for extensibility
+- [ ] HDR color support
+- [ ] GPU-accelerated rendering
+
+### Phase 3: Industry Standard
+- [ ] CMYK color management
+- [ ] Print preparation tools
+- [ ] Batch processing
+- [ ] Scripting/automation
+- [ ] Professional color correction
+
+**Your expertise in any of these areas would accelerate our progress tremendously!**
 
 ## Getting Started
 
@@ -110,9 +166,21 @@ The `integration_test/integration_helpers.dart` file provides reusable helper fu
    - Clear the canvas
    - Save your artwork
 
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
+
+## Code of Conduct
+
+Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
+
+## Security
+
+If you discover a security vulnerability, please see our [Security Policy](SECURITY.md).
+
 ## License
 
-This project is licensed under the **MIT** License.
+This project is licensed under the **MIT** License - see the [LICENSE](LICENSE) file for details.
 
 ## Screenshots
 
