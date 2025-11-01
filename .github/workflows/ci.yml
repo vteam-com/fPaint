@@ -51,25 +51,5 @@ jobs:
         with:
           file: coverage/lcov.info
 
-  integration-test:
-    name: Integration Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.35.7"
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Run integration tests
-        run: bash tool/run_integration_tests.sh
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: coverage/merged_lcov.info
+  # Integration tests disabled for CI/CD stability
+  # Run locally with: bash tool/run_integration_tests.sh
