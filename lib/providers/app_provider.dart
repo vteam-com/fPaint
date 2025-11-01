@@ -326,6 +326,11 @@ class AppProvider extends ChangeNotifier {
   /// Sets the selected action.
   set selectedAction(final ActionType value) {
     _selectedAction = value;
+
+    if (value != ActionType.fill) {
+      // Stop the Flood fill tool when switching to other tools
+      fillModel.clear();
+    }
     update();
   }
 
