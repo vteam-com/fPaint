@@ -21,12 +21,6 @@ class SelectionRectWidget extends StatefulWidget {
     this.enableMoveAndResize = true,
   });
 
-  /// The primary path of the selection rectangle.
-  final Path? path1;
-
-  /// An optional secondary path for the selection rectangle.
-  final Path? path2;
-
   /// Whether the selection rectangle can be moved and resized.
   final bool enableMoveAndResize;
 
@@ -35,6 +29,12 @@ class SelectionRectWidget extends StatefulWidget {
 
   /// A callback that is called when the selection rectangle is resized.
   final void Function(NineGridHandle, Offset) onResize;
+
+  /// The primary path of the selection rectangle.
+  final Path? path1;
+
+  /// An optional secondary path for the selection rectangle.
+  final Path? path2;
 
   @override
   State<SelectionRectWidget> createState() => _SelectionRectWidgetState();

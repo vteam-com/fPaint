@@ -88,23 +88,6 @@ class MainScreen extends StatelessWidget {
     return _buildMidToLargeDevices(shellProvider, appProvider);
   }
 
-  /// Builds the layout for mobile phone devices.
-  ///
-  /// If the side panel is visible, it is returned. Otherwise, the main view is returned.
-  Widget _buildMobilePhoneLayout(
-    final ShellProvider shellProvider,
-    final AppProvider appProvider,
-  ) {
-    if (shellProvider.showMenu) {
-      return SidePanel(
-        minimal: !shellProvider.isSidePanelExpanded,
-        preferences: appProvider.preferences,
-      );
-    } else {
-      return const MainView();
-    }
-  }
-
   /// Builds the layout for mid-to-large devices.
   ///
   /// A multi-split view is returned, which contains the side panel and main view.
@@ -133,5 +116,22 @@ class MainScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Builds the layout for mobile phone devices.
+  ///
+  /// If the side panel is visible, it is returned. Otherwise, the main view is returned.
+  Widget _buildMobilePhoneLayout(
+    final ShellProvider shellProvider,
+    final AppProvider appProvider,
+  ) {
+    if (shellProvider.showMenu) {
+      return SidePanel(
+        minimal: !shellProvider.isSidePanelExpanded,
+        preferences: appProvider.preferences,
+      );
+    } else {
+      return const MainView();
+    }
   }
 }

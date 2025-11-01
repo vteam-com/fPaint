@@ -18,14 +18,14 @@ class AnimatedMarchingAntsPath extends StatefulWidget {
     this.linePointEnd,
   });
 
-  /// The path to draw.
-  final Path? path;
+  /// The end point of a line to draw.
+  final Offset? linePointEnd;
 
   /// The start point of a line to draw.
   final Offset? linePointStart;
 
-  /// The end point of a line to draw.
-  final Offset? linePointEnd;
+  /// The path to draw.
+  final Path? path;
 
   @override
   AnimatedMarchingAntsPathState createState() => AnimatedMarchingAntsPathState();

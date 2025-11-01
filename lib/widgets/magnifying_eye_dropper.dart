@@ -26,17 +26,17 @@ class MagnifyingEyeDropper extends StatefulWidget {
   /// The layers provider.
   final LayersProvider layers;
 
-  /// The position of the pointer.
-  final Offset pointerPosition;
-
-  /// The position of the pixel to sample.
-  final Offset pixelPosition;
+  /// A callback that is called when the eye dropper is closed.
+  final void Function() onClosed;
 
   /// A callback that is called when a color is picked.
   final void Function(Color color) onColorPicked;
 
-  /// A callback that is called when the eye dropper is closed.
-  final void Function() onClosed;
+  /// The position of the pixel to sample.
+  final Offset pixelPosition;
+
+  /// The position of the pointer.
+  final Offset pointerPosition;
 
   @override
   MagnifyingEyeDropperState createState() => MagnifyingEyeDropperState();
@@ -50,20 +50,20 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   /// The size of the button.
   final double buttonSize = 40;
 
-  /// The size of the spacer.
-  final double spacer = 4;
+  /// The magnification factor.
+  final double magnifyFactor = 6;
 
   /// The size of the region.
   final double regionSize = 100;
 
-  /// The width of the widget.
-  final double widgewidgetWidth = 50;
-
-  /// The magnification factor.
-  final double magnifyFactor = 6;
+  /// The size of the spacer.
+  final double spacer = 4;
 
   /// The total height of the widget.
   late final double totalHeightOfTheWidget = buttonSize + spacer + regionSize + spacer + buttonSize;
+
+  /// The width of the widget.
+  final double widgewidgetWidth = 50;
 
   @override
   void initState() {

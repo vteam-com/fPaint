@@ -86,17 +86,17 @@ class MyApp extends StatelessWidget {
   /// Creates a [MyApp] widget.
   MyApp({super.key});
 
-  /// Global navigator key to access context from outside of the widget tree
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-  /// Provides shell-level functionalities and states.
-  final ShellProvider shellProvider = ShellProvider();
-
   /// Provides application-level functionalities and states.
   final AppProvider appProvider = AppProvider();
 
   /// Provides functionalities and states for managing layers.
   final LayersProvider layersProvider = LayersProvider();
+
+  /// Global navigator key to access context from outside of the widget tree
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+  /// Provides shell-level functionalities and states.
+  final ShellProvider shellProvider = ShellProvider();
 
   /// Provides functionalities for undo and redo operations.
   final UndoProvider undoProvider = UndoProvider();

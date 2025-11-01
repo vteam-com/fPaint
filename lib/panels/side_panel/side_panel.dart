@@ -61,14 +61,6 @@ class _SidePanelState extends State<SidePanel> {
     _splitController.removeListener(_rebuild);
   }
 
-  /// Rebuilds the widget when the split controller changes.
-  void _rebuild() async {
-    final double? heightOfTopSection = _splitController.areas[0].size;
-    if (heightOfTopSection != null) {
-      await widget.preferences.setSidePanelDistance(heightOfTopSection);
-    }
-  }
-
   @override
   Widget build(final BuildContext context) {
     return Material(
@@ -91,5 +83,13 @@ class _SidePanelState extends State<SidePanel> {
         ),
       ),
     );
+  }
+
+  /// Rebuilds the widget when the split controller changes.
+  void _rebuild() async {
+    final double? heightOfTopSection = _splitController.areas[0].size;
+    if (heightOfTopSection != null) {
+      await widget.preferences.setSidePanelDistance(heightOfTopSection);
+    }
   }
 }

@@ -18,11 +18,11 @@ class DashedRectangle extends StatelessWidget {
   /// The color to fill the rectangle with.
   final Color fillColor;
 
-  /// The width of the rectangle.
-  final double width;
-
   /// The height of the rectangle.
   final double height;
+
+  /// The width of the rectangle.
+  final double width;
 
   @override
   Widget build(final BuildContext context) {

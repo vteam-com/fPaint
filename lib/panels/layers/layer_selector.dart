@@ -21,20 +21,20 @@ class LayerSelector extends StatelessWidget {
     required this.allowRemoveLayer,
   });
 
+  /// Whether to allow removing the layer.
+  final bool allowRemoveLayer;
+
   /// The build context.
   final BuildContext context;
+
+  /// Whether the layer is selected.
+  final bool isSelected;
 
   /// The layer to display.
   final LayerProvider layer;
 
   /// Whether to display the layer in minimal mode.
   final bool minimal;
-
-  /// Whether the layer is selected.
-  final bool isSelected;
-
-  /// Whether to allow removing the layer.
-  final bool allowRemoveLayer;
 
   @override
   Widget build(final BuildContext context) {
@@ -65,6 +65,79 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
+  /// Returns information about the layer.
+  String information() {
+    final List<String> texts = <String>[
+      '[${layer.id}]',
+      layer.name,
+      if (!layer.isVisible) 'Hidden',
+      'Opacity: ${layer.opacity.toStringAsFixed(0)}',
+      'Blend: ${blendModeToText(layer.blendMode)}',
+    ];
+    return texts.join('\n');
+  }
+
+  /// Renames the layer.
+  Future<void> renameLayer() async {
+    final TextEditingController controller = TextEditingController(text: layer.name);
+
+    final String? newName = await showDialog<String>(
+      context: context,
+      builder: (final BuildContext context) => AlertDialog(
+        title: const Text('Layer Name'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Layer Name',
+          ),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, controller.text);
+              LayersProvider.of(context).update();
+            },
+            child: const Text('Apply'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName != null && newName.isNotEmpty) {
+      layer.name = newName;
+    }
+  }
+
+  /// Builds the layer selector for a large surface.
+  Widget _buildForLargeSurface(
+    final BuildContext context,
+    final LayersProvider layers,
+    final LayerProvider layer,
+    final bool allowRemoveLayer,
+  ) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              _buildLayerName(layers),
+              if (isSelected) _buildLayerControls(context, layers, layer, allowRemoveLayer),
+            ],
+          ),
+        ),
+        _buildThumbnailPreviewAndVisibility(
+          layers,
+          layer,
+        ),
+      ],
+    );
+  }
+
   /// Builds the layer selector for a small surface.
   Widget _buildForSmallSurface(
     final BuildContext context,
@@ -88,38 +161,109 @@ class LayerSelector extends StatelessWidget {
     );
   }
 
-  /// Returns information about the layer.
-  String information() {
-    final List<String> texts = <String>[
-      '[${layer.id}]',
-      layer.name,
-      if (!layer.isVisible) 'Hidden',
-      'Opacity: ${layer.opacity.toStringAsFixed(0)}',
-      'Blend: ${blendModeToText(layer.blendMode)}',
-    ];
-    return texts.join('\n');
-  }
-
-  /// Builds the layer selector for a large surface.
-  Widget _buildForLargeSurface(
+  /// Builds the layer controls widget.
+  Widget _buildLayerControls(
     final BuildContext context,
     final LayersProvider layers,
     final LayerProvider layer,
     final bool allowRemoveLayer,
   ) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      children: <Widget>[
+        IconButton(
+          tooltip: 'Add a layer above',
+          icon: const Icon(Icons.playlist_add),
+          onPressed: () => _onAddLayer(layers),
+        ),
+        if (allowRemoveLayer)
+          IconButton(
+            tooltip: 'Delete this layer',
+            icon: const Icon(Icons.playlist_remove),
+            onPressed: allowRemoveLayer ? () => layers.remove(layer) : null,
+          ),
+        if (allowRemoveLayer)
+          IconButton(
+            tooltip: 'Merge to below layer',
+            icon: const Icon(Icons.layers_outlined),
+            onPressed: layer == layers.list.last
+                ? null
+                : () => _onMergeLayer(
+                    layers,
+                    layers.selectedLayerIndex,
+                    layers.selectedLayerIndex + 1,
+                  ),
+          ),
+        if (allowRemoveLayer)
+          IconButton(
+            tooltip: 'Blend Mode\n"${blendModeToText(layer.blendMode)}"',
+            icon: const Icon(Icons.blender_outlined),
+            onPressed: () async {
+              layer.blendMode = await showBlendModeMenu(
+                context: context,
+                selectedBlendMode: layer.blendMode,
+              );
+            },
+          ),
+        if (this.layer.backgroundColor != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 50),
+            child: ColorPreview(
+              color: this.layer.backgroundColor ?? Colors.transparent,
+              onPressed: () {
+                showColorPicker(
+                  context: context,
+                  title: 'Background Color',
+                  color: this.layer.backgroundColor ?? Colors.transparent,
+                  onSelectedColor: (final Color color) {
+                    this.layer.backgroundColor = color;
+                    layer.clearCache();
+                    layers.update();
+                  },
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Builds the layer name widget.
+  Widget _buildLayerName(final LayersProvider layers) {
     return Row(
       children: <Widget>[
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          itemBuilder: (final BuildContext context) => _buildPopupMenuItems(),
+          onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
+        ),
+        if (layer.parentGroupName.isNotEmpty)
+          Opacity(
+            opacity: 0.5,
+            child: Text('${layer.parentGroupName}.'),
+          ),
         Expanded(
-          child: Column(
-            children: <Widget>[
-              _buildLayerName(layers),
-              if (isSelected) _buildLayerControls(context, layers, layer, allowRemoveLayer),
-            ],
+          child: GestureDetector(
+            onLongPress: () async {
+              await renameLayer();
+            },
+            child: Text(
+              layer.name,
+              style: TextStyle(
+                fontSize: 13 * 1.3,
+                fontWeight: FontWeight.bold,
+                color: isSelected ? Colors.blue.shade100 : Colors.grey.shade400,
+              ),
+            ),
           ),
         ),
-        _buildThumbnailPreviewAndVisibility(
-          layers,
-          layer,
+        IconButton(
+          tooltip: 'Hide/Show this layer',
+          icon: Icon(
+            layer.isVisible ? Icons.visibility : Icons.visibility_off,
+            color: layer.isVisible ? Colors.blue : const ui.Color.fromARGB(255, 135, 9, 9),
+          ),
+          onPressed: () => layers.layersToggleVisibility(layer),
         ),
       ],
     );
@@ -229,6 +373,62 @@ class LayerSelector extends StatelessWidget {
     ];
   }
 
+  /// Builds the thumbnail preview widget.
+  Widget _buildThumbnailPreview(
+    final LayersProvider layers,
+    final LayerProvider layer,
+  ) {
+    return SizedBox(
+      height: 60,
+      width: 60,
+      child: ContainerSlider(
+        key: ValueKey<String>(layer.name + layer.id),
+        minValue: 0.0,
+        maxValue: 1.0,
+        initialValue: layer.opacity,
+        onSlideStart: () {
+          // appProvider.update();
+        },
+        onChanged: (final double value) => layer.opacity = value,
+        onChangeEnd: (final double value) {
+          layer.opacity = value;
+          layer.clearCache();
+          layers.update();
+        },
+        onSlideEnd: () => layers.update(),
+        child: LayerThumbnail(layer: layer),
+      ),
+    );
+  }
+
+  /// Builds the thumbnail preview and visibility widget.
+  Widget _buildThumbnailPreviewAndVisibility(
+    final LayersProvider layers,
+    final LayerProvider layer,
+  ) {
+    return GestureDetector(
+      onLongPress: () {
+        showMenu(
+          context: context,
+          position: const RelativeRect.fromLTRB(0, 0, 0, 0),
+          items: _buildPopupMenuItems(),
+          elevation: 8,
+        ).then((final String? value) {
+          if (value != null) {
+            _handlePopupMenuSelection(value, layers);
+          }
+        });
+      },
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: <Widget>[
+          _buildThumbnailPreview(layers, layer),
+          if (minimal && !layer.isVisible) const Icon(Icons.visibility_off, color: Colors.red),
+        ],
+      ),
+    );
+  }
+
   /// Handles the selection of a popup menu item.
   Future<void> _handlePopupMenuSelection(
     final String value,
@@ -275,150 +475,6 @@ class LayerSelector extends StatelessWidget {
     }
   }
 
-  /// Builds the layer name widget.
-  Widget _buildLayerName(final LayersProvider layers) {
-    return Row(
-      children: <Widget>[
-        PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert),
-          itemBuilder: (final BuildContext context) => _buildPopupMenuItems(),
-          onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
-        ),
-        if (layer.parentGroupName.isNotEmpty)
-          Opacity(
-            opacity: 0.5,
-            child: Text('${layer.parentGroupName}.'),
-          ),
-        Expanded(
-          child: GestureDetector(
-            onLongPress: () async {
-              await renameLayer();
-            },
-            child: Text(
-              layer.name,
-              style: TextStyle(
-                fontSize: 13 * 1.3,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.blue.shade100 : Colors.grey.shade400,
-              ),
-            ),
-          ),
-        ),
-        IconButton(
-          tooltip: 'Hide/Show this layer',
-          icon: Icon(
-            layer.isVisible ? Icons.visibility : Icons.visibility_off,
-            color: layer.isVisible ? Colors.blue : const ui.Color.fromARGB(255, 135, 9, 9),
-          ),
-          onPressed: () => layers.layersToggleVisibility(layer),
-        ),
-      ],
-    );
-  }
-
-  /// Renames the layer.
-  Future<void> renameLayer() async {
-    final TextEditingController controller = TextEditingController(text: layer.name);
-
-    final String? newName = await showDialog<String>(
-      context: context,
-      builder: (final BuildContext context) => AlertDialog(
-        title: const Text('Layer Name'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Layer Name',
-          ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, controller.text);
-              LayersProvider.of(context).update();
-            },
-            child: const Text('Apply'),
-          ),
-        ],
-      ),
-    );
-
-    if (newName != null && newName.isNotEmpty) {
-      layer.name = newName;
-    }
-  }
-
-  /// Builds the layer controls widget.
-  Widget _buildLayerControls(
-    final BuildContext context,
-    final LayersProvider layers,
-    final LayerProvider layer,
-    final bool allowRemoveLayer,
-  ) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      children: <Widget>[
-        IconButton(
-          tooltip: 'Add a layer above',
-          icon: const Icon(Icons.playlist_add),
-          onPressed: () => _onAddLayer(layers),
-        ),
-        if (allowRemoveLayer)
-          IconButton(
-            tooltip: 'Delete this layer',
-            icon: const Icon(Icons.playlist_remove),
-            onPressed: allowRemoveLayer ? () => layers.remove(layer) : null,
-          ),
-        if (allowRemoveLayer)
-          IconButton(
-            tooltip: 'Merge to below layer',
-            icon: const Icon(Icons.layers_outlined),
-            onPressed: layer == layers.list.last
-                ? null
-                : () => _onMergeLayer(
-                    layers,
-                    layers.selectedLayerIndex,
-                    layers.selectedLayerIndex + 1,
-                  ),
-          ),
-        if (allowRemoveLayer)
-          IconButton(
-            tooltip: 'Blend Mode\n"${blendModeToText(layer.blendMode)}"',
-            icon: const Icon(Icons.blender_outlined),
-            onPressed: () async {
-              layer.blendMode = await showBlendModeMenu(
-                context: context,
-                selectedBlendMode: layer.blendMode,
-              );
-            },
-          ),
-        if (this.layer.backgroundColor != null)
-          Padding(
-            padding: const EdgeInsets.only(left: 50),
-            child: ColorPreview(
-              color: this.layer.backgroundColor ?? Colors.transparent,
-              onPressed: () {
-                showColorPicker(
-                  context: context,
-                  title: 'Background Color',
-                  color: this.layer.backgroundColor ?? Colors.transparent,
-                  onSelectedColor: (final Color color) {
-                    this.layer.backgroundColor = color;
-                    layer.clearCache();
-                    layers.update();
-                  },
-                );
-              },
-            ),
-          ),
-      ],
-    );
-  }
-
   /// Method to insert a new layer above the currently selected one
   void _onAddLayer(final LayersProvider layers) {
     final UndoProvider undoProvider = UndoProvider();
@@ -447,61 +503,5 @@ class LayerSelector extends StatelessWidget {
     final int indexTo,
   ) {
     layers.mergeLayers(indexFrom, indexTo);
-  }
-
-  /// Builds the thumbnail preview and visibility widget.
-  Widget _buildThumbnailPreviewAndVisibility(
-    final LayersProvider layers,
-    final LayerProvider layer,
-  ) {
-    return GestureDetector(
-      onLongPress: () {
-        showMenu(
-          context: context,
-          position: const RelativeRect.fromLTRB(0, 0, 0, 0),
-          items: _buildPopupMenuItems(),
-          elevation: 8,
-        ).then((final String? value) {
-          if (value != null) {
-            _handlePopupMenuSelection(value, layers);
-          }
-        });
-      },
-      child: Stack(
-        alignment: Alignment.topCenter,
-        children: <Widget>[
-          _buildThumbnailPreview(layers, layer),
-          if (minimal && !layer.isVisible) const Icon(Icons.visibility_off, color: Colors.red),
-        ],
-      ),
-    );
-  }
-
-  /// Builds the thumbnail preview widget.
-  Widget _buildThumbnailPreview(
-    final LayersProvider layers,
-    final LayerProvider layer,
-  ) {
-    return SizedBox(
-      height: 60,
-      width: 60,
-      child: ContainerSlider(
-        key: ValueKey<String>(layer.name + layer.id),
-        minValue: 0.0,
-        maxValue: 1.0,
-        initialValue: layer.opacity,
-        onSlideStart: () {
-          // appProvider.update();
-        },
-        onChanged: (final double value) => layer.opacity = value,
-        onChangeEnd: (final double value) {
-          layer.opacity = value;
-          layer.clearCache();
-          layers.update();
-        },
-        onSlideEnd: () => layers.update(),
-        child: LayerThumbnail(layer: layer),
-      ),
-    );
   }
 }

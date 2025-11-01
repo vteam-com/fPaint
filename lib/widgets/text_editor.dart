@@ -12,6 +12,7 @@ class TextEditor extends StatefulWidget {
 
 class _TextEditorState extends State<TextEditor> {
   late final AppProvider appProvider;
+
   late final TextObject textObject;
 
   @override
@@ -30,6 +31,16 @@ class _TextEditorState extends State<TextEditor> {
   Widget build(final BuildContext context) {
     // Return an empty container since the dialog handles everything
     return const SizedBox.shrink();
+  }
+
+  void _deleteText() {
+    // Find and remove the text object from the action stack
+    final List<UserActionDrawing> actionStack = appProvider.layers.selectedLayer.actionStack;
+    actionStack.removeWhere((final UserActionDrawing action) => action.textObject == textObject);
+
+    appProvider.selectedTextObject = null;
+    appProvider.layers.selectedLayer.clearCache();
+    appProvider.update();
   }
 
   void _showEditTextDialog() {
@@ -186,15 +197,5 @@ class _TextEditorState extends State<TextEditor> {
         );
       },
     );
-  }
-
-  void _deleteText() {
-    // Find and remove the text object from the action stack
-    final List<UserActionDrawing> actionStack = appProvider.layers.selectedLayer.actionStack;
-    actionStack.removeWhere((final UserActionDrawing action) => action.textObject == textObject);
-
-    appProvider.selectedTextObject = null;
-    appProvider.layers.selectedLayer.clearCache();
-    appProvider.update();
   }
 }

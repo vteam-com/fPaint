@@ -13,23 +13,23 @@ abstract class BasePicker<T> extends StatefulWidget {
     this.divisions,
   });
 
+  /// The number of divisions for the slider (optional).
+  final int? divisions;
+
+  /// The maximum value of the picker (optional).
+  final T? max;
+
+  /// The minimum value of the picker (optional).
+  final T? min;
+
+  /// A callback that is called when the value of the picker changes.
+  final ValueChanged<T> onChanged;
+
   /// The title of the picker.
   final String title;
 
   /// The current value of the picker.
   final T value;
-
-  /// A callback that is called when the value of the picker changes.
-  final ValueChanged<T> onChanged;
-
-  /// The minimum value of the picker (optional).
-  final T? min;
-
-  /// The maximum value of the picker (optional).
-  final T? max;
-
-  /// The number of divisions for the slider (optional).
-  final int? divisions;
 
   /// Creates the state for this picker.
   @override
@@ -42,9 +42,6 @@ abstract class BasePicker<T> extends StatefulWidget {
 /// The base state for picker widgets.
 abstract class BasePickerState<T> extends State<BasePicker<T>> {
   late T _value;
-
-  /// Gets the current value.
-  T get currentValue => _value;
 
   @override
   void initState() {
@@ -62,9 +59,6 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
     }
   }
 
-  /// Clamps the value to the min/max bounds if they are provided.
-  T clampValue(final T value);
-
   /// Builds the picker UI.
   @override
   Widget build(final BuildContext context) {
@@ -80,6 +74,12 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
 
   /// Builds the specific picker widget (slider, dropdown, etc.).
   Widget buildPickerWidget();
+
+  /// Clamps the value to the min/max bounds if they are provided.
+  T clampValue(final T value);
+
+  /// Gets the current value.
+  T get currentValue => _value;
 
   /// Formats the value for display.
   String formatValue(final T value);

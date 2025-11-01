@@ -18,14 +18,14 @@ class ColorPickerDialog extends StatefulWidget {
     required this.onColorChanged,
   });
 
-  /// The title of the dialog.
-  final String title;
-
   /// The initial color to display in the picker.
   final Color color;
 
   /// A callback that is called when the user picks a color.
   final ValueChanged<Color> onColorChanged;
+
+  /// The title of the dialog.
+  final String title;
 
   @override
   State<ColorPickerDialog> createState() => _ColorPickerDialogState();

@@ -54,6 +54,171 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
+  /// Adds a tool option for brush color.
+  void addToolOptionColorForBrush(
+    final List<Widget> widgets,
+    final AppProvider appProvider,
+    final BuildContext context,
+  ) {
+    widgets.add(
+      ToolAttributeWidget(
+        minimal: minimal,
+        name: 'Brush Color',
+        childLeft: Column(
+          children: <Widget>[
+            colorPreviewWithTransparentPaper(
+              key: Keys.toolPanelBrushColor1,
+              minimal: minimal,
+              color: appProvider.brushColor,
+              onPressed: () {
+                showColorPicker(
+                  context: context,
+                  title: 'Brush Color',
+                  color: appProvider.brushColor,
+                  onSelectedColor: (final Color color) => appProvider.brushColor = color,
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.colorize_outlined),
+              onPressed: () {
+                //
+                appProvider.eyeDropPositionForFill = null; // remove the possibly active
+                appProvider.eyeDropPositionForBrush = appProvider.canvasCenter;
+                appProvider.update();
+              },
+            ),
+          ],
+        ),
+        childRight: minimal
+            ? null
+            : ColorSelector(
+                color: appProvider.brushColor,
+                onColorChanged: (final Color color) => appProvider.brushColor = color,
+              ),
+      ),
+    );
+  }
+
+  /// Adds a tool option for fill color.
+  void addToolOptionColorForFill(
+    final List<Widget> widgets,
+    final AppProvider appProvider,
+    final BuildContext context,
+  ) {
+    widgets.add(
+      ToolAttributeWidget(
+        minimal: minimal,
+        name: 'Fill Color',
+        childLeft: Column(
+          children: <Widget>[
+            colorPreviewWithTransparentPaper(
+              key: Keys.toolPanelFillColor,
+              minimal: minimal,
+              color: appProvider.fillColor,
+              onPressed: () {
+                showColorPicker(
+                  context: context,
+                  title: 'Fill Color',
+                  color: appProvider.fillColor,
+                  onSelectedColor: (final Color color) => appProvider.fillColor = color,
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.colorize_outlined),
+              onPressed: () {
+                //
+                appProvider.eyeDropPositionForBrush = null; // just in case remove the other eyedrop
+
+                appProvider.eyeDropPositionForFill = appProvider.canvasCenter;
+                appProvider.update();
+              },
+            ),
+          ],
+        ),
+        childRight: minimal
+            ? null
+            : ColorSelector(
+                color: appProvider.fillColor,
+                onColorChanged: (final Color color) => appProvider.fillColor = color,
+              ),
+      ),
+    );
+  }
+
+  /// Adds a tool option for fill mode.
+  void addToolOptionFillMode(
+    final List<Widget> widgets,
+    final AppProvider appProvider,
+    final BuildContext context,
+  ) {
+    widgets.add(
+      ToolAttributeWidget(
+        minimal: minimal,
+        name: 'Solid',
+        childLeft: const Text('S'),
+      ),
+    );
+  }
+
+  /// Adds a tool option for color tolerance.
+  void addToolOptionTolerance(
+    final List<Widget> widgets,
+    final BuildContext context,
+    final AppProvider appProvider,
+  ) {
+    widgets.add(
+      ToolAttributeWidget(
+        minimal: minimal,
+        name: 'Color Tolerance',
+        childLeft: IconButton(
+          icon: const Icon(Icons.support),
+          color: Colors.grey.shade500,
+          onPressed: () {
+            showTolerancePicker(context, appProvider.tolerance, (final int newValue) {
+              appProvider.tolerance = newValue;
+            });
+          },
+        ),
+        childRight: minimal
+            ? null
+            : TolerancePicker(
+                value: appProvider.tolerance,
+                onChanged: (final int value) {
+                  appProvider.tolerance = value;
+                },
+              ),
+      ),
+    );
+  }
+
+  /// Adds a tool option for top colors.
+  void addToolOptionTopColors(
+    final List<Widget> widgets,
+    final LayersProvider layers,
+    final AppProvider appProvider,
+    final bool minimal,
+  ) {
+    widgets.add(
+      TopColors(
+        colorUsages: layers.topColors,
+        onRefresh: () {
+          layers.evaluatTopColor();
+          appProvider.update();
+        },
+        onColorPicked: (final Color color) {
+          (appProvider.selectedAction == ActionType.rectangle ||
+                  appProvider.selectedAction == ActionType.circle ||
+                  appProvider.selectedAction == ActionType.fill)
+              ? appProvider.fillColor = color
+              : appProvider.brushColor = color;
+        },
+        minimal: minimal,
+      ),
+    );
+  }
+
   /// Returns a list of widgets representing the available tools.
   List<Widget> getListOfTools(
     final BuildContext context,
@@ -553,171 +718,6 @@ class ToolsPanel extends StatelessWidget {
     }
 
     return widgets;
-  }
-
-  /// Adds a tool option for color tolerance.
-  void addToolOptionTolerance(
-    final List<Widget> widgets,
-    final BuildContext context,
-    final AppProvider appProvider,
-  ) {
-    widgets.add(
-      ToolAttributeWidget(
-        minimal: minimal,
-        name: 'Color Tolerance',
-        childLeft: IconButton(
-          icon: const Icon(Icons.support),
-          color: Colors.grey.shade500,
-          onPressed: () {
-            showTolerancePicker(context, appProvider.tolerance, (final int newValue) {
-              appProvider.tolerance = newValue;
-            });
-          },
-        ),
-        childRight: minimal
-            ? null
-            : TolerancePicker(
-                value: appProvider.tolerance,
-                onChanged: (final int value) {
-                  appProvider.tolerance = value;
-                },
-              ),
-      ),
-    );
-  }
-
-  /// Adds a tool option for fill mode.
-  void addToolOptionFillMode(
-    final List<Widget> widgets,
-    final AppProvider appProvider,
-    final BuildContext context,
-  ) {
-    widgets.add(
-      ToolAttributeWidget(
-        minimal: minimal,
-        name: 'Solid',
-        childLeft: const Text('S'),
-      ),
-    );
-  }
-
-  /// Adds a tool option for brush color.
-  void addToolOptionColorForBrush(
-    final List<Widget> widgets,
-    final AppProvider appProvider,
-    final BuildContext context,
-  ) {
-    widgets.add(
-      ToolAttributeWidget(
-        minimal: minimal,
-        name: 'Brush Color',
-        childLeft: Column(
-          children: <Widget>[
-            colorPreviewWithTransparentPaper(
-              key: Keys.toolPanelBrushColor1,
-              minimal: minimal,
-              color: appProvider.brushColor,
-              onPressed: () {
-                showColorPicker(
-                  context: context,
-                  title: 'Brush Color',
-                  color: appProvider.brushColor,
-                  onSelectedColor: (final Color color) => appProvider.brushColor = color,
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.colorize_outlined),
-              onPressed: () {
-                //
-                appProvider.eyeDropPositionForFill = null; // remove the possibly active
-                appProvider.eyeDropPositionForBrush = appProvider.canvasCenter;
-                appProvider.update();
-              },
-            ),
-          ],
-        ),
-        childRight: minimal
-            ? null
-            : ColorSelector(
-                color: appProvider.brushColor,
-                onColorChanged: (final Color color) => appProvider.brushColor = color,
-              ),
-      ),
-    );
-  }
-
-  /// Adds a tool option for fill color.
-  void addToolOptionColorForFill(
-    final List<Widget> widgets,
-    final AppProvider appProvider,
-    final BuildContext context,
-  ) {
-    widgets.add(
-      ToolAttributeWidget(
-        minimal: minimal,
-        name: 'Fill Color',
-        childLeft: Column(
-          children: <Widget>[
-            colorPreviewWithTransparentPaper(
-              key: Keys.toolPanelFillColor,
-              minimal: minimal,
-              color: appProvider.fillColor,
-              onPressed: () {
-                showColorPicker(
-                  context: context,
-                  title: 'Fill Color',
-                  color: appProvider.fillColor,
-                  onSelectedColor: (final Color color) => appProvider.fillColor = color,
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.colorize_outlined),
-              onPressed: () {
-                //
-                appProvider.eyeDropPositionForBrush = null; // just in case remove the other eyedrop
-
-                appProvider.eyeDropPositionForFill = appProvider.canvasCenter;
-                appProvider.update();
-              },
-            ),
-          ],
-        ),
-        childRight: minimal
-            ? null
-            : ColorSelector(
-                color: appProvider.fillColor,
-                onColorChanged: (final Color color) => appProvider.fillColor = color,
-              ),
-      ),
-    );
-  }
-
-  /// Adds a tool option for top colors.
-  void addToolOptionTopColors(
-    final List<Widget> widgets,
-    final LayersProvider layers,
-    final AppProvider appProvider,
-    final bool minimal,
-  ) {
-    widgets.add(
-      TopColors(
-        colorUsages: layers.topColors,
-        onRefresh: () {
-          layers.evaluatTopColor();
-          appProvider.update();
-        },
-        onColorPicked: (final Color color) {
-          (appProvider.selectedAction == ActionType.rectangle ||
-                  appProvider.selectedAction == ActionType.circle ||
-                  appProvider.selectedAction == ActionType.fill)
-              ? appProvider.fillColor = color
-              : appProvider.brushColor = color;
-        },
-        minimal: minimal,
-      ),
-    );
   }
 }
 

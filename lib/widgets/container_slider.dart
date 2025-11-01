@@ -24,29 +24,29 @@ class ContainerSlider extends StatefulWidget {
     required this.child,
   });
 
-  /// The minimum value of the slider.
-  final double minValue;
+  /// The widget to display inside the slider.
+  final Widget child;
+
+  /// The initial value of the slider.
+  final double initialValue;
 
   /// The maximum value of the slider.
   final double maxValue;
 
-  /// The initial value of the slider.
-  final double initialValue;
+  /// The minimum value of the slider.
+  final double minValue;
+
+  /// A callback that is called when the user stops sliding.
+  final ValueChanged<double> onChangeEnd;
 
   /// A callback that is called when the value of the slider changes.
   final ValueChanged<double> onChanged;
 
   /// A callback that is called when the user stops sliding.
-  final ValueChanged<double> onChangeEnd;
+  final VoidCallback onSlideEnd;
 
   /// A callback that is called when the user starts sliding.
   final VoidCallback onSlideStart;
-
-  /// A callback that is called when the user stops sliding.
-  final VoidCallback onSlideEnd;
-
-  /// The widget to display inside the slider.
-  final Widget child;
 
   @override
   State<ContainerSlider> createState() => _ContainerSliderState();
@@ -54,20 +54,13 @@ class ContainerSlider extends StatefulWidget {
 
 class _ContainerSliderState extends State<ContainerSlider> {
   late double currentValue;
+
   double? initialTouchValue;
 
   @override
   void initState() {
     super.initState();
     currentValue = widget.initialValue.clamp(widget.minValue, widget.maxValue);
-  }
-
-  /// Adjusts the value of the slider by the given delta.
-  void _adjustValue(final double delta) {
-    setState(() {
-      currentValue = (currentValue + delta).clamp(widget.minValue, widget.maxValue);
-    });
-    widget.onChanged(currentValue);
   }
 
   @override
@@ -123,6 +116,14 @@ class _ContainerSliderState extends State<ContainerSlider> {
         ),
       ),
     );
+  }
+
+  /// Adjusts the value of the slider by the given delta.
+  void _adjustValue(final double delta) {
+    setState(() {
+      currentValue = (currentValue + delta).clamp(widget.minValue, widget.maxValue);
+    });
+    widget.onChanged(currentValue);
   }
 }
 

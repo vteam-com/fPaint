@@ -57,17 +57,17 @@ class ColorPreview extends StatelessWidget {
     this.tooltipText,
   });
 
-  /// The color to preview.
-  final Color color;
-
-  /// A callback that is called when the color preview is tapped.
-  final GestureTapCallback onPressed;
-
   /// Whether to display a border around the color preview.
   final bool border;
 
+  /// The color to preview.
+  final Color color;
+
   /// Whether to display a minimal version of the color preview.
   final bool minimal;
+
+  /// A callback that is called when the color preview is tapped.
+  final GestureTapCallback onPressed;
 
   /// The text to display in the color preview.
   final String? text;

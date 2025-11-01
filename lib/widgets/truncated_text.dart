@@ -17,11 +17,11 @@ class TruncatedTextWidget extends StatelessWidget {
     this.maxLength = 6,
   });
 
-  /// The text to display.
-  final String text;
-
   /// The maximum length of the truncated text.
   final int maxLength;
+
+  /// The text to display.
+  final String text;
 
   @override
   Widget build(final BuildContext context) {

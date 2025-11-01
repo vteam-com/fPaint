@@ -14,11 +14,11 @@ class NineGridSelector extends StatelessWidget {
     required this.onPositionSelected,
   });
 
-  /// The currently selected position.
-  final CanvasResizePosition selectedPosition;
-
   /// A callback that is called when a position is selected.
   final void Function(CanvasResizePosition) onPositionSelected;
+
+  /// The currently selected position.
+  final CanvasResizePosition selectedPosition;
 
   @override
   Widget build(final BuildContext context) {
