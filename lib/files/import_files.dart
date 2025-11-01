@@ -184,18 +184,6 @@ Future<bool> openFileFromPath({
 
   final String extension = path.split('.').last.toLowerCase();
 
-  if (extension == 'xcf') {
-    // Show unsupported format message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('XCF files are not currently supported. Canvas will not be changed.'),
-        duration: Duration(seconds: 3),
-      ),
-    );
-
-    return false;
-  }
-
   if (isFileExtensionSupported(extension)) {
     try {
       if (extension == 'ora') {
@@ -252,7 +240,6 @@ final List<String> supportedImageFileExtensions = <String>[
   'webp',
   'jpg',
   'jpeg',
-  // 'xcf',
 ];
 
 /// Checks if the given file extension is supported.
