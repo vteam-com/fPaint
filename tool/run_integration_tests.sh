@@ -1,16 +1,14 @@
 #!/bin/bash
 
-# fPaint Integration Test Runner
-# This script helps run integration tests on mobile platforms
+flutter test integration_test --coverage  --coverage-path=coverage/lcov_integration.info -d macos || exit 1
 
-echo "🚀 fPaint Integration Test Runner"
-echo "=================================="
+flutter test --coverage --coverage-path=coverage/lcov_units.info || exit 1
 
-# Check flutter installation
-if ! command -v flutter &> /dev/null; then
-    echo "❌ Flutter not found. Please install Flutter first."
-    exit 1
-fi
+lcov -a coverage/lcov_integration.info -a coverage/lcov_units.info -o coverage/lcov.info
 
-echo "✅ Flutter found"
-flutter test integration_test/app_integration_test.dart -d macos
+genhtml --css-file coverage/genhtml.css  -q coverage/lcov.info -o coverage/html > coverage/cc.txt
+
+# keep the file cc.txt in git log, but also display it to the user
+cat coverage/cc.txt
+
+open coverage/html/index.html

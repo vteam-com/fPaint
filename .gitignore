@@ -47,3 +47,5 @@ app.*.map.json
 web/downloads/flutter-linux-app.zip
 web/downloads/flutter-macos-app.zip
 web/downloads/flutter-windows-app.zip
+coverage_report/
+coverage/html/*
