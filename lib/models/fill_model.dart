@@ -4,10 +4,24 @@ import 'package:fpaint/models/visible_model.dart';
 // Exports
 export 'package:fpaint/helpers/draw_path_helper.dart';
 
-/// Represents the different fill modes available.
+/// Defines the available fill modes for shapes in the paint application.
+///
+/// - [solid]: Single color fill
+/// - [linear]: Linear gradient fill with two or more color stops
+/// - [radial]: Radial gradient fill emanating from a center point
 enum FillMode { solid, linear, radial }
 
-/// Represents the fill properties for a shape.
+/// Manages fill properties and gradient configuration for shapes.
+///
+/// This model extends [VisibleModel] to provide visibility control and manages
+/// different fill modes including solid colors and gradients. It handles the
+/// creation and manipulation of gradient points for linear and radial fills.
+///
+/// The model supports:
+/// - Solid color fills
+/// - Linear gradients with multiple color stops
+/// - Radial gradients with configurable center points
+/// - Dynamic gradient point management
 class FillModel extends VisibleModel {
   ///-------------------------------------------
   /// Mode

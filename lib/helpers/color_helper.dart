@@ -337,6 +337,19 @@ class ColorUsage {
   }
 }
 
+/// Calculates the Euclidean distance between two colors in RGB color space.
+///
+/// This function computes the distance between two colors using the Euclidean
+/// distance formula in 3D RGB space. The distance represents how visually
+/// different the two colors are, with larger distances indicating greater
+/// differences.
+///
+/// Note: This calculation is performed in linear RGB space and doesn't account
+/// for human color perception (which would require LAB color space).
+///
+/// [a] The first color to compare.
+/// [b] The second color to compare.
+/// Returns the Euclidean distance between the two colors (0.0 to ~1.73).
 double colorDistance(final Color a, final Color b) {
   return sqrt(
     pow(a.r.toDouble() - b.r.toDouble(), 2) +

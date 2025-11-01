@@ -6,22 +6,33 @@ import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
-/*
-  For this to work you have to include 
-
-  dependencies:
-    shared_preferences: ^2.5.3
-    window_manager: ^0.5.0
-
-*/
-
+/// Window management utilities for the fPaint application.
+///
+/// This class handles window positioning, sizing, and state persistence
+/// across application sessions. It provides platform-specific optimizations
+/// and integration test support.
+///
+/// Dependencies required:
+/// - shared_preferences: ^2.5.3
+/// - window_manager: ^0.5.0
 class MyWindowManager extends WindowListener {
   /// Checks if the app is running in integration test mode.
+  ///
+  /// Returns true if the current runtime type indicates integration testing.
   static bool _isIntegrationTest() {
     return WidgetsBinding.instance.runtimeType.toString().contains('IntegrationTest');
   }
 
-  static void setupMainWindow() async {
+  /// Sets up the main application window with platform-specific optimizations.
+  ///
+  /// This method configures:
+  /// - Impeller rendering engine for mobile platforms
+  /// - Window manager for desktop platforms
+  /// - System UI mode for edge-to-edge display
+  /// - Window state restoration
+  ///
+  /// Does nothing on web platforms.
+  static Future<void> setupMainWindow() async {
     if (!kIsWeb) {
       // Enable Impeller for better performance
       // This reduces shader compilation jank on mobile platforms
@@ -50,6 +61,10 @@ class MyWindowManager extends WindowListener {
     }
   }
 
+  /// Saves the current window state to persistent storage.
+  ///
+  /// Stores the window position (x, y) and size (width, height) in SharedPreferences
+  /// so it can be restored in future application sessions.
   static Future<void> saveWindowState() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final Rect bounds = await windowManager.getBounds();
@@ -60,6 +75,11 @@ class MyWindowManager extends WindowListener {
     await prefs.setDouble('window_height', bounds.height);
   }
 
+  /// Restores the window state from persistent storage.
+  ///
+  /// Retrieves previously saved window bounds and applies them. If no saved state
+  /// exists, sets up default window sizing based on whether integration tests
+  /// are running. Centers the window and ensures it's visible and focused.
   static Future<void> restoreWindowState() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -91,6 +111,14 @@ class MyWindowManager extends WindowListener {
     await windowManager.focus();
   }
 
+  /// Safely retrieves a double value from SharedPreferences.
+  ///
+  /// Handles type conversion from int to double for backward compatibility.
+  /// Returns null if the key doesn't exist or contains an incompatible type.
+  ///
+  /// [prefs] The SharedPreferences instance to read from.
+  /// [key] The key to retrieve the value for.
+  /// Returns the double value, or null if not found or incompatible.
   static double? getSafeDouble(final SharedPreferences prefs, final String key) {
     final Object? value = prefs.get(key);
     if (value is double) {
@@ -101,8 +129,12 @@ class MyWindowManager extends WindowListener {
     return null;
   }
 
+  /// Handles window close events to ensure proper cleanup.
+  ///
+  /// Saves the window state before allowing the window to close.
+  /// This ensures that window position and size are preserved for the next session.
   @override
-  void onWindowClose() async {
+  Future<void> onWindowClose() async {
     final bool isPreventClose = await windowManager.isPreventClose();
     if (isPreventClose) {
       // Prevent the close, do your save logic first
