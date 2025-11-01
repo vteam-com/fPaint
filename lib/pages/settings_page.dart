@@ -23,7 +23,7 @@ class _SettingsPageState extends State<SettingsPage> {
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 40,
+              spacing: 20,
               children: <Widget>[
                 SwitchListTile(
                   title: const Text('Use Apple Pencil Only'),

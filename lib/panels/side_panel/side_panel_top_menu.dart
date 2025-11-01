@@ -42,7 +42,7 @@ class SidePanelTopMenu extends StatelessWidget {
           ),
         if (shellProvider.isSidePanelExpanded) // Show when panel is expanded
           buildIconButton(
-            tooltip: 'Rotate Canvas 90° CW', // TODO: Localize this string
+            tooltip: strings[StringId.rotateCanvasTooltip]!,
             icon: Icons.rotate_90_degrees_cw_outlined,
             onPressed: () async {
               final AppProvider appProvider = AppProvider.of(context);

@@ -15,19 +15,19 @@ class PlatformsPage extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                paltformItem(
+                platformItem(
                   'macOS',
                   'assets/images/platforms/platformDesktopMacOS.png',
                   'Desktop Software.',
                   'https://paint.vteam.com/downloads/flutter-macos-app.zip',
                 ),
-                paltformItem(
+                platformItem(
                   'Windows',
                   'assets/images/platforms/platformDesktopWindows.png',
                   'Desktop Software.',
                   'https://paint.vteam.com/downloads/flutter-windows-app.zip',
                 ),
-                paltformItem(
+                platformItem(
                   'Linux',
                   'assets/images/platforms/platformDesktopLinux.png',
                   'Desktop Software.',
@@ -36,13 +36,13 @@ class PlatformsPage extends StatelessWidget {
                 const SizedBox(
                   height: 40,
                 ),
-                paltformItem(
+                platformItem(
                   'iOS',
                   'assets/images/platforms/platformMobileIOS.png',
                   'Mobile app.',
                   'https://apps.apple.com/us/app/cooking-timer-by-vteam/id1188460815',
                 ),
-                paltformItem(
+                platformItem(
                   'Android',
                   'assets/images/platforms/platformMobileAndroid.png',
                   'Mobile app.',
@@ -51,7 +51,7 @@ class PlatformsPage extends StatelessWidget {
                 const SizedBox(
                   height: 40,
                 ),
-                paltformItem(
+                platformItem(
                   'Web Browser',
                   'assets/images/platforms/platformWeb.png',
                   'Run on any OS with most browsers.',
@@ -66,34 +66,38 @@ class PlatformsPage extends StatelessWidget {
   }
 
   /// A widget that displays a platform item with an image, name, description, and URL.
-  Widget paltformItem(
+  Widget platformItem(
     final String name,
     final String image,
     final String description,
     final String url,
   ) {
-    return MaterialButton(
-      key: ValueKey<String>(name),
-      elevation: 9,
-      padding: const EdgeInsets.all(20),
-      onPressed: () {
-        launchUrl(Uri.parse(url));
-      },
-      child: Row(
-        spacing: 20,
-        children: <Widget>[
-          CircleAvatar(
-            backgroundColor: Colors.white,
-            foregroundImage: AssetImage(image),
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: InkWell(
+        onTap: () {
+          launchUrl(Uri.parse(url));
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            spacing: 20,
+            children: <Widget>[
+              CircleAvatar(
+                backgroundColor: Colors.white,
+                foregroundImage: AssetImage(image),
+              ),
+              Expanded(child: Text(name, style: const TextStyle(fontSize: 18))),
+              Expanded(
+                child: Opacity(
+                  opacity: 0.8,
+                  child: Text(description),
+                ),
+              ),
+            ],
           ),
-          Expanded(child: Text(name, style: const TextStyle(fontSize: 20))),
-          Expanded(
-            child: Opacity(
-              opacity: 0.8,
-              child: Text(description),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

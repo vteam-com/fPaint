@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/main_screen.dart';
+import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/my_window_manager.dart';
 import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
@@ -118,17 +119,17 @@ class MyApp extends StatelessWidget {
       ],
       child: MaterialApp(
         navigatorKey: navigatorKey,
-        title: 'Flutter Paint App',
+        title: 'fPaint',
         theme: ThemeData.dark().copyWith(
           colorScheme: const ColorScheme.dark(
-            primary: Colors.lightBlue,
-            secondary: Colors.blue,
+            primary: AppColors.primary,
+            secondary: AppColors.secondary,
           ),
           sliderTheme: SliderThemeData(
-            activeTrackColor: Colors.blue.shade800,
-            inactiveTrackColor: Colors.white24,
-            thumbColor: Colors.blue.shade100,
-            overlayColor: Colors.blue.withAlpha(100),
+            activeTrackColor: AppColors.secondary,
+            inactiveTrackColor: AppColors.surfaceVariant,
+            thumbColor: AppColors.accent,
+            overlayColor: AppColors.primary.withAlpha(100),
           ),
         ),
         routes: <String, WidgetBuilder>{

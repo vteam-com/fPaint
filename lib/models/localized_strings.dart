@@ -12,6 +12,8 @@ enum StringId {
   exportTooltip,
   platforms,
   settings,
+  newFromClipboard,
+  rotateCanvasTooltip,
 }
 
 /// Map containing the localized strings for each StringId.
@@ -28,4 +30,6 @@ const Map<StringId, String> strings = <StringId, String>{
   StringId.exportTooltip: 'Export...',
   StringId.settings: 'Settings...',
   StringId.platforms: 'Available on...',
+  StringId.newFromClipboard: 'New from Clipboard',
+  StringId.rotateCanvasTooltip: 'Rotate Canvas 90° CW',
 };

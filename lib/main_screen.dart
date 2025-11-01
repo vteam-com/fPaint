@@ -41,7 +41,7 @@ class MainScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey,
       body: shellMode == ShellMode.hidden
-          ? _buildMainContent(shellProvider, appProvider)
+          ? _buildMainContent(context, shellProvider, appProvider)
           : MultiSplitViewTheme(
               data: MultiSplitViewThemeData(
                 dividerPainter: DividerPainters.grooved1(
@@ -54,7 +54,7 @@ class MainScreen extends StatelessWidget {
                   strokeCap: StrokeCap.round,
                 ),
               ),
-              child: _buildMainContent(shellProvider, appProvider),
+              child: _buildMainContent(context, shellProvider, appProvider),
             ),
       floatingActionButton: shellMode == ShellMode.hidden
           ? myFloatButton(
@@ -75,6 +75,7 @@ class MainScreen extends StatelessWidget {
   /// If the shell mode is hidden, the main view is returned. Otherwise, a multi-split view
   /// is returned, which contains the side panel and main view.
   Widget _buildMainContent(
+    final BuildContext context,
     final ShellProvider shellProvider,
     final AppProvider appProvider,
   ) {
@@ -83,7 +84,7 @@ class MainScreen extends StatelessWidget {
     }
 
     if (shellProvider.deviceSizeSmall) {
-      return _buildMobilePhoneLayout(shellProvider, appProvider);
+      return _buildMobilePhoneLayout(context, shellProvider, appProvider);
     }
     return _buildMidToLargeDevices(shellProvider, appProvider);
   }
@@ -120,18 +121,39 @@ class MainScreen extends StatelessWidget {
 
   /// Builds the layout for mobile phone devices.
   ///
-  /// If the side panel is visible, it is returned. Otherwise, the main view is returned.
+  /// Uses a stack layout where the main view is always visible,
+  /// and the side panel can be shown as an overlay when needed.
   Widget _buildMobilePhoneLayout(
+    final BuildContext context,
     final ShellProvider shellProvider,
     final AppProvider appProvider,
   ) {
-    if (shellProvider.showMenu) {
-      return SidePanel(
-        minimal: !shellProvider.isSidePanelExpanded,
-        preferences: appProvider.preferences,
-      );
-    } else {
-      return const MainView();
-    }
+    return Stack(
+      children: <Widget>[
+        const MainView(),
+        if (shellProvider.showMenu)
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () {
+                shellProvider.showMenu = false;
+                shellProvider.update();
+              },
+              child: Container(
+                color: Colors.black.withAlpha(128), // Semi-transparent overlay
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.85, // 85% of screen width
+                    child: SidePanel(
+                      minimal: false, // Always show full panel on mobile
+                      preferences: appProvider.preferences,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
   }
 }

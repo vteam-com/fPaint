@@ -15,8 +15,6 @@ analyzer:
     - build/**
 
   errors:
-    todo: ignore
-    unnecessary_this: ignore
     avoid_empty_else: error
     avoid_function_literals_in_foreach_calls: ignore
 

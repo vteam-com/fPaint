@@ -82,7 +82,6 @@ class ToolsPanel extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.colorize_outlined),
               onPressed: () {
-                //
                 appProvider.eyeDropPositionForFill = null; // remove the possibly active
                 appProvider.eyeDropPositionForBrush = appProvider.canvasCenter;
                 appProvider.update();
@@ -128,7 +127,6 @@ class ToolsPanel extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.colorize_outlined),
               onPressed: () {
-                //
                 appProvider.eyeDropPositionForBrush = null; // just in case remove the other eyedrop
 
                 appProvider.eyeDropPositionForFill = appProvider.canvasCenter;

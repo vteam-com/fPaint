@@ -78,11 +78,11 @@ We're building toward feature parity with commercial graphics editors. Current p
 
 ### Prerequisites
 
-- Flutter SDK (3.2 or higher)
-- Dart SDK
-- Edit and build on MacOS,Windows, or Linux
-- IDE VS Code or Android Studio
-- iOS Simulator / Android Emulator
+- Flutter SDK (3.35.7 or higher)
+- Dart SDK (3.9.2 or higher)
+- Edit and build on macOS, Windows, or Linux
+- IDE: VS Code or Android Studio
+- iOS Simulator / Android Emulator (for mobile development)
 
 ### Installation
 

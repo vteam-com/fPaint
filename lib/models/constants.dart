@@ -1,8 +1,34 @@
 import 'package:flutter/material.dart';
 
-/// This App Colors
+/// Application color constants for consistent theming
 class AppColors {
-  static Color colorFloatButtonBackground = Colors.grey.shade600;
+  // Primary colors
+  static const Color primary = Color(0xFF2196F3); // Light blue
+  static const Color secondary = Color(0xFF1976D2); // Blue
+  static const Color accent = Color(0xFF42A5F5); // Lighter blue
+
+  // Background colors
+  static const Color background = Color(0xFF121212); // Dark background
+  static const Color surface = Color(0xFF1E1E1E); // Surface color
+  static const Color surfaceVariant = Color(0xFF2D2D2D); // Variant surface
+
+  // Panel colors
+  static const Color panelBackground = Color(0xFF2D2D2D); // Side panel background
+  static const Color divider = Color(0xFF424242); // Divider color
+
+  // Button colors
+  static const Color floatingButtonBackground = Color(0xFF424242); // Floating button background
+  static const Color floatingButtonForeground = Colors.white;
+
+  // Text colors
+  static const Color textPrimary = Colors.white;
+  static const Color textSecondary = Color(0xFFB3B3B3);
+  static const Color textDisabled = Color(0xFF666666);
+
+  // Interactive colors
+  static const Color hover = Color(0xFF333333);
+  static const Color selected = Color(0xFF2196F3);
+  static const Color pressed = Color(0xFF1976D2);
 }
 
 class Keys {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/panels/side_panel/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -64,7 +65,7 @@ class _SidePanelState extends State<SidePanel> {
   @override
   Widget build(final BuildContext context) {
     return Material(
-      color: Colors.grey.shade800,
+      color: AppColors.panelBackground,
       child: MultiSplitViewTheme(
         data: MultiSplitViewThemeData(
           dividerPainter: DividerPainters.grooved1(

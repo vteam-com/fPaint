@@ -37,7 +37,9 @@ class AppProvider extends ChangeNotifier {
         },
       );
     } catch (error) {
-      // TODO
+      debugPrint('Failed to load preferences: $error');
+      // Fall back to default preferences - they're already initialized
+      update();
     }
   }
 
