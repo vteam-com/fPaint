@@ -4,6 +4,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2025-11-01
+
+### Add
+
+- Comprehensive unit test suite for MagnifyingEyeDropper widget
+- Integration test coverage with 53.2% overall code coverage
+- VSCode test coverage configuration and HTML coverage reports
+- Comprehensive documentation for all lib/*.dart files
+- LCOV coverage file generation and merging utilities
+
+### Update
+
+- Enhanced documentation quality across entire codebase
+- Improved test infrastructure with better mocking and async handling
+- Updated VSCode settings for test coverage visualization
+- Refactored test utilities for better maintainability
+
+### Fix
+
+- Resolved all failing unit tests (8 test files fixed)
+- Fixed MagnifyingEyeDropper widget positioning issues
+- Corrected test coverage file paths and configurations
+- Improved error handling in test utilities
+
+### Remove
+
+- XCF (GIMP) file format support (experimental implementation removed)
+
 ## [1.1.0] - 2025-10-29
 
 ### Add
