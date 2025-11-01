@@ -31,7 +31,7 @@ void main() {
         expect(isFileExtensionSupported('bmp'), isFalse);
         expect(isFileExtensionSupported('svg'), isFalse);
         expect(isFileExtensionSupported('psd'), isFalse);
-        expect(isFileExtensionSupported('xcf'), isFalse); // Explicitly unsupported
+        expect(isFileExtensionSupported('xcf'), isFalse);
         expect(isFileExtensionSupported('txt'), isFalse);
         expect(isFileExtensionSupported('exe'), isFalse);
       });
