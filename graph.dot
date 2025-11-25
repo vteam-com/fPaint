@@ -84,6 +84,7 @@ digraph "" {
   "/lib/helpers/list_helper.dart" [label="list_helper"];
   "/lib/helpers/draw_path_helper.dart" [label="draw_path_helper"];
   "/lib/helpers/color_helper.dart" [label="color_helper"];
+  "/lib/services/fill_service.dart" [label="fill_service"];
   "/lib/widgets/color_picker_dialog.dart" [label="color_picker_dialog"];
   "/lib/widgets/fill_widget.dart" [label="fill_widget"];
   "/lib/widgets/marching_ants_path.dart" [label="marching_ants_path"];
@@ -96,6 +97,7 @@ digraph "" {
   "/lib/widgets/brush_size_picker.dart" [label="brush_size_picker"];
   "/lib/widgets/text_editor.dart" [label="text_editor"];
   "/lib/widgets/transparent_background.dart" [label="transparent_background"];
+  "/lib/widgets/canvas_gesture_handler.dart" [label="canvas_gesture_handler"];
   "/lib/widgets/tolerance_picker.dart" [label="tolerance_picker"];
   "/lib/widgets/image_painter.dart" [label="image_painter"];
   "/lib/widgets/color_preview.dart" [label="color_preview"];
@@ -107,10 +109,11 @@ digraph "" {
   "/lib/widgets/main_view.dart" [label="main_view"];
   "/lib/widgets/magnifying_eye_dropper.dart" [label="magnifying_eye_dropper"];
   "/lib/widgets/selector_widget.dart" [label="selector_widget"];
+  "/lib/widgets/text_editor_dialog.dart" [label="text_editor_dialog"];
   "/lib/widgets/shortcuts_help.dart" [label="shortcuts_help"];
   "/tool/sort_source.dart" [label="sort_source"];
   subgraph "cluster~" {
-    label="fpaint";
+    label="fPaint";
     subgraph "cluster~/integration_test" {
       label="integration_test";
       "/integration_test/integration_test.dart";
@@ -249,6 +252,10 @@ digraph "" {
         "/lib/helpers/draw_path_helper.dart";
         "/lib/helpers/color_helper.dart";
       }
+      subgraph "cluster~/lib/services" {
+        label="services";
+        "/lib/services/fill_service.dart";
+      }
       subgraph "cluster~/lib/widgets" {
         label="widgets";
         "/lib/widgets/color_picker_dialog.dart";
@@ -263,6 +270,7 @@ digraph "" {
         "/lib/widgets/brush_size_picker.dart";
         "/lib/widgets/text_editor.dart";
         "/lib/widgets/transparent_background.dart";
+        "/lib/widgets/canvas_gesture_handler.dart";
         "/lib/widgets/tolerance_picker.dart";
         "/lib/widgets/image_painter.dart";
         "/lib/widgets/color_preview.dart";
@@ -274,6 +282,7 @@ digraph "" {
         "/lib/widgets/main_view.dart";
         "/lib/widgets/magnifying_eye_dropper.dart";
         "/lib/widgets/selector_widget.dart";
+        "/lib/widgets/text_editor_dialog.dart";
         "/lib/widgets/shortcuts_help.dart";
       }
     }
@@ -361,6 +370,7 @@ digraph "" {
   "/lib/providers/app_provider.dart" -> "/lib/providers/app_preferences.dart";
   "/lib/providers/app_provider.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/providers/app_provider.dart" -> "/lib/providers/undo_provider.dart";
+  "/lib/providers/app_provider.dart" -> "/lib/services/fill_service.dart";
   "/lib/providers/app_provider.dart" -> "/lib/providers/layers_provider.dart" [style=dashed];
   "/lib/providers/layers_provider.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/providers/layers_provider.dart" -> "/lib/helpers/list_helper.dart";
@@ -475,6 +485,9 @@ digraph "" {
   "/lib/main_screen.dart" -> "/lib/widgets/main_view.dart";
   "/lib/main_screen.dart" -> "/lib/providers/app_provider.dart";
   "/lib/helpers/image_helper.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/services/fill_service.dart" -> "/lib/models/fill_model.dart";
+  "/lib/services/fill_service.dart" -> "/lib/panels/tools/flood_fill.dart";
+  "/lib/services/fill_service.dart" -> "/lib/providers/layer_provider.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/providers/layers_provider.dart";
   "/lib/widgets/color_picker_dialog.dart" -> "/lib/providers/shell_provider.dart";
@@ -496,6 +509,12 @@ digraph "" {
   "/lib/widgets/text_editor.dart" -> "/lib/models/text_object.dart";
   "/lib/widgets/text_editor.dart" -> "/lib/providers/app_provider.dart";
   "/lib/widgets/text_editor.dart" -> "/lib/widgets/color_selector.dart";
+  "/lib/widgets/canvas_gesture_handler.dart" -> "/lib/helpers/color_helper.dart";
+  "/lib/widgets/canvas_gesture_handler.dart" -> "/lib/models/fill_model.dart";
+  "/lib/widgets/canvas_gesture_handler.dart" -> "/lib/models/text_object.dart";
+  "/lib/widgets/canvas_gesture_handler.dart" -> "/lib/providers/app_provider.dart";
+  "/lib/widgets/canvas_gesture_handler.dart" -> "/lib/providers/shell_provider.dart";
+  "/lib/widgets/canvas_gesture_handler.dart" -> "/lib/widgets/text_editor_dialog.dart";
   "/lib/widgets/tolerance_picker.dart" -> "/lib/widgets/base_picker.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/color_preview.dart" -> "/lib/widgets/transparent_background.dart";
@@ -512,13 +531,11 @@ digraph "" {
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/color_picker_dialog.dart";
   "/lib/widgets/color_selector.dart" -> "/lib/widgets/transparent_background.dart";
   "/lib/widgets/nine_grid_selector.dart" -> "/lib/models/canvas_resize.dart";
-  "/lib/widgets/main_view.dart" -> "/lib/helpers/color_helper.dart";
   "/lib/widgets/main_view.dart" -> "/lib/models/fill_model.dart";
-  "/lib/widgets/main_view.dart" -> "/lib/models/text_object.dart";
   "/lib/widgets/main_view.dart" -> "/lib/panels/canvas_panel.dart";
   "/lib/widgets/main_view.dart" -> "/lib/providers/app_provider.dart";
   "/lib/widgets/main_view.dart" -> "/lib/providers/shell_provider.dart";
-  "/lib/widgets/main_view.dart" -> "/lib/widgets/color_selector.dart";
+  "/lib/widgets/main_view.dart" -> "/lib/widgets/canvas_gesture_handler.dart";
   "/lib/widgets/main_view.dart" -> "/lib/widgets/fill_widget.dart";
   "/lib/widgets/main_view.dart" -> "/lib/widgets/magnifying_eye_dropper.dart";
   "/lib/widgets/main_view.dart" -> "/lib/widgets/selector_widget.dart";
@@ -529,4 +546,6 @@ digraph "" {
   "/lib/widgets/selector_widget.dart" -> "/lib/helpers/draw_path_helper.dart";
   "/lib/widgets/selector_widget.dart" -> "/lib/models/selector_model.dart";
   "/lib/widgets/selector_widget.dart" -> "/lib/widgets/marching_ants_path.dart";
+  "/lib/widgets/text_editor_dialog.dart" -> "/lib/models/text_object.dart";
+  "/lib/widgets/text_editor_dialog.dart" -> "/lib/widgets/color_selector.dart";
 }

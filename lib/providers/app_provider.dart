@@ -14,6 +14,7 @@ import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:fpaint/services/fill_service.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // Exports
@@ -55,6 +56,8 @@ class AppProvider extends ChangeNotifier {
   UndoProvider get undoProvider => _undoProvider;
 
   final Debouncer _debounceGradientFill = Debouncer();
+
+  final FillService _fillService = FillService();
 
   /// Gets the [AppProvider] instance from the provided [BuildContext].
   ///
@@ -450,80 +453,30 @@ class AppProvider extends ChangeNotifier {
 
   /// Performs a flood fill with a solid color.
   void floodFillSolidAction(final Offset position) async {
-    final Region region = await getRegionPathFromLayerImage(position);
-
-    final ui.Path path = region.path.shift(Offset(region.left.toDouble(), region.top.toDouble()));
-
-    final ui.Rect bounds = path.getBounds();
-
-    recordExecuteDrawingActionToSelectedLayer(
-      action: UserActionDrawing(
-        action: ActionType.region,
-        path: path,
-        positions: <ui.Offset>[
-          bounds.topLeft,
-          bounds.bottomRight,
-        ],
-        fillColor: this.fillColor,
-        clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
-      ),
+    final UserActionDrawing action = await _fillService.createFloodFillSolidAction(
+      selectedLayer: layers.selectedLayer,
+      canvasSize: layers.size,
+      position: position,
+      fillColor: this.fillColor,
+      tolerance: this.tolerance,
+      clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
     );
+
+    recordExecuteDrawingActionToSelectedLayer(action: action);
   }
 
   /// Performs a flood fill with a gradient.
   void floodFillGradientAction(final FillModel fillModel) async {
-    // For radial gradients, start flood fill at the first gradient handle position
-    // For linear gradients, start at the center between handles
-    final ui.Offset floodFillStartPoint = fillModel.mode == FillMode.radial
-        ? toCanvas(fillModel.gradientPoints.first.offset)
-        : toCanvas(fillModel.centerPoint);
-
-    final Region region = await getRegionPathFromLayerImage(floodFillStartPoint);
-
-    final ui.Path path = region.path.shift(Offset(region.left.toDouble(), region.top.toDouble()));
-
-    final ui.Rect bounds = path.getBounds();
-
-    final Gradient gradient;
-    if (fillModel.mode == FillMode.radial) {
-      // For radial gradients, the center is the location of the first gradient handle
-      final ui.Offset centerPoint = toCanvas(fillModel.gradientPoints.first.offset);
-
-      gradient = RadialGradient(
-        colors: fillModel.gradientPoints.map((final GradientPoint point) => point.color).toList(),
-        center: Alignment(
-          ((centerPoint.dx - bounds.left) / bounds.width) * 2 - 1,
-          ((centerPoint.dy - bounds.top) / bounds.height) * 2 - 1,
-        ),
-        radius: (fillModel.gradientPoints.last.offset - fillModel.gradientPoints.first.offset).distance / bounds.width,
-      );
-    } else {
-      gradient = LinearGradient(
-        colors: fillModel.gradientPoints.map((final GradientPoint point) => point.color).toList(),
-        // stops: <double>[0, 1],
-        begin: Alignment(
-          (fillModel.gradientPoints.first.offset.dx / bounds.width) * 2 - 1,
-          (fillModel.gradientPoints.first.offset.dy / bounds.height) * 2 - 1,
-        ),
-        end: Alignment(
-          (fillModel.gradientPoints.last.offset.dx / bounds.width) * 2 - 1,
-          (fillModel.gradientPoints.last.offset.dy / bounds.height) * 2 - 1,
-        ),
-      );
-    }
-
-    recordExecuteDrawingActionToSelectedLayer(
-      action: UserActionDrawing(
-        action: ActionType.region,
-        path: path,
-        positions: <ui.Offset>[
-          bounds.topLeft,
-          bounds.bottomRight,
-        ],
-        gradient: gradient,
-        clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
-      ),
+    final UserActionDrawing action = await _fillService.createFloodFillGradientAction(
+      selectedLayer: layers.selectedLayer,
+      canvasSize: layers.size,
+      fillModel: fillModel,
+      tolerance: this.tolerance,
+      clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
+      toCanvas: this.toCanvas,
     );
+
+    recordExecuteDrawingActionToSelectedLayer(action: action);
   }
 
   /// Updates the gradient fill.
@@ -541,16 +494,12 @@ class AppProvider extends ChangeNotifier {
 
   /// Gets the region path from a layer image.
   Future<Region> getRegionPathFromLayerImage(final ui.Offset position) async {
-    final ui.Image img = layers.selectedLayer.toImageForStorage(layers.size);
-
-    // Perform flood fill at the clicked position
-    final Region region = await extractRegionByColorEdgeAndOffset(
-      image: img,
-      x: position.dx.toInt(),
-      y: position.dy.toInt(),
+    return _fillService.getRegionPathFromLayerImage(
+      selectedLayer: layers.selectedLayer,
+      canvasSize: layers.size,
+      position: position,
       tolerance: this.tolerance,
     );
-    return region;
   }
 
   //-------------------------

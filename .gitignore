@@ -49,3 +49,6 @@ web/downloads/flutter-macos-app.zip
 web/downloads/flutter-windows-app.zip
 coverage_report/
 coverage/html/*
+coverage/lcov_integration.info
+coverage/lcov_units.info
+coverage/merged_lcov.info
