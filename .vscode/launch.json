@@ -10,6 +10,12 @@
             "type": "dart"
         },
         {
+            "name": "debug macos",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "macos"
+        },
+        {
             "name": "fpaint (profile mode)",
             "request": "launch",
             "type": "dart",
