@@ -77,10 +77,10 @@ packages:
     dependency: "direct dev"
     description:
       name: build_runner
-      sha256: a9461b8e586bf018dd4afd2e13b49b08c6a844a4b226c8d1d10f3a723cdd78c3
+      sha256: "110c56ef29b5eb367b4d17fc79375fa8c18a6cd7acd92c05bb3986c17a079057"
       url: "https://pub.dev"
     source: hosted
-    version: "2.10.1"
+    version: "2.10.4"
   built_collection:
     dependency: transitive
     description:
@@ -261,10 +261,10 @@ packages:
     dependency: "direct main"
     description:
       name: file_picker
-      sha256: f2d9f173c2c14635cc0e9b14c143c49ef30b4934e8d1d274d6206fcb0086a06f
+      sha256: d974b6ba2606371ac71dd94254beefb6fa81185bde0b59bdc1df09885da85fde
       url: "https://pub.dev"
     source: hosted
-    version: "10.3.3"
+    version: "10.3.8"
   fixnum:
     dependency: transitive
     description:
@@ -311,10 +311,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_svg
-      sha256: b9c2ad5872518a27507ab432d1fb97e8813b05f0fc693f9d40fad06d073e0678
+      sha256: "87fbd7c534435b6c5d9d98b01e1fd527812b82e68ddd8bd35fc45ed0fa8f0a95"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.1"
+    version: "2.2.3"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -374,10 +374,10 @@ packages:
     dependency: "direct main"
     description:
       name: image
-      sha256: "4e973fcf4caae1a4be2fa0a13157aa38a8f9cb049db6529aa00b4d71abc4d928"
+      sha256: "492bd52f6c4fbb6ee41f781ff27765ce5f627910e1e0cbecfa3d9add5562604c"
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.4"
+    version: "4.7.2"
   integration_test:
     dependency: "direct dev"
     description: flutter
@@ -475,10 +475,10 @@ packages:
     dependency: "direct main"
     description:
       name: material_symbols_icons
-      sha256: "9a7de58ffc299c8e362b4e860e36e1d198fa0981a894376fe1b6bfe52773e15b"
+      sha256: "02555a48e1ec02b16e532dfd4ef13c4f6bf7ec7c20230e58e56641a393433dc3"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2874.0"
+    version: "4.2892.0"
   meta:
     dependency: transitive
     description:
@@ -499,10 +499,10 @@ packages:
     dependency: "direct dev"
     description:
       name: mockito
-      sha256: "4feb43bc4eb6c03e832f5fcd637d1abb44b98f9cfa245c58e27382f58859f8f6"
+      sha256: dac24d461418d363778d53198d9ac0510b9d073869f078450f195766ec48d05e
       url: "https://pub.dev"
     source: hosted
-    version: "5.5.1"
+    version: "5.6.1"
   multi_split_view:
     dependency: "direct main"
     description:
@@ -723,10 +723,10 @@ packages:
     dependency: "direct main"
     description:
       name: shared_preferences
-      sha256: "6e8bf70b7fef813df4e9a36f658ac46d107db4b4cfe1048b477d4e453a8159f5"
+      sha256: "2939ae520c9024cb197fc20dee269cd8cdbf564c8b5746374ec6cacdc5169e64"
       url: "https://pub.dev"
     source: hosted
-    version: "2.5.3"
+    version: "2.5.4"
   shared_preferences_android:
     dependency: transitive
     description:

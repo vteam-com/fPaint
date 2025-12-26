@@ -22,37 +22,37 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  archive: ^4.0.7
-  cupertino_icons: ^1.0.8
-  file_picker: ^10.1.9
+  archive: any
+  cupertino_icons: any
+  file_picker: any
   flutter:
     sdk: flutter
-  flutter_svg: ^2.1.0
-  image: ^4.5.4
-  material_symbols_icons: ^4.2815.0
-  multi_split_view: ^3.6.0
-  pasteboard: ^0.4.0
-  path_provider: ^2.0.7
-  provider: ^6.1.5
-  shared_preferences: ^2.5.3
-  super_clipboard: ^0.9.1
-  url_launcher: ^6.3.1
-  vector_math: ^2.1.4
-  web: ^1.1.0
-  window_manager: ^0.5.0
-  xml: ^6.3.0
+  flutter_svg: any
+  image: any
+  material_symbols_icons: any
+  multi_split_view: any
+  pasteboard: any
+  path_provider: any
+  provider: any
+  shared_preferences: any
+  super_clipboard: any
+  url_launcher: any
+  vector_math: any
+  web: any
+  window_manager: any
+  xml: any
 
 dev_dependencies:
   analyzer: any
-  build_runner: ^2.4.10 # Use a recent version
-  coverage: ^1.8.0
-  flutter_launcher_icons:
-  flutter_lints: ^6.0.0
+  build_runner: any
+  coverage: any
+  flutter_launcher_icons: any
+  flutter_lints: any
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
-  mockito: ^5.4.4 # Use a recent version
+  mockito: any
   nested: any
 
 # The following section is specific to Flutter packages.
