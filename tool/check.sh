@@ -4,13 +4,6 @@ flutter pub get > /dev/null || { echo "Pub get failed"; exit 1; }
 echo --- Pub Outdated
 flutter pub outdated
 
-# echo --- Generate Loc
-# python3 tool/loc.py
-
-echo --- Sort code
-dart run tool/sort_source.dart
-
-
 echo --- Analyze
 flutter analyze lib test --no-pub | sed 's/^/    /'
 
@@ -23,9 +16,6 @@ echo --- fCheck
 # Note: `dart pub cache exec` doesn't exist on all Dart SDK versions; `pub global run` does.
 dart pub global activate fcheck 1.1.3 > /dev/null
 dart pub global run fcheck --svg --fix --list full
-
-echo --- Graph Dependencies
-tool/graph.sh | sed 's/^/    /'
 
 echo --- Format sources
 dart format . | sed 's/^/    /'
