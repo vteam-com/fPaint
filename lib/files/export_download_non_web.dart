@@ -28,7 +28,7 @@ Future<void> onExportAsPng(
   final LayersProvider layers, [
   final String fileName = 'image.png',
 ]) async {
-  final String? filePath = await FilePicker.platform.saveFile(
+  final String? filePath = await FilePicker.saveFile(
     dialogTitle: 'fPaint Save Image',
     initialDirectory: '.',
     fileName: fileName,
@@ -82,7 +82,7 @@ Future<void> onExportAsJpeg(
   final LayersProvider layers, [
   final String fileName = 'image.jpg',
 ]) async {
-  final String? filePath = await FilePicker.platform.saveFile(
+  final String? filePath = await FilePicker.saveFile(
     dialogTitle: 'Save image',
     fileName: fileName,
     allowedExtensions: <String>['jpg', 'jpeg'],
@@ -130,7 +130,7 @@ Future<void> onExportAsOra(
   final LayersProvider layers, [
   final String fileName = 'image.jpg',
 ]) async {
-  final String? filePath = await FilePicker.platform.saveFile(
+  final String? filePath = await FilePicker.saveFile(
     dialogTitle: 'Save image',
     fileName: fileName,
     allowedExtensions: <String>['ora'],
@@ -165,7 +165,7 @@ Future<void> onExportAsTiff(
   final LayersProvider layers, [
   final String fileName = 'image.tiff',
 ]) async {
-  final String? filePath = await FilePicker.platform.saveFile(
+  final String? filePath = await FilePicker.saveFile(
     dialogTitle: 'fPaint Save Image as TIFF',
     initialDirectory: '.',
     fileName: fileName,

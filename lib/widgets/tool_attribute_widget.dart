@@ -39,10 +39,11 @@ class ToolAttributeWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 10,
           children: <Widget>[
+            // ignore: use_null_aware_elements
             if (childLeft != null) childLeft!,
-            if (childRight != null)
+            if (childRight case final Widget childRightWidget?)
               Expanded(
-                child: childRight!,
+                child: childRightWidget,
               ),
           ],
         ),
