@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
-import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:provider/provider.dart';
@@ -447,10 +446,11 @@ class LayersProvider extends ChangeNotifier {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
 
-    // Draw the custom painter on the canvas
-    final CanvasPanelPainter painter = CanvasPanelPainter(this);
-
-    painter.paint(canvas, this.size);
+    for (final LayerProvider layer in _list.reversed) {
+      if (layer.isVisible) {
+        layer.renderLayer(canvas);
+      }
+    }
 
     // End the recording and get the picture
     final ui.Picture picture = recorder.endRecording();

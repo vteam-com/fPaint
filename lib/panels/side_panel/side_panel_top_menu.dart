@@ -3,7 +3,7 @@ import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/models/localized_strings.dart';
 import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
-import 'package:fpaint/providers/app_provider.dart'; // Added for AppProvider
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
 /// A widget that displays the top menu of the side panel.

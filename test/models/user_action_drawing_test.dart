@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/widgets/action_type_icon.dart';
 
 void main() {
   group('UserActionDrawing', () {

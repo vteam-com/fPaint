@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui; // Explicit import for ui.Image clarity & other ui types
+import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart'; // For Offset, Size, and transitively foundation types (Uint8List, debugPrint)
-
-import 'package:fpaint/providers/layers_provider.dart'; // For LayersProvider
+import 'package:flutter/material.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:image/image.dart' as img;
 
 Future<Uint8List> convertToTiff(final Uint8List inputBytes) async {

@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+
 import 'package:image/image.dart' as img;
 
 /// Converts the given image bytes to JPG format.

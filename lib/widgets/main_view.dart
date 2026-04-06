@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/panels/canvas_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
+import 'package:fpaint/widgets/canvas_panel.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/selector_widget.dart';

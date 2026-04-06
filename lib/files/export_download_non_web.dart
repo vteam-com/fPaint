@@ -5,7 +5,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
-import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
 /// Exports the current painter content as a PNG image file.
@@ -58,7 +57,7 @@ Future<void> saveAsPng(
   final String filePath,
 ) async {
   // Capture the image bytes
-  final Uint8List bytes = await capturePainterToImageBytes(layers);
+  final Uint8List bytes = await layers.capturePainterToImageBytes();
   await File(filePath).writeAsBytes(bytes);
 }
 
@@ -110,7 +109,7 @@ Future<void> saveAsJpeg(
 ) async {
   if (filePath != null) {
     // Capture the image bytes
-    final Uint8List imageBytes = await capturePainterToImageBytes(layers);
+    final Uint8List imageBytes = await layers.capturePainterToImageBytes();
 
     // Convert the image bytes to JPG format
     final Uint8List outputBytes = await convertToJpg(imageBytes);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/color_picker_dialog.dart';
 
 class TextEditor extends StatefulWidget {
   const TextEditor({super.key});

@@ -10,7 +10,6 @@ import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
-import 'package:fpaint/panels/tools/flood_fill.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
@@ -453,9 +452,9 @@ class AppProvider extends ChangeNotifier {
 
   /// Performs a flood fill with a solid color.
   void floodFillSolidAction(final Offset position) async {
+    final ui.Image sourceImage = layers.selectedLayer.toImageForStorage(layers.size);
     final UserActionDrawing action = await _fillService.createFloodFillSolidAction(
-      selectedLayer: layers.selectedLayer,
-      canvasSize: layers.size,
+      sourceImage: sourceImage,
       position: position,
       fillColor: this.fillColor,
       tolerance: this.tolerance,
@@ -467,9 +466,9 @@ class AppProvider extends ChangeNotifier {
 
   /// Performs a flood fill with a gradient.
   void floodFillGradientAction(final FillModel fillModel) async {
+    final ui.Image sourceImage = layers.selectedLayer.toImageForStorage(layers.size);
     final UserActionDrawing action = await _fillService.createFloodFillGradientAction(
-      selectedLayer: layers.selectedLayer,
-      canvasSize: layers.size,
+      sourceImage: sourceImage,
       fillModel: fillModel,
       tolerance: this.tolerance,
       clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
@@ -493,10 +492,9 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Gets the region path from a layer image.
-  Future<Region> getRegionPathFromLayerImage(final ui.Offset position) async {
-    return _fillService.getRegionPathFromLayerImage(
-      selectedLayer: layers.selectedLayer,
-      canvasSize: layers.size,
+  Future<FillRegion> getRegionPathFromLayerImage(final ui.Offset position) async {
+    return _fillService.getRegionPathFromImage(
+      image: layers.selectedLayer.toImageForStorage(layers.size),
       position: position,
       tolerance: this.tolerance,
     );
@@ -533,7 +531,7 @@ class AppProvider extends ChangeNotifier {
   /// Starts a selector creation.
   void selectorCreationStart(final Offset position) {
     if (selectorModel.mode == SelectorMode.wand) {
-      getRegionPathFromLayerImage(position).then((final Region region) {
+      getRegionPathFromLayerImage(position).then((final FillRegion region) {
         selectorModel.isVisible = true;
         if (selectorModel.math == SelectorMath.replace) {
           selectorModel.path1 = region.path.shift(region.offset);
