@@ -14,11 +14,11 @@ class BrushSizePicker extends BasePicker<double> {
   }) : super(min: min, max: max, divisions: (max * 10).toInt());
 
   @override
-  BrushSizePickerState createState() => BrushSizePickerState();
+  BasePickerState<double> createState() => _BrushSizePickerState();
 }
 
 /// The state for [BrushSizePicker].
-class BrushSizePickerState extends BasePickerState<double> {
+class _BrushSizePickerState extends BasePickerState<double> {
   @override
   double clampValue(final double value) {
     final double min = widget.min!;

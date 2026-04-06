@@ -1,3 +1,4 @@
+// ignore: fcheck_one_class_per_file
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';

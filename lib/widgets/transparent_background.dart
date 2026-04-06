@@ -45,15 +45,15 @@ class TransparentPaper extends StatelessWidget {
   Widget build(final BuildContext context) {
     return CustomPaint(
       size: Size.infinite,
-      painter: TransparentBackgroundPainter(patternSize),
+      painter: _TransparentBackgroundPainter(patternSize),
     );
   }
 }
 
 /// A custom painter that draws a transparent background with a grid pattern.
-class TransparentBackgroundPainter extends CustomPainter {
-  /// Creates a [TransparentBackgroundPainter].
-  TransparentBackgroundPainter([this.patternSize = 10]);
+class _TransparentBackgroundPainter extends CustomPainter {
+  /// Creates a [_TransparentBackgroundPainter].
+  _TransparentBackgroundPainter([this.patternSize = 10]);
 
   /// The size of the grid pattern.
   final int patternSize;
@@ -70,7 +70,7 @@ class TransparentBackgroundPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(final TransparentBackgroundPainter oldDelegate) => true;
+  bool shouldRepaint(final _TransparentBackgroundPainter oldDelegate) => true;
 }
 
 /// Draws a transparent background grid on the canvas.

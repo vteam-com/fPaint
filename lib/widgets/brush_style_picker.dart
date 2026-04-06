@@ -12,11 +12,11 @@ class BrushStylePicker extends BasePicker<BrushStyle> {
   }) : super(title: 'Brush Style');
 
   @override
-  BrushStylePickerState createState() => BrushStylePickerState();
+  BasePickerState<BrushStyle> createState() => _BrushStylePickerState();
 }
 
 /// The state for [BrushStylePicker].
-class BrushStylePickerState extends BasePickerState<BrushStyle> {
+class _BrushStylePickerState extends BasePickerState<BrushStyle> {
   @override
   BrushStyle clampValue(final BrushStyle value) {
     return value; // No clamping needed for enums
