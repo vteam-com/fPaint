@@ -19,8 +19,6 @@ import 'package:vector_math/vector_math_64.dart';
 // Exports
 export 'package:fpaint/providers/layers_provider.dart';
 
-class UserLayerAction {}
-
 /// The `AppProvider` class is a `ChangeNotifier` that manages the state of the application,
 /// including the canvas, layers, and selection tools. It provides methods for interacting
 /// with the canvas, such as clearing the canvas, converting between canvas and screen

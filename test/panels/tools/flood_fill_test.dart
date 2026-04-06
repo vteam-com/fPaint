@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/image_helper.dart';
-import 'package:fpaint/panels/tools/flood_fill.dart';
+import 'package:fpaint/services/flood_fill.dart';
 
 const int testImageSize = 5;
 
