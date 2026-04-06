@@ -30,7 +30,6 @@ class ToolsPanel extends StatelessWidget {
 
   /// A boolean indicating whether the panel is in minimal mode.
   final bool minimal;
-
   @override
   Widget build(final BuildContext context) {
     return SingleChildScrollView(
@@ -57,94 +56,39 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  /// Adds a tool option for brush color.
-  void addToolOptionColorForBrush(
+  /// Adds a tool option for brush or fill color.
+  void addToolOptionColor(
     final List<Widget> widgets,
     final AppProvider appProvider,
     final BuildContext context,
+    final bool isBrush,
   ) {
-    widgets.add(
-      ToolAttributeWidget(
-        minimal: minimal,
-        name: 'Brush Color',
-        childLeft: Column(
-          children: <Widget>[
-            colorPreviewWithTransparentPaper(
-              key: Keys.toolPanelBrushColor1,
-              minimal: minimal,
-              color: appProvider.brushColor,
-              onPressed: () {
-                showColorPicker(
-                  context: context,
-                  title: 'Brush Color',
-                  color: appProvider.brushColor,
-                  onSelectedColor: (final Color color) => appProvider.brushColor = color,
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.colorize_outlined),
-              onPressed: () {
-                appProvider.eyeDropPositionForFill = null; // remove the possibly active
-                appProvider.eyeDropPositionForBrush = appProvider.canvasCenter;
-                appProvider.update();
-              },
-            ),
-          ],
-        ),
-        childRight: minimal
-            ? null
-            : ColorSelector(
-                color: appProvider.brushColor,
-                onColorChanged: (final Color color) => appProvider.brushColor = color,
-              ),
-      ),
-    );
-  }
-
-  /// Adds a tool option for fill color.
-  void addToolOptionColorForFill(
-    final List<Widget> widgets,
-    final AppProvider appProvider,
-    final BuildContext context,
-  ) {
-    widgets.add(
-      ToolAttributeWidget(
-        minimal: minimal,
-        name: 'Fill Color',
-        childLeft: Column(
-          children: <Widget>[
-            colorPreviewWithTransparentPaper(
-              key: Keys.toolPanelFillColor,
-              minimal: minimal,
-              color: appProvider.fillColor,
-              onPressed: () {
-                showColorPicker(
-                  context: context,
-                  title: 'Fill Color',
-                  color: appProvider.fillColor,
-                  onSelectedColor: (final Color color) => appProvider.fillColor = color,
-                );
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.colorize_outlined),
-              onPressed: () {
-                appProvider.eyeDropPositionForBrush = null; // just in case remove the other eyedrop
-
-                appProvider.eyeDropPositionForFill = appProvider.canvasCenter;
-                appProvider.update();
-              },
-            ),
-          ],
-        ),
-        childRight: minimal
-            ? null
-            : ColorSelector(
-                color: appProvider.fillColor,
-                onColorChanged: (final Color color) => appProvider.fillColor = color,
-              ),
-      ),
+    final String name = isBrush ? 'Brush Color' : 'Fill Color';
+    final Key previewKey = isBrush ? Keys.toolPanelBrushColor1 : Keys.toolPanelFillColor;
+    final Color color = isBrush ? appProvider.brushColor : appProvider.fillColor;
+    _addToolOptionColor(
+      widgets: widgets,
+      context: context,
+      name: name,
+      previewKey: previewKey,
+      color: color,
+      onColorChanged: (final Color selectedColor) {
+        if (isBrush) {
+          appProvider.brushColor = selectedColor;
+        } else {
+          appProvider.fillColor = selectedColor;
+        }
+      },
+      onPickFromCanvas: () {
+        if (isBrush) {
+          appProvider.eyeDropPositionForFill = null;
+          appProvider.eyeDropPositionForBrush = appProvider.canvasCenter;
+        } else {
+          appProvider.eyeDropPositionForBrush = null;
+          appProvider.eyeDropPositionForFill = appProvider.canvasCenter;
+        }
+        appProvider.update();
+      },
     );
   }
 
@@ -419,7 +363,7 @@ class ToolsPanel extends StatelessWidget {
             ),
           ),
         );
-        addToolOptionColorForFill(widgets, appProvider, context);
+        addToolOptionColor(widgets, appProvider, context, false);
         addToolOptionTolerance(widgets, context, appProvider);
         addToolOptionTopColors(widgets, layers, appProvider, minimal);
         break;
@@ -690,12 +634,12 @@ class ToolsPanel extends StatelessWidget {
 
         // Brush color
         if (selectedTool.isSupported(ActionOptions.brushColor)) {
-          addToolOptionColorForBrush(widgets, appProvider, context);
+          addToolOptionColor(widgets, appProvider, context, true);
         }
 
         // Fill Color
         if (selectedTool.isSupported(ActionOptions.colorFill)) {
-          addToolOptionColorForFill(widgets, appProvider, context);
+          addToolOptionColor(widgets, appProvider, context, false);
         }
 
         // Color Tolerance used by Fill and Magic wand
@@ -719,6 +663,51 @@ class ToolsPanel extends StatelessWidget {
     }
 
     return widgets;
+  }
+
+  /// Adds a color-related tool option row with preview, picker, and selector.
+  void _addToolOptionColor({
+    required final List<Widget> widgets,
+    required final BuildContext context,
+    required final String name,
+    required final Key previewKey,
+    required final Color color,
+    required final ValueChanged<Color> onColorChanged,
+    required final VoidCallback onPickFromCanvas,
+  }) {
+    widgets.add(
+      ToolAttributeWidget(
+        minimal: minimal,
+        name: name,
+        childLeft: Column(
+          children: <Widget>[
+            colorPreviewWithTransparentPaper(
+              key: previewKey,
+              minimal: minimal,
+              color: color,
+              onPressed: () {
+                showColorPicker(
+                  context: context,
+                  title: name,
+                  color: color,
+                  onSelectedColor: onColorChanged,
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.colorize_outlined),
+              onPressed: onPickFromCanvas,
+            ),
+          ],
+        ),
+        childRight: minimal
+            ? null
+            : ColorSelector(
+                color: color,
+                onColorChanged: onColorChanged,
+              ),
+      ),
+    );
   }
 }
 

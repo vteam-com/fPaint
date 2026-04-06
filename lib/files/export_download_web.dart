@@ -21,6 +21,7 @@ Future<void> onExportAsPng(
   await saveAsPng(layers, fileName);
 }
 
+/// Saves the current canvas as a PNG file and triggers a browser download.
 Future<void> saveAsPng(
   final LayersProvider layers,
   final String filePath,
@@ -98,6 +99,7 @@ Future<void> saveAsOra(
   downloadBlob(Uint8List.fromList(image), filePath);
 }
 
+/// Exports the current canvas as a TIFF file and triggers a browser download.
 Future<void> onExportAsTiff(
   final LayersProvider layers, [
   final String fileName = 'image.tiff',

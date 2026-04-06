@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:image/image.dart' as img;
 
+/// Converts encoded image bytes into TIFF-encoded bytes.
 Future<Uint8List> convertToTiff(final Uint8List inputBytes) async {
   final img.Image? image = img.decodeImage(inputBytes);
   if (image == null) {
@@ -16,6 +17,7 @@ Future<Uint8List> convertToTiff(final Uint8List inputBytes) async {
   return Uint8List.fromList(outputBytes);
 }
 
+/// Decodes TIFF bytes and populates [layers] with one layer per TIFF frame.
 Future<void> readTiffFileFromBytes(
   final LayersProvider layers,
   final Uint8List bytes,
@@ -102,6 +104,7 @@ Future<void> readTiffFileFromBytes(
   layers.clearHasChanged();
 }
 
+/// Loads a TIFF file from disk and decodes it into [layers].
 Future<void> readTiffFromFilePath(
   final LayersProvider layers,
   final String path,

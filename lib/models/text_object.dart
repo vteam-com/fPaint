@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Represents a text element placed on the canvas with style and position.
 class TextObject {
   TextObject({
     required this.text,

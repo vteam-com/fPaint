@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// Displays an overview of keyboard shortcuts in a modal dialog.
 class ShortcutsHelpDialog extends StatelessWidget {
   const ShortcutsHelpDialog({super.key});
 
@@ -79,6 +80,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
     );
   }
 
+  /// Builds a single shortcut row with key caps and description text.
   Widget _buildShortcut(final String keys, final String description) {
     return Padding(
       padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
@@ -106,6 +108,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
     );
   }
 
+  /// Builds the section title for a shortcut category.
   Widget _buildShortcutCategory(final String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -119,6 +122,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
     );
   }
 
+  /// Builds a fixed-width group of shortcuts under a category heading.
   Widget _buildShortcutGroup(
     final String title,
     final List<Map<String, String>> shortcuts,

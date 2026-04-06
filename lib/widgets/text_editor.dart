@@ -3,6 +3,7 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 
+/// Opens the text editing flow for the currently selected text object.
 class TextEditor extends StatefulWidget {
   const TextEditor({super.key});
 
@@ -43,6 +44,7 @@ class _TextEditorState extends State<TextEditor> {
     appProvider.update();
   }
 
+  /// Displays the text editing dialog for the currently selected text object.
   void _showEditTextDialog() {
     final TextEditingController controller = TextEditingController(text: textObject.text);
     double fontSize = textObject.size;

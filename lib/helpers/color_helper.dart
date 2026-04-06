@@ -329,6 +329,11 @@ class ColorUsage {
   ColorUsage(this.color, this.percentage);
   Color color = Colors.black;
   double percentage = 1.0; // from 0 to 1
+
+  /// Returns this usage value formatted as a percentage string.
+  ///
+  /// Uses [decimals] fractional digits and returns "<0.1%" for tiny values
+  /// when very low precision is requested.
   String toStringPercentage([final int decimals = 3]) {
     if (decimals < 2 && this.percentage < 0.01) {
       return '<0.1%';
