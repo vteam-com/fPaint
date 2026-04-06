@@ -11,12 +11,12 @@ import 'package:fpaint/helpers/color_helper.dart' as _i15;
 import 'package:fpaint/models/canvas_resize.dart' as _i14;
 import 'package:fpaint/models/fill_model.dart' as _i5;
 import 'package:fpaint/models/selector_model.dart' as _i6;
-import 'package:fpaint/panels/tools/flood_fill.dart' as _i8;
 import 'package:fpaint/providers/app_preferences.dart' as _i2;
 import 'package:fpaint/providers/app_provider.dart' as _i10;
 import 'package:fpaint/providers/layers_provider.dart' as _i4;
 import 'package:fpaint/providers/shell_provider.dart' as _i12;
 import 'package:fpaint/providers/undo_provider.dart' as _i7;
+import 'package:fpaint/services/fill_service.dart' as _i8;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i13;
 import 'package:shared_preferences/shared_preferences.dart' as _i9;
@@ -61,8 +61,8 @@ class _FakeColor_6 extends _i1.SmartFake implements _i3.Color {
   _FakeColor_6(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
-class _FakeRegion_7 extends _i1.SmartFake implements _i8.Region {
-  _FakeRegion_7(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
+class _FakeFillRegion_7 extends _i1.SmartFake implements _i8.FillRegion {
+  _FakeFillRegion_7(Object parent, Invocation parentInvocation) : super(parent, parentInvocation);
 }
 
 class _FakeSharedPreferences_8 extends _i1.SmartFake implements _i9.SharedPreferences {
@@ -470,17 +470,17 @@ class MockAppProvider extends _i1.Mock implements _i10.AppProvider {
   );
 
   @override
-  _i11.Future<_i8.Region> getRegionPathFromLayerImage(_i3.Offset? position) =>
+  _i11.Future<_i8.FillRegion> getRegionPathFromLayerImage(_i3.Offset? position) =>
       (super.noSuchMethod(
             Invocation.method(#getRegionPathFromLayerImage, [position]),
-            returnValue: _i11.Future<_i8.Region>.value(
-              _FakeRegion_7(
+            returnValue: _i11.Future<_i8.FillRegion>.value(
+              _FakeFillRegion_7(
                 this,
                 Invocation.method(#getRegionPathFromLayerImage, [position]),
               ),
             ),
           )
-          as _i11.Future<_i8.Region>);
+          as _i11.Future<_i8.FillRegion>);
 
   @override
   bool isReadyForDrawing() =>
