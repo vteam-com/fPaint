@@ -10,6 +10,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
+/// Handles pointer, pan, and zoom gestures over the canvas widget tree.
 class CanvasGestureHandler extends StatefulWidget {
   const CanvasGestureHandler({
     super.key,
@@ -148,6 +149,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     );
   }
 
+  /// Returns the distance between the first two active touch points.
+  ///
+  /// Returns 0.0 when fewer than two touch pointers are active.
   double _getDistanceBetweenTouchPoints() {
     if (_pointerPositions.length >= 2) {
       final List<Offset> positions = _pointerPositions.values.toList();
@@ -159,6 +163,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     }
   }
 
+  /// Handles two-finger pan and pinch updates for manual canvas navigation.
   void _handleMultiTouchUpdate(
     final PointerMoveEvent event,
     final AppProvider appProvider,
@@ -183,6 +188,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     appProvider.update();
   }
 
+  /// Finalizes an active pointer interaction and clears temporary drawing state.
   void _handlePointerEnd(
     final AppProvider appProvider,
     final PointerEvent event,
@@ -199,6 +205,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     }
   }
 
+  /// Handles pointer move events for drawing, selection, and eyedropper interactions.
   void _handlePointerMove(
     final AppProvider appProvider,
     final PointerEvent event,
@@ -240,6 +247,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     }
   }
 
+  /// Starts pointer interactions including drawing, selection, fill, and text placement.
   void _handlePointerStart(
     final AppProvider appProvider,
     final PointerDownEvent event,
@@ -361,6 +369,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     appProvider.canvasPan(offsetDelta: offsetDelta);
   }
 
+  /// Applies user-driven canvas scaling around [anchorPoint].
   void _handleUserScalingTheCanvas(
     final ShellProvider shellProvider,
     final AppProvider appProvider,
@@ -379,6 +388,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     );
   }
 
+  /// Opens the text editor dialog and inserts text at the tapped [position].
   void _showTextDialog(final AppProvider appProvider, final Offset position) {
     showDialog<void>(
       context: context,

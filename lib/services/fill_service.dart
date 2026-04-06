@@ -6,6 +6,7 @@ import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/services/flood_fill.dart';
 
+/// Describes a flood-filled region path and its offset relative to the source.
 class FillRegion {
   FillRegion({
     required this.path,
@@ -16,6 +17,7 @@ class FillRegion {
   final Offset offset;
 }
 
+/// Builds fill actions from image-based flood-fill regions.
 class FillService {
   /// Performs a flood fill with a solid color.
   Future<UserActionDrawing> createFloodFillSolidAction({

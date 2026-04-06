@@ -32,6 +32,7 @@ class AppColors {
   static const Color pressed = Color(0xFF1976D2);
 }
 
+/// Shared widget keys used by tests and UI lookups across the app.
 class Keys {
   static Key floatActionZoomIn = const Key('floating_action_zoom_in');
   static Key floatActionZoomOut = const Key('floating_action_zoom_out');

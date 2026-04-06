@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 
+/// Modal dialog used to create a new text object with style settings.
 class TextEditorDialog extends StatefulWidget {
   const TextEditorDialog({
     super.key,

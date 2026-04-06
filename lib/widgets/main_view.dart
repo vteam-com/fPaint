@@ -22,6 +22,7 @@ class MainView extends StatefulWidget {
   MainViewState createState() => MainViewState();
 }
 
+/// State for [MainView], composing the canvas and editing overlays.
 class MainViewState extends State<MainView> {
   @override
   Widget build(final BuildContext context) {

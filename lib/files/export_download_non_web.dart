@@ -28,17 +28,12 @@ Future<void> onExportAsPng(
   final LayersProvider layers, [
   final String fileName = 'image.png',
 ]) async {
-  final String? filePath = await FilePicker.saveFile(
+  await _exportWithFilePicker(
     dialogTitle: 'fPaint Save Image',
-    initialDirectory: '.',
     fileName: fileName,
-    type: FileType.custom,
     allowedExtensions: <String>['png'],
-    lockParentWindow: true,
+    onFileSelected: (final String filePath) => saveAsPng(layers, filePath),
   );
-  if (filePath != null && filePath.isNotEmpty) {
-    await saveAsPng(layers, filePath);
-  }
 }
 
 /// Saves the current painter content as a PNG image file.
@@ -161,23 +156,42 @@ Future<void> saveAsOra(
   }
 }
 
+/// Opens a save dialog and exports the current canvas as a TIFF file.
 Future<void> onExportAsTiff(
   final LayersProvider layers, [
   final String fileName = 'image.tiff',
 ]) async {
-  final String? filePath = await FilePicker.saveFile(
+  await _exportWithFilePicker(
     dialogTitle: 'fPaint Save Image as TIFF',
+    fileName: fileName,
+    allowedExtensions: <String>['tif', 'tiff'],
+    onFileSelected: (final String filePath) => saveAsTiff(layers, filePath),
+  );
+}
+
+/// Shows a file-save dialog and invokes [onFileSelected] when a valid path is chosen.
+Future<void> _exportWithFilePicker({
+  required final String dialogTitle,
+  required final String fileName,
+  required final List<String> allowedExtensions,
+  required final Future<void> Function(String filePath) onFileSelected,
+}) async {
+  final String? filePath = await FilePicker.saveFile(
+    dialogTitle: dialogTitle,
     initialDirectory: '.',
     fileName: fileName,
     type: FileType.custom,
-    allowedExtensions: <String>['tif', 'tiff'],
+    allowedExtensions: allowedExtensions,
     lockParentWindow: true,
   );
   if (filePath != null && filePath.isNotEmpty) {
-    await saveAsTiff(layers, filePath);
+    await onFileSelected(filePath);
   }
 }
 
+/// Saves the current canvas as a TIFF file at [filePath].
+///
+/// If [filePath] is null, the export is skipped.
 Future<void> saveAsTiff(
   final LayersProvider layers,
   final String? filePath,

@@ -67,6 +67,7 @@ Future<void> readOraFileFromBytes(
   }
 }
 
+/// Imports image metadata and root stack information from an ORA XML document.
 Future<void> importFromOraXml(
   final Archive archive,
   final LayersProvider layers,
@@ -82,6 +83,7 @@ Future<void> importFromOraXml(
   await importStack(archive, layers, xmlElementTopStack);
 }
 
+/// Recursively imports a stack node and its child stacks and layers.
 Future<void> importStack(
   final Archive archive,
   final LayersProvider layers,
@@ -101,6 +103,7 @@ Future<void> importStack(
   }
 }
 
+/// Creates and configures a layer from an ORA layer XML node.
 Future<void> addLayer(
   final Archive archive,
   final LayersProvider layers,

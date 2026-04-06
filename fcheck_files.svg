@@ -258,9 +258,6 @@
 <rect x="50.0" y="90.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/main.dart
 
 1 Magic Numbers warning</title></rect>
-<rect x="50.0" y="160.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/files/assets_helper.dart
-
-3 Dead Code warnings</title></rect>
 <rect x="370.0" y="90.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/main_screen.dart
 
 9 Magic Numbers warnings
@@ -277,12 +274,10 @@
 10 Magic Numbers warnings</title></rect>
 <rect x="690.0" y="90.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/shortcuts.dart
 
-13 Dead Code warnings
-1 Documentation warning</title></rect>
+13 Dead Code warnings</title></rect>
 <rect x="690.0" y="160.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/main_view.dart
 
-1 Dead Code warning
-1 Documentation warning</title></rect>
+1 Dead Code warning</title></rect>
 <rect x="690.0" y="230.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/floating_buttons.dart
 
 7 Magic Numbers warnings</title></rect>
@@ -293,12 +288,10 @@
 <rect x="1010.0" y="90.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/panels/tools/tools_panel.dart
 
 11 Magic Numbers warnings
-3 Dead Code warnings
-2 Duplicate Code warnings</title></rect>
+3 Dead Code warnings</title></rect>
 <rect x="1010.0" y="160.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/canvas_gesture_handler.dart
 
 16 Magic Numbers warnings
-8 Documentation warnings
 3 Dead Code warnings</title></rect>
 <rect x="1010.0" y="230.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/fill_widget.dart
 
@@ -317,13 +310,11 @@
 <rect x="1010.0" y="510.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/text_editor.dart
 
 9 Magic Numbers warnings
-2 Documentation warnings
 1 Dead Code warning</title></rect>
 <rect x="1010.0" y="580.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/canvas_panel.dart</title></rect>
 <rect x="1010.0" y="650.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/shortcuts_help.dart
 
-11 Magic Numbers warnings
-4 Documentation warnings</title></rect>
+11 Magic Numbers warnings</title></rect>
 <rect x="1370.0" y="90.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/action_type_icon.dart</title></rect>
 <rect x="1370.0" y="160.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/marching_ants_path.dart
 
@@ -335,8 +326,7 @@
 2 Dead Code warnings</title></rect>
 <rect x="1370.0" y="300.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/text_attributes_widget.dart
 
-4 Magic Numbers warnings
-2 Documentation warnings</title></rect>
+4 Magic Numbers warnings</title></rect>
 <rect x="1370.0" y="370.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/gitHub/fPaint/lib/panels/side_panel/side_panel_top_menu.dart</title></rect>
 <rect x="1370.0" y="440.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/brush_style_picker.dart
 
@@ -344,8 +334,7 @@
 <rect x="1370.0" y="510.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/canvas_panel_painter.dart</title></rect>
 <rect x="1370.0" y="580.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/text_editor_dialog.dart
 
-9 Magic Numbers warnings
-1 Documentation warning</title></rect>
+9 Magic Numbers warnings</title></rect>
 <rect x="1370.0" y="650.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/tolerance_picker.dart
 
 5 Magic Numbers warnings
@@ -360,9 +349,7 @@
 
 14 Magic Numbers warnings
 3 Dead Code warnings</title></rect>
-<rect x="1764.0" y="160.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/models/constants.dart
-
-1 Documentation warning</title></rect>
+<rect x="1764.0" y="160.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/gitHub/fPaint/lib/models/constants.dart</title></rect>
 <rect x="1764.0" y="230.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/brush_size_picker.dart
 
 1 Dead Code warning
@@ -425,13 +412,10 @@
 <rect x="2534.0" y="230.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/color_preview.dart
 
 10 Magic Numbers warnings</title></rect>
-<rect x="2534.0" y="300.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/files/export_download_non_web.dart
+<rect x="2534.0" y="300.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/files/export_download_non_web.dart
 
-2 Documentation warnings
-2 Duplicate Code warnings</title></rect>
-<rect x="2534.0" y="370.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/files/export_download_web.dart
-
-2 Documentation warnings</title></rect>
+1 Dead Code warning</title></rect>
+<rect x="2534.0" y="370.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/gitHub/fPaint/lib/files/export_download_web.dart</title></rect>
 <rect x="2534.0" y="440.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/widgets/nine_grid_selector.dart
 
 16 Magic Numbers warnings
@@ -441,12 +425,10 @@
 6 Magic Numbers warnings</title></rect>
 <rect x="2888.0" y="160.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/files/file_tiff.dart
 
-3 Documentation warnings
 2 Magic Numbers warnings</title></rect>
 <rect x="2888.0" y="230.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/gitHub/fPaint/lib/models/selector_model.dart</title></rect>
 <rect x="2888.0" y="300.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/files/file_ora.dart
 
-3 Documentation warnings
 2 Dead Code warnings
 1 Magic Numbers warning</title></rect>
 <rect x="2888.0" y="370.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/providers/app_preferences.dart
@@ -455,8 +437,7 @@
 <rect x="2888.0" y="440.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/gitHub/fPaint/lib/files/file_jpeg.dart</title></rect>
 <rect x="2888.0" y="510.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/services/fill_service.dart
 
-6 Magic Numbers warnings
-2 Documentation warnings</title></rect>
+6 Magic Numbers warnings</title></rect>
 <rect x="3218.0" y="90.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/providers/layers_provider.dart
 
 10 Magic Numbers warnings
@@ -495,12 +476,10 @@
 <rect x="4178.0" y="90.0" width="220" height="50" class="fileNode fileNodeError"><title>File: /Users/jp/src/gitHub/fPaint/lib/helpers/color_helper.dart
 
 41 Magic Numbers warnings
-9 Dead Code warnings
-1 Documentation warning</title></rect>
+9 Dead Code warnings</title></rect>
 <rect x="4178.0" y="160.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/gitHub/fPaint/lib/models/text_object.dart
 
-2 Magic Numbers warnings
-1 Documentation warning</title></rect>
+2 Magic Numbers warnings</title></rect>
 <rect x="4178.0" y="230.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/gitHub/fPaint/lib/models/brush_style.dart</title></rect>
 <defs>
 <linearGradient id="flatEdgeGradient1" gradientUnits="userSpaceOnUse" x1="4084.0" y1="115.0" x2="4184.0" y2="115.0"><stop offset="0%" stop-color="#28a745"/><stop offset="100%" stop-color="#007bff"/></linearGradient>
@@ -1338,7 +1317,6 @@
 8. shell_provider.dart
 9. shortcuts.dart
 10. undo_provider.dart</title></g><text x="160.0" y="115.0" class="textNormal">main.dart</text>
-<text x="160.0" y="185.0" class="textNormal">assets_helper.dart</text>
 <g class="badge incomingBadge">
   <path d="M 382.0,115.0 L 370.0,108.0 Q 367.0,108.0 367.0,111.0 L 367.0,119.0 Q 367.0,122.0 370.0,122.0 Z" fill="#3b82f6"/>
   <text x="371.68" y="116.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. main.dart</title></g><g class="badge outgoingBadge">

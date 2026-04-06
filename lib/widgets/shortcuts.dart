@@ -306,7 +306,7 @@ class HelpIntent extends Intent {
   const HelpIntent();
 }
 
-// Add a method to show the shortcuts help dialog
+/// Shows the keyboard shortcuts help dialog.
 void showShortcutsHelp(final BuildContext context) {
   showDialog<void>(
     context: context,

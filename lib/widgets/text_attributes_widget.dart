@@ -7,6 +7,7 @@ import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
 
+/// Renders font size and color controls for the text tool.
 class TextAttributesWidget extends StatelessWidget {
   const TextAttributesWidget({
     super.key,
@@ -85,6 +86,7 @@ class TextAttributesWidget extends StatelessWidget {
   }
 }
 
+/// Builds a visual divider between text attribute controls.
 Widget separator() {
   return const Divider(
     thickness: 1,
