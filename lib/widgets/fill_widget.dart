@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 
 /// A widget that displays the fill controls for a gradient or solid color fill.

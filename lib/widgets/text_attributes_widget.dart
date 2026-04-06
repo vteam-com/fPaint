@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/constants.dart';
-import 'package:fpaint/panels/tools/tool_attributes_widget.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
+import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/tool_attribute_widget.dart';
 
 class TextAttributesWidget extends StatelessWidget {
   const TextAttributesWidget({

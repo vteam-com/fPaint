@@ -267,3 +267,24 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     );
   }
 }
+
+/// Displays a color picker dialog with the given title and initial color.
+void showColorPicker({
+  required final BuildContext context,
+  required final String title,
+  required final Color color,
+  required final ValueChanged<Color> onSelectedColor,
+}) {
+  showDialog<dynamic>(
+    context: context,
+    builder: (final BuildContext context) {
+      return ColorPickerDialog(
+        title: title,
+        color: color,
+        onColorChanged: (final Color color) {
+          onSelectedColor(color);
+        },
+      );
+    },
+  );
+}

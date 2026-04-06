@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/action_type_icon.dart';
+import 'package:fpaint/widgets/color_picker_dialog.dart';
 
 /// Builds a column of floating action buttons for the paint application,
 /// including buttons for undo, redo, zoom in, zoom out,

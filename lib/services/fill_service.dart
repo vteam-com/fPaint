@@ -2,29 +2,35 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/panels/tools/flood_fill.dart';
-import 'package:fpaint/providers/layer_provider.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/services/flood_fill.dart';
+
+class FillRegion {
+  FillRegion({
+    required this.path,
+    required this.offset,
+  });
+
+  final Path path;
+  final Offset offset;
+}
 
 class FillService {
   /// Performs a flood fill with a solid color.
   Future<UserActionDrawing> createFloodFillSolidAction({
-    required final LayerProvider selectedLayer,
-    required final Size canvasSize,
+    required final ui.Image sourceImage,
     required final Offset position,
     required final Color fillColor,
     required final int tolerance,
     required final Path? clipPath,
   }) async {
-    final Region region = await getRegionPathFromLayerImage(
-      selectedLayer: selectedLayer,
-      canvasSize: canvasSize,
+    final FillRegion region = await getRegionPathFromImage(
+      image: sourceImage,
       position: position,
       tolerance: tolerance,
     );
 
-    final ui.Path path = region.path.shift(
-      Offset(region.left.toDouble(), region.top.toDouble()),
-    );
+    final ui.Path path = region.path.shift(region.offset);
 
     final ui.Rect bounds = path.getBounds();
 
@@ -42,8 +48,7 @@ class FillService {
 
   /// Performs a flood fill with a gradient.
   Future<UserActionDrawing> createFloodFillGradientAction({
-    required final LayerProvider selectedLayer,
-    required final Size canvasSize,
+    required final ui.Image sourceImage,
     required final FillModel fillModel,
     required final int tolerance,
     required final Path? clipPath,
@@ -55,16 +60,13 @@ class FillService {
         ? toCanvas(fillModel.gradientPoints.first.offset)
         : toCanvas(fillModel.centerPoint);
 
-    final Region region = await getRegionPathFromLayerImage(
-      selectedLayer: selectedLayer,
-      canvasSize: canvasSize,
+    final FillRegion region = await getRegionPathFromImage(
+      image: sourceImage,
       position: floodFillStartPoint,
       tolerance: tolerance,
     );
 
-    final ui.Path path = region.path.shift(
-      Offset(region.left.toDouble(), region.top.toDouble()),
-    );
+    final ui.Path path = region.path.shift(region.offset);
 
     final ui.Rect bounds = path.getBounds();
 
@@ -108,21 +110,21 @@ class FillService {
   }
 
   /// Gets the region path from a layer image.
-  Future<Region> getRegionPathFromLayerImage({
-    required final LayerProvider selectedLayer,
-    required final Size canvasSize,
+  Future<FillRegion> getRegionPathFromImage({
+    required final ui.Image image,
     required final ui.Offset position,
     required final int tolerance,
   }) async {
-    final ui.Image img = selectedLayer.toImageForStorage(canvasSize);
-
     // Perform flood fill at the clicked position
     final Region region = await extractRegionByColorEdgeAndOffset(
-      image: img,
+      image: image,
       x: position.dx.toInt(),
       y: position.dy.toInt(),
       tolerance: tolerance,
     );
-    return region;
+    return FillRegion(
+      path: region.path,
+      offset: region.offset,
+    );
   }
 }

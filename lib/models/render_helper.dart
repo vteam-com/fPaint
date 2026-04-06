@@ -1,7 +1,8 @@
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/text_object.dart';
-import 'package:fpaint/widgets/brush_style_picker.dart';
 
 /// Renders a pencil stroke on the canvas.
 ///

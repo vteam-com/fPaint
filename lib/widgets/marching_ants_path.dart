@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 
 /// A widget that displays an animated "marching ants" path.

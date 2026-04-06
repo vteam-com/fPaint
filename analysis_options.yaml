@@ -48,7 +48,6 @@ linter:
     sort_child_properties_last: true
     sort_constructors_first: true
     sort_pub_dependencies: true
-    super_goes_last: false
     unnecessary_this: false
     use_decorated_box: true
     use_key_in_widget_constructors: true

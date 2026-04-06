@@ -5,8 +5,8 @@ import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
-import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/container_slider.dart';
 import 'package:fpaint/widgets/truncated_text.dart';
 

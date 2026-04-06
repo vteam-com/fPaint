@@ -4,10 +4,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:fpaint/helpers/color_helper.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:super_clipboard/super_clipboard.dart';
-
-import 'color_helper.dart';
 
 /// Extracts the dominant colors from a given [image].
 ///

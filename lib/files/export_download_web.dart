@@ -1,11 +1,10 @@
 // ignore: avoid_web_libraries_in_flutter
-import 'dart:js_interop'; // For JS interop utilities
+import 'dart:js_interop';
 import 'dart:typed_data';
 
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
-import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:web/web.dart' as web;
 
@@ -26,7 +25,7 @@ Future<void> saveAsPng(
   final LayersProvider layers,
   final String filePath,
 ) async {
-  final Uint8List imageBytes = await capturePainterToImageBytes(layers);
+  final Uint8List imageBytes = await layers.capturePainterToImageBytes();
 
   // Create a Blob from the image bytes
   downloadBlob(imageBytes, filePath);
@@ -56,7 +55,7 @@ Future<void> saveAsJpeg(
   final LayersProvider layers,
   final String filePath,
 ) async {
-  final Uint8List imageBytes = await capturePainterToImageBytes(layers);
+  final Uint8List imageBytes = await layers.capturePainterToImageBytes();
 
   // Convert the image bytes to JPG format
   final Uint8List outputBytes = await convertToJpg(imageBytes);
