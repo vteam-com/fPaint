@@ -34,9 +34,6 @@ abstract class BasePicker<T> extends StatefulWidget {
   /// Creates the state for this picker.
   @override
   BasePickerState<T> createState();
-
-  /// Whether this picker requires min/max bounds.
-  bool get requiresBounds => true;
 }
 
 /// The base state for picker widgets.
@@ -92,23 +89,4 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
     });
     widget.onChanged(clampedValue);
   }
-}
-
-/// Shows a dialog containing a picker widget.
-Future<T?> showPickerDialog<T>({
-  required final BuildContext context,
-  required final String title,
-  required final Widget content,
-}) {
-  return showDialog<T>(
-    context: context,
-    builder: (final BuildContext context) {
-      return AlertDialog(
-        title: Text(title),
-        content: IntrinsicHeight(
-          child: content,
-        ),
-      );
-    },
-  );
 }

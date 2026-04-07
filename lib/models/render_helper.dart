@@ -244,23 +244,6 @@ void renderImage(
   canvas.drawImage(image, topLeftPosition, Paint());
 }
 
-/// Renders a fill on the canvas.
-///
-/// The [canvas] parameter is the canvas to draw on.
-/// The [position] parameter is the position of the fill.
-/// The [fillColor] parameter is the fill color.
-/// The [image] parameter is the image to use for the fill.
-void renderFill(
-  final Canvas canvas,
-  final Offset position,
-  final Color fillColor,
-  final ui.Image image,
-) {
-  final Paint paint = Paint();
-  paint.color = fillColor;
-  renderImage(canvas, position, image);
-}
-
 /// Draws a path with a brush style.
 ///
 /// The [canvas] parameter is the canvas to draw on.

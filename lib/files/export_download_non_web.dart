@@ -174,7 +174,7 @@ Future<void> _exportWithFilePicker({
   required final String dialogTitle,
   required final String fileName,
   required final List<String> allowedExtensions,
-  required final Future<void> Function(String filePath) onFileSelected,
+  required final Future<void> Function(String) onFileSelected,
 }) async {
   final String? filePath = await FilePicker.saveFile(
     dialogTitle: dialogTitle,

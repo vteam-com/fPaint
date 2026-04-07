@@ -39,7 +39,7 @@ class MyWindowManager extends WindowListener {
       if (Platform.isIOS || Platform.isAndroid) {
         // Impeller is enabled by default on iOS, but we can explicitly set it
         // For Android, we need to opt-in
-        PlatformDispatcher.instance.onError = (final Object error, final StackTrace stack) {
+        PlatformDispatcher.instance.onError = (final Object error, final StackTrace _) {
           // Log any Impeller-related errors
           if (kDebugMode) {
             print('Unhandled error: $error');

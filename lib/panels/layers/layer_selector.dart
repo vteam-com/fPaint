@@ -54,7 +54,6 @@ class LayerSelector extends StatelessWidget {
           ? _buildForSmallSurface(
               context,
               layer,
-              allowRemoveLayer,
             )
           : _buildForLargeSurface(
               context,
@@ -142,7 +141,6 @@ class LayerSelector extends StatelessWidget {
   Widget _buildForSmallSurface(
     final BuildContext context,
     final LayerProvider layer,
-    final bool allowRemoveLayer,
   ) {
     final LayersProvider layers = LayersProvider.of(context);
 
@@ -234,7 +232,7 @@ class LayerSelector extends StatelessWidget {
       children: <Widget>[
         PopupMenuButton<String>(
           icon: const Icon(Icons.more_vert),
-          itemBuilder: (final BuildContext context) => _buildPopupMenuItems(),
+          itemBuilder: (final BuildContext _) => _buildPopupMenuItems(),
           onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
         ),
         if (layer.parentGroupName.isNotEmpty)

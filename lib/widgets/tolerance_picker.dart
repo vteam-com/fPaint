@@ -48,7 +48,7 @@ void showTolerancePicker(
 ) {
   showDialog<dynamic>(
     context: context,
-    builder: (final BuildContext context) {
+    builder: (final BuildContext _) {
       return AlertDialog(
         title: const Text('Color Tolerance'),
         content: IntrinsicHeight(

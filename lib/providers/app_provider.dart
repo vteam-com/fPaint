@@ -518,14 +518,6 @@ class AppProvider extends ChangeNotifier {
   /// The selector model.
   SelectorModel selectorModel = SelectorModel();
 
-  /// Checks if the app is ready for drawing.
-  bool isReadyForDrawing() {
-    if (selectedAction == ActionType.selector) {
-      return false;
-    }
-    return true;
-  }
-
   /// Starts a selector creation.
   void selectorCreationStart(final Offset position) {
     if (selectorModel.mode == SelectorMode.wand) {

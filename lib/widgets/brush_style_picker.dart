@@ -82,7 +82,7 @@ void showBrushStylePicker(
 ) {
   showDialog<dynamic>(
     context: context,
-    builder: (final BuildContext context) {
+    builder: (final BuildContext _) {
       return AlertDialog(
         title: const Text('Brush'),
         content: IntrinsicHeight(

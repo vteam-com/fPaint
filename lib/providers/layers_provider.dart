@@ -5,7 +5,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
-import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
@@ -276,11 +275,6 @@ class LayersProvider extends ChangeNotifier {
     }
   }
 
-  /// Gets a layer by its name.
-  LayerProvider? getByName(final String name) {
-    return _list.findFirstMatch((final LayerProvider layer) => layer.name == name);
-  }
-
   /// Adds a layer to the top of the canvas.
   LayerProvider addTop({final String? name}) => this.insertAt(0, name);
 
@@ -546,7 +540,7 @@ class LayersProvider extends ChangeNotifier {
       final int a = byteData.getUint8(pixelIndex + 3);
 
       return Color.fromARGB(a, r, g, b);
-    } catch (error) {
+    } catch (_) {
       return null;
     }
   }

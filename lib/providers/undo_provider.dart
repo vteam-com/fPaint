@@ -128,14 +128,6 @@ class UndoProvider extends ChangeNotifier {
         .reversed
         .toList();
   }
-
-  /// Gets the last action that was executed.
-  RecordAction? getLastAction() {
-    if (_undoStack.isNotEmpty) {
-      return _undoStack.last;
-    }
-    return null;
-  }
 }
 
 /// Represents an action that can be undone and redone.

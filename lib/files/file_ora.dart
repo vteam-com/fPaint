@@ -138,7 +138,6 @@ Future<void> addLayer(
 
     await addImageToLayer(
       archive: archive,
-      layers: layers,
       layer: newLayer,
       imageName: src,
       offset: offset,
@@ -196,7 +195,6 @@ ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
 /// Any errors during the process are caught and logged.
 Future<void> addImageToLayer({
   required final Archive archive,
-  required final LayersProvider layers,
   required final LayerProvider layer,
   required final String imageName,
   required final ui.Offset offset,
@@ -234,7 +232,6 @@ Future<void> addImageToLayer({
 /// ```dart
 /// await addImageToLayer(
 ///   archive: myArchive,
-///   layers: myLayersProvider,
 ///   layer: myLayerProvider,
 ///   imageName: 'example.png',
 ///   offset: ui.Offset(10, 20),
@@ -245,18 +242,6 @@ Future<ui.Image> decodeImage(final List<int> bytes) async {
   final Completer<ui.Image> completer = Completer<ui.Image>();
   ui.decodeImageFromList(Uint8List.fromList(bytes), completer.complete);
   return completer.future;
-}
-
-///
-/// Persist to ORA type file
-///
-Future<void> saveToORA({
-  required final LayersProvider layers,
-  required final String filePath,
-}) async {
-  final List<int> encodedData = await createOraAchive(layers);
-
-  await File(filePath).writeAsBytes(encodedData);
 }
 
 /// Creates an ORA (OpenRaster) archive from the provided layers.

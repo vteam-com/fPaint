@@ -92,21 +92,6 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  /// Adds a tool option for fill mode.
-  void addToolOptionFillMode(
-    final List<Widget> widgets,
-    final AppProvider appProvider,
-    final BuildContext context,
-  ) {
-    widgets.add(
-      ToolAttributeWidget(
-        minimal: minimal,
-        name: 'Solid',
-        childLeft: const Text('S'),
-      ),
-    );
-  }
-
   /// Adds a tool option for color tolerance.
   void addToolOptionTolerance(
     final List<Widget> widgets,

@@ -22,7 +22,7 @@ class MainMenu extends StatelessWidget {
       tooltip: strings[StringId.menuTooltip],
       icon: const Icon(Icons.menu),
       onSelected: (final int result) => onDropDownMenuSelection(context, result),
-      itemBuilder: (final BuildContext context) => <PopupMenuEntry<int>>[
+      itemBuilder: (final BuildContext _) => <PopupMenuEntry<int>>[
         buildMenuItem(
           value: MenuIds.newFile,
           text: strings[StringId.startOver]!,
@@ -140,7 +140,6 @@ PopupMenuEntry<int> buildMenuItem({
   required final int value,
   required final String text,
   final IconData? icon,
-  final VoidCallback? onPressed,
 }) {
   return PopupMenuItem<int>(
     value: value,

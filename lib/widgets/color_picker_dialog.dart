@@ -201,7 +201,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                       _currentColor = color;
                       _hexController.text = colorToHexString(color);
                     });
-                  } catch (e) {
+                  } catch (_) {
                     // Invalid hex color format
                   }
                 },
@@ -220,7 +220,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                       setState(() {
                         _currentColor = color;
                       });
-                    } catch (e) {
+                    } catch (_) {
                       // Invalid hex color format
                     }
                   },
@@ -277,7 +277,7 @@ void showColorPicker({
 }) {
   showDialog<dynamic>(
     context: context,
-    builder: (final BuildContext context) {
+    builder: (final BuildContext _) {
       return ColorPickerDialog(
         title: title,
         color: color,

@@ -131,29 +131,6 @@ class LayerProvider extends ChangeNotifier {
     }
   }
 
-  /// Gets the area of the layer that contains content.
-  Rect getArea() {
-    if (actionStack.isEmpty) {
-      return Rect.zero;
-    }
-
-    double minX = double.infinity;
-    double minY = double.infinity;
-    double maxX = double.negativeInfinity;
-    double maxY = double.negativeInfinity;
-
-    for (final UserActionDrawing action in actionStack) {
-      for (final ui.Offset position in action.positions) {
-        minX = minX < position.dx ? minX : position.dx;
-        minY = minY < position.dy ? minY : position.dy;
-        maxX = maxX > position.dx ? maxX : position.dx;
-        maxY = maxY > position.dy ? maxY : position.dy;
-      }
-    }
-
-    return Rect.fromLTRB(minX, minY, maxX, maxY);
-  }
-
   ///---------------------------------------
   // Visibility
   //
@@ -341,11 +318,6 @@ class LayerProvider extends ChangeNotifier {
     actionStack.last.positions.add(position);
   }
 
-  /// Updates the last position of the last action.
-  void lastActionUpdatePosition(final Offset position) {
-    actionStack.last.positions.last = position;
-  }
-
   /// Undoes the last action performed on the layer.
   void undo() {
     if (actionStack.isNotEmpty) {
@@ -435,7 +407,7 @@ class LayerProvider extends ChangeNotifier {
     final Canvas canvas,
     final ui.Path? clipPath,
     final void Function(
-      Canvas theCanvasToUse,
+      Canvas,
     )
     actionFunction,
   ) {
@@ -606,48 +578,5 @@ class LayerProvider extends ChangeNotifier {
 
     // Restore the canvas to apply the opacity and blend mode
     canvas.restore();
-  }
-
-  /// Gets a path using flood fill.
-  Path getPathUsingFloodFill({
-    required final ui.Image image,
-    required final Offset position,
-    final int tolerance = 1,
-  }) {
-    final ui.Path path = Path();
-    final int width = image.width;
-    final int height = image.height;
-
-    final List<List<bool>> visited = List<List<bool>>.generate(
-      height,
-      (final int y) => List<bool>.filled(width, false),
-    );
-
-    final List<ui.Offset> queue = <Offset>[];
-    queue.add(position);
-
-    while (queue.isNotEmpty) {
-      final ui.Offset current = queue.removeAt(0);
-      final int x = current.dx.round();
-      final int y = current.dy.round();
-
-      if (x < 0 || x >= width || y < 0 || y >= height) {
-        continue;
-      }
-      if (visited[y][x]) {
-        continue;
-      }
-
-      visited[y][x] = true;
-      path.addRect(Rect.fromLTWH(x.toDouble(), y.toDouble(), 1, 1));
-
-      // Add adjacent pixels to queue
-      queue.add(Offset(x + 1, y.toDouble()));
-      queue.add(Offset(x - 1, y.toDouble()));
-      queue.add(Offset(x.toDouble(), y + 1));
-      queue.add(Offset(x.toDouble(), y - 1));
-    }
-
-    return path;
   }
 }
