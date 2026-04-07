@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 enum CanvasAutoPlacement {
   fit,
@@ -25,19 +26,19 @@ Offset anchorFactors(final CanvasResizePosition anchor) {
     case CanvasResizePosition.topLeft:
       return const Offset(0, 0);
     case CanvasResizePosition.top:
-      return const Offset(0.5, 0);
+      return const Offset(AppVisual.half, 0);
     case CanvasResizePosition.topRight:
       return const Offset(1, 0);
     case CanvasResizePosition.left:
-      return const Offset(0, 0.5);
+      return const Offset(0, AppVisual.half);
     case CanvasResizePosition.center:
-      return const Offset(0.5, 0.5);
+      return const Offset(AppVisual.half, AppVisual.half);
     case CanvasResizePosition.right:
-      return const Offset(1, 0.5);
+      return const Offset(1, AppVisual.half);
     case CanvasResizePosition.bottomLeft:
       return const Offset(0, 1);
     case CanvasResizePosition.bottom:
-      return const Offset(0.5, 1);
+      return const Offset(AppVisual.half, 1);
     case CanvasResizePosition.bottomRight:
       return const Offset(1, 1);
   }
@@ -53,8 +54,8 @@ Offset anchorTranslate(
 
   // Special handling for center anchor to maintain visual centering
   if (anchor == CanvasResizePosition.center) {
-    final double dx = (toSize.width - fromSize.width) / 2;
-    final double dy = (toSize.height - fromSize.height) / 2;
+    final double dx = (toSize.width - fromSize.width) / AppMath.pair;
+    final double dy = (toSize.height - fromSize.height) / AppMath.pair;
     return Offset(dx, dy);
   }
 

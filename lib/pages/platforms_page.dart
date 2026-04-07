@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// A page that displays the available platforms for the application.
@@ -11,7 +12,7 @@ class PlatformsPage extends StatelessWidget {
       appBar: AppBar(title: const Text('Available Platforms')),
       body: Center(
         child: SizedBox(
-          width: 400,
+          width: AppLayout.platformPageWidth,
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -34,7 +35,7 @@ class PlatformsPage extends StatelessWidget {
                   'https://paint.vteam.com/downloads/flutter-linux-app.zip',
                 ),
                 const SizedBox(
-                  height: 40,
+                  height: AppSpacing.huge,
                 ),
                 platformItem(
                   'iOS',
@@ -49,7 +50,7 @@ class PlatformsPage extends StatelessWidget {
                   'https://play.google.com/store/apps/details?id=com.vteam.cookingtimerflutter',
                 ),
                 const SizedBox(
-                  height: 40,
+                  height: AppSpacing.huge,
                 ),
                 platformItem(
                   'Web Browser',
@@ -73,25 +74,27 @@ class PlatformsPage extends StatelessWidget {
     final String url,
   ) {
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      elevation: AppMath.pair.toDouble(),
+      margin: const EdgeInsets.symmetric(vertical: AppSpacing.sm, horizontal: AppSpacing.xl),
       child: InkWell(
         onTap: () {
           launchUrl(Uri.parse(url));
         },
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.xl),
           child: Row(
-            spacing: 20,
+            spacing: AppSpacing.xxl,
             children: <Widget>[
               CircleAvatar(
                 backgroundColor: Colors.white,
                 foregroundImage: AssetImage(image),
               ),
-              Expanded(child: Text(name, style: const TextStyle(fontSize: 18))),
+              Expanded(
+                child: Text(name, style: const TextStyle(fontSize: AppLayout.platformTitleFontSize)),
+              ),
               Expanded(
                 child: Opacity(
-                  opacity: 0.8,
+                  opacity: AppVisual.disabled,
                   child: Text(description),
                 ),
               ),

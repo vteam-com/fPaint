@@ -2,6 +2,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/draw_rect.dart';
@@ -50,22 +51,22 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   Color? _selectedColor;
 
   /// The size of the button.
-  final double buttonSize = 40;
+  final double buttonSize = AppSpacing.huge;
 
   /// The magnification factor.
-  final double magnifyFactor = 6;
+  final double magnifyFactor = AppInteraction.magnifierScale;
 
   /// The size of the region.
-  final double regionSize = 100;
+  final double regionSize = AppLayout.previewRegionSize;
 
   /// The size of the spacer.
-  final double spacer = 4;
+  final double spacer = AppSpacing.xxs;
 
   /// The total height of the widget.
   late final double totalHeightOfTheWidget = buttonSize + spacer + regionSize + spacer + buttonSize;
 
   /// The width of the widget.
-  final double widgewidgetWidth = 50;
+  final double widgewidgetWidth = AppLayout.magnifierWidgetWidth;
 
   @override
   void initState() {
@@ -94,7 +95,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
     // Magnifying Glass Effect
     return Positioned(
       left: widget.pointerPosition.dx - (widgewidgetWidth),
-      top: widget.pointerPosition.dy - (totalHeightOfTheWidget / 2),
+      top: widget.pointerPosition.dy - (totalHeightOfTheWidget / AppMath.pair),
       child: Column(
         spacing: spacer.toDouble(),
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -108,7 +109,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
               decoration: BoxDecoration(
                 color: Colors.black,
                 border: Border.all(color: Colors.white),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: IconButton(
                 onPressed: () {
@@ -140,8 +141,8 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
                 ),
                 DashedRectangle(
                   fillColor: _selectedColor ?? Colors.transparent,
-                  width: 30,
-                  height: 30,
+                  width: AppLayout.magnifierTargetSize,
+                  height: AppLayout.magnifierTargetSize,
                 ),
               ],
             ),
@@ -156,7 +157,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
               decoration: BoxDecoration(
                 color: Colors.black,
                 border: Border.all(color: Colors.white),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: IconButton(
                 onPressed: () {
@@ -218,7 +219,7 @@ class MagnifyingGlassPainter extends CustomPainter {
 
   @override
   void paint(final Canvas canvas, final Size size) {
-    final double scaleFactor = 8.0;
+    final double scaleFactor = AppInteraction.magnifierImageScale;
 
     final Paint paint = Paint()
       ..shader = ImageShader(
@@ -229,25 +230,25 @@ class MagnifyingGlassPainter extends CustomPainter {
       );
 
     canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      size.width / 2,
+      Offset(size.width / AppMath.pair, size.height / AppMath.pair),
+      size.width / AppMath.pair,
       paint,
     );
 
     canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      size.width / 2,
+      Offset(size.width / AppMath.pair, size.height / AppMath.pair),
+      size.width / AppMath.pair,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
+        ..strokeWidth = AppStroke.regular
         ..color = Colors.black,
     );
     canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      (size.width / 2) - 1,
+      Offset(size.width / AppMath.pair, size.height / AppMath.pair),
+      (size.width / AppMath.pair) - AppStroke.thin,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
+        ..strokeWidth = AppStroke.regular
         ..color = Colors.white,
     );
   }

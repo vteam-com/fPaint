@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 
 /// A widget that displays a 3x3 grid of icons, allowing the user to select a [CanvasResizePosition].
@@ -23,27 +24,27 @@ class NineGridSelector extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return Container(
-      width: 120,
-      height: 120,
+      width: AppLayout.gridSelectorSize,
+      height: AppLayout.gridSelectorSize,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: GridView.builder(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 4,
-          mainAxisSpacing: 4,
+          crossAxisCount: AppMath.triple,
+          crossAxisSpacing: AppSpacing.xxs,
+          mainAxisSpacing: AppSpacing.xxs,
         ),
-        itemCount: 9,
+        itemCount: AppMath.triple * AppMath.triple,
         itemBuilder: (final BuildContext _, final int index) {
           return GestureDetector(
             onTap: () => onPositionSelected(CanvasResizePosition.values[index]),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: selectedPosition == CanvasResizePosition.values[index] ? Colors.blue : Colors.grey.shade800,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
               child: Icon(
                 selectedPosition == CanvasResizePosition.values[index] ? Icons.image : getDirectionIcon(index),
@@ -57,26 +58,17 @@ class NineGridSelector extends StatelessWidget {
 
   /// Returns the appropriate [IconData] for the given direction.
   IconData getDirectionIcon(final int direction) {
-    switch (direction) {
-      case 0:
-        return CupertinoIcons.arrow_up_left;
-      case 1:
-        return CupertinoIcons.arrow_up;
-      case 2:
-        return CupertinoIcons.arrow_up_right;
-      case 3:
-        return CupertinoIcons.arrow_left;
-      case 4:
-        return Icons.crop_square_outlined; // Center Center
-      case 5:
-        return CupertinoIcons.arrow_right;
-      case 6:
-        return CupertinoIcons.arrow_down_left;
-      case 7:
-        return CupertinoIcons.arrow_down;
-      case 8:
-        return CupertinoIcons.arrow_down_right;
-    }
-    return Icons.crop_square_outlined;
+    const List<IconData> directionIcons = <IconData>[
+      CupertinoIcons.arrow_up_left,
+      CupertinoIcons.arrow_up,
+      CupertinoIcons.arrow_up_right,
+      CupertinoIcons.arrow_left,
+      Icons.crop_square_outlined,
+      CupertinoIcons.arrow_right,
+      CupertinoIcons.arrow_down_left,
+      CupertinoIcons.arrow_down,
+      CupertinoIcons.arrow_down_right,
+    ];
+    return directionIcons[direction];
   }
 }

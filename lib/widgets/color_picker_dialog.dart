@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/color_preview.dart';
@@ -64,10 +65,10 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           ? Dialog.fullscreen(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: 20,
+                spacing: AppSpacing.xxl,
                 children: <Widget>[
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     child: Text(
                       widget.title,
                       textAlign: TextAlign.start,
@@ -80,9 +81,9 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             )
           : AlertDialog(
               title: Text(widget.title),
-              contentPadding: const EdgeInsets.all(2),
+              contentPadding: const EdgeInsets.all(AppSpacing.xxxs),
               content: SizedBox(
-                width: 600,
+                width: AppLayout.sliderDialogWidth,
                 child: _buildContent(layersModel),
               ),
             ),
@@ -92,23 +93,23 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   /// Builds the content of the dialog.
   Widget _buildContent(final LayersProvider layers) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
-        spacing: 30,
+        spacing: AppSpacing.xxxl,
         children: <Widget>[
           //----------------------------
           // Color preview and selection sliders
           Row(
-            spacing: 10,
+            spacing: AppSpacing.xs,
             children: <Widget>[
               SizedBox(
-                height: 60,
-                width: 60,
+                height: AppLayout.layerPreviewSize,
+                width: AppLayout.layerPreviewSize,
                 child: transparentPaperContainer(
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     child: ColorPreview(
                       color: _currentColor,
                       border: false,
@@ -151,8 +152,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                     });
                   },
                   child: Container(
-                    width: 40,
-                    height: 40,
+                    width: AppSpacing.huge,
+                    height: AppSpacing.huge,
                     decoration: BoxDecoration(
                       color: color,
                       shape: BoxShape.circle,
@@ -207,7 +208,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 },
               ),
               SizedBox(
-                width: 150,
+                width: AppLayout.inputFieldWidth,
                 child: TextField(
                   controller: _hexController,
                   decoration: const InputDecoration(
@@ -244,7 +245,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             ],
           ),
           const SizedBox(
-            height: 40,
+            height: AppSpacing.huge,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,

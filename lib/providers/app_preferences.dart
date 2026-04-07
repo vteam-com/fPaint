@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 export 'package:provider/provider.dart';
@@ -18,8 +19,8 @@ class AppPreferences {
   static const String keyUseApplePencil = 'keyUseApplePencil';
 
   // Default values
-  double _sidePanelDistance = 200;
-  double _brushSize = 5.0;
+  double _sidePanelDistance = AppLayout.sidePanelTopDefault;
+  double _brushSize = AppDefaults.brushSize;
   Color _brushColor = Colors.black;
   Color _fillColor = Colors.blue;
   bool _useApplePencil = true;
@@ -87,16 +88,16 @@ class AppPreferences {
   Future<void> _loadPreferences() async {
     _prefs = await SharedPreferences.getInstance();
 
-    _sidePanelDistance = _prefs!.getDouble(keySidePanelDistance) ?? 200.0;
+    _sidePanelDistance = _prefs!.getDouble(keySidePanelDistance) ?? AppLayout.sidePanelTopDefault;
 
     // Load brush size
-    _brushSize = _prefs!.getDouble(keyBrushSize) ?? 5.0;
+    _brushSize = _prefs!.getDouble(keyBrushSize) ?? AppDefaults.brushSize;
 
     // Load last used color
     _brushColor = Color(_prefs!.getInt(keyLastBrushColor) ?? Colors.black.toARGB32());
 
     _fillColor = Color(_prefs!.getInt(keyLastFillColor) ?? Colors.blue.toARGB32());
 
-    _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? false;
+    _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? AppDefaults.useApplePencil;
   }
 }

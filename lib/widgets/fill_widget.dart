@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/constants.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
@@ -26,7 +26,7 @@ class FillWidget extends StatefulWidget {
   State<FillWidget> createState() => _FillWidgetState();
 }
 
-const int defaultHandleSize = 20;
+const int defaultHandleSize = AppInteraction.selectionHandleSize;
 
 class _FillWidgetState extends State<FillWidget> {
   bool showDetails = false;
@@ -36,7 +36,7 @@ class _FillWidgetState extends State<FillWidget> {
     final List<Widget> stackChildren = <Widget>[];
 
     // For radial gradients, show a circular marching ants path
-    if (widget.fillModel.mode == FillMode.radial && widget.fillModel.gradientPoints.length >= 2) {
+    if (widget.fillModel.mode == FillMode.radial && widget.fillModel.gradientPoints.length >= AppMath.pair) {
       final Offset center = widget.fillModel.gradientPoints.first.offset;
       final Offset outerPoint = widget.fillModel.gradientPoints.last.offset;
       final double radius = (outerPoint - center).distance;
@@ -72,18 +72,18 @@ class _FillWidgetState extends State<FillWidget> {
     // For linear gradients, show center dot at midpoint
     if (widget.fillModel.mode == FillMode.linear) {
       final Offset midPoint = widget.fillModel.centerPoint;
-      final double centerDot = 8;
+      final double centerDot = AppSpacing.sm;
       stackChildren.add(
         Positioned(
-          left: midPoint.dx - (centerDot / 2),
-          top: midPoint.dy - (centerDot / 2),
+          left: midPoint.dx - (centerDot / AppMath.pair),
+          top: midPoint.dy - (centerDot / AppMath.pair),
           child: Container(
             width: centerDot,
             height: centerDot,
             decoration: BoxDecoration(
               color: Colors.black,
               shape: BoxShape.rectangle,
-              border: Border.all(color: Colors.white, width: 1),
+              border: Border.all(color: Colors.white, width: AppStroke.thin),
               borderRadius: BorderRadius.circular(centerDot),
             ),
           ),
@@ -103,11 +103,11 @@ class _FillWidgetState extends State<FillWidget> {
     required final BuildContext context,
     required final GradientPoint point,
   }) {
-    final int handleSize = (showDetails ? (defaultHandleSize * 1.5) : defaultHandleSize).toInt();
+    final int handleSize = (showDetails ? (defaultHandleSize * AppVisual.previewTextScale) : defaultHandleSize).toInt();
 
     return Positioned(
-      left: point.offset.dx - (handleSize / 2),
-      top: point.offset.dy - (handleSize / 2),
+      left: point.offset.dx - (handleSize / AppMath.pair),
+      top: point.offset.dy - (handleSize / AppMath.pair),
       child: GestureDetector(
         key: key,
         onPanUpdate: (final DragUpdateDetails details) {
@@ -153,13 +153,13 @@ class _FillWidgetState extends State<FillWidget> {
             height: handleSize.toDouble(),
             decoration: BoxDecoration(
               color: point.color,
-              border: Border.all(color: Colors.white, width: 1),
-              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white, width: AppStroke.thin),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1),
-                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.black, width: AppStroke.thin),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
             ),
           ),

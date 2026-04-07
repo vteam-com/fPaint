@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
@@ -37,7 +38,7 @@ void showCanvasSettings(final BuildContext context) {
 
       return SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(AppSpacing.xxl),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -47,13 +48,13 @@ void showCanvasSettings(final BuildContext context) {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(
-                height: 30,
+                height: AppSpacing.xxxl,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   SizedBox(
-                    width: 150,
+                    width: AppLayout.inputFieldWidth,
                     child: TextField(
                       decoration: const InputDecoration(
                         labelText: 'Width',
@@ -97,7 +98,7 @@ void showCanvasSettings(final BuildContext context) {
                     },
                   ),
                   SizedBox(
-                    width: 150,
+                    width: AppLayout.inputFieldWidth,
                     child: TextField(
                       decoration: const InputDecoration(
                         labelText: 'Height',
@@ -119,10 +120,10 @@ void showCanvasSettings(final BuildContext context) {
                 ],
               ),
               const SizedBox(
-                height: 30,
+                height: AppSpacing.xxxl,
               ),
               Column(
-                spacing: 10,
+                spacing: AppSpacing.md,
                 children: <Widget>[
                   const Text('Content Alignment'),
                   NineGridSelector(

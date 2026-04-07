@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// Displays an overview of keyboard shortcuts in a modal dialog.
 class ShortcutsHelpDialog extends StatelessWidget {
@@ -12,8 +13,8 @@ class ShortcutsHelpDialog extends StatelessWidget {
       title: const Text('Keyboard Shortcuts'),
       content: SingleChildScrollView(
         child: Wrap(
-          spacing: 20.0,
-          runSpacing: 20.0,
+          spacing: AppSpacing.xxl,
+          runSpacing: AppSpacing.xxl,
           children: <Widget>[
             _buildShortcutGroup(
               'File Operations',
@@ -83,14 +84,14 @@ class ShortcutsHelpDialog extends StatelessWidget {
   /// Builds a single shortcut row with key caps and description text.
   Widget _buildShortcut(final String keys, final String description) {
     return Padding(
-      padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
+      padding: const EdgeInsets.only(left: AppSpacing.xl, bottom: AppSpacing.sm),
       child: Row(
         children: <Widget>[
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
             decoration: BoxDecoration(
               color: Colors.grey.shade800,
-              borderRadius: BorderRadius.circular(4.0),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
               border: Border.all(color: Colors.grey.shade600),
             ),
             child: Text(
@@ -101,7 +102,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(width: 16.0),
+          const SizedBox(width: AppSpacing.xl),
           Expanded(child: Text(description)),
         ],
       ),
@@ -111,12 +112,12 @@ class ShortcutsHelpDialog extends StatelessWidget {
   /// Builds the section title for a shortcut category.
   Widget _buildShortcutCategory(final String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Text(
         title,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 16,
+          fontSize: AppSpacing.xl,
         ),
       ),
     );
@@ -128,7 +129,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
     final List<Map<String, String>> shortcuts,
   ) {
     return SizedBox(
-      width: 250,
+      width: AppLayout.shortcutGroupWidth,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

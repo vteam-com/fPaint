@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/render_helper.dart';
@@ -213,10 +214,10 @@ class LayerProvider extends ChangeNotifier {
         final Matrix4 matrix = Matrix4.identity();
         matrix.setEntry(0, 0, 0.0);
         matrix.setEntry(0, 1, -1.0);
-        matrix.setEntry(0, 3, oldCanvasHeight); // Translation for x' = H-y
+        matrix.setEntry(0, AppMath.triple, oldCanvasHeight); // Translation for x' = H-y
         matrix.setEntry(1, 0, 1.0);
         matrix.setEntry(1, 1, 0.0);
-        matrix.setEntry(1, 3, 0.0); // No translation for y'
+        matrix.setEntry(1, AppMath.triple, 0.0); // No translation for y'
         newPath = oldAction.path!.transform(matrix.storage);
       }
 
@@ -226,10 +227,10 @@ class LayerProvider extends ChangeNotifier {
         final Matrix4 matrix = Matrix4.identity();
         matrix.setEntry(0, 0, 0.0);
         matrix.setEntry(0, 1, -1.0);
-        matrix.setEntry(0, 3, oldCanvasHeight);
+        matrix.setEntry(0, AppMath.triple, oldCanvasHeight);
         matrix.setEntry(1, 0, 1.0);
         matrix.setEntry(1, 1, 0.0);
-        matrix.setEntry(1, 3, 0.0);
+        matrix.setEntry(1, AppMath.triple, 0.0);
         newClipPath = oldAction.clipPath!.transform(matrix.storage);
       }
 
@@ -241,11 +242,11 @@ class LayerProvider extends ChangeNotifier {
         final double newImageWidth = originalImage.height.toDouble();
         final double newImageHeight = originalImage.width.toDouble();
 
-        canvas.translate(newImageWidth / 2, newImageHeight / 2);
-        canvas.rotate(-pi / 2); // 90 degrees clockwise (Flutter canvas +angle is CCW)
+        canvas.translate(newImageWidth / AppMath.pair, newImageHeight / AppMath.pair);
+        canvas.rotate(-pi / AppMath.pair); // 90 degrees clockwise (Flutter canvas +angle is CCW)
         canvas.drawImage(
           originalImage,
-          Offset(-originalImage.width / 2, -originalImage.height / 2),
+          Offset(-originalImage.width / AppMath.pair, -originalImage.height / AppMath.pair),
           Paint(),
         );
         newImage = await recorder.endRecording().toImage(
@@ -363,7 +364,7 @@ class LayerProvider extends ChangeNotifier {
     // Cache the thumbnail version
     _cachedThumnailImage = await resizeImage(
       _cachedImage!,
-      scaleSizeTo(size, maxHeight: 64),
+      scaleSizeTo(size, maxHeight: AppLayout.thumbnailMaxHeight),
     );
 
     _cacheTopColorsUsed();
@@ -428,7 +429,7 @@ class LayerProvider extends ChangeNotifier {
   void renderLayer(final Canvas canvas) {
     // Save a layer with opacity and blend mode applied
     final Paint layerPaint = Paint();
-    layerPaint.color = Colors.black.withAlpha((255 * opacity).toInt());
+    layerPaint.color = Colors.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt());
     layerPaint.blendMode = blendMode;
 
     canvas.saveLayer(null, layerPaint);

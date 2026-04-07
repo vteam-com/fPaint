@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// Creates an [SvgPicture] widget from an SVG asset.
 ///
@@ -13,8 +14,8 @@ Widget iconFromSvgAsset(
 ]) {
   return SvgPicture.asset(
     assetsPathToImage,
-    width: 24.0,
-    height: 24.0,
+    width: AppLayout.iconSize,
+    height: AppLayout.iconSize,
     colorFilter: ColorFilter.mode(color, BlendMode.srcATop),
   );
 }

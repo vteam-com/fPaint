@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// A widget that displays a tool attribute with a label and a child widget.
 class ToolAttributeWidget extends StatelessWidget {
@@ -26,18 +27,18 @@ class ToolAttributeWidget extends StatelessWidget {
   Widget build(final BuildContext context) {
     if (minimal && childRight == null) {
       return SizedBox(
-        width: 50,
-        height: 50,
+        width: AppLayout.toolbarButtonSize,
+        height: AppLayout.toolbarButtonSize,
         child: childLeft!,
       );
     }
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: minimal ? 0 : 8.0),
+      padding: EdgeInsets.symmetric(horizontal: minimal ? 0 : AppSpacing.sm),
       child: Tooltip(
         message: name,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 10,
+          spacing: AppSpacing.md,
           children: <Widget>[
             // ignore: use_null_aware_elements
             if (childLeft != null) childLeft!,

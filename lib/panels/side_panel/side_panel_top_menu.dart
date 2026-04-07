@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/models/localized_strings.dart';
-import 'package:fpaint/panels/share_panel.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
+import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 

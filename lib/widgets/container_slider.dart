@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// A custom slider widget that allows users to adjust a value by dragging horizontally within a container.
 class ContainerSlider extends StatefulWidget {
@@ -16,7 +17,7 @@ class ContainerSlider extends StatefulWidget {
     super.key,
     this.minValue = 0.0,
     this.maxValue = 1.0,
-    this.initialValue = 0.5,
+    this.initialValue = AppVisual.half,
     required this.onChanged,
     required this.onChangeEnd,
     required this.onSlideStart,
@@ -76,7 +77,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
               }
               ..onUpdate = (final DragUpdateDetails details) {
                 _adjustValue(
-                  details.primaryDelta! * 0.01,
+                  details.primaryDelta! * AppMath.tinyPercentage,
                 ); // Adjust sensitivity.
               }
               ..onEnd = (final _) {
@@ -89,7 +90,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: Colors.grey,
-          borderRadius: BorderRadius.circular(3.0),
+          borderRadius: BorderRadius.circular(AppStroke.emphasis),
         ),
         child: Stack(
           alignment: Alignment.center,
@@ -100,13 +101,13 @@ class _ContainerSliderState extends State<ContainerSlider> {
               child: Container(
                 padding: const EdgeInsets.all(1),
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(140),
-                  borderRadius: BorderRadius.circular(2.0),
+                  color: Colors.black.withAlpha(AppLayout.overlayAlpha + AppSpacing.lg.toInt()),
+                  borderRadius: BorderRadius.circular(AppSpacing.xxxs),
                 ),
                 child: Text(
-                  '${(currentValue * 100).toStringAsFixed(1)}%',
+                  '${(currentValue * AppLimits.percentMax).toStringAsFixed(1)}%',
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: AppSpacing.lg,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

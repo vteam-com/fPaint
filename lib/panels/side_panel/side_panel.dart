@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/constants.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/side_panel/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -38,13 +38,13 @@ class _SidePanelState extends State<SidePanel> {
     _splitController.areas = <Area>[
       Area(
         size: topPanelHeight,
-        min: 100,
+        min: AppLayout.minPanelExtent,
         builder: (final BuildContext _, final Area _) => const TopMenuAndLayersPanel(),
       ),
       Area(
-        min: 100,
+        min: AppLayout.minPanelExtent,
         builder: (final BuildContext _, final Area _) => Padding(
-          padding: const EdgeInsets.only(top: 8.0),
+          padding: const EdgeInsets.only(top: AppSpacing.sm),
           child: ToolsPanel(
             minimal: widget.minimal,
           ),
@@ -73,8 +73,8 @@ class _SidePanelState extends State<SidePanel> {
             backgroundColor: Colors.grey.shade600,
             highlightedBackgroundColor: Colors.blue,
             color: Colors.grey.shade800,
-            thickness: 6,
-            highlightedThickness: 8,
+            thickness: AppStroke.divider,
+            highlightedThickness: AppStroke.dividerHighlighted,
             strokeCap: StrokeCap.round,
           ),
         ),

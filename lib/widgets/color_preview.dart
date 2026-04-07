@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 /// Creates a color preview with a transparent paper background.
@@ -19,12 +20,12 @@ Widget colorPreviewWithTransparentPaper({
 }) {
   return SizedBox(
     key: key,
-    height: minimal ? 50 : 60,
-    width: minimal ? 50 : 60,
+    height: minimal ? AppLayout.layerPreviewCompactSize : AppLayout.layerPreviewSize,
+    width: minimal ? AppLayout.layerPreviewCompactSize : AppLayout.layerPreviewSize,
     child: transparentPaperContainer(
-      radius: minimal ? 10 : 8,
+      radius: minimal ? AppRadius.lg : AppRadius.md,
       Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         child: ColorPreview(
           color: color,
           onPressed: onPressed,
@@ -77,7 +78,7 @@ class ColorPreview extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final double size = minimal ? 40 : 50;
+    final double size = minimal ? AppSpacing.huge : AppLayout.layerPreviewCompactSize;
 
     final String text = this.text ?? colorToHexString(color);
 
@@ -100,7 +101,7 @@ class ColorPreview extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: color,
                     border: border ? Border.all(color: Colors.grey) : null,
-                    borderRadius: const BorderRadius.all(Radius.circular(4)),
+                    borderRadius: const BorderRadius.all(Radius.circular(AppRadius.sm)),
                   ),
                 ),
               ),
@@ -115,8 +116,8 @@ class ColorPreview extends StatelessWidget {
                     text,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 9,
-                      color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                      fontSize: AppSpacing.sm + AppStroke.thin,
+                      color: color.computeLuminance() > AppVisual.half ? Colors.black : Colors.white,
                     ),
                   ),
                 ),

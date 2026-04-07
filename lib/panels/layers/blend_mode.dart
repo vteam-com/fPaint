@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// A comprehensive mapping of blend modes supported by the fPaint application.
 ///
@@ -113,7 +114,7 @@ Future<BlendMode> showBlendModeMenu({
                   subtitle: Text(
                     entry.value['description'] as String,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: AppSpacing.lg,
                       color: Colors.grey.shade500,
                     ),
                   ),

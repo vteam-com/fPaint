@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
@@ -32,7 +33,7 @@ void sharePanel(final BuildContext context) {
     builder: (final BuildContext context) {
       return SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(top: 18.0),
+          padding: const EdgeInsets.only(top: AppSpacing.xl + AppSpacing.xxxs),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[

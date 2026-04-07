@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 
@@ -19,11 +20,11 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(title: const Text('Settings')),
       body: Center(
         child: SizedBox(
-          width: 400,
+          width: AppLayout.dialogWidth,
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 20,
+              spacing: AppSpacing.xxl,
               children: <Widget>[
                 SwitchListTile(
                   title: const Text('Use Apple Pencil Only'),

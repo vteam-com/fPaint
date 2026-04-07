@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/constants.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -30,14 +30,14 @@ class TextAttributesWidget extends StatelessWidget {
             icon: const Icon(Icons.format_size),
             color: Colors.grey.shade500,
             constraints: minimal ? const BoxConstraints() : null,
-            padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
+            padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
             onPressed: () {
               showBrushSizePicker(
                 context: context,
                 title: 'Font Size',
                 value: appProvider.brushSize,
                 min: 1,
-                max: 200,
+                max: AppLimits.brushSizeMax.toDouble(),
                 onChanged: (final double newValue) {
                   appProvider.brushSize = newValue;
                 },
@@ -50,7 +50,7 @@ class TextAttributesWidget extends StatelessWidget {
                   title: 'Font Size',
                   value: appProvider.brushSize,
                   min: 1,
-                  max: 200,
+                  max: AppLimits.brushSizeMax.toDouble(),
                   onChanged: (final double value) {
                     appProvider.brushSize = value;
                   },
@@ -89,8 +89,8 @@ class TextAttributesWidget extends StatelessWidget {
 /// Builds a visual divider between text attribute controls.
 Widget separator() {
   return const Divider(
-    thickness: 1,
-    height: 15,
+    thickness: AppStroke.thin,
+    height: AppLayout.separatorHeight,
     color: Colors.black,
   );
 }

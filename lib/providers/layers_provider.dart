@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
@@ -46,7 +47,7 @@ class LayersProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Size _size = const Size(1024, 768);
+  Size _size = const Size(AppLayout.canvasDefaultWidth, AppLayout.canvasDefaultHeight);
 
   /// Gets the size of the canvas.
   Size get size => _size;
@@ -94,7 +95,7 @@ class LayersProvider extends ChangeNotifier {
   /// Sets the scale of the canvas.
   set scale(final double value) {
     if (_scale != value) {
-      _scale = value.clamp(10 / 100, 1000 / 100);
+      _scale = value.clamp(AppInteraction.minCanvasScale, AppInteraction.maxCanvasScale);
     }
   }
 
@@ -431,7 +432,7 @@ class LayersProvider extends ChangeNotifier {
     topColors.sort(
       (final ColorUsage a, final ColorUsage b) => b.percentage.compareTo(a.percentage),
     );
-    topColors = topColors.take(20).toList();
+    topColors = topColors.take(AppLimits.topColorCount).toList();
     return topColors;
   }
 
@@ -485,7 +486,7 @@ class LayersProvider extends ChangeNotifier {
         Size currentOldSize = newSize; // Size before the first CCW rotation
         Size nextSize = oldSize; // Size after the first CCW rotation
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < AppMath.triple; i++) {
           for (final LayerProvider layer in _list) {
             // Effectively rotating counter-clockwise by passing the "new" size as old,
             // because rotate90Clockwise expects the size *before* its CW rotation.
@@ -531,13 +532,13 @@ class LayersProvider extends ChangeNotifier {
       }
 
       // Calculate pixel index (4 bytes per pixel: RGBA)
-      final int pixelIndex = (y * image.width + x) * 4;
+      final int pixelIndex = (y * image.width + x) * AppMath.bytesPerPixel;
 
       // Extract RGBA values
       final int r = byteData.getUint8(pixelIndex);
       final int g = byteData.getUint8(pixelIndex + 1);
-      final int b = byteData.getUint8(pixelIndex + 2);
-      final int a = byteData.getUint8(pixelIndex + 3);
+      final int b = byteData.getUint8(pixelIndex + AppMath.pair);
+      final int a = byteData.getUint8(pixelIndex + AppMath.triple);
 
       return Color.fromARGB(a, r, g, b);
     } catch (_) {

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -38,7 +39,7 @@ Future<void> onFileNew(final BuildContext context) async {
           title: const Text('New Canvas Size'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            spacing: 20,
+            spacing: AppSpacing.xxl,
             children: <Widget>[
               TextField(
                 controller: widthController,
@@ -55,7 +56,7 @@ Future<void> onFileNew(final BuildContext context) async {
           actions: <Widget>[
             if (offNewDocFromClipboard)
               Padding(
-                padding: const EdgeInsets.only(right: 20),
+                padding: const EdgeInsets.only(right: AppSpacing.xxl),
                 child: ElevatedButton(
                   onPressed: () {
                     // Handle creating new document from clipboard image
@@ -222,7 +223,7 @@ Future<bool> openFileFromPath({
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('File format .$extension is not supported'),
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: AppMath.triple),
         ),
       );
     }
@@ -282,7 +283,7 @@ Future<bool> _decodeAndApplyImage(
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to load image: ${e.toString()}'),
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: AppMath.triple),
         ),
       );
     }
@@ -307,7 +308,7 @@ Future<bool> readImageFromFilePath(
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error reading file: ${e.toString()}'),
-          duration: const Duration(seconds: 3),
+          duration: const Duration(seconds: AppMath.triple),
         ),
       );
     }

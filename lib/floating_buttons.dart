@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/constants.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/action_type_icon.dart';
@@ -37,7 +37,7 @@ Widget floatingActionButtons(
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
-      spacing: 5,
+      spacing: AppSpacing.xs - AppStroke.thin,
       children: <Widget>[
         if (!shellProvider.showMenu)
           FloatingActionButton(
@@ -81,7 +81,7 @@ Widget floatingActionButtons(
 
   return Column(
     mainAxisAlignment: MainAxisAlignment.end,
-    spacing: 4,
+    spacing: AppSpacing.xxs,
     children: <Widget>[
       undoButton,
       redo,
@@ -92,7 +92,7 @@ Widget floatingActionButtons(
         onPressed: () {
           shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
           appProvider.applyScaleToCanvas(
-            scaleDelta: 1.10,
+            scaleDelta: AppVisual.enlarge,
             anchorPoint: appProvider.canvasCenter,
           );
         },
@@ -106,17 +106,17 @@ Widget floatingActionButtons(
           shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
           appProvider.update();
           // Its still unclear why but this is needed to update the canvas and the Selectors/Fill widget correctly
-          Future<void>.delayed(const Duration(milliseconds: 100), () {
+          Future<void>.delayed(const Duration(milliseconds: AppLimits.percentMax), () {
             appProvider.update();
           });
         },
         child: Text(
-          '${(appProvider.layers.scale * 100).toInt()}%\n${appProvider.layers.size.width.toInt()}\n${appProvider.layers.size.height.toInt()}',
+          '${(appProvider.layers.scale * AppLimits.percentMax).toInt()}%\n${appProvider.layers.size.width.toInt()}\n${appProvider.layers.size.height.toInt()}',
           textAlign: TextAlign.right,
           style: const TextStyle(
             color: AppColors.floatingButtonForeground,
             fontWeight: FontWeight.bold,
-            fontSize: 12,
+            fontSize: AppSpacing.lg,
           ),
         ),
       ),
@@ -127,7 +127,7 @@ Widget floatingActionButtons(
         onPressed: () {
           shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
           appProvider.applyScaleToCanvas(
-            scaleDelta: 0.90,
+            scaleDelta: AppVisual.shrink,
             anchorPoint: appProvider.canvasCenter,
           );
         },

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:image/image.dart' as img;
 
@@ -28,7 +29,7 @@ Future<void> readTiffFileFromBytes(
   if (tiffInfo == null) {
     layers.clear();
     layers.addWhiteBackgroundLayer();
-    layers.size = const Size(100, 100);
+    layers.size = const Size(AppLayout.minPanelExtent, AppLayout.minPanelExtent);
     debugPrint('Failed to decode TIFF info. Added default background.');
     layers.clearHasChanged();
     throw Exception('Invalid TIFF data or unable to read TIFF info.');

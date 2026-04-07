@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:xml/xml.dart';
@@ -297,7 +298,7 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
       'parentGroupName': layer.parentGroupName,
       'name': layer.name,
       'visibility': layer.isVisible ? 'visible' : 'hidden',
-      'opacity': layer.opacity.toStringAsFixed(5),
+      'opacity': layer.opacity.toStringAsFixed(AppLimits.opacityPrecision),
       'src': imageName,
       'x': 0,
       'y': 0,

@@ -2,6 +2,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/services/flood_fill.dart';
@@ -81,8 +82,8 @@ class FillService {
       gradient = RadialGradient(
         colors: fillModel.gradientPoints.map((final GradientPoint point) => point.color).toList(),
         center: Alignment(
-          ((centerPoint.dx - bounds.left) / bounds.width) * 2 - 1,
-          ((centerPoint.dy - bounds.top) / bounds.height) * 2 - 1,
+          ((centerPoint.dx - bounds.left) / bounds.width) * AppMath.pair - 1,
+          ((centerPoint.dy - bounds.top) / bounds.height) * AppMath.pair - 1,
         ),
         radius: (fillModel.gradientPoints.last.offset - fillModel.gradientPoints.first.offset).distance / bounds.width,
       );
@@ -90,12 +91,12 @@ class FillService {
       gradient = LinearGradient(
         colors: fillModel.gradientPoints.map((final GradientPoint point) => point.color).toList(),
         begin: Alignment(
-          (toCanvas(fillModel.gradientPoints.first.offset).dx / bounds.width) * 2 - 1,
-          (toCanvas(fillModel.gradientPoints.first.offset).dy / bounds.height) * 2 - 1,
+          (toCanvas(fillModel.gradientPoints.first.offset).dx / bounds.width) * AppMath.pair - 1,
+          (toCanvas(fillModel.gradientPoints.first.offset).dy / bounds.height) * AppMath.pair - 1,
         ),
         end: Alignment(
-          (toCanvas(fillModel.gradientPoints.last.offset).dx / bounds.width) * 2 - 1,
-          (toCanvas(fillModel.gradientPoints.last.offset).dy / bounds.height) * 2 - 1,
+          (toCanvas(fillModel.gradientPoints.last.offset).dx / bounds.width) * AppMath.pair - 1,
+          (toCanvas(fillModel.gradientPoints.last.offset).dy / bounds.height) * AppMath.pair - 1,
         ),
       );
     }

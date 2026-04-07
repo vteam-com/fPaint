@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// Collection of color utility functions for:
 /// - Color manipulation (tinting, brightness, opacity)
@@ -64,10 +65,26 @@ List<String> getColorComponentsAsHex(
   final bool includeAlpha = true,
   final bool alphaIsFirst = true,
 ]) {
-  final String alpha = (color.a * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
-  final String red = (color.r * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
-  final String green = (color.g * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
-  final String blue = (color.b * 255).toInt().toRadixString(16).padLeft(2, '0').toUpperCase();
+  final String alpha = (color.a * AppLimits.rgbChannelMax)
+      .toInt()
+      .toRadixString(AppMath.hexRadix)
+      .padLeft(AppMath.hexPad, '0')
+      .toUpperCase();
+  final String red = (color.r * AppLimits.rgbChannelMax)
+      .toInt()
+      .toRadixString(AppMath.hexRadix)
+      .padLeft(AppMath.hexPad, '0')
+      .toUpperCase();
+  final String green = (color.g * AppLimits.rgbChannelMax)
+      .toInt()
+      .toRadixString(AppMath.hexRadix)
+      .padLeft(AppMath.hexPad, '0')
+      .toUpperCase();
+  final String blue = (color.b * AppLimits.rgbChannelMax)
+      .toInt()
+      .toRadixString(AppMath.hexRadix)
+      .padLeft(AppMath.hexPad, '0')
+      .toUpperCase();
   if (alphaIsFirst) {
     return <String>[
       if (includeAlpha) alpha,
@@ -94,11 +111,15 @@ List<String> getColorComponentsAsHex(
 ///
 Color contrastColor(final Color color) {
   // Calculate the luminance of the color including alpha
-  final double luminance = (0.299 * (color.r * 255) + 0.587 * (color.g * 255) + 0.114 * (color.b * 255)) / 255;
+  final double luminance =
+      (0.299 * (color.r * AppLimits.rgbChannelMax) +
+          0.587 * (color.g * AppLimits.rgbChannelMax) +
+          0.114 * (color.b * AppLimits.rgbChannelMax)) /
+      AppLimits.rgbChannelMax;
   final double alphaFactor = color.a;
 
   // Determine whether to make the contrast color black or white based on the luminance and alpha
-  final Color contrastColor = (luminance * alphaFactor) > 0.5 ? Colors.black : Colors.white;
+  final Color contrastColor = (luminance * alphaFactor) > AppVisual.half ? Colors.black : Colors.white;
 
   return contrastColor;
 }
@@ -115,10 +136,10 @@ Color contrastColor(final Color color) {
 ///
 Color getColorFromString(final String hexColor) {
   String newHexColor = hexColor.trim().replaceAll('#', '');
-  if (newHexColor.length == 6) {
+  if (newHexColor.length == AppLimits.hexRgbLength) {
     newHexColor = 'FF$newHexColor';
   }
-  if (newHexColor.length == 8) {
+  if (newHexColor.length == AppLimits.hexArgbLength) {
     return Color(int.parse('0x$newHexColor'));
   }
   return Colors.transparent;
@@ -155,10 +176,10 @@ class ColorUsage {
   ///
   /// Uses [decimals] fractional digits and returns "<0.1%" for tiny values
   /// when very low precision is requested.
-  String toStringPercentage([final int decimals = 3]) {
-    if (decimals < 2 && this.percentage < 0.01) {
+  String toStringPercentage([final int decimals = AppMath.triple]) {
+    if (decimals < AppMath.pair && this.percentage < AppMath.tinyPercentage) {
       return '<0.1%';
     }
-    return '${(this.percentage * 100).toStringAsFixed(decimals)}%';
+    return '${(this.percentage * AppLimits.percentMax).toStringAsFixed(decimals)}%';
   }
 }
