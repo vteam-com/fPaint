@@ -55,7 +55,7 @@ void showBrushSizePicker({
 }) {
   showDialog<dynamic>(
     context: context,
-    builder: (final BuildContext context) {
+    builder: (final BuildContext _) {
       return AlertDialog(
         title: Text('Select $title'),
         content: IntrinsicHeight(

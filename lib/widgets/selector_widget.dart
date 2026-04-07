@@ -194,7 +194,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
           });
           onPanUpdate(details);
         },
-        onPanEnd: (final DragEndDetails details) => setState(() => showCoordinate = false),
+        onPanEnd: (final DragEndDetails _) => setState(() => showCoordinate = false),
         child: MouseRegion(
           cursor: cursor,
           child: Container(

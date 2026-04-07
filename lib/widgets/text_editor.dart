@@ -54,7 +54,7 @@ class _TextEditorState extends State<TextEditor> {
 
     showDialog<void>(
       context: context,
-      builder: (final BuildContext context) {
+      builder: (final BuildContext _) {
         return StatefulBuilder(
           builder: (final BuildContext context, final StateSetter setState) {
             return AlertDialog(

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 
@@ -7,73 +5,14 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('ImageHelper Tests', () {
-    group('imageBytesListToString', () {
-      test('converts byte array to string list', () {
-        // Create test RGBA bytes: 2x2 image (16 bytes total: 4 bytes per pixel)
-        final Uint8List bytes = Uint8List.fromList(<int>[
-          255, 0, 0, 255, // Red pixel (0,0)
-          0, 255, 0, 255, // Green pixel (1,0)
-          0, 0, 255, 255, // Blue pixel (0,1)
-          255, 255, 255, 255, // White pixel (1,1)
-        ]);
-
-        const int width = 2;
-        final List<String> result = imageBytesListToString(bytes, width);
-
-        expect(result, isNotEmpty);
-        expect(result.length, equals(width)); // Should have 'height' rows (2)
-
-        // Check first row (first 2 pixels)
-        expect(result[0], equals('ff0000ff|00ff00ff'));
-        // Check second row (last 2 pixels)
-        expect(result[1], equals('0000ffff|ffffffff'));
-      });
-
-      test('handles width that divides evenly', () {
-        // 1x1 image
-        final Uint8List bytes = Uint8List.fromList(<int>[255, 0, 0, 255]);
-        const int width = 1;
-        final List<String> result = imageBytesListToString(bytes, width);
-
-        expect(result.length, equals(1));
-        expect(result[0], equals('ff0000ff'));
-      });
-
-      test('handles empty bytes list', () {
-        final Uint8List bytes = Uint8List(0);
-        const int width = 1;
-        final List<String> result = imageBytesListToString(bytes, width);
-
-        expect(result, isEmpty);
-      });
-
-      test('handles partial pixels at end', () {
-        // 5 bytes instead of multiple of 4 (incomplete pixel)
-        final Uint8List bytes = Uint8List.fromList(<int>[255, 0, 0, 255, 128]);
-        const int width = 1;
-        final List<String> result = imageBytesListToString(bytes, width);
-
-        // The function should process what it can using integer row calculation
-        // Height = 5 ~/ (4 * 1) = 1, but due to loop logic, it may produce empty rows
-        expect(result, isNotEmpty);
-        // First pixel should be processed completely
-        expect(result.first, contains('ff0000ff'));
-        // The exact number depends on implementation details, just verify it works
-        expect(result.length, greaterThan(0));
-      });
-    });
-
     group('Function existence tests', () {
       test('core image helper functions exist', () {
         expect(getImageColors, isNotNull);
         expect(fromBytesToImage, isNotNull);
         expect(convertImageToUint8List, isNotNull);
-        expect(imageToListToString, isNotNull);
-        expect(createImageFromBytes, isNotNull);
       });
 
       test('clipboard-related functions exist', () {
-        expect(copyImageBase64, isNotNull);
         expect(copyImageToClipboard, isNotNull);
         expect(getImageFromClipboard, isNotNull);
         expect(clipboardHasImage, isNotNull);
@@ -150,7 +89,7 @@ void main() {
     });
 
     // Note: Complex image processing functions (getImageColors, fromBytesToImage, convertImageToUint8List,
-    // imageToListToString, createImageFromBytes, copyImageToClipboard, resizeImage, cropImage)
+    // copyImageToClipboard, resizeImage, cropImage)
     // are difficult to unit test due to their dependency on Flutter's Image/ui classes and
     // platform-specific operations. Integration tests would be more appropriate for these functions.
   });

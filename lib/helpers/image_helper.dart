@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:super_clipboard/super_clipboard.dart';
@@ -74,73 +72,6 @@ Future<Uint8List?> convertImageToUint8List(final ui.Image image) async {
   return byteData!.buffer.asUint8List();
 }
 
-/// Converts a [ui.Image] to a list of strings, where each string represents a row of pixels.
-///
-/// Each pixel is represented as a hexadecimal string of its RGBA values.
-Future<List<String>> imageToListToString(final ui.Image image) async {
-  final Uint8List? data = await convertImageToUint8List(image);
-  return imageBytesListToString(data!, image.width);
-}
-
-/// Converts a [Uint8List] of image bytes to a list of strings, where each string represents a row of pixels.
-///
-/// Each pixel is represented as a hexadecimal string of its RGBA values.
-List<String> imageBytesListToString(final Uint8List bytes, final int width) {
-  final int length = bytes.length;
-  final List<String> rows = <String>[];
-
-  for (int i = 0; i < length; i += 4 * width) {
-    final List<String> row = <String>[];
-    for (int j = 0; j < width * 4; j += 4) {
-      final int index = i + j;
-      if (index + 3 < length) {
-        final int alpha = bytes[index + 3];
-        final int red = bytes[index];
-        final int green = bytes[index + 1];
-        final int blue = bytes[index + 2];
-        row.add(
-          '${red.toRadixString(16).padLeft(2, '0')}'
-          '${green.toRadixString(16).padLeft(2, '0')}'
-          '${blue.toRadixString(16).padLeft(2, '0')}'
-          '${alpha.toRadixString(16).padLeft(2, '0')}',
-        );
-      }
-    }
-    rows.add(row.join('|'));
-  }
-
-  return rows;
-}
-
-/// Creates a [ui.Image] from a [Uint8List] of pixel data.
-///
-/// The [bytes] parameter is the raw pixel data, [width] is the width of the image,
-/// and [height] is the height of the image.
-Future<ui.Image> createImageFromBytes({
-  required final Uint8List bytes,
-  required final int width,
-  required final int height,
-}) async {
-  final Completer<ui.Image> completer = Completer<ui.Image>();
-  ui.decodeImageFromPixels(
-    bytes,
-    width,
-    height,
-    ui.PixelFormat.rgba8888,
-    (final ui.Image img) {
-      completer.complete(img);
-    },
-  );
-  return completer.future;
-}
-
-/// Copies an image to the clipboard as a base64 encoded string.
-Future<void> copyImageBase64(final Uint8List imageBytes) async {
-  final String base64String = base64Encode(imageBytes);
-  final ClipboardData clipboardData = ClipboardData(text: 'data:image/png;base64,$base64String');
-  await Clipboard.setData(clipboardData);
-}
-
 /// Copies a [ui.Image] to the system clipboard as a PNG.
 Future<void> copyImageToClipboard(final ui.Image image) async {
   final SystemClipboard? clipboard = SystemClipboard.instance;
@@ -180,7 +111,7 @@ Future<bool> clipboardHasImage() async {
 /// Resizes a [ui.Image] to a new [Size].
 ///
 /// The [image] parameter is the image to resize, and [newSize] is the desired size.
-Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
+Future<ui.Image> resizeImage(final ui.Image image, final ui.Size newSize) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);
   final ui.Paint paint = ui.Paint()
@@ -189,8 +120,8 @@ Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
 
   canvas.drawImageRect(
     image,
-    Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-    Rect.fromLTWH(0, 0, newSize.width, newSize.height),
+    ui.Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+    ui.Rect.fromLTWH(0, 0, newSize.width, newSize.height),
     paint,
   );
 
@@ -201,18 +132,18 @@ Future<ui.Image> resizeImage(final ui.Image image, final Size newSize) {
 /// Crops a [ui.Image] to a specified [Rect].
 ///
 /// The [image] parameter is the image to crop, and [rect] is the rectangle to crop to.
-ui.Image cropImage(final ui.Image image, final Rect rect) {
+ui.Image cropImage(final ui.Image image, final ui.Rect rect) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);
 
-  final ui.Rect srcRect = Rect.fromLTWH(
+  final ui.Rect srcRect = ui.Rect.fromLTWH(
     rect.left,
     rect.top,
     rect.width,
     rect.height,
   );
 
-  final ui.Rect dstRect = Rect.fromLTWH(0, 0, rect.width, rect.height);
+  final ui.Rect dstRect = ui.Rect.fromLTWH(0, 0, rect.width, rect.height);
 
   canvas.drawImageRect(image, srcRect, dstRect, ui.Paint());
 

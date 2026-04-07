@@ -75,21 +75,6 @@ void main() {
       expect(layer.lastUserAction?.action, ActionType.image);
     });
 
-    test('Update last user action end position', () {
-      final UserActionDrawing userAction = UserActionDrawing(
-        action: ActionType.brush,
-        positions: <ui.Offset>[Offset.zero, const Offset(1, 1)],
-        brush: MyBrush(
-          color: Colors.black,
-          size: 1,
-        ),
-        fillColor: Colors.transparent,
-      );
-      layer.appendDrawingAction(userAction);
-      layer.lastActionUpdatePosition(const Offset(2, 2));
-      expect(layer.lastUserAction?.positions.last, const Offset(2, 2));
-    });
-
     test('Clear cache', () {
       layer.clearCache();
       expect(layer.thumbnailImage, null);

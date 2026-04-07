@@ -117,13 +117,13 @@ class _FillWidgetState extends State<FillWidget> {
             widget.onUpdate(point);
           });
         },
-        onPanEnd: (final DragEndDetails details) => setState(() => showDetails = false),
-        onTapDown: (final TapDownDetails details) {
+        onPanEnd: (final DragEndDetails _) => setState(() => showDetails = false),
+        onTapDown: (final TapDownDetails _) {
           setState(() {
             showDetails = true;
           });
         },
-        onTapUp: (final TapUpDetails details) {
+        onTapUp: (final TapUpDetails _) {
           setState(() {
             showDetails = false;
           });

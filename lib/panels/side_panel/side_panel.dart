@@ -39,11 +39,11 @@ class _SidePanelState extends State<SidePanel> {
       Area(
         size: topPanelHeight,
         min: 100,
-        builder: (final BuildContext context, final Area area) => const TopMenuAndLayersPanel(),
+        builder: (final BuildContext _, final Area _) => const TopMenuAndLayersPanel(),
       ),
       Area(
         min: 100,
-        builder: (final BuildContext context, final Area area) => Padding(
+        builder: (final BuildContext _, final Area _) => Padding(
           padding: const EdgeInsets.only(top: 8.0),
           child: ToolsPanel(
             minimal: widget.minimal,

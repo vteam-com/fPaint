@@ -1,9 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/list_helper.dart';
-
-enum TestEnum { valueA, valueB, valueC }
 
 void main() {
   group('ListHelper Tests', () {
@@ -21,22 +17,6 @@ void main() {
       });
     });
 
-    group('getMinMaxValues', () {
-      test('should return [0,0] for empty list', () {
-        expect(getMinMaxValues(<double>[]), orderedEquals(<num>[0, 0]));
-      });
-
-      test('should return [value, value] for single element list', () {
-        expect(getMinMaxValues(<double>[5.0]), orderedEquals(<num>[5.0, 5.0]));
-      });
-
-      test('should return correct min and max values', () {
-        expect(getMinMaxValues(<double>[1.0, 5.0, 2.0, 8.0, 3.0]), orderedEquals(<num>[1.0, 8.0]));
-        expect(getMinMaxValues(<double>[-1.0, -5.0, -2.0]), orderedEquals(<num>[-5.0, -1.0]));
-        expect(getMinMaxValues(<double>[5.0, 1.0]), orderedEquals(<num>[1.0, 5.0])); // Test initial comparison
-      });
-    });
-
     group('isIndexInRange', () {
       final List<int> list = <int>[1, 2, 3];
       test('should return true for valid index', () {
@@ -49,56 +29,6 @@ void main() {
         expect(isIndexInRange(list, -1), isFalse);
         expect(isIndexInRange(list, 3), isFalse);
         expect(isIndexInRange(<dynamic>[], 0), isFalse);
-      });
-    });
-
-    group('padList', () {
-      test('should not pad if list is already long enough', () {
-        expect(padList(<String>['a', 'b', 'c'], 2, 'x'), orderedEquals(<dynamic>['a', 'b', 'c']));
-        expect(padList(<String>['a', 'b'], 2, 'x'), orderedEquals(<dynamic>['a', 'b']));
-      });
-
-      test('should pad list to specified length', () {
-        expect(padList(<String>['a'], 3, 'x'), orderedEquals(<dynamic>['a', 'x', 'x']));
-        expect(padList(<String>[], 2, 'y'), orderedEquals(<dynamic>['y', 'y']));
-      });
-    });
-
-    group('sortByDate', () {
-      final DateTime date1 = DateTime(2023, 1, 1);
-      final DateTime date2 = DateTime(2023, 1, 15);
-
-      test('should sort dates ascending by default', () {
-        expect(sortByDate(date1, date2), -1); // date1 < date2
-        expect(sortByDate(date2, date1), 1); // date2 > date1
-        expect(sortByDate(date1, date1), 0); // date1 == date1
-      });
-
-      test('should sort dates descending', () {
-        expect(sortByDate(date1, date2, false), 1); // date1 < date2 (desc: date2 then date1)
-        expect(sortByDate(date2, date1, false), -1); // date2 > date1 (desc: date1 then date2)
-      });
-
-      test('should handle null dates', () {
-        expect(sortByDate(null, date1), -1); // nulls first ascending
-        expect(sortByDate(date1, null), 1);
-        expect(sortByDate(null, null), 0);
-
-        expect(sortByDate(null, date1, false), 1); // nulls last descending
-        expect(sortByDate(date1, null, false), -1);
-      });
-    });
-
-    group('sortByValue', () {
-      test('should sort numbers ascending', () {
-        expect(sortByValue(1, 5, true), -1);
-        expect(sortByValue(5, 1, true), 1);
-        expect(sortByValue(1, 1, true), 0);
-      });
-
-      test('should sort numbers descending', () {
-        expect(sortByValue(1, 5, false), 1);
-        expect(sortByValue(5, 1, false), -1);
       });
     });
 
@@ -178,50 +108,12 @@ void main() {
       });
     });
 
-    group('enumToStringList', () {
-      test('should convert enum list to string list', () {
-        final List<TestEnum> enumList = <TestEnum>[TestEnum.valueA, TestEnum.valueB, TestEnum.valueC];
-        expect(enumToStringList(enumList), orderedEquals(<dynamic>['valueA', 'valueB', 'valueC']));
-      });
-      test('should return empty list for empty enum list', () {
-        expect(enumToStringList(<TestEnum>[]), isEmpty);
-      });
-    });
-
     group('Extensions', () {
-      test('getRandomItem from List', () {
-        final List<int> list = <int>[1, 2, 3, 4, 5];
-        final int randomItem = list.getRandomItem();
-        expect(list.contains(randomItem), isTrue);
-
-        final List<int> singleItemList = <int>[10];
-        expect(singleItemList.getRandomItem(), 10);
-
-        expect(() => <int>[].getRandomItem(), throwsException);
-      });
-
       test('findFirstMatch from Iterable', () {
         final List<int> list = <int>[1, 2, 3, 4, 5];
         expect(list.findFirstMatch((final int x) => x > 3), 4);
         expect(list.findFirstMatch((final int x) => x == 3), 3);
         expect(list.findFirstMatch((final int x) => x > 10), isNull);
-      });
-
-      test('firstWhereOrNull from List (FirWheresOrNull extension)', () {
-        final List<int> list = <int>[10, 20, 30, 40, 50];
-        expect(list.firstWhereOrNull((final int x) => x > 25), 30);
-        expect(list.firstWhereOrNull((final int x) => x == 20), 20);
-        expect(list.firstWhereOrNull((final int x) => x > 100), isNull);
-        expect(<int>[].firstWhereOrNull((final int x) => true), isNull);
-      });
-    });
-
-    group('uint8ListToHex', () {
-      test('should convert Uint8List to hex string', () {
-        expect(uint8ListToHex(Uint8List.fromList(<int>[])), '');
-        expect(uint8ListToHex(Uint8List.fromList(<int>[0, 1, 2])), '000102');
-        expect(uint8ListToHex(Uint8List.fromList(<int>[10, 17, 255])), '0a11ff'); // a, 11, ff
-        expect(uint8ListToHex(Uint8List.fromList(<int>[255, 255, 255])), 'ffffff');
       });
     });
   });

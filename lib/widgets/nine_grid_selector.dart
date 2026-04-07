@@ -37,7 +37,7 @@ class NineGridSelector extends StatelessWidget {
           mainAxisSpacing: 4,
         ),
         itemCount: 9,
-        itemBuilder: (final BuildContext context, final int index) {
+        itemBuilder: (final BuildContext _, final int index) {
           return GestureDetector(
             onTap: () => onPositionSelected(CanvasResizePosition.values[index]),
             child: DecoratedBox(

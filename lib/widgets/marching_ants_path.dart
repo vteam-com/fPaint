@@ -55,7 +55,7 @@ class _AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath> wit
   Widget build(final BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (final BuildContext context, final Widget? child) {
+      builder: (final BuildContext _, final Widget? _) {
         return CustomPaint(
           painter: MarchingAntsPainter(
             path: widget.path,

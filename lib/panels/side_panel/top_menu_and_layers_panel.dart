@@ -23,7 +23,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
               (
                 final BuildContext context2,
                 final LayersProvider layers,
-                final Widget? child,
+                final Widget? _,
               ) {
                 return Expanded(
                   child: ReorderableListView.builder(
@@ -38,7 +38,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                       layers.insert(newIndex, layer);
                       layers.selectedLayerIndex = newIndex;
                     },
-                    itemBuilder: (final BuildContext context, final int index) {
+                    itemBuilder: (final BuildContext _, final int index) {
                       final LayerProvider layer = layers.get(index);
                       return ReorderableDragStartListener(
                         key: Key('$index'),

@@ -142,22 +142,22 @@ Widget shortCutsForMainApp(
     child: Actions(
       actions: <Type, Action<Intent>>{
         UndoIntent: CallbackAction<UndoIntent>(
-          onInvoke: (final UndoIntent intent) => appProvider.undoAction(),
+          onInvoke: (final UndoIntent _) => appProvider.undoAction(),
         ),
         RedoIntent: CallbackAction<RedoIntent>(
-          onInvoke: (final RedoIntent intent) => appProvider.redoAction(),
+          onInvoke: (final RedoIntent _) => appProvider.redoAction(),
         ),
         SaveIntent: CallbackAction<SaveIntent>(
-          onInvoke: (final SaveIntent intent) async => await saveFile(shellProvider, appProvider.layers),
+          onInvoke: (final SaveIntent _) async => await saveFile(shellProvider, appProvider.layers),
         ),
         CutIntent: CallbackAction<CutIntent>(
-          onInvoke: (final CutIntent intent) async => appProvider.regionCut(),
+          onInvoke: (final CutIntent _) async => appProvider.regionCut(),
         ),
         CopyIntent: CallbackAction<CopyIntent>(
-          onInvoke: (final CopyIntent intent) async => await appProvider.regionCopy(),
+          onInvoke: (final CopyIntent _) async => await appProvider.regionCopy(),
         ),
         NewDocumentFromClipboardImage: CallbackAction<NewDocumentFromClipboardImage>(
-          onInvoke: (final NewDocumentFromClipboardImage intent) async {
+          onInvoke: (final NewDocumentFromClipboardImage _) async {
             if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
               return;
             }
@@ -166,13 +166,13 @@ Widget shortCutsForMainApp(
           },
         ),
         PasteIntent: CallbackAction<PasteIntent>(
-          onInvoke: (final PasteIntent intent) async => await appProvider.paste(),
+          onInvoke: (final PasteIntent _) async => await appProvider.paste(),
         ),
 
         //-------------------------------------------------------------
         // toggle shell mode aka the tools
         ToggleShellModeIntent: CallbackAction<ToggleShellModeIntent>(
-          onInvoke: (final ToggleShellModeIntent intent) async {
+          onInvoke: (final ToggleShellModeIntent _) async {
             switch (shellProvider.shellMode) {
               case ShellMode.hidden:
                 shellProvider.shellMode = ShellMode.full;
@@ -188,7 +188,7 @@ Widget shortCutsForMainApp(
         //-------------------------------------------------------------
         // Select all
         SelectAllIntent: CallbackAction<SelectAllIntent>(
-          onInvoke: (final SelectAllIntent intent) async {
+          onInvoke: (final SelectAllIntent _) async {
             appProvider.selectAll();
             appProvider.selectedAction = ActionType.selector;
             return null;
@@ -198,7 +198,7 @@ Widget shortCutsForMainApp(
         //-------------------------------------------------------------
         // Escape current action
         EscapeIntent: CallbackAction<EscapeIntent>(
-          onInvoke: (final EscapeIntent intent) async {
+          onInvoke: (final EscapeIntent _) async {
             appProvider.selectorModel.clear();
             appProvider.fillModel.clear();
             appProvider.eyeDropPositionForBrush = null;
@@ -211,7 +211,7 @@ Widget shortCutsForMainApp(
         //-------------------------------------------------------------
         // Delete/Erase
         DeleteIntent: CallbackAction<DeleteIntent>(
-          onInvoke: (final DeleteIntent intent) async {
+          onInvoke: (final DeleteIntent _) async {
             appProvider.regionErase();
             return null;
           },
@@ -219,7 +219,7 @@ Widget shortCutsForMainApp(
 
         // Add a help action
         HelpIntent: CallbackAction<HelpIntent>(
-          onInvoke: (final HelpIntent intent) {
+          onInvoke: (final HelpIntent _) {
             showShortcutsHelp(context);
             return null;
           },
@@ -310,6 +310,6 @@ class HelpIntent extends Intent {
 void showShortcutsHelp(final BuildContext context) {
   showDialog<void>(
     context: context,
-    builder: (final BuildContext context) => const ShortcutsHelpDialog(),
+    builder: (final BuildContext _) => const ShortcutsHelpDialog(),
   );
 }

@@ -54,7 +54,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           }
         }
       },
-      onPointerPanZoomStart: (final PointerPanZoomStartEvent event) {
+      onPointerPanZoomStart: (final PointerPanZoomStartEvent _) {
         // No-op
       },
       onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
@@ -75,7 +75,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           );
         }
       },
-      onPointerPanZoomEnd: (final PointerPanZoomEndEvent event) {
+      onPointerPanZoomEnd: (final PointerPanZoomEndEvent _) {
         // No-op
       },
       onPointerDown: (final PointerDownEvent event) {
@@ -338,6 +338,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             }
             appProvider.fillModel.isVisible = true;
             appProvider.floodFillGradientAction(appProvider.fillModel);
+            appProvider.update();
           }
         }
         return;
@@ -392,7 +393,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   void _showTextDialog(final AppProvider appProvider, final Offset position) {
     showDialog<void>(
       context: context,
-      builder: (final BuildContext context) {
+      builder: (final BuildContext _) {
         return TextEditorDialog(
           initialFontSize: appProvider.brushSize,
           initialColor: appProvider.brushColor,
