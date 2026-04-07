@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -85,7 +86,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
 
           _activePointers.add(event.pointer);
 
-          if (_activePointers.length == 2) {
+          if (_activePointers.length == AppMath.pair) {
             // Set the initial focal point between two fingers
             _baseDistance = _getDistanceBetweenTouchPoints();
           } else {
@@ -102,7 +103,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           _pointerPositions[event.pointer] = event.localPosition;
           _getDistanceBetweenTouchPoints();
 
-          if (_activePointers.length == 2) {
+          if (_activePointers.length == AppMath.pair) {
             _handleMultiTouchUpdate(
               event,
               appProvider,
@@ -122,7 +123,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           _pointerPositions.remove(event.pointer);
           _getDistanceBetweenTouchPoints(); // Recalculate distance
           _activePointers.remove(event.pointer);
-          if (_activePointers.length < 2) {
+          if (_activePointers.length < AppMath.pair) {
             _baseDistance = 0.0; // Reset base distance
           } else {
             if (event.buttons == 1 && !appProvider.preferences.useApplePencil) {
@@ -138,7 +139,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           _pointerPositions.remove(event.pointer);
           _getDistanceBetweenTouchPoints(); // Recalculate distance
           _activePointers.remove(event.pointer);
-          if (_activePointers.length < 2) {
+          if (_activePointers.length < AppMath.pair) {
             _baseDistance = 0.0; // Reset base distance
           }
         } else {
@@ -153,7 +154,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   ///
   /// Returns 0.0 when fewer than two touch pointers are active.
   double _getDistanceBetweenTouchPoints() {
-    if (_pointerPositions.length >= 2) {
+    if (_pointerPositions.length >= AppMath.pair) {
       final List<Offset> positions = _pointerPositions.values.toList();
       final Offset pos1 = positions[0];
       final Offset pos2 = positions[1];
@@ -173,9 +174,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final double newDistance = _getDistanceBetweenTouchPoints();
     final double distanceDelta = _baseDistance - newDistance;
 
-    if (distanceDelta.abs() > 50) {
+    if (distanceDelta.abs() > AppInteraction.multiTouchScaleThreshold) {
       _scaleFactor = _getDistanceBetweenTouchPoints() / _baseDistance;
-      _scaleFactor = max(0.1, min(_scaleFactor, 10.0));
+      _scaleFactor = max(AppInteraction.minCanvasScale, min(_scaleFactor, AppInteraction.maxCanvasScale));
 
       final Offset before = appProvider.toCanvas(event.localPosition);
       appProvider.layers.scale = _scaleFactor;
@@ -312,27 +313,34 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             if (appProvider.fillModel.mode == FillMode.linear) {
               appProvider.fillModel.addPoint(
                 GradientPoint(
-                  offset: appProvider.fromCanvas(adjustedPosition + const Offset(-40, 0)),
-                  color: adjustBrightness(appProvider.fillColor, 0.3),
+                  offset: appProvider.fromCanvas(
+                    adjustedPosition + const Offset(-AppInteraction.linearFillHandleOffset, 0),
+                  ),
+                  color: adjustBrightness(appProvider.fillColor, AppVisual.low),
                 ),
               );
               appProvider.fillModel.addPoint(
                 GradientPoint(
-                  offset: appProvider.fromCanvas(adjustedPosition + const Offset(40, 0)),
-                  color: adjustBrightness(appProvider.fillColor, 0.7),
+                  offset: appProvider.fromCanvas(
+                    adjustedPosition + const Offset(AppInteraction.linearFillHandleOffset, 0),
+                  ),
+                  color: adjustBrightness(appProvider.fillColor, AppVisual.medium),
                 ),
               );
             } else if (appProvider.fillModel.mode == FillMode.radial) {
               appProvider.fillModel.addPoint(
                 GradientPoint(
                   offset: appProvider.fromCanvas(adjustedPosition),
-                  color: adjustBrightness(appProvider.fillColor, 0.3),
+                  color: adjustBrightness(appProvider.fillColor, AppVisual.low),
                 ),
               );
               appProvider.fillModel.addPoint(
                 GradientPoint(
-                  offset: appProvider.fromCanvas(adjustedPosition + const Offset(50, 50)),
-                  color: adjustBrightness(appProvider.fillColor, 0.7),
+                  offset: appProvider.fromCanvas(
+                    adjustedPosition +
+                        const Offset(AppInteraction.radialFillHandleOffset, AppInteraction.radialFillHandleOffset),
+                  ),
+                  color: adjustBrightness(appProvider.fillColor, AppVisual.medium),
                 ),
               );
             }

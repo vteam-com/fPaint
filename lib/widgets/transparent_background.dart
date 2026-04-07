@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// Wraps a [Widget] in a transparent paper-like container with a rounded border.
 ///
@@ -14,15 +15,15 @@ import 'package:flutter/material.dart';
 /// )
 Widget transparentPaperContainer(
   final Widget child, {
-  final double radius = 8,
+  final double radius = AppRadius.md,
 }) {
   return ClipRRect(
     borderRadius: BorderRadius.circular(radius),
     child: Padding(
-      padding: const EdgeInsets.all(1.0),
+      padding: const EdgeInsets.all(AppStroke.thin),
       child: Stack(
         children: <Widget>[
-          const TransparentPaper(patternSize: 4),
+          const TransparentPaper(patternSize: AppMath.bytesPerPixel),
           Container(
             alignment: Alignment.center,
             child: child,
@@ -36,7 +37,7 @@ Widget transparentPaperContainer(
 /// A widget that displays a transparent background with a grid pattern.
 class TransparentPaper extends StatelessWidget {
   /// Creates a [TransparentPaper].
-  const TransparentPaper({super.key, this.patternSize = 10});
+  const TransparentPaper({super.key, this.patternSize = AppLimits.transparentPatternSize});
 
   /// The size of the grid pattern.
   final int patternSize;
@@ -53,7 +54,7 @@ class TransparentPaper extends StatelessWidget {
 /// A custom painter that draws a transparent background with a grid pattern.
 class _TransparentBackgroundPainter extends CustomPainter {
   /// Creates a [_TransparentBackgroundPainter].
-  _TransparentBackgroundPainter([this.patternSize = 10]);
+  _TransparentBackgroundPainter([this.patternSize = AppLimits.transparentPatternSize]);
 
   /// The size of the grid pattern.
   final int patternSize;
@@ -81,7 +82,7 @@ void drawTransaparentBackgroundOffsetAndSize({
   required final Canvas canvas,
   required final Size size,
   final Offset offset = Offset.zero,
-  final int patternSize = 10,
+  final int patternSize = AppLimits.transparentPatternSize,
 }) {
   final double cellSize = size.width / (size.width / patternSize);
   canvas.save();
@@ -98,7 +99,7 @@ void drawTransaparentBackgroundOffsetAndSize({
 
   for (double x = 0; x < size.width; x += cellSize) {
     for (double y = 0; y < size.height; y += cellSize) {
-      if ((x ~/ cellSize + y ~/ cellSize) % 2 == 0) {
+      if ((x ~/ cellSize + y ~/ cellSize) % AppMath.pair == 0) {
         canvas.drawRect(
           Rect.fromLTWH(
             x + offset.dx,

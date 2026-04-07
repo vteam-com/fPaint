@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 
 /// Represents a region in an image, defined by its bounding box and a path.
@@ -32,7 +33,7 @@ class Point {
 }
 
 /// The number of bytes per pixel in the image data (assumed to be 4 for RGBA).
-final int bytesPerPixel = 4;
+final int bytesPerPixel = AppMath.bytesPerPixel;
 
 /// Calculates the index of a pixel in a byte array representing image data.
 ///
@@ -134,8 +135,8 @@ Future<Region> extractRegionByColorEdgeAndOffset({
     final int pixelIndex = index(px, py, width);
     final int r = pixels[pixelIndex];
     final int g = pixels[pixelIndex + 1];
-    final int b = pixels[pixelIndex + 2];
-    final int a = pixels[pixelIndex + 3];
+    final int b = pixels[pixelIndex + AppMath.pair];
+    final int a = pixels[pixelIndex + AppMath.triple];
 
     // Check color tolerance
     if ((r - targetR).abs() > tolerance255 ||

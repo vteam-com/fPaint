@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/text_object.dart';
 
@@ -109,10 +110,10 @@ void renderCircle(
   paint.strokeWidth = brush.size;
   paint.style = PaintingStyle.fill;
 
-  final double radius = (p1 - p2).distance / 2;
+  final double radius = (p1 - p2).distance / AppMath.pair;
   final Offset center = Offset(
-    (p1.dx + p2.dx) / 2,
-    (p1.dy + p2.dy) / 2,
+    (p1.dx + p2.dx) / AppMath.pair,
+    (p1.dy + p2.dy) / AppMath.pair,
   );
   canvas.drawCircle(center, radius, paint);
   paint.style = PaintingStyle.stroke;
@@ -263,8 +264,8 @@ void drawPathWithBrushStyle(
       path,
       canvas,
       paint,
-      brushSize * 3,
-      brushSize * 2,
+      brushSize * AppMath.triple,
+      brushSize * AppMath.pair,
     );
   } else {
     canvas.drawPath(path, paint);
@@ -338,7 +339,7 @@ void renderText(
           ui.ParagraphStyle(
             textAlign: TextAlign.left,
             fontSize: textObject.size,
-            height: 1.2, // Better line height for readability
+            height: AppVisual.iconScale, // Better line height for readability
           ),
         )
         ..pushStyle(

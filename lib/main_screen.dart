@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/floating_buttons.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -16,7 +17,7 @@ class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
 
   /// The minimum size of the side panel.
-  final double minSidePanelSize = 100.0;
+  final double minSidePanelSize = AppLayout.sidePanelCollapsed;
 
   @override
   Widget build(final BuildContext context) {
@@ -27,7 +28,7 @@ class MainScreen extends StatelessWidget {
       return const Scaffold(
         backgroundColor: Colors.grey,
         body: Center(
-          child: CupertinoActivityIndicator(color: Colors.black, radius: 40),
+          child: CupertinoActivityIndicator(color: Colors.black, radius: AppLayout.loaderRadius),
         ),
       );
     }
@@ -35,7 +36,7 @@ class MainScreen extends StatelessWidget {
     final ShellProvider shellProvider = ShellProvider.of(context, listen: true);
     final ShellMode shellMode = shellProvider.shellMode;
 
-    shellProvider.deviceSizeSmall = MediaQuery.of(context).size.width < 600;
+    shellProvider.deviceSizeSmall = MediaQuery.of(context).size.width < AppLayout.desktopBreakpoint;
 
     return Scaffold(
       backgroundColor: Colors.grey,
@@ -48,8 +49,8 @@ class MainScreen extends StatelessWidget {
                   backgroundColor: Colors.grey.shade600,
                   highlightedBackgroundColor: Colors.blue,
                   color: Colors.grey.shade800,
-                  thickness: 6,
-                  highlightedThickness: 8,
+                  thickness: AppStroke.divider,
+                  highlightedThickness: AppStroke.dividerHighlighted,
                   strokeCap: StrokeCap.round,
                 ),
               ),
@@ -103,9 +104,9 @@ class MainScreen extends StatelessWidget {
       },
       initialAreas: <Area>[
         Area(
-          size: shellProvider.isSidePanelExpanded ? 400 : minSidePanelSize,
-          min: shellProvider.isSidePanelExpanded ? 350 : minSidePanelSize,
-          max: shellProvider.isSidePanelExpanded ? 600 : minSidePanelSize,
+          size: shellProvider.isSidePanelExpanded ? AppLayout.sidePanelExpanded : minSidePanelSize,
+          min: shellProvider.isSidePanelExpanded ? AppLayout.sidePanelExpandedMin : minSidePanelSize,
+          max: shellProvider.isSidePanelExpanded ? AppLayout.sidePanelExpandedMax : minSidePanelSize,
           builder: (final BuildContext _, final Area _) => SidePanel(
             minimal: !shellProvider.isSidePanelExpanded,
             preferences: appProvider.preferences,
@@ -138,11 +139,11 @@ class MainScreen extends StatelessWidget {
                 shellProvider.update();
               },
               child: Container(
-                color: Colors.black.withAlpha(128), // Semi-transparent overlay
+                color: Colors.black.withAlpha(AppLayout.overlayAlpha),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.85, // 85% of screen width
+                    width: MediaQuery.of(context).size.width * AppLayout.mobileMenuWidthFactor,
                     child: SidePanel(
                       minimal: false, // Always show full panel on mobile
                       preferences: appProvider.preferences,

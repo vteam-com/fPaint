@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// Represents a text element placed on the canvas with style and position.
 class TextObject {
@@ -56,8 +57,8 @@ class TextObject {
   Offset get center {
     final Rect bounds = getBounds();
     return Offset(
-      bounds.left + bounds.width / 2,
-      bounds.top + bounds.height / 2,
+      bounds.left + bounds.width / AppMath.pair,
+      bounds.top + bounds.height / AppMath.pair,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
@@ -47,12 +48,12 @@ class TopColors extends StatelessWidget {
       final List<String> components = getColorComponentsAsHex(colorUsed.color);
       final String alpha = components[0];
       final String red = components[1];
-      final String green = components[2];
-      final String blue = components[3];
+      final String green = components[AppMath.pair];
+      final String blue = components[AppMath.triple];
       final String colorAsHex = '$red$green$blue\n$alpha';
       String tooltipText = '';
       if (colorUsed.percentage < 1) {
-        tooltipText = '\nUsage ${colorUsed.toStringPercentage(1)}';
+        tooltipText = '\nUsage ${colorUsed.toStringPercentage(AppStroke.thin.toInt())}';
       }
 
       return ColorPreview(
@@ -82,7 +83,7 @@ class TopColors extends StatelessWidget {
         IntrinsicHeight(
           child: transparentPaperContainer(
             Padding(
-              padding: EdgeInsets.all(minimal ? 0 : 4.0),
+              padding: EdgeInsets.all(minimal ? 0 : AppSpacing.xxs),
               child: Wrap(
                 spacing: 1,
                 runSpacing: 1,

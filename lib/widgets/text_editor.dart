@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -60,7 +61,7 @@ class _TextEditorState extends State<TextEditor> {
             return AlertDialog(
               title: const Text('Edit Text'),
               content: SizedBox(
-                width: 400,
+                width: AppLayout.dialogWidth,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,22 +83,22 @@ class _TextEditorState extends State<TextEditor> {
                         fontStyle: fontStyle,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.xxl),
 
                     // Font size control
                     Text('Font Size: ${fontSize.round()}'),
                     Slider(
                       value: fontSize,
-                      min: 8,
-                      max: 72,
-                      divisions: 32,
+                      min: AppSpacing.sm + AppMath.pair.toDouble(),
+                      max: AppLimits.textSizeMax.toDouble(),
+                      divisions: AppLimits.textSizeDivisions,
                       onChanged: (final double value) {
                         setState(() {
                           fontSize = value;
                         });
                       },
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.xs),
 
                     // Style controls
                     Row(
@@ -132,12 +133,12 @@ class _TextEditorState extends State<TextEditor> {
 
                         // Color picker button
                         Container(
-                          width: 40,
-                          height: 40,
+                          width: AppSpacing.huge,
+                          height: AppSpacing.huge,
                           decoration: BoxDecoration(
                             color: textColor,
                             border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
                           child: IconButton(
                             icon: const Icon(Icons.color_lens, color: Colors.white),

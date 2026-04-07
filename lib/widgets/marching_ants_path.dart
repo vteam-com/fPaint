@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// A widget that displays an animated "marching ants" path.
 ///
@@ -61,7 +62,7 @@ class _AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath> wit
             path: widget.path,
             linePointStart: widget.linePointStart,
             linePointEnd: widget.linePointEnd,
-            phase: _controller.value * 10,
+            phase: _controller.value * AppMath.baseTen,
           ),
         );
       },
@@ -100,7 +101,7 @@ class MarchingAntsPainter extends CustomPainter {
     // First, draw a solid white rectangle border
     final Paint paint = Paint()
       ..color = Colors.white
-      ..strokeWidth = 2
+      ..strokeWidth = AppStroke.regular
       // ..blendMode = BlendMode.difference
       ..style = PaintingStyle.stroke;
 
@@ -135,11 +136,11 @@ class MarchingAntsPainter extends CustomPainter {
 
     if (linePointStart != null && linePointEnd != null) {
       paint.color = Colors.white;
-      paint.strokeWidth = 2;
+      paint.strokeWidth = AppStroke.regular;
       canvas.drawLine(linePointStart!, linePointEnd!, paint);
 
       paint.color = Colors.black;
-      paint.strokeWidth = 1;
+      paint.strokeWidth = AppStroke.thin;
 
       final double totalLength = (linePointEnd! - linePointStart!).distance;
       const double dashWidth = 4;

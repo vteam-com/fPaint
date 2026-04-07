@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// A widget that draws a rectangle with dashed borders and a specified fill color.
 class DashedRectangle extends StatelessWidget {
@@ -11,8 +12,8 @@ class DashedRectangle extends StatelessWidget {
   const DashedRectangle({
     super.key,
     required this.fillColor,
-    this.width = 100.0,
-    this.height = 100.0,
+    this.width = AppLayout.previewRegionSize,
+    this.height = AppLayout.previewRegionSize,
   });
 
   /// The color to fill the rectangle with.
@@ -44,7 +45,7 @@ class _DashedRectanglePainter extends CustomPainter {
   final Color fillColor;
 
   /// The width of each dash.
-  final double dashWidth = 2.0;
+  final double dashWidth = AppStroke.regular;
 
   /// The space between each dash.
   final double dashSpace = 0.0;
@@ -62,12 +63,12 @@ class _DashedRectanglePainter extends CustomPainter {
     // Create paint objects for the black and white dashed borders
     final Paint blackPaint = Paint()
       ..color = Colors.black
-      ..strokeWidth = 2.0
+      ..strokeWidth = AppStroke.regular
       ..style = PaintingStyle.stroke;
 
     final Paint whitePaint = Paint()
       ..color = Colors.white
-      ..strokeWidth = 2.0
+      ..strokeWidth = AppStroke.regular
       ..style = PaintingStyle.stroke;
 
     // Draw dashed borders

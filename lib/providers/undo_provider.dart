@@ -1,6 +1,7 @@
 // ignore: fcheck_one_class_per_file
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:provider/provider.dart';
 
 /// Manages the undo and redo stacks for the application.
@@ -109,7 +110,7 @@ class UndoProvider extends ChangeNotifier {
   /// Gets the history of actions as a string.
   String getHistoryString(final List<RecordAction> list) {
     try {
-      return this.getActionsAsStrings(list, 20).join('\n');
+      return this.getActionsAsStrings(list, AppLimits.topColorCount).join('\n');
     } catch (error) {
       debugPrint(error.toString());
       return 'error';

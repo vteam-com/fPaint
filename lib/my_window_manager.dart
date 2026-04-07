@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -99,7 +100,7 @@ class MyWindowManager extends WindowListener {
     } else {
       // Set integration test window size if running integration tests
       if (_isIntegrationTest()) {
-        await windowManager.setSize(const Size(1200, 900));
+        await windowManager.setSize(const Size(AppLayout.desktopWindowWidth, AppLayout.desktopWindowHeight));
       } else {
         // Optional: set a default window size
         // await windowManager.setSize(const Size(800, 600));

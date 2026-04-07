@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/main.dart' as app;
 import 'package:fpaint/main_screen.dart';
-import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
@@ -245,7 +245,7 @@ Future<void> _addSunRays(final WidgetTester tester, final Offset sunCenter, fina
   // Flood fill
   await performFloodFillGradient(
     tester,
-    gradientMode: FillMode.radial,
+    gradientMode: FillMode.linear,
     gradientPoints: <GradientPoint>[
       GradientPoint(
         color: const Color.fromARGB(255, 255, 242, 1),

@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// A custom painter that displays an image, scaling and centering it to fit within the available space.
 class ImagePainter extends CustomPainter {
@@ -24,8 +25,8 @@ class ImagePainter extends CustomPainter {
     final double scaledHeight = image.height * scale;
 
     // Center the image within the destination rectangle
-    final double dx = (size.width - scaledWidth) / 2;
-    final double dy = (size.height - scaledHeight) / 2;
+    final double dx = (size.width - scaledWidth) / AppMath.pair;
+    final double dy = (size.height - scaledHeight) / AppMath.pair;
 
     final ui.Rect src = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
     final ui.Rect dst = Rect.fromLTWH(dx, dy, scaledWidth, scaledHeight);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// A widget that displays a truncated version of a given text.
 ///
@@ -14,7 +15,7 @@ class TruncatedTextWidget extends StatelessWidget {
   const TruncatedTextWidget({
     super.key,
     required this.text,
-    this.maxLength = 6,
+    this.maxLength = AppLimits.truncatedTextLength,
   });
 
   /// The maximum length of the truncated text.
@@ -31,7 +32,7 @@ class TruncatedTextWidget extends StatelessWidget {
       width: double.infinity, // Ensure the text has a bounded width
       child: Text(
         truncatedText,
-        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: AppSpacing.md, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -46,14 +47,14 @@ class TruncatedTextWidget extends StatelessWidget {
       return text; // No truncation needed for short texts
     }
 
-    final int splitLength = (maxLength / 2).floor();
+    final int splitLength = (maxLength / AppMath.pair).floor();
 
     // Ensure the first character, middle ellipsis, and last character are kept
     final String start = text.substring(0, splitLength);
     final String end = text.substring(text.length - splitLength);
 
     // If there are multiple digits at the end, we keep them
-    final String middle = text.length > 3 ? '…' : '';
+    final String middle = text.length > AppMath.triple ? '…' : '';
 
     return '$start$middle$end';
   }

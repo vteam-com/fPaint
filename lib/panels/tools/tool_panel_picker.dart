@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// Represents a selectable tool in the user interface.
 ///
@@ -36,7 +37,7 @@ class ToolPanelPicker extends StatelessWidget {
       onPressed: onPressed,
       tooltip: name,
       constraints: minimal ? const BoxConstraints() : null,
-      padding: EdgeInsets.all(minimal ? 2 : 8),
+      padding: EdgeInsets.all(minimal ? AppSpacing.xxxs : AppSpacing.sm),
     );
   }
 }

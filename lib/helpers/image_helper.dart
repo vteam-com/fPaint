@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
@@ -19,10 +20,10 @@ Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
   final Uint8List pixels = byteData.buffer.asUint8List();
   final Map<int, int> colorCount = <int, int>{};
   final int length = pixels.length;
-  final int totalPixels = length ~/ 4;
+  final int totalPixels = length ~/ AppMath.bytesPerPixel;
 
   // Count color occurrences using packed ARGB integer
-  for (int i = 0; i < length; i += 4) {
+  for (int i = 0; i < length; i += AppMath.bytesPerPixel) {
     final int alpha = pixels[i + 3];
     if (alpha > 0) {
       final int packedColor = (alpha << 24) | (pixels[i] << 16) | (pixels[i + 1] << 8) | pixels[i + 2];
@@ -47,12 +48,12 @@ Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
     (final ColorUsage a, final ColorUsage b) => b.percentage.compareTo(a.percentage),
   );
 
-  if (colorUsages.length <= 20) {
+  if (colorUsages.length <= AppLimits.topColorCount) {
     return colorUsages;
   }
 
   // Take top 20 colors
-  return colorUsages.sublist(0, 20);
+  return colorUsages.sublist(0, AppLimits.topColorCount);
 }
 
 /// Converts a [Uint8List] of image data to a [ui.Image].

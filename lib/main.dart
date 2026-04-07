@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/files/import_files.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/main_screen.dart';
-import 'package:fpaint/models/constants.dart';
 import 'package:fpaint/my_window_manager.dart';
 import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
@@ -129,7 +129,7 @@ class MyApp extends StatelessWidget {
             activeTrackColor: AppColors.secondary,
             inactiveTrackColor: AppColors.surfaceVariant,
             thumbColor: AppColors.accent,
-            overlayColor: AppColors.primary.withAlpha(100),
+            overlayColor: AppColors.primary.withAlpha(AppLimits.percentMax),
           ),
         ),
         routes: <String, WidgetBuilder>{

@@ -1,5 +1,6 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
@@ -53,35 +54,35 @@ class _ColorSelectorState extends State<ColorSelector> {
     }
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
           color: Colors.grey,
-          width: 1,
+          width: AppStroke.thin,
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(1.0),
+        padding: const EdgeInsets.all(AppStroke.thin),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(7), // Same radius as container
+          borderRadius: BorderRadius.circular(AppSpacing.sm - AppStroke.thin), // Same radius as container
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               SizedBox(
-                height: 30,
+                height: AppLayout.sliderHeight,
                 child: CustomPaint(
                   painter: HueGradientPainter(),
                   child: Slider(
                     value: hue,
                     min: 0,
                     max: maxHue,
-                    divisions: 360 * 2,
+                    divisions: AppLimits.hueDivisions * AppMath.pair,
                     label: hue.floor().toString(),
                     onChanged: (final double value) {
                       setState(() {
                         hue = value;
                         if (brightness == 0 || brightness == 1) {
-                          brightness = 0.5;
+                          brightness = AppVisual.half;
                         }
                         widget.onColorChanged(hsvToColor(hue, brightness, alpha));
                       });
@@ -90,15 +91,15 @@ class _ColorSelectorState extends State<ColorSelector> {
                 ),
               ),
               SizedBox(
-                height: 30,
+                height: AppLayout.sliderHeight,
                 child: CustomPaint(
                   painter: BrightnessGradientPainter(hue: hue),
                   child: Slider(
                     value: brightness,
                     min: 0,
                     max: 1,
-                    divisions: 100,
-                    label: (brightness * 100).round().toString(),
+                    divisions: AppLimits.sliderDivisions,
+                    label: (brightness * AppLimits.percentMax).round().toString(),
                     onChanged: (final double value) {
                       setState(() {
                         brightness = value;
@@ -109,11 +110,11 @@ class _ColorSelectorState extends State<ColorSelector> {
                 ),
               ),
               SizedBox(
-                height: 30,
+                height: AppLayout.sliderHeight,
                 child: Stack(
                   alignment: AlignmentDirectional.center,
                   children: <Widget>[
-                    const TransparentPaper(patternSize: 4),
+                    const TransparentPaper(patternSize: AppMath.bytesPerPixel),
                     CustomPaint(
                       painter: AlphaGradientPainter(
                         hue: hue,
@@ -123,8 +124,8 @@ class _ColorSelectorState extends State<ColorSelector> {
                         value: alpha,
                         min: 0,
                         max: 1,
-                        divisions: 100,
-                        label: (alpha * 100).round().toString(),
+                        divisions: AppLimits.sliderDivisions,
+                        label: (alpha * AppLimits.percentMax).round().toString(),
                         onChanged: (final double value) {
                           setState(() {
                             alpha = value;
@@ -202,7 +203,7 @@ class BrightnessGradientPainter extends CustomPainter {
     final Gradient gradient = LinearGradient(
       colors: <Color>[
         HSLColor.fromAHSL(1.0, hue, 1.0, 0.0).toColor(), // Black
-        HSLColor.fromAHSL(1.0, hue, 1.0, 0.5).toColor(), // Middle lightness
+        HSLColor.fromAHSL(1.0, hue, 1.0, AppVisual.half).toColor(), // Middle lightness
         HSLColor.fromAHSL(1.0, hue, 1.0, 1.0).toColor(), // White
       ],
     );

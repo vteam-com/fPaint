@@ -5,6 +5,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/fill_model.dart';
@@ -126,8 +127,8 @@ class AppProvider extends ChangeNotifier {
 
   /// Gets the center of the canvas.
   Offset get canvasCenter => Offset(
-    this.canvasOffset.dx + (this.layers.width / 2) * this.layers.scale,
-    this.canvasOffset.dy + (this.layers.height / 2) * this.layers.scale,
+    this.canvasOffset.dx + (this.layers.width / AppMath.pair) * this.layers.scale,
+    this.canvasOffset.dy + (this.layers.height / AppMath.pair) * this.layers.scale,
   );
 
   /// Erases a region on the canvas.
@@ -311,8 +312,10 @@ class AppProvider extends ChangeNotifier {
     //
     // Step 2 Pan
     //
-    final double offsetX = ((containerWidth - (this.layers.width * this.layers.scale)) / 2) - this.canvasOffset.dx;
-    final double offsetY = ((containerHeight - (this.layers.height * this.layers.scale)) / 2) - this.canvasOffset.dy;
+    final double offsetX =
+        ((containerWidth - (this.layers.width * this.layers.scale)) / AppMath.pair) - this.canvasOffset.dx;
+    final double offsetY =
+        ((containerHeight - (this.layers.height * this.layers.scale)) / AppMath.pair) - this.canvasOffset.dy;
     final Offset offsetDelta = Offset(offsetX, offsetY);
 
     this.canvasPan(offsetDelta: offsetDelta, notifyListener: false);
@@ -390,14 +393,14 @@ class AppProvider extends ChangeNotifier {
 
   //-------------------------
   // Tolerance
-  int _tolarance = 50; // Mid point 0..100
+  int _tolarance = AppDefaults.tolerance; // Mid point 0..100
 
   /// Gets the tolerance.
   int get tolerance => _tolarance;
 
   /// Sets the tolerance.
   set tolerance(final int value) {
-    _tolarance = max(1, min(100, value));
+    _tolarance = max(1, min(AppLimits.percentMax, value));
     update();
   }
 

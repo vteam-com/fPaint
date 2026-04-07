@@ -2,11 +2,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/localized_strings.dart';
 import 'package:fpaint/models/menu_model.dart';
-import 'package:fpaint/panels/about.dart';
-import 'package:fpaint/panels/canvas_settings.dart';
-import 'package:fpaint/panels/share_panel.dart';
+import 'package:fpaint/panels/side_panel/about.dart';
+import 'package:fpaint/panels/side_panel/canvas_settings.dart';
+import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
@@ -145,8 +146,8 @@ PopupMenuEntry<int> buildMenuItem({
     value: value,
     child: Row(
       children: <Widget>[
-        if (icon != null) Icon(icon, size: 18),
-        if (icon != null) const SizedBox(width: 8),
+        if (icon != null) Icon(icon, size: AppSpacing.xl),
+        if (icon != null) const SizedBox(width: AppSpacing.sm),
         Text(text),
       ],
     ),

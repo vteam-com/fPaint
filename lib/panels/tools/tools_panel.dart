@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fpaint/models/constants.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/tool_panel_picker.dart';
@@ -38,8 +38,8 @@ class ToolsPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Wrap(
-            spacing: minimal ? 2.0 : 4,
-            runSpacing: minimal ? 2.0 : 4,
+            spacing: minimal ? AppSpacing.xxxs : AppSpacing.xxs,
+            runSpacing: minimal ? AppSpacing.xxxs : AppSpacing.xxs,
             alignment: WrapAlignment.center,
             children: getListOfTools(context),
           ),
@@ -47,7 +47,7 @@ class ToolsPanel extends StatelessWidget {
             color: Colors.black,
           ),
           Wrap(
-            runSpacing: minimal ? 8.0 : 2,
+            runSpacing: minimal ? AppSpacing.sm : AppSpacing.xxxs,
             alignment: WrapAlignment.center,
             children: getWidgetForSelectedTool(context: context),
           ),
@@ -543,8 +543,8 @@ class ToolsPanel extends StatelessWidget {
 
       default:
         final String title = appProvider.selectedAction == ActionType.pencil ? 'Pencil Size' : 'Brush Size';
-        final double min = appProvider.selectedAction == ActionType.pencil ? 1 : 0.1;
-        final double max = 100;
+        final double min = appProvider.selectedAction == ActionType.pencil ? 1 : AppInteraction.minCanvasScale;
+        final double max = AppLimits.percentMax.toDouble();
 
         // Brush Size
         if (selectedTool.isSupported(ActionOptions.brushSize)) {
@@ -558,7 +558,7 @@ class ToolsPanel extends StatelessWidget {
                 icon: const Icon(Icons.line_weight),
                 color: Colors.grey.shade500,
                 constraints: minimal ? const BoxConstraints() : null,
-                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
+                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
                 onPressed: () {
                   showBrushSizePicker(
                     context: context,
@@ -598,7 +598,7 @@ class ToolsPanel extends StatelessWidget {
                 icon: const Icon(Icons.line_style_outlined),
                 color: Colors.grey.shade500,
                 constraints: minimal ? const BoxConstraints() : null,
-                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(8),
+                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
                 onPressed: () {
                   showBrushStylePicker(
                     context,
@@ -699,8 +699,8 @@ class ToolsPanel extends StatelessWidget {
 /// Returns a widget that displays a separator.
 Widget separator() {
   return const Divider(
-    thickness: 1,
-    height: 15,
+    thickness: AppStroke.thin,
+    height: AppLayout.separatorHeight,
     color: Colors.black,
   );
 }

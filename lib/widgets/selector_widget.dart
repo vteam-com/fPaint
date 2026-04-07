@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
@@ -40,7 +41,7 @@ class SelectionRectWidget extends StatefulWidget {
   State<SelectionRectWidget> createState() => _SelectionRectWidgetState();
 }
 
-const int defaultHandleSize = 20;
+const int defaultHandleSize = AppInteraction.selectionHandleSize;
 
 class _SelectionRectWidgetState extends State<SelectionRectWidget> {
   bool showCoordinate = false;
@@ -182,11 +183,12 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     required final MouseCursor cursor,
     required final void Function(DragUpdateDetails) onPanUpdate,
   }) {
-    final int handleSize = (showCoordinate ? (defaultHandleSize * 1.5) : defaultHandleSize).toInt();
+    final int handleSize = (showCoordinate ? (defaultHandleSize * AppVisual.previewTextScale) : defaultHandleSize)
+        .toInt();
 
     return Positioned(
-      left: position.dx - (handleSize / 2),
-      top: position.dy - (handleSize / 2),
+      left: position.dx - (handleSize / AppMath.pair),
+      top: position.dy - (handleSize / AppMath.pair),
       child: GestureDetector(
         onPanUpdate: (final DragUpdateDetails details) {
           setState(() {
@@ -202,15 +204,15 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
             height: handleSize.toDouble(),
             decoration: BoxDecoration(
               color: Colors.blue,
-              border: Border.all(color: Colors.white, width: 2),
-              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.white, width: AppStroke.regular),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
             child: showCoordinate
                 ? Center(
                     child: Text(
                       '${position.dx.toInt()}\n${position.dy.toInt()}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 8, color: Colors.white),
+                      style: const TextStyle(fontSize: AppSpacing.sm, color: Colors.white),
                     ),
                   )
                 : null,

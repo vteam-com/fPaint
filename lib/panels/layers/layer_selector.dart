@@ -1,6 +1,5 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/layers_provider.dart';
@@ -40,15 +39,15 @@ class LayerSelector extends StatelessWidget {
   Widget build(final BuildContext context) {
     final LayersProvider layers = LayersProvider.of(context);
     return Container(
-      margin: EdgeInsets.all(minimal ? 2 : 4),
-      padding: EdgeInsets.all(minimal ? 2 : 8),
+      margin: EdgeInsets.all(minimal ? AppSpacing.xxxs : AppSpacing.xxs),
+      padding: EdgeInsets.all(minimal ? AppSpacing.xxxs : AppSpacing.sm),
       decoration: BoxDecoration(
         color: layer.isVisible ? null : Colors.grey.shade600,
         border: Border.all(
           color: layer.isSelected ? Colors.blue : Colors.grey.shade700,
-          width: 3,
+          width: AppStroke.emphasis,
         ),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
       child: minimal
           ? _buildForSmallSurface(
@@ -145,11 +144,11 @@ class LayerSelector extends StatelessWidget {
     final LayersProvider layers = LayersProvider.of(context);
 
     return Tooltip(
-      margin: const EdgeInsets.only(left: 50),
+      margin: const EdgeInsets.only(left: AppSpacing.panelMargin),
       message: information(),
       child: Column(
         children: <Widget>[
-          TruncatedTextWidget(text: layer.name, maxLength: 10),
+          TruncatedTextWidget(text: layer.name, maxLength: AppSpacing.md.toInt()),
           _buildThumbnailPreviewAndVisibility(
             layers,
             layer,
@@ -205,7 +204,7 @@ class LayerSelector extends StatelessWidget {
           ),
         if (this.layer.backgroundColor != null)
           Padding(
-            padding: const EdgeInsets.only(left: 50),
+            padding: const EdgeInsets.only(left: AppSpacing.panelMargin),
             child: ColorPreview(
               color: this.layer.backgroundColor ?? Colors.transparent,
               onPressed: () {
@@ -237,7 +236,7 @@ class LayerSelector extends StatelessWidget {
         ),
         if (layer.parentGroupName.isNotEmpty)
           Opacity(
-            opacity: 0.5,
+            opacity: AppVisual.half,
             child: Text('${layer.parentGroupName}.'),
           ),
         Expanded(
@@ -248,7 +247,7 @@ class LayerSelector extends StatelessWidget {
             child: Text(
               layer.name,
               style: TextStyle(
-                fontSize: 13 * 1.3,
+                fontSize: AppLayout.layerTitleFontSize * AppVisual.titleScale,
                 fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.blue.shade100 : Colors.grey.shade400,
               ),
@@ -259,7 +258,7 @@ class LayerSelector extends StatelessWidget {
           tooltip: 'Hide/Show this layer',
           icon: Icon(
             layer.isVisible ? Icons.visibility : Icons.visibility_off,
-            color: layer.isVisible ? Colors.blue : const ui.Color.fromARGB(255, 135, 9, 9),
+            color: layer.isVisible ? Colors.blue : AppColors.layerHiddenWarning,
           ),
           onPressed: () => layers.layersToggleVisibility(layer),
         ),
@@ -335,9 +334,9 @@ class LayerSelector extends StatelessWidget {
           children: <Widget>[
             Icon(
               layer.isVisible ? Icons.visibility : Icons.visibility_off,
-              color: layer.isVisible ? Colors.blue : const ui.Color.fromARGB(255, 135, 9, 9),
+              color: layer.isVisible ? Colors.blue : AppColors.layerHiddenWarning,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Text(layer.isVisible ? 'Hide layer' : 'Show layer'),
           ],
         ),
@@ -377,8 +376,8 @@ class LayerSelector extends StatelessWidget {
     final LayerProvider layer,
   ) {
     return SizedBox(
-      height: 60,
-      width: 60,
+      height: AppLayout.layerPreviewSize,
+      width: AppLayout.layerPreviewSize,
       child: ContainerSlider(
         key: ValueKey<String>(layer.name + layer.id),
         minValue: 0.0,
@@ -410,7 +409,7 @@ class LayerSelector extends StatelessWidget {
           context: context,
           position: const RelativeRect.fromLTRB(0, 0, 0, 0),
           items: _buildPopupMenuItems(),
-          elevation: 8,
+          elevation: AppSpacing.sm,
         ).then((final String? value) {
           if (value != null) {
             _handlePopupMenuSelection(value, layers);

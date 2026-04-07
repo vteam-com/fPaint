@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// A generic base picker widget that can handle different value types.
 abstract class BasePicker<T> extends StatefulWidget {
@@ -61,7 +62,7 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
   Widget build(final BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 20,
+      spacing: AppSpacing.xxl,
       children: <Widget>[
         Text('${widget.title}: ${formatValue(_value)}'),
         buildPickerWidget(),
