@@ -213,7 +213,7 @@ void main() {
       }
     });
 
-    test('offsetContent updates positions in all layers', () {
+    test('layer offset updates positions in all layers', () {
       final LayerProvider layer1 = layersProvider.get(0);
       final UserActionDrawing action1 = UserActionDrawing(
         action: ActionType.brush,
@@ -229,7 +229,9 @@ void main() {
       layer2.appendDrawingAction(action2);
 
       const Offset offset = Offset(5, -5);
-      layersProvider.offsetContent(offset);
+      for (final LayerProvider layer in layersProvider.list) {
+        layer.offset(offset);
+      }
 
       expect(layer1.actionStack.first.positions.first, const Offset(10 + 5, 10 - 5));
       expect(layer2.actionStack.first.positions.first, const Offset(20 + 5, 20 - 5));

@@ -36,7 +36,7 @@ class UserActionDrawing {
   final Gradient? gradient;
 
   /// Optional path used for the action.
-  final ui.Path? path;
+  ui.Path? path;
 
   /// Optional image used for the action.
   final ui.Image? image;

@@ -172,6 +172,18 @@ class LayerProvider extends ChangeNotifier {
       for (int i = 0; i < action.positions.length; i++) {
         action.positions[i] = action.positions[i].translate(offset.dx, offset.dy);
       }
+
+      if (action.path != null) {
+        action.path = action.path!.shift(offset);
+      }
+
+      if (action.clipPath != null) {
+        action.clipPath = action.clipPath!.shift(offset);
+      }
+
+      if (action.textObject != null) {
+        action.textObject!.position = action.textObject!.position.translate(offset.dx, offset.dy);
+      }
     }
     clearCache();
   }

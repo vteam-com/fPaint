@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 
 /// TextEditingController for the width input field.
@@ -158,10 +158,11 @@ void showCanvasSettings(final BuildContext context) {
                         height.toInt(),
                         layers.canvasResizePosition,
                       );
-                      AppProvider.of(context, listen: false).canvasFitToContainer(
-                        containerWidth: MediaQuery.of(context).size.width,
-                        containerHeight: MediaQuery.of(context).size.height,
-                      );
+
+                      final ShellProvider shellProvider = ShellProvider.of(context, listen: false);
+                      shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+                      shellProvider.update();
+
                       AppProvider.of(context, listen: false).update(); // <-- Add this line
                       Navigator.pop(context);
                     }

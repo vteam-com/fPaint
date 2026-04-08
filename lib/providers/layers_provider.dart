@@ -1,5 +1,4 @@
 // Imports
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -121,11 +120,18 @@ class LayersProvider extends ChangeNotifier {
     final int newHeight,
     final CanvasResizePosition position,
   ) {
+    if (newWidth <= 0 || newHeight <= 0) {
+      return;
+    }
+
     final UndoProvider undoProvider = UndoProvider();
 
     final Size oldSize = this.size;
-    final double oldViewScale = this.scale;
     final Size newCurrentSize = Size(newWidth.toDouble(), newHeight.toDouble());
+
+    if (oldSize == newCurrentSize) {
+      return;
+    }
 
     undoProvider.executeAction(
       name: 'Resize Canvas',
@@ -145,19 +151,6 @@ class LayersProvider extends ChangeNotifier {
         // 3. Now update the canvas size
         this.size = newCurrentSize;
 
-        // 4. (Optional) Adjust view scale if canvas became smaller
-        if (newWidth < oldSize.width || newHeight < oldSize.height) {
-          double calculatedScale = 1.0;
-          if (oldSize.width != 0 && oldSize.height != 0) {
-            calculatedScale = min(newWidth / oldSize.width, newHeight / oldSize.height);
-          } else if (oldSize.width != 0) {
-            calculatedScale = newWidth / oldSize.width;
-          } else if (oldSize.height != 0) {
-            calculatedScale = newHeight / oldSize.height;
-          }
-          this.scale = calculatedScale;
-        }
-
         this.update();
       },
       backward: () {
@@ -168,16 +161,11 @@ class LayersProvider extends ChangeNotifier {
           oldSize,
         );
         for (final LayerProvider layer in _list) {
-          for (final UserActionDrawing action in layer.actionStack) {
-            for (int i = 0; i < action.positions.length; i++) {
-              action.positions[i] = action.positions[i] + backwardOffset;
-            }
-          }
+          layer.offset(backwardOffset);
         }
 
         // Revert to old size
         this.size = oldSize;
-        this.scale = oldViewScale;
 
         this.update();
       },
@@ -367,13 +355,6 @@ class LayersProvider extends ChangeNotifier {
 
   /// Gets the list of layers.
   List<LayerProvider> get list => _list;
-
-  /// Offsets the content of all layers by the given offset.
-  void offsetContent(final Offset offset) {
-    for (final LayerProvider layer in _list) {
-      layer.offset(offset);
-    }
-  }
 
   /// Hides or shows all layers except the given layer.
   void hideShowAllExcept(final LayerProvider exceptLayer, final bool show) {

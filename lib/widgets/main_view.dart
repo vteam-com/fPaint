@@ -100,11 +100,14 @@ class MainViewState extends State<MainView> {
             ),
             enableMoveAndResize: appProvider.selectedAction == ActionType.selector,
             onDrag: (final Offset offset) {
-              appProvider.selectorModel.translate(offset);
+              appProvider.selectorModel.translate(offset / appProvider.layers.scale);
               appProvider.update();
             },
             onResize: (final NineGridHandle handle, final Offset offset) {
-              appProvider.selectorModel.nindeGridResize(handle, offset);
+              appProvider.selectorModel.nindeGridResize(
+                handle,
+                offset / appProvider.layers.scale,
+              );
               appProvider.update();
             },
           ),

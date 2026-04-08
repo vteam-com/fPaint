@@ -16,6 +16,13 @@
             "deviceId": "macos"
         },
         {
+            "name": "integration tests macos",
+            "request": "launch",
+            "type": "dart",
+            "deviceId": "macos",
+            "templateFor": "integration_test"
+        },
+        {
             "name": "fpaint (profile mode)",
             "request": "launch",
             "type": "dart",

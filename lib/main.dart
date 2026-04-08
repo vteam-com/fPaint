@@ -22,10 +22,12 @@ late MyApp mainApp;
 ///
 /// It initializes the Flutter widgets, sets up the system UI mode,
 /// handles file opening events, and runs the app.
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  MyWindowManager.setupMainWindow();
+  await MyWindowManager.setupMainWindow();
+  mainApp = MyApp();
+
   // Platform channel for file opening.
   const MethodChannel('com.vteam.fpaint/file').setMethodCallHandler((final MethodCall call) async {
     if (call.method == 'fileOpened') {
@@ -73,8 +75,6 @@ void main() async {
       }
     }
   });
-
-  mainApp = MyApp();
 
   runApp(mainApp);
 }

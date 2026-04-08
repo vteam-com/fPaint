@@ -125,11 +125,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           _activePointers.remove(event.pointer);
           if (_activePointers.length < AppMath.pair) {
             _baseDistance = 0.0; // Reset base distance
-          } else {
-            if (event.buttons == 1 && !appProvider.preferences.useApplePencil) {
-              _handlePointerEnd(appProvider, event);
-            }
           }
+          _handlePointerEnd(appProvider, event);
         } else {
           _handlePointerEnd(appProvider, event);
         }

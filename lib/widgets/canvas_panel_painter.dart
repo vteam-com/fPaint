@@ -5,16 +5,12 @@ import 'package:fpaint/widgets/transparent_background.dart';
 /// A custom painter that paints the canvas panel.
 class CanvasPanelPainter extends CustomPainter {
   CanvasPanelPainter(
-    this._layers,
-    this._size, {
+    this._layers, {
     this.includeTransparentBackground = false,
   });
 
   /// The layers to paint.
   final List<LayerProvider> _layers;
-
-  /// The target canvas size.
-  final Size _size;
 
   /// Whether to include the transparent background.
   final bool includeTransparentBackground;
@@ -28,7 +24,7 @@ class CanvasPanelPainter extends CustomPainter {
     if (includeTransparentBackground) {
       drawTransaparentBackgroundOffsetAndSize(
         canvas: canvas,
-        size: _size,
+        size: size,
       );
     }
 

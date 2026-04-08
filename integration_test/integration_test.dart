@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/main.dart' as app;
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/localized_strings.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:integration_test/integration_test.dart';
@@ -25,7 +26,7 @@ void main() {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       debugPrint('🧹 Shared preferences mocked for clean test environment');
 
-      app.main();
+      await app.main();
       await tester.pumpAndSettle();
 
       await tapByKey(tester, Keys.floatActionCenter);
@@ -58,6 +59,16 @@ void main() {
       // 5️⃣ FENCE LAYER: Simple Fence in Front
       // ================================
       await _drawFence(tester, canvasCenter);
+
+      // ================================
+      // 📐 CANVAS RESIZE: Crop to square (half height, centered)
+      // ================================
+      await _resizeCanvasToSquare(tester);
+
+      // ================================
+      // 🖼️ BLACK FRAME: Draw border to confirm crop bounds
+      // ================================
+      await _drawBlackFrame(tester);
 
       await LayerTestHelpers.printLayerStructure(tester);
 
@@ -144,8 +155,8 @@ Future<void> _drawLand(final WidgetTester tester, final Offset canvasCenter) asy
   // Draw ground: Large green rectangle covering bottom of canvas
   await drawRectangleWithHumanGestures(
     tester,
-    startPosition: canvasCenter + const Offset(-370, 10), // Bottom-left
-    endPosition: canvasCenter + const Offset(370, 300), // Bottom-right (full width, bottom quarter)
+    startPosition: canvasCenter + const Offset(-300, 10), // Bottom-left (stay within canvas bounds)
+    endPosition: canvasCenter + const Offset(300, 300), // Bottom-right (full width, bottom quarter)
     brushSize: 1,
     brushColor: Colors.greenAccent,
     fillColor: Colors.green,
@@ -229,6 +240,115 @@ Future<void> _drawHouse(final WidgetTester tester, final Offset canvasCenter) as
   );
 
   debugPrint('🏠 House with roof completed!');
+}
+
+/// Resizes the canvas to a square using half the current height, centered.
+Future<void> _resizeCanvasToSquare(final WidgetTester tester) async {
+  debugPrint('📐 Resizing canvas to centered square (half height)...');
+
+  final BuildContext context = tester.element(find.byType(MainScreen));
+  final LayersProvider layersProvider = LayersProvider.of(context);
+  final double halfHeight = (layersProvider.size.height / 2).roundToDouble();
+  final String squareSize = halfHeight.toInt().toString();
+
+  debugPrint('📐 Current canvas: ${layersProvider.size} → target: ${squareSize}x$squareSize');
+
+  // Open menu → Canvas...
+  await tester.tap(find.byIcon(Icons.menu));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(strings[StringId.canvas]!));
+  await tester.pumpAndSettle();
+
+  // Disable aspect-ratio lock so width/height can be set independently.
+  final Finder lockButton = find.byIcon(Icons.link);
+  if (lockButton.evaluate().isNotEmpty) {
+    await tester.tap(lockButton.first);
+    await tester.pumpAndSettle();
+  }
+
+  // Enter square dimensions (half height × half height).
+  final Finder widthField = find.widgetWithText(TextField, 'Width');
+  final Finder heightField = find.widgetWithText(TextField, 'Height');
+  expect(widthField, findsOneWidget);
+  expect(heightField, findsOneWidget);
+
+  await tester.enterText(widthField, squareSize);
+  await tester.pump();
+  await tester.enterText(heightField, squareSize);
+  await tester.pump();
+
+  // Apply (center anchor is the default).
+  await tester.tap(find.widgetWithText(ElevatedButton, 'Apply'));
+  await tester.pumpAndSettle();
+
+  expect(layersProvider.size, Size(halfHeight, halfHeight));
+  debugPrint('📐 Canvas resized to ${layersProvider.size}');
+}
+
+/// Draws a black rectangle frame around the entire canvas to confirm crop bounds.
+Future<void> _drawBlackFrame(final WidgetTester tester) async {
+  debugPrint('🖼️ Drawing black frame around cropped canvas...');
+
+  final BuildContext context = tester.element(find.byType(MainScreen));
+  final LayersProvider layersProvider = LayersProvider.of(context);
+
+  await LayerTestHelpers.addNewLayer(tester, 'Frame');
+
+  final double w = layersProvider.size.width;
+  final double h = layersProvider.size.height;
+  const double inset = 4;
+
+  // Convert canvas coordinates to widget-local coordinates for the MainView.
+  // The Listener in CanvasGestureHandler receives localPosition relative to
+  // the MainView widget, so we need: canvasOffset + canvas coords * scale,
+  // then add the MainView's global top-left to get global test coordinates.
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
+  final Finder mainViewFinder = find.byType(MainView);
+  final Offset mainViewTopLeft = tester.getTopLeft(mainViewFinder);
+  Offset toScreen(final Offset canvasPoint) =>
+      mainViewTopLeft +
+      Offset(
+        canvasPoint.dx * appProvider.layers.scale + appProvider.canvasOffset.dx,
+        canvasPoint.dy * appProvider.layers.scale + appProvider.canvasOffset.dy,
+      );
+
+  // Top edge
+  await drawLineWithHumanGestures(
+    tester,
+    startPosition: toScreen(const Offset(inset, inset)),
+    endPosition: toScreen(Offset(w - inset, inset)),
+    brushSize: 4,
+    brushColor: Colors.black,
+  );
+
+  // Right edge
+  await drawLineWithHumanGestures(
+    tester,
+    startPosition: toScreen(Offset(w - inset, inset)),
+    endPosition: toScreen(Offset(w - inset, h - inset)),
+    brushSize: 4,
+    brushColor: Colors.black,
+  );
+
+  // Bottom edge
+  await drawLineWithHumanGestures(
+    tester,
+    startPosition: toScreen(Offset(w - inset, h - inset)),
+    endPosition: toScreen(Offset(inset, h - inset)),
+    brushSize: 4,
+    brushColor: Colors.black,
+  );
+
+  // Left edge
+  await drawLineWithHumanGestures(
+    tester,
+    startPosition: toScreen(Offset(inset, h - inset)),
+    endPosition: toScreen(const Offset(inset, inset)),
+    brushSize: 4,
+    brushColor: Colors.black,
+  );
+
+  debugPrint('🖼️ Black frame completed!');
 }
 
 /// Adds sun rays by drawing filled rectangles radiating from the sun
