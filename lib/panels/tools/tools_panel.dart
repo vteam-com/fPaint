@@ -4,6 +4,7 @@ import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/tool_panel_picker.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/action_type_icon.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
@@ -512,6 +513,10 @@ class ToolsPanel extends StatelessWidget {
                       false,
                     ),
                     onPressed: () {
+                      final ShellProvider shellProvider = ShellProvider.of(context);
+                      shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+                      shellProvider.update();
+
                       appProvider.crop();
                       appProvider.update();
                     },

@@ -152,6 +152,57 @@ ui.Image cropImage(final ui.Image image, final ui.Rect rect) {
   return picture.toImageSync(rect.width.toInt(), rect.height.toInt());
 }
 
+/// Returns the tight bounding box of non-transparent pixels in [image].
+///
+/// Returns `null` when the image is fully transparent.
+Future<ui.Rect?> getNonTransparentBounds(final ui.Image image) async {
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  if (byteData == null) {
+    return null;
+  }
+
+  final Uint8List pixels = byteData.buffer.asUint8List();
+  final int width = image.width;
+  final int height = image.height;
+
+  int minX = width;
+  int minY = height;
+  int maxX = -1;
+  int maxY = -1;
+
+  for (int y = 0; y < height; y++) {
+    final int rowStart = y * width * AppMath.bytesPerPixel;
+    for (int x = 0; x < width; x++) {
+      final int alphaIndex = rowStart + (x * AppMath.bytesPerPixel) + 3;
+      if (pixels[alphaIndex] > 0) {
+        if (x < minX) {
+          minX = x;
+        }
+        if (y < minY) {
+          minY = y;
+        }
+        if (x > maxX) {
+          maxX = x;
+        }
+        if (y > maxY) {
+          maxY = y;
+        }
+      }
+    }
+  }
+
+  if (maxX < minX || maxY < minY) {
+    return null;
+  }
+
+  return ui.Rect.fromLTRB(
+    minX.toDouble(),
+    minY.toDouble(),
+    (maxX + 1).toDouble(),
+    (maxY + 1).toDouble(),
+  );
+}
+
 /// A utility class that debounces a function call.
 class Debouncer {
   /// Creates a [Debouncer] with an optional [duration].

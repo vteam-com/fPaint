@@ -21,7 +21,16 @@ class MyWindowManager extends WindowListener {
   ///
   /// Returns true if the current runtime type indicates integration testing.
   static bool _isIntegrationTest() {
-    return WidgetsBinding.instance.runtimeType.toString().contains('IntegrationTest');
+    // `flutter test` sets this at compile time and is the most stable signal.
+    if (const bool.fromEnvironment('FLUTTER_TEST')) {
+      return true;
+    }
+
+    // Fallback for environments where the compile-time flag is unavailable.
+    final String bindingType = WidgetsBinding.instance.runtimeType.toString();
+    return bindingType.contains('IntegrationTest') ||
+        bindingType.contains('LiveTestWidgetsFlutterBinding') ||
+        bindingType.contains('AutomatedTestWidgetsFlutterBinding');
   }
 
   /// Sets up the main application window with platform-specific optimizations.
@@ -34,31 +43,33 @@ class MyWindowManager extends WindowListener {
   ///
   /// Does nothing on web platforms.
   static Future<void> setupMainWindow() async {
-    if (!kIsWeb) {
-      // Enable Impeller for better performance
-      // This reduces shader compilation jank on mobile platforms
-      if (Platform.isIOS || Platform.isAndroid) {
-        // Impeller is enabled by default on iOS, but we can explicitly set it
-        // For Android, we need to opt-in
-        PlatformDispatcher.instance.onError = (final Object error, final StackTrace _) {
-          // Log any Impeller-related errors
-          if (kDebugMode) {
-            print('Unhandled error: $error');
-          }
-          return true;
-        };
-        // Only enable system UI mode for iOS/Android.
-        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-      } else {
-        await windowManager.ensureInitialized();
+    if (kIsWeb || _isIntegrationTest()) {
+      return;
+    }
 
-        // Tell window_manager we want to intercept close
-        await windowManager.setPreventClose(true);
+    // Enable Impeller for better performance
+    // This reduces shader compilation jank on mobile platforms
+    if (Platform.isIOS || Platform.isAndroid) {
+      // Impeller is enabled by default on iOS, but we can explicitly set it
+      // For Android, we need to opt-in
+      PlatformDispatcher.instance.onError = (final Object error, final StackTrace _) {
+        // Log any Impeller-related errors
+        if (kDebugMode) {
+          print('Unhandled error: $error');
+        }
+        return true;
+      };
+      // Only enable system UI mode for iOS/Android.
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    } else {
+      await windowManager.ensureInitialized();
 
-        windowManager.addListener(MyWindowManager());
+      // Tell window_manager we want to intercept close
+      await windowManager.setPreventClose(true);
 
-        await MyWindowManager.restoreWindowState();
-      }
+      windowManager.addListener(MyWindowManager());
+
+      await MyWindowManager.restoreWindowState();
     }
   }
 

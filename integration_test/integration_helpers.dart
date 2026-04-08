@@ -64,10 +64,8 @@ Future<void> drawRectangleWithHumanGestures(
   }
 
   // Select rectangle tool via UI (always needed for rectangle drawing)
-  const Duration toolSelectionDelay = Duration(milliseconds: 100);
   await tester.tap(find.byIcon(Icons.crop_square));
-
-  await Future.delayed(toolSelectionDelay);
+  await tester.pumpAndSettle();
 
   final TestGesture gesture = await tester.startGesture(
     startPosition,
@@ -182,8 +180,7 @@ Future<void> drawLineWithHumanGestures(
 
   // Select line tool via UI
   await tester.tap(find.byIcon(Icons.line_axis));
-
-  await myWait(tester);
+  await tester.pumpAndSettle();
 
   await dragLikeHuman(tester, startPosition, endPosition);
 }
@@ -220,6 +217,7 @@ Future<void> dragLikeHuman(
   }
 
   await gesture.up();
+  await tester.pump();
 }
 
 /// Helper method to perform flood fill with gradient configuration
@@ -241,6 +239,9 @@ Future<void> performFloodFillSolid(
   // APPLY THE FILL WITH HUMAN GESTURE
   // ================================
   await tapLikeHuman(tester, position);
+
+  // Wait for the async fill service to complete and record the action.
+  await tester.pump(const Duration(milliseconds: 500));
 }
 
 /// Helper method to perform flood fill with gradient configuration
@@ -301,7 +302,7 @@ Future<void> performFloodFillGradient(
   // APPLY THE FILL WITH A STABLE TAP
   // ================================
   await myWait(tester);
-  await tester.tapAt(activationPoint);
+  await tapLikeHuman(tester, activationPoint);
   await tester.pump();
 
   // Wait for gradient handles to be mounted before interacting with them.
@@ -373,10 +374,13 @@ Future<void> performFloodFillGradient(
   await tester.pump();
   await Future.delayed(const Duration(milliseconds: 1000));
 
-  // Reset fill mode back to solid to terminate gradient gesture
-  await tapByKey(tester, Keys.toolFillModeSolid);
-
-  await Future.delayed(const Duration(milliseconds: 200));
+  // Dismiss the fill overlay so subsequent drawing gestures reach the canvas.
+  // The FillWidget (with AnimatedMarchingAntsPath) covers the entire canvas
+  // and absorbs all pointer events while fillModel.isVisible is true.
+  final BuildContext fillCtx = tester.element(find.byType(MainView));
+  final AppProvider fillAppProvider = AppProvider.of(fillCtx, listen: false);
+  fillAppProvider.fillModel.clear();
+  fillAppProvider.update();
   await tester.pumpAndSettle();
 }
 

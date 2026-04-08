@@ -44,12 +44,15 @@ flutter devices
 if flutter devices | grep -q "macOS"; then
     echo "🍎 Running integration tests on macOS..."
     flutter test integration_test/integration_test.dart --coverage -d macos
+    flutter test integration_test/canvas_resize_test.dart --coverage -d macos
 elif flutter devices | grep -q "linux"; then
     echo "🐧 Running integration tests on Linux..."
     flutter test integration_test/integration_test.dart --coverage -d linux
+    flutter test integration_test/canvas_resize_test.dart --coverage -d linux
 elif flutter devices | grep -q "chrome"; then
     echo "🌐 Running integration tests on Chrome..."
     flutter test integration_test/integration_test.dart --coverage -d chrome
+    flutter test integration_test/canvas_resize_test.dart --coverage -d chrome
 else
     echo "❌ No suitable device found for integration tests"
     echo "📱 Available devices:"

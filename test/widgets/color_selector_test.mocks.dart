@@ -515,10 +515,13 @@ class MockAppProvider extends _i1.Mock implements _i10.AppProvider {
   );
 
   @override
-  void crop() => super.noSuchMethod(
-    Invocation.method(#crop, []),
-    returnValueForMissingStub: null,
-  );
+  _i11.Future<void> crop() =>
+      (super.noSuchMethod(
+            Invocation.method(#crop, []),
+            returnValue: _i11.Future<void>.value(),
+            returnValueForMissingStub: _i11.Future<void>.value(),
+          )
+          as _i11.Future<void>);
 
   @override
   void newDocumentFromClipboardImage() => super.noSuchMethod(
