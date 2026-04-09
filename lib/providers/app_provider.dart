@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/image_placement_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -200,30 +201,85 @@ class AppProvider extends ChangeNotifier {
     if (image == null) {
       return;
     }
+
+    // Center the image on the visible canvas area.
+    final Offset center = Offset(
+      layers.size.width / AppMath.pair,
+      layers.size.height / AppMath.pair,
+    );
+    final Offset initialPosition = Offset(
+      center.dx - image.width / AppMath.pair,
+      center.dy - image.height / AppMath.pair,
+    );
+
+    imagePlacementModel.start(
+      imageToPlace: image,
+      initialPosition: initialPosition,
+    );
+    update();
+  }
+
+  /// Commits the interactively placed image to a new layer.
+  Future<void> confirmImagePlacement() async {
+    final ui.Image? sourceImage = imagePlacementModel.image;
+    if (sourceImage == null) {
+      imagePlacementModel.clear();
+      update();
+      return;
+    }
+
+    // Bake scale + rotation into a new rasterised image.
+    final double outWidth = imagePlacementModel.displayWidth;
+    final double outHeight = imagePlacementModel.displayHeight;
+    final double rotation = imagePlacementModel.rotation;
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    canvas.translate(outWidth / AppMath.pair, outHeight / AppMath.pair);
+    canvas.rotate(rotation);
+    canvas.translate(-outWidth / AppMath.pair, -outHeight / AppMath.pair);
+    canvas.drawImageRect(
+      sourceImage,
+      Rect.fromLTWH(
+        0,
+        0,
+        sourceImage.width.toDouble(),
+        sourceImage.height.toDouble(),
+      ),
+      Rect.fromLTWH(0, 0, outWidth, outHeight),
+      Paint()..filterQuality = FilterQuality.high,
+    );
+
+    final ui.Image bakedImage = await recorder.endRecording().toImage(outWidth.ceil(), outHeight.ceil());
+
+    final Offset offset = imagePlacementModel.position;
     final int currentIndex = layers.selectedLayerIndex;
     int newLayerIndex = -1;
 
     _undoProvider.executeAction(
       name: 'Paste',
       forward: () {
-        final LayerProvider newLayerForPatedImage = layers.addTop(name: 'Pasted');
-        newLayerIndex = layers.getLayerIndex(newLayerForPatedImage);
-        newLayerForPatedImage.addImage(
-          imageToAdd: image,
-          offset: const Offset(0, 0),
-        );
-        // Add the pasted image to the selected layer
+        final LayerProvider newLayer = layers.addTop(name: 'Pasted');
+        newLayerIndex = layers.getLayerIndex(newLayer);
+        newLayer.addImage(imageToAdd: bakedImage, offset: offset);
         update();
       },
       backward: () {
-        // Step 1
         layers.removeByIndex(newLayerIndex);
-
-        // Step 2 -restore the selected layer
         layers.selectedLayerIndex = currentIndex;
         update();
       },
     );
+
+    imagePlacementModel.clear();
+    update();
+  }
+
+  /// Cancels an in-progress image placement.
+  void cancelImagePlacement() {
+    imagePlacementModel.clear();
+    update();
   }
 
   /// Gets whether the canvas resize lock aspect ratio is enabled.
@@ -531,6 +587,9 @@ class AppProvider extends ChangeNotifier {
 
   /// The selector model.
   SelectorModel selectorModel = SelectorModel();
+
+  /// The image placement model for interactive paste.
+  final ImagePlacementModel imagePlacementModel = ImagePlacementModel();
 
   /// Starts a selector creation.
   void selectorCreationStart(final Offset position) {
