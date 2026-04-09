@@ -37,6 +37,7 @@ To create a **free alternative to expensive commercial graphics software** throu
 ## 💝 100% Free, No Ads, No Paywalls
 
 Unlike commercial alternatives, fPaint will always remain completely free with:
+
 - 🙅🏼 No ads or monetization
 - 🙅🏼 No feature restrictions
 - 🙅🏼 No premium tiers
@@ -49,6 +50,7 @@ Unlike commercial alternatives, fPaint will always remain completely free with:
 We're building toward feature parity with commercial graphics editors. Current priorities include:
 
 ### Phase 1: Core Enhancement (Current)
+
 - [x] Multi-layer system with blending modes
 - [x] Advanced selection tools (Magic Wand, Lasso)
 - [x] Professional color management
@@ -58,6 +60,7 @@ We're building toward feature parity with commercial graphics editors. Current p
 - [ ] **Performance optimizations** (contributions needed!)
 
 ### Phase 2: Professional Features
+
 - [ ] Non-destructive filters and effects
 - [ ] Advanced typography and text-on-path
 - [ ] CMYK color management
@@ -157,6 +160,38 @@ The `integration_test/integration_helpers.dart` file provides reusable helper fu
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
+
+## CI/CD Pipeline
+
+Every push to `main` triggers the following automated pipeline:
+
+```text
+Push to main
+  └─► CI (ci.yml)
+       ├─ Analyze (flutter analyze, dart format)
+       └─ Test (flutter test --coverage → Codecov)
+            │
+            ▼ on success
+       Deploy Pipeline (firebase-hosting-merge.yml)
+       ├─► Build Linux   ─┐
+       ├─► Build Windows  ├─ parallel
+       ├─► Build macOS   ─┘
+       │         │
+       │         ▼ all complete
+       └─► Build Web + Deploy
+            ├─ flutter build web
+            ├─ Copy desktop zips into build/web/downloads/
+            └─ Deploy to paint.vteam.com (Firebase Hosting)
+```
+
+| Workflow     | File                                                  | Trigger                        |
+| ------------ | ----------------------------------------------------- | ------------------------------ |
+| CI           | `.github/workflows/ci.yml`                            | Push/PR to `main` or `develop` |
+| Deploy       | `.github/workflows/firebase-hosting-merge.yml`        | After CI succeeds on `main`    |
+| PR Preview   | `.github/workflows/firebase-hosting-pull-request.yml` | Pull requests                  |
+| Desktop Only | `.github/workflows/build-apps.yml`                    | Manual (`workflow_dispatch`)   |
+
+The desktop downloads at `paint.vteam.com/downloads/` are built and deployed automatically with each release. The **"Available on..."** page in the app links directly to these URLs.
 
 ## Code of Conduct
 
