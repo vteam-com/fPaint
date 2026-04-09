@@ -162,6 +162,11 @@ class AppInteraction {
   static const double rotationHandleDistance = 30.0;
   static const double rotationHandleSize = 16.0;
   static const double rotationHandleLineWidth = 1.5;
+  static const double imagePlacementHandleSize = 14.0;
+  static const double imagePlacementButtonSpacing = 8.0;
+  static const double imagePlacementButtonSize = 36.0;
+  static const double imagePlacementMinScale = 0.1;
+  static const double imagePlacementMaxScale = 5.0;
 }
 
 /// Shared persisted/default app values.

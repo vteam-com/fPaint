@@ -5,6 +5,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
+import 'package:fpaint/widgets/rotation_handle_widgets.dart';
 
 const String _selectorCoordinatesFormat = '{x}\n{y}';
 const String _placeholderX = '{x}';
@@ -178,7 +179,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
         ),
 
         // Rotation handle stem line
-        _buildRotationStem(bounds),
+        buildRotationStem(bounds),
 
         // Rotation handle
         _buildRotationHandle(bounds),
@@ -285,24 +286,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
               color: Colors.white,
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  /// Builds the thin line connecting the top-center edge to the rotation handle.
-  Widget _buildRotationStem(final Rect bounds) {
-    final double stemTop = bounds.top - AppInteraction.rotationHandleDistance;
-    final double stemX = bounds.center.dx;
-
-    return Positioned(
-      left: stemX - (AppInteraction.rotationHandleLineWidth / AppMath.pair),
-      top: stemTop,
-      child: IgnorePointer(
-        child: Container(
-          width: AppInteraction.rotationHandleLineWidth,
-          height: AppInteraction.rotationHandleDistance,
-          color: Colors.blue,
         ),
       ),
     );
