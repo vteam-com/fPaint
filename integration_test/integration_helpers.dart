@@ -22,13 +22,7 @@ Future<void> setBrushSizeViaUI(final WidgetTester tester, final double brushSize
   // Use Provider to access AppProvider and set brush size directly
   final AppProvider appProvider = AppProvider.of(context, listen: false);
   appProvider.brushSize = brushSize;
-
-  debugPrint('🎨 Set brush size directly via AppProvider: $brushSize');
-
-  // Pump to ensure the UI updates
-  await tester.pumpAndSettle();
-
-  debugPrint('🎨 Brush size UI interaction completed');
+  await tester.pump();
 }
 
 /// Helper method to draw a rectangle with human-like gestures
@@ -65,7 +59,7 @@ Future<void> drawRectangleWithHumanGestures(
 
   // Select rectangle tool via UI (always needed for rectangle drawing)
   await tester.tap(find.byIcon(Icons.crop_square));
-  await tester.pumpAndSettle();
+  await tester.pump();
 
   final TestGesture gesture = await tester.startGesture(
     startPosition,
@@ -77,18 +71,9 @@ Future<void> drawRectangleWithHumanGestures(
   final Offset totalOffset = endPosition - startPosition;
   final Offset stepOffset = totalOffset / 3;
 
-  // Human-like drag with natural timing between steps
-  const List<Duration> delays = <Duration>[
-    Duration(milliseconds: 100),
-    Duration(milliseconds: 100),
-    Duration(milliseconds: 100),
-  ];
-
   for (int i = 0; i < 3; i++) {
     await gesture.moveBy(stepOffset);
-    if (i < delays.length) {
-      await Future.delayed(delays[i]);
-    }
+    await tester.pump();
   }
 
   await gesture.up();
@@ -128,10 +113,8 @@ Future<void> drawCircleWithHumanGestures(
   }
 
   // Select circle tool via UI
-  const Duration toolSelectionDelay = Duration(milliseconds: 100);
   await tester.tap(find.byIcon(Icons.circle_outlined));
   await tester.pump();
-  await Future.delayed(toolSelectionDelay);
 
   final TestGesture gesture = await tester.startGesture(
     center - Offset(radius / 2, 0),
@@ -180,7 +163,7 @@ Future<void> drawLineWithHumanGestures(
 
   // Select line tool via UI
   await tester.tap(find.byIcon(Icons.line_axis));
-  await tester.pumpAndSettle();
+  await tester.pump();
 
   await dragLikeHuman(tester, startPosition, endPosition);
 }
@@ -206,13 +189,11 @@ Future<void> dragLikeHuman(
     buttons: kPrimaryButton,
   );
 
-  // Calculate total movement and divide into smooth human-like steps
+  // Calculate total movement and divide into steps
   final Offset totalOffset = endPosition - startPosition;
-  final Offset stepOffset = totalOffset / 8; // More steps for smoother line
+  final Offset stepOffset = totalOffset / 3;
 
-  // Human-like drag with natural timing (more steps, shorter delays for line drawing)
-
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 3; i++) {
     await gesture.moveBy(stepOffset);
   }
 
@@ -241,7 +222,7 @@ Future<void> performFloodFillSolid(
   await tapLikeHuman(tester, position);
 
   // Wait for the async fill service to complete and record the action.
-  await tester.pump(const Duration(milliseconds: 500));
+  await tester.pump(const Duration(milliseconds: 200));
 }
 
 /// Helper method to perform flood fill with gradient configuration
@@ -260,7 +241,7 @@ Future<void> performFloodFillGradient(
   if (appProvider.fillModel.isVisible || appProvider.fillModel.gradientPoints.isNotEmpty) {
     appProvider.fillModel.clear();
     appProvider.update();
-    await tester.pumpAndSettle();
+    await tester.pump();
   }
 
   // ================================
@@ -306,8 +287,8 @@ Future<void> performFloodFillGradient(
   await tester.pump();
 
   // Wait for gradient handles to be mounted before interacting with them.
-  for (int frame = 0; frame < 10; frame++) {
-    await tester.pump(const Duration(milliseconds: 100));
+  for (int frame = 0; frame < 5; frame++) {
+    await tester.pump(const Duration(milliseconds: 50));
     if (find.byKey(Key('${Keys.gradientHandleKeyPrefixText}0')).evaluate().isNotEmpty) {
       break;
     }
@@ -318,8 +299,8 @@ Future<void> performFloodFillGradient(
     // Some desktop test runs miss the first tap event; retry with a mouse-like gesture.
     await tapLikeHuman(tester, activationPoint);
     await tester.pump();
-    for (int frame = 0; frame < 10; frame++) {
-      await tester.pump(const Duration(milliseconds: 100));
+    for (int frame = 0; frame < 5; frame++) {
+      await tester.pump(const Duration(milliseconds: 50));
       if (firstHandleFinder.evaluate().isNotEmpty) {
         break;
       }
@@ -334,8 +315,7 @@ Future<void> performFloodFillGradient(
 
       // Reset fill mode back to solid to terminate gradient mode for next steps.
       await tapByKey(tester, Keys.toolFillModeSolid);
-      await Future.delayed(const Duration(milliseconds: 200));
-      await tester.pumpAndSettle();
+      await tester.pump();
       return;
     }
   }
@@ -371,8 +351,7 @@ Future<void> performFloodFillGradient(
   }
 
   // Allow time for the fill operation to complete and UI to update
-  await tester.pump();
-  await Future.delayed(const Duration(milliseconds: 1000));
+  await tester.pump(const Duration(milliseconds: 500));
 
   // Dismiss the fill overlay so subsequent drawing gestures reach the canvas.
   // The FillWidget (with AnimatedMarchingAntsPath) covers the entire canvas
@@ -381,13 +360,13 @@ Future<void> performFloodFillGradient(
   final AppProvider fillAppProvider = AppProvider.of(fillCtx, listen: false);
   fillAppProvider.fillModel.clear();
   fillAppProvider.update();
-  await tester.pumpAndSettle();
+  await tester.pump();
 }
 
 Future<void> myWait(
   final WidgetTester tester,
 ) async {
-  await Future.delayed(const Duration(milliseconds: 300));
+  await tester.pump();
 }
 
 /// Layer management helper methods for integration tests
@@ -407,20 +386,16 @@ class LayerTestHelpers {
 
     debugPrint('🆕 Added new layer via API (total layers now: ${layersProvider.length})');
 
-    // Give time for UI to update and try to make layer visible
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    // Try to select the layer via UI to ensure it's properly visible
+    // Select the layer via UI to ensure it's properly visible
     try {
       await switchToLayer(tester, currentIndex);
-      await tester.pumpAndSettle();
-      debugPrint('🔄 Selected layer via UI to ensure visibility');
     } catch (e) {
       debugPrint('⚠️ Could not select layer via UI, using API selection');
     }
 
-    // Give additional time for UI to settle before renaming
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // Rename the newly selected layer using context menu
     await renameLayer(tester, name);
@@ -452,7 +427,7 @@ class LayerTestHelpers {
       if (thumbnails.evaluate().isNotEmpty && layerIndex < thumbnails.evaluate().length) {
         try {
           await tester.tap(thumbnails.at(layerIndex));
-          await tester.pump(const Duration(milliseconds: 300));
+          await tester.pump();
           debugPrint('🔄 Switched to layer index: $layerIndex via thumbnail tap fallback');
           return;
         } catch (e) {
@@ -469,7 +444,7 @@ class LayerTestHelpers {
 
     // Tap on the layer text/name widget to select it
     await tester.tap(textFinder.first);
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
 
     debugPrint('🔄 Switched to layer index: $layerIndex ("$targetLayerName") via UI tap');
   }
@@ -504,7 +479,7 @@ class LayerTestHelpers {
       if (thumbnails.evaluate().isNotEmpty && layerIndex < thumbnails.evaluate().length) {
         try {
           await tester.tap(thumbnails.at(layerIndex));
-          await tester.pump(const Duration(milliseconds: 300));
+          await tester.pump();
           debugPrint('🔄 Switched to layer "$layerName" via thumbnail tap fallback');
           return;
         } catch (e) {
@@ -521,7 +496,7 @@ class LayerTestHelpers {
 
     // Tap on the layer text/name widget to select it
     await tester.tap(textFinder.first);
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
 
     debugPrint('🔄 Switched to layer "$layerName" via UI tap');
   }
@@ -533,7 +508,7 @@ class LayerTestHelpers {
 
     // Find and tap the merge button (layers_outlined icon)
     await tester.tap(find.byIcon(Icons.layers_outlined));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
 
     debugPrint('🔗 Merged layer $fromIndex into layer below via UI');
   }
@@ -545,14 +520,14 @@ class LayerTestHelpers {
 
     // Find and tap the remove button (playlist_remove icon)
     await tester.tap(find.byIcon(Icons.playlist_remove));
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
 
     debugPrint('🗑️ Removed layer $layerIndex via UI delete button');
   }
 
   /// Prints the current layer structure (async to avoid conflicts)
   static Future<void> printLayerStructure(final WidgetTester tester) async {
-    await tester.pumpAndSettle(); // Ensure UI is settled before accessing context
+    await tester.pump(); // Ensure UI is settled before accessing context
     final BuildContext context = tester.element(find.byType(MainView));
     final LayersProvider layersProvider = LayersProvider.of(context);
     debugPrint('📚 Layer Structure:');
@@ -572,8 +547,7 @@ class LayerTestHelpers {
 
     // Tap the menu button to open the context menu with increased pump time
     await tester.tap(menuButtonFinder.first);
-    await Future.delayed(const Duration(milliseconds: 200));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 100));
 
     // Find the "Rename layer" menu item using descendant finder to be more specific
     final Finder popupMenu = find.byWidgetPredicate(
@@ -596,8 +570,7 @@ class LayerTestHelpers {
 
     // Try tapping with warnIfMissed disabled since popup menus often have positioning issues in tests
     await tester.tap(finalRenameFinder, warnIfMissed: false);
-    await Future.delayed(const Duration(milliseconds: 300));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // Verify dialog is open by looking for TextField
     final Finder textFieldFinder = find.byType(TextField);
@@ -605,14 +578,14 @@ class LayerTestHelpers {
 
     // Enter new name in the text field
     await tester.enterText(textFieldFinder.first, newName);
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // Find and tap the "Apply" button
     final Finder applyButtonFinder = find.widgetWithText(TextButton, 'Apply');
     expect(applyButtonFinder, findsOneWidget, reason: 'Should find Apply button in rename dialog');
 
     await tester.tap(applyButtonFinder);
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     debugPrint('✏️ Renamed selected layer to: "$newName" via context menu');
   }
@@ -637,7 +610,7 @@ Future<void> _setGradientPointColor(
   final WidgetTester tester,
   final Color desiredColor,
 ) async {
-  await myWait(tester);
+  await tester.pump();
 
   // Find the hex color text field by its type and label (more robust)
   final Finder dialogFinder = find.byType(AlertDialog);
@@ -647,23 +620,20 @@ Future<void> _setGradientPointColor(
       (final Widget widget) => widget is TextField && widget.decoration?.labelText == 'Hex Color',
     ),
   );
-  await myWait(tester);
 
   if (hexFieldFinder.evaluate().isEmpty) {
     throw Exception('Hex Color text field not found in color picker dialog');
   }
 
   await tester.enterText(hexFieldFinder.first, colorToHexString(desiredColor));
-  await myWait(tester);
 
   // Press the Apply button to confirm the color change
   final Finder applyButtonFinder = find.widgetWithText(TextButton, 'Apply');
   if (applyButtonFinder.evaluate().isEmpty) {
     throw Exception('Apply button not found in color picker dialog');
   }
-  await myWait(tester);
   await tester.tap(applyButtonFinder);
-  await myWait(tester);
+  await tester.pump();
 }
 
 Future<void> tapByKey(final WidgetTester tester, final Key key) async {
@@ -672,7 +642,7 @@ Future<void> tapByKey(final WidgetTester tester, final Key key) async {
   expect(elementFound, findsOneWidget, reason: 'Should find button with key: $key');
 
   await tester.tap(elementFound.first);
-  await tester.pumpAndSettle();
+  await tester.pump();
 }
 
 /// Helper method to select a circle area using circle selection tool
