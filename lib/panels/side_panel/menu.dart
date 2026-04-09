@@ -30,14 +30,14 @@ class MainMenu extends StatelessWidget {
           icon: Icons.power_settings_new_outlined,
         ),
         buildMenuItem(
-          value: MenuIds.openFile,
-          text: strings[StringId.import]!,
-          icon: Icons.file_download_outlined,
-        ),
-        buildMenuItem(
           value: MenuIds.newFromClipboard,
           text: strings[StringId.newFromClipboard]!,
           icon: Icons.content_paste_go,
+        ),
+        buildMenuItem(
+          value: MenuIds.openFile,
+          text: strings[StringId.import]!,
+          icon: Icons.file_download_outlined,
         ),
         buildMenuItem(
           value: MenuIds.export,

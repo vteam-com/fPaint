@@ -107,6 +107,7 @@ class AppStroke {
 /// Shared scale and opacity tokens.
 class AppVisual {
   static const double half = 0.5;
+  static const double popupBorderAlpha = 0.35;
   static const double low = 0.3;
   static const double medium = 0.7;
   static const double disabled = 0.8;
