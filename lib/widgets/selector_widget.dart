@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
@@ -23,6 +25,7 @@ class SelectionRectWidget extends StatefulWidget {
     required this.path2,
     required this.onDrag,
     required this.onResize,
+    required this.onRotate,
     this.enableMoveAndResize = true,
   });
 
@@ -34,6 +37,9 @@ class SelectionRectWidget extends StatefulWidget {
 
   /// A callback that is called when the selection rectangle is resized.
   final void Function(NineGridHandle, Offset) onResize;
+
+  /// A callback that is called when the selection is rotated by [angleRadians].
+  final void Function(double angleRadians) onRotate;
 
   /// The primary path of the selection rectangle.
   final Path? path1;
@@ -49,7 +55,6 @@ const int defaultHandleSize = AppInteraction.selectionHandleSize;
 
 class _SelectionRectWidgetState extends State<SelectionRectWidget> {
   bool showCoordinate = false;
-
   @override
   Widget build(final BuildContext context) {
     if (widget.path1 == null) {
@@ -58,7 +63,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     final Rect bounds = widget.path1!.getBounds();
     final double width = bounds.left + bounds.width + defaultHandleSize;
 
-    final double height = bounds.bottom + bounds.height + defaultHandleSize;
+    // Extra space above for the rotation handle stem + handle
+    final double rotationOverhead = widget.enableMoveAndResize
+        ? AppInteraction.rotationHandleDistance + AppInteraction.rotationHandleSize
+        : 0;
+    final double height = bounds.bottom + bounds.height + defaultHandleSize + rotationOverhead;
 
     final List<Widget> stackChildren = <Widget>[
       AnimatedMarchingAntsPath(path: widget.path1!),
@@ -167,6 +176,12 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
             details.delta,
           ),
         ),
+
+        // Rotation handle stem line
+        _buildRotationStem(bounds),
+
+        // Rotation handle
+        _buildRotationHandle(bounds),
       ]);
     }
 
@@ -223,6 +238,71 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
                   )
                 : null,
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the rotation handle above the selection.
+  ///
+  /// Dragging this handle rotates the selection around its center.
+  Widget _buildRotationHandle(final Rect bounds) {
+    final double handleSize = AppInteraction.rotationHandleSize;
+    final Offset handleCenter = Offset(
+      bounds.center.dx,
+      bounds.top - AppInteraction.rotationHandleDistance,
+    );
+
+    return Positioned(
+      left: handleCenter.dx - (handleSize / AppMath.pair),
+      top: handleCenter.dy - (handleSize / AppMath.pair),
+      child: GestureDetector(
+        onPanUpdate: (final DragUpdateDetails details) {
+          final Offset pointer = handleCenter + details.delta;
+          final double previousAngle = atan2(
+            handleCenter.dy - bounds.center.dy,
+            handleCenter.dx - bounds.center.dx,
+          );
+          final double currentAngle = atan2(
+            pointer.dy - bounds.center.dy,
+            pointer.dx - bounds.center.dx,
+          );
+          widget.onRotate(currentAngle - previousAngle);
+        },
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: Container(
+            width: handleSize,
+            height: handleSize,
+            decoration: BoxDecoration(
+              color: Colors.green,
+              border: Border.all(color: Colors.white, width: AppStroke.regular),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.rotate_right,
+              size: AppSpacing.lg,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the thin line connecting the top-center edge to the rotation handle.
+  Widget _buildRotationStem(final Rect bounds) {
+    final double stemTop = bounds.top - AppInteraction.rotationHandleDistance;
+    final double stemX = bounds.center.dx;
+
+    return Positioned(
+      left: stemX - (AppInteraction.rotationHandleLineWidth / AppMath.pair),
+      top: stemTop,
+      child: IgnorePointer(
+        child: Container(
+          width: AppInteraction.rotationHandleLineWidth,
+          height: AppInteraction.rotationHandleDistance,
+          color: Colors.blue,
         ),
       ),
     );

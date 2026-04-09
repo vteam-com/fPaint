@@ -62,7 +62,11 @@ void main() {
       // ================================
       // 📐 CANVAS RESIZE: Crop to square (half height, centered)
       // ================================
+      final int layerCountBeforeCrop = LayersProvider.of(
+        tester.element(find.byType(MainScreen)),
+      ).length;
       await _resizeCanvasToSquare(tester);
+      _validateCrop(tester, layerCountBeforeCrop);
 
       // ================================
       // 🖼️ BLACK FRAME: Draw border to confirm crop bounds
@@ -282,6 +286,36 @@ Future<void> _resizeCanvasToSquare(final WidgetTester tester) async {
 
   expect(layersProvider.size, Size(halfHeight, halfHeight));
   debugPrint('📐 Canvas resized to ${layersProvider.size}');
+}
+
+/// Validates that the crop operation resized the canvas and all layers correctly.
+void _validateCrop(final WidgetTester tester, final int expectedLayerCount) {
+  final BuildContext context = tester.element(find.byType(MainScreen));
+  final LayersProvider layersProvider = LayersProvider.of(context);
+
+  final Size canvasSize = layersProvider.size;
+
+  // Canvas should be square
+  expect(canvasSize.width, canvasSize.height, reason: 'Canvas should be square after crop');
+  expect(canvasSize.width, greaterThan(0), reason: 'Canvas width must be positive');
+
+  // All layers must survive the crop
+  expect(layersProvider.length, expectedLayerCount, reason: 'Layer count must be preserved after crop');
+
+  // Every layer must match the new canvas size
+  for (int i = 0; i < layersProvider.length; i++) {
+    final LayerProvider layer = layersProvider.get(i);
+    expect(
+      layer.size,
+      canvasSize,
+      reason: 'Layer "${layer.name}" (index $i) size must match canvas after crop',
+    );
+  }
+
+  debugPrint(
+    '✅ Crop validated: ${canvasSize.width.toInt()}x${canvasSize.height.toInt()}, '
+    '$expectedLayerCount layers, all sizes match',
+  );
 }
 
 /// Draws a black rectangle frame around the entire canvas to confirm crop bounds.
