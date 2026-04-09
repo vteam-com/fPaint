@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/color_preview.dart';
@@ -14,7 +15,7 @@ class ColorPickerDialog extends StatefulWidget {
   /// Creates a [ColorPickerDialog].
   const ColorPickerDialog({
     super.key,
-    this.title = 'Choose a Color',
+    required this.title,
     required this.color,
     required this.onColorChanged,
   });
@@ -35,7 +36,7 @@ class ColorPickerDialog extends StatefulWidget {
 class _ColorPickerDialogState extends State<ColorPickerDialog> {
   late Color _currentColor;
   late TextEditingController _hexController;
-
+  static const String _plainTextMimeType = 'text/plain';
   @override
   void initState() {
     super.initState();
@@ -92,6 +93,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
   /// Builds the content of the dialog.
   Widget _buildContent(final LayersProvider layers) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
@@ -192,7 +195,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               IconButton(
                 icon: const Icon(Icons.paste),
                 onPressed: () async {
-                  final ClipboardData? data = await Clipboard.getData('text/plain');
+                  final ClipboardData? data = await Clipboard.getData(_plainTextMimeType);
 
                   try {
                     final Color color = getColorFromString(
@@ -211,9 +214,9 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 width: AppLayout.inputFieldWidth,
                 child: TextField(
                   controller: _hexController,
-                  decoration: const InputDecoration(
-                    labelText: 'Hex Color',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.hexColor,
+                    border: const OutlineInputBorder(),
                   ),
                   onChanged: (final String value) {
                     try {
@@ -236,8 +239,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                     ),
                   );
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Hex Color copied to clipboard'),
+                    SnackBar(
+                      content: Text(l10n.hexColorCopiedToClipboard),
                     ),
                   );
                 },
@@ -252,14 +255,14 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             children: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
               TextButton(
                 onPressed: () {
                   widget.onColorChanged(_currentColor);
                   Navigator.of(context).pop();
                 },
-                child: const Text('Apply'),
+                child: Text(l10n.apply),
               ),
             ],
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
@@ -42,6 +43,7 @@ class TopColors extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final List<ColorUsage> sortedColors = sortColorByHueAndPopularity();
 
     final List<Widget> colorPreviews = sortedColors.map((final ColorUsage colorUsed) {
@@ -53,7 +55,7 @@ class TopColors extends StatelessWidget {
       final String colorAsHex = '$red$green$blue\n$alpha';
       String tooltipText = '';
       if (colorUsed.percentage < 1) {
-        tooltipText = '\nUsage ${colorUsed.toStringPercentage(AppStroke.thin.toInt())}';
+        tooltipText = l10n.colorUsage(colorUsed.toStringPercentage(AppStroke.thin.toInt()));
       }
 
       return ColorPreview(
@@ -73,7 +75,7 @@ class TopColors extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            if (!minimal) Text('Top ${colorUsages.length} colors'),
+            if (!minimal) Text(l10n.topColors(colorUsages.length)),
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: onRefresh,

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/action_type_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
+
+const String _canvasZoomAndSizeFormat = '{zoom}%\n{width}\n{height}';
+const String _placeholderZoom = '{zoom}';
+const String _placeholderWidth = '{width}';
+const String _placeholderHeight = '{height}';
 
 /// Builds a column of floating action buttons for the paint application,
 /// including buttons for undo, redo, zoom in, zoom out,
@@ -17,6 +23,8 @@ Widget floatingActionButtons(
   final ShellProvider shellProvider,
   final AppProvider appProvider,
 ) {
+  final AppLocalizations l10n = AppLocalizations.of(context)!;
+
   final Widget undoButton = myFloatButton(
     icon: Icons.undo,
     tooltip: appProvider.undoProvider.getHistoryStringForUndo(),
@@ -44,7 +52,7 @@ Widget floatingActionButtons(
             heroTag: null,
             backgroundColor: AppColors.floatingButtonBackground,
             foregroundColor: Colors.white,
-            tooltip: 'Active tool',
+            tooltip: l10n.activeTool,
             onPressed: () {
               shellProvider.showMenu = !shellProvider.showMenu;
             },
@@ -54,11 +62,11 @@ Widget floatingActionButtons(
           myFloatButton(
             icon: Icons.color_lens,
             foregroundColor: appProvider.preferences.brushColor,
-            tooltip: 'Color',
+            tooltip: l10n.colorLabel,
             onPressed: () {
               showColorPicker(
                 context: context,
-                title: 'Color',
+                title: l10n.colorLabel,
                 color: appProvider.preferences.brushColor,
                 onSelectedColor: (final Color color) {
                   appProvider.preferences.setBrushColor(color);
@@ -111,7 +119,10 @@ Widget floatingActionButtons(
           });
         },
         child: Text(
-          '${(appProvider.layers.scale * AppLimits.percentMax).toInt()}%\n${appProvider.layers.size.width.toInt()}\n${appProvider.layers.size.height.toInt()}',
+          _canvasZoomAndSizeFormat
+              .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
+              .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
+              .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
           textAlign: TextAlign.right,
           style: const TextStyle(
             color: AppColors.floatingButtonForeground,

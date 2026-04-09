@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
-import 'package:fpaint/models/localized_strings.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -18,31 +18,33 @@ class SidePanelTopMenu extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         const MainMenu(),
         if (shellProvider.isSidePanelExpanded)
           buildIconButton(
-            tooltip: strings[StringId.startOver]!,
+            tooltip: l10n.startOverTooltip,
             icon: Icons.power_settings_new_outlined,
             onPressed: () => onFileNew(context),
           ),
         if (shellProvider.isSidePanelExpanded)
           buildIconButton(
-            tooltip: strings[StringId.importTooltip]!,
+            tooltip: l10n.importTooltip,
             icon: Icons.file_download_outlined,
             onPressed: () => onFileOpen(context),
           ),
         if (shellProvider.isSidePanelExpanded)
           buildIconButton(
-            tooltip: strings[StringId.exportTooltip]!,
+            tooltip: l10n.exportTooltip,
             icon: Icons.ios_share_outlined,
             onPressed: () => sharePanel(context),
           ),
         if (shellProvider.isSidePanelExpanded) // Show when panel is expanded
           buildIconButton(
-            tooltip: strings[StringId.rotateCanvasTooltip]!,
+            tooltip: l10n.rotateCanvasTooltip,
             icon: Icons.rotate_90_degrees_cw_outlined,
             onPressed: () async {
               final AppProvider appProvider = AppProvider.of(context);
@@ -51,7 +53,7 @@ class SidePanelTopMenu extends StatelessWidget {
           ),
         if (!shellProvider.showMenu)
           buildIconButton(
-            tooltip: strings[StringId.exportTooltip]!,
+            tooltip: l10n.exportTooltip,
             icon: shellProvider.isSidePanelExpanded
                 ? Icons.keyboard_double_arrow_left
                 : Icons.keyboard_double_arrow_right,

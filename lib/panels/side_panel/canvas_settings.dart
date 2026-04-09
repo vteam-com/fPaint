@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
+
+const String _pxUnit = 'px';
 
 /// TextEditingController for the width input field.
 final TextEditingController widthController = TextEditingController();
@@ -26,6 +29,7 @@ void showCanvasSettings(final BuildContext context) {
   showModalBottomSheet<dynamic>(
     context: context,
     builder: (final BuildContext context) {
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
       final LayersProvider layers = LayersProvider.of(context, listen: true);
       if (initOnce) {
         widthController.text = layers.size.width.toInt().toString();
@@ -44,7 +48,7 @@ void showCanvasSettings(final BuildContext context) {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
-                'Canvas Size',
+                l10n.canvasSizeTitle,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(
@@ -56,10 +60,10 @@ void showCanvasSettings(final BuildContext context) {
                   SizedBox(
                     width: AppLayout.inputFieldWidth,
                     child: TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Width',
-                        suffixText: 'px',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.width,
+                        suffixText: _pxUnit,
+                        border: const OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
                       controller: widthController,
@@ -100,10 +104,10 @@ void showCanvasSettings(final BuildContext context) {
                   SizedBox(
                     width: AppLayout.inputFieldWidth,
                     child: TextField(
-                      decoration: const InputDecoration(
-                        labelText: 'Height',
-                        suffixText: 'px',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.height,
+                        suffixText: _pxUnit,
+                        border: const OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
                       controller: heightController,
@@ -125,7 +129,7 @@ void showCanvasSettings(final BuildContext context) {
               Column(
                 spacing: AppSpacing.md,
                 children: <Widget>[
-                  const Text('Content Alignment'),
+                  Text(l10n.contentAlignment),
                   NineGridSelector(
                     selectedPosition: layers.canvasResizePosition,
                     onPositionSelected: (final CanvasResizePosition newPosition) {
@@ -142,14 +146,14 @@ void showCanvasSettings(final BuildContext context) {
                     final double height = double.tryParse(heightController.text) ?? -1;
                     if (width == -1 || height == -1) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Invalid image size: Dimensions must be numbers.'),
+                        SnackBar(
+                          content: Text(l10n.invalidImageSizeDimensionsMustBeNumbers),
                         ),
                       );
                     } else if (width <= 0 || height <= 0) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Canvas dimensions must be positive.'),
+                        SnackBar(
+                          content: Text(l10n.canvasDimensionsMustBePositive),
                         ),
                       );
                     } else {
@@ -167,7 +171,7 @@ void showCanvasSettings(final BuildContext context) {
                       Navigator.pop(context);
                     }
                   },
-                  child: const Text('Apply'),
+                  child: Text(l10n.apply),
                 ),
               ),
             ],

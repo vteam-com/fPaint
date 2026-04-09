@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -19,13 +20,14 @@ class TextAttributesWidget extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: true);
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     return Column(
       children: <Widget>[
         // Font size
         ToolAttributeWidget(
           minimal: minimal,
-          name: 'Font Size',
+          name: l10n.fontSizeLabel,
           childLeft: IconButton(
             icon: const Icon(Icons.format_size),
             color: Colors.grey.shade500,
@@ -34,7 +36,7 @@ class TextAttributesWidget extends StatelessWidget {
             onPressed: () {
               showBrushSizePicker(
                 context: context,
-                title: 'Font Size',
+                title: l10n.fontSizeLabel,
                 value: appProvider.brushSize,
                 min: 1,
                 max: AppLimits.brushSizeMax.toDouble(),
@@ -47,7 +49,7 @@ class TextAttributesWidget extends StatelessWidget {
           childRight: minimal
               ? null
               : BrushSizePicker(
-                  title: 'Font Size',
+                  title: l10n.fontSizeLabel,
                   value: appProvider.brushSize,
                   min: 1,
                   max: AppLimits.brushSizeMax.toDouble(),
@@ -60,7 +62,7 @@ class TextAttributesWidget extends StatelessWidget {
         // Font color
         ToolAttributeWidget(
           minimal: minimal,
-          name: 'Font Color',
+          name: l10n.fontColor,
           childLeft: colorPreviewWithTransparentPaper(
             key: Keys.toolPanelFontColor,
             minimal: minimal,
@@ -68,7 +70,7 @@ class TextAttributesWidget extends StatelessWidget {
             onPressed: () {
               showColorPicker(
                 context: context,
-                title: 'Font Color',
+                title: l10n.fontColor,
                 color: appProvider.brushColor,
                 onSelectedColor: (final Color color) => appProvider.brushColor = color,
               );

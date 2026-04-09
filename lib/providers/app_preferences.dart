@@ -17,6 +17,7 @@ class AppPreferences {
   static const String keyLastFillColor = 'keyLastFillColor';
   static const String keySidePanelDistance = 'keySidePanelDistance';
   static const String keyUseApplePencil = 'keyUseApplePencil';
+  static const String keyLanguageCode = 'keyLanguageCode';
 
   // Default values
   double _sidePanelDistance = AppLayout.sidePanelTopDefault;
@@ -24,6 +25,7 @@ class AppPreferences {
   Color _brushColor = Colors.black;
   Color _fillColor = Colors.blue;
   bool _useApplePencil = true;
+  String? _languageCode;
 
   // Getters
 
@@ -41,6 +43,16 @@ class AppPreferences {
 
   /// Gets whether to use Apple Pencil only.
   bool get useApplePencil => _useApplePencil;
+
+  /// Gets the preferred app language code.
+  ///
+  /// Returns null to use system locale.
+  String? get languageCode => _languageCode;
+
+  /// Gets the preferred app locale.
+  ///
+  /// Returns null to use system locale.
+  Locale? get preferredLocale => _languageCode == null ? null : Locale(_languageCode!);
 
   /// Gets the SharedPreferences instance.
   Future<SharedPreferences> getPref() async {
@@ -84,6 +96,19 @@ class AppPreferences {
     (await getPref()).setBool(keyUseApplePencil, value);
   }
 
+  /// Sets the preferred app language code.
+  ///
+  /// Pass null to use the system locale.
+  Future<void> setLanguageCode(final String? value) async {
+    _languageCode = value;
+    final SharedPreferences prefs = await getPref();
+    if (value == null) {
+      await prefs.remove(keyLanguageCode);
+      return;
+    }
+    await prefs.setString(keyLanguageCode, value);
+  }
+
   /// Loads the preferences from SharedPreferences.
   Future<void> _loadPreferences() async {
     _prefs = await SharedPreferences.getInstance();
@@ -99,5 +124,7 @@ class AppPreferences {
     _fillColor = Color(_prefs!.getInt(keyLastFillColor) ?? Colors.blue.toARGB32());
 
     _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? AppDefaults.useApplePencil;
+
+    _languageCode = _prefs!.getString(keyLanguageCode);
   }
 }

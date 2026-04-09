@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:provider/provider.dart';
 
+const String _errorFallback = 'error';
+
 /// Manages the undo and redo stacks for the application.
 ///
 /// This class is a singleton that provides methods for recording actions,
@@ -113,7 +115,7 @@ class UndoProvider extends ChangeNotifier {
       return this.getActionsAsStrings(list, AppLimits.topColorCount).join('\n');
     } catch (error) {
       debugPrint(error.toString());
-      return 'error';
+      return _errorFallback;
     }
   }
 

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+const String _platformWindows = 'Windows';
+const String _platformAndroid = 'Android';
+const String _platformLinux = 'Linux';
 
 /// A page that displays the available platforms for the application.
 class PlatformsPage extends StatelessWidget {
@@ -8,8 +13,10 @@ class PlatformsPage extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Available Platforms')),
+      appBar: AppBar(title: Text(l10n.availablePlatforms)),
       body: Center(
         child: SizedBox(
           width: AppLayout.platformPageWidth,
@@ -19,19 +26,19 @@ class PlatformsPage extends StatelessWidget {
                 platformItem(
                   'macOS',
                   'assets/images/platforms/platformDesktopMacOS.png',
-                  'Desktop Software.',
+                  l10n.desktopSoftware,
                   'https://paint.vteam.com/downloads/flutter-macos-app.zip',
                 ),
                 platformItem(
-                  'Windows',
+                  _platformWindows,
                   'assets/images/platforms/platformDesktopWindows.png',
-                  'Desktop Software.',
+                  l10n.desktopSoftware,
                   'https://paint.vteam.com/downloads/flutter-windows-app.zip',
                 ),
                 platformItem(
-                  'Linux',
+                  _platformLinux,
                   'assets/images/platforms/platformDesktopLinux.png',
-                  'Desktop Software.',
+                  l10n.desktopSoftware,
                   'https://paint.vteam.com/downloads/flutter-linux-app.zip',
                 ),
                 const SizedBox(
@@ -40,22 +47,22 @@ class PlatformsPage extends StatelessWidget {
                 platformItem(
                   'iOS',
                   'assets/images/platforms/platformMobileIOS.png',
-                  'Mobile app.',
+                  l10n.mobileApp,
                   'https://apps.apple.com/us/app/cooking-timer-by-vteam/id1188460815',
                 ),
                 platformItem(
-                  'Android',
+                  _platformAndroid,
                   'assets/images/platforms/platformMobileAndroid.png',
-                  'Mobile app.',
+                  l10n.mobileApp,
                   'https://play.google.com/store/apps/details?id=com.vteam.cookingtimerflutter',
                 ),
                 const SizedBox(
                   height: AppSpacing.huge,
                 ),
                 platformItem(
-                  'Web Browser',
+                  l10n.webBrowser,
                   'assets/images/platforms/platformWeb.png',
-                  'Run on any OS with most browsers.',
+                  l10n.runOnMostBrowsers,
                   'https://paint.vteam.com',
                 ),
               ],

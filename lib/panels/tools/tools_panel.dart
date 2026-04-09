@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/panels/tools/tool_panel_picker.dart';
@@ -99,6 +100,8 @@ class ToolsPanel extends StatelessWidget {
     final BuildContext context,
     final AppProvider appProvider,
   ) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+
     widgets.add(
       ToolAttributeWidget(
         minimal: minimal,
@@ -115,6 +118,7 @@ class ToolsPanel extends StatelessWidget {
         childRight: minimal
             ? null
             : TolerancePicker(
+                title: l10n.tolerance,
                 value: appProvider.tolerance,
                 onChanged: (final int value) {
                   appProvider.tolerance = value;

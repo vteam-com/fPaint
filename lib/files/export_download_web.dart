@@ -8,6 +8,8 @@ import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:web/web.dart' as web;
 
+const String _htmlAnchorTag = 'a';
+
 /// Exports the current painter as a PNG image and triggers a download.
 ///
 /// This function captures the current painter's image bytes and creates a PNG
@@ -135,7 +137,7 @@ void downloadBlob(final Uint8List image, final String fileName) {
   final String url = web.URL.createObjectURL(blob);
 
   // Create an anchor element for downloading the file
-  final web.HTMLAnchorElement anchor = web.document.createElement('a') as web.HTMLAnchorElement;
+  final web.HTMLAnchorElement anchor = web.document.createElement(_htmlAnchorTag) as web.HTMLAnchorElement;
   anchor.href = url;
   anchor.target = '_blank';
   anchor.download = fileName;

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
@@ -10,11 +11,11 @@ import 'package:super_clipboard/super_clipboard.dart';
 ///
 /// If the app is running on the web, the action text will be "Download as [fileName]".
 /// Otherwise, it will be "Save as [fileName]".
-Widget textAction(final String fileName) {
-  final String action = kIsWeb ? 'Download' : 'Save';
-  final String text = '$action as "$fileName"';
-
-  return Text(text);
+Widget textAction(final String fileName, final AppLocalizations l10n) {
+  if (kIsWeb) {
+    return Text(l10n.downloadAsFile(fileName));
+  }
+  return Text(l10n.saveAsFile(fileName));
 }
 
 /// Displays a modal bottom sheet with options to share the canvas.
@@ -31,6 +32,8 @@ void sharePanel(final BuildContext context) {
   showModalBottomSheet<dynamic>(
     context: context,
     builder: (final BuildContext context) {
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
+
       return SafeArea(
         child: Padding(
           padding: const EdgeInsets.only(top: AppSpacing.xl + AppSpacing.xxxs),
@@ -39,7 +42,7 @@ void sharePanel(final BuildContext context) {
             children: <Widget>[
               ListTile(
                 leading: const Icon(Icons.copy),
-                title: const Text('Copy to clipboard'),
+                title: Text(l10n.copyToClipboard),
                 onTap: () {
                   Navigator.pop(context);
                   _onExportToClipboard(context);
@@ -47,7 +50,7 @@ void sharePanel(final BuildContext context) {
               ),
               ListTile(
                 leading: const Icon(Icons.download),
-                title: textAction('image.PNG'),
+                title: textAction('image.PNG', l10n),
                 onTap: () {
                   Navigator.pop(context);
                   onExportAsPng(layers);
@@ -55,7 +58,7 @@ void sharePanel(final BuildContext context) {
               ),
               ListTile(
                 leading: const Icon(Icons.download),
-                title: textAction('image.JPG'),
+                title: textAction('image.JPG', l10n),
                 onTap: () {
                   Navigator.pop(context);
                   onExportAsJpeg(layers);
@@ -63,7 +66,7 @@ void sharePanel(final BuildContext context) {
               ),
               ListTile(
                 leading: const Icon(Icons.download),
-                title: textAction('image.ORA'),
+                title: textAction('image.ORA', l10n),
                 onTap: () {
                   Navigator.pop(context);
                   onExportAsOra(layers);
@@ -71,7 +74,7 @@ void sharePanel(final BuildContext context) {
               ),
               ListTile(
                 leading: const Icon(Icons.download), // Or a more specific icon if available
-                title: textAction('image.TIFF'), // textAction is defined in this file
+                title: textAction('image.TIFF', l10n), // textAction is defined in this file
                 onTap: () {
                   Navigator.pop(context);
                   onExportAsTiff(layers); // This calls the function from the conditionally imported file

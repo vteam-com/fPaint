@@ -44,6 +44,18 @@ class AppProvider extends ChangeNotifier {
   /// The application preferences.
   final AppPreferences preferences = AppPreferences();
 
+  /// Preferred app locale, or null to follow system locale.
+  Locale? get preferredLocale => preferences.preferredLocale;
+
+  /// Preferred app language code, or null to follow system locale.
+  String? get languageCode => preferences.languageCode;
+
+  /// Sets the preferred app language code and notifies listeners.
+  Future<void> setLanguageCode(final String? value) async {
+    await preferences.setLanguageCode(value);
+    update();
+  }
+
   /// Whether the preferences are loaded.
   bool get isPreferencesLoaded => preferences.isLoaded;
 

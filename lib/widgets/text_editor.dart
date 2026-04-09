@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -47,6 +48,7 @@ class _TextEditorState extends State<TextEditor> {
 
   /// Displays the text editing dialog for the currently selected text object.
   void _showEditTextDialog() {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final TextEditingController controller = TextEditingController(text: textObject.text);
     double fontSize = textObject.size;
     Color textColor = textObject.color;
@@ -59,7 +61,7 @@ class _TextEditorState extends State<TextEditor> {
         return StatefulBuilder(
           builder: (final BuildContext context, final StateSetter setState) {
             return AlertDialog(
-              title: const Text('Edit Text'),
+              title: Text(l10n.editText),
               content: SizedBox(
                 width: AppLayout.dialogWidth,
                 child: Column(
@@ -72,9 +74,9 @@ class _TextEditorState extends State<TextEditor> {
                       autofocus: true,
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
-                      decoration: const InputDecoration(
-                        hintText: 'Enter your text here...',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        hintText: l10n.enterYourTextHere,
+                        border: const OutlineInputBorder(),
                       ),
                       style: TextStyle(
                         fontSize: fontSize,
@@ -86,7 +88,7 @@ class _TextEditorState extends State<TextEditor> {
                     const SizedBox(height: AppSpacing.xxl),
 
                     // Font size control
-                    Text('Font Size: ${fontSize.round()}'),
+                    Text(l10n.fontSizeValue(fontSize.round())),
                     Slider(
                       value: fontSize,
                       min: AppSpacing.sm + AppMath.pair.toDouble(),
@@ -145,7 +147,7 @@ class _TextEditorState extends State<TextEditor> {
                             onPressed: () async {
                               showColorPicker(
                                 context: context,
-                                title: 'Text Color',
+                                title: l10n.textColor,
                                 color: textColor,
                                 onSelectedColor: (final Color color) {
                                   setState(() {
@@ -163,14 +165,14 @@ class _TextEditorState extends State<TextEditor> {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: const Text('Delete'),
+                  child: Text(l10n.delete),
                   onPressed: () {
                     _deleteText();
                     Navigator.of(context).pop();
                   },
                 ),
                 TextButton(
-                  child: const Text('Cancel'),
+                  child: Text(l10n.cancel),
                   onPressed: () {
                     appProvider.selectedTextObject = null;
                     appProvider.update();
@@ -178,7 +180,7 @@ class _TextEditorState extends State<TextEditor> {
                   },
                 ),
                 TextButton(
-                  child: const Text('Apply'),
+                  child: Text(l10n.apply),
                   onPressed: () {
                     if (controller.text.isNotEmpty) {
                       textObject.text = controller.text;

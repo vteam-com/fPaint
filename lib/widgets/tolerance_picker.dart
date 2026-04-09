@@ -1,6 +1,7 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/base_picker.dart';
 
 /// A widget that allows the user to pick a tolerance value using a slider.
@@ -8,9 +9,10 @@ class TolerancePicker extends BasePicker<int> {
   /// Creates a [TolerancePicker].
   const TolerancePicker({
     super.key,
+    required super.title,
     required super.value,
     required super.onChanged,
-  }) : super(title: 'Tolerance', min: 1, max: AppLimits.percentMax, divisions: AppLimits.sliderDivisions);
+  }) : super(min: 1, max: AppLimits.percentMax, divisions: AppLimits.sliderDivisions);
 
   @override
   TolerancePickerState createState() => TolerancePickerState();
@@ -50,10 +52,13 @@ void showTolerancePicker(
   showDialog<dynamic>(
     context: context,
     builder: (final BuildContext _) {
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
+
       return AlertDialog(
-        title: const Text('Color Tolerance'),
+        title: Text(l10n.colorTolerance),
         content: IntrinsicHeight(
           child: TolerancePicker(
+            title: l10n.tolerance,
             value: value.toInt(),
             onChanged: (final int newValue) {
               onChanged(newValue);

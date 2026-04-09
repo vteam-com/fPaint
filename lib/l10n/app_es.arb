@@ -1,0 +1,161 @@
+{
+  "@@locale": "es",
+  "about": "Acerca de...",
+  "activeTool": "Herramienta activa",
+  "addText": "Agregar texto",
+  "apply": "Aplicar",
+  "availablePlatforms": "Plataformas disponibles",
+  "blendModeColorBurnDescription": "Oscurece el destino aumentando el contraste basado en el color de origen.",
+  "blendModeColorDescription": "Usa el tono y saturación del origen, pero mantiene la luminancia del destino.",
+  "blendModeColorDodgeDescription": "Aclara el destino reduciendo el contraste basado en el color de origen.",
+  "blendModeDarkenDescription": "Conserva el color más oscuro de los píxeles de origen y destino.",
+  "blendModeHardLightDescription": "Aplica multiplicar o pantalla según la intensidad del color de origen, creando un contraste fuerte.",
+  "blendModeHueDescription": "Usa el tono del origen y la saturación y luminancia del destino.",
+  "blendModeLightenDescription": "Conserva el color más claro de los píxeles de origen y destino.",
+  "blendModeLinearDodgeDescription": "Suma los colores de origen y destino, limitando a blanco.",
+  "blendModeLuminosityDescription": "Usa la luminancia del origen y el tono y saturación del destino.",
+  "blendModeMultiplyDescription": "Multiplica los colores de origen y destino, produciendo una salida más oscura.",
+  "blendModeNormalDescription": "Coloca la imagen de origen sobre el destino sin mezclar.",
+  "blendModeNormalLabel": "Normal",
+  "blendModeOverlayDescription": "Combina los modos multiplicar y pantalla: oscurece las áreas oscuras y aclara las claras.",
+  "blendModeSaturationDescription": "Usa la saturación del origen y el tono y luminancia del destino.",
+  "blendModeScreenDescription": "Multiplica los inversos del origen y destino, produciendo una salida más clara.",
+  "blendModeSoftLightDescription": "Suaviza el contraste oscureciendo o aclarando el destino según el origen.",
+  "brush": "Pincel",
+  "brushStyle": "Estilo de pincel",
+  "cancel": "Cancelar",
+  "canvas": "Lienzo...",
+  "canvasDimensionsMustBePositive": "Las dimensiones del lienzo deben ser positivas.",
+  "canvasSizeTitle": "Tamano del lienzo",
+  "colorLabel": "Color",
+  "colorTolerance": "Tolerancia de color",
+  "colorUsage": "Uso {percentage}",
+  "@colorUsage": {
+    "placeholders": {
+      "percentage": {}
+    }
+  },
+  "contentAlignment": "Alineacion del contenido",
+  "copyToClipboard": "Copiar al portapapeles",
+  "create": "Crear",
+  "delete": "Eliminar",
+  "desktopSoftware": "Aplicacion de escritorio.",
+  "deviceScreenResolution": "Resolucion de pantalla: {resolution}",
+  "@deviceScreenResolution": {
+    "placeholders": {
+      "resolution": {}
+    }
+  },
+  "discard": "Descartar",
+  "discardAndOpen": "Descartar y abrir",
+  "discardCurrentDocumentQuestion": "Descartar el documento actual?",
+  "downloadAsFile": "Descargar como {fileName}",
+  "@downloadAsFile": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "editText": "Editar texto",
+  "enterYourTextHere": "Escribe tu texto aqui...",
+  "errorProcessingFile": "Error al procesar archivo: {error}",
+  "@errorProcessingFile": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorReadingFile": "Error al leer archivo: {error}",
+  "@errorReadingFile": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "exportLabel": "Exportar...",
+  "exportTooltip": "Exportar...",
+  "failedToLoadImage": "No se pudo cargar la imagen: {error}",
+  "@failedToLoadImage": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "fileFormatNotSupported": "El formato de archivo .{extension} no es compatible",
+  "@fileFormatNotSupported": {
+    "placeholders": {
+      "extension": {}
+    }
+  },
+  "fontColor": "Color de fuente",
+  "fontSizeLabel": "Tamano de fuente",
+  "fontSizeValue": "Tamano de fuente: {value}",
+  "@fontSizeValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "fpaintLoadImage": "fPaint Cargar imagen",
+  "githubRepo": "Repositorio GitHub",
+  "gradientPointColor": "Color del punto de degradado",
+  "height": "Alto",
+  "hexColor": "Color Hex",
+  "hexColorCopiedToClipboard": "Color Hex copiado al portapapeles",
+  "importLabel": "Importar...",
+  "importTooltip": "Importar...",
+  "invalidImageSizeDimensionsMustBeNumbers": "Tamano de imagen invalido: las dimensiones deben ser numeros.",
+  "invalidSize": "Tamano invalido",
+  "keyboardShortcuts": "Atajos de teclado",
+  "languageEnglish": "Ingles",
+  "languageFrench": "Frances",
+  "languageLabel": "Idioma",
+  "languageSpanish": "Espanol",
+  "languageSubtitle": "Elige el idioma de la aplicacion o usa el del sistema",
+  "languageSystem": "Predeterminado del sistema",
+  "menuTooltip": "Menu principal",
+  "mobileApp": "Aplicacion movil.",
+  "newCanvasSize": "Tamano del nuevo lienzo",
+  "newFromClipboard": "Nuevo desde el portapapeles",
+  "no": "No",
+  "platforms": "Disponible en...",
+  "rotateCanvasTooltip": "Girar lienzo 90 grados en sentido horario",
+  "runOnMostBrowsers": "Funciona en la mayoria de navegadores.",
+  "saveAsFile": "Guardar como {fileName}",
+  "@saveAsFile": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "savedMessage": "Guardado {fileName}",
+  "@savedMessage": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "saveLoadedFile": "Guardar \"{fileName}\"",
+  "@saveLoadedFile": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "selectionIsHidden": "La seleccion esta oculta.",
+  "selectValue": "Seleccionar {value}",
+  "@selectValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "settings": "Configuracion...",
+  "startOver": "Nuevo...",
+  "startOverTooltip": "Nuevo...",
+  "textColor": "Color de texto",
+  "tolerance": "Tolerancia",
+  "topColors": "Top {count} colores",
+  "@topColors": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "unsavedChanges": "Cambios no guardados",
+  "unsavedChangesDiscardAndOpenPrompt": "Tienes cambios no guardados. Quieres descartarlos y abrir el nuevo archivo?",
+  "useApplePencilOnlySubtitle": "Si esta activado, solo se usara el Apple Pencil para dibujar.",
+  "useApplePencilOnlyTitle": "Usar solo Apple Pencil",
+  "webBrowser": "Navegador web",
+  "width": "Ancho"
+}

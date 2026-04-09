@@ -5,7 +5,11 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+
+const String _fpaintSaveImageTitle = 'fPaint Save Image';
+const String _fpaintSaveImageAsTiffTitle = 'fPaint Save Image as TIFF';
 
 /// Exports the current painter content as a PNG image file.
 ///
@@ -29,9 +33,9 @@ Future<void> onExportAsPng(
   final String fileName = 'image.png',
 ]) async {
   await _exportWithFilePicker(
-    dialogTitle: 'fPaint Save Image',
+    dialogTitle: _fpaintSaveImageTitle,
     fileName: fileName,
-    allowedExtensions: <String>['png'],
+    allowedExtensions: <String>[FileExtensions.png],
     onFileSelected: (final String filePath) => saveAsPng(layers, filePath),
   );
 }
@@ -162,9 +166,9 @@ Future<void> onExportAsTiff(
   final String fileName = 'image.tiff',
 ]) async {
   await _exportWithFilePicker(
-    dialogTitle: 'fPaint Save Image as TIFF',
+    dialogTitle: _fpaintSaveImageAsTiffTitle,
     fileName: fileName,
-    allowedExtensions: <String>['tif', 'tiff'],
+    allowedExtensions: <String>[FileExtensions.tif, FileExtensions.tiff],
     onFileSelected: (final String filePath) => saveAsTiff(layers, filePath),
   );
 }

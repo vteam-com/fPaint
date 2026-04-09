@@ -10,6 +10,39 @@ import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:xml/xml.dart';
 
+// ORA file format element and attribute identifiers
+const String _oraElementImage = 'image';
+const String _oraElementStack = 'stack';
+const String _oraElementLayer = 'layer';
+const String _oraAttrWidth = 'w';
+const String _oraAttrHeight = 'h';
+const String _oraAttrName = 'name';
+const String _oraAttrVersion = 'version';
+const String _oraAttrVisibility = 'visibility';
+const String _oraAttrOpacity = 'opacity';
+const String _oraAttrSrc = 'src';
+const String _oraAttrX = 'x';
+const String _oraAttrY = 'y';
+const String _oraVisibilityVisible = 'visible';
+const String _oraVisibilityHidden = 'hidden';
+const String _oraXmlProcessingTarget = 'xml';
+const String _oraXmlEncoding = 'version="1.0" encoding="UTF-8"';
+const String _oraMimetypeEntry = 'mimetype';
+
+// SVG composite operation identifiers used in the ORA format
+const String _svgSourceOver = 'svg:source-over';
+const String _svgMultiply = 'svg:multiply';
+const String _svgScreen = 'svg:screen';
+const String _svgOverlay = 'svg:overlay';
+const String _svgDarken = 'svg:darken';
+const String _svgLighten = 'svg:lighten';
+const String _svgColorDodge = 'svg:color-dodge';
+const String _svgColorBurn = 'svg:color-burn';
+const String _svgHardLight = 'svg:hard-light';
+const String _svgSoftLight = 'svg:soft-light';
+const String _svgDifference = 'svg:difference';
+const String _svgExclusion = 'svg:exclusion';
+
 /// Reads an ORA file and updates the provided [AppProvider] with its contents.
 ///
 /// This function asynchronously reads the ORA file located at the given [filePath]
@@ -74,13 +107,13 @@ Future<void> importFromOraXml(
   final LayersProvider layers,
   final XmlDocument xmlDoc,
 ) async {
-  final XmlElement? xmlElementImage = xmlDoc.getElement('image');
+  final XmlElement? xmlElementImage = xmlDoc.getElement(_oraElementImage);
   layers.size = ui.Size(
-    double.parse(xmlElementImage!.getAttribute('w')!),
-    double.parse(xmlElementImage.getAttribute('h')!),
+    double.parse(xmlElementImage!.getAttribute(_oraAttrWidth)!),
+    double.parse(xmlElementImage.getAttribute(_oraAttrHeight)!),
   );
 
-  final XmlElement? xmlElementTopStack = xmlElementImage.getElement('stack');
+  final XmlElement? xmlElementTopStack = xmlElementImage.getElement(_oraElementStack);
   await importStack(archive, layers, xmlElementTopStack);
 }
 
@@ -91,12 +124,12 @@ Future<void> importStack(
   final XmlElement? xmlElementTopStack,
 ) async {
   if (xmlElementTopStack != null) {
-    final String stackName = xmlElementTopStack.getAttribute('name') ?? '';
+    final String stackName = xmlElementTopStack.getAttribute(_oraAttrName) ?? '';
     for (final XmlElement xmlElementchild in xmlElementTopStack.childElements) {
-      if (xmlElementchild.localName == 'stack') {
+      if (xmlElementchild.localName == _oraElementStack) {
         await importStack(archive, layers, xmlElementchild);
       } else {
-        if (xmlElementchild.localName == 'layer') {
+        if (xmlElementchild.localName == _oraElementLayer) {
           await addLayer(archive, layers, stackName, xmlElementchild);
         }
       }
@@ -111,9 +144,9 @@ Future<void> addLayer(
   final String stackName,
   final XmlElement xmlLayer,
 ) async {
-  final String name = xmlLayer.getAttribute('name') ?? 'Unnamed';
-  final String opacityAsText = xmlLayer.getAttribute('opacity') ?? '1';
-  final String visibleAsText = xmlLayer.getAttribute('visible') ?? 'true';
+  final String name = xmlLayer.getAttribute(_oraAttrName) ?? 'Unnamed';
+  final String opacityAsText = xmlLayer.getAttribute(_oraAttrOpacity) ?? '1';
+  final String visibleAsText = xmlLayer.getAttribute(_oraAttrVisibility) ?? 'true';
   final String compositeOp = xmlLayer.getAttribute('composite-op') ?? 'svg:src-over';
 
   final bool preserveAlpha = xmlLayer.getAttribute('alpha-preserve') == 'true';
@@ -124,10 +157,10 @@ Future<void> addLayer(
   newLayer.opacity = double.parse(opacityAsText);
 
   // is there an image on this layer?
-  final String? src = xmlLayer.getAttribute('src');
+  final String? src = xmlLayer.getAttribute(_oraAttrSrc);
   if (src != null) {
-    final String? xAsText = xmlLayer.getAttribute('x');
-    final String? yAsText = xmlLayer.getAttribute('y');
+    final String? xAsText = xmlLayer.getAttribute(_oraAttrX);
+    final String? yAsText = xmlLayer.getAttribute(_oraAttrY);
 
     final ui.Offset offset = ui.Offset(
       double.parse(xAsText ?? '0'),
@@ -157,29 +190,29 @@ Future<void> addLayer(
 ///
 ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
   switch (compositeOp) {
-    case 'svg:source-over':
+    case _svgSourceOver:
       return ui.BlendMode.srcOver;
-    case 'svg:multiply':
+    case _svgMultiply:
       return ui.BlendMode.multiply;
-    case 'svg:screen':
+    case _svgScreen:
       return ui.BlendMode.screen;
-    case 'svg:overlay':
+    case _svgOverlay:
       return ui.BlendMode.overlay;
-    case 'svg:darken':
+    case _svgDarken:
       return ui.BlendMode.darken;
-    case 'svg:lighten':
+    case _svgLighten:
       return ui.BlendMode.lighten;
-    case 'svg:color-dodge':
+    case _svgColorDodge:
       return ui.BlendMode.colorDodge;
-    case 'svg:color-burn':
+    case _svgColorBurn:
       return ui.BlendMode.colorBurn;
-    case 'svg:hard-light':
+    case _svgHardLight:
       return ui.BlendMode.hardLight;
-    case 'svg:soft-light':
+    case _svgSoftLight:
       return ui.BlendMode.softLight;
-    case 'svg:difference':
+    case _svgDifference:
       return ui.BlendMode.difference;
-    case 'svg:exclusion':
+    case _svgExclusion:
       return ui.BlendMode.exclusion;
     default:
       return ui.BlendMode.srcOver;
@@ -267,7 +300,7 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
   // Add uncompressed mimetype
   archive.addFile(
     ArchiveFile(
-      'mimetype',
+      _oraMimetypeEntry,
       'image/openraster'.length,
       utf8.encode('image/openraster'),
     ),
@@ -296,32 +329,32 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
 
     layersData.add(<String, dynamic>{
       'parentGroupName': layer.parentGroupName,
-      'name': layer.name,
-      'visibility': layer.isVisible ? 'visible' : 'hidden',
-      'opacity': layer.opacity.toStringAsFixed(AppLimits.opacityPrecision),
-      'src': imageName,
-      'x': 0,
-      'y': 0,
+      _oraAttrName: layer.name,
+      _oraAttrVisibility: layer.isVisible ? _oraVisibilityVisible : _oraVisibilityHidden,
+      _oraAttrOpacity: layer.opacity.toStringAsFixed(AppLimits.opacityPrecision),
+      _oraAttrSrc: imageName,
+      _oraAttrX: 0,
+      _oraAttrY: 0,
     });
   }
 
   // Create stack.xml synchronously
-  builder.processing('xml', 'version="1.0" encoding="UTF-8"');
+  builder.processing(_oraXmlProcessingTarget, _oraXmlEncoding);
   builder.element(
-    'image',
+    _oraElementImage,
     nest: () {
-      builder.attribute('version', '0.0.1');
+      builder.attribute(_oraAttrVersion, '0.0.1');
       builder.attribute(
-        'w',
+        _oraAttrWidth,
         layers.size.width.toInt().toString(),
       );
       builder.attribute(
-        'h',
+        _oraAttrHeight,
         layers.size.height.toInt().toString(),
       );
 
       builder.element(
-        'stack',
+        _oraElementStack,
         nest: () {
           final Map<String, List<Map<String, dynamic>>> groupedLayers = <String, List<Map<String, dynamic>>>{};
           final List<Map<String, dynamic>> ungroupedLayers = <Map<String, dynamic>>[];
@@ -343,9 +376,9 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
 
           for (final String groupName in groupedLayers.keys) {
             builder.element(
-              'stack',
+              _oraElementStack,
               nest: () {
-                builder.attribute('name', groupName);
+                builder.attribute(_oraAttrName, groupName);
                 buildLayers(builder, groupedLayers[groupName]!);
               },
             );
@@ -387,14 +420,14 @@ void buildLayers(
 ) {
   for (final Map<String, dynamic> layerData in layersData) {
     builder.element(
-      'layer',
+      _oraElementLayer,
       nest: () {
-        builder.attribute('name', layerData['name']);
-        builder.attribute('visibility', layerData['visibility']);
-        builder.attribute('opacity', layerData['opacity']);
-        builder.attribute('src', layerData['src']);
-        builder.attribute('x', layerData['x']);
-        builder.attribute('y', layerData['y']);
+        builder.attribute(_oraAttrName, layerData[_oraAttrName]);
+        builder.attribute(_oraAttrVisibility, layerData[_oraAttrVisibility]);
+        builder.attribute(_oraAttrOpacity, layerData[_oraAttrOpacity]);
+        builder.attribute(_oraAttrSrc, layerData[_oraAttrSrc]);
+        builder.attribute(_oraAttrX, layerData[_oraAttrX]);
+        builder.attribute(_oraAttrY, layerData[_oraAttrY]);
       },
     );
   }

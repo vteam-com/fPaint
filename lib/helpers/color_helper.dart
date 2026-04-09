@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 
+const String _hexOpaqueAlpha = 'FF';
+const String _colorPercentageTiny = '<0.1%';
+
 /// Collection of color utility functions for:
 /// - Color manipulation (tinting, brightness, opacity)
 /// - Format conversion (hex, HSL, RGB)
@@ -137,7 +140,7 @@ Color contrastColor(final Color color) {
 Color getColorFromString(final String hexColor) {
   String newHexColor = hexColor.trim().replaceAll('#', '');
   if (newHexColor.length == AppLimits.hexRgbLength) {
-    newHexColor = 'FF$newHexColor';
+    newHexColor = '$_hexOpaqueAlpha$newHexColor';
   }
   if (newHexColor.length == AppLimits.hexArgbLength) {
     return Color(int.parse('0x$newHexColor'));
@@ -178,7 +181,7 @@ class ColorUsage {
   /// when very low precision is requested.
   String toStringPercentage([final int decimals = AppMath.triple]) {
     if (decimals < AppMath.pair && this.percentage < AppMath.tinyPercentage) {
-      return '<0.1%';
+      return _colorPercentageTiny;
     }
     return '${(this.percentage * AppLimits.percentMax).toStringAsFixed(decimals)}%';
   }

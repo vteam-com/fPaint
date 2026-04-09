@@ -1,0 +1,170 @@
+{
+  "@@locale": "en",
+  "about": "About...",
+  "activeTool": "Active tool",
+  "addText": "Add Text",
+  "apply": "Apply",
+  "availablePlatforms": "Available Platforms",
+  "blendModeColorBurnDescription": "Darkens the destination by increasing contrast based on the source color.",
+  "blendModeColorDescription": "Uses the source's hue and saturation, but keeps the destination's luminance.",
+  "blendModeColorDodgeDescription": "Brightens the destination by reducing contrast based on the source color.",
+  "blendModeDarkenDescription": "Keeps the darker color of the source and destination pixels.",
+  "blendModeHardLightDescription": "Applies multiply or screen based on the source color's intensity, creating a strong contrast.",
+  "blendModeHueDescription": "Uses the source's hue and the destination's saturation and luminance.",
+  "blendModeLightenDescription": "Keeps the lighter color of the source and destination pixels.",
+  "blendModeLinearDodgeDescription": "Adds the source and destination colors, clamping at white.",
+  "blendModeLuminosityDescription": "Uses the source's luminance and the destination's hue and saturation.",
+  "blendModeMultiplyDescription": "Multiplies the source and destination colors, resulting in a darker output.",
+  "blendModeNormalDescription": "Places the source image over the destination without blending.",
+  "blendModeNormalLabel": "Normal",
+  "@blendModeNormalLabel": {
+    "description": "REVIEWED"
+  },
+  "blendModeOverlayDescription": "Combines multiply and screen modes: darkens dark areas, and lightens light areas.",
+  "blendModeSaturationDescription": "Uses the source's saturation and the destination's hue and luminance.",
+  "blendModeScreenDescription": "Multiplies the inverses of the source and destination, resulting in a lighter output.",
+  "blendModeSoftLightDescription": "Softens the contrast by darkening or lightening the destination depending on the source.",
+  "brush": "Brush",
+  "brushStyle": "Brush Style",
+  "cancel": "Cancel",
+  "canvas": "Canvas...",
+  "canvasDimensionsMustBePositive": "Canvas dimensions must be positive.",
+  "canvasSizeTitle": "Canvas Size",
+  "colorLabel": "Color",
+  "@colorLabel": {
+    "description": "REVIEWED"
+  },
+  "colorTolerance": "Color Tolerance",
+  "colorUsage": "Usage {percentage}",
+  "@colorUsage": {
+    "placeholders": {
+      "percentage": {}
+    }
+  },
+  "contentAlignment": "Content Alignment",
+  "copyToClipboard": "Copy to clipboard",
+  "create": "Create",
+  "delete": "Delete",
+  "desktopSoftware": "Desktop Software.",
+  "deviceScreenResolution": "Device Screen Resolution: {resolution}",
+  "@deviceScreenResolution": {
+    "placeholders": {
+      "resolution": {}
+    }
+  },
+  "discard": "Discard",
+  "discardAndOpen": "Discard and Open",
+  "discardCurrentDocumentQuestion": "Discard current document?",
+  "downloadAsFile": "Download as {fileName}",
+  "@downloadAsFile": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "editText": "Edit Text",
+  "enterYourTextHere": "Enter your text here...",
+  "errorProcessingFile": "Error processing file: {error}",
+  "@errorProcessingFile": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorReadingFile": "Error reading file: {error}",
+  "@errorReadingFile": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "exportLabel": "Export...",
+  "exportTooltip": "Export...",
+  "failedToLoadImage": "Failed to load image: {error}",
+  "@failedToLoadImage": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "fileFormatNotSupported": "File format .{extension} is not supported",
+  "@fileFormatNotSupported": {
+    "placeholders": {
+      "extension": {}
+    }
+  },
+  "fontColor": "Font Color",
+  "fontSizeLabel": "Font Size",
+  "fontSizeValue": "Font Size: {value}",
+  "@fontSizeValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "fpaintLoadImage": "fPaint Load Image",
+  "githubRepo": "GitHub Repo",
+  "gradientPointColor": "Gradient Point Color",
+  "height": "Height",
+  "hexColor": "Hex Color",
+  "hexColorCopiedToClipboard": "Hex Color copied to clipboard",
+  "importLabel": "Import...",
+  "importTooltip": "Import...",
+  "invalidImageSizeDimensionsMustBeNumbers": "Invalid image size: Dimensions must be numbers.",
+  "invalidSize": "Invalid size",
+  "keyboardShortcuts": "Keyboard Shortcuts",
+  "languageEnglish": "English",
+  "languageFrench": "French",
+  "languageLabel": "Language",
+  "languageSpanish": "Spanish",
+  "languageSubtitle": "Choose app language or follow system",
+  "languageSystem": "System default",
+  "menuTooltip": "Menu",
+  "mobileApp": "Mobile app.",
+  "newCanvasSize": "New Canvas Size",
+  "newFromClipboard": "New from Clipboard",
+  "no": "No",
+  "@no": {
+    "description": "REVIEWED"
+  },
+  "platforms": "Available on...",
+  "rotateCanvasTooltip": "Rotate Canvas 90° CW",
+  "runOnMostBrowsers": "Run on any OS with most browsers.",
+  "saveAsFile": "Save as {fileName}",
+  "@saveAsFile": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "savedMessage": "Saved {fileName}",
+  "@savedMessage": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "saveLoadedFile": "Save \"{fileName}\"",
+  "@saveLoadedFile": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "selectionIsHidden": "Selection is hidden.",
+  "selectValue": "Select {value}",
+  "@selectValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "settings": "Settings...",
+  "startOver": "Start new...",
+  "startOverTooltip": "Start new...",
+  "textColor": "Text Color",
+  "tolerance": "Tolerance",
+  "topColors": "Top {count} colors",
+  "@topColors": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "unsavedChanges": "Unsaved Changes",
+  "unsavedChangesDiscardAndOpenPrompt": "You have unsaved changes. Do you want to discard them and open the new file?",
+  "useApplePencilOnlySubtitle": "If enabled, only the Apple Pencil will be used for drawing.",
+  "useApplePencilOnlyTitle": "Use Apple Pencil Only",
+  "webBrowser": "Web Browser",
+  "width": "Width"
+}
