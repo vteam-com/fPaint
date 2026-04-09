@@ -104,6 +104,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
+    final BorderSide popupBorder = BorderSide(
+      color: Colors.white.withValues(alpha: AppVisual.popupBorderAlpha),
+      width: AppStroke.thin,
+    );
+
+    final RoundedRectangleBorder popupShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(AppRadius.md),
+      side: popupBorder,
+    );
+
     return MultiProvider(
       providers: <SingleChildWidget>[
         // ignore: always_specify_types
@@ -124,6 +134,19 @@ class MyApp extends StatelessWidget {
           colorScheme: const ColorScheme.dark(
             primary: AppColors.primary,
             secondary: AppColors.secondary,
+          ),
+          dialogTheme: DialogThemeData(
+            backgroundColor: AppColors.surface,
+            shape: popupShape,
+          ),
+          popupMenuTheme: PopupMenuThemeData(
+            color: AppColors.surface,
+            shape: popupShape,
+          ),
+          bottomSheetTheme: BottomSheetThemeData(
+            backgroundColor: AppColors.surface,
+            modalBackgroundColor: AppColors.surface,
+            shape: popupShape,
           ),
           sliderTheme: SliderThemeData(
             activeTrackColor: AppColors.secondary,

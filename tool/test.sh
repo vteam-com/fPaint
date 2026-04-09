@@ -55,53 +55,17 @@ run_integration_file_once() {
   flutter test "$test_file" --reporter=compact -d macos 2>&1 | tee "$log_file"
 }
 
-is_transient_launch_failure() {
-  local log_file="$1"
-
-  grep -E -q \
-    "Error waiting for a debug connection|Unable to start the app on the device|The log reader stopped unexpectedly|Failed to foreground app; open returned 1" \
-    "$log_file"
-}
-
-run_integration_file_with_retry() {
-  local test_file="$1"
-  local max_attempts=3
-  local attempt=1
-
-  while (( attempt <= max_attempts )); do
-    local log_file
-    log_file="$(mktemp -t fpaint_integration_test.XXXXXX.log)"
-
-    cleanup_desktop_test_processes
-    echo "Attempt $attempt/$max_attempts: $test_file"
-
-    if run_integration_file_once "$test_file" "$log_file"; then
-      rm -f "$log_file"
-      return 0
-    fi
-
-    if (( attempt == max_attempts )); then
-      echo "Integration test failed after $max_attempts attempts: $test_file"
-      echo "Last attempt log: $log_file"
-      return 1
-    fi
-
-    if is_transient_launch_failure "$log_file"; then
-      echo "Detected transient macOS launch/attach failure. Retrying: $test_file"
-      rm -f "$log_file"
-    else
-      echo "Integration test failed with non-transient error: $test_file"
-      echo "Failure log: $log_file"
-      return 1
-    fi
-
-    ((attempt++))
-  done
-}
-
 for test_file in "${integration_files[@]}"; do
   echo "Running integration test: $test_file"
-  run_integration_file_with_retry "$test_file"
+  log_file="$(mktemp -t fpaint_integration_test.XXXXXX.log)"
+  cleanup_desktop_test_processes
+  if run_integration_file_once "$test_file" "$log_file"; then
+    rm -f "$log_file"
+  else
+    echo "Integration test failed: $test_file"
+    echo "Failure log: $log_file"
+    exit 1
+  fi
 done
 
 echo "All unit and integration tests passed."
