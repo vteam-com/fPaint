@@ -4,6 +4,10 @@ import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 
+const String _selectorCoordinatesFormat = '{x}\n{y}';
+const String _placeholderX = '{x}';
+const String _placeholderY = '{y}';
+
 /// A widget that displays a selection rectangle with handles for resizing and moving.
 class SelectionRectWidget extends StatefulWidget {
   /// Creates a [SelectionRectWidget].
@@ -210,7 +214,9 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
             child: showCoordinate
                 ? Center(
                     child: Text(
-                      '${position.dx.toInt()}\n${position.dy.toInt()}',
+                      _selectorCoordinatesFormat
+                          .replaceFirst(_placeholderX, position.dx.toInt().toString())
+                          .replaceFirst(_placeholderY, position.dy.toInt().toString()),
                       textAlign: TextAlign.center,
                       style: const TextStyle(fontSize: AppSpacing.sm, color: Colors.white),
                     ),

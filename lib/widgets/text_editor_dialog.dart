@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 
@@ -52,8 +53,10 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
 
   @override
   Widget build(final BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+
     return AlertDialog(
-      title: const Text('Add Text'),
+      title: Text(l10n.addText),
       content: SizedBox(
         width: AppLayout.dialogWidth,
         child: Column(
@@ -66,9 +69,9 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
               autofocus: true,
               maxLines: null,
               keyboardType: TextInputType.multiline,
-              decoration: const InputDecoration(
-                hintText: 'Enter your text here...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: l10n.enterYourTextHere,
+                border: const OutlineInputBorder(),
               ),
               style: TextStyle(
                 fontSize: _fontSize,
@@ -80,7 +83,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
             const SizedBox(height: AppSpacing.xxl),
 
             // Font size control
-            Text('Font Size: ${_fontSize.round()}'),
+            Text(l10n.fontSizeValue(_fontSize.round())),
             Slider(
               value: _fontSize,
               min: AppSpacing.sm + AppMath.pair.toDouble(),
@@ -139,7 +142,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                     onPressed: () async {
                       showColorPicker(
                         context: context,
-                        title: 'Text Color',
+                        title: l10n.textColor,
                         color: _textColor,
                         onSelectedColor: (final Color color) {
                           setState(() {
@@ -157,13 +160,13 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
       ),
       actions: <Widget>[
         TextButton(
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         TextButton(
-          child: const Text('Add Text'),
+          child: Text(l10n.addText),
           onPressed: () {
             if (_controller.text.isNotEmpty) {
               widget.onFinished(

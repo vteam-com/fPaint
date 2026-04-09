@@ -168,6 +168,16 @@ class AppDefaults {
   static const bool useApplePencil = false;
 }
 
+/// File extension identifiers used across import/export/save operations.
+class FileExtensions {
+  static const String png = 'png';
+  static const String jpg = 'jpg';
+  static const String jpeg = 'jpeg';
+  static const String ora = 'ora';
+  static const String tif = 'tif';
+  static const String tiff = 'tiff';
+}
+
 /// Shared widget keys used by tests and UI lookups across the app.
 class Keys {
   static Key floatActionZoomIn = const Key('floating_action_zoom_in');

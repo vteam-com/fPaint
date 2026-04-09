@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
+
+const String _blendModeNormalFallback = 'Normal';
 
 /// A comprehensive mapping of blend modes supported by the fPaint application.
 ///
@@ -13,66 +16,66 @@ import 'package:fpaint/helpers/constants.dart';
 /// - Overlay/Soft Light/Hard Light: Contrast adjustments
 /// - Color operations: Hue, Saturation, Color, Luminosity adjustments
 /// - Dodge/Burn: Contrast modifications
-final Map<String, Map<String, Object>> supportedBlendModes = <String, Map<String, Object>>{
+Map<String, Map<String, Object>> getSupportedBlendModes(final AppLocalizations l10n) => <String, Map<String, Object>>{
   'Normal': <String, Object>{
     'flutterBlendMode': BlendMode.srcOver,
-    'description': 'Places the source image over the destination without blending.',
+    'description': l10n.blendModeNormalDescription,
   },
   'Darken': <String, Object>{
     'flutterBlendMode': BlendMode.darken,
-    'description': 'Keeps the darker color of the source and destination pixels.',
+    'description': l10n.blendModeDarkenDescription,
   },
   'Multiply': <String, Object>{
     'flutterBlendMode': BlendMode.multiply,
-    'description': 'Multiplies the source and destination colors, resulting in a darker output.',
+    'description': l10n.blendModeMultiplyDescription,
   },
   'Color Burn': <String, Object>{
     'flutterBlendMode': BlendMode.colorBurn,
-    'description': 'Darkens the destination by increasing contrast based on the source color.',
+    'description': l10n.blendModeColorBurnDescription,
   },
   'Lighten': <String, Object>{
     'flutterBlendMode': BlendMode.lighten,
-    'description': 'Keeps the lighter color of the source and destination pixels.',
+    'description': l10n.blendModeLightenDescription,
   },
   'Screen': <String, Object>{
     'flutterBlendMode': BlendMode.screen,
-    'description': 'Multiplies the inverses of the source and destination, resulting in a lighter output.',
+    'description': l10n.blendModeScreenDescription,
   },
   'Color Dodge': <String, Object>{
     'flutterBlendMode': BlendMode.colorDodge,
-    'description': 'Brightens the destination by reducing contrast based on the source color.',
+    'description': l10n.blendModeColorDodgeDescription,
   },
   'Linear Dodge (Add)': <String, Object>{
     'flutterBlendMode': BlendMode.plus,
-    'description': 'Adds the source and destination colors, clamping at white.',
+    'description': l10n.blendModeLinearDodgeDescription,
   },
   'Overlay': <String, Object>{
     'flutterBlendMode': BlendMode.overlay,
-    'description': 'Combines multiply and screen modes: darkens dark areas, and lightens light areas.',
+    'description': l10n.blendModeOverlayDescription,
   },
   'Soft Light': <String, Object>{
     'flutterBlendMode': BlendMode.softLight,
-    'description': 'Softens the contrast by darkening or lightening the destination depending on the source.',
+    'description': l10n.blendModeSoftLightDescription,
   },
   'Hard Light': <String, Object>{
     'flutterBlendMode': BlendMode.hardLight,
-    'description': 'Applies multiply or screen based on the source color\'s intensity, creating a strong contrast.',
+    'description': l10n.blendModeHardLightDescription,
   },
   'Hue': <String, Object>{
     'flutterBlendMode': BlendMode.hue,
-    'description': 'Uses the source\'s hue and the destination\'s saturation and luminance.',
+    'description': l10n.blendModeHueDescription,
   },
   'Saturation': <String, Object>{
     'flutterBlendMode': BlendMode.saturation,
-    'description': 'Uses the source\'s saturation and the destination\'s hue and luminance.',
+    'description': l10n.blendModeSaturationDescription,
   },
   'Color': <String, Object>{
     'flutterBlendMode': BlendMode.color,
-    'description': 'Uses the source\'s hue and saturation, but keeps the destination\'s luminance.',
+    'description': l10n.blendModeColorDescription,
   },
   'Luminosity': <String, Object>{
     'flutterBlendMode': BlendMode.luminosity,
-    'description': 'Uses the source\'s luminance and the destination\'s hue and saturation.',
+    'description': l10n.blendModeLuminosityDescription,
   },
 };
 
@@ -91,6 +94,8 @@ Future<BlendMode> showBlendModeMenu({
   final Offset position = Offset.zero,
   final BlendMode? selectedBlendMode,
 }) async {
+  final AppLocalizations l10n = AppLocalizations.of(context)!;
+  final Map<String, Map<String, Object>> blendModes = getSupportedBlendModes(l10n);
   return await showMenu<BlendMode>(
         context: context,
         position: RelativeRect.fromLTRB(
@@ -99,7 +104,7 @@ Future<BlendMode> showBlendModeMenu({
           position.dx + 1,
           position.dy + 1,
         ),
-        items: supportedBlendModes.entries.map((final MapEntry<String, Map<String, Object>> entry) {
+        items: blendModes.entries.map((final MapEntry<String, Map<String, Object>> entry) {
           final BlendMode menuFlutterBlendMode = (entry.value['flutterBlendMode'] as BlendMode?) ?? BlendMode.srcOver;
 
           return PopupMenuItem<BlendMode>(
@@ -134,10 +139,11 @@ Future<BlendMode> showBlendModeMenu({
 /// for proper display in UI elements.
 ///
 /// [blendMode] The BlendMode to convert to text.
+/// [l10n] Optional localizations for translated blend mode names.
 /// Returns a capitalized string representation of the blend mode.
-String blendModeToText(final BlendMode blendMode) {
+String blendModeToText(final BlendMode blendMode, [final AppLocalizations? l10n]) {
   if (blendMode == BlendMode.srcOver) {
-    return 'Normal';
+    return l10n?.blendModeNormalLabel ?? _blendModeNormalFallback;
   }
   return blendMode.name[0].toUpperCase() + blendMode.name.substring(1);
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/layers_provider.dart';
@@ -8,6 +9,34 @@ import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/container_slider.dart';
 import 'package:fpaint/widgets/truncated_text.dart';
+
+const String _labelHidden = 'Hidden';
+const String _labelOpacity = 'Opacity: ';
+const String _labelBlend = 'Blend: ';
+const String _dialogLayerNameTitle = 'Layer Name';
+const String _dialogCancel = 'Cancel';
+const String _dialogApply = 'Apply';
+const String _tooltipAddLayerAbove = 'Add a layer above';
+const String _tooltipDeleteLayer = 'Delete this layer';
+const String _tooltipMergeBelow = 'Merge to below layer';
+const String _tooltipBlendMode = 'Blend Mode';
+const String _labelBackgroundColor = 'Background Color';
+const String _tooltipHideShowLayer = 'Hide/Show this layer';
+const String _menuActionRename = 'rename';
+const String _menuActionAdd = 'add';
+const String _menuActionDelete = 'delete';
+const String _menuActionMerge = 'merge';
+const String _menuActionBlend = 'blend';
+const String _menuActionVisibility = 'visibility';
+const String _menuActionAllHide = 'allHide';
+const String _menuActionAllShow = 'allShow';
+const String _menuLabelRenameLayer = 'Rename layer';
+const String _menuLabelChangeBlendMode = 'Change Blend Mode';
+const String _menuLabelHideAllOtherLayers = 'Hide all other layers';
+const String _menuLabelShowAllLayers = 'Show all layers';
+const String _menuLabelHideLayer = 'Hide layer';
+const String _menuLabelShowLayer = 'Show layer';
+const String _undoActionAddLayer = 'Add Layer';
 
 /// A widget that displays a layer in the layer selector panel.
 class LayerSelector extends StatelessWidget {
@@ -68,9 +97,9 @@ class LayerSelector extends StatelessWidget {
     final List<String> texts = <String>[
       '[${layer.id}]',
       layer.name,
-      if (!layer.isVisible) 'Hidden',
-      'Opacity: ${layer.opacity.toStringAsFixed(0)}',
-      'Blend: ${blendModeToText(layer.blendMode)}',
+      if (!layer.isVisible) _labelHidden,
+      '$_labelOpacity${layer.opacity.toStringAsFixed(0)}',
+      '$_labelBlend${blendModeToText(layer.blendMode, AppLocalizations.of(context))}',
     ];
     return texts.join('\n');
   }
@@ -81,34 +110,33 @@ class LayerSelector extends StatelessWidget {
 
     final String? newName = await showDialog<String>(
       context: context,
-      builder: (final BuildContext context) => AlertDialog(
-        title: const Text('Layer Name'),
+      builder: (final BuildContext dialogContext) => AlertDialog(
+        title: const Text(_dialogLayerNameTitle),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Layer Name',
-          ),
+          decoration: const InputDecoration(labelText: _dialogLayerNameTitle),
         ),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text(_dialogCancel),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context, controller.text);
-              LayersProvider.of(context).update();
+              Navigator.pop(dialogContext, controller.text);
+              LayersProvider.of(dialogContext).update();
             },
-            child: const Text('Apply'),
+            child: const Text(_dialogApply),
           ),
         ],
       ),
     );
 
-    if (newName != null && newName.isNotEmpty) {
-      layer.name = newName;
+    if (newName == null || newName.isEmpty) {
+      return;
     }
+    layer.name = newName;
   }
 
   /// Builds the layer selector for a large surface.
@@ -169,19 +197,19 @@ class LayerSelector extends StatelessWidget {
       alignment: WrapAlignment.center,
       children: <Widget>[
         IconButton(
-          tooltip: 'Add a layer above',
+          tooltip: _tooltipAddLayerAbove,
           icon: const Icon(Icons.playlist_add),
           onPressed: () => _onAddLayer(layers),
         ),
         if (allowRemoveLayer)
           IconButton(
-            tooltip: 'Delete this layer',
+            tooltip: _tooltipDeleteLayer,
             icon: const Icon(Icons.playlist_remove),
             onPressed: allowRemoveLayer ? () => layers.remove(layer) : null,
           ),
         if (allowRemoveLayer)
           IconButton(
-            tooltip: 'Merge to below layer',
+            tooltip: _tooltipMergeBelow,
             icon: const Icon(Icons.layers_outlined),
             onPressed: layer == layers.list.last
                 ? null
@@ -193,7 +221,7 @@ class LayerSelector extends StatelessWidget {
           ),
         if (allowRemoveLayer)
           IconButton(
-            tooltip: 'Blend Mode\n"${blendModeToText(layer.blendMode)}"',
+            tooltip: '$_tooltipBlendMode\n"${blendModeToText(layer.blendMode, AppLocalizations.of(context))}"',
             icon: const Icon(Icons.blender_outlined),
             onPressed: () async {
               layer.blendMode = await showBlendModeMenu(
@@ -210,7 +238,7 @@ class LayerSelector extends StatelessWidget {
               onPressed: () {
                 showColorPicker(
                   context: context,
-                  title: 'Background Color',
+                  title: _labelBackgroundColor,
                   color: this.layer.backgroundColor ?? Colors.transparent,
                   onSelectedColor: (final Color color) {
                     this.layer.backgroundColor = color;
@@ -255,7 +283,7 @@ class LayerSelector extends StatelessWidget {
           ),
         ),
         IconButton(
-          tooltip: 'Hide/Show this layer',
+          tooltip: _tooltipHideShowLayer,
           icon: Icon(
             layer.isVisible ? Icons.visibility : Icons.visibility_off,
             color: layer.isVisible ? Colors.blue : AppColors.layerHiddenWarning,
@@ -270,65 +298,65 @@ class LayerSelector extends StatelessWidget {
   List<PopupMenuItem<String>> _buildPopupMenuItems() {
     return <PopupMenuItem<String>>[
       const PopupMenuItem<String>(
-        value: 'rename',
+        value: _menuActionRename,
         enabled: true,
         child: Row(
           children: <Widget>[
             Icon(Icons.edit),
-            SizedBox(width: 8),
-            Text('Rename layer'),
+            SizedBox(width: AppSpacing.sm),
+            Text(_menuLabelRenameLayer),
           ],
         ),
       ),
       const PopupMenuItem<String>(
-        value: 'add',
+        value: _menuActionAdd,
         enabled: true,
         child: Row(
           children: <Widget>[
             Icon(Icons.playlist_add),
-            SizedBox(width: 8),
-            Text('Add a layer above'),
+            SizedBox(width: AppSpacing.sm),
+            Text(_tooltipAddLayerAbove),
           ],
         ),
       ),
       if (allowRemoveLayer)
         PopupMenuItem<String>(
-          value: 'delete',
+          value: _menuActionDelete,
           enabled: allowRemoveLayer,
           child: const Row(
             children: <Widget>[
               Icon(Icons.playlist_remove),
-              SizedBox(width: 8),
-              Text('Delete this layer'),
+              SizedBox(width: AppSpacing.sm),
+              Text(_tooltipDeleteLayer),
             ],
           ),
         ),
       if (allowRemoveLayer)
         PopupMenuItem<String>(
-          value: 'merge',
+          value: _menuActionMerge,
           enabled: allowRemoveLayer,
           child: const Row(
             children: <Widget>[
               Icon(Icons.layers_outlined),
-              SizedBox(width: 8),
-              Text('Merge to below layer'),
+              SizedBox(width: AppSpacing.sm),
+              Text(_tooltipMergeBelow),
             ],
           ),
         ),
       if (allowRemoveLayer)
         const PopupMenuItem<String>(
-          value: 'blend',
+          value: _menuActionBlend,
           enabled: true,
           child: Row(
             children: <Widget>[
               Icon(Icons.blender_outlined),
-              SizedBox(width: 8),
-              Text('Change Blend Mode'),
+              SizedBox(width: AppSpacing.sm),
+              Text(_menuLabelChangeBlendMode),
             ],
           ),
         ),
       PopupMenuItem<String>(
-        value: 'visibility',
+        value: _menuActionVisibility,
         enabled: true,
         child: Row(
           children: <Widget>[
@@ -337,33 +365,33 @@ class LayerSelector extends StatelessWidget {
               color: layer.isVisible ? Colors.blue : AppColors.layerHiddenWarning,
             ),
             const SizedBox(width: AppSpacing.sm),
-            Text(layer.isVisible ? 'Hide layer' : 'Show layer'),
+            Text(layer.isVisible ? _menuLabelHideLayer : _menuLabelShowLayer),
           ],
         ),
       ),
       const PopupMenuItem<String>(
-        value: 'allHide',
+        value: _menuActionAllHide,
         enabled: true,
         child: Row(
           children: <Widget>[
             Icon(
               Icons.visibility_off,
             ),
-            SizedBox(width: 8),
-            Text('Hide all other layers'),
+            SizedBox(width: AppSpacing.sm),
+            Text(_menuLabelHideAllOtherLayers),
           ],
         ),
       ),
       const PopupMenuItem<String>(
-        value: 'allShow',
+        value: _menuActionAllShow,
         enabled: true,
         child: Row(
           children: <Widget>[
             Icon(
               Icons.visibility,
             ),
-            SizedBox(width: 8),
-            Text('Show all layers'),
+            SizedBox(width: AppSpacing.sm),
+            Text(_menuLabelShowAllLayers),
           ],
         ),
       ),
@@ -432,18 +460,18 @@ class LayerSelector extends StatelessWidget {
     final LayersProvider layers,
   ) async {
     switch (value) {
-      case 'rename':
+      case _menuActionRename:
         await renameLayer();
         break;
-      case 'add':
+      case _menuActionAdd:
         _onAddLayer(layers);
         break;
-      case 'delete':
+      case _menuActionDelete:
         if (allowRemoveLayer) {
           layers.remove(layer);
         }
         break;
-      case 'merge':
+      case _menuActionMerge:
         if (layer != layers.list.last) {
           _onMergeLayer(
             layers,
@@ -452,20 +480,20 @@ class LayerSelector extends StatelessWidget {
           );
         }
         break;
-      case 'blend':
+      case _menuActionBlend:
         layer.blendMode = await showBlendModeMenu(
           context: context,
           selectedBlendMode: layer.blendMode,
         );
         break;
-      case 'visibility':
+      case _menuActionVisibility:
         layers.layersToggleVisibility(layer);
         break;
-      case 'allHide':
+      case _menuActionAllHide:
         layers.hideShowAllExcept(layer, false);
         layers.update();
         break;
-      case 'allShow':
+      case _menuActionAllShow:
         layers.hideShowAllExcept(layer, true);
         layers.update();
         break;
@@ -479,7 +507,7 @@ class LayerSelector extends StatelessWidget {
     final int currentIndex = layers.selectedLayerIndex;
 
     undoProvider.executeAction(
-      name: 'Add Layer',
+      name: _undoActionAddLayer,
       forward: () {
         // Add
         final LayerProvider newLayer = layers.insertAt(currentIndex);

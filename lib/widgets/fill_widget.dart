@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
@@ -134,9 +135,11 @@ class _FillWidgetState extends State<FillWidget> {
           });
         },
         onLongPress: () {
+          final AppLocalizations l10n = AppLocalizations.of(context)!;
+
           showColorPicker(
             context: context,
-            title: 'Gradient Point Color',
+            title: l10n.gradientPointColor,
             color: point.color,
             onSelectedColor: (final Color color) {
               setState(() {

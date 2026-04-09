@@ -6,7 +6,6 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/main.dart' as app;
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/models/localized_strings.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:integration_test/integration_test.dart';
@@ -256,7 +255,7 @@ Future<void> _resizeCanvasToSquare(final WidgetTester tester) async {
   // Open menu → Canvas...
   await tester.tap(find.byIcon(Icons.menu));
   await tester.pumpAndSettle();
-  await tester.tap(find.text(strings[StringId.canvas]!));
+  await tester.tap(find.text('Canvas...'));
   await tester.pumpAndSettle();
 
   // Disable aspect-ratio lock so width/height can be set independently.

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 
 void main() {
   group('TolerancePicker', () {
     testWidgets('TolerancePickerState clamps value correctly', (final WidgetTester tester) async {
       final TolerancePicker picker = TolerancePicker(
+        title: 'Tolerance',
         value: 50,
         onChanged: (final int value) {},
       );
@@ -19,6 +21,7 @@ void main() {
 
     testWidgets('TolerancePickerState formats value correctly', (final WidgetTester tester) async {
       final TolerancePicker picker = TolerancePicker(
+        title: 'Tolerance',
         value: 50,
         onChanged: (final int value) {},
       );
@@ -35,6 +38,7 @@ void main() {
           home: Scaffold(
             body: Material(
               child: TolerancePicker(
+                title: 'Tolerance',
                 value: 50,
                 onChanged: (final int value) {},
               ),
@@ -53,6 +57,7 @@ void main() {
           home: Scaffold(
             body: Material(
               child: TolerancePicker(
+                title: 'Tolerance',
                 value: 50,
                 onChanged: (final int value) {},
               ),
@@ -71,6 +76,8 @@ void main() {
     testWidgets('showTolerancePicker displays dialog with TolerancePicker', (final WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
             builder: (final BuildContext context) {
               return ElevatedButton(
@@ -97,6 +104,7 @@ void main() {
         MaterialApp(
           home: Material(
             child: TolerancePicker(
+              title: 'Tolerance',
               value: 50,
               onChanged: (final int value) {
                 changedValue = value;

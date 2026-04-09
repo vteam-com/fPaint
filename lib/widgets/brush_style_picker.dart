@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/widgets/base_picker.dart';
 
@@ -7,9 +8,10 @@ class BrushStylePicker extends BasePicker<BrushStyle> {
   /// Creates a [BrushStylePicker].
   const BrushStylePicker({
     super.key,
+    required super.title,
     required super.value,
     required super.onChanged,
-  }) : super(title: 'Brush Style');
+  });
 
   @override
   BasePickerState<BrushStyle> createState() => _BrushStylePickerState();
@@ -83,10 +85,13 @@ void showBrushStylePicker(
   showDialog<dynamic>(
     context: context,
     builder: (final BuildContext _) {
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
+
       return AlertDialog(
-        title: const Text('Brush'),
+        title: Text(l10n.brush),
         content: IntrinsicHeight(
           child: BrushStylePicker(
+            title: l10n.brushStyle,
             value: brushStyle,
             onChanged: onChanged,
           ),

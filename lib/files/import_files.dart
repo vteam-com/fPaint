@@ -8,8 +8,19 @@ import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+
+const String _defaultCanvasDimension = '800';
+const String _fileExtensionOra = 'ora';
+const String _fileExtensionTif = 'tif';
+const String _fileExtensionTiff = 'tiff';
+const String _fileExtensionPng = 'png';
+const String _fileExtensionWebp = 'webp';
+const String _fileExtensionJpg = 'jpg';
+const String _fileExtensionJpeg = 'jpeg';
+const String _loadedImageDefaultName = 'Loaded Image';
 
 /// Handles the creation of a new file within the application.
 ///
@@ -20,6 +31,7 @@ import 'package:fpaint/providers/shell_provider.dart';
 /// [context] The BuildContext of the widget that invokes this function.
 Future<void> onFileNew(final BuildContext context) async {
   final AppProvider appProvider = AppProvider.of(context);
+  final AppLocalizations l10n = AppLocalizations.of(context)!;
 
   if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
     return;
@@ -32,11 +44,11 @@ Future<void> onFileNew(final BuildContext context) async {
     await showDialog<Size>(
       context: context,
       builder: (final BuildContext context) {
-        final TextEditingController widthController = TextEditingController(text: '800');
-        final TextEditingController heightController = TextEditingController(text: '800');
+        final TextEditingController widthController = TextEditingController(text: _defaultCanvasDimension);
+        final TextEditingController heightController = TextEditingController(text: _defaultCanvasDimension);
 
         return AlertDialog(
-          title: const Text('New Canvas Size'),
+          title: Text(l10n.newCanvasSize),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             spacing: AppSpacing.xxl,
@@ -44,12 +56,12 @@ Future<void> onFileNew(final BuildContext context) async {
               TextField(
                 controller: widthController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Width'),
+                decoration: InputDecoration(labelText: l10n.width),
               ),
               TextField(
                 controller: heightController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Height'),
+                decoration: InputDecoration(labelText: l10n.height),
               ),
             ],
           ),
@@ -63,14 +75,14 @@ Future<void> onFileNew(final BuildContext context) async {
                     appProvider.newDocumentFromClipboardImage();
                     Navigator.of(context).pop();
                   },
-                  child: const Text('New from Clipboard'),
+                  child: Text(l10n.newFromClipboard),
                 ),
               ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(null);
               },
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -82,11 +94,11 @@ Future<void> onFileNew(final BuildContext context) async {
                 } else {
                   // Show error message if input is invalid
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Invalid size')),
+                    SnackBar(content: Text(l10n.invalidSize)),
                   );
                 }
               },
-              child: const Text('Create'),
+              child: Text(l10n.create),
             ),
           ],
         );
@@ -108,6 +120,7 @@ Future<void> onFileNew(final BuildContext context) async {
 Future<void> onFileOpen(final BuildContext context) async {
   final ShellProvider shellProvider = ShellProvider.of(context);
   final LayersProvider layers = LayersProvider.of(context);
+  final AppLocalizations l10n = AppLocalizations.of(context)!;
 
   if (layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
     return;
@@ -115,7 +128,7 @@ Future<void> onFileOpen(final BuildContext context) async {
 
   try {
     final FilePickerResult? result = await FilePicker.pickFiles(
-      dialogTitle: 'fPaint Load Image',
+      dialogTitle: l10n.fpaintLoadImage,
       // type: FileType.custom,
       // allowedExtensions: supportedImageFileExtensions,
       allowMultiple: false,
@@ -130,10 +143,10 @@ Future<void> onFileOpen(final BuildContext context) async {
         final Uint8List bytes = result.files.single.bytes!;
         final String fileName = result.files.single.name; // Get filename for naming the layer
         final String extension = result.files.single.extension?.toLowerCase() ?? '';
-        if (extension == 'ora') {
+        if (extension == _fileExtensionOra) {
           // Assuming readOraFileFromBytes handles its own clearing and sizing or needs similar refactor
           await readOraFileFromBytes(layers, bytes);
-        } else if (extension == 'tif' || extension == 'tiff') {
+        } else if (extension == _fileExtensionTif || extension == _fileExtensionTiff) {
           // Assuming readTiffFileFromBytes handles its own clearing and sizing or needs similar refactor
           await readTiffFileFromBytes(layers, bytes);
         } else if (isFileExtensionSupported(extension)) {
@@ -187,18 +200,13 @@ Future<bool> openFileFromPath({
 
   if (isFileExtensionSupported(extension)) {
     try {
-      if (extension == 'ora') {
-        // File with support for layers
-        // Assuming readImageFromFilePathOra handles its own clearing and sizing or needs similar refactor
+      if (extension == _fileExtensionOra) {
         await readImageFromFilePathOra(layers, path);
-        return true; // Assuming success if no error
-      } else if (extension == 'tif' || extension == 'tiff') {
-        // Assuming readTiffFromFilePath handles its own clearing and sizing or needs similar refactor
+        return true;
+      } else if (extension == _fileExtensionTif || extension == _fileExtensionTiff) {
         await readTiffFromFilePath(layers, path);
-        return true; // Assuming success if no error
+        return true;
       } else {
-        // PNG, JPG, WEBP
-        // Pass context, extract filename for layer name
         final String fileName = path.split(Platform.pathSeparator).last;
         return await readImageFromFilePath(layers, path, context, imageName: fileName);
       }
@@ -209,7 +217,7 @@ Future<bool> openFileFromPath({
         // Check context validity
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error processing file: ${e.toString()}'),
+            content: Text(AppLocalizations.of(context)!.errorProcessingFile(e.toString())),
           ),
         );
       }
@@ -222,7 +230,7 @@ Future<bool> openFileFromPath({
       // Check context validity
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('File format .$extension is not supported'),
+          content: Text(AppLocalizations.of(context)!.fileFormatNotSupported(extension)),
           duration: const Duration(seconds: AppMath.triple),
         ),
       );
@@ -233,14 +241,14 @@ Future<bool> openFileFromPath({
 }
 
 final List<String> supportedImageFileExtensions = <String>[
-  'ora',
-  'png',
+  _fileExtensionOra,
+  _fileExtensionPng,
   // 'psd',
-  'tif',
-  'tiff',
-  'webp',
-  'jpg',
-  'jpeg',
+  _fileExtensionTif,
+  _fileExtensionTiff,
+  _fileExtensionWebp,
+  _fileExtensionJpg,
+  _fileExtensionJpeg,
 ];
 
 /// Checks if the given file extension is supported.
@@ -265,7 +273,7 @@ Future<bool> _decodeAndApplyImage(
   final LayersProvider layers,
   final Uint8List imageBytes,
   final BuildContext context, {
-  final String imageName = 'Loaded Image',
+  final String imageName = _loadedImageDefaultName,
 }) async {
   try {
     final ui.Image image = await decodeImageFromList(imageBytes);
@@ -282,7 +290,7 @@ Future<bool> _decodeAndApplyImage(
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to load image: ${e.toString()}'),
+          content: Text(AppLocalizations.of(context)!.failedToLoadImage(e.toString())),
           duration: const Duration(seconds: AppMath.triple),
         ),
       );
@@ -296,7 +304,7 @@ Future<bool> readImageFromFilePath(
   final LayersProvider layers,
   final String path,
   final BuildContext context, {
-  final String imageName = 'Loaded Image',
+  final String imageName = _loadedImageDefaultName,
 }) async {
   try {
     final Uint8List fileBytes = await File(path).readAsBytes();
@@ -307,7 +315,7 @@ Future<bool> readImageFromFilePath(
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error reading file: ${e.toString()}'),
+          content: Text(AppLocalizations.of(context)!.errorReadingFile(e.toString())),
           duration: const Duration(seconds: AppMath.triple),
         ),
       );
@@ -321,7 +329,7 @@ Future<bool> readImageFileFromBytes(
   final LayersProvider layers,
   final Uint8List bytes,
   final BuildContext context, {
-  final String imageName = 'Loaded Image',
+  final String imageName = _loadedImageDefaultName,
 }) async {
   return await _decodeAndApplyImage(layers, bytes, context, imageName: imageName);
 }
@@ -339,23 +347,24 @@ Future<bool> readImageFileFromBytes(
 /// - Parameters:
 ///   - context: The [BuildContext] used to display the dialog.
 Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
+  final AppLocalizations l10n = AppLocalizations.of(context)!;
   final bool? discardCurrentFile = await showDialog<bool>(
     context: context,
     builder: (final BuildContext context) {
       return AlertDialog(
-        title: const Text('Discard current document?'),
+        title: Text(l10n.discardCurrentDocumentQuestion),
         actions: <Widget>[
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(true);
             },
-            child: const Text('Discard'),
+            child: Text(l10n.discard),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(false);
             },
-            child: const Text('No'),
+            child: Text(l10n.no),
           ),
         ],
       );

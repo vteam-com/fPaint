@@ -1,0 +1,161 @@
+{
+  "@@locale": "fr",
+  "about": "A propos...",
+  "activeTool": "Outil actif",
+  "addText": "Ajouter du texte",
+  "apply": "Appliquer",
+  "availablePlatforms": "Plateformes disponibles",
+  "blendModeColorBurnDescription": "Assombrit la destination en augmentant le contraste basé sur la couleur source.",
+  "blendModeColorDescription": "Utilise la teinte et la saturation de la source, mais conserve la luminance de la destination.",
+  "blendModeColorDodgeDescription": "Éclaircit la destination en réduisant le contraste basé sur la couleur source.",
+  "blendModeDarkenDescription": "Conserve la couleur la plus sombre des pixels source et destination.",
+  "blendModeHardLightDescription": "Applique multiplication ou écran selon l'intensité de la couleur source, créant un contraste fort.",
+  "blendModeHueDescription": "Utilise la teinte de la source et la saturation et luminance de la destination.",
+  "blendModeLightenDescription": "Conserve la couleur la plus claire des pixels source et destination.",
+  "blendModeLinearDodgeDescription": "Additionne les couleurs source et destination, plafonné au blanc.",
+  "blendModeLuminosityDescription": "Utilise la luminance de la source et la teinte et saturation de la destination.",
+  "blendModeMultiplyDescription": "Multiplie les couleurs source et destination, produisant une sortie plus sombre.",
+  "blendModeNormalDescription": "Place l'image source sur la destination sans mélange.",
+  "blendModeNormalLabel": "Normal",
+  "blendModeOverlayDescription": "Combine les modes multiplication et écran : assombrit les zones sombres et éclaircit les zones claires.",
+  "blendModeSaturationDescription": "Utilise la saturation de la source et la teinte et luminance de la destination.",
+  "blendModeScreenDescription": "Multiplie les inverses de la source et de la destination, produisant une sortie plus claire.",
+  "blendModeSoftLightDescription": "Adoucit le contraste en assombrissant ou éclaircissant la destination selon la source.",
+  "brush": "Pinceau",
+  "brushStyle": "Style de pinceau",
+  "cancel": "Annuler",
+  "canvas": "Toile...",
+  "canvasDimensionsMustBePositive": "Les dimensions de la toile doivent etre positives.",
+  "canvasSizeTitle": "Taille de la toile",
+  "colorLabel": "Couleur",
+  "colorTolerance": "Tolérance de couleur",
+  "colorUsage": "Utilisation {percentage}",
+  "@colorUsage": {
+    "placeholders": {
+      "percentage": {}
+    }
+  },
+  "contentAlignment": "Alignement du contenu",
+  "copyToClipboard": "Copier dans le presse-papiers",
+  "create": "Creer",
+  "delete": "Supprimer",
+  "desktopSoftware": "Application de bureau.",
+  "deviceScreenResolution": "Resolution de l'ecran: {resolution}",
+  "@deviceScreenResolution": {
+    "placeholders": {
+      "resolution": {}
+    }
+  },
+  "discard": "Ignorer",
+  "discardAndOpen": "Ignorer et ouvrir",
+  "discardCurrentDocumentQuestion": "Ignorer le document actuel ?",
+  "downloadAsFile": "Telecharger en tant que {fileName}",
+  "@downloadAsFile": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "editText": "Modifier le texte",
+  "enterYourTextHere": "Saisissez votre texte ici...",
+  "errorProcessingFile": "Erreur de traitement du fichier : {error}",
+  "@errorProcessingFile": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "errorReadingFile": "Erreur de lecture du fichier : {error}",
+  "@errorReadingFile": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "exportLabel": "Exporter...",
+  "exportTooltip": "Exporter...",
+  "failedToLoadImage": "Echec du chargement de l'image : {error}",
+  "@failedToLoadImage": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "fileFormatNotSupported": "Le format de fichier .{extension} n'est pas pris en charge",
+  "@fileFormatNotSupported": {
+    "placeholders": {
+      "extension": {}
+    }
+  },
+  "fontColor": "Couleur de police",
+  "fontSizeLabel": "Taille de police",
+  "fontSizeValue": "Taille de police : {value}",
+  "@fontSizeValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "fpaintLoadImage": "fPaint Charger une image",
+  "githubRepo": "Depot GitHub",
+  "gradientPointColor": "Couleur du point de degrade",
+  "height": "Hauteur",
+  "hexColor": "Couleur Hex",
+  "hexColorCopiedToClipboard": "Couleur Hex copiee dans le presse-papiers",
+  "importLabel": "Importer...",
+  "importTooltip": "Importer...",
+  "invalidImageSizeDimensionsMustBeNumbers": "Taille d'image invalide: les dimensions doivent etre des nombres.",
+  "invalidSize": "Taille invalide",
+  "keyboardShortcuts": "Raccourcis clavier",
+  "languageEnglish": "Anglais",
+  "languageFrench": "Francais",
+  "languageLabel": "Langue",
+  "languageSpanish": "Espagnol",
+  "languageSubtitle": "Choisissez la langue de l'application ou suivez le systeme",
+  "languageSystem": "Systeme",
+  "menuTooltip": "Menu principal",
+  "mobileApp": "Application mobile.",
+  "newCanvasSize": "Nouvelle taille de toile",
+  "newFromClipboard": "Nouveau depuis le presse-papiers",
+  "no": "Non",
+  "platforms": "Disponible sur...",
+  "rotateCanvasTooltip": "Pivoter la toile de 90 degres sens horaire",
+  "runOnMostBrowsers": "Fonctionne sur la plupart des navigateurs.",
+  "saveAsFile": "Enregistrer sous {fileName}",
+  "@saveAsFile": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "savedMessage": "Enregistre {fileName}",
+  "@savedMessage": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "saveLoadedFile": "Enregistrer \"{fileName}\"",
+  "@saveLoadedFile": {
+    "placeholders": {
+      "fileName": {}
+    }
+  },
+  "selectionIsHidden": "La selection est masquee.",
+  "selectValue": "Selectionner {value}",
+  "@selectValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "settings": "Parametres...",
+  "startOver": "Nouveau...",
+  "startOverTooltip": "Nouveau...",
+  "textColor": "Couleur du texte",
+  "tolerance": "Tolérance",
+  "topColors": "Top {count} couleurs",
+  "@topColors": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "unsavedChanges": "Modifications non enregistrees",
+  "unsavedChangesDiscardAndOpenPrompt": "Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?",
+  "useApplePencilOnlySubtitle": "Si active, seul l'Apple Pencil sera utilise pour dessiner.",
+  "useApplePencilOnlyTitle": "Utiliser uniquement l'Apple Pencil",
+  "webBrowser": "Navigateur Web",
+  "width": "Largeur"
+}

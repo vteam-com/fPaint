@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/color_helper.dart' hide hsvToColor;
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -293,6 +294,8 @@ void main() {
               ChangeNotifierProvider<LayersProvider>.value(value: mockLayersProvider),
             ],
             child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
               // Added ThemeData
               theme: ThemeData(),
               home: Scaffold(

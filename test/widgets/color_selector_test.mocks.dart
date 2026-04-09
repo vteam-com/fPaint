@@ -1053,12 +1053,12 @@ class MockLayersProvider extends _i1.Mock implements _i4.LayersProvider {
   );
 
   @override
-  _i4.LayerProvider addWhiteBackgroundLayer() =>
+  _i4.LayerProvider addWhiteBackgroundLayer([String? name]) =>
       (super.noSuchMethod(
-            Invocation.method(#addWhiteBackgroundLayer, []),
+            Invocation.method(#addWhiteBackgroundLayer, [name]),
             returnValue: _FakeLayerProvider_10(
               this,
-              Invocation.method(#addWhiteBackgroundLayer, []),
+              Invocation.method(#addWhiteBackgroundLayer, [name]),
             ),
           )
           as _i4.LayerProvider);

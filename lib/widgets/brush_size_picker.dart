@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/base_picker.dart';
 
 /// A widget that allows the user to pick a brush size using a slider.
@@ -57,8 +58,10 @@ void showBrushSizePicker({
   showDialog<dynamic>(
     context: context,
     builder: (final BuildContext _) {
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
+
       return AlertDialog(
-        title: Text('Select $title'),
+        title: Text(l10n.selectValue(title)),
         content: IntrinsicHeight(
           child: BrushSizePicker(
             title: title,

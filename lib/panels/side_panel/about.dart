@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+const String _repoUrl = 'https://github.com/your-repo-url';
+const String _applicationLegalese = '(c) 2025 VTeam';
 
 /// Displays an about dialog with information about the application.
 ///
@@ -10,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 ///
 /// The [context] parameter is the [BuildContext] used to show the dialog.
 void showAboutBox(final BuildContext context) {
+  final AppLocalizations l10n = AppLocalizations.of(context)!;
   final MediaQueryData mediaQuery = MediaQuery.of(context);
   final String screenResolution = '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';
 
@@ -17,7 +22,7 @@ void showAboutBox(final BuildContext context) {
     context: context,
     applicationName: 'fPaint',
     applicationVersion: '1.0.0',
-    applicationLegalese: '© 2025 VTeam',
+    applicationLegalese: _applicationLegalese,
     applicationIcon: Image.asset(
       'assets/app_icon.png',
       width: AppLayout.appIconSize,
@@ -25,17 +30,17 @@ void showAboutBox(final BuildContext context) {
     ),
     children: <Widget>[
       const SizedBox(height: AppSpacing.xxl),
-      Text('Device Screen Resolution: $screenResolution'),
+      Text(l10n.deviceScreenResolution(screenResolution)),
       const SizedBox(height: AppSpacing.xxl),
       InkWell(
-        child: const Text(
-          'GitHub Repo',
-          style: TextStyle(
+        child: Text(
+          l10n.githubRepo,
+          style: const TextStyle(
             color: Colors.blue,
             decoration: TextDecoration.underline,
           ),
         ),
-        onTap: () => launchUrl(Uri.parse('https://github.com/your-repo-url')),
+        onTap: () => launchUrl(Uri.parse(_repoUrl)),
       ),
     ],
   );

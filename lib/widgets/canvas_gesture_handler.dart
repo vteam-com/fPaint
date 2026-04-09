@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -273,9 +274,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       }
 
       if (appProvider.layers.selectedLayer.isVisible == false) {
+        final AppLocalizations l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Selection is hidden.'),
+          SnackBar(
+            content: Text(l10n.selectionIsHidden),
           ),
         );
         return;
@@ -394,7 +396,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     );
   }
 
-  /// Opens the text editor dialog and inserts text at the tapped [position].
+  /// Shows a text editor dialog at the given canvas [position].
+  ///
+  /// When the user finishes editing, the resulting [TextObject] is recorded
+  /// as a drawing action on the currently selected layer.
   void _showTextDialog(final AppProvider appProvider, final Offset position) {
     showDialog<void>(
       context: context,

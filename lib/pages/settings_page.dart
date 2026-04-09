@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 
@@ -12,12 +13,19 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  static const String _languageCodeEn = 'en';
+  static const String _languageCodeEs = 'es';
+  static const String _languageCodeFr = 'fr';
+  static const String _systemLanguage = 'system';
   @override
   Widget build(final BuildContext context) {
-    final AppProvider appProvider = AppProvider.of(context);
+    final AppProvider appProvider = AppProvider.of(context, listen: true);
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+
+    final String selectedLanguage = appProvider.languageCode ?? _systemLanguage;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settings)),
       body: Center(
         child: SizedBox(
           width: AppLayout.dialogWidth,
@@ -26,11 +34,43 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: AppSpacing.xxl,
               children: <Widget>[
-                SwitchListTile(
-                  title: const Text('Use Apple Pencil Only'),
-                  subtitle: const Text(
-                    'If enabled, only the Apple Pencil will be used for drawing.',
+                ListTile(
+                  title: Text(l10n.languageLabel),
+                  subtitle: Text(l10n.languageSubtitle),
+                  trailing: DropdownButton<String>(
+                    value: selectedLanguage,
+                    onChanged: (final String? value) {
+                      if (value == null) {
+                        return;
+                      }
+
+                      final String? languageCode = value == _systemLanguage ? null : value;
+                      appProvider.setLanguageCode(languageCode);
+                    },
+                    items: <DropdownMenuItem<String>>[
+                      DropdownMenuItem<String>(
+                        value: _systemLanguage,
+                        child: Text(l10n.languageSystem),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: _languageCodeEn,
+                        child: Text(l10n.languageEnglish),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: _languageCodeFr,
+                        child: Text(l10n.languageFrench),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: _languageCodeEs,
+                        child: Text(l10n.languageSpanish),
+                      ),
+                    ],
                   ),
+                ),
+                const Divider(),
+                SwitchListTile(
+                  title: Text(l10n.useApplePencilOnlyTitle),
+                  subtitle: Text(l10n.useApplePencilOnlySubtitle),
                   value: appProvider.preferences.useApplePencil,
                   onChanged: (final bool value) {
                     setState(() {
@@ -43,7 +83,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   onPressed: () {
                     showShortcutsHelp(context);
                   },
-                  child: const Text('Keyboard Shortcuts'),
+                  child: Text(l10n.keyboardShortcuts),
                 ),
               ],
             ),

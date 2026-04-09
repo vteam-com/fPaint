@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/models/localized_strings.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/menu_model.dart';
 import 'package:fpaint/panels/side_panel/about.dart';
 import 'package:fpaint/panels/side_panel/canvas_settings.dart';
@@ -18,56 +18,57 @@ class MainMenu extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final ShellProvider shellProvider = ShellProvider.of(context);
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     return PopupMenuButton<int>(
-      tooltip: strings[StringId.menuTooltip],
+      tooltip: l10n.menuTooltip,
       icon: const Icon(Icons.menu),
       onSelected: (final int result) => onDropDownMenuSelection(context, result),
       itemBuilder: (final BuildContext _) => <PopupMenuEntry<int>>[
         buildMenuItem(
           value: MenuIds.newFile,
-          text: strings[StringId.startOver]!,
+          text: l10n.startOver,
           icon: Icons.power_settings_new_outlined,
         ),
         buildMenuItem(
           value: MenuIds.newFromClipboard,
-          text: strings[StringId.newFromClipboard]!,
+          text: l10n.newFromClipboard,
           icon: Icons.content_paste_go,
         ),
         buildMenuItem(
           value: MenuIds.openFile,
-          text: strings[StringId.import]!,
+          text: l10n.importLabel,
           icon: Icons.file_download_outlined,
         ),
         buildMenuItem(
           value: MenuIds.export,
-          text: strings[StringId.export]!,
+          text: l10n.exportLabel,
           icon: Icons.ios_share_outlined,
         ),
         if (!kIsWeb && shellProvider.loadedFileName.isNotEmpty)
           buildMenuItem(
             value: MenuIds.save,
-            text: 'Save "${shellProvider.loadedFileName}"',
+            text: l10n.saveLoadedFile(shellProvider.loadedFileName),
             icon: Icons.check_circle_outline,
           ),
         buildMenuItem(
           value: MenuIds.canvasSize,
-          text: strings[StringId.canvas]!,
+          text: l10n.canvas,
           icon: Icons.edit,
         ),
         buildMenuItem(
           value: MenuIds.settings,
-          text: strings[StringId.settings]!,
+          text: l10n.settings,
           icon: Icons.settings,
         ),
         buildMenuItem(
           value: MenuIds.platforms,
-          text: strings[StringId.platforms]!,
+          text: l10n.platforms,
           icon: Icons.outbound_sharp,
         ),
         buildMenuItem(
           value: MenuIds.about,
-          text: strings[StringId.about]!,
+          text: l10n.about,
           icon: Icons.info_outline,
         ),
       ],
@@ -82,6 +83,7 @@ void onDropDownMenuSelection(
 ) {
   final ShellProvider shellProvider = ShellProvider.of(context);
   final LayersProvider layers = LayersProvider.of(context);
+  final AppLocalizations l10n = AppLocalizations.of(context)!;
 
   switch (result) {
     case MenuIds.newFile:
@@ -105,7 +107,7 @@ void onDropDownMenuSelection(
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  '${strings[StringId.savedMessage]}${shellProvider.loadedFileName}',
+                  l10n.savedMessage(shellProvider.loadedFileName),
                 ),
               ),
             );

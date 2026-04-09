@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/my_window_manager.dart';
 import 'package:fpaint/pages/platforms_page.dart';
@@ -38,22 +40,24 @@ Future<void> main() async {
         final bool shouldProceed =
             await showDialog<bool>(
               context: mainApp.navigatorKey.currentContext!,
-              builder: (final BuildContext context) => AlertDialog(
-                title: const Text('Unsaved Changes'),
-                content: const Text(
-                  'You have unsaved changes. Do you want to discard them and open the new file?',
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text('Discard and Open'),
-                  ),
-                ],
-              ),
+              builder: (final BuildContext context) {
+                final AppLocalizations l10n = AppLocalizations.of(context)!;
+
+                return AlertDialog(
+                  title: Text(l10n.unsavedChanges),
+                  content: Text(l10n.unsavedChangesDiscardAndOpenPrompt),
+                  actions: <Widget>[
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: Text(l10n.cancel),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: Text(l10n.discardAndOpen),
+                    ),
+                  ],
+                );
+              },
             ) ??
             false;
 
@@ -127,43 +131,68 @@ class MyApp extends StatelessWidget {
         // ignore: always_specify_types
         ChangeNotifierProvider(create: (final BuildContext _) => undoProvider),
       ],
-      child: MaterialApp(
-        navigatorKey: navigatorKey,
-        title: 'fPaint',
-        theme: ThemeData.dark().copyWith(
-          colorScheme: const ColorScheme.dark(
-            primary: AppColors.primary,
-            secondary: AppColors.secondary,
-          ),
-          dialogTheme: DialogThemeData(
-            backgroundColor: AppColors.surface,
-            shape: popupShape,
-          ),
-          popupMenuTheme: PopupMenuThemeData(
-            color: AppColors.surface,
-            shape: popupShape,
-          ),
-          bottomSheetTheme: BottomSheetThemeData(
-            backgroundColor: AppColors.surface,
-            modalBackgroundColor: AppColors.surface,
-            shape: popupShape,
-          ),
-          sliderTheme: SliderThemeData(
-            activeTrackColor: AppColors.secondary,
-            inactiveTrackColor: AppColors.surfaceVariant,
-            thumbColor: AppColors.accent,
-            overlayColor: AppColors.primary.withAlpha(AppLimits.percentMax),
-          ),
-        ),
-        routes: <String, WidgetBuilder>{
-          '/': (final BuildContext context) => shortCutsForMainApp(
-            context,
-            shellProvider,
-            appProvider,
-            const MainScreen(),
-          ),
-          '/settings': (final _) => const SettingsPage(),
-          '/platforms': (final _) => const PlatformsPage(),
+      child: Consumer<AppProvider>(
+        builder: (final BuildContext _, final AppProvider currentAppProvider, final Widget? _) {
+          return MaterialApp(
+            navigatorKey: navigatorKey,
+            title: 'fPaint',
+            localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: currentAppProvider.preferredLocale,
+            localeResolutionCallback: (final Locale? locale, final Iterable<Locale> supportedLocales) {
+              if (locale == null) {
+                return const Locale('en');
+              }
+
+              for (final Locale supportedLocale in supportedLocales) {
+                if (supportedLocale.languageCode == locale.languageCode) {
+                  return supportedLocale;
+                }
+              }
+
+              return const Locale('en');
+            },
+            theme: ThemeData.dark().copyWith(
+              colorScheme: const ColorScheme.dark(
+                primary: AppColors.primary,
+                secondary: AppColors.secondary,
+              ),
+              dialogTheme: DialogThemeData(
+                backgroundColor: AppColors.surface,
+                shape: popupShape,
+              ),
+              popupMenuTheme: PopupMenuThemeData(
+                color: AppColors.surface,
+                shape: popupShape,
+              ),
+              bottomSheetTheme: BottomSheetThemeData(
+                backgroundColor: AppColors.surface,
+                modalBackgroundColor: AppColors.surface,
+                shape: popupShape,
+              ),
+              sliderTheme: SliderThemeData(
+                activeTrackColor: AppColors.secondary,
+                inactiveTrackColor: AppColors.surfaceVariant,
+                thumbColor: AppColors.accent,
+                overlayColor: AppColors.primary.withAlpha(AppLimits.percentMax),
+              ),
+            ),
+            routes: <String, WidgetBuilder>{
+              '/': (final BuildContext context) => shortCutsForMainApp(
+                context,
+                shellProvider,
+                currentAppProvider,
+                const MainScreen(),
+              ),
+              '/settings': (final _) => const SettingsPage(),
+              '/platforms': (final _) => const PlatformsPage(),
+            },
+          );
         },
       ),
     );

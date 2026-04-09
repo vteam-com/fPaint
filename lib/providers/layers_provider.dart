@@ -13,6 +13,9 @@ import 'package:provider/provider.dart';
 // Exports
 export 'package:fpaint/providers/layer_provider.dart';
 
+const String _defaultBackgroundName = 'Background';
+const String _defaultLayerPrefix = 'Layer';
+
 /// Manages a collection of [LayerProvider] objects, providing methods to interact with and manipulate the layers.
 ///
 /// The [LayersProvider] class is responsible for maintaining the list of layers, providing methods to add, remove, and
@@ -173,8 +176,8 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Adds a white background layer to the canvas.
-  LayerProvider addWhiteBackgroundLayer() {
-    final LayerProvider firstLayer = newLayer('Background');
+  LayerProvider addWhiteBackgroundLayer([final String? name]) {
+    final LayerProvider firstLayer = newLayer(name ?? _defaultBackgroundName);
     firstLayer.backgroundColor = Colors.white;
     _list.add(firstLayer);
     return firstLayer;
@@ -260,7 +263,7 @@ class LayersProvider extends ChangeNotifier {
   /// Ensures that a layer exists at the given index.
   void ensureLayerAtIndex(final int index) {
     while (_list.length <= index) {
-      _list.add(newLayer('Layer ${_list.length + 1}'));
+      _list.add(newLayer('$_defaultLayerPrefix ${_list.length + 1}'));
     }
   }
 
@@ -281,7 +284,7 @@ class LayersProvider extends ChangeNotifier {
 
   /// Inserts a new layer at the given index.
   LayerProvider insertAt(final int index, [String? name]) {
-    name ??= 'Layer${this.length}';
+    name ??= '$_defaultLayerPrefix${this.length}';
     final LayerProvider layer = newLayer(name);
     this.insert(index, layer);
     this.selectedLayerIndex = this.getLayerIndex(layer);

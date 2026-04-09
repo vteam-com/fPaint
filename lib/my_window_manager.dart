@@ -28,10 +28,14 @@ class MyWindowManager extends WindowListener {
 
     // Fallback for environments where the compile-time flag is unavailable.
     final String bindingType = WidgetsBinding.instance.runtimeType.toString();
-    return bindingType.contains('IntegrationTest') ||
-        bindingType.contains('LiveTestWidgetsFlutterBinding') ||
-        bindingType.contains('AutomatedTestWidgetsFlutterBinding');
+    return bindingType.contains(_integrationBindingMarker) ||
+        bindingType.contains(_liveTestBindingMarker) ||
+        bindingType.contains(_automatedTestBindingMarker);
   }
+
+  static const String _integrationBindingMarker = 'IntegrationTest';
+  static const String _liveTestBindingMarker = 'LiveTestWidgetsFlutterBinding';
+  static const String _automatedTestBindingMarker = 'AutomatedTestWidgetsFlutterBinding';
 
   /// Sets up the main application window with platform-specific optimizations.
   ///
