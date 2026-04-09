@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: List Artifacts
         id: list_artifacts
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           script: |
             const artifactResponse = await github.rest.actions.listArtifactsForRepo({
@@ -27,7 +27,7 @@ jobs:
             return sortedArtifacts;
 
       - name: Delete Old Artifacts
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           script: |
             const artifacts = ${{ steps.list_artifacts.outputs.result }};
