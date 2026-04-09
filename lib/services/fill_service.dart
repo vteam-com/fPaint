@@ -74,6 +74,14 @@ class FillService {
 
     final ui.Rect bounds = path.getBounds();
 
+    // Guard against empty region (e.g. tap outside canvas or on invalid coordinates)
+    if (bounds.isEmpty || bounds.width == 0 || bounds.height == 0) {
+      return UserActionDrawing(
+        action: ActionType.fill,
+        positions: const <ui.Offset>[],
+      );
+    }
+
     final Gradient gradient;
     if (fillModel.mode == FillMode.radial) {
       // For radial gradients, the center is the location of the first gradient handle
@@ -119,11 +127,24 @@ class FillService {
     required final ui.Offset position,
     required final int tolerance,
   }) async {
+    // Guard against NaN or infinite coordinates
+    if (position.dx.isNaN || position.dy.isNaN || position.dx.isInfinite || position.dy.isInfinite) {
+      return FillRegion(path: ui.Path(), offset: ui.Offset.zero);
+    }
+
+    final int x = position.dx.toInt();
+    final int y = position.dy.toInt();
+
+    // Guard against out-of-bounds or invalid coordinates
+    if (x < 0 || y < 0 || x >= image.width || y >= image.height) {
+      return FillRegion(path: ui.Path(), offset: ui.Offset.zero);
+    }
+
     // Perform flood fill at the clicked position
     final Region region = await extractRegionByColorEdgeAndOffset(
       image: image,
-      x: position.dx.toInt(),
-      y: position.dy.toInt(),
+      x: x,
+      y: y,
       tolerance: tolerance,
     );
     return FillRegion(
