@@ -1,3 +1,10 @@
+# Auto-generated agent skills (VS Code extensions)
+.agents/
+.claude/skills/
+.windsurf/skills/
+.continue/skills/
+skills-lock.json
+
 # Miscellaneous
 *.class
 *.log
