@@ -350,8 +350,10 @@ Future<void> performFloodFillGradient(
     await tester.pump(const Duration(milliseconds: 10));
   }
 
-  // Allow time for the fill operation to complete and UI to update
-  await tester.pump(const Duration(milliseconds: 500));
+  // Allow time for the debounced fill operation to fire and complete.
+  // The gradient fill debouncer defaults to AppDefaults.debounceDuration (1 s),
+  // so we must wait at least that long for the action to be recorded.
+  await tester.pump(AppDefaults.debounceDuration + const Duration(milliseconds: 500));
 
   // Dismiss the fill overlay so subsequent drawing gestures reach the canvas.
   // The FillWidget (with AnimatedMarchingAntsPath) covers the entire canvas
@@ -360,7 +362,9 @@ Future<void> performFloodFillGradient(
   final AppProvider fillAppProvider = AppProvider.of(fillCtx, listen: false);
   fillAppProvider.fillModel.clear();
   fillAppProvider.update();
-  await tester.pump();
+
+  // Pump to render the gradient result visible on the layer.
+  await tester.pump(const Duration(milliseconds: 500));
 }
 
 Future<void> myWait(

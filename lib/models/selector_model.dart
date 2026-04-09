@@ -58,6 +58,13 @@ class SelectorModel extends VisibleModel {
     }
   }
 
+  /// Rotates the selection around its center by [angleRadians].
+  void rotate(final double angleRadians) {
+    if (this.path1 != null) {
+      this.path1 = rotatePathAroundCenter(this.path1!, angleRadians);
+    }
+  }
+
   /// Adds the first point to the selection.
   void addP1(final Offset p1) {
     isVisible = true;

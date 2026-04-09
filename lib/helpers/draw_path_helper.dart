@@ -124,6 +124,20 @@ Path expandPathInDirectionWithOffset(
   return adjustedPath.transform(scaleMatrix.storage);
 }
 
+/// Rotates the given [path] around its bounding-box center by [angleRadians].
+Path rotatePathAroundCenter(final Path path, final double angleRadians) {
+  final Rect bounds = path.getBounds();
+  final double cx = bounds.center.dx;
+  final double cy = bounds.center.dy;
+
+  final Matrix4 matrix = Matrix4.identity()
+    ..translateByVector3(vm.Vector3(cx, cy, 0))
+    ..rotateZ(angleRadians)
+    ..translateByVector3(vm.Vector3(-cx, -cy, 0));
+
+  return path.transform(matrix.storage);
+}
+
 /// Scales the [inputSize] to fit within the specified [maxWith] and [maxHeight],
 /// while maintaining the aspect ratio.
 ///

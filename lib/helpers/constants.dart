@@ -159,6 +159,9 @@ class AppInteraction {
   static const double magnifierScale = 6.0;
   static const double magnifierImageScale = 8.0;
   static const int selectionHandleSize = 20;
+  static const double rotationHandleDistance = 30.0;
+  static const double rotationHandleSize = 16.0;
+  static const double rotationHandleLineWidth = 1.5;
 }
 
 /// Shared persisted/default app values.
@@ -166,6 +169,7 @@ class AppDefaults {
   static const double brushSize = 5.0;
   static const int tolerance = 50;
   static const bool useApplePencil = false;
+  static const Duration debounceDuration = Duration(seconds: 1);
 }
 
 /// File extension identifiers used across import/export/save operations.

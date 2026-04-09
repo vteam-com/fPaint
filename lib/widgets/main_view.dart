@@ -110,6 +110,10 @@ class MainViewState extends State<MainView> {
               );
               appProvider.update();
             },
+            onRotate: (final double angleRadians) {
+              appProvider.selectorModel.rotate(angleRadians);
+              appProvider.update();
+            },
           ),
 
         //

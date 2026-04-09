@@ -206,8 +206,8 @@ Future<ui.Rect?> getNonTransparentBounds(final ui.Image image) async {
 /// A utility class that debounces a function call.
 class Debouncer {
   /// Creates a [Debouncer] with an optional [duration].
-  /// Defaults to 1 second if no duration is provided.
-  Debouncer([this.duration = const Duration(seconds: 1)]);
+  /// Defaults to [AppDefaults.debounceDuration] if no duration is provided.
+  Debouncer([this.duration = AppDefaults.debounceDuration]);
 
   final Duration duration;
   Timer? _timer;
