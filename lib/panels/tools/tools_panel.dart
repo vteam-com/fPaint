@@ -271,9 +271,9 @@ class ToolsPanel extends StatelessWidget {
           key: Keys.toolTransform,
           minimal: minimal,
           name: 'Transform',
-          image: iconAndColor(
-            Icons.transform,
-            appProvider.transformModel.isVisible,
+          image: iconFromSvgAsset(
+            AppAssets.transformIcon,
+            appProvider.transformModel.isVisible ? Colors.blue : IconTheme.of(context).color!,
           ),
           onPressed: () {
             appProvider.startTransform();

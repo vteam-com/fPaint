@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -23,6 +24,9 @@ class TransformModel extends VisibleModel {
   /// Order: topLeft, topRight, bottomRight, bottomLeft.
   List<Offset> corners = <Offset>[];
 
+  /// Whether the transform overlay is currently in rotate mode.
+  bool isRotateMode = false;
+
   /// Begins a transform operation with the given [image] captured from the selection
   /// at the given [bounds].
   void start({
@@ -37,6 +41,7 @@ class TransformModel extends VisibleModel {
       bounds.bottomRight,
       bounds.bottomLeft,
     ];
+    isRotateMode = false;
     isVisible = true;
   }
 
@@ -56,6 +61,21 @@ class TransformModel extends VisibleModel {
     for (int i = 0; i < corners.length; i++) {
       corners[i] = corners[i] + delta;
     }
+  }
+
+  /// Rotates the full quad around its center by [angleRadians].
+  void rotate(final double angleRadians) {
+    final Offset rotationCenter = center;
+    final double cosine = math.cos(angleRadians);
+    final double sine = math.sin(angleRadians);
+
+    corners = corners.map((final Offset corner) {
+      final Offset vector = corner - rotationCenter;
+      return Offset(
+        rotationCenter.dx + (vector.dx * cosine) - (vector.dy * sine),
+        rotationCenter.dy + (vector.dx * sine) + (vector.dy * cosine),
+      );
+    }).toList();
   }
 
   /// Returns the center of the quad.
@@ -113,6 +133,7 @@ class TransformModel extends VisibleModel {
     super.clear();
     sourceImage = null;
     sourceBounds = Rect.zero;
+    isRotateMode = false;
     corners.clear();
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/transform_model.dart';
+import 'package:fpaint/widgets/svg_icon.dart';
 
 /// An overlay widget that lets the user interactively skew and change
 /// perspective of a selected region by dragging corner and edge handles.
@@ -37,7 +39,6 @@ class TransformWidget extends StatelessWidget {
 
   /// Called when the user commits the transform.
   final VoidCallback onConfirm;
-
   @override
   Widget build(final BuildContext context) {
     final ui.Image? image = model.sourceImage;
@@ -78,44 +79,52 @@ class TransformWidget extends StatelessWidget {
             ),
           ),
 
-          // Corner handles (perspective)
-          _buildCornerHandle(TransformModel.topLeftIndex, screenCorners[TransformModel.topLeftIndex]),
-          _buildCornerHandle(TransformModel.topRightIndex, screenCorners[TransformModel.topRightIndex]),
-          _buildCornerHandle(TransformModel.bottomRightIndex, screenCorners[TransformModel.bottomRightIndex]),
-          _buildCornerHandle(TransformModel.bottomLeftIndex, screenCorners[TransformModel.bottomLeftIndex]),
+          if (!model.isRotateMode) ...<Widget>[
+            // Corner handles (perspective)
+            _buildCornerHandle(TransformModel.topLeftIndex, screenCorners[TransformModel.topLeftIndex]),
+            _buildCornerHandle(TransformModel.topRightIndex, screenCorners[TransformModel.topRightIndex]),
+            _buildCornerHandle(TransformModel.bottomRightIndex, screenCorners[TransformModel.bottomRightIndex]),
+            _buildCornerHandle(TransformModel.bottomLeftIndex, screenCorners[TransformModel.bottomLeftIndex]),
 
-          // Edge midpoint handles (skew)
-          _buildEdgeHandle(
-            TransformModel.topLeftIndex,
-            TransformModel.topRightIndex,
-            topMid,
-          ),
-          _buildEdgeHandle(
-            TransformModel.topRightIndex,
-            TransformModel.bottomRightIndex,
-            rightMid,
-          ),
-          _buildEdgeHandle(
-            TransformModel.bottomRightIndex,
-            TransformModel.bottomLeftIndex,
-            bottomMid,
-          ),
-          _buildEdgeHandle(
-            TransformModel.bottomLeftIndex,
-            TransformModel.topLeftIndex,
-            leftMid,
-          ),
+            // Edge midpoint handles (skew)
+            _buildEdgeHandle(
+              TransformModel.topLeftIndex,
+              TransformModel.topRightIndex,
+              topMid,
+            ),
+            _buildEdgeHandle(
+              TransformModel.topRightIndex,
+              TransformModel.bottomRightIndex,
+              rightMid,
+            ),
+            _buildEdgeHandle(
+              TransformModel.bottomRightIndex,
+              TransformModel.bottomLeftIndex,
+              bottomMid,
+            ),
+            _buildEdgeHandle(
+              TransformModel.bottomLeftIndex,
+              TransformModel.topLeftIndex,
+              leftMid,
+            ),
 
-          // Center handle (move)
-          _buildHandle(
-            position: screenCenter,
-            size: AppInteraction.imagePlacementHandleSize,
-            color: Colors.blue,
-            cursor: SystemMouseCursors.move,
-            onPanUpdate: (final DragUpdateDetails details) {
-              model.moveAll(details.delta / canvasScale);
-              onChanged();
-            },
+            // Center handle (move)
+            _buildHandle(
+              position: screenCenter,
+              size: AppInteraction.imagePlacementHandleSize,
+              color: Colors.blue,
+              cursor: SystemMouseCursors.move,
+              onPanUpdate: (final DragUpdateDetails details) {
+                model.moveAll(details.delta / canvasScale);
+                onChanged();
+              },
+            ),
+          ],
+
+          _buildModeControls(
+            l10n: l10n,
+            screenCenter: screenCenter,
+            screenCorners: screenCorners,
           ),
 
           // Confirm / Cancel buttons
@@ -229,6 +238,103 @@ class TransformWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildModeControls({
+    required final AppLocalizations l10n,
+    required final Offset screenCenter,
+    required final List<Offset> screenCorners,
+  }) {
+    final double buttonSize = AppInteraction.imagePlacementButtonSize;
+    final double spacing = AppInteraction.imagePlacementButtonSpacing;
+    final double controlsTop = _screenQuadTop(screenCorners) - buttonSize - AppInteraction.imagePlacementHandleSize;
+    final Offset rotationHandleCenter = Offset(
+      screenCenter.dx - (buttonSize + spacing) / AppMath.pair,
+      controlsTop + buttonSize / AppMath.pair,
+    );
+
+    return Positioned(
+      left: screenCenter.dx - buttonSize - spacing / AppMath.pair,
+      top: controlsTop,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: spacing,
+        children: <Widget>[
+          Tooltip(
+            message: l10n.resizeRotate,
+            child: GestureDetector(
+              onTap: () {
+                if (!model.isRotateMode) {
+                  model.isRotateMode = true;
+                  onChanged();
+                }
+              },
+              onPanUpdate: (final DragUpdateDetails details) {
+                if (!model.isRotateMode) {
+                  model.isRotateMode = true;
+                }
+                final double previousAngle = atan2(
+                  rotationHandleCenter.dy - screenCenter.dy,
+                  rotationHandleCenter.dx - screenCenter.dx,
+                );
+                final Offset pointer = rotationHandleCenter + details.delta;
+                final double currentAngle = atan2(
+                  pointer.dy - screenCenter.dy,
+                  pointer.dx - screenCenter.dx,
+                );
+                model.rotate(currentAngle - previousAngle);
+                onChanged();
+              },
+              child: MouseRegion(
+                cursor: SystemMouseCursors.grab,
+                child: _modeButton(
+                  color: Colors.green,
+                  child: const Icon(
+                    Icons.rotate_right,
+                    size: AppLayout.iconSize,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Tooltip(
+            message: l10n.transform,
+            child: GestureDetector(
+              onTap: () {
+                if (model.isRotateMode) {
+                  model.isRotateMode = false;
+                  onChanged();
+                }
+              },
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: _modeButton(
+                  color: AppColors.transformCornerHandle,
+                  child: iconFromSvgAsset(AppAssets.transformIcon),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _modeButton({
+    required final Color color,
+    required final Widget child,
+  }) {
+    return Container(
+      width: AppInteraction.imagePlacementButtonSize,
+      height: AppInteraction.imagePlacementButtonSize,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: AppStroke.regular),
+      ),
+      child: child,
+    );
+  }
+
   double _screenQuadBottom(final List<Offset> screenCorners) {
     double maxY = screenCorners[0].dy;
     for (final Offset corner in screenCorners) {
@@ -237,6 +343,16 @@ class TransformWidget extends StatelessWidget {
       }
     }
     return maxY;
+  }
+
+  double _screenQuadTop(final List<Offset> screenCorners) {
+    double minY = screenCorners[0].dy;
+    for (final Offset corner in screenCorners) {
+      if (corner.dy < minY) {
+        minY = corner.dy;
+      }
+    }
+    return minY;
   }
 
   Offset _toScreen(final Offset canvasPoint) {

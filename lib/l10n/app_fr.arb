@@ -114,6 +114,7 @@
   "newFromClipboard": "Importé du Presse-papiers",
   "no": "Non",
   "platforms": "Disponible sur...",
+  "resizeRotate": "Redimensionner / Pivoter",
   "rotateCanvasTooltip": "Pivoter la toile de 90 degres sens horaire",
   "runOnMostBrowsers": "Fonctionne sur la plupart des navigateurs.",
   "saveAsFile": "Enregistrer sous {fileName}",
@@ -146,13 +147,13 @@
   "startOverTooltip": "Nouveau...",
   "textColor": "Couleur du texte",
   "tolerance": "Tolérance",
-  "transform": "Transformer",
   "topColors": "Top {count} couleurs",
   "@topColors": {
     "placeholders": {
       "count": {}
     }
   },
+  "transform": "Transformer",
   "unsavedChanges": "Modifications non enregistrees",
   "unsavedChangesDiscardAndOpenPrompt": "Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?",
   "useApplePencilOnlySubtitle": "Si active, seul l'Apple Pencil sera utilise pour dessiner.",

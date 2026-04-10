@@ -114,6 +114,7 @@
   "newFromClipboard": "Nuevo desde el portapapeles",
   "no": "No",
   "platforms": "Disponible en...",
+  "resizeRotate": "Redimensionar / Girar",
   "rotateCanvasTooltip": "Girar lienzo 90 grados en sentido horario",
   "runOnMostBrowsers": "Funciona en la mayoria de navegadores.",
   "saveAsFile": "Guardar como {fileName}",
@@ -146,13 +147,13 @@
   "startOverTooltip": "Nuevo...",
   "textColor": "Color de texto",
   "tolerance": "Tolerancia",
-  "transform": "Transformar",
   "topColors": "Top {count} colores",
   "@topColors": {
     "placeholders": {
       "count": {}
     }
   },
+  "transform": "Transformar",
   "unsavedChanges": "Cambios no guardados",
   "unsavedChangesDiscardAndOpenPrompt": "Tienes cambios no guardados. Quieres descartarlos y abrir el nuevo archivo?",
   "useApplePencilOnlySubtitle": "Si esta activado, solo se usara el Apple Pencil para dibujar.",

@@ -193,9 +193,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final PointerEvent event,
   ) async {
     appProvider.layers.selectedLayer.isUserDrawing = false;
+    final bool isSelectionActive =
+        appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
 
     if (_activePointerId == event.pointer) {
-      if (appProvider.selectedAction == ActionType.selector) {
+      if (isSelectionActive) {
         appProvider.selectorCreationEnd();
       }
       _activePointerId = -1;
@@ -210,6 +212,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final PointerEvent event,
   ) {
     final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
+    final bool isSelectionActive =
+        appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
 
     if (appProvider.eyeDropPositionForBrush != null) {
       appProvider.eyeDropPositionForBrush = event.localPosition;
@@ -223,7 +227,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     }
 
     if (event.buttons == 1 && _activePointerId == event.pointer) {
-      if (appProvider.selectedAction == ActionType.selector) {
+      if (isSelectionActive) {
         appProvider.selectorCreationAdditionalPoint(adjustedPosition);
         return;
       }
@@ -252,6 +256,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final PointerDownEvent event,
   ) async {
     final ui.Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
+    final bool isSelectionActive =
+        appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
 
     if (event.buttons == 1 && _activePointerId == -1) {
       if (appProvider.eyeDropPositionForBrush != null) {
@@ -268,7 +274,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
 
       _activePointerId = event.pointer;
 
-      if (appProvider.selectedAction == ActionType.selector) {
+      if (isSelectionActive) {
         appProvider.selectorCreationStart(adjustedPosition);
         return;
       }
