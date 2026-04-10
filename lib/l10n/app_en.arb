@@ -155,6 +155,7 @@
   "startOverTooltip": "Start new...",
   "textColor": "Text Color",
   "tolerance": "Tolerance",
+  "transform": "Transform",
   "topColors": "Top {count} colors",
   "@topColors": {
     "placeholders": {

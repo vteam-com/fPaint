@@ -24,27 +24,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get availablePlatforms => 'Plateformes disponibles';
 
   @override
-  String get blendModeColorBurnDescription =>
-      'Assombrit la destination en augmentant le contraste basé sur la couleur source.';
+  String get blendModeColorBurnDescription => 'Assombrit la destination en augmentant le contraste basé sur la couleur source.';
 
   @override
-  String get blendModeColorDescription =>
-      'Utilise la teinte et la saturation de la source, mais conserve la luminance de la destination.';
+  String get blendModeColorDescription => 'Utilise la teinte et la saturation de la source, mais conserve la luminance de la destination.';
 
   @override
-  String get blendModeColorDodgeDescription =>
-      'Éclaircit la destination en réduisant le contraste basé sur la couleur source.';
+  String get blendModeColorDodgeDescription => 'Éclaircit la destination en réduisant le contraste basé sur la couleur source.';
 
   @override
   String get blendModeDarkenDescription => 'Conserve la couleur la plus sombre des pixels source et destination.';
 
   @override
-  String get blendModeHardLightDescription =>
-      'Applique multiplication ou écran selon l\'intensité de la couleur source, créant un contraste fort.';
+  String get blendModeHardLightDescription => 'Applique multiplication ou écran selon l\'intensité de la couleur source, créant un contraste fort.';
 
   @override
-  String get blendModeHueDescription =>
-      'Utilise la teinte de la source et la saturation et luminance de la destination.';
+  String get blendModeHueDescription => 'Utilise la teinte de la source et la saturation et luminance de la destination.';
 
   @override
   String get blendModeLightenDescription => 'Conserve la couleur la plus claire des pixels source et destination.';
@@ -53,12 +48,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get blendModeLinearDodgeDescription => 'Additionne les couleurs source et destination, plafonné au blanc.';
 
   @override
-  String get blendModeLuminosityDescription =>
-      'Utilise la luminance de la source et la teinte et saturation de la destination.';
+  String get blendModeLuminosityDescription => 'Utilise la luminance de la source et la teinte et saturation de la destination.';
 
   @override
-  String get blendModeMultiplyDescription =>
-      'Multiplie les couleurs source et destination, produisant une sortie plus sombre.';
+  String get blendModeMultiplyDescription => 'Multiplie les couleurs source et destination, produisant une sortie plus sombre.';
 
   @override
   String get blendModeNormalDescription => 'Place l\'image source sur la destination sans mélange.';
@@ -67,20 +60,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get blendModeNormalLabel => 'Normal';
 
   @override
-  String get blendModeOverlayDescription =>
-      'Combine les modes multiplication et écran : assombrit les zones sombres et éclaircit les zones claires.';
+  String get blendModeOverlayDescription => 'Combine les modes multiplication et écran : assombrit les zones sombres et éclaircit les zones claires.';
 
   @override
-  String get blendModeSaturationDescription =>
-      'Utilise la saturation de la source et la teinte et luminance de la destination.';
+  String get blendModeSaturationDescription => 'Utilise la saturation de la source et la teinte et luminance de la destination.';
 
   @override
-  String get blendModeScreenDescription =>
-      'Multiplie les inverses de la source et de la destination, produisant une sortie plus claire.';
+  String get blendModeScreenDescription => 'Multiplie les inverses de la source et de la destination, produisant une sortie plus claire.';
 
   @override
-  String get blendModeSoftLightDescription =>
-      'Adoucit le contraste en assombrissant ou éclaircissant la destination selon la source.';
+  String get blendModeSoftLightDescription => 'Adoucit le contraste en assombrissant ou éclaircissant la destination selon la source.';
 
   @override
   String get brush => 'Pinceau';
@@ -213,8 +202,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importTooltip => 'Importer...';
 
   @override
-  String get invalidImageSizeDimensionsMustBeNumbers =>
-      'Taille d\'image invalide: les dimensions doivent etre des nombres.';
+  String get invalidImageSizeDimensionsMustBeNumbers => 'Taille d\'image invalide: les dimensions doivent etre des nombres.';
 
   @override
   String get invalidSize => 'Taille invalide';
@@ -303,6 +291,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tolerance => 'Tolérance';
 
   @override
+  String get transform => 'Transformer';
+
+  @override
   String topColors(Object count) {
     return 'Top $count couleurs';
   }
@@ -311,8 +302,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get unsavedChanges => 'Modifications non enregistrees';
 
   @override
-  String get unsavedChangesDiscardAndOpenPrompt =>
-      'Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?';
+  String get unsavedChangesDiscardAndOpenPrompt => 'Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?';
 
   @override
   String get useApplePencilOnlySubtitle => 'Si active, seul l\'Apple Pencil sera utilise pour dessiner.';

@@ -7,10 +7,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/image_placement_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
+import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
@@ -279,6 +281,99 @@ class AppProvider extends ChangeNotifier {
   /// Cancels an in-progress image placement.
   void cancelImagePlacement() {
     imagePlacementModel.clear();
+    update();
+  }
+
+  //=============================================================================
+  // Transform
+
+  /// Begins a perspective/skew transform on the current selection.
+  ///
+  /// Captures the pixels under the selection from the current layer and
+  /// initialises the [transformModel] for interactive manipulation.
+  Future<void> startTransform() async {
+    if (!selectorModel.isVisible || selectorModel.path1 == null) {
+      return;
+    }
+
+    final Rect bounds = selectorModel.path1!.getBounds();
+    if (bounds.width <= 0 || bounds.height <= 0) {
+      return;
+    }
+
+    // Capture the pixels under the selection from the current layer.
+    final ui.Image layerImage = layers.selectedLayer.toImageForStorage(layers.size);
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.translate(-bounds.left, -bounds.top);
+    canvas.clipPath(selectorModel.path1!);
+    canvas.drawImage(layerImage, Offset.zero, Paint());
+
+    final ui.Image clippedImage = await recorder.endRecording().toImage(
+      bounds.width.ceil(),
+      bounds.height.ceil(),
+    );
+
+    transformModel.start(image: clippedImage, bounds: bounds);
+    update();
+  }
+
+  /// Commits the current transform, erasing the original selection region
+  /// and placing the warped result as a new image action.
+  Future<void> confirmTransform() async {
+    final ui.Image? sourceImage = transformModel.sourceImage;
+    if (sourceImage == null) {
+      transformModel.clear();
+      update();
+      return;
+    }
+
+    // Render the warped image to a raster.
+    final ui.Image transformedImage = await renderTransformedImage(
+      sourceImage,
+      transformModel.corners,
+      AppInteraction.transformGridSubdivisions,
+    );
+
+    // Capture state for undo.
+    final Path erasePath = Path.from(selectorModel.path1!);
+    final Rect quadBounds = transformModel.quadBounds;
+    final Offset imageOffset = Offset(quadBounds.left, quadBounds.top);
+
+    _undoProvider.executeAction(
+      name: 'Transform',
+      forward: () {
+        // Erase the original region.
+        layers.selectedLayer.appendDrawingAction(
+          UserActionDrawing(
+            action: ActionType.cut,
+            positions: <ui.Offset>[],
+            path: erasePath,
+          ),
+        );
+        // Add the transformed image.
+        layers.selectedLayer.addImage(
+          imageToAdd: transformedImage,
+          offset: imageOffset,
+        );
+        update();
+      },
+      backward: () {
+        layers.selectedLayer.undo(); // undo add image
+        layers.selectedLayer.undo(); // undo cut
+        update();
+      },
+    );
+
+    selectorModel.clear();
+    transformModel.clear();
+    update();
+  }
+
+  /// Cancels an in-progress transform operation.
+  void cancelTransform() {
+    transformModel.clear();
     update();
   }
 
@@ -590,6 +685,9 @@ class AppProvider extends ChangeNotifier {
 
   /// The image placement model for interactive paste.
   final ImagePlacementModel imagePlacementModel = ImagePlacementModel();
+
+  /// The transform model for perspective/skew operations.
+  final TransformModel transformModel = TransformModel();
 
   /// Starts a selector creation.
   void selectorCreationStart(final Offset position) {

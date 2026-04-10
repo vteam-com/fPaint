@@ -265,6 +265,21 @@ class ToolsPanel extends StatelessWidget {
         },
       ),
 
+      // Transform (perspective / skew) — operates on the active selection
+      if (appProvider.selectorModel.isVisible)
+        ToolPanelPicker(
+          key: Keys.toolTransform,
+          minimal: minimal,
+          name: 'Transform',
+          image: iconAndColor(
+            Icons.transform,
+            appProvider.transformModel.isVisible,
+          ),
+          onPressed: () {
+            appProvider.startTransform();
+          },
+        ),
+
       // Text
       ToolPanelPicker(
         minimal: minimal,

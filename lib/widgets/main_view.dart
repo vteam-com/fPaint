@@ -9,6 +9,7 @@ import 'package:fpaint/widgets/image_placement_widget.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/text_editor.dart';
+import 'package:fpaint/widgets/transform_widget.dart';
 
 /// The main view of the application, which is a stateful widget.
 /// This widget is responsible for managing the state of the main view,
@@ -145,6 +146,19 @@ class MainViewState extends State<MainView> {
             onChanged: () => appProvider.update(),
             onConfirm: () => appProvider.confirmImagePlacement(),
             onCancel: () => appProvider.cancelImagePlacement(),
+          ),
+
+        //
+        // Transform overlay (perspective/skew)
+        //
+        if (appProvider.transformModel.isVisible)
+          TransformWidget(
+            model: appProvider.transformModel,
+            canvasOffset: appProvider.canvasOffset,
+            canvasScale: appProvider.layers.scale,
+            onChanged: () => appProvider.update(),
+            onConfirm: () => appProvider.confirmTransform(),
+            onCancel: () => appProvider.cancelTransform(),
           ),
       ],
     );

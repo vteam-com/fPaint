@@ -35,6 +35,10 @@ class AppColors {
   static const Color selected = Color(0xFF2196F3);
   static const Color pressed = Color(0xFF1976D2);
   static const Color layerHiddenWarning = Color.fromARGB(255, 135, 9, 9);
+
+  // Transform handle colors
+  static const Color transformCornerHandle = Color(0xFFFF9800);
+  static const Color transformEdgeHandle = Color(0xFFFFC107);
 }
 
 /// Shared spacing tokens used across dialogs, panels, and controls.
@@ -170,6 +174,8 @@ class AppInteraction {
   static const double imagePlacementButtonSize = 36.0;
   static const double imagePlacementMinScale = 0.1;
   static const double imagePlacementMaxScale = 5.0;
+  static const double transformEdgeHandleSize = 12.0;
+  static const int transformGridSubdivisions = 10;
 }
 
 /// Shared persisted/default app values.
@@ -213,4 +219,5 @@ class Keys {
   static Key toolPanelFillColor = const Key('toolPanelFillColor');
   static Key toolPanelBrushColor1 = const Key('toolPanelBrushColor1');
   static Key toolPanelFontColor = const Key('toolPanelFontColor');
+  static Key toolTransform = const Key('tool-transform');
 }
