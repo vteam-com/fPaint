@@ -123,6 +123,7 @@
     "description": "REVIEWED"
   },
   "platforms": "Available on...",
+  "resizeRotate": "Resize / Rotate",
   "rotateCanvasTooltip": "Rotate Canvas 90° CW",
   "runOnMostBrowsers": "Run on any OS with most browsers.",
   "saveAsFile": "Save as {fileName}",
@@ -155,13 +156,13 @@
   "startOverTooltip": "Start new...",
   "textColor": "Text Color",
   "tolerance": "Tolerance",
-  "transform": "Transform",
   "topColors": "Top {count} colors",
   "@topColors": {
     "placeholders": {
       "count": {}
     }
   },
+  "transform": "Transform",
   "unsavedChanges": "Unsaved Changes",
   "unsavedChangesDiscardAndOpenPrompt": "You have unsaved changes. Do you want to discard them and open the new file?",
   "useApplePencilOnlySubtitle": "If enabled, only the Apple Pencil will be used for drawing.",

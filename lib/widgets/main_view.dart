@@ -92,7 +92,7 @@ class MainViewState extends State<MainView> {
         //
         // Selection Widget
         //
-        if (appProvider.selectorModel.isVisible)
+        if (appProvider.selectorModel.isVisible && !appProvider.transformModel.isVisible)
           SelectionRectWidget(
             path1: appProvider.getPathAdjustToCanvasSizeAndPosition(
               appProvider.selectorModel.path1,
@@ -100,7 +100,9 @@ class MainViewState extends State<MainView> {
             path2: appProvider.getPathAdjustToCanvasSizeAndPosition(
               appProvider.selectorModel.path2,
             ),
-            enableMoveAndResize: appProvider.selectedAction == ActionType.selector,
+            enableMoveAndResize:
+                appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible,
+            isTransformMode: appProvider.transformModel.isVisible,
             onDrag: (final Offset offset) {
               appProvider.selectorModel.translate(offset / appProvider.layers.scale);
               appProvider.update();
@@ -115,6 +117,14 @@ class MainViewState extends State<MainView> {
             onRotate: (final double angleRadians) {
               appProvider.selectorModel.rotate(angleRadians);
               appProvider.update();
+            },
+            onToggleTransformMode: () async {
+              if (appProvider.transformModel.isVisible) {
+                appProvider.cancelTransform();
+                return;
+              }
+
+              await appProvider.startTransform();
             },
           ),
 

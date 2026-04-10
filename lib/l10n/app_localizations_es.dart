@@ -24,19 +24,23 @@ class AppLocalizationsEs extends AppLocalizations {
   String get availablePlatforms => 'Plataformas disponibles';
 
   @override
-  String get blendModeColorBurnDescription => 'Oscurece el destino aumentando el contraste basado en el color de origen.';
+  String get blendModeColorBurnDescription =>
+      'Oscurece el destino aumentando el contraste basado en el color de origen.';
 
   @override
-  String get blendModeColorDescription => 'Usa el tono y saturación del origen, pero mantiene la luminancia del destino.';
+  String get blendModeColorDescription =>
+      'Usa el tono y saturación del origen, pero mantiene la luminancia del destino.';
 
   @override
-  String get blendModeColorDodgeDescription => 'Aclara el destino reduciendo el contraste basado en el color de origen.';
+  String get blendModeColorDodgeDescription =>
+      'Aclara el destino reduciendo el contraste basado en el color de origen.';
 
   @override
   String get blendModeDarkenDescription => 'Conserva el color más oscuro de los píxeles de origen y destino.';
 
   @override
-  String get blendModeHardLightDescription => 'Aplica multiplicar o pantalla según la intensidad del color de origen, creando un contraste fuerte.';
+  String get blendModeHardLightDescription =>
+      'Aplica multiplicar o pantalla según la intensidad del color de origen, creando un contraste fuerte.';
 
   @override
   String get blendModeHueDescription => 'Usa el tono del origen y la saturación y luminancia del destino.';
@@ -51,7 +55,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get blendModeLuminosityDescription => 'Usa la luminancia del origen y el tono y saturación del destino.';
 
   @override
-  String get blendModeMultiplyDescription => 'Multiplica los colores de origen y destino, produciendo una salida más oscura.';
+  String get blendModeMultiplyDescription =>
+      'Multiplica los colores de origen y destino, produciendo una salida más oscura.';
 
   @override
   String get blendModeNormalDescription => 'Coloca la imagen de origen sobre el destino sin mezclar.';
@@ -60,16 +65,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get blendModeNormalLabel => 'Normal';
 
   @override
-  String get blendModeOverlayDescription => 'Combina los modos multiplicar y pantalla: oscurece las áreas oscuras y aclara las claras.';
+  String get blendModeOverlayDescription =>
+      'Combina los modos multiplicar y pantalla: oscurece las áreas oscuras y aclara las claras.';
 
   @override
   String get blendModeSaturationDescription => 'Usa la saturación del origen y el tono y luminancia del destino.';
 
   @override
-  String get blendModeScreenDescription => 'Multiplica los inversos del origen y destino, produciendo una salida más clara.';
+  String get blendModeScreenDescription =>
+      'Multiplica los inversos del origen y destino, produciendo una salida más clara.';
 
   @override
-  String get blendModeSoftLightDescription => 'Suaviza el contraste oscureciendo o aclarando el destino según el origen.';
+  String get blendModeSoftLightDescription =>
+      'Suaviza el contraste oscureciendo o aclarando el destino según el origen.';
 
   @override
   String get brush => 'Pincel';
@@ -291,6 +299,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tolerance => 'Tolerancia';
 
   @override
+  String get resizeRotate => 'Redimensionar / Girar';
+
+  @override
   String get transform => 'Transformar';
 
   @override
@@ -302,7 +313,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get unsavedChanges => 'Cambios no guardados';
 
   @override
-  String get unsavedChangesDiscardAndOpenPrompt => 'Tienes cambios no guardados. Quieres descartarlos y abrir el nuevo archivo?';
+  String get unsavedChangesDiscardAndOpenPrompt =>
+      'Tienes cambios no guardados. Quieres descartarlos y abrir el nuevo archivo?';
 
   @override
   String get useApplePencilOnlySubtitle => 'Si esta activado, solo se usara el Apple Pencil para dibujar.';

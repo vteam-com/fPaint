@@ -6,9 +6,22 @@ import 'package:fpaint/helpers/constants.dart';
 ///
 /// The stem is positioned centred horizontally on [bounds] and extends upward
 /// by [AppInteraction.rotationHandleDistance] pixels.
-Widget buildRotationStem(final Rect bounds) {
-  final double stemTop = bounds.top - AppInteraction.rotationHandleDistance;
+///
+/// When [handleSize] is provided, the stem ends at the bottom edge of the
+/// handle instead of its centre. This keeps larger selector-mode buttons from
+/// being visually bisected by the stem line.
+Widget buildRotationStem(final Rect bounds, {final double? handleSize}) {
+  final double stemTop = handleSize == null
+      ? bounds.top - AppInteraction.rotationHandleDistance
+      : bounds.top - AppInteraction.rotationHandleDistance + handleSize / AppMath.pair;
+  final double stemHeight = handleSize == null
+      ? AppInteraction.rotationHandleDistance
+      : AppInteraction.rotationHandleDistance - handleSize / AppMath.pair;
   final double stemX = bounds.center.dx;
+
+  if (stemHeight <= 0) {
+    return const SizedBox.shrink();
+  }
 
   return Positioned(
     left: stemX - (AppInteraction.rotationHandleLineWidth / AppMath.pair),
@@ -16,7 +29,7 @@ Widget buildRotationStem(final Rect bounds) {
     child: IgnorePointer(
       child: Container(
         width: AppInteraction.rotationHandleLineWidth,
-        height: AppInteraction.rotationHandleDistance,
+        height: stemHeight,
         color: Colors.blue,
       ),
     ),

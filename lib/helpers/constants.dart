@@ -196,6 +196,11 @@ class FileExtensions {
   static const String tiff = 'tiff';
 }
 
+/// Shared asset paths used across the application.
+class AppAssets {
+  static const String transformIcon = 'assets/icons/transform.svg';
+}
+
 /// Shared widget keys used by tests and UI lookups across the app.
 class Keys {
   static Key floatActionZoomIn = const Key('floating_action_zoom_in');
