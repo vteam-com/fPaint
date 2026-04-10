@@ -39,6 +39,7 @@
     "workbench.editor.closeOnFileDelete": true,
     "cSpell.enabled": true,
     "cSpell.words": [
+        "fcheck",
         "fpaint",
         "pkill",
         "vteam"
