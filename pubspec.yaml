@@ -9,7 +9,7 @@ repository: https://github.com/vteam-com/fPaint
 homepage: https://github.com/vteam-com/fPaint
 issue_tracker: https://github.com/vteam-com/fPaint/issues
 
-version: 1.1.2+1
+version: 1.1.3+1
 
 environment:
   sdk: ">=3.9.2"
@@ -34,6 +34,7 @@ dependencies:
   intl: any
   material_symbols_icons: ^4.2928.1
   multi_split_view: any
+  package_info_plus: ^9.0.1
   pasteboard: ^0.5.0
   path_provider: any
   provider: any

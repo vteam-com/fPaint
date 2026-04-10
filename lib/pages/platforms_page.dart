@@ -85,7 +85,11 @@ class PlatformsPage extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: AppSpacing.sm, horizontal: AppSpacing.xl),
       child: InkWell(
         onTap: () {
-          launchUrl(Uri.parse(url));
+          launchUrl(
+            Uri.parse(url),
+            mode: LaunchMode.externalApplication,
+            webOnlyWindowName: '_blank',
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.xl),

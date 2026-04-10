@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const String _repoUrl = 'https://github.com/your-repo-url';
@@ -13,15 +14,20 @@ const String _applicationLegalese = '(c) 2025 VTeam';
 /// screen resolution and a link to the application's GitHub repository.
 ///
 /// The [context] parameter is the [BuildContext] used to show the dialog.
-void showAboutBox(final BuildContext context) {
+Future<void> showAboutBox(final BuildContext context) async {
   final AppLocalizations l10n = AppLocalizations.of(context)!;
   final MediaQueryData mediaQuery = MediaQuery.of(context);
   final String screenResolution = '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';
+  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+  if (!context.mounted) {
+    return;
+  }
 
   showAboutDialog(
     context: context,
-    applicationName: 'fPaint',
-    applicationVersion: '1.0.0',
+    applicationName: appName,
+    applicationVersion: packageInfo.version,
     applicationLegalese: _applicationLegalese,
     applicationIcon: Image.asset(
       'assets/app_icon.png',

@@ -38,39 +38,6 @@ jobs:
           name: flutter-windows-app
           path: flutter-windows-app.zip
 
-  build-linux:
-    name: Build Linux
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install Linux build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake ninja-build g++ pkg-config libgtk-3-dev
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.35.7"
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build Linux
-        run: flutter build linux
-
-      - name: Zip Linux build
-        run: cd build/linux/x64/release/bundle && zip -r "$GITHUB_WORKSPACE/flutter-linux-app.zip" .
-
-      - name: Upload Linux artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: flutter-linux-app
-          path: flutter-linux-app.zip
-
   build-macos:
     name: Build macOS
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -99,17 +66,18 @@ jobs:
           name: flutter-macos-app
           path: flutter-macos-app.zip
 
-  deploy-web:
-    name: Build & Deploy Web
-    needs: [build-windows, build-linux, build-macos]
+  build-linux-and-deploy-web:
+    name: Build Linux & Deploy Web
+    needs: [build-windows, build-macos]
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      - name: Download desktop artifacts
-        uses: actions/download-artifact@v7
-        with:
-          path: desktop-artifacts
+      - name: Install Linux build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ pkg-config libgtk-3-dev
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -120,14 +88,25 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Build Linux desktop
+        run: flutter build linux
+
+      - name: Zip Linux build
+        run: cd build/linux/x64/release/bundle && zip -r "$GITHUB_WORKSPACE/flutter-linux-app.zip" .
+
       - name: Build web
         run: flutter build web
+
+      - name: Download desktop artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: desktop-artifacts
 
       - name: Copy desktop downloads into web build
         run: |
           mkdir -p build/web/downloads
+          cp flutter-linux-app.zip build/web/downloads/
           cp desktop-artifacts/flutter-windows-app/flutter-windows-app.zip build/web/downloads/
-          cp desktop-artifacts/flutter-linux-app/flutter-linux-app.zip build/web/downloads/
           cp desktop-artifacts/flutter-macos-app/flutter-macos-app.zip build/web/downloads/
 
       - name: Deploy to Firebase Hosting

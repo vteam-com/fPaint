@@ -2,6 +2,9 @@
 // ignore: fcheck_magic_numbers
 import 'package:flutter/material.dart';
 
+/// The application display name.
+const String appName = 'fPaint';
+
 /// Application color constants for consistent theming
 class AppColors {
   // Primary colors

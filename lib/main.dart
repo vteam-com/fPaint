@@ -135,7 +135,7 @@ class MyApp extends StatelessWidget {
         builder: (final BuildContext _, final AppProvider currentAppProvider, final Widget? _) {
           return MaterialApp(
             navigatorKey: navigatorKey,
-            title: 'fPaint',
+            title: appName,
             localizationsDelegates: <LocalizationsDelegate<dynamic>>[
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
