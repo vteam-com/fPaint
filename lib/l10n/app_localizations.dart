@@ -290,6 +290,12 @@ abstract class AppLocalizations {
   /// **'Create'**
   String get create;
 
+  /// No description provided for @degreesValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}°'**
+  String degreesValue(Object value);
+
   /// No description provided for @delete.
   ///
   /// In en, this message translates to:
@@ -530,11 +536,23 @@ abstract class AppLocalizations {
   /// **'No'**
   String get no;
 
+  /// No description provided for @percentageValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}%'**
+  String percentageValue(Object value);
+
   /// No description provided for @platforms.
   ///
   /// In en, this message translates to:
   /// **'Available on...'**
   String get platforms;
+
+  /// No description provided for @resizeRotate.
+  ///
+  /// In en, this message translates to:
+  /// **'Resize / Rotate'**
+  String get resizeRotate;
 
   /// No description provided for @rotateCanvasTooltip.
   ///
@@ -565,6 +583,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save \"{fileName}\"'**
   String saveLoadedFile(Object fileName);
+
+  /// No description provided for @scale.
+  ///
+  /// In en, this message translates to:
+  /// **'Scale'**
+  String get scale;
 
   /// No description provided for @selectionIsHidden.
   ///
@@ -608,23 +632,17 @@ abstract class AppLocalizations {
   /// **'Tolerance'**
   String get tolerance;
 
-  /// No description provided for @resizeRotate.
+  /// No description provided for @topColors.
   ///
   /// In en, this message translates to:
-  /// **'Resize / Rotate'**
-  String get resizeRotate;
+  /// **'Top {count} colors'**
+  String topColors(Object count);
 
   /// No description provided for @transform.
   ///
   /// In en, this message translates to:
   /// **'Transform'**
   String get transform;
-
-  /// No description provided for @topColors.
-  ///
-  /// In en, this message translates to:
-  /// **'Top {count} colors'**
-  String topColors(Object count);
 
   /// No description provided for @unsavedChanges.
   ///

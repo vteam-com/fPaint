@@ -24,8 +24,20 @@ class TransformModel extends VisibleModel {
   /// Order: topLeft, topRight, bottomRight, bottomLeft.
   List<Offset> corners = <Offset>[];
 
-  /// Whether the transform overlay is currently in rotate mode.
-  bool isRotateMode = false;
+  /// The active interaction mode for the transform overlay.
+  TransformInteractionMode interactionMode = TransformInteractionMode.deform;
+
+  /// The cumulative scale percentage for the active scale drag gesture.
+  double activeScalePercent = AppMath.percentScale;
+
+  /// Whether the scale percentage feedback should be shown.
+  bool isScaleFeedbackVisible = false;
+
+  /// The cumulative rotation delta in degrees for the active rotate drag gesture.
+  double activeRotationDegrees = 0;
+
+  /// Whether the rotation feedback should be shown.
+  bool isRotationFeedbackVisible = false;
 
   /// Begins a transform operation with the given [image] captured from the selection
   /// at the given [bounds].
@@ -41,7 +53,7 @@ class TransformModel extends VisibleModel {
       bounds.bottomRight,
       bounds.bottomLeft,
     ];
-    isRotateMode = false;
+    setDeformMode();
     isVisible = true;
   }
 
@@ -61,6 +73,88 @@ class TransformModel extends VisibleModel {
     for (int i = 0; i < corners.length; i++) {
       corners[i] = corners[i] + delta;
     }
+  }
+
+  /// Whether the overlay is currently in deform mode.
+  bool get isDeformMode => interactionMode == TransformInteractionMode.deform;
+
+  /// Whether the overlay is currently in rotate mode.
+  bool get isRotateMode => interactionMode == TransformInteractionMode.rotate;
+
+  /// Whether the overlay is currently in uniform scale mode.
+  bool get isScaleMode => interactionMode == TransformInteractionMode.scale;
+
+  /// Whether a live feedback bubble should be shown.
+  bool get isFeedbackVisible => isScaleFeedbackVisible || isRotationFeedbackVisible;
+
+  /// Sets deform mode and clears any transient scale feedback.
+  void setDeformMode() {
+    interactionMode = TransformInteractionMode.deform;
+    endScaleGesture();
+    endRotateGesture();
+  }
+
+  /// Sets rotate mode and clears any transient scale feedback.
+  void setRotateMode() {
+    interactionMode = TransformInteractionMode.rotate;
+    endScaleGesture();
+    endRotateGesture();
+  }
+
+  /// Sets uniform scale mode without starting a drag gesture.
+  void setScaleMode() {
+    interactionMode = TransformInteractionMode.scale;
+    endScaleGesture();
+    endRotateGesture();
+  }
+
+  /// Starts a scale drag gesture and resets the live scale feedback.
+  void beginScaleGesture() {
+    interactionMode = TransformInteractionMode.scale;
+    activeScalePercent = AppMath.percentScale;
+    isScaleFeedbackVisible = true;
+    endRotateGesture();
+  }
+
+  /// Ends the active scale gesture and hides the live scale feedback.
+  void endScaleGesture() {
+    activeScalePercent = AppMath.percentScale;
+    isScaleFeedbackVisible = false;
+  }
+
+  /// Starts a rotate drag gesture and resets the live rotation feedback.
+  void beginRotateGesture() {
+    interactionMode = TransformInteractionMode.rotate;
+    activeRotationDegrees = 0;
+    isRotationFeedbackVisible = true;
+    endScaleGesture();
+  }
+
+  /// Updates the live rotation feedback by [angleRadians].
+  void updateRotationFeedback(final double angleRadians) {
+    activeRotationDegrees += angleRadians * AppMath.degreesPerHalfTurn / math.pi;
+  }
+
+  /// Ends the active rotate gesture and hides the live rotation feedback.
+  void endRotateGesture() {
+    activeRotationDegrees = 0;
+    isRotationFeedbackVisible = false;
+  }
+
+  /// Uniformly scales the full quad around its center by [factor].
+  void scaleUniform(final double factor) {
+    final double clampedFactor = factor.clamp(
+      AppInteraction.transformScaleFactorMin,
+      AppInteraction.transformScaleFactorMax,
+    );
+    final Offset scaleCenter = center;
+
+    corners = corners.map((final Offset corner) {
+      final Offset vector = corner - scaleCenter;
+      return scaleCenter + (vector * clampedFactor);
+    }).toList();
+
+    activeScalePercent *= clampedFactor;
   }
 
   /// Rotates the full quad around its center by [angleRadians].
@@ -133,7 +227,14 @@ class TransformModel extends VisibleModel {
     super.clear();
     sourceImage = null;
     sourceBounds = Rect.zero;
-    isRotateMode = false;
+    setDeformMode();
     corners.clear();
   }
+}
+
+/// Interaction modes available in the transform overlay.
+enum TransformInteractionMode {
+  scale,
+  rotate,
+  deform,
 }

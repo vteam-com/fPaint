@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/models/visible_model.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
@@ -62,6 +63,23 @@ class SelectorModel extends VisibleModel {
   void rotate(final double angleRadians) {
     if (this.path1 != null) {
       this.path1 = rotatePathAroundCenter(this.path1!, angleRadians);
+      if (this.path2 != null) {
+        this.path2 = rotatePathAroundCenter(this.path2!, angleRadians);
+      }
+    }
+  }
+
+  /// Scales the selection uniformly around its center by [factor].
+  void scaleUniform(final double factor) {
+    if (this.path1 != null) {
+      final double clampedFactor = factor.clamp(
+        AppInteraction.transformScaleFactorMin,
+        AppInteraction.transformScaleFactorMax,
+      );
+      this.path1 = scalePathAroundCenter(this.path1!, clampedFactor, null);
+      if (this.path2 != null) {
+        this.path2 = scalePathAroundCenter(this.path2!, clampedFactor, null);
+      }
     }
   }
 

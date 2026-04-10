@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/transform_model.dart';
+import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 
 /// An overlay widget that lets the user interactively skew and change
@@ -79,7 +80,7 @@ class TransformWidget extends StatelessWidget {
             ),
           ),
 
-          if (!model.isRotateMode) ...<Widget>[
+          if (model.isDeformMode) ...<Widget>[
             // Corner handles (perspective)
             _buildCornerHandle(TransformModel.topLeftIndex, screenCorners[TransformModel.topLeftIndex]),
             _buildCornerHandle(TransformModel.topRightIndex, screenCorners[TransformModel.topRightIndex]),
@@ -140,17 +141,19 @@ class TransformWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               spacing: AppInteraction.imagePlacementButtonSpacing,
               children: <Widget>[
-                _actionButton(
-                  icon: Icons.check,
-                  color: Colors.green,
+                buildOverlayCircleButton(
                   tooltip: l10n.apply,
-                  onPressed: onConfirm,
+                  color: Colors.green,
+                  cursor: SystemMouseCursors.click,
+                  onTap: onConfirm,
+                  child: const Icon(Icons.check, color: Colors.white, size: AppLayout.iconSize),
                 ),
-                _actionButton(
-                  icon: Icons.close,
-                  color: Colors.red,
+                buildOverlayCircleButton(
                   tooltip: l10n.cancel,
-                  onPressed: onCancel,
+                  color: Colors.red,
+                  cursor: SystemMouseCursors.click,
+                  onTap: onCancel,
+                  child: const Icon(Icons.close, color: Colors.white, size: AppLayout.iconSize),
                 ),
               ],
             ),
@@ -160,30 +163,7 @@ class TransformWidget extends StatelessWidget {
     );
   }
 
-  Widget _actionButton({
-    required final IconData icon,
-    required final Color color,
-    required final String tooltip,
-    required final VoidCallback onPressed,
-  }) {
-    return Tooltip(
-      message: tooltip,
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Container(
-          width: AppInteraction.imagePlacementButtonSize,
-          height: AppInteraction.imagePlacementButtonSize,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: AppStroke.regular),
-          ),
-          child: Icon(icon, color: Colors.white, size: AppLayout.iconSize),
-        ),
-      ),
-    );
-  }
-
+  /// Builds a draggable corner handle for perspective edits.
   Widget _buildCornerHandle(final int index, final Offset position) {
     return _buildHandle(
       position: position,
@@ -197,6 +177,7 @@ class TransformWidget extends StatelessWidget {
     );
   }
 
+  /// Builds a draggable edge handle for skew edits.
   Widget _buildEdgeHandle(final int index1, final int index2, final Offset position) {
     return _buildHandle(
       position: position,
@@ -210,6 +191,7 @@ class TransformWidget extends StatelessWidget {
     );
   }
 
+  /// Builds a draggable handle at [position] for move, skew, or perspective edits.
   Widget _buildHandle({
     required final Offset position,
     required final double size,
@@ -238,6 +220,7 @@ class TransformWidget extends StatelessWidget {
     );
   }
 
+  /// Builds the transform mode controls and their live feedback bubble.
   Widget _buildModeControls({
     required final AppLocalizations l10n,
     required final Offset screenCenter,
@@ -245,98 +228,146 @@ class TransformWidget extends StatelessWidget {
   }) {
     final double buttonSize = AppInteraction.imagePlacementButtonSize;
     final double spacing = AppInteraction.imagePlacementButtonSpacing;
+    final double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
     final double controlsTop = _screenQuadTop(screenCorners) - buttonSize - AppInteraction.imagePlacementHandleSize;
+    final double controlsLeft = screenCenter.dx - controlsWidth / AppMath.pair;
+    final Offset scaleHandleCenter = Offset(
+      controlsLeft + buttonSize / AppMath.pair,
+      controlsTop + buttonSize / AppMath.pair,
+    );
     final Offset rotationHandleCenter = Offset(
-      screenCenter.dx - (buttonSize + spacing) / AppMath.pair,
+      controlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
       controlsTop + buttonSize / AppMath.pair,
     );
 
     return Positioned(
-      left: screenCenter.dx - buttonSize - spacing / AppMath.pair,
-      top: controlsTop,
-      child: Row(
+      left: controlsLeft,
+      top: model.isFeedbackVisible ? controlsTop - buttonSize : controlsTop,
+      child: Column(
         mainAxisSize: MainAxisSize.min,
-        spacing: spacing,
         children: <Widget>[
-          Tooltip(
-            message: l10n.resizeRotate,
-            child: GestureDetector(
-              onTap: () {
-                if (!model.isRotateMode) {
-                  model.isRotateMode = true;
-                  onChanged();
-                }
-              },
-              onPanUpdate: (final DragUpdateDetails details) {
-                if (!model.isRotateMode) {
-                  model.isRotateMode = true;
-                }
-                final double previousAngle = atan2(
-                  rotationHandleCenter.dy - screenCenter.dy,
-                  rotationHandleCenter.dx - screenCenter.dx,
-                );
-                final Offset pointer = rotationHandleCenter + details.delta;
-                final double currentAngle = atan2(
-                  pointer.dy - screenCenter.dy,
-                  pointer.dx - screenCenter.dx,
-                );
-                model.rotate(currentAngle - previousAngle);
-                onChanged();
-              },
-              child: MouseRegion(
+          if (model.isFeedbackVisible)
+            buildOverlayFeedbackBubble(
+              label: model.isScaleFeedbackVisible
+                  ? l10n.percentageValue(model.activeScalePercent.round())
+                  : l10n.degreesValue(model.activeRotationDegrees.round()),
+            ),
+          if (model.isFeedbackVisible) const SizedBox(height: AppInteraction.imagePlacementButtonSpacing),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: spacing,
+            children: <Widget>[
+              buildOverlayCircleButton(
+                tooltip: l10n.scale,
+                color: AppColors.selected,
                 cursor: SystemMouseCursors.grab,
-                child: _modeButton(
-                  color: Colors.green,
-                  child: const Icon(
-                    Icons.rotate_right,
-                    size: AppLayout.iconSize,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Tooltip(
-            message: l10n.transform,
-            child: GestureDetector(
-              onTap: () {
-                if (model.isRotateMode) {
-                  model.isRotateMode = false;
+                onTap: () {
+                  if (!model.isScaleMode) {
+                    model.setScaleMode();
+                    onChanged();
+                  }
+                },
+                onPanStart: (final DragStartDetails _) {
+                  model.beginScaleGesture();
                   onChanged();
-                }
-              },
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: _modeButton(
-                  color: AppColors.transformCornerHandle,
-                  child: iconFromSvgAsset(AppAssets.transformIcon),
+                },
+                onPanUpdate: (final DragUpdateDetails details) {
+                  if (!model.isScaleMode || !model.isScaleFeedbackVisible) {
+                    model.beginScaleGesture();
+                  }
+
+                  final double previousDistance = (scaleHandleCenter - screenCenter).distance;
+                  final Offset pointer = scaleHandleCenter + details.delta;
+                  final double currentDistance = (pointer - screenCenter).distance;
+                  if (previousDistance <= AppMath.tinyPercentage) {
+                    return;
+                  }
+
+                  model.scaleUniform(currentDistance / previousDistance);
+                  onChanged();
+                },
+                onPanEnd: (final DragEndDetails _) {
+                  model.endScaleGesture();
+                  onChanged();
+                },
+                onPanCancel: () {
+                  model.endScaleGesture();
+                  onChanged();
+                },
+                child: const Icon(
+                  Icons.open_in_full,
+                  size: AppLayout.iconSize,
+                  color: Colors.white,
                 ),
               ),
-            ),
+              buildOverlayCircleButton(
+                tooltip: l10n.resizeRotate,
+                color: Colors.green,
+                cursor: SystemMouseCursors.grab,
+                onTap: () {
+                  if (!model.isRotateMode) {
+                    model.setRotateMode();
+                    onChanged();
+                  }
+                },
+                onPanStart: (final DragStartDetails _) {
+                  model.beginRotateGesture();
+                  onChanged();
+                },
+                onPanUpdate: (final DragUpdateDetails details) {
+                  if (!model.isRotateMode || !model.isRotationFeedbackVisible) {
+                    model.beginRotateGesture();
+                  }
+                  final double previousAngle = atan2(
+                    rotationHandleCenter.dy - screenCenter.dy,
+                    rotationHandleCenter.dx - screenCenter.dx,
+                  );
+                  final Offset pointer = rotationHandleCenter + details.delta;
+                  final double currentAngle = atan2(
+                    pointer.dy - screenCenter.dy,
+                    pointer.dx - screenCenter.dx,
+                  );
+                  final double angleDelta = currentAngle - previousAngle;
+                  model.rotate(angleDelta);
+                  model.updateRotationFeedback(angleDelta);
+                  onChanged();
+                },
+                onPanEnd: (final DragEndDetails _) {
+                  model.endRotateGesture();
+                  onChanged();
+                },
+                onPanCancel: () {
+                  model.endRotateGesture();
+                  onChanged();
+                },
+                child: const Icon(
+                  Icons.rotate_right,
+                  size: AppLayout.iconSize,
+                  color: Colors.white,
+                ),
+              ),
+              buildOverlayCircleButton(
+                tooltip: l10n.transform,
+                color: AppColors.transformCornerHandle,
+                cursor: SystemMouseCursors.click,
+                onTap: () {
+                  if (!model.isDeformMode) {
+                    model.setDeformMode();
+                    onChanged();
+                  }
+                },
+                child: iconFromSvgAsset(AppAssets.transformIcon),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _modeButton({
-    required final Color color,
-    required final Widget child,
-  }) {
-    return Container(
-      width: AppInteraction.imagePlacementButtonSize,
-      height: AppInteraction.imagePlacementButtonSize,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: AppStroke.regular),
-      ),
-      child: child,
-    );
-  }
-
+  /// Returns the lowest on-screen Y value of the transformed quad.
   double _screenQuadBottom(final List<Offset> screenCorners) {
-    double maxY = screenCorners[0].dy;
+    double maxY = screenCorners[TransformModel.topLeftIndex].dy;
     for (final Offset corner in screenCorners) {
       if (corner.dy > maxY) {
         maxY = corner.dy;
@@ -345,8 +376,9 @@ class TransformWidget extends StatelessWidget {
     return maxY;
   }
 
+  /// Returns the highest on-screen Y value of the transformed quad.
   double _screenQuadTop(final List<Offset> screenCorners) {
-    double minY = screenCorners[0].dy;
+    double minY = screenCorners[TransformModel.topLeftIndex].dy;
     for (final Offset corner in screenCorners) {
       if (corner.dy < minY) {
         minY = corner.dy;
@@ -387,10 +419,10 @@ class _TransformPreviewPainter extends CustomPainter {
       ..strokeWidth = AppStroke.regular;
 
     final Path outlinePath = Path()
-      ..moveTo(screenCorners[0].dx, screenCorners[0].dy)
-      ..lineTo(screenCorners[1].dx, screenCorners[1].dy)
-      ..lineTo(screenCorners[2].dx, screenCorners[2].dy)
-      ..lineTo(screenCorners[3].dx, screenCorners[3].dy)
+      ..moveTo(screenCorners[TransformModel.topLeftIndex].dx, screenCorners[TransformModel.topLeftIndex].dy)
+      ..lineTo(screenCorners[TransformModel.topRightIndex].dx, screenCorners[TransformModel.topRightIndex].dy)
+      ..lineTo(screenCorners[TransformModel.bottomRightIndex].dx, screenCorners[TransformModel.bottomRightIndex].dy)
+      ..lineTo(screenCorners[TransformModel.bottomLeftIndex].dx, screenCorners[TransformModel.bottomLeftIndex].dy)
       ..close();
 
     canvas.drawPath(outlinePath, outlinePaint);

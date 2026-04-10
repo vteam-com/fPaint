@@ -6,11 +6,18 @@ import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
+import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 
 const String _selectorCoordinatesFormat = '{x}\n{y}';
 const String _placeholderX = '{x}';
 const String _placeholderY = '{y}';
+
+enum _SelectionOverlayFeedbackMode {
+  none,
+  scale,
+  rotate,
+}
 
 /// A widget that displays a selection rectangle with handles for resizing and moving.
 class SelectionRectWidget extends StatefulWidget {
@@ -25,8 +32,8 @@ class SelectionRectWidget extends StatefulWidget {
     super.key,
     required this.path1,
     required this.path2,
-    required this.isTransformMode,
     required this.onDrag,
+    required this.onScale,
     required this.onResize,
     required this.onRotate,
     required this.onToggleTransformMode,
@@ -36,9 +43,6 @@ class SelectionRectWidget extends StatefulWidget {
   /// Whether the selection rectangle can be moved and resized.
   final bool enableMoveAndResize;
 
-  /// Whether the selection is currently in perspective/skew transform mode.
-  final bool isTransformMode;
-
   /// A callback that is called when the selection rectangle is dragged.
   final void Function(Offset) onDrag;
 
@@ -47,6 +51,9 @@ class SelectionRectWidget extends StatefulWidget {
 
   /// A callback that is called when the selection is rotated by [angleRadians].
   final void Function(double angleRadians) onRotate;
+
+  /// A callback that is called when the selection is uniformly scaled.
+  final void Function(double factor) onScale;
 
   /// A callback that toggles between resize/rotate and perspective/skew modes.
   final VoidCallback onToggleTransformMode;
@@ -63,6 +70,9 @@ class SelectionRectWidget extends StatefulWidget {
 const int defaultHandleSize = AppInteraction.selectionHandleSize;
 
 class _SelectionRectWidgetState extends State<SelectionRectWidget> {
+  double _activeRotationDegrees = 0;
+  double _activeScalePercent = AppMath.percentScale;
+  _SelectionOverlayFeedbackMode _feedbackMode = _SelectionOverlayFeedbackMode.none;
   bool showCoordinate = false;
   @override
   Widget build(final BuildContext context) {
@@ -74,9 +84,10 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     final Rect bounds = widget.path1!.getBounds();
     final double modeToggleSize = AppInteraction.imagePlacementButtonSize;
     final double modeToggleSpacing = AppInteraction.imagePlacementButtonSpacing;
+    final double controlsWidth = modeToggleSize * AppMath.triple + modeToggleSpacing * AppMath.pair;
     final double width = max(
       bounds.left + bounds.width + defaultHandleSize,
-      bounds.center.dx + modeToggleSize + modeToggleSpacing + modeToggleSize,
+      bounds.center.dx + controlsWidth / AppMath.pair,
     );
 
     // Extra space above for the rotation handle stem + handle
@@ -86,13 +97,12 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     final double height = bounds.bottom + bounds.height + defaultHandleSize + rotationOverhead;
 
     final List<Widget> stackChildren = <Widget>[
-      if (!widget.isTransformMode) AnimatedMarchingAntsPath(path: widget.path1!),
-      if (!widget.isTransformMode && widget.path2 != null) AnimatedMarchingAntsPath(path: widget.path2!),
-      _buildRotateModeControl(bounds, l10n),
-      _buildTransformModeControl(bounds, l10n),
+      AnimatedMarchingAntsPath(path: widget.path1!),
+      if (widget.path2 != null) AnimatedMarchingAntsPath(path: widget.path2!),
+      _buildModeControls(bounds, l10n),
     ];
 
-    if (widget.enableMoveAndResize && !widget.isTransformMode) {
+    if (widget.enableMoveAndResize) {
       stackChildren.addAll(<Widget>[
         // Center handle for moving
         _buildHandle(
@@ -204,6 +214,20 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     );
   }
 
+  void _beginRotateFeedback() {
+    setState(() {
+      _feedbackMode = _SelectionOverlayFeedbackMode.rotate;
+      _activeRotationDegrees = 0;
+    });
+  }
+
+  void _beginScaleFeedback() {
+    setState(() {
+      _feedbackMode = _SelectionOverlayFeedbackMode.scale;
+      _activeScalePercent = AppMath.percentScale;
+    });
+  }
+
   /// Builds a handle for resizing or moving the selection rectangle.
   ///
   /// The [position] parameter specifies the position of the handle.
@@ -255,96 +279,141 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     );
   }
 
-  /// Builds the rotate/resize mode control above the selection.
-  ///
-  /// When transform mode is inactive, dragging this control rotates the
-  /// selection around its center. When transform mode is active, tapping it
-  /// switches back to rotate/resize mode.
-  Widget _buildRotateModeControl(
+  /// Builds the scale, rotate, and transform mode controls shown above the selection.
+  Widget _buildModeControls(
     final Rect bounds,
     final AppLocalizations l10n,
   ) {
-    final double handleSize = AppInteraction.imagePlacementButtonSize;
-    final Offset handleCenter = Offset(
-      bounds.center.dx,
-      bounds.top - AppInteraction.rotationHandleDistance,
+    final double buttonSize = AppInteraction.imagePlacementButtonSize;
+    final double spacing = AppInteraction.imagePlacementButtonSpacing;
+    final double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
+    final double controlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
+    final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
+    final Offset scaleHandleCenter = Offset(
+      controlsLeft + buttonSize / AppMath.pair,
+      controlsTop + buttonSize / AppMath.pair,
+    );
+    final Offset rotateHandleCenter = Offset(
+      controlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
+      controlsTop + buttonSize / AppMath.pair,
     );
 
     return Positioned(
-      left: handleCenter.dx - (handleSize / AppMath.pair),
-      top: handleCenter.dy - (handleSize / AppMath.pair),
-      child: Tooltip(
-        message: l10n.resizeRotate,
-        child: GestureDetector(
-          onTap: widget.isTransformMode ? widget.onToggleTransformMode : null,
-          onPanUpdate: widget.isTransformMode
-              ? null
-              : (final DragUpdateDetails details) {
-                  final Offset pointer = handleCenter + details.delta;
+      left: controlsLeft,
+      top: _isFeedbackVisible ? controlsTop - buttonSize : controlsTop,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (_isFeedbackVisible) buildOverlayFeedbackBubble(label: _feedbackLabel(l10n)),
+          if (_isFeedbackVisible) const SizedBox(height: AppInteraction.imagePlacementButtonSpacing),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: spacing,
+            children: <Widget>[
+              buildOverlayCircleButton(
+                tooltip: l10n.scale,
+                color: AppColors.selected,
+                cursor: SystemMouseCursors.grab,
+                onPanStart: (final DragStartDetails _) => _beginScaleFeedback(),
+                onPanUpdate: (final DragUpdateDetails details) {
+                  final double previousDistance = (scaleHandleCenter - bounds.center).distance;
+                  final Offset pointer = scaleHandleCenter + details.delta;
+                  final double currentDistance = (pointer - bounds.center).distance;
+                  if (previousDistance <= AppMath.tinyPercentage) {
+                    return;
+                  }
+                  final double factor = currentDistance / previousDistance;
+                  _updateScaleFeedback(factor);
+                  widget.onScale(factor);
+                },
+                onPanEnd: (final DragEndDetails _) => _endFeedback(),
+                onPanCancel: _endFeedback,
+                child: const Icon(
+                  Icons.open_in_full,
+                  size: AppLayout.iconSize,
+                  color: Colors.white,
+                ),
+              ),
+              buildOverlayCircleButton(
+                tooltip: l10n.resizeRotate,
+                color: Colors.green,
+                cursor: SystemMouseCursors.grab,
+                onPanStart: (final DragStartDetails _) => _beginRotateFeedback(),
+                onPanUpdate: (final DragUpdateDetails details) {
+                  final Offset pointer = rotateHandleCenter + details.delta;
                   final double previousAngle = atan2(
-                    handleCenter.dy - bounds.center.dy,
-                    handleCenter.dx - bounds.center.dx,
+                    rotateHandleCenter.dy - bounds.center.dy,
+                    rotateHandleCenter.dx - bounds.center.dx,
                   );
                   final double currentAngle = atan2(
                     pointer.dy - bounds.center.dy,
                     pointer.dx - bounds.center.dx,
                   );
-                  widget.onRotate(currentAngle - previousAngle);
+                  final double angleDelta = currentAngle - previousAngle;
+                  _updateRotateFeedback(angleDelta);
+                  widget.onRotate(angleDelta);
                 },
-          child: MouseRegion(
-            cursor: widget.isTransformMode ? SystemMouseCursors.click : SystemMouseCursors.grab,
-            child: Container(
-              width: handleSize,
-              height: handleSize,
-              decoration: BoxDecoration(
-                color: Colors.green,
-                border: Border.all(color: Colors.white, width: AppStroke.regular),
-                shape: BoxShape.circle,
+                onPanEnd: (final DragEndDetails _) => _endFeedback(),
+                onPanCancel: _endFeedback,
+                child: const Icon(
+                  Icons.rotate_right,
+                  size: AppLayout.iconSize,
+                  color: Colors.white,
+                ),
               ),
-              child: const Icon(
-                Icons.rotate_right,
-                size: AppLayout.iconSize,
-                color: Colors.white,
+              buildOverlayCircleButton(
+                tooltip: l10n.transform,
+                color: AppColors.transformCornerHandle,
+                cursor: SystemMouseCursors.click,
+                onTap: widget.onToggleTransformMode,
+                child: iconFromSvgAsset(AppAssets.transformIcon),
               ),
-            ),
+            ],
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildTransformModeControl(
-    final Rect bounds,
-    final AppLocalizations l10n,
-  ) {
-    final double handleSize = AppInteraction.imagePlacementButtonSize;
-    final Offset toggleCenter = Offset(
-      bounds.center.dx + handleSize + AppInteraction.imagePlacementButtonSpacing,
-      bounds.top - AppInteraction.rotationHandleDistance,
-    );
+  void _endFeedback() {
+    setState(() {
+      _feedbackMode = _SelectionOverlayFeedbackMode.none;
+      _activeScalePercent = AppMath.percentScale;
+      _activeRotationDegrees = 0;
+    });
+  }
 
-    return Positioned(
-      left: toggleCenter.dx - (handleSize / AppMath.pair),
-      top: toggleCenter.dy - (handleSize / AppMath.pair),
-      child: Tooltip(
-        message: l10n.transform,
-        child: GestureDetector(
-          onTap: widget.isTransformMode ? null : widget.onToggleTransformMode,
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Container(
-              width: handleSize,
-              height: handleSize,
-              decoration: BoxDecoration(
-                color: AppColors.transformCornerHandle,
-                border: Border.all(color: Colors.white, width: AppStroke.regular),
-                shape: BoxShape.circle,
-              ),
-              child: iconFromSvgAsset(AppAssets.transformIcon),
-            ),
-          ),
-        ),
-      ),
-    );
+  /// Returns the localized label for the active feedback bubble.
+  String _feedbackLabel(final AppLocalizations l10n) {
+    switch (_feedbackMode) {
+      case _SelectionOverlayFeedbackMode.scale:
+        return l10n.percentageValue(_activeScalePercent.round());
+      case _SelectionOverlayFeedbackMode.rotate:
+        return l10n.degreesValue(_activeRotationDegrees.round());
+      case _SelectionOverlayFeedbackMode.none:
+        return '';
+    }
+  }
+
+  bool get _isFeedbackVisible => _feedbackMode != _SelectionOverlayFeedbackMode.none;
+
+  void _updateRotateFeedback(final double angleRadians) {
+    setState(() {
+      if (_feedbackMode != _SelectionOverlayFeedbackMode.rotate) {
+        _feedbackMode = _SelectionOverlayFeedbackMode.rotate;
+        _activeRotationDegrees = 0;
+      }
+      _activeRotationDegrees += angleRadians * AppMath.degreesPerHalfTurn / pi;
+    });
+  }
+
+  void _updateScaleFeedback(final double factor) {
+    setState(() {
+      if (_feedbackMode != _SelectionOverlayFeedbackMode.scale) {
+        _feedbackMode = _SelectionOverlayFeedbackMode.scale;
+        _activeScalePercent = AppMath.percentScale;
+      }
+      _activeScalePercent *= factor;
+    });
   }
 }

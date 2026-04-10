@@ -4,6 +4,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-04-10
+
+### Add
+
+- Scale, Rotate, and Transform controls directly on the selection overlay
+- Live scale and rotation feedback during selection and transform edits
+- A dedicated transform workflow that cleanly takes over from selection during active edits
+
+### Update
+
+- Shared overlay controls, localization, and tests for the new editing workflow
+
 ## [1.1.1] - 2025-11-01
 
 ### Add

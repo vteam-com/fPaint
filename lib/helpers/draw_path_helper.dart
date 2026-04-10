@@ -138,6 +138,25 @@ Path rotatePathAroundCenter(final Path path, final double angleRadians) {
   return path.transform(matrix.storage);
 }
 
+/// Scales the given [path] around its bounding-box center.
+Path scalePathAroundCenter(
+  final Path path,
+  final double scaleX,
+  final double? scaleY,
+) {
+  final Rect bounds = path.getBounds();
+  final double cx = bounds.center.dx;
+  final double cy = bounds.center.dy;
+  final double effectiveScaleY = scaleY ?? scaleX;
+
+  final Matrix4 matrix = Matrix4.identity()
+    ..translateByVector3(vm.Vector3(cx, cy, 0))
+    ..scaleByVector3(vm.Vector3(scaleX, effectiveScaleY, 1.0))
+    ..translateByVector3(vm.Vector3(-cx, -cy, 0));
+
+  return path.transform(matrix.storage);
+}
+
 /// Scales the [inputSize] to fit within the specified [maxWith] and [maxHeight],
 /// while maintaining the aspect ratio.
 ///

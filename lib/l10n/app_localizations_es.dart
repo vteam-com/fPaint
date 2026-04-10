@@ -118,6 +118,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get create => 'Crear';
 
   @override
+  String degreesValue(Object value) {
+    return 'Giro: $value°';
+  }
+
+  @override
   String get delete => 'Eliminar';
 
   @override
@@ -252,7 +257,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get no => 'No';
 
   @override
+  String percentageValue(Object value) {
+    return 'Escala: $value%';
+  }
+
+  @override
   String get platforms => 'Disponible en...';
+
+  @override
+  String get resizeRotate => 'Redimensionar / Girar';
 
   @override
   String get rotateCanvasTooltip => 'Girar lienzo 90 grados en sentido horario';
@@ -274,6 +287,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String saveLoadedFile(Object fileName) {
     return 'Guardar \"$fileName\"';
   }
+
+  @override
+  String get scale => 'Escalar';
 
   @override
   String get selectionIsHidden => 'La seleccion esta oculta.';
@@ -299,15 +315,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tolerance => 'Tolerancia';
 
   @override
-  String get resizeRotate => 'Redimensionar / Girar';
-
-  @override
-  String get transform => 'Transformar';
-
-  @override
   String topColors(Object count) {
     return 'Top $count colores';
   }
+
+  @override
+  String get transform => 'Transformar';
 
   @override
   String get unsavedChanges => 'Cambios no guardados';
