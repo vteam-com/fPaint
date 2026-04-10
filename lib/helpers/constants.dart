@@ -152,6 +152,7 @@ class AppMath {
   static const int hexRadix = 16;
   static const int hexPad = 2;
   static const double smallPercentage = 0.1;
+  static const double degreesPerHalfTurn = 180.0;
   static const double percentScale = 100.0;
   static const double tinyPercentage = 0.01;
 }
@@ -175,6 +176,8 @@ class AppInteraction {
   static const double imagePlacementMinScale = 0.1;
   static const double imagePlacementMaxScale = 5.0;
   static const double transformEdgeHandleSize = 12.0;
+  static const double transformScaleFactorMin = 0.1;
+  static const double transformScaleFactorMax = 10.0;
   static const int transformGridSubdivisions = 10;
 }
 

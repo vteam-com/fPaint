@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/transform_model.dart';
 
 /// Creates a test image.
@@ -93,6 +94,23 @@ void main() {
       expect(model.corners[TransformModel.bottomLeftIndex], const Offset(20, 130));
     });
 
+    test('scaleUniform scales all corners evenly around the center', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      const Rect bounds = Rect.fromLTWH(0, 0, 100, 100);
+      model.start(image: image, bounds: bounds);
+
+      model.beginScaleGesture();
+      model.scaleUniform(2);
+
+      expect(model.corners[TransformModel.topLeftIndex], const Offset(-50, -50));
+      expect(model.corners[TransformModel.topRightIndex], const Offset(150, -50));
+      expect(model.corners[TransformModel.bottomRightIndex], const Offset(150, 150));
+      expect(model.corners[TransformModel.bottomLeftIndex], const Offset(-50, 150));
+      expect(model.activeScalePercent, AppMath.percentScale * 2);
+      expect(model.isScaleFeedbackVisible, isTrue);
+    });
+
     test('center returns quad centroid', () async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
@@ -147,12 +165,18 @@ void main() {
       final ui.Image image = await _createTestImage();
       model.start(image: image, bounds: const Rect.fromLTWH(0, 0, 100, 100));
 
+      model.beginScaleGesture();
+      model.setRotateMode();
+
       model.clear();
 
       expect(model.isVisible, isFalse);
       expect(model.sourceImage, isNull);
       expect(model.sourceBounds, Rect.zero);
       expect(model.corners, isEmpty);
+      expect(model.isDeformMode, isTrue);
+      expect(model.activeScalePercent, AppMath.percentScale);
+      expect(model.isScaleFeedbackVisible, isFalse);
     });
   });
 }

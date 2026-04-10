@@ -102,9 +102,12 @@ class MainViewState extends State<MainView> {
             ),
             enableMoveAndResize:
                 appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible,
-            isTransformMode: appProvider.transformModel.isVisible,
             onDrag: (final Offset offset) {
               appProvider.selectorModel.translate(offset / appProvider.layers.scale);
+              appProvider.update();
+            },
+            onScale: (final double factor) {
+              appProvider.selectorModel.scaleUniform(factor);
               appProvider.update();
             },
             onResize: (final NineGridHandle handle, final Offset offset) {

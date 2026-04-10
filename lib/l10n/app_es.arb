@@ -38,6 +38,12 @@
   "contentAlignment": "Alineacion del contenido",
   "copyToClipboard": "Copiar al portapapeles",
   "create": "Crear",
+  "degreesValue": "Giro: {value}°",
+  "@degreesValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "delete": "Eliminar",
   "desktopSoftware": "Aplicacion de escritorio.",
   "deviceScreenResolution": "Resolucion de pantalla: {resolution}",
@@ -113,6 +119,12 @@
   "newCanvasSize": "Tamano del nuevo lienzo",
   "newFromClipboard": "Nuevo desde el portapapeles",
   "no": "No",
+  "percentageValue": "Escala: {value}%",
+  "@percentageValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "platforms": "Disponible en...",
   "resizeRotate": "Redimensionar / Girar",
   "rotateCanvasTooltip": "Girar lienzo 90 grados en sentido horario",
@@ -135,6 +147,7 @@
       "fileName": {}
     }
   },
+  "scale": "Escalar",
   "selectionIsHidden": "La seleccion esta oculta.",
   "selectValue": "Seleccionar {value}",
   "@selectValue": {

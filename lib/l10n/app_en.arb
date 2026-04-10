@@ -44,6 +44,12 @@
   "contentAlignment": "Content Alignment",
   "copyToClipboard": "Copy to clipboard",
   "create": "Create",
+  "degreesValue": "{value}°",
+  "@degreesValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "delete": "Delete",
   "desktopSoftware": "Desktop Software.",
   "deviceScreenResolution": "Device Screen Resolution: {resolution}",
@@ -122,6 +128,12 @@
   "@no": {
     "description": "REVIEWED"
   },
+  "percentageValue": "{value}%",
+  "@percentageValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "platforms": "Available on...",
   "resizeRotate": "Resize / Rotate",
   "rotateCanvasTooltip": "Rotate Canvas 90° CW",
@@ -144,6 +156,7 @@
       "fileName": {}
     }
   },
+  "scale": "Scale",
   "selectionIsHidden": "Selection is hidden.",
   "selectValue": "Select {value}",
   "@selectValue": {

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/image_placement_model.dart';
+import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/rotation_handle_widgets.dart';
 
 /// An overlay widget that lets the user move, scale, and rotate a pasted image
@@ -128,48 +129,24 @@ class ImagePlacementWidget extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               spacing: AppInteraction.imagePlacementButtonSpacing,
               children: <Widget>[
-                _actionButton(
-                  icon: Icons.check,
-                  color: Colors.green,
+                buildOverlayCircleButton(
                   tooltip: l10n.apply,
-                  onPressed: onConfirm,
+                  color: Colors.green,
+                  cursor: SystemMouseCursors.click,
+                  onTap: onConfirm,
+                  child: const Icon(Icons.check, color: Colors.white, size: AppLayout.iconSize),
                 ),
-                _actionButton(
-                  icon: Icons.close,
-                  color: Colors.red,
+                buildOverlayCircleButton(
                   tooltip: l10n.cancel,
-                  onPressed: onCancel,
+                  color: Colors.red,
+                  cursor: SystemMouseCursors.click,
+                  onTap: onCancel,
+                  child: const Icon(Icons.close, color: Colors.white, size: AppLayout.iconSize),
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  /// Builds a circular action button with an [icon], background [color],
-  /// hover [tooltip], and tap [onPressed] callback.
-  Widget _actionButton({
-    required final IconData icon,
-    required final Color color,
-    required final String tooltip,
-    required final VoidCallback onPressed,
-  }) {
-    return Tooltip(
-      message: tooltip,
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Container(
-          width: AppInteraction.imagePlacementButtonSize,
-          height: AppInteraction.imagePlacementButtonSize,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: AppStroke.regular),
-          ),
-          child: Icon(icon, color: Colors.white, size: AppLayout.iconSize),
-        ),
       ),
     );
   }
