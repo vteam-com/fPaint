@@ -33,13 +33,16 @@ JAVA_HOME_COMMAND_PATH="/usr/libexec/java_home"
 JAVA_VERSION_PREFIX_LEGACY="1"
 ANDROID_INTEGRATION_TEST_GRADLE_OPTS="-Dorg.gradle.daemon=false"
 ARTIFACT_FILE_EXTENSION="jpg"
+ORA_ARTIFACT_FILE_EXTENSION="ora"
 TEST_ARTIFACT_FILENAME_PREFIX="integration_test_"
 ARTIFACT_STAGE_DIR_NAME="integration_test_screenshots"
-FINAL_ARTWORK_ARTIFACT_FILENAME="integration_test_final_artwork.$ARTIFACT_FILE_EXTENSION"
+FINAL_ARTWORK_ARTIFACT_FILENAME="final.$ORA_ARTIFACT_FILE_EXTENSION"
 FINAL_RENDERED_ARTIFACT_FILENAME="integration_test_final_rendered.$ARTIFACT_FILE_EXTENSION"
 ANDROID_SCREENSHOT_STAGE_DIR="files/$ARTIFACT_STAGE_DIR_NAME"
 LOCAL_SCREENSHOT_STAGE_DIR="$ROOT_DIR/$ARTIFACT_STAGE_DIR_NAME"
 SCREENSHOT_OUTPUT_DIR="$ROOT_DIR/test"
+FINAL_ARTWORK_HOST_PATH="$SCREENSHOT_OUTPUT_DIR/$FINAL_ARTWORK_ARTIFACT_FILENAME"
+FINAL_RENDERED_HOST_PATH="$SCREENSHOT_OUTPUT_DIR/$FINAL_RENDERED_ARTIFACT_FILENAME"
 ANDROID_BOOT_COMPLETED_PROPERTY_NAME="sys.boot_completed"
 ANDROID_BOOT_COMPLETED_PROPERTY_VALUE="1"
 EMULATOR_DISCOVERY_RETRY_COUNT="60"
@@ -656,7 +659,7 @@ cleanup_test_processes() {
 
 clear_android_internal_screenshot_dir() {
   adb -s "$FLUTTER_TEST_DEVICE_ID" shell run-as "$ANDROID_APP_ID" sh -c \
-    "mkdir -p '$ANDROID_SCREENSHOT_STAGE_DIR' && rm -f '$ANDROID_SCREENSHOT_STAGE_DIR'/*.${ARTIFACT_FILE_EXTENSION}" \
+    "mkdir -p '$ANDROID_SCREENSHOT_STAGE_DIR' && rm -f '$ANDROID_SCREENSHOT_STAGE_DIR'/*.${ARTIFACT_FILE_EXTENSION} '$ANDROID_SCREENSHOT_STAGE_DIR'/*.${ORA_ARTIFACT_FILE_EXTENSION}" \
     >/dev/null 2>&1 || true
 }
 
@@ -675,6 +678,30 @@ jpeg_file_is_valid() {
   [[ "$jpeg_header" == "ffd8" ]]
 }
 
+ora_file_is_valid() {
+  local file_path="$1"
+
+  [[ -s "$file_path" ]] || return 1
+  unzip -tq "$file_path" >/dev/null 2>&1
+}
+
+artifact_file_is_valid() {
+  local artifact_filename="$1"
+  local file_path="$2"
+
+  case "$artifact_filename" in
+    *.$ARTIFACT_FILE_EXTENSION)
+      jpeg_file_is_valid "$file_path"
+      ;;
+    *.$ORA_ARTIFACT_FILE_EXTENSION)
+      ora_file_is_valid "$file_path"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 try_collect_android_internal_screenshot_file() {
   local artifact_filename="$1"
   local artifact_source_path="$2"
@@ -684,7 +711,7 @@ try_collect_android_internal_screenshot_file() {
   temp_file="$(mktemp "$ROOT_DIR/.artifact_pull.XXXXXX")"
 
   if adb -s "$FLUTTER_TEST_DEVICE_ID" exec-out run-as "$ANDROID_APP_ID" cat \
-    "$artifact_source_path" > "$temp_file" 2>/dev/null && jpeg_file_is_valid "$temp_file"; then
+    "$artifact_source_path" > "$temp_file" 2>/dev/null && artifact_file_is_valid "$artifact_filename" "$temp_file"; then
     mv "$temp_file" "$target_file"
     return 0
   fi
@@ -740,6 +767,7 @@ run_android_integration_file_with_artifact_collection() {
 prepare_integration_screenshot_dirs() {
   mkdir -p "$SCREENSHOT_OUTPUT_DIR"
   rm -f "$SCREENSHOT_OUTPUT_DIR"/${TEST_ARTIFACT_FILENAME_PREFIX}*.${ARTIFACT_FILE_EXTENSION} >/dev/null 2>&1 || true
+  rm -f "$SCREENSHOT_OUTPUT_DIR"/final.${ORA_ARTIFACT_FILE_EXTENSION} >/dev/null 2>&1 || true
 
   if [[ "$FLUTTER_TEST_DEVICE_PLATFORM" == "$TEST_DEVICE_PLATFORM_ANDROID" ]]; then
     clear_android_internal_screenshot_dir
@@ -760,6 +788,10 @@ collect_integration_screenshots() {
 
   if compgen -G "$LOCAL_SCREENSHOT_STAGE_DIR/*.${ARTIFACT_FILE_EXTENSION}" >/dev/null; then
     cp "$LOCAL_SCREENSHOT_STAGE_DIR"/*.${ARTIFACT_FILE_EXTENSION} "$SCREENSHOT_OUTPUT_DIR"/
+  fi
+
+  if compgen -G "$LOCAL_SCREENSHOT_STAGE_DIR"/*.${ORA_ARTIFACT_FILE_EXTENSION} >/dev/null; then
+    cp "$LOCAL_SCREENSHOT_STAGE_DIR"/*.${ORA_ARTIFACT_FILE_EXTENSION} "$SCREENSHOT_OUTPUT_DIR"/
   fi
 }
 
@@ -793,4 +825,10 @@ for test_file in "${integration_files[@]}"; do
 done
 
 echo "Integration JPG artifacts mirrored to: $SCREENSHOT_OUTPUT_DIR"
+if [[ -f "$FINAL_ARTWORK_HOST_PATH" ]]; then
+  echo "Final ORA artifact: $FINAL_ARTWORK_HOST_PATH"
+fi
+if [[ -f "$FINAL_RENDERED_HOST_PATH" ]]; then
+  echo "Final rendered JPG artifact: $FINAL_RENDERED_HOST_PATH"
+fi
 echo "All unit and integration tests passed."
