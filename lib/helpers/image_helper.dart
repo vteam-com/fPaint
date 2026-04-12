@@ -7,6 +7,8 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
+Uint8List? _sessionClipboardImageBytes;
+
 /// Extracts the dominant colors from a given [image].
 ///
 /// Returns a list of [ColorUsage] objects, each representing a color and its
@@ -75,14 +77,21 @@ Future<Uint8List?> convertImageToUint8List(final ui.Image image) async {
 
 /// Copies a [ui.Image] to the system clipboard as a PNG.
 Future<void> copyImageToClipboard(final ui.Image image) async {
+  final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
+  if (data == null) {
+    return;
+  }
+
+  final Uint8List pngBytes = data.buffer.asUint8List();
+  _sessionClipboardImageBytes = pngBytes;
+
   final SystemClipboard? clipboard = SystemClipboard.instance;
   if (clipboard != null) {
     final DataWriterItem item = DataWriterItem(suggestedName: 'fpaint.png');
-    final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
-    item.add(Formats.png(data!.buffer.asUint8List()));
-    await clipboard.write(<DataWriterItem>[item]);
-  } else {
-    // showMessage(_notAvailableMessage);
+    item.add(Formats.png(pngBytes));
+    try {
+      await clipboard.write(<DataWriterItem>[item]).timeout(AppDefaults.clipboardAccessTimeout);
+    } catch (_) {}
   }
 }
 
@@ -90,7 +99,14 @@ Future<void> copyImageToClipboard(final ui.Image image) async {
 ///
 /// Returns a [ui.Image] if an image is found on the clipboard, otherwise returns null.
 Future<ui.Image?> getImageFromClipboard() async {
-  final Uint8List? bytes = await Pasteboard.image;
+  Uint8List? bytes;
+
+  try {
+    bytes = await Pasteboard.image.timeout(AppDefaults.clipboardAccessTimeout);
+  } catch (_) {}
+
+  bytes ??= _sessionClipboardImageBytes;
+
   if (bytes != null) {
     try {
       return await fromBytesToImage(bytes);
@@ -105,8 +121,12 @@ Future<ui.Image?> getImageFromClipboard() async {
 ///
 /// Returns true if the clipboard contains an image, otherwise returns false.
 Future<bool> clipboardHasImage() async {
-  final Uint8List? bytes = await Pasteboard.image;
-  return bytes != null;
+  try {
+    final Uint8List? bytes = await Pasteboard.image.timeout(AppDefaults.clipboardAccessTimeout);
+    return bytes != null || _sessionClipboardImageBytes != null;
+  } catch (_) {
+    return _sessionClipboardImageBytes != null;
+  }
 }
 
 /// Resizes a [ui.Image] to a new [Size].

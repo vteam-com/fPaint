@@ -5,7 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/main.dart' as app;
 import 'package:fpaint/main_screen.dart';
+import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/transform_model.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:integration_test/integration_test.dart';
@@ -13,84 +16,173 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'integration_helpers.dart';
 
+const String _englishLanguageCode = 'en';
+const Map<String, Object> _integrationTestPreferences = <String, Object>{
+  AppPreferences.keyLanguageCode: _englishLanguageCode,
+};
+const String _aggregatedIntegrationTestName = 'Aggregated Painting Mastery - Multi-Layer Scene And Bird Transforms';
+const String _birdsLayerName = 'Birds';
+const String _finalArtworkFilename = 'integration_test_final_artwork.jpg';
+const String _finalRenderedFilename = 'integration_test_final_rendered.jpg';
+const String _applyTooltipText = 'Apply';
+const String _scaleTooltipText = 'Scale';
+const String _rotateTooltipText = 'Resize / Rotate';
+const Size _defaultCanvasSize = Size(
+  AppLayout.canvasDefaultWidth,
+  AppLayout.canvasDefaultHeight,
+);
+const int _birdCopyCount = 3;
+const double _birdBrushSize = 4.0;
+const double _birdSelectionWidth = 60.0;
+const double _birdSelectionHeight = 28.0;
+const double _screenPositionTolerance = 4.0;
+const double _transformChangeTolerance = 1.0;
+const double _transformScaleDragFactor = 0.55;
+const double _transformRotateDragFactor = 0.4;
+const Duration _clipboardPumpDuration = Duration(milliseconds: 300);
+const Duration _overlayActionPumpDuration = Duration(milliseconds: 300);
+const Offset _birdOriginalTopLeftOffset = Offset(80, -170);
+const Offset _birdScaledCopyTopLeftOffset = Offset(180, -210);
+const Offset _birdRotatedCopyTopLeftOffset = Offset(250, -150);
+const Offset _birdTransformedCopyTopLeftOffset = Offset(330, -205);
+const Offset _birdLine1Start = Offset(4, 18);
+const Offset _birdLine1End = Offset(18, 4);
+const Offset _birdLine2Start = Offset(18, 4);
+const Offset _birdLine2End = Offset(30, 18);
+const Offset _birdLine3Start = Offset(30, 18);
+const Offset _birdLine3End = Offset(42, 6);
+const Offset _birdLine4Start = Offset(42, 6);
+const Offset _birdLine4End = Offset(56, 18);
+const Offset _birdSelectionSizeOffset = Offset(_birdSelectionWidth, _birdSelectionHeight);
+const Offset _birdDeformDelta = Offset(18, -14);
+
+enum _BirdTransformVariant {
+  scale,
+  rotate,
+  deform,
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('fPaint Integration Tests', () {
-    testWidgets('Multi-Layer Painting Mastery - Complete Scene', (final WidgetTester tester) async {
-      debugPrint('🎨🖼️  Testing Multi-Layer Painting Mastery - Creating Complete 6-Layer Scene');
+    testWidgets(_aggregatedIntegrationTestName, (final WidgetTester tester) async {
+      debugPrint('🎨🖼️  Testing aggregated integration flow');
 
-      // Mock shared preferences to ensure clean test environment
-      // This prevents using engineer's existing preferences and ensures consistent test behavior
-      SharedPreferences.setMockInitialValues(<String, Object>{});
-      debugPrint('🧹 Shared preferences mocked for clean test environment');
-
-      await app.main();
-      await tester.pumpAndSettle();
-
-      await tapByKey(tester, Keys.floatActionCenter);
-      await tapByKey(tester, Keys.floatActionZoomOut); // ensure that we do not hit the float actions
-
-      final Finder canvasFinder = find.byType(MainView);
-      final Offset canvasCenter = tester.getCenter(canvasFinder);
-
-      // ================================
-      // 1️⃣ BOTTOM LAYER: Sky Background
-      // ================================
-      await _drawSky(tester, canvasCenter);
-
-      // ================================
-      // 2️⃣ SUN LAYER: Bright Yellow Circle
-      // ================================
-      await _drawSun(tester, canvasCenter);
-
-      // ================================
-      // 3️⃣ LAND LAYER: Green Ground
-      // ================================
-      await _drawLand(tester, canvasCenter);
-
-      // ================================
-      // 4️⃣ HOUSE LAYER: Complete House Structure
-      // ================================
-      await _drawHouse(tester, canvasCenter);
-
-      // ================================
-      // 5️⃣ FENCE LAYER: Simple Fence in Front
-      // ================================
-      await _drawFence(tester, canvasCenter);
-
-      // ================================
-      // 📐 CANVAS RESIZE: Crop to square (half height, centered)
-      // ================================
-      final int layerCountBeforeCrop = LayersProvider.of(
-        tester.element(find.byType(MainScreen)),
-      ).length;
-      await _resizeCanvasToSquare(tester);
-      _validateCrop(tester, layerCountBeforeCrop);
-
-      // ================================
-      // 🖼️ BLACK FRAME: Draw border to confirm crop bounds
-      // ================================
-      await _drawBlackFrame(tester);
-
-      await LayerTestHelpers.printLayerStructure(tester);
-
-      // ================================
-      // 🎯 VALIDATION: Multi-Layer Scene Complete
-
-      // Check that we have the right number of layers
-      final BuildContext context = tester.element(find.byType(MainScreen));
-      final LayersProvider layersProvider = LayersProvider.of(context);
-
-      debugPrint('🎨 Multi-Layer Scene Final Status:');
-
-      // Save the multi-layer masterpiece!
-      await IntegrationTestUtils.saveArtworkScreenshot(
-        layersProvider: layersProvider,
-        filename: 'multi_layer_masterpiece.png',
-      );
+      await _launchIntegrationTestApp(tester);
+      await _runMultiLayerSceneScenario(tester);
+      await _resetCanvasForBirdScenario(tester);
+      await _runBirdTransformScenario(tester);
+      await _saveFinalAggregatedScreenshots(tester);
     });
   });
+}
+
+Future<void> _launchIntegrationTestApp(final WidgetTester tester) async {
+  SharedPreferences.setMockInitialValues(_integrationTestPreferences);
+  debugPrint('🧹 Shared preferences mocked for clean test environment');
+
+  await configureTabletLandscapeViewport(tester);
+
+  await app.main();
+  await tester.pumpAndSettle();
+
+  await prepareCanvasViewport(tester);
+}
+
+Future<void> _runMultiLayerSceneScenario(final WidgetTester tester) async {
+  debugPrint('🎨 Running multi-layer scene scenario');
+
+  final Offset canvasCenter = tester.getCenter(find.byType(MainView));
+
+  await _drawSky(tester, canvasCenter);
+  await _drawSun(tester, canvasCenter);
+  await _drawLand(tester, canvasCenter);
+  await _drawHouse(tester, canvasCenter);
+  await _drawFence(tester, canvasCenter);
+
+  final int layerCountBeforeCrop = LayersProvider.of(
+    tester.element(find.byType(MainScreen)),
+  ).length;
+  await _resizeCanvasToSquare(tester);
+  _validateCrop(tester, layerCountBeforeCrop);
+  await _drawBlackFrame(tester);
+  await LayerTestHelpers.printLayerStructure(tester);
+}
+
+Future<void> _resetCanvasForBirdScenario(final WidgetTester tester) async {
+  debugPrint('🧹 Resetting canvas for bird transform scenario');
+
+  final AppProvider appProvider = _appProvider(tester);
+  appProvider.canvasClear(_defaultCanvasSize);
+  appProvider.update();
+
+  await tester.pumpAndSettle();
+  await prepareCanvasViewport(tester);
+}
+
+Future<void> _runBirdTransformScenario(final WidgetTester tester) async {
+  debugPrint('🐦 Running bird transform scenario');
+
+  final Offset canvasCenter = tester.getCenter(find.byType(MainView));
+
+  await _drawSky(tester, canvasCenter);
+  await _drawSun(tester, canvasCenter);
+  await _drawLand(tester, canvasCenter);
+  await _drawHouse(tester, canvasCenter);
+  await _drawBirdLayer(tester, canvasCenter);
+
+  final BuildContext context = tester.element(find.byType(MainScreen));
+  final LayersProvider layersProvider = LayersProvider.of(context);
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
+  final int layerCountBeforeBirdCopies = layersProvider.length;
+
+  await _pasteAndTransformBirdCopy(
+    tester,
+    canvasCenter: canvasCenter,
+    targetTopLeft: canvasCenter + _birdScaledCopyTopLeftOffset,
+    variant: _BirdTransformVariant.scale,
+  );
+  await _pasteAndTransformBirdCopy(
+    tester,
+    canvasCenter: canvasCenter,
+    targetTopLeft: canvasCenter + _birdRotatedCopyTopLeftOffset,
+    variant: _BirdTransformVariant.rotate,
+  );
+  await _pasteAndTransformBirdCopy(
+    tester,
+    canvasCenter: canvasCenter,
+    targetTopLeft: canvasCenter + _birdTransformedCopyTopLeftOffset,
+    variant: _BirdTransformVariant.deform,
+  );
+
+  expect(
+    layersProvider.length,
+    layerCountBeforeBirdCopies + _birdCopyCount,
+    reason: 'Each pasted bird copy should commit as its own layer',
+  );
+  expect(appProvider.imagePlacementModel.isVisible, isFalse);
+  expect(appProvider.transformModel.isVisible, isFalse);
+  expect(appProvider.selectorModel.isVisible, isFalse);
+
+  await LayerTestHelpers.printLayerStructure(tester);
+}
+
+Future<void> _saveFinalAggregatedScreenshots(final WidgetTester tester) async {
+  final BuildContext context = tester.element(find.byType(MainScreen));
+  final LayersProvider layersProvider = LayersProvider.of(context);
+
+  debugPrint('📸 Saving final aggregated screenshots');
+
+  await IntegrationTestUtils.saveArtworkScreenshot(
+    layersProvider: layersProvider,
+    filename: _finalArtworkFilename,
+  );
+  await IntegrationTestUtils.saveRenderedViewScreenshot(
+    tester: tester,
+    filename: _finalRenderedFilename,
+  );
+  await Future<void>.delayed(AppDefaults.integrationEvidenceCollectionDelay);
 }
 
 /// Draws the sky background layer with a blue gradient
@@ -245,6 +337,219 @@ Future<void> _drawHouse(final WidgetTester tester, final Offset canvasCenter) as
   debugPrint('🏠 House with roof completed!');
 }
 
+Future<void> _drawBirdLayer(final WidgetTester tester, final Offset canvasCenter) async {
+  await LayerTestHelpers.addNewLayer(tester, _birdsLayerName);
+
+  final Offset birdTopLeft = canvasCenter + _birdOriginalTopLeftOffset;
+
+  await drawLineWithHumanGestures(
+    tester,
+    startPosition: birdTopLeft + _birdLine1Start,
+    endPosition: birdTopLeft + _birdLine1End,
+    brushSize: _birdBrushSize,
+    brushColor: Colors.black,
+  );
+  await drawLineWithHumanGestures(
+    tester,
+    startPosition: birdTopLeft + _birdLine2Start,
+    endPosition: birdTopLeft + _birdLine2End,
+    brushSize: _birdBrushSize,
+    brushColor: Colors.black,
+  );
+  await drawLineWithHumanGestures(
+    tester,
+    startPosition: birdTopLeft + _birdLine3Start,
+    endPosition: birdTopLeft + _birdLine3End,
+    brushSize: _birdBrushSize,
+    brushColor: Colors.black,
+  );
+  await drawLineWithHumanGestures(
+    tester,
+    startPosition: birdTopLeft + _birdLine4Start,
+    endPosition: birdTopLeft + _birdLine4End,
+    brushSize: _birdBrushSize,
+    brushColor: Colors.black,
+  );
+}
+
+Future<void> _pasteAndTransformBirdCopy(
+  final WidgetTester tester, {
+  required final Offset canvasCenter,
+  required final Offset targetTopLeft,
+  required final _BirdTransformVariant variant,
+}) async {
+  await LayerTestHelpers.switchToLayerByName(tester, _birdsLayerName);
+
+  final Rect originalBirdRect = _birdRectAt(canvasCenter + _birdOriginalTopLeftOffset);
+  await selectRectangleArea(
+    tester,
+    startPosition: originalBirdRect.topLeft,
+    endPosition: originalBirdRect.bottomRight,
+  );
+
+  final AppProvider appProvider = _appProvider(tester);
+  await appProvider.regionCopy();
+  await tester.pump(_clipboardPumpDuration);
+  await appProvider.paste();
+  await tester.pump(_overlayActionPumpDuration);
+
+  expect(appProvider.imagePlacementModel.isVisible, isTrue, reason: 'Paste should open image placement overlay');
+
+  await _moveActiveImagePlacementTo(tester, targetTopLeft: targetTopLeft);
+  await tapByTooltip(tester, _applyTooltipText);
+  await tester.pump(_overlayActionPumpDuration);
+
+  expect(appProvider.imagePlacementModel.isVisible, isFalse, reason: 'Pasted bird should be committed to a layer');
+
+  final Rect pastedBirdRect = _birdRectAt(targetTopLeft);
+  await selectRectangleArea(
+    tester,
+    startPosition: pastedBirdRect.topLeft,
+    endPosition: pastedBirdRect.bottomRight,
+  );
+
+  await tapByKey(tester, Keys.toolTransform);
+  await tester.pump(_overlayActionPumpDuration);
+
+  expect(appProvider.transformModel.isVisible, isTrue, reason: 'Selected pasted bird should enter transform mode');
+
+  switch (variant) {
+    case _BirdTransformVariant.scale:
+      await _applyScaleTransform(tester);
+    case _BirdTransformVariant.rotate:
+      await _applyRotateTransform(tester);
+    case _BirdTransformVariant.deform:
+      await _applyDeformTransform(tester);
+  }
+
+  await tapByTooltip(tester, _applyTooltipText);
+  await tester.pump(_overlayActionPumpDuration);
+
+  expect(appProvider.transformModel.isVisible, isFalse, reason: 'Transform should be committed after Apply');
+  expect(appProvider.selectorModel.isVisible, isFalse, reason: 'Transform commit should clear the active selection');
+}
+
+Future<void> _moveActiveImagePlacementTo(
+  final WidgetTester tester, {
+  required final Offset targetTopLeft,
+}) async {
+  final AppProvider appProvider = _appProvider(tester);
+  final Offset currentCenter = _imagePlacementCenterGlobal(tester, appProvider);
+  final Offset targetCenter =
+      targetTopLeft +
+      Offset(
+        appProvider.imagePlacementModel.displayWidth * appProvider.layers.scale / AppMath.pair,
+        appProvider.imagePlacementModel.displayHeight * appProvider.layers.scale / AppMath.pair,
+      );
+
+  await dragLikeHuman(tester, currentCenter, targetCenter);
+  await tester.pump();
+
+  final Offset updatedTopLeft = _imagePlacementTopLeftGlobal(tester, appProvider);
+  expect(updatedTopLeft.dx, moreOrLessEquals(targetTopLeft.dx, epsilon: _screenPositionTolerance));
+  expect(updatedTopLeft.dy, moreOrLessEquals(targetTopLeft.dy, epsilon: _screenPositionTolerance));
+}
+
+Future<void> _applyScaleTransform(final WidgetTester tester) async {
+  final AppProvider appProvider = _appProvider(tester);
+  final Rect initialBounds = appProvider.transformModel.quadBounds;
+  final Offset transformCenter = _transformCenterGlobal(tester, appProvider);
+  final Offset scaleControlCenter = tester.getCenter(find.byTooltip(_scaleTooltipText));
+  final Offset scaleDelta = (scaleControlCenter - transformCenter) * _transformScaleDragFactor;
+
+  await dragByTooltip(
+    tester,
+    tooltip: _scaleTooltipText,
+    delta: scaleDelta,
+  );
+
+  final Rect updatedBounds = appProvider.transformModel.quadBounds;
+  expect(appProvider.transformModel.isScaleMode, isTrue);
+  expect(updatedBounds.width, greaterThan(initialBounds.width + _transformChangeTolerance));
+  expect(updatedBounds.height, greaterThan(initialBounds.height + _transformChangeTolerance));
+}
+
+Future<void> _applyRotateTransform(final WidgetTester tester) async {
+  final AppProvider appProvider = _appProvider(tester);
+  final List<Offset> initialCorners = List<Offset>.of(appProvider.transformModel.corners);
+  final Offset transformCenter = _transformCenterGlobal(tester, appProvider);
+  final Offset rotateControlCenter = tester.getCenter(find.byTooltip(_rotateTooltipText));
+  final Offset rotateVector = rotateControlCenter - transformCenter;
+  final Offset rotateDelta = Offset(-rotateVector.dy, rotateVector.dx) * _transformRotateDragFactor;
+
+  await dragByTooltip(
+    tester,
+    tooltip: _rotateTooltipText,
+    delta: rotateDelta,
+  );
+
+  expect(appProvider.transformModel.isRotateMode, isTrue);
+  expect(_cornersChanged(initialCorners, appProvider.transformModel.corners), isTrue);
+}
+
+Future<void> _applyDeformTransform(final WidgetTester tester) async {
+  final AppProvider appProvider = _appProvider(tester);
+  final Offset initialCorner = appProvider.transformModel.corners[TransformModel.topRightIndex];
+  final Offset handlePosition = _transformCornerGlobal(
+    tester,
+    appProvider,
+    TransformModel.topRightIndex,
+  );
+
+  await dragLikeHuman(tester, handlePosition, handlePosition + _birdDeformDelta);
+  await tester.pump();
+
+  final Offset updatedCorner = appProvider.transformModel.corners[TransformModel.topRightIndex];
+  expect(appProvider.transformModel.isDeformMode, isTrue);
+  expect((updatedCorner - initialCorner).distance, greaterThan(_transformChangeTolerance));
+}
+
+AppProvider _appProvider(final WidgetTester tester) {
+  final BuildContext context = tester.element(find.byType(MainScreen));
+  return AppProvider.of(context, listen: false);
+}
+
+Rect _birdRectAt(final Offset topLeft) {
+  return Rect.fromPoints(topLeft, topLeft + _birdSelectionSizeOffset);
+}
+
+Offset _imagePlacementTopLeftGlobal(final WidgetTester tester, final AppProvider appProvider) {
+  return _mainViewTopLeft(tester) + appProvider.fromCanvas(appProvider.imagePlacementModel.position);
+}
+
+Offset _imagePlacementCenterGlobal(final WidgetTester tester, final AppProvider appProvider) {
+  return _mainViewTopLeft(tester) +
+      appProvider.fromCanvas(
+        appProvider.imagePlacementModel.position +
+            Offset(
+              appProvider.imagePlacementModel.displayWidth / AppMath.pair,
+              appProvider.imagePlacementModel.displayHeight / AppMath.pair,
+            ),
+      );
+}
+
+Offset _transformCenterGlobal(final WidgetTester tester, final AppProvider appProvider) {
+  return _mainViewTopLeft(tester) + appProvider.fromCanvas(appProvider.transformModel.center);
+}
+
+Offset _transformCornerGlobal(
+  final WidgetTester tester,
+  final AppProvider appProvider,
+  final int cornerIndex,
+) {
+  return _mainViewTopLeft(tester) + appProvider.fromCanvas(appProvider.transformModel.corners[cornerIndex]);
+}
+
+Offset _mainViewTopLeft(final WidgetTester tester) {
+  return tester.getTopLeft(find.byType(MainView));
+}
+
+bool _cornersChanged(final List<Offset> previousCorners, final List<Offset> updatedCorners) {
+  return List<int>.generate(previousCorners.length, (final int index) => index).any(
+    (final int index) => (updatedCorners[index] - previousCorners[index]).distance > _transformChangeTolerance,
+  );
+}
+
 /// Resizes the canvas to a square using half the current height, centered.
 Future<void> _resizeCanvasToSquare(final WidgetTester tester) async {
   debugPrint('📐 Resizing canvas to centered square (half height)...');
@@ -256,33 +561,12 @@ Future<void> _resizeCanvasToSquare(final WidgetTester tester) async {
 
   debugPrint('📐 Current canvas: ${layersProvider.size} → target: ${squareSize}x$squareSize');
 
-  // Open menu → Canvas...
-  await tester.tap(find.byIcon(Icons.menu));
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Canvas...'));
-  await tester.pumpAndSettle();
-
-  // Disable aspect-ratio lock so width/height can be set independently.
-  final Finder lockButton = find.byIcon(Icons.link);
-  if (lockButton.evaluate().isNotEmpty) {
-    await tester.tap(lockButton.first);
-    await tester.pumpAndSettle();
-  }
-
-  // Enter square dimensions (half height × half height).
-  final Finder widthField = find.widgetWithText(TextField, 'Width');
-  final Finder heightField = find.widgetWithText(TextField, 'Height');
-  expect(widthField, findsOneWidget);
-  expect(heightField, findsOneWidget);
-
-  await tester.enterText(widthField, squareSize);
+  layersProvider.canvasResize(
+    halfHeight.toInt(),
+    halfHeight.toInt(),
+    CanvasResizePosition.center,
+  );
   await tester.pump();
-  await tester.enterText(heightField, squareSize);
-  await tester.pump();
-
-  // Apply (center anchor is the default).
-  await tester.tap(find.widgetWithText(ElevatedButton, 'Apply'));
-  await tester.pumpAndSettle();
 
   expect(layersProvider.size, Size(halfHeight, halfHeight));
   debugPrint('📐 Canvas resized to ${layersProvider.size}');

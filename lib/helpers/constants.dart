@@ -94,6 +94,8 @@ class AppLayout {
   static const double canvasDefaultHeight = 768.0;
   static const double desktopWindowWidth = 1200.0;
   static const double desktopWindowHeight = 900.0;
+  static const double integrationTestTabletLandscapeWidth = 1600.0;
+  static const double integrationTestTabletLandscapeHeight = 800.0;
   static const double thumbnailMaxHeight = 64.0;
   static const double shortcutGroupWidth = 250.0;
   static const double separatorHeight = 15.0;
@@ -187,6 +189,10 @@ class AppDefaults {
   static const int tolerance = 50;
   static const bool useApplePencil = false;
   static const Duration debounceDuration = Duration(seconds: 1);
+  static const Duration clipboardAccessTimeout = Duration(seconds: 2);
+  static const Duration integrationEvidenceCollectionDelay = Duration(seconds: 2);
+  static const int integrationEvidenceJpegQuality = 95;
+  static const double renderedScreenshotPixelRatio = 1.0;
 }
 
 /// File extension identifiers used across import/export/save operations.
@@ -210,6 +216,7 @@ class Keys {
   static Key floatActionZoomOut = const Key('floating_action_zoom_out');
   static Key floatActionCenter = const Key('floating_action_center');
   static Key floatActionToggle = const Key('floating_action_toggle');
+  static Key mainViewScreenshotBoundary = const Key('main-view-screenshot-boundary');
   static String gradientHandleKeyPrefixText = 'gradient_handle_';
 
   static Key toolFill = const Key('tool-fill');
