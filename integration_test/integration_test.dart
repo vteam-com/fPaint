@@ -22,7 +22,7 @@ const Map<String, Object> _integrationTestPreferences = <String, Object>{
 };
 const String _aggregatedIntegrationTestName = 'Aggregated Painting Mastery - Multi-Layer Scene And Bird Transforms';
 const String _birdsLayerName = 'Birds';
-const String _finalArtworkFilename = 'integration_test_final_artwork.jpg';
+const String _finalArtworkFilename = 'final.ora';
 const String _finalRenderedFilename = 'integration_test_final_rendered.jpg';
 const String _applyTooltipText = 'Apply';
 const String _scaleTooltipText = 'Scale';
@@ -31,6 +31,10 @@ const Size _defaultCanvasSize = Size(
   AppLayout.canvasDefaultWidth,
   AppLayout.canvasDefaultHeight,
 );
+const Offset _grassTopLeftOffset = Offset(-300, 10);
+const Offset _grassBottomRightOffset = Offset(300, 300);
+const double _birdHorizontalShiftFraction = 0.4;
+const double _birdHorizontalRightAdjustmentPixels = 200.0;
 const int _birdCopyCount = 3;
 const double _birdBrushSize = 4.0;
 const double _birdSelectionWidth = 60.0;
@@ -41,10 +45,11 @@ const double _transformScaleDragFactor = 0.55;
 const double _transformRotateDragFactor = 0.4;
 const Duration _clipboardPumpDuration = Duration(milliseconds: 300);
 const Duration _overlayActionPumpDuration = Duration(milliseconds: 300);
-const Offset _birdOriginalTopLeftOffset = Offset(80, -170);
-const Offset _birdScaledCopyTopLeftOffset = Offset(180, -210);
-const Offset _birdRotatedCopyTopLeftOffset = Offset(250, -150);
-const Offset _birdTransformedCopyTopLeftOffset = Offset(330, -205);
+const double _birdHorizontalShiftPixels = AppLayout.canvasDefaultWidth * _birdHorizontalShiftFraction;
+const Offset _birdOriginalBaseTopLeftOffset = Offset(80, -170);
+const Offset _birdScaledCopyBaseTopLeftOffset = Offset(180, -210);
+const Offset _birdRotatedCopyBaseTopLeftOffset = Offset(250, -150);
+const Offset _birdTransformedCopyBaseTopLeftOffset = Offset(330, -205);
 const Offset _birdLine1Start = Offset(4, 18);
 const Offset _birdLine1End = Offset(18, 4);
 const Offset _birdLine2Start = Offset(18, 4);
@@ -56,10 +61,37 @@ const Offset _birdLine4End = Offset(56, 18);
 const Offset _birdSelectionSizeOffset = Offset(_birdSelectionWidth, _birdSelectionHeight);
 const Offset _birdDeformDelta = Offset(18, -14);
 
+final Offset _birdOriginalTopLeftOffset = _shiftBirdOffsetLeft(_birdOriginalBaseTopLeftOffset);
+final Offset _birdScaledCopyTopLeftOffset = _shiftBirdOffsetLeft(_birdScaledCopyBaseTopLeftOffset);
+final Offset _birdRotatedCopyTopLeftOffset = _shiftBirdOffsetLeft(_birdRotatedCopyBaseTopLeftOffset);
+final Offset _birdTransformedCopyTopLeftOffset = _shiftBirdOffsetLeft(_birdTransformedCopyBaseTopLeftOffset);
+
 enum _BirdTransformVariant {
   scale,
   rotate,
   deform,
+}
+
+Offset _shiftBirdOffsetLeft(final Offset offset) {
+  return Offset(
+    offset.dx - _birdHorizontalShiftPixels + _birdHorizontalRightAdjustmentPixels,
+    offset.dy,
+  );
+}
+
+double _grassCropWidth() {
+  return _grassBottomRightOffset.dx - _grassTopLeftOffset.dx;
+}
+
+double _grassCropHeight(final Size canvasSize) {
+  return (canvasSize.height / 2) + _grassBottomRightOffset.dy;
+}
+
+Size _calculateGrassBoundsCropSize(final Size canvasSize) {
+  return Size(
+    _grassCropWidth(),
+    _grassCropHeight(canvasSize),
+  );
 }
 
 void main() {
@@ -104,8 +136,8 @@ Future<void> _runMultiLayerSceneScenario(final WidgetTester tester) async {
   final int layerCountBeforeCrop = LayersProvider.of(
     tester.element(find.byType(MainScreen)),
   ).length;
-  await _resizeCanvasToSquare(tester);
-  _validateCrop(tester, layerCountBeforeCrop);
+  final Size expectedCropSize = await _resizeCanvasToGrassBoundsCrop(tester);
+  _validateCrop(tester, layerCountBeforeCrop, expectedCropSize);
   await _drawBlackFrame(tester);
   await LayerTestHelpers.printLayerStructure(tester);
 }
@@ -130,6 +162,7 @@ Future<void> _runBirdTransformScenario(final WidgetTester tester) async {
   await _drawSun(tester, canvasCenter);
   await _drawLand(tester, canvasCenter);
   await _drawHouse(tester, canvasCenter);
+  await _drawFence(tester, canvasCenter);
   await _drawBirdLayer(tester, canvasCenter);
 
   final BuildContext context = tester.element(find.byType(MainScreen));
@@ -165,6 +198,10 @@ Future<void> _runBirdTransformScenario(final WidgetTester tester) async {
   expect(appProvider.transformModel.isVisible, isFalse);
   expect(appProvider.selectorModel.isVisible, isFalse);
 
+  final int layerCountBeforeCrop = layersProvider.length;
+  final Size expectedCropSize = await _resizeCanvasToGrassBoundsCrop(tester);
+  _validateCrop(tester, layerCountBeforeCrop, expectedCropSize);
+
   await LayerTestHelpers.printLayerStructure(tester);
 }
 
@@ -174,12 +211,12 @@ Future<void> _saveFinalAggregatedScreenshots(final WidgetTester tester) async {
 
   debugPrint('📸 Saving final aggregated screenshots');
 
-  await IntegrationTestUtils.saveArtworkScreenshot(
+  await IntegrationTestUtils.saveArtworkOraArchive(
     layersProvider: layersProvider,
     filename: _finalArtworkFilename,
   );
-  await IntegrationTestUtils.saveRenderedViewScreenshot(
-    tester: tester,
+  await IntegrationTestUtils.saveArtworkScreenshot(
+    layersProvider: layersProvider,
     filename: _finalRenderedFilename,
   );
   await Future<void>.delayed(AppDefaults.integrationEvidenceCollectionDelay);
@@ -250,8 +287,8 @@ Future<void> _drawLand(final WidgetTester tester, final Offset canvasCenter) asy
   // Draw ground: Large green rectangle covering bottom of canvas
   await drawRectangleWithHumanGestures(
     tester,
-    startPosition: canvasCenter + const Offset(-300, 10), // Bottom-left (stay within canvas bounds)
-    endPosition: canvasCenter + const Offset(300, 300), // Bottom-right (full width, bottom quarter)
+    startPosition: canvasCenter + _grassTopLeftOffset, // Bottom-left (stay within canvas bounds)
+    endPosition: canvasCenter + _grassBottomRightOffset, // Bottom-right (full width, bottom quarter)
     brushSize: 1,
     brushColor: Colors.greenAccent,
     fillColor: Colors.green,
@@ -550,38 +587,49 @@ bool _cornersChanged(final List<Offset> previousCorners, final List<Offset> upda
   );
 }
 
-/// Resizes the canvas to a square using half the current height, centered.
-Future<void> _resizeCanvasToSquare(final WidgetTester tester) async {
-  debugPrint('📐 Resizing canvas to centered square (half height)...');
+/// Resizes the canvas to match the grass width and bottom edge.
+Future<Size> _resizeCanvasToGrassBoundsCrop(final WidgetTester tester) async {
+  debugPrint('📐 Resizing canvas to grass width and bottom edge...');
 
   final BuildContext context = tester.element(find.byType(MainScreen));
   final LayersProvider layersProvider = LayersProvider.of(context);
-  final double halfHeight = (layersProvider.size.height / 2).roundToDouble();
-  final String squareSize = halfHeight.toInt().toString();
+  final Size targetSize = _calculateGrassBoundsCropSize(layersProvider.size);
 
-  debugPrint('📐 Current canvas: ${layersProvider.size} → target: ${squareSize}x$squareSize');
+  debugPrint(
+    '📐 Current canvas: ${layersProvider.size} → target: '
+    '${targetSize.width.toInt()}x${targetSize.height.toInt()}',
+  );
 
   layersProvider.canvasResize(
-    halfHeight.toInt(),
-    halfHeight.toInt(),
-    CanvasResizePosition.center,
+    targetSize.width.toInt(),
+    targetSize.height.toInt(),
+    CanvasResizePosition.top,
   );
   await tester.pump();
 
-  expect(layersProvider.size, Size(halfHeight, halfHeight));
+  expect(layersProvider.size, targetSize);
   debugPrint('📐 Canvas resized to ${layersProvider.size}');
+  return targetSize;
 }
 
 /// Validates that the crop operation resized the canvas and all layers correctly.
-void _validateCrop(final WidgetTester tester, final int expectedLayerCount) {
+void _validateCrop(
+  final WidgetTester tester,
+  final int expectedLayerCount,
+  final Size expectedCanvasSize,
+) {
   final BuildContext context = tester.element(find.byType(MainScreen));
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   final Size canvasSize = layersProvider.size;
 
-  // Canvas should be square
-  expect(canvasSize.width, canvasSize.height, reason: 'Canvas should be square after crop');
+  expect(
+    canvasSize,
+    expectedCanvasSize,
+    reason: 'Canvas should match the grass bounds crop result',
+  );
   expect(canvasSize.width, greaterThan(0), reason: 'Canvas width must be positive');
+  expect(canvasSize.height, greaterThan(0), reason: 'Canvas height must be positive');
 
   // All layers must survive the crop
   expect(layersProvider.length, expectedLayerCount, reason: 'Layer count must be preserved after crop');

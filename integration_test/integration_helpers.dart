@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
@@ -20,6 +21,9 @@ const String _workspaceRootEnvVarName = 'PWD';
 const String _stagedScreenshotsDirectoryName = 'integration_test_screenshots';
 const String _defaultArtworkEvidenceFilename = 'integration_test_artwork.jpg';
 const String _defaultRenderedEvidenceFilename = 'integration_test_rendered.jpg';
+const String _defaultOraEvidenceFilename = 'final.ora';
+const String _oraArtifactStagedMessage = '📦 ORA artwork staged for mirroring: ';
+const String _renderedArtifactStagedMessage = '🖼️ Rendered screenshot staged for mirroring: ';
 
 Future<void> configureTabletLandscapeViewport(final WidgetTester tester) async {
   addTearDown(tester.view.resetPhysicalSize);
@@ -582,6 +586,17 @@ class LayerTestHelpers {
 
 /// Integration test utilities for common operations
 class IntegrationTestUtils {
+  /// Saves the current layered artwork as an ORA archive.
+  static Future<void> saveArtworkOraArchive({
+    required final LayersProvider layersProvider,
+    final String filename = _defaultOraEvidenceFilename,
+  }) async {
+    final List<int> bytes = await createOraAchive(layersProvider);
+    final File outputFile = await _resolveStagedScreenshotOutputFile(filename);
+    await outputFile.writeAsBytes(bytes);
+    debugPrint('$_oraArtifactStagedMessage${_describeStagedArtifact(outputFile)}');
+  }
+
   /// Saves the current layer artwork to a JPG file.
   static Future<void> saveArtworkScreenshot({
     required final LayersProvider layersProvider,
@@ -619,7 +634,15 @@ class IntegrationTestUtils {
     await outputFile.writeAsBytes(
       _convertImageBytesToJpg(byteData.buffer.asUint8List()),
     );
-    debugPrint('🖼️ Rendered screenshot staged: ${outputFile.path}');
+    debugPrint('$_renderedArtifactStagedMessage${_describeStagedArtifact(outputFile)}');
+  }
+
+  static String _describeStagedArtifact(final File outputFile) {
+    if (Platform.isAndroid) {
+      return outputFile.uri.pathSegments.last;
+    }
+
+    return outputFile.path;
   }
 
   static Uint8List _convertImageBytesToJpg(final Uint8List imageBytes) {
