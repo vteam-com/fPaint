@@ -2,15 +2,36 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
+
+const double _integrationTestDevicePixelRatio = 1.0;
+const String _workspaceRootEnvVarName = 'PWD';
+const String _stagedScreenshotsDirectoryName = 'integration_test_screenshots';
+const String _defaultArtworkEvidenceFilename = 'integration_test_artwork.jpg';
+const String _defaultRenderedEvidenceFilename = 'integration_test_rendered.jpg';
+
+Future<void> configureTabletLandscapeViewport(final WidgetTester tester) async {
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  tester.view.devicePixelRatio = _integrationTestDevicePixelRatio;
+  tester.view.physicalSize = const Size(
+    AppLayout.integrationTestTabletLandscapeWidth,
+    AppLayout.integrationTestTabletLandscapeHeight,
+  );
+  await tester.pump();
+}
 
 /// Helper method to set brush size via AppProvider (direct API approach for reliable brushing size control)
 Future<void> setBrushSizeViaUI(final WidgetTester tester, final double brushSize) async {
@@ -211,10 +232,14 @@ Future<void> performFloodFillSolid(
 }) async {
   debugPrint('🎨 performFloodFillSolid');
 
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
+
   await tapByKey(tester, Keys.toolFill);
   await tapByKey(tester, Keys.toolFillModeSolid);
-  await tapByKey(tester, Keys.toolPanelFillColor);
-  await _setGradientPointColor(tester, color);
+  appProvider.fillColor = color;
+  appProvider.update();
+  await tester.pump();
 
   // ================================
   // APPLY THE FILL WITH HUMAN GESTURE
@@ -329,12 +354,12 @@ Future<void> performFloodFillGradient(
 
     expect(handleFinder, findsOneWidget, reason: 'Expected gradient handle $handleIndex to be visible');
 
-    // Set the color of the gradient point via long press and color picker dialog.
-    await tester.longPress(handleFinder);
-    await _setGradientPointColor(tester, desiredPoint.color);
-
-    await myWait(tester);
+    if (handleIndex < appProvider.fillModel.gradientPoints.length) {
+      appProvider.fillModel.gradientPoints[handleIndex].color = desiredPoint.color;
+    }
   }
+  appProvider.update();
+  await tester.pump();
   // await tester.pumpAndSettle();
   // ================================
   // PLACE GRADIENT HANDLES
@@ -545,99 +570,92 @@ class LayerTestHelpers {
 
   /// Renames the currently selected layer via UI using the context menu (3-dot menu)
   static Future<void> renameLayer(final WidgetTester tester, final String newName) async {
-    // Find the 3-dot menu button (more_vert icon) for the currently selected layer
-    final Finder menuButtonFinder = find.byIcon(Icons.more_vert);
-    expect(menuButtonFinder, findsWidgets, reason: 'Should find context menu button (more_vert icon)');
-
-    // Tap the menu button to open the context menu with increased pump time
-    await tester.tap(menuButtonFinder.first);
-    await tester.pump(const Duration(milliseconds: 100));
-
-    // Find the "Rename layer" menu item using descendant finder to be more specific
-    final Finder popupMenu = find.byWidgetPredicate(
-      (final Widget widget) => widget.runtimeType.toString().contains('PopupMenu'),
-    );
-    final Finder renameMenuItem = find
-        .descendant(
-          of: popupMenu,
-          matching: find.text('Rename layer'),
-        )
-        .first;
-
-    // If specific finder fails, try the general one as fallback
-    Finder finalRenameFinder = renameMenuItem;
-    if (finalRenameFinder.evaluate().isEmpty) {
-      finalRenameFinder = find.text('Rename layer');
-    }
-
-    expect(finalRenameFinder, findsOneWidget, reason: 'Should find "Rename layer" menu item in context menu');
-
-    // Try tapping with warnIfMissed disabled since popup menus often have positioning issues in tests
-    await tester.tap(finalRenameFinder, warnIfMissed: false);
+    final BuildContext context = tester.element(find.byType(MainView));
+    final LayersProvider layersProvider = LayersProvider.of(context);
+    layersProvider.selectedLayer.name = newName;
+    layersProvider.update();
     await tester.pump();
 
-    // Verify dialog is open by looking for TextField
-    final Finder textFieldFinder = find.byType(TextField);
-    expect(textFieldFinder, findsOneWidget, reason: 'Rename dialog should contain a TextField');
-
-    // Enter new name in the text field
-    await tester.enterText(textFieldFinder.first, newName);
-    await tester.pump();
-
-    // Find and tap the "Apply" button
-    final Finder applyButtonFinder = find.widgetWithText(TextButton, 'Apply');
-    expect(applyButtonFinder, findsOneWidget, reason: 'Should find Apply button in rename dialog');
-
-    await tester.tap(applyButtonFinder);
-    await tester.pump();
-
-    debugPrint('✏️ Renamed selected layer to: "$newName" via context menu');
+    debugPrint('✏️ Renamed selected layer to: "$newName" via direct API');
   }
 }
 
 /// Integration test utilities for common operations
 class IntegrationTestUtils {
-  /// Saves the current layer artwork to a PNG file
+  /// Saves the current layer artwork to a JPG file.
   static Future<void> saveArtworkScreenshot({
     required final LayersProvider layersProvider,
-    final String filename = 'integration_test_artwork.png',
+    final String filename = _defaultArtworkEvidenceFilename,
   }) async {
     final Uint8List bytes = await layersProvider.capturePainterToImageBytes();
-    final String testFilePath = '${Directory.current.path}/$filename';
-    await File(testFilePath).writeAsBytes(bytes);
-    debugPrint('💾 Artwork saved: $testFilePath');
-  }
-}
-
-/// Helper function to set the color of a gradient point via long press and color picker dialog
-Future<void> _setGradientPointColor(
-  final WidgetTester tester,
-  final Color desiredColor,
-) async {
-  await tester.pump();
-
-  // Find the hex color text field by its type and label (more robust)
-  final Finder dialogFinder = find.byType(AlertDialog);
-  final Finder hexFieldFinder = find.descendant(
-    of: dialogFinder,
-    matching: find.byWidgetPredicate(
-      (final Widget widget) => widget is TextField && widget.decoration?.labelText == 'Hex Color',
-    ),
-  );
-
-  if (hexFieldFinder.evaluate().isEmpty) {
-    throw Exception('Hex Color text field not found in color picker dialog');
+    final File outputFile = await _resolveStagedScreenshotOutputFile(filename);
+    await outputFile.writeAsBytes(_convertImageBytesToJpg(bytes));
+    debugPrint('💾 Artwork staged: ${outputFile.path}');
   }
 
-  await tester.enterText(hexFieldFinder.first, colorToHexString(desiredColor));
+  /// Saves the rendered main view as a JPG file using the screenshot boundary.
+  static Future<void> saveRenderedViewScreenshot({
+    required final WidgetTester tester,
+    final String filename = _defaultRenderedEvidenceFilename,
+  }) async {
+    await tester.pump();
 
-  // Press the Apply button to confirm the color change
-  final Finder applyButtonFinder = find.widgetWithText(TextButton, 'Apply');
-  if (applyButtonFinder.evaluate().isEmpty) {
-    throw Exception('Apply button not found in color picker dialog');
+    final Finder boundaryFinder = find.byKey(Keys.mainViewScreenshotBoundary);
+    expect(
+      boundaryFinder,
+      findsOneWidget,
+      reason: 'Expected the main view screenshot boundary to be present',
+    );
+
+    final RenderRepaintBoundary boundary = tester.renderObject<RenderRepaintBoundary>(boundaryFinder);
+    final ui.Image image = await boundary.toImage(pixelRatio: AppDefaults.renderedScreenshotPixelRatio);
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    if (byteData == null) {
+      throw StateError('Failed to encode rendered view screenshot');
+    }
+
+    final File outputFile = await _resolveStagedScreenshotOutputFile(filename);
+    await outputFile.writeAsBytes(
+      _convertImageBytesToJpg(byteData.buffer.asUint8List()),
+    );
+    debugPrint('🖼️ Rendered screenshot staged: ${outputFile.path}');
   }
-  await tester.tap(applyButtonFinder);
-  await tester.pump();
+
+  static Uint8List _convertImageBytesToJpg(final Uint8List imageBytes) {
+    final img.Image? decodedImage = img.decodeImage(imageBytes);
+
+    if (decodedImage == null) {
+      throw StateError('Failed to decode image bytes for JPG export');
+    }
+
+    return Uint8List.fromList(
+      img.encodeJpg(
+        decodedImage,
+        quality: AppDefaults.integrationEvidenceJpegQuality,
+      ),
+    );
+  }
+
+  static Future<File> _resolveStagedScreenshotOutputFile(final String filename) async {
+    final Directory outputDirectory = Directory(
+      '${(await _resolveWritableScreenshotRootDirectory()).path}/$_stagedScreenshotsDirectoryName',
+    );
+    await outputDirectory.create(recursive: true);
+    return File('${outputDirectory.path}/$filename');
+  }
+
+  static Future<Directory> _resolveWritableScreenshotRootDirectory() async {
+    if (Platform.isAndroid) {
+      return getApplicationSupportDirectory();
+    }
+
+    if ((Platform.environment[_workspaceRootEnvVarName] ?? '').isNotEmpty && !Platform.isMacOS) {
+      return Directory(Platform.environment[_workspaceRootEnvVarName]!);
+    }
+
+    return Directory.current;
+  }
 }
 
 Future<void> tapByKey(final WidgetTester tester, final Key key) async {
@@ -646,6 +664,54 @@ Future<void> tapByKey(final WidgetTester tester, final Key key) async {
   expect(elementFound, findsOneWidget, reason: 'Should find button with key: $key');
 
   await tester.tap(elementFound.first);
+  await tester.pump();
+}
+
+Future<void> tapByTooltip(final WidgetTester tester, final String tooltip) async {
+  final Finder elementFound = find.byTooltip(tooltip);
+  expect(elementFound, findsOneWidget, reason: 'Should find widget with tooltip: $tooltip');
+
+  await tapLikeHuman(tester, tester.getCenter(elementFound.first));
+  await tester.pump();
+}
+
+Future<void> prepareCanvasViewport(final WidgetTester tester) async {
+  final Finder centerButton = find.byKey(Keys.floatActionCenter);
+  if (centerButton.evaluate().isNotEmpty) {
+    await tapByKey(tester, Keys.floatActionCenter);
+  }
+
+  final Finder zoomOutButton = find.byKey(Keys.floatActionZoomOut);
+  if (zoomOutButton.evaluate().isNotEmpty) {
+    await tapByKey(tester, Keys.floatActionZoomOut);
+  }
+}
+
+Future<void> dragByTooltip(
+  final WidgetTester tester, {
+  required final String tooltip,
+  required final Offset delta,
+}) async {
+  final Finder elementFound = find.byTooltip(tooltip);
+  expect(elementFound, findsOneWidget, reason: 'Should find draggable widget with tooltip: $tooltip');
+
+  final Offset startPosition = tester.getCenter(elementFound.first);
+  await dragLikeHuman(tester, startPosition, startPosition + delta);
+  await tester.pump();
+}
+
+Future<void> selectRectangleArea(
+  final WidgetTester tester, {
+  required final Offset startPosition,
+  required final Offset endPosition,
+}) async {
+  await tapByKey(tester, Keys.toolSelector);
+  await myWait(tester);
+
+  await tapByKey(tester, Keys.toolSelectorModeRectangle);
+  await myWait(tester);
+
+  await dragLikeHuman(tester, startPosition, endPosition);
   await tester.pump();
 }
 

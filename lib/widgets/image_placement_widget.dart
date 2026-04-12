@@ -111,10 +111,13 @@ class ImagePlacementWidget extends StatelessWidget {
           ..._buildCornerHandles(screenBounds),
 
           // Rotation handle above the top center
-          _buildRotationHandle(screenBounds, screenCenter),
+          _buildRotationHandle(screenBounds, screenCenter, l10n),
 
           // Rotation stem line
-          buildRotationStem(screenBounds),
+          buildRotationStem(
+            screenBounds,
+            handleSize: AppInteraction.imagePlacementButtonSize,
+          ),
 
           // Confirm / Cancel buttons below the image
           Positioned(
@@ -268,8 +271,12 @@ class ImagePlacementWidget extends StatelessWidget {
   /// Builds the circular green rotation handle above the bounding box.
   ///
   /// Dragging this handle rotates the image around [screenCenter].
-  Widget _buildRotationHandle(final Rect screenBounds, final Offset screenCenter) {
-    const double handleSize = AppInteraction.rotationHandleSize;
+  Widget _buildRotationHandle(
+    final Rect screenBounds,
+    final Offset screenCenter,
+    final AppLocalizations l10n,
+  ) {
+    const double handleSize = AppInteraction.imagePlacementButtonSize;
     final Offset handleCenter = Offset(
       screenBounds.center.dx,
       screenBounds.top - AppInteraction.rotationHandleDistance,
@@ -278,7 +285,10 @@ class ImagePlacementWidget extends StatelessWidget {
     return Positioned(
       left: handleCenter.dx - handleSize / AppMath.pair,
       top: handleCenter.dy - handleSize / AppMath.pair,
-      child: GestureDetector(
+      child: buildOverlayCircleButton(
+        tooltip: l10n.resizeRotate,
+        color: Colors.green,
+        cursor: SystemMouseCursors.grab,
         onPanUpdate: (final DragUpdateDetails details) {
           final Offset pointer = handleCenter + details.delta;
           final double previousAngle = atan2(
@@ -292,22 +302,10 @@ class ImagePlacementWidget extends StatelessWidget {
           model.rotation += currentAngle - previousAngle;
           onChanged();
         },
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: Container(
-            width: handleSize,
-            height: handleSize,
-            decoration: BoxDecoration(
-              color: Colors.green,
-              border: Border.all(color: Colors.white, width: AppStroke.regular),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.rotate_right,
-              size: AppSpacing.lg,
-              color: Colors.white,
-            ),
-          ),
+        child: const Icon(
+          Icons.rotate_right,
+          size: AppLayout.iconSize,
+          color: Colors.white,
         ),
       ),
     );

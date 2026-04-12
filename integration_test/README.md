@@ -7,6 +7,7 @@ This integration test suite performs complete end-to-end testing of the fPaint F
 ## Test Coverage
 
 ### Complete Workflow Testing
+
 1. **App Launch** - Full initialization and UI loading (macOS compatible)
 2. **Canvas Drawing** - Tap and move gestures with all tools
 3. **New Document Creation** - Canvas clearing and layer management
@@ -16,6 +17,7 @@ This integration test suite performs complete end-to-end testing of the fPaint F
 7. **App Closure** - Final state verification
 
 ### Specific Features Tested
+
 - ✅ Drawing tools: Brush, Pencil, Rectangle, Circle
 - ✅ Color palette: Multiple colors and fill options
 - ✅ Layer system: Creation, selection, management
@@ -28,23 +30,33 @@ This integration test suite performs complete end-to-end testing of the fPaint F
 ## Platform Requirements
 
 ### ✅ macOS Desktop (Primary Target)
+
 - **macOS Integration Testing**: Purpose-built to work on macOS
 - **SharedPreferences Handling**: Graceful degradation when blocked
 - **Desktop UI Testing**: Full support for desktop Flutter testing
 
 ### ✅ Mobile Platforms (Secondary)
+
 - **Android Devices/Emulators**: Full SharedPreferences support
 - **iOS Simulators/Devices**: Native platform testing
 
 ## Running Tests
 
 ### On macOS (Primary Method)
+
 ```bash
-# Run integration tests directly on macOS
-flutter test integration_test/app_integration_test.dart
+# Run the repo test runner so integration screenshots are mirrored into
+# integration_test/screenshots after the macOS app finishes.
+tool/test.sh
 ```
 
+### Screenshot Evidence
+
+- Integration UI screenshots are staged inside the macOS app container during the test run.
+- `tool/test.sh` mirrors those PNG files into `integration_test/screenshots/` as persistent evidence artifacts.
+
 ### On Android Devices (Alternative)
+
 ```bash
 # Connect Android device/emulator first
 flutter devices
@@ -54,6 +66,7 @@ flutter test integration_test/app_integration_test.dart -d <android_device_id>
 ```
 
 ### On iOS Simulator (Alternative)
+
 ```bash
 # Launch iOS Simulator first
 open -a Simulator
@@ -70,11 +83,13 @@ flutter test integration_test/app_integration_test.dart -d <ios_simulator_id>
 This integration test includes special handling for macOS environments:
 
 ### 🛠️ SharedPreferences Workarounds
+
 - **Timeout-based initialization**: Uses controlled timeouts instead of `pumpAndSettle`
 - **Graceful provider fallback**: Continues testing even if SharedPreferences blocks
 - **Partial success reporting**: Reports what tests succeeded vs. what was blocked
 
 ### 🎯 macOS-Specific Testing
+
 - **Gesture simulation**: Works correctly on desktop trackpad/mouse input
 - **UI component verification**: Tests desktop-specific UI elements
 - **Provider access testing**: Tests provider functionality when available
@@ -83,6 +98,7 @@ This integration test includes special handling for macOS environments:
 ### 📊Expected Results on macOS
 
 **Full Success** (SharedPreferences working):
+
 ```
 ✅ App launched and basic initialization completed
 ✅ UI components verified
@@ -94,6 +110,7 @@ This integration test includes special handling for macOS environments:
 ```
 
 **Partial Success** (SharedPreferences blocked):
+
 ```
 ✅ App launched and basic initialization completed
 ✅ UI components verified
