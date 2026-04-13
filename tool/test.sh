@@ -43,13 +43,29 @@ LOCAL_SCREENSHOT_STAGE_DIR="$ROOT_DIR/$ARTIFACT_STAGE_DIR_NAME"
 SCREENSHOT_OUTPUT_DIR="$ROOT_DIR/test"
 FINAL_ARTWORK_HOST_PATH="$SCREENSHOT_OUTPUT_DIR/$FINAL_ARTWORK_ARTIFACT_FILENAME"
 FINAL_RENDERED_HOST_PATH="$SCREENSHOT_OUTPUT_DIR/$FINAL_RENDERED_ARTIFACT_FILENAME"
+VIDEO_FRAMES_SUBDIR_NAME="video_frames"
+VIDEO_FRAME_FILE_EXTENSION="png"
+VIDEO_OUTPUT_FILENAME="integration_test_video.mp4"
+VIDEO_OUTPUT_HOST_PATH="$SCREENSHOT_OUTPUT_DIR/$VIDEO_OUTPUT_FILENAME"
+VIDEO_FRAMES_FPS="20"
 ANDROID_BOOT_COMPLETED_PROPERTY_NAME="sys.boot_completed"
 ANDROID_BOOT_COMPLETED_PROPERTY_VALUE="1"
+ANDROID_STAY_AWAKE_SETTING_KEY="stay_on_while_plugged_in"
+ANDROID_STAY_AWAKE_USB_AND_AC_VALUE="3"
+ANDROID_LOCKSCREEN_MENU_KEYCODE="82"
+ANDROID_WAKEUP_KEYCODE="KEYCODE_WAKEUP"
+ANDROID_INTENT_ACTION_MAIN="android.intent.action.MAIN"
+ANDROID_INTENT_CATEGORY_LAUNCHER="android.intent.category.LAUNCHER"
+ANDROID_WINDOW_FOCUS_FIELD="mCurrentFocus"
 EMULATOR_DISCOVERY_RETRY_COUNT="60"
 EMULATOR_BOOT_RETRY_COUNT="60"
 EMULATOR_SHUTDOWN_RETRY_COUNT="30"
 EMULATOR_RETRY_DELAY_SECONDS="2"
 ARTIFACT_POLL_INTERVAL_SECONDS="0.2"
+INTEGRATION_VISUAL_PLAYBACK_ENV_NAME="FLUTTER_TEST_VISUAL_PLAYBACK"
+INTEGRATION_VISUAL_PLAYBACK_ENABLED="${FLUTTER_TEST_VISUAL_PLAYBACK:-1}"
+INTEGRATION_VISUAL_PLAYBACK_DART_DEFINE_KEY="FP_VISUAL_TEST_PLAYBACK"
+INTEGRATION_VISUAL_DRIVER_PATH="test_driver/integration_test.dart"
 
 echo "== fPaint test runner =="
 
@@ -641,6 +657,14 @@ echo "Running unit tests..."
 flutter test --reporter=compact
 
 echo "Running integration tests on $FLUTTER_TEST_DEVICE_PLATFORM device $FLUTTER_TEST_DEVICE_ID..."
+if [[ "$INTEGRATION_VISUAL_PLAYBACK_ENABLED" == "1" ]]; then
+  echo "Integration visual playback: enabled"
+  if [[ "$FLUTTER_TEST_DEVICE_PLATFORM" == "$TEST_DEVICE_PLATFORM_ANDROID" ]]; then
+    echo "Android visual playback runner: flutter drive"
+  fi
+else
+  echo "Integration visual playback: disabled (set $INTEGRATION_VISUAL_PLAYBACK_ENV_NAME=1 to enable)"
+fi
 integration_files=()
 while IFS= read -r f; do
   integration_files+=("$f")
@@ -655,6 +679,34 @@ cleanup_test_processes() {
   if [[ "$FLUTTER_TEST_DEVICE_PLATFORM" == "$TEST_DEVICE_PLATFORM_ANDROID" ]]; then
     adb -s "$FLUTTER_TEST_DEVICE_ID" shell am force-stop "$ANDROID_APP_ID" >/dev/null 2>&1 || true
   fi
+}
+
+prepare_android_visual_playback() {
+  adb -s "$FLUTTER_TEST_DEVICE_ID" shell input keyevent "$ANDROID_WAKEUP_KEYCODE" >/dev/null 2>&1 || true
+  adb -s "$FLUTTER_TEST_DEVICE_ID" shell wm dismiss-keyguard >/dev/null 2>&1 || true
+  adb -s "$FLUTTER_TEST_DEVICE_ID" shell input keyevent "$ANDROID_LOCKSCREEN_MENU_KEYCODE" >/dev/null 2>&1 || true
+  adb -s "$FLUTTER_TEST_DEVICE_ID" shell settings put global "$ANDROID_STAY_AWAKE_SETTING_KEY" "$ANDROID_STAY_AWAKE_USB_AND_AC_VALUE" >/dev/null 2>&1 || true
+}
+
+android_app_has_window_focus() {
+  if adb -s "$FLUTTER_TEST_DEVICE_ID" shell dumpsys window windows 2>/dev/null |
+    grep -F "$ANDROID_WINDOW_FOCUS_FIELD" | grep -Fq "$ANDROID_APP_ID"; then
+    return 0
+  fi
+
+  adb -s "$FLUTTER_TEST_DEVICE_ID" shell dumpsys activity top 2>/dev/null |
+    grep -Fq "$ANDROID_APP_ID/"
+}
+
+bring_android_app_to_foreground() {
+  if android_app_has_window_focus; then
+    return
+  fi
+
+  adb -s "$FLUTTER_TEST_DEVICE_ID" shell am start \
+    -a "$ANDROID_INTENT_ACTION_MAIN" \
+    -c "$ANDROID_INTENT_CATEGORY_LAUNCHER" \
+    -p "$ANDROID_APP_ID" >/dev/null 2>&1 || true
 }
 
 clear_android_internal_screenshot_dir() {
@@ -758,14 +810,28 @@ run_android_integration_file_with_artifact_collection() {
     integration_test_gradle_opts="$integration_test_gradle_opts $GRADLE_OPTS"
   fi
 
+  local flutter_test_command=()
+  if [[ "$INTEGRATION_VISUAL_PLAYBACK_ENABLED" == "1" ]]; then
+    flutter_test_command=(
+      flutter drive
+      --driver "$INTEGRATION_VISUAL_DRIVER_PATH"
+      --target "$test_file"
+      -d "$FLUTTER_TEST_DEVICE_ID"
+      --dart-define "$INTEGRATION_VISUAL_PLAYBACK_DART_DEFINE_KEY=true"
+    )
+  else
+    flutter_test_command=(flutter test "$test_file" --reporter=compact -d "$FLUTTER_TEST_DEVICE_ID")
+  fi
+
   (
     env GRADLE_OPTS="$integration_test_gradle_opts" \
-      flutter test "$test_file" --reporter=compact -d "$FLUTTER_TEST_DEVICE_ID" 2>&1 | tee "$log_file"
+      "${flutter_test_command[@]}" 2>&1 | tee "$log_file"
   ) &
   flutter_test_pid="$!"
 
   while kill -0 "$flutter_test_pid" >/dev/null 2>&1; do
     collect_android_internal_screenshots
+    collect_android_video_frames_incremental
     sleep "$ARTIFACT_POLL_INTERVAL_SECONDS"
   done
 
@@ -775,6 +841,7 @@ run_android_integration_file_with_artifact_collection() {
   set -e
 
   collect_android_internal_screenshots
+  collect_android_video_frames_incremental
   return "$flutter_test_exit_code"
 }
 
@@ -782,6 +849,8 @@ prepare_integration_screenshot_dirs() {
   mkdir -p "$SCREENSHOT_OUTPUT_DIR"
   rm -f "$SCREENSHOT_OUTPUT_DIR"/${TEST_ARTIFACT_FILENAME_PREFIX}*.${ARTIFACT_FILE_EXTENSION} >/dev/null 2>&1 || true
   rm -f "$SCREENSHOT_OUTPUT_DIR"/final.${ORA_ARTIFACT_FILE_EXTENSION} >/dev/null 2>&1 || true
+  rm -f "$VIDEO_OUTPUT_HOST_PATH" >/dev/null 2>&1 || true
+  rm -rf "$SCREENSHOT_OUTPUT_DIR/$VIDEO_FRAMES_SUBDIR_NAME" >/dev/null 2>&1 || true
 
   if [[ "$FLUTTER_TEST_DEVICE_PLATFORM" == "$TEST_DEVICE_PLATFORM_ANDROID" ]]; then
     clear_android_internal_screenshot_dir
@@ -809,6 +878,94 @@ collect_integration_screenshots() {
   fi
 }
 
+collect_android_video_frames_incremental() {
+  local android_frames_dir="$ANDROID_SCREENSHOT_STAGE_DIR/$VIDEO_FRAMES_SUBDIR_NAME"
+  local host_frames_dir="$SCREENSHOT_OUTPUT_DIR/$VIDEO_FRAMES_SUBDIR_NAME"
+  local frame_file=""
+  local temp_file=""
+
+  mkdir -p "$host_frames_dir"
+
+  while IFS= read -r frame_file; do
+    [[ -n "$frame_file" ]] || continue
+
+    # Skip if it doesn't look like a frame filename
+    case "$frame_file" in
+      frame_*.${VIDEO_FRAME_FILE_EXTENSION}) ;;
+      *) continue ;;
+    esac
+
+    # Skip already pulled frames
+    [[ ! -f "$host_frames_dir/$frame_file" ]] || continue
+
+    temp_file="$(mktemp "$ROOT_DIR/.frame_pull.XXXXXX")"
+
+    if adb -s "$FLUTTER_TEST_DEVICE_ID" exec-out run-as "$ANDROID_APP_ID" cat \
+      "$android_frames_dir/$frame_file" > "$temp_file" 2>/dev/null && [[ -s "$temp_file" ]]; then
+      mv "$temp_file" "$host_frames_dir/$frame_file"
+    else
+      rm -f "$temp_file"
+    fi
+  done < <(
+    adb -s "$FLUTTER_TEST_DEVICE_ID" exec-out run-as "$ANDROID_APP_ID" sh -c \
+      "if [ -d '$android_frames_dir' ]; then ls '$android_frames_dir' | sort; fi" 2>/dev/null | tr -d '\r'
+  )
+}
+
+collect_video_frames() {
+  local local_frames_dir="$LOCAL_SCREENSHOT_STAGE_DIR/$VIDEO_FRAMES_SUBDIR_NAME"
+  local host_frames_dir="$SCREENSHOT_OUTPUT_DIR/$VIDEO_FRAMES_SUBDIR_NAME"
+
+  mkdir -p "$host_frames_dir"
+
+  if [[ "$FLUTTER_TEST_DEVICE_PLATFORM" == "$TEST_DEVICE_PLATFORM_ANDROID" ]]; then
+    collect_android_video_frames_incremental
+    local pulled_count=""
+    pulled_count="$(find "$host_frames_dir" -maxdepth 1 -type f -name "frame_*.${VIDEO_FRAME_FILE_EXTENSION}" 2>/dev/null | wc -l | tr -d ' ')"
+    echo "Video frames collected from Android: $pulled_count"
+    return
+  fi
+
+  if [[ -d "$local_frames_dir" ]] && compgen -G "$local_frames_dir"/*.${VIDEO_FRAME_FILE_EXTENSION} >/dev/null; then
+    cp "$local_frames_dir"/*.${VIDEO_FRAME_FILE_EXTENSION} "$host_frames_dir"/
+  fi
+}
+
+assemble_video_from_frames() {
+  local frames_dir="$SCREENSHOT_OUTPUT_DIR/$VIDEO_FRAMES_SUBDIR_NAME"
+  local frame_count=""
+
+  if [[ ! -d "$frames_dir" ]]; then
+    return
+  fi
+
+  frame_count="$(find "$frames_dir" -maxdepth 1 -type f -name "*.${VIDEO_FRAME_FILE_EXTENSION}" | wc -l | tr -d ' ')"
+  if [[ "$frame_count" -eq 0 ]]; then
+    echo "No video frames to assemble"
+    return
+  fi
+
+  echo "Assembling video from $frame_count frames..."
+
+  if ! command -v ffmpeg >/dev/null 2>&1; then
+    echo "Warning: ffmpeg not found — skipping video assembly"
+    echo "Frames saved in: $frames_dir"
+    echo "To assemble manually: ffmpeg -framerate $VIDEO_FRAMES_FPS -i '$frames_dir/frame_%06d.$VIDEO_FRAME_FILE_EXTENSION' -c:v libx264 -pix_fmt yuv420p '$VIDEO_OUTPUT_HOST_PATH'"
+    return
+  fi
+
+  if ffmpeg -y -framerate "$VIDEO_FRAMES_FPS" \
+    -i "$frames_dir/frame_%06d.$VIDEO_FRAME_FILE_EXTENSION" \
+    -c:v libx264 -pix_fmt yuv420p \
+    "$VIDEO_OUTPUT_HOST_PATH" </dev/null >/dev/null 2>&1; then
+    echo "Video assembled: $VIDEO_OUTPUT_HOST_PATH ($frame_count frames)"
+    rm -rf "$frames_dir"
+  else
+    echo "Warning: ffmpeg failed to assemble video"
+    echo "Frames preserved in: $frames_dir"
+  fi
+}
+
 run_integration_file_once() {
   local test_file="$1"
   local log_file="$2"
@@ -818,7 +975,12 @@ run_integration_file_once() {
     return
   fi
 
-  flutter test "$test_file" --reporter=compact -d "$FLUTTER_TEST_DEVICE_ID" 2>&1 | tee "$log_file"
+  local flutter_test_command=(flutter test "$test_file" --reporter=compact -d "$FLUTTER_TEST_DEVICE_ID")
+  if [[ "$INTEGRATION_VISUAL_PLAYBACK_ENABLED" == "1" ]]; then
+    flutter_test_command+=(--dart-define "$INTEGRATION_VISUAL_PLAYBACK_DART_DEFINE_KEY=true")
+  fi
+
+  "${flutter_test_command[@]}" 2>&1 | tee "$log_file"
 }
 
 prepare_integration_screenshot_dirs
@@ -827,16 +989,24 @@ for test_file in "${integration_files[@]}"; do
   echo "Running integration test: $test_file"
   log_file="$(mktemp -t fpaint_integration_test.XXXXXX.log)"
   cleanup_test_processes
+  if [[ "$FLUTTER_TEST_DEVICE_PLATFORM" == "$TEST_DEVICE_PLATFORM_ANDROID" ]] && [[ "$INTEGRATION_VISUAL_PLAYBACK_ENABLED" == "1" ]]; then
+    prepare_android_visual_playback
+    bring_android_app_to_foreground
+  fi
   if run_integration_file_once "$test_file" "$log_file"; then
     collect_integration_screenshots
+    collect_video_frames
     rm -f "$log_file"
   else
     collect_integration_screenshots
+    collect_video_frames
     echo "Integration test failed: $test_file"
     echo "Failure log: $log_file"
     exit 1
   fi
 done
+
+assemble_video_from_frames
 
 echo "Integration JPG artifacts mirrored to: $SCREENSHOT_OUTPUT_DIR"
 if [[ -f "$FINAL_ARTWORK_HOST_PATH" ]]; then
@@ -844,5 +1014,8 @@ if [[ -f "$FINAL_ARTWORK_HOST_PATH" ]]; then
 fi
 if [[ -f "$FINAL_RENDERED_HOST_PATH" ]]; then
   echo "Final rendered JPG artifact: $FINAL_RENDERED_HOST_PATH"
+fi
+if [[ -f "$VIDEO_OUTPUT_HOST_PATH" ]]; then
+  echo "Integration video: $VIDEO_OUTPUT_HOST_PATH"
 fi
 echo "All unit and integration tests passed."
