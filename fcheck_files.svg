@@ -326,9 +326,7 @@
 <rect x="3400.0" y="580.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/helpers/transform_helper.dart</title></rect>
 <rect x="3400.0" y="650.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/files/file_jpeg.dart</title></rect>
 <rect x="3400.0" y="720.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/services/fill_service.dart</title></rect>
-<rect x="3840.0" y="90.0" width="220" height="50" class="fileNode fileNodeWarning"><title>File: /Users/jp/src/github/vteam/fPaint/lib/providers/layers_provider.dart
-
-1 Documentation warning</title></rect>
+<rect x="3840.0" y="90.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/providers/layers_provider.dart</title></rect>
 <rect x="3840.0" y="160.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/models/fill_model.dart</title></rect>
 <rect x="3840.0" y="230.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/helpers/list_helper.dart</title></rect>
 <rect x="3840.0" y="300.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/services/flood_fill.dart</title></rect>
