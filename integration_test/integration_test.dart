@@ -7,7 +7,9 @@ import 'package:fpaint/main.dart' as app;
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/transform_model.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
@@ -47,6 +49,11 @@ const double _transformScaleDragFactor = 0.55;
 const double _transformRotateDragFactor = 0.4;
 const Duration _clipboardPumpDuration = Duration(milliseconds: 300);
 const Duration _overlayActionPumpDuration = Duration(milliseconds: 300);
+const String _signatureText = 'fPaint';
+const String _signatureLayerName = 'Signature';
+const double _signatureFontSize = 24.0;
+const double _signatureMarginRight = 10.0;
+const double _signatureMarginBottom = 10.0;
 const double _birdHorizontalShiftPixels = AppLayout.canvasDefaultWidth * _birdHorizontalShiftFraction;
 const Offset _birdOriginalBaseTopLeftOffset = Offset(80, -170);
 const Offset _birdScaledCopyBaseTopLeftOffset = Offset(180, -210);
@@ -121,6 +128,8 @@ void main() {
 
       await _visualCheckpointPause(tester);
       await _runBirdTransformScenario(tester);
+      await _visualCheckpointPause(tester);
+      await _drawSignatureText(tester);
       await _visualCheckpointPause(tester);
 
       await _saveFinalAggregatedScreenshots(tester);
@@ -765,6 +774,49 @@ Future<void> _addSunRays(final WidgetTester tester, final Offset sunCenter, fina
   // await myWait(tester);
 
   debugPrint('☀️ Sun rays completed!');
+}
+
+/// Draws the signature text "fPaint" at the bottom-right of the canvas.
+Future<void> _drawSignatureText(final WidgetTester tester) async {
+  debugPrint('✍️ Drawing signature text at bottom-right...');
+
+  await LayerTestHelpers.addNewLayer(tester, _signatureLayerName);
+
+  final BuildContext context = tester.element(find.byType(MainScreen));
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
+  final LayersProvider layersProvider = LayersProvider.of(context);
+
+  final Size canvasSize = layersProvider.size;
+
+  // Measure the text to position it precisely at the bottom-right
+  final TextObject signatureTextObject = TextObject(
+    text: _signatureText,
+    position: Offset.zero,
+    color: Colors.white,
+    size: _signatureFontSize,
+    fontWeight: FontWeight.bold,
+  );
+  final Rect textBounds = signatureTextObject.getBounds();
+
+  final Offset bottomRightPosition = Offset(
+    canvasSize.width - textBounds.width - _signatureMarginRight,
+    canvasSize.height - textBounds.height - _signatureMarginBottom,
+  );
+  signatureTextObject.position = bottomRightPosition;
+
+  appProvider.recordExecuteDrawingActionToSelectedLayer(
+    action: UserActionDrawing(
+      action: ActionType.text,
+      positions: <Offset>[bottomRightPosition],
+      textObject: signatureTextObject,
+    ),
+  );
+  await tester.pumpAndSettle();
+
+  debugPrint(
+    '✍️ Signature "$_signatureText" placed at '
+    '(${bottomRightPosition.dx.toInt()}, ${bottomRightPosition.dy.toInt()})',
+  );
 }
 
 /// Draws a fence with vertical pickets and horizontal rails
