@@ -25,6 +25,11 @@ class AppColors {
   static const Color floatingButtonBackground = Color(0xFF424242); // Floating button background
   static const Color floatingButtonForeground = Colors.white;
 
+  // ITU-R BT.601 luma coefficients for perceived brightness
+  static const double lumaRedWeight = 0.299;
+  static const double lumaGreenWeight = 0.587;
+  static const double lumaBlueWeight = 0.114;
+
   // Text colors
   static const Color textPrimary = Colors.white;
   static const Color textSecondary = Color(0xFFB3B3B3);
