@@ -29,14 +29,12 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                   child: ReorderableListView.builder(
                     itemCount: layers.length,
                     buildDefaultDragHandles: false,
-                    onReorder: (final int oldIndex, int newIndex) {
-                      if (newIndex > oldIndex) {
-                        newIndex -= 1;
-                      }
+                    onReorder: (final int oldIndex, final int newIndex) {
+                      final int adjustedIndex = newIndex > oldIndex ? newIndex - 1 : newIndex;
                       final LayerProvider layer = layers.get(oldIndex);
                       layers.removeByIndex(oldIndex);
-                      layers.insert(newIndex, layer);
-                      layers.selectedLayerIndex = newIndex;
+                      layers.insert(adjustedIndex, layer);
+                      layers.selectedLayerIndex = adjustedIndex;
                     },
                     itemBuilder: (final BuildContext _, final int index) {
                       final LayerProvider layer = layers.get(index);

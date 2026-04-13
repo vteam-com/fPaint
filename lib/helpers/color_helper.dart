@@ -12,15 +12,14 @@ const String _colorPercentageTiny = '<0.1%';
 /// - Color state management
 
 /// Adjusts the brightness of the input color to the specified value within the valid range (0.0 to 1.0).
-Color adjustBrightness(final Color color, double brightness) {
-  // Ensure brightness is within valid range
-  brightness = brightness.clamp(0.0, 1.0);
+Color adjustBrightness(final Color color, final double brightness) {
+  final double clampedBrightness = brightness.clamp(0.0, 1.0);
 
   // Convert color to HSL
   HSLColor hslColor = HSLColor.fromColor(color);
 
   // Adjust lightness component
-  hslColor = hslColor.withLightness(brightness);
+  hslColor = hslColor.withLightness(clampedBrightness);
 
   // Convert back to RGB
   return hslColor.toColor();
@@ -51,10 +50,10 @@ String colorToHexString(
   final Color color, {
   final bool alphaFirst = true,
   final bool includeAlpha = true,
-  final String seperator = '',
+  final String separator = '',
 }) {
   final List<String> components = getColorComponentsAsHex(color, includeAlpha, alphaFirst);
-  return '#${components.join(seperator)}';
+  return '#${components.join(separator)}';
 }
 
 /// Returns the color components (alpha, red, green, blue) as an array of hexadecimal strings.
