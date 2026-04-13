@@ -2,9 +2,6 @@
 name: Deploy to Firebase Hosting on PR
 on: pull_request
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 permissions:
   checks: write
   contents: read
@@ -28,7 +25,7 @@ jobs:
       - name: Build web
         run: flutter build web
 
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - uses: FirebaseExtended/action-hosting-deploy@v0.9
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VTEAM_PAINT }}
