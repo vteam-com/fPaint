@@ -12,8 +12,8 @@ issue_tracker: https://github.com/vteam-com/fPaint/issues
 version: 1.2.0+1
 
 environment:
-  sdk: ">=3.9.2"
-  flutter: ">=3.35.7"
+  sdk: ">=3.11.4"
+  flutter: ">=3.41.6"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions

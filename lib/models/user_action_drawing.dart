@@ -66,7 +66,8 @@ enum ActionType {
   image,
   cut,
   text,
-  selector;
+  selector
+  ;
 
   /// Checks if the action type supports the given attribute.
   bool isSupported(final ActionOptions attribute) {
