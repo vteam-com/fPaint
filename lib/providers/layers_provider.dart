@@ -316,6 +316,14 @@ class LayersProvider extends ChangeNotifier {
     );
   }
 
+  /// Builds the merged actions for a source layer when merging two layers.
+  ///
+  /// Returns the action stack directly if the [layer] doesn't require rasterized merge.
+  /// Otherwise, returns a single image action containing the flattened layer image.
+  ///
+  /// This handles both simple layers that can be merged directly and complex layers
+  /// that require rasterization due to special blend modes, opacity, background color,
+  /// or certain action types like cut or eraser.
   List<UserActionDrawing> _buildMergedActionsForSourceLayer(final LayerProvider layer) {
     if (!_sourceLayerRequiresRasterizedMerge(layer)) {
       return List<UserActionDrawing>.from(layer.actionStack);

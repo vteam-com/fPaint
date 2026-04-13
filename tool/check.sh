@@ -1,4 +1,23 @@
 #!/bin/sh
+
+CHECK_FAILURE_EXIT_CODE="1"
+FCHECK_VERSION="1.2.0"
+ANSI_RED="$(printf '\033[31m')"
+ANSI_BOLD="$(printf '\033[1m')"
+ANSI_BLINK="$(printf '\033[5m')"
+ANSI_RESET="$(printf '\033[0m')"
+
+show_fcheck_score_error() {
+	printf '\n%s%s%s' "$ANSI_RED" "$ANSI_BOLD" "$ANSI_BLINK"
+	cat <<'EOF'
+################################################################
+############### Expected fCheck SCORE of 100%   ################
+############### Fix the remaining fCheck issues ################
+################################################################
+EOF
+	printf '%s\n\n' "$ANSI_RESET"
+}
+
 echo --- Pub Get
 flutter pub get > /dev/null || { echo "Pub get failed"; exit 1; }
 echo --- Pub Outdated
@@ -14,8 +33,21 @@ flutter test --reporter=compact --no-pub
 echo --- fCheck
 # Install the pinned version into the isolated cache, then run it.
 # Note: `dart pub cache exec` doesn't exist on all Dart SDK versions; `pub global run` does.
-dart pub global activate fcheck 1.1.3 > /dev/null
-dart pub global run fcheck --svg --fix --list full
+dart pub global activate fcheck "$FCHECK_VERSION" > /dev/null
+dart pub global run fcheck --strict --svg --fix --list full
+fcheck_exit_code="$?"
+
+case "$fcheck_exit_code" in
+	0)
+		;;
+	[1-9]|[1-9][0-9])
+		show_fcheck_score_error
+		;;
+	*)
+		echo "fCheck failed"
+		exit "$CHECK_FAILURE_EXIT_CODE"
+		;;
+esac
 
 # fcheck --fix can touch dependency declarations; refresh package resolution
 # before formatter/analyzer reads analysis_options includes.
@@ -25,4 +57,8 @@ flutter pub get > /dev/null || { echo "Pub get failed"; exit 1; }
 echo --- Format sources
 dart format lib test integration_test tool | sed 's/^/    /'
 dart fix --apply | sed 's/^/    /'
+
+if [ "$fcheck_exit_code" -ne 0 ]; then
+	exit "$CHECK_FAILURE_EXIT_CODE"
+fi
 

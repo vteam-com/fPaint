@@ -291,9 +291,7 @@
 <rect x="243.0" y="2750.0" width="348.0" height="98.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: l10n</title></rect>
 </g>
 <g class="folderLayer">
-<rect x="243.0" y="2872.0" width="348.0" height="258.0" rx="12.0" ry="12.0" class="layerBackground layerBackgroundWarning"><title>Folder: providers
-
-1 Documentation warning</title></rect>
+<rect x="243.0" y="2872.0" width="348.0" height="258.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: providers</title></rect>
 </g>
 <g class="folderLayer">
 <rect x="243.0" y="3750.0" width="348.0" height="258.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: helpers</title></rect>
@@ -549,9 +547,7 @@
 <rect x="251.0" y="266.0" width="332.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: my_window_manager.dart</title></rect>
 <rect x="251.0" y="2788.0" width="332.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: l10n/app_localizations.dart</title></rect>
 <rect x="251.0" y="2910.0" width="332.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/app_provider.dart</title></rect>
-<rect x="251.0" y="2942.0" width="332.0" height="28.0" rx="5.0" ry="5.0" class="fileNode fileNodeWarning"><title>File: providers/layers_provider.dart
-
-1 Documentation warning</title></rect>
+<rect x="251.0" y="2942.0" width="332.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/layers_provider.dart</title></rect>
 <rect x="251.0" y="2974.0" width="332.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/layer_provider.dart</title></rect>
 <rect x="251.0" y="3006.0" width="332.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/shell_provider.dart</title></rect>
 <rect x="251.0" y="3038.0" width="332.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/app_preferences.dart</title></rect>
