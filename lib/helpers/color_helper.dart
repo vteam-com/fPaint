@@ -114,9 +114,9 @@ List<String> getColorComponentsAsHex(
 Color contrastColor(final Color color) {
   // Calculate the luminance of the color including alpha
   final double luminance =
-      (0.299 * (color.r * AppLimits.rgbChannelMax) +
-          0.587 * (color.g * AppLimits.rgbChannelMax) +
-          0.114 * (color.b * AppLimits.rgbChannelMax)) /
+      (AppColors.lumaRedWeight * (color.r * AppLimits.rgbChannelMax) +
+          AppColors.lumaGreenWeight * (color.g * AppLimits.rgbChannelMax) +
+          AppColors.lumaBlueWeight * (color.b * AppLimits.rgbChannelMax)) /
       AppLimits.rgbChannelMax;
   final double alphaFactor = color.a;
 
