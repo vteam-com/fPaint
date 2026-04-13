@@ -23,6 +23,9 @@ const String _defaultRenderedEvidenceFilename = 'integration_test_rendered.jpg';
 const String _defaultOraEvidenceFilename = 'final.ora';
 const String _oraArtifactStagedMessage = '📦 ORA artwork staged for mirroring: ';
 const String _renderedArtifactStagedMessage = '🖼️ Rendered screenshot staged for mirroring: ';
+const String _videoFrameSubdirectoryName = 'video_frames';
+const String _videoFrameFilenamePrefix = 'frame_';
+const String _videoFrameFileExtension = 'png';
 
 Future<void> configureTabletLandscapeViewport(final WidgetTester tester) async {
   addTearDown(tester.view.resetPhysicalSize);
@@ -407,6 +410,7 @@ Future<void> myWait(
   final WidgetTester tester,
 ) async {
   await tester.pump();
+  await IntegrationTestVideoRecorder.instance?.captureFrame();
 }
 
 /// Layer management helper methods for integration tests
@@ -644,6 +648,92 @@ class IntegrationTestUtils {
     }
 
     return Directory.current;
+  }
+}
+
+/// Records integration test frames as numbered PNG files. Frame capture is
+/// explicit — call [captureFrame] at each meaningful test step. The active
+/// recorder is accessible via the static [instance] field so that shared
+/// helpers like [myWait] can capture automatically.
+class IntegrationTestVideoRecorder {
+  IntegrationTestVideoRecorder(this._tester);
+
+  static IntegrationTestVideoRecorder? instance;
+
+  final WidgetTester _tester;
+  int _frameIndex = 0;
+  int _frameErrors = 0;
+  Directory? _framesDirectory;
+
+  Future<void> start() async {
+    try {
+      final Directory screenshotRoot = await IntegrationTestUtils._resolveWritableScreenshotRootDirectory();
+      _framesDirectory = Directory(
+        '${screenshotRoot.path}/$_stagedScreenshotsDirectoryName/$_videoFrameSubdirectoryName',
+      );
+      await _framesDirectory!.create(recursive: true);
+
+      // Clear any previous frames
+      await for (final FileSystemEntity entity in _framesDirectory!.list()) {
+        if (entity is File) {
+          await entity.delete();
+        }
+      }
+
+      _frameIndex = 0;
+      _frameErrors = 0;
+      instance = this;
+      debugPrint('🎬 Video recorder started — frames directory: ${_framesDirectory!.path}');
+    } catch (e) {
+      debugPrint('🎬 Video recorder failed to start: $e');
+      _framesDirectory = null;
+    }
+  }
+
+  Future<void> captureFrame() async {
+    if (_framesDirectory == null) {
+      return;
+    }
+
+    final Finder boundaryFinder = find.byKey(Keys.appScreenshotBoundary);
+    if (boundaryFinder.evaluate().isEmpty) {
+      _frameErrors++;
+      return;
+    }
+
+    try {
+      final RenderRepaintBoundary boundary = _tester.renderObject<RenderRepaintBoundary>(boundaryFinder);
+      final ui.Image image = await boundary.toImage(pixelRatio: AppDefaults.renderedScreenshotPixelRatio);
+      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+
+      if (byteData == null) {
+        _frameErrors++;
+        return;
+      }
+
+      final String paddedIndex = _frameIndex.toString().padLeft(6, '0');
+      final File frameFile = File(
+        '${_framesDirectory!.path}/$_videoFrameFilenamePrefix$paddedIndex.$_videoFrameFileExtension',
+      );
+      await frameFile.writeAsBytes(byteData.buffer.asUint8List(), flush: true);
+      _frameIndex++;
+    } catch (e) {
+      _frameErrors++;
+      debugPrint('🎬 Frame capture failed: $e');
+    }
+  }
+
+  Future<void> stop() async {
+    instance = null;
+
+    // Capture one final frame
+    await captureFrame();
+
+    debugPrint('🎬 Video recorder stopped: $_frameIndex frames captured, $_frameErrors errors');
+    if (_framesDirectory != null) {
+      debugPrint('📁 Frames directory: ${_framesDirectory!.path}');
+    }
   }
 }
 

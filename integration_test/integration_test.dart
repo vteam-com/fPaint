@@ -25,17 +25,14 @@ const String _birdsLayerName = 'Birds';
 const String _pastedLayerName = 'Pasted';
 const String _finalArtworkFilename = 'final.ora';
 const String _finalRenderedFilename = 'integration_test_final_rendered.jpg';
-const String _gradientFillToolScreenshotFilename = 'integration_test_tool_gradient_fill.jpg';
-const String _transformScaleToolScreenshotFilename = 'integration_test_tool_transform_scale.jpg';
-const String _transformRotateToolScreenshotFilename = 'integration_test_tool_transform_rotate.jpg';
-const String _transformDeformToolScreenshotFilename = 'integration_test_tool_transform_deform.jpg';
+const String _integrationVisualPlaybackDefine = 'FP_VISUAL_TEST_PLAYBACK';
+const bool _integrationVisualPlaybackEnabled = bool.fromEnvironment(
+  _integrationVisualPlaybackDefine,
+  defaultValue: false,
+);
 const String _applyTooltipText = 'Apply';
 const String _scaleTooltipText = 'Scale';
 const String _rotateTooltipText = 'Resize / Rotate';
-const Size _defaultCanvasSize = Size(
-  AppLayout.canvasDefaultWidth,
-  AppLayout.canvasDefaultHeight,
-);
 const Offset _grassTopLeftOffset = Offset(-300, 10);
 const Offset _grassBottomRightOffset = Offset(300, 300);
 const double _birdHorizontalShiftFraction = 0.4;
@@ -77,17 +74,6 @@ enum _BirdTransformVariant {
   deform,
 }
 
-String _transformScreenshotFilename(final _BirdTransformVariant variant) {
-  switch (variant) {
-    case _BirdTransformVariant.scale:
-      return _transformScaleToolScreenshotFilename;
-    case _BirdTransformVariant.rotate:
-      return _transformRotateToolScreenshotFilename;
-    case _BirdTransformVariant.deform:
-      return _transformDeformToolScreenshotFilename;
-  }
-}
-
 Offset _shiftBirdOffsetLeft(final Offset offset) {
   return Offset(
     offset.dx - _birdHorizontalShiftPixels + _birdHorizontalRightAdjustmentPixels,
@@ -110,6 +96,17 @@ Size _calculateGrassBoundsCropSize(final Size canvasSize) {
   );
 }
 
+Future<void> _visualCheckpointPause(final WidgetTester tester) async {
+  await IntegrationTestVideoRecorder.instance?.captureFrame();
+
+  if (!_integrationVisualPlaybackEnabled) {
+    return;
+  }
+
+  await tester.pump(AppDefaults.integrationVisualCheckpointDelay);
+  await IntegrationTestVideoRecorder.instance?.captureFrame();
+}
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -118,10 +115,17 @@ void main() {
       debugPrint('🎨🖼️  Testing aggregated integration flow');
 
       await _launchIntegrationTestApp(tester);
-      await _runMultiLayerSceneScenario(tester);
-      await _resetCanvasForBirdScenario(tester);
+
+      final IntegrationTestVideoRecorder videoRecorder = IntegrationTestVideoRecorder(tester);
+      await videoRecorder.start();
+
+      await _visualCheckpointPause(tester);
       await _runBirdTransformScenario(tester);
+      await _visualCheckpointPause(tester);
+
       await _saveFinalAggregatedScreenshots(tester);
+      await tester.pumpAndSettle();
+      await videoRecorder.stop();
     });
   });
 }
@@ -138,48 +142,23 @@ Future<void> _launchIntegrationTestApp(final WidgetTester tester) async {
   await prepareCanvasViewport(tester);
 }
 
-Future<void> _runMultiLayerSceneScenario(final WidgetTester tester) async {
-  debugPrint('🎨 Running multi-layer scene scenario');
-
-  final Offset canvasCenter = tester.getCenter(find.byType(MainView));
-
-  await _drawSky(tester, canvasCenter);
-  await _drawSun(tester, canvasCenter);
-  await _drawLand(tester, canvasCenter);
-  await _drawHouse(tester, canvasCenter);
-  await _drawFence(tester, canvasCenter);
-
-  final int layerCountBeforeCrop = LayersProvider.of(
-    tester.element(find.byType(MainScreen)),
-  ).length;
-  final Size expectedCropSize = await _resizeCanvasToGrassBoundsCrop(tester);
-  _validateCrop(tester, layerCountBeforeCrop, expectedCropSize);
-  await _drawBlackFrame(tester);
-  await LayerTestHelpers.printLayerStructure(tester);
-}
-
-Future<void> _resetCanvasForBirdScenario(final WidgetTester tester) async {
-  debugPrint('🧹 Resetting canvas for bird transform scenario');
-
-  final AppProvider appProvider = _appProvider(tester);
-  appProvider.canvasClear(_defaultCanvasSize);
-  appProvider.update();
-
-  await tester.pumpAndSettle();
-  await prepareCanvasViewport(tester);
-}
-
 Future<void> _runBirdTransformScenario(final WidgetTester tester) async {
   debugPrint('🐦 Running bird transform scenario');
 
   final Offset canvasCenter = tester.getCenter(find.byType(MainView));
 
   await _drawSky(tester, canvasCenter);
+  await _visualCheckpointPause(tester);
   await _drawSun(tester, canvasCenter);
+  await _visualCheckpointPause(tester);
   await _drawLand(tester, canvasCenter);
+  await _visualCheckpointPause(tester);
   await _drawHouse(tester, canvasCenter);
+  await _visualCheckpointPause(tester);
   await _drawFence(tester, canvasCenter);
+  await _visualCheckpointPause(tester);
   await _drawBirdLayer(tester, canvasCenter);
+  await _visualCheckpointPause(tester);
 
   final BuildContext context = tester.element(find.byType(MainScreen));
   final LayersProvider layersProvider = LayersProvider.of(context);
@@ -192,18 +171,21 @@ Future<void> _runBirdTransformScenario(final WidgetTester tester) async {
     targetTopLeft: canvasCenter + _birdScaledCopyTopLeftOffset,
     variant: _BirdTransformVariant.scale,
   );
+  await _visualCheckpointPause(tester);
   await _pasteAndTransformBirdCopy(
     tester,
     canvasCenter: canvasCenter,
     targetTopLeft: canvasCenter + _birdRotatedCopyTopLeftOffset,
     variant: _BirdTransformVariant.rotate,
   );
+  await _visualCheckpointPause(tester);
   await _pasteAndTransformBirdCopy(
     tester,
     canvasCenter: canvasCenter,
     targetTopLeft: canvasCenter + _birdTransformedCopyTopLeftOffset,
     variant: _BirdTransformVariant.deform,
   );
+  await _visualCheckpointPause(tester);
 
   expect(
     layersProvider.length,
@@ -218,10 +200,12 @@ Future<void> _runBirdTransformScenario(final WidgetTester tester) async {
     tester,
     expectedLayerCountAfterCleanup: layerCountBeforeBirdCopies,
   );
+  await _visualCheckpointPause(tester);
 
   final int layerCountBeforeCrop = layersProvider.length;
   final Size expectedCropSize = await _resizeCanvasToGrassBoundsCrop(tester);
   _validateCrop(tester, layerCountBeforeCrop, expectedCropSize);
+  await _visualCheckpointPause(tester);
 
   await LayerTestHelpers.printLayerStructure(tester);
 }
@@ -289,6 +273,8 @@ Future<void> _saveFinalAggregatedScreenshots(final WidgetTester tester) async {
 
   debugPrint('📸 Saving final aggregated screenshots');
 
+  await tester.pumpAndSettle();
+
   await IntegrationTestUtils.saveArtworkOraArchive(
     layersProvider: layersProvider,
     filename: _finalArtworkFilename,
@@ -321,7 +307,6 @@ Future<void> _drawSky(final WidgetTester tester, final Offset canvasCenter) asyn
         offset: canvasCenter + const Offset(0, -20),
       ), // Dark blue at bottom relative to center
     ],
-    screenshotFilename: _gradientFillToolScreenshotFilename,
   );
 
   debugPrint('🌤️ Sky gradient background completed!');
@@ -538,11 +523,6 @@ Future<void> _pasteAndTransformBirdCopy(
       await _applyDeformTransform(tester);
   }
 
-  await IntegrationTestUtils.saveRenderedViewScreenshot(
-    tester: tester,
-    filename: _transformScreenshotFilename(variant),
-  );
-
   await tapByTooltip(tester, _applyTooltipText);
   await tester.pump(_overlayActionPumpDuration);
 
@@ -703,7 +683,7 @@ Future<Size> _resizeCanvasToGrassBoundsCrop(final WidgetTester tester) async {
     targetSize.height.toInt(),
     CanvasResizePosition.top,
   );
-  await tester.pump();
+  await tester.pumpAndSettle();
 
   expect(layersProvider.size, targetSize);
   debugPrint('📐 Canvas resized to ${layersProvider.size}');
@@ -746,72 +726,6 @@ void _validateCrop(
     '✅ Crop validated: ${canvasSize.width.toInt()}x${canvasSize.height.toInt()}, '
     '$expectedLayerCount layers, all sizes match',
   );
-}
-
-/// Draws a black rectangle frame around the entire canvas to confirm crop bounds.
-Future<void> _drawBlackFrame(final WidgetTester tester) async {
-  debugPrint('🖼️ Drawing black frame around cropped canvas...');
-
-  final BuildContext context = tester.element(find.byType(MainScreen));
-  final LayersProvider layersProvider = LayersProvider.of(context);
-
-  await LayerTestHelpers.addNewLayer(tester, 'Frame');
-
-  final double w = layersProvider.size.width;
-  final double h = layersProvider.size.height;
-  const double inset = 4;
-
-  // Convert canvas coordinates to widget-local coordinates for the MainView.
-  // The Listener in CanvasGestureHandler receives localPosition relative to
-  // the MainView widget, so we need: canvasOffset + canvas coords * scale,
-  // then add the MainView's global top-left to get global test coordinates.
-  final AppProvider appProvider = AppProvider.of(context, listen: false);
-  final Finder mainViewFinder = find.byType(MainView);
-  final Offset mainViewTopLeft = tester.getTopLeft(mainViewFinder);
-  Offset toScreen(final Offset canvasPoint) =>
-      mainViewTopLeft +
-      Offset(
-        canvasPoint.dx * appProvider.layers.scale + appProvider.canvasOffset.dx,
-        canvasPoint.dy * appProvider.layers.scale + appProvider.canvasOffset.dy,
-      );
-
-  // Top edge
-  await drawLineWithHumanGestures(
-    tester,
-    startPosition: toScreen(const Offset(inset, inset)),
-    endPosition: toScreen(Offset(w - inset, inset)),
-    brushSize: 4,
-    brushColor: Colors.black,
-  );
-
-  // Right edge
-  await drawLineWithHumanGestures(
-    tester,
-    startPosition: toScreen(Offset(w - inset, inset)),
-    endPosition: toScreen(Offset(w - inset, h - inset)),
-    brushSize: 4,
-    brushColor: Colors.black,
-  );
-
-  // Bottom edge
-  await drawLineWithHumanGestures(
-    tester,
-    startPosition: toScreen(Offset(w - inset, h - inset)),
-    endPosition: toScreen(Offset(inset, h - inset)),
-    brushSize: 4,
-    brushColor: Colors.black,
-  );
-
-  // Left edge
-  await drawLineWithHumanGestures(
-    tester,
-    startPosition: toScreen(Offset(inset, h - inset)),
-    endPosition: toScreen(const Offset(inset, inset)),
-    brushSize: 4,
-    brushColor: Colors.black,
-  );
-
-  debugPrint('🖼️ Black frame completed!');
 }
 
 /// Adds sun rays by drawing filled rectangles radiating from the sun
