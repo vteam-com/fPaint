@@ -24,7 +24,7 @@ void main() {
         expect(colorToHexString(const Color(0x80AABBCC), includeAlpha: true, alphaFirst: true), '#80AABBCC');
         expect(colorToHexString(const Color(0x80AABBCC), includeAlpha: true, alphaFirst: false), '#AABBCC80');
         expect(colorToHexString(const Color(0xFFCCDDEE), includeAlpha: false), '#CCDDEE');
-        expect(colorToHexString(const Color(0xFF445566), seperator: '-'), '#FF-44-55-66');
+        expect(colorToHexString(const Color(0xFF445566), separator: '-'), '#FF-44-55-66');
       });
 
       test('getColorComponentsAsHex', () {
