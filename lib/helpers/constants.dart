@@ -115,6 +115,7 @@ class AppStroke {
 
 /// Shared scale and opacity tokens.
 class AppVisual {
+  static const double full = 1.0;
   static const double half = 0.5;
   static const double popupBorderAlpha = 0.35;
   static const double low = 0.3;
@@ -216,6 +217,7 @@ class Keys {
   static Key floatActionZoomOut = const Key('floating_action_zoom_out');
   static Key floatActionCenter = const Key('floating_action_center');
   static Key floatActionToggle = const Key('floating_action_toggle');
+  static Key appScreenshotBoundary = const Key('app-screenshot-boundary');
   static Key mainViewScreenshotBoundary = const Key('main-view-screenshot-boundary');
   static String gradientHandleKeyPrefixText = 'gradient_handle_';
 

@@ -1,7 +1,20 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/canvas_resize.dart'; // Added for CanvasResizePosition
 import 'package:fpaint/providers/layers_provider.dart';
+
+const int _samplePixelTopLeftX = 5;
+const int _samplePixelTopLeftY = 5;
+const int _samplePixelMovedX = 25;
+const int _samplePixelMovedY = 5;
+const int _rgbaBytesPerPixel = 4;
+const int _rgbaRedOffset = 0;
+const int _rgbaGreenOffset = 1;
+const int _rgbaBlueOffset = 2;
+const int _rgbaAlphaOffset = 3;
 
 // Mock LayerProvider if its methods are too complex or have external deps for these tests.
 // For now, we'll use real LayerProvider instances, assuming their basic state changes are testable.
@@ -164,7 +177,7 @@ void main() {
       final LayerProvider layer = layersProvider.selectedLayer;
       layer.name = 'New Name';
       // This doesn't automatically notify LayersProvider unless LayerProvider.name setter calls a callback
-      // that LayersProvider listens to. Assuming LayerProvider.onThumnailChanged or similar might be it.
+      // that LayersProvider listens to. Assuming LayerProvider.onThumbnailChanged or similar might be it.
       // For this test, we check the LayerProvider instance directly.
       expect(layersProvider.selectedLayer.name, 'New Name');
     });
@@ -191,6 +204,60 @@ void main() {
       expect(layersProvider.get(0).name, 'Middle'); // Merged layer is now at index 0
       expect(layersProvider.get(0).actionStack.length, 2); // Both actions should be in 'Middle'
       expect(layersProvider.selectedLayerIndex, 0); // Selection should update
+    });
+
+    test('mergeLayers rasterize cut actions so they do not erase earlier merged content', () async {
+      final LayerProvider lowerLayer = layersProvider.addTop(name: 'Lower');
+      final LayerProvider upperLayer = layersProvider.addTop(name: 'Upper');
+
+      lowerLayer.actionStack.add(
+        UserActionDrawing(
+          action: ActionType.region,
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
+          fillColor: Colors.red,
+        ),
+      );
+
+      upperLayer.actionStack.add(
+        UserActionDrawing(
+          action: ActionType.region,
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
+          fillColor: Colors.green,
+        ),
+      );
+      upperLayer.actionStack.add(
+        UserActionDrawing(
+          action: ActionType.cut,
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
+        ),
+      );
+      upperLayer.actionStack.add(
+        UserActionDrawing(
+          action: ActionType.region,
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(20, 0, 10, 10)),
+          fillColor: Colors.green,
+        ),
+      );
+
+      layersProvider.mergeLayers(0, 1);
+
+      expect(layersProvider.get(0).actionStack.length, 2);
+      expect(layersProvider.get(0).actionStack.last.action, ActionType.image);
+
+      final ui.Image mergedImage = layersProvider.get(0).toImageForStorage(layersProvider.size);
+
+      expect(
+        (await _pixelColorAt(mergedImage, _samplePixelTopLeftX, _samplePixelTopLeftY)).toARGB32(),
+        Colors.red.toARGB32(),
+      );
+      expect(
+        (await _pixelColorAt(mergedImage, _samplePixelMovedX, _samplePixelMovedY)).toARGB32(),
+        Colors.green.toARGB32(),
+      );
     });
 
     // mergeAll and mergeVisible are not implemented in the provided LayersProvider code.
@@ -237,4 +304,19 @@ void main() {
       expect(layer2.actionStack.first.positions.first, const Offset(20 + 5, 20 - 5));
     });
   });
+}
+
+Future<Color> _pixelColorAt(final ui.Image image, final int x, final int y) async {
+  final ByteData? imageBytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+
+  expect(imageBytes, isNotNull);
+
+  final int pixelOffset = ((y * image.width) + x) * _rgbaBytesPerPixel;
+
+  return Color.fromARGB(
+    imageBytes!.getUint8(pixelOffset + _rgbaAlphaOffset),
+    imageBytes.getUint8(pixelOffset + _rgbaRedOffset),
+    imageBytes.getUint8(pixelOffset + _rgbaGreenOffset),
+    imageBytes.getUint8(pixelOffset + _rgbaBlueOffset),
+  );
 }

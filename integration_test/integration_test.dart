@@ -22,8 +22,13 @@ const Map<String, Object> _integrationTestPreferences = <String, Object>{
 };
 const String _aggregatedIntegrationTestName = 'Aggregated Painting Mastery - Multi-Layer Scene And Bird Transforms';
 const String _birdsLayerName = 'Birds';
+const String _pastedLayerName = 'Pasted';
 const String _finalArtworkFilename = 'final.ora';
 const String _finalRenderedFilename = 'integration_test_final_rendered.jpg';
+const String _gradientFillToolScreenshotFilename = 'integration_test_tool_gradient_fill.jpg';
+const String _transformScaleToolScreenshotFilename = 'integration_test_tool_transform_scale.jpg';
+const String _transformRotateToolScreenshotFilename = 'integration_test_tool_transform_rotate.jpg';
+const String _transformDeformToolScreenshotFilename = 'integration_test_tool_transform_deform.jpg';
 const String _applyTooltipText = 'Apply';
 const String _scaleTooltipText = 'Scale';
 const String _rotateTooltipText = 'Resize / Rotate';
@@ -70,6 +75,17 @@ enum _BirdTransformVariant {
   scale,
   rotate,
   deform,
+}
+
+String _transformScreenshotFilename(final _BirdTransformVariant variant) {
+  switch (variant) {
+    case _BirdTransformVariant.scale:
+      return _transformScaleToolScreenshotFilename;
+    case _BirdTransformVariant.rotate:
+      return _transformRotateToolScreenshotFilename;
+    case _BirdTransformVariant.deform:
+      return _transformDeformToolScreenshotFilename;
+  }
 }
 
 Offset _shiftBirdOffsetLeft(final Offset offset) {
@@ -198,9 +214,71 @@ Future<void> _runBirdTransformScenario(final WidgetTester tester) async {
   expect(appProvider.transformModel.isVisible, isFalse);
   expect(appProvider.selectorModel.isVisible, isFalse);
 
+  await _mergeBirdCopiesIntoSingleLayer(
+    tester,
+    expectedLayerCountAfterCleanup: layerCountBeforeBirdCopies,
+  );
+
   final int layerCountBeforeCrop = layersProvider.length;
   final Size expectedCropSize = await _resizeCanvasToGrassBoundsCrop(tester);
   _validateCrop(tester, layerCountBeforeCrop, expectedCropSize);
+
+  await LayerTestHelpers.printLayerStructure(tester);
+}
+
+Future<void> _mergeBirdCopiesIntoSingleLayer(
+  final WidgetTester tester, {
+  required final int expectedLayerCountAfterCleanup,
+}) async {
+  debugPrint('🔗 Merging bird copies into a single Birds layer...');
+
+  final BuildContext context = tester.element(find.byType(MainScreen));
+  final LayersProvider layersProvider = LayersProvider.of(context);
+
+  for (int mergeIteration = 1; mergeIteration < _birdCopyCount; mergeIteration++) {
+    await LayerTestHelpers.mergeLayer(tester, 0, 1);
+    await tester.pump(_overlayActionPumpDuration);
+  }
+
+  expect(
+    layersProvider.length,
+    expectedLayerCountAfterCleanup + 1,
+    reason: 'Merging three pasted bird layers should leave one merged copy plus the hidden source layer',
+  );
+  expect(
+    _countLayersNamed(layersProvider, _pastedLayerName),
+    1,
+    reason: 'Only one temporary pasted bird layer should remain after merging',
+  );
+
+  final int sourceBirdLayerIndex = _findLayerIndexByName(layersProvider, _birdsLayerName);
+  expect(
+    sourceBirdLayerIndex,
+    greaterThanOrEqualTo(0),
+    reason: 'The hidden source Birds layer should still exist before cleanup',
+  );
+
+  await LayerTestHelpers.removeLayer(tester, sourceBirdLayerIndex);
+  await tester.pump(_overlayActionPumpDuration);
+
+  await LayerTestHelpers.switchToLayer(tester, 0);
+  await LayerTestHelpers.renameLayer(tester, _birdsLayerName);
+
+  expect(
+    layersProvider.length,
+    expectedLayerCountAfterCleanup,
+    reason: 'Bird layer cleanup should restore the pre-copy layer count',
+  );
+  expect(
+    _countLayersNamed(layersProvider, _birdsLayerName),
+    1,
+    reason: 'The transformed birds should end on a single layer named Birds',
+  );
+  expect(
+    _countLayersNamed(layersProvider, _pastedLayerName),
+    0,
+    reason: 'Temporary pasted bird layers should not remain after cleanup',
+  );
 
   await LayerTestHelpers.printLayerStructure(tester);
 }
@@ -243,6 +321,7 @@ Future<void> _drawSky(final WidgetTester tester, final Offset canvasCenter) asyn
         offset: canvasCenter + const Offset(0, -20),
       ), // Dark blue at bottom relative to center
     ],
+    screenshotFilename: _gradientFillToolScreenshotFilename,
   );
 
   debugPrint('🌤️ Sky gradient background completed!');
@@ -459,6 +538,11 @@ Future<void> _pasteAndTransformBirdCopy(
       await _applyDeformTransform(tester);
   }
 
+  await IntegrationTestUtils.saveRenderedViewScreenshot(
+    tester: tester,
+    filename: _transformScreenshotFilename(variant),
+  );
+
   await tapByTooltip(tester, _applyTooltipText);
   await tester.pump(_overlayActionPumpDuration);
 
@@ -585,6 +669,20 @@ bool _cornersChanged(final List<Offset> previousCorners, final List<Offset> upda
   return List<int>.generate(previousCorners.length, (final int index) => index).any(
     (final int index) => (updatedCorners[index] - previousCorners[index]).distance > _transformChangeTolerance,
   );
+}
+
+int _countLayersNamed(final LayersProvider layersProvider, final String layerName) {
+  return layersProvider.list.where((final LayerProvider layer) => layer.name == layerName).length;
+}
+
+int _findLayerIndexByName(final LayersProvider layersProvider, final String layerName) {
+  for (int index = 0; index < layersProvider.length; index++) {
+    if (layersProvider.get(index).name == layerName) {
+      return index;
+    }
+  }
+
+  return -1;
 }
 
 /// Resizes the canvas to match the grass width and bottom edge.

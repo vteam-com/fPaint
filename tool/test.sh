@@ -663,9 +663,23 @@ clear_android_internal_screenshot_dir() {
     >/dev/null 2>&1 || true
 }
 
+list_android_internal_artifact_filenames() {
+  local artifact_extension="$1"
+
+  adb -s "$FLUTTER_TEST_DEVICE_ID" exec-out run-as "$ANDROID_APP_ID" sh -c \
+    "if [ -d '$ANDROID_SCREENSHOT_STAGE_DIR' ]; then find '$ANDROID_SCREENSHOT_STAGE_DIR' -maxdepth 1 -type f -name '*.${artifact_extension}' -exec basename {} \\; | sort; fi" \
+    2>/dev/null | tr -d '\r'
+}
+
 collect_android_internal_screenshots() {
+  local artifact_filename=""
+
+  while IFS= read -r artifact_filename; do
+    [[ -n "$artifact_filename" ]] || continue
+    collect_android_internal_screenshot_file "$artifact_filename"
+  done < <(list_android_internal_artifact_filenames "$ARTIFACT_FILE_EXTENSION")
+
   collect_android_internal_screenshot_file "$FINAL_ARTWORK_ARTIFACT_FILENAME"
-  collect_android_internal_screenshot_file "$FINAL_RENDERED_ARTIFACT_FILENAME"
 }
 
 jpeg_file_is_valid() {

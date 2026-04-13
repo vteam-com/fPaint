@@ -126,7 +126,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (final BuildContext _) => appProvider),
         // The layers provider is a shared singleton; provide the existing
         // instance without transferring disposal ownership to Provider.
-        ChangeNotifierProvider.value(value: layersProvider),
+        ChangeNotifierProvider<LayersProvider>.value(value: layersProvider),
         // ignore: always_specify_types
         ChangeNotifierProvider(create: (final BuildContext _) => undoProvider),
       ],
