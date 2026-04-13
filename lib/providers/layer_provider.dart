@@ -25,7 +25,7 @@ class LayerProvider extends ChangeNotifier {
   LayerProvider({
     required final String name,
     required final Size size,
-    required this.onThumnailChanged,
+    required this.onThumbnailChanged,
     this.parentGroupName = '',
     this.id = '',
     this.isSelected = false,
@@ -101,7 +101,7 @@ class LayerProvider extends ChangeNotifier {
   final Debouncer _debounceTimer = Debouncer();
 
   /// A callback function that is called when the thumbnail image changes.
-  final void Function() onThumnailChanged;
+  final void Function() onThumbnailChanged;
   //---------------------------------------------
   // Size
   Size _size = const Size(0, 0);
@@ -382,7 +382,7 @@ class LayerProvider extends ChangeNotifier {
     _cacheTopColorsUsed();
 
     // the latest thumbnail is ready
-    this.onThumnailChanged();
+    this.onThumbnailChanged();
   }
 
   /// Clears the cached image and thumbnail, and updates the thumbnail.

@@ -256,7 +256,7 @@ class LayersProvider extends ChangeNotifier {
     return LayerProvider(
       name: name,
       size: _size,
-      onThumnailChanged: () => notifyListeners(),
+      onThumbnailChanged: () => notifyListeners(),
     );
   }
 
@@ -306,6 +306,35 @@ class LayersProvider extends ChangeNotifier {
     }
   }
 
+  bool _sourceLayerRequiresRasterizedMerge(final LayerProvider layer) {
+    if (layer.backgroundColor != null || layer.blendMode != ui.BlendMode.srcOver || layer.opacity != AppVisual.full) {
+      return true;
+    }
+
+    return layer.actionStack.any(
+      (final UserActionDrawing action) => action.action == ActionType.cut || action.action == ActionType.eraser,
+    );
+  }
+
+  List<UserActionDrawing> _buildMergedActionsForSourceLayer(final LayerProvider layer) {
+    if (!_sourceLayerRequiresRasterizedMerge(layer)) {
+      return List<UserActionDrawing>.from(layer.actionStack);
+    }
+
+    final ui.Image flattenedLayerImage = layer.toImageForStorage(size);
+
+    return <UserActionDrawing>[
+      UserActionDrawing(
+        action: ActionType.image,
+        positions: <Offset>[
+          Offset.zero,
+          Offset(size.width, size.height),
+        ],
+        image: flattenedLayerImage,
+      ),
+    ];
+  }
+
   /// Merges two layers together.
   void mergeLayers(final int indexFrom, final int indexTo) {
     if (indexFrom == indexTo) {
@@ -320,7 +349,7 @@ class LayersProvider extends ChangeNotifier {
 
     final LayerProvider layerTo = this.get(indexTo);
 
-    final List<UserActionDrawing> actionsToAppend = List<UserActionDrawing>.from(layerFrom.actionStack);
+    final List<UserActionDrawing> actionsToAppend = _buildMergedActionsForSourceLayer(layerFrom);
 
     final int numberOfActionAdded = actionsToAppend.length;
 

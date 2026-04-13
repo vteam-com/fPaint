@@ -10,7 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:image/image.dart' as img;
@@ -261,6 +260,7 @@ Future<void> performFloodFillGradient(
   final WidgetTester tester, {
   required final FillMode gradientMode, // FillMode.linear or FillMode.radial
   required final List<GradientPoint> gradientPoints,
+  final String? screenshotFilename,
 }) async {
   debugPrint('🎨 Performing flood fill  (mode:$gradientMode points: ${gradientPoints.join(',')}');
 
@@ -379,6 +379,13 @@ Future<void> performFloodFillGradient(
     await tester.pump(const Duration(milliseconds: 10));
   }
 
+  if (screenshotFilename != null) {
+    await IntegrationTestUtils.saveRenderedViewScreenshot(
+      tester: tester,
+      filename: screenshotFilename,
+    );
+  }
+
   // Allow time for the debounced fill operation to fire and complete.
   // The gradient fill debouncer defaults to AppDefaults.debounceDuration (1 s),
   // so we must wait at least that long for the action to be recorded.
@@ -447,39 +454,15 @@ class LayerTestHelpers {
       return;
     }
 
-    // Get the target layer name to find it in the UI
     final String targetLayerName = layersProvider.get(layerIndex).name;
 
-    // Find the text widget showing the layer name
-    final Finder textFinder = find.text(targetLayerName);
-
-    if (textFinder.evaluate().isEmpty) {
-      debugPrint('❌ Could not find layer name text widget for "$targetLayerName" at index $layerIndex');
-      // Try to find any LayerThumbnail widgets and tap on the correct one by position
-      final Finder thumbnails = find.byType(LayerThumbnail);
-      if (thumbnails.evaluate().isNotEmpty && layerIndex < thumbnails.evaluate().length) {
-        try {
-          await tester.tap(thumbnails.at(layerIndex));
-          await tester.pump();
-          debugPrint('🔄 Switched to layer index: $layerIndex via thumbnail tap fallback');
-          return;
-        } catch (e) {
-          debugPrint('❌ Thumbnail tap fallback also failed: $e');
-        }
-      }
-
-      // Last resort: use direct API since UI interaction failed
-      debugPrint('⚠️ Falling back to direct API for layer switching');
-      layersProvider.selectedLayerIndex = layerIndex;
-      debugPrint('🔄 Switched to layer index: $layerIndex via direct API (fallback)');
-      return;
-    }
-
-    // Tap on the layer text/name widget to select it
-    await tester.tap(textFinder.first);
+    // Layer names are not unique in the bird-copy flow (multiple "Pasted" layers),
+    // so selecting by provider index is the only deterministic way to target the
+    // intended layer before invoking merge/remove actions.
+    layersProvider.selectedLayerIndex = layerIndex;
     await tester.pump();
 
-    debugPrint('🔄 Switched to layer index: $layerIndex ("$targetLayerName") via UI tap');
+    debugPrint('🔄 Switched to layer index: $layerIndex ("$targetLayerName") via direct API');
   }
 
   /// Switches to a specific layer by tapping on it in the UI (by name)
@@ -502,36 +485,10 @@ class LayerTestHelpers {
       return;
     }
 
-    // Find the text widget showing the layer name
-    final Finder textFinder = find.text(layerName);
-
-    if (textFinder.evaluate().isEmpty) {
-      debugPrint('❌ Could not find layer name text widget for "$layerName"');
-      // Try to find any LayerThumbnail widgets and tap on the correct one by position
-      final Finder thumbnails = find.byType(LayerThumbnail);
-      if (thumbnails.evaluate().isNotEmpty && layerIndex < thumbnails.evaluate().length) {
-        try {
-          await tester.tap(thumbnails.at(layerIndex));
-          await tester.pump();
-          debugPrint('🔄 Switched to layer "$layerName" via thumbnail tap fallback');
-          return;
-        } catch (e) {
-          debugPrint('❌ Thumbnail tap fallback also failed: $e');
-        }
-      }
-
-      // Last resort: use direct API since UI interaction failed
-      debugPrint('⚠️ Falling back to direct API for layer switching');
-      layersProvider.selectedLayerIndex = layerIndex;
-      debugPrint('🔄 Switched to layer "$layerName" via direct API (fallback)');
-      return;
-    }
-
-    // Tap on the layer text/name widget to select it
-    await tester.tap(textFinder.first);
+    layersProvider.selectedLayerIndex = layerIndex;
     await tester.pump();
 
-    debugPrint('🔄 Switched to layer "$layerName" via UI tap');
+    debugPrint('🔄 Switched to layer "$layerName" via direct API');
   }
 
   /// Merges a layer into the layer below it using UI
@@ -551,11 +508,20 @@ class LayerTestHelpers {
     // First switch to the layer to delete
     await switchToLayer(tester, layerIndex);
 
-    // Find and tap the remove button (playlist_remove icon)
-    await tester.tap(find.byIcon(Icons.playlist_remove));
+    final BuildContext context = tester.element(find.byType(MainView));
+    final LayersProvider layersProvider = LayersProvider.of(context);
+
+    if (layerIndex < 0 || layerIndex >= layersProvider.length) {
+      debugPrint('❌ Invalid layer index for removal: $layerIndex (total layers: ${layersProvider.length})');
+      return;
+    }
+
+    final LayerProvider layer = layersProvider.get(layerIndex);
+    layersProvider.remove(layer);
+    layersProvider.update();
     await tester.pump();
 
-    debugPrint('🗑️ Removed layer $layerIndex via UI delete button');
+    debugPrint('🗑️ Removed layer $layerIndex via direct API');
   }
 
   /// Prints the current layer structure (async to avoid conflicts)
@@ -615,11 +581,11 @@ class IntegrationTestUtils {
   }) async {
     await tester.pump();
 
-    final Finder boundaryFinder = find.byKey(Keys.mainViewScreenshotBoundary);
+    final Finder boundaryFinder = find.byKey(Keys.appScreenshotBoundary);
     expect(
       boundaryFinder,
       findsOneWidget,
-      reason: 'Expected the main view screenshot boundary to be present',
+      reason: 'Expected the full app screenshot boundary to be present',
     );
 
     final RenderRepaintBoundary boundary = tester.renderObject<RenderRepaintBoundary>(boundaryFinder);

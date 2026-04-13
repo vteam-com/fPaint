@@ -38,35 +38,38 @@ class MainScreen extends StatelessWidget {
 
     shellProvider.deviceSizeSmall = MediaQuery.of(context).size.width < AppLayout.desktopBreakpoint;
 
-    return Scaffold(
-      backgroundColor: Colors.grey,
-      body: shellMode == ShellMode.hidden
-          ? _buildMainContent(context, shellProvider, appProvider)
-          : MultiSplitViewTheme(
-              data: MultiSplitViewThemeData(
-                dividerPainter: DividerPainters.grooved1(
-                  animationEnabled: true,
-                  backgroundColor: Colors.grey.shade600,
-                  highlightedBackgroundColor: Colors.blue,
-                  color: Colors.grey.shade800,
-                  thickness: AppStroke.divider,
-                  highlightedThickness: AppStroke.dividerHighlighted,
-                  strokeCap: StrokeCap.round,
+    return RepaintBoundary(
+      key: Keys.appScreenshotBoundary,
+      child: Scaffold(
+        backgroundColor: Colors.grey,
+        body: shellMode == ShellMode.hidden
+            ? _buildMainContent(context, shellProvider, appProvider)
+            : MultiSplitViewTheme(
+                data: MultiSplitViewThemeData(
+                  dividerPainter: DividerPainters.grooved1(
+                    animationEnabled: true,
+                    backgroundColor: Colors.grey.shade600,
+                    highlightedBackgroundColor: Colors.blue,
+                    color: Colors.grey.shade800,
+                    thickness: AppStroke.divider,
+                    highlightedThickness: AppStroke.dividerHighlighted,
+                    strokeCap: StrokeCap.round,
+                  ),
                 ),
+                child: _buildMainContent(context, shellProvider, appProvider),
               ),
-              child: _buildMainContent(context, shellProvider, appProvider),
-            ),
-      floatingActionButton: shellMode == ShellMode.hidden
-          ? myFloatButton(
-              icon: Icons.more_vert,
-              onPressed: () {
-                Future<void>.microtask(() {
-                  shellProvider.shellMode = ShellMode.full;
-                  shellProvider.update();
-                });
-              },
-            )
-          : floatingActionButtons(context, shellProvider, appProvider),
+        floatingActionButton: shellMode == ShellMode.hidden
+            ? myFloatButton(
+                icon: Icons.more_vert,
+                onPressed: () {
+                  Future<void>.microtask(() {
+                    shellProvider.shellMode = ShellMode.full;
+                    shellProvider.update();
+                  });
+                },
+              )
+            : floatingActionButtons(context, shellProvider, appProvider),
+      ),
     );
   }
 

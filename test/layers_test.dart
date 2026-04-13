@@ -12,7 +12,7 @@ void main() {
       layer = LayerProvider(
         name: 'Test Layer',
         size: const Size(100, 100),
-        onThumnailChanged: () {
+        onThumbnailChanged: () {
           //
         },
       );
@@ -174,14 +174,14 @@ void main() {
       final LayerProvider layer1 = LayerProvider(
         name: 'Base Layer',
         size: const Size(20, 20),
-        onThumnailChanged: () {},
+        onThumbnailChanged: () {},
       );
       layer1.backgroundColor = Colors.red;
 
       final LayerProvider layer2 = LayerProvider(
         name: 'Blend Layer',
         size: const Size(20, 20),
-        onThumnailChanged: () {},
+        onThumbnailChanged: () {},
       );
       layer2.backgroundColor = Colors.blue;
 
