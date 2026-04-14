@@ -174,6 +174,24 @@ void triggerScaleSnapHaptic(
   }
 }
 
+/// Fires haptic feedback when the selection crosses the perfect-square
+/// boundary (width == height).
+///
+/// Triggers when the sign of `width − height` changes between
+/// [previousBounds] and [currentBounds].
+void triggerSquareSnapHaptic(
+  final Rect previousBounds,
+  final Rect currentBounds,
+) {
+  final double prevDiff = previousBounds.width - previousBounds.height;
+  final double currDiff = currentBounds.width - currentBounds.height;
+
+  // Crossed zero in either direction, or just arrived at zero.
+  if ((prevDiff > 0 && currDiff <= 0) || (prevDiff < 0 && currDiff >= 0)) {
+    _performHaptic();
+  }
+}
+
 /// Triggers a platform-appropriate haptic tick.
 void _performHaptic() {
   if (Platform.isMacOS) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
+import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/models/visible_model.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
@@ -11,6 +12,7 @@ export 'package:fpaint/helpers/draw_path_helper.dart';
 class SelectorModel extends VisibleModel {
   SelectorMode mode = SelectorMode.rectangle;
   SelectorMath math = SelectorMath.replace;
+  bool isDrawing = false;
 
   List<Offset> points = <Offset>[];
   Path? path1;
@@ -23,6 +25,7 @@ class SelectorModel extends VisibleModel {
   @override
   void clear() {
     this.isVisible = false;
+    this.isDrawing = false;
     this.path1 = null;
     this.path2 = null;
     this.points.clear();
@@ -55,7 +58,9 @@ class SelectorModel extends VisibleModel {
     final Offset offset,
   ) {
     if (this.path1 != null) {
+      final Rect previousBounds = this.path1!.getBounds();
       this.path1 = expandPathInDirectionWithOffset(this.path1!, offset, handle);
+      triggerSquareSnapHaptic(previousBounds, this.path1!.getBounds());
     }
   }
 

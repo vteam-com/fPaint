@@ -51,6 +51,13 @@
     }
   },
   "delete": "Delete",
+  "dimensionsValue": "{width} × {height}",
+  "@dimensionsValue": {
+    "placeholders": {
+      "width": {},
+      "height": {}
+    }
+  },
   "desktopSoftware": "Desktop Software.",
   "deviceScreenResolution": "Device Screen Resolution: {resolution}",
   "@deviceScreenResolution": {

@@ -691,6 +691,7 @@ class AppProvider extends ChangeNotifier {
 
   /// Starts a selector creation.
   void selectorCreationStart(final Offset position) {
+    selectorModel.isDrawing = true;
     if (selectorModel.mode == SelectorMode.wand) {
       getRegionPathFromLayerImage(position).then((final FillRegion region) {
         selectorModel.isVisible = true;
@@ -719,6 +720,7 @@ class AppProvider extends ChangeNotifier {
 
   /// Ends the selector creation.
   void selectorCreationEnd() {
+    selectorModel.isDrawing = false;
     selectorModel.applyMath();
     update();
   }

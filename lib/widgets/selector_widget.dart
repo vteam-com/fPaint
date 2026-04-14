@@ -16,6 +16,7 @@ const String _placeholderY = '{y}';
 
 enum _SelectionOverlayFeedbackMode {
   none,
+  resize,
   scale,
   rotate,
 }
@@ -39,10 +40,14 @@ class SelectionRectWidget extends StatefulWidget {
     required this.onRotate,
     required this.onToggleTransformMode,
     this.enableMoveAndResize = true,
+    this.isDrawing = false,
   });
 
   /// Whether the selection rectangle can be moved and resized.
   final bool enableMoveAndResize;
+
+  /// Whether a new selection is actively being drawn.
+  final bool isDrawing;
 
   /// A callback that is called when the selection rectangle is dragged.
   final void Function(Offset) onDrag;
@@ -73,6 +78,7 @@ const int defaultHandleSize = AppInteraction.selectionHandleSize;
 class _SelectionRectWidgetState extends State<SelectionRectWidget> {
   double _activeRotationDegrees = 0;
   double _activeScalePercent = AppMath.percentScale;
+  Size _activeResizeDimensions = Size.zero;
   _SelectionOverlayFeedbackMode _feedbackMode = _SelectionOverlayFeedbackMode.none;
   bool showCoordinate = false;
   @override
@@ -251,8 +257,12 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
             showCoordinate = true;
           });
           onPanUpdate(details);
+          _updateResizeFeedback();
         },
-        onPanEnd: (final DragEndDetails _) => setState(() => showCoordinate = false),
+        onPanEnd: (final DragEndDetails _) {
+          setState(() => showCoordinate = false);
+          _endFeedback();
+        },
         child: MouseRegion(
           cursor: cursor,
           child: Container(
@@ -381,22 +391,35 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       _feedbackMode = _SelectionOverlayFeedbackMode.none;
       _activeScalePercent = AppMath.percentScale;
       _activeRotationDegrees = 0;
+      _activeResizeDimensions = Size.zero;
     });
   }
 
   /// Returns the localized label for the active feedback bubble.
   String _feedbackLabel(final AppLocalizations l10n) {
+    if (widget.isDrawing && widget.path1 != null) {
+      final Rect bounds = widget.path1!.getBounds();
+      return l10n.dimensionsValue(
+        bounds.width.round(),
+        bounds.height.round(),
+      );
+    }
     switch (_feedbackMode) {
       case _SelectionOverlayFeedbackMode.scale:
         return l10n.percentageValue(_activeScalePercent.round());
       case _SelectionOverlayFeedbackMode.rotate:
         return l10n.degreesValue(_activeRotationDegrees.round());
+      case _SelectionOverlayFeedbackMode.resize:
+        return l10n.dimensionsValue(
+          _activeResizeDimensions.width.round(),
+          _activeResizeDimensions.height.round(),
+        );
       case _SelectionOverlayFeedbackMode.none:
         return '';
     }
   }
 
-  bool get _isFeedbackVisible => _feedbackMode != _SelectionOverlayFeedbackMode.none;
+  bool get _isFeedbackVisible => _feedbackMode != _SelectionOverlayFeedbackMode.none || widget.isDrawing;
 
   /// Accumulates [angleRadians] into the live rotation feedback and triggers
   /// haptic feedback when the cumulative angle crosses a snap interval.
@@ -423,6 +446,18 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       final double previousPercent = _activeScalePercent;
       _activeScalePercent *= factor;
       triggerScaleSnapHaptic(previousPercent, _activeScalePercent);
+    });
+  }
+
+  /// Updates the resize dimensions feedback from the current path bounds.
+  void _updateResizeFeedback() {
+    if (widget.path1 == null) {
+      return;
+    }
+    setState(() {
+      _feedbackMode = _SelectionOverlayFeedbackMode.resize;
+      final Rect bounds = widget.path1!.getBounds();
+      _activeResizeDimensions = bounds.size;
     });
   }
 }
