@@ -47,6 +47,7 @@
         "pkill",
         "RRGGBB",
         "subosito",
+        "tracefile",
         "vteam"
     ],
     "cSpell.ignorePaths": [
@@ -59,4 +60,7 @@
         "macos"
     ],
     "dart.testCoverageFile": "coverage/lcov.info",
+    "flutter-coverage.coverageFileNames": [
+        "lcov.info"
+    ],
 }

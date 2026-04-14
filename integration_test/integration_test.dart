@@ -34,6 +34,8 @@ const bool _integrationVisualPlaybackEnabled = bool.fromEnvironment(
 const String _applyTooltipText = 'Apply';
 const String _scaleTooltipText = 'Scale';
 const String _rotateTooltipText = 'Resize / Rotate';
+const String _copyToClipboardTooltipText = 'Copy to clipboard';
+const String _pasteToolName = 'Paste';
 const Offset _grassTopLeftOffset = Offset(-300, 10);
 const Offset _grassBottomRightOffset = Offset(300, 300);
 const double _birdHorizontalShiftFraction = 0.4;
@@ -497,9 +499,9 @@ Future<void> _pasteAndTransformBirdCopy(
   );
 
   final AppProvider appProvider = _appProvider(tester);
-  await appProvider.regionCopy();
+  await tapByTooltip(tester, _copyToClipboardTooltipText);
   await tester.pump(_clipboardPumpDuration);
-  await appProvider.paste();
+  await tapByTooltip(tester, _pasteToolName);
   await tester.pump(_overlayActionPumpDuration);
 
   expect(appProvider.imagePlacementModel.isVisible, isTrue, reason: 'Paste should open image placement overlay');

@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' as vm;
 
-/// Possition for anchor
+/// Position for anchor
 enum NineGridHandle {
   left,
   right,
