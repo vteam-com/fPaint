@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/my_window_manager.dart';
@@ -26,6 +27,7 @@ late MyApp mainApp;
 /// handles file opening events, and runs the app.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  initLogging();
 
   await MyWindowManager.setupMainWindow();
   mainApp = MyApp();

@@ -4,8 +4,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/log_helper.dart';
+import 'package:logging/logging.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:super_clipboard/super_clipboard.dart';
+
+final Logger _log = Logger(logNameImageHelper);
 
 Uint8List? _sessionClipboardImageBytes;
 
@@ -111,7 +115,7 @@ Future<ui.Image?> getImageFromClipboard() async {
     try {
       return await fromBytesToImage(bytes);
     } catch (e) {
-      debugPrint(e.toString());
+      _log.severe('Failed to decode clipboard image', e);
     }
   }
   return null;

@@ -5,8 +5,12 @@ import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:logging/logging.dart';
+
+final Logger _log = Logger(logNameSave);
 
 /// Saves the current image as a TIFF file.
 Future<void> saveAsTiff(
@@ -28,7 +32,7 @@ Future<void> saveAsTiff(
     layers.clearHasChanged(); // Mark changes as saved
   } catch (e) {
     // Handle or log the error appropriately
-    debugPrint('Error saving as TIFF to $fileName: $e');
+    _log.severe('Error saving as TIFF to $fileName', e);
     // Optionally, rethrow or show a user-facing error
     throw Exception('Failed to save as TIFF to $fileName: $e');
   }
@@ -64,7 +68,7 @@ Future<void> saveFile(
       break;
     default:
       // Handle unsupported extension or throw error
-      debugPrint('Unsupported file extension for saving: $extension');
+      _log.severe('Unsupported file extension for saving: $extension');
       throw Exception('Unsupported file extension for saving: $extension');
   }
 }

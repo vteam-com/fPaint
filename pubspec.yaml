@@ -32,6 +32,7 @@ dependencies:
   flutter_svg: ^2.2.4
   image: ^4.8.0
   intl: any
+  logging: any
   material_symbols_icons: ^4.2928.1
   multi_split_view: any
   package_info_plus: ^9.0.1

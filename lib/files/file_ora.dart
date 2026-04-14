@@ -7,8 +7,12 @@ import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/list_helper.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:logging/logging.dart';
 import 'package:xml/xml.dart';
+
+final Logger _log = Logger(logNameFileOra);
 
 // ORA file format element and attribute identifiers
 const String _oraElementImage = 'image';
@@ -244,10 +248,10 @@ Future<void> addImageToLayer({
         offset: offset,
       );
     } else {
-      debugPrint('$imageName not found in the achive');
+      _log.warning('$imageName not found in the archive');
     }
   } catch (e) {
-    debugPrint(e.toString());
+    _log.severe('Failed to add image to layer', e);
   }
 }
 
@@ -260,7 +264,7 @@ Future<void> addImageToLayer({
 /// - [offset]: The position where the image will be added on the layer.
 ///
 /// Throws:
-/// - This function does not throw errors but logs them using [debugPrint].
+/// - This function does not throw errors but logs them using [Logger].
 ///
 /// Example:
 /// ```dart
