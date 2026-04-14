@@ -66,6 +66,11 @@ INTEGRATION_VISUAL_PLAYBACK_ENV_NAME="FLUTTER_TEST_VISUAL_PLAYBACK"
 INTEGRATION_VISUAL_PLAYBACK_ENABLED="${FLUTTER_TEST_VISUAL_PLAYBACK:-1}"
 INTEGRATION_VISUAL_PLAYBACK_DART_DEFINE_KEY="FP_VISUAL_TEST_PLAYBACK"
 INTEGRATION_VISUAL_DRIVER_PATH="test_driver/integration_test.dart"
+COVERAGE_DIR="$ROOT_DIR/coverage"
+COVERAGE_UNIT_FILE="$COVERAGE_DIR/lcov_units.info"
+COVERAGE_INTEGRATION_FILE="$COVERAGE_DIR/lcov_integration.info"
+COVERAGE_LCOV_FILE="$COVERAGE_DIR/lcov.info"
+COVERAGE_SUMMARY_FILE="$COVERAGE_DIR/cc.txt"
 
 echo "== fPaint test runner =="
 
@@ -653,8 +658,12 @@ fi
 
 echo "Selected Flutter test device: $FLUTTER_TEST_DEVICE_ID ($FLUTTER_TEST_DEVICE_PLATFORM)"
 
-echo "Running unit tests..."
-flutter test --reporter=compact
+echo "Running unit tests with coverage..."
+mkdir -p "$COVERAGE_DIR"
+flutter test --reporter=compact --coverage
+if [[ -f "$COVERAGE_LCOV_FILE" ]]; then
+  mv "$COVERAGE_LCOV_FILE" "$COVERAGE_UNIT_FILE"
+fi
 
 echo "Running integration tests on $FLUTTER_TEST_DEVICE_PLATFORM device $FLUTTER_TEST_DEVICE_ID..."
 if [[ "$INTEGRATION_VISUAL_PLAYBACK_ENABLED" == "1" ]]; then
@@ -975,12 +984,15 @@ run_integration_file_once() {
     return
   fi
 
-  local flutter_test_command=(flutter test "$test_file" --reporter=compact -d "$FLUTTER_TEST_DEVICE_ID")
+  local flutter_test_command=(flutter test "$test_file" --reporter=compact --coverage -d "$FLUTTER_TEST_DEVICE_ID")
   if [[ "$INTEGRATION_VISUAL_PLAYBACK_ENABLED" == "1" ]]; then
     flutter_test_command+=(--dart-define "$INTEGRATION_VISUAL_PLAYBACK_DART_DEFINE_KEY=true")
   fi
 
   "${flutter_test_command[@]}" 2>&1 | tee "$log_file"
+  if [[ -f "$COVERAGE_LCOV_FILE" ]]; then
+    mv "$COVERAGE_LCOV_FILE" "$COVERAGE_INTEGRATION_FILE"
+  fi
 }
 
 prepare_integration_screenshot_dirs
@@ -1018,4 +1030,23 @@ fi
 if [[ -f "$VIDEO_OUTPUT_HOST_PATH" ]]; then
   echo "Integration video: $VIDEO_OUTPUT_HOST_PATH"
 fi
+# Merge coverage and write summary
+if [[ -f "$COVERAGE_UNIT_FILE" ]] && [[ -f "$COVERAGE_INTEGRATION_FILE" ]]; then
+  echo "Merging unit and integration coverage..."
+  lcov --add-tracefile "$COVERAGE_UNIT_FILE" \
+       --add-tracefile "$COVERAGE_INTEGRATION_FILE" \
+       --output-file "$COVERAGE_LCOV_FILE" \
+       --quiet
+elif [[ -f "$COVERAGE_UNIT_FILE" ]]; then
+  cp "$COVERAGE_UNIT_FILE" "$COVERAGE_LCOV_FILE"
+elif [[ -f "$COVERAGE_INTEGRATION_FILE" ]]; then
+  cp "$COVERAGE_INTEGRATION_FILE" "$COVERAGE_LCOV_FILE"
+fi
+
+if [[ -f "$COVERAGE_LCOV_FILE" ]]; then
+  lcov --summary "$COVERAGE_LCOV_FILE" 2>&1 | grep -v "^Reading tracefile" | tee "$COVERAGE_SUMMARY_FILE"
+  echo ""
+  echo "Coverage summary written to: $COVERAGE_SUMMARY_FILE"
+fi
+
 echo "All unit and integration tests passed."
