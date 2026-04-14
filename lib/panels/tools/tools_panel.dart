@@ -159,6 +159,7 @@ class ToolsPanel extends StatelessWidget {
     final BuildContext context,
   ) {
     final AppProvider appProvider = AppProvider.of(context);
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final ActionType selectedTool = appProvider.selectedAction;
 
     final List<Widget> tools = <Widget>[
@@ -291,6 +292,17 @@ class ToolsPanel extends StatelessWidget {
         onPressed: () {
           appProvider.selectedAction = ActionType.text;
         },
+      ),
+
+      // Paste from clipboard
+      ToolPanelPicker(
+        minimal: minimal,
+        name: l10n.paste,
+        image: Icon(
+          Icons.paste,
+          color: IconTheme.of(context).color,
+        ),
+        onPressed: () => appProvider.paste(),
       ),
     ];
     return tools;

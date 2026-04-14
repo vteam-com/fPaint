@@ -51,18 +51,19 @@
     }
   },
   "delete": "Delete",
-  "dimensionsValue": "{width} × {height}",
-  "@dimensionsValue": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
   "desktopSoftware": "Desktop Software.",
   "deviceScreenResolution": "Device Screen Resolution: {resolution}",
   "@deviceScreenResolution": {
     "placeholders": {
       "resolution": {}
+    }
+  },
+  "dimensionsValue": "{width} × {height}",
+  "@dimensionsValue": {
+    "description": "REVIEWED",
+    "placeholders": {
+      "width": {},
+      "height": {}
     }
   },
   "discard": "Discard",
@@ -135,6 +136,7 @@
   "@no": {
     "description": "REVIEWED"
   },
+  "paste": "Paste",
   "percentageValue": "{value}%",
   "@percentageValue": {
     "placeholders": {

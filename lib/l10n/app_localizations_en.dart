@@ -24,19 +24,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get availablePlatforms => 'Available Platforms';
 
   @override
-  String get blendModeColorBurnDescription => 'Darkens the destination by increasing contrast based on the source color.';
+  String get blendModeColorBurnDescription =>
+      'Darkens the destination by increasing contrast based on the source color.';
 
   @override
-  String get blendModeColorDescription => 'Uses the source\'s hue and saturation, but keeps the destination\'s luminance.';
+  String get blendModeColorDescription =>
+      'Uses the source\'s hue and saturation, but keeps the destination\'s luminance.';
 
   @override
-  String get blendModeColorDodgeDescription => 'Brightens the destination by reducing contrast based on the source color.';
+  String get blendModeColorDodgeDescription =>
+      'Brightens the destination by reducing contrast based on the source color.';
 
   @override
   String get blendModeDarkenDescription => 'Keeps the darker color of the source and destination pixels.';
 
   @override
-  String get blendModeHardLightDescription => 'Applies multiply or screen based on the source color\'s intensity, creating a strong contrast.';
+  String get blendModeHardLightDescription =>
+      'Applies multiply or screen based on the source color\'s intensity, creating a strong contrast.';
 
   @override
   String get blendModeHueDescription => 'Uses the source\'s hue and the destination\'s saturation and luminance.';
@@ -48,10 +52,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get blendModeLinearDodgeDescription => 'Adds the source and destination colors, clamping at white.';
 
   @override
-  String get blendModeLuminosityDescription => 'Uses the source\'s luminance and the destination\'s hue and saturation.';
+  String get blendModeLuminosityDescription =>
+      'Uses the source\'s luminance and the destination\'s hue and saturation.';
 
   @override
-  String get blendModeMultiplyDescription => 'Multiplies the source and destination colors, resulting in a darker output.';
+  String get blendModeMultiplyDescription =>
+      'Multiplies the source and destination colors, resulting in a darker output.';
 
   @override
   String get blendModeNormalDescription => 'Places the source image over the destination without blending.';
@@ -60,16 +66,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get blendModeNormalLabel => 'Normal';
 
   @override
-  String get blendModeOverlayDescription => 'Combines multiply and screen modes: darkens dark areas, and lightens light areas.';
+  String get blendModeOverlayDescription =>
+      'Combines multiply and screen modes: darkens dark areas, and lightens light areas.';
 
   @override
-  String get blendModeSaturationDescription => 'Uses the source\'s saturation and the destination\'s hue and luminance.';
+  String get blendModeSaturationDescription =>
+      'Uses the source\'s saturation and the destination\'s hue and luminance.';
 
   @override
-  String get blendModeScreenDescription => 'Multiplies the inverses of the source and destination, resulting in a lighter output.';
+  String get blendModeScreenDescription =>
+      'Multiplies the inverses of the source and destination, resulting in a lighter output.';
 
   @override
-  String get blendModeSoftLightDescription => 'Softens the contrast by darkening or lightening the destination depending on the source.';
+  String get blendModeSoftLightDescription =>
+      'Softens the contrast by darkening or lightening the destination depending on the source.';
 
   @override
   String get brush => 'Brush';
@@ -259,6 +269,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get paste => 'Paste';
+
+  @override
   String get platforms => 'Available on...';
 
   @override
@@ -323,7 +336,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unsavedChanges => 'Unsaved Changes';
 
   @override
-  String get unsavedChangesDiscardAndOpenPrompt => 'You have unsaved changes. Do you want to discard them and open the new file?';
+  String get unsavedChangesDiscardAndOpenPrompt =>
+      'You have unsaved changes. Do you want to discard them and open the new file?';
 
   @override
   String get useApplePencilOnlySubtitle => 'If enabled, only the Apple Pencil will be used for drawing.';
