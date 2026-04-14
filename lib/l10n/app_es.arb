@@ -45,6 +45,13 @@
     }
   },
   "delete": "Eliminar",
+  "dimensionsValue": "{width} × {height}",
+  "@dimensionsValue": {
+    "placeholders": {
+      "width": {},
+      "height": {}
+    }
+  },
   "desktopSoftware": "Aplicacion de escritorio.",
   "deviceScreenResolution": "Resolucion de pantalla: {resolution}",
   "@deviceScreenResolution": {

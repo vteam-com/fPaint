@@ -105,6 +105,7 @@ class MainViewState extends State<MainView> {
               ),
               enableMoveAndResize:
                   appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible,
+              isDrawing: appProvider.selectorModel.isDrawing,
               onDrag: (final Offset offset) {
                 appProvider.selectorModel.translate(offset / appProvider.layers.scale);
                 appProvider.update();
