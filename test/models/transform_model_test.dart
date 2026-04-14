@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/transform_model.dart';
@@ -19,6 +20,15 @@ Future<ui.Image> _createTestImage({
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('com.vteam.fpaint/haptic'),
+      (final MethodCall methodCall) async => null,
+    );
+  });
+
   group('TransformModel', () {
     test('starts hidden with no image', () {
       final TransformModel model = TransformModel();
