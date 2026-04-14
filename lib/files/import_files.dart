@@ -8,9 +8,11 @@ import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:logging/logging.dart';
 
 const String _defaultCanvasDimension = '800';
 const String _fileExtensionOra = 'ora';
@@ -21,6 +23,8 @@ const String _fileExtensionWebp = 'webp';
 const String _fileExtensionJpg = 'jpg';
 const String _fileExtensionJpeg = 'jpeg';
 const String _loadedImageDefaultName = 'Loaded Image';
+
+final Logger _log = Logger(logNameImportFiles);
 
 /// Handles the creation of a new file within the application.
 ///
@@ -170,7 +174,7 @@ Future<void> onFileOpen(final BuildContext context) async {
     }
   } catch (e) {
     // Handle any errors that occur during file picking/loading
-    debugPrint('Error opening file: $e');
+    _log.severe('Error opening file', e);
   }
 }
 

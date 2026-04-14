@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/log_helper.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 const String _errorFallback = 'error';
@@ -17,6 +19,7 @@ class UndoProvider extends ChangeNotifier {
   }
 
   UndoProvider._internal();
+  static final Logger _log = Logger(logNameUndoProvider);
   static final UndoProvider _instance = UndoProvider._internal();
 
   /// Retrieves the [UndoProvider] instance from the given [BuildContext].
@@ -114,7 +117,7 @@ class UndoProvider extends ChangeNotifier {
     try {
       return this.getActionsAsStrings(list, AppLimits.topColorCount).join('\n');
     } catch (error) {
-      debugPrint(error.toString());
+      _log.severe('Failed to get history', error);
       return _errorFallback;
     }
   }

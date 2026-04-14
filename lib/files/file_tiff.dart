@@ -5,8 +5,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:logging/logging.dart';
 
 /// Converts encoded image bytes into TIFF-encoded bytes.
 Future<Uint8List> convertToTiff(final Uint8List inputBytes) async {
@@ -17,6 +19,8 @@ Future<Uint8List> convertToTiff(final Uint8List inputBytes) async {
   final Uint8List outputBytes = img.encodeTiff(image);
   return Uint8List.fromList(outputBytes);
 }
+
+final Logger _log = Logger(logNameFileTiff);
 
 /// Decodes TIFF bytes and populates [layers] with one layer per TIFF frame.
 Future<void> readTiffFileFromBytes(
@@ -30,7 +34,7 @@ Future<void> readTiffFileFromBytes(
     layers.clear();
     layers.addWhiteBackgroundLayer();
     layers.size = const Size(AppLayout.minPanelExtent, AppLayout.minPanelExtent);
-    debugPrint('Failed to decode TIFF info. Added default background.');
+    _log.severe('Failed to decode TIFF info. Added default background.');
     layers.clearHasChanged();
     throw Exception('Invalid TIFF data or unable to read TIFF info.');
   }
@@ -42,7 +46,7 @@ Future<void> readTiffFileFromBytes(
 
   if (numFrames == 0) {
     layers.addWhiteBackgroundLayer();
-    debugPrint('TIFF file contained no image frames. Added default background.');
+    _log.warning('TIFF file contained no image frames. Added default background.');
     layers.clearHasChanged();
     return;
   }
@@ -51,7 +55,7 @@ Future<void> readTiffFileFromBytes(
     final img.Image? frame = decoder.decodeFrame(i);
 
     if (frame == null) {
-      debugPrint('Warning: Failed to decode frame $i from TIFF.');
+      _log.warning('Failed to decode frame $i from TIFF.');
       continue;
     }
 
@@ -98,7 +102,7 @@ Future<void> readTiffFileFromBytes(
 
   if (layers.isEmpty) {
     layers.addWhiteBackgroundLayer();
-    debugPrint('No layers were decoded. Added default background.');
+    _log.warning('No layers were decoded. Added default background.');
   }
 
   layers.selectedLayerIndex = 0;

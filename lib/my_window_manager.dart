@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/log_helper.dart';
+import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -17,6 +19,8 @@ import 'package:window_manager/window_manager.dart';
 /// - shared_preferences: ^2.5.3
 /// - window_manager: ^0.5.0
 class MyWindowManager extends WindowListener {
+  static final Logger _log = Logger(logNameMyWindowManager);
+
   /// Checks if the app is running in integration test mode.
   ///
   /// Returns true if the current runtime type indicates integration testing.
@@ -57,10 +61,7 @@ class MyWindowManager extends WindowListener {
       // Impeller is enabled by default on iOS, but we can explicitly set it
       // For Android, we need to opt-in
       PlatformDispatcher.instance.onError = (final Object error, final StackTrace _) {
-        // Log any Impeller-related errors
-        if (kDebugMode) {
-          print('Unhandled error: $error');
-        }
+        _log.severe('Unhandled error', error);
         return true;
       };
       // Only enable system UI mode for iOS/Android.

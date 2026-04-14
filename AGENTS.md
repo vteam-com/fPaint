@@ -14,3 +14,8 @@
 
 - Magic number currently reported: `lib/main.dart` line 108 value `0.35`.
 - Do not add similar inline values in future edits.
+
+## Quality Gate
+
+- After any code change, `tool/check.sh` must pass with a clean report before the work is considered complete.
+- Fix all flagged issues (documentation, hardcoded strings, magic numbers, lint warnings) before finishing.

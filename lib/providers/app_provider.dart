@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/image_placement_model.dart';
@@ -17,6 +18,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/services/fill_service.dart';
+import 'package:logging/logging.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // Exports
@@ -38,11 +40,12 @@ class AppProvider extends ChangeNotifier {
         },
       );
     } catch (error) {
-      debugPrint('Failed to load preferences: $error');
+      _log.severe('Failed to load preferences', error);
       // Fall back to default preferences - they're already initialized
       update();
     }
   }
+  static final Logger _log = Logger(logNameAppProvider);
 
   /// The application preferences.
   final AppPreferences preferences = AppPreferences();
