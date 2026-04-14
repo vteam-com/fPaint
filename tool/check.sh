@@ -28,7 +28,10 @@ flutter analyze lib test --no-pub | sed 's/^/    /'
 
 echo --- Test
 echo "    Running tests..."
-flutter test --reporter=compact --no-pub
+test_output="$(flutter test --reporter=compact --no-pub 2>&1)" || {
+	echo "$test_output"
+	exit "$CHECK_FAILURE_EXIT_CODE"
+}
 
 echo --- fCheck
 # Install the pinned version into the isolated cache, then run it.
@@ -55,8 +58,8 @@ echo --- Pub Get post-fcheck
 flutter pub get > /dev/null || { echo "Pub get failed"; exit 1; }
 
 echo --- Format sources
-dart format lib test integration_test tool | sed 's/^/    /'
-dart fix --apply | sed 's/^/    /'
+dart format lib test tool
+dart fix --apply
 
 if [ "$fcheck_exit_code" -ne 0 ]; then
 	exit "$CHECK_FAILURE_EXIT_CODE"
