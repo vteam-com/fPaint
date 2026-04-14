@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fpaint/helpers/constants.dart';
 
 /// Renders a perspective-warped image by subdividing the destination quad
@@ -127,4 +129,56 @@ Future<ui.Image> renderTransformedImage(
     max(1, width.ceil()),
     max(1, height.ceil()),
   );
+}
+
+/// Platform channel for macOS trackpad haptic feedback.
+const MethodChannel _hapticChannel = MethodChannel('com.vteam.fpaint/haptic');
+
+/// Fires haptic feedback when the cumulative rotation crosses any multiple
+/// of [AppMath.rotationSnapInterval] degrees.
+///
+/// [previousDegrees] is the rotation before the latest delta was applied.
+/// [currentDegrees] is the rotation after.
+void triggerRotationSnapHaptic(
+  final double previousDegrees,
+  final double currentDegrees,
+) {
+  final double interval = AppMath.rotationSnapInterval;
+
+  // Which snap bucket each value falls in (floor towards −∞).
+  final int prevSlot = (previousDegrees / interval).floor();
+  final int currSlot = (currentDegrees / interval).floor();
+
+  if (prevSlot != currSlot) {
+    _performHaptic();
+  }
+}
+
+/// Fires haptic feedback when the cumulative scale crosses any multiple
+/// of [AppMath.scaleSnapInterval] percent.
+///
+/// [previousPercent] is the scale percentage before the latest factor was applied.
+/// [currentPercent] is the scale percentage after.
+void triggerScaleSnapHaptic(
+  final double previousPercent,
+  final double currentPercent,
+) {
+  final double interval = AppMath.scaleSnapInterval;
+
+  // Which snap bucket each value falls in (floor towards −∞).
+  final int prevSlot = (previousPercent / interval).floor();
+  final int currSlot = (currentPercent / interval).floor();
+
+  if (prevSlot != currSlot) {
+    _performHaptic();
+  }
+}
+
+/// Triggers a platform-appropriate haptic tick.
+void _performHaptic() {
+  if (Platform.isMacOS) {
+    _hapticChannel.invokeMethod<void>('hapticAlignment');
+  } else {
+    HapticFeedback.mediumImpact();
+  }
 }

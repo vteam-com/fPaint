@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
+import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
@@ -397,23 +398,31 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
 
   bool get _isFeedbackVisible => _feedbackMode != _SelectionOverlayFeedbackMode.none;
 
+  /// Accumulates [angleRadians] into the live rotation feedback and triggers
+  /// haptic feedback when the cumulative angle crosses a snap interval.
   void _updateRotateFeedback(final double angleRadians) {
     setState(() {
       if (_feedbackMode != _SelectionOverlayFeedbackMode.rotate) {
         _feedbackMode = _SelectionOverlayFeedbackMode.rotate;
         _activeRotationDegrees = 0;
       }
+      final double previousDegrees = _activeRotationDegrees;
       _activeRotationDegrees += angleRadians * AppMath.degreesPerHalfTurn / pi;
+      triggerRotationSnapHaptic(previousDegrees, _activeRotationDegrees);
     });
   }
 
+  /// Multiplies the live scale percentage by [factor] and triggers haptic
+  /// feedback when the cumulative scale crosses a snap interval.
   void _updateScaleFeedback(final double factor) {
     setState(() {
       if (_feedbackMode != _SelectionOverlayFeedbackMode.scale) {
         _feedbackMode = _SelectionOverlayFeedbackMode.scale;
         _activeScalePercent = AppMath.percentScale;
       }
+      final double previousPercent = _activeScalePercent;
       _activeScalePercent *= factor;
+      triggerScaleSnapHaptic(previousPercent, _activeScalePercent);
     });
   }
 }

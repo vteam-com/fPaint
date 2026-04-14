@@ -161,8 +161,15 @@ class AppMath {
   static const int hexPad = 2;
   static const double smallPercentage = 0.1;
   static const double degreesPerHalfTurn = 180.0;
+  static const double degreesPerFullTurn = 360.0;
   static const double percentScale = 100.0;
   static const double tinyPercentage = 0.01;
+
+  /// Angle increment for rotation snap haptic feedback.
+  static const double rotationSnapInterval = 45.0;
+
+  /// Scale percentage increment for scale snap haptic feedback.
+  static const double scaleSnapInterval = 25.0;
 }
 
 /// Shared fill and gesture tuning values.

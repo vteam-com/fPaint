@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/models/visible_model.dart';
 
 /// Holds the state for a perspective/skew transform operation on a selected region.
@@ -132,7 +133,9 @@ class TransformModel extends VisibleModel {
 
   /// Updates the live rotation feedback by [angleRadians].
   void updateRotationFeedback(final double angleRadians) {
+    final double previousDegrees = activeRotationDegrees;
     activeRotationDegrees += angleRadians * AppMath.degreesPerHalfTurn / math.pi;
+    triggerRotationSnapHaptic(previousDegrees, activeRotationDegrees);
   }
 
   /// Ends the active rotate gesture and hides the live rotation feedback.
@@ -154,7 +157,9 @@ class TransformModel extends VisibleModel {
       return scaleCenter + (vector * clampedFactor);
     }).toList();
 
+    final double previousPercent = activeScalePercent;
     activeScalePercent *= clampedFactor;
+    triggerScaleSnapHaptic(previousPercent, activeScalePercent);
   }
 
   /// Rotates the full quad around its center by [angleRadians].
