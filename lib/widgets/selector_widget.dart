@@ -39,6 +39,7 @@ class SelectionRectWidget extends StatefulWidget {
     required this.onResize,
     required this.onRotate,
     required this.onToggleTransformMode,
+    required this.onCopy,
     this.enableMoveAndResize = true,
     this.isDrawing = false,
   });
@@ -48,6 +49,9 @@ class SelectionRectWidget extends StatefulWidget {
 
   /// Whether a new selection is actively being drawn.
   final bool isDrawing;
+
+  /// A callback that copies the selection to the clipboard.
+  final VoidCallback onCopy;
 
   /// A callback that is called when the selection rectangle is dragged.
   final void Function(Offset) onDrag;
@@ -76,9 +80,9 @@ class SelectionRectWidget extends StatefulWidget {
 const int defaultHandleSize = AppInteraction.selectionHandleSize;
 
 class _SelectionRectWidgetState extends State<SelectionRectWidget> {
+  Size _activeResizeDimensions = Size.zero;
   double _activeRotationDegrees = 0;
   double _activeScalePercent = AppMath.percentScale;
-  Size _activeResizeDimensions = Size.zero;
   _SelectionOverlayFeedbackMode _feedbackMode = _SelectionOverlayFeedbackMode.none;
   bool showCoordinate = false;
   @override
@@ -107,6 +111,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       AnimatedMarchingAntsPath(path: widget.path1!),
       if (widget.path2 != null) AnimatedMarchingAntsPath(path: widget.path2!),
       _buildModeControls(bounds, l10n),
+      if (widget.enableMoveAndResize && !widget.isDrawing) _buildBottomControls(bounds, l10n),
     ];
 
     if (widget.enableMoveAndResize) {
@@ -233,6 +238,31 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       _feedbackMode = _SelectionOverlayFeedbackMode.scale;
       _activeScalePercent = AppMath.percentScale;
     });
+  }
+
+  /// Builds the copy-to-clipboard control shown below the selection.
+  Widget _buildBottomControls(
+    final Rect bounds,
+    final AppLocalizations l10n,
+  ) {
+    final double buttonSize = AppInteraction.imagePlacementButtonSize;
+    final double controlsTop = bounds.bottom + AppInteraction.imagePlacementButtonSpacing;
+
+    return Positioned(
+      left: bounds.center.dx - buttonSize / AppMath.pair,
+      top: controlsTop,
+      child: buildOverlayCircleButton(
+        tooltip: l10n.copyToClipboard,
+        color: AppColors.selected,
+        cursor: SystemMouseCursors.click,
+        onTap: widget.onCopy,
+        child: const Icon(
+          Icons.copy,
+          size: AppLayout.iconSize,
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 
   /// Builds a handle for resizing or moving the selection rectangle.
@@ -421,6 +451,18 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
 
   bool get _isFeedbackVisible => _feedbackMode != _SelectionOverlayFeedbackMode.none || widget.isDrawing;
 
+  /// Updates the resize dimensions feedback from the current path bounds.
+  void _updateResizeFeedback() {
+    if (widget.path1 == null) {
+      return;
+    }
+    setState(() {
+      _feedbackMode = _SelectionOverlayFeedbackMode.resize;
+      final Rect bounds = widget.path1!.getBounds();
+      _activeResizeDimensions = bounds.size;
+    });
+  }
+
   /// Accumulates [angleRadians] into the live rotation feedback and triggers
   /// haptic feedback when the cumulative angle crosses a snap interval.
   void _updateRotateFeedback(final double angleRadians) {
@@ -446,18 +488,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       final double previousPercent = _activeScalePercent;
       _activeScalePercent *= factor;
       triggerScaleSnapHaptic(previousPercent, _activeScalePercent);
-    });
-  }
-
-  /// Updates the resize dimensions feedback from the current path bounds.
-  void _updateResizeFeedback() {
-    if (widget.path1 == null) {
-      return;
-    }
-    setState(() {
-      _feedbackMode = _SelectionOverlayFeedbackMode.resize;
-      final Rect bounds = widget.path1!.getBounds();
-      _activeResizeDimensions = bounds.size;
     });
   }
 }

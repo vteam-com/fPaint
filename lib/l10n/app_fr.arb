@@ -45,18 +45,18 @@
     }
   },
   "delete": "Supprimer",
-  "dimensionsValue": "{width} × {height}",
-  "@dimensionsValue": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
   "desktopSoftware": "Application de bureau.",
   "deviceScreenResolution": "Resolution de l'ecran: {resolution}",
   "@deviceScreenResolution": {
     "placeholders": {
       "resolution": {}
+    }
+  },
+  "dimensionsValue": "{width} × {height}",
+  "@dimensionsValue": {
+    "placeholders": {
+      "width": {},
+      "height": {}
     }
   },
   "discard": "Ignorer",
@@ -126,6 +126,7 @@
   "newCanvasSize": "Nouvelle taille de toile",
   "newFromClipboard": "Importé du Presse-papiers",
   "no": "Non",
+  "paste": "Coller",
   "percentageValue": "Echelle : {value} %",
   "@percentageValue": {
     "placeholders": {

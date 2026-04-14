@@ -45,18 +45,19 @@
     }
   },
   "delete": "Eliminar",
-  "dimensionsValue": "{width} × {height}",
-  "@dimensionsValue": {
-    "placeholders": {
-      "width": {},
-      "height": {}
-    }
-  },
   "desktopSoftware": "Aplicacion de escritorio.",
   "deviceScreenResolution": "Resolucion de pantalla: {resolution}",
   "@deviceScreenResolution": {
     "placeholders": {
       "resolution": {}
+    }
+  },
+  "dimensionsValue": "{width} × {height}",
+  "@dimensionsValue": {
+    "description": "REVIEWED",
+    "placeholders": {
+      "width": {},
+      "height": {}
     }
   },
   "discard": "Descartar",
@@ -126,6 +127,7 @@
   "newCanvasSize": "Tamano del nuevo lienzo",
   "newFromClipboard": "Nuevo desde el portapapeles",
   "no": "No",
+  "paste": "Pegar",
   "percentageValue": "Escala: {value}%",
   "@percentageValue": {
     "placeholders": {

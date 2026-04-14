@@ -133,6 +133,7 @@ class MainViewState extends State<MainView> {
 
                 await appProvider.startTransform();
               },
+              onCopy: () => appProvider.regionCopy(),
             ),
 
           //
