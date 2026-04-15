@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
@@ -163,12 +164,12 @@ Future<void> saveAsOra(
 /// Opens a save dialog and exports the current canvas as a TIFF file.
 Future<void> onExportAsTiff(
   final LayersProvider layers, [
-  final String fileName = 'image.tiff',
+  final String fileName = defaultTiffExportFileName,
 ]) async {
   await _exportWithFilePicker(
     dialogTitle: _fpaintSaveImageAsTiffTitle,
-    fileName: fileName,
-    allowedExtensions: <String>[FileExtensions.tif, FileExtensions.tiff],
+    fileName: normalizeTiffExportFileName(fileName),
+    allowedExtensions: <String>[FileExtensions.tif],
     onFileSelected: (final String filePath) => saveAsTiff(layers, filePath),
   );
 }
@@ -193,7 +194,7 @@ Future<void> _exportWithFilePicker({
   }
 }
 
-/// Saves the current canvas as a TIFF file at [filePath].
+/// Saves all layers as a layered TIFF file at [filePath].
 ///
 /// If [filePath] is null, the export is skipped.
 Future<void> saveAsTiff(
@@ -201,12 +202,9 @@ Future<void> saveAsTiff(
   final String? filePath,
 ) async {
   if (filePath != null) {
-    final Uint8List pngBytes = await layers.capturePainterToImageBytes();
-    if (pngBytes.isEmpty) {
-      throw Exception('Failed to capture image bytes for TIFF export.');
-    }
-    final Uint8List tiffBytes = await convertToTiff(pngBytes);
-    await File(filePath).writeAsBytes(tiffBytes);
+    final String normalizedFilePath = normalizeTiffExportFileName(filePath);
+    final Uint8List tiffBytes = await convertLayersToTiff(layers);
+    await File(normalizedFilePath).writeAsBytes(tiffBytes);
     layers.clearHasChanged();
   }
 }

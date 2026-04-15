@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
+import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -12,28 +13,18 @@ import 'package:logging/logging.dart';
 
 final Logger _log = Logger(logNameSave);
 
-/// Saves the current image as a TIFF file.
+/// Saves all layers as a layered TIFF file.
 Future<void> saveAsTiff(
   final LayersProvider layers,
   final String fileName,
 ) async {
   try {
-    // 1. Get the full image from LayersProvider.
-    final Uint8List pngBytes = await layers.capturePainterToImageBytes();
-    if (pngBytes.isEmpty) {
-      throw Exception('Failed to capture image for saving as TIFF.');
-    }
-
-    // 2. Convert these PNG bytes to TIFF format.
-    final Uint8List tiffBytes = await convertToTiff(pngBytes);
-
-    // 3. Use File(fileName).writeAsBytes to save the TIFF bytes.
-    await File(fileName).writeAsBytes(tiffBytes);
-    layers.clearHasChanged(); // Mark changes as saved
+    final String normalizedFileName = normalizeTiffExportFileName(fileName);
+    final Uint8List tiffBytes = await convertLayersToTiff(layers);
+    await File(normalizedFileName).writeAsBytes(tiffBytes);
+    layers.clearHasChanged();
   } catch (e) {
-    // Handle or log the error appropriately
     _log.severe('Error saving as TIFF to $fileName', e);
-    // Optionally, rethrow or show a user-facing error
     throw Exception('Failed to save as TIFF to $fileName: $e');
   }
 }
@@ -64,7 +55,12 @@ Future<void> saveFile(
       break;
     case FileExtensions.tif:
     case FileExtensions.tiff:
-      await saveAsTiff(layers, fileName);
+      final String normalizedFileName = normalizeTiffExportFileName(fileName);
+      await saveAsTiff(layers, normalizedFileName);
+      if (shellProvider.loadedFileName != normalizedFileName) {
+        shellProvider.loadedFileName = normalizedFileName;
+        shellProvider.update();
+      }
       break;
     default:
       // Handle unsupported extension or throw error

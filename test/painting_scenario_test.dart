@@ -108,7 +108,7 @@ const String _screenshotFinal = 'scenario_final.png';
 const String _finalOraFilename = 'final.ora';
 const String _finalPngFilename = 'final.png';
 const String _finalJpegFilename = 'final.jpg';
-const String _finalTiffFilename = 'final.tiff';
+const String _finalTiffFilename = 'final.tif';
 
 void main() {
   SharedPreferences.setMockInitialValues(_testPreferences);

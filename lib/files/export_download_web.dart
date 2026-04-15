@@ -2,6 +2,7 @@
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
@@ -101,17 +102,13 @@ Future<void> saveAsOra(
   downloadBlob(Uint8List.fromList(image), filePath);
 }
 
-/// Exports the current canvas as a TIFF file and triggers a browser download.
+/// Exports all layers as a layered TIFF and triggers download.
 Future<void> onExportAsTiff(
   final LayersProvider layers, [
-  final String fileName = 'image.tiff',
+  final String fileName = defaultTiffExportFileName,
 ]) async {
-  final Uint8List pngBytes = await layers.capturePainterToImageBytes();
-  if (pngBytes.isEmpty) {
-    throw Exception('Failed to capture image bytes for TIFF export.');
-  }
-  final Uint8List tiffBytes = await convertToTiff(pngBytes);
-  downloadBlob(tiffBytes, fileName); // Use downloadBlob directly
+  final Uint8List tiffBytes = await convertLayersToTiff(layers);
+  downloadBlob(tiffBytes, normalizeTiffExportFileName(fileName));
   layers.clearHasChanged();
 }
 
