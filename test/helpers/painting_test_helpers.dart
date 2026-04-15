@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
@@ -621,7 +622,7 @@ Future<void> saveUnitTestJpeg(
   });
 }
 
-/// Saves the current artwork as a TIFF to the `test/` directory.
+/// Saves all layers as a layered TIFF to the `test/` directory.
 Future<void> saveUnitTestTiff(
   final WidgetTester tester, {
   required final String filename,
@@ -630,9 +631,9 @@ Future<void> saveUnitTestTiff(
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   await tester.runAsync(() async {
-    final Uint8List pngBytes = await layersProvider.capturePainterToImageBytes();
-    final Uint8List tiffBytes = await convertToTiff(pngBytes);
-    final File outputFile = File('test/$filename');
+    final String normalizedFileName = normalizeTiffExportFileName(filename);
+    final Uint8List tiffBytes = await convertLayersToTiff(layersProvider);
+    final File outputFile = File('test/$normalizedFileName');
     await outputFile.writeAsBytes(tiffBytes);
     debugPrint('📦 Unit test TIFF saved: ${outputFile.path}');
   });
@@ -655,7 +656,7 @@ class UnitTestVideoRecorder {
   int _frameErrors = 0;
   late final Directory _framesDirectory;
 
-  /// Initialises the frames directory, clearing any previous frames.
+  /// Initialize the frames directory, clearing any previous frames.
   Future<void> start() async {
     _framesDirectory = Directory(
       'build/$_unitTestScreenshotDirectoryName/$_videoFrameSubdirectoryName',
