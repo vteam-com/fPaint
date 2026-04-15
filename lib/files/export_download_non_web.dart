@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/files/file_webp.dart' show convertImageToWebp;
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
@@ -161,6 +163,19 @@ Future<void> saveAsOra(
   }
 }
 
+/// Opens a save dialog and exports the current canvas as a WebP image file.
+Future<void> onExportAsWebp(
+  final LayersProvider layers, [
+  final String fileName = 'image.webp',
+]) async {
+  await _exportWithFilePicker(
+    dialogTitle: _fpaintSaveImageTitle,
+    fileName: fileName,
+    allowedExtensions: <String>[FileExtensions.webp],
+    onFileSelected: (final String filePath) => saveAsWebp(layers, filePath),
+  );
+}
+
 /// Opens a save dialog and exports the current canvas as a TIFF file.
 Future<void> onExportAsTiff(
   final LayersProvider layers, [
@@ -206,5 +221,24 @@ Future<void> saveAsTiff(
     final Uint8List tiffBytes = await convertLayersToTiff(layers);
     await File(normalizedFilePath).writeAsBytes(tiffBytes);
     layers.clearHasChanged();
+  }
+}
+
+/// Saves the current painter content as a WebP image file.
+///
+/// Captures the painter's current state as image bytes, converts them to WebP
+/// format, and writes the resulting bytes to the specified file path.
+///
+/// Parameters:
+/// - `layers`: The `LayersProvider` containing the current painter state.
+/// - `filePath`: The destination file path where the WebP image will be saved.
+Future<void> saveAsWebp(
+  final LayersProvider layers,
+  final String? filePath,
+) async {
+  if (filePath != null) {
+    final ui.Image image = await layers.capturePainterToImage();
+    final Uint8List outputBytes = await convertImageToWebp(image);
+    await File(filePath).writeAsBytes(outputBytes);
   }
 }

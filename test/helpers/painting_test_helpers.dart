@@ -12,6 +12,7 @@ import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/files/file_webp.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -636,6 +637,23 @@ Future<void> saveUnitTestTiff(
     final File outputFile = File('test/$normalizedFileName');
     await outputFile.writeAsBytes(tiffBytes);
     debugPrint('📦 Unit test TIFF saved: ${outputFile.path}');
+  });
+}
+
+/// Saves the current artwork as a WebP to the `test/` directory.
+Future<void> saveUnitTestWebp(
+  final WidgetTester tester, {
+  required final String filename,
+}) async {
+  final BuildContext context = tester.element(find.byType(MainView));
+  final LayersProvider layersProvider = LayersProvider.of(context);
+
+  await tester.runAsync(() async {
+    final ui.Image image = await layersProvider.capturePainterToImage();
+    final Uint8List webpBytes = await convertImageToWebp(image);
+    final File outputFile = File('test/$filename');
+    await outputFile.writeAsBytes(webpBytes);
+    debugPrint('📦 Unit test WebP saved: ${outputFile.path}');
   });
 }
 

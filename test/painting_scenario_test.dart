@@ -109,6 +109,7 @@ const String _finalOraFilename = 'final.ora';
 const String _finalPngFilename = 'final.png';
 const String _finalJpegFilename = 'final.jpg';
 const String _finalTiffFilename = 'final.tif';
+const String _finalWebpFilename = 'final.webp';
 
 void main() {
   SharedPreferences.setMockInitialValues(_testPreferences);
@@ -450,6 +451,7 @@ void main() {
       await saveUnitTestPng(tester, filename: _finalPngFilename);
       await saveUnitTestJpeg(tester, filename: _finalJpegFilename);
       await saveUnitTestTiff(tester, filename: _finalTiffFilename);
+      await saveUnitTestWebp(tester, filename: _finalWebpFilename);
 
       await videoRecorder.stop();
 

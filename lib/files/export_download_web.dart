@@ -1,11 +1,13 @@
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:js_interop';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/files/file_webp.dart' show convertImageToWebp;
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:web/web.dart' as web;
 
@@ -102,6 +104,14 @@ Future<void> saveAsOra(
   downloadBlob(Uint8List.fromList(image), filePath);
 }
 
+/// Exports the current painter as a WebP image and triggers a download.
+Future<void> onExportAsWebp(
+  final LayersProvider layers, [
+  final String fileName = 'image.webp',
+]) async {
+  await saveAsWebp(layers, fileName);
+}
+
 /// Exports all layers as a layered TIFF and triggers download.
 Future<void> onExportAsTiff(
   final LayersProvider layers, [
@@ -110,6 +120,16 @@ Future<void> onExportAsTiff(
   final Uint8List tiffBytes = await convertLayersToTiff(layers);
   downloadBlob(tiffBytes, normalizeTiffExportFileName(fileName));
   layers.clearHasChanged();
+}
+
+/// Saves the current content as a WebP file and triggers a browser download.
+Future<void> saveAsWebp(
+  final LayersProvider layers,
+  final String filePath,
+) async {
+  final ui.Image image = await layers.capturePainterToImage();
+  final Uint8List outputBytes = await convertImageToWebp(image);
+  downloadBlob(outputBytes, filePath);
 }
 
 /// Downloads a file represented by the given image bytes and file name.
