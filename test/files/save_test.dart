@@ -72,6 +72,11 @@ void main() {
       expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'tif');
     });
 
+    test('saveFile routes WebP files correctly', () async {
+      mockShell.loadedFileName = 'test.webp';
+      expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'webp');
+    });
+
     test('saveFile throws for unsupported extensions', () async {
       mockShell.loadedFileName = 'test.gif';
       expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'gif');

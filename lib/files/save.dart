@@ -62,6 +62,9 @@ Future<void> saveFile(
         shellProvider.update();
       }
       break;
+    case FileExtensions.webp:
+      await saveAsWebp(layers, fileName);
+      break;
     default:
       // Handle unsupported extension or throw error
       _log.severe('Unsupported file extension for saving: $extension');

@@ -73,11 +73,19 @@ void sharePanel(final BuildContext context) {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.download), // Or a more specific icon if available
-                title: textAction('image.TIF', l10n), // textAction is defined in this file
+                leading: const Icon(Icons.download),
+                title: textAction('image.WEBP', l10n),
                 onTap: () {
                   Navigator.pop(context);
-                  onExportAsTiff(layers); // This calls the function from the conditionally imported file
+                  onExportAsWebp(layers);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.download),
+                title: textAction('image.TIF', l10n),
+                onTap: () {
+                  Navigator.pop(context);
+                  onExportAsTiff(layers);
                 },
               ),
             ],

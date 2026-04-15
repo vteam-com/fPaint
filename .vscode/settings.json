@@ -35,6 +35,22 @@
         ".firebase/": true,
         ".idea/": true,
     },
+    "files.watcherExclude": {
+        "**/.dart_tool/**": true,
+        "**/build/**": true,
+        "**/ios/Pods/**": true,
+        "**/macos/Pods/**": true,
+        "**/android/.gradle/**": true,
+        "**/android/app/build/**": true,
+    },
+    "search.exclude": {
+        "**/.dart_tool/**": true,
+        "**/build/**": true,
+        "**/ios/Pods/**": true,
+        "**/macos/Pods/**": true,
+        "**/android/.gradle/**": true,
+        "**/android/app/build/**": true,
+    },
     "editor.formatOnSave": true,
     "workbench.editor.closeOnFileDelete": true,
     "cSpell.enabled": true,
@@ -48,7 +64,8 @@
         "RRGGBB",
         "subosito",
         "tracefile",
-        "vteam"
+        "vteam",
+        "webp"
     ],
     "cSpell.ignorePaths": [
         // "*.json"
