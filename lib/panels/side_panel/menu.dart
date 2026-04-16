@@ -10,6 +10,8 @@ import 'package:fpaint/panels/side_panel/canvas_settings.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 
 /// A widget that displays the main menu.
 class MainMenu extends StatelessWidget {
@@ -22,54 +24,54 @@ class MainMenu extends StatelessWidget {
 
     return PopupMenuButton<int>(
       tooltip: l10n.menuTooltip,
-      icon: const Icon(Icons.menu),
+      icon: const AppSvgIcon(icon: AppIcon.menu),
       onSelected: (final int result) => onDropDownMenuSelection(context, result),
       itemBuilder: (final BuildContext _) => <PopupMenuEntry<int>>[
         buildMenuItem(
           value: MenuIds.newFile,
           text: l10n.startOver,
-          icon: Icons.power_settings_new_outlined,
+          icon: AppIcon.powerSettingsNew,
         ),
         buildMenuItem(
           value: MenuIds.newFromClipboard,
           text: l10n.newFromClipboard,
-          icon: Icons.content_paste_go,
+          icon: AppIcon.contentPasteGo,
         ),
         buildMenuItem(
           value: MenuIds.openFile,
           text: l10n.importLabel,
-          icon: Icons.file_download_outlined,
+          icon: AppIcon.fileDownload,
         ),
         buildMenuItem(
           value: MenuIds.export,
           text: l10n.exportLabel,
-          icon: Icons.ios_share_outlined,
+          icon: AppIcon.iosShare,
         ),
         if (!kIsWeb && shellProvider.loadedFileName.isNotEmpty)
           buildMenuItem(
             value: MenuIds.save,
             text: l10n.saveLoadedFile(shellProvider.loadedFileName),
-            icon: Icons.check_circle_outline,
+            icon: AppIcon.checkCircle,
           ),
         buildMenuItem(
           value: MenuIds.canvasSize,
           text: l10n.canvas,
-          icon: Icons.edit,
+          icon: AppIcon.edit,
         ),
         buildMenuItem(
           value: MenuIds.settings,
           text: l10n.settings,
-          icon: Icons.settings,
+          icon: AppIcon.settings,
         ),
         buildMenuItem(
           value: MenuIds.platforms,
           text: l10n.platforms,
-          icon: Icons.outbound_sharp,
+          icon: AppIcon.outbound,
         ),
         buildMenuItem(
           value: MenuIds.about,
           text: l10n.about,
-          icon: Icons.info_outline,
+          icon: AppIcon.info,
         ),
       ],
     );
@@ -142,13 +144,13 @@ void onDropDownMenuSelection(
 PopupMenuEntry<int> buildMenuItem({
   required final int value,
   required final String text,
-  final IconData? icon,
+  final AppIcon? icon,
 }) {
   return PopupMenuItem<int>(
     value: value,
     child: Row(
       children: <Widget>[
-        if (icon != null) Icon(icon, size: AppSpacing.xl),
+        if (icon != null) AppSvgIcon(icon: icon, size: AppSpacing.xl),
         if (icon != null) const SizedBox(width: AppSpacing.sm),
         Text(text),
       ],

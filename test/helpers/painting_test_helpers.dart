@@ -197,6 +197,15 @@ Future<void> _applyBrushAndFillColors(
   }
 }
 
+Future<void> _tapIconButtonBySvgKey(
+  final WidgetTester tester,
+  final String iconKey,
+) async {
+  final Finder iconFinder = find.byKey(ValueKey<String>(iconKey));
+  final Finder buttonFinder = find.ancestor(of: iconFinder, matching: find.byType(IconButton));
+  await tester.tap(buttonFinder.first);
+}
+
 /// Draws a line from [startPosition] to [endPosition] using human-like gestures.
 Future<void> drawLineWithHumanGestures(
   final WidgetTester tester, {
@@ -211,7 +220,7 @@ Future<void> drawLineWithHumanGestures(
   }
   await _applyBrushAndFillColors(tester, brushColor: brushColor, fillColor: fillColor);
 
-  await tester.tap(find.byIcon(Icons.line_axis));
+  await _tapIconButtonBySvgKey(tester, 'app_icon_lineAxis');
   await tester.pump();
 
   await dragLikeHuman(tester, startPosition, endPosition);
@@ -231,7 +240,7 @@ Future<void> drawRectangleWithHumanGestures(
   }
   await _applyBrushAndFillColors(tester, brushColor: brushColor, fillColor: fillColor);
 
-  await tester.tap(find.byIcon(Icons.crop_square));
+  await _tapIconButtonBySvgKey(tester, 'app_icon_cropSquare');
   await tester.pump();
 
   final TestGesture gesture = await tester.startGesture(
@@ -264,7 +273,7 @@ Future<void> drawCircleWithHumanGestures(
   }
   await _applyBrushAndFillColors(tester, brushColor: brushColor, fillColor: fillColor);
 
-  await tester.tap(find.byIcon(Icons.circle_outlined));
+  await _tapIconButtonBySvgKey(tester, 'app_icon_circle');
   await tester.pump();
 
   final TestGesture gesture = await tester.startGesture(
@@ -457,7 +466,7 @@ class PaintingLayerHelpers {
     final int toIndex,
   ) async {
     await switchToLayer(tester, fromIndex);
-    await tester.tap(find.byIcon(Icons.layers_outlined));
+    await _tapIconButtonBySvgKey(tester, 'app_icon_layers');
     await tester.pump();
   }
 

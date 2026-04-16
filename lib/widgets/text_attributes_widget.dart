@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
@@ -29,7 +31,7 @@ class TextAttributesWidget extends StatelessWidget {
           minimal: minimal,
           name: l10n.fontSizeLabel,
           childLeft: IconButton(
-            icon: const Icon(Icons.format_size),
+            icon: const AppSvgIcon(icon: AppIcon.formatSize),
             color: Colors.grey.shade500,
             constraints: minimal ? const BoxConstraints() : null,
             padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),

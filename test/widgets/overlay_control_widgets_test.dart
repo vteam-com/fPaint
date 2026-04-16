@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 
 void main() {
@@ -19,7 +21,7 @@ void main() {
                 onTap: () {
                   tapCount += 1;
                 },
-                child: const Icon(Icons.check),
+                child: const AppSvgIcon(icon: AppIcon.check),
               ),
             ],
           ),
@@ -29,7 +31,7 @@ void main() {
 
     expect(find.text('125%'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.check));
+    await tester.tap(find.byTooltip('Confirm'));
     await tester.pump();
 
     expect(tapCount, 1);

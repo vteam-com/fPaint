@@ -1,7 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 
 void main() {
@@ -31,7 +32,7 @@ void main() {
       );
 
       // Check that we have the expected number of icons
-      expect(find.byType(Icon), findsNWidgets(9));
+      expect(find.byType(AppSvgIcon), findsNWidgets(9));
     });
 
     testWidgets('highlights selected position with blue color', (final WidgetTester tester) async {
@@ -105,16 +106,15 @@ void main() {
         onPositionSelected: (final CanvasResizePosition position) {},
       );
 
-      // Test each position - note: the widget uses CupertinoIcons for arrows
-      expect(selector.getDirectionIcon(0), CupertinoIcons.arrow_up_left); // topLeft
-      expect(selector.getDirectionIcon(1), CupertinoIcons.arrow_up); // top
-      expect(selector.getDirectionIcon(2), CupertinoIcons.arrow_up_right); // topRight
-      expect(selector.getDirectionIcon(3), CupertinoIcons.arrow_left); // left
-      expect(selector.getDirectionIcon(4), Icons.crop_square_outlined); // center
-      expect(selector.getDirectionIcon(5), CupertinoIcons.arrow_right); // right
-      expect(selector.getDirectionIcon(6), CupertinoIcons.arrow_down_left); // bottomLeft
-      expect(selector.getDirectionIcon(7), CupertinoIcons.arrow_down); // bottom
-      expect(selector.getDirectionIcon(8), CupertinoIcons.arrow_down_right); // bottomRight
+      expect(selector.getDirectionIcon(0), AppIcon.arrowUpLeft); // topLeft
+      expect(selector.getDirectionIcon(1), AppIcon.arrowUp); // top
+      expect(selector.getDirectionIcon(2), AppIcon.arrowUpRight); // topRight
+      expect(selector.getDirectionIcon(3), AppIcon.arrowLeft); // left
+      expect(selector.getDirectionIcon(4), AppIcon.cropSquare); // center
+      expect(selector.getDirectionIcon(5), AppIcon.arrowRight); // right
+      expect(selector.getDirectionIcon(6), AppIcon.arrowDownLeft); // bottomLeft
+      expect(selector.getDirectionIcon(7), AppIcon.arrowDown); // bottom
+      expect(selector.getDirectionIcon(8), AppIcon.arrowDownRight); // bottomRight
     });
 
     testWidgets('selected position shows image icon instead of direction icon', (final WidgetTester tester) async {
@@ -127,19 +127,8 @@ void main() {
         ),
       );
 
-      // The center position should show an image icon when selected
-      final Iterable<Icon> icons = tester.widgetList<Icon>(find.byType(Icon));
-      expect(icons.length, 9);
-
-      // At least one icon should be Icons.image (the selected one)
-      bool hasImageIcon = false;
-      for (final Icon icon in icons) {
-        if (icon.icon == Icons.image) {
-          hasImageIcon = true;
-          break;
-        }
-      }
-      expect(hasImageIcon, true);
+      expect(find.byType(AppSvgIcon), findsNWidgets(9));
+      expect(find.byKey(const ValueKey<String>('app_icon_image')), findsOneWidget);
     });
   });
 }

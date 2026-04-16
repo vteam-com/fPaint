@@ -1,7 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 
 /// A widget that displays a 3x3 grid of icons, allowing the user to select a [CanvasResizePosition].
 class NineGridSelector extends StatelessWidget {
@@ -46,8 +47,8 @@ class NineGridSelector extends StatelessWidget {
                 color: selectedPosition == CanvasResizePosition.values[index] ? Colors.blue : Colors.grey.shade800,
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
-              child: Icon(
-                selectedPosition == CanvasResizePosition.values[index] ? Icons.image : getDirectionIcon(index),
+              child: AppSvgIcon(
+                icon: selectedPosition == CanvasResizePosition.values[index] ? AppIcon.image : getDirectionIcon(index),
               ),
             ),
           );
@@ -56,18 +57,18 @@ class NineGridSelector extends StatelessWidget {
     );
   }
 
-  /// Returns the appropriate [IconData] for the given direction.
-  IconData getDirectionIcon(final int direction) {
-    const List<IconData> directionIcons = <IconData>[
-      CupertinoIcons.arrow_up_left,
-      CupertinoIcons.arrow_up,
-      CupertinoIcons.arrow_up_right,
-      CupertinoIcons.arrow_left,
-      Icons.crop_square_outlined,
-      CupertinoIcons.arrow_right,
-      CupertinoIcons.arrow_down_left,
-      CupertinoIcons.arrow_down,
-      CupertinoIcons.arrow_down_right,
+  /// Returns the appropriate [AppIcon] for the given direction.
+  AppIcon getDirectionIcon(final int direction) {
+    const List<AppIcon> directionIcons = <AppIcon>[
+      AppIcon.arrowUpLeft,
+      AppIcon.arrowUp,
+      AppIcon.arrowUpRight,
+      AppIcon.arrowLeft,
+      AppIcon.cropSquare,
+      AppIcon.arrowRight,
+      AppIcon.arrowDownLeft,
+      AppIcon.arrowDown,
+      AppIcon.arrowDownRight,
     ];
     return directionIcons[direction];
   }

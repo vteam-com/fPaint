@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/image_placement_model.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/rotation_handle_widgets.dart';
 
@@ -137,14 +139,14 @@ class ImagePlacementWidget extends StatelessWidget {
                   color: Colors.green,
                   cursor: SystemMouseCursors.click,
                   onTap: onConfirm,
-                  child: const Icon(Icons.check, color: Colors.white, size: AppLayout.iconSize),
+                  child: const AppSvgIcon(icon: AppIcon.check, color: Colors.white, size: AppLayout.iconSize),
                 ),
                 buildOverlayCircleButton(
                   tooltip: l10n.cancel,
                   color: Colors.red,
                   cursor: SystemMouseCursors.click,
                   onTap: onCancel,
-                  child: const Icon(Icons.close, color: Colors.white, size: AppLayout.iconSize),
+                  child: const AppSvgIcon(icon: AppIcon.close, color: Colors.white, size: AppLayout.iconSize),
                 ),
               ],
             ),
@@ -302,11 +304,7 @@ class ImagePlacementWidget extends StatelessWidget {
           model.rotation += currentAngle - previousAngle;
           onChanged();
         },
-        child: const Icon(
-          Icons.rotate_right,
-          size: AppLayout.iconSize,
-          color: Colors.white,
-        ),
+        child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: Colors.white),
       ),
     );
   }

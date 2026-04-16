@@ -5,6 +5,8 @@ import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/container_slider.dart';
@@ -198,19 +200,19 @@ class LayerSelector extends StatelessWidget {
       children: <Widget>[
         IconButton(
           tooltip: _tooltipAddLayerAbove,
-          icon: const Icon(Icons.playlist_add),
+          icon: const AppSvgIcon(icon: AppIcon.playlistAdd),
           onPressed: () => _onAddLayer(layers),
         ),
         if (allowRemoveLayer)
           IconButton(
             tooltip: _tooltipDeleteLayer,
-            icon: const Icon(Icons.playlist_remove),
+            icon: const AppSvgIcon(icon: AppIcon.playlistRemove),
             onPressed: allowRemoveLayer ? () => layers.remove(layer) : null,
           ),
         if (allowRemoveLayer)
           IconButton(
             tooltip: _tooltipMergeBelow,
-            icon: const Icon(Icons.layers_outlined),
+            icon: const AppSvgIcon(icon: AppIcon.layers),
             onPressed: layer == layers.list.last
                 ? null
                 : () => _onMergeLayer(
@@ -222,7 +224,7 @@ class LayerSelector extends StatelessWidget {
         if (allowRemoveLayer)
           IconButton(
             tooltip: '$_tooltipBlendMode\n"${blendModeToText(layer.blendMode, AppLocalizations.of(context))}"',
-            icon: const Icon(Icons.blender_outlined),
+            icon: const AppSvgIcon(icon: AppIcon.blender),
             onPressed: () async {
               layer.blendMode = await showBlendModeMenu(
                 context: context,
@@ -258,7 +260,7 @@ class LayerSelector extends StatelessWidget {
     return Row(
       children: <Widget>[
         PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert),
+          icon: const AppSvgIcon(icon: AppIcon.moreVert),
           itemBuilder: (final BuildContext _) => _buildPopupMenuItems(),
           onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
         ),
@@ -284,8 +286,8 @@ class LayerSelector extends StatelessWidget {
         ),
         IconButton(
           tooltip: _tooltipHideShowLayer,
-          icon: Icon(
-            layer.isVisible ? Icons.visibility : Icons.visibility_off,
+          icon: AppSvgIcon(
+            icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
             color: layer.isVisible ? Colors.blue : AppColors.layerHiddenWarning,
           ),
           onPressed: () => layers.layersToggleVisibility(layer),
@@ -302,7 +304,7 @@ class LayerSelector extends StatelessWidget {
         enabled: true,
         child: Row(
           children: <Widget>[
-            Icon(Icons.edit),
+            AppSvgIcon(icon: AppIcon.edit),
             SizedBox(width: AppSpacing.sm),
             Text(_menuLabelRenameLayer),
           ],
@@ -313,7 +315,7 @@ class LayerSelector extends StatelessWidget {
         enabled: true,
         child: Row(
           children: <Widget>[
-            Icon(Icons.playlist_add),
+            AppSvgIcon(icon: AppIcon.playlistAdd),
             SizedBox(width: AppSpacing.sm),
             Text(_tooltipAddLayerAbove),
           ],
@@ -325,7 +327,7 @@ class LayerSelector extends StatelessWidget {
           enabled: allowRemoveLayer,
           child: const Row(
             children: <Widget>[
-              Icon(Icons.playlist_remove),
+              AppSvgIcon(icon: AppIcon.playlistRemove),
               SizedBox(width: AppSpacing.sm),
               Text(_tooltipDeleteLayer),
             ],
@@ -337,7 +339,7 @@ class LayerSelector extends StatelessWidget {
           enabled: allowRemoveLayer,
           child: const Row(
             children: <Widget>[
-              Icon(Icons.layers_outlined),
+              AppSvgIcon(icon: AppIcon.layers),
               SizedBox(width: AppSpacing.sm),
               Text(_tooltipMergeBelow),
             ],
@@ -349,7 +351,7 @@ class LayerSelector extends StatelessWidget {
           enabled: true,
           child: Row(
             children: <Widget>[
-              Icon(Icons.blender_outlined),
+              AppSvgIcon(icon: AppIcon.blender),
               SizedBox(width: AppSpacing.sm),
               Text(_menuLabelChangeBlendMode),
             ],
@@ -360,8 +362,8 @@ class LayerSelector extends StatelessWidget {
         enabled: true,
         child: Row(
           children: <Widget>[
-            Icon(
-              layer.isVisible ? Icons.visibility : Icons.visibility_off,
+            AppSvgIcon(
+              icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
               color: layer.isVisible ? Colors.blue : AppColors.layerHiddenWarning,
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -374,9 +376,7 @@ class LayerSelector extends StatelessWidget {
         enabled: true,
         child: Row(
           children: <Widget>[
-            Icon(
-              Icons.visibility_off,
-            ),
+            AppSvgIcon(icon: AppIcon.visibilityOff),
             SizedBox(width: AppSpacing.sm),
             Text(_menuLabelHideAllOtherLayers),
           ],
@@ -387,9 +387,7 @@ class LayerSelector extends StatelessWidget {
         enabled: true,
         child: Row(
           children: <Widget>[
-            Icon(
-              Icons.visibility,
-            ),
+            AppSvgIcon(icon: AppIcon.visibility),
             SizedBox(width: AppSpacing.sm),
             Text(_menuLabelShowAllLayers),
           ],
@@ -448,7 +446,7 @@ class LayerSelector extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: <Widget>[
           _buildThumbnailPreview(layers, layer),
-          if (minimal && !layer.isVisible) const Icon(Icons.visibility_off, color: Colors.red),
+          if (minimal && !layer.isVisible) const AppSvgIcon(icon: AppIcon.visibilityOff, color: Colors.red),
         ],
       ),
     );

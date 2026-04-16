@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/draw_rect.dart';
 import 'package:vector_math/vector_math_64.dart' as vm64;
 
@@ -115,7 +117,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
                 onPressed: () {
                   widget.onClosed();
                 },
-                icon: const Icon(Icons.close),
+                icon: const AppSvgIcon(icon: AppIcon.close),
               ),
             ),
           ),
@@ -163,7 +165,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
                 onPressed: () {
                   widget.onColorPicked(_selectedColor!);
                 },
-                icon: const Icon(Icons.check),
+                icon: const AppSvgIcon(icon: AppIcon.check),
               ),
             ),
           ),

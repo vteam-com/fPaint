@@ -5,6 +5,8 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/top_colors.dart';
@@ -193,7 +195,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               IconButton(
-                icon: const Icon(Icons.paste),
+                icon: const AppSvgIcon(icon: AppIcon.paste),
                 onPressed: () async {
                   final ClipboardData? data = await Clipboard.getData(_plainTextMimeType);
 
@@ -231,7 +233,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.copy),
+                icon: const AppSvgIcon(icon: AppIcon.copy),
                 onPressed: () {
                   Clipboard.setData(
                     ClipboardData(

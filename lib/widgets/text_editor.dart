@@ -3,6 +3,8 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 
 /// Opens the text editing flow for the currently selected text object.
@@ -107,8 +109,8 @@ class _TextEditorState extends State<TextEditor> {
                       children: <Widget>[
                         // Bold toggle
                         IconButton(
-                          icon: Icon(
-                            Icons.format_bold,
+                          icon: AppSvgIcon(
+                            icon: AppIcon.formatBold,
                             color: fontWeight == FontWeight.bold ? Colors.blue : Colors.grey,
                           ),
                           onPressed: () {
@@ -120,8 +122,8 @@ class _TextEditorState extends State<TextEditor> {
 
                         // Italic toggle
                         IconButton(
-                          icon: Icon(
-                            Icons.format_italic,
+                          icon: AppSvgIcon(
+                            icon: AppIcon.formatItalic,
                             color: fontStyle == FontStyle.italic ? Colors.blue : Colors.grey,
                           ),
                           onPressed: () {
@@ -143,7 +145,7 @@ class _TextEditorState extends State<TextEditor> {
                             borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
                           child: IconButton(
-                            icon: const Icon(Icons.color_lens, color: Colors.white),
+                            icon: const AppSvgIcon(icon: AppIcon.colorLens, color: Colors.white),
                             onPressed: () async {
                               showColorPicker(
                                 context: context,

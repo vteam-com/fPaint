@@ -6,6 +6,8 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/transform_model.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 
@@ -146,14 +148,14 @@ class TransformWidget extends StatelessWidget {
                   color: Colors.green,
                   cursor: SystemMouseCursors.click,
                   onTap: onConfirm,
-                  child: const Icon(Icons.check, color: Colors.white, size: AppLayout.iconSize),
+                  child: const AppSvgIcon(icon: AppIcon.check, color: Colors.white, size: AppLayout.iconSize),
                 ),
                 buildOverlayCircleButton(
                   tooltip: l10n.cancel,
                   color: Colors.red,
                   cursor: SystemMouseCursors.click,
                   onTap: onCancel,
-                  child: const Icon(Icons.close, color: Colors.white, size: AppLayout.iconSize),
+                  child: const AppSvgIcon(icon: AppIcon.close, color: Colors.white, size: AppLayout.iconSize),
                 ),
               ],
             ),
@@ -294,11 +296,7 @@ class TransformWidget extends StatelessWidget {
                   model.endScaleGesture();
                   onChanged();
                 },
-                child: const Icon(
-                  Icons.open_in_full,
-                  size: AppLayout.iconSize,
-                  color: Colors.white,
-                ),
+                child: const AppSvgIcon(icon: AppIcon.openInFull, size: AppLayout.iconSize, color: Colors.white),
               ),
               buildOverlayCircleButton(
                 tooltip: l10n.resizeRotate,
@@ -340,11 +338,7 @@ class TransformWidget extends StatelessWidget {
                   model.endRotateGesture();
                   onChanged();
                 },
-                child: const Icon(
-                  Icons.rotate_right,
-                  size: AppLayout.iconSize,
-                  color: Colors.white,
-                ),
+                child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: Colors.white),
               ),
               buildOverlayCircleButton(
                 tooltip: l10n.transform,

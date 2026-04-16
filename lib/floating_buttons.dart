@@ -4,6 +4,8 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/action_type_icon.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 
 const String _canvasZoomAndSizeFormat = '{zoom}%\n{width}\n{height}';
@@ -26,7 +28,7 @@ Widget floatingActionButtons(
   final AppLocalizations l10n = AppLocalizations.of(context)!;
 
   final Widget undoButton = myFloatButton(
-    icon: Icons.undo,
+    icon: AppIcon.undo,
     tooltip: appProvider.undoProvider.getHistoryStringForUndo(),
     onPressed: () {
       Future<void>.microtask(() => appProvider.undoAction());
@@ -34,7 +36,7 @@ Widget floatingActionButtons(
   );
 
   final Widget redo = myFloatButton(
-    icon: Icons.redo,
+    icon: AppIcon.redo,
     tooltip: appProvider.undoProvider.getHistoryStringForRedo(),
     onPressed: () {
       Future<void>.microtask(() => appProvider.redoAction());
@@ -60,7 +62,7 @@ Widget floatingActionButtons(
           ),
         if (!shellProvider.showMenu)
           myFloatButton(
-            icon: Icons.color_lens,
+            icon: AppIcon.colorLens,
             foregroundColor: appProvider.preferences.brushColor,
             tooltip: l10n.colorLabel,
             onPressed: () {
@@ -78,7 +80,7 @@ Widget floatingActionButtons(
         if (!shellProvider.showMenu) redo,
         if (shellProvider.showMenu)
           myFloatButton(
-            icon: Icons.close,
+            icon: AppIcon.close,
             onPressed: () {
               shellProvider.showMenu = !shellProvider.showMenu;
             },
@@ -104,7 +106,7 @@ Widget floatingActionButtons(
             anchorPoint: appProvider.canvasCenter,
           );
         },
-        icon: Icons.zoom_in,
+        icon: AppIcon.zoomIn,
       ),
 
       /// Center and fit image
@@ -142,7 +144,7 @@ Widget floatingActionButtons(
             anchorPoint: appProvider.canvasCenter,
           );
         },
-        icon: Icons.zoom_out,
+        icon: AppIcon.zoomOut,
       ),
 
       /// Show/Hide floating action panel
@@ -152,7 +154,7 @@ Widget floatingActionButtons(
           shellProvider.shellMode = ShellMode.hidden;
           shellProvider.update();
         },
-        icon: Icons.arrow_drop_down,
+        icon: AppIcon.arrowDropDown,
       ),
     ],
   );
@@ -167,7 +169,7 @@ Widget floatingActionButtons(
 /// The [child] parameter specifies an optional widget to display on the button instead of an icon.
 Widget myFloatButton({
   final Key? key,
-  final IconData? icon,
+  final AppIcon? icon,
   final Color foregroundColor = Colors.white,
   final String? tooltip,
   required final void Function() onPressed,
@@ -182,6 +184,6 @@ Widget myFloatButton({
     onPressed: () {
       Future<void>.microtask(() => onPressed());
     },
-    child: child ?? Icon(icon!),
+    child: child ?? AppSvgIcon(icon: icon!, color: foregroundColor),
   );
 }
