@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fpaint/floating_buttons.dart';
@@ -29,7 +28,14 @@ class MainScreen extends StatelessWidget {
       return const Scaffold(
         backgroundColor: Colors.grey,
         body: Center(
-          child: CupertinoActivityIndicator(color: Colors.black, radius: AppLayout.loaderRadius),
+          child: SizedBox(
+            width: AppLayout.loaderRadius,
+            height: AppLayout.loaderRadius,
+            child: CircularProgressIndicator(
+              strokeWidth: AppLayout.loaderStrokeWidth,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+            ),
+          ),
         ),
       );
     }

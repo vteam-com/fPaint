@@ -88,6 +88,7 @@ class AppLayout {
   static const double sliderDialogWidth = 600.0;
   static const double platformPageWidth = 400.0;
   static const double loaderRadius = 40.0;
+  static const double loaderStrokeWidth = 4.0;
   static const double layerPreviewSize = 60.0;
   static const double layerPreviewCompactSize = 50.0;
   static const double toolbarButtonSize = 50.0;
