@@ -1,8 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/main.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/models/canvas_resize.dart';
@@ -69,12 +73,34 @@ const double _fenceY = 140.0;
 const double _fenceHeight = 80.0;
 const double _fencePicketSpacing = 80.0;
 const double _fenceStartX = -200.0;
-const int _fencePicketCount = 7;
+const int _fencePicketCount = 6;
 const double _fencePicketBrushSize = 10.0;
+const double _fencePicketStripeOffset = 4.0;
+const Color _fencePicketCenterColor = Color.fromARGB(255, 231, 214, 187);
+const Color _fencePicketRightColor = Color.fromARGB(255, 140, 80, 255);
 const Offset _fenceRailTopStart = Offset(-210, 80);
 const Offset _fenceRailTopEnd = Offset(300, 90);
 const Offset _fenceRailBottomStart = Offset(-210, 110);
 const Offset _fenceRailBottomEnd = Offset(300, 120);
+
+// Fence shadow via duplicated layer transform
+const String _fenceShadowLayerName = 'Fence Shadow';
+const double _fenceShadowCropPadding = 40.0;
+const double _fenceShadowSkewX = -140.0;
+const double _fenceShadowDownOffset = 0.0;
+const double _fenceShadowXOffset = 125.0;
+const double _fenceShadowYOffset = 12.0;
+const Color _fenceShadowTintColor = Color.fromARGB(190, 0, 60, 0);
+const double _fenceShadowLayerOpacity = 0.7;
+
+// Shadows layer (house + fence)
+const String _shadowsLayerName = 'Shadows';
+const Color _shadowColorNear = Color.fromARGB(190, 0, 60, 0);
+const Color _shadowColorFar = Color.fromARGB(0, 0, 60, 0);
+const Color _shadowStrokeColor = Colors.transparent;
+const double _shadowBrushSize = 0.0;
+const Offset _shadowOffset = Offset(30, 20);
+const Offset _shadowGradientDelta = Offset(0, 80);
 
 // Birds layer
 const String _birdsLayerName = 'Birds';
@@ -100,7 +126,8 @@ const double _signatureMarginRight = 10.0;
 const double _signatureMarginBottom = 10.0;
 
 // Expected: background + sky + sun + land + house + fence + birds + signature = 8
-const int _expectedLayerCountAfterScene = 8;
+// Expected: background + sky + sun + land + shadows + house + fence shadow + fence + birds + signature = 10
+const int _expectedLayerCountAfterScene = 10;
 
 // Screenshot filenames
 const String _screenshotAfterHouse = 'scenario_house.png';
@@ -191,6 +218,34 @@ void main() {
       // ---------------------------------------------------------------
       // Draw House (body + door + window + roof)
       // ---------------------------------------------------------------
+      await PaintingLayerHelpers.addNewLayer(tester, _shadowsLayerName);
+      await tester.pumpAndSettle();
+
+      final Offset houseShadowStart = _houseBodyStart + _shadowOffset;
+      final Offset houseShadowEnd = _houseBodyEnd + _shadowOffset;
+      final Offset houseShadowFillPoint = Offset(
+        (houseShadowStart.dx + houseShadowEnd.dx) / AppMath.pair,
+        (houseShadowStart.dy + houseShadowEnd.dy) / AppMath.pair,
+      );
+
+      // House shadow
+      await drawRectangleWithHumanGestures(
+        tester,
+        startPosition: canvasCenter + houseShadowStart,
+        endPosition: canvasCenter + houseShadowEnd,
+        brushSize: _shadowBrushSize,
+        brushColor: _shadowStrokeColor,
+        fillColor: _shadowColorNear,
+      );
+      await performFloodFillGradient(
+        tester,
+        gradientMode: FillMode.linear,
+        gradientPoints: <GradientPoint>[
+          GradientPoint(offset: canvasCenter + houseShadowFillPoint, color: _shadowColorNear),
+          GradientPoint(offset: canvasCenter + houseShadowFillPoint + _shadowGradientDelta, color: _shadowColorFar),
+        ],
+      );
+
       await PaintingLayerHelpers.addNewLayer(tester, _houseLayerName);
 
       await drawRectangleWithHumanGestures(
@@ -263,13 +318,19 @@ void main() {
 
       for (int i = 0; i < _fencePicketCount; i++) {
         final double picketX = _fenceStartX + (i * _fencePicketSpacing);
-        await drawLineWithHumanGestures(
-          tester,
-          startPosition: canvasCenter + Offset(picketX, _fenceY),
-          endPosition: canvasCenter + Offset(picketX, _fenceY - _fenceHeight),
-          brushSize: _fencePicketBrushSize,
-          brushColor: Colors.white,
-        );
+        for (final (double offsetX, Color color) in <(double, Color)>[
+          (-_fencePicketStripeOffset, Colors.white),
+          (_fencePicketStripeOffset, _fencePicketRightColor),
+          (0, _fencePicketCenterColor),
+        ]) {
+          await drawLineWithHumanGestures(
+            tester,
+            startPosition: canvasCenter + Offset(picketX + offsetX, _fenceY),
+            endPosition: canvasCenter + Offset(picketX + offsetX, _fenceY - _fenceHeight),
+            brushSize: _fencePicketBrushSize,
+            brushColor: color,
+          );
+        }
       }
 
       await drawRectangleWithHumanGestures(
@@ -289,6 +350,113 @@ void main() {
         fillColor: Colors.white,
       );
       await videoRecorder.captureFrame();
+
+      // ---------------------------------------------------------------
+      // Fence shadow (duplicate fence layer, flip vertically, skew)
+      // ---------------------------------------------------------------
+      await tester.runAsync(() async {
+        final BuildContext context = tester.element(find.byType(MainView));
+        final LayersProvider layersProvider = LayersProvider.of(context);
+        final Offset canvasCenterInCanvas = Offset(
+          layersProvider.size.width / AppMath.pair,
+          layersProvider.size.height / AppMath.pair,
+        );
+
+        final int fenceIndex = layersProvider.list.indexWhere((final LayerProvider l) => l.name == _fenceLayerName);
+        if (fenceIndex == -1) {
+          throw StateError('Fence layer not found');
+        }
+
+        final LayerProvider fenceLayer = layersProvider.get(fenceIndex);
+        final ui.Image fenceImage = fenceLayer.toImageForStorage(layersProvider.size);
+
+        final double cropLeft = canvasCenterInCanvas.dx + _fenceRailTopStart.dx - _fenceShadowCropPadding;
+        final double cropTop = canvasCenterInCanvas.dy + (_fenceY - _fenceHeight) - _fenceShadowCropPadding;
+        final double cropWidth =
+            (_fenceRailTopEnd.dx - _fenceRailTopStart.dx) + (_fenceShadowCropPadding * AppMath.pair);
+        final double cropHeight = _fenceHeight + (_fenceShadowCropPadding * AppMath.pair);
+
+        final ui.Image croppedFence = cropImage(
+          fenceImage,
+          ui.Rect.fromLTWH(cropLeft, cropTop, cropWidth, cropHeight),
+        );
+
+        final ui.PictureRecorder flipRecorder = ui.PictureRecorder();
+        final Canvas flipCanvas = Canvas(flipRecorder);
+        flipCanvas.translate(0, croppedFence.height.toDouble());
+        flipCanvas.scale(AppVisual.full, -AppVisual.full);
+        flipCanvas.drawImage(
+          croppedFence,
+          Offset.zero,
+          Paint()
+            ..colorFilter = const ColorFilter.mode(_fenceShadowTintColor, BlendMode.srcIn)
+            ..filterQuality = FilterQuality.high,
+        );
+        final ui.Image flippedFence = await flipRecorder.endRecording().toImage(
+          croppedFence.width,
+          croppedFence.height,
+        );
+
+        final double shadowTopY = canvasCenterInCanvas.dy + _fenceY + _fenceShadowDownOffset + _fenceShadowYOffset;
+        final double shadowHeight = cropHeight * AppVisual.half;
+
+        final Offset dstTopLeft = Offset(cropLeft + _fenceShadowXOffset + _fenceShadowSkewX, shadowTopY);
+        final Offset dstTopRight = Offset(cropLeft + cropWidth + _fenceShadowXOffset + _fenceShadowSkewX, shadowTopY);
+        final Offset dstBottomRight = Offset(cropLeft + cropWidth + _fenceShadowXOffset, shadowTopY + shadowHeight);
+        final Offset dstBottomLeft = Offset(cropLeft + _fenceShadowXOffset, shadowTopY + shadowHeight);
+
+        final List<Offset> corners = <Offset>[dstTopLeft, dstTopRight, dstBottomRight, dstBottomLeft];
+        final ui.Image skewedShadow = await renderTransformedImage(
+          flippedFence,
+          corners,
+          AppInteraction.transformGridSubdivisions,
+        );
+
+        final double minX = <double>[
+          dstTopLeft.dx,
+          dstTopRight.dx,
+          dstBottomRight.dx,
+          dstBottomLeft.dx,
+        ].reduce((final double a, final double b) => a < b ? a : b);
+        final double maxX = <double>[
+          dstTopLeft.dx,
+          dstTopRight.dx,
+          dstBottomRight.dx,
+          dstBottomLeft.dx,
+        ].reduce((final double a, final double b) => a > b ? a : b);
+        final double minY = <double>[
+          dstTopLeft.dy,
+          dstTopRight.dy,
+          dstBottomRight.dy,
+          dstBottomLeft.dy,
+        ].reduce((final double a, final double b) => a < b ? a : b);
+        final double maxY = <double>[
+          dstTopLeft.dy,
+          dstTopRight.dy,
+          dstBottomRight.dy,
+          dstBottomLeft.dy,
+        ].reduce((final double a, final double b) => a > b ? a : b);
+
+        final LayerProvider shadowLayer = layersProvider.insertAt(fenceIndex, _fenceShadowLayerName);
+        shadowLayer.opacity = _fenceShadowLayerOpacity;
+        shadowLayer.actionStack.add(
+          UserActionDrawing(
+            action: ActionType.image,
+            positions: <Offset>[
+              Offset(minX, minY),
+              Offset(maxX, maxY),
+            ],
+            image: skewedShadow,
+          ),
+        );
+        shadowLayer.hasChanged = true;
+        shadowLayer.clearCache();
+
+        fenceImage.dispose();
+        croppedFence.dispose();
+        flippedFence.dispose();
+      });
+      await tester.pump();
 
       // ---------------------------------------------------------------
       // Draw Birds (V-shape lines)
