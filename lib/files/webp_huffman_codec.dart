@@ -192,6 +192,7 @@ class WebPHuffmanCodec {
   }
 
   /// Compresses [codeLengths] into an RLE symbol sequence per the VP8L spec.
+  // ignore: library_private_types_in_public_api
   List<_WebPClSymbol> buildRleSequence(List<int> codeLengths, int alphabetSize) {
     final List<_WebPClSymbol> result = <_WebPClSymbol>[];
     int i = 0;
