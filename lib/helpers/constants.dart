@@ -479,49 +479,6 @@ class TiffConstants {
   static const String ifdValueTypeAscii = 'ascii';
 }
 
-/// WebP/VP8L constants used by the custom WebP encoder.
-class WebPConstants {
-  static const int bytesPerPixel = 4;
-  static const int bytesPerU32 = 4;
-  static const int bitsPerByte = 8;
-  static const int bitsShift = 3;
-  static const int bitsRoundUp = 7;
-  static const int growFactor = 2;
-  static const int initialBufferPadding = 1024;
-
-  static const int dimensionBits = 14;
-  static const int versionBits = 3;
-  static const int vp8lSignature = 0x2f;
-
-  static const int channelAlphabetSize = 256;
-  static const int endOfImageSymbol = 256;
-  static const int greenLiteralCount = 257;
-  static const int greenAlphabetSize = 280;
-  static const int distanceAlphabetSize = 40;
-
-  static const int blueChannelOffset = 2;
-  static const int alphaChannelOffset = 3;
-
-  static const int greenCodeBits = 9;
-
-  static const int codeLengthEntries = 12;
-  static const int codeLengthOffset = 4;
-  static const int codeLengthCountBits = 4;
-  static const int codeLengthBits = 3;
-  static const int cl0Index = 2;
-  static const int cl8Index = 11;
-  static const int cl9Index = 12;
-  static const int maxSymbolSubtract = 2;
-  static const int maxHeaderBits = 11;
-
-  static const int webpTagSize = 4;
-  static const int chunkHeaderSize = 8;
-
-  static const List<int> riffTag = <int>[0x52, 0x49, 0x46, 0x46];
-  static const List<int> webpTag = <int>[0x57, 0x45, 0x42, 0x50];
-  static const List<int> vp8lTag = <int>[0x56, 0x50, 0x38, 0x4c];
-}
-
 /// File extension identifiers used across import/export/save operations.
 class FileExtensions {
   static const String png = 'png';
