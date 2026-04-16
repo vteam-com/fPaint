@@ -36,10 +36,9 @@ const Color _skyColorBottom = Color.fromARGB(255, 110, 161, 219);
 // Sun layer
 const String _sunLayerName = 'Sun';
 const Offset _sunOffset = Offset(-200, -220);
-const double _sunRadius = 70.0;
-const double _sunRayRadius = 400.0;
-const Color _sunRayColorCenter = Color.fromARGB(255, 255, 242, 1);
-const Color _sunRayColorEdge = Color.fromARGB(59, 0, 28, 242);
+const double _sunRadius = 50.0;
+const Color _sunRayColorCenter = Color.fromARGB(100, 255, 242, 1);
+const Color _sunRayColorEdge = Color.fromARGB(0, 198, 242, 0);
 const Color _sunBodyColor = Color.fromARGB(179, 241, 226, 179);
 
 // Land layer
@@ -146,19 +145,22 @@ void main() {
       );
       await videoRecorder.captureFrame();
 
+      await PaintingLayerHelpers.addNewLayer(tester, _sunLayerName);
+      final Offset sunCenter = canvasCenter + _sunOffset;
       // ---------------------------------------------------------------
       // Draw Sun (rays gradient + circle)
       // ---------------------------------------------------------------
-      await PaintingLayerHelpers.addNewLayer(tester, _sunLayerName);
-      final Offset sunCenter = canvasCenter + _sunOffset;
       await performFloodFillGradient(
         tester,
-        gradientMode: FillMode.linear,
+        gradientMode: FillMode.radial,
         gradientPoints: <GradientPoint>[
-          GradientPoint(color: _sunRayColorCenter, offset: sunCenter),
-          GradientPoint(color: _sunRayColorEdge, offset: sunCenter + const Offset(_sunRayRadius, _sunRayRadius)),
+          GradientPoint(color: _sunRayColorCenter, offset: Offset(sunCenter.dx / 2, sunCenter.dy)),
+          GradientPoint(color: _sunRayColorEdge, offset: sunCenter + const Offset(40, 40)),
         ],
       );
+
+      await videoRecorder.captureFrame();
+
       await drawCircleWithHumanGestures(
         tester,
         center: sunCenter,
@@ -167,6 +169,7 @@ void main() {
         brushColor: Colors.transparent,
         fillColor: _sunBodyColor,
       );
+
       await videoRecorder.captureFrame();
 
       // ---------------------------------------------------------------

@@ -26,8 +26,11 @@ const double _humanDragSteps = 3;
 /// Device pixel ratio used for unit test screenshots.
 const double _unitTestDevicePixelRatio = 1.0;
 
-/// Subdirectory for unit test screenshot output.
-const String _unitTestScreenshotDirectoryName = 'unit_test_screenshots';
+/// Base output directory for generated unit test artifacts.
+const String _unitTestOutputDirectoryPath = 'test/output';
+
+/// Subdirectory for unit test screenshot output within [_unitTestOutputDirectoryPath].
+const String _unitTestScreenshotDirectoryName = 'screenshots';
 
 /// Subdirectory for video frame output within the screenshot directory.
 const String _videoFrameSubdirectoryName = 'video_frames';
@@ -42,7 +45,7 @@ const String _videoFrameFileExtension = 'png';
 const String _videoOutputFilename = 'unit_test_video.mp4';
 
 /// Frames per second for the assembled video.
-const int _videoFramesFps = 20;
+const int _videoFramesFps = 30;
 
 /// Width of the zero-padded frame index in filenames.
 const int _videoFrameIndexPadding = 6;
@@ -543,7 +546,7 @@ Future<void> saveUnitTestScreenshot(
       throw StateError('Failed to encode unit test screenshot');
     }
 
-    final Directory outputDir = Directory('build/$_unitTestScreenshotDirectoryName');
+    final Directory outputDir = Directory('$_unitTestOutputDirectoryPath/$_unitTestScreenshotDirectoryName');
     await outputDir.create(recursive: true);
     final File outputFile = File('${outputDir.path}/$filename');
     await outputFile.writeAsBytes(byteData.buffer.asUint8List());
@@ -572,7 +575,7 @@ Future<void> saveUnitTestArtworkScreenshot(
       img.encodeJpg(decoded, quality: AppDefaults.integrationEvidenceJpegQuality),
     );
 
-    final Directory outputDir = Directory('build/$_unitTestScreenshotDirectoryName');
+    final Directory outputDir = Directory('$_unitTestOutputDirectoryPath/$_unitTestScreenshotDirectoryName');
     await outputDir.create(recursive: true);
     final File outputFile = File('${outputDir.path}/$filename');
     await outputFile.writeAsBytes(jpgBytes);
@@ -580,7 +583,7 @@ Future<void> saveUnitTestArtworkScreenshot(
   });
 }
 
-/// Saves the current layered artwork as an ORA archive to the `test/` directory.
+/// Saves the current layered artwork as an ORA archive to the test output directory.
 ///
 /// Uses [WidgetTester.runAsync] for the same reason as [saveUnitTestScreenshot].
 Future<void> saveUnitTestOraArchive(
@@ -593,13 +596,15 @@ Future<void> saveUnitTestOraArchive(
   await tester.runAsync(() async {
     final List<int> bytes = await createOraAchive(layersProvider);
 
-    final File outputFile = File('test/$filename');
+    final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
+    await outputDir.create(recursive: true);
+    final File outputFile = File('${outputDir.path}/$filename');
     await outputFile.writeAsBytes(bytes);
     debugPrint('📦 Unit test ORA archive saved: ${outputFile.path}');
   });
 }
 
-/// Saves the current artwork as a flattened PNG to the `test/` directory.
+/// Saves the current artwork as a flattened PNG to the test output directory.
 Future<void> saveUnitTestPng(
   final WidgetTester tester, {
   required final String filename,
@@ -609,13 +614,15 @@ Future<void> saveUnitTestPng(
 
   await tester.runAsync(() async {
     final Uint8List bytes = await layersProvider.capturePainterToImageBytes();
-    final File outputFile = File('test/$filename');
+    final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
+    await outputDir.create(recursive: true);
+    final File outputFile = File('${outputDir.path}/$filename');
     await outputFile.writeAsBytes(bytes);
     debugPrint('📦 Unit test PNG saved: ${outputFile.path}');
   });
 }
 
-/// Saves the current artwork as a JPEG to the `test/` directory.
+/// Saves the current artwork as a JPEG to the test output directory.
 Future<void> saveUnitTestJpeg(
   final WidgetTester tester, {
   required final String filename,
@@ -626,13 +633,15 @@ Future<void> saveUnitTestJpeg(
   await tester.runAsync(() async {
     final Uint8List pngBytes = await layersProvider.capturePainterToImageBytes();
     final Uint8List jpgBytes = await convertToJpg(pngBytes);
-    final File outputFile = File('test/$filename');
+    final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
+    await outputDir.create(recursive: true);
+    final File outputFile = File('${outputDir.path}/$filename');
     await outputFile.writeAsBytes(jpgBytes);
     debugPrint('📦 Unit test JPEG saved: ${outputFile.path}');
   });
 }
 
-/// Saves all layers as a layered TIFF to the `test/` directory.
+/// Saves all layers as a layered TIFF to the test output directory.
 Future<void> saveUnitTestTiff(
   final WidgetTester tester, {
   required final String filename,
@@ -643,13 +652,15 @@ Future<void> saveUnitTestTiff(
   await tester.runAsync(() async {
     final String normalizedFileName = normalizeTiffExportFileName(filename);
     final Uint8List tiffBytes = await convertLayersToTiff(layersProvider);
-    final File outputFile = File('test/$normalizedFileName');
+    final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
+    await outputDir.create(recursive: true);
+    final File outputFile = File('${outputDir.path}/$normalizedFileName');
     await outputFile.writeAsBytes(tiffBytes);
     debugPrint('📦 Unit test TIFF saved: ${outputFile.path}');
   });
 }
 
-/// Saves the current artwork as a WebP to the `test/` directory.
+/// Saves the current artwork as a WebP to the test output directory.
 Future<void> saveUnitTestWebp(
   final WidgetTester tester, {
   required final String filename,
@@ -660,7 +671,9 @@ Future<void> saveUnitTestWebp(
   await tester.runAsync(() async {
     final ui.Image image = await layersProvider.capturePainterToImage();
     final Uint8List webpBytes = await convertImageToWebp(image);
-    final File outputFile = File('test/$filename');
+    final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
+    await outputDir.create(recursive: true);
+    final File outputFile = File('${outputDir.path}/$filename');
     await outputFile.writeAsBytes(webpBytes);
     debugPrint('📦 Unit test WebP saved: ${outputFile.path}');
   });
@@ -686,7 +699,7 @@ class UnitTestVideoRecorder {
   /// Initialize the frames directory, clearing any previous frames.
   Future<void> start() async {
     _framesDirectory = Directory(
-      'build/$_unitTestScreenshotDirectoryName/$_videoFrameSubdirectoryName',
+      '$_unitTestOutputDirectoryPath/$_unitTestScreenshotDirectoryName/$_videoFrameSubdirectoryName',
     );
 
     await _tester.runAsync(() async {
@@ -767,7 +780,9 @@ class UnitTestVideoRecorder {
         return;
       }
 
-      final String outputPath = 'test/$_videoOutputFilename';
+      final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
+      await outputDir.create(recursive: true);
+      final String outputPath = '${outputDir.path}/$_videoOutputFilename';
 
       final ProcessResult result = await Process.run(
         'ffmpeg',
