@@ -86,8 +86,8 @@ void main() {
       await tester.pump();
 
       expect(find.byType(MagnifyingEyeDropper), findsOneWidget);
-      expect(find.byIcon(Icons.close), findsOneWidget);
-      expect(find.byIcon(Icons.check), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('app_icon_close')), findsOneWidget);
+      expect(find.byKey(const ValueKey<String>('app_icon_check')), findsOneWidget);
       expect(find.byType(CustomPaint), findsWidgets);
     });
 
@@ -118,7 +118,12 @@ void main() {
 
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(
+        find.ancestor(
+          of: find.byKey(const ValueKey<String>('app_icon_close')),
+          matching: find.byType(IconButton),
+        ),
+      );
       await tester.pump();
 
       expect(closedCalled, true);
@@ -151,7 +156,12 @@ void main() {
 
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.check));
+      await tester.tap(
+        find.ancestor(
+          of: find.byKey(const ValueKey<String>('app_icon_check')),
+          matching: find.byType(IconButton),
+        ),
+      );
       await tester.pump();
 
       expect(colorPickedCalled, true);

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 /// Returns an icon widget for the given action type.
 Widget iconFromaActionType(
@@ -10,37 +11,34 @@ Widget iconFromaActionType(
 ) {
   switch (type) {
     case ActionType.pencil:
-      return iconAndColor(Icons.create, isSelected);
+      return iconFromAppIconSelected(AppIcon.create, isSelected);
     case ActionType.brush:
-      return iconAndColor(Icons.brush, isSelected);
+      return iconFromAppIconSelected(AppIcon.brush, isSelected);
     case ActionType.line:
-      return iconAndColor(Icons.line_axis, isSelected);
+      return iconFromAppIconSelected(AppIcon.lineAxis, isSelected);
     case ActionType.circle:
-      return iconAndColor(Icons.circle_outlined, isSelected);
+      return iconFromAppIconSelected(AppIcon.circle, isSelected);
     case ActionType.rectangle:
-      return iconAndColor(Icons.crop_square, isSelected);
+      return iconFromAppIconSelected(AppIcon.cropSquare, isSelected);
     case ActionType.region:
-      return iconAndColor(Icons.crop, isSelected);
+      return iconFromAppIconSelected(AppIcon.canvasCrop, isSelected);
     case ActionType.fill:
-      return iconAndColor(Icons.format_color_fill, isSelected);
+      return iconFromAppIconSelected(AppIcon.formatColorFill, isSelected);
     case ActionType.eraser:
       return iconFromSvgAsset(
-        'assets/icons/eraser.svg',
+        AppToolIconAssets.eraser,
         isSelected ? Colors.blue : Colors.white,
       );
     case ActionType.image:
-      return iconAndColor(Icons.image, isSelected);
+      return iconFromAppIconSelected(AppIcon.image, isSelected);
     case ActionType.cut:
-      return iconAndColor(Icons.crop_free, isSelected);
+      return iconFromAppIconSelected(AppIcon.cropFree, isSelected);
     case ActionType.selector:
-      return iconAndColor(Symbols.select, isSelected);
+      return iconFromSvgAsset(
+        AppToolIconAssets.selectorReplace,
+        isSelected ? Colors.blue : Colors.white,
+      );
     case ActionType.text:
-      return iconAndColor(Icons.font_download, isSelected);
+      return iconFromAppIconSelected(AppIcon.fontDownload, isSelected);
   }
-}
-
-/// Returns an icon widget with the given icon data and color.
-Icon iconAndColor(final IconData tool, [final bool isSelected = false]) {
-  final Color? color = isSelected ? Colors.blue : null;
-  return Icon(tool, color: color);
 }

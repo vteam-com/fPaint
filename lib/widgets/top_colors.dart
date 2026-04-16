@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
@@ -77,7 +79,7 @@ class TopColors extends StatelessWidget {
           children: <Widget>[
             if (!minimal) Text(l10n.topColors(colorUsages.length)),
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const AppSvgIcon(icon: AppIcon.refresh),
               onPressed: onRefresh,
             ),
           ],

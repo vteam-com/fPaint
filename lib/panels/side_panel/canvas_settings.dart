@@ -3,6 +3,8 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 
 const String _pxUnit = 'px';
@@ -81,8 +83,8 @@ void showCanvasSettings(final BuildContext context) {
                     ),
                   ),
                   IconButton(
-                    icon: Icon(
-                      layers.canvasResizeLockAspectRatio ? Icons.link : Icons.link_off,
+                    icon: AppSvgIcon(
+                      icon: layers.canvasResizeLockAspectRatio ? AppIcon.link : AppIcon.linkOff,
                     ),
                     onPressed: () {
                       final bool newLockState = !layers.canvasResizeLockAspectRatio;

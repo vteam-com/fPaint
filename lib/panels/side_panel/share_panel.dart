@@ -5,6 +5,8 @@ import 'package:fpaint/files/export_download_non_web.dart'
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 /// Returns a Text widget with the appropriate action text based on the platform.
@@ -41,7 +43,7 @@ void sharePanel(final BuildContext context) {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ListTile(
-                leading: const Icon(Icons.copy),
+                leading: const AppSvgIcon(icon: AppIcon.copy),
                 title: Text(l10n.copyToClipboard),
                 onTap: () {
                   Navigator.pop(context);
@@ -49,7 +51,7 @@ void sharePanel(final BuildContext context) {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.download),
+                leading: const AppSvgIcon(icon: AppIcon.download),
                 title: textAction('image.PNG', l10n),
                 onTap: () {
                   Navigator.pop(context);
@@ -57,7 +59,7 @@ void sharePanel(final BuildContext context) {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.download),
+                leading: const AppSvgIcon(icon: AppIcon.download),
                 title: textAction('image.JPG', l10n),
                 onTap: () {
                   Navigator.pop(context);
@@ -65,7 +67,7 @@ void sharePanel(final BuildContext context) {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.download),
+                leading: const AppSvgIcon(icon: AppIcon.download),
                 title: textAction('image.ORA', l10n),
                 onTap: () {
                   Navigator.pop(context);
@@ -73,7 +75,7 @@ void sharePanel(final BuildContext context) {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.download),
+                leading: const AppSvgIcon(icon: AppIcon.download),
                 title: textAction('image.WEBP', l10n),
                 onTap: () {
                   Navigator.pop(context);
@@ -81,7 +83,7 @@ void sharePanel(final BuildContext context) {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.download),
+                leading: const AppSvgIcon(icon: AppIcon.download),
                 title: textAction('image.TIF', l10n),
                 onTap: () {
                   Navigator.pop(context);

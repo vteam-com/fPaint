@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/text_object.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 
 /// Modal dialog used to create a new text object with style settings.
@@ -102,8 +104,8 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
               children: <Widget>[
                 // Bold toggle
                 IconButton(
-                  icon: Icon(
-                    Icons.format_bold,
+                  icon: AppSvgIcon(
+                    icon: AppIcon.formatBold,
                     color: _fontWeight == FontWeight.bold ? Colors.blue : Colors.grey,
                   ),
                   onPressed: () {
@@ -115,8 +117,8 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
 
                 // Italic toggle
                 IconButton(
-                  icon: Icon(
-                    Icons.format_italic,
+                  icon: AppSvgIcon(
+                    icon: AppIcon.formatItalic,
                     color: _fontStyle == FontStyle.italic ? Colors.blue : Colors.grey,
                   ),
                   onPressed: () {
@@ -138,7 +140,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.color_lens, color: Colors.white),
+                    icon: const AppSvgIcon(icon: AppIcon.colorLens, color: Colors.white),
                     onPressed: () async {
                       showColorPicker(
                         context: context,

@@ -7,6 +7,8 @@ import 'package:fpaint/panels/tools/tool_panel_picker.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/action_type_icon.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -17,7 +19,6 @@ import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
 import 'package:fpaint/widgets/top_colors.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 /// Represents a panel that displays tools for the application.
 /// The ToolsPanel is a stateless widget that displays a set of tools
@@ -107,7 +108,7 @@ class ToolsPanel extends StatelessWidget {
         minimal: minimal,
         name: 'Color Tolerance',
         childLeft: IconButton(
-          icon: const Icon(Icons.support),
+          icon: const AppSvgIcon(icon: AppIcon.support),
           color: Colors.grey.shade500,
           onPressed: () {
             showTolerancePicker(context, appProvider.tolerance, (final int newValue) {
@@ -246,7 +247,7 @@ class ToolsPanel extends StatelessWidget {
         minimal: minimal,
         name: 'Eraser',
         image: iconFromSvgAsset(
-          'assets/icons/eraser.svg',
+          AppToolIconAssets.eraser,
           selectedTool == ActionType.eraser ? Colors.blue : IconTheme.of(context).color!,
         ),
         onPressed: () {
@@ -298,10 +299,7 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: l10n.paste,
-        image: Icon(
-          Icons.paste,
-          color: IconTheme.of(context).color,
-        ),
+        image: AppSvgIcon(icon: AppIcon.paste, color: IconTheme.of(context).color),
         onPressed: () => appProvider.paste(),
       ),
     ];
@@ -333,10 +331,7 @@ class ToolsPanel extends StatelessWidget {
                   key: Keys.toolFillModeSolid,
                   minimal: minimal,
                   name: 'Solid',
-                  image: iconAndColor(
-                    Icons.square,
-                    appProvider.fillModel.mode == FillMode.solid,
-                  ),
+                  image: iconFromAppIconSelected(AppIcon.square, appProvider.fillModel.mode == FillMode.solid),
                   onPressed: () {
                     appProvider.fillModel.mode = FillMode.solid;
                     appProvider.update();
@@ -350,7 +345,7 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Linear Gradient',
                   image: iconFromSvgAsset(
-                    'assets/icons/fill_linear.svg',
+                    AppToolIconAssets.fillLinear,
                     appProvider.fillModel.mode == FillMode.linear ? Colors.blue : IconTheme.of(context).color!,
                   ),
                   onPressed: () {
@@ -367,7 +362,7 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Radial Gradient',
                   image: iconFromSvgAsset(
-                    'assets/icons/fill_radial.svg',
+                    AppToolIconAssets.fillRadial,
                     appProvider.fillModel.mode == FillMode.radial ? Colors.blue : IconTheme.of(context).color!,
                   ),
                   onPressed: () {
@@ -407,8 +402,8 @@ class ToolsPanel extends StatelessWidget {
                   key: Keys.toolSelectorModeRectangle,
                   minimal: minimal,
                   name: 'Rectangle',
-                  image: iconAndColor(
-                    Icons.highlight_alt,
+                  image: iconFromAppIconSelected(
+                    AppIcon.highlightAlt,
                     appProvider.selectorModel.mode == SelectorMode.rectangle,
                   ),
                   onPressed: () {
@@ -423,10 +418,7 @@ class ToolsPanel extends StatelessWidget {
                   key: Keys.toolSelectorModeCircle,
                   minimal: minimal,
                   name: 'Circle',
-                  image: iconAndColor(
-                    Symbols.lasso_select,
-                    appProvider.selectorModel.mode == SelectorMode.circle,
-                  ),
+                  image: iconFromAppIconSelected(AppIcon.circle, appProvider.selectorModel.mode == SelectorMode.circle),
                   onPressed: () {
                     appProvider.selectorModel.mode = SelectorMode.circle;
                     appProvider.update();
@@ -440,7 +432,7 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Lasso',
                   image: iconFromSvgAsset(
-                    'assets/icons/lasso.svg',
+                    AppToolIconAssets.lasso,
                     appProvider.selectorModel.mode == SelectorMode.lasso ? Colors.blue : IconTheme.of(context).color!,
                   ),
                   onPressed: () {
@@ -455,8 +447,8 @@ class ToolsPanel extends StatelessWidget {
                   key: Keys.toolSelectorModeWand,
                   minimal: minimal,
                   name: 'Magic',
-                  image: iconAndColor(
-                    Icons.auto_fix_high_outlined,
+                  image: iconFromAppIconSelected(
+                    AppIcon.autoFixHigh,
                     appProvider.selectorModel.mode == SelectorMode.wand,
                   ),
                   onPressed: () {
@@ -475,7 +467,7 @@ class ToolsPanel extends StatelessWidget {
                     minimal: minimal,
                     name: 'Replace',
                     image: iconFromSvgAssetSelected(
-                      'assets/icons/selector_replace.svg',
+                      AppToolIconAssets.selectorReplace,
                       appProvider.selectorModel.math == SelectorMath.replace,
                     ),
                     onPressed: () {
@@ -489,7 +481,7 @@ class ToolsPanel extends StatelessWidget {
                     minimal: minimal,
                     name: 'Add',
                     image: iconFromSvgAssetSelected(
-                      'assets/icons/selector_add.svg',
+                      AppToolIconAssets.selectorAdd,
                       appProvider.selectorModel.math == SelectorMath.add,
                     ),
                     onPressed: () {
@@ -503,7 +495,7 @@ class ToolsPanel extends StatelessWidget {
                     minimal: minimal,
                     name: 'Remove',
                     image: iconFromSvgAssetSelected(
-                      'assets/icons/selector_remove.svg',
+                      AppToolIconAssets.selectorRemove,
                       appProvider.selectorModel.math == SelectorMath.remove,
                     ),
                     onPressed: () {
@@ -519,7 +511,7 @@ class ToolsPanel extends StatelessWidget {
                     minimal: minimal,
                     name: 'Invert',
                     image: iconFromSvgAssetSelected(
-                      'assets/icons/selector_invert.svg',
+                      AppToolIconAssets.selectorInvert,
                       false,
                     ),
                     onPressed: () {
@@ -539,10 +531,7 @@ class ToolsPanel extends StatelessWidget {
                   ToolPanelPicker(
                     minimal: minimal,
                     name: 'Crop',
-                    image: iconAndColor(
-                      Icons.crop,
-                      false,
-                    ),
+                    image: iconFromAppIconSelected(AppIcon.canvasCrop, false),
                     onPressed: () {
                       final ShellProvider shellProvider = ShellProvider.of(context);
                       shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
@@ -558,8 +547,8 @@ class ToolsPanel extends StatelessWidget {
                     key: Keys.toolSelectorCancel,
                     minimal: minimal,
                     name: 'Cancel',
-                    image: iconAndColor(
-                      Symbols.remove_selection,
+                    image: iconFromSvgAssetSelected(
+                      AppToolIconAssets.selectorRemove,
                       false,
                     ),
                     onPressed: () {
@@ -591,7 +580,7 @@ class ToolsPanel extends StatelessWidget {
               name: title,
               childLeft: IconButton(
                 key: const Key('tool_brush_size_button'),
-                icon: const Icon(Icons.line_weight),
+                icon: const AppSvgIcon(icon: AppIcon.lineWeight),
                 color: Colors.grey.shade500,
                 constraints: minimal ? const BoxConstraints() : null,
                 padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
@@ -631,7 +620,7 @@ class ToolsPanel extends StatelessWidget {
               minimal: minimal,
               name: 'Brush Style',
               childLeft: IconButton(
-                icon: const Icon(Icons.line_style_outlined),
+                icon: const AppSvgIcon(icon: AppIcon.lineStyle),
                 color: Colors.grey.shade500,
                 constraints: minimal ? const BoxConstraints() : null,
                 padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
@@ -716,7 +705,7 @@ class ToolsPanel extends StatelessWidget {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.colorize_outlined),
+              icon: const AppSvgIcon(icon: AppIcon.colorize),
               onPressed: onPickFromCanvas,
             ),
           ],

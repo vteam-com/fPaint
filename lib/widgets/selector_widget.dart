@@ -6,6 +6,8 @@ import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
@@ -256,11 +258,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
         color: AppColors.selected,
         cursor: SystemMouseCursors.click,
         onTap: widget.onCopy,
-        child: const Icon(
-          Icons.copy,
-          size: AppLayout.iconSize,
-          color: Colors.white,
-        ),
+        child: const AppSvgIcon(icon: AppIcon.copy, size: AppLayout.iconSize, color: Colors.white),
       ),
     );
   }
@@ -369,11 +367,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
                 },
                 onPanEnd: (final DragEndDetails _) => _endFeedback(),
                 onPanCancel: _endFeedback,
-                child: const Icon(
-                  Icons.open_in_full,
-                  size: AppLayout.iconSize,
-                  color: Colors.white,
-                ),
+                child: const AppSvgIcon(icon: AppIcon.openInFull, size: AppLayout.iconSize, color: Colors.white),
               ),
               buildOverlayCircleButton(
                 tooltip: l10n.resizeRotate,
@@ -396,11 +390,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
                 },
                 onPanEnd: (final DragEndDetails _) => _endFeedback(),
                 onPanCancel: _endFeedback,
-                child: const Icon(
-                  Icons.rotate_right,
-                  size: AppLayout.iconSize,
-                  color: Colors.white,
-                ),
+                child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: Colors.white),
               ),
               buildOverlayCircleButton(
                 tooltip: l10n.transform,

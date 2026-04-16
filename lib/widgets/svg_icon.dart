@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 
 /// Creates an [SvgPicture] widget from an SVG asset.
 ///
@@ -17,6 +19,25 @@ Widget iconFromSvgAsset(
     width: AppLayout.iconSize,
     height: AppLayout.iconSize,
     colorFilter: ColorFilter.mode(color, BlendMode.srcATop),
+  );
+}
+
+/// Creates an app SVG icon from an [AppIcon].
+Widget iconFromAppIcon(
+  final AppIcon icon, [
+  final Color color = Colors.white,
+]) {
+  return AppSvgIcon(icon: icon, color: color);
+}
+
+/// Creates an app SVG icon from an [AppIcon], tinted based on selection state.
+Widget iconFromAppIconSelected(
+  final AppIcon icon,
+  final bool isSelected,
+) {
+  return iconFromAppIcon(
+    icon,
+    isSelected ? Colors.blue : Colors.white,
   );
 }
 

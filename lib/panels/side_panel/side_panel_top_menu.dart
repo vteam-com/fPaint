@@ -5,6 +5,8 @@ import 'package:fpaint/panels/side_panel/menu.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_svg_icon.dart';
 
 /// A widget that displays the top menu of the side panel.
 class SidePanelTopMenu extends StatelessWidget {
@@ -27,25 +29,25 @@ class SidePanelTopMenu extends StatelessWidget {
         if (shellProvider.isSidePanelExpanded)
           buildIconButton(
             tooltip: l10n.startOverTooltip,
-            icon: Icons.power_settings_new_outlined,
+            icon: AppIcon.powerSettingsNew,
             onPressed: () => onFileNew(context),
           ),
         if (shellProvider.isSidePanelExpanded)
           buildIconButton(
             tooltip: l10n.importTooltip,
-            icon: Icons.file_download_outlined,
+            icon: AppIcon.fileDownload,
             onPressed: () => onFileOpen(context),
           ),
         if (shellProvider.isSidePanelExpanded)
           buildIconButton(
             tooltip: l10n.exportTooltip,
-            icon: Icons.ios_share_outlined,
+            icon: AppIcon.iosShare,
             onPressed: () => sharePanel(context),
           ),
         if (shellProvider.isSidePanelExpanded) // Show when panel is expanded
           buildIconButton(
             tooltip: l10n.rotateCanvasTooltip,
-            icon: Icons.rotate_90_degrees_cw_outlined,
+            icon: AppIcon.rotate90DegreesCw,
             onPressed: () async {
               final AppProvider appProvider = AppProvider.of(context);
               await appProvider.rotateCanvas90();
@@ -55,8 +57,8 @@ class SidePanelTopMenu extends StatelessWidget {
           buildIconButton(
             tooltip: l10n.exportTooltip,
             icon: shellProvider.isSidePanelExpanded
-                ? Icons.keyboard_double_arrow_left
-                : Icons.keyboard_double_arrow_right,
+                ? AppIcon.keyboardDoubleArrowLeft
+                : AppIcon.keyboardDoubleArrowRight,
             onPressed: () {
               shellProvider.isSidePanelExpanded = !shellProvider.isSidePanelExpanded;
             },
@@ -68,12 +70,12 @@ class SidePanelTopMenu extends StatelessWidget {
   /// Builds an icon button.
   Widget buildIconButton({
     required final String tooltip,
-    required final IconData icon,
+    required final AppIcon icon,
     required final VoidCallback onPressed,
   }) {
     return IconButton(
       tooltip: tooltip,
-      icon: Icon(icon),
+      icon: AppSvgIcon(icon: icon),
       onPressed: onPressed,
     );
   }
@@ -82,12 +84,12 @@ class SidePanelTopMenu extends StatelessWidget {
 /// Builds an icon button.
 Widget buildIconButton({
   required final String tooltip,
-  required final IconData icon,
+  required final AppIcon icon,
   required final VoidCallback onPressed,
 }) {
   return IconButton(
     tooltip: tooltip,
-    icon: Icon(icon),
+    icon: AppSvgIcon(icon: icon),
     onPressed: onPressed,
   );
 }

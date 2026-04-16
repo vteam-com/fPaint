@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 /// The application display name.
 const String appName = 'fPaint';
 
+/// Non-user-facing key prefix for identifying SVG icons in widget tests.
+const String appIconKeyPrefix = 'app_icon_';
+
 /// Application color constants for consistent theming
 class AppColors {
   // Primary colors
@@ -107,6 +110,86 @@ class AppLayout {
   static const double layerTitleFontSize = 13.0;
   static const double platformTitleFontSize = 18.0;
   static const double inputFieldWidth = 150.0;
+}
+
+/// SVG asset paths for app icons (non-user-facing).
+class AppIconAssets {
+  static const String arrowDown = 'assets/icons/arrow_down.svg';
+  static const String arrowDownLeft = 'assets/icons/arrow_down_left.svg';
+  static const String arrowDownRight = 'assets/icons/arrow_down_right.svg';
+  static const String arrowDropDown = 'assets/icons/arrow_drop_down.svg';
+  static const String arrowLeft = 'assets/icons/arrow_left.svg';
+  static const String arrowRight = 'assets/icons/arrow_right.svg';
+  static const String arrowUp = 'assets/icons/arrow_up.svg';
+  static const String arrowUpLeft = 'assets/icons/arrow_up_left.svg';
+  static const String arrowUpRight = 'assets/icons/arrow_up_right.svg';
+  static const String autoFixHigh = 'assets/icons/auto_fix_high.svg';
+  static const String blender = 'assets/icons/blender.svg';
+  static const String brush = 'assets/icons/brush.svg';
+  static const String canvasCrop = 'assets/icons/crop.svg';
+  static const String check = 'assets/icons/check.svg';
+  static const String checkCircle = 'assets/icons/check_circle.svg';
+  static const String circle = 'assets/icons/circle.svg';
+  static const String close = 'assets/icons/close.svg';
+  static const String colorLens = 'assets/icons/color_lens.svg';
+  static const String colorize = 'assets/icons/colorize.svg';
+  static const String contentPasteGo = 'assets/icons/content_paste_go.svg';
+  static const String copy = 'assets/icons/copy.svg';
+  static const String create = 'assets/icons/create.svg';
+  static const String cropFree = 'assets/icons/crop_free.svg';
+  static const String cropSquare = 'assets/icons/crop_square.svg';
+  static const String download = 'assets/icons/download.svg';
+  static const String edit = 'assets/icons/edit.svg';
+  static const String fileDownload = 'assets/icons/file_download.svg';
+  static const String fontDownload = 'assets/icons/font_download.svg';
+  static const String formatBold = 'assets/icons/format_bold.svg';
+  static const String formatColorFill = 'assets/icons/format_color_fill.svg';
+  static const String formatItalic = 'assets/icons/format_italic.svg';
+  static const String formatSize = 'assets/icons/format_size.svg';
+  static const String highlightAlt = 'assets/icons/highlight_alt.svg';
+  static const String image = 'assets/icons/image.svg';
+  static const String info = 'assets/icons/info.svg';
+  static const String iosShare = 'assets/icons/ios_share.svg';
+  static const String keyboardDoubleArrowLeft = 'assets/icons/keyboard_double_arrow_left.svg';
+  static const String keyboardDoubleArrowRight = 'assets/icons/keyboard_double_arrow_right.svg';
+  static const String layers = 'assets/icons/layers.svg';
+  static const String lineAxis = 'assets/icons/line_axis.svg';
+  static const String lineStyle = 'assets/icons/line_style.svg';
+  static const String lineWeight = 'assets/icons/line_weight.svg';
+  static const String link = 'assets/icons/link.svg';
+  static const String linkOff = 'assets/icons/link_off.svg';
+  static const String menu = 'assets/icons/menu.svg';
+  static const String moreVert = 'assets/icons/more_vert.svg';
+  static const String openInFull = 'assets/icons/open_in_full.svg';
+  static const String outbound = 'assets/icons/outbound.svg';
+  static const String paste = 'assets/icons/paste.svg';
+  static const String playlistAdd = 'assets/icons/playlist_add.svg';
+  static const String playlistRemove = 'assets/icons/playlist_remove.svg';
+  static const String powerSettingsNew = 'assets/icons/power_settings_new.svg';
+  static const String redo = 'assets/icons/redo.svg';
+  static const String refresh = 'assets/icons/refresh.svg';
+  static const String rotate90DegreesCw = 'assets/icons/rotate_90_degrees_cw.svg';
+  static const String rotateRight = 'assets/icons/rotate_right.svg';
+  static const String settings = 'assets/icons/settings.svg';
+  static const String square = 'assets/icons/square.svg';
+  static const String support = 'assets/icons/support.svg';
+  static const String undo = 'assets/icons/undo.svg';
+  static const String visibility = 'assets/icons/visibility.svg';
+  static const String visibilityOff = 'assets/icons/visibility_off.svg';
+  static const String zoomIn = 'assets/icons/zoom_in.svg';
+  static const String zoomOut = 'assets/icons/zoom_out.svg';
+}
+
+/// SVG asset paths for tool icons (non-user-facing).
+class AppToolIconAssets {
+  static const String eraser = 'assets/icons/eraser.svg';
+  static const String fillLinear = 'assets/icons/fill_linear.svg';
+  static const String fillRadial = 'assets/icons/fill_radial.svg';
+  static const String lasso = 'assets/icons/lasso.svg';
+  static const String selectorAdd = 'assets/icons/selector_add.svg';
+  static const String selectorInvert = 'assets/icons/selector_invert.svg';
+  static const String selectorRemove = 'assets/icons/selector_remove.svg';
+  static const String selectorReplace = 'assets/icons/selector_replace.svg';
 }
 
 /// Shared divider and border tokens.

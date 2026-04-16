@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
@@ -60,7 +61,7 @@ class MainScreen extends StatelessWidget {
               ),
         floatingActionButton: shellMode == ShellMode.hidden
             ? myFloatButton(
-                icon: Icons.more_vert,
+                icon: AppIcon.moreVert,
                 onPressed: () {
                   Future<void>.microtask(() {
                     shellProvider.shellMode = ShellMode.full;
