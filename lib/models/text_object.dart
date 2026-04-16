@@ -8,6 +8,7 @@ class TextObject {
     required this.position,
     required this.color,
     required this.size,
+    this.fontFamily,
     this.fontWeight = FontWeight.normal,
     this.fontStyle = FontStyle.normal,
   });
@@ -16,6 +17,7 @@ class TextObject {
   Offset position;
   Color color;
   double size;
+  String? fontFamily;
   FontWeight fontWeight;
   FontStyle fontStyle;
 
@@ -29,6 +31,7 @@ class TextObject {
       text: TextSpan(
         text: text,
         style: TextStyle(
+          fontFamily: fontFamily,
           fontSize: size,
           color: color,
           fontWeight: fontWeight,

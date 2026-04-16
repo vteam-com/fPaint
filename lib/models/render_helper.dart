@@ -338,6 +338,7 @@ void renderText(
       ui.ParagraphBuilder(
           ui.ParagraphStyle(
             textAlign: TextAlign.left,
+            fontFamily: textObject.fontFamily,
             fontSize: textObject.size,
             height: AppVisual.iconScale, // Better line height for readability
           ),
@@ -345,6 +346,7 @@ void renderText(
         ..pushStyle(
           ui.TextStyle(
             color: textObject.color,
+            fontFamily: textObject.fontFamily,
             fontWeight: textObject.fontWeight,
             fontStyle: textObject.fontStyle,
             fontSize: textObject.size,
