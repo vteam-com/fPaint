@@ -416,7 +416,7 @@ void main() {
       final TextObject signatureTextObject = TextObject(
         text: _signatureText,
         position: Offset.zero,
-        color: Colors.white,
+        color: const Color.fromARGB(255, 1, 43, 8),
         size: _signatureFontSize,
         fontFamily: _signatureFontFamily,
         fontWeight: FontWeight.bold,
