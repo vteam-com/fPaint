@@ -379,6 +379,7 @@ Future<void> performFloodFillGradient(
   final WidgetTester tester, {
   required final FillMode gradientMode,
   required final List<GradientPoint> gradientPoints,
+  Offset Function(Offset)? toCanvas,
 }) async {
   final BuildContext context = tester.element(find.byType(MainView));
   final AppProvider appProvider = AppProvider.of(context, listen: false);
@@ -400,7 +401,7 @@ Future<void> performFloodFillGradient(
       fillModel: fillModel,
       tolerance: appProvider.tolerance,
       clipPath: null,
-      toCanvas: appProvider.toCanvas,
+      toCanvas: toCanvas ?? appProvider.toCanvas,
     );
     appProvider.recordExecuteDrawingActionToSelectedLayer(action: action);
   });
