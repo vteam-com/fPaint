@@ -26,6 +26,7 @@ jobs:
         with:
           name: flutter-windows-app
           path: build/windows/x64/runner/Release/**
+          retention-days: 14
 
   build-linux:
     name: Build Linux
@@ -54,6 +55,7 @@ jobs:
         with:
           name: flutter-linux-app
           path: build/linux/
+          retention-days: 14
 
   build-macos:
     name: Build macOS
@@ -77,43 +79,4 @@ jobs:
         with:
           name: flutter-macos-app
           path: build/macos/Build/Products/Release/
-
-  # cleanup_artifacts:
-  #   needs:
-  #     - build-windows
-  #     - build-linux
-  #     - build-macos
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: List Artifacts
-  #       id: list_artifacts
-  #       uses: actions/github-script@v6
-  #       with:
-  #         script: |
-  #           const artifacts = await github.rest.actions.listArtifactsForRepo({
-  #             owner: context.repo.owner,
-  #             repo: context.repo.repo,
-  #             per_page: 100,
-  #           });
-  #           return artifacts.data.artifacts;
-
-  #     - name: Delete Old Artifacts
-  #       uses: actions/github-script@v6
-  #       with:
-  #         script: |
-  #           const artifacts = ${{ steps.list_artifacts.outputs.result }};
-  #           const artifactsToKeep = 6;
-
-  #           if (artifacts.length > artifactsToKeep) {
-  #             const oldArtifacts = artifacts.slice(artifactsToKeep);
-  #             for (const artifact of oldArtifacts) {
-  #               await github.rest.actions.deleteArtifact({
-  #                 owner: context.repo.owner,
-  #                 repo: context.repo.repo,
-  #                 artifact_id: artifact.id,
-  #               });
-  #               console.log(`Deleted artifact: ${artifact.name}`);
-  #             }
-  #           } else {
-  #             console.log("No artifacts to delete.");
-  #           }
+          retention-days: 14
