@@ -9,6 +9,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/render_helper.dart';
+import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:provider/provider.dart';
 
@@ -267,6 +268,22 @@ class LayerProvider extends ChangeNotifier {
         );
       }
 
+      // Rotate the text object position: (x,y) -> (H_old - y - textHeight, x)
+      TextObject? newTextObject;
+      if (oldAction.textObject != null) {
+        final TextObject t = oldAction.textObject!;
+        final Rect bounds = t.getBounds();
+        newTextObject = TextObject(
+          text: t.text,
+          position: Offset(oldCanvasHeight - t.position.dy - bounds.height, t.position.dx),
+          color: t.color,
+          size: t.size,
+          fontFamily: t.fontFamily,
+          fontWeight: t.fontWeight,
+          fontStyle: t.fontStyle,
+        );
+      }
+
       newActionStack.add(
         UserActionDrawing(
           action: oldAction.action,
@@ -277,6 +294,7 @@ class LayerProvider extends ChangeNotifier {
           path: newPath,
           image: newImage,
           clipPath: newClipPath,
+          textObject: newTextObject,
         ),
       );
     }
@@ -286,6 +304,123 @@ class LayerProvider extends ChangeNotifier {
 
     // The layer's own size will be updated by LayersProvider after all layers are processed.
     clearCache();
+  }
+
+  /// Flips all actions and content in the layer horizontally (left ↔ right).
+  ///
+  /// [canvasSize] is the current canvas size used to compute mirrored positions.
+  Future<void> flipHorizontal(final Size canvasSize) => _flip(canvasSize, isHorizontal: true);
+
+  /// Flips all actions and content in the layer vertically (top ↔ bottom).
+  ///
+  /// [canvasSize] is the current canvas size used to compute mirrored positions.
+  Future<void> flipVertical(final Size canvasSize) => _flip(canvasSize, isHorizontal: false);
+
+  /// Shared implementation for flipping layer content on one axis.
+  Future<void> _flip(final Size canvasSize, {required final bool isHorizontal}) async {
+    final double extent = isHorizontal ? canvasSize.width : canvasSize.height;
+    final List<UserActionDrawing> newActionStack = <UserActionDrawing>[];
+
+    for (final UserActionDrawing oldAction in actionStack) {
+      final List<Offset> newPositions = List<Offset>.from(oldAction.positions);
+      for (int i = 0; i < newPositions.length; i++) {
+        final Offset oldPos = newPositions[i];
+        newPositions[i] = isHorizontal ? Offset(extent - oldPos.dx, oldPos.dy) : Offset(oldPos.dx, extent - oldPos.dy);
+      }
+
+      final ui.Path? newPath = _transformPath(oldAction.path, extent, isHorizontal: isHorizontal);
+      final ui.Path? newClipPath = _transformPath(oldAction.clipPath, extent, isHorizontal: isHorizontal);
+      final ui.Image? newImage = await _flipImage(oldAction.image, isHorizontal: isHorizontal);
+      final TextObject? newTextObject = _flipTextObject(oldAction.textObject, extent, isHorizontal: isHorizontal);
+
+      newActionStack.add(
+        UserActionDrawing(
+          action: oldAction.action,
+          positions: newPositions,
+          brush: oldAction.brush,
+          fillColor: oldAction.fillColor,
+          gradient: oldAction.gradient,
+          path: newPath,
+          image: newImage,
+          clipPath: newClipPath,
+          textObject: newTextObject,
+        ),
+      );
+    }
+
+    actionStack.clear();
+    actionStack.addAll(newActionStack);
+    clearCache();
+  }
+
+  /// Transforms a path for a flip operation.
+  ui.Path? _transformPath(
+    final ui.Path? path,
+    final double extent, {
+    required final bool isHorizontal,
+  }) {
+    if (path == null) {
+      return null;
+    }
+    final Matrix4 matrix = Matrix4.identity();
+    if (isHorizontal) {
+      matrix.setEntry(0, 0, -1.0);
+      matrix.setEntry(0, AppMath.triple, extent);
+    } else {
+      matrix.setEntry(1, 1, -1.0);
+      matrix.setEntry(1, AppMath.triple, extent);
+    }
+    return path.transform(matrix.storage);
+  }
+
+  /// Flips an image horizontally or vertically.
+  Future<ui.Image?> _flipImage(
+    final ui.Image? image, {
+    required final bool isHorizontal,
+  }) async {
+    if (image == null) {
+      return null;
+    }
+    final double w = image.width.toDouble();
+    final double h = image.height.toDouble();
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    if (isHorizontal) {
+      canvas.translate(w, 0);
+      canvas.scale(-1, 1);
+    } else {
+      canvas.translate(0, h);
+      canvas.scale(1, -1);
+    }
+    canvas.drawImage(image, Offset.zero, Paint());
+
+    return recorder.endRecording().toImage(w.toInt(), h.toInt());
+  }
+
+  /// Flips a text object's position for a flip operation.
+  TextObject? _flipTextObject(
+    final TextObject? textObject,
+    final double extent, {
+    required final bool isHorizontal,
+  }) {
+    if (textObject == null) {
+      return null;
+    }
+    final Rect bounds = textObject.getBounds();
+    final Offset oldPos = textObject.position;
+    final Offset newPos = isHorizontal
+        ? Offset(extent - oldPos.dx - bounds.width, oldPos.dy)
+        : Offset(oldPos.dx, extent - oldPos.dy - bounds.height);
+    return TextObject(
+      text: textObject.text,
+      position: newPos,
+      color: textObject.color,
+      size: textObject.size,
+      fontFamily: textObject.fontFamily,
+      fontWeight: textObject.fontWeight,
+      fontStyle: textObject.fontStyle,
+    );
   }
 
   /// Gets the last user action performed on the layer.

@@ -96,6 +96,8 @@
       "extension": {}
     }
   },
+  "flipHorizontalTooltip": "Retourner horizontalement",
+  "flipVerticalTooltip": "Retourner verticalement",
   "fontColor": "Couleur de police",
   "fontSizeLabel": "Taille de police",
   "fontSizeValue": "Taille de police : {value}",

@@ -103,6 +103,8 @@
       "extension": {}
     }
   },
+  "flipHorizontalTooltip": "Flip Horizontal",
+  "flipVerticalTooltip": "Flip Vertical",
   "fontColor": "Font Color",
   "fontSizeLabel": "Font Size",
   "fontSizeValue": "Font Size: {value}",

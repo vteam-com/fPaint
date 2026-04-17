@@ -97,6 +97,8 @@
       "extension": {}
     }
   },
+  "flipHorizontalTooltip": "Voltear horizontalmente",
+  "flipVerticalTooltip": "Voltear verticalmente",
   "fontColor": "Color de fuente",
   "fontSizeLabel": "Tamano de fuente",
   "fontSizeValue": "Tamano de fuente: {value}",

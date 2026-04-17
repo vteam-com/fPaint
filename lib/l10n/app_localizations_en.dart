@@ -128,16 +128,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
-  String dimensionsValue(Object width, Object height) {
-    return '$width × $height';
-  }
-
-  @override
   String get desktopSoftware => 'Desktop Software.';
 
   @override
   String deviceScreenResolution(Object resolution) {
     return 'Device Screen Resolution: $resolution';
+  }
+
+  @override
+  String dimensionsValue(Object width, Object height) {
+    return '$width × $height';
   }
 
   @override
@@ -264,18 +264,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no => 'No';
 
   @override
+  String get paste => 'Paste';
+
+  @override
   String percentageValue(Object value) {
     return '$value%';
   }
-
-  @override
-  String get paste => 'Paste';
 
   @override
   String get platforms => 'Available on...';
 
   @override
   String get resizeRotate => 'Resize / Rotate';
+
+  @override
+  String get flipHorizontalTooltip => 'Flip Horizontal';
+
+  @override
+  String get flipVerticalTooltip => 'Flip Vertical';
 
   @override
   String get rotateCanvasTooltip => 'Rotate Canvas 90° CW';

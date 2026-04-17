@@ -4,6 +4,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-04-17
+
+### Add
+
+- WEBP image format support
+- Copy & Paste UX for touch devices
+- Display dimensions when drawing the selection rectangle
+- Haptic feedback on scale and rotate gestures
+- SVG icons replacing Cupertino icons
+- Video recording of test runs
+- Test interaction overlay with tap target visualization
+
+### Update
+
+- Replaced integration tests with unit tests
+- Use structured logging instead of debugPrint
+- Use Roboto font in test runs for consistency
+- Node.js 24 and Flutter 3.41.7
+
+### Fix
+
+- Crash when flipping canvas with text objects
+- Crash when rotating canvas with text objects
+- TIF export
+- Hardcoded flip action names now use localized strings
+
+### Remove
+
+- cupertino_icons dependency
+
 ## [1.2.0] - 2026-04-10
 
 ### Add

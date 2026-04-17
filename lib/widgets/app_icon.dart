@@ -29,6 +29,8 @@ enum AppIcon {
   download,
   edit,
   fileDownload,
+  flipHorizontal,
+  flipVertical,
   fontDownload,
   formatBold,
   formatColorFill,
@@ -126,6 +128,10 @@ extension AppIconAssetPath on AppIcon {
         return AppIconAssets.edit;
       case AppIcon.fileDownload:
         return AppIconAssets.fileDownload;
+      case AppIcon.flipHorizontal:
+        return AppIconAssets.flipHorizontal;
+      case AppIcon.flipVertical:
+        return AppIconAssets.flipVertical;
       case AppIcon.fontDownload:
         return AppIconAssets.fontDownload;
       case AppIcon.formatBold:

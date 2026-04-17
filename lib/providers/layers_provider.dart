@@ -525,6 +525,38 @@ class LayersProvider extends ChangeNotifier {
     );
   }
 
+  /// Flips the entire canvas and all its layers horizontally (left ↔ right).
+  Future<void> flipCanvasHorizontal(final String actionName) => _flipCanvas(isHorizontal: true, actionName: actionName);
+
+  /// Flips the entire canvas and all its layers vertically (top ↔ bottom).
+  Future<void> flipCanvasVertical(final String actionName) => _flipCanvas(isHorizontal: false, actionName: actionName);
+
+  /// Shared implementation for flipping all layers on one axis.
+  Future<void> _flipCanvas({
+    required final bool isHorizontal,
+    required final String actionName,
+  }) async {
+    final UndoProvider undoProvider = UndoProvider();
+    final Size canvasSize = Size(width, height);
+
+    Future<void> applyFlip() async {
+      for (final LayerProvider layer in _list) {
+        if (isHorizontal) {
+          await layer.flipHorizontal(canvasSize);
+        } else {
+          await layer.flipVertical(canvasSize);
+        }
+      }
+      this.update();
+    }
+
+    undoProvider.executeAction(
+      name: actionName,
+      forward: applyFlip,
+      backward: applyFlip,
+    );
+  }
+
   /// Captures the canvas panel to an image and returns the image bytes.
   Future<Uint8List> capturePainterToImageBytes() async {
     final ui.Image image = await capturePainterToImage();
