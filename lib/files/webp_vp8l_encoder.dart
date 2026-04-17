@@ -205,7 +205,7 @@ class WebPVp8LEncoder {
     return out.getBytes();
   }
 
-  /// Tokenizes pixel data using hash-chain LZ77 back-reference matching.
+  /// Tokenises pixel data using hash-chain LZ77 back-reference matching.
   _WebPTokenStream _tokenize(
     Uint8List r,
     Uint8List g,

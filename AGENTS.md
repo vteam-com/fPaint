@@ -19,3 +19,8 @@
 
 - After any code change, `tool/check.sh` must pass with a clean report before the work is considered complete.
 - Fix all flagged issues (documentation, hardcoded strings, magic numbers, lint warnings) before finishing.
+
+## Testing Rules
+
+- When a test performs a tap (via `tapLikeHuman`, `tapByKey`, or `tapByTooltip`), a red target overlay must be drawn at the tap position and the frame saved to the video when a `UnitTestVideoRecorder` is active.
+- Any new tap helper must call `UnitTestVideoRecorder.captureAfterInteraction(tester)` after performing the tap and recording the interaction.
