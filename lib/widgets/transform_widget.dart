@@ -13,7 +13,7 @@ import 'package:fpaint/widgets/svg_icon.dart';
 
 /// An overlay widget that lets the user interactively skew and change
 /// perspective of a selected region by dragging corner and edge handles.
-class TransformWidget extends StatelessWidget {
+class TransformWidget extends StatefulWidget {
   /// Creates a [TransformWidget].
   const TransformWidget({
     super.key,
@@ -42,6 +42,13 @@ class TransformWidget extends StatelessWidget {
 
   /// Called when the user commits the transform.
   final VoidCallback onConfirm;
+
+  @override
+  State<TransformWidget> createState() => _TransformWidgetState();
+}
+
+class _TransformWidgetState extends State<TransformWidget> {
+  bool _showCoordinates = false;
   @override
   Widget build(final BuildContext context) {
     final ui.Image? image = model.sourceImage;
@@ -84,43 +91,120 @@ class TransformWidget extends StatelessWidget {
 
           if (model.isDeformMode) ...<Widget>[
             // Corner handles (perspective)
-            _buildCornerHandle(TransformModel.topLeftIndex, screenCorners[TransformModel.topLeftIndex]),
-            _buildCornerHandle(TransformModel.topRightIndex, screenCorners[TransformModel.topRightIndex]),
-            _buildCornerHandle(TransformModel.bottomRightIndex, screenCorners[TransformModel.bottomRightIndex]),
-            _buildCornerHandle(TransformModel.bottomLeftIndex, screenCorners[TransformModel.bottomLeftIndex]),
+            OverlayDragHandle(
+              position: screenCorners[TransformModel.topLeftIndex],
+              cursor: SystemMouseCursors.grab,
+              showCoordinates: _showCoordinates,
+              onPanUpdate: (final DragUpdateDetails details) {
+                _beginHandleDrag();
+                model.moveCorner(TransformModel.topLeftIndex, details.delta / canvasScale);
+                onChanged();
+              },
+              onPanEnd: _endHandleDrag,
+            ),
+            OverlayDragHandle(
+              position: screenCorners[TransformModel.topRightIndex],
+              cursor: SystemMouseCursors.grab,
+              showCoordinates: _showCoordinates,
+              onPanUpdate: (final DragUpdateDetails details) {
+                _beginHandleDrag();
+                model.moveCorner(TransformModel.topRightIndex, details.delta / canvasScale);
+                onChanged();
+              },
+              onPanEnd: _endHandleDrag,
+            ),
+            OverlayDragHandle(
+              position: screenCorners[TransformModel.bottomRightIndex],
+              cursor: SystemMouseCursors.grab,
+              showCoordinates: _showCoordinates,
+              onPanUpdate: (final DragUpdateDetails details) {
+                _beginHandleDrag();
+                model.moveCorner(TransformModel.bottomRightIndex, details.delta / canvasScale);
+                onChanged();
+              },
+              onPanEnd: _endHandleDrag,
+            ),
+            OverlayDragHandle(
+              position: screenCorners[TransformModel.bottomLeftIndex],
+              cursor: SystemMouseCursors.grab,
+              showCoordinates: _showCoordinates,
+              onPanUpdate: (final DragUpdateDetails details) {
+                _beginHandleDrag();
+                model.moveCorner(TransformModel.bottomLeftIndex, details.delta / canvasScale);
+                onChanged();
+              },
+              onPanEnd: _endHandleDrag,
+            ),
 
             // Edge midpoint handles (skew)
-            _buildEdgeHandle(
-              TransformModel.topLeftIndex,
-              TransformModel.topRightIndex,
-              topMid,
+            OverlayDragHandle(
+              position: topMid,
+              cursor: SystemMouseCursors.grab,
+              showCoordinates: _showCoordinates,
+              onPanUpdate: (final DragUpdateDetails details) {
+                _beginHandleDrag();
+                model.moveEdge(TransformModel.topLeftIndex, TransformModel.topRightIndex, details.delta / canvasScale);
+                onChanged();
+              },
+              onPanEnd: _endHandleDrag,
             ),
-            _buildEdgeHandle(
-              TransformModel.topRightIndex,
-              TransformModel.bottomRightIndex,
-              rightMid,
+            OverlayDragHandle(
+              position: rightMid,
+              cursor: SystemMouseCursors.grab,
+              showCoordinates: _showCoordinates,
+              onPanUpdate: (final DragUpdateDetails details) {
+                _beginHandleDrag();
+                model.moveEdge(
+                  TransformModel.topRightIndex,
+                  TransformModel.bottomRightIndex,
+                  details.delta / canvasScale,
+                );
+                onChanged();
+              },
+              onPanEnd: _endHandleDrag,
             ),
-            _buildEdgeHandle(
-              TransformModel.bottomRightIndex,
-              TransformModel.bottomLeftIndex,
-              bottomMid,
+            OverlayDragHandle(
+              position: bottomMid,
+              cursor: SystemMouseCursors.grab,
+              showCoordinates: _showCoordinates,
+              onPanUpdate: (final DragUpdateDetails details) {
+                _beginHandleDrag();
+                model.moveEdge(
+                  TransformModel.bottomRightIndex,
+                  TransformModel.bottomLeftIndex,
+                  details.delta / canvasScale,
+                );
+                onChanged();
+              },
+              onPanEnd: _endHandleDrag,
             ),
-            _buildEdgeHandle(
-              TransformModel.bottomLeftIndex,
-              TransformModel.topLeftIndex,
-              leftMid,
+            OverlayDragHandle(
+              position: leftMid,
+              cursor: SystemMouseCursors.grab,
+              showCoordinates: _showCoordinates,
+              onPanUpdate: (final DragUpdateDetails details) {
+                _beginHandleDrag();
+                model.moveEdge(
+                  TransformModel.bottomLeftIndex,
+                  TransformModel.topLeftIndex,
+                  details.delta / canvasScale,
+                );
+                onChanged();
+              },
+              onPanEnd: _endHandleDrag,
             ),
 
             // Center handle (move)
-            _buildHandle(
+            OverlayDragHandle(
               position: screenCenter,
-              size: AppInteraction.imagePlacementHandleSize,
-              color: Colors.blue,
               cursor: SystemMouseCursors.move,
+              showCoordinates: _showCoordinates,
               onPanUpdate: (final DragUpdateDetails details) {
+                _beginHandleDrag();
                 model.moveAll(details.delta / canvasScale);
                 onChanged();
               },
+              onPanEnd: _endHandleDrag,
             ),
           ],
 
@@ -165,61 +249,25 @@ class TransformWidget extends StatelessWidget {
     );
   }
 
-  /// Builds a draggable corner handle for perspective edits.
-  Widget _buildCornerHandle(final int index, final Offset position) {
-    return _buildHandle(
-      position: position,
-      size: AppInteraction.imagePlacementHandleSize,
-      color: AppColors.transformCornerHandle,
-      cursor: SystemMouseCursors.grab,
-      onPanUpdate: (final DragUpdateDetails details) {
-        model.moveCorner(index, details.delta / canvasScale);
-        onChanged();
-      },
-    );
-  }
+  /// The canvas translation offset in screen coordinates.
+  Offset get canvasOffset => widget.canvasOffset;
 
-  /// Builds a draggable edge handle for skew edits.
-  Widget _buildEdgeHandle(final int index1, final int index2, final Offset position) {
-    return _buildHandle(
-      position: position,
-      size: AppInteraction.transformEdgeHandleSize,
-      color: AppColors.transformEdgeHandle,
-      cursor: SystemMouseCursors.grab,
-      onPanUpdate: (final DragUpdateDetails details) {
-        model.moveEdge(index1, index2, details.delta / canvasScale);
-        onChanged();
-      },
-    );
-  }
+  /// The canvas zoom scale factor.
+  double get canvasScale => widget.canvasScale;
 
-  /// Builds a draggable handle at [position] for move, skew, or perspective edits.
-  Widget _buildHandle({
-    required final Offset position,
-    required final double size,
-    required final Color color,
-    required final MouseCursor cursor,
-    required final void Function(DragUpdateDetails) onPanUpdate,
-  }) {
-    return Positioned(
-      left: position.dx - size / AppMath.pair,
-      top: position.dy - size / AppMath.pair,
-      child: GestureDetector(
-        onPanUpdate: onPanUpdate,
-        child: MouseRegion(
-          cursor: cursor,
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: color,
-              border: Border.all(color: Colors.white, width: AppStroke.regular),
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-            ),
-          ),
-        ),
-      ),
-    );
+  /// The current transform state.
+  TransformModel get model => widget.model;
+
+  /// Called when the user cancels the transform.
+  VoidCallback get onCancel => widget.onCancel;
+
+  /// Called whenever the user drags a handle.
+  VoidCallback get onChanged => widget.onChanged;
+
+  /// Called when the user commits the transform.
+  VoidCallback get onConfirm => widget.onConfirm;
+  void _beginHandleDrag() {
+    setState(() => _showCoordinates = true);
   }
 
   /// Builds the transform mode controls and their live feedback bubble.
@@ -357,6 +405,10 @@ class TransformWidget extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _endHandleDrag() {
+    setState(() => _showCoordinates = false);
   }
 
   /// Returns the lowest on-screen Y value of the transformed quad.

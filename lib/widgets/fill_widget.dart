@@ -27,7 +27,7 @@ class FillWidget extends StatefulWidget {
   State<FillWidget> createState() => _FillWidgetState();
 }
 
-const int defaultHandleSize = AppInteraction.selectionHandleSize;
+const double defaultHandleSize = AppInteraction.selectionHandleSize;
 
 class _FillWidgetState extends State<FillWidget> {
   bool showDetails = false;
