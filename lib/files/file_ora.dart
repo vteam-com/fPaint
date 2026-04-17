@@ -32,6 +32,15 @@ const String _oraVisibilityHidden = 'hidden';
 const String _oraXmlProcessingTarget = 'xml';
 const String _oraXmlEncoding = 'version="1.0" encoding="UTF-8"';
 const String _oraMimetypeEntry = 'mimetype';
+const String _oraStackXmlEntry = 'stack.xml';
+
+/// Creates an [ArchiveFile] with a fixed timestamp so archives are
+/// byte-identical across runs when the payload has not changed.
+ArchiveFile _neutralArchiveFile(final String name, final List<int> data) {
+  final ArchiveFile file = ArchiveFile(name, data.length, data);
+  file.lastModTime = 0;
+  return file;
+}
 
 // SVG composite operation identifiers used in the ORA format
 const String _svgSourceOver = 'svg:source-over';
@@ -88,8 +97,8 @@ Future<void> readOraFileFromBytes(
 
     // Find the stack.xml file
     final ArchiveFile stackFile = archive.files.firstWhere(
-      (final ArchiveFile file) => file.name == 'stack.xml',
-      orElse: () => throw Exception('stack.xml not found in ORA file'),
+      (final ArchiveFile file) => file.name == _oraStackXmlEntry,
+      orElse: () => throw Exception('$_oraStackXmlEntry not found in ORA file'),
     );
 
     // Parse the stack.xml content
@@ -303,9 +312,8 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
 
   // Add uncompressed mimetype
   archive.addFile(
-    ArchiveFile(
+    _neutralArchiveFile(
       _oraMimetypeEntry,
-      'image/openraster'.length,
       utf8.encode('image/openraster'),
     ),
   );
@@ -324,10 +332,9 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
     final ByteData? bytes = await imageLayer.toByteData(format: ui.ImageByteFormat.png);
 
     archive.addFile(
-      ArchiveFile(
+      _neutralArchiveFile(
         imageName,
-        bytes!.lengthInBytes,
-        bytes.buffer.asUint8List(),
+        bytes!.buffer.asUint8List(),
       ),
     );
 
@@ -397,9 +404,8 @@ Future<List<int>> createOraAchive(final LayersProvider layers) async {
   // Add stack.xml to the archive
   final String stackXml = builder.buildDocument().toString();
   archive.addFile(
-    ArchiveFile(
-      'stack.xml',
-      stackXml.length,
+    _neutralArchiveFile(
+      _oraStackXmlEntry,
       utf8.encode(stackXml),
     ),
   );
