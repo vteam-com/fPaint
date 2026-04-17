@@ -53,6 +53,24 @@ class SidePanelTopMenu extends StatelessWidget {
               await appProvider.rotateCanvas90();
             },
           ),
+        if (shellProvider.isSidePanelExpanded)
+          buildIconButton(
+            tooltip: l10n.flipHorizontalTooltip,
+            icon: AppIcon.flipHorizontal,
+            onPressed: () async {
+              final AppProvider appProvider = AppProvider.of(context);
+              await appProvider.flipCanvasHorizontal(l10n.flipHorizontalTooltip);
+            },
+          ),
+        if (shellProvider.isSidePanelExpanded)
+          buildIconButton(
+            tooltip: l10n.flipVerticalTooltip,
+            icon: AppIcon.flipVertical,
+            onPressed: () async {
+              final AppProvider appProvider = AppProvider.of(context);
+              await appProvider.flipCanvasVertical(l10n.flipVerticalTooltip);
+            },
+          ),
         if (!shellProvider.showMenu)
           buildIconButton(
             tooltip: l10n.exportTooltip,

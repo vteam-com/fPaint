@@ -909,6 +909,18 @@ class AppProvider extends ChangeNotifier {
     resetView(); // This also calls update()
   }
 
+  /// Flips the canvas horizontally (left ↔ right).
+  Future<void> flipCanvasHorizontal(final String actionName) async {
+    await layers.flipCanvasHorizontal(actionName);
+    update();
+  }
+
+  /// Flips the canvas vertically (top ↔ bottom).
+  Future<void> flipCanvasVertical(final String actionName) async {
+    await layers.flipCanvasVertical(actionName);
+    update();
+  }
+
   TextObject? selectedTextObject;
 
   //=============================================================================

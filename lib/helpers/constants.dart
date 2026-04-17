@@ -142,6 +142,8 @@ class AppIconAssets {
   static const String download = 'assets/icons/download.svg';
   static const String edit = 'assets/icons/edit.svg';
   static const String fileDownload = 'assets/icons/file_download.svg';
+  static const String flipHorizontal = 'assets/icons/flip_horizontal.svg';
+  static const String flipVertical = 'assets/icons/flip_vertical.svg';
   static const String fontDownload = 'assets/icons/font_download.svg';
   static const String formatBold = 'assets/icons/format_bold.svg';
   static const String formatColorFill = 'assets/icons/format_color_fill.svg';

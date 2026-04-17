@@ -302,12 +302,6 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get delete;
 
-  /// No description provided for @dimensionsValue.
-  ///
-  /// In en, this message translates to:
-  /// **'{width} × {height}'**
-  String dimensionsValue(Object width, Object height);
-
   /// No description provided for @desktopSoftware.
   ///
   /// In en, this message translates to:
@@ -319,6 +313,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Device Screen Resolution: {resolution}'**
   String deviceScreenResolution(Object resolution);
+
+  /// REVIEWED
+  ///
+  /// In en, this message translates to:
+  /// **'{width} × {height}'**
+  String dimensionsValue(Object width, Object height);
 
   /// No description provided for @discard.
   ///
@@ -542,17 +542,17 @@ abstract class AppLocalizations {
   /// **'No'**
   String get no;
 
-  /// No description provided for @percentageValue.
-  ///
-  /// In en, this message translates to:
-  /// **'{value}%'**
-  String percentageValue(Object value);
-
   /// No description provided for @paste.
   ///
   /// In en, this message translates to:
   /// **'Paste'**
   String get paste;
+
+  /// No description provided for @percentageValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}%'**
+  String percentageValue(Object value);
 
   /// No description provided for @platforms.
   ///
@@ -565,6 +565,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resize / Rotate'**
   String get resizeRotate;
+
+  /// No description provided for @flipHorizontalTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Flip Horizontal'**
+  String get flipHorizontalTooltip;
+
+  /// No description provided for @flipVerticalTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Flip Vertical'**
+  String get flipVerticalTooltip;
 
   /// No description provided for @rotateCanvasTooltip.
   ///
