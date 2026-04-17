@@ -4,45 +4,46 @@ permissions:
   contents: read
 
 on:
+  schedule:
+    - cron: "0 0 * * 0" # Weekly on Sunday at midnight UTC
   workflow_dispatch:
 
 jobs:
   cleanup_artifacts:
     runs-on: ubuntu-latest
     steps:
-      - name: List Artifacts
-        id: list_artifacts
+      - name: Keep only latest artifact per name
         uses: actions/github-script@v8
         with:
           script: |
-            const artifactResponse = await github.rest.actions.listArtifactsForRepo({
+            const { data } = await github.rest.actions.listArtifactsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 100,
             });
-            // Sort artifacts by creation date (most recent first)
-            const sortedArtifacts = artifactResponse.data.artifacts.sort(
-              (a, b) => new Date(b.created_at) - new Date(a.created_at)
-            );
-            return sortedArtifacts;
+            const artifacts = data.artifacts;
+            console.log(`Found ${artifacts.length} total artifacts`);
 
-      - name: Delete Old Artifacts
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const artifacts = ${{ steps.list_artifacts.outputs.result }};
-            const artifactsToKeep = 6;
+            // Group by name, keep only the most recent per name
+            const latestByName = {};
+            for (const a of artifacts) {
+              if (!latestByName[a.name] || new Date(a.created_at) > new Date(latestByName[a.name].created_at)) {
+                latestByName[a.name] = a;
+              }
+            }
+            const keepIds = new Set(Object.values(latestByName).map(a => a.id));
+            console.log(`Keeping ${keepIds.size} artifacts (latest per name)`);
 
-            if (artifacts.length > artifactsToKeep) {
-              const oldArtifacts = artifacts.slice(artifactsToKeep);
-              for (const artifact of oldArtifacts) {
+            let deleted = 0;
+            for (const a of artifacts) {
+              if (!keepIds.has(a.id)) {
                 await github.rest.actions.deleteArtifact({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  artifact_id: artifact.id,
+                  artifact_id: a.id,
                 });
-                console.log(`Deleted artifact: ${artifact.name}`);
+                deleted++;
+                console.log(`Deleted: ${a.name} (${a.created_at})`);
               }
-            } else {
-              console.log("No artifacts to delete.");
             }
+            console.log(`Deleted ${deleted} old artifacts`);

@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   build-windows:
     name: Build Windows
@@ -38,6 +42,7 @@ jobs:
         with:
           name: flutter-windows-app
           path: flutter-windows-app.zip
+          retention-days: 1
 
   build-macos:
     name: Build macOS
@@ -67,6 +72,7 @@ jobs:
         with:
           name: flutter-macos-app
           path: flutter-macos-app.zip
+          retention-days: 1
 
   build-linux-and-deploy-web:
     name: Build Linux & Deploy Web
@@ -112,6 +118,117 @@ jobs:
           cp desktop-artifacts/flutter-windows-app/flutter-windows-app.zip build/web/downloads/
           cp desktop-artifacts/flutter-macos-app/flutter-macos-app.zip build/web/downloads/
 
+      - name: Clean old Firebase Hosting versions
+        continue-on-error: true
+        env:
+          FIREBASE_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VTEAM_PAINT }}
+        run: |
+          node << 'CLEANUP_SCRIPT'
+          const crypto = require('crypto');
+          const sa = JSON.parse(process.env.FIREBASE_SA_KEY);
+          const SITE = 'vteam-paint';
+          const VERSIONS_TO_KEEP = 3;
+          const API = 'https://firebasehosting.googleapis.com/v1beta1';
+
+          async function getAccessToken() {
+            const now = Math.floor(Date.now() / 1000);
+            const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+            const hdr = b64({ alg: 'RS256', typ: 'JWT' });
+            const body = b64({
+              iss: sa.client_email,
+              scope: 'https://www.googleapis.com/auth/firebase https://www.googleapis.com/auth/cloud-platform',
+              aud: 'https://oauth2.googleapis.com/token',
+              iat: now,
+              exp: now + 3600,
+            });
+            const sig = crypto.createSign('RSA-SHA256')
+              .update(hdr + '.' + body)
+              .sign(sa.private_key, 'base64url');
+            const res = await fetch('https://oauth2.googleapis.com/token', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=' + hdr + '.' + body + '.' + sig,
+            });
+            const data = await res.json();
+            if (!data.access_token) throw new Error('Auth failed: ' + JSON.stringify(data));
+            return data.access_token;
+          }
+
+          async function deleteVersions(headers, filter) {
+            let page = '';
+            let deleted = 0;
+            do {
+              const url = API + '/sites/' + SITE + '/versions?pageSize=25'
+                + (filter ? '&filter=' + encodeURIComponent(filter) : '')
+                + (page ? '&pageToken=' + page : '');
+              const vRes = await fetch(url, { headers });
+              const data = await vRes.json();
+              if (data.error) { console.log('List error:', JSON.stringify(data.error)); break; }
+              const versions = data.versions || [];
+              page = data.nextPageToken || '';
+              for (const v of versions) {
+                if (!active.has(v.name)) {
+                  const d = await fetch(API + '/' + v.name, { method: 'DELETE', headers });
+                  if (d.ok) { deleted++; console.log('Deleted: ' + v.name); }
+                  else { const e = await d.json(); console.log('Cannot delete ' + v.name + ': ' + JSON.stringify(e.error || e)); }
+                }
+              }
+            } while (page);
+            return deleted;
+          }
+
+          let active = new Set();
+
+          async function main() {
+            const token = await getAccessToken();
+            const headers = { Authorization: 'Bearer ' + token };
+
+            // Set retained release count on the live channel
+            const chRes = await fetch(
+              API + '/sites/' + SITE + '/channels/live?updateMask=retainedReleaseCount',
+              {
+                method: 'PATCH',
+                headers: { ...headers, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ retainedReleaseCount: VERSIONS_TO_KEEP }),
+              }
+            );
+            console.log('Set retainedReleaseCount=' + VERSIONS_TO_KEEP + ' (HTTP ' + chRes.status + ')');
+
+            // Get active versions to preserve
+            const relRes = await fetch(
+              API + '/sites/' + SITE + '/releases?pageSize=' + VERSIONS_TO_KEEP,
+              { headers }
+            );
+            const releases = (await relRes.json()).releases || [];
+            active = new Set(releases.map(r => r.version && r.version.name).filter(Boolean));
+            console.log('Active versions to keep: ' + [...active].join(', '));
+
+            // Delete expired preview channels
+            const chListRes = await fetch(API + '/sites/' + SITE + '/channels?pageSize=100', { headers });
+            const channels = (await chListRes.json()).channels || [];
+            for (const ch of channels) {
+              if (ch.name && !ch.name.endsWith('/channels/live')) {
+                const expiry = ch.expireTime ? new Date(ch.expireTime) : null;
+                if (expiry && expiry < new Date()) {
+                  const d = await fetch(API + '/' + ch.name, { method: 'DELETE', headers });
+                  console.log('Deleted expired channel ' + ch.name + ' (HTTP ' + d.status + ')');
+                }
+              }
+            }
+
+            // Delete old finalized versions
+            const d1 = await deleteVersions(headers, 'status="FINALIZED"');
+            // Delete old created (abandoned) versions
+            const d2 = await deleteVersions(headers, 'status="CREATED"');
+            console.log('Total deleted: ' + (d1 + d2) + ' versions');
+          }
+
+          main().catch(e => { console.error(e.message); process.exit(1); });
+          CLEANUP_SCRIPT
+
+      - name: Wait for quota to update
+        run: sleep 15
+
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         env:
@@ -121,3 +238,27 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VTEAM_PAINT }}
           channelId: live
           projectId: vteam-paint
+
+  cleanup-artifacts:
+    name: Clean up build artifacts
+    needs: [ build-linux-and-deploy-web ]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete workflow artifacts
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data } = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+            });
+            for (const artifact of data.artifacts) {
+              await github.rest.actions.deleteArtifact({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                artifact_id: artifact.id,
+              });
+              console.log(`Deleted: ${artifact.name}`);
+            }
