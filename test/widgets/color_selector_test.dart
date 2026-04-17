@@ -11,8 +11,8 @@ import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:nested/nested.dart';
 import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Generate Mocks
