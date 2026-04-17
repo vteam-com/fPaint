@@ -12,10 +12,6 @@ import 'package:fpaint/widgets/marching_ants_path.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 
-const String _selectorCoordinatesFormat = '{x}\n{y}';
-const String _placeholderX = '{x}';
-const String _placeholderY = '{y}';
-
 enum _SelectionOverlayFeedbackMode {
   none,
   resize,
@@ -79,14 +75,14 @@ class SelectionRectWidget extends StatefulWidget {
   State<SelectionRectWidget> createState() => _SelectionRectWidgetState();
 }
 
-const int defaultHandleSize = AppInteraction.selectionHandleSize;
+const double defaultHandleSize = AppInteraction.selectionHandleSize;
 
 class _SelectionRectWidgetState extends State<SelectionRectWidget> {
   Size _activeResizeDimensions = Size.zero;
   double _activeRotationDegrees = 0;
   double _activeScalePercent = AppMath.percentScale;
   _SelectionOverlayFeedbackMode _feedbackMode = _SelectionOverlayFeedbackMode.none;
-  bool showCoordinate = false;
+  bool _showCoordinates = false;
   @override
   Widget build(final BuildContext context) {
     if (widget.path1 == null) {
@@ -119,104 +115,120 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     if (widget.enableMoveAndResize) {
       stackChildren.addAll(<Widget>[
         // Center handle for moving
-        _buildHandle(
+        OverlayDragHandle(
           position: bounds.center,
           cursor: SystemMouseCursors.move,
-          onPanUpdate: (final DragUpdateDetails details) => widget.onDrag(
-            details.delta,
-          ),
+          showCoordinates: _showCoordinates,
+          onPanUpdate: (final DragUpdateDetails details) {
+            _beginHandleDrag();
+            widget.onDrag(details.delta);
+            _updateResizeFeedback();
+          },
+          onPanEnd: _endHandleDrag,
         ),
 
         // Top Left
-        _buildHandle(
+        OverlayDragHandle(
           position: bounds.topLeft,
           cursor: SystemMouseCursors.resizeUpLeft,
-          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
-            NineGridHandle.topLeft,
-            details.delta,
-          ),
+          showCoordinates: _showCoordinates,
+          onPanUpdate: (final DragUpdateDetails details) {
+            _beginHandleDrag();
+            widget.onResize(NineGridHandle.topLeft, details.delta);
+            _updateResizeFeedback();
+          },
+          onPanEnd: _endHandleDrag,
         ),
 
         // Top Right
-        _buildHandle(
+        OverlayDragHandle(
           position: bounds.topRight,
           cursor: SystemMouseCursors.resizeUpRight,
-          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
-            NineGridHandle.topRight,
-            details.delta,
-          ),
+          showCoordinates: _showCoordinates,
+          onPanUpdate: (final DragUpdateDetails details) {
+            _beginHandleDrag();
+            widget.onResize(NineGridHandle.topRight, details.delta);
+            _updateResizeFeedback();
+          },
+          onPanEnd: _endHandleDrag,
         ),
 
         // Bottom Left
-        _buildHandle(
+        OverlayDragHandle(
           position: bounds.bottomLeft,
           cursor: SystemMouseCursors.resizeDownLeft,
-          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
-            NineGridHandle.bottomLeft,
-            details.delta,
-          ),
+          showCoordinates: _showCoordinates,
+          onPanUpdate: (final DragUpdateDetails details) {
+            _beginHandleDrag();
+            widget.onResize(NineGridHandle.bottomLeft, details.delta);
+            _updateResizeFeedback();
+          },
+          onPanEnd: _endHandleDrag,
         ),
 
         // Bottom right
-        _buildHandle(
+        OverlayDragHandle(
           position: bounds.bottomRight,
           cursor: SystemMouseCursors.resizeDownRight,
-          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
-            NineGridHandle.bottomRight,
-            details.delta,
-          ),
+          showCoordinates: _showCoordinates,
+          onPanUpdate: (final DragUpdateDetails details) {
+            _beginHandleDrag();
+            widget.onResize(NineGridHandle.bottomRight, details.delta);
+            _updateResizeFeedback();
+          },
+          onPanEnd: _endHandleDrag,
         ),
 
         // Side Left
-        _buildHandle(
-          position: Offset(
-            bounds.left,
-            bounds.center.dy,
-          ),
+        OverlayDragHandle(
+          position: Offset(bounds.left, bounds.center.dy),
           cursor: SystemMouseCursors.resizeLeft,
-          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
-            NineGridHandle.left,
-            details.delta,
-          ),
+          showCoordinates: _showCoordinates,
+          onPanUpdate: (final DragUpdateDetails details) {
+            _beginHandleDrag();
+            widget.onResize(NineGridHandle.left, details.delta);
+            _updateResizeFeedback();
+          },
+          onPanEnd: _endHandleDrag,
         ),
 
         // Side Right
-        _buildHandle(
-          position: Offset(
-            bounds.right,
-            bounds.center.dy,
-          ),
+        OverlayDragHandle(
+          position: Offset(bounds.right, bounds.center.dy),
           cursor: SystemMouseCursors.resizeRight,
-          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
-            NineGridHandle.right,
-            details.delta,
-          ),
+          showCoordinates: _showCoordinates,
+          onPanUpdate: (final DragUpdateDetails details) {
+            _beginHandleDrag();
+            widget.onResize(NineGridHandle.right, details.delta);
+            _updateResizeFeedback();
+          },
+          onPanEnd: _endHandleDrag,
         ),
 
         // Center Top
-        _buildHandle(
-          position: Offset(
-            bounds.center.dx,
-            bounds.top,
-          ),
+        OverlayDragHandle(
+          position: Offset(bounds.center.dx, bounds.top),
           cursor: SystemMouseCursors.resizeUp,
-          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
-            NineGridHandle.top,
-            details.delta,
-          ),
+          showCoordinates: _showCoordinates,
+          onPanUpdate: (final DragUpdateDetails details) {
+            _beginHandleDrag();
+            widget.onResize(NineGridHandle.top, details.delta);
+            _updateResizeFeedback();
+          },
+          onPanEnd: _endHandleDrag,
         ),
 
         // Center Bottom
-        _buildHandle(
-          position: Offset(
-            bounds.center.dx,
-            bounds.bottom,
-          ),
+        OverlayDragHandle(
+          position: Offset(bounds.center.dx, bounds.bottom),
           cursor: SystemMouseCursors.resizeDown,
-          onPanUpdate: (final DragUpdateDetails details) => widget.onResize(
-            NineGridHandle.bottom,
-            details.delta,
-          ),
+          showCoordinates: _showCoordinates,
+          onPanUpdate: (final DragUpdateDetails details) {
+            _beginHandleDrag();
+            widget.onResize(NineGridHandle.bottom, details.delta);
+            _updateResizeFeedback();
+          },
+          onPanEnd: _endHandleDrag,
         ),
       ]);
     }
@@ -226,6 +238,10 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       height: height < 0 ? 0 : height,
       child: Stack(children: stackChildren),
     );
+  }
+
+  void _beginHandleDrag() {
+    setState(() => _showCoordinates = true);
   }
 
   void _beginRotateFeedback() {
@@ -259,61 +275,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
         cursor: SystemMouseCursors.click,
         onTap: widget.onCopy,
         child: const AppSvgIcon(icon: AppIcon.copy, size: AppLayout.iconSize, color: Colors.white),
-      ),
-    );
-  }
-
-  /// Builds a handle for resizing or moving the selection rectangle.
-  ///
-  /// The [position] parameter specifies the position of the handle.
-  /// The [cursor] parameter specifies the cursor to display when the mouse is over the handle.
-  /// The [onPanUpdate] parameter is a callback that is called when the handle is dragged.
-  Widget _buildHandle({
-    required final Offset position,
-    required final MouseCursor cursor,
-    required final void Function(DragUpdateDetails) onPanUpdate,
-  }) {
-    final int handleSize = (showCoordinate ? (defaultHandleSize * AppVisual.previewTextScale) : defaultHandleSize)
-        .toInt();
-
-    return Positioned(
-      left: position.dx - (handleSize / AppMath.pair),
-      top: position.dy - (handleSize / AppMath.pair),
-      child: GestureDetector(
-        onPanUpdate: (final DragUpdateDetails details) {
-          setState(() {
-            showCoordinate = true;
-          });
-          onPanUpdate(details);
-          _updateResizeFeedback();
-        },
-        onPanEnd: (final DragEndDetails _) {
-          setState(() => showCoordinate = false);
-          _endFeedback();
-        },
-        child: MouseRegion(
-          cursor: cursor,
-          child: Container(
-            width: handleSize.toDouble(),
-            height: handleSize.toDouble(),
-            decoration: BoxDecoration(
-              color: Colors.blue,
-              border: Border.all(color: Colors.white, width: AppStroke.regular),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-            ),
-            child: showCoordinate
-                ? Center(
-                    child: Text(
-                      _selectorCoordinatesFormat
-                          .replaceFirst(_placeholderX, position.dx.toInt().toString())
-                          .replaceFirst(_placeholderY, position.dy.toInt().toString()),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: AppSpacing.sm, color: Colors.white),
-                    ),
-                  )
-                : null,
-          ),
-        ),
       ),
     );
   }
@@ -413,6 +374,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       _activeRotationDegrees = 0;
       _activeResizeDimensions = Size.zero;
     });
+  }
+
+  void _endHandleDrag() {
+    setState(() => _showCoordinates = false);
+    _endFeedback();
   }
 
   /// Returns the localized label for the active feedback bubble.

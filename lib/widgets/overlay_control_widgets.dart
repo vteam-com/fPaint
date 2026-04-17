@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 
+/// Coordinate format template for handle labels.
+const String _coordinatesFormat = '{x}\n{y}';
+const String _placeholderX = '{x}';
+const String _placeholderY = '{y}';
+
 /// Builds a circular control button used by canvas overlays.
 Widget buildOverlayCircleButton({
   required final Widget child,
@@ -58,4 +63,78 @@ Widget buildOverlayFeedbackBubble({required final String label}) {
       ),
     ),
   );
+}
+
+/// A draggable handle that shows X/Y coordinates while being dragged.
+///
+/// Used by both the selection overlay and the transform overlay.
+class OverlayDragHandle extends StatelessWidget {
+  /// Creates an [OverlayDragHandle].
+  const OverlayDragHandle({
+    super.key,
+    required this.position,
+    required this.cursor,
+    required this.onPanUpdate,
+    this.onPanEnd,
+    this.showCoordinates = false,
+    this.size = AppInteraction.selectionHandleSize,
+    this.borderRadius = AppRadius.lg,
+  });
+
+  /// Corner radius of the handle box.
+  final double borderRadius;
+
+  /// Mouse cursor shown when hovering.
+  final MouseCursor cursor;
+
+  /// Called when the drag ends.
+  final VoidCallback? onPanEnd;
+
+  /// Called on every drag update.
+  final void Function(DragUpdateDetails) onPanUpdate;
+
+  /// Screen-space position of the handle center.
+  final Offset position;
+
+  /// Whether to display coordinate labels inside the handle.
+  final bool showCoordinates;
+
+  /// Base size of the handle in logical pixels.
+  final double size;
+  @override
+  Widget build(final BuildContext context) {
+    final double activeSize = showCoordinates ? size * AppVisual.previewTextScale : size;
+
+    return Positioned(
+      left: position.dx - activeSize / AppMath.pair,
+      top: position.dy - activeSize / AppMath.pair,
+      child: GestureDetector(
+        onPanUpdate: onPanUpdate,
+        onPanEnd: (final DragEndDetails _) => onPanEnd?.call(),
+        child: MouseRegion(
+          cursor: cursor,
+          child: Container(
+            width: activeSize,
+            height: activeSize,
+            decoration: BoxDecoration(
+              color: Colors.blue,
+              border: Border.all(color: Colors.white, width: AppStroke.regular),
+              borderRadius: BorderRadius.circular(borderRadius),
+            ),
+            child: showCoordinates
+                ? Center(
+                    child: Text(
+                      _coordinatesFormat
+                          .replaceFirst(_placeholderX, position.dx.toInt().toString())
+                          .replaceFirst(_placeholderY, position.dy.toInt().toString()),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: AppSpacing.sm, color: Colors.white),
+                    ),
+                  )
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -267,7 +267,7 @@ class AppInteraction {
   static const double radialFillHandleOffset = 50.0;
   static const double magnifierScale = 6.0;
   static const double magnifierImageScale = 8.0;
-  static const int selectionHandleSize = 20;
+  static const double selectionHandleSize = 20;
   static const double rotationHandleDistance = 30.0;
   static const double rotationHandleSize = 16.0;
   static const double rotationHandleLineWidth = 1.5;
