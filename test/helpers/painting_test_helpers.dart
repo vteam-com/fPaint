@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -51,6 +52,94 @@ const int _videoFramesFps = 30;
 const int _videoFrameIndexPadding = 6;
 
 // ---------------------------------------------------------------------------
+// Interaction overlay constants
+// ---------------------------------------------------------------------------
+
+/// Outer radius of the tap indicator circle.
+const double _tapIndicatorRadius = 18.0;
+
+/// Length of each crosshair arm extending from the tap centre.
+const double _tapCrosshairLength = 24.0;
+
+/// Stroke width of tap indicator outlines.
+const double _tapIndicatorStrokeWidth = 2.5;
+
+/// Inner dot radius drawn at the exact tap point.
+const double _tapDotRadius = 4.0;
+
+/// Stroke width of the drag indicator line.
+const double _dragIndicatorStrokeWidth = 2.5;
+
+/// Radius of the small circle at the drag start point.
+const double _dragStartCircleRadius = 6.0;
+
+/// Length of the arrowhead sides at the drag end point.
+const double _dragArrowHeadLength = 14.0;
+
+/// Half-angle (in radians) of the arrowhead opening.
+const double _dragArrowHeadAngle = math.pi / 6;
+
+/// Primary colour of tap indicators (red with some transparency).
+const Color _tapIndicatorColor = Color.fromARGB(200, 255, 50, 50);
+
+/// Primary colour of drag indicators (blue with some transparency).
+const Color _dragIndicatorColor = Color.fromARGB(200, 50, 120, 255);
+
+/// White outline drawn behind indicators for contrast on any background.
+const Color _indicatorOutlineColor = Color.fromARGB(160, 255, 255, 255);
+
+/// Stroke width of the contrast outline behind indicators.
+const double _indicatorOutlineWidth = 4.0;
+
+// ---------------------------------------------------------------------------
+// Interaction tracking
+// ---------------------------------------------------------------------------
+
+/// Describes one recorded user interaction for overlay rendering.
+class InteractionRecord {
+  InteractionRecord.tap(this.position) : endPosition = null, type = InteractionType.tap;
+
+  InteractionRecord.drag(this.position, this.endPosition) : type = InteractionType.drag;
+
+  /// Screen-space position of the interaction (tap point or drag start).
+  final Offset position;
+
+  /// Screen-space end position for drag interactions; `null` for taps.
+  final Offset? endPosition;
+
+  /// Whether this is a tap or drag.
+  final InteractionType type;
+}
+
+/// The kind of user interaction being recorded.
+enum InteractionType {
+  /// A single-point tap or click.
+  tap,
+
+  /// A drag gesture from one point to another.
+  drag,
+}
+
+/// Collects [InteractionRecord]s so the video recorder can draw overlays.
+class InteractionTracker {
+  InteractionTracker._();
+
+  static final List<InteractionRecord> _records = <InteractionRecord>[];
+
+  /// All interactions recorded since the last [clear].
+  static List<InteractionRecord> get records => List<InteractionRecord>.unmodifiable(_records);
+
+  /// Records a tap at [position].
+  static void recordTap(Offset position) => _records.add(InteractionRecord.tap(position));
+
+  /// Records a drag from [start] to [end].
+  static void recordDrag(Offset start, Offset end) => _records.add(InteractionRecord.drag(start, end));
+
+  /// Removes all recorded interactions.
+  static void clear() => _records.clear();
+}
+
+// ---------------------------------------------------------------------------
 // Viewport
 // ---------------------------------------------------------------------------
 
@@ -88,6 +177,8 @@ Future<void> dragLikeHuman(
   final Offset start,
   final Offset end,
 ) async {
+  InteractionTracker.recordDrag(start, end);
+
   final TestGesture gesture = await tester.startGesture(
     start,
     kind: PointerDeviceKind.mouse,
@@ -104,24 +195,35 @@ Future<void> dragLikeHuman(
 }
 
 /// Simulates a simple mouse tap at [position].
+///
+/// When a [UnitTestVideoRecorder] is active, a frame with a red target
+/// overlay is automatically captured after the tap.
 Future<void> tapLikeHuman(
   final WidgetTester tester,
   final Offset position,
 ) async {
+  InteractionTracker.recordTap(position);
+
   final TestGesture gesture = await tester.startGesture(
     position,
     kind: PointerDeviceKind.mouse,
     buttons: kPrimaryButton,
   );
   await gesture.up();
+  await UnitTestVideoRecorder.captureAfterInteraction(tester);
 }
 
 /// Finds the widget matching [key] and taps it.
+///
+/// When a [UnitTestVideoRecorder] is active, a frame with a red target
+/// overlay is automatically captured after the tap.
 Future<void> tapByKey(final WidgetTester tester, final Key key) async {
   final Finder found = find.byKey(key);
   expect(found, findsOneWidget, reason: 'Should find button with key: $key');
+  InteractionTracker.recordTap(tester.getCenter(found.first));
   await tester.tap(found.first);
   await tester.pump();
+  await UnitTestVideoRecorder.captureAfterInteraction(tester);
 }
 
 /// Finds the widget matching [tooltip] and taps it.
@@ -681,11 +783,137 @@ Future<void> saveUnitTestWebp(
 }
 
 // ---------------------------------------------------------------------------
+// Interaction overlay rendering
+// ---------------------------------------------------------------------------
+
+/// Composites interaction overlays onto a base screenshot image.
+///
+/// Returns a new [ui.Image] with tap targets and drag indicators drawn on
+/// top.  The caller is responsible for disposing the returned image.  The
+/// original [base] image is **not** disposed by this function.
+ui.Image _compositeOverlays(
+  ui.Image base,
+  List<InteractionRecord> interactions,
+) {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+
+  // Draw the base screenshot.
+  canvas.drawImage(base, Offset.zero, Paint());
+
+  // Draw each recorded interaction on top.
+  for (final InteractionRecord record in interactions) {
+    switch (record.type) {
+      case InteractionType.tap:
+        _drawTapIndicator(canvas, record.position);
+      case InteractionType.drag:
+        _drawDragIndicator(canvas, record.position, record.endPosition!);
+    }
+  }
+
+  final ui.Picture picture = recorder.endRecording();
+  final ui.Image result = picture.toImageSync(base.width, base.height);
+  picture.dispose();
+  return result;
+}
+
+/// Draws a red crosshair-and-circle tap indicator at [center].
+void _drawTapIndicator(Canvas canvas, Offset center) {
+  final Paint outlinePaint = Paint()
+    ..color = _indicatorOutlineColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = _indicatorOutlineWidth
+    ..strokeCap = StrokeCap.round;
+
+  final Paint strokePaint = Paint()
+    ..color = _tapIndicatorColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = _tapIndicatorStrokeWidth
+    ..strokeCap = StrokeCap.round;
+
+  final Paint fillPaint = Paint()
+    ..color = _tapIndicatorColor
+    ..style = PaintingStyle.fill;
+
+  // Circle — outline for contrast, then red stroke.
+  canvas.drawCircle(center, _tapIndicatorRadius, outlinePaint);
+  canvas.drawCircle(center, _tapIndicatorRadius, strokePaint);
+
+  // Horizontal crosshair.
+  final Offset hStart = center - const Offset(_tapCrosshairLength, 0);
+  final Offset hEnd = center + const Offset(_tapCrosshairLength, 0);
+  canvas.drawLine(hStart, hEnd, outlinePaint);
+  canvas.drawLine(hStart, hEnd, strokePaint);
+
+  // Vertical crosshair.
+  final Offset vStart = center - const Offset(0, _tapCrosshairLength);
+  final Offset vEnd = center + const Offset(0, _tapCrosshairLength);
+  canvas.drawLine(vStart, vEnd, outlinePaint);
+  canvas.drawLine(vStart, vEnd, strokePaint);
+
+  // Inner dot.
+  canvas.drawCircle(center, _tapDotRadius, fillPaint);
+}
+
+/// Draws a blue line-with-arrowhead drag indicator from [start] to [end].
+void _drawDragIndicator(Canvas canvas, Offset start, Offset end) {
+  final Paint outlinePaint = Paint()
+    ..color = _indicatorOutlineColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = _indicatorOutlineWidth
+    ..strokeCap = StrokeCap.round;
+
+  final Paint strokePaint = Paint()
+    ..color = _dragIndicatorColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = _dragIndicatorStrokeWidth
+    ..strokeCap = StrokeCap.round;
+
+  final Paint fillPaint = Paint()
+    ..color = _dragIndicatorColor
+    ..style = PaintingStyle.fill;
+
+  // Line from start to end.
+  canvas.drawLine(start, end, outlinePaint);
+  canvas.drawLine(start, end, strokePaint);
+
+  // Start circle.
+  canvas.drawCircle(start, _dragStartCircleRadius, outlinePaint);
+  canvas.drawCircle(start, _dragStartCircleRadius, strokePaint);
+
+  // Arrowhead at end.
+  final double angle = (end - start).direction;
+  final Offset arrow1 =
+      end -
+      Offset(
+        _dragArrowHeadLength * math.cos(angle - _dragArrowHeadAngle),
+        _dragArrowHeadLength * math.sin(angle - _dragArrowHeadAngle),
+      );
+  final Offset arrow2 =
+      end -
+      Offset(
+        _dragArrowHeadLength * math.cos(angle + _dragArrowHeadAngle),
+        _dragArrowHeadLength * math.sin(angle + _dragArrowHeadAngle),
+      );
+  final Path arrowPath = Path()
+    ..moveTo(end.dx, end.dy)
+    ..lineTo(arrow1.dx, arrow1.dy)
+    ..lineTo(arrow2.dx, arrow2.dy)
+    ..close();
+
+  canvas.drawPath(arrowPath, outlinePaint);
+  canvas.drawPath(arrowPath, fillPaint);
+}
+
+// ---------------------------------------------------------------------------
 // Video recording
 // ---------------------------------------------------------------------------
 
 /// Records numbered PNG frames at each test checkpoint and assembles them
 /// into an MP4 video using ffmpeg when [stop] is called.
+///
+/// When active, tap helpers automatically capture a frame with the red
+/// target overlay drawn at the tap position.
 ///
 /// All frame capture uses [WidgetTester.runAsync] so that
 /// [RenderRepaintBoundary.toImage] completes in the fake async zone.
@@ -696,6 +924,21 @@ class UnitTestVideoRecorder {
   int _frameIndex = 0;
   int _frameErrors = 0;
   late final Directory _framesDirectory;
+
+  /// The currently active recorder, if any.
+  ///
+  /// Tap helpers check this to auto-capture a frame after each interaction.
+  static UnitTestVideoRecorder? _active;
+
+  /// Captures a frame with interaction overlays if a recorder is active.
+  ///
+  /// Called automatically by tap helpers; does nothing when no recording is
+  /// in progress.
+  static Future<void> captureAfterInteraction(WidgetTester tester) async {
+    if (_active != null) {
+      await _active!.captureFrame();
+    }
+  }
 
   /// Initialize the frames directory, clearing any previous frames.
   Future<void> start() async {
@@ -715,10 +958,14 @@ class UnitTestVideoRecorder {
 
     _frameIndex = 0;
     _frameErrors = 0;
+    _active = this;
     debugPrint('🎬 Video recorder started — frames: ${_framesDirectory.path}');
   }
 
   /// Captures the current app screenshot boundary as a numbered PNG frame.
+  ///
+  /// Any pending [InteractionTracker] records are composited as overlays
+  /// (red tap targets, blue drag arrows) before saving.
   Future<void> captureFrame() async {
     await _tester.pumpAndSettle();
 
@@ -728,12 +975,24 @@ class UnitTestVideoRecorder {
       return;
     }
 
+    // Snapshot and clear pending interactions before entering runAsync.
+    final List<InteractionRecord> pendingInteractions = InteractionTracker.records.toList();
+    InteractionTracker.clear();
+
     await _tester.runAsync(() async {
       try {
         final RenderRepaintBoundary boundary = _tester.renderObject<RenderRepaintBoundary>(boundaryFinder);
-        final ui.Image image = await boundary.toImage(
+        ui.Image image = await boundary.toImage(
           pixelRatio: AppDefaults.renderedScreenshotPixelRatio,
         );
+
+        // Composite interaction overlays onto the frame if any are pending.
+        if (pendingInteractions.isNotEmpty) {
+          final ui.Image composited = _compositeOverlays(image, pendingInteractions);
+          image.dispose();
+          image = composited;
+        }
+
         final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
         image.dispose();
 
@@ -762,6 +1021,7 @@ class UnitTestVideoRecorder {
   /// and cleans up the frames directory on success.
   Future<void> stop() async {
     await captureFrame();
+    _active = null;
 
     debugPrint(
       '🎬 Video recorder stopped: $_frameIndex frames, $_frameErrors errors',

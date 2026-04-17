@@ -1,15 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:fpaint/files/webp_bit_writer.dart';
+import 'package:fpaint/files/webp_cl_symbol.dart';
 import 'package:fpaint/files/webp_encoder_shared.dart';
-
-/// A code-length symbol with optional extra-bits payload for RLE encoding.
-class _WebPClSymbol {
-  _WebPClSymbol(this.symbol, this.extraBits, this.extraValue);
-  final int symbol;
-  final int extraBits;
-  final int extraValue;
-}
 
 /// Builds, encodes, and writes Huffman codes for the VP8L bitstream.
 class WebPHuffmanCodec {
@@ -98,7 +91,7 @@ class WebPHuffmanCodec {
     return cl;
   }
 
-  /// Serializes a Huffman code table into the VP8L bitstream.
+  /// Serialises a Huffman code table into the VP8L bitstream.
   void writeHuffmanCode(
     WebPBitWriter bw,
     int alphabetSize,
@@ -142,10 +135,10 @@ class WebPHuffmanCodec {
       return;
     }
 
-    final List<_WebPClSymbol> clSymbols = buildRleSequence(codeLengths, alphabetSize);
+    final List<WebPClSymbol> clSymbols = buildRleSequence(codeLengths, alphabetSize);
 
     final List<int> clFreq = List<int>.filled(WebPEncodingConstants.metaAlphabetSize, 0);
-    for (final _WebPClSymbol s in clSymbols) {
+    for (final WebPClSymbol s in clSymbols) {
       clFreq[s.symbol]++;
     }
 
@@ -183,7 +176,7 @@ class WebPHuffmanCodec {
 
     bw.writeBits(0, 1);
 
-    for (final _WebPClSymbol s in clSymbols) {
+    for (final WebPClSymbol s in clSymbols) {
       bw.writeBits(clCodes[s.symbol], clCl[s.symbol]);
       if (s.extraBits > 0) {
         bw.writeBits(s.extraValue, s.extraBits);
@@ -192,9 +185,8 @@ class WebPHuffmanCodec {
   }
 
   /// Compresses [codeLengths] into an RLE symbol sequence per the VP8L spec.
-  // ignore: library_private_types_in_public_api
-  List<_WebPClSymbol> buildRleSequence(List<int> codeLengths, int alphabetSize) {
-    final List<_WebPClSymbol> result = <_WebPClSymbol>[];
+  List<WebPClSymbol> buildRleSequence(List<int> codeLengths, int alphabetSize) {
+    final List<WebPClSymbol> result = <WebPClSymbol>[];
     int i = 0;
     while (i < alphabetSize) {
       final int cl = codeLengths[i];
@@ -211,7 +203,7 @@ class WebPHuffmanCodec {
               WebPEncodingConstants.rleRepeatZeroLongMax,
             );
             result.add(
-              _WebPClSymbol(
+              WebPClSymbol(
                 WebPEncodingConstants.rleRepeatZeroLong,
                 WebPEncodingConstants.rleRepeatZeroLongBits,
                 n - WebPEncodingConstants.rleRepeatZeroLongMin,
@@ -224,7 +216,7 @@ class WebPHuffmanCodec {
               WebPEncodingConstants.rleRepeatZeroShortMax,
             );
             result.add(
-              _WebPClSymbol(
+              WebPClSymbol(
                 WebPEncodingConstants.rleRepeatZeroShort,
                 WebPEncodingConstants.rleRepeatZeroShortBits,
                 n - WebPEncodingConstants.rleRepeatZeroShortMin,
@@ -232,13 +224,13 @@ class WebPHuffmanCodec {
             );
             rem -= n;
           } else {
-            result.add(_WebPClSymbol(0, 0, 0));
+            result.add(WebPClSymbol(0, 0, 0));
             rem--;
           }
         }
         i += count;
       } else {
-        result.add(_WebPClSymbol(cl, 0, 0));
+        result.add(WebPClSymbol(cl, 0, 0));
         i++;
         while (i < alphabetSize && codeLengths[i] == cl) {
           int count = 0;
@@ -249,7 +241,7 @@ class WebPHuffmanCodec {
           }
           if (count >= WebPEncodingConstants.rleRepeatPrevMin) {
             result.add(
-              _WebPClSymbol(
+              WebPClSymbol(
                 WebPEncodingConstants.rleRepeatPrev,
                 WebPEncodingConstants.rleRepeatPrevBits,
                 count - WebPEncodingConstants.rleRepeatPrevMin,
@@ -258,7 +250,7 @@ class WebPHuffmanCodec {
             i += count;
           } else {
             for (int k = 0; k < count; k++) {
-              result.add(_WebPClSymbol(cl, 0, 0));
+              result.add(WebPClSymbol(cl, 0, 0));
             }
             i += count;
           }
