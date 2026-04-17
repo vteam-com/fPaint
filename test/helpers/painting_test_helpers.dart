@@ -15,10 +15,12 @@ import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/file_webp.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/services/fill_service.dart';
 import 'package:fpaint/widgets/main_view.dart';
+import 'package:fpaint/widgets/nine_grid_selector.dart';
 import 'package:image/image.dart' as img;
 
 /// Number of incremental steps used in human-like drag gestures.
@@ -50,6 +52,22 @@ const int _videoFramesFps = 30;
 
 /// Width of the zero-padded frame index in filenames.
 const int _videoFrameIndexPadding = 6;
+
+// ---------------------------------------------------------------------------
+// UI interaction string constants (must match production widget strings)
+// ---------------------------------------------------------------------------
+
+/// Tooltip on the add-layer button in [LayerSelector].
+const String _uiTooltipAddLayerAbove = 'Add a layer above';
+
+/// Button label in the layer rename dialog.
+const String _uiDialogApply = 'Apply';
+
+/// Tooltip on the main hamburger menu.
+const String _uiMenuTooltip = 'Menu';
+
+/// Menu item text for canvas settings (l10n.canvas in English).
+const String _uiMenuCanvasSettings = 'Canvas...';
 
 // ---------------------------------------------------------------------------
 // Interaction overlay constants
@@ -398,19 +416,31 @@ Future<void> drawCircleWithHumanGestures(
 
 /// Performs a solid flood fill at [position] with [color].
 ///
-/// Uses [FillService] directly inside [WidgetTester.runAsync] because
-/// the pixel-level flood fill requires real async I/O (`image.toByteData`)
-/// that cannot complete in the fake async zone of widget tests.
+/// Selects the fill tool and solid mode via UI taps, then executes the fill
+/// inside [WidgetTester.runAsync] because the pixel-level flood fill requires
+/// real async I/O (`image.toByteData`) that cannot complete in the fake async
+/// zone of widget tests.
 Future<void> performFloodFillSolid(
   final WidgetTester tester, {
   required final Offset position,
   required final Color color,
   int? tolerance,
 }) async {
+  // Select fill tool and solid mode via UI
+  await tapByKey(tester, Keys.toolFill);
+  await tapByKey(tester, Keys.toolFillModeSolid);
+
   final BuildContext context = tester.element(find.byType(MainView));
   final AppProvider appProvider = AppProvider.of(context, listen: false);
-  final Offset canvasPosition = appProvider.toCanvas(position);
+  appProvider.fillColor = color;
+  if (tolerance != null) {
+    appProvider.tolerance = tolerance;
+  }
 
+  // Record tap at fill position for video overlay
+  InteractionTracker.recordTap(position);
+
+  final Offset canvasPosition = appProvider.toCanvas(position);
   await tester.runAsync(() async {
     final ui.Image sourceImage = appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
     final FillService fillService = FillService();
@@ -432,11 +462,14 @@ Future<void> performFloodFillSolid(
     appProvider.recordExecuteDrawingActionToSelectedLayer(action: action);
   });
 
-  await tester.pump();
+  await UnitTestVideoRecorder.captureAfterInteraction(tester);
 }
 
 /// Performs a solid flood fill at the given [canvasPosition] (in canvas pixel
 /// coordinates, not screen coordinates).
+///
+/// Selects the fill tool and solid mode via UI taps, then executes the fill
+/// inside [WidgetTester.runAsync].
 ///
 /// Use this instead of [performFloodFillSolid] when screen-to-canvas conversion
 /// via [AppProvider.toCanvas] is unreliable (e.g. after zoom-out).
@@ -446,8 +479,20 @@ Future<void> performFloodFillSolidAtCanvasPosition(
   required final Color color,
   int? tolerance,
 }) async {
+  // Select fill tool and solid mode via UI
+  await tapByKey(tester, Keys.toolFill);
+  await tapByKey(tester, Keys.toolFillModeSolid);
+
   final BuildContext context = tester.element(find.byType(MainView));
   final AppProvider appProvider = AppProvider.of(context, listen: false);
+  appProvider.fillColor = color;
+  if (tolerance != null) {
+    appProvider.tolerance = tolerance;
+  }
+
+  // Record tap at approximate screen position for video overlay
+  final Offset screenPos = appProvider.fromCanvas(canvasPosition);
+  InteractionTracker.recordTap(screenPos);
 
   await tester.runAsync(() async {
     final ui.Image sourceImage = appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
@@ -470,21 +515,31 @@ Future<void> performFloodFillSolidAtCanvasPosition(
     appProvider.recordExecuteDrawingActionToSelectedLayer(action: action);
   });
 
-  await tester.pump();
+  await UnitTestVideoRecorder.captureAfterInteraction(tester);
 }
 
 /// Performs a gradient flood fill with the specified [gradientMode] and [gradientPoints].
 ///
-/// Uses [FillService] directly inside [WidgetTester.runAsync] for the same
-/// reason as [performFloodFillSolid].
+/// Selects the fill tool and gradient mode via UI taps, then executes the fill
+/// inside [WidgetTester.runAsync] for the same reason as [performFloodFillSolid].
 Future<void> performFloodFillGradient(
   final WidgetTester tester, {
   required final FillMode gradientMode,
   required final List<GradientPoint> gradientPoints,
   Offset Function(Offset)? toCanvas,
 }) async {
+  // Select fill tool and gradient mode via UI
+  await tapByKey(tester, Keys.toolFill);
+  final Key modeKey = gradientMode == FillMode.linear ? Keys.toolFillModeLinear : Keys.toolFillModeRadial;
+  await tapByKey(tester, modeKey);
+
   final BuildContext context = tester.element(find.byType(MainView));
   final AppProvider appProvider = AppProvider.of(context, listen: false);
+
+  // Record tap at first gradient point for video overlay
+  if (gradientPoints.isNotEmpty) {
+    InteractionTracker.recordTap(gradientPoints.first.offset);
+  }
 
   final FillModel fillModel = FillModel();
   fillModel.mode = gradientMode;
@@ -508,7 +563,7 @@ Future<void> performFloodFillGradient(
     appProvider.recordExecuteDrawingActionToSelectedLayer(action: action);
   });
 
-  await tester.pump();
+  await UnitTestVideoRecorder.captureAfterInteraction(tester);
 }
 
 // ---------------------------------------------------------------------------
@@ -517,23 +572,45 @@ Future<void> performFloodFillGradient(
 
 /// Helpers for managing layers during painting tests.
 class PaintingLayerHelpers {
-  /// Adds a new layer above the current selection and renames it.
+  /// Adds a new layer above the current selection via UI and renames it.
+  ///
+  /// Taps the "Add a layer above" button in the layer panel, then opens the
+  /// rename dialog via long-press on the new layer's name and enters [name].
   static Future<void> addNewLayer(
     final WidgetTester tester,
     final String name,
   ) async {
+    // Tap the "Add a layer above" button visible on the selected layer.
+    await tapByTooltip(tester, _uiTooltipAddLayerAbove);
+    await tester.pumpAndSettle();
+
+    // Determine the default name assigned to the newly created layer.
     final BuildContext context = tester.element(find.byType(MainView));
     final LayersProvider layersProvider = LayersProvider.of(context);
-    final int currentIndex = layersProvider.selectedLayerIndex;
+    final String defaultName = layersProvider.selectedLayer.name;
 
-    layersProvider.insertAt(currentIndex);
-    final LayerProvider newLayer = layersProvider.get(currentIndex);
-    layersProvider.selectedLayerIndex = layersProvider.getLayerIndex(newLayer);
-    await tester.pump();
+    // Long-press on the layer name text to open the rename dialog.
+    final Finder layerNameText = find.text(defaultName);
+    expect(layerNameText, findsWidgets, reason: 'Should find the new layer name "$defaultName"');
+    await tester.longPress(layerNameText.first);
+    await tester.pumpAndSettle();
 
-    layersProvider.selectedLayer.name = name;
-    layersProvider.update();
-    await tester.pump();
+    // Enter the desired name in the rename dialog's TextField.
+    final Finder dialogFinder = find.byType(AlertDialog);
+    expect(dialogFinder, findsOneWidget, reason: 'Layer rename dialog should be visible');
+    final Finder textField = find.descendant(
+      of: dialogFinder,
+      matching: find.byType(TextField),
+    );
+    await tester.enterText(textField.first, name);
+
+    // Tap "Apply" to confirm the rename.
+    final Finder applyButton = find.descendant(
+      of: dialogFinder,
+      matching: find.text(_uiDialogApply),
+    );
+    await tester.tap(applyButton);
+    await tester.pumpAndSettle();
   }
 
   /// Switches to the layer at [layerIndex].
@@ -614,6 +691,147 @@ class PaintingLayerHelpers {
       debugPrint('  [$i] $visible "${layer.name}" - ${layer.actionStack.length} actions$selected');
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Text placement via UI
+// ---------------------------------------------------------------------------
+
+/// Places a text object on the canvas by selecting the text tool, tapping
+/// on the canvas, and interacting with the text editor dialog.
+///
+/// Sets [fontSize] and [color] on [AppProvider] before tapping so the dialog
+/// opens with the correct initial values.  The font size slider and color
+/// picker dialog are not manipulated directly because their continuous
+/// nature makes exact values fragile in widget tests.
+Future<void> placeTextViaUI(
+  final WidgetTester tester, {
+  required final Offset canvasPosition,
+  required final String text,
+  required final double fontSize,
+  required final Color color,
+  final FontWeight fontWeight = FontWeight.normal,
+  final String? fontFamily,
+}) async {
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
+
+  // Pre-configure the text tool settings so the dialog opens with the
+  // desired initial font size and color.
+  appProvider.brushSize = fontSize;
+  appProvider.brushColor = color;
+
+  // Select the text tool via UI.
+  await _tapIconButtonBySvgKey(tester, '${appIconKeyPrefix}fontDownload');
+  await tester.pump();
+
+  // Tap on the canvas at the target position to open the text dialog.
+  final Offset screenPosition = appProvider.fromCanvas(canvasPosition);
+  await tapLikeHuman(tester, screenPosition);
+  await tester.pumpAndSettle();
+
+  // Interact with the TextEditorDialog.
+  final Finder dialogFinder = find.byType(AlertDialog);
+  expect(dialogFinder, findsOneWidget, reason: 'Text editor dialog should be visible');
+
+  // Enter text into the text field.
+  final Finder textField = find.descendant(
+    of: dialogFinder,
+    matching: find.byType(TextField),
+  );
+  await tester.enterText(textField.first, text);
+  await tester.pump();
+
+  // Toggle bold if requested.
+  if (fontWeight == FontWeight.bold) {
+    final Finder boldIcon = find.descendant(
+      of: dialogFinder,
+      matching: find.byKey(const ValueKey<String>('${appIconKeyPrefix}formatBold')),
+    );
+    final Finder boldButton = find.ancestor(
+      of: boldIcon,
+      matching: find.byType(IconButton),
+    );
+    await tester.tap(boldButton.first);
+    await tester.pump();
+  }
+
+  // Tap the "Add Text" action button (find the TextButton, not the title).
+  final Finder addTextButton = find.descendant(
+    of: dialogFinder,
+    matching: find.widgetWithText(TextButton, 'Add Text'),
+  );
+  await tester.tap(addTextButton.first);
+  await tester.pumpAndSettle();
+}
+
+// ---------------------------------------------------------------------------
+// Canvas resize via UI
+// ---------------------------------------------------------------------------
+
+/// Resizes the canvas by opening the canvas settings dialog from the main
+/// menu, entering the new dimensions, selecting the anchor position, and
+/// tapping Apply.
+Future<void> resizeCanvasViaUI(
+  final WidgetTester tester, {
+  required final int width,
+  required final int height,
+  required final CanvasResizePosition position,
+}) async {
+  // Open the main menu.
+  await tapByTooltip(tester, _uiMenuTooltip);
+  await tester.pumpAndSettle();
+
+  // Tap "Canvas..." menu item.
+  final Finder canvasMenuItem = find.text(_uiMenuCanvasSettings);
+  expect(canvasMenuItem, findsOneWidget, reason: 'Should find Canvas... menu item');
+  await tester.tap(canvasMenuItem);
+  await tester.pumpAndSettle();
+
+  // The canvas settings bottom sheet is now visible.
+
+  // Unlock aspect ratio if locked (default is locked) by tapping the link icon.
+  final Finder linkIcon = find.byKey(const ValueKey<String>('${appIconKeyPrefix}link'));
+  if (linkIcon.evaluate().isNotEmpty) {
+    final Finder lockButton = find.ancestor(
+      of: linkIcon,
+      matching: find.byType(IconButton),
+    );
+    if (lockButton.evaluate().isNotEmpty) {
+      await tester.tap(lockButton.first);
+      await tester.pumpAndSettle();
+    }
+  }
+
+  // Find the width and height TextFields by their label text.
+  final Finder widthField = find.widgetWithText(TextField, 'Width');
+  final Finder heightField = find.widgetWithText(TextField, 'Height');
+
+  // Enter new width.
+  await tester.enterText(widthField.first, width.toString());
+  await tester.pump();
+
+  // Enter new height.
+  await tester.enterText(heightField.first, height.toString());
+  await tester.pump();
+
+  // Select the anchor position in the NineGridSelector.
+  // The positions map to enum indices 0..8 in the grid.
+  final Finder gridSelector = find.byType(NineGridSelector);
+  expect(gridSelector, findsOneWidget, reason: 'NineGridSelector should be visible');
+
+  // Find the GestureDetector at the desired index within the grid.
+  final Finder gridGestureDetectors = find.descendant(
+    of: gridSelector,
+    matching: find.byType(GestureDetector),
+  );
+  await tester.tap(gridGestureDetectors.at(position.index));
+  await tester.pump();
+
+  // Tap "Apply" to execute the resize.
+  final Finder applyButton = find.text(_uiDialogApply);
+  await tester.tap(applyButton.first);
+  await tester.pumpAndSettle();
 }
 
 // ---------------------------------------------------------------------------
