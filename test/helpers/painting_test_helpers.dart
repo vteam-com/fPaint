@@ -53,6 +53,14 @@ const int _videoFramesFps = 30;
 /// Width of the zero-padded frame index in filenames.
 const int _videoFrameIndexPadding = 6;
 
+/// Fixed creation-time metadata embedded in the MP4 container so the output
+/// is byte-identical across test runs.
+const String _ffmpegFixedCreationTime = '2000-01-01T00:00:00';
+
+/// Thread count for ffmpeg encoding.  Single-threaded ensures deterministic
+/// output so that two identical test runs produce byte-identical MP4 files.
+const int _ffmpegThreadCount = 1;
+
 // ---------------------------------------------------------------------------
 // UI interaction string constants (must match production widget strings)
 // ---------------------------------------------------------------------------
@@ -1267,14 +1275,22 @@ class UnitTestVideoRecorder {
         'ffmpeg',
         <String>[
           '-y',
+          '-fflags',
+          '+bitexact',
           '-framerate',
           '$_videoFramesFps',
           '-i',
           '${_framesDirectory.path}/$_videoFrameFilenamePrefix%0${_videoFrameIndexPadding}d.$_videoFrameFileExtension',
           '-c:v',
           'libx264',
+          '-flags:v',
+          '+bitexact',
+          '-threads',
+          '$_ffmpegThreadCount',
           '-pix_fmt',
           'yuv420p',
+          '-metadata',
+          'creation_time=$_ffmpegFixedCreationTime',
           outputPath,
         ],
       );
