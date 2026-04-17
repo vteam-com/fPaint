@@ -530,10 +530,9 @@ void main() {
       await videoRecorder.captureFrame();
 
       // ---------------------------------------------------------------
-      // Crop canvas to grass bounds (top-anchored)
+      // Crop canvas to grass bounds (top-anchored) via canvas settings UI
       // ---------------------------------------------------------------
       final BuildContext context = tester.element(find.byType(MainScreen));
-      final AppProvider appProvider = AppProvider.of(context, listen: false);
       final LayersProvider layersProvider = LayersProvider.of(context);
       final Size preCropCanvasSize = layersProvider.size;
       final int layerCountBeforeCrop = layersProvider.length;
@@ -547,13 +546,12 @@ void main() {
         '${cropTargetSize.width.toInt()}x${cropTargetSize.height.toInt()}',
       );
 
-      layersProvider.canvasResize(
-        cropTargetSize.width.toInt(),
-        cropTargetSize.height.toInt(),
-        CanvasResizePosition.top,
+      await resizeCanvasViaUI(
+        tester,
+        width: cropTargetSize.width.toInt(),
+        height: cropTargetSize.height.toInt(),
+        position: CanvasResizePosition.top,
       );
-      appProvider.update();
-      await tester.pumpAndSettle();
       await prepareCanvasViewport(tester);
       await tester.pumpAndSettle();
 
@@ -575,13 +573,15 @@ void main() {
       await videoRecorder.captureFrame();
 
       // ---------------------------------------------------------------
-      // Draw Signature (text via API — after crop so it uses final canvas size)
+      // Draw Signature (text via UI — after crop so it uses final canvas size)
       // ---------------------------------------------------------------
       await PaintingLayerHelpers.addNewLayer(tester, _signatureLayerName);
 
       final Size croppedCanvasSize = layersProvider.size;
 
-      final TextObject signatureTextObject = TextObject(
+      // Compute the bottom-right canvas position for the signature using a
+      // temporary TextObject to measure bounds.
+      final TextObject measureText = TextObject(
         text: _signatureText,
         position: Offset.zero,
         color: const Color.fromARGB(255, 1, 43, 8),
@@ -589,22 +589,21 @@ void main() {
         fontFamily: _signatureFontFamily,
         fontWeight: FontWeight.bold,
       );
-      final Rect textBounds = signatureTextObject.getBounds();
+      final Rect textBounds = measureText.getBounds();
 
       final Offset signaturePosition = Offset(
         croppedCanvasSize.width - textBounds.width - _signatureMarginRight,
         croppedCanvasSize.height - textBounds.height - _signatureMarginBottom,
       );
-      signatureTextObject.position = signaturePosition;
 
-      appProvider.recordExecuteDrawingActionToSelectedLayer(
-        action: UserActionDrawing(
-          action: ActionType.text,
-          positions: <Offset>[signaturePosition],
-          textObject: signatureTextObject,
-        ),
+      await placeTextViaUI(
+        tester,
+        canvasPosition: signaturePosition,
+        text: _signatureText,
+        fontSize: _signatureFontSize,
+        color: const Color.fromARGB(255, 1, 43, 8),
+        fontWeight: FontWeight.bold,
       );
-      await tester.pumpAndSettle();
       await videoRecorder.captureFrame();
 
       // ---------------------------------------------------------------
