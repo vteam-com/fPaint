@@ -2,7 +2,7 @@
 name: Deploy to Firebase Hosting on merge
 on:
   workflow_run:
-    workflows: ["CI"]
+    workflows: [ "CI" ]
     types:
       - completed
     branches:
@@ -29,7 +29,8 @@ jobs:
         run: flutter build windows
 
       - name: Zip Windows build
-        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath flutter-windows-app.zip
+        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath
+          flutter-windows-app.zip
         shell: pwsh
 
       - name: Upload Windows artifact
@@ -58,7 +59,8 @@ jobs:
         run: flutter build macos
 
       - name: Zip macOS build
-        run: cd build/macos/Build/Products/Release && zip -r "$GITHUB_WORKSPACE/flutter-macos-app.zip" .
+        run: cd build/macos/Build/Products/Release && zip -r
+          "$GITHUB_WORKSPACE/flutter-macos-app.zip" .
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v6
@@ -68,7 +70,7 @@ jobs:
 
   build-linux-and-deploy-web:
     name: Build Linux & Deploy Web
-    needs: [build-windows, build-macos]
+    needs: [ build-windows, build-macos ]
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
@@ -92,7 +94,8 @@ jobs:
         run: flutter build linux
 
       - name: Zip Linux build
-        run: cd build/linux/x64/release/bundle && zip -r "$GITHUB_WORKSPACE/flutter-linux-app.zip" .
+        run: cd build/linux/x64/release/bundle && zip -r
+          "$GITHUB_WORKSPACE/flutter-linux-app.zip" .
 
       - name: Build web
         run: flutter build web
@@ -111,6 +114,8 @@ jobs:
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VTEAM_PAINT }}
