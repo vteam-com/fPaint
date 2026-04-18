@@ -20,6 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install yq (avoid Chocolatey)
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/mikefarah/yq/releases/latest/download/yq_windows_amd64.exe" -OutFile "$env:USERPROFILE\yq.exe"
+          echo "$env:USERPROFILE" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+        shell: pwsh
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
