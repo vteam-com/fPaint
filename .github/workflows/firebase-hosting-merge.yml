@@ -88,6 +88,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Set up Node.js for Firebase CLI
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
@@ -123,6 +128,13 @@ jobs:
           cp flutter-linux-app.zip build/web/downloads/
           cp desktop-artifacts/flutter-windows-app/flutter-windows-app.zip build/web/downloads/
           cp desktop-artifacts/flutter-macos-app/flutter-macos-app.zip build/web/downloads/
+
+      - name: Configure Firebase credentials
+        run: |
+          cat > "$RUNNER_TEMP/firebase-service-account.json" <<'EOF'
+          ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VTEAM_PAINT }}
+          EOF
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
 
       - name: Clean old Firebase Hosting versions
         continue-on-error: true
@@ -236,14 +248,8 @@ jobs:
         run: sleep 15
 
       - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VTEAM_PAINT }}
-          channelId: live
-          projectId: vteam-paint
+        run: npx -y firebase-tools@latest deploy --only hosting --project vteam-paint
+          --non-interactive
 
   cleanup-artifacts:
     name: Clean up build artifacts
