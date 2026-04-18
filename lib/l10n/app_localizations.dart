@@ -338,6 +338,30 @@ abstract class AppLocalizations {
   /// **'Discard current document?'**
   String get discardCurrentDocumentQuestion;
 
+  /// No description provided for @dropFileAddLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as New Layer'**
+  String get dropFileAddLayer;
+
+  /// No description provided for @dropFileOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open File'**
+  String get dropFileOpen;
+
+  /// No description provided for @dropFilePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to add this as a new layer or open the file?'**
+  String get dropFilePrompt;
+
+  /// No description provided for @dropFileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'File Dropped'**
+  String get dropFileTitle;
+
   /// No description provided for @downloadAsFile.
   ///
   /// In en, this message translates to:

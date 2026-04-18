@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=fPaint
+Comment=A feature-rich drawing and painting application
+Exec=fpaint %f
+Icon=fpaint
+Terminal=false
+Categories=Graphics;2DGraphics;RasterGraphics;
+MimeType=image/png;image/jpeg;image/webp;image/tiff;image/openraster;

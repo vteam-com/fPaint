@@ -68,6 +68,10 @@
       "fileName": {}
     }
   },
+  "dropFileAddLayer": "Ajouter comme nouveau calque",
+  "dropFileOpen": "Ouvrir le fichier",
+  "dropFilePrompt": "Voulez-vous ajouter ceci comme nouveau calque ou ouvrir le fichier ?",
+  "dropFileTitle": "Fichier déposé",
   "editText": "Modifier le texte",
   "enterYourTextHere": "Saisissez votre texte ici...",
   "errorProcessingFile": "Erreur de traitement du fichier : {error}",

@@ -20,14 +20,14 @@
 			</dict>
 			<dict>
 				<key>CFBundleTypeName</key>
-				<string>JPG Image</string>
+				<string>JPEG Image</string>
 				<key>CFBundleTypeRole</key>
 				<string>Editor</string>
 				<key>LSHandlerRank</key>
 				<string>Alternate</string>
 				<key>LSItemContentTypes</key>
 				<array>
-					<string>public.jpg</string>
+					<string>public.jpeg</string>
 				</array>
 			</dict>
 			<dict>
@@ -39,7 +39,19 @@
 				<string>Alternate</string>
 				<key>LSItemContentTypes</key>
 				<array>
-					<string>public.webp</string>
+					<string>org.webmproject.webp</string>
+				</array>
+			</dict>
+			<dict>
+				<key>CFBundleTypeName</key>
+				<string>TIFF Image</string>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>LSHandlerRank</key>
+				<string>Alternate</string>
+				<key>LSItemContentTypes</key>
+				<array>
+					<string>public.tiff</string>
 				</array>
 			</dict>
 			<dict>
@@ -92,5 +104,28 @@
 		<string>This app requires access files for loading image.</string>
 		<key>NSPrincipalClass</key>
 		<string>NSApplication</string>
+		<key>UTImportedTypeDeclarations</key>
+		<array>
+			<dict>
+				<key>UTTypeIdentifier</key>
+				<string>public.ora</string>
+				<key>UTTypeDescription</key>
+				<string>OpenRaster Image</string>
+				<key>UTTypeConformsTo</key>
+				<array>
+					<string>public.data</string>
+					<string>public.image</string>
+				</array>
+				<key>UTTypeTagSpecification</key>
+				<dict>
+					<key>public.filename-extension</key>
+					<array>
+						<string>ora</string>
+					</array>
+					<key>public.mime-type</key>
+					<string>image/openraster</string>
+				</dict>
+			</dict>
+		</array>
 	</dict>
 </plist>

@@ -151,6 +151,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get discardCurrentDocumentQuestion => 'Ignorer le document actuel ?';
 
   @override
+  String get dropFileAddLayer => 'Ajouter comme nouveau calque';
+
+  @override
+  String get dropFileOpen => 'Ouvrir le fichier';
+
+  @override
+  String get dropFilePrompt => 'Voulez-vous ajouter ceci comme nouveau calque ou ouvrir le fichier ?';
+
+  @override
+  String get dropFileTitle => 'Fichier déposé';
+
+  @override
   String downloadAsFile(Object fileName) {
     return 'Telecharger en tant que $fileName';
   }

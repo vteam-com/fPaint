@@ -69,6 +69,10 @@
       "fileName": {}
     }
   },
+  "dropFileAddLayer": "Agregar como nueva capa",
+  "dropFileOpen": "Abrir archivo",
+  "dropFilePrompt": "¿Desea agregar esto como una nueva capa o abrir el archivo?",
+  "dropFileTitle": "Archivo soltado",
   "editText": "Editar texto",
   "enterYourTextHere": "Escribe tu texto aqui...",
   "errorProcessingFile": "Error al procesar archivo: {error}",

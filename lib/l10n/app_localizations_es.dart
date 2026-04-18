@@ -148,6 +148,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get discardCurrentDocumentQuestion => 'Descartar el documento actual?';
 
   @override
+  String get dropFileAddLayer => 'Agregar como nueva capa';
+
+  @override
+  String get dropFileOpen => 'Abrir archivo';
+
+  @override
+  String get dropFilePrompt => '¿Desea agregar esto como una nueva capa o abrir el archivo?';
+
+  @override
+  String get dropFileTitle => 'Archivo soltado';
+
+  @override
   String downloadAsFile(Object fileName) {
     return 'Descargar como $fileName';
   }
