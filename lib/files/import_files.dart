@@ -377,3 +377,118 @@ Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
 
   return discardCurrentFile == true;
 }
+
+/// The result chosen by the user when dropping a file onto a canvas that
+/// already contains content.
+enum DropFileAction {
+  /// Open the file, replacing the current content.
+  open,
+
+  /// Add the file as a new layer on top of the existing content.
+  addLayer,
+}
+
+/// Handles a file dropped onto the canvas from the desktop.
+///
+/// When the canvas has no meaningful content the file is opened directly.
+/// Otherwise a dialog asks the user whether to open the file (replacing the
+/// current content) or to add it as a new layer.
+Future<void> onFileDropped({
+  required final BuildContext context,
+  required final String path,
+}) async {
+  final LayersProvider layers = LayersProvider.of(context);
+  final ShellProvider shellProvider = ShellProvider.of(context);
+
+  final String extension = path.split('.').last.toLowerCase();
+  if (!isFileExtensionSupported(extension)) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.fileFormatNotSupported(extension),
+          ),
+          duration: const Duration(seconds: AppMath.triple),
+        ),
+      );
+    }
+    return;
+  }
+
+  final bool canvasHasContent = layers.list.any(
+    (final LayerProvider layer) => layer.actionStack.isNotEmpty,
+  );
+
+  if (canvasHasContent) {
+    final DropFileAction? action = await showDialog<DropFileAction>(
+      context: context,
+      builder: (final BuildContext dialogContext) {
+        final AppLocalizations l10n = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
+          title: Text(l10n.dropFileTitle),
+          content: Text(l10n.dropFilePrompt),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, DropFileAction.addLayer),
+              child: Text(l10n.dropFileAddLayer),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, DropFileAction.open),
+              child: Text(l10n.dropFileOpen),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (action == null || !context.mounted) {
+      return;
+    }
+
+    if (action == DropFileAction.addLayer) {
+      await _addDroppedFileAsLayer(
+        context: context,
+        layers: layers,
+        path: path,
+      );
+      return;
+    }
+  }
+
+  // Open the file, replacing the current content.
+  if (context.mounted) {
+    await openFileFromPath(context: context, layers: layers, path: path);
+    shellProvider.loadedFileName = path;
+    layers.clearHasChanged();
+  }
+}
+
+/// Decodes the image at [path] and adds it as a new layer on top of the
+/// current layer stack.
+Future<void> _addDroppedFileAsLayer({
+  required final BuildContext context,
+  required final LayersProvider layers,
+  required final String path,
+}) async {
+  final String fileName = path.split(Platform.pathSeparator).last;
+
+  try {
+    final Uint8List fileBytes = await File(path).readAsBytes();
+    final ui.Image image = await decodeImageFromList(fileBytes);
+
+    layers.addTop(name: fileName);
+    layers.selectedLayer.addImage(imageToAdd: image);
+    layers.update();
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.failedToLoadImage(e.toString()),
+          ),
+          duration: const Duration(seconds: AppMath.triple),
+        ),
+      );
+    }
+  }
+}

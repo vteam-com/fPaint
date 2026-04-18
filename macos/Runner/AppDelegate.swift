@@ -25,16 +25,6 @@ class AppDelegate: FlutterAppDelegate {
         return true
     }
 
-    override func application(_ application: NSApplication, open urls: [URL]) {
-        NSLog("🚀 fPaint A - application")
-        
-        for url in urls {
-            NSLog("🚀 fPaint A fileOpened \(url.path)")
-            AppDelegate.pendingFilePath = url.path
-            fileChannel?.invokeMethod("fileOpened", arguments: url.path)
-        }
-    }
-
     override func applicationDidFinishLaunching(_ notification: Notification) {
         NSLog("🚀 fPaint B - applicationDidFinishLaunching")
 
@@ -46,12 +36,23 @@ class AppDelegate: FlutterAppDelegate {
             name: "com.vteam.fpaint/file",
             binaryMessenger: controller.engine.binaryMessenger
         )
+
+        // Handle Dart-side queries for pending file path
+        fileChannel?.setMethodCallHandler { (call, result) in
+            if call.method == "getPendingFile" {
+                result(AppDelegate.pendingFilePath)
+                AppDelegate.pendingFilePath = nil
+            } else {
+                result(FlutterMethodNotImplemented)
+            }
+        }
         
-        // Send pending file path to Flutter if available
+        // Send pending file path to Flutter if available.
+        // Do NOT clear pendingFilePath here — the Dart engine may not be
+        // listening yet. Let the Dart side clear it via getPendingFile.
         if let pendingFilePath = AppDelegate.pendingFilePath {
-            NSLog("📡 Sending pending file to Flutter")
+            NSLog("📡 Sending pending file to Flutter (Dart may not be ready yet)")
             fileChannel?.invokeMethod("fileOpened", arguments: pendingFilePath)
-            AppDelegate.pendingFilePath = nil // Clear after sending
         } else {
             NSLog("⚠️ No pending file found at launch")
         }

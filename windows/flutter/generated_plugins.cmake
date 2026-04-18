@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  desktop_drop
   irondash_engine_context
   pasteboard
   screen_retriever_windows

@@ -33,56 +33,69 @@ Future<void> main() async {
   mainApp = MyApp();
 
   // Platform channel for file opening.
-  const MethodChannel('com.vteam.fpaint/file').setMethodCallHandler((final MethodCall call) async {
+  const MethodChannel fileChannel = MethodChannel('com.vteam.fpaint/file');
+  fileChannel.setMethodCallHandler((final MethodCall call) async {
     if (call.method == 'fileOpened') {
       final String filePath = call.arguments as String;
-
-      // Check if there are unsaved changes before clearing
-      if (mainApp.appProvider.layers.hasChanged) {
-        final bool shouldProceed =
-            await showDialog<bool>(
-              context: mainApp.navigatorKey.currentContext!,
-              builder: (final BuildContext context) {
-                final AppLocalizations l10n = AppLocalizations.of(context)!;
-
-                return AlertDialog(
-                  title: Text(l10n.unsavedChanges),
-                  content: Text(l10n.unsavedChangesDiscardAndOpenPrompt),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: Text(l10n.cancel),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: Text(l10n.discardAndOpen),
-                    ),
-                  ],
-                );
-              },
-            ) ??
-            false;
-
-        if (!shouldProceed) {
-          return;
-        }
-      }
-
-      mainApp.appProvider.layers.clear();
-      final bool success = await openFileFromPath(
-        context: mainApp.navigatorKey.currentContext!,
-        layers: mainApp.appProvider.layers,
-        path: filePath,
-      );
-
-      // Update the shell provider with the file name if successful
-      if (success) {
-        mainApp.shellProvider.loadedFileName = filePath;
-      }
+      await _handleFileOpened(filePath);
     }
   });
 
   runApp(mainApp);
+
+  // After the app is running, check for a file that was pending at launch.
+  WidgetsBinding.instance.addPostFrameCallback((final _) async {
+    final String? pendingFile = await fileChannel.invokeMethod<String>('getPendingFile');
+    if (pendingFile != null && pendingFile.isNotEmpty) {
+      await _handleFileOpened(pendingFile);
+    }
+  });
+}
+
+/// Handles a file opened from the platform (e.g. double-click in Finder).
+Future<void> _handleFileOpened(final String filePath) async {
+  // Check if there are unsaved changes before clearing
+  if (mainApp.appProvider.layers.hasChanged) {
+    final bool shouldProceed =
+        await showDialog<bool>(
+          context: mainApp.navigatorKey.currentContext!,
+          builder: (final BuildContext context) {
+            final AppLocalizations l10n = AppLocalizations.of(context)!;
+
+            return AlertDialog(
+              title: Text(l10n.unsavedChanges),
+              content: Text(l10n.unsavedChangesDiscardAndOpenPrompt),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text(l10n.cancel),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text(l10n.discardAndOpen),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+
+    if (!shouldProceed) {
+      return;
+    }
+  }
+
+  mainApp.appProvider.layers.clear();
+  final bool success = await openFileFromPath(
+    context: mainApp.navigatorKey.currentContext!,
+    layers: mainApp.appProvider.layers,
+    path: filePath,
+  );
+
+  // Update the shell provider with the file name if successful
+  if (success) {
+    mainApp.shellProvider.loadedFileName = filePath;
+  }
 }
 
 /// The main entry point for the Flutter Paint App.

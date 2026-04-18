@@ -75,6 +75,10 @@
       "fileName": {}
     }
   },
+  "dropFileAddLayer": "Add as New Layer",
+  "dropFileOpen": "Open File",
+  "dropFilePrompt": "Would you like to add this as a new layer or open the file?",
+  "dropFileTitle": "File Dropped",
   "editText": "Edit Text",
   "enterYourTextHere": "Enter your text here...",
   "errorProcessingFile": "Error processing file: {error}",

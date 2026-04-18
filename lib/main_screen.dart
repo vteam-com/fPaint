@@ -1,5 +1,8 @@
+import 'package:desktop_drop/desktop_drop.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/floating_buttons.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
@@ -18,7 +21,6 @@ class MainScreen extends StatelessWidget {
 
   /// The minimum size of the side panel.
   final double minSidePanelSize = AppLayout.sidePanelCollapsed;
-
   @override
   Widget build(final BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
@@ -45,37 +47,42 @@ class MainScreen extends StatelessWidget {
 
     shellProvider.deviceSizeSmall = MediaQuery.of(context).size.width < AppLayout.desktopBreakpoint;
 
-    return RepaintBoundary(
-      key: Keys.appScreenshotBoundary,
-      child: Scaffold(
-        backgroundColor: Colors.grey,
-        body: shellMode == ShellMode.hidden
-            ? _buildMainContent(context, shellProvider, appProvider)
-            : MultiSplitViewTheme(
-                data: MultiSplitViewThemeData(
-                  dividerPainter: DividerPainters.grooved1(
-                    animationEnabled: true,
-                    backgroundColor: Colors.grey.shade600,
-                    highlightedBackgroundColor: Colors.blue,
-                    color: Colors.grey.shade800,
-                    thickness: AppStroke.divider,
-                    highlightedThickness: AppStroke.dividerHighlighted,
-                    strokeCap: StrokeCap.round,
+    return DropTarget(
+      onDragDone: (final DropDoneDetails details) {
+        _handleDroppedFiles(context, details);
+      },
+      child: RepaintBoundary(
+        key: Keys.appScreenshotBoundary,
+        child: Scaffold(
+          backgroundColor: Colors.grey,
+          body: shellMode == ShellMode.hidden
+              ? _buildMainContent(context, shellProvider, appProvider)
+              : MultiSplitViewTheme(
+                  data: MultiSplitViewThemeData(
+                    dividerPainter: DividerPainters.grooved1(
+                      animationEnabled: true,
+                      backgroundColor: Colors.grey.shade600,
+                      highlightedBackgroundColor: Colors.blue,
+                      color: Colors.grey.shade800,
+                      thickness: AppStroke.divider,
+                      highlightedThickness: AppStroke.dividerHighlighted,
+                      strokeCap: StrokeCap.round,
+                    ),
                   ),
+                  child: _buildMainContent(context, shellProvider, appProvider),
                 ),
-                child: _buildMainContent(context, shellProvider, appProvider),
-              ),
-        floatingActionButton: shellMode == ShellMode.hidden
-            ? myFloatButton(
-                icon: AppIcon.moreVert,
-                onPressed: () {
-                  Future<void>.microtask(() {
-                    shellProvider.shellMode = ShellMode.full;
-                    shellProvider.update();
-                  });
-                },
-              )
-            : floatingActionButtons(context, shellProvider, appProvider),
+          floatingActionButton: shellMode == ShellMode.hidden
+              ? myFloatButton(
+                  icon: AppIcon.moreVert,
+                  onPressed: () {
+                    Future<void>.microtask(() {
+                      shellProvider.shellMode = ShellMode.full;
+                      shellProvider.update();
+                    });
+                  },
+                )
+              : floatingActionButtons(context, shellProvider, appProvider),
+        ),
       ),
     );
   }
@@ -165,5 +172,26 @@ class MainScreen extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  /// Handles files dropped onto the main screen from the desktop.
+  void _handleDroppedFiles(
+    final BuildContext context,
+    final DropDoneDetails details,
+  ) {
+    // Only handle file drops on non-web platforms where file paths are
+    // available.
+    if (kIsWeb) {
+      return;
+    }
+
+    for (final DropItem xFile in details.files) {
+      final String path = xFile.path;
+      if (path.isNotEmpty) {
+        onFileDropped(context: context, path: path);
+        // Only handle the first file.
+        break;
+      }
+    }
   }
 }

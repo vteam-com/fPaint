@@ -150,6 +150,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discardCurrentDocumentQuestion => 'Discard current document?';
 
   @override
+  String get dropFileAddLayer => 'Add as New Layer';
+
+  @override
+  String get dropFileOpen => 'Open File';
+
+  @override
+  String get dropFilePrompt => 'Would you like to add this as a new layer or open the file?';
+
+  @override
+  String get dropFileTitle => 'File Dropped';
+
+  @override
   String downloadAsFile(Object fileName) {
     return 'Download as $fileName';
   }
