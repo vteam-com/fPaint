@@ -16,10 +16,21 @@ import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+const String _clearPendingFileMethod = 'clearPendingFile';
+const String _fileChannelName = 'com.vteam.fpaint/file';
+const String _fileOpenedMethod = 'fileOpened';
+const String _fileUrlPrefix = 'file://';
+const String _getPendingFileMethod = 'getPendingFile';
+const MethodChannel _fileChannel = MethodChannel(_fileChannelName);
+
 /// The global instance of the [MyApp] widget.
 ///
 /// This variable is initialized in the [main] function and used to access the app's providers.
 late MyApp mainApp;
+
+String? _queuedPlatformFilePath;
+bool _isProcessingQueuedPlatformFile = false;
+bool _platformFileHandlingReady = false;
 
 /// The main function is the entry point of the Flutter application.
 ///
@@ -33,11 +44,10 @@ Future<void> main() async {
   mainApp = MyApp();
 
   // Platform channel for file opening.
-  const MethodChannel fileChannel = MethodChannel('com.vteam.fpaint/file');
-  fileChannel.setMethodCallHandler((final MethodCall call) async {
-    if (call.method == 'fileOpened') {
-      final String filePath = call.arguments as String;
-      await _handleFileOpened(filePath);
+  _fileChannel.setMethodCallHandler((final MethodCall call) async {
+    if (call.method == _fileOpenedMethod) {
+      final String filePath = _normalizePlatformFilePath(call.arguments as String);
+      await _queueOrHandlePlatformFile(filePath);
     }
   });
 
@@ -45,11 +55,115 @@ Future<void> main() async {
 
   // After the app is running, check for a file that was pending at launch.
   WidgetsBinding.instance.addPostFrameCallback((final _) async {
-    final String? pendingFile = await fileChannel.invokeMethod<String>('getPendingFile');
-    if (pendingFile != null && pendingFile.isNotEmpty) {
-      await _handleFileOpened(pendingFile);
+    String? pendingFile;
+
+    try {
+      pendingFile = await _fileChannel.invokeMethod<String>(_getPendingFileMethod);
+    } on MissingPluginException {
+      pendingFile = null;
+    } on PlatformException {
+      pendingFile = null;
+    }
+
+    final String? startupFilePath =
+        _queuedPlatformFilePath ?? (pendingFile == null ? null : _normalizePlatformFilePath(pendingFile));
+    _queuedPlatformFilePath = null;
+
+    _platformFileHandlingReady = true;
+
+    if (startupFilePath != null && startupFilePath.isNotEmpty) {
+      _queuedPlatformFilePath = startupFilePath;
+      _scheduleQueuedPlatformFileHandling();
+      return;
+    }
+
+    _scheduleQueuedPlatformFileHandling();
+  });
+}
+
+Future<void> _queueOrHandlePlatformFile(final String filePath) async {
+  if (_platformFileHandlingReady == false || mainApp.navigatorKey.currentContext == null) {
+    _queuedPlatformFilePath = filePath;
+    _scheduleQueuedPlatformFileHandling();
+    return;
+  }
+
+  await _consumePlatformFile(filePath);
+}
+
+/// Schedules queued platform file handling for the next frame.
+///
+/// This defers file processing until the navigator context exists and ensures
+/// only one queued file is being processed at a time.
+void _scheduleQueuedPlatformFileHandling() {
+  if (_queuedPlatformFilePath == null || _isProcessingQueuedPlatformFile) {
+    return;
+  }
+
+  WidgetsBinding.instance.addPostFrameCallback((final _) async {
+    if (_queuedPlatformFilePath == null || _isProcessingQueuedPlatformFile) {
+      return;
+    }
+
+    if (_platformFileHandlingReady == false || mainApp.navigatorKey.currentContext == null) {
+      _scheduleQueuedPlatformFileHandling();
+      return;
+    }
+
+    final String filePath = _queuedPlatformFilePath!;
+    _queuedPlatformFilePath = null;
+    _isProcessingQueuedPlatformFile = true;
+
+    try {
+      await _consumePlatformFile(filePath);
+    } finally {
+      _isProcessingQueuedPlatformFile = false;
+      if (_queuedPlatformFilePath != null) {
+        _scheduleQueuedPlatformFileHandling();
+      }
     }
   });
+}
+
+/// Processes a platform-provided file path and clears the native pending state.
+///
+/// This keeps the Flutter and native sides in sync so repeated launches do not
+/// reuse a path that has already been handled.
+Future<void> _consumePlatformFile(final String filePath) async {
+  try {
+    await _handleFileOpened(filePath);
+  } finally {
+    if (_queuedPlatformFilePath == filePath) {
+      _queuedPlatformFilePath = null;
+    }
+    await _clearPendingPlatformFile();
+  }
+}
+
+Future<void> _clearPendingPlatformFile() async {
+  try {
+    await _fileChannel.invokeMethod<void>(_clearPendingFileMethod);
+  } on MissingPluginException {
+    return;
+  } on PlatformException {
+    return;
+  }
+}
+
+/// Converts a platform-supplied file URL into a local file path when needed.
+///
+/// Finder and other macOS entry points may send a `file://` URL instead of a
+/// plain path, so this normalizes both representations for the file loaders.
+String _normalizePlatformFilePath(final String filePathOrUrl) {
+  if (filePathOrUrl.startsWith(_fileUrlPrefix) == false) {
+    return filePathOrUrl;
+  }
+
+  try {
+    return Uri.parse(filePathOrUrl).toFilePath();
+  } on FormatException {
+    return filePathOrUrl;
+  }
 }
 
 /// Handles a file opened from the platform (e.g. double-click in Finder).
