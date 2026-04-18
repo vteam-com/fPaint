@@ -13,6 +13,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Set up Node.js for Firebase CLI
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -25,11 +30,74 @@ jobs:
       - name: Build web
         run: flutter build web
 
-      - uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Configure Firebase credentials
+        run: |
+          cat > "$RUNNER_TEMP/firebase-service-account.json" <<'EOF'
+          ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VTEAM_PAINT }}
+          EOF
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/firebase-service-account.json" >> "$GITHUB_ENV"
+
+      - name: Deploy Firebase preview channel
+        id: deploy_preview
         env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+          PREVIEW_CHANNEL: pr-${{ github.event.pull_request.number }}
+        run: |
+          npx -y firebase-tools@latest hosting:channel:deploy "$PREVIEW_CHANNEL" --project vteam-paint --expires 3d --non-interactive
+          preview_url="$(npx -y firebase-tools@latest hosting:channel:open "$PREVIEW_CHANNEL" --project vteam-paint | tail -n 1 | tr -d '\r')"
+          if [ -z "$preview_url" ]; then
+            echo "Failed to resolve Firebase preview URL" >&2
+            exit 1
+          fi
+          echo "channel_id=$PREVIEW_CHANNEL" >> "$GITHUB_OUTPUT"
+          echo "preview_url=$preview_url" >> "$GITHUB_OUTPUT"
+
+      - name: Add preview URL to job summary
+        run: |
+          echo "### Firebase Hosting Preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "${{ steps.deploy_preview.outputs.preview_url }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment preview URL on pull request
+        uses: actions/github-script@v8
+        env:
+          PREVIEW_CHANNEL: ${{ steps.deploy_preview.outputs.channel_id }}
+          PREVIEW_URL: ${{ steps.deploy_preview.outputs.preview_url }}
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_VTEAM_PAINT }}
-          expires: 3d
-          projectId: vteam-paint
+          script: |
+            const marker = '<!-- firebase-hosting-preview -->';
+            const body = [
+              marker,
+              'Firebase Hosting preview is ready.',
+              '',
+              `Preview URL: ${process.env.PREVIEW_URL}`,
+              `Channel: ${process.env.PREVIEW_CHANNEL}`,
+              'Expires: 3d',
+            ].join('\n');
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+
+            const existingComment = comments.find((comment) =>
+              comment.user?.login === 'github-actions[bot]' &&
+              typeof comment.body === 'string' &&
+              comment.body.includes(marker)
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
