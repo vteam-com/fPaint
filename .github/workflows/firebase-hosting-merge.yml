@@ -64,8 +64,8 @@ jobs:
         run: flutter build macos
 
       - name: Zip macOS build
-        run: cd build/macos/Build/Products/Release && zip -r
-          "$GITHUB_WORKSPACE/flutter-macos-app.zip" .
+        run: cd build/macos/Build/Products/Release && zip -ry
+          "$GITHUB_WORKSPACE/flutter-macos-app.zip" *.app
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v6
