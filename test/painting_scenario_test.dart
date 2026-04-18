@@ -130,8 +130,6 @@ const double _signatureMarginBottom = 10.0;
 const int _expectedLayerCountAfterScene = 10;
 
 // Screenshot filenames
-const String _screenshotAfterHouse = 'scenario_house.png';
-const String _screenshotFinal = 'scenario_final.png';
 const String _finalOraFilename = 'final.ora';
 const String _finalPngFilename = 'final.png';
 const String _finalJpegFilename = 'final.jpg';
@@ -308,7 +306,6 @@ void main() {
         tolerance: 0,
       );
 
-      await saveUnitTestScreenshot(tester, filename: _screenshotAfterHouse);
       await videoRecorder.captureFrame();
 
       // ---------------------------------------------------------------
@@ -618,7 +615,6 @@ void main() {
       );
 
       // Capture final screenshot and save in all supported formats
-      await saveUnitTestScreenshot(tester, filename: _screenshotFinal);
       await saveUnitTestOraArchive(tester, filename: _finalOraFilename);
       await saveUnitTestPng(tester, filename: _finalPngFilename);
       await saveUnitTestJpeg(tester, filename: _finalJpegFilename);
