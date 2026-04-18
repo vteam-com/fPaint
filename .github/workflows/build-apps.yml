@@ -21,11 +21,15 @@ jobs:
       - name: Build Windows App
         run: flutter build windows
 
+      - name: Zip Windows Build
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath
+          fpaint-windows.zip
+
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v6
         with:
-          name: flutter-windows-app
-          path: build/windows/x64/runner/Release/**
+          name: fpaint-windows
+          path: fpaint-windows.zip
           retention-days: 14
 
   build-linux:
@@ -50,11 +54,15 @@ jobs:
       - name: Build Linux App
         run: flutter build linux
 
+      - name: Zip Linux Build
+        run: cd build/linux/x64/release/bundle && zip -r
+          "$GITHUB_WORKSPACE/fpaint-linux.zip" .
+
       - name: Upload Linux Artifact
         uses: actions/upload-artifact@v6
         with:
-          name: flutter-linux-app
-          path: build/linux/
+          name: fpaint-linux
+          path: fpaint-linux.zip
           retention-days: 14
 
   build-macos:
@@ -74,9 +82,13 @@ jobs:
       - name: Build macOS App
         run: flutter build macos
 
+      - name: Zip macOS Build
+        run: cd build/macos/Build/Products/Release && zip -r
+          "$GITHUB_WORKSPACE/fpaint-macos.zip" *.app
+
       - name: Upload macOS Artifact
         uses: actions/upload-artifact@v6
         with:
-          name: flutter-macos-app
-          path: build/macos/Build/Products/Release/
+          name: fpaint-macos
+          path: fpaint-macos.zip
           retention-days: 14
