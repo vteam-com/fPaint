@@ -31,7 +31,7 @@ void showCanvasSettings(final BuildContext context) {
   showModalBottomSheet<dynamic>(
     context: context,
     builder: (final BuildContext context) {
-      final AppLocalizations l10n = AppLocalizations.of(context)!;
+      final AppLocalizations l10n = context.l10n;
       final LayersProvider layers = LayersProvider.of(context, listen: true);
       if (initOnce) {
         widthController.text = layers.size.width.toInt().toString();
@@ -147,16 +147,12 @@ void showCanvasSettings(final BuildContext context) {
                     final double width = double.tryParse(widthController.text) ?? -1;
                     final double height = double.tryParse(heightController.text) ?? -1;
                     if (width == -1 || height == -1) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.invalidImageSizeDimensionsMustBeNumbers),
-                        ),
+                      context.showSnackBarMessage(
+                        l10n.invalidImageSizeDimensionsMustBeNumbers,
                       );
                     } else if (width <= 0 || height <= 0) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(l10n.canvasDimensionsMustBePositive),
-                        ),
+                      context.showSnackBarMessage(
+                        l10n.canvasDimensionsMustBePositive,
                       );
                     } else {
                       layers.canvasResize(

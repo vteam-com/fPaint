@@ -55,7 +55,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
 
   @override
   Widget build(final BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     return AlertDialog(
       title: Text(l10n.addText),

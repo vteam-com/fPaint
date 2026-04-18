@@ -174,7 +174,7 @@ Future<void> _handleFileOpened(final String filePath) async {
         await showDialog<bool>(
           context: mainApp.navigatorKey.currentContext!,
           builder: (final BuildContext context) {
-            final AppLocalizations l10n = AppLocalizations.of(context)!;
+            final AppLocalizations l10n = context.l10n;
 
             return AlertDialog(
               title: Text(l10n.unsavedChanges),

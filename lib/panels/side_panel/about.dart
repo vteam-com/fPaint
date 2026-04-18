@@ -15,7 +15,7 @@ const String _applicationLegalese = '(c) 2025 VTeam';
 ///
 /// The [context] parameter is the [BuildContext] used to show the dialog.
 Future<void> showAboutBox(final BuildContext context) async {
-  final AppLocalizations l10n = AppLocalizations.of(context)!;
+  final AppLocalizations l10n = context.l10n;
   final MediaQueryData mediaQuery = MediaQuery.of(context);
   final String screenResolution = '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();

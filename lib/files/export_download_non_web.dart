@@ -84,13 +84,12 @@ Future<void> onExportAsJpeg(
   final LayersProvider layers, [
   final String fileName = 'image.jpg',
 ]) async {
-  final String? filePath = await FilePicker.saveFile(
-    dialogTitle: 'Save image',
+  await _exportWithFilePicker(
+    dialogTitle: _fpaintSaveImageTitle,
     fileName: fileName,
-    allowedExtensions: <String>['jpg', 'jpeg'],
-    type: FileType.custom,
+    allowedExtensions: <String>[FileExtensions.jpg, FileExtensions.jpeg],
+    onFileSelected: (final String filePath) => saveAsJpeg(layers, filePath),
   );
-  await saveAsJpeg(layers, filePath);
 }
 
 /// Saves the current painter content as a JPEG image file.
@@ -132,13 +131,12 @@ Future<void> onExportAsOra(
   final LayersProvider layers, [
   final String fileName = 'image.jpg',
 ]) async {
-  final String? filePath = await FilePicker.saveFile(
-    dialogTitle: 'Save image',
+  await _exportWithFilePicker(
+    dialogTitle: _fpaintSaveImageTitle,
     fileName: fileName,
-    allowedExtensions: <String>['ora'],
-    type: FileType.custom,
+    allowedExtensions: <String>[FileExtensions.ora],
+    onFileSelected: (final String filePath) => saveAsOra(layers, filePath),
   );
-  await saveAsOra(layers, filePath);
 }
 
 /// Saves the current project as an ORA (OpenRaster) file.

@@ -94,7 +94,7 @@ Future<BlendMode> showBlendModeMenu({
   final Offset position = Offset.zero,
   final BlendMode? selectedBlendMode,
 }) async {
-  final AppLocalizations l10n = AppLocalizations.of(context)!;
+  final AppLocalizations l10n = context.l10n;
   final Map<String, Map<String, Object>> blendModes = getSupportedBlendModes(l10n);
   return await showMenu<BlendMode>(
         context: context,

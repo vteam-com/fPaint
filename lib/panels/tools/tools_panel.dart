@@ -101,7 +101,7 @@ class ToolsPanel extends StatelessWidget {
     final BuildContext context,
     final AppProvider appProvider,
   ) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     widgets.add(
       ToolAttributeWidget(
@@ -160,7 +160,7 @@ class ToolsPanel extends StatelessWidget {
     final BuildContext context,
   ) {
     final AppProvider appProvider = AppProvider.of(context);
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
     final ActionType selectedTool = appProvider.selectedAction;
 
     final List<Widget> tools = <Widget>[

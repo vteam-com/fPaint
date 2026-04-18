@@ -55,25 +55,18 @@ void showBrushSizePicker({
   required final double max,
   required final ValueChanged<double> onChanged,
 }) {
-  showDialog<dynamic>(
+  final AppLocalizations l10n = context.l10n;
+  showPickerDialog(
     context: context,
-    builder: (final BuildContext _) {
-      final AppLocalizations l10n = AppLocalizations.of(context)!;
-
-      return AlertDialog(
-        title: Text(l10n.selectValue(title)),
-        content: IntrinsicHeight(
-          child: BrushSizePicker(
-            title: title,
-            value: value,
-            min: min,
-            max: max,
-            onChanged: (final double newValue) {
-              onChanged(newValue);
-            },
-          ),
-        ),
-      );
-    },
+    title: l10n.selectValue(title),
+    child: BrushSizePicker(
+      title: title,
+      value: value,
+      min: min,
+      max: max,
+      onChanged: (final double newValue) {
+        onChanged(newValue);
+      },
+    ),
   );
 }

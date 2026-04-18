@@ -280,11 +280,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       }
 
       if (appProvider.layers.selectedLayer.isVisible == false) {
-        final AppLocalizations l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.selectionIsHidden),
-          ),
+        final AppLocalizations l10n = context.l10n;
+        context.showSnackBarMessage(
+          l10n.selectionIsHidden,
         );
         return;
       }

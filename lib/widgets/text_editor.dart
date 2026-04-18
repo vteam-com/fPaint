@@ -50,7 +50,7 @@ class _TextEditorState extends State<TextEditor> {
 
   /// Displays the text editing dialog for the currently selected text object.
   void _showEditTextDialog() {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
     final TextEditingController controller = TextEditingController(text: textObject.text);
     double fontSize = textObject.size;
     Color textColor = textObject.color;

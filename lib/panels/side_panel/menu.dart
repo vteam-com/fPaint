@@ -20,7 +20,7 @@ class MainMenu extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final ShellProvider shellProvider = ShellProvider.of(context);
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     return PopupMenuButton<int>(
       tooltip: l10n.menuTooltip,
@@ -85,7 +85,7 @@ void onDropDownMenuSelection(
 ) {
   final ShellProvider shellProvider = ShellProvider.of(context);
   final LayersProvider layers = LayersProvider.of(context);
-  final AppLocalizations l10n = AppLocalizations.of(context)!;
+  final AppLocalizations l10n = context.l10n;
 
   switch (result) {
     case MenuIds.newFile:
@@ -105,15 +105,10 @@ void onDropDownMenuSelection(
         // ignore: use_build_context_synchronously
         (final _) {
           layers.clearHasChanged();
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  l10n.savedMessage(shellProvider.loadedFileName),
-                ),
-              ),
-            );
-          }
+          // ignore: use_build_context_synchronously
+          context.showSnackBarMessage(
+            l10n.savedMessage(shellProvider.loadedFileName),
+          );
         },
       );
       break;

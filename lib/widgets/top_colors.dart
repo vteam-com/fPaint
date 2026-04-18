@@ -45,7 +45,7 @@ class TopColors extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
     final List<ColorUsage> sortedColors = sortColorByHueAndPopularity();
 
     final List<Widget> colorPreviews = sortedColors.map((final ColorUsage colorUsed) {

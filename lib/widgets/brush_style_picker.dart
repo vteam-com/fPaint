@@ -26,20 +26,7 @@ class _BrushStylePickerState extends BasePickerState<BrushStyle> {
 
   @override
   Widget buildPickerWidget() {
-    return DropdownButton<int>(
-      value: currentValue.index,
-      items: BrushStyle.values.map<DropdownMenuItem<int>>((final BrushStyle value) {
-        return DropdownMenuItem<int>(
-          value: value.index,
-          child: Text(value.name),
-        );
-      }).toList(),
-      onChanged: (final int? index) {
-        if (index != null) {
-          updateValue(BrushStyle.values[index]);
-        }
-      },
-    );
+    return brushStyleDropDown(currentValue, updateValue);
   }
 
   @override
@@ -56,14 +43,16 @@ Widget brushStyleDropDown(
   final BrushStyle value,
   final void Function(BrushStyle) onChanged,
 ) {
+  final List<DropdownMenuItem<int>> items = BrushStyle.values.map<DropdownMenuItem<int>>((final BrushStyle value) {
+    return DropdownMenuItem<int>(
+      value: value.index,
+      child: Text(value.name),
+    );
+  }).toList();
+
   return DropdownButton<int>(
     value: value.index,
-    items: BrushStyle.values.map<DropdownMenuItem<int>>((final BrushStyle value) {
-      return DropdownMenuItem<int>(
-        value: value.index,
-        child: Text(value.name),
-      );
-    }).toList(),
+    items: items,
     onChanged: (final int? index) {
       if (index != null) {
         onChanged(BrushStyle.values[index]);
@@ -82,21 +71,14 @@ void showBrushStylePicker(
   final BrushStyle brushStyle,
   final void Function(BrushStyle) onChanged,
 ) {
-  showDialog<dynamic>(
+  final AppLocalizations l10n = context.l10n;
+  showPickerDialog(
     context: context,
-    builder: (final BuildContext _) {
-      final AppLocalizations l10n = AppLocalizations.of(context)!;
-
-      return AlertDialog(
-        title: Text(l10n.brush),
-        content: IntrinsicHeight(
-          child: BrushStylePicker(
-            title: l10n.brushStyle,
-            value: brushStyle,
-            onChanged: onChanged,
-          ),
-        ),
-      );
-    },
+    title: l10n.brush,
+    child: BrushStylePicker(
+      title: l10n.brushStyle,
+      value: brushStyle,
+      onChanged: onChanged,
+    ),
   );
 }

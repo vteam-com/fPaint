@@ -22,7 +22,7 @@ class TextAttributesWidget extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: true);
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     return Column(
       children: <Widget>[

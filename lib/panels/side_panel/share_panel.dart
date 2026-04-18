@@ -34,7 +34,7 @@ void sharePanel(final BuildContext context) {
   showModalBottomSheet<dynamic>(
     context: context,
     builder: (final BuildContext context) {
-      final AppLocalizations l10n = AppLocalizations.of(context)!;
+      final AppLocalizations l10n = context.l10n;
 
       return SafeArea(
         child: Padding(

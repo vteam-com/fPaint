@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_en.dart';
 import 'package:fpaint/l10n/app_localizations_es.dart';
@@ -9,6 +9,31 @@ import 'package:fpaint/l10n/app_localizations_fr.dart';
 import 'package:intl/intl.dart' as intl;
 
 // ignore_for_file: type=lint
+
+/// Shared `BuildContext` helpers for localization and transient app messages.
+extension AppLocalizationsBuildContextX on BuildContext {
+  /// Returns the localized strings for this context.
+  AppLocalizations get l10n => AppLocalizations.of(this)!;
+
+  /// Shows a snack bar message if the context is still mounted.
+  void showSnackBarMessage(
+    final String message, {
+    final Duration? duration,
+  }) {
+    if (!mounted) {
+      return;
+    }
+
+    final SnackBar snackBar = duration == null
+        ? SnackBar(content: Text(message))
+        : SnackBar(
+            content: Text(message),
+            duration: duration,
+          );
+
+    ScaffoldMessenger.of(this).showSnackBar(snackBar);
+  }
+}
 
 /// Callers can lookup localized strings with an instance of AppLocalizations
 /// returned by `AppLocalizations.of(context)`.

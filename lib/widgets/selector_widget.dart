@@ -89,7 +89,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       return const SizedBox();
     }
 
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
     final Rect bounds = widget.path1!.getBounds();
     final double modeToggleSize = AppInteraction.imagePlacementButtonSize;
     final double modeToggleSpacing = AppInteraction.imagePlacementButtonSpacing;

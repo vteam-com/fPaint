@@ -56,7 +56,7 @@ class _TransformWidgetState extends State<TransformWidget> {
       return const SizedBox();
     }
 
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     // Convert corners to screen space
     final List<Offset> screenCorners = model.corners.map((final Offset c) => _toScreen(c)).toList();
