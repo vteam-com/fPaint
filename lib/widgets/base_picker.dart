@@ -91,3 +91,20 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
     widget.onChanged(clampedValue);
   }
 }
+
+/// Shows a standard alert dialog wrapper for picker widgets.
+Future<void> showPickerDialog({
+  required final BuildContext context,
+  required final String title,
+  required final Widget child,
+}) async {
+  await showDialog<void>(
+    context: context,
+    builder: (final BuildContext _) {
+      return AlertDialog(
+        title: Text(title),
+        content: IntrinsicHeight(child: child),
+      );
+    },
+  );
+}

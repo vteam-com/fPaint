@@ -13,7 +13,7 @@ class PlatformsPage extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.availablePlatforms)),

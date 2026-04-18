@@ -68,7 +68,8 @@
         "syms",
         "tracefile",
         "vteam",
-        "webp"
+        "webp",
+        "xcworkspace"
     ],
     "cSpell.ignorePaths": [
         // "*.json"

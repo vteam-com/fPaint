@@ -20,7 +20,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: true);
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     final String selectedLanguage = appProvider.languageCode ?? _systemLanguage;
 

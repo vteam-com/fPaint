@@ -20,32 +20,32 @@ class SidePanelTopMenu extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         const MainMenu(),
         if (shellProvider.isSidePanelExpanded)
-          buildIconButton(
+          _buildIconButton(
             tooltip: l10n.startOverTooltip,
             icon: AppIcon.powerSettingsNew,
             onPressed: () => onFileNew(context),
           ),
         if (shellProvider.isSidePanelExpanded)
-          buildIconButton(
+          _buildIconButton(
             tooltip: l10n.importTooltip,
             icon: AppIcon.fileDownload,
             onPressed: () => onFileOpen(context),
           ),
         if (shellProvider.isSidePanelExpanded)
-          buildIconButton(
+          _buildIconButton(
             tooltip: l10n.exportTooltip,
             icon: AppIcon.iosShare,
             onPressed: () => sharePanel(context),
           ),
         if (shellProvider.isSidePanelExpanded) // Show when panel is expanded
-          buildIconButton(
+          _buildIconButton(
             tooltip: l10n.rotateCanvasTooltip,
             icon: AppIcon.rotate90DegreesCw,
             onPressed: () async {
@@ -54,7 +54,7 @@ class SidePanelTopMenu extends StatelessWidget {
             },
           ),
         if (shellProvider.isSidePanelExpanded)
-          buildIconButton(
+          _buildIconButton(
             tooltip: l10n.flipHorizontalTooltip,
             icon: AppIcon.flipHorizontal,
             onPressed: () async {
@@ -63,7 +63,7 @@ class SidePanelTopMenu extends StatelessWidget {
             },
           ),
         if (shellProvider.isSidePanelExpanded)
-          buildIconButton(
+          _buildIconButton(
             tooltip: l10n.flipVerticalTooltip,
             icon: AppIcon.flipVertical,
             onPressed: () async {
@@ -72,7 +72,7 @@ class SidePanelTopMenu extends StatelessWidget {
             },
           ),
         if (!shellProvider.showMenu)
-          buildIconButton(
+          _buildIconButton(
             tooltip: l10n.exportTooltip,
             icon: shellProvider.isSidePanelExpanded
                 ? AppIcon.keyboardDoubleArrowLeft
@@ -84,23 +84,10 @@ class SidePanelTopMenu extends StatelessWidget {
       ],
     );
   }
-
-  /// Builds an icon button.
-  Widget buildIconButton({
-    required final String tooltip,
-    required final AppIcon icon,
-    required final VoidCallback onPressed,
-  }) {
-    return IconButton(
-      tooltip: tooltip,
-      icon: AppSvgIcon(icon: icon),
-      onPressed: onPressed,
-    );
-  }
 }
 
 /// Builds an icon button.
-Widget buildIconButton({
+Widget _buildIconButton({
   required final String tooltip,
   required final AppIcon icon,
   required final VoidCallback onPressed,

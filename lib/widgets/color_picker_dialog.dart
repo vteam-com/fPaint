@@ -95,7 +95,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
   /// Builds the content of the dialog.
   Widget _buildContent(final LayersProvider layers) {
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -240,10 +240,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                       text: colorToHexString(_currentColor),
                     ),
                   );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(l10n.hexColorCopiedToClipboard),
-                    ),
+                  context.showSnackBarMessage(
+                    l10n.hexColorCopiedToClipboard,
                   );
                 },
               ),

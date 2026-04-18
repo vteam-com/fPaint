@@ -49,23 +49,16 @@ void showTolerancePicker(
   final int value,
   final ValueChanged<int> onChanged,
 ) {
-  showDialog<dynamic>(
+  final AppLocalizations l10n = context.l10n;
+  showPickerDialog(
     context: context,
-    builder: (final BuildContext _) {
-      final AppLocalizations l10n = AppLocalizations.of(context)!;
-
-      return AlertDialog(
-        title: Text(l10n.colorTolerance),
-        content: IntrinsicHeight(
-          child: TolerancePicker(
-            title: l10n.tolerance,
-            value: value.toInt(),
-            onChanged: (final int newValue) {
-              onChanged(newValue);
-            },
-          ),
-        ),
-      );
-    },
+    title: l10n.colorTolerance,
+    child: TolerancePicker(
+      title: l10n.tolerance,
+      value: value.toInt(),
+      onChanged: (final int newValue) {
+        onChanged(newValue);
+      },
+    ),
   );
 }

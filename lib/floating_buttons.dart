@@ -25,7 +25,7 @@ Widget floatingActionButtons(
   final ShellProvider shellProvider,
   final AppProvider appProvider,
 ) {
-  final AppLocalizations l10n = AppLocalizations.of(context)!;
+  final AppLocalizations l10n = context.l10n;
 
   final Widget undoButton = myFloatButton(
     icon: AppIcon.undo,

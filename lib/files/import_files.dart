@@ -35,7 +35,7 @@ final Logger _log = Logger(logNameImportFiles);
 /// [context] The BuildContext of the widget that invokes this function.
 Future<void> onFileNew(final BuildContext context) async {
   final AppProvider appProvider = AppProvider.of(context);
-  final AppLocalizations l10n = AppLocalizations.of(context)!;
+  final AppLocalizations l10n = context.l10n;
 
   if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
     return;
@@ -97,9 +97,7 @@ Future<void> onFileNew(final BuildContext context) async {
                   Navigator.of(context).pop();
                 } else {
                   // Show error message if input is invalid
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.invalidSize)),
-                  );
+                  context.showSnackBarMessage(l10n.invalidSize);
                 }
               },
               child: Text(l10n.create),
@@ -124,7 +122,7 @@ Future<void> onFileNew(final BuildContext context) async {
 Future<void> onFileOpen(final BuildContext context) async {
   final ShellProvider shellProvider = ShellProvider.of(context);
   final LayersProvider layers = LayersProvider.of(context);
-  final AppLocalizations l10n = AppLocalizations.of(context)!;
+  final AppLocalizations l10n = context.l10n;
 
   if (layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
     return;
@@ -218,11 +216,8 @@ Future<bool> openFileFromPath({
       // General error catch, readImageFromFilePath might have already shown a SnackBar for decode errors
       // ignore: use_build_context_synchronously
       if (context.mounted) {
-        // Check context validity
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.errorProcessingFile(e.toString())),
-          ),
+        context.showSnackBarMessage(
+          context.l10n.errorProcessingFile(e.toString()),
         );
       }
       return false;
@@ -231,12 +226,9 @@ Future<bool> openFileFromPath({
     // Show unsupported format message
     // ignore: use_build_context_synchronously
     if (context.mounted) {
-      // Check context validity
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.fileFormatNotSupported(extension)),
-          duration: const Duration(seconds: AppMath.triple),
-        ),
+      context.showSnackBarMessage(
+        context.l10n.fileFormatNotSupported(extension),
+        duration: const Duration(seconds: AppMath.triple),
       );
     }
     return false; // Return false regardless of context.mounted if format is not supported
@@ -292,11 +284,9 @@ Future<bool> _decodeAndApplyImage(
   } catch (e) {
     // ignore: use_build_context_synchronously
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.failedToLoadImage(e.toString())),
-          duration: const Duration(seconds: AppMath.triple),
-        ),
+      context.showSnackBarMessage(
+        context.l10n.failedToLoadImage(e.toString()),
+        duration: const Duration(seconds: AppMath.triple),
       );
     }
     return false; // Failure
@@ -317,11 +307,9 @@ Future<bool> readImageFromFilePath(
   } catch (e) {
     // ignore: use_build_context_synchronously
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.errorReadingFile(e.toString())),
-          duration: const Duration(seconds: AppMath.triple),
-        ),
+      context.showSnackBarMessage(
+        context.l10n.errorReadingFile(e.toString()),
+        duration: const Duration(seconds: AppMath.triple),
       );
     }
     return false;
@@ -351,7 +339,7 @@ Future<bool> readImageFileFromBytes(
 /// - Parameters:
 ///   - context: The [BuildContext] used to display the dialog.
 Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
-  final AppLocalizations l10n = AppLocalizations.of(context)!;
+  final AppLocalizations l10n = context.l10n;
   final bool? discardCurrentFile = await showDialog<bool>(
     context: context,
     builder: (final BuildContext context) {
@@ -403,13 +391,9 @@ Future<void> onFileDropped({
   final String extension = path.split('.').last.toLowerCase();
   if (!isFileExtensionSupported(extension)) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.fileFormatNotSupported(extension),
-          ),
-          duration: const Duration(seconds: AppMath.triple),
-        ),
+      context.showSnackBarMessage(
+        context.l10n.fileFormatNotSupported(extension),
+        duration: const Duration(seconds: AppMath.triple),
       );
     }
     return;
@@ -423,7 +407,7 @@ Future<void> onFileDropped({
     final DropFileAction? action = await showDialog<DropFileAction>(
       context: context,
       builder: (final BuildContext dialogContext) {
-        final AppLocalizations l10n = AppLocalizations.of(dialogContext)!;
+        final AppLocalizations l10n = dialogContext.l10n;
         return AlertDialog(
           title: Text(l10n.dropFileTitle),
           content: Text(l10n.dropFilePrompt),
@@ -481,13 +465,9 @@ Future<void> _addDroppedFileAsLayer({
     layers.update();
   } catch (e) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.of(context)!.failedToLoadImage(e.toString()),
-          ),
-          duration: const Duration(seconds: AppMath.triple),
-        ),
+      context.showSnackBarMessage(
+        context.l10n.failedToLoadImage(e.toString()),
+        duration: const Duration(seconds: AppMath.triple),
       );
     }
   }

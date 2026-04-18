@@ -135,7 +135,7 @@ class _FillWidgetState extends State<FillWidget> {
           });
         },
         onLongPress: () {
-          final AppLocalizations l10n = AppLocalizations.of(context)!;
+          final AppLocalizations l10n = context.l10n;
 
           showColorPicker(
             context: context,

@@ -48,7 +48,7 @@ class ImagePlacementWidget extends StatelessWidget {
       return const SizedBox();
     }
 
-    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final AppLocalizations l10n = context.l10n;
 
     // Screen-space bounding rect of the image
     final Offset screenTopLeft = _toScreen(model.position);
