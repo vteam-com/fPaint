@@ -310,9 +310,7 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String saveLoadedFile(Object fileName) {
-    return 'Guardar \"$fileName\"';
-  }
+  String get saveLabel => 'Guardar';
 
   @override
   String get scale => 'Escalar';

@@ -102,7 +102,7 @@ class _TextEditorState extends State<TextEditor> {
                         });
                       },
                     ),
-                    const SizedBox(height: AppSpacing.xs),
+                    const SizedBox(height: AppSpacing.sm),
 
                     // Style controls
                     Row(

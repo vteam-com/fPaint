@@ -651,11 +651,11 @@ abstract class AppLocalizations {
   /// **'Saved {fileName}'**
   String savedMessage(Object fileName);
 
-  /// No description provided for @saveLoadedFile.
+  /// No description provided for @saveLabel.
   ///
   /// In en, this message translates to:
-  /// **'Save \"{fileName}\"'**
-  String saveLoadedFile(Object fileName);
+  /// **'Save'**
+  String get saveLabel;
 
   /// No description provided for @scale.
   ///

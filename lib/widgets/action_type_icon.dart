@@ -5,7 +5,7 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/svg_icon.dart';
 
 /// Returns an icon widget for the given action type.
-Widget iconFromaActionType(
+Widget iconFormatActionType(
   final ActionType type,
   final bool isSelected,
 ) {

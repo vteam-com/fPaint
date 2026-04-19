@@ -92,38 +92,38 @@ void main() {
 
   group('iconFromActionType', () {
     testWidgets('returns correct icon for pencil', (final WidgetTester tester) async {
-      final Widget icon = iconFromaActionType(ActionType.pencil, false);
+      final Widget icon = iconFormatActionType(ActionType.pencil, false);
       expect(icon, isA<AppSvgIcon>());
       final AppSvgIcon iconWidget = icon as AppSvgIcon;
       expect(iconWidget.icon, AppIcon.create);
     });
 
     testWidgets('returns correct icon for brush', (final WidgetTester tester) async {
-      final Widget icon = iconFromaActionType(ActionType.brush, false);
+      final Widget icon = iconFormatActionType(ActionType.brush, false);
       expect(icon, isA<AppSvgIcon>());
       final AppSvgIcon iconWidget = icon as AppSvgIcon;
       expect(iconWidget.icon, AppIcon.brush);
     });
 
     testWidgets('returns correct icon for eraser (SVG)', (final WidgetTester tester) async {
-      final Widget icon = iconFromaActionType(ActionType.eraser, false);
+      final Widget icon = iconFormatActionType(ActionType.eraser, false);
       expect(icon, isA<Widget>()); // Could be SvgPicture or other widget
     });
 
     testWidgets('returns correct icon for selector', (final WidgetTester tester) async {
-      final Widget icon = iconFromaActionType(ActionType.selector, false);
+      final Widget icon = iconFormatActionType(ActionType.selector, false);
       expect(icon, isA<SvgPicture>());
     });
 
     testWidgets('applies blue color when selected', (final WidgetTester tester) async {
-      final Widget icon = iconFromaActionType(ActionType.pencil, true);
+      final Widget icon = iconFormatActionType(ActionType.pencil, true);
       expect(icon, isA<AppSvgIcon>());
       final AppSvgIcon iconWidget = icon as AppSvgIcon;
       expect(iconWidget.color, Colors.blue);
     });
 
     testWidgets('applies default color when not selected', (final WidgetTester tester) async {
-      final Widget icon = iconFromaActionType(ActionType.pencil, false);
+      final Widget icon = iconFormatActionType(ActionType.pencil, false);
       expect(icon, isA<AppSvgIcon>());
       final AppSvgIcon iconWidget = icon as AppSvgIcon;
       expect(iconWidget.color, Colors.white);

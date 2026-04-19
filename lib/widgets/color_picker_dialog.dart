@@ -84,7 +84,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             )
           : AlertDialog(
               title: Text(widget.title),
-              contentPadding: const EdgeInsets.all(AppSpacing.xxxs),
+              contentPadding: const EdgeInsets.all(AppSpacing.thin),
               content: SizedBox(
                 width: AppLayout.sliderDialogWidth,
                 child: _buildContent(layersModel),
@@ -107,7 +107,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           //----------------------------
           // Color preview and selection sliders
           Row(
-            spacing: AppSpacing.xs,
+            spacing: AppSpacing.sm,
             children: <Widget>[
               SizedBox(
                 height: AppLayout.layerPreviewSize,
@@ -178,7 +178,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             colorUsages: layers.topColors,
             onRefresh: () {
               setState(() {
-                layers.evaluatTopColor();
+                layers.evaluateTopColor();
               });
             },
             onColorPicked: (final Color color) {

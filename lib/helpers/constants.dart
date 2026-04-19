@@ -51,18 +51,15 @@ class AppColors {
 
 /// Shared spacing tokens used across dialogs, panels, and controls.
 class AppSpacing {
-  static const double xxxs = 2.0;
-  static const double xxs = 4.0;
-  static const double xs = 6.0;
-  static const double sm = 8.0;
+  static const double thin = 2.0;
+  static const double xs = 4.0;
+  static const double sm = 6.0;
   static const double md = 10.0;
   static const double lg = 12.0;
   static const double xl = 16.0;
   static const double xxl = 20.0;
   static const double xxxl = 30.0;
   static const double huge = 40.0;
-  static const double panelMargin = 50.0;
-  static const double previewSize = 60.0;
 }
 
 /// Shared corner radius tokens.
@@ -108,9 +105,14 @@ class AppLayout {
   static const double thumbnailMaxHeight = 64.0;
   static const double shortcutGroupWidth = 250.0;
   static const double separatorHeight = 15.0;
-  static const double layerTitleFontSize = 13.0;
-  static const double platformTitleFontSize = 18.0;
   static const double inputFieldWidth = 150.0;
+}
+
+/// Shared font size tokens for consistent typography across the app.
+class AppFontSize {
+  static const double title = 12.0;
+  static const double titleHero = 15.0;
+  static const double subtitle = 10.0;
 }
 
 /// SVG asset paths for app icons (non-user-facing).
@@ -204,7 +206,7 @@ class AppStroke {
   static const double dividerHighlighted = 8.0;
 }
 
-/// Shared scale and opacity tokens.
+/// Shared scale tokens.
 class AppVisual {
   static const double full = 1.0;
   static const double half = 0.5;

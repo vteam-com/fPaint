@@ -102,7 +102,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
                 padding: const EdgeInsets.all(1),
                 decoration: BoxDecoration(
                   color: Colors.black.withAlpha(AppLayout.overlayAlpha + AppSpacing.lg.toInt()),
-                  borderRadius: BorderRadius.circular(AppSpacing.xxxs),
+                  borderRadius: BorderRadius.circular(AppSpacing.thin),
                 ),
                 child: Text(
                   '${(currentValue * AppLimits.percentMax).toStringAsFixed(1)}%',

@@ -70,8 +70,8 @@ class LayerSelector extends StatelessWidget {
   Widget build(final BuildContext context) {
     final LayersProvider layers = LayersProvider.of(context);
     return Container(
-      margin: EdgeInsets.all(minimal ? AppSpacing.xxxs : AppSpacing.xxs),
-      padding: EdgeInsets.all(minimal ? AppSpacing.xxxs : AppSpacing.sm),
+      margin: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.xs),
+      padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.sm),
       decoration: BoxDecoration(
         color: layer.isVisible ? null : Colors.grey.shade600,
         border: Border.all(
@@ -176,7 +176,7 @@ class LayerSelector extends StatelessWidget {
     final LayersProvider layers = LayersProvider.of(context);
 
     return Tooltip(
-      margin: const EdgeInsets.only(left: AppSpacing.panelMargin),
+      margin: const EdgeInsets.only(left: AppSpacing.huge),
       message: information(),
       child: Column(
         children: <Widget>[
@@ -237,7 +237,7 @@ class LayerSelector extends StatelessWidget {
           ),
         if (this.layer.backgroundColor != null)
           Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.panelMargin),
+            padding: const EdgeInsets.only(left: AppSpacing.huge),
             child: ColorPreview(
               color: this.layer.backgroundColor ?? Colors.transparent,
               onPressed: () {
@@ -280,7 +280,7 @@ class LayerSelector extends StatelessWidget {
             child: Text(
               layer.name,
               style: TextStyle(
-                fontSize: AppLayout.layerTitleFontSize * AppVisual.titleScale,
+                fontSize: AppFontSize.title * AppVisual.titleScale,
                 fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.blue.shade100 : Colors.grey.shade400,
               ),

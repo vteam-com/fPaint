@@ -87,7 +87,7 @@ class TopColors extends StatelessWidget {
         IntrinsicHeight(
           child: transparentPaperContainer(
             Padding(
-              padding: EdgeInsets.all(minimal ? 0 : AppSpacing.xxs),
+              padding: EdgeInsets.all(minimal ? 0 : AppSpacing.xs),
               child: Wrap(
                 spacing: 1,
                 runSpacing: 1,

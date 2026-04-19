@@ -38,7 +38,7 @@ void sharePanel(final BuildContext context) {
 
       return SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.xl + AppSpacing.xxxs),
+          padding: const EdgeInsets.only(top: AppSpacing.xl + AppSpacing.thin),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[

@@ -416,7 +416,7 @@ class LayersProvider extends ChangeNotifier {
   ];
 
   /// Evaluates the top colors used in the canvas.
-  void evaluatTopColor() {
+  void evaluateTopColor() {
     this.getTopColorUsed().then((final List<ColorUsage> topColorsFound) {
       topColors = topColorsFound;
     });

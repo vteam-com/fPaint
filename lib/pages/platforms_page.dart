@@ -101,7 +101,7 @@ class PlatformsPage extends StatelessWidget {
                 foregroundImage: AssetImage(image),
               ),
               Expanded(
-                child: Text(name, style: const TextStyle(fontSize: AppLayout.platformTitleFontSize)),
+                child: Text(name, style: const TextStyle(fontSize: AppFontSize.titleHero)),
               ),
               Expanded(
                 child: Opacity(

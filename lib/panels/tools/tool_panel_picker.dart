@@ -37,7 +37,7 @@ class ToolPanelPicker extends StatelessWidget {
       onPressed: onPressed,
       tooltip: name,
       constraints: minimal ? const BoxConstraints() : null,
-      padding: EdgeInsets.all(minimal ? AppSpacing.xxxs : AppSpacing.sm),
+      padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.sm),
     );
   }
 }

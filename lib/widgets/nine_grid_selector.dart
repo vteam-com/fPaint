@@ -35,8 +35,8 @@ class NineGridSelector extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.sm),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: AppMath.triple,
-          crossAxisSpacing: AppSpacing.xxs,
-          mainAxisSpacing: AppSpacing.xxs,
+          crossAxisSpacing: AppSpacing.xs,
+          mainAxisSpacing: AppSpacing.xs,
         ),
         itemCount: AppMath.triple * AppMath.triple,
         itemBuilder: (final BuildContext _, final int index) {
