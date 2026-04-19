@@ -53,38 +53,35 @@ class MainScreen extends StatelessWidget {
       onDragDone: (final DropDoneDetails details) {
         _handleDroppedFiles(context, details);
       },
-      child: RepaintBoundary(
-        key: Keys.appScreenshotBoundary,
-        child: Scaffold(
-          backgroundColor: Colors.grey,
-          body: shellMode == ShellMode.hidden
-              ? _buildMainContent(context, shellProvider, appPreferences)
-              : MultiSplitViewTheme(
-                  data: MultiSplitViewThemeData(
-                    dividerPainter: DividerPainters.grooved1(
-                      animationEnabled: true,
-                      backgroundColor: Colors.grey.shade600,
-                      highlightedBackgroundColor: Colors.blue,
-                      color: Colors.grey.shade800,
-                      thickness: AppStroke.divider,
-                      highlightedThickness: AppStroke.dividerHighlighted,
-                      strokeCap: StrokeCap.round,
-                    ),
+      child: Scaffold(
+        backgroundColor: Colors.grey,
+        body: shellMode == ShellMode.hidden
+            ? _buildMainContent(context, shellProvider, appPreferences)
+            : MultiSplitViewTheme(
+                data: MultiSplitViewThemeData(
+                  dividerPainter: DividerPainters.grooved1(
+                    animationEnabled: true,
+                    backgroundColor: Colors.grey.shade600,
+                    highlightedBackgroundColor: Colors.blue,
+                    color: Colors.grey.shade800,
+                    thickness: AppStroke.divider,
+                    highlightedThickness: AppStroke.dividerHighlighted,
+                    strokeCap: StrokeCap.round,
                   ),
-                  child: _buildMainContent(context, shellProvider, appPreferences),
                 ),
-          floatingActionButton: shellMode == ShellMode.hidden
-              ? myFloatButton(
-                  icon: AppIcon.moreVert,
-                  onPressed: () {
-                    Future<void>.microtask(() {
-                      shellProvider.shellMode = ShellMode.full;
-                      shellProvider.update();
-                    });
-                  },
-                )
-              : floatingActionButtons(context, shellProvider, appProvider),
-        ),
+                child: _buildMainContent(context, shellProvider, appPreferences),
+              ),
+        floatingActionButton: shellMode == ShellMode.hidden
+            ? myFloatButton(
+                icon: AppIcon.moreVert,
+                onPressed: () {
+                  Future<void>.microtask(() {
+                    shellProvider.shellMode = ShellMode.full;
+                    shellProvider.update();
+                  });
+                },
+              )
+            : floatingActionButtons(context, shellProvider, appProvider),
       ),
     );
   }

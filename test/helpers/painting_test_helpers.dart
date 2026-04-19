@@ -22,7 +22,6 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/text_object.dart';
-import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
@@ -412,6 +411,8 @@ Future<void> pressListTileWithoutSettling(
   if (tapResult is Future<void>) {
     await tapResult;
   }
+  await tester.pump();
+  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
 }
 
 Future<void> openPopupMenuButtonWithoutSettling<T>(
@@ -423,6 +424,24 @@ Future<void> openPopupMenuButtonWithoutSettling<T>(
   InteractionTracker.recordTap(tester.getCenter(target.first));
   final PopupMenuButtonState<T> state = tester.state<PopupMenuButtonState<T>>(target);
   state.showButtonMenu();
+  await tester.pump();
+  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+}
+
+Future<void> tapFinderWithoutSettling(
+  final WidgetTester tester,
+  final Finder target,
+) async {
+  expect(target, findsOneWidget, reason: 'Should find exactly one visible tappable widget');
+
+  await tester.ensureVisible(target.first);
+  await tester.pump();
+
+  final Finder tappable = target.hitTestable();
+  expect(tappable, findsOneWidget, reason: 'Should find exactly one hit-testable widget');
+
+  InteractionTracker.recordTap(tester.getCenter(tappable.first));
+  await tester.tap(tappable.first);
   await tester.pump();
   await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
 }
@@ -1343,6 +1362,26 @@ Future<void> _saveUnitTestExportArtifactFallback(
   }
 }
 
+Future<void> _openUnitTestExportSheetFromMainMenu(
+  final WidgetTester tester,
+  final AppLocalizations l10n,
+) async {
+  final Finder mainMenuButton = find.byKey(Keys.mainMenuButton);
+  await openPopupMenuButtonWithoutSettling<int>(tester, mainMenuButton);
+  await _pumpUnitTestExportUiTransition(tester);
+
+  final Finder exportMenuItemLabel = find.text(l10n.exportLabel);
+  expect(
+    exportMenuItemLabel,
+    findsOneWidget,
+    reason: 'Should find the main-menu export action',
+  );
+
+  await tapFinderWithoutSettling(tester, exportMenuItemLabel);
+  await _pumpUnitTestExportUiTransition(tester);
+  _unitTestExportSheetIsOpen = true;
+}
+
 /// Drives the real export UI: open the export sheet, then choose the format.
 Future<void> saveUnitTestArtworkViaExportUi(
   final WidgetTester tester, {
@@ -1365,10 +1404,7 @@ Future<void> saveUnitTestArtworkViaExportUi(
     }
 
     if (!_unitTestExportSheetIsOpen) {
-      sharePanel(context, dismissOnAction: false);
-      await tester.pump();
-      await _pumpUnitTestExportUiTransition(tester);
-      _unitTestExportSheetIsOpen = true;
+      await _openUnitTestExportSheetFromMainMenu(tester, l10n);
     }
 
     final Finder exportActionLabel = find.text(format.actionLabel(l10n));
@@ -1389,6 +1425,8 @@ Future<void> saveUnitTestArtworkViaExportUi(
     expect(exportActionTile, findsOneWidget, reason: 'Should find the visible export action tile');
 
     await pressListTileWithoutSettling(tester, exportActionTile);
+    _unitTestExportSheetIsOpen = false;
+    await _pumpUnitTestExportUiTransition(tester);
     expect(
       testFilePicker.lastSuggestedFileName,
       format.pickerFileName,
