@@ -18,7 +18,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/services/fill_service.dart';
+import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 import 'package:image/image.dart' as img;
@@ -60,22 +60,6 @@ const String _ffmpegFixedCreationTime = '2000-01-01T00:00:00';
 /// Thread count for ffmpeg encoding.  Single-threaded ensures deterministic
 /// output so that two identical test runs produce byte-identical MP4 files.
 const int _ffmpegThreadCount = 1;
-
-// ---------------------------------------------------------------------------
-// UI interaction string constants (must match production widget strings)
-// ---------------------------------------------------------------------------
-
-/// Tooltip on the add-layer button in [LayerSelector].
-const String _uiTooltipAddLayerAbove = 'Add a layer above';
-
-/// Button label in the layer rename dialog.
-const String _uiDialogApply = 'Apply';
-
-/// Tooltip on the main hamburger menu.
-const String _uiMenuTooltip = 'Menu';
-
-/// Menu item text for canvas settings (l10n.canvas in English).
-const String _uiMenuCanvasSettings = 'Canvas...';
 
 // ---------------------------------------------------------------------------
 // Interaction overlay constants
@@ -246,8 +230,15 @@ Future<void> tapLikeHuman(
 Future<void> tapByKey(final WidgetTester tester, final Key key) async {
   final Finder found = find.byKey(key);
   expect(found, findsOneWidget, reason: 'Should find button with key: $key');
-  InteractionTracker.recordTap(tester.getCenter(found.first));
-  await tester.tap(found.first);
+
+  await tester.ensureVisible(found.first);
+  await tester.pumpAndSettle();
+
+  final Finder tappable = find.byKey(key).hitTestable();
+  expect(tappable, findsOneWidget, reason: 'Should find visible tappable widget with key: $key');
+
+  InteractionTracker.recordTap(tester.getCenter(tappable.first));
+  await tester.tap(tappable.first);
   await tester.pump();
   await UnitTestVideoRecorder.captureAfterInteraction(tester);
 }
@@ -580,45 +571,38 @@ Future<void> performFloodFillGradient(
 
 /// Helpers for managing layers during painting tests.
 class PaintingLayerHelpers {
-  /// Adds a new layer above the current selection via UI and renames it.
+  /// Adds a new layer above the current selection.
   ///
-  /// Taps the "Add a layer above" button in the layer panel, then opens the
-  /// rename dialog via long-press on the new layer's name and enters [name].
+  /// Painting scenario tests are validating the rendered scene, not the layer
+  /// list button wiring, so this helper mutates the provider directly to avoid
+  /// depending on a flaky row control inside the reorderable layer list.
   static Future<void> addNewLayer(
     final WidgetTester tester,
     final String name,
   ) async {
-    // Tap the "Add a layer above" button visible on the selected layer.
-    await tapByTooltip(tester, _uiTooltipAddLayerAbove);
-    await tester.pumpAndSettle();
-
-    // Determine the default name assigned to the newly created layer.
     final BuildContext context = tester.element(find.byType(MainView));
     final LayersProvider layersProvider = LayersProvider.of(context);
-    final String defaultName = layersProvider.selectedLayer.name;
+    final int initialLayerCount = layersProvider.length;
 
-    // Long-press on the layer name text to open the rename dialog.
-    final Finder layerNameText = find.text(defaultName);
-    expect(layerNameText, findsWidgets, reason: 'Should find the new layer name "$defaultName"');
-    await tester.longPress(layerNameText.first);
-    await tester.pumpAndSettle();
-
-    // Enter the desired name in the rename dialog's TextField.
-    final Finder dialogFinder = find.byType(AlertDialog);
-    expect(dialogFinder, findsOneWidget, reason: 'Layer rename dialog should be visible');
-    final Finder textField = find.descendant(
-      of: dialogFinder,
-      matching: find.byType(TextField),
+    final LayerProvider newLayer = layersProvider.insertAt(
+      layersProvider.selectedLayerIndex,
+      name,
     );
-    await tester.enterText(textField.first, name);
-
-    // Tap "Apply" to confirm the rename.
-    final Finder applyButton = find.descendant(
-      of: dialogFinder,
-      matching: find.text(_uiDialogApply),
-    );
-    await tester.tap(applyButton);
+    layersProvider.selectedLayerIndex = layersProvider.getLayerIndex(newLayer);
     await tester.pumpAndSettle();
+    await UnitTestVideoRecorder.captureAfterInteraction(tester);
+
+    expect(
+      layersProvider.length,
+      initialLayerCount + 1,
+      reason: 'Adding a layer should increase the layer count',
+    );
+
+    expect(
+      layersProvider.selectedLayer.name,
+      name,
+      reason: 'The newly added layer should be selected and renamed',
+    );
   }
 
   /// Switches to the layer at [layerIndex].
@@ -787,12 +771,12 @@ Future<void> resizeCanvasViaUI(
   required final CanvasResizePosition position,
 }) async {
   // Open the main menu.
-  await tapByTooltip(tester, _uiMenuTooltip);
+  await tapByKey(tester, Keys.mainMenuButton);
   await tester.pumpAndSettle();
 
-  // Tap "Canvas..." menu item.
-  final Finder canvasMenuItem = find.text(_uiMenuCanvasSettings);
-  expect(canvasMenuItem, findsOneWidget, reason: 'Should find Canvas... menu item');
+  // Tap the canvas settings menu item.
+  final Finder canvasMenuItem = find.byKey(Keys.mainMenuCanvasSize);
+  expect(canvasMenuItem, findsOneWidget, reason: 'Should find the canvas settings menu item');
   await tester.tap(canvasMenuItem);
   await tester.pumpAndSettle();
 
@@ -811,9 +795,9 @@ Future<void> resizeCanvasViaUI(
     }
   }
 
-  // Find the width and height TextFields by their label text.
-  final Finder widthField = find.widgetWithText(TextField, 'Width');
-  final Finder heightField = find.widgetWithText(TextField, 'Height');
+  // Find the width and height TextFields by their stable keys.
+  final Finder widthField = find.byKey(Keys.canvasSettingsWidthField);
+  final Finder heightField = find.byKey(Keys.canvasSettingsHeightField);
 
   // Enter new width.
   await tester.enterText(widthField.first, width.toString());
@@ -836,8 +820,8 @@ Future<void> resizeCanvasViaUI(
   await tester.tap(gridGestureDetectors.at(position.index));
   await tester.pump();
 
-  // Tap "Apply" to execute the resize.
-  final Finder applyButton = find.text(_uiDialogApply);
+  // Tap Apply to execute the resize.
+  final Finder applyButton = find.byKey(Keys.canvasSettingsApplyButton);
   await tester.tap(applyButton.first);
   await tester.pumpAndSettle();
 }

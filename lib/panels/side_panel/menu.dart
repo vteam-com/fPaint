@@ -23,6 +23,7 @@ class MainMenu extends StatelessWidget {
     final AppLocalizations l10n = context.l10n;
 
     return PopupMenuButton<int>(
+      key: Keys.mainMenuButton,
       tooltip: l10n.menuTooltip,
       icon: const AppSvgIcon(icon: AppIcon.menu),
       onSelected: (final int result) => onDropDownMenuSelection(context, result),
@@ -57,6 +58,7 @@ class MainMenu extends StatelessWidget {
           value: MenuIds.canvasSize,
           text: l10n.canvas,
           icon: AppIcon.edit,
+          key: Keys.mainMenuCanvasSize,
         ),
         buildMenuItem(
           value: MenuIds.settings,
@@ -140,8 +142,10 @@ PopupMenuEntry<int> buildMenuItem({
   required final int value,
   required final String text,
   final AppIcon? icon,
+  final Key? key,
 }) {
   return PopupMenuItem<int>(
+    key: key,
     value: value,
     child: Row(
       children: <Widget>[

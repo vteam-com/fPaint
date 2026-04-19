@@ -1,7 +1,10 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:fpaint/files/file_exceptions.dart';
 import 'package:fpaint/files/webp_encoder.dart';
+
+const String _errorFailedToGetWebpRgbaBytes = 'Failed to get raw RGBA bytes from image.';
 
 /// Converts a [ui.Image] to WebP format bytes using lossless encoding.
 ///
@@ -12,7 +15,7 @@ Future<Uint8List> convertImageToWebp(final ui.Image image) async {
     format: ui.ImageByteFormat.rawStraightRgba,
   );
   if (byteData == null) {
-    throw Exception('Failed to get raw RGBA bytes from image');
+    throw const WebpConversionException(_errorFailedToGetWebpRgbaBytes);
   }
 
   return encodeWebpLossless(

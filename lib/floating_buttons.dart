@@ -63,15 +63,15 @@ Widget floatingActionButtons(
         if (!shellProvider.showMenu)
           myFloatButton(
             icon: AppIcon.colorLens,
-            foregroundColor: appProvider.preferences.brushColor,
+            foregroundColor: appProvider.brushColor,
             tooltip: l10n.colorLabel,
             onPressed: () {
               showColorPicker(
                 context: context,
                 title: l10n.colorLabel,
-                color: appProvider.preferences.brushColor,
+                color: appProvider.brushColor,
                 onSelectedColor: (final Color color) {
-                  appProvider.preferences.setBrushColor(color);
+                  appProvider.brushColor = color;
                 },
               );
             },

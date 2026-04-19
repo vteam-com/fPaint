@@ -587,9 +587,17 @@ class Keys {
   static Key floatActionZoomOut = const Key('floating_action_zoom_out');
   static Key floatActionCenter = const Key('floating_action_center');
   static Key floatActionToggle = const Key('floating_action_toggle');
+  static Key mainMenuButton = const Key('main-menu-button');
+  static Key mainMenuCanvasSize = const Key('main-menu-canvas-size');
   static Key appScreenshotBoundary = const Key('app-screenshot-boundary');
   static Key mainViewScreenshotBoundary = const Key('main-view-screenshot-boundary');
   static String gradientHandleKeyPrefixText = 'gradient_handle_';
+  static Key layerAddAboveButton = const Key('layer-add-above-button');
+  static Key layerRenameTextField = const Key('layer-rename-text-field');
+  static Key layerRenameApplyButton = const Key('layer-rename-apply-button');
+  static Key canvasSettingsWidthField = const Key('canvas-settings-width-field');
+  static Key canvasSettingsHeightField = const Key('canvas-settings-height-field');
+  static Key canvasSettingsApplyButton = const Key('canvas-settings-apply-button');
 
   static Key toolFill = const Key('tool-fill');
   static Key toolFillModeSolid = const Key('tool-fill-mode-solid');

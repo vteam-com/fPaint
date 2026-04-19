@@ -3,20 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
+import '../helpers/layers_provider_test_helper.dart';
+
 void main() {
   group('Canvas Resize Feature Tests', () {
     late LayersProvider layersProvider;
 
     setUp(() {
-      layersProvider = LayersProvider();
-      layersProvider.clear();
-      layersProvider.size = const Size(800, 600);
-      layersProvider.scale = 1.0;
-      layersProvider.canvasResizeLockAspectRatio = true;
-      layersProvider.canvasResizePosition = CanvasResizePosition.center;
-      layersProvider.addWhiteBackgroundLayer();
-      layersProvider.selectedLayerIndex = 0;
-      layersProvider.clearHasChanged();
+      layersProvider = createInitializedLayersProvider();
     });
 
     group('anchorTranslate() calculation', () {

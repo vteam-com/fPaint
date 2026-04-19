@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,7 +9,7 @@ void main() {
 
   group('appProvider Tests', () {
     test('initial state should have one empty layer', () {
-      final AppProvider appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
       expect(appProvider.layers.length, 1);
       expect(appProvider.layers.selectedLayerIndex, 0);
       expect(
@@ -18,7 +19,7 @@ void main() {
     });
 
     test('addShape with Shape object should add to current layer', () {
-      final AppProvider appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
       final UserActionDrawing shape = UserActionDrawing(
         positions: <Offset>[
           const Offset(0, 0),
@@ -40,7 +41,7 @@ void main() {
     });
 
     test('add UserAction with parameters should create and add new shape', () {
-      final AppProvider appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
       appProvider.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
@@ -71,7 +72,7 @@ void main() {
     });
 
     test('undo should remove last shape', () {
-      final AppProvider appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
       appProvider.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),
@@ -92,7 +93,7 @@ void main() {
     });
 
     test('multiple shapes should be added and managed correctly', () {
-      final AppProvider appProvider = AppProvider();
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
       appProvider.updateAction(
         start: const Offset(0, 0),
         end: const Offset(10, 10),

@@ -4,55 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/color_helper.dart' hide hsvToColor;
 import 'package:fpaint/l10n/app_localizations.dart';
-import 'package:fpaint/providers/app_preferences.dart';
-import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_selector.dart';
-import 'package:mockito/annotations.dart';
-import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-// Generate Mocks
-@GenerateMocks(<Type>[
-  AppProvider,
-  ShellProvider,
-  AppPreferences,
-  SharedPreferences,
-  LayersProvider, // Added for MockLayersProvider
-])
-import 'color_selector_test.mocks.dart';
 
 void main() {
-  late MockAppProvider mockAppProvider;
-  late MockShellProvider mockShellProvider;
-  late MockAppPreferences mockAppPreferences;
-  late MockLayersProvider mockLayersProvider; // Added
-  // mockSharedPreferences can be created if needed for AppPreferences stubbing
-
-  setUp(() {
-    mockAppProvider = MockAppProvider();
-    mockShellProvider = MockShellProvider();
-    mockAppPreferences = MockAppPreferences();
-    mockLayersProvider = MockLayersProvider(); // Added
-
-    // Default stub for AppProvider.preferences
-    when(mockAppProvider.preferences).thenReturn(mockAppPreferences);
-    // Default stub for AppPreferences if its methods are called via AppProvider during dialog init
-    when(mockAppPreferences.brushColor).thenReturn(Colors.black); // Provide sensible defaults
-    when(mockAppPreferences.fillColor).thenReturn(Colors.blue);
-    // Add other necessary stubs for AppPreferences if ColorPickerDialog indirectly uses them via AppProvider
-
-    // Stub for ShellProvider
-    when(mockShellProvider.deviceSizeSmall).thenReturn(false); // Default stub for deviceSizeSmall
-
-    // Stub for LayersProvider as ColorPickerDialog uses it for topColors
-    when(mockLayersProvider.topColors).thenReturn(<ColorUsage>[]);
-    // when(mockLayersProvider.selectedLayer).thenReturn(MockLayerProvider()); // If needed for other interactions
-  });
-
   group('ColorSelector Widget Tests', () {
     testWidgets('Initial rendering reflects input color', (final WidgetTester tester) async {
       // Using blue as it has a non-zero hue, to avoid potential issues with hue=0 being default/uninitialized for slider
@@ -274,7 +233,8 @@ void main() {
       'showColorPicker calls showDialog with ColorPickerDialog',
       (final WidgetTester tester) async {
         Color selectedColorOut = Colors.transparent;
-        // Mocks are initialized in setUp
+        final ShellProvider shellProvider = ShellProvider()..deviceSizeSmall = false;
+        final LayersProvider layersProvider = LayersProvider()..topColors = <ColorUsage>[];
 
         // Set a larger physical size for the test window to avoid overflow
         final Size originalSize = tester.view.physicalSize; // Correct way to get size
@@ -289,9 +249,8 @@ void main() {
         await tester.pumpWidget(
           MultiProvider(
             providers: <SingleChildWidget>[
-              ChangeNotifierProvider<AppProvider>.value(value: mockAppProvider),
-              ChangeNotifierProvider<ShellProvider>.value(value: mockShellProvider),
-              ChangeNotifierProvider<LayersProvider>.value(value: mockLayersProvider),
+              ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
+              ChangeNotifierProvider<LayersProvider>.value(value: layersProvider),
             ],
             child: MaterialApp(
               localizationsDelegates: AppLocalizations.localizationsDelegates,

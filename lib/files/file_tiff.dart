@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/files/file_exceptions.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -16,6 +17,11 @@ part 'file_tiff_encoder.dart';
 
 const String _errorNoLayersToExportAsTiff = 'No layers to export as TIFF.';
 const String _errorCompositeRasterizationFailed = 'Failed to rasterize layered TIFF composite.';
+const String _errorTiffFileNotFoundPrefix = 'TIFF file not found:';
+const String _errorTiffReadFilePrefix = 'Failed to read TIFF file:';
+const String _errorInvalidTiffData = 'Invalid TIFF data or unable to read TIFF info.';
+const String _errorNoTiffFrames = 'TIFF file contained no image frames.';
+const String _errorNoDecodedTiffLayers = 'No layers could be decoded from TIFF file.';
 
 /// Converts all layers from [layers] into a layered TIFF with a flattened root
 /// image and one SubIFD per layer, bottom-to-top.
@@ -86,7 +92,7 @@ Future<List<_LayerFrame>> _buildLayerFrames(final LayersProvider layers) async {
   }
 
   if (frames.isEmpty) {
-    throw Exception(_errorNoLayersToExportAsTiff);
+    throw const TiffFileException(_errorNoLayersToExportAsTiff);
   }
 
   return frames;
@@ -98,7 +104,7 @@ Future<img.Image> _buildCompositeFrame(final LayersProvider layers) async {
   );
 
   if (compositeImage == null) {
-    throw Exception(_errorCompositeRasterizationFailed);
+    throw const TiffFileException(_errorCompositeRasterizationFailed);
   }
 
   return compositeImage;
@@ -143,46 +149,61 @@ Future<void> readTiffFileFromBytes(
   final LayersProvider layers,
   final Uint8List bytes,
 ) async {
+  final _DecodedTiffDocument decodedDocument = _decodeTiffDocument(bytes);
+
+  layers.clear();
+  layers.size = decodedDocument.size;
+
+  for (final _DecodedTiffLayer layer in decodedDocument.layers) {
+    await _appendDecodedTiffLayer(layers, meta: layer.meta, image: layer.image, offset: layer.offset);
+  }
+
+  layers.selectedLayerIndex = 0;
+  layers.clearHasChanged();
+}
+
+/// Decodes [bytes] into a validated TIFF document model ready to apply.
+///
+/// This parses the TIFF header, prefers layered SubIFD content when present,
+/// falls back to frame-by-frame decoding for flat TIFFs, and throws a
+/// [TiffFileException] when the payload is invalid or contains no usable
+/// layers.
+_DecodedTiffDocument _decodeTiffDocument(final Uint8List bytes) {
   final img.TiffDecoder decoder = img.TiffDecoder();
   final img.TiffInfo? tiffInfo = decoder.startDecode(bytes);
 
   if (tiffInfo == null) {
-    layers.clear();
-    layers.addWhiteBackgroundLayer();
-    layers.size = const Size(AppLayout.minPanelExtent, AppLayout.minPanelExtent);
-    _log.severe('Failed to decode TIFF info. Added default background.');
-    layers.clearHasChanged();
-    throw Exception('Invalid TIFF data or unable to read TIFF info.');
+    throw const TiffFileException(_errorInvalidTiffData);
   }
-
-  layers.clear();
-  layers.size = Size(tiffInfo.width.toDouble(), tiffInfo.height.toDouble());
 
   final List<_DecodedTiffLayer>? subIfdLayers = _tryDecodeSubIfdLayers(bytes, tiffInfo);
-  if (subIfdLayers != null) {
-    for (final _DecodedTiffLayer layer in subIfdLayers) {
-      await _appendDecodedTiffLayer(layers, meta: layer.meta, image: layer.image, offset: layer.offset);
-    }
-
-    if (layers.isEmpty) {
-      layers.addWhiteBackgroundLayer();
-      _log.warning('No layers were decoded. Added default background.');
-    }
-
-    layers.selectedLayerIndex = 0;
-    layers.clearHasChanged();
-    return;
+  final List<_DecodedTiffLayer> decodedLayers = subIfdLayers ?? _decodeFrameLayers(decoder, tiffInfo);
+  if (decodedLayers.isEmpty) {
+    throw const TiffFileException(_errorNoDecodedTiffLayers);
   }
 
+  return _DecodedTiffDocument(
+    size: Size(tiffInfo.width.toDouble(), tiffInfo.height.toDouble()),
+    layers: decodedLayers,
+  );
+}
+
+/// Decodes standard TIFF frames into layer models when no SubIFD layers exist.
+///
+/// Frames are read back-to-front so the resulting layer order matches the
+/// painting stack expected by [LayersProvider]. Any undecodable frame is skipped
+/// with a warning, while an entirely empty TIFF still fails with a
+/// [TiffFileException].
+List<_DecodedTiffLayer> _decodeFrameLayers(
+  final img.TiffDecoder decoder,
+  final img.TiffInfo tiffInfo,
+) {
   final int numFrames = decoder.numFrames();
-
   if (numFrames == 0) {
-    layers.addWhiteBackgroundLayer();
-    _log.warning('TIFF file contained no image frames. Added default background.');
-    layers.clearHasChanged();
-    return;
+    throw const TiffFileException(_errorNoTiffFrames);
   }
 
+  final List<_DecodedTiffLayer> decodedLayers = <_DecodedTiffLayer>[];
   for (int i = numFrames - 1; i >= 0; i--) {
     final img.Image? frame = decoder.decodeFrame(i);
 
@@ -191,18 +212,26 @@ Future<void> readTiffFileFromBytes(
       continue;
     }
 
-    // Extract layer metadata from the TiffImage IFD tags.
-    final _LayerMeta meta = _extractLayerMeta(tiffInfo, i);
-    await _appendDecodedTiffLayer(layers, meta: meta, image: frame, offset: Offset.zero);
+    decodedLayers.add(
+      _DecodedTiffLayer(
+        image: frame,
+        meta: _extractLayerMeta(tiffInfo, i),
+        offset: Offset.zero,
+      ),
+    );
   }
 
-  if (layers.isEmpty) {
-    layers.addWhiteBackgroundLayer();
-    _log.warning('No layers were decoded. Added default background.');
-  }
+  return decodedLayers;
+}
 
-  layers.selectedLayerIndex = 0;
-  layers.clearHasChanged();
+class _DecodedTiffDocument {
+  _DecodedTiffDocument({
+    required this.size,
+    required this.layers,
+  });
+
+  final Size size;
+  final List<_DecodedTiffLayer> layers;
 }
 
 class _DecodedTiffLayer {
@@ -535,8 +564,34 @@ Future<void> readTiffFromFilePath(
   final LayersProvider layers,
   final String path,
 ) async {
-  final Uint8List bytes = await File(path).readAsBytes();
-  await readTiffFileFromBytes(layers, bytes);
+  final File tiffFile = File(path);
+  if (!await tiffFile.exists()) {
+    throw TiffFileException('$_errorTiffFileNotFoundPrefix "$path"');
+  }
+
+  try {
+    final Uint8List bytes = await tiffFile.readAsBytes();
+    await readTiffFileFromBytes(layers, bytes);
+  } on TiffFileException {
+    rethrow;
+  } catch (error, stackTrace) {
+    _throwTiffException(
+      '$_errorTiffReadFilePrefix "$path"',
+      error,
+      stackTrace,
+    );
+  }
+}
+
+Never _throwTiffException(
+  final String message,
+  final Object error,
+  final StackTrace stackTrace,
+) {
+  Error.throwWithStackTrace(
+    TiffFileException(message, cause: error),
+    stackTrace,
+  );
 }
 
 // Private helper to convert Uint8List to ui.Image

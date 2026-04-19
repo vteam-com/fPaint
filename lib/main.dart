@@ -9,11 +9,11 @@ import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/my_window_manager.dart';
 import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
-import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
 const String _clearPendingFileMethod = 'clearPendingFile';
@@ -220,8 +220,11 @@ class MyApp extends StatelessWidget {
   /// Creates a [MyApp] widget.
   MyApp({super.key});
 
+  /// Provides application preferences and persisted UI settings.
+  final AppPreferences appPreferences = AppPreferences();
+
   /// Provides application-level functionalities and states.
-  final AppProvider appProvider = AppProvider();
+  late final AppProvider appProvider = AppProvider(preferences: appPreferences);
 
   /// Provides functionalities and states for managing layers.
   final LayersProvider layersProvider = LayersProvider();
@@ -252,6 +255,8 @@ class MyApp extends StatelessWidget {
         // ignore: always_specify_types
         ChangeNotifierProvider(create: (final BuildContext _) => shellProvider),
         // ignore: always_specify_types
+        ChangeNotifierProvider(create: (final BuildContext _) => appPreferences),
+        // ignore: always_specify_types
         ChangeNotifierProvider(create: (final BuildContext _) => appProvider),
         // The layers provider is a shared singleton; provide the existing
         // instance without transferring disposal ownership to Provider.
@@ -259,69 +264,75 @@ class MyApp extends StatelessWidget {
         // ignore: always_specify_types
         ChangeNotifierProvider(create: (final BuildContext _) => undoProvider),
       ],
-      child: Consumer<AppProvider>(
-        builder: (final BuildContext _, final AppProvider currentAppProvider, final Widget? _) {
-          return MaterialApp(
-            navigatorKey: navigatorKey,
-            title: appName,
-            localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            supportedLocales: AppLocalizations.supportedLocales,
-            locale: currentAppProvider.preferredLocale,
-            localeResolutionCallback: (final Locale? locale, final Iterable<Locale> supportedLocales) {
-              if (locale == null) {
-                return const Locale('en');
-              }
+      child: Consumer2<AppProvider, AppPreferences>(
+        builder:
+            (
+              final BuildContext _,
+              final AppProvider currentAppProvider,
+              final AppPreferences currentPreferences,
+              final Widget? _,
+            ) {
+              return MaterialApp(
+                navigatorKey: navigatorKey,
+                title: appName,
+                localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                ],
+                supportedLocales: AppLocalizations.supportedLocales,
+                locale: currentPreferences.preferredLocale,
+                localeResolutionCallback: (final Locale? locale, final Iterable<Locale> supportedLocales) {
+                  if (locale == null) {
+                    return const Locale('en');
+                  }
 
-              for (final Locale supportedLocale in supportedLocales) {
-                if (supportedLocale.languageCode == locale.languageCode) {
-                  return supportedLocale;
-                }
-              }
+                  for (final Locale supportedLocale in supportedLocales) {
+                    if (supportedLocale.languageCode == locale.languageCode) {
+                      return supportedLocale;
+                    }
+                  }
 
-              return const Locale('en');
+                  return const Locale('en');
+                },
+                theme: ThemeData.dark().copyWith(
+                  colorScheme: const ColorScheme.dark(
+                    primary: AppColors.primary,
+                    secondary: AppColors.secondary,
+                  ),
+                  dialogTheme: DialogThemeData(
+                    backgroundColor: AppColors.surface,
+                    shape: popupShape,
+                  ),
+                  popupMenuTheme: PopupMenuThemeData(
+                    color: AppColors.surface,
+                    shape: popupShape,
+                  ),
+                  bottomSheetTheme: BottomSheetThemeData(
+                    backgroundColor: AppColors.surface,
+                    modalBackgroundColor: AppColors.surface,
+                    shape: popupShape,
+                  ),
+                  sliderTheme: SliderThemeData(
+                    activeTrackColor: AppColors.secondary,
+                    inactiveTrackColor: AppColors.surfaceVariant,
+                    thumbColor: AppColors.accent,
+                    overlayColor: AppColors.primary.withAlpha(AppLimits.percentMax),
+                  ),
+                ),
+                routes: <String, WidgetBuilder>{
+                  '/': (final BuildContext context) => shortCutsForMainApp(
+                    context,
+                    shellProvider,
+                    currentAppProvider,
+                    const MainScreen(),
+                  ),
+                  '/settings': (final _) => const SettingsPage(),
+                  '/platforms': (final _) => const PlatformsPage(),
+                },
+              );
             },
-            theme: ThemeData.dark().copyWith(
-              colorScheme: const ColorScheme.dark(
-                primary: AppColors.primary,
-                secondary: AppColors.secondary,
-              ),
-              dialogTheme: DialogThemeData(
-                backgroundColor: AppColors.surface,
-                shape: popupShape,
-              ),
-              popupMenuTheme: PopupMenuThemeData(
-                color: AppColors.surface,
-                shape: popupShape,
-              ),
-              bottomSheetTheme: BottomSheetThemeData(
-                backgroundColor: AppColors.surface,
-                modalBackgroundColor: AppColors.surface,
-                shape: popupShape,
-              ),
-              sliderTheme: SliderThemeData(
-                activeTrackColor: AppColors.secondary,
-                inactiveTrackColor: AppColors.surfaceVariant,
-                thumbColor: AppColors.accent,
-                overlayColor: AppColors.primary.withAlpha(AppLimits.percentMax),
-              ),
-            ),
-            routes: <String, WidgetBuilder>{
-              '/': (final BuildContext context) => shortCutsForMainApp(
-                context,
-                shellProvider,
-                currentAppProvider,
-                const MainScreen(),
-              ),
-              '/settings': (final _) => const SettingsPage(),
-              '/platforms': (final _) => const PlatformsPage(),
-            },
-          );
-        },
       ),
     );
   }

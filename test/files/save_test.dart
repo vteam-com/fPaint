@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/files/file_exceptions.dart';
 import 'package:fpaint/files/save.dart';
 
 // Mock classes to test saveFile routing logic and saveAsTiff
@@ -42,50 +43,42 @@ void main() {
     test('saveFile routes PNG files correctly', () async {
       mockShell.loadedFileName = 'test.png';
 
-      // This test verifies the extension parsing logic
-      // The actual saveAsPng call would need extensive mocking
-      final String extension = mockShell.loadedFileName.split('.').last.toLowerCase();
-      expect(extension, 'png');
-
-      // In saveFile, PNG should call saveAsPng
-      // We verify the routing logic works by checking extension parsing
+      expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), SaveFileFormat.png);
     });
 
     test('saveFile routes JPEG variants correctly', () async {
       mockShell.loadedFileName = 'test.jpg';
-      expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'jpg');
+      expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), SaveFileFormat.jpeg);
 
       mockShell.loadedFileName = 'test.jpeg';
-      expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'jpeg');
+      expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), SaveFileFormat.jpeg);
     });
 
     test('saveFile routes ORA files correctly', () async {
       mockShell.loadedFileName = 'test.ora';
-      expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'ora');
+      expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), SaveFileFormat.ora);
     });
 
     test('saveFile routes TIFF variants correctly', () async {
       mockShell.loadedFileName = 'test.tiff';
-      expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'tiff');
+      expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), SaveFileFormat.tiff);
 
       mockShell.loadedFileName = 'test.tif';
-      expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'tif');
+      expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), SaveFileFormat.tiff);
     });
 
     test('saveFile routes WebP files correctly', () async {
       mockShell.loadedFileName = 'test.webp';
-      expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'webp');
+      expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), SaveFileFormat.webp);
     });
 
     test('saveFile throws for unsupported extensions', () async {
       mockShell.loadedFileName = 'test.gif';
-      expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'gif');
+      expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), isNull);
+      expect(const UnsupportedSaveFormatException('gif').extension, 'gif');
 
       mockShell.loadedFileName = 'test.bmp';
-      expect(mockShell.loadedFileName.split('.').last.toLowerCase(), 'bmp');
-
-      // Note: In actual saveFile() function, unsupported extensions would throw
-      // "Unsupported file extension for saving" exception
+      expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), isNull);
     });
 
     test('saveAsTiff function exists and is properly defined', () {

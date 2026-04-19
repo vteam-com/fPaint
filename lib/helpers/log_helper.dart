@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
 // Logger name constants for each module.
+const String logNameAppPreferences = 'AppPreferences';
 const String logNameAppProvider = 'AppProvider';
 const String logNameFileOra = 'FileOra';
 const String logNameFileTiff = 'FileTiff';

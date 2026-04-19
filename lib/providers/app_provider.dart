@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
-import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/image_placement_model.dart';
@@ -15,10 +14,9 @@ import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
-import 'package:fpaint/services/fill_service.dart';
-import 'package:logging/logging.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // Exports
@@ -29,26 +27,13 @@ export 'package:fpaint/providers/layers_provider.dart';
 /// with the canvas, such as clearing the canvas, converting between canvas and screen
 /// coordinates, and performing region-based operations like erasing and cutting.
 class AppProvider extends ChangeNotifier {
-  AppProvider() {
+  AppProvider({final AppPreferences? preferences}) : preferences = preferences ?? AppPreferences() {
+    this.preferences.addListener(_handlePreferencesChanged);
     this.canvasClear(layers.size);
-
-    // this will initialize and load the preferencefor the first time
-    try {
-      this.preferences.getPref().then(
-        (final _) {
-          update();
-        },
-      );
-    } catch (error) {
-      _log.severe('Failed to load preferences', error);
-      // Fall back to default preferences - they're already initialized
-      update();
-    }
   }
-  static final Logger _log = Logger(logNameAppProvider);
 
   /// The application preferences.
-  final AppPreferences preferences = AppPreferences();
+  final AppPreferences preferences;
 
   /// Preferred app locale, or null to follow system locale.
   Locale? get preferredLocale => preferences.preferredLocale;
@@ -61,9 +46,6 @@ class AppProvider extends ChangeNotifier {
     await preferences.setLanguageCode(value);
     update();
   }
-
-  /// Whether the preferences are loaded.
-  bool get isPreferencesLoaded => preferences.isLoaded;
 
   final UndoProvider _undoProvider = UndoProvider();
 
@@ -83,6 +65,16 @@ class AppProvider extends ChangeNotifier {
     final BuildContext context, {
     final bool listen = false,
   }) => Provider.of<AppProvider>(context, listen: listen);
+
+  @override
+  void dispose() {
+    preferences.removeListener(_handlePreferencesChanged);
+    super.dispose();
+  }
+
+  void _handlePreferencesChanged() {
+    update();
+  }
 
   //=============================================================================
   // All things Canvas
@@ -113,7 +105,7 @@ class AppProvider extends ChangeNotifier {
   /// Applies a scale to the canvas.
   void applyScaleToCanvas({
     required final double scaleDelta,
-    final ui.Offset? anchorPoint, // optional anchoer point
+    final ui.Offset? anchorPoint, // optional anchor point
     final bool notifyListener = true,
   }) {
     // Step 1: Convert screen coordinates to canvas coordinates
@@ -233,7 +225,7 @@ class AppProvider extends ChangeNotifier {
       return;
     }
 
-    // Bake scale + rotation into a new rasterised image.
+    // Bake scale + rotation into a new rasterized image.
     final double outWidth = imagePlacementModel.displayWidth;
     final double outHeight = imagePlacementModel.displayHeight;
     final double rotation = imagePlacementModel.rotation;
@@ -293,7 +285,7 @@ class AppProvider extends ChangeNotifier {
   /// Begins a perspective/skew transform on the current selection.
   ///
   /// Captures the pixels under the selection from the current layer and
-  /// initialises the [transformModel] for interactive manipulation.
+  /// initializes the [transformModel] for interactive manipulation.
   Future<void> startTransform() async {
     if (!selectorModel.isVisible || selectorModel.path1 == null) {
       return;
@@ -558,14 +550,14 @@ class AppProvider extends ChangeNotifier {
 
   //-------------------------
   // Tolerance
-  int _tolarance = AppDefaults.tolerance; // Mid point 0..100
+  int _tolerance = AppDefaults.tolerance; // Mid point 0..100
 
   /// Gets the tolerance.
-  int get tolerance => _tolarance;
+  int get tolerance => _tolerance;
 
   /// Sets the tolerance.
   set tolerance(final int value) {
-    _tolarance = max(1, min(AppLimits.percentMax, value));
+    _tolerance = max(1, min(AppLimits.percentMax, value));
     update();
   }
 

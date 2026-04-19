@@ -1,12 +1,30 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/log_helper.dart';
+import 'package:logging/logging.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 export 'package:provider/provider.dart';
 
 /// Manages the application's persistent settings using SharedPreferences.
-class AppPreferences {
+class AppPreferences extends ChangeNotifier {
+  AppPreferences() {
+    unawaited(_loadInitialPreferences());
+  }
+
+  static final Logger _log = Logger(logNameAppPreferences);
+
   SharedPreferences? _prefs;
+  Future<void>? _loadFuture;
+
+  /// Retrieves the [AppPreferences] instance from the widget tree.
+  static AppPreferences of(
+    final BuildContext context, {
+    final bool listen = false,
+  }) => Provider.of<AppPreferences>(context, listen: listen);
 
   /// Indicates whether the preferences have been loaded.
   bool get isLoaded => _prefs != null;
@@ -56,9 +74,7 @@ class AppPreferences {
 
   /// Gets the SharedPreferences instance.
   Future<SharedPreferences> getPref() async {
-    if (_prefs == null) {
-      await _loadPreferences();
-    }
+    await _ensureLoaded();
     return _prefs!;
   }
 
@@ -67,25 +83,25 @@ class AppPreferences {
     final double value,
   ) async {
     _sidePanelDistance = value;
-    (await getPref()).setDouble(keySidePanelDistance, value);
+    await (await getPref()).setDouble(keySidePanelDistance, value);
   }
 
   /// Sets the brush size.
   Future<void> setBrushSize(final double size) async {
     _brushSize = size;
-    (await getPref()).setDouble(keyBrushSize, size);
+    await (await getPref()).setDouble(keyBrushSize, size);
   }
 
   /// Sets the brush color.
   Future<void> setBrushColor(final Color color) async {
     _brushColor = color;
-    (await getPref()).setInt(keyLastBrushColor, color.toARGB32());
+    await (await getPref()).setInt(keyLastBrushColor, color.toARGB32());
   }
 
   /// Sets the fill color.
   Future<void> setFillColor(final Color color) async {
     _fillColor = color;
-    (await getPref()).setInt(keyLastFillColor, color.toARGB32());
+    await (await getPref()).setInt(keyLastFillColor, color.toARGB32());
   }
 
   /// Sets whether to use Apple Pencil only.
@@ -93,7 +109,8 @@ class AppPreferences {
     final bool value,
   ) async {
     _useApplePencil = value;
-    (await getPref()).setBool(keyUseApplePencil, value);
+    await (await getPref()).setBool(keyUseApplePencil, value);
+    notifyListeners();
   }
 
   /// Sets the preferred app language code.
@@ -104,9 +121,44 @@ class AppPreferences {
     final SharedPreferences prefs = await getPref();
     if (value == null) {
       await prefs.remove(keyLanguageCode);
+      notifyListeners();
       return;
     }
     await prefs.setString(keyLanguageCode, value);
+    notifyListeners();
+  }
+
+  /// Ensures preferences are loaded once before any persisted value is read.
+  ///
+  /// Concurrent callers share the same in-flight load future so
+  /// [SharedPreferences] initialization is not duplicated. Once loading
+  /// completes, listeners are notified so widgets depending on persisted values
+  /// can rebuild.
+  Future<void> _ensureLoaded() async {
+    if (_prefs != null) {
+      return;
+    }
+
+    if (_loadFuture != null) {
+      await _loadFuture;
+      return;
+    }
+
+    _loadFuture = _loadPreferences();
+    try {
+      await _loadFuture;
+      notifyListeners();
+    } finally {
+      _loadFuture = null;
+    }
+  }
+
+  Future<void> _loadInitialPreferences() async {
+    try {
+      await _ensureLoaded();
+    } catch (error, stackTrace) {
+      _log.severe('Failed to load app preferences.', error, stackTrace);
+    }
   }
 
   /// Loads the preferences from SharedPreferences.

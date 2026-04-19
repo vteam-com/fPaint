@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/files/file_exceptions.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:xml/xml.dart';
@@ -27,7 +28,7 @@ void main() {
 
     expect(
       () => readImageFromFilePathOra(layers, 'nonexistent.ora'),
-      throwsException,
+      throwsA(isA<OraFileException>()),
     );
   });
 
@@ -58,7 +59,7 @@ void main() {
 
     expect(
       () => readOraFileFromBytes(layers, invalidBytes),
-      throwsException,
+      throwsA(isA<OraFileException>()),
     );
   });
 

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
-import 'package:fpaint/services/flood_fill.dart';
+import 'package:fpaint/providers/flood_fill.dart';
 
 /// Describes a flood-filled region path and its offset relative to the source.
 class FillRegion {

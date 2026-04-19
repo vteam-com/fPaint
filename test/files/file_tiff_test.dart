@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/files/file_exceptions.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
@@ -168,6 +169,24 @@ void main() {
           _croppedLayerOffset.dy + _croppedLayerImageSize.height,
         ),
       );
+    });
+
+    test('invalid TIFF bytes throw without mutating existing layers', () async {
+      final LayersProvider layers = LayersProvider();
+      layers.clear();
+      layers.size = const ui.Size(32, 24);
+      layers.addWhiteBackgroundLayer('Existing');
+
+      final Uint8List invalidBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
+
+      await expectLater(
+        () => readTiffFileFromBytes(layers, invalidBytes),
+        throwsA(isA<TiffFileException>()),
+      );
+
+      expect(layers.size, const ui.Size(32, 24));
+      expect(layers.length, 1);
+      expect(layers.get(0).name, 'Existing');
     });
 
     // Note: readTiffFileFromBytes and readTiffFromFilePath are complex functions that
