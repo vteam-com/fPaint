@@ -3,8 +3,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/models/canvas_resize.dart'; // Added for CanvasResizePosition
+import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+
+import '../helpers/layers_provider_test_helper.dart';
 
 const int _samplePixelTopLeftX = 5;
 const int _samplePixelTopLeftY = 5;
@@ -23,28 +25,7 @@ void main() {
   late LayersProvider layersProvider;
 
   setUp(() {
-    // LayersProvider is a singleton, so we need to ensure a clean state for each test.
-    // This is tricky. The singleton pattern in LayersProvider means it retains state across tests.
-    // For true unit tests, this should be refactored or a reset method provided.
-    // Workaround: Access the instance and clear/reset its state manually.
-    layersProvider = LayersProvider(); // Gets the singleton instance
-
-    // Manually reset state to mimic a fresh instance as much as possible
-    layersProvider.clear(); // Clear all layers first
-
-    // Reset properties to their initial default values as defined in LayersProvider
-    layersProvider.size = const Size(800, 600); // Default size
-    layersProvider.scale = 1.0; // Default scale
-    layersProvider.canvasResizeLockAspectRatio = true; // Default
-    layersProvider.canvasResizePosition = CanvasResizePosition.center; // Default
-
-    // Add the initial background layer (constructor also does this, clear() removes it)
-    layersProvider.addWhiteBackgroundLayer();
-    layersProvider.selectedLayerIndex = 0; // Select the background layer
-
-    // Clear any 'changed' flags from previous tests
-    layersProvider.clearHasChanged();
-    // Note: UndoProvider state is not easily reset here if it's internal to LayersProvider's methods.
+    layersProvider = createInitializedLayersProvider();
   });
 
   group('LayersProvider Initialization and Defaults', () {

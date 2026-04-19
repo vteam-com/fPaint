@@ -115,6 +115,7 @@ class LayerSelector extends StatelessWidget {
       builder: (final BuildContext dialogContext) => AlertDialog(
         title: const Text(_dialogLayerNameTitle),
         content: TextField(
+          key: Keys.layerRenameTextField,
           controller: controller,
           autofocus: true,
           decoration: const InputDecoration(labelText: _dialogLayerNameTitle),
@@ -125,6 +126,7 @@ class LayerSelector extends StatelessWidget {
             child: const Text(_dialogCancel),
           ),
           TextButton(
+            key: Keys.layerRenameApplyButton,
             onPressed: () {
               Navigator.pop(dialogContext, controller.text);
               LayersProvider.of(dialogContext).update();
@@ -199,6 +201,7 @@ class LayerSelector extends StatelessWidget {
       alignment: WrapAlignment.center,
       children: <Widget>[
         IconButton(
+          key: Keys.layerAddAboveButton,
           tooltip: _tooltipAddLayerAbove,
           icon: const AppSvgIcon(icon: AppIcon.playlistAdd),
           onPressed: () => _onAddLayer(layers),

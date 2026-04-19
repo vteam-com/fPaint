@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
-import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 
 /// A page that allows the user to modify application settings.
@@ -19,10 +19,10 @@ class _SettingsPageState extends State<SettingsPage> {
   static const String _systemLanguage = 'system';
   @override
   Widget build(final BuildContext context) {
-    final AppProvider appProvider = AppProvider.of(context, listen: true);
+    final AppPreferences appPreferences = AppPreferences.of(context, listen: true);
     final AppLocalizations l10n = context.l10n;
 
-    final String selectedLanguage = appProvider.languageCode ?? _systemLanguage;
+    final String selectedLanguage = appPreferences.languageCode ?? _systemLanguage;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings)),
@@ -45,7 +45,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       }
 
                       final String? languageCode = value == _systemLanguage ? null : value;
-                      appProvider.setLanguageCode(languageCode);
+                      appPreferences.setLanguageCode(languageCode);
                     },
                     items: <DropdownMenuItem<String>>[
                       DropdownMenuItem<String>(
@@ -71,10 +71,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 SwitchListTile(
                   title: Text(l10n.useApplePencilOnlyTitle),
                   subtitle: Text(l10n.useApplePencilOnlySubtitle),
-                  value: appProvider.preferences.useApplePencil,
+                  value: appPreferences.useApplePencil,
                   onChanged: (final bool value) {
                     setState(() {
-                      appProvider.preferences.setUseApplePencil(value);
+                      appPreferences.setUseApplePencil(value);
                     });
                   },
                 ),

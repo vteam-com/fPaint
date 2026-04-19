@@ -1,11 +1,14 @@
 #!/bin/sh
 
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CHECK_FAILURE_EXIT_CODE="1"
 FCHECK_VERSION="1.2.0"
 ANSI_RED="$(printf '\033[31m')"
 ANSI_BOLD="$(printf '\033[1m')"
 ANSI_BLINK="$(printf '\033[5m')"
 ANSI_RESET="$(printf '\033[0m')"
+
+cd "$ROOT_DIR"
 
 show_fcheck_score_error() {
 	printf '\n%s%s%s' "$ANSI_RED" "$ANSI_BOLD" "$ANSI_BLINK"
@@ -28,10 +31,13 @@ flutter analyze lib test --no-pub | sed 's/^/    /'
 
 echo --- Test
 echo "    Running tests..."
-test_output="$(flutter test --reporter=compact --no-pub 2>&1)" || {
+test_output="$(flutter test --reporter=compact --coverage --no-pub 2>&1)" || {
 	echo "$test_output"
 	exit "$CHECK_FAILURE_EXIT_CODE"
 }
+
+echo --- Coverage Summary
+"$ROOT_DIR/tool/update_coverage_summary.sh" || exit "$CHECK_FAILURE_EXIT_CODE"
 
 echo --- fCheck
 # Install the pinned version into the isolated cache, then run it.

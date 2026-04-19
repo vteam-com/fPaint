@@ -62,6 +62,7 @@ void showCanvasSettings(final BuildContext context) {
                   SizedBox(
                     width: AppLayout.inputFieldWidth,
                     child: TextField(
+                      key: Keys.canvasSettingsWidthField,
                       decoration: InputDecoration(
                         labelText: l10n.width,
                         suffixText: _pxUnit,
@@ -106,6 +107,7 @@ void showCanvasSettings(final BuildContext context) {
                   SizedBox(
                     width: AppLayout.inputFieldWidth,
                     child: TextField(
+                      key: Keys.canvasSettingsHeightField,
                       decoration: InputDecoration(
                         labelText: l10n.height,
                         suffixText: _pxUnit,
@@ -143,6 +145,7 @@ void showCanvasSettings(final BuildContext context) {
               Align(
                 alignment: Alignment.centerRight,
                 child: ElevatedButton(
+                  key: Keys.canvasSettingsApplyButton,
                   onPressed: () {
                     final double width = double.tryParse(widthController.text) ?? -1;
                     final double height = double.tryParse(heightController.text) ?? -1;

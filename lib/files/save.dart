@@ -4,14 +4,47 @@ import 'package:flutter/foundation.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/files/export_file_name.dart';
+import 'package:fpaint/files/file_exceptions.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
-import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:logging/logging.dart';
 
 final Logger _log = Logger(logNameSave);
+const String _errorFailedToSaveTiffPrefix = 'Failed to save TIFF file:';
+
+/// Supported save file formats.
+enum SaveFileFormat {
+  png,
+  jpeg,
+  ora,
+  tiff,
+  webp
+  ;
+
+  /// Resolves a save format from a file name.
+  static SaveFileFormat? fromFileName(final String fileName) {
+    final String extension = fileName.split('.').last.toLowerCase();
+    switch (extension) {
+      case FileExtensions.png:
+        return SaveFileFormat.png;
+      case FileExtensions.jpg:
+      case FileExtensions.jpeg:
+        return SaveFileFormat.jpeg;
+      case FileExtensions.ora:
+        return SaveFileFormat.ora;
+      case FileExtensions.tif:
+      case FileExtensions.tiff:
+        return SaveFileFormat.tiff;
+      case FileExtensions.webp:
+        return SaveFileFormat.webp;
+      default:
+        return null;
+    }
+  }
+}
 
 /// Saves all layers as a layered TIFF file.
 Future<void> saveAsTiff(
@@ -23,9 +56,14 @@ Future<void> saveAsTiff(
     final Uint8List tiffBytes = await convertLayersToTiff(layers);
     await File(normalizedFileName).writeAsBytes(tiffBytes);
     layers.clearHasChanged();
-  } catch (e) {
-    _log.severe('Error saving as TIFF to $fileName', e);
-    throw Exception('Failed to save as TIFF to $fileName: $e');
+  } on FileOperationException {
+    rethrow;
+  } catch (error, stackTrace) {
+    _log.severe('Error saving as TIFF to $fileName', error, stackTrace);
+    Error.throwWithStackTrace(
+      FileSaveException('$_errorFailedToSaveTiffPrefix "$fileName"', cause: error),
+      stackTrace,
+    );
   }
 }
 
@@ -40,21 +78,24 @@ Future<void> saveFile(
   final LayersProvider layers,
 ) async {
   final String fileName = shellProvider.loadedFileName;
-  final String extension = fileName.split('.').last.toLowerCase();
+  final SaveFileFormat? format = SaveFileFormat.fromFileName(fileName);
+  if (format == null) {
+    final String extension = fileName.split('.').last.toLowerCase();
+    _log.severe('Unsupported file extension for saving: $extension');
+    throw UnsupportedSaveFormatException(extension);
+  }
 
-  switch (extension) {
-    case FileExtensions.png:
+  switch (format) {
+    case SaveFileFormat.png:
       await saveAsPng(layers, fileName);
       break;
-    case FileExtensions.jpg:
-    case FileExtensions.jpeg:
+    case SaveFileFormat.jpeg:
       await saveAsJpeg(layers, fileName);
       break;
-    case FileExtensions.ora:
+    case SaveFileFormat.ora:
       await saveAsOra(layers, fileName);
       break;
-    case FileExtensions.tif:
-    case FileExtensions.tiff:
+    case SaveFileFormat.tiff:
       final String normalizedFileName = normalizeTiffExportFileName(fileName);
       await saveAsTiff(layers, normalizedFileName);
       if (shellProvider.loadedFileName != normalizedFileName) {
@@ -62,12 +103,8 @@ Future<void> saveFile(
         shellProvider.update();
       }
       break;
-    case FileExtensions.webp:
+    case SaveFileFormat.webp:
       await saveAsWebp(layers, fileName);
       break;
-    default:
-      // Handle unsupported extension or throw error
-      _log.severe('Unsupported file extension for saving: $extension');
-      throw Exception('Unsupported file extension for saving: $extension');
   }
 }

@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fpaint/files/file_exceptions.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -33,6 +34,12 @@ const String _oraXmlProcessingTarget = 'xml';
 const String _oraXmlEncoding = 'version="1.0" encoding="UTF-8"';
 const String _oraMimetypeEntry = 'mimetype';
 const String _oraStackXmlEntry = 'stack.xml';
+const String _errorOraFileNotFoundPrefix = 'ORA file not found:';
+const String _errorOraReadFilePrefix = 'Failed to read ORA file:';
+const String _errorOraReadBytes = 'Failed to read ORA bytes.';
+const String _errorOraMissingStackXml = 'stack.xml not found in ORA file.';
+const String _errorOraMissingImageElement = 'image element not found in ORA stack.xml.';
+const String _errorOraMissingDimensions = 'ORA image dimensions are missing.';
 
 /// Creates an [ArchiveFile] with a fixed timestamp so archives are
 /// byte-identical across runs when the payload has not changed.
@@ -70,19 +77,24 @@ Future<void> readImageFromFilePathOra(
   final LayersProvider layers,
   final String filePath,
 ) async {
-  try {
-    final File oraFile = File(filePath);
-    if (!await oraFile.exists()) {
-      throw Exception('File not found "$filePath"');
-    }
+  final File oraFile = File(filePath);
+  if (!await oraFile.exists()) {
+    throw OraFileException('$_errorOraFileNotFoundPrefix "$filePath"');
+  }
 
-    // Read the file as bytes
+  try {
     await readOraFileFromBytes(
       layers,
       await oraFile.readAsBytes(),
     );
-  } catch (e) {
-    throw Exception('Failed to read ORA file: $e');
+  } on OraFileException {
+    rethrow;
+  } catch (error, stackTrace) {
+    _throwOraException(
+      '$_errorOraReadFilePrefix "$filePath"',
+      error,
+      stackTrace,
+    );
   }
 }
 
@@ -98,7 +110,7 @@ Future<void> readOraFileFromBytes(
     // Find the stack.xml file
     final ArchiveFile stackFile = archive.files.firstWhere(
       (final ArchiveFile file) => file.name == _oraStackXmlEntry,
-      orElse: () => throw Exception('$_oraStackXmlEntry not found in ORA file'),
+      orElse: () => throw const OraFileException(_errorOraMissingStackXml),
     );
 
     // Parse the stack.xml content
@@ -106,11 +118,11 @@ Future<void> readOraFileFromBytes(
       String.fromCharCodes(stackFile.content),
     );
 
-    // print(xmlDoc.toString());
-
     await importFromOraXml(archive, layers, xmlDoc);
-  } catch (error) {
-    throw Exception('Failed to read ORA file: $error');
+  } on OraFileException {
+    rethrow;
+  } catch (error, stackTrace) {
+    _throwOraException(_errorOraReadBytes, error, stackTrace);
   }
 }
 
@@ -121,13 +133,34 @@ Future<void> importFromOraXml(
   final XmlDocument xmlDoc,
 ) async {
   final XmlElement? xmlElementImage = xmlDoc.getElement(_oraElementImage);
+  if (xmlElementImage == null) {
+    throw const OraFileException(_errorOraMissingImageElement);
+  }
+
+  final String? width = xmlElementImage.getAttribute(_oraAttrWidth);
+  final String? height = xmlElementImage.getAttribute(_oraAttrHeight);
+  if (width == null || height == null) {
+    throw const OraFileException(_errorOraMissingDimensions);
+  }
+
   layers.size = ui.Size(
-    double.parse(xmlElementImage!.getAttribute(_oraAttrWidth)!),
-    double.parse(xmlElementImage.getAttribute(_oraAttrHeight)!),
+    double.parse(width),
+    double.parse(height),
   );
 
   final XmlElement? xmlElementTopStack = xmlElementImage.getElement(_oraElementStack);
   await importStack(archive, layers, xmlElementTopStack);
+}
+
+Never _throwOraException(
+  final String message,
+  final Object error,
+  final StackTrace stackTrace,
+) {
+  Error.throwWithStackTrace(
+    OraFileException(message, cause: error),
+    stackTrace,
+  );
 }
 
 /// Recursively imports a stack node and its child stacks and layers.

@@ -8,6 +8,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/text_object.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
@@ -35,6 +36,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: false);
+    final AppPreferences appPreferences = AppPreferences.of(context, listen: true);
     final ShellProvider shellProvider = ShellProvider.of(context);
 
     return Listener(
@@ -91,7 +93,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             // Set the initial focal point between two fingers
             _baseDistance = _getDistanceBetweenTouchPoints();
           } else {
-            if (event.buttons == 1 && !appProvider.preferences.useApplePencil) {
+            if (event.buttons == 1 && !appPreferences.useApplePencil) {
               _handlePointerStart(appProvider, event);
             }
           }
@@ -111,7 +113,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
               shellProvider,
             );
           } else {
-            if (event.buttons == 1 && !appProvider.preferences.useApplePencil) {
+            if (event.buttons == 1 && !appPreferences.useApplePencil) {
               _handlePointerMove(appProvider, event);
             }
           }

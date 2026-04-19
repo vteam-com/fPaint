@@ -6,6 +6,7 @@ import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/floating_buttons.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
@@ -24,9 +25,10 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    final AppPreferences appPreferences = AppPreferences.of(context, listen: true);
     final AppProvider appProvider = AppProvider.of(context, listen: true);
 
-    if (appProvider.isPreferencesLoaded == false) {
+    if (appPreferences.isLoaded == false) {
       return const Scaffold(
         backgroundColor: Colors.grey,
         body: Center(
@@ -56,7 +58,7 @@ class MainScreen extends StatelessWidget {
         child: Scaffold(
           backgroundColor: Colors.grey,
           body: shellMode == ShellMode.hidden
-              ? _buildMainContent(context, shellProvider, appProvider)
+              ? _buildMainContent(context, shellProvider, appPreferences)
               : MultiSplitViewTheme(
                   data: MultiSplitViewThemeData(
                     dividerPainter: DividerPainters.grooved1(
@@ -69,7 +71,7 @@ class MainScreen extends StatelessWidget {
                       strokeCap: StrokeCap.round,
                     ),
                   ),
-                  child: _buildMainContent(context, shellProvider, appProvider),
+                  child: _buildMainContent(context, shellProvider, appPreferences),
                 ),
           floatingActionButton: shellMode == ShellMode.hidden
               ? myFloatButton(
@@ -94,16 +96,16 @@ class MainScreen extends StatelessWidget {
   Widget _buildMainContent(
     final BuildContext context,
     final ShellProvider shellProvider,
-    final AppProvider appProvider,
+    final AppPreferences appPreferences,
   ) {
     if (shellProvider.shellMode == ShellMode.hidden) {
       return const MainView();
     }
 
     if (shellProvider.deviceSizeSmall) {
-      return _buildMobilePhoneLayout(context, shellProvider, appProvider);
+      return _buildMobilePhoneLayout(context, shellProvider, appPreferences);
     }
-    return _buildMidToLargeDevices(shellProvider, appProvider);
+    return _buildMidToLargeDevices(shellProvider, appPreferences);
   }
 
   /// Builds the layout for mid-to-large devices.
@@ -111,7 +113,7 @@ class MainScreen extends StatelessWidget {
   /// A multi-split view is returned, which contains the side panel and main view.
   Widget _buildMidToLargeDevices(
     final ShellProvider shellProvider,
-    final AppProvider appProvider,
+    final AppPreferences appPreferences,
   ) {
     return MultiSplitView(
       key: Key('key_side_panel_size_${shellProvider.isSidePanelExpanded}'),
@@ -126,7 +128,7 @@ class MainScreen extends StatelessWidget {
           max: shellProvider.isSidePanelExpanded ? AppLayout.sidePanelExpandedMax : minSidePanelSize,
           builder: (final BuildContext _, final Area _) => SidePanel(
             minimal: !shellProvider.isSidePanelExpanded,
-            preferences: appProvider.preferences,
+            preferences: appPreferences,
           ),
         ),
         Area(
@@ -143,7 +145,7 @@ class MainScreen extends StatelessWidget {
   Widget _buildMobilePhoneLayout(
     final BuildContext context,
     final ShellProvider shellProvider,
-    final AppProvider appProvider,
+    final AppPreferences appPreferences,
   ) {
     return Stack(
       children: <Widget>[
@@ -163,7 +165,7 @@ class MainScreen extends StatelessWidget {
                     width: MediaQuery.of(context).size.width * AppLayout.mobileMenuWidthFactor,
                     child: SidePanel(
                       minimal: false, // Always show full panel on mobile
-                      preferences: appProvider.preferences,
+                      preferences: appPreferences,
                     ),
                   ),
                 ),
