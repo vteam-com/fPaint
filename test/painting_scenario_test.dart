@@ -625,8 +625,6 @@ void main() {
         reason: 'Should have background + sky + sun + land + house + fence + birds + signature',
       );
 
-      await videoRecorder.stop();
-
       // Capture final exports through the real main-menu export UI.
       await saveUnitTestArtworkViaExportUi(
         tester,
@@ -658,6 +656,8 @@ void main() {
         filename: _finalWebpFilename,
       );
       await dismissOpenUnitTestExportSheet(tester);
+
+      await videoRecorder.stop();
 
       // Drain any pending debounce timers to avoid a "Pending timers" warning.
       await tester.pump(AppDefaults.debounceDuration);

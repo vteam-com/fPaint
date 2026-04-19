@@ -13150,389 +13150,389 @@ File: lib/models/visible_model.dart</title>
 </g>
 </g>
 <g>
-  <rect x="2739.979701808563" y="1163.543562066307" width="250.79790374520792" height="376.037646158573" fill="#1f6f8b" fill-opacity="0.70"/>
-  <rect x="2739.979701808563" y="1163.543562066307" width="250.79790374520792" height="376.037646158573" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2739.979701808563" y="1163.543562066307" width="250.79790374520792" height="376.037646158573" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2739.979701808563" y="1163.543562066307" width="250.79790374520792" height="376.037646158573" fill="transparent" pointer-events="all">
-    <title>268 LOC File: lib/main.dart</title>
+  <rect x="2739.979701808563" y="1163.543562066307" width="251.9642099997387" height="378.5138752818824" fill="#1f6f8b" fill-opacity="0.70"/>
+  <rect x="2739.979701808563" y="1163.543562066307" width="251.9642099997387" height="378.5138752818824" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2739.979701808563" y="1163.543562066307" width="251.9642099997387" height="378.5138752818824" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2739.979701808563" y="1163.543562066307" width="251.9642099997387" height="378.5138752818824" fill="transparent" pointer-events="all">
+    <title>271 LOC File: lib/main.dart</title>
   </rect>
   <text x="2747.979701808563" y="1178.543562066307" text-anchor="start" font-size="9.00" fill="#000" font-weight="700">main.dart</text>
-  <text x="2982.7776055537706" y="1178.543562066307" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">268 LOC</text>
+  <text x="2983.9439118083014" y="1178.543562066307" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">271 LOC</text>
 <g>
-  <rect x="2747.979701808563" y="1187.543562066307" width="234.79790374520792" height="197.69327428515015" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.45"/>
-  <rect x="2747.979701808563" y="1187.543562066307" width="234.79790374520792" height="197.69327428515015" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2747.979701808563" y="1187.543562066307" width="234.79790374520792" height="197.69327428515015" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="6,4"/>
-  <rect x="2747.979701808563" y="1187.543562066307" width="234.79790374520792" height="197.69327428515015" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+  <rect x="2747.979701808563" y="1187.543562066307" width="235.9642099997387" height="196.91194388712137" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.45"/>
+  <rect x="2747.979701808563" y="1187.543562066307" width="235.9642099997387" height="196.91194388712137" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2747.979701808563" y="1187.543562066307" width="235.9642099997387" height="196.91194388712137" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8" stroke-dasharray="6,4"/>
+  <rect x="2747.979701808563" y="1187.543562066307" width="235.9642099997387" height="196.91194388712137" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
     <title>154 LOC in Class: &lt;...&gt;
 
 File: lib/main.dart</title>
   </rect>
   <text x="2755.979701808563" y="1202.543562066307" text-anchor="start" font-size="9.00" fill="#000" font-weight="700">&lt;...&gt;</text>
-  <text x="2974.7776055537706" y="1202.543562066307" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">154 LOC</text>
+  <text x="2975.9439118083014" y="1202.543562066307" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">154 LOC</text>
 <g>
-  <rect x="2755.979701808563" y="1296.4613651374464" width="113.6612486988093" height="80.77547121401071" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2755.979701808563" y="1296.4613651374464" width="113.6612486988093" height="80.77547121401071" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2755.979701808563" y="1296.4613651374464" width="113.6612486988093" height="80.77547121401071" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2755.979701808563" y="1296.4613651374464" width="113.6612486988093" height="80.77547121401071" fill="transparent" pointer-events="all">
+  <rect x="2755.979701808563" y="1296.0609333084567" width="114.26712207778633" height="80.39457264497167" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2755.979701808563" y="1296.0609333084567" width="114.26712207778633" height="80.39457264497167" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2755.979701808563" y="1296.0609333084567" width="114.26712207778633" height="80.39457264497167" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2755.979701808563" y="1296.0609333084567" width="114.26712207778633" height="80.39457264497167" fill="transparent" pointer-events="all">
     <title>39 LOC in Function: main()
 
 File: lib/main.dart</title>
   </rect>
-  <text x="2812.8103261579677" y="1336.8491007444518" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2812.8103261579677" dy="-6.0" font-size="14.00">main</tspan>
-    <tspan x="2812.8103261579677" dy="14.0" font-size="14.00">39</tspan>
+  <text x="2813.113262847456" y="1336.2582196309424" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2813.113262847456" dy="-6.0" font-size="14.00">main</tspan>
+    <tspan x="2813.113262847456" dy="14.0" font-size="14.00">39</tspan>
   </text>
 </g>
 <g>
-  <rect x="2947.6455655417967" y="1307.824789015786" width="27.132040011973842" height="69.41204733567102" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2947.6455655417967" y="1307.824789015786" width="27.132040011973842" height="69.41204733567102" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2947.6455655417967" y="1307.824789015786" width="27.132040011973842" height="69.41204733567102" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2947.6455655417967" y="1307.824789015786" width="27.132040011973842" height="69.41204733567102" fill="transparent" pointer-events="all">
+  <rect x="2948.6672439574754" y="1307.370772703418" width="27.276667850826414" height="69.08473325001032" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2948.6672439574754" y="1307.370772703418" width="27.276667850826414" height="69.08473325001032" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2948.6672439574754" y="1307.370772703418" width="27.276667850826414" height="69.08473325001032" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2948.6672439574754" y="1307.370772703418" width="27.276667850826414" height="69.08473325001032" fill="transparent" pointer-events="all">
     <title>8 LOC in Function: _queueOrHandlePlatformFile()
 
 File: lib/main.dart</title>
   </rect>
-  <text x="2961.2115855477837" y="1342.5308126836217" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2961.2115855477837" dy="-6.0" font-size="3.00">_queueOrHandlePlatformFile</tspan>
-    <tspan x="2961.2115855477837" dy="14.0" font-size="3.00">8</tspan>
+  <text x="2962.3055778828884" y="1341.913139328423" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2962.3055778828884" dy="-6.0" font-size="3.00">_queueOrHandlePlatformFile</tspan>
+    <tspan x="2962.3055778828884" dy="14.0" font-size="3.00">8</tspan>
   </text>
 </g>
 <g>
-  <rect x="2869.640950507372" y="1211.543562066307" width="70.90611619408278" height="96.28122694947913" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2869.640950507372" y="1211.543562066307" width="70.90611619408278" height="96.28122694947913" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2869.640950507372" y="1211.543562066307" width="70.90611619408278" height="96.28122694947913" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2869.640950507372" y="1211.543562066307" width="70.90611619408278" height="96.28122694947913" fill="transparent" pointer-events="all">
+  <rect x="2870.2468238863494" y="1211.543562066307" width="71.28408255201438" height="95.82721063711105" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2870.2468238863494" y="1211.543562066307" width="71.28408255201438" height="95.82721063711105" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2870.2468238863494" y="1211.543562066307" width="71.28408255201438" height="95.82721063711105" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2870.2468238863494" y="1211.543562066307" width="71.28408255201438" height="95.82721063711105" fill="transparent" pointer-events="all">
     <title>29 LOC in Function: _scheduleQueuedPlatformFileHandling()
 
 File: lib/main.dart</title>
   </rect>
-  <text x="2905.0940086044134" y="1259.6841755410467" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2905.0940086044134" dy="-6.0" font-size="3.22">_scheduleQueuedPlatformFileHandling</tspan>
-    <tspan x="2905.0940086044134" dy="14.0" font-size="3.22">29</tspan>
+  <text x="2905.8888651623565" y="1259.4571673848625" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2905.8888651623565" dy="-6.0" font-size="3.24">_scheduleQueuedPlatformFileHandling</tspan>
+    <tspan x="2905.8888651623565" dy="14.0" font-size="3.24">29</tspan>
   </text>
 </g>
 <g>
-  <rect x="2940.5470667014547" y="1211.543562066307" width="34.23053885231583" height="96.28122694947913" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2940.5470667014547" y="1211.543562066307" width="34.23053885231583" height="96.28122694947913" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2940.5470667014547" y="1211.543562066307" width="34.23053885231583" height="96.28122694947913" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2940.5470667014547" y="1211.543562066307" width="34.23053885231583" height="96.28122694947913" fill="transparent" pointer-events="all">
+  <rect x="2941.5309064383637" y="1211.543562066307" width="34.41300536993799" height="95.82721063711105" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2941.5309064383637" y="1211.543562066307" width="34.41300536993799" height="95.82721063711105" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2941.5309064383637" y="1211.543562066307" width="34.41300536993799" height="95.82721063711105" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2941.5309064383637" y="1211.543562066307" width="34.41300536993799" height="95.82721063711105" fill="transparent" pointer-events="all">
     <title>14 LOC in Function: _consumePlatformFile()
 
 File: lib/main.dart</title>
   </rect>
-  <text x="2957.6623361276124" y="1259.6841755410467" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2957.6623361276124" dy="-6.0" font-size="3.00">_consumePlatformFile</tspan>
-    <tspan x="2957.6623361276124" dy="14.0" font-size="3.00">14</tspan>
+  <text x="2958.737409123333" y="1259.4571673848625" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2958.737409123333" dy="-6.0" font-size="3.00">_consumePlatformFile</tspan>
+    <tspan x="2958.737409123333" dy="14.0" font-size="3.00">14</tspan>
   </text>
 </g>
 <g>
-  <rect x="2917.122020528326" y="1307.824789015786" width="30.52354501347056" height="69.41204733567102" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2917.122020528326" y="1307.824789015786" width="30.52354501347056" height="69.41204733567102" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2917.122020528326" y="1307.824789015786" width="30.52354501347056" height="69.41204733567102" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2917.122020528326" y="1307.824789015786" width="30.52354501347056" height="69.41204733567102" fill="transparent" pointer-events="all">
+  <rect x="2917.9809926252956" y="1307.370772703418" width="30.686251332179722" height="69.08473325001032" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2917.9809926252956" y="1307.370772703418" width="30.686251332179722" height="69.08473325001032" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2917.9809926252956" y="1307.370772703418" width="30.686251332179722" height="69.08473325001032" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2917.9809926252956" y="1307.370772703418" width="30.686251332179722" height="69.08473325001032" fill="transparent" pointer-events="all">
     <title>9 LOC in Function: _clearPendingPlatformFile()
 
 File: lib/main.dart</title>
   </rect>
-  <text x="2932.3837930350614" y="1342.5308126836217" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2932.3837930350614" dy="-6.0" font-size="3.00">_clearPendingPlatformFile</tspan>
-    <tspan x="2932.3837930350614" dy="14.0" font-size="3.00">9</tspan>
+  <text x="2933.3241182913853" y="1341.913139328423" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2933.3241182913853" dy="-6.0" font-size="3.00">_clearPendingPlatformFile</tspan>
+    <tspan x="2933.3241182913853" dy="14.0" font-size="3.00">9</tspan>
   </text>
 </g>
 <g>
-  <rect x="2869.640950507372" y="1307.824789015786" width="47.48107002095421" height="69.41204733567102" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2869.640950507372" y="1307.824789015786" width="47.48107002095421" height="69.41204733567102" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2869.640950507372" y="1307.824789015786" width="47.48107002095421" height="69.41204733567102" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2869.640950507372" y="1307.824789015786" width="47.48107002095421" height="69.41204733567102" fill="transparent" pointer-events="all">
+  <rect x="2870.2468238863494" y="1307.370772703418" width="47.73416873894624" height="69.08473325001032" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2870.2468238863494" y="1307.370772703418" width="47.73416873894624" height="69.08473325001032" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2870.2468238863494" y="1307.370772703418" width="47.73416873894624" height="69.08473325001032" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2870.2468238863494" y="1307.370772703418" width="47.73416873894624" height="69.08473325001032" fill="transparent" pointer-events="all">
     <title>14 LOC in Function: _normalizePlatformFilePath()
 
 File: lib/main.dart</title>
   </rect>
-  <text x="2893.3814855178493" y="1342.5308126836217" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2893.3814855178493" dy="-6.0" font-size="3.00">_normalizePlatformFilePath</tspan>
-    <tspan x="2893.3814855178493" dy="14.0" font-size="3.00">14</tspan>
+  <text x="2894.1139082558225" y="1341.913139328423" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2894.1139082558225" dy="-6.0" font-size="3.00">_normalizePlatformFilePath</tspan>
+    <tspan x="2894.1139082558225" dy="14.0" font-size="3.00">14</tspan>
   </text>
 </g>
 <g>
-  <rect x="2755.979701808563" y="1211.543562066307" width="113.6612486988093" height="84.91780307113945" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2755.979701808563" y="1211.543562066307" width="113.6612486988093" height="84.91780307113945" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2755.979701808563" y="1211.543562066307" width="113.6612486988093" height="84.91780307113945" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2755.979701808563" y="1211.543562066307" width="113.6612486988093" height="84.91780307113945" fill="transparent" pointer-events="all">
+  <rect x="2755.979701808563" y="1211.543562066307" width="114.26712207778633" height="84.5173712421497" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2755.979701808563" y="1211.543562066307" width="114.26712207778633" height="84.5173712421497" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2755.979701808563" y="1211.543562066307" width="114.26712207778633" height="84.5173712421497" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2755.979701808563" y="1211.543562066307" width="114.26712207778633" height="84.5173712421497" fill="transparent" pointer-events="all">
     <title>41 LOC in Function: _handleFileOpened()
 
 File: lib/main.dart</title>
   </rect>
-  <text x="2812.8103261579677" y="1254.0024636018768" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2812.8103261579677" dy="-6.0" font-size="11.21">_handleFileOpened</tspan>
-    <tspan x="2812.8103261579677" dy="14.0" font-size="11.21">41</tspan>
+  <text x="2813.113262847456" y="1253.8022476873819" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2813.113262847456" dy="-6.0" font-size="11.27">_handleFileOpened</tspan>
+    <tspan x="2813.113262847456" dy="14.0" font-size="11.27">41</tspan>
   </text>
 </g>
 </g>
 <g>
-  <rect x="2747.979701808563" y="1385.2368363514572" width="234.79790374520792" height="146.34437187342286" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="2747.979701808563" y="1385.2368363514572" width="234.79790374520792" height="146.34437187342286" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2747.979701808563" y="1385.2368363514572" width="234.79790374520792" height="146.34437187342286" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2747.979701808563" y="1385.2368363514572" width="234.79790374520792" height="146.34437187342286" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>114 LOC in Class: MyApp
+  <rect x="2747.979701808563" y="1384.4555059534284" width="235.9642099997387" height="149.60193139476104" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="2747.979701808563" y="1384.4555059534284" width="235.9642099997387" height="149.60193139476104" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2747.979701808563" y="1384.4555059534284" width="235.9642099997387" height="149.60193139476104" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2747.979701808563" y="1384.4555059534284" width="235.9642099997387" height="149.60193139476104" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>117 LOC in Class: MyApp
 
 File: lib/main.dart</title>
   </rect>
-  <text x="2755.979701808563" y="1400.2368363514572" text-anchor="start" font-size="9.00" fill="#000" font-weight="700">MyApp</text>
-  <text x="2974.7776055537706" y="1400.2368363514572" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">114 LOC</text>
+  <text x="2755.979701808563" y="1399.4555059534284" text-anchor="start" font-size="9.00" fill="#000" font-weight="700">MyApp</text>
+  <text x="2975.9439118083014" y="1399.4555059534284" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">117 LOC</text>
 <g>
-  <rect x="2970.2193158924124" y="1409.2368363514572" width="4.558289661358515" height="114.34437187342286" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2970.2193158924124" y="1409.2368363514572" width="4.558289661358515" height="114.34437187342286" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2970.2193158924124" y="1409.2368363514572" width="4.558289661358515" height="114.34437187342286" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2970.2193158924124" y="1409.2368363514572" width="4.558289661358515" height="114.34437187342286" fill="transparent" pointer-events="all">
+  <rect x="2971.500190394165" y="1408.4555059534284" width="4.443721414136149" height="117.60193139476104" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2971.500190394165" y="1408.4555059534284" width="4.443721414136149" height="117.60193139476104" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2971.500190394165" y="1408.4555059534284" width="4.443721414136149" height="117.60193139476104" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2971.500190394165" y="1408.4555059534284" width="4.443721414136149" height="117.60193139476104" fill="transparent" pointer-events="all">
     <title>2 LOC in Method: MyApp.MyApp()
 
 File: lib/main.dart</title>
   </rect>
-  <text x="2972.4984607230917" y="1466.4090222881687" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2972.4984607230917" dy="-6.0" font-size="3.00">MyApp</tspan>
-    <tspan x="2972.4984607230917" dy="14.0" font-size="3.00">2</tspan>
+  <text x="2973.7220511012333" y="1467.2564716508089" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2973.7220511012333" dy="-6.0" font-size="3.00">MyApp</tspan>
+    <tspan x="2973.7220511012333" dy="14.0" font-size="3.00">2</tspan>
   </text>
 </g>
 <g>
-  <rect x="2755.979701808563" y="1409.2368363514572" width="214.2396140838494" height="114.34437187342286" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2755.979701808563" y="1409.2368363514572" width="214.2396140838494" height="114.34437187342286" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2755.979701808563" y="1409.2368363514572" width="214.2396140838494" height="114.34437187342286" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2755.979701808563" y="1409.2368363514572" width="214.2396140838494" height="114.34437187342286" fill="transparent" pointer-events="all">
-    <title>94 LOC in Method: MyApp.build()
+  <rect x="2755.979701808563" y="1408.4555059534284" width="215.52048858560255" height="117.60193139476104" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2755.979701808563" y="1408.4555059534284" width="215.52048858560255" height="117.60193139476104" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2755.979701808563" y="1408.4555059534284" width="215.52048858560255" height="117.60193139476104" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2755.979701808563" y="1408.4555059534284" width="215.52048858560255" height="117.60193139476104" fill="transparent" pointer-events="all">
+    <title>97 LOC in Method: MyApp.build()
 
 File: lib/main.dart</title>
   </rect>
-  <text x="2863.0995088504874" y="1466.4090222881687" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2863.0995088504874" dy="-6.0" font-size="14.00">build</tspan>
-    <tspan x="2863.0995088504874" dy="14.0" font-size="14.00">94</tspan>
+  <text x="2863.7399461013642" y="1467.2564716508089" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2863.7399461013642" dy="-6.0" font-size="14.00">build</tspan>
+    <tspan x="2863.7399461013642" dy="14.0" font-size="14.00">97</tspan>
   </text>
 </g>
 </g>
 </g>
 <g>
-  <rect x="2994.7776055537706" y="1165.543562066307" width="173.2223944462295" height="372.037646158573" rx="5.00" ry="5.00" fill="#8fa4ba" fill-opacity="0.70"/>
-  <rect x="2994.7776055537706" y="1165.543562066307" width="173.2223944462295" height="372.037646158573" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2994.7776055537706" y="1165.543562066307" width="173.2223944462295" height="372.037646158573" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2994.7776055537706" y="1165.543562066307" width="173.2223944462295" height="372.037646158573" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+  <rect x="2995.9439118083014" y="1165.543562066307" width="172.0560881916987" height="374.5138752818824" rx="5.00" ry="5.00" fill="#8fa4ba" fill-opacity="0.70"/>
+  <rect x="2995.9439118083014" y="1165.543562066307" width="172.0560881916987" height="374.5138752818824" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2995.9439118083014" y="1165.543562066307" width="172.0560881916987" height="374.5138752818824" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2995.9439118083014" y="1165.543562066307" width="172.0560881916987" height="374.5138752818824" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
     <title>190 LOC Folder: lib/pages</title>
   </rect>
-  <text x="3002.7776055537706" y="1180.543562066307" text-anchor="start" font-size="9.00" fill="#000" font-weight="700">pages</text>
+  <text x="3003.9439118083014" y="1180.543562066307" text-anchor="start" font-size="9.00" fill="#000" font-weight="700">pages</text>
   <text x="3160.0" y="1180.543562066307" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">190 LOC</text>
 <g>
-  <rect x="3005.7776055537706" y="1190.543562066307" width="151.2223944462295" height="186.58942364636178" fill="#1f6f8b" fill-opacity="0.62"/>
-  <rect x="3005.7776055537706" y="1190.543562066307" width="151.2223944462295" height="186.58942364636178" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3005.7776055537706" y="1190.543562066307" width="151.2223944462295" height="186.58942364636178" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3005.7776055537706" y="1190.543562066307" width="151.2223944462295" height="186.58942364636178" fill="transparent" pointer-events="all">
+  <rect x="3006.9439118083014" y="1190.543562066307" width="150.0560881916987" height="187.9708988414712" fill="#1f6f8b" fill-opacity="0.62"/>
+  <rect x="3006.9439118083014" y="1190.543562066307" width="150.0560881916987" height="187.9708988414712" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3006.9439118083014" y="1190.543562066307" width="150.0560881916987" height="187.9708988414712" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3006.9439118083014" y="1190.543562066307" width="150.0560881916987" height="187.9708988414712" fill="transparent" pointer-events="all">
     <title>106 LOC File: lib/pages/platforms_page.dart</title>
   </rect>
-  <text x="3013.7776055537706" y="1205.543562066307" text-anchor="start" font-size="6.41" fill="#000" font-weight="700">platforms_page.dart</text>
-  <text x="3149.0" y="1205.543562066307" text-anchor="end" font-size="6.41" fill="#000" font-weight="700">106 LOC</text>
+  <text x="3014.9439118083014" y="1205.543562066307" text-anchor="start" font-size="6.34" fill="#000" font-weight="700">platforms_page.dart</text>
+  <text x="3149.0" y="1205.543562066307" text-anchor="end" font-size="6.34" fill="#000" font-weight="700">106 LOC</text>
 <g>
-  <rect x="3013.7776055537706" y="1214.543562066307" width="135.2223944462295" height="154.58942364636178" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="3013.7776055537706" y="1214.543562066307" width="135.2223944462295" height="154.58942364636178" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3013.7776055537706" y="1214.543562066307" width="135.2223944462295" height="154.58942364636178" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3013.7776055537706" y="1214.543562066307" width="135.2223944462295" height="154.58942364636178" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+  <rect x="3014.9439118083014" y="1214.543562066307" width="134.0560881916987" height="155.9708988414712" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="3014.9439118083014" y="1214.543562066307" width="134.0560881916987" height="155.9708988414712" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3014.9439118083014" y="1214.543562066307" width="134.0560881916987" height="155.9708988414712" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3014.9439118083014" y="1214.543562066307" width="134.0560881916987" height="155.9708988414712" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
     <title>106 LOC in Class: PlatformsPage
 
 File: lib/pages/platforms_page.dart</title>
   </rect>
-  <text x="3021.7776055537706" y="1229.543562066307" text-anchor="start" font-size="7.90" fill="#000" font-weight="700">PlatformsPage</text>
-  <text x="3141.0" y="1229.543562066307" text-anchor="end" font-size="7.90" fill="#000" font-weight="700">106 LOC</text>
+  <text x="3022.9439118083014" y="1229.543562066307" text-anchor="start" font-size="7.81" fill="#000" font-weight="700">PlatformsPage</text>
+  <text x="3141.0" y="1229.543562066307" text-anchor="end" font-size="7.81" fill="#000" font-weight="700">106 LOC</text>
 <g>
-  <rect x="3138.2273861756694" y="1309.9548768117604" width="2.772613824330918" height="51.17810890090833" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="3138.2273861756694" y="1309.9548768117604" width="2.772613824330918" height="51.17810890090833" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3138.2273861756694" y="1309.9548768117604" width="2.772613824330918" height="51.17810890090833" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3138.2273861756694" y="1309.9548768117604" width="2.772613824330918" height="51.17810890090833" fill="transparent" pointer-events="all">
+  <rect x="3138.2545095769374" y="1310.759619643863" width="2.745490423062762" height="51.75484126391517" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="3138.2545095769374" y="1310.759619643863" width="2.745490423062762" height="51.75484126391517" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3138.2545095769374" y="1310.759619643863" width="2.745490423062762" height="51.75484126391517" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3138.2545095769374" y="1310.759619643863" width="2.745490423062762" height="51.75484126391517" fill="transparent" pointer-events="all">
     <title>1 LOC in Method: PlatformsPage.PlatformsPage()
 
 File: lib/pages/platforms_page.dart</title>
   </rect>
-  <text x="3139.6136930878347" y="1335.5439312622145" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="3139.6136930878347" dy="-6.0" font-size="3.00">PlatformsPage</tspan>
-    <tspan x="3139.6136930878347" dy="14.0" font-size="3.00">1</tspan>
+  <text x="3139.6272547884687" y="1336.6370402758207" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="3139.6272547884687" dy="-6.0" font-size="3.00">PlatformsPage</tspan>
+    <tspan x="3139.6272547884687" dy="14.0" font-size="3.00">1</tspan>
   </text>
 </g>
 <g>
-  <rect x="3021.7776055537706" y="1238.543562066307" width="119.22239444622949" height="71.41131474545345" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="3021.7776055537706" y="1238.543562066307" width="119.22239444622949" height="71.41131474545345" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3021.7776055537706" y="1238.543562066307" width="119.22239444622949" height="71.41131474545345" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3021.7776055537706" y="1238.543562066307" width="119.22239444622949" height="71.41131474545345" fill="transparent" pointer-events="all">
+  <rect x="3022.9439118083014" y="1238.543562066307" width="118.0560881916987" height="72.21605757755604" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="3022.9439118083014" y="1238.543562066307" width="118.0560881916987" height="72.21605757755604" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3022.9439118083014" y="1238.543562066307" width="118.0560881916987" height="72.21605757755604" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3022.9439118083014" y="1238.543562066307" width="118.0560881916987" height="72.21605757755604" fill="transparent" pointer-events="all">
     <title>60 LOC in Method: PlatformsPage.build()
 
 File: lib/pages/platforms_page.dart</title>
   </rect>
-  <text x="3081.3888027768853" y="1274.2492194390338" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="3081.3888027768853" dy="-6.0" font-size="14.00">build</tspan>
-    <tspan x="3081.3888027768853" dy="14.0" font-size="14.00">60</tspan>
+  <text x="3081.971955904151" y="1274.651590855085" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="3081.971955904151" dy="-6.0" font-size="14.00">build</tspan>
+    <tspan x="3081.971955904151" dy="14.0" font-size="14.00">60</tspan>
   </text>
 </g>
 <g>
-  <rect x="3021.7776055537706" y="1309.9548768117604" width="116.44978062189857" height="51.17810890090833" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="3021.7776055537706" y="1309.9548768117604" width="116.44978062189857" height="51.17810890090833" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3021.7776055537706" y="1309.9548768117604" width="116.44978062189857" height="51.17810890090833" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3021.7776055537706" y="1309.9548768117604" width="116.44978062189857" height="51.17810890090833" fill="transparent" pointer-events="all">
+  <rect x="3022.9439118083014" y="1310.759619643863" width="115.31059776863594" height="51.75484126391517" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="3022.9439118083014" y="1310.759619643863" width="115.31059776863594" height="51.75484126391517" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3022.9439118083014" y="1310.759619643863" width="115.31059776863594" height="51.75484126391517" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3022.9439118083014" y="1310.759619643863" width="115.31059776863594" height="51.75484126391517" fill="transparent" pointer-events="all">
     <title>42 LOC in Method: PlatformsPage.platformItem()
 
 File: lib/pages/platforms_page.dart</title>
   </rect>
-  <text x="3080.00249586472" y="1335.5439312622145" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="3080.00249586472" dy="-6.0" font-size="14.00">platformItem</tspan>
-    <tspan x="3080.00249586472" dy="14.0" font-size="14.00">42</tspan>
+  <text x="3080.5992106926196" y="1336.6370402758207" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="3080.5992106926196" dy="-6.0" font-size="14.00">platformItem</tspan>
+    <tspan x="3080.5992106926196" dy="14.0" font-size="14.00">42</tspan>
   </text>
 </g>
 </g>
 </g>
 <g>
-  <rect x="3005.7776055537706" y="1379.1329857126689" width="151.2223944462295" height="147.44822251221123" fill="#1f6f8b" fill-opacity="0.62"/>
-  <rect x="3005.7776055537706" y="1379.1329857126689" width="151.2223944462295" height="147.44822251221123" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3005.7776055537706" y="1379.1329857126689" width="151.2223944462295" height="147.44822251221123" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3005.7776055537706" y="1379.1329857126689" width="151.2223944462295" height="147.44822251221123" fill="transparent" pointer-events="all">
+  <rect x="3006.9439118083014" y="1380.5144609077781" width="150.0560881916987" height="148.5429764404112" fill="#1f6f8b" fill-opacity="0.62"/>
+  <rect x="3006.9439118083014" y="1380.5144609077781" width="150.0560881916987" height="148.5429764404112" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3006.9439118083014" y="1380.5144609077781" width="150.0560881916987" height="148.5429764404112" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3006.9439118083014" y="1380.5144609077781" width="150.0560881916987" height="148.5429764404112" fill="transparent" pointer-events="all">
     <title>84 LOC File: lib/pages/settings_page.dart</title>
   </rect>
-  <text x="3013.7776055537706" y="1394.1329857126689" text-anchor="start" font-size="6.77" fill="#000" font-weight="700">settings_page.dart</text>
-  <text x="3149.0" y="1394.1329857126689" text-anchor="end" font-size="6.77" fill="#000" font-weight="700">84 LOC</text>
+  <text x="3014.9439118083014" y="1395.5144609077781" text-anchor="start" font-size="6.71" fill="#000" font-weight="700">settings_page.dart</text>
+  <text x="3149.0" y="1395.5144609077781" text-anchor="end" font-size="6.71" fill="#000" font-weight="700">84 LOC</text>
 <g>
-  <rect x="3013.7776055537706" y="1403.1329857126689" width="125.56365198578453" height="115.44822251221123" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="3013.7776055537706" y="1403.1329857126689" width="125.56365198578453" height="115.44822251221123" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3013.7776055537706" y="1403.1329857126689" width="125.56365198578453" height="115.44822251221123" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3013.7776055537706" y="1403.1329857126689" width="125.56365198578453" height="115.44822251221123" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+  <rect x="3014.9439118083014" y="1404.5144609077781" width="124.48065332086308" height="116.5429764404112" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="3014.9439118083014" y="1404.5144609077781" width="124.48065332086308" height="116.5429764404112" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3014.9439118083014" y="1404.5144609077781" width="124.48065332086308" height="116.5429764404112" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3014.9439118083014" y="1404.5144609077781" width="124.48065332086308" height="116.5429764404112" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
     <title>78 LOC in Class: _SettingsPageState
 
 File: lib/pages/settings_page.dart</title>
   </rect>
-  <text x="3021.7776055537706" y="1418.1329857126689" text-anchor="start" font-size="5.05" fill="#000" font-weight="700">_SettingsPageState</text>
-  <text x="3131.341257539555" y="1418.1329857126689" text-anchor="end" font-size="5.05" fill="#000" font-weight="700">78 LOC</text>
+  <text x="3022.9439118083014" y="1419.5144609077781" text-anchor="start" font-size="5.00" fill="#000" font-weight="700">_SettingsPageState</text>
+  <text x="3131.4245651291644" y="1419.5144609077781" text-anchor="end" font-size="5.00" fill="#000" font-weight="700">78 LOC</text>
 <g>
-  <rect x="3021.7776055537706" y="1427.1329857126689" width="109.56365198578453" height="83.44822251221123" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="3021.7776055537706" y="1427.1329857126689" width="109.56365198578453" height="83.44822251221123" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3021.7776055537706" y="1427.1329857126689" width="109.56365198578453" height="83.44822251221123" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3021.7776055537706" y="1427.1329857126689" width="109.56365198578453" height="83.44822251221123" fill="transparent" pointer-events="all">
+  <rect x="3022.9439118083014" y="1428.5144609077781" width="108.48065332086308" height="84.5429764404112" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="3022.9439118083014" y="1428.5144609077781" width="108.48065332086308" height="84.5429764404112" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3022.9439118083014" y="1428.5144609077781" width="108.48065332086308" height="84.5429764404112" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3022.9439118083014" y="1428.5144609077781" width="108.48065332086308" height="84.5429764404112" fill="transparent" pointer-events="all">
     <title>72 LOC in Method: _SettingsPageState.build()
 
 File: lib/pages/settings_page.dart</title>
   </rect>
-  <text x="3076.559431546663" y="1468.8570969687744" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="3076.559431546663" dy="-6.0" font-size="14.00">build</tspan>
-    <tspan x="3076.559431546663" dy="14.0" font-size="14.00">72</tspan>
+  <text x="3077.184238468733" y="1470.7859491279837" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="3077.184238468733" dy="-6.0" font-size="14.00">build</tspan>
+    <tspan x="3077.184238468733" dy="14.0" font-size="14.00">72</tspan>
   </text>
 </g>
 </g>
 <g>
-  <rect x="3139.341257539555" y="1403.1329857126689" width="9.658742460444955" height="115.44822251221123" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="3139.341257539555" y="1403.1329857126689" width="9.658742460444955" height="115.44822251221123" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3139.341257539555" y="1403.1329857126689" width="9.658742460444955" height="115.44822251221123" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3139.341257539555" y="1403.1329857126689" width="9.658742460444955" height="115.44822251221123" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+  <rect x="3139.4245651291644" y="1404.5144609077781" width="9.575434870835622" height="116.5429764404112" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="3139.4245651291644" y="1404.5144609077781" width="9.575434870835622" height="116.5429764404112" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3139.4245651291644" y="1404.5144609077781" width="9.575434870835622" height="116.5429764404112" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3139.4245651291644" y="1404.5144609077781" width="9.575434870835622" height="116.5429764404112" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
     <title>6 LOC in Class: SettingsPage
 
 File: lib/pages/settings_page.dart</title>
   </rect>
-  <text x="3147.341257539555" y="1418.1329857126689" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">SettingsPage</text>
-  <text x="3141.0" y="1418.1329857126689" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">6 LOC</text>
+  <text x="3147.4245651291644" y="1419.5144609077781" text-anchor="start" font-size="3.00" fill="#000" font-weight="700">SettingsPage</text>
+  <text x="3141.0" y="1419.5144609077781" text-anchor="end" font-size="3.00" fill="#000" font-weight="700">6 LOC</text>
 </g>
 </g>
 </g>
 <g>
-  <rect x="2739.979701808563" y="1541.58120822488" width="430.0202981914374" height="140.7958794441771" fill="#1f6f8b" fill-opacity="0.70"/>
-  <rect x="2739.979701808563" y="1541.58120822488" width="430.0202981914374" height="140.7958794441771" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2739.979701808563" y="1541.58120822488" width="430.0202981914374" height="140.7958794441771" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2739.979701808563" y="1541.58120822488" width="430.0202981914374" height="140.7958794441771" fill="transparent" pointer-events="all">
-    <title>173 LOC File: lib/main_screen.dart</title>
+  <rect x="2739.979701808563" y="1544.0574373481895" width="430.0202981914374" height="138.3196503208677" fill="#1f6f8b" fill-opacity="0.70"/>
+  <rect x="2739.979701808563" y="1544.0574373481895" width="430.0202981914374" height="138.3196503208677" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2739.979701808563" y="1544.0574373481895" width="430.0202981914374" height="138.3196503208677" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2739.979701808563" y="1544.0574373481895" width="430.0202981914374" height="138.3196503208677" fill="transparent" pointer-events="all">
+    <title>170 LOC File: lib/main_screen.dart</title>
   </rect>
-  <text x="2747.979701808563" y="1556.58120822488" text-anchor="start" font-size="9.00" fill="#000" font-weight="700">main_screen.dart</text>
-  <text x="3162.0" y="1556.58120822488" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">173 LOC</text>
+  <text x="2747.979701808563" y="1559.0574373481895" text-anchor="start" font-size="9.00" fill="#000" font-weight="700">main_screen.dart</text>
+  <text x="3162.0" y="1559.0574373481895" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">170 LOC</text>
 <g>
-  <rect x="2747.979701808563" y="1565.58120822488" width="414.0202981914374" height="108.7958794441771" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
-  <rect x="2747.979701808563" y="1565.58120822488" width="414.0202981914374" height="108.7958794441771" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2747.979701808563" y="1565.58120822488" width="414.0202981914374" height="108.7958794441771" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2747.979701808563" y="1565.58120822488" width="414.0202981914374" height="108.7958794441771" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
-    <title>173 LOC in Class: MainScreen
+  <rect x="2747.979701808563" y="1568.0574373481895" width="414.0202981914374" height="106.31965032086771" rx="5.00" ry="5.00" fill="#9eb89a" fill-opacity="0.78"/>
+  <rect x="2747.979701808563" y="1568.0574373481895" width="414.0202981914374" height="106.31965032086771" rx="5.00" ry="5.00" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2747.979701808563" y="1568.0574373481895" width="414.0202981914374" height="106.31965032086771" rx="5.00" ry="5.00" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2747.979701808563" y="1568.0574373481895" width="414.0202981914374" height="106.31965032086771" rx="5.00" ry="5.00" fill="transparent" pointer-events="all">
+    <title>170 LOC in Class: MainScreen
 
 File: lib/main_screen.dart</title>
   </rect>
-  <text x="2755.979701808563" y="1580.58120822488" text-anchor="start" font-size="9.00" fill="#000" font-weight="700">MainScreen</text>
-  <text x="3154.0" y="1580.58120822488" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">173 LOC</text>
+  <text x="2755.979701808563" y="1583.0574373481895" text-anchor="start" font-size="9.00" fill="#000" font-weight="700">MainScreen</text>
+  <text x="3154.0" y="1583.0574373481895" text-anchor="end" font-size="9.00" fill="#000" font-weight="700">170 LOC</text>
 <g>
-  <rect x="3108.4434598455587" y="1658.2933108854595" width="45.556540154441635" height="8.083776783597585" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="3108.4434598455587" y="1658.2933108854595" width="45.556540154441635" height="8.083776783597585" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3108.4434598455587" y="1658.2933108854595" width="45.556540154441635" height="8.083776783597585" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3108.4434598455587" y="1658.2933108854595" width="45.556540154441635" height="8.083776783597585" fill="transparent" pointer-events="all">
+  <rect x="3107.6049959163356" y="1658.55396658265" width="46.39500408366449" height="7.823121086407127" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="3107.6049959163356" y="1658.55396658265" width="46.39500408366449" height="7.823121086407127" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3107.6049959163356" y="1658.55396658265" width="46.39500408366449" height="7.823121086407127" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3107.6049959163356" y="1658.55396658265" width="46.39500408366449" height="7.823121086407127" fill="transparent" pointer-events="all">
     <title>2 LOC in Method: MainScreen.MainScreen()
 
 File: lib/main_screen.dart</title>
   </rect>
-  <text x="3131.2217299227796" y="1662.3351992772582" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="3131.2217299227796" dy="-6.0" font-size="6.04">MainScreen</tspan>
-    <tspan x="3131.2217299227796" dy="14.0" font-size="6.04">2</tspan>
+  <text x="3130.802497958168" y="1662.4655271258534" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="3130.802497958168" dy="-6.0" font-size="6.18">MainScreen</tspan>
+    <tspan x="3130.802497958168" dy="14.0" font-size="6.18">2</tspan>
   </text>
 </g>
 <g>
-  <rect x="2755.979701808563" y="1589.58120822488" width="148.65818366186215" height="76.7958794441771" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2755.979701808563" y="1589.58120822488" width="148.65818366186215" height="76.7958794441771" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2755.979701808563" y="1589.58120822488" width="148.65818366186215" height="76.7958794441771" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2755.979701808563" y="1589.58120822488" width="148.65818366186215" height="76.7958794441771" fill="transparent" pointer-events="all">
-    <title>62 LOC in Method: MainScreen.build()
+  <rect x="2755.979701808563" y="1592.0574373481895" width="144.0686968913792" height="74.31965032086771" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2755.979701808563" y="1592.0574373481895" width="144.0686968913792" height="74.31965032086771" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2755.979701808563" y="1592.0574373481895" width="144.0686968913792" height="74.31965032086771" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2755.979701808563" y="1592.0574373481895" width="144.0686968913792" height="74.31965032086771" fill="transparent" pointer-events="all">
+    <title>59 LOC in Method: MainScreen.build()
 
 File: lib/main_screen.dart</title>
   </rect>
-  <text x="2830.308793639494" y="1627.9791479469684" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2830.308793639494" dy="-6.0" font-size="14.00">build</tspan>
-    <tspan x="2830.308793639494" dy="14.0" font-size="14.00">62</tspan>
+  <text x="2828.0140502542527" y="1629.2172625086234" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2828.0140502542527" dy="-6.0" font-size="14.00">build</tspan>
+    <tspan x="2828.0140502542527" dy="14.0" font-size="14.00">59</tspan>
   </text>
 </g>
 <g>
-  <rect x="3108.4434598455587" y="1589.58120822488" width="45.556540154441635" height="68.71210266057952" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="3108.4434598455587" y="1589.58120822488" width="45.556540154441635" height="68.71210266057952" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3108.4434598455587" y="1589.58120822488" width="45.556540154441635" height="68.71210266057952" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3108.4434598455587" y="1589.58120822488" width="45.556540154441635" height="68.71210266057952" fill="transparent" pointer-events="all">
+  <rect x="3107.6049959163356" y="1592.0574373481895" width="46.39500408366449" height="66.49652923446058" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="3107.6049959163356" y="1592.0574373481895" width="46.39500408366449" height="66.49652923446058" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3107.6049959163356" y="1592.0574373481895" width="46.39500408366449" height="66.49652923446058" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3107.6049959163356" y="1592.0574373481895" width="46.39500408366449" height="66.49652923446058" fill="transparent" pointer-events="all">
     <title>17 LOC in Method: MainScreen._buildMainContent()
 
 File: lib/main_screen.dart</title>
   </rect>
-  <text x="3131.2217299227796" y="1623.9372595551697" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="3131.2217299227796" dy="-6.0" font-size="3.73">_buildMainContent</tspan>
-    <tspan x="3131.2217299227796" dy="14.0" font-size="3.73">17</tspan>
+  <text x="3130.802497958168" y="1625.3057019654198" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="3130.802497958168" dy="-6.0" font-size="3.82">_buildMainContent</tspan>
+    <tspan x="3130.802497958168" dy="14.0" font-size="3.82">17</tspan>
   </text>
 </g>
 <g>
-  <rect x="2993.353253139601" y="1589.58120822488" width="69.53366655151618" height="76.7958794441771" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2993.353253139601" y="1589.58120822488" width="69.53366655151618" height="76.7958794441771" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2993.353253139601" y="1589.58120822488" width="69.53366655151618" height="76.7958794441771" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2993.353253139601" y="1589.58120822488" width="69.53366655151618" height="76.7958794441771" fill="transparent" pointer-events="all">
+  <rect x="2990.396564547078" y="1592.0574373481895" width="70.81342728559314" height="74.31965032086771" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2990.396564547078" y="1592.0574373481895" width="70.81342728559314" height="74.31965032086771" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2990.396564547078" y="1592.0574373481895" width="70.81342728559314" height="74.31965032086771" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2990.396564547078" y="1592.0574373481895" width="70.81342728559314" height="74.31965032086771" fill="transparent" pointer-events="all">
     <title>29 LOC in Method: MainScreen._buildMidToLargeDevices()
 
 File: lib/main_screen.dart</title>
   </rect>
-  <text x="3028.120086415359" y="1627.9791479469684" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="3028.120086415359" dy="-6.0" font-size="4.62">_buildMidToLargeDevices</tspan>
-    <tspan x="3028.120086415359" dy="14.0" font-size="4.62">29</tspan>
+  <text x="3025.8032781898746" y="1629.2172625086234" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="3025.8032781898746" dy="-6.0" font-size="4.71">_buildMidToLargeDevices</tspan>
+    <tspan x="3025.8032781898746" dy="14.0" font-size="4.71">29</tspan>
   </text>
 </g>
 <g>
-  <rect x="2904.637885470425" y="1589.58120822488" width="88.7153676691758" height="76.7958794441771" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="2904.637885470425" y="1589.58120822488" width="88.7153676691758" height="76.7958794441771" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="2904.637885470425" y="1589.58120822488" width="88.7153676691758" height="76.7958794441771" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="2904.637885470425" y="1589.58120822488" width="88.7153676691758" height="76.7958794441771" fill="transparent" pointer-events="all">
+  <rect x="2900.048398699942" y="1592.0574373481895" width="90.3481658471361" height="74.31965032086771" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="2900.048398699942" y="1592.0574373481895" width="90.3481658471361" height="74.31965032086771" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="2900.048398699942" y="1592.0574373481895" width="90.3481658471361" height="74.31965032086771" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="2900.048398699942" y="1592.0574373481895" width="90.3481658471361" height="74.31965032086771" fill="transparent" pointer-events="all">
     <title>37 LOC in Method: MainScreen._buildMobilePhoneLayout()
 
 File: lib/main_screen.dart</title>
   </rect>
-  <text x="2948.995569305013" y="1627.9791479469684" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="2948.995569305013" dy="-6.0" font-size="6.15">_buildMobilePhoneLayout</tspan>
-    <tspan x="2948.995569305013" dy="14.0" font-size="6.15">37</tspan>
+  <text x="2945.2224816235102" y="1629.2172625086234" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="2945.2224816235102" dy="-6.0" font-size="6.28">_buildMobilePhoneLayout</tspan>
+    <tspan x="2945.2224816235102" dy="14.0" font-size="6.28">37</tspan>
   </text>
 </g>
 <g>
-  <rect x="3062.886919691117" y="1589.58120822488" width="45.556540154441635" height="76.7958794441771" fill="#2e8b57" fill-opacity="0.72"/>
-  <rect x="3062.886919691117" y="1589.58120822488" width="45.556540154441635" height="76.7958794441771" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
-  <rect x="3062.886919691117" y="1589.58120822488" width="45.556540154441635" height="76.7958794441771" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
-  <rect x="3062.886919691117" y="1589.58120822488" width="45.556540154441635" height="76.7958794441771" fill="transparent" pointer-events="all">
+  <rect x="3061.209991832671" y="1592.0574373481895" width="46.395004083664475" height="74.31965032086771" fill="#2e8b57" fill-opacity="0.72"/>
+  <rect x="3061.209991832671" y="1592.0574373481895" width="46.395004083664475" height="74.31965032086771" fill="url(#codeSizeInnerTileDiagonalGradient)"/>
+  <rect x="3061.209991832671" y="1592.0574373481895" width="46.395004083664475" height="74.31965032086771" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="0.8"/>
+  <rect x="3061.209991832671" y="1592.0574373481895" width="46.395004083664475" height="74.31965032086771" fill="transparent" pointer-events="all">
     <title>19 LOC in Method: MainScreen._handleDroppedFiles()
 
 File: lib/main_screen.dart</title>
   </rect>
-  <text x="3085.6651897683378" y="1627.9791479469684" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
-    <tspan x="3085.6651897683378" dy="-6.0" font-size="3.43">_handleDroppedFiles</tspan>
-    <tspan x="3085.6651897683378" dy="14.0" font-size="3.43">19</tspan>
+  <text x="3084.4074938745034" y="1629.2172625086234" text-anchor="middle" dominant-baseline="middle" fill="#000" font-weight="700">
+    <tspan x="3084.4074938745034" dy="-6.0" font-size="3.51">_handleDroppedFiles</tspan>
+    <tspan x="3084.4074938745034" dy="14.0" font-size="3.51">19</tspan>
   </text>
 </g>
 </g>

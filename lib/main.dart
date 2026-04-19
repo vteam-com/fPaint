@@ -272,65 +272,68 @@ class MyApp extends StatelessWidget {
               final AppPreferences currentPreferences,
               final Widget? _,
             ) {
-              return MaterialApp(
-                navigatorKey: navigatorKey,
-                title: appName,
-                localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-                  AppLocalizations.delegate,
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                ],
-                supportedLocales: AppLocalizations.supportedLocales,
-                locale: currentPreferences.preferredLocale,
-                localeResolutionCallback: (final Locale? locale, final Iterable<Locale> supportedLocales) {
-                  if (locale == null) {
-                    return const Locale('en');
-                  }
-
-                  for (final Locale supportedLocale in supportedLocales) {
-                    if (supportedLocale.languageCode == locale.languageCode) {
-                      return supportedLocale;
+              return RepaintBoundary(
+                key: Keys.appScreenshotBoundary,
+                child: MaterialApp(
+                  navigatorKey: navigatorKey,
+                  title: appName,
+                  localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+                    AppLocalizations.delegate,
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                  ],
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  locale: currentPreferences.preferredLocale,
+                  localeResolutionCallback: (final Locale? locale, final Iterable<Locale> supportedLocales) {
+                    if (locale == null) {
+                      return const Locale('en');
                     }
-                  }
 
-                  return const Locale('en');
-                },
-                theme: ThemeData.dark().copyWith(
-                  colorScheme: const ColorScheme.dark(
-                    primary: AppColors.primary,
-                    secondary: AppColors.secondary,
+                    for (final Locale supportedLocale in supportedLocales) {
+                      if (supportedLocale.languageCode == locale.languageCode) {
+                        return supportedLocale;
+                      }
+                    }
+
+                    return const Locale('en');
+                  },
+                  theme: ThemeData.dark().copyWith(
+                    colorScheme: const ColorScheme.dark(
+                      primary: AppColors.primary,
+                      secondary: AppColors.secondary,
+                    ),
+                    dialogTheme: DialogThemeData(
+                      backgroundColor: AppColors.surface,
+                      shape: popupShape,
+                    ),
+                    popupMenuTheme: PopupMenuThemeData(
+                      color: AppColors.surface,
+                      shape: popupShape,
+                    ),
+                    bottomSheetTheme: BottomSheetThemeData(
+                      backgroundColor: AppColors.surface,
+                      modalBackgroundColor: AppColors.surface,
+                      shape: popupShape,
+                    ),
+                    sliderTheme: SliderThemeData(
+                      activeTrackColor: AppColors.secondary,
+                      inactiveTrackColor: AppColors.surfaceVariant,
+                      thumbColor: AppColors.accent,
+                      overlayColor: AppColors.primary.withAlpha(AppLimits.percentMax),
+                    ),
                   ),
-                  dialogTheme: DialogThemeData(
-                    backgroundColor: AppColors.surface,
-                    shape: popupShape,
-                  ),
-                  popupMenuTheme: PopupMenuThemeData(
-                    color: AppColors.surface,
-                    shape: popupShape,
-                  ),
-                  bottomSheetTheme: BottomSheetThemeData(
-                    backgroundColor: AppColors.surface,
-                    modalBackgroundColor: AppColors.surface,
-                    shape: popupShape,
-                  ),
-                  sliderTheme: SliderThemeData(
-                    activeTrackColor: AppColors.secondary,
-                    inactiveTrackColor: AppColors.surfaceVariant,
-                    thumbColor: AppColors.accent,
-                    overlayColor: AppColors.primary.withAlpha(AppLimits.percentMax),
-                  ),
+                  routes: <String, WidgetBuilder>{
+                    '/': (final BuildContext context) => shortCutsForMainApp(
+                      context,
+                      shellProvider,
+                      currentAppProvider,
+                      const MainScreen(),
+                    ),
+                    '/settings': (final _) => const SettingsPage(),
+                    '/platforms': (final _) => const PlatformsPage(),
+                  },
                 ),
-                routes: <String, WidgetBuilder>{
-                  '/': (final BuildContext context) => shortCutsForMainApp(
-                    context,
-                    shellProvider,
-                    currentAppProvider,
-                    const MainScreen(),
-                  ),
-                  '/settings': (final _) => const SettingsPage(),
-                  '/platforms': (final _) => const PlatformsPage(),
-                },
               );
             },
       ),
