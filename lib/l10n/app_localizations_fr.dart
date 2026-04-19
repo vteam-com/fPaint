@@ -314,9 +314,7 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String saveLoadedFile(Object fileName) {
-    return 'Enregistrer \"$fileName\"';
-  }
+  String get saveLabel => 'Enregistrer';
 
   @override
   String get scale => 'Mettre a l\'echelle';

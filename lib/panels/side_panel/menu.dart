@@ -51,7 +51,8 @@ class MainMenu extends StatelessWidget {
         if (!kIsWeb && shellProvider.loadedFileName.isNotEmpty)
           buildMenuItem(
             value: MenuIds.save,
-            text: l10n.saveLoadedFile(shellProvider.loadedFileName),
+            text: l10n.saveLabel,
+            subtitle: shellProvider.loadedFileName,
             icon: AppIcon.checkCircle,
           ),
         buildMenuItem(
@@ -141,18 +142,43 @@ void onDropDownMenuSelection(
 PopupMenuEntry<int> buildMenuItem({
   required final int value,
   required final String text,
+  final String? subtitle,
   final AppIcon? icon,
   final Key? key,
 }) {
   return PopupMenuItem<int>(
     key: key,
     value: value,
-    child: Row(
-      children: <Widget>[
-        if (icon != null) AppSvgIcon(icon: icon, size: AppSpacing.xl),
-        if (icon != null) const SizedBox(width: AppSpacing.sm),
-        Text(text),
-      ],
+    child: Builder(
+      builder: (final BuildContext _) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            if (icon != null) AppSvgIcon(icon: icon, size: AppSpacing.xl),
+            if (icon != null) const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(text),
+                  if (subtitle != null) ...<Widget>[
+                    const SizedBox(height: AppSpacing.thin),
+                    Text(
+                      subtitle,
+                      softWrap: true,
+                      style: const TextStyle(
+                        fontSize: AppFontSize.subtitle,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     ),
   );
 }

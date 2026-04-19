@@ -132,7 +132,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
       child: Row(
         children: <Widget>[
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
             decoration: BoxDecoration(
               color: Colors.grey.shade800,
               borderRadius: BorderRadius.circular(AppRadius.sm),

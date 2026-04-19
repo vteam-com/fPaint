@@ -47,7 +47,7 @@ Widget floatingActionButtons(
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
-      spacing: AppSpacing.xs - AppStroke.thin,
+      spacing: AppSpacing.sm - AppStroke.thin,
       children: <Widget>[
         if (!shellProvider.showMenu)
           FloatingActionButton(
@@ -58,7 +58,7 @@ Widget floatingActionButtons(
             onPressed: () {
               shellProvider.showMenu = !shellProvider.showMenu;
             },
-            child: iconFromaActionType(appProvider.selectedAction, false),
+            child: iconFormatActionType(appProvider.selectedAction, false),
           ),
         if (!shellProvider.showMenu)
           myFloatButton(
@@ -91,7 +91,7 @@ Widget floatingActionButtons(
 
   return Column(
     mainAxisAlignment: MainAxisAlignment.end,
-    spacing: AppSpacing.xxs,
+    spacing: AppSpacing.xs,
     children: <Widget>[
       undoButton,
       redo,

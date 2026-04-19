@@ -62,7 +62,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   final double regionSize = AppLayout.previewRegionSize;
 
   /// The size of the spacer.
-  final double spacer = AppSpacing.xxs;
+  final double spacer = AppSpacing.xs;
 
   /// The total height of the widget.
   late final double totalHeightOfTheWidget = buttonSize + spacer + regionSize + spacer + buttonSize;

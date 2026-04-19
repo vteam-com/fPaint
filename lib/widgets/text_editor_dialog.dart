@@ -97,7 +97,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                 });
               },
             ),
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.sm),
 
             // Style controls
             Row(

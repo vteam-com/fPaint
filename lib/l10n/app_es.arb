@@ -156,12 +156,7 @@
       "fileName": {}
     }
   },
-  "saveLoadedFile": "Guardar \"{fileName}\"",
-  "@saveLoadedFile": {
-    "placeholders": {
-      "fileName": {}
-    }
-  },
+  "saveLabel": "Guardar",
   "scale": "Escalar",
   "selectionIsHidden": "La seleccion esta oculta.",
   "selectValue": "Seleccionar {value}",

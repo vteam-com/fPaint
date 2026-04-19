@@ -41,8 +41,8 @@ class ToolsPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Wrap(
-            spacing: minimal ? AppSpacing.xxxs : AppSpacing.xxs,
-            runSpacing: minimal ? AppSpacing.xxxs : AppSpacing.xxs,
+            spacing: minimal ? AppSpacing.thin : AppSpacing.xs,
+            runSpacing: minimal ? AppSpacing.thin : AppSpacing.xs,
             alignment: WrapAlignment.center,
             children: getListOfTools(context),
           ),
@@ -50,7 +50,7 @@ class ToolsPanel extends StatelessWidget {
             color: Colors.black,
           ),
           Wrap(
-            runSpacing: minimal ? AppSpacing.sm : AppSpacing.xxxs,
+            runSpacing: minimal ? AppSpacing.sm : AppSpacing.thin,
             alignment: WrapAlignment.center,
             children: getWidgetForSelectedTool(context: context),
           ),
@@ -140,7 +140,7 @@ class ToolsPanel extends StatelessWidget {
       TopColors(
         colorUsages: layers.topColors,
         onRefresh: () {
-          layers.evaluatTopColor();
+          layers.evaluateTopColor();
           appProvider.update();
         },
         onColorPicked: (final Color color) {
@@ -168,7 +168,7 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Pencil',
-        image: iconFromaActionType(
+        image: iconFormatActionType(
           ActionType.pencil,
           selectedTool == ActionType.pencil,
         ),
@@ -181,7 +181,7 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Brush',
-        image: iconFromaActionType(
+        image: iconFormatActionType(
           ActionType.brush,
           selectedTool == ActionType.brush,
         ),
@@ -194,7 +194,7 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Line',
-        image: iconFromaActionType(
+        image: iconFormatActionType(
           ActionType.line,
           selectedTool == ActionType.line,
         ),
@@ -207,7 +207,7 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Rectangle',
-        image: iconFromaActionType(
+        image: iconFormatActionType(
           ActionType.rectangle,
           selectedTool == ActionType.rectangle,
         ),
@@ -220,7 +220,7 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Circle',
-        image: iconFromaActionType(
+        image: iconFormatActionType(
           ActionType.circle,
           selectedTool == ActionType.circle,
         ),
@@ -234,7 +234,7 @@ class ToolsPanel extends StatelessWidget {
         key: Keys.toolFill,
         minimal: minimal,
         name: 'Paint Bucket',
-        image: iconFromaActionType(
+        image: iconFormatActionType(
           ActionType.fill,
           selectedTool == ActionType.fill,
         ),
@@ -258,7 +258,7 @@ class ToolsPanel extends StatelessWidget {
         key: Keys.toolSelector,
         minimal: minimal,
         name: 'Selector',
-        image: iconFromaActionType(
+        image: iconFormatActionType(
           ActionType.selector,
           selectedTool == ActionType.selector,
         ),
@@ -271,7 +271,7 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: 'Text',
-        image: iconFromaActionType(
+        image: iconFormatActionType(
           ActionType.text,
           selectedTool == ActionType.text,
         ),
@@ -444,9 +444,6 @@ class ToolsPanel extends StatelessWidget {
 
                 if (appProvider.selectorModel.isVisible) const Divider(),
 
-                //
-                // Sub=Selector options Repace/Add/Remove/Invert/Cancel
-                //
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,

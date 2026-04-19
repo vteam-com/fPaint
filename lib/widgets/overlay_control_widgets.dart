@@ -48,7 +48,7 @@ Widget buildOverlayFeedbackBubble({required final String label}) {
   return Container(
     padding: const EdgeInsets.symmetric(
       horizontal: AppSpacing.sm,
-      vertical: AppSpacing.xxs,
+      vertical: AppSpacing.xs,
     ),
     decoration: BoxDecoration(
       color: AppColors.surface.withValues(alpha: AppVisual.disabled),
