@@ -114,6 +114,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: IconButton(
+                key: Keys.magnifyingEyeDropperCloseButton,
                 onPressed: () {
                   widget.onClosed();
                 },
@@ -162,6 +163,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               child: IconButton(
+                key: Keys.magnifyingEyeDropperConfirmButton,
                 onPressed: () {
                   widget.onColorPicked(_selectedColor!);
                 },

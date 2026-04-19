@@ -20,6 +20,17 @@ Widget textAction(final String fileName, final AppLocalizations l10n) {
   return Text(l10n.saveAsFile(fileName));
 }
 
+Future<void> _runSharePanelAction(
+  final BuildContext context,
+  final Future<void> Function() onAction,
+  final bool dismissOnAction,
+) async {
+  await onAction();
+  if (dismissOnAction && context.mounted) {
+    Navigator.pop(context);
+  }
+}
+
 /// Displays a modal bottom sheet with options to share the canvas.
 ///
 /// This function presents a list of options to the user, including:
@@ -29,68 +40,97 @@ Widget textAction(final String fileName, final AppLocalizations l10n) {
 /// - Download as ORA
 ///
 /// The [context] parameter is the [BuildContext] used to display the modal.
-void sharePanel(final BuildContext context) {
+Future<dynamic> sharePanel(
+  final BuildContext context, {
+  final bool dismissOnAction = true,
+}) {
   final LayersProvider layers = LayersProvider.of(context);
-  showModalBottomSheet<dynamic>(
+  return showModalBottomSheet<dynamic>(
     context: context,
+    isScrollControlled: true,
     builder: (final BuildContext context) {
       final AppLocalizations l10n = context.l10n;
 
       return SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.xl + AppSpacing.thin),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: const AppSvgIcon(icon: AppIcon.copy),
-                title: Text(l10n.copyToClipboard),
-                onTap: () {
-                  Navigator.pop(context);
-                  _onExportToClipboard(context);
-                },
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * AppLayout.modalSheetMaxHeightFactor,
+          ),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.xl + AppSpacing.thin),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ListTile(
+                    leading: const AppSvgIcon(icon: AppIcon.copy),
+                    title: Text(l10n.copyToClipboard),
+                    onTap: () async {
+                      await _runSharePanelAction(
+                        context,
+                        () => _onExportToClipboard(context),
+                        dismissOnAction,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const AppSvgIcon(icon: AppIcon.download),
+                    title: textAction('image.PNG', l10n),
+                    onTap: () async {
+                      await _runSharePanelAction(
+                        context,
+                        () => onExportAsPng(layers),
+                        dismissOnAction,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const AppSvgIcon(icon: AppIcon.download),
+                    title: textAction('image.JPG', l10n),
+                    onTap: () async {
+                      await _runSharePanelAction(
+                        context,
+                        () => onExportAsJpeg(layers),
+                        dismissOnAction,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const AppSvgIcon(icon: AppIcon.download),
+                    title: textAction('image.ORA', l10n),
+                    onTap: () async {
+                      await _runSharePanelAction(
+                        context,
+                        () => onExportAsOra(layers),
+                        dismissOnAction,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const AppSvgIcon(icon: AppIcon.download),
+                    title: textAction('image.WEBP', l10n),
+                    onTap: () async {
+                      await _runSharePanelAction(
+                        context,
+                        () => onExportAsWebp(layers),
+                        dismissOnAction,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: const AppSvgIcon(icon: AppIcon.download),
+                    title: textAction('image.TIF', l10n),
+                    onTap: () async {
+                      await _runSharePanelAction(
+                        context,
+                        () => onExportAsTiff(layers),
+                        dismissOnAction,
+                      );
+                    },
+                  ),
+                ],
               ),
-              ListTile(
-                leading: const AppSvgIcon(icon: AppIcon.download),
-                title: textAction('image.PNG', l10n),
-                onTap: () {
-                  Navigator.pop(context);
-                  onExportAsPng(layers);
-                },
-              ),
-              ListTile(
-                leading: const AppSvgIcon(icon: AppIcon.download),
-                title: textAction('image.JPG', l10n),
-                onTap: () {
-                  Navigator.pop(context);
-                  onExportAsJpeg(layers);
-                },
-              ),
-              ListTile(
-                leading: const AppSvgIcon(icon: AppIcon.download),
-                title: textAction('image.ORA', l10n),
-                onTap: () {
-                  Navigator.pop(context);
-                  onExportAsOra(layers);
-                },
-              ),
-              ListTile(
-                leading: const AppSvgIcon(icon: AppIcon.download),
-                title: textAction('image.WEBP', l10n),
-                onTap: () {
-                  Navigator.pop(context);
-                  onExportAsWebp(layers);
-                },
-              ),
-              ListTile(
-                leading: const AppSvgIcon(icon: AppIcon.download),
-                title: textAction('image.TIF', l10n),
-                onTap: () {
-                  Navigator.pop(context);
-                  onExportAsTiff(layers);
-                },
-              ),
-            ],
+            ),
           ),
         ),
       );

@@ -192,6 +192,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Line
       ToolPanelPicker(
+        key: Keys.toolLine,
         minimal: minimal,
         name: 'Line',
         image: iconFormatActionType(
@@ -205,6 +206,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Rectangle
       ToolPanelPicker(
+        key: Keys.toolRectangle,
         minimal: minimal,
         name: 'Rectangle',
         image: iconFormatActionType(
@@ -218,6 +220,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Circle
       ToolPanelPicker(
+        key: Keys.toolCircle,
         minimal: minimal,
         name: 'Circle',
         image: iconFormatActionType(
@@ -269,6 +272,7 @@ class ToolsPanel extends StatelessWidget {
 
       // Text
       ToolPanelPicker(
+        key: Keys.toolText,
         minimal: minimal,
         name: 'Text',
         image: iconFormatActionType(

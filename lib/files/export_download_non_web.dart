@@ -129,7 +129,7 @@ Future<void> saveAsJpeg(
 /// Throws an [Exception] if the export process fails.
 Future<void> onExportAsOra(
   final LayersProvider layers, [
-  final String fileName = 'image.jpg',
+  final String fileName = 'image.ora',
 ]) async {
   await _exportWithFilePicker(
     dialogTitle: _fpaintSaveImageTitle,
@@ -156,7 +156,7 @@ Future<void> saveAsOra(
   final String? filePath,
 ) async {
   if (filePath != null) {
-    final List<int> encodedData = await createOraAchive(layers);
+    final List<int> encodedData = await createOraArchive(layers);
     await File(filePath).writeAsBytes(encodedData);
   }
 }

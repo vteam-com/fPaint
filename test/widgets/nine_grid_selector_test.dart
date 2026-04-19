@@ -128,7 +128,10 @@ void main() {
       );
 
       expect(find.byType(AppSvgIcon), findsNWidgets(9));
-      expect(find.byKey(const ValueKey<String>('app_icon_image')), findsOneWidget);
+
+      final List<AppSvgIcon> icons = tester.widgetList<AppSvgIcon>(find.byType(AppSvgIcon)).toList();
+      expect(icons.where((final AppSvgIcon icon) => icon.icon == AppIcon.image), hasLength(1));
+      expect(icons.where((final AppSvgIcon icon) => icon.icon == AppIcon.cropSquare), isEmpty);
     });
   });
 }

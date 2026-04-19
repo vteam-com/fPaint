@@ -124,6 +124,7 @@ const String _signatureFontFamily = 'Roboto';
 const double _signatureFontSize = 24.0;
 const double _signatureMarginRight = 10.0;
 const double _signatureMarginBottom = 10.0;
+const double _signaturePositionTolerance = 1.0;
 
 // Expected: background + sky + sun + land + house + fence + birds + signature = 8
 // Expected: background + sky + sun + land + shadows + house + fence shadow + fence + birds + signature = 10
@@ -148,7 +149,7 @@ void main() {
       await tester.pump();
 
       await tester.pumpWidget(MyApp());
-      await tester.pumpAndSettle();
+      await pumpForUnitTestUiSettle(tester);
       await prepareCanvasViewport(tester);
 
       final UnitTestVideoRecorder videoRecorder = UnitTestVideoRecorder(tester);
@@ -201,7 +202,6 @@ void main() {
       // Draw Land (green rectangle)
       // ---------------------------------------------------------------
       await PaintingLayerHelpers.addNewLayer(tester, _landLayerName);
-      await tester.pumpAndSettle();
 
       await drawRectangleWithHumanGestures(
         tester,
@@ -217,7 +217,6 @@ void main() {
       // Draw House (body + door + window + roof)
       // ---------------------------------------------------------------
       await PaintingLayerHelpers.addNewLayer(tester, _shadowsLayerName);
-      await tester.pumpAndSettle();
 
       final Offset houseShadowStart = _houseBodyStart + _shadowOffset;
       final Offset houseShadowEnd = _houseBodyEnd + _shadowOffset;
@@ -550,7 +549,7 @@ void main() {
         position: CanvasResizePosition.top,
       );
       await prepareCanvasViewport(tester);
-      await tester.pumpAndSettle();
+      await pumpForUnitTestUiSettle(tester);
 
       // Validate crop
       expect(layersProvider.size, cropTargetSize);
@@ -600,7 +599,19 @@ void main() {
         fontSize: _signatureFontSize,
         color: const Color.fromARGB(255, 1, 43, 8),
         fontWeight: FontWeight.bold,
+        fontFamily: _signatureFontFamily,
       );
+
+      final TextObject? signatureTextObject = layersProvider.selectedLayer.actionStack.isEmpty
+          ? null
+          : layersProvider.selectedLayer.actionStack.last.textObject;
+      expect(signatureTextObject, isNotNull, reason: 'Signature layer should contain a text action');
+      expect(signatureTextObject!.text, _signatureText);
+      expect(signatureTextObject.fontFamily, _signatureFontFamily);
+      expect(signatureTextObject.fontWeight, FontWeight.bold);
+      expect(signatureTextObject.position.dx, closeTo(signaturePosition.dx, _signaturePositionTolerance));
+      expect(signatureTextObject.position.dy, closeTo(signaturePosition.dy, _signaturePositionTolerance));
+
       await videoRecorder.captureFrame();
 
       // ---------------------------------------------------------------
@@ -614,14 +625,39 @@ void main() {
         reason: 'Should have background + sky + sun + land + house + fence + birds + signature',
       );
 
-      // Capture final screenshot and save in all supported formats
-      await saveUnitTestOraArchive(tester, filename: _finalOraFilename);
-      await saveUnitTestPng(tester, filename: _finalPngFilename);
-      await saveUnitTestJpeg(tester, filename: _finalJpegFilename);
-      await saveUnitTestTiff(tester, filename: _finalTiffFilename);
-      await saveUnitTestWebp(tester, filename: _finalWebpFilename);
-
       await videoRecorder.stop();
+
+      // Capture final exports through the real main-menu export UI.
+      await saveUnitTestArtworkViaExportUi(
+        tester,
+        format: UnitTestExportFormat.ora,
+        filename: _finalOraFilename,
+      );
+
+      await saveUnitTestArtworkViaExportUi(
+        tester,
+        format: UnitTestExportFormat.png,
+        filename: _finalPngFilename,
+      );
+
+      await saveUnitTestArtworkViaExportUi(
+        tester,
+        format: UnitTestExportFormat.jpeg,
+        filename: _finalJpegFilename,
+      );
+
+      await saveUnitTestArtworkViaExportUi(
+        tester,
+        format: UnitTestExportFormat.tiff,
+        filename: _finalTiffFilename,
+      );
+
+      await saveUnitTestArtworkViaExportUi(
+        tester,
+        format: UnitTestExportFormat.webp,
+        filename: _finalWebpFilename,
+      );
+      await dismissOpenUnitTestExportSheet(tester);
 
       // Drain any pending debounce timers to avoid a "Pending timers" warning.
       await tester.pump(AppDefaults.debounceDuration);

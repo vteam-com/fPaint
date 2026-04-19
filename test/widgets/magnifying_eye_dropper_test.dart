@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:mockito/mockito.dart';
@@ -86,8 +87,8 @@ void main() {
       await tester.pump();
 
       expect(find.byType(MagnifyingEyeDropper), findsOneWidget);
-      expect(find.byKey(const ValueKey<String>('app_icon_close')), findsOneWidget);
-      expect(find.byKey(const ValueKey<String>('app_icon_check')), findsOneWidget);
+      expect(find.byKey(Keys.magnifyingEyeDropperCloseButton), findsOneWidget);
+      expect(find.byKey(Keys.magnifyingEyeDropperConfirmButton), findsOneWidget);
       expect(find.byType(CustomPaint), findsWidgets);
     });
 
@@ -118,12 +119,7 @@ void main() {
 
       await tester.pump();
 
-      await tester.tap(
-        find.ancestor(
-          of: find.byKey(const ValueKey<String>('app_icon_close')),
-          matching: find.byType(IconButton),
-        ),
-      );
+      await tester.tap(find.byKey(Keys.magnifyingEyeDropperCloseButton));
       await tester.pump();
 
       expect(closedCalled, true);
@@ -156,12 +152,7 @@ void main() {
 
       await tester.pump();
 
-      await tester.tap(
-        find.ancestor(
-          of: find.byKey(const ValueKey<String>('app_icon_check')),
-          matching: find.byType(IconButton),
-        ),
-      );
+      await tester.tap(find.byKey(Keys.magnifyingEyeDropperConfirmButton));
       await tester.pump();
 
       expect(colorPickedCalled, true);

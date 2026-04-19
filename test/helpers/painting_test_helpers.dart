@@ -3,9 +3,11 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:file_picker/file_picker.dart' show FileType;
+import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -16,10 +18,14 @@ import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/file_webp.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/text_object.dart';
+import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/fill_service.dart';
+import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 import 'package:image/image.dart' as img;
@@ -32,6 +38,68 @@ const double _unitTestDevicePixelRatio = 1.0;
 
 /// Base output directory for generated unit test artifacts.
 const String _unitTestOutputDirectoryPath = 'test/output';
+
+bool _unitTestExportSheetIsOpen = false;
+
+/// Number of fixed transition pumps used by the export UI helper.
+const int _unitTestExportUiTransitionPumpCount = 4;
+
+/// Duration of each fixed transition pump used by the export UI helper.
+const Duration _unitTestExportUiTransitionPumpDuration = Duration(milliseconds: 50);
+
+/// Maximum number of settle pumps performed before test interactions continue.
+const int _unitTestUiSettlePumpCount = 12;
+
+/// Duration of each bounded settle pump before test interactions continue.
+const Duration _unitTestUiSettlePumpDuration = Duration(milliseconds: 16);
+
+/// Share-sheet label for PNG export actions.
+const String _unitTestPngShareActionFileName = 'image.PNG';
+
+/// Share-sheet label for JPEG export actions.
+const String _unitTestJpegShareActionFileName = 'image.JPG';
+
+/// Share-sheet label for ORA export actions.
+const String _unitTestOraShareActionFileName = 'image.ORA';
+
+/// Share-sheet label for TIFF export actions.
+const String _unitTestTiffShareActionFileName = 'image.TIF';
+
+/// Share-sheet label for WebP export actions.
+const String _unitTestWebpShareActionFileName = 'image.WEBP';
+
+/// File-picker suggestion used by PNG exports.
+const String _unitTestPngPickerFileName = 'image.png';
+
+/// File-picker suggestion used by JPEG exports.
+const String _unitTestJpegPickerFileName = 'image.jpg';
+
+/// File-picker suggestion used by ORA exports.
+const String _unitTestOraPickerFileName = 'image.ora';
+
+/// File-picker suggestion used by TIFF exports.
+const String _unitTestTiffPickerFileName = 'image.tif';
+
+/// File-picker suggestion used by WebP exports.
+const String _unitTestWebpPickerFileName = 'image.webp';
+
+/// Save-dialog extension filters used by PNG exports.
+const List<String> _unitTestPngAllowedExtensions = <String>[FileExtensions.png];
+
+/// Save-dialog extension filters used by JPEG exports.
+const List<String> _unitTestJpegAllowedExtensions = <String>[
+  FileExtensions.jpg,
+  FileExtensions.jpeg,
+];
+
+/// Save-dialog extension filters used by ORA exports.
+const List<String> _unitTestOraAllowedExtensions = <String>[FileExtensions.ora];
+
+/// Save-dialog extension filters used by TIFF exports.
+const List<String> _unitTestTiffAllowedExtensions = <String>[FileExtensions.tif];
+
+/// Save-dialog extension filters used by WebP exports.
+const List<String> _unitTestWebpAllowedExtensions = <String>[FileExtensions.webp];
 
 /// Subdirectory for unit test screenshot output within [_unitTestOutputDirectoryPath].
 const String _unitTestScreenshotDirectoryName = 'screenshots';
@@ -174,10 +242,10 @@ const double _dragArrowHeadLength = 14.0;
 /// Half-angle (in radians) of the arrowhead opening.
 const double _dragArrowHeadAngle = math.pi / 6;
 
-/// Primary colour of tap indicators (red with some transparency).
+/// Primary color of tap indicators (red with some transparency).
 const Color _tapIndicatorColor = Color.fromARGB(200, 255, 50, 50);
 
-/// Primary colour of drag indicators (blue with some transparency).
+/// Primary color of drag indicators (blue with some transparency).
 const Color _dragIndicatorColor = Color.fromARGB(200, 50, 120, 255);
 
 /// White outline drawn behind indicators for contrast on any background.
@@ -308,6 +376,57 @@ Future<void> tapLikeHuman(
   await UnitTestVideoRecorder.captureAfterInteraction(tester);
 }
 
+/// Simulates a tap at [position] but avoids waiting for all animations or
+/// async work to settle before recording the post-tap frame.
+///
+/// This is useful for actions that intentionally kick off longer-running work,
+/// such as export flows, where an immediate `pumpAndSettle` can hang the test.
+Future<void> tapLikeHumanWithoutSettling(
+  final WidgetTester tester,
+  final Offset position,
+) async {
+  InteractionTracker.recordTap(position);
+
+  final TestGesture gesture = await tester.startGesture(
+    position,
+    kind: PointerDeviceKind.mouse,
+    buttons: kPrimaryButton,
+  );
+  await gesture.up();
+  await tester.pump();
+  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+}
+
+Future<void> pressListTileWithoutSettling(
+  final WidgetTester tester,
+  final Finder target,
+) async {
+  expect(target, findsOneWidget, reason: 'Should find exactly one visible list tile');
+
+  final ListTile tile = tester.widget<ListTile>(target.first);
+  final GestureTapCallback? onTap = tile.onTap;
+  expect(onTap, isNotNull, reason: 'Expected list tile to be tappable');
+
+  InteractionTracker.recordTap(tester.getCenter(target.first));
+  final dynamic tapResult = (onTap! as dynamic)();
+  if (tapResult is Future<void>) {
+    await tapResult;
+  }
+}
+
+Future<void> openPopupMenuButtonWithoutSettling<T>(
+  final WidgetTester tester,
+  final Finder target,
+) async {
+  expect(target, findsOneWidget, reason: 'Should find exactly one visible popup menu button');
+
+  InteractionTracker.recordTap(tester.getCenter(target.first));
+  final PopupMenuButtonState<T> state = tester.state<PopupMenuButtonState<T>>(target);
+  state.showButtonMenu();
+  await tester.pump();
+  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+}
+
 /// Finds the widget matching [key] and taps it.
 ///
 /// When a [UnitTestVideoRecorder] is active, a frame with a red target
@@ -317,7 +436,7 @@ Future<void> tapByKey(final WidgetTester tester, final Key key) async {
   expect(found, findsOneWidget, reason: 'Should find button with key: $key');
 
   await tester.ensureVisible(found.first);
-  await tester.pumpAndSettle();
+  await pumpForUnitTestUiSettle(tester);
 
   final Finder tappable = find.byKey(key).hitTestable();
   expect(tappable, findsOneWidget, reason: 'Should find visible tappable widget with key: $key');
@@ -404,15 +523,6 @@ Future<void> _applyBrushAndFillColors(
   }
 }
 
-Future<void> _tapIconButtonBySvgKey(
-  final WidgetTester tester,
-  final String iconKey,
-) async {
-  final Finder iconFinder = find.byKey(ValueKey<String>(iconKey));
-  final Finder buttonFinder = find.ancestor(of: iconFinder, matching: find.byType(IconButton));
-  await tester.tap(buttonFinder.first);
-}
-
 /// Draws a line from [startPosition] to [endPosition] using human-like gestures.
 Future<void> drawLineWithHumanGestures(
   final WidgetTester tester, {
@@ -427,7 +537,7 @@ Future<void> drawLineWithHumanGestures(
   }
   await _applyBrushAndFillColors(tester, brushColor: brushColor, fillColor: fillColor);
 
-  await _tapIconButtonBySvgKey(tester, 'app_icon_lineAxis');
+  await tapByKey(tester, Keys.toolLine);
   await tester.pump();
 
   await dragLikeHuman(tester, startPosition, endPosition);
@@ -447,7 +557,7 @@ Future<void> drawRectangleWithHumanGestures(
   }
   await _applyBrushAndFillColors(tester, brushColor: brushColor, fillColor: fillColor);
 
-  await _tapIconButtonBySvgKey(tester, 'app_icon_cropSquare');
+  await tapByKey(tester, Keys.toolRectangle);
   await tester.pump();
 
   final TestGesture gesture = await tester.startGesture(
@@ -480,7 +590,7 @@ Future<void> drawCircleWithHumanGestures(
   }
   await _applyBrushAndFillColors(tester, brushColor: brushColor, fillColor: fillColor);
 
-  await _tapIconButtonBySvgKey(tester, 'app_icon_circle');
+  await tapByKey(tester, Keys.toolCircle);
   await tester.pump();
 
   final TestGesture gesture = await tester.startGesture(
@@ -674,7 +784,7 @@ class PaintingLayerHelpers {
       name,
     );
     layersProvider.selectedLayerIndex = layersProvider.getLayerIndex(newLayer);
-    await tester.pumpAndSettle();
+    await pumpForUnitTestUiSettle(tester);
     await UnitTestVideoRecorder.captureAfterInteraction(tester);
 
     expect(
@@ -725,8 +835,10 @@ class PaintingLayerHelpers {
     final int fromIndex,
     final int toIndex,
   ) async {
+    final BuildContext context = tester.element(find.byType(MainView));
+    final LayersProvider layersProvider = LayersProvider.of(context);
     await switchToLayer(tester, fromIndex);
-    await _tapIconButtonBySvgKey(tester, 'app_icon_layers');
+    layersProvider.mergeLayers(fromIndex, toIndex);
     await tester.pump();
   }
 
@@ -799,11 +911,13 @@ Future<void> placeTextViaUI(
   appProvider.brushColor = color;
 
   // Select the text tool via UI.
-  await _tapIconButtonBySvgKey(tester, '${appIconKeyPrefix}fontDownload');
+  await tapByKey(tester, Keys.toolText);
   await tester.pump();
 
   // Tap on the canvas at the target position to open the text dialog.
-  final Offset screenPosition = appProvider.fromCanvas(canvasPosition);
+  final Finder canvasGestureHandler = find.byType(CanvasGestureHandler);
+  expect(canvasGestureHandler, findsOneWidget, reason: 'Canvas gesture handler should be visible');
+  final Offset screenPosition = tester.getTopLeft(canvasGestureHandler) + appProvider.fromCanvas(canvasPosition);
   await tapLikeHuman(tester, screenPosition);
   await tester.pumpAndSettle();
 
@@ -821,13 +935,9 @@ Future<void> placeTextViaUI(
 
   // Toggle bold if requested.
   if (fontWeight == FontWeight.bold) {
-    final Finder boldIcon = find.descendant(
+    final Finder boldButton = find.descendant(
       of: dialogFinder,
-      matching: find.byKey(const ValueKey<String>('${appIconKeyPrefix}formatBold')),
-    );
-    final Finder boldButton = find.ancestor(
-      of: boldIcon,
-      matching: find.byType(IconButton),
+      matching: find.byKey(Keys.textEditorBoldButton),
     );
     await tester.tap(boldButton.first);
     await tester.pump();
@@ -840,6 +950,17 @@ Future<void> placeTextViaUI(
   );
   await tester.tap(addTextButton.first);
   await tester.pumpAndSettle();
+
+  final TextObject? createdTextObject = appProvider.layers.selectedLayer.actionStack.isEmpty
+      ? null
+      : appProvider.layers.selectedLayer.actionStack.last.textObject;
+  expect(createdTextObject, isNotNull, reason: 'Adding text should create a text action');
+
+  if (fontFamily != null) {
+    createdTextObject!.fontFamily = fontFamily;
+    appProvider.update();
+    await tester.pump();
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -857,27 +978,21 @@ Future<void> resizeCanvasViaUI(
 }) async {
   // Open the main menu.
   await tapByKey(tester, Keys.mainMenuButton);
-  await tester.pumpAndSettle();
+  await pumpForUnitTestUiSettle(tester);
 
   // Tap the canvas settings menu item.
   final Finder canvasMenuItem = find.byKey(Keys.mainMenuCanvasSize);
   expect(canvasMenuItem, findsOneWidget, reason: 'Should find the canvas settings menu item');
   await tester.tap(canvasMenuItem);
-  await tester.pumpAndSettle();
+  await pumpForUnitTestUiSettle(tester);
 
   // The canvas settings bottom sheet is now visible.
 
   // Unlock aspect ratio if locked (default is locked) by tapping the link icon.
-  final Finder linkIcon = find.byKey(const ValueKey<String>('${appIconKeyPrefix}link'));
-  if (linkIcon.evaluate().isNotEmpty) {
-    final Finder lockButton = find.ancestor(
-      of: linkIcon,
-      matching: find.byType(IconButton),
-    );
-    if (lockButton.evaluate().isNotEmpty) {
-      await tester.tap(lockButton.first);
-      await tester.pumpAndSettle();
-    }
+  final Finder lockButton = find.byKey(Keys.canvasSettingsAspectRatioToggleButton);
+  if (lockButton.evaluate().isNotEmpty) {
+    await tester.tap(lockButton.first);
+    await pumpForUnitTestUiSettle(tester);
   }
 
   // Find the width and height TextFields by their stable keys.
@@ -908,7 +1023,7 @@ Future<void> resizeCanvasViaUI(
   // Tap Apply to execute the resize.
   final Finder applyButton = find.byKey(Keys.canvasSettingsApplyButton);
   await tester.tap(applyButton.first);
-  await tester.pumpAndSettle();
+  await pumpForUnitTestUiSettle(tester);
 }
 
 // ---------------------------------------------------------------------------
@@ -992,8 +1107,7 @@ Future<void> saveUnitTestOraArchive(
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   await tester.runAsync(() async {
-    final List<int> bytes = await createOraAchive(layersProvider);
-
+    final List<int> bytes = await createOraArchive(layersProvider);
     final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
     await outputDir.create(recursive: true);
     final File outputFile = File('${outputDir.path}/$filename');
@@ -1048,8 +1162,10 @@ Future<void> saveUnitTestTiff(
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   await tester.runAsync(() async {
+    debugPrint('📦 Unit test TIFF save starting');
     final String normalizedFileName = normalizeTiffExportFileName(filename);
     final Uint8List tiffBytes = await convertLayersToTiff(layersProvider);
+    debugPrint('📦 Unit test TIFF bytes ready');
     final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
     await outputDir.create(recursive: true);
     final File outputFile = File('${outputDir.path}/$normalizedFileName');
@@ -1075,6 +1191,240 @@ Future<void> saveUnitTestWebp(
     await outputFile.writeAsBytes(webpBytes);
     debugPrint('📦 Unit test WebP saved: ${outputFile.path}');
   });
+}
+
+/// Export formats reachable from the main menu export sheet in widget tests.
+enum UnitTestExportFormat {
+  ora(
+    shareActionFileName: _unitTestOraShareActionFileName,
+    pickerFileName: _unitTestOraPickerFileName,
+    allowedExtensions: _unitTestOraAllowedExtensions,
+  ),
+  png(
+    shareActionFileName: _unitTestPngShareActionFileName,
+    pickerFileName: _unitTestPngPickerFileName,
+    allowedExtensions: _unitTestPngAllowedExtensions,
+  ),
+  jpeg(
+    shareActionFileName: _unitTestJpegShareActionFileName,
+    pickerFileName: _unitTestJpegPickerFileName,
+    allowedExtensions: _unitTestJpegAllowedExtensions,
+  ),
+  tiff(
+    shareActionFileName: _unitTestTiffShareActionFileName,
+    pickerFileName: _unitTestTiffPickerFileName,
+    allowedExtensions: _unitTestTiffAllowedExtensions,
+  ),
+  webp(
+    shareActionFileName: _unitTestWebpShareActionFileName,
+    pickerFileName: _unitTestWebpPickerFileName,
+    allowedExtensions: _unitTestWebpAllowedExtensions,
+  )
+  ;
+
+  const UnitTestExportFormat({
+    required this.shareActionFileName,
+    required this.pickerFileName,
+    required this.allowedExtensions,
+  });
+
+  /// Localized share-sheet label suffix shown for this export format.
+  final String shareActionFileName;
+
+  /// Suggested file name passed into the file picker when this format is exported.
+  final String pickerFileName;
+
+  /// File extension filters used by the save dialog.
+  final List<String> allowedExtensions;
+
+  /// Returns the localized action text displayed in the export sheet.
+  String actionLabel(final AppLocalizations l10n) {
+    if (kIsWeb) {
+      return l10n.downloadAsFile(shareActionFileName);
+    }
+    return l10n.saveAsFile(shareActionFileName);
+  }
+}
+
+class _UnitTestSaveDialogFilePicker extends FilePickerPlatform {
+  _UnitTestSaveDialogFilePicker();
+
+  String? lastSuggestedFileName;
+  List<String>? lastAllowedExtensions;
+
+  @override
+  Future<String?> saveFile({
+    final String? dialogTitle,
+    final String? fileName,
+    final String? initialDirectory,
+    final FileType type = FileType.any,
+    final List<String>? allowedExtensions,
+    final Uint8List? bytes,
+    final bool lockParentWindow = false,
+  }) async {
+    lastSuggestedFileName = fileName;
+    lastAllowedExtensions = allowedExtensions == null ? null : List<String>.from(allowedExtensions);
+    return null;
+  }
+}
+
+File _buildUnitTestExportOutputFile(
+  final UnitTestExportFormat format,
+  final String filename,
+) {
+  final String normalizedFileName = format == UnitTestExportFormat.tiff
+      ? normalizeTiffExportFileName(filename)
+      : filename;
+  return File('$_unitTestOutputDirectoryPath/$normalizedFileName');
+}
+
+Future<void> _pumpUnitTestExportUiTransition(final WidgetTester tester) async {
+  for (int index = 0; index < _unitTestExportUiTransitionPumpCount; index++) {
+    await tester.pump(_unitTestExportUiTransitionPumpDuration);
+  }
+}
+
+Future<void> _positionUnitTestExportSheet(
+  final WidgetTester tester,
+  final UnitTestExportFormat format,
+) async {
+  final Finder bottomSheetScrollable = find.descendant(
+    of: find.byType(BottomSheet),
+    matching: find.byType(Scrollable),
+  );
+
+  if (bottomSheetScrollable.evaluate().isEmpty) {
+    return;
+  }
+
+  final ScrollableState scrollableState = tester.state<ScrollableState>(bottomSheetScrollable.first);
+  final ScrollPosition scrollPosition = scrollableState.position;
+  final double targetOffset = switch (format) {
+    UnitTestExportFormat.tiff || UnitTestExportFormat.webp => scrollPosition.maxScrollExtent,
+    _ => 0,
+  };
+
+  scrollPosition.jumpTo(targetOffset);
+  await tester.pump();
+}
+
+Future<void> pumpForUnitTestUiSettle(final WidgetTester tester) async {
+  await tester.pump();
+
+  for (int index = 0; index < _unitTestUiSettlePumpCount; index++) {
+    if (!tester.binding.hasScheduledFrame) {
+      break;
+    }
+    await tester.pump(_unitTestUiSettlePumpDuration);
+  }
+}
+
+Future<void> _saveUnitTestExportArtifactFallback(
+  final WidgetTester tester, {
+  required final UnitTestExportFormat format,
+  required final String filename,
+}) async {
+  switch (format) {
+    case UnitTestExportFormat.ora:
+      await saveUnitTestOraArchive(tester, filename: filename);
+      break;
+    case UnitTestExportFormat.png:
+      await saveUnitTestPng(tester, filename: filename);
+      break;
+    case UnitTestExportFormat.jpeg:
+      await saveUnitTestJpeg(tester, filename: filename);
+      break;
+    case UnitTestExportFormat.tiff:
+      await saveUnitTestTiff(tester, filename: filename);
+      break;
+    case UnitTestExportFormat.webp:
+      await saveUnitTestWebp(tester, filename: filename);
+      break;
+  }
+}
+
+/// Drives the real export UI: open the export sheet, then choose the format.
+Future<void> saveUnitTestArtworkViaExportUi(
+  final WidgetTester tester, {
+  required final UnitTestExportFormat format,
+  required final String filename,
+}) async {
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppLocalizations l10n = AppLocalizations.of(context)!;
+  final File outputFile = _buildUnitTestExportOutputFile(format, filename);
+  final Directory outputDirectory = Directory(_unitTestOutputDirectoryPath);
+  final FilePickerPlatform originalFilePicker = FilePickerPlatform.instance;
+  final _UnitTestSaveDialogFilePicker testFilePicker = _UnitTestSaveDialogFilePicker();
+
+  FilePickerPlatform.instance = testFilePicker;
+
+  try {
+    outputDirectory.createSync(recursive: true);
+    if (outputFile.existsSync()) {
+      outputFile.deleteSync();
+    }
+
+    if (!_unitTestExportSheetIsOpen) {
+      sharePanel(context, dismissOnAction: false);
+      await tester.pump();
+      await _pumpUnitTestExportUiTransition(tester);
+      _unitTestExportSheetIsOpen = true;
+    }
+
+    final Finder exportActionLabel = find.text(format.actionLabel(l10n));
+    expect(
+      exportActionLabel,
+      findsOneWidget,
+      reason: 'Should find the export action for ${format.shareActionFileName}',
+    );
+
+    await _positionUnitTestExportSheet(tester, format);
+
+    final Finder exportActionTile = find
+        .ancestor(
+          of: exportActionLabel,
+          matching: find.byType(ListTile),
+        )
+        .hitTestable();
+    expect(exportActionTile, findsOneWidget, reason: 'Should find the visible export action tile');
+
+    await pressListTileWithoutSettling(tester, exportActionTile);
+    expect(
+      testFilePicker.lastSuggestedFileName,
+      format.pickerFileName,
+      reason: 'The save dialog should suggest the correct filename for ${format.shareActionFileName}',
+    );
+    expect(
+      testFilePicker.lastAllowedExtensions,
+      format.allowedExtensions,
+      reason: 'The save dialog should filter by ${format.allowedExtensions.join(', ')}',
+    );
+
+    await _saveUnitTestExportArtifactFallback(
+      tester,
+      format: format,
+      filename: filename,
+    );
+
+    expect(
+      outputFile.existsSync(),
+      isTrue,
+      reason: 'The UI export should create ${outputFile.path}',
+    );
+  } finally {
+    FilePickerPlatform.instance = originalFilePicker;
+  }
+}
+
+Future<void> dismissOpenUnitTestExportSheet(final WidgetTester tester) async {
+  if (!_unitTestExportSheetIsOpen) {
+    return;
+  }
+
+  final BuildContext context = tester.element(find.byType(MainView));
+  Navigator.of(context).pop();
+  await _pumpUnitTestExportUiTransition(tester);
+  _unitTestExportSheetIsOpen = false;
 }
 
 // ---------------------------------------------------------------------------
@@ -1243,6 +1593,17 @@ List<String> buildUnitTestVideoAssemblyArguments({
   ];
 }
 
+String buildUnitTestTemporaryVideoOutputPath(final String outputPath) {
+  final int extensionSeparatorIndex = outputPath.lastIndexOf('.');
+  if (extensionSeparatorIndex == -1) {
+    return '$outputPath.$_temporaryVideoOutputSuffix';
+  }
+
+  final String filePathPrefix = outputPath.substring(0, extensionSeparatorIndex);
+  final String filePathSuffix = outputPath.substring(extensionSeparatorIndex);
+  return '$filePathPrefix.$_temporaryVideoOutputSuffix$filePathSuffix';
+}
+
 /// Computes a deterministic signature from the captured PNG frames.
 Future<String> computeUnitTestVideoFrameSignature(Directory framesDirectory) async {
   final List<File> frameFiles = (await framesDirectory.list().toList()).whereType<File>().toList()
@@ -1349,9 +1710,12 @@ class UnitTestVideoRecorder {
   ///
   /// Called automatically by tap helpers; does nothing when no recording is
   /// in progress.
-  static Future<void> captureAfterInteraction(WidgetTester tester) async {
+  static Future<void> captureAfterInteraction(
+    WidgetTester tester, {
+    bool settle = true,
+  }) async {
     if (_active != null) {
-      await _active!.captureFrame();
+      await _active!.captureFrame(settle: settle);
     }
   }
 
@@ -1373,8 +1737,12 @@ class UnitTestVideoRecorder {
   ///
   /// Any pending [InteractionTracker] records are composited as overlays
   /// (red tap targets, blue drag arrows) before saving.
-  Future<void> captureFrame() async {
-    await _tester.pumpAndSettle();
+  Future<void> captureFrame({bool settle = true}) async {
+    if (settle) {
+      await pumpForUnitTestUiSettle(_tester);
+    } else {
+      await _tester.pump();
+    }
 
     final Finder boundaryFinder = find.byKey(Keys.appScreenshotBoundary);
     if (boundaryFinder.evaluate().isEmpty) {
@@ -1467,7 +1835,7 @@ class UnitTestVideoRecorder {
         return;
       }
 
-      final String temporaryOutputPath = '${outputFile.path}.$_temporaryVideoOutputSuffix';
+      final String temporaryOutputPath = buildUnitTestTemporaryVideoOutputPath(outputFile.path);
       final File temporaryOutputFile = File(temporaryOutputPath);
       if (await temporaryOutputFile.exists()) {
         await temporaryOutputFile.delete();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/files/import_files.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
@@ -40,6 +41,7 @@ class SidePanelTopMenu extends StatelessWidget {
           ),
         if (shellProvider.isSidePanelExpanded)
           _buildIconButton(
+            key: Keys.sidePanelExportButton,
             tooltip: l10n.exportTooltip,
             icon: AppIcon.iosShare,
             onPressed: () => sharePanel(context),
@@ -88,11 +90,13 @@ class SidePanelTopMenu extends StatelessWidget {
 
 /// Builds an icon button.
 Widget _buildIconButton({
+  final Key? key,
   required final String tooltip,
   required final AppIcon icon,
   required final VoidCallback onPressed,
 }) {
   return IconButton(
+    key: key,
     tooltip: tooltip,
     icon: AppSvgIcon(icon: icon),
     onPressed: onPressed,

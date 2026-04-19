@@ -99,7 +99,7 @@ Future<void> saveAsOra(
   final LayersProvider layers,
   final String filePath,
 ) async {
-  final List<int> image = await createOraAchive(layers);
+  final List<int> image = await createOraArchive(layers);
   // Create a Blob from the image bytes
   downloadBlob(Uint8List.fromList(image), filePath);
 }

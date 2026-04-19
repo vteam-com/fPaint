@@ -77,6 +77,7 @@ class AppLayout {
   static const double sidePanelExpandedMin = 350.0;
   static const double sidePanelExpandedMax = 600.0;
   static const double sidePanelTopDefault = 200.0;
+  static const double modalSheetMaxHeightFactor = 0.9;
   static const double mobileMenuWidthFactor = 0.85;
   static const int overlayAlpha = 128;
   static const double desktopBreakpoint = 600.0;
@@ -591,6 +592,7 @@ class Keys {
   static Key floatActionToggle = const Key('floating_action_toggle');
   static Key mainMenuButton = const Key('main-menu-button');
   static Key mainMenuCanvasSize = const Key('main-menu-canvas-size');
+  static Key sidePanelExportButton = const Key('side-panel-export-button');
   static Key appScreenshotBoundary = const Key('app-screenshot-boundary');
   static Key mainViewScreenshotBoundary = const Key('main-view-screenshot-boundary');
   static String gradientHandleKeyPrefixText = 'gradient_handle_';
@@ -599,7 +601,16 @@ class Keys {
   static Key layerRenameApplyButton = const Key('layer-rename-apply-button');
   static Key canvasSettingsWidthField = const Key('canvas-settings-width-field');
   static Key canvasSettingsHeightField = const Key('canvas-settings-height-field');
+  static Key canvasSettingsAspectRatioToggleButton = const Key('canvas-settings-aspect-ratio-toggle-button');
   static Key canvasSettingsApplyButton = const Key('canvas-settings-apply-button');
+  static Key textEditorBoldButton = const Key('text-editor-bold-button');
+  static Key magnifyingEyeDropperCloseButton = const Key('magnifying-eye-dropper-close-button');
+  static Key magnifyingEyeDropperConfirmButton = const Key('magnifying-eye-dropper-confirm-button');
+
+  static Key toolLine = const Key('tool-line');
+  static Key toolRectangle = const Key('tool-rectangle');
+  static Key toolCircle = const Key('tool-circle');
+  static Key toolText = const Key('tool-text');
 
   static Key toolFill = const Key('tool-fill');
   static Key toolFillModeSolid = const Key('tool-fill-mode-solid');
