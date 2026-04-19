@@ -104,6 +104,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
               children: <Widget>[
                 // Bold toggle
                 IconButton(
+                  key: Keys.textEditorBoldButton,
                   icon: AppSvgIcon(
                     icon: AppIcon.formatBold,
                     color: _fontWeight == FontWeight.bold ? Colors.blue : Colors.grey,

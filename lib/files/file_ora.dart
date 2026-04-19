@@ -339,7 +339,7 @@ Future<ui.Image> decodeImage(final List<int> bytes) async {
 ///
 /// - Returns: A `Future` that resolves to a `List<int>` representing the
 ///   binary data of the created ORA archive.
-Future<List<int>> createOraAchive(final LayersProvider layers) async {
+Future<List<int>> createOraArchive(final LayersProvider layers) async {
   final Archive archive = Archive();
   final XmlBuilder builder = XmlBuilder();
 

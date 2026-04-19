@@ -84,6 +84,7 @@ void showCanvasSettings(final BuildContext context) {
                     ),
                   ),
                   IconButton(
+                    key: Keys.canvasSettingsAspectRatioToggleButton,
                     icon: AppSvgIcon(
                       icon: layers.canvasResizeLockAspectRatio ? AppIcon.link : AppIcon.linkOff,
                     ),

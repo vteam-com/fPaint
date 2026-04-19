@@ -36,7 +36,7 @@ void main() {
     final LayersProvider layers = LayersProvider();
     layers.size = const ui.Size(100, 100);
 
-    final List<int> archiveData = await createOraAchive(layers);
+    final List<int> archiveData = await createOraArchive(layers);
     final Archive archive = ZipDecoder().decodeBytes(archiveData);
 
     expect(

@@ -18,11 +18,10 @@ class AppSvgIcon extends StatelessWidget {
   Widget build(final BuildContext context) {
     final double resolvedSize = size ?? AppLayout.iconSize;
     final Color resolvedColor = color ?? IconTheme.of(context).color ?? Colors.white;
-    final Key resolvedKey = key ?? ValueKey<String>('$appIconKeyPrefix${icon.name}');
 
     return SvgPicture.asset(
       icon.assetPath,
-      key: resolvedKey,
+      key: key,
       width: resolvedSize,
       height: resolvedSize,
       colorFilter: ColorFilter.mode(resolvedColor, BlendMode.srcATop),
