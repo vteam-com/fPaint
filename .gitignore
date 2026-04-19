@@ -58,3 +58,6 @@ coverage_report/
 coverage/html/*
 coverage/lcov_integration.info
 coverage/merged_lcov.info
+
+# Generated unit-test frame staging artifacts
+test/output/screenshots/video_frames/
