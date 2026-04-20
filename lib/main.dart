@@ -275,6 +275,7 @@ class MyApp extends StatelessWidget {
               return RepaintBoundary(
                 key: Keys.appScreenshotBoundary,
                 child: MaterialApp(
+                  debugShowCheckedModeBanner: false,
                   navigatorKey: navigatorKey,
                   title: appName,
                   localizationsDelegates: <LocalizationsDelegate<dynamic>>[
