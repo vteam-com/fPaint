@@ -27,6 +27,7 @@ import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
+import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:image/image.dart' as img;
 
 /// Number of incremental steps used in human-like drag gestures.
@@ -37,6 +38,36 @@ const int _lassoSelectionMinimumPointCount = 3;
 
 /// Minimum number of points required to draw a freehand stroke.
 const int _freehandStrokeMinimumPointCount = 2;
+
+/// Total number of deform handles shown by the transform overlay.
+const int _transformOverlayHandleCount = 9;
+
+/// Build-order index for the transform overlay's top-left corner handle.
+const int _transformOverlayHandleTopLeftIndex = 0;
+
+/// Build-order index for the transform overlay's top-right corner handle.
+const int _transformOverlayHandleTopRightIndex = 1;
+
+/// Build-order index for the transform overlay's bottom-right corner handle.
+const int _transformOverlayHandleBottomRightIndex = 2;
+
+/// Build-order index for the transform overlay's bottom-left corner handle.
+const int _transformOverlayHandleBottomLeftIndex = 3;
+
+/// Build-order index for the transform overlay's top edge handle.
+const int _transformOverlayHandleTopIndex = 4;
+
+/// Build-order index for the transform overlay's right edge handle.
+const int _transformOverlayHandleRightIndex = 5;
+
+/// Build-order index for the transform overlay's bottom edge handle.
+const int _transformOverlayHandleBottomIndex = 6;
+
+/// Build-order index for the transform overlay's left edge handle.
+const int _transformOverlayHandleLeftIndex = 7;
+
+/// Build-order index for the transform overlay's center move handle.
+const int _transformOverlayHandleCenterIndex = 8;
 
 /// Device pixel ratio used for unit test screenshots.
 const double _unitTestDevicePixelRatio = 1.0;
@@ -543,6 +574,93 @@ Future<void> selectLassoArea(
 
   await gesture.up();
   await tester.pump();
+}
+
+/// Named handles exposed by the transform overlay in deform mode.
+enum TransformOverlayHandle {
+  topLeft,
+  topRight,
+  bottomRight,
+  bottomLeft,
+  top,
+  right,
+  bottom,
+  left,
+  center,
+}
+
+int _transformOverlayHandleIndex(final TransformOverlayHandle handle) {
+  switch (handle) {
+    case TransformOverlayHandle.topLeft:
+      return _transformOverlayHandleTopLeftIndex;
+    case TransformOverlayHandle.topRight:
+      return _transformOverlayHandleTopRightIndex;
+    case TransformOverlayHandle.bottomRight:
+      return _transformOverlayHandleBottomRightIndex;
+    case TransformOverlayHandle.bottomLeft:
+      return _transformOverlayHandleBottomLeftIndex;
+    case TransformOverlayHandle.top:
+      return _transformOverlayHandleTopIndex;
+    case TransformOverlayHandle.right:
+      return _transformOverlayHandleRightIndex;
+    case TransformOverlayHandle.bottom:
+      return _transformOverlayHandleBottomIndex;
+    case TransformOverlayHandle.left:
+      return _transformOverlayHandleLeftIndex;
+    case TransformOverlayHandle.center:
+      return _transformOverlayHandleCenterIndex;
+  }
+}
+
+/// Selects a contiguous region with the magic wand selector.
+Future<void> selectWandArea(
+  final WidgetTester tester, {
+  required final Offset position,
+  int? tolerance,
+}) async {
+  await tapByKey(tester, Keys.toolSelector);
+  await tester.pump();
+
+  await tapByKey(tester, Keys.toolSelectorModeWand);
+  await tester.pump();
+
+  if (tolerance != null) {
+    final BuildContext context = tester.element(find.byType(MainView));
+    final AppProvider appProvider = AppProvider.of(context, listen: false);
+    appProvider.tolerance = tolerance;
+    await tester.pump();
+  }
+
+  await tapLikeHuman(tester, position);
+  await pumpForUnitTestUiSettle(tester);
+}
+
+/// Deforms the current selection through the transform overlay and applies it.
+Future<void> deformSelectionWithTransformOverlay(
+  final WidgetTester tester, {
+  required final Map<TransformOverlayHandle, Offset> handleDeltas,
+}) async {
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppLocalizations l10n = context.l10n;
+
+  await tapByTooltip(tester, l10n.transform);
+  await pumpForUnitTestUiSettle(tester);
+
+  final Finder handles = find.byType(OverlayDragHandle);
+  expect(
+    handles.evaluate().length,
+    _transformOverlayHandleCount,
+    reason: 'Transform overlay should expose all deform handles',
+  );
+
+  for (final MapEntry<TransformOverlayHandle, Offset> entry in handleDeltas.entries) {
+    final Finder handle = handles.at(_transformOverlayHandleIndex(entry.key));
+    final Offset handleCenter = tester.getCenter(handle);
+    await dragLikeHuman(tester, handleCenter, handleCenter + entry.value);
+  }
+
+  await tapByTooltip(tester, l10n.apply);
+  await pumpForUnitTestUiSettle(tester);
 }
 
 // ---------------------------------------------------------------------------

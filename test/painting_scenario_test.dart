@@ -48,36 +48,54 @@ const Color _sunBodyColor = Color.fromARGB(179, 241, 226, 179);
 
 // Land layer
 const String _landLayerName = 'Land';
-const Offset _landTopLeft = Offset(-300, 10);
-const Offset _landBottomRight = Offset(300, 300);
+const double _landTopY = 10.0;
+const double _landBottomY = 300.0;
+const Offset _landTopLeft = Offset(-300, _landTopY);
+const Offset _landBottomRight = Offset(300, _landBottomY);
 
 // Lake layer (temporary layer merged into land)
 const String _pondDraftLayerName = 'Lake Draft';
 const String _pondLayerName = 'Lake';
-const List<Offset> _pondSelectionPoints = <Offset>[
-  Offset(-268, 75),
-  Offset(-254, 51),
-  Offset(-230, 33),
-  Offset(-194, 21),
-  Offset(-150, 23),
-  Offset(-118, 31),
-  Offset(-92, 25),
-  Offset(-66, 37),
-  Offset(-44, 57),
-  Offset(-36, 79),
-  Offset(-48, 99),
-  Offset(-74, 113),
-  Offset(-106, 109),
-  Offset(-134, 121),
-  Offset(-174, 129),
-  Offset(-214, 123),
-  Offset(-242, 111),
-  Offset(-260, 95),
-];
-const Offset _pondGradientCenter = Offset(-164, 75);
-const Offset _pondGradientEdgeOffset = Offset(108, 62);
-const Color _pondColorCenter = Color.fromARGB(255, 252, 254, 255);
-const Color _pondColorEdge = Color.fromARGB(255, 42, 118, 191);
+const double _pondVerticalInsetFactor = 0.2;
+const double _pondVerticalBandStartY = _landTopY;
+const double _pondVerticalBandEndY = _fenceY;
+const double _pondVerticalBandHeight = _pondVerticalBandEndY - _pondVerticalBandStartY;
+const double _pondVerticalInset = _pondVerticalBandHeight * _pondVerticalInsetFactor;
+const double _pondTopY = _pondVerticalBandStartY + _pondVerticalInset;
+const double _pondBottomY = _pondVerticalBandEndY - _pondVerticalInset;
+const double _pondCenterY = (_pondTopY + _pondBottomY) / AppMath.pair;
+// drawCircleWithHumanGestures passes a horizontal span that becomes the rendered circle diameter.
+const double _pondBaseCircleRadius = _pondBottomY - _pondTopY;
+const double _pondWidthFactor = 3.0;
+const double _pondTargetWidth = _pondBaseCircleRadius * _pondWidthFactor;
+const double _pondHorizontalExpansion = (_pondTargetWidth - _pondBaseCircleRadius) / AppMath.pair;
+const double _pondCornerHorizontalExpansionFactor = 0.75;
+const double _pondCornerHorizontalExpansion = _pondHorizontalExpansion * _pondCornerHorizontalExpansionFactor;
+const double _pondCornerVerticalNudge = 2.0;
+const double _pondCenterX = -164.0;
+const double _pondGradientHalfWidth = _pondTargetWidth / AppMath.pair;
+const int _pondWandTolerance = 12;
+const Color _pondBaseColor = Color.fromARGB(255, 56, 132, 201);
+const Map<TransformOverlayHandle, Offset> _pondTransformHandleDeltas = <TransformOverlayHandle, Offset>{
+  TransformOverlayHandle.topLeft: Offset(-_pondCornerHorizontalExpansion, _pondCornerVerticalNudge),
+  TransformOverlayHandle.topRight: Offset(_pondCornerHorizontalExpansion, _pondCornerVerticalNudge),
+  TransformOverlayHandle.right: Offset(_pondHorizontalExpansion, 0),
+  TransformOverlayHandle.bottomRight: Offset(_pondCornerHorizontalExpansion, -_pondCornerVerticalNudge),
+  TransformOverlayHandle.bottomLeft: Offset(-_pondCornerHorizontalExpansion, -_pondCornerVerticalNudge),
+  TransformOverlayHandle.left: Offset(-_pondHorizontalExpansion, 0),
+};
+const Offset _pondGradientCenter = Offset(_pondCenterX, _pondCenterY);
+const Offset _pondGradientStart = Offset(
+  _pondCenterX - _pondGradientHalfWidth,
+  _pondCenterY,
+);
+const Offset _pondGradientEnd = Offset(
+  _pondCenterX + _pondGradientHalfWidth,
+  _pondCenterY,
+);
+const Color _pondColorLight = Color.fromARGB(255, 116, 192, 247);
+const Color _pondColorMid = Color.fromARGB(255, 49, 132, 206);
+const Color _pondColorDark = Color.fromARGB(255, 8, 58, 132);
 const double _pondHighlightBrushSize = AppStroke.thin;
 const Color _pondHighlightColor = Color.fromARGB(200, 255, 255, 255);
 const List<Offset> _pondHighlightWave1 = <Offset>[
@@ -336,7 +354,7 @@ void main() {
       await videoRecorder.captureFrame();
 
       // ---------------------------------------------------------------
-      // Draw Lake (lasso selection + clipped fill/highlights + merge)
+      // Draw Lake (wand selection + transform + clipped fill/highlights + merge)
       // ---------------------------------------------------------------
       final BuildContext sceneContext = tester.element(find.byType(MainView));
       final AppProvider sceneAppProvider = AppProvider.of(sceneContext, listen: false);
@@ -347,19 +365,41 @@ void main() {
       await PaintingLayerHelpers.renameLayer(tester, _pondLayerName);
       expect(sceneLayersProvider.selectedLayer.name, _pondLayerName);
 
-      await selectLassoArea(
+      final Offset pondCenter = canvasCenter + _pondGradientCenter;
+
+      await drawCircleWithHumanGestures(
         tester,
-        points: _pondSelectionPoints.map((final Offset point) => canvasCenter + point).toList(),
+        center: pondCenter,
+        radius: _pondBaseCircleRadius,
+        brushSize: 0,
+        brushColor: Colors.transparent,
+        fillColor: _pondBaseColor,
       );
 
-      final Offset pondCenter = canvasCenter + _pondGradientCenter;
+      await selectWandArea(
+        tester,
+        position: pondCenter,
+        tolerance: _pondWandTolerance,
+      );
+
+      await deformSelectionWithTransformOverlay(
+        tester,
+        handleDeltas: _pondTransformHandleDeltas,
+      );
+
+      await selectWandArea(
+        tester,
+        position: pondCenter,
+        tolerance: _pondWandTolerance,
+      );
 
       await performFloodFillGradient(
         tester,
-        gradientMode: FillMode.radial,
+        gradientMode: FillMode.linear,
         gradientPoints: <GradientPoint>[
-          GradientPoint(color: _pondColorCenter, offset: pondCenter),
-          GradientPoint(color: _pondColorEdge, offset: pondCenter + _pondGradientEdgeOffset),
+          GradientPoint(color: _pondColorLight, offset: canvasCenter + _pondGradientStart),
+          GradientPoint(color: _pondColorMid, offset: pondCenter),
+          GradientPoint(color: _pondColorDark, offset: canvasCenter + _pondGradientEnd),
         ],
       );
 
