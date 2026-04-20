@@ -50,6 +50,23 @@ const String _landLayerName = 'Land';
 const Offset _landTopLeft = Offset(-300, 10);
 const Offset _landBottomRight = Offset(300, 300);
 
+// Pond layer (temporary layer merged into land)
+const String _pondDraftLayerName = 'Pond Draft';
+const String _pondLayerName = 'Pond';
+const Offset _pondTopLeft = Offset(-250, 165);
+const Offset _pondBottomRight = Offset(-70, 265);
+const Offset _pondGradientEdgeOffset = Offset(55, 30);
+const Color _pondColorCenter = Color.fromARGB(255, 122, 196, 230);
+const Color _pondColorEdge = Color.fromARGB(255, 32, 103, 150);
+const double _pondHighlightBrushSize = AppStroke.thin;
+const Color _pondHighlightColor = Color.fromARGB(200, 255, 255, 255);
+const Offset _pondHighlight1Start = Offset(-228, 202);
+const Offset _pondHighlight1End = Offset(-165, 194);
+const Offset _pondHighlight2Start = Offset(-214, 220);
+const Offset _pondHighlight2End = Offset(-138, 210);
+const Offset _pondHighlight3Start = Offset(-196, 240);
+const Offset _pondHighlight3End = Offset(-122, 230);
+
 // House layer
 const String _houseLayerName = 'House';
 const Offset _houseBodyStart = Offset(0, 0);
@@ -211,6 +228,95 @@ void main() {
         brushColor: Colors.greenAccent,
         fillColor: Colors.green,
       );
+      await videoRecorder.captureFrame();
+
+      // ---------------------------------------------------------------
+      // Draw Pond (circle selection + clipped fill/highlights + merge)
+      // ---------------------------------------------------------------
+      final BuildContext sceneContext = tester.element(find.byType(MainView));
+      final AppProvider sceneAppProvider = AppProvider.of(sceneContext, listen: false);
+      final LayersProvider sceneLayersProvider = LayersProvider.of(sceneContext);
+      final int layerCountBeforePond = sceneLayersProvider.length;
+
+      await PaintingLayerHelpers.addNewLayer(tester, _pondDraftLayerName);
+      await PaintingLayerHelpers.renameLayer(tester, _pondLayerName);
+      expect(sceneLayersProvider.selectedLayer.name, _pondLayerName);
+
+      await selectCircleArea(
+        tester,
+        startPosition: canvasCenter + _pondTopLeft,
+        endPosition: canvasCenter + _pondBottomRight,
+      );
+
+      final Offset pondCenter =
+          canvasCenter +
+          Offset(
+            (_pondTopLeft.dx + _pondBottomRight.dx) / AppMath.pair,
+            (_pondTopLeft.dy + _pondBottomRight.dy) / AppMath.pair,
+          );
+
+      await performFloodFillGradient(
+        tester,
+        gradientMode: FillMode.radial,
+        gradientPoints: <GradientPoint>[
+          GradientPoint(color: _pondColorCenter, offset: pondCenter),
+          GradientPoint(color: _pondColorEdge, offset: pondCenter + _pondGradientEdgeOffset),
+        ],
+      );
+
+      for (final (Offset start, Offset end) in <(Offset, Offset)>[
+        (_pondHighlight1Start, _pondHighlight1End),
+        (_pondHighlight2Start, _pondHighlight2End),
+        (_pondHighlight3Start, _pondHighlight3End),
+      ]) {
+        await drawLineWithHumanGestures(
+          tester,
+          startPosition: canvasCenter + start,
+          endPosition: canvasCenter + end,
+          brushSize: _pondHighlightBrushSize,
+          brushColor: _pondHighlightColor,
+        );
+      }
+
+      expect(
+        sceneAppProvider.selectorModel.isVisible,
+        isTrue,
+        reason: 'Pond selection should remain active while highlights are drawn',
+      );
+
+      sceneAppProvider.selectorModel.clear();
+      sceneAppProvider.update();
+      await pumpForUnitTestUiSettle(tester);
+
+      expect(
+        sceneAppProvider.selectorModel.isVisible,
+        isFalse,
+        reason: 'Pond selection should be dismissed after finishing the pond',
+      );
+
+      final int pondLayerIndex = sceneLayersProvider.list.indexWhere(
+        (final LayerProvider layer) => layer.name == _pondLayerName,
+      );
+      final int landLayerIndex = sceneLayersProvider.list.indexWhere(
+        (final LayerProvider layer) => layer.name == _landLayerName,
+      );
+
+      expect(pondLayerIndex, isNonNegative, reason: 'Pond layer should exist before merge');
+      expect(landLayerIndex, isNonNegative, reason: 'Land layer should exist before merge');
+
+      await PaintingLayerHelpers.mergeLayer(tester, pondLayerIndex, landLayerIndex);
+
+      expect(
+        sceneLayersProvider.length,
+        layerCountBeforePond,
+        reason: 'Merging the pond into land should restore the original layer count',
+      );
+      expect(
+        sceneLayersProvider.list.any((final LayerProvider layer) => layer.name == _pondLayerName),
+        isFalse,
+        reason: 'Pond layer should be removed after merge',
+      );
+
       await videoRecorder.captureFrame();
 
       // ---------------------------------------------------------------

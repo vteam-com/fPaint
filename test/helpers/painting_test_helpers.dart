@@ -506,6 +506,22 @@ Future<void> selectRectangleArea(
   await tester.pump();
 }
 
+/// Selects a circular area on the canvas.
+Future<void> selectCircleArea(
+  final WidgetTester tester, {
+  required final Offset startPosition,
+  required final Offset endPosition,
+}) async {
+  await tapByKey(tester, Keys.toolSelector);
+  await tester.pump();
+
+  await tapByKey(tester, Keys.toolSelectorModeCircle);
+  await tester.pump();
+
+  await dragLikeHuman(tester, startPosition, endPosition);
+  await tester.pump();
+}
+
 // ---------------------------------------------------------------------------
 // Drawing helpers
 // ---------------------------------------------------------------------------
