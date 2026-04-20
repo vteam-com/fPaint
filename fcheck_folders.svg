@@ -3312,7 +3312,7 @@
   <text x="595.68" y="1195.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. helpers/constants.dart
 2. l10n/app_localizations.dart</title></g><text x="415.0" y="1188.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">platforms_page.dart</text>
 <g class="folderTitleLayer">
-<text x="403.0" y="105.0" class="layerTitle">fpaint v1.3.2+1</text>
+<text x="403.0" y="105.0" class="layerTitle">fpaint v1.3.3+1</text>
 <text x="423.0" y="157.0" class="layerTitle">  ...</text>
 <text x="423.0" y="3415.0" class="layerTitle">  l10n</text>
 <text x="423.0" y="3537.0" class="layerTitle">  providers</text>
