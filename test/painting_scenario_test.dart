@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -159,9 +160,19 @@ const Offset _shadowGradientDelta = Offset(0, 80);
 // Birds layer
 const String _birdsLayerName = 'Birds';
 const double _birdBrushSize = 4.0;
-const Offset _birdOffset = Offset(-20, -170);
-const Offset _birdOffset2 = Offset(80, -210);
-const Offset _birdOffset3 = Offset(150, -150);
+const Offset _bird1Offset = Offset(-20, -170);
+const Offset _bird2Offset = Offset(80, -210);
+const Offset _bird3Offset = Offset(150, -150);
+const Offset _birdPivot = Offset(30, 11);
+const double _bird1Scale = 0.9;
+const double _bird2Scale = 0.65;
+const double _bird3Scale = 1.2;
+const double _bird1RotationRadians = -0.08;
+const double _bird2RotationRadians = 0.22;
+const double _bird3RotationRadians = -0.18;
+const double _bird1BrushSize = _birdBrushSize;
+const double _bird2BrushSize = 3.0;
+const double _bird3BrushSize = 5.0;
 const Offset _birdLine1Start = Offset(4, 18);
 const Offset _birdLine1End = Offset(18, 4);
 const Offset _birdLine2Start = Offset(18, 4);
@@ -190,6 +201,63 @@ const String _finalPngFilename = 'final.png';
 const String _finalJpegFilename = 'final.jpg';
 const String _finalTiffFilename = 'final.tif';
 const String _finalWebpFilename = 'final.webp';
+
+Offset _transformBirdPoint(
+  final Offset topLeft,
+  final Offset point, {
+  required final double scale,
+  required final double rotationRadians,
+}) {
+  final Offset centeredPoint = point - _birdPivot;
+  final Offset scaledPoint = Offset(
+    centeredPoint.dx * scale,
+    centeredPoint.dy * scale,
+  );
+  final double cosine = math.cos(rotationRadians);
+  final double sine = math.sin(rotationRadians);
+  final Offset rotatedPoint = Offset(
+    (scaledPoint.dx * cosine) - (scaledPoint.dy * sine),
+    (scaledPoint.dx * sine) + (scaledPoint.dy * cosine),
+  );
+
+  return topLeft + _birdPivot + rotatedPoint;
+}
+
+Future<void> _drawBird(
+  final WidgetTester tester, {
+  required final Offset canvasCenter,
+  required final Offset topLeftOffset,
+  required final double scale,
+  required final double rotationRadians,
+  required final double brushSize,
+}) async {
+  final Offset birdTopLeft = canvasCenter + topLeftOffset;
+
+  for (final (Offset start, Offset end) in const <(Offset, Offset)>[
+    (_birdLine1Start, _birdLine1End),
+    (_birdLine2Start, _birdLine2End),
+    (_birdLine3Start, _birdLine3End),
+    (_birdLine4Start, _birdLine4End),
+  ]) {
+    await drawLineWithHumanGestures(
+      tester,
+      startPosition: _transformBirdPoint(
+        birdTopLeft,
+        start,
+        scale: scale,
+        rotationRadians: rotationRadians,
+      ),
+      endPosition: _transformBirdPoint(
+        birdTopLeft,
+        end,
+        scale: scale,
+        rotationRadians: rotationRadians,
+      ),
+      brushSize: brushSize,
+      brushColor: Colors.black,
+    );
+  }
+}
 
 void main() {
   SharedPreferences.setMockInitialValues(_testPreferences);
@@ -591,74 +659,36 @@ void main() {
       await tester.pump();
 
       // ---------------------------------------------------------------
-      // Draw Birds (V-shape lines)
+      // Draw Birds (varied size and rotation)
       // ---------------------------------------------------------------
       await PaintingLayerHelpers.addNewLayer(tester, _birdsLayerName);
 
-      final Offset birdTopLeft = canvasCenter + _birdOffset;
-
-      await drawLineWithHumanGestures(
+      await _drawBird(
         tester,
-        startPosition: birdTopLeft + _birdLine1Start,
-        endPosition: birdTopLeft + _birdLine1End,
-        brushSize: _birdBrushSize,
-        brushColor: Colors.black,
-      );
-      await drawLineWithHumanGestures(
-        tester,
-        startPosition: birdTopLeft + _birdLine2Start,
-        endPosition: birdTopLeft + _birdLine2End,
-        brushSize: _birdBrushSize,
-        brushColor: Colors.black,
-      );
-      await drawLineWithHumanGestures(
-        tester,
-        startPosition: birdTopLeft + _birdLine3Start,
-        endPosition: birdTopLeft + _birdLine3End,
-        brushSize: _birdBrushSize,
-        brushColor: Colors.black,
-      );
-      await drawLineWithHumanGestures(
-        tester,
-        startPosition: birdTopLeft + _birdLine4Start,
-        endPosition: birdTopLeft + _birdLine4End,
-        brushSize: _birdBrushSize,
-        brushColor: Colors.black,
+        canvasCenter: canvasCenter,
+        topLeftOffset: _bird1Offset,
+        scale: _bird1Scale,
+        rotationRadians: _bird1RotationRadians,
+        brushSize: _bird1BrushSize,
       );
 
-      // Bird 2
-      final Offset bird2TopLeft = canvasCenter + _birdOffset2;
-      for (final (Offset start, Offset end) in <(Offset, Offset)>[
-        (_birdLine1Start, _birdLine1End),
-        (_birdLine2Start, _birdLine2End),
-        (_birdLine3Start, _birdLine3End),
-        (_birdLine4Start, _birdLine4End),
-      ]) {
-        await drawLineWithHumanGestures(
-          tester,
-          startPosition: bird2TopLeft + start,
-          endPosition: bird2TopLeft + end,
-          brushSize: _birdBrushSize,
-          brushColor: Colors.black,
-        );
-      }
+      await _drawBird(
+        tester,
+        canvasCenter: canvasCenter,
+        topLeftOffset: _bird2Offset,
+        scale: _bird2Scale,
+        rotationRadians: _bird2RotationRadians,
+        brushSize: _bird2BrushSize,
+      );
 
-      // Bird 3
-      final Offset bird3TopLeft = canvasCenter + _birdOffset3;
-      for (final (Offset start, Offset end) in <(Offset, Offset)>[
-        (_birdLine1Start, _birdLine1End),
-        (_birdLine2Start, _birdLine2End),
-        (_birdLine3Start, _birdLine3End),
-        (_birdLine4Start, _birdLine4End),
-      ]) {
-        await drawLineWithHumanGestures(
-          tester,
-          startPosition: bird3TopLeft + start,
-          endPosition: bird3TopLeft + end,
-          brushSize: _birdBrushSize,
-          brushColor: Colors.black,
-        );
-      }
+      await _drawBird(
+        tester,
+        canvasCenter: canvasCenter,
+        topLeftOffset: _bird3Offset,
+        scale: _bird3Scale,
+        rotationRadians: _bird3RotationRadians,
+        brushSize: _bird3BrushSize,
+      );
       await videoRecorder.captureFrame();
 
       // ---------------------------------------------------------------
