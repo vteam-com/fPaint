@@ -32,6 +32,12 @@ import 'package:image/image.dart' as img;
 /// Number of incremental steps used in human-like drag gestures.
 const double _humanDragSteps = 3;
 
+/// Minimum number of vertices required to form a lasso selection polygon.
+const int _lassoSelectionMinimumPointCount = 3;
+
+/// Minimum number of points required to draw a freehand stroke.
+const int _freehandStrokeMinimumPointCount = 2;
+
 /// Device pixel ratio used for unit test screenshots.
 const double _unitTestDevicePixelRatio = 1.0;
 
@@ -506,19 +512,36 @@ Future<void> selectRectangleArea(
   await tester.pump();
 }
 
-/// Selects a circular area on the canvas.
-Future<void> selectCircleArea(
+/// Selects a free-style lasso area on the canvas.
+Future<void> selectLassoArea(
   final WidgetTester tester, {
-  required final Offset startPosition,
-  required final Offset endPosition,
+  required final List<Offset> points,
 }) async {
+  expect(
+    points.length,
+    greaterThanOrEqualTo(_lassoSelectionMinimumPointCount),
+    reason: 'Lasso selection requires at least three points',
+  );
+
   await tapByKey(tester, Keys.toolSelector);
   await tester.pump();
 
-  await tapByKey(tester, Keys.toolSelectorModeCircle);
+  await tapByKey(tester, Keys.toolSelectorModeLasso);
   await tester.pump();
 
-  await dragLikeHuman(tester, startPosition, endPosition);
+  InteractionTracker.recordDrag(points.first, points.last);
+
+  final TestGesture gesture = await tester.startGesture(
+    points.first,
+    kind: PointerDeviceKind.mouse,
+    buttons: kPrimaryButton,
+  );
+
+  for (final Offset point in points.skip(1)) {
+    await gesture.moveTo(point);
+  }
+
+  await gesture.up();
   await tester.pump();
 }
 
@@ -556,6 +579,56 @@ Future<void> _applyBrushAndFillColors(
   if (fillColor != null) {
     appProvider.fillColor = fillColor;
   }
+}
+
+/// Selects a drawing action directly through [AppProvider].
+Future<void> _selectDrawingAction(
+  final WidgetTester tester,
+  final ActionType action,
+) async {
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppProvider appProvider = AppProvider.of(context);
+
+  appProvider.selectedAction = action;
+  await tester.pump();
+}
+
+/// Draws a freehand stroke through [points] using human-like gestures.
+Future<void> drawFreehandStrokeWithHumanGestures(
+  final WidgetTester tester, {
+  required final List<Offset> points,
+  final ActionType action = ActionType.pencil,
+  final double? brushSize,
+  final Color? brushColor,
+  final Color? fillColor,
+}) async {
+  expect(
+    points.length,
+    greaterThanOrEqualTo(_freehandStrokeMinimumPointCount),
+    reason: 'Freehand strokes require at least two points',
+  );
+
+  if (brushSize != null) {
+    await setBrushSizeViaProvider(tester, brushSize);
+  }
+  await _applyBrushAndFillColors(tester, brushColor: brushColor, fillColor: fillColor);
+  await _selectDrawingAction(tester, action);
+
+  InteractionTracker.recordDrag(points.first, points.last);
+
+  final TestGesture gesture = await tester.startGesture(
+    points.first,
+    kind: PointerDeviceKind.mouse,
+    buttons: kPrimaryButton,
+  );
+
+  for (final Offset point in points.skip(1)) {
+    await gesture.moveTo(point);
+    await tester.pump();
+  }
+
+  await gesture.up();
+  await tester.pump();
 }
 
 /// Draws a line from [startPosition] to [endPosition] using human-like gestures.
