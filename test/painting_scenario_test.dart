@@ -50,22 +50,59 @@ const String _landLayerName = 'Land';
 const Offset _landTopLeft = Offset(-300, 10);
 const Offset _landBottomRight = Offset(300, 300);
 
-// Pond layer (temporary layer merged into land)
-const String _pondDraftLayerName = 'Pond Draft';
-const String _pondLayerName = 'Pond';
-const Offset _pondTopLeft = Offset(-250, 165);
-const Offset _pondBottomRight = Offset(-70, 265);
-const Offset _pondGradientEdgeOffset = Offset(55, 30);
-const Color _pondColorCenter = Color.fromARGB(255, 122, 196, 230);
-const Color _pondColorEdge = Color.fromARGB(255, 32, 103, 150);
+// Lake layer (temporary layer merged into land)
+const String _pondDraftLayerName = 'Lake Draft';
+const String _pondLayerName = 'Lake';
+const List<Offset> _pondSelectionPoints = <Offset>[
+  Offset(-268, 75),
+  Offset(-254, 51),
+  Offset(-230, 33),
+  Offset(-194, 21),
+  Offset(-150, 23),
+  Offset(-118, 31),
+  Offset(-92, 25),
+  Offset(-66, 37),
+  Offset(-44, 57),
+  Offset(-36, 79),
+  Offset(-48, 99),
+  Offset(-74, 113),
+  Offset(-106, 109),
+  Offset(-134, 121),
+  Offset(-174, 129),
+  Offset(-214, 123),
+  Offset(-242, 111),
+  Offset(-260, 95),
+];
+const Offset _pondGradientCenter = Offset(-164, 75);
+const Offset _pondGradientEdgeOffset = Offset(108, 62);
+const Color _pondColorCenter = Color.fromARGB(255, 252, 254, 255);
+const Color _pondColorEdge = Color.fromARGB(255, 42, 118, 191);
 const double _pondHighlightBrushSize = AppStroke.thin;
 const Color _pondHighlightColor = Color.fromARGB(200, 255, 255, 255);
-const Offset _pondHighlight1Start = Offset(-228, 202);
-const Offset _pondHighlight1End = Offset(-165, 194);
-const Offset _pondHighlight2Start = Offset(-214, 220);
-const Offset _pondHighlight2End = Offset(-138, 210);
-const Offset _pondHighlight3Start = Offset(-196, 240);
-const Offset _pondHighlight3End = Offset(-122, 230);
+const List<Offset> _pondHighlightWave1 = <Offset>[
+  Offset(-236, 63),
+  Offset(-220, 57),
+  Offset(-204, 63),
+  Offset(-188, 57),
+  Offset(-172, 62),
+  Offset(-156, 56),
+];
+const List<Offset> _pondHighlightWave2 = <Offset>[
+  Offset(-224, 81),
+  Offset(-206, 75),
+  Offset(-188, 81),
+  Offset(-170, 75),
+  Offset(-152, 80),
+  Offset(-134, 74),
+];
+const List<Offset> _pondHighlightWave3 = <Offset>[
+  Offset(-206, 101),
+  Offset(-188, 95),
+  Offset(-170, 101),
+  Offset(-152, 95),
+  Offset(-134, 100),
+  Offset(-116, 94),
+];
 
 // House layer
 const String _houseLayerName = 'House';
@@ -231,7 +268,7 @@ void main() {
       await videoRecorder.captureFrame();
 
       // ---------------------------------------------------------------
-      // Draw Pond (circle selection + clipped fill/highlights + merge)
+      // Draw Lake (lasso selection + clipped fill/highlights + merge)
       // ---------------------------------------------------------------
       final BuildContext sceneContext = tester.element(find.byType(MainView));
       final AppProvider sceneAppProvider = AppProvider.of(sceneContext, listen: false);
@@ -242,18 +279,12 @@ void main() {
       await PaintingLayerHelpers.renameLayer(tester, _pondLayerName);
       expect(sceneLayersProvider.selectedLayer.name, _pondLayerName);
 
-      await selectCircleArea(
+      await selectLassoArea(
         tester,
-        startPosition: canvasCenter + _pondTopLeft,
-        endPosition: canvasCenter + _pondBottomRight,
+        points: _pondSelectionPoints.map((final Offset point) => canvasCenter + point).toList(),
       );
 
-      final Offset pondCenter =
-          canvasCenter +
-          Offset(
-            (_pondTopLeft.dx + _pondBottomRight.dx) / AppMath.pair,
-            (_pondTopLeft.dy + _pondBottomRight.dy) / AppMath.pair,
-          );
+      final Offset pondCenter = canvasCenter + _pondGradientCenter;
 
       await performFloodFillGradient(
         tester,
@@ -264,15 +295,14 @@ void main() {
         ],
       );
 
-      for (final (Offset start, Offset end) in <(Offset, Offset)>[
-        (_pondHighlight1Start, _pondHighlight1End),
-        (_pondHighlight2Start, _pondHighlight2End),
-        (_pondHighlight3Start, _pondHighlight3End),
+      for (final List<Offset> wavePoints in <List<Offset>>[
+        _pondHighlightWave1,
+        _pondHighlightWave2,
+        _pondHighlightWave3,
       ]) {
-        await drawLineWithHumanGestures(
+        await drawFreehandStrokeWithHumanGestures(
           tester,
-          startPosition: canvasCenter + start,
-          endPosition: canvasCenter + end,
+          points: wavePoints.map((final Offset point) => canvasCenter + point).toList(),
           brushSize: _pondHighlightBrushSize,
           brushColor: _pondHighlightColor,
         );
@@ -281,7 +311,7 @@ void main() {
       expect(
         sceneAppProvider.selectorModel.isVisible,
         isTrue,
-        reason: 'Pond selection should remain active while highlights are drawn',
+        reason: 'Lake selection should remain active while highlights are drawn',
       );
 
       sceneAppProvider.selectorModel.clear();
@@ -291,7 +321,7 @@ void main() {
       expect(
         sceneAppProvider.selectorModel.isVisible,
         isFalse,
-        reason: 'Pond selection should be dismissed after finishing the pond',
+        reason: 'Lake selection should be dismissed after finishing the lake',
       );
 
       final int pondLayerIndex = sceneLayersProvider.list.indexWhere(
