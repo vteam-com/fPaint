@@ -1,11 +1,15 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/recovery/draft_recovery_storage.dart';
+import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
 const String _draftRecoveryDirectoryName = 'draft_recovery';
 const String _draftRecoveryFileName = 'recovery.ora';
+
+final Logger _log = Logger(logNameDraftRecoveryStorage);
 
 /// Creates the file-backed recovery storage used on non-web platforms.
 DraftRecoveryStorage createDraftRecoveryStorage() {
@@ -34,13 +38,23 @@ class _IoDraftRecoveryStorage implements DraftRecoveryStorage {
       return null;
     }
 
-    return draftFile.readAsBytes();
+    try {
+      return draftFile.readAsBytes();
+    } catch (e) {
+      _log.severe('Error reading draft file: ${draftFile.path}', e);
+      rethrow;
+    }
   }
 
   @override
   Future<void> writeDraft(final Uint8List bytes) async {
     final File draftFile = await _getDraftFile();
-    await draftFile.writeAsBytes(bytes, flush: true);
+    try {
+      await draftFile.writeAsBytes(bytes, flush: true);
+    } catch (e) {
+      _log.severe('Error writing draft file: ${draftFile.path}', e);
+      rethrow;
+    }
   }
 
   /// Returns the application-support directory reserved for recovery drafts.

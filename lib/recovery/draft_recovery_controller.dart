@@ -49,6 +49,8 @@ class DraftRecoveryController with WidgetsBindingObserver {
   bool _isReconciling = false;
   bool _needsReconcile = false;
   bool _isDisposed = false;
+  bool _isStartupRecoveryCheckPending = true;
+  bool _hasWrittenDraftThisSession = false;
 
   /// Starts listening for layer changes and lifecycle events.
   Future<void> initialize() async {
@@ -92,52 +94,42 @@ class DraftRecoveryController with WidgetsBindingObserver {
     await _reconcileDraft();
   }
 
-  /// Prompts the user to restore a stored draft and applies it when accepted.
-  Future<void> maybeRestoreDraft({
-    required final BuildContext context,
+  /// Restores a stored draft automatically when one is available.
+  Future<void> restoreDraftIfAvailable({
     required final AppProvider appProvider,
   }) async {
-    if (await _storage.hasDraft() == false || context.mounted == false) {
-      if (await _storage.hasDraft() == false) {
+    try {
+      final bool hasDraft = await _storage.hasDraft();
+      if (hasDraft == false) {
         await preferences.clearRecoveryDraftSourceFilePath();
+        return;
       }
-      return;
+
+      final Uint8List? bytes = await _storage.readDraft();
+      if (bytes == null || bytes.isEmpty) {
+        _log.warning('Draft bytes were null or empty, discarding');
+        await discardDraft();
+        return;
+      }
+
+      await _restoreDraft(
+        appProvider: appProvider,
+        bytes: bytes,
+      );
+    } finally {
+      _isStartupRecoveryCheckPending = false;
     }
+  }
 
-    final AppLocalizations l10n = context.l10n;
-    final bool shouldRestore =
-        await showDialog<bool>(
-          context: context,
-          builder: (final BuildContext dialogContext) {
-            return AlertDialog(
-              title: Text(l10n.restoreRecoveryDraftTitle),
-              content: Text(l10n.restoreRecoveryDraftMessage),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(false),
-                  child: Text(l10n.discardRecoveryDraft),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(true),
-                  child: Text(l10n.restoreRecoveryDraft),
-                ),
-              ],
-            );
-          },
-        ) ??
-        false;
-
-    if (shouldRestore == false) {
-      await discardDraft();
-      return;
-    }
-
-    final Uint8List? bytes = await _storage.readDraft();
-    if (bytes == null || bytes.isEmpty) {
-      await discardDraft();
-      return;
-    }
-
+  /// Applies draft bytes to the in-memory document and resets view state.
+  ///
+  /// If [context] is provided, restoration failures are surfaced to users via
+  /// a localized snackbar message before discarding the unreadable draft.
+  Future<void> _restoreDraft({
+    required final AppProvider appProvider,
+    required final Uint8List bytes,
+    final BuildContext? context,
+  }) async {
     try {
       final String? sourceFilePath = await preferences.getRecoveryDraftSourceFilePath();
       layers.clear();
@@ -149,7 +141,7 @@ class DraftRecoveryController with WidgetsBindingObserver {
       appProvider.update();
     } catch (error, stackTrace) {
       _log.severe('Failed to restore recovery draft.', error, stackTrace);
-      if (context.mounted) {
+      if (context != null && context.mounted) {
         context.showSnackBarMessage(
           context.l10n.errorProcessingFile(error.toString()),
         );
@@ -196,8 +188,12 @@ class DraftRecoveryController with WidgetsBindingObserver {
         if (layers.hasChanged) {
           final Uint8List bytes = Uint8List.fromList(await _encoder(layers));
           await _storage.writeDraft(bytes);
+          _hasWrittenDraftThisSession = true;
           await preferences.setRecoveryDraftSourceFilePath(_currentSourceFilePath);
         } else {
+          if (_isStartupRecoveryCheckPending && _hasWrittenDraftThisSession == false) {
+            continue;
+          }
           await _storage.deleteDraft();
           await preferences.clearRecoveryDraftSourceFilePath();
         }

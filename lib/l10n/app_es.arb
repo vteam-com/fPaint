@@ -63,7 +63,6 @@
   "discard": "Descartar",
   "discardAndOpen": "Descartar y abrir",
   "discardCurrentDocumentQuestion": "Descartar el documento actual?",
-  "discardRecoveryDraft": "Descartar",
   "downloadAsFile": "Descargar como {fileName}",
   "@downloadAsFile": {
     "placeholders": {
@@ -143,9 +142,6 @@
   },
   "platforms": "Disponible en...",
   "resizeRotate": "Redimensionar / Girar",
-  "restoreRecoveryDraft": "Restaurar",
-  "restoreRecoveryDraftMessage": "fPaint encontro un borrador de recuperacion de tu ultima sesion. Restauralo ahora o descartalo.",
-  "restoreRecoveryDraftTitle": "Restaurar trabajo no guardado?",
   "rotateCanvasTooltip": "Girar lienzo 90 grados en sentido horario",
   "runOnMostBrowsers": "Funciona en la mayoria de navegadores.",
   "saveAsFile": "Guardar como {fileName}",

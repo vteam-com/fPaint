@@ -4,6 +4,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-04-21
+
+### Add
+
+- Automatic recovery-restore flow for unsaved artwork at startup
+
+### Fix
+
+- ORA layer [visibility] attribute save/load
+
 ## [1.3.0] - 2026-04-17
 
 ### Add

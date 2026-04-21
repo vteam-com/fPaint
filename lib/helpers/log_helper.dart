@@ -12,6 +12,7 @@ const String logNameImageHelper = 'ImageHelper';
 const String logNameImportFiles = 'ImportFiles';
 const String logNameMyWindowManager = 'MyWindowManager';
 const String logNameDraftRecovery = 'DraftRecovery';
+const String logNameDraftRecoveryStorage = 'DraftRecoveryStorage';
 const String logNameSave = 'Save';
 const String logNameUndoProvider = 'UndoProvider';
 

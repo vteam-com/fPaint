@@ -28,8 +28,13 @@ const String _oraAttrOpacity = 'opacity';
 const String _oraAttrSrc = 'src';
 const String _oraAttrX = 'x';
 const String _oraAttrY = 'y';
+const String _oraAttrCompositeOp = 'composite-op';
+const String _oraAttrAlphaPreserve = 'alpha-preserve';
 const String _oraVisibilityVisible = 'visible';
 const String _oraVisibilityHidden = 'hidden';
+const String _oraVisibilityInherit = 'inherit';
+const String _booleanTextTrue = 'true';
+const String _booleanTextFalse = 'false';
 const String _oraXmlProcessingTarget = 'xml';
 const String _oraXmlEncoding = 'version="1.0" encoding="UTF-8"';
 const String _oraMimetypeEntry = 'mimetype';
@@ -62,6 +67,7 @@ const String _svgHardLight = 'svg:hard-light';
 const String _svgSoftLight = 'svg:soft-light';
 const String _svgDifference = 'svg:difference';
 const String _svgExclusion = 'svg:exclusion';
+const String _svgSrcOverLegacy = 'svg:src-over';
 
 /// Reads an ORA file and updates the provided [AppProvider] with its contents.
 ///
@@ -192,14 +198,14 @@ Future<void> addLayer(
 ) async {
   final String name = xmlLayer.getAttribute(_oraAttrName) ?? 'Unnamed';
   final String opacityAsText = xmlLayer.getAttribute(_oraAttrOpacity) ?? '1';
-  final String visibleAsText = xmlLayer.getAttribute(_oraAttrVisibility) ?? 'true';
-  final String compositeOp = xmlLayer.getAttribute('composite-op') ?? 'svg:src-over';
+  final String visibleAsText = xmlLayer.getAttribute(_oraAttrVisibility) ?? _oraVisibilityVisible;
+  final String compositeOp = xmlLayer.getAttribute(_oraAttrCompositeOp) ?? _svgSrcOverLegacy;
 
-  final bool preserveAlpha = xmlLayer.getAttribute('alpha-preserve') == 'true';
+  final bool preserveAlpha = xmlLayer.getAttribute(_oraAttrAlphaPreserve) == _booleanTextTrue;
 
   final LayerProvider newLayer = layers.addBottom(name);
   newLayer.parentGroupName = stackName;
-  newLayer.isVisible = visibleAsText == 'true';
+  newLayer.isVisible = _isLayerVisible(visibleAsText);
   newLayer.opacity = double.parse(opacityAsText);
 
   // is there an image on this layer?
@@ -224,6 +230,25 @@ Future<void> addLayer(
     );
   }
   return;
+}
+
+/// Converts ORA visibility text into a layer-visible flag.
+///
+/// OpenRaster baseline uses "visible" and "hidden" while some legacy
+/// documents may contain boolean text values. Unknown values default to
+/// visible to match the ORA default visibility semantics.
+bool _isLayerVisible(final String visibilityAsText) {
+  if (visibilityAsText == _oraVisibilityHidden || visibilityAsText == _booleanTextFalse) {
+    return false;
+  }
+
+  if (visibilityAsText == _oraVisibilityVisible ||
+      visibilityAsText == _booleanTextTrue ||
+      visibilityAsText == _oraVisibilityInherit) {
+    return true;
+  }
+
+  return true;
 }
 
 /// Returns a [ui.BlendMode] corresponding to the given OpenRaster (ORA)

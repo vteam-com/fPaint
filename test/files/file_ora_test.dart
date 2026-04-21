@@ -98,7 +98,7 @@ void main() {
             <stack>
               <stack name="Fruits">
                 <layer name="Orange" visibility="visible" opacity="1.00000" src="data/layer-0.png" x="0" y="0"/>
-                <layer name="Banna" visibility="visible" opacity="1.00000" src="data/layer-1.png" x="0" y="0"/>
+                <layer name="Banna" visibility="hidden" opacity="1.00000" src="data/layer-1.png" x="0" y="0"/>
               </stack>
               <layer name="Pasted Layer" visibility="visible" opacity="1.00000" src="data/layer-2.png" x="0" y="0"/>
               <layer name="Background" visibility="visible" opacity="1.00000" src="data/layer-3.png" x="0" y="0"/>
@@ -150,8 +150,12 @@ void main() {
 
     expect(layers.length, 4);
     expect(layers.list[0].name, 'Orange');
+    expect(layers.list[0].isVisible, isTrue);
     expect(layers.list[1].name, 'Banna');
+    expect(layers.list[1].isVisible, isFalse);
     expect(layers.list[2].name, 'Pasted Layer');
+    expect(layers.list[2].isVisible, isTrue);
     expect(layers.list[3].name, 'Background');
+    expect(layers.list[3].isVisible, isTrue);
   });
 }
