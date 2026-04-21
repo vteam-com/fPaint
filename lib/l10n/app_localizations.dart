@@ -651,6 +651,30 @@ abstract class AppLocalizations {
   /// **'Saved {fileName}'**
   String savedMessage(Object fileName);
 
+  /// No description provided for @restoreRecoveryDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get restoreRecoveryDraft;
+
+  /// No description provided for @discardRecoveryDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get discardRecoveryDraft;
+
+  /// No description provided for @restoreRecoveryDraftTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore unsaved work?'**
+  String get restoreRecoveryDraftTitle;
+
+  /// No description provided for @restoreRecoveryDraftMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'fPaint found a recovery draft from your last session. Restore it now or discard it.'**
+  String get restoreRecoveryDraftMessage;
+
   /// No description provided for @saveLabel.
   ///
   /// In en, this message translates to:

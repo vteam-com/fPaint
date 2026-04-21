@@ -314,6 +314,19 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get restoreRecoveryDraft => 'Restaurer';
+
+  @override
+  String get discardRecoveryDraft => 'Ignorer';
+
+  @override
+  String get restoreRecoveryDraftTitle => 'Restaurer le travail non enregistre ?';
+
+  @override
+  String get restoreRecoveryDraftMessage =>
+      'fPaint a trouve un brouillon de recuperation de votre derniere session. Restaurez-le maintenant ou ignorez-le.';
+
+  @override
   String get saveLabel => 'Enregistrer';
 
   @override

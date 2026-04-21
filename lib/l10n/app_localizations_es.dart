@@ -310,6 +310,19 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get restoreRecoveryDraft => 'Restaurar';
+
+  @override
+  String get discardRecoveryDraft => 'Descartar';
+
+  @override
+  String get restoreRecoveryDraftTitle => 'Restaurar trabajo no guardado?';
+
+  @override
+  String get restoreRecoveryDraftMessage =>
+      'fPaint encontro un borrador de recuperacion de tu ultima sesion. Restauralo ahora o descartalo.';
+
+  @override
   String get saveLabel => 'Guardar';
 
   @override

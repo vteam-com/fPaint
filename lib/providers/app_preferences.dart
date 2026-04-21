@@ -36,6 +36,7 @@ class AppPreferences extends ChangeNotifier {
   static const String keySidePanelDistance = 'keySidePanelDistance';
   static const String keyUseApplePencil = 'keyUseApplePencil';
   static const String keyLanguageCode = 'keyLanguageCode';
+  static const String keyRecoveryDraftSourceFilePath = 'keyRecoveryDraftSourceFilePath';
 
   // Default values
   double _sidePanelDistance = AppLayout.sidePanelTopDefault;
@@ -126,6 +127,27 @@ class AppPreferences extends ChangeNotifier {
     }
     await prefs.setString(keyLanguageCode, value);
     notifyListeners();
+  }
+
+  /// Persists the source file path associated with the recovery draft.
+  Future<void> setRecoveryDraftSourceFilePath(final String? value) async {
+    final SharedPreferences prefs = await getPref();
+    if (value == null || value.isEmpty) {
+      await prefs.remove(keyRecoveryDraftSourceFilePath);
+      return;
+    }
+
+    await prefs.setString(keyRecoveryDraftSourceFilePath, value);
+  }
+
+  /// Returns the source file path associated with the recovery draft, if any.
+  Future<String?> getRecoveryDraftSourceFilePath() async {
+    return (await getPref()).getString(keyRecoveryDraftSourceFilePath);
+  }
+
+  /// Clears the stored recovery draft source file path.
+  Future<void> clearRecoveryDraftSourceFilePath() async {
+    await (await getPref()).remove(keyRecoveryDraftSourceFilePath);
   }
 
   /// Ensures preferences are loaded once before any persisted value is read.

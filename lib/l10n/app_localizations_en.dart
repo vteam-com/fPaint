@@ -312,6 +312,19 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get restoreRecoveryDraft => 'Restore';
+
+  @override
+  String get discardRecoveryDraft => 'Discard';
+
+  @override
+  String get restoreRecoveryDraftTitle => 'Restore unsaved work?';
+
+  @override
+  String get restoreRecoveryDraftMessage =>
+      'fPaint found a recovery draft from your last session. Restore it now or discard it.';
+
+  @override
   String get saveLabel => 'Save';
 
   @override

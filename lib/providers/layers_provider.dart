@@ -235,6 +235,15 @@ class LayersProvider extends ChangeNotifier {
     for (final LayerProvider layer in _list) {
       layer.hasChanged = false;
     }
+    notifyListeners();
+  }
+
+  /// Marks all layers as changed.
+  void markAllChanged() {
+    for (final LayerProvider layer in _list) {
+      layer.hasChanged = true;
+    }
+    notifyListeners();
   }
 
   /// Checks if the given index is within the range of the layer list.
