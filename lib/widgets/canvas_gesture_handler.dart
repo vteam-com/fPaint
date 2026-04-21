@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -11,6 +12,7 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
 /// Handles pointer, pan, and zoom gestures over the canvas widget tree.
@@ -204,6 +206,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       }
       _activePointerId = -1;
       appProvider.layers.selectedLayer.clearCache();
+      final DraftRecoveryController controller = Provider.of<DraftRecoveryController>(context, listen: false);
+      unawaited(controller.flushNow());
       appProvider.update();
     }
   }

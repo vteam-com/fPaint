@@ -62,7 +62,6 @@
   "discard": "Ignorer",
   "discardAndOpen": "Ignorer et ouvrir",
   "discardCurrentDocumentQuestion": "Ignorer le document actuel ?",
-  "discardRecoveryDraft": "Ignorer",
   "downloadAsFile": "Telecharger en tant que {fileName}",
   "@downloadAsFile": {
     "placeholders": {
@@ -142,9 +141,6 @@
   },
   "platforms": "Disponible sur...",
   "resizeRotate": "Redimensionner / Pivoter",
-  "restoreRecoveryDraft": "Restaurer",
-  "restoreRecoveryDraftMessage": "fPaint a trouve un brouillon de recuperation de votre derniere session. Restaurez-le maintenant ou ignorez-le.",
-  "restoreRecoveryDraftTitle": "Restaurer le travail non enregistre ?",
   "rotateCanvasTooltip": "Pivoter la toile de 90 degres sens horaire",
   "runOnMostBrowsers": "Fonctionne sur la plupart des navigateurs.",
   "saveAsFile": "Enregistrer sous {fileName}",

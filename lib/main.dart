@@ -74,14 +74,9 @@ Future<void> main() async {
     _platformFileHandlingReady = true;
 
     if (startupFilePath == null || startupFilePath.isEmpty) {
-      final BuildContext? navigatorContext = mainApp.navigatorKey.currentContext;
-      if (navigatorContext != null) {
-        await mainApp.draftRecoveryController.maybeRestoreDraft(
-          // ignore: use_build_context_synchronously
-          context: navigatorContext,
-          appProvider: mainApp.appProvider,
-        );
-      }
+      await mainApp.draftRecoveryController.restoreDraftIfAvailable(
+        appProvider: mainApp.appProvider,
+      );
     }
 
     if (startupFilePath != null && startupFilePath.isNotEmpty) {
@@ -271,6 +266,7 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: <SingleChildWidget>[
+        Provider<DraftRecoveryController>.value(value: draftRecoveryController),
         // ignore: always_specify_types
         ChangeNotifierProvider(create: (final BuildContext _) => shellProvider),
         // ignore: always_specify_types

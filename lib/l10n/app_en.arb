@@ -69,7 +69,6 @@
   "discard": "Discard",
   "discardAndOpen": "Discard and Open",
   "discardCurrentDocumentQuestion": "Discard current document?",
-  "discardRecoveryDraft": "Discard",
   "downloadAsFile": "Download as {fileName}",
   "@downloadAsFile": {
     "placeholders": {
@@ -152,9 +151,6 @@
   },
   "platforms": "Available on...",
   "resizeRotate": "Resize / Rotate",
-  "restoreRecoveryDraft": "Restore",
-  "restoreRecoveryDraftMessage": "fPaint found a recovery draft from your last session. Restore it now or discard it.",
-  "restoreRecoveryDraftTitle": "Restore unsaved work?",
   "rotateCanvasTooltip": "Rotate Canvas 90° CW",
   "runOnMostBrowsers": "Run on any OS with most browsers.",
   "saveAsFile": "Save as {fileName}",

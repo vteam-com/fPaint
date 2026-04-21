@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -65,28 +64,8 @@ void main() {
 
     await preferences.setRecoveryDraftSourceFilePath('/tmp/recovered.ora');
     await controller.initialize();
-    await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Builder(
-          builder: (final BuildContext context) {
-            return const SizedBox.shrink();
-          },
-        ),
-      ),
-    );
-
-    final BuildContext context = tester.element(find.byType(SizedBox));
-    final Future<void> restoreFuture = controller.maybeRestoreDraft(
-      context: context,
-      appProvider: appProvider,
-    );
-
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Restore'));
-    await tester.pumpAndSettle();
-    await restoreFuture;
+    await controller.restoreDraftIfAvailable(appProvider: appProvider);
+    await tester.pump();
 
     expect(restoredBytes, Uint8List.fromList(<int>[9, 8, 7]));
     expect(shellProvider.loadedFileName, '/tmp/recovered.ora');
@@ -97,12 +76,48 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('discard removes the stored recovery draft', (final WidgetTester tester) async {
+  testWidgets('automatic restore loads the stored recovery draft without a prompt', (final WidgetTester tester) async {
     final AppPreferences preferences = await _createPreferences();
     final LayersProvider layers = _resetLayers();
     final ShellProvider shellProvider = ShellProvider();
     final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
-      bytes: Uint8List.fromList(<int>[4, 5, 6]),
+      bytes: Uint8List.fromList(<int>[6, 5, 4]),
+    );
+    final AppProvider appProvider = AppProvider(preferences: preferences);
+    Uint8List? restoredBytes;
+    final DraftRecoveryController controller = DraftRecoveryController(
+      preferences: preferences,
+      layers: layers,
+      shellProvider: shellProvider,
+      storage: storage,
+      restorer: (final LayersProvider targetLayers, final Uint8List bytes) async {
+        restoredBytes = bytes;
+        targetLayers.addBottom('Recovered Automatically');
+      },
+      saveDebounce: Duration.zero,
+    );
+
+    await preferences.setRecoveryDraftSourceFilePath('/tmp/auto.ora');
+    await controller.initialize();
+
+    await controller.restoreDraftIfAvailable(appProvider: appProvider);
+    await tester.pump();
+
+    expect(restoredBytes, Uint8List.fromList(<int>[6, 5, 4]));
+    expect(shellProvider.loadedFileName, '/tmp/auto.ora');
+    expect(layers.length, 1);
+    expect(layers.list.single.name, 'Recovered Automatically');
+    expect(layers.hasChanged, true);
+
+    controller.dispose();
+  });
+
+  testWidgets('restore discards empty stored recovery drafts', (final WidgetTester tester) async {
+    final AppPreferences preferences = await _createPreferences();
+    final LayersProvider layers = _resetLayers();
+    final ShellProvider shellProvider = ShellProvider();
+    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
+      bytes: Uint8List(0),
     );
     final AppProvider appProvider = AppProvider(preferences: preferences);
     final DraftRecoveryController controller = DraftRecoveryController(
@@ -115,28 +130,8 @@ void main() {
 
     await preferences.setRecoveryDraftSourceFilePath('/tmp/discard.ora');
     await controller.initialize();
-    await tester.pumpWidget(
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Builder(
-          builder: (final BuildContext context) {
-            return const SizedBox.shrink();
-          },
-        ),
-      ),
-    );
-
-    final BuildContext context = tester.element(find.byType(SizedBox));
-    final Future<void> discardFuture = controller.maybeRestoreDraft(
-      context: context,
-      appProvider: appProvider,
-    );
-
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Discard'));
-    await tester.pumpAndSettle();
-    await discardFuture;
+    await controller.restoreDraftIfAvailable(appProvider: appProvider);
+    await tester.pump();
 
     expect(storage.bytes, isNull);
     expect(await preferences.getRecoveryDraftSourceFilePath(), isNull);
