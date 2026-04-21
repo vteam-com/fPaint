@@ -292,6 +292,7 @@ class AppDefaults {
   static const bool useApplePencil = false;
   static const Duration debounceDuration = Duration(seconds: 1);
   static const Duration clipboardAccessTimeout = Duration(seconds: 2);
+  static const Duration recoverySaveDebounce = Duration(seconds: 2);
   static const Duration integrationEvidenceCollectionDelay = Duration(seconds: 2);
   static const Duration integrationVisualCheckpointDelay = Duration(milliseconds: 700);
   static const int integrationEvidenceJpegQuality = 95;

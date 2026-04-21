@@ -13,6 +13,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -42,6 +43,7 @@ Future<void> main() async {
 
   await MyWindowManager.setupMainWindow();
   mainApp = MyApp();
+  await mainApp.draftRecoveryController.initialize();
 
   // Platform channel for file opening.
   _fileChannel.setMethodCallHandler((final MethodCall call) async {
@@ -70,6 +72,17 @@ Future<void> main() async {
     _queuedPlatformFilePath = null;
 
     _platformFileHandlingReady = true;
+
+    if (startupFilePath == null || startupFilePath.isEmpty) {
+      final BuildContext? navigatorContext = mainApp.navigatorKey.currentContext;
+      if (navigatorContext != null) {
+        await mainApp.draftRecoveryController.maybeRestoreDraft(
+          // ignore: use_build_context_synchronously
+          context: navigatorContext,
+          appProvider: mainApp.appProvider,
+        );
+      }
+    }
 
     if (startupFilePath != null && startupFilePath.isNotEmpty) {
       _queuedPlatformFilePath = startupFilePath;
@@ -226,6 +239,13 @@ class MyApp extends StatelessWidget {
   /// Provides application-level functionalities and states.
   late final AppProvider appProvider = AppProvider(preferences: appPreferences);
 
+  /// Manages autosave snapshots and startup draft recovery.
+  late final DraftRecoveryController draftRecoveryController = DraftRecoveryController(
+    preferences: appPreferences,
+    layers: layersProvider,
+    shellProvider: shellProvider,
+  );
+
   /// Provides functionalities and states for managing layers.
   final LayersProvider layersProvider = LayersProvider();
 
@@ -237,7 +257,6 @@ class MyApp extends StatelessWidget {
 
   /// Provides functionalities for undo and redo operations.
   final UndoProvider undoProvider = UndoProvider();
-
   @override
   Widget build(final BuildContext context) {
     final BorderSide popupBorder = BorderSide(
