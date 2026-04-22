@@ -113,7 +113,7 @@ extension AppIconAssetPath on AppIcon {
       case AppIcon.colorize:
         return AppIconAssets.colorize;
       case AppIcon.contentPasteGo:
-        return AppIconAssets.contentPasteGo;
+        return AppIconAssets.clipboardCopy;
       case AppIcon.copy:
         return AppIconAssets.copy;
       case AppIcon.create:
@@ -175,7 +175,7 @@ extension AppIconAssetPath on AppIcon {
       case AppIcon.outbound:
         return AppIconAssets.outbound;
       case AppIcon.paste:
-        return AppIconAssets.paste;
+        return AppIconAssets.clipboardPaste;
       case AppIcon.playlistAdd:
         return AppIconAssets.playlistAdd;
       case AppIcon.playlistRemove:

@@ -97,6 +97,18 @@ Widget shortCutsForMainApp(
       ): const PasteIntent(),
 
       //-------------------------------------------------
+      // Duplicate (selection copy + paste)
+      LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.keyD,
+      ): const DuplicateIntent(),
+
+      LogicalKeySet(
+        LogicalKeyboardKey.meta,
+        LogicalKeyboardKey.keyD,
+      ): const DuplicateIntent(),
+
+      //-------------------------------------------------
       // Tab key
       LogicalKeySet(
         LogicalKeyboardKey.tab,
@@ -167,6 +179,9 @@ Widget shortCutsForMainApp(
         ),
         PasteIntent: CallbackAction<PasteIntent>(
           onInvoke: (final PasteIntent _) async => await appProvider.paste(),
+        ),
+        DuplicateIntent: CallbackAction<DuplicateIntent>(
+          onInvoke: (final DuplicateIntent _) async => await appProvider.regionDuplicate(),
         ),
 
         //-------------------------------------------------------------
@@ -280,6 +295,12 @@ class CopyIntent extends Intent {
 class PasteIntent extends Intent {
   /// Creates a [PasteIntent].
   const PasteIntent();
+}
+
+/// An [Intent] that triggers the duplicate action.
+class DuplicateIntent extends Intent {
+  /// Creates a [DuplicateIntent].
+  const DuplicateIntent();
 }
 
 /// An [Intent] that triggers the escape action.

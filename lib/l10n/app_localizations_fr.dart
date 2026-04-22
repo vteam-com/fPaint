@@ -118,6 +118,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get copyToClipboard => 'Copier dans le presse-papiers';
 
   @override
+  String get duplicate => 'Dupliquer';
+
+  @override
   String get create => 'Creer';
 
   @override

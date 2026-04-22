@@ -38,6 +38,7 @@ class SelectionRectWidget extends StatefulWidget {
     required this.onRotate,
     required this.onToggleTransformMode,
     required this.onCopy,
+    required this.onDuplicate,
     this.enableMoveAndResize = true,
     this.isDrawing = false,
   });
@@ -53,6 +54,9 @@ class SelectionRectWidget extends StatefulWidget {
 
   /// A callback that is called when the selection rectangle is dragged.
   final void Function(Offset) onDrag;
+
+  /// A callback that duplicates the selection (copy then paste).
+  final VoidCallback onDuplicate;
 
   /// A callback that is called when the selection rectangle is resized.
   final void Function(NineGridHandle, Offset) onResize;
@@ -264,17 +268,31 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     final AppLocalizations l10n,
   ) {
     final double buttonSize = AppInteraction.imagePlacementButtonSize;
+    final double spacing = AppInteraction.imagePlacementButtonSpacing;
+    final double controlsWidth = buttonSize * AppMath.pair + spacing;
     final double controlsTop = bounds.bottom + AppInteraction.imagePlacementButtonSpacing;
 
     return Positioned(
-      left: bounds.center.dx - buttonSize / AppMath.pair,
+      left: bounds.center.dx - controlsWidth / AppMath.pair,
       top: controlsTop,
-      child: buildOverlayCircleButton(
-        tooltip: l10n.copyToClipboard,
-        color: AppColors.selected,
-        cursor: SystemMouseCursors.click,
-        onTap: widget.onCopy,
-        child: const AppSvgIcon(icon: AppIcon.copy, size: AppLayout.iconSize, color: Colors.white),
+      child: Row(
+        spacing: spacing,
+        children: <Widget>[
+          buildOverlayCircleButton(
+            tooltip: l10n.copyToClipboard,
+            color: AppColors.selected,
+            cursor: SystemMouseCursors.click,
+            onTap: widget.onCopy,
+            child: const AppSvgIcon(icon: AppIcon.contentPasteGo, size: AppLayout.iconSize, color: Colors.white),
+          ),
+          buildOverlayCircleButton(
+            tooltip: l10n.duplicate,
+            color: AppColors.selected,
+            cursor: SystemMouseCursors.click,
+            onTap: widget.onDuplicate,
+            child: const AppSvgIcon(icon: AppIcon.copy, size: AppLayout.iconSize, color: Colors.white),
+          ),
+        ],
       ),
     );
   }

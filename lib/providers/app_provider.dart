@@ -162,14 +162,51 @@ class AppProvider extends ChangeNotifier {
 
   /// Copies a region on the canvas.
   Future<void> regionCopy() async {
-    final ui.Rect bounds = selectorModel.path1!.getBounds();
-    if (bounds.isEmpty) {
-      // nothing to copy
+    final ui.Image? clippedImage = await _createSelectionImage();
+    if (clippedImage == null) {
       return;
     }
 
-    final ui.Image image = layers.selectedLayer.toImageForStorage(this.layers.size);
+    // Copy the image to the clipboard
+    await copyImageToClipboard(clippedImage);
+  }
 
+  /// Duplicates the current selection without touching system clipboard data.
+  Future<void> regionDuplicate() async {
+    final ui.Image? clippedImage = await _createSelectionImage();
+    if (clippedImage == null) {
+      return;
+    }
+
+    _startImagePlacement(clippedImage);
+  }
+
+  /// Pastes an image from the clipboard onto the canvas.
+  Future<void> paste() async {
+    final ui.Image? image = await getImageFromClipboard();
+    if (image == null) {
+      return;
+    }
+
+    _startImagePlacement(image);
+  }
+
+  /// Renders the active selection bounds into a standalone clipped image.
+  ///
+  /// Returns `null` when there is no active selection path or when the
+  /// computed selection bounds are empty.
+  Future<ui.Image?> _createSelectionImage() async {
+    if (selectorModel.path1 == null) {
+      // No active selection to copy/duplicate.
+      return null;
+    }
+
+    final ui.Rect bounds = selectorModel.path1!.getBounds();
+    if (bounds.isEmpty) {
+      return null;
+    }
+
+    final ui.Image image = layers.selectedLayer.toImageForStorage(this.layers.size);
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final ui.Canvas canvas = ui.Canvas(recorder);
 
@@ -182,23 +219,14 @@ class AppProvider extends ChangeNotifier {
     // Draw the image, making sure to align it properly
     canvas.drawImage(image, Offset.zero, Paint());
 
-    // Convert the recorded drawing into an image
-    final ui.Image clippedImage = await recorder.endRecording().toImage(
+    return recorder.endRecording().toImage(
       bounds.width.toInt(),
       bounds.height.toInt(),
     );
-
-    // Copy the image to the clipboard
-    await copyImageToClipboard(clippedImage);
   }
 
-  /// Pastes an image from the clipboard onto the canvas.
-  Future<void> paste() async {
-    final ui.Image? image = await getImageFromClipboard();
-    if (image == null) {
-      return;
-    }
-
+  /// Starts interactive placement for [image], centered on the current canvas.
+  void _startImagePlacement(final ui.Image image) {
     // Center the image on the visible canvas area.
     final Offset center = Offset(
       layers.size.width / AppMath.pair,
