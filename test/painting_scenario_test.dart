@@ -40,8 +40,10 @@ part 'painting_scenario_layers/scenario_export_outputs.dart';
 // ---------------------------------------------------------------------------
 
 const String _testLanguageCode = 'en';
+const double _testSidePanelSplitHeight = 400.0;
 const Map<String, Object> _testPreferences = <String, Object>{
   AppPreferences.keyLanguageCode: _testLanguageCode,
+  AppPreferences.keySidePanelDistance: _testSidePanelSplitHeight,
 };
 
 const String _scenarioTestName = 'Painting scenario runs entirely in unit tests without a simulator';
@@ -196,42 +198,19 @@ const Offset _roofFillCanvasPosition = Offset(
 );
 const Color _roofFillColor = Color.fromARGB(255, 183, 104, 19);
 
-// Fence layer
-const String _fenceLayerName = 'Fence';
-const double _fenceY = 180.0;
-const double _fenceHeight = 80.0;
-const double _fencePicketSpacing = 80.0;
-const double _fenceStartX = -200.0;
-const int _fencePicketCount = 6;
-const double _fencePicketBrushSize = 10.0;
-const double _fencePicketStripeOffset = 4.0;
-const Color _fencePicketCenterColor = Color.fromARGB(255, 231, 214, 187);
-const Color _fencePicketRightColor = Color.fromARGB(255, 140, 80, 255);
-const Offset _fenceRailTopStart = Offset(-210, _fenceY - 90);
-const Offset _fenceRailTopEnd = Offset(300, _fenceY - 80);
-const Offset _fenceRailBottomStart = Offset(-210, _fenceY - 70);
-const Offset _fenceRailBottomEnd = Offset(300, _fenceY - 60);
-
 // Fence shadow via wand-select + fill + skew
-const String _fenceShadowLayerName = 'Fence Shadow';
-const int _fenceShadowWandTolerance = 48;
-const Color _fenceShadowFillColor = Color.fromARGB(50, 100, 0, 180);
-final Offset _fenceShadowWandTapOffset = Offset(
-  (_fenceRailTopStart.dx + _fenceRailTopEnd.dx) / AppMath.pair,
-  (_fenceRailTopStart.dy + _fenceRailTopEnd.dy) / AppMath.pair,
-);
-const double _fenceShadowGroundOffset = 100.0;
-const double _fenceShadowTopHandleDelta = _fenceHeight + _fenceShadowGroundOffset;
+const Color _shadowColor = Color.fromARGB(50, 100, 0, 180);
 
-// Shadows layer (house + fence)
-const String _shadowsLayerName = 'Shadows';
-const Color _shadowColorNear = Color.fromARGB(190, 0, 60, 0);
-const Color _shadowColorFar = Color.fromARGB(0, 0, 60, 0);
-const Color _shadowStrokeColor = Colors.transparent;
-const double _shadowBrushSize = 0.0;
-const Offset _shadowOffset = Offset(30, 20);
-const Offset _shadowGradientDelta = Offset(0, 80);
-const double _shadowSkewRight = 100.0;
+// House Shadow layer (wand-select + fill + skew, same technique as fence shadow)
+const String _houseShadowLayerName = 'House Shadow';
+const int _houseShadowWandTolerance = 75;
+const double _houseHeight = 200.0;
+const double _houseShadowGroundOffset = 100.0;
+const double _houseShadowTopHandleDelta = _houseHeight + _houseShadowGroundOffset;
+final Offset _houseShadowWandTapOffset = Offset(
+  (_houseBodyStart.dx + _houseBodyEnd.dx) / AppMath.pair,
+  (_houseBodyStart.dy + _houseBodyEnd.dy) / AppMath.pair,
+);
 
 // Birds layer
 const String _birdsLayerName = 'Birds';
@@ -267,8 +246,7 @@ const double _signatureMarginRight = 10.0;
 const double _signatureMarginBottom = 10.0;
 const double _signaturePositionTolerance = 1.0;
 
-// Expected: background + sky + mountains + clouds + sun + land + house + fence + birds + signature = 10
-// Expected: background + sky + mountains + clouds + sun + land + shadows + house + fence shadow + fence + birds + signature = 12
+// Expected: background + sky + mountains + clouds + sun + land + house + house shadow + fence + fence shadow + birds + signature = 12
 const String _backgroundLayerName = 'Background';
 const int _expectedLayerCountAfterScene = 12;
 
@@ -403,8 +381,8 @@ void main() {
       await paintLayerSun(session);
       await paintLayerLand(session);
       await paintLayerLake(session);
-      await paintLayerShadows(session);
       await paintLayerHouse(session);
+      await paintLayerHouseShadow(session);
       await paintLayerFence(session);
       await paintLayerFenceShadow(session);
       await paintLayerBirds(session);
