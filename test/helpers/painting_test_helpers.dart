@@ -36,6 +36,18 @@ const double _humanDragSteps = 3;
 /// Minimum number of vertices required to form a lasso selection polygon.
 const int _lassoSelectionMinimumPointCount = 3;
 
+/// Tooltip label for selector math: replace current selection.
+const String _selectorMathReplaceTooltip = 'Replace';
+
+/// Tooltip label for selector math: add to current selection.
+const String _selectorMathAddTooltip = 'Add';
+
+/// Tooltip label for selector math: remove from current selection.
+const String _selectorMathRemoveTooltip = 'Remove';
+
+/// Tooltip label for selector operation: invert current selection.
+const String _selectorInvertTooltip = 'Invert';
+
 /// Minimum number of points required to draw a freehand stroke.
 const int _freehandStrokeMinimumPointCount = 2;
 
@@ -543,6 +555,24 @@ Future<void> selectRectangleArea(
   await tester.pump();
 }
 
+/// Selects an oval area on the canvas.
+Future<void> selectCircleArea(
+  final WidgetTester tester, {
+  required final Offset center,
+  required final double radius,
+}) async {
+  await tapByKey(tester, Keys.toolSelector);
+  await tester.pump();
+
+  await tapByKey(tester, Keys.toolSelectorModeCircle);
+  await tester.pump();
+
+  final Offset start = center - Offset(radius / AppMath.pair, 0);
+  final Offset end = center + Offset(radius / AppMath.pair, 0);
+  await dragLikeHuman(tester, start, end);
+  await tester.pump();
+}
+
 /// Selects a free-style lasso area on the canvas.
 Future<void> selectLassoArea(
   final WidgetTester tester, {
@@ -633,6 +663,79 @@ Future<void> selectWandArea(
 
   await tapLikeHuman(tester, position);
   await pumpForUnitTestUiSettle(tester);
+}
+
+/// Sets selector math mode to replace.
+Future<void> setSelectorMathReplace(final WidgetTester tester) async {
+  await tapByKey(tester, Keys.toolSelector);
+  await tester.pump();
+  await tapByTooltip(tester, _selectorMathReplaceTooltip);
+  await tester.pump();
+}
+
+/// Sets selector math mode to add.
+Future<void> setSelectorMathAdd(final WidgetTester tester) async {
+  await tapByKey(tester, Keys.toolSelector);
+  await tester.pump();
+  await tapByTooltip(tester, _selectorMathAddTooltip);
+  await tester.pump();
+}
+
+/// Sets selector math mode to remove.
+Future<void> setSelectorMathRemove(final WidgetTester tester) async {
+  await tapByKey(tester, Keys.toolSelector);
+  await tester.pump();
+  await tapByTooltip(tester, _selectorMathRemoveTooltip);
+  await tester.pump();
+}
+
+/// Inverts the current selector path.
+Future<void> invertCurrentSelection(final WidgetTester tester) async {
+  await tapByKey(tester, Keys.toolSelector);
+  await tester.pump();
+  await tapByTooltip(tester, _selectorInvertTooltip);
+  await tester.pump();
+}
+
+/// Drags one overlay handle of the current selection by [delta].
+Future<void> dragSelectionHandle(
+  final WidgetTester tester, {
+  required final TransformOverlayHandle handle,
+  required final Offset delta,
+}) async {
+  final Finder handles = find.byType(OverlayDragHandle);
+  expect(
+    handles.evaluate().length,
+    _transformOverlayHandleCount,
+    reason: 'Selection overlay should expose all drag handles',
+  );
+
+  final Finder handleFinder = handles.at(_transformOverlayHandleIndex(handle));
+  final Offset start = tester.getCenter(handleFinder);
+  await dragLikeHuman(tester, start, start + delta);
+  await tester.pump();
+}
+
+/// Scales the current selection through the top overlay control.
+Future<void> scaleSelectionWithOverlayControl(
+  final WidgetTester tester, {
+  required final Offset delta,
+}) async {
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppLocalizations l10n = context.l10n;
+  await dragByTooltip(tester, tooltip: l10n.scale, delta: delta);
+  await tester.pump();
+}
+
+/// Rotates the current selection through the top overlay control.
+Future<void> rotateSelectionWithOverlayControl(
+  final WidgetTester tester, {
+  required final Offset delta,
+}) async {
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppLocalizations l10n = context.l10n;
+  await dragByTooltip(tester, tooltip: l10n.resizeRotate, delta: delta);
+  await tester.pump();
 }
 
 /// Deforms the current selection through the transform overlay and applies it.
