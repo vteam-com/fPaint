@@ -38,6 +38,42 @@ const Offset _skyGradientBottom = Offset(0, -20);
 const Color _skyColorTop = Color.fromARGB(255, 34, 97, 168);
 const Color _skyColorBottom = Color.fromARGB(255, 110, 161, 219);
 
+// Mountains layer
+const String _mountainsLayerName = 'Mountains';
+const Color _mountainGradientTopColor = Colors.white;
+const Color _mountainGradientBlueColor = Color.fromARGB(255, 110, 161, 219);
+const Offset _mountain1BaseLeft = Offset(-380, 80);
+const Offset _mountain1Peak = Offset(-190, -110);
+const Offset _mountain1PeakLeftCurve = Offset(-212, -96);
+const Offset _mountain1PeakRightCurve = Offset(-168, -96);
+const Offset _mountain1BaseRight = Offset(40, 80);
+const Offset _mountain1GradientQuickDropPoint = Offset(-190, -92);
+const Offset _mountain1FillPoint = Offset(-190, -24);
+const List<Offset> _mountain1SelectionPoints = <Offset>[
+  _mountain1BaseLeft,
+  _mountain1PeakLeftCurve,
+  _mountain1Peak,
+  _mountain1PeakRightCurve,
+  _mountain1BaseRight,
+  _mountain1BaseLeft,
+];
+
+// Clouds layer (drawn with 5 circles and bottom trimmed by selection erase)
+const String _cloudsLayerName = 'Clouds';
+const Color _cloudFillColor = Color.fromARGB(130, 255, 255, 255);
+const Offset _cloud1Center = Offset(110, -182);
+const double _cloud1Radius = 30.0;
+const Offset _cloud2Center = Offset(130, -190);
+const double _cloud2Radius = 58.0;
+const Offset _cloud3Center = Offset(200, -212);
+const double _cloud3Radius = 100.0;
+const Offset _cloud4Center = Offset(270, -190);
+const double _cloud4Radius = 60.0;
+const Offset _cloud5Center = Offset(290, -180);
+const double _cloud5Radius = 44.0;
+const Offset _cloudBottomCutoutStart = Offset(80, -180);
+const Offset _cloudBottomCutoutEnd = Offset(320, -40);
+
 // Sun layer
 const String _sunLayerName = 'Sun';
 const Offset _sunOffset = Offset(-200, -220);
@@ -209,9 +245,9 @@ const double _signatureMarginRight = 10.0;
 const double _signatureMarginBottom = 10.0;
 const double _signaturePositionTolerance = 1.0;
 
-// Expected: background + sky + sun + land + house + fence + birds + signature = 8
-// Expected: background + sky + sun + land + shadows + house + fence shadow + fence + birds + signature = 10
-const int _expectedLayerCountAfterScene = 10;
+// Expected: background + sky + mountains + clouds + sun + land + house + fence + birds + signature = 10
+// Expected: background + sky + mountains + clouds + sun + land + shadows + house + fence shadow + fence + birds + signature = 12
+const int _expectedLayerCountAfterScene = 12;
 
 // Screenshot filenames
 const String _finalOraFilename = 'final.ora';
@@ -309,6 +345,137 @@ void main() {
           GradientPoint(color: _skyColorBottom, offset: canvasCenter + _skyGradientBottom),
         ],
       );
+      await videoRecorder.captureFrame();
+
+      // ---------------------------------------------------------------
+      // Hide Sky Layer before drawing Mountains
+      // ---------------------------------------------------------------
+      final BuildContext contextBeforeMountains = tester.element(find.byType(MainView));
+      final LayersProvider layersProviderBeforeMountains = LayersProvider.of(contextBeforeMountains);
+      for (int i = 0; i < layersProviderBeforeMountains.length; i++) {
+        if (layersProviderBeforeMountains.get(i).name == _skyLayerName) {
+          layersProviderBeforeMountains.get(i).isVisible = false;
+          layersProviderBeforeMountains.update();
+          await tester.pump();
+          break;
+        }
+      }
+
+      // ---------------------------------------------------------------
+      // Draw Mountains (background silhouettes)
+      // ---------------------------------------------------------------
+      await PaintingLayerHelpers.addNewLayer(tester, _mountainsLayerName);
+
+      await selectLassoArea(
+        tester,
+        points: _mountain1SelectionPoints.map((final Offset point) => canvasCenter + point).toList(),
+      );
+      await performFloodFillGradient(
+        tester,
+        gradientMode: FillMode.linear,
+        gradientPoints: <GradientPoint>[
+          GradientPoint(
+            color: _mountainGradientTopColor,
+            offset: canvasCenter + _mountain1Peak,
+          ),
+          GradientPoint(
+            color: _mountainGradientBlueColor,
+            offset: canvasCenter + _mountain1GradientQuickDropPoint,
+          ),
+          GradientPoint(
+            color: _mountainGradientBlueColor,
+            offset: canvasCenter + _mountain1FillPoint,
+          ),
+        ],
+      );
+      final BuildContext mountainContext = tester.element(find.byType(MainView));
+      final AppProvider mountainAppProvider = AppProvider.of(mountainContext, listen: false);
+      mountainAppProvider.selectorModel.clear();
+      mountainAppProvider.update();
+      await tester.pump();
+
+      // ---------------------------------------------------------------
+      // Unhide Sky Layer after drawing Mountains
+      // ---------------------------------------------------------------
+      final BuildContext contextAfterMountains = tester.element(find.byType(MainView));
+      final LayersProvider layersProviderAfterMountains = LayersProvider.of(contextAfterMountains);
+      for (int i = 0; i < layersProviderAfterMountains.length; i++) {
+        if (layersProviderAfterMountains.get(i).name == _skyLayerName) {
+          layersProviderAfterMountains.get(i).isVisible = true;
+          layersProviderAfterMountains.update();
+          await tester.pump();
+          break;
+        }
+      }
+
+      await videoRecorder.captureFrame();
+
+      // ---------------------------------------------------------------
+      // Draw Clouds (selector math + transforms to exercise selector paths)
+      // ---------------------------------------------------------------
+      await PaintingLayerHelpers.addNewLayer(tester, _cloudsLayerName);
+
+      // Draw 5 overlapping circles
+      await drawCircleWithHumanGestures(
+        tester,
+        center: canvasCenter + _cloud1Center,
+        radius: _cloud1Radius,
+        brushSize: 0,
+        brushColor: Colors.transparent,
+        fillColor: _cloudFillColor,
+      );
+      await drawCircleWithHumanGestures(
+        tester,
+        center: canvasCenter + _cloud2Center,
+        radius: _cloud2Radius,
+        brushSize: 0,
+        brushColor: Colors.transparent,
+        fillColor: _cloudFillColor,
+      );
+      await drawCircleWithHumanGestures(
+        tester,
+        center: canvasCenter + _cloud3Center,
+        radius: _cloud3Radius,
+        brushSize: 0,
+        brushColor: Colors.transparent,
+        fillColor: _cloudFillColor,
+      );
+      await drawCircleWithHumanGestures(
+        tester,
+        center: canvasCenter + _cloud4Center,
+        radius: _cloud4Radius,
+        brushSize: 0,
+        brushColor: Colors.transparent,
+        fillColor: _cloudFillColor,
+      );
+      await drawCircleWithHumanGestures(
+        tester,
+        center: canvasCenter + _cloud5Center,
+        radius: _cloud5Radius,
+        brushSize: 0,
+        brushColor: Colors.transparent,
+        fillColor: _cloudFillColor,
+      );
+
+      final BuildContext cloudContext = tester.element(find.byType(MainView));
+      final AppProvider cloudAppProvider = AppProvider.of(cloudContext, listen: false);
+      expect(cloudAppProvider.layers.selectedLayer.actionStack, isNotEmpty);
+
+      // Cut a flat bottom using a fresh rectangle selection, then delete it.
+      await selectRectangleArea(
+        tester,
+        startPosition: canvasCenter + _cloudBottomCutoutStart,
+        endPosition: canvasCenter + _cloudBottomCutoutEnd,
+      );
+      expect(cloudAppProvider.selectorModel.path1, isNotNull);
+
+      cloudAppProvider.regionErase();
+      await tester.pump();
+
+      await setSelectorMathReplace(tester);
+      await tapByKey(tester, Keys.toolSelectorCancel);
+
+      expect(cloudAppProvider.selectorModel.isVisible, isFalse);
       await videoRecorder.captureFrame();
 
       await PaintingLayerHelpers.addNewLayer(tester, _sunLayerName);
@@ -828,7 +995,8 @@ void main() {
       expect(
         layersProvider.length,
         _expectedLayerCountAfterScene,
-        reason: 'Should have background + sky + sun + land + house + fence + birds + signature',
+        reason:
+            'Should have background + sky + mountains + clouds + sun + land + shadows + house + fence shadow + fence + birds + signature',
       );
 
       // Capture final exports through the real main-menu export UI.
