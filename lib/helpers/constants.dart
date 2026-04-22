@@ -137,7 +137,8 @@ class AppIconAssets {
   static const String close = 'assets/icons/close.svg';
   static const String colorLens = 'assets/icons/color_lens.svg';
   static const String colorize = 'assets/icons/colorize.svg';
-  static const String contentPasteGo = 'assets/icons/content_paste_go.svg';
+  static const String clipboardCopy = 'assets/icons/clipboard_copy.svg';
+  static const String clipboardPaste = 'assets/icons/clipboard_paste.svg';
   static const String copy = 'assets/icons/copy.svg';
   static const String create = 'assets/icons/create.svg';
   static const String cropFree = 'assets/icons/crop_free.svg';
@@ -168,7 +169,7 @@ class AppIconAssets {
   static const String moreVert = 'assets/icons/more_vert.svg';
   static const String openInFull = 'assets/icons/open_in_full.svg';
   static const String outbound = 'assets/icons/outbound.svg';
-  static const String paste = 'assets/icons/paste.svg';
+  static const String clipboard = 'assets/icons/paste.svg';
   static const String playlistAdd = 'assets/icons/playlist_add.svg';
   static const String playlistRemove = 'assets/icons/playlist_remove.svg';
   static const String powerSettingsNew = 'assets/icons/power_settings_new.svg';

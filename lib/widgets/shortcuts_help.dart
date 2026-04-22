@@ -15,6 +15,7 @@ const String _actionRedo = 'Redo';
 const String _actionCut = 'Cut';
 const String _actionCopy = 'Copy';
 const String _actionPaste = 'Paste';
+const String _actionDuplicate = 'Duplicate';
 const String _actionZoomIn = 'Zoom In';
 const String _actionZoomOut = 'Zoom Out';
 const String _actionResetZoom = 'Reset Zoom';
@@ -24,7 +25,6 @@ const String _actionSelectionTool = 'Selection Tool';
 const String _actionFillTool = 'Fill Tool';
 const String _actionTextTool = 'Text Tool';
 const String _actionNewLayer = 'New Layer';
-const String _actionDuplicateLayer = 'Duplicate Layer';
 const String _actionDeleteLayer = 'Delete Layer';
 const String _labelDelete = 'Delete';
 const String _labelClose = 'Close';
@@ -76,6 +76,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
                 <String, String>{'keys': '$mod $_keyX', 'description': _actionCut},
                 <String, String>{'keys': '$mod $_keyC', 'description': _actionCopy},
                 <String, String>{'keys': '$mod $_keyV', 'description': _actionPaste},
+                <String, String>{'keys': '$mod $_keyD', 'description': _actionDuplicate},
               ],
             ),
             _buildShortcutGroup(
@@ -102,10 +103,6 @@ class ShortcutsHelpDialog extends StatelessWidget {
                 <String, String>{
                   'keys': '$mod $_modShift $_keyN',
                   'description': _actionNewLayer,
-                },
-                <String, String>{
-                  'keys': '$mod $_modShift $_keyD',
-                  'description': _actionDuplicateLayer,
                 },
                 <String, String>{
                   'keys': _labelDelete,

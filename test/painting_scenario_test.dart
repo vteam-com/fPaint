@@ -35,20 +35,24 @@ const String _scenarioTestName = 'Painting scenario runs entirely in unit tests 
 const String _skyLayerName = 'Sky';
 const Offset _skyGradientTop = Offset(0, -240);
 const Offset _skyGradientBottom = Offset(0, -20);
-const Color _skyColorTop = Color.fromARGB(255, 34, 97, 168);
+const Color _skyColorTop = ui.Color.fromARGB(255, 27, 87, 155);
 const Color _skyColorBottom = Color.fromARGB(255, 110, 161, 219);
 
 // Mountains layer
 const String _mountainsLayerName = 'Mountains';
-const Color _mountainGradientTopColor = Colors.white;
-const Color _mountainGradientBlueColor = Color.fromARGB(255, 110, 161, 219);
+const Color _mountainGradientTopColor = ui.Color.fromARGB(255, 187, 220, 220);
+const Color _mountainGradientBlueColor = ui.Color.fromARGB(255, 8, 185, 147);
 const Offset _mountain1BaseLeft = Offset(-380, 80);
 const Offset _mountain1Peak = Offset(-190, -110);
-const Offset _mountain1PeakLeftCurve = Offset(-212, -96);
+const Offset _mountain1PeakLeftCurve = Offset(-200, -96);
 const Offset _mountain1PeakRightCurve = Offset(-168, -96);
 const Offset _mountain1BaseRight = Offset(40, 80);
 const Offset _mountain1GradientQuickDropPoint = Offset(-190, -92);
 const Offset _mountain1FillPoint = Offset(-190, -24);
+const double _mountainDuplicateLargeScaleFactor = 1.35;
+const Offset _mountainDuplicateLargeMoveDelta = Offset(-170, -24);
+const double _mountainDuplicateSmallScaleFactor = 0.7;
+const Offset _mountainDuplicateSmallMoveDelta = Offset(210, 14);
 const List<Offset> _mountain1SelectionPoints = <Offset>[
   _mountain1BaseLeft,
   _mountain1PeakLeftCurve,
@@ -383,13 +387,65 @@ void main() {
             offset: canvasCenter + _mountain1GradientQuickDropPoint,
           ),
           GradientPoint(
-            color: _mountainGradientBlueColor,
+            color: const ui.Color.fromARGB(255, 0, 112, 30),
             offset: canvasCenter + _mountain1FillPoint,
           ),
         ],
       );
+
       final BuildContext mountainContext = tester.element(find.byType(MainView));
       final AppProvider mountainAppProvider = AppProvider.of(mountainContext, listen: false);
+      final LayersProvider mountainLayersProvider = LayersProvider.of(mountainContext);
+
+      Future<void> duplicateSelectedMountain({
+        required final Offset moveDelta,
+        required final double scaleFactor,
+      }) async {
+        mountainAppProvider.selectAll();
+        mountainAppProvider.selectedAction = ActionType.selector;
+        mountainAppProvider.update();
+        await tester.pump();
+
+        await mountainAppProvider.regionDuplicate();
+        mountainAppProvider.imagePlacementModel.position += moveDelta;
+        mountainAppProvider.imagePlacementModel.scale *= scaleFactor;
+        mountainAppProvider.update();
+        await tester.pump();
+
+        await mountainAppProvider.confirmImagePlacement();
+        await tester.pump();
+      }
+
+      // Mountain 2: duplicate and move/scale larger.
+      await duplicateSelectedMountain(
+        moveDelta: _mountainDuplicateLargeMoveDelta,
+        scaleFactor: _mountainDuplicateLargeScaleFactor,
+      );
+      final LayerProvider firstDuplicateLayer = mountainLayersProvider.selectedLayer;
+
+      // Mountain 3: duplicate again and move/scale smaller.
+      await duplicateSelectedMountain(
+        moveDelta: _mountainDuplicateSmallMoveDelta,
+        scaleFactor: _mountainDuplicateSmallScaleFactor,
+      );
+      final LayerProvider secondDuplicateLayer = mountainLayersProvider.selectedLayer;
+
+      int mountainsLayerIndex = mountainLayersProvider.list.indexWhere(
+        (final LayerProvider layer) => layer.name == _mountainsLayerName,
+      );
+      final int secondDuplicateLayerIndex = mountainLayersProvider.list.indexOf(secondDuplicateLayer);
+      expect(secondDuplicateLayerIndex, isNonNegative, reason: 'Second duplicated mountain layer should exist');
+      expect(mountainsLayerIndex, isNonNegative, reason: 'Mountains layer should exist for merge');
+      await PaintingLayerHelpers.mergeLayer(tester, secondDuplicateLayerIndex, mountainsLayerIndex);
+
+      mountainsLayerIndex = mountainLayersProvider.list.indexWhere(
+        (final LayerProvider layer) => layer.name == _mountainsLayerName,
+      );
+      final int firstDuplicateLayerIndex = mountainLayersProvider.list.indexOf(firstDuplicateLayer);
+      expect(firstDuplicateLayerIndex, isNonNegative, reason: 'First duplicated mountain layer should exist');
+      expect(mountainsLayerIndex, isNonNegative, reason: 'Mountains layer should exist for merge');
+      await PaintingLayerHelpers.mergeLayer(tester, firstDuplicateLayerIndex, mountainsLayerIndex);
+
       mountainAppProvider.selectorModel.clear();
       mountainAppProvider.update();
       await tester.pump();

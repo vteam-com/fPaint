@@ -72,6 +72,7 @@
   "dropFileOpen": "Ouvrir le fichier",
   "dropFilePrompt": "Voulez-vous ajouter ceci comme nouveau calque ou ouvrir le fichier ?",
   "dropFileTitle": "Fichier déposé",
+  "duplicate": "Dupliquer",
   "editText": "Modifier le texte",
   "enterYourTextHere": "Saisissez votre texte ici...",
   "errorProcessingFile": "Erreur de traitement du fichier : {error}",
