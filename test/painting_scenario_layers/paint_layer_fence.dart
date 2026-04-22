@@ -1,5 +1,32 @@
 part of '../painting_scenario_test.dart';
 
+// Fence layer
+const String _fenceLayerName = 'Fence';
+const double _fenceY = 180.0;
+const double _fenceHeight = 80.0;
+const double _fencePicketSpacing = 100.0;
+const double _fenceStartX = -200.0;
+const int _fencePicketCount = 6;
+const double _fencePicketBrushSize = 10.0;
+const double _fencePicketStripeOffset = 4.0;
+const Color _fencePicketCenterColor = Color.fromARGB(255, 231, 214, 187);
+const Color _fencePicketRightColor = Color.fromARGB(255, 140, 80, 255);
+// top rail
+Offset _fenceRailTopStart = const Offset(-210, _fenceY - 70);
+Offset _fenceRailTopEnd = const Offset(300, _fenceY - 80);
+// bottom rail vertical offset from top rail
+const double _fenceRailVerticalSpacing = 40.0;
+
+// Fence shadow
+const String _fenceShadowLayerName = 'Fence Shadow';
+const int _fenceShadowWandTolerance = 48;
+final Offset _fenceShadowWandTapOffset = Offset(
+  (_fenceRailTopStart.dx + _fenceRailTopEnd.dx) / AppMath.pair,
+  (_fenceRailTopStart.dy + _fenceRailTopEnd.dy) / AppMath.pair,
+);
+const double _fenceShadowGroundOffset = 100.0;
+const double _fenceShadowTopHandleDelta = _fenceHeight + _fenceShadowGroundOffset;
+
 Future<void> paintLayerFence(final PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _fenceLayerName);
 
@@ -33,8 +60,8 @@ Future<void> paintLayerFence(final PaintingScenarioSession session) async {
   );
   await drawRectangleWithHumanGestures(
     session.tester,
-    startPosition: session.canvasCenter + _fenceRailBottomStart,
-    endPosition: session.canvasCenter + _fenceRailBottomEnd,
+    startPosition: session.canvasCenter + _fenceRailTopStart + const Offset(0, _fenceRailVerticalSpacing),
+    endPosition: session.canvasCenter + _fenceRailTopEnd + const Offset(0, _fenceRailVerticalSpacing),
     brushSize: AppStroke.thin,
     brushColor: Colors.grey,
     fillColor: _fencePicketCenterColor,
@@ -64,7 +91,7 @@ Future<void> paintLayerFenceShadow(final PaintingScenarioSession session) async 
   await performFloodFillSolid(
     session.tester,
     position: session.canvasCenter + _fenceShadowWandTapOffset,
-    color: _fenceShadowFillColor,
+    color: _shadowColor,
     tolerance: _fenceShadowWandTolerance,
   );
 

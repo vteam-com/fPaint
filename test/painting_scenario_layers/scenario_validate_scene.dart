@@ -10,7 +10,7 @@ Future<void> validateScenarioScene(
     layersProvider.length,
     _expectedLayerCountAfterScene,
     reason:
-        'Should have background + sky + mountains + clouds + sun + land + shadows + house + fence shadow + fence + birds + signature',
+        'Should have background + sky + mountains + clouds + sun + land + house + house shadow + fence + fence shadow + birds + signature',
   );
 
   expect(
@@ -21,7 +21,7 @@ Future<void> validateScenarioScene(
       _fenceShadowLayerName,
       _fenceLayerName,
       _houseLayerName,
-      _shadowsLayerName,
+      _houseShadowLayerName,
       _landLayerName,
       _sunLayerName,
       _cloudsLayerName,
