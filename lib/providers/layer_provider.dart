@@ -371,6 +371,8 @@ class LayerProvider extends ChangeNotifier {
   }
 
   /// Flips an image horizontally or vertically.
+  ///
+  /// Delegates to the shared [flipImage] helper.
   Future<ui.Image?> _flipImage(
     final ui.Image? image, {
     required final bool isHorizontal,
@@ -378,21 +380,7 @@ class LayerProvider extends ChangeNotifier {
     if (image == null) {
       return null;
     }
-    final double w = image.width.toDouble();
-    final double h = image.height.toDouble();
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-
-    if (isHorizontal) {
-      canvas.translate(w, 0);
-      canvas.scale(-1, 1);
-    } else {
-      canvas.translate(0, h);
-      canvas.scale(1, -1);
-    }
-    canvas.drawImage(image, Offset.zero, Paint());
-
-    return recorder.endRecording().toImage(w.toInt(), h.toInt());
+    return flipImage(image, isHorizontal: isHorizontal);
   }
 
   /// Flips a text object's position for a flip operation.

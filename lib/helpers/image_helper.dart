@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -152,6 +153,49 @@ Future<ui.Image> resizeImage(final ui.Image image, final ui.Size newSize) {
 
   final ui.Picture picture = recorder.endRecording();
   return picture.toImage(newSize.width.toInt(), newSize.height.toInt());
+}
+
+/// Flips an [image] horizontally or vertically.
+///
+/// When [isHorizontal] is `true` the image is mirrored left ↔ right;
+/// otherwise it is mirrored top ↔ bottom.
+Future<ui.Image> flipImage(
+  final ui.Image image, {
+  required final bool isHorizontal,
+}) async {
+  final double w = image.width.toDouble();
+  final double h = image.height.toDouble();
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+
+  if (isHorizontal) {
+    canvas.translate(w, 0);
+    canvas.scale(-1, 1);
+  } else {
+    canvas.translate(0, h);
+    canvas.scale(1, -1);
+  }
+  canvas.drawImage(image, ui.Offset.zero, ui.Paint());
+
+  return recorder.endRecording().toImage(w.toInt(), h.toInt());
+}
+
+/// Rotates an [image] 90 degrees clockwise.
+///
+/// The returned image has its width and height swapped.
+Future<ui.Image> rotateImage90(final ui.Image image) async {
+  final double w = image.width.toDouble();
+  final double h = image.height.toDouble();
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+
+  // Rotate 90° CW: translate to new width (old height), then rotate.
+  canvas.translate(h, 0);
+  canvas.rotate(math.pi / AppMath.pair);
+  canvas.drawImage(image, ui.Offset.zero, ui.Paint());
+
+  // Output dimensions are swapped.
+  return recorder.endRecording().toImage(h.toInt(), w.toInt());
 }
 
 /// Crops a [ui.Image] to a specified [Rect].
