@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_svg_icon.dart';
 
 /// A widget that displays a 3x3 grid of icons, allowing the user to select a [CanvasResizePosition].
 class NineGridSelector extends StatelessWidget {

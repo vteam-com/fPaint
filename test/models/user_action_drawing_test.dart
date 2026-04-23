@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
-import 'package:fpaint/widgets/action_type_icon.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_svg_icon.dart';
 
 void main() {
   group('UserActionDrawing', () {
@@ -90,43 +88,29 @@ void main() {
     });
   });
 
-  group('iconFromActionType', () {
-    testWidgets('returns correct icon for pencil', (final WidgetTester tester) async {
-      final Widget icon = iconFormatActionType(ActionType.pencil, false);
-      expect(icon, isA<AppSvgIcon>());
-      final AppSvgIcon iconWidget = icon as AppSvgIcon;
-      expect(iconWidget.icon, AppIcon.create);
+  group('ActionType.icon', () {
+    test('returns correct icon for pencil', () {
+      expect(ActionType.pencil.icon, AppIcon.create);
     });
 
-    testWidgets('returns correct icon for brush', (final WidgetTester tester) async {
-      final Widget icon = iconFormatActionType(ActionType.brush, false);
-      expect(icon, isA<AppSvgIcon>());
-      final AppSvgIcon iconWidget = icon as AppSvgIcon;
-      expect(iconWidget.icon, AppIcon.brush);
+    test('returns correct icon for brush', () {
+      expect(ActionType.brush.icon, AppIcon.brush);
     });
 
-    testWidgets('returns correct icon for eraser (SVG)', (final WidgetTester tester) async {
-      final Widget icon = iconFormatActionType(ActionType.eraser, false);
-      expect(icon, isA<Widget>()); // Could be SvgPicture or other widget
+    test('returns correct icon for eraser', () {
+      expect(ActionType.eraser.icon, AppIcon.eraser);
     });
 
-    testWidgets('returns correct icon for selector', (final WidgetTester tester) async {
-      final Widget icon = iconFormatActionType(ActionType.selector, false);
-      expect(icon, isA<SvgPicture>());
+    test('returns correct icon for selector', () {
+      expect(ActionType.selector.icon, AppIcon.selectorReplace);
     });
 
-    testWidgets('applies blue color when selected', (final WidgetTester tester) async {
-      final Widget icon = iconFormatActionType(ActionType.pencil, true);
-      expect(icon, isA<AppSvgIcon>());
-      final AppSvgIcon iconWidget = icon as AppSvgIcon;
-      expect(iconWidget.color, Colors.blue);
-    });
+    testWidgets('AppSvgIcon uses isSelected', (final WidgetTester tester) async {
+      const AppSvgIcon selected = AppSvgIcon(icon: AppIcon.create, isSelected: true);
+      expect(selected.isSelected, true);
 
-    testWidgets('applies default color when not selected', (final WidgetTester tester) async {
-      final Widget icon = iconFormatActionType(ActionType.pencil, false);
-      expect(icon, isA<AppSvgIcon>());
-      final AppSvgIcon iconWidget = icon as AppSvgIcon;
-      expect(iconWidget.color, Colors.white);
+      const AppSvgIcon unselected = AppSvgIcon(icon: AppIcon.create, isSelected: false);
+      expect(unselected.isSelected, false);
     });
   });
 

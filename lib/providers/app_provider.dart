@@ -13,6 +13,7 @@ import 'package:fpaint/models/image_placement_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/transform_model.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/providers/layers_provider.dart';

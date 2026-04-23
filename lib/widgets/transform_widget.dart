@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/app_icon_enum.dart' show AppIcon;
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
-import 'package:fpaint/widgets/svg_icon.dart';
 
 /// An overlay widget that lets the user interactively skew and change
 /// perspective of a selected region by dragging corner and edge handles.
@@ -398,7 +397,7 @@ class _TransformWidgetState extends State<TransformWidget> {
                     onChanged();
                   }
                 },
-                child: iconFromSvgAsset(AppAssets.transformIcon),
+                child: const AppSvgIcon(icon: AppIcon.transform),
               ),
             ],
           ),

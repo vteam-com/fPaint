@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/floating_buttons.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 

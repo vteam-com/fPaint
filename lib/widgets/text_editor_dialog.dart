@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 
 /// Modal dialog used to create a new text object with style settings.

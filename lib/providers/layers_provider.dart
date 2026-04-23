@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:provider/provider.dart';

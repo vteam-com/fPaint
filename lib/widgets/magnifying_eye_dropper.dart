@@ -4,9 +4,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/draw_rect.dart';
 import 'package:vector_math/vector_math_64.dart' as vm64;
 

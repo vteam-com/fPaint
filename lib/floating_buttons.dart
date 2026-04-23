@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/action_type_icon.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 
 const String _canvasZoomAndSizeFormat = '{zoom}%\n{width}\n{height}';
@@ -58,7 +57,7 @@ Widget floatingActionButtons(
             onPressed: () {
               shellProvider.showMenu = !shellProvider.showMenu;
             },
-            child: iconFormatActionType(appProvider.selectedAction, false),
+            child: AppSvgIcon(icon: appProvider.selectedAction.icon, isSelected: false),
           ),
         if (!shellProvider.showMenu)
           myFloatButton(
@@ -96,7 +95,7 @@ Widget floatingActionButtons(
       undoButton,
       redo,
 
-      // Zooom in
+      // Zoom in
       myFloatButton(
         key: Keys.floatActionZoomIn,
         onPressed: () {
