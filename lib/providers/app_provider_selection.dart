@@ -65,12 +65,12 @@ extension AppProviderSelection on AppProvider {
 
   /// Renders the active selection bounds into a standalone clipped image.
   ///
-  /// Returns `null` when there is no active selection path or when the
-  /// computed selection bounds are empty.
+  /// When no selection exists the entire active layer is used as the
+  /// implicit target (auto-select-all).
+  ///
+  /// Returns `null` when the computed selection bounds are empty.
   Future<ui.Image?> createSelectionImage() async {
-    if (selectorModel.path1 == null) {
-      return null;
-    }
+    _ensureSelection();
 
     final ui.Rect bounds = selectorModel.path1!.getBounds();
     if (bounds.isEmpty) {
@@ -239,10 +239,11 @@ extension AppProviderSelection on AppProvider {
 
   /// Applies a [SelectionEffect] to the pixels under the current selection,
   /// replacing the original region with the processed result.
+  ///
+  /// When no selection exists the entire active layer is used as the
+  /// implicit target (auto-select-all).
   Future<void> applyEffect(final SelectionEffect effect) async {
-    if (selectorModel.path1 == null) {
-      return;
-    }
+    _ensureSelection();
 
     final ui.Image? clippedImage = await createSelectionImage();
     if (clippedImage == null) {
@@ -329,6 +330,14 @@ extension AppProviderSelection on AppProvider {
     selectorModel.isDrawing = false;
     selectorModel.applyMath();
     update();
+  }
+
+  /// Ensures a selection exists. If no selection path is set, selects the
+  /// entire canvas so that operations can treat the full layer as the target.
+  void _ensureSelection() {
+    if (selectorModel.path1 == null) {
+      selectAll();
+    }
   }
 
   /// Selects all.

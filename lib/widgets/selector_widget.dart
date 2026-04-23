@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/app_icon.dart';
@@ -497,26 +498,6 @@ class _EffectsPopupButton extends StatelessWidget {
     );
   }
 
-  /// Returns the localized display label for the given [effect].
-  String _effectLabel(final SelectionEffect effect) {
-    switch (effect) {
-      case SelectionEffect.blur:
-        return l10n.effectBlur;
-      case SelectionEffect.sharpen:
-        return l10n.effectSharpen;
-      case SelectionEffect.pixelate:
-        return l10n.effectPixelate;
-      case SelectionEffect.grayscale:
-        return l10n.effectGrayscale;
-      case SelectionEffect.noise:
-        return l10n.effectNoise;
-      case SelectionEffect.soften:
-        return l10n.effectSoften;
-      case SelectionEffect.vignette:
-        return l10n.effectVignette;
-    }
-  }
-
   /// Opens a popup menu anchored below this button listing all available
   /// [SelectionEffect] options with their icons and localized labels.
   void _showEffectsMenu(final BuildContext context) {
@@ -544,7 +525,7 @@ class _EffectsPopupButton extends StatelessWidget {
                     icon: effect.icon,
                     size: AppLayout.iconSize,
                   ),
-                  Text(_effectLabel(effect)),
+                  Text(effectLabel(l10n, effect)),
                 ],
               ),
             ),

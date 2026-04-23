@@ -1,4 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
-    <path
-        d="M200-200v-80h80v80h-80Zm0-160v-80h80v80h-80Zm0-160v-80h80v80h-80Zm0-160v-80h80v80h-80Zm160 320v-80h80v80h-80Zm0-320v-80h80v80h-80Zm160 480v-80h80v80h-80Zm0-160v-80h80v80h-80Zm0-160v-80h80v80h-80Zm0-160v-80h80v80h-80Zm160 400v-80h80v80h-80Zm0-240v-80h80v80h-80Zm-480 320v-80h80v80h-80Zm320 0v-80h80v80h-80Zm-160-160v-80h80v80h-80Zm320 0v-80h80v80h-80Z" />
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://w3.org">
+    <circle cx="5" cy="6" r="1" fill="currentColor" />
+    <circle cx="10" cy="4" r="1.5" fill="currentColor" opacity="0.6" />
+    <circle cx="18" cy="7" r="1" fill="currentColor" />
+    <circle cx="14" cy="11" r="1" fill="currentColor" opacity="0.8" />
+    <circle cx="6" cy="14" r="1.5" fill="currentColor" />
+    <circle cx="19" cy="15" r="1" fill="currentColor" opacity="0.5" />
+    <circle cx="11" cy="19" r="1" fill="currentColor" />
+    <circle cx="4" cy="20" r="1" fill="currentColor" opacity="0.7" />
+    <circle cx="20" cy="21" r="1.5" fill="currentColor" />
 </svg>
