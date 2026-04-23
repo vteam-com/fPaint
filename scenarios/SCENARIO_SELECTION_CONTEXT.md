@@ -24,6 +24,9 @@ Any action that operates on "the selected region" must fall back to the full can
 | **Cut**                                                                   | Cmd+X / Ctrl+X                               | Copies entire active layer, then erases it           |
 | **Duplicate**                                                             | Cmd+D / Ctrl+D, selection overlay button     | Duplicates entire active layer as a new placed image |
 | **Effects** (Blur, Sharpen, Pixelate, Grayscale, Noise, Soften, Vignette) | Selector tool panel, selection overlay popup | Applies effect to entire active layer                |
+| **Flip Horizontal**                                                       | Side panel button                            | Flips entire canvas (all layers)                     |
+| **Flip Vertical**                                                         | Side panel button                            | Flips entire canvas (all layers)                     |
+| **Rotate 90° CW**                                                         | Side panel button                            | Rotates entire canvas (all layers)                   |
 
 ### Actions that remain gated on an existing selection
 

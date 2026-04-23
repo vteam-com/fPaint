@@ -53,7 +53,7 @@ class SidePanelTopMenu extends StatelessWidget {
             icon: AppIcon.rotate90DegreesCw,
             onPressed: () async {
               final AppProvider appProvider = AppProvider.of(context);
-              await appProvider.rotateCanvas90();
+              await appProvider.rotateCanvas90(l10n.rotateCanvasTooltip);
             },
           ),
         if (shellProvider.isSidePanelExpanded)

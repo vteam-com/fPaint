@@ -264,6 +264,81 @@ extension AppProviderSelection on AppProvider {
     update();
   }
 
+  /// Flips the selected region horizontally (left ↔ right).
+  ///
+  /// When no selection exists the entire active layer is used as the
+  /// implicit target (auto-select-all).
+  Future<void> flipSelectionHorizontal(final String actionName) async {
+    await _flipSelection(actionName, isHorizontal: true);
+  }
+
+  /// Flips the selected region vertically (top ↔ bottom).
+  ///
+  /// When no selection exists the entire active layer is used as the
+  /// implicit target (auto-select-all).
+  Future<void> flipSelectionVertical(final String actionName) async {
+    await _flipSelection(actionName, isHorizontal: false);
+  }
+
+  /// Shared implementation for selection-aware flipping.
+  Future<void> _flipSelection(
+    final String actionName, {
+    required final bool isHorizontal,
+  }) async {
+    _ensureSelection();
+
+    final ui.Image? clippedImage = await createSelectionImage();
+    if (clippedImage == null) {
+      return;
+    }
+
+    final Rect bounds = selectorModel.path1!.getBounds();
+    final ui.Image flippedImage = await flipImage(
+      clippedImage,
+      isHorizontal: isHorizontal,
+    );
+
+    replaceRegion(
+      name: actionName,
+      erasePath: Path.from(selectorModel.path1!),
+      replacement: flippedImage,
+      offset: Offset(bounds.left, bounds.top),
+    );
+
+    update();
+  }
+
+  /// Rotates the selected region 90 degrees clockwise.
+  ///
+  /// The rotated image is centered within the original selection bounds.
+  /// When no selection exists the entire active layer is used as the
+  /// implicit target (auto-select-all).
+  Future<void> rotateSelection90(final String actionName) async {
+    _ensureSelection();
+
+    final ui.Image? clippedImage = await createSelectionImage();
+    if (clippedImage == null) {
+      return;
+    }
+
+    final Rect bounds = selectorModel.path1!.getBounds();
+    final ui.Image rotatedImage = await rotateImage90(clippedImage);
+
+    // The rotated image has swapped dimensions.  Center it within the
+    // original selection bounds so the visual anchor stays consistent.
+    final double dx = bounds.left + (bounds.width - rotatedImage.width) / AppMath.pair;
+    final double dy = bounds.top + (bounds.height - rotatedImage.height) / AppMath.pair;
+
+    replaceRegion(
+      name: actionName,
+      erasePath: Path.from(selectorModel.path1!),
+      replacement: rotatedImage,
+      offset: Offset(dx, dy),
+    );
+
+    update();
+  }
+
   /// Erases [erasePath] from the selected layer and places [replacement] at
   /// [offset], wrapped in an undoable action named [name].
   void replaceRegion({

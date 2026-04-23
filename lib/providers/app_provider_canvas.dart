@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
 
 /// Canvas viewport operations: pan, zoom, scale, coordinate conversion,
 /// rotation, flipping, and document lifecycle.
@@ -131,21 +132,43 @@ extension AppProviderCanvas on AppProvider {
     }
   }
 
-  /// Rotates the canvas 90 degrees clockwise.
-  Future<void> rotateCanvas90() async {
-    await layers.rotateCanvas90Clockwise();
-    resetView();
+  /// Rotates 90 degrees clockwise.
+  ///
+  /// When a selection exists, only the selected region on the active layer
+  /// is rotated.  Otherwise the entire canvas (all layers) is rotated.
+  Future<void> rotateCanvas90(final String actionName) async {
+    if (selectorModel.isVisible) {
+      await rotateSelection90(actionName);
+      update();
+    } else {
+      await layers.rotateCanvas90Clockwise();
+      resetView();
+    }
   }
 
-  /// Flips the canvas horizontally (left ↔ right).
+  /// Flips horizontally (left ↔ right).
+  ///
+  /// When a selection exists, only the selected region on the active layer
+  /// is flipped.  Otherwise the entire canvas (all layers) is flipped.
   Future<void> flipCanvasHorizontal(final String actionName) async {
-    await layers.flipCanvasHorizontal(actionName);
+    if (selectorModel.isVisible) {
+      await flipSelectionHorizontal(actionName);
+    } else {
+      await layers.flipCanvasHorizontal(actionName);
+    }
     update();
   }
 
-  /// Flips the canvas vertically (top ↔ bottom).
+  /// Flips vertically (top ↔ bottom).
+  ///
+  /// When a selection exists, only the selected region on the active layer
+  /// is flipped.  Otherwise the entire canvas (all layers) is flipped.
   Future<void> flipCanvasVertical(final String actionName) async {
-    await layers.flipCanvasVertical(actionName);
+    if (selectorModel.isVisible) {
+      await flipSelectionVertical(actionName);
+    } else {
+      await layers.flipCanvasVertical(actionName);
+    }
     update();
   }
 }

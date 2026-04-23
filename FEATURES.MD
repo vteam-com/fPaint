@@ -62,6 +62,8 @@ This document lists the features currently available in fPaint.
 - Live scale and rotation feedback during edits
 - Canvas rotation
 - Canvas flip support
+- Selection-aware flip: flips only the selected region when a selection exists, otherwise flips the entire canvas
+- Selection-aware rotate 90°: rotates only the selected region when a selection exists, otherwise rotates the entire canvas
 
 ## Layers
 
