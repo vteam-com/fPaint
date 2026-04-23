@@ -20,11 +20,14 @@ import 'package:fpaint/files/file_webp.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
@@ -697,6 +700,55 @@ Future<void> invertCurrentSelection(final WidgetTester tester) async {
   await tester.pump();
   await tapByTooltip(tester, _selectorInvertTooltip);
   await tester.pump();
+}
+
+/// Effects whose [SelectionEffect.apply] uses byte-level pixel manipulation
+/// (e.g. `toByteData`, `ImmutableBuffer`, codec) and must run inside
+/// [WidgetTester.runAsync] to avoid deadlocking the fake-async test zone.
+const Set<SelectionEffect> _effectsRequiringRunAsync = <SelectionEffect>{
+  SelectionEffect.noise,
+  SelectionEffect.sharpen,
+};
+
+/// Applies a [SelectionEffect] by tapping its button in the tools panel,
+/// recording the interaction for the test video.
+///
+/// Switches to the selector tool and selects all if no selection is active,
+/// since the effect buttons are only visible under the selector tool.
+/// Effects that need byte-level image processing are re-applied inside
+/// [WidgetTester.runAsync] after the tap so the pixel operations can complete.
+Future<void> applyEffectViaUi(
+  final WidgetTester tester,
+  final SelectionEffect effect,
+) async {
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
+
+  // Ensure the selector tool is active so the effect buttons are visible.
+  // If no selection exists, select all as a fallback.
+  appProvider.selectedAction = ActionType.selector;
+  if (!appProvider.selectorModel.isVisible) {
+    appProvider.selectAll();
+  }
+  appProvider.update();
+  await tester.pump();
+
+  final AppLocalizations l10n = AppLocalizations.of(context)!;
+  final String tooltip = effectLabel(l10n, effect);
+
+  await tapByTooltip(tester, tooltip);
+  await tester.pump();
+
+  if (_effectsRequiringRunAsync.contains(effect)) {
+    // The tap fired applyEffect as fire-and-forget; byte-level operations
+    // cannot complete in the fake-async zone. Re-apply inside runAsync so
+    // the pixel processing resolves. The stuck future from the tap never
+    // modified state (it blocked before replaceRegion), so this is safe.
+    await tester.runAsync(() async {
+      await appProvider.applyEffect(effect);
+    });
+    await tester.pump();
+  }
 }
 
 /// Drags one overlay handle of the current selection by [delta].

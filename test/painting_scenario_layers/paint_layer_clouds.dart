@@ -34,6 +34,14 @@ Future<void> paintLayerClouds(final PaintingScenarioSession session) async {
   cloudAppProvider.regionErase();
   await session.tester.pump();
 
+  // Clear the cutout selection so blur applies to the full cloud layer.
+  cloudAppProvider.selectorModel.clear();
+  cloudAppProvider.update();
+  await session.tester.pump();
+
+  // Apply blur effect to soften the clouds.
+  await applyEffectViaUi(session.tester, SelectionEffect.blur);
+
   cloudAppProvider.selectorModel.clear();
   cloudAppProvider.update();
   await session.tester.pump();

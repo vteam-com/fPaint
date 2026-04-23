@@ -12,6 +12,7 @@ import 'package:fpaint/main.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -112,6 +113,9 @@ const double _landTopY = 10.0;
 const double _landBottomY = 300.0;
 const Offset _landTopLeft = Offset(-300, _landTopY);
 const Offset _landBottomRight = Offset(300, _landBottomY);
+const double _landBorderBrushSize = 8.0;
+const double _landSelectionMargin = 4.0;
+const int _landGrassDistortionPasses = 4;
 
 // Lake layer (temporary layer merged into land)
 const String _pondDraftLayerName = 'Lake Draft';
@@ -188,7 +192,7 @@ const String _houseLayerName = 'House';
 const Offset _houseBodyStart = Offset(0, 0);
 const Offset _houseBodyEnd = Offset(200, 100);
 const Offset _houseDoorStart = Offset(130, 24);
-const Offset _houseDoorEnd = Offset(180, 88);
+const Offset _houseDoorEnd = Offset(180, 100);
 const Offset _houseWindowStart = Offset(20, 30);
 const Offset _houseWindowEnd = Offset(80, 50);
 const Offset _roofLeft = Offset(-5, 0);
