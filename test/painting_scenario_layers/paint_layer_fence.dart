@@ -12,8 +12,8 @@ const double _fencePicketStripeOffset = 4.0;
 const Color _fencePicketCenterColor = Color.fromARGB(255, 231, 214, 187);
 const Color _fencePicketRightColor = Color.fromARGB(255, 140, 80, 255);
 // top rail
-Offset _fenceRailTopStart = const Offset(-210, _fenceY - 70);
-Offset _fenceRailTopEnd = const Offset(300, _fenceY - 80);
+Offset _fenceRailTopStart = const Offset(-210, _fenceY - 60);
+Offset _fenceRailTopEnd = const Offset(300, _fenceY - 70);
 // bottom rail vertical offset from top rail
 const double _fenceRailVerticalSpacing = 40.0;
 
