@@ -4,6 +4,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.1] - 2026-04-23
+
+### Refactor
+
+- Unified SVG icon system into a single enhanced enum (`AppIcon`) and widget (`AppSvgIcon`)
+- Removed redundant icon indirection layers (`AppIconAssets`, `AppToolIconAssets`, `AppAssets`)
+- Removed deprecated files (`svg_icon.dart`, `app_svg_icon.dart`, `action_type_icon.dart`)
+- Added `icon` property to `ActionType` enum, eliminating `iconFormatActionType` function
+- Added `isSelected` parameter to `AppSvgIcon` for consistent selection state handling
+
 ## [1.4.0] - 2026-04-21
 
 ### Add

@@ -335,7 +335,7 @@ class ToolsPanel extends StatelessWidget {
                   name: 'Linear Gradient',
                   image: AppSvgIcon(
                     icon: AppIcon.fillLinear,
-                    color: appProvider.fillModel.mode == FillMode.linear ? Colors.blue : IconTheme.of(context).color!,
+                    isSelected: appProvider.fillModel.mode == FillMode.linear,
                   ),
                   onPressed: () {
                     appProvider.fillModel.mode = FillMode.linear;
@@ -352,7 +352,7 @@ class ToolsPanel extends StatelessWidget {
                   name: 'Radial Gradient',
                   image: AppSvgIcon(
                     icon: AppIcon.fillRadial,
-                    color: appProvider.fillModel.mode == FillMode.radial ? Colors.blue : IconTheme.of(context).color!,
+                    isSelected: appProvider.fillModel.mode == FillMode.radial,
                   ),
                   onPressed: () {
                     appProvider.fillModel.mode = FillMode.radial;
@@ -425,9 +425,7 @@ class ToolsPanel extends StatelessWidget {
                   name: 'Lasso',
                   image: AppSvgIcon(
                     icon: AppIcon.lasso,
-                    color: appProvider.selectorModel.mode == SelectorMode.lasso
-                        ? Colors.blue
-                        : IconTheme.of(context).color!,
+                    isSelected: appProvider.selectorModel.mode == SelectorMode.lasso,
                   ),
                   onPressed: () {
                     appProvider.selectorModel.mode = SelectorMode.lasso;
