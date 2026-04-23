@@ -11,6 +11,7 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:logging/logging.dart';
 

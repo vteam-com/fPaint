@@ -62,6 +62,7 @@
         "fcheck",
         "fflags",
         "fpaint",
+        "grayscale",
         "libx",
         "LTWH",
         "luma",
@@ -73,6 +74,7 @@
         "subosito",
         "syms",
         "tracefile",
+        "unsharp",
         "vteam",
         "webp",
         "xcworkspace"

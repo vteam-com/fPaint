@@ -10,6 +10,7 @@ import 'package:fpaint/panels/side_panel/about.dart';
 import 'package:fpaint/panels/side_panel/canvas_settings.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 

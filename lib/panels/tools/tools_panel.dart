@@ -3,10 +3,14 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/tools/tool_panel_picker.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_canvas.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
+import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
@@ -301,6 +305,7 @@ class ToolsPanel extends StatelessWidget {
   }) {
     final List<Widget> widgets = <Widget>[];
     final AppProvider appProvider = AppProvider.of(context, listen: true);
+    final AppLocalizations l10n = context.l10n;
     final LayersProvider layers = LayersProvider.of(context);
     final ActionType selectedTool = appProvider.selectedAction;
 
@@ -531,13 +536,27 @@ class ToolsPanel extends StatelessWidget {
                     },
                   ),
 
+                if (appProvider.selectorModel.isVisible) const Divider(),
+
+                // Selection Effects
+                if (appProvider.selectorModel.isVisible)
+                  for (final SelectionEffect effect in SelectionEffect.values)
+                    ToolPanelPicker(
+                      minimal: minimal,
+                      name: _effectLabel(l10n, effect),
+                      image: AppSvgIcon(icon: effect.icon, isSelected: false),
+                      onPressed: () => appProvider.applyEffect(effect),
+                    ),
+
+                if (appProvider.selectorModel.isVisible) const Divider(),
+
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     key: Keys.toolSelectorCancel,
                     minimal: minimal,
                     name: 'Cancel',
                     image: const AppSvgIcon(
-                      icon: AppIcon.selectorRemove,
+                      icon: AppIcon.close,
                       isSelected: false,
                     ),
                     onPressed: () {
@@ -707,6 +726,29 @@ class ToolsPanel extends StatelessWidget {
               ),
       ),
     );
+  }
+
+  /// Returns the localized label for a [SelectionEffect].
+  String _effectLabel(
+    final AppLocalizations l10n,
+    final SelectionEffect effect,
+  ) {
+    switch (effect) {
+      case SelectionEffect.blur:
+        return l10n.effectBlur;
+      case SelectionEffect.sharpen:
+        return l10n.effectSharpen;
+      case SelectionEffect.pixelate:
+        return l10n.effectPixelate;
+      case SelectionEffect.grayscale:
+        return l10n.effectGrayscale;
+      case SelectionEffect.noise:
+        return l10n.effectNoise;
+      case SelectionEffect.soften:
+        return l10n.effectSoften;
+      case SelectionEffect.vignette:
+        return l10n.effectVignette;
+    }
   }
 }
 

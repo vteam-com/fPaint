@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
@@ -38,6 +39,7 @@ class SelectionRectWidget extends StatefulWidget {
     required this.onToggleTransformMode,
     required this.onCopy,
     required this.onDuplicate,
+    required this.onApplyEffect,
     this.enableMoveAndResize = true,
     this.isDrawing = false,
   });
@@ -47,6 +49,9 @@ class SelectionRectWidget extends StatefulWidget {
 
   /// Whether a new selection is actively being drawn.
   final bool isDrawing;
+
+  /// A callback that applies a [SelectionEffect] to the selected region.
+  final void Function(SelectionEffect effect) onApplyEffect;
 
   /// A callback that copies the selection to the clipboard.
   final VoidCallback onCopy;
@@ -268,7 +273,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
   ) {
     final double buttonSize = AppInteraction.imagePlacementButtonSize;
     final double spacing = AppInteraction.imagePlacementButtonSpacing;
-    final double controlsWidth = buttonSize * AppMath.pair + spacing;
+    final double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
     final double controlsTop = bounds.bottom + AppInteraction.imagePlacementButtonSpacing;
 
     return Positioned(
@@ -290,6 +295,10 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
             cursor: SystemMouseCursors.click,
             onTap: widget.onDuplicate,
             child: const AppSvgIcon(icon: AppIcon.copy, size: AppLayout.iconSize, color: Colors.white),
+          ),
+          _EffectsPopupButton(
+            l10n: l10n,
+            onApplyEffect: widget.onApplyEffect,
           ),
         ],
       ),
@@ -461,6 +470,90 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       final double previousPercent = _activeScalePercent;
       _activeScalePercent *= factor;
       triggerScaleSnapHaptic(previousPercent, _activeScalePercent);
+    });
+  }
+}
+
+/// A circular button that opens a popup menu of [SelectionEffect] options.
+class _EffectsPopupButton extends StatelessWidget {
+  const _EffectsPopupButton({
+    required this.l10n,
+    required this.onApplyEffect,
+  });
+  final AppLocalizations l10n;
+  final void Function(SelectionEffect effect) onApplyEffect;
+  @override
+  Widget build(final BuildContext context) {
+    return buildOverlayCircleButton(
+      tooltip: l10n.effects,
+      color: AppColors.selected,
+      cursor: SystemMouseCursors.click,
+      onTap: () => _showEffectsMenu(context),
+      child: const AppSvgIcon(
+        icon: AppIcon.autoFixHigh,
+        size: AppLayout.iconSize,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  /// Returns the localized display label for the given [effect].
+  String _effectLabel(final SelectionEffect effect) {
+    switch (effect) {
+      case SelectionEffect.blur:
+        return l10n.effectBlur;
+      case SelectionEffect.sharpen:
+        return l10n.effectSharpen;
+      case SelectionEffect.pixelate:
+        return l10n.effectPixelate;
+      case SelectionEffect.grayscale:
+        return l10n.effectGrayscale;
+      case SelectionEffect.noise:
+        return l10n.effectNoise;
+      case SelectionEffect.soften:
+        return l10n.effectSoften;
+      case SelectionEffect.vignette:
+        return l10n.effectVignette;
+    }
+  }
+
+  /// Opens a popup menu anchored below this button listing all available
+  /// [SelectionEffect] options with their icons and localized labels.
+  void _showEffectsMenu(final BuildContext context) {
+    final RenderBox button = context.findRenderObject()! as RenderBox;
+    final Offset offset = button.localToGlobal(
+      Offset(button.size.width / AppMath.pair, button.size.height),
+    );
+
+    showMenu<SelectionEffect>(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        offset.dx,
+        offset.dy,
+        offset.dx,
+        offset.dy,
+      ),
+      items: SelectionEffect.values
+          .map(
+            (final SelectionEffect effect) => PopupMenuItem<SelectionEffect>(
+              value: effect,
+              child: Row(
+                spacing: AppSpacing.md,
+                children: <Widget>[
+                  AppSvgIcon(
+                    icon: effect.icon,
+                    size: AppLayout.iconSize,
+                  ),
+                  Text(_effectLabel(effect)),
+                ],
+              ),
+            ),
+          )
+          .toList(),
+    ).then((final SelectionEffect? selected) {
+      if (selected != null) {
+        onApplyEffect(selected);
+      }
     });
   }
 }
