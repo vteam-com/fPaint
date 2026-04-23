@@ -256,18 +256,6 @@ class ToolsPanel extends StatelessWidget {
           appProvider.selectedAction = ActionType.eraser;
         },
       ),
-      ToolPanelPicker(
-        key: Keys.toolSelector,
-        minimal: minimal,
-        name: 'Selector',
-        image: AppSvgIcon(
-          icon: ActionType.selector.icon,
-          isSelected: selectedTool == ActionType.selector,
-        ),
-        onPressed: () {
-          appProvider.selectedAction = ActionType.selector;
-        },
-      ),
 
       // Text
       ToolPanelPicker(
@@ -280,6 +268,19 @@ class ToolsPanel extends StatelessWidget {
         ),
         onPressed: () {
           appProvider.selectedAction = ActionType.text;
+        },
+      ),
+
+      ToolPanelPicker(
+        key: Keys.toolSelector,
+        minimal: minimal,
+        name: 'Selector',
+        image: AppSvgIcon(
+          icon: ActionType.selector.icon,
+          isSelected: selectedTool == ActionType.selector,
+        ),
+        onPressed: () {
+          appProvider.selectedAction = ActionType.selector;
         },
       ),
 
@@ -391,7 +392,7 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Rectangle',
                   image: AppSvgIcon(
-                    icon: AppIcon.highlightAlt,
+                    icon: AppIcon.selectorSquare,
                     isSelected: appProvider.selectorModel.mode == SelectorMode.rectangle,
                   ),
                   onPressed: () {
@@ -407,7 +408,7 @@ class ToolsPanel extends StatelessWidget {
                   minimal: minimal,
                   name: 'Circle',
                   image: AppSvgIcon(
-                    icon: AppIcon.circle,
+                    icon: AppIcon.selectorCircle,
                     isSelected: appProvider.selectorModel.mode == SelectorMode.circle,
                   ),
                   onPressed: () {
