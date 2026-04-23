@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
@@ -538,15 +539,13 @@ class ToolsPanel extends StatelessWidget {
 
                 if (appProvider.selectorModel.isVisible) const Divider(),
 
-                // Selection Effects
-                if (appProvider.selectorModel.isVisible)
-                  for (final SelectionEffect effect in SelectionEffect.values)
-                    ToolPanelPicker(
-                      minimal: minimal,
-                      name: _effectLabel(l10n, effect),
-                      image: AppSvgIcon(icon: effect.icon, isSelected: false),
-                      onPressed: () => appProvider.applyEffect(effect),
-                    ),
+                for (final SelectionEffect effect in SelectionEffect.values)
+                  ToolPanelPicker(
+                    minimal: minimal,
+                    name: effectLabel(l10n, effect),
+                    image: AppSvgIcon(icon: effect.icon, isSelected: false),
+                    onPressed: () => appProvider.applyEffect(effect),
+                  ),
 
                 if (appProvider.selectorModel.isVisible) const Divider(),
 
@@ -726,29 +725,6 @@ class ToolsPanel extends StatelessWidget {
               ),
       ),
     );
-  }
-
-  /// Returns the localized label for a [SelectionEffect].
-  String _effectLabel(
-    final AppLocalizations l10n,
-    final SelectionEffect effect,
-  ) {
-    switch (effect) {
-      case SelectionEffect.blur:
-        return l10n.effectBlur;
-      case SelectionEffect.sharpen:
-        return l10n.effectSharpen;
-      case SelectionEffect.pixelate:
-        return l10n.effectPixelate;
-      case SelectionEffect.grayscale:
-        return l10n.effectGrayscale;
-      case SelectionEffect.noise:
-        return l10n.effectNoise;
-      case SelectionEffect.soften:
-        return l10n.effectSoften;
-      case SelectionEffect.vignette:
-        return l10n.effectVignette;
-    }
   }
 }
 

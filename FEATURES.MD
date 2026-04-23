@@ -52,6 +52,7 @@ This document lists the features currently available in fPaint.
 - Selection math modes: replace, add, remove, invert
 - Region erase operations based on active selection
 - One-step Duplicate action for active selections
+- Selection-aware actions: copy, cut, duplicate, and effects auto-select the entire active layer when no selection exists (see [SCENARIO_SELECTION_CONTEXT](scenarios/SCENARIO_SELECTION_CONTEXT.md))
 
 ## Transform Capabilities
 
@@ -93,6 +94,7 @@ This document lists the features currently available in fPaint.
 - Haptic feedback on scale and rotate gestures
 - Display dimensions while drawing selection rectangles
 - Updated icon set using SVG assets
+- Effects (Blur, Sharpen, Pixelate, Grayscale, Noise, Soften, Vignette) accessible from the selector tool panel without requiring an active selection
 
 ## Quality and Testing Support (Project Capability)
 
