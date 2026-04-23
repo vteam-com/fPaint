@@ -67,7 +67,7 @@ enum ActionType {
   image(AppIcon.image),
   cut(AppIcon.cropFree),
   text(AppIcon.fontDownload),
-  selector(AppIcon.selectorReplace),
+  selector(AppIcon.selector),
   ;
 
   const ActionType(this.icon);

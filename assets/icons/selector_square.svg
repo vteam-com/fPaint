@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   height="24"
+   viewBox="0 -960 960 960"
+   width="24"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="selector_square.svg"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="13.782389"
+     inkscape:cx="18.465594"
+     inkscape:cy="13.386649"
+     inkscape:window-width="2560"
+     inkscape:window-height="1382"
+     inkscape:window-x="0"
+     inkscape:window-y="30"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <path
+     d="m 280,-120 v -80 h 80 v 80 z m -80,-640 h -80 c 0,-22 7.83333,-40.83333 23.5,-56.5 15.66667,-15.66667 34.5,-23.5 56.5,-23.5 z m 80,0 v -80 h 80 v 80 z m 160,0 v -80 h 80 v 80 z m 160,0 v -80 h 80 v 80 z m 160,0 v -80 c 22,0 40.83333,7.83333 56.5,23.5 15.66667,15.66667 23.5,34.5 23.5,56.5 z m -560,560 v 80 c -22,0 -40.83333,-7.83333 -56.5,-23.5 C 127.83333,-159.16667 120,-178 120,-200 Z m -80,-80 v -80 h 80 v 80 z m 0,-160 v -80 h 80 v 80 z m 0,-160 v -80 h 80 v 80 z m 640,0 v -80 h 80 v 80 z m -323.29965,481.64982 v -80 h 80 v 80 z"
+     id="path1"
+     sodipodi:nodetypes="cccccccscccccccccccccccccccsccccsccccccccccccccccccccccccccc" />
+  <path
+     d="m 280,-120 v -80 h 80 v 80 z m 0,-640 v -80 h 80 v 80 z m 160,0 v -80 h 80 v 80 z m 160,0 v -80 h 80 v 80 z m 160,0 v -80 c 22,0 40.83333,7.83333 56.5,23.5 15.66667,15.66667 23.5,34.5 23.5,56.5 z m -560,560 v 80 c -22,0 -40.83333,-7.83333 -56.5,-23.5 C 127.83333,-159.16667 120,-178 120,-200 Z m -80,-80 v -80 h 80 v 80 z m 0,-160 v -80 h 80 v 80 z m 0,-160 v -80 h 80 v 80 z m 640,0 v -80 h 80 v 80 z m -323.29965,481.64982 v -80 h 80 v 80 z m 152.64832,0.029 v -80 h 80 v 80 z m 159.43955,-0.029 v -80 h 80 v 80 z m 5.4229,-164.89144 v -80 h 80 v 80 z m 0,-160 v -80 h 80 v 80 z"
+     id="path2"
+     sodipodi:nodetypes="ccccccccccccccccccccccsccccsccccccccccccccccccccccccccccccccccccccccccccccc" />
+</svg>
