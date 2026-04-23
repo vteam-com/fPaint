@@ -13,9 +13,6 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:provider/provider.dart';
 
-// Exports
-export 'package:fpaint/models/user_action_drawing.dart';
-
 /// Represents a layer in the painting application.
 ///
 /// A layer contains a stack of user actions, such as drawing, erasing, or adding images.

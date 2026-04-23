@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/text_object.dart';
 export 'package:fpaint/models/brush_style.dart';
@@ -55,19 +56,24 @@ class UserActionDrawing {
 
 /// Enum representing the different types of drawing actions.
 enum ActionType {
-  pencil,
-  brush,
-  line,
-  circle,
-  rectangle,
-  region,
-  fill,
-  eraser,
-  image,
-  cut,
-  text,
-  selector
+  pencil(AppIcon.create),
+  brush(AppIcon.brush),
+  line(AppIcon.lineAxis),
+  circle(AppIcon.circle),
+  rectangle(AppIcon.cropSquare),
+  region(AppIcon.canvasCrop),
+  fill(AppIcon.formatColorFill),
+  eraser(AppIcon.eraser),
+  image(AppIcon.image),
+  cut(AppIcon.cropFree),
+  text(AppIcon.fontDownload),
+  selector(AppIcon.selectorReplace),
   ;
+
+  const ActionType(this.icon);
+
+  /// The [AppIcon] representing this action type.
+  final AppIcon icon;
 
   /// Checks if the action type supports the given attribute.
   bool isSupported(final ActionOptions attribute) {

@@ -5,12 +5,11 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_svg_icon.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
-import 'package:fpaint/widgets/svg_icon.dart';
 
 enum _SelectionOverlayFeedbackMode {
   none,
@@ -376,7 +375,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
                 color: AppColors.transformCornerHandle,
                 cursor: SystemMouseCursors.click,
                 onTap: widget.onToggleTransformMode,
-                child: iconFromSvgAsset(AppAssets.transformIcon),
+                child: const AppSvgIcon(icon: AppIcon.transform),
               ),
             ],
           ),
