@@ -133,6 +133,7 @@ class AppVisual {
   static const double low = 0.3;
   static const double medium = 0.7;
   static const double disabled = 0.8;
+  static const double fitToContainerScale = 0.95;
   static const double shrink = 0.9;
   static const double enlarge = 1.1;
   static const double iconScale = 1.2;
@@ -201,6 +202,48 @@ class AppInteraction {
   static const double transformScaleFactorMin = 0.1;
   static const double transformScaleFactorMax = 10.0;
   static const int transformGridSubdivisions = 10;
+}
+
+/// Constants for selection region effects.
+class AppEffects {
+  /// Gaussian blur sigma for the blur effect.
+  static const double blurSigma = 6.0;
+
+  /// Gaussian blur sigma for the soften (edge softener) effect.
+  static const double softenSigma = 2.0;
+
+  /// Gaussian blur sigma used as the base for the sharpen (unsharp-mask) effect.
+  static const double sharpenBlurSigma = 1.5;
+
+  /// Strength multiplier for the unsharp-mask sharpen effect.
+  static const double sharpenAmount = 1.5;
+
+  /// Downscale factor for the pixelation effect (pixels are grouped into blocks).
+  static const int pixelateBlockSize = 8;
+
+  /// Total range of random noise values added to each channel.
+  static const int noiseRange = 51;
+
+  /// Offset subtracted from the random noise to center it around zero.
+  static const int noiseOffset = 25;
+
+  /// Number of colour channels processed (R, G, B — alpha is preserved).
+  static const int rgbChannelCount = 3;
+
+  /// Byte index of the alpha channel within an RGBA pixel.
+  static const int alphaChannelIndex = 3;
+
+  /// Strength of the vignette darkening at the edges (0 = none, 1 = full black).
+  static const double vignetteStrength = 0.75;
+
+  /// ITU-R BT.601 luma coefficient for the red channel.
+  static const double lumaRed = 0.2126;
+
+  /// ITU-R BT.601 luma coefficient for the green channel.
+  static const double lumaGreen = 0.7152;
+
+  /// ITU-R BT.601 luma coefficient for the blue channel.
+  static const double lumaBlue = 0.0722;
 }
 
 /// Shared persisted/default app values.

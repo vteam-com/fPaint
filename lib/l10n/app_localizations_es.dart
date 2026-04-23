@@ -171,6 +171,30 @@ class AppLocalizationsEs extends AppLocalizations {
   String get editText => 'Editar texto';
 
   @override
+  String get effectBlur => 'Desenfoque';
+
+  @override
+  String get effectGrayscale => 'Escala de grises';
+
+  @override
+  String get effectNoise => 'Ruido';
+
+  @override
+  String get effectPixelate => 'Pixelar';
+
+  @override
+  String get effectSharpen => 'Nitidez';
+
+  @override
+  String get effectSoften => 'Suavizar bordes';
+
+  @override
+  String get effectVignette => 'Viñeta';
+
+  @override
+  String get effects => 'Efectos';
+
+  @override
   String get enterYourTextHere => 'Escribe tu texto aqui...';
 
   @override

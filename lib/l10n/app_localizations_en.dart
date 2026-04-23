@@ -173,6 +173,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editText => 'Edit Text';
 
   @override
+  String get effectBlur => 'Blur';
+
+  @override
+  String get effectGrayscale => 'Grayscale';
+
+  @override
+  String get effectNoise => 'Noise';
+
+  @override
+  String get effectPixelate => 'Pixelate';
+
+  @override
+  String get effectSharpen => 'Sharpen';
+
+  @override
+  String get effectSoften => 'Edge Soften';
+
+  @override
+  String get effectVignette => 'Vignette';
+
+  @override
+  String get effects => 'Effects';
+
+  @override
   String get enterYourTextHere => 'Enter your text here...';
 
   @override

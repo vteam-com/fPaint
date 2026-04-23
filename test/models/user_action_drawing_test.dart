@@ -102,7 +102,7 @@ void main() {
     });
 
     test('returns correct icon for selector', () {
-      expect(ActionType.selector.icon, AppIcon.selectorReplace);
+      expect(ActionType.selector.icon, AppIcon.selector);
     });
 
     testWidgets('AppSvgIcon uses isSelected', (final WidgetTester tester) async {

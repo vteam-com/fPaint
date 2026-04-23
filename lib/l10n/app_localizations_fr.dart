@@ -174,6 +174,30 @@ class AppLocalizationsFr extends AppLocalizations {
   String get editText => 'Modifier le texte';
 
   @override
+  String get effectBlur => 'Flou';
+
+  @override
+  String get effectGrayscale => 'Niveaux de gris';
+
+  @override
+  String get effectNoise => 'Bruit';
+
+  @override
+  String get effectPixelate => 'Pixéliser';
+
+  @override
+  String get effectSharpen => 'Netteté';
+
+  @override
+  String get effectSoften => 'Adoucir les bords';
+
+  @override
+  String get effectVignette => 'Vignetage';
+
+  @override
+  String get effects => 'Effets';
+
+  @override
   String get enterYourTextHere => 'Saisissez votre texte ici...';
 
   @override

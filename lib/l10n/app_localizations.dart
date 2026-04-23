@@ -405,6 +405,54 @@ abstract class AppLocalizations {
   /// **'Edit Text'**
   String get editText;
 
+  /// No description provided for @effectBlur.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur'**
+  String get effectBlur;
+
+  /// No description provided for @effectGrayscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Grayscale'**
+  String get effectGrayscale;
+
+  /// No description provided for @effectNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Noise'**
+  String get effectNoise;
+
+  /// No description provided for @effectPixelate.
+  ///
+  /// In en, this message translates to:
+  /// **'Pixelate'**
+  String get effectPixelate;
+
+  /// No description provided for @effectSharpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharpen'**
+  String get effectSharpen;
+
+  /// No description provided for @effectSoften.
+  ///
+  /// In en, this message translates to:
+  /// **'Edge Soften'**
+  String get effectSoften;
+
+  /// No description provided for @effectVignette.
+  ///
+  /// In en, this message translates to:
+  /// **'Vignette'**
+  String get effectVignette;
+
+  /// No description provided for @effects.
+  ///
+  /// In en, this message translates to:
+  /// **'Effects'**
+  String get effects;
+
   /// No description provided for @enterYourTextHere.
   ///
   /// In en, this message translates to:
