@@ -57,8 +57,8 @@ Future<void> paintLayerMountains(final PaintingScenarioSession session) async {
   expect(mountainsLayerIndex, isNonNegative, reason: 'Mountains layer should exist for merge');
   await PaintingLayerHelpers.mergeLayer(session.tester, firstDuplicateLayerIndex, mountainsLayerIndex);
 
-  // Apply blur effect to soften the merged mountains.
-  await applyEffectViaUi(session.tester, SelectionEffect.blur);
+  // Apply blur effect at reduced intensity to soften the merged mountains.
+  await applyEffectViaUi(session.tester, SelectionEffect.blur, strength: _mountainBlurIntensity);
 
   mountainAppProvider.selectorModel.clear();
   mountainAppProvider.update();

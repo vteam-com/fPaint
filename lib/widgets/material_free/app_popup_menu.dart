@@ -49,7 +49,10 @@ Future<T?> showAppMenu<T>({
                 top: position.top.clamp(0, overlaySize.height - _menuItemHeight),
                 child: IntrinsicWidth(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(minWidth: _menuMinWidth),
+                    constraints: BoxConstraints(
+                      minWidth: _menuMinWidth,
+                      maxHeight: overlaySize.height - position.top.clamp(0, overlaySize.height - _menuItemHeight),
+                    ),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: AppColors.surface,
@@ -61,33 +64,35 @@ Future<T?> showAppMenu<T>({
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: items.map((final AppPopupMenuItem<T> item) {
-                            return GestureDetector(
-                              onTap: () {
-                                selectedValue = item.value;
-                                Navigator.pop(dialogContext);
-                              },
-                              child: MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: AppSpacing.xl,
-                                    vertical: AppSpacing.md,
-                                  ),
-                                  child: DefaultTextStyle(
-                                    style: const TextStyle(
-                                      fontFamily: appFontFamily,
-                                      color: AppPalette.white,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: items.map((final AppPopupMenuItem<T> item) {
+                              return GestureDetector(
+                                onTap: () {
+                                  selectedValue = item.value;
+                                  Navigator.pop(dialogContext);
+                                },
+                                child: MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: AppSpacing.xl,
+                                      vertical: AppSpacing.md,
                                     ),
-                                    child: item.child,
+                                    child: DefaultTextStyle(
+                                      style: const TextStyle(
+                                        fontFamily: appFontFamily,
+                                        color: AppPalette.white,
+                                      ),
+                                      child: item.child,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
+                              );
+                            }).toList(),
+                          ),
                         ),
                       ),
                     ),

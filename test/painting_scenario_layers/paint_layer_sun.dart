@@ -23,4 +23,18 @@ Future<void> paintLayerSun(final PaintingScenarioSession session) async {
     fillColor: _sunBodyColor,
   );
   await session.videoRecorder.captureFrame();
+
+  // Apply soften effect to give the sun a soft edge.
+  final BuildContext sunContext = session.tester.element(find.byType(MainView));
+  final AppProvider sunAppProvider = AppProvider.of(sunContext, listen: false);
+  sunAppProvider.selectAll();
+  sunAppProvider.update();
+  await session.tester.pump();
+
+  await applyEffectViaUi(session.tester, SelectionEffect.soften, strength: _sunSoftenIntensity);
+
+  sunAppProvider.selectorModel.clear();
+  sunAppProvider.update();
+  await session.tester.pump();
+  await session.videoRecorder.captureFrame();
 }

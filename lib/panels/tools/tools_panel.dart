@@ -767,7 +767,7 @@ class _EffectsSectionState extends State<_EffectsSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(widget.l10n.effectIntensity),
+              Text('${widget.l10n.effectIntensity} (${(_strength * AppMath.percentScale).round()}%)'),
               AppSlider(
                 key: Keys.effectIntensitySlider,
                 value: _strength,

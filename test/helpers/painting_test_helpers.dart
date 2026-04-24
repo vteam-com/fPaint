@@ -714,11 +714,13 @@ Future<void> invertCurrentSelection(final WidgetTester tester) async {
 ///
 /// Switches to the selector tool and selects all if no selection is active,
 /// since the effect buttons are only visible under the selector tool.
-/// Shows the intensity dialog and taps Apply with default strength.
+/// Shows the intensity dialog, optionally adjusts the slider to [strength],
+/// and taps Apply.
 Future<void> applyEffectViaUi(
   final WidgetTester tester,
-  final SelectionEffect effect,
-) async {
+  final SelectionEffect effect, {
+  final double strength = AppEffects.defaultIntensity,
+}) async {
   final BuildContext context = tester.element(find.byType(MainView));
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
@@ -747,21 +749,53 @@ Future<void> applyEffectViaUi(
   final AppLocalizations l10n = AppLocalizations.of(context)!;
   final String effectLabel_ = effectLabel(l10n, effect);
 
-  // Tap the Effects button (by key) to open the popup menu.
-  await tapByKey(tester, Keys.effectsButton);
-  // Pump past the showGeneralDialog transition animation.
+  // --- 1. Tap the Effects button to open the popup menu ---
+  // Record tap target and capture frame showing the red circle BEFORE tapping.
+  final Finder effectsBtn = find.byKey(Keys.effectsButton);
+  expect(effectsBtn, findsOneWidget, reason: 'Effects button should be visible');
+  InteractionTracker.recordTap(tester.getCenter(effectsBtn));
+  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+
+  await tester.tap(effectsBtn);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
 
-  // Tap the effect name from the popup menu to open the intensity dialog.
-  await tester.tap(find.text(effectLabel_));
-  // The menu dismisses and the intensity dialog opens; pump past both transitions.
+  // --- 2. Tap the effect name from the popup menu ---
+  final Finder menuItem = find.text(effectLabel_);
+  expect(menuItem, findsOneWidget, reason: 'Effect menu item "$effectLabel_" should be visible');
+  await tester.ensureVisible(menuItem);
+  await tester.pump();
+  InteractionTracker.recordTap(tester.getCenter(menuItem));
+  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+
+  await tester.tap(menuItem);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
 
-  // The intensity dialog is now open. Tap Apply (by key).
-  await tapByKey(tester, Keys.effectIntensityApplyButton);
-  // Pump to process the effect application and dialog dismissal.
+  // --- 3. Adjust intensity slider if a custom strength was requested ---
+  // Directly invoke the slider's onChanged callback to avoid gesture
+  // recognition issues inside the showGeneralDialog overlay.
+  if (strength != AppEffects.defaultIntensity) {
+    final Finder sliderFinder = find.byKey(Keys.effectIntensityDialogSlider);
+    expect(sliderFinder, findsOneWidget, reason: 'Intensity dialog slider should be visible');
+
+    // Record red circle at the slider's target position before adjusting.
+    final Offset sliderCenter = tester.getCenter(sliderFinder);
+    InteractionTracker.recordTap(sliderCenter);
+    await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+
+    final AppSlider slider = tester.widget<AppSlider>(sliderFinder);
+    slider.onChanged?.call(strength);
+    await tester.pump();
+  }
+
+  // --- 4. Tap Apply ---
+  final Finder applyBtn = find.byKey(Keys.effectIntensityApplyButton);
+  expect(applyBtn, findsOneWidget, reason: 'Apply button should be visible');
+  InteractionTracker.recordTap(tester.getCenter(applyBtn));
+  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+
+  await tester.tap(applyBtn);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
 }

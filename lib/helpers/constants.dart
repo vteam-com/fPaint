@@ -650,4 +650,5 @@ class Keys {
   static Key effectsButton = const Key('effects-button');
   static Key effectIntensityApplyButton = const Key('effect-intensity-apply-button');
   static Key effectIntensitySlider = const Key('effect-intensity-slider');
+  static Key effectIntensityDialogSlider = const Key('effect-intensity-dialog-slider');
 }
