@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/helpers/constants.dart';
@@ -13,6 +13,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// A widget that displays the main menu.
 class MainMenu extends StatelessWidget {
@@ -23,12 +24,12 @@ class MainMenu extends StatelessWidget {
     final ShellProvider shellProvider = ShellProvider.of(context);
     final AppLocalizations l10n = context.l10n;
 
-    return PopupMenuButton<int>(
+    return AppPopupMenuButton<int>(
       key: Keys.mainMenuButton,
       tooltip: l10n.menuTooltip,
       icon: const AppSvgIcon(icon: AppIcon.menu),
       onSelected: (final int result) => onDropDownMenuSelection(context, result),
-      itemBuilder: (final BuildContext _) => <PopupMenuEntry<int>>[
+      itemBuilder: (final BuildContext _) => <AppPopupMenuItem<int>>[
         buildMenuItem(
           value: MenuIds.newFile,
           text: l10n.startOver,
@@ -140,46 +141,42 @@ void onDropDownMenuSelection(
 }
 
 /// Builds a menu item.
-PopupMenuEntry<int> buildMenuItem({
+AppPopupMenuItem<int> buildMenuItem({
   required final int value,
   required final String text,
   final String? subtitle,
   final AppIcon? icon,
   final Key? key,
 }) {
-  return PopupMenuItem<int>(
-    key: key,
+  return AppPopupMenuItem<int>(
     value: value,
-    child: Builder(
-      builder: (final BuildContext _) {
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            if (icon != null) AppSvgIcon(icon: icon, size: AppSpacing.xl),
-            if (icon != null) const SizedBox(width: AppSpacing.sm),
-            Flexible(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(text),
-                  if (subtitle != null) ...<Widget>[
-                    const SizedBox(height: AppSpacing.thin),
-                    Text(
-                      subtitle,
-                      softWrap: true,
-                      style: const TextStyle(
-                        fontSize: AppFontSize.subtitle,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        );
-      },
+    child: Row(
+      key: key,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        if (icon != null) AppSvgIcon(icon: icon, size: AppSpacing.xl),
+        if (icon != null) const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(text),
+              if (subtitle != null) ...<Widget>[
+                const SizedBox(height: AppSpacing.thin),
+                Text(
+                  subtitle,
+                  softWrap: true,
+                  style: const TextStyle(
+                    fontSize: AppFontSize.subtitle,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     ),
   );
 }

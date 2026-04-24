@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/helpers/constants.dart';
@@ -7,6 +7,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
 /// Returns a Text widget with the appropriate action text based on the platform.
@@ -45,91 +46,85 @@ Future<dynamic> sharePanel(
   final bool dismissOnAction = true,
 }) {
   final LayersProvider layers = LayersProvider.of(context);
-  return showModalBottomSheet<dynamic>(
+  return showAppBottomSheet<dynamic>(
     context: context,
-    isScrollControlled: true,
     builder: (final BuildContext context) {
       final AppLocalizations l10n = context.l10n;
 
       return SafeArea(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * AppLayout.modalSheetMaxHeightFactor,
-          ),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xl + AppSpacing.thin),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  ListTile(
-                    leading: const AppSvgIcon(icon: AppIcon.copy),
-                    title: Text(l10n.copyToClipboard),
-                    onTap: () async {
-                      await _runSharePanelAction(
-                        context,
-                        () => _onExportToClipboard(context),
-                        dismissOnAction,
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: const AppSvgIcon(icon: AppIcon.download),
-                    title: textAction('image.PNG', l10n),
-                    onTap: () async {
-                      await _runSharePanelAction(
-                        context,
-                        () => onExportAsPng(layers),
-                        dismissOnAction,
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: const AppSvgIcon(icon: AppIcon.download),
-                    title: textAction('image.JPG', l10n),
-                    onTap: () async {
-                      await _runSharePanelAction(
-                        context,
-                        () => onExportAsJpeg(layers),
-                        dismissOnAction,
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: const AppSvgIcon(icon: AppIcon.download),
-                    title: textAction('image.ORA', l10n),
-                    onTap: () async {
-                      await _runSharePanelAction(
-                        context,
-                        () => onExportAsOra(layers),
-                        dismissOnAction,
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: const AppSvgIcon(icon: AppIcon.download),
-                    title: textAction('image.WEBP', l10n),
-                    onTap: () async {
-                      await _runSharePanelAction(
-                        context,
-                        () => onExportAsWebp(layers),
-                        dismissOnAction,
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: const AppSvgIcon(icon: AppIcon.download),
-                    title: textAction('image.TIF', l10n),
-                    onTap: () async {
-                      await _runSharePanelAction(
-                        context,
-                        () => onExportAsTiff(layers),
-                        dismissOnAction,
-                      );
-                    },
-                  ),
-                ],
-              ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xl + AppSpacing.thin),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                AppListTile(
+                  leading: const AppSvgIcon(icon: AppIcon.copy),
+                  title: Text(l10n.copyToClipboard),
+                  onTap: () async {
+                    await _runSharePanelAction(
+                      context,
+                      () => _onExportToClipboard(context),
+                      dismissOnAction,
+                    );
+                  },
+                ),
+                AppListTile(
+                  leading: const AppSvgIcon(icon: AppIcon.download),
+                  title: textAction('image.PNG', l10n),
+                  onTap: () async {
+                    await _runSharePanelAction(
+                      context,
+                      () => onExportAsPng(layers),
+                      dismissOnAction,
+                    );
+                  },
+                ),
+                AppListTile(
+                  leading: const AppSvgIcon(icon: AppIcon.download),
+                  title: textAction('image.JPG', l10n),
+                  onTap: () async {
+                    await _runSharePanelAction(
+                      context,
+                      () => onExportAsJpeg(layers),
+                      dismissOnAction,
+                    );
+                  },
+                ),
+                AppListTile(
+                  leading: const AppSvgIcon(icon: AppIcon.download),
+                  title: textAction('image.ORA', l10n),
+                  onTap: () async {
+                    await _runSharePanelAction(
+                      context,
+                      () => onExportAsOra(layers),
+                      dismissOnAction,
+                    );
+                  },
+                ),
+                AppListTile(
+                  leading: const AppSvgIcon(icon: AppIcon.download),
+                  title: textAction('image.WEBP', l10n),
+                  onTap: () async {
+                    await _runSharePanelAction(
+                      context,
+                      () => onExportAsWebp(layers),
+                      dismissOnAction,
+                    );
+                  },
+                ),
+                AppListTile(
+                  leading: const AppSvgIcon(icon: AppIcon.download),
+                  title: textAction('image.TIF', l10n),
+                  onTap: () async {
+                    await _runSharePanelAction(
+                      context,
+                      () => onExportAsTiff(layers),
+                      dismissOnAction,
+                    );
+                  },
+                ),
+              ],
             ),
           ),
         ),

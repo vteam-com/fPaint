@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -7,6 +7,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// Opens the text editing flow for the currently selected text object.
 class TextEditor extends StatefulWidget {
@@ -58,12 +59,12 @@ class _TextEditorState extends State<TextEditor> {
     FontWeight fontWeight = textObject.fontWeight;
     FontStyle fontStyle = textObject.fontStyle;
 
-    showDialog<void>(
+    showAppDialog<void>(
       context: context,
       builder: (final BuildContext _) {
         return StatefulBuilder(
           builder: (final BuildContext context, final StateSetter setState) {
-            return AlertDialog(
+            return AppDialog(
               title: Text(l10n.editText),
               content: SizedBox(
                 width: AppLayout.dialogWidth,
@@ -72,15 +73,12 @@ class _TextEditorState extends State<TextEditor> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     // Text input field
-                    TextField(
+                    AppTextField(
                       controller: controller,
                       autofocus: true,
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
-                      decoration: InputDecoration(
-                        hintText: l10n.enterYourTextHere,
-                        border: const OutlineInputBorder(),
-                      ),
+                      hintText: l10n.enterYourTextHere,
                       style: TextStyle(
                         fontSize: fontSize,
                         color: textColor,
@@ -92,7 +90,7 @@ class _TextEditorState extends State<TextEditor> {
 
                     // Font size control
                     Text(l10n.fontSizeValue(fontSize.round())),
-                    Slider(
+                    AppSlider(
                       value: fontSize,
                       min: AppSpacing.sm + AppMath.pair.toDouble(),
                       max: AppLimits.textSizeMax.toDouble(),
@@ -109,10 +107,10 @@ class _TextEditorState extends State<TextEditor> {
                     Row(
                       children: <Widget>[
                         // Bold toggle
-                        IconButton(
+                        AppIconButton(
                           icon: AppSvgIcon(
                             icon: AppIcon.formatBold,
-                            color: fontWeight == FontWeight.bold ? Colors.blue : Colors.grey,
+                            color: fontWeight == FontWeight.bold ? AppPalette.blue : AppPalette.grey,
                           ),
                           onPressed: () {
                             setState(() {
@@ -122,10 +120,10 @@ class _TextEditorState extends State<TextEditor> {
                         ),
 
                         // Italic toggle
-                        IconButton(
+                        AppIconButton(
                           icon: AppSvgIcon(
                             icon: AppIcon.formatItalic,
-                            color: fontStyle == FontStyle.italic ? Colors.blue : Colors.grey,
+                            color: fontStyle == FontStyle.italic ? AppPalette.blue : AppPalette.grey,
                           ),
                           onPressed: () {
                             setState(() {
@@ -142,12 +140,12 @@ class _TextEditorState extends State<TextEditor> {
                           height: AppSpacing.huge,
                           decoration: BoxDecoration(
                             color: textColor,
-                            border: Border.all(color: Colors.grey),
+                            border: Border.all(color: AppPalette.grey),
                             borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
-                          child: IconButton(
-                            icon: const AppSvgIcon(icon: AppIcon.colorLens, color: Colors.white),
-                            onPressed: () async {
+                          child: AppIconButton(
+                            icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppPalette.white),
+                            onPressed: () {
                               showColorPicker(
                                 context: context,
                                 title: l10n.textColor,
@@ -167,14 +165,14 @@ class _TextEditorState extends State<TextEditor> {
                 ),
               ),
               actions: <Widget>[
-                TextButton(
+                AppTextButton(
                   child: Text(l10n.delete),
                   onPressed: () {
                     _deleteText();
                     Navigator.of(context).pop();
                   },
                 ),
-                TextButton(
+                AppTextButton(
                   child: Text(l10n.cancel),
                   onPressed: () {
                     appProvider.selectedTextObject = null;
@@ -182,7 +180,7 @@ class _TextEditorState extends State<TextEditor> {
                     Navigator.of(context).pop();
                   },
                 ),
-                TextButton(
+                AppTextButton(
                   child: Text(l10n.apply),
                   onPressed: () {
                     if (controller.text.isNotEmpty) {

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
@@ -434,10 +434,10 @@ class LayerProvider extends ChangeNotifier {
         ),
       ],
       brush: MyBrush(
-        color: Colors.transparent,
+        color: AppPalette.transparent,
         size: 0,
       ),
-      fillColor: Colors.transparent,
+      fillColor: AppPalette.transparent,
       image: imageToAdd,
     );
 
@@ -561,7 +561,7 @@ class LayerProvider extends ChangeNotifier {
   void renderLayer(final Canvas canvas) {
     // Save a layer with opacity and blend mode applied
     final Paint layerPaint = Paint();
-    layerPaint.color = Colors.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt());
+    layerPaint.color = AppPalette.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt());
     layerPaint.blendMode = blendMode;
 
     canvas.saveLayer(null, layerPaint);

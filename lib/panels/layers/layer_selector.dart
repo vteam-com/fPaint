@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -10,6 +10,7 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/container_slider.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/truncated_text.dart';
 
 const String _labelHidden = 'Hidden';
@@ -73,9 +74,9 @@ class LayerSelector extends StatelessWidget {
       margin: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.xs),
       padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.sm),
       decoration: BoxDecoration(
-        color: layer.isVisible ? null : Colors.grey.shade600,
+        color: layer.isVisible ? null : AppPalette.grey600,
         border: Border.all(
-          color: layer.isSelected ? Colors.blue : Colors.grey.shade700,
+          color: layer.isSelected ? AppPalette.blue : AppPalette.grey700,
           width: AppStroke.emphasis,
         ),
         borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -110,22 +111,22 @@ class LayerSelector extends StatelessWidget {
   Future<void> renameLayer() async {
     final TextEditingController controller = TextEditingController(text: layer.name);
 
-    final String? newName = await showDialog<String>(
+    final String? newName = await showAppDialog<String>(
       context: context,
-      builder: (final BuildContext dialogContext) => AlertDialog(
+      builder: (final BuildContext dialogContext) => AppDialog(
         title: const Text(_dialogLayerNameTitle),
-        content: TextField(
+        content: AppTextField(
           key: Keys.layerRenameTextField,
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(labelText: _dialogLayerNameTitle),
+          hintText: _dialogLayerNameTitle,
         ),
         actions: <Widget>[
-          TextButton(
+          AppTextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: const Text(_dialogCancel),
           ),
-          TextButton(
+          AppTextButton(
             key: Keys.layerRenameApplyButton,
             onPressed: () {
               Navigator.pop(dialogContext, controller.text);
@@ -175,8 +176,7 @@ class LayerSelector extends StatelessWidget {
   ) {
     final LayersProvider layers = LayersProvider.of(context);
 
-    return Tooltip(
-      margin: const EdgeInsets.only(left: AppSpacing.huge),
+    return AppTooltip(
       message: information(),
       child: Column(
         children: <Widget>[
@@ -200,24 +200,24 @@ class LayerSelector extends StatelessWidget {
     return Wrap(
       alignment: WrapAlignment.center,
       children: <Widget>[
-        IconButton(
+        AppIconButton(
           key: Keys.layerAddAboveButton,
           tooltip: _tooltipAddLayerAbove,
           icon: const AppSvgIcon(icon: AppIcon.playlistAdd),
           onPressed: () => _onAddLayer(layers),
         ),
         if (allowRemoveLayer)
-          IconButton(
+          AppIconButton(
             tooltip: _tooltipDeleteLayer,
             icon: const AppSvgIcon(icon: AppIcon.playlistRemove),
-            onPressed: allowRemoveLayer ? () => layers.remove(layer) : null,
+            onPressed: () => layers.remove(layer),
           ),
         if (allowRemoveLayer)
-          IconButton(
+          AppIconButton(
             tooltip: _tooltipMergeBelow,
             icon: const AppSvgIcon(icon: AppIcon.layers),
             onPressed: layer == layers.list.last
-                ? null
+                ? () {}
                 : () => _onMergeLayer(
                     layers,
                     layers.selectedLayerIndex,
@@ -225,7 +225,7 @@ class LayerSelector extends StatelessWidget {
                   ),
           ),
         if (allowRemoveLayer)
-          IconButton(
+          AppIconButton(
             tooltip: '$_tooltipBlendMode\n"${blendModeToText(layer.blendMode, AppLocalizations.of(context))}"',
             icon: const AppSvgIcon(icon: AppIcon.blender),
             onPressed: () async {
@@ -239,12 +239,12 @@ class LayerSelector extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: AppSpacing.huge),
             child: ColorPreview(
-              color: this.layer.backgroundColor ?? Colors.transparent,
+              color: this.layer.backgroundColor ?? AppPalette.transparent,
               onPressed: () {
                 showColorPicker(
                   context: context,
                   title: _labelBackgroundColor,
-                  color: this.layer.backgroundColor ?? Colors.transparent,
+                  color: this.layer.backgroundColor ?? AppPalette.transparent,
                   onSelectedColor: (final Color color) {
                     this.layer.backgroundColor = color;
                     layer.clearCache();
@@ -262,7 +262,7 @@ class LayerSelector extends StatelessWidget {
   Widget _buildLayerName(final LayersProvider layers) {
     return Row(
       children: <Widget>[
-        PopupMenuButton<String>(
+        AppPopupMenuButton<String>(
           icon: const AppSvgIcon(icon: AppIcon.moreVert),
           itemBuilder: (final BuildContext _) => _buildPopupMenuItems(),
           onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
@@ -282,16 +282,16 @@ class LayerSelector extends StatelessWidget {
               style: TextStyle(
                 fontSize: AppFontSize.title * AppVisual.titleScale,
                 fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.blue.shade100 : Colors.grey.shade400,
+                color: isSelected ? AppPalette.blueShade100 : AppPalette.grey400,
               ),
             ),
           ),
         ),
-        IconButton(
+        AppIconButton(
           tooltip: _tooltipHideShowLayer,
           icon: AppSvgIcon(
             icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
-            color: layer.isVisible ? Colors.blue : AppColors.layerHiddenWarning,
+            color: layer.isVisible ? AppPalette.blue : AppColors.layerHiddenWarning,
           ),
           onPressed: () => layers.layersToggleVisibility(layer),
         ),
@@ -300,11 +300,10 @@ class LayerSelector extends StatelessWidget {
   }
 
   /// Builds the popup menu items for the layer selector.
-  List<PopupMenuItem<String>> _buildPopupMenuItems() {
-    return <PopupMenuItem<String>>[
-      const PopupMenuItem<String>(
+  List<AppPopupMenuItem<String>> _buildPopupMenuItems() {
+    return <AppPopupMenuItem<String>>[
+      const AppPopupMenuItem<String>(
         value: _menuActionRename,
-        enabled: true,
         child: Row(
           children: <Widget>[
             AppSvgIcon(icon: AppIcon.edit),
@@ -313,9 +312,8 @@ class LayerSelector extends StatelessWidget {
           ],
         ),
       ),
-      const PopupMenuItem<String>(
+      const AppPopupMenuItem<String>(
         value: _menuActionAdd,
-        enabled: true,
         child: Row(
           children: <Widget>[
             AppSvgIcon(icon: AppIcon.playlistAdd),
@@ -325,10 +323,9 @@ class LayerSelector extends StatelessWidget {
         ),
       ),
       if (allowRemoveLayer)
-        PopupMenuItem<String>(
+        const AppPopupMenuItem<String>(
           value: _menuActionDelete,
-          enabled: allowRemoveLayer,
-          child: const Row(
+          child: Row(
             children: <Widget>[
               AppSvgIcon(icon: AppIcon.playlistRemove),
               SizedBox(width: AppSpacing.sm),
@@ -337,10 +334,9 @@ class LayerSelector extends StatelessWidget {
           ),
         ),
       if (allowRemoveLayer)
-        PopupMenuItem<String>(
+        const AppPopupMenuItem<String>(
           value: _menuActionMerge,
-          enabled: allowRemoveLayer,
-          child: const Row(
+          child: Row(
             children: <Widget>[
               AppSvgIcon(icon: AppIcon.layers),
               SizedBox(width: AppSpacing.sm),
@@ -349,9 +345,8 @@ class LayerSelector extends StatelessWidget {
           ),
         ),
       if (allowRemoveLayer)
-        const PopupMenuItem<String>(
+        const AppPopupMenuItem<String>(
           value: _menuActionBlend,
-          enabled: true,
           child: Row(
             children: <Widget>[
               AppSvgIcon(icon: AppIcon.blender),
@@ -360,23 +355,21 @@ class LayerSelector extends StatelessWidget {
             ],
           ),
         ),
-      PopupMenuItem<String>(
+      AppPopupMenuItem<String>(
         value: _menuActionVisibility,
-        enabled: true,
         child: Row(
           children: <Widget>[
             AppSvgIcon(
               icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
-              color: layer.isVisible ? Colors.blue : AppColors.layerHiddenWarning,
+              color: layer.isVisible ? AppPalette.blue : AppColors.layerHiddenWarning,
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(layer.isVisible ? _menuLabelHideLayer : _menuLabelShowLayer),
           ],
         ),
       ),
-      const PopupMenuItem<String>(
+      const AppPopupMenuItem<String>(
         value: _menuActionAllHide,
-        enabled: true,
         child: Row(
           children: <Widget>[
             AppSvgIcon(icon: AppIcon.visibilityOff),
@@ -385,9 +378,8 @@ class LayerSelector extends StatelessWidget {
           ],
         ),
       ),
-      const PopupMenuItem<String>(
+      const AppPopupMenuItem<String>(
         value: _menuActionAllShow,
-        enabled: true,
         child: Row(
           children: <Widget>[
             AppSvgIcon(icon: AppIcon.visibility),
@@ -434,11 +426,10 @@ class LayerSelector extends StatelessWidget {
   ) {
     return GestureDetector(
       onLongPress: () {
-        showMenu(
+        showAppMenu<String>(
           context: context,
           position: const RelativeRect.fromLTRB(0, 0, 0, 0),
           items: _buildPopupMenuItems(),
-          elevation: AppSpacing.sm,
         ).then((final String? value) {
           if (value != null) {
             _handlePopupMenuSelection(value, layers);
@@ -449,7 +440,7 @@ class LayerSelector extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: <Widget>[
           _buildThumbnailPreview(layers, layer),
-          if (minimal && !layer.isVisible) const AppSvgIcon(icon: AppIcon.visibilityOff, color: Colors.red),
+          if (minimal && !layer.isVisible) const AppSvgIcon(icon: AppIcon.visibilityOff, color: AppPalette.red),
         ],
       ),
     );

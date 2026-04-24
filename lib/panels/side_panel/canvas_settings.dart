@@ -1,13 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
-
-const String _pxUnit = 'px';
 
 /// TextEditingController for the width input field.
 final TextEditingController widthController = TextEditingController();
@@ -28,7 +27,7 @@ bool initOnce = false;
 /// The [context] parameter is the [BuildContext] used to display the modal.
 void showCanvasSettings(final BuildContext context) {
   initOnce = true;
-  showModalBottomSheet<dynamic>(
+  showAppBottomSheet<dynamic>(
     context: context,
     builder: (final BuildContext context) {
       final AppLocalizations l10n = context.l10n;
@@ -51,7 +50,11 @@ void showCanvasSettings(final BuildContext context) {
             children: <Widget>[
               Text(
                 l10n.canvasSizeTitle,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: const TextStyle(
+                  color: AppPalette.white,
+                  fontSize: AppFontSize.titleHero,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(
                 height: AppSpacing.xxxl,
@@ -61,13 +64,9 @@ void showCanvasSettings(final BuildContext context) {
                 children: <Widget>[
                   SizedBox(
                     width: AppLayout.inputFieldWidth,
-                    child: TextField(
+                    child: AppTextField(
                       key: Keys.canvasSettingsWidthField,
-                      decoration: InputDecoration(
-                        labelText: l10n.width,
-                        suffixText: _pxUnit,
-                        border: const OutlineInputBorder(),
-                      ),
+                      hintText: l10n.width,
                       keyboardType: TextInputType.number,
                       controller: widthController,
                       onChanged: (final String value) {
@@ -83,7 +82,7 @@ void showCanvasSettings(final BuildContext context) {
                       },
                     ),
                   ),
-                  IconButton(
+                  AppIconButton(
                     key: Keys.canvasSettingsAspectRatioToggleButton,
                     icon: AppSvgIcon(
                       icon: layers.canvasResizeLockAspectRatio ? AppIcon.link : AppIcon.linkOff,
@@ -107,13 +106,9 @@ void showCanvasSettings(final BuildContext context) {
                   ),
                   SizedBox(
                     width: AppLayout.inputFieldWidth,
-                    child: TextField(
+                    child: AppTextField(
                       key: Keys.canvasSettingsHeightField,
-                      decoration: InputDecoration(
-                        labelText: l10n.height,
-                        suffixText: _pxUnit,
-                        border: const OutlineInputBorder(),
-                      ),
+                      hintText: l10n.height,
                       keyboardType: TextInputType.number,
                       controller: heightController,
                       onChanged: (final String value) {
@@ -145,7 +140,7 @@ void showCanvasSettings(final BuildContext context) {
               ),
               Align(
                 alignment: Alignment.centerRight,
-                child: ElevatedButton(
+                child: AppElevatedButton(
                   key: Keys.canvasSettingsApplyButton,
                   onPressed: () {
                     final double width = double.tryParse(widthController.text) ?? -1;

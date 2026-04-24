@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/models/visible_model.dart';
 
 /// Holds the state for an image being interactively placed on the canvas

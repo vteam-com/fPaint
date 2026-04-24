@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -90,7 +90,7 @@ class ImagePlacementWidget extends StatelessWidget {
                   height: screenHeight,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Colors.blue,
+                      color: AppPalette.blue,
                       width: AppStroke.thin,
                     ),
                   ),
@@ -136,17 +136,17 @@ class ImagePlacementWidget extends StatelessWidget {
               children: <Widget>[
                 buildOverlayCircleButton(
                   tooltip: l10n.apply,
-                  color: Colors.green,
+                  color: AppPalette.green,
                   cursor: SystemMouseCursors.click,
                   onTap: onConfirm,
-                  child: const AppSvgIcon(icon: AppIcon.check, color: Colors.white, size: AppLayout.iconSize),
+                  child: const AppSvgIcon(icon: AppIcon.check, color: AppPalette.white, size: AppLayout.iconSize),
                 ),
                 buildOverlayCircleButton(
                   tooltip: l10n.cancel,
-                  color: Colors.red,
+                  color: AppPalette.red,
                   cursor: SystemMouseCursors.click,
                   onTap: onCancel,
-                  child: const AppSvgIcon(icon: AppIcon.close, color: Colors.white, size: AppLayout.iconSize),
+                  child: const AppSvgIcon(icon: AppIcon.close, color: AppPalette.white, size: AppLayout.iconSize),
                 ),
               ],
             ),
@@ -260,8 +260,8 @@ class ImagePlacementWidget extends StatelessWidget {
             width: handleSize,
             height: handleSize,
             decoration: BoxDecoration(
-              color: Colors.blue,
-              border: Border.all(color: Colors.white, width: AppStroke.regular),
+              color: AppPalette.blue,
+              border: Border.all(color: AppPalette.white, width: AppStroke.regular),
               borderRadius: BorderRadius.circular(AppRadius.sm),
             ),
           ),
@@ -289,7 +289,7 @@ class ImagePlacementWidget extends StatelessWidget {
       top: handleCenter.dy - handleSize / AppMath.pair,
       child: buildOverlayCircleButton(
         tooltip: l10n.resizeRotate,
-        color: Colors.green,
+        color: AppPalette.green,
         cursor: SystemMouseCursors.grab,
         onPanUpdate: (final DragUpdateDetails details) {
           final Offset pointer = handleCenter + details.delta;
@@ -304,7 +304,7 @@ class ImagePlacementWidget extends StatelessWidget {
           model.rotation += currentAngle - previousAngle;
           onChanged();
         },
-        child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: Colors.white),
+        child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppPalette.white),
       ),
     );
   }

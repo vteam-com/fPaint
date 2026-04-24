@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 
 /// Builds the thin vertical line that connects a bounding box's top-center edge
@@ -30,7 +30,7 @@ Widget buildRotationStem(final Rect bounds, {final double? handleSize}) {
       child: Container(
         width: AppInteraction.rotationHandleLineWidth,
         height: stemHeight,
-        color: Colors.blue,
+        color: AppPalette.blue,
       ),
     ),
   );

@@ -4,6 +4,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -26,32 +27,32 @@ void main() {
     expect(find.text('Language'), findsOneWidget);
     expect(find.text('Use Apple Pencil Only'), findsOneWidget);
 
-    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.tap(find.byType(AppDropdown<String>));
     await tester.pumpAndSettle();
     await tester.tap(find.text('French').last);
     await tester.pumpAndSettle();
 
     expect(preferences.languageCode, 'fr');
 
-    await tester.tap(find.byType(Switch));
+    await tester.tap(find.byType(AppToggleSwitch));
     await tester.pumpAndSettle();
 
     expect(preferences.useApplePencil, isTrue);
 
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Keyboard Shortcuts'));
+    await tester.tap(find.widgetWithText(AppTextButton, 'Keyboard Shortcuts'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(AlertDialog), findsOneWidget);
+    expect(find.byType(AppDialog), findsOneWidget);
     expect(
       find.descendant(
-        of: find.byType(AlertDialog),
+        of: find.byType(AppDialog),
         matching: find.text('Keyboard Shortcuts'),
       ),
       findsOneWidget,
     );
     expect(
       find.descendant(
-        of: find.byType(AlertDialog),
+        of: find.byType(AppDialog),
         matching: find.text('Close'),
       ),
       findsOneWidget,
@@ -69,8 +70,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Available Platforms'), findsOneWidget);
-    expect(find.byType(Card), findsNWidgets(6));
-    expect(find.byType(CircleAvatar), findsNWidgets(6));
+    expect(find.byType(AppCard), findsNWidgets(6));
+    expect(find.byType(ClipOval), findsNWidgets(6));
     expect(find.text('macOS'), findsOneWidget);
     expect(find.text('Windows'), findsOneWidget);
     expect(find.text('Linux'), findsOneWidget);

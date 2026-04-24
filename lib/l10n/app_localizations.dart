@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_en.dart';
 import 'package:fpaint/l10n/app_localizations_es.dart';
 import 'package:fpaint/l10n/app_localizations_fr.dart';
+import 'package:fpaint/widgets/material_free/app_snackbar.dart';
 import 'package:intl/intl.dart' as intl;
 
 // ignore_for_file: type=lint
@@ -15,7 +16,7 @@ extension AppLocalizationsBuildContextX on BuildContext {
   /// Returns the localized strings for this context.
   AppLocalizations get l10n => AppLocalizations.of(this)!;
 
-  /// Shows a snack bar message if the context is still mounted.
+  /// Shows a notification overlay message if the context is still mounted.
   void showSnackBarMessage(
     final String message, {
     final Duration? duration,
@@ -24,14 +25,7 @@ extension AppLocalizationsBuildContextX on BuildContext {
       return;
     }
 
-    final SnackBar snackBar = duration == null
-        ? SnackBar(content: Text(message))
-        : SnackBar(
-            content: Text(message),
-            duration: duration,
-          );
-
-    ScaffoldMessenger.of(this).showSnackBar(snackBar);
+    AppNotificationOverlay.show(this, message, duration: duration);
   }
 }
 
@@ -101,16 +95,13 @@ abstract class AppLocalizations {
   /// delegates.
   ///
   /// Returns a list of localizations delegates containing this delegate along with
-  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
-  /// and GlobalWidgetsLocalizations.delegate.
+  /// GlobalWidgetsLocalizations.delegate.
   ///
   /// Additional delegates can be added by appending to this list in
-  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// WidgetsApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
   ];
 

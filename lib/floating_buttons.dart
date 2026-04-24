@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -7,6 +7,7 @@ import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 const String _canvasZoomAndSizeFormat = '{zoom}%\n{width}\n{height}';
 const String _placeholderZoom = '{zoom}';
@@ -50,15 +51,26 @@ Widget floatingActionButtons(
       spacing: AppSpacing.sm - AppStroke.thin,
       children: <Widget>[
         if (!shellProvider.showMenu)
-          FloatingActionButton(
-            heroTag: null,
-            backgroundColor: AppColors.floatingButtonBackground,
-            foregroundColor: Colors.white,
-            tooltip: l10n.activeTool,
-            onPressed: () {
+          GestureDetector(
+            onTap: () {
               shellProvider.showMenu = !shellProvider.showMenu;
             },
-            child: AppSvgIcon(icon: appProvider.selectedAction.icon, isSelected: false),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: SizedBox(
+                width: AppLayout.toolbarButtonSize,
+                height: AppLayout.toolbarButtonSize,
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    color: AppColors.floatingButtonBackground,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: AppSvgIcon(icon: appProvider.selectedAction.icon, isSelected: false),
+                  ),
+                ),
+              ),
+            ),
           ),
         if (!shellProvider.showMenu)
           myFloatButton(
@@ -170,20 +182,35 @@ Widget floatingActionButtons(
 Widget myFloatButton({
   final Key? key,
   final AppIcon? icon,
-  final Color foregroundColor = Colors.white,
+  final Color foregroundColor = AppPalette.white,
   final String? tooltip,
   required final void Function() onPressed,
   final Widget? child,
 }) {
-  return FloatingActionButton(
+  final Widget button = GestureDetector(
     key: key,
-    heroTag: null,
-    backgroundColor: AppColors.floatingButtonBackground,
-    foregroundColor: foregroundColor,
-    tooltip: tooltip,
-    onPressed: () {
+    onTap: () {
       Future<void>.microtask(() => onPressed());
     },
-    child: child ?? AppSvgIcon(icon: icon!, color: foregroundColor),
+    child: MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: SizedBox(
+        width: AppLayout.toolbarButtonSize,
+        height: AppLayout.toolbarButtonSize,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            color: AppColors.floatingButtonBackground,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: child ?? AppSvgIcon(icon: icon!, color: foregroundColor),
+          ),
+        ),
+      ),
+    ),
   );
+  if (tooltip != null) {
+    return AppTooltip(message: tooltip, child: button);
+  }
+  return button;
 }

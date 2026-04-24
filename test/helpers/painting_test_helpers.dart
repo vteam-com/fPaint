@@ -31,6 +31,7 @@ import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:image/image.dart' as img;
@@ -456,7 +457,7 @@ Future<void> pressListTileWithoutSettling(
 ) async {
   expect(target, findsOneWidget, reason: 'Should find exactly one visible list tile');
 
-  final ListTile tile = tester.widget<ListTile>(target.first);
+  final AppListTile tile = tester.widget<AppListTile>(target.first);
   final GestureTapCallback? onTap = tile.onTap;
   expect(onTap, isNotNull, reason: 'Expected list tile to be tappable');
 
@@ -475,9 +476,9 @@ Future<void> openPopupMenuButtonWithoutSettling<T>(
 ) async {
   expect(target, findsOneWidget, reason: 'Should find exactly one visible popup menu button');
 
-  InteractionTracker.recordTap(tester.getCenter(target.first));
-  final PopupMenuButtonState<T> state = tester.state<PopupMenuButtonState<T>>(target);
-  state.showButtonMenu();
+  final Offset center = tester.getCenter(target.first);
+  InteractionTracker.recordTap(center);
+  await tester.tap(target.first);
   await tester.pump();
   await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
 }
@@ -525,7 +526,9 @@ Future<void> tapByTooltip(
   final WidgetTester tester,
   final String tooltip,
 ) async {
-  final Finder found = find.byTooltip(tooltip);
+  final Finder found = find.byWidgetPredicate(
+    (final Widget w) => w is AppTooltip && w.message == tooltip,
+  );
   expect(found, findsOneWidget, reason: 'Should find widget with tooltip: $tooltip');
   await tapLikeHuman(tester, tester.getCenter(found.first));
   await tester.pump();
@@ -537,7 +540,9 @@ Future<void> dragByTooltip(
   required final String tooltip,
   required final Offset delta,
 }) async {
-  final Finder found = find.byTooltip(tooltip);
+  final Finder found = find.byWidgetPredicate(
+    (final Widget w) => w is AppTooltip && w.message == tooltip,
+  );
   expect(found, findsOneWidget, reason: 'Should find draggable widget with tooltip: $tooltip');
   final Offset start = tester.getCenter(found.first);
   await dragLikeHuman(tester, start, start + delta);
@@ -1305,13 +1310,13 @@ Future<void> placeTextViaUI(
   await tester.pumpAndSettle();
 
   // Interact with the TextEditorDialog.
-  final Finder dialogFinder = find.byType(AlertDialog);
+  final Finder dialogFinder = find.byType(AppDialog);
   expect(dialogFinder, findsOneWidget, reason: 'Text editor dialog should be visible');
 
   // Enter text into the text field.
   final Finder textField = find.descendant(
     of: dialogFinder,
-    matching: find.byType(TextField),
+    matching: find.byType(EditableText),
   );
   await tester.enterText(textField.first, text);
   await tester.pump();
@@ -1329,7 +1334,7 @@ Future<void> placeTextViaUI(
   // Tap the "Add Text" action button (find the TextButton, not the title).
   final Finder addTextButton = find.descendant(
     of: dialogFinder,
-    matching: find.widgetWithText(TextButton, 'Add Text'),
+    matching: find.widgetWithText(AppTextButton, 'Add Text'),
   );
   await tester.tap(addTextButton.first);
   await tester.pumpAndSettle();
@@ -1672,7 +1677,7 @@ Future<void> _positionUnitTestExportSheet(
   final UnitTestExportFormat format,
 ) async {
   final Finder bottomSheetScrollable = find.descendant(
-    of: find.byType(BottomSheet),
+    of: find.byType(ConstrainedBox),
     matching: find.byType(Scrollable),
   );
 
@@ -1783,7 +1788,7 @@ Future<void> saveUnitTestArtworkViaExportUi(
     final Finder exportActionTile = find
         .ancestor(
           of: exportActionLabel,
-          matching: find.byType(ListTile),
+          matching: find.byType(AppListTile),
         )
         .hitTestable();
     expect(exportActionTile, findsOneWidget, reason: 'Should find the visible export action tile');

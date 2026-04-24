@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -24,30 +25,47 @@ Future<void> showAboutBox(final BuildContext context) async {
     return;
   }
 
-  showAboutDialog(
+  showAppDialog<void>(
     context: context,
-    applicationName: appName,
-    applicationVersion: packageInfo.version,
-    applicationLegalese: _applicationLegalese,
-    applicationIcon: Image.asset(
-      'assets/app_icon.png',
-      width: AppLayout.appIconSize,
-      height: AppLayout.appIconSize,
-    ),
-    children: <Widget>[
-      const SizedBox(height: AppSpacing.xxl),
-      Text(l10n.deviceScreenResolution(screenResolution)),
-      const SizedBox(height: AppSpacing.xxl),
-      InkWell(
-        child: Text(
-          l10n.githubRepo,
-          style: const TextStyle(
-            color: Colors.blue,
-            decoration: TextDecoration.underline,
-          ),
+    builder: (final BuildContext dialogContext) {
+      return AppDialog(
+        title: Text('$appName ${packageInfo.version}'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Image.asset(
+              'assets/app_icon.png',
+              width: AppLayout.appIconSize,
+              height: AppLayout.appIconSize,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            const Text(_applicationLegalese),
+            const SizedBox(height: AppSpacing.xxl),
+            Text(l10n.deviceScreenResolution(screenResolution)),
+            const SizedBox(height: AppSpacing.xxl),
+            GestureDetector(
+              onTap: () => launchUrl(Uri.parse(_repoUrl)),
+              child: MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: Text(
+                  l10n.githubRepo,
+                  style: const TextStyle(
+                    color: AppPalette.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
-        onTap: () => launchUrl(Uri.parse(_repoUrl)),
-      ),
-    ],
+        actions: <Widget>[
+          AppTextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
+          ),
+        ],
+      );
+    },
   );
 }

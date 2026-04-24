@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 const String _blendModeNormalFallback = 'Normal';
 
@@ -96,7 +97,7 @@ Future<BlendMode> showBlendModeMenu({
 }) async {
   final AppLocalizations l10n = context.l10n;
   final Map<String, Map<String, Object>> blendModes = getSupportedBlendModes(l10n);
-  return await showMenu<BlendMode>(
+  return await showAppMenu<BlendMode>(
         context: context,
         position: RelativeRect.fromLTRB(
           position.dx,
@@ -107,21 +108,20 @@ Future<BlendMode> showBlendModeMenu({
         items: blendModes.entries.map((final MapEntry<String, Map<String, Object>> entry) {
           final BlendMode menuFlutterBlendMode = (entry.value['flutterBlendMode'] as BlendMode?) ?? BlendMode.srcOver;
 
-          return PopupMenuItem<BlendMode>(
+          return AppPopupMenuItem<BlendMode>(
             value: menuFlutterBlendMode,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                ListTile(
-                  selected: selectedBlendMode == menuFlutterBlendMode,
-                  selectedColor: Colors.blue,
-                  title: Text(entry.key),
-                  subtitle: Text(
-                    entry.value['description'] as String,
-                    style: TextStyle(
-                      fontSize: AppSpacing.lg,
-                      color: Colors.grey.shade500,
-                    ),
+                Text(
+                  entry.key,
+                  style: selectedBlendMode == menuFlutterBlendMode ? const TextStyle(color: AppPalette.blue) : null,
+                ),
+                Text(
+                  entry.value['description'] as String,
+                  style: const TextStyle(
+                    fontSize: AppSpacing.lg,
+                    color: AppPalette.grey500,
                   ),
                 ),
               ],

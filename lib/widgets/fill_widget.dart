@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/fill_model.dart';
@@ -82,9 +82,9 @@ class _FillWidgetState extends State<FillWidget> {
             width: centerDot,
             height: centerDot,
             decoration: BoxDecoration(
-              color: Colors.black,
+              color: AppPalette.black,
               shape: BoxShape.rectangle,
-              border: Border.all(color: Colors.white, width: AppStroke.thin),
+              border: Border.all(color: AppPalette.white, width: AppStroke.thin),
               borderRadius: BorderRadius.circular(centerDot),
             ),
           ),
@@ -156,12 +156,12 @@ class _FillWidgetState extends State<FillWidget> {
             height: handleSize.toDouble(),
             decoration: BoxDecoration(
               color: point.color,
-              border: Border.all(color: Colors.white, width: AppStroke.thin),
+              border: Border.all(color: AppPalette.white, width: AppStroke.thin),
               borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: AppStroke.thin),
+                border: Border.all(color: AppPalette.black, width: AppStroke.thin),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
             ),

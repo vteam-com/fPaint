@@ -4,36 +4,48 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Font family name used by Material widgets by default.
-const String _kDefaultFontFamily = 'Roboto';
+/// Font family name used by the app.
+const String _kDefaultFontFamily = 'Inter';
 
-/// Filename of the regular-weight Roboto font bundled with the Flutter SDK.
-const String _kRobotoFontFilename = 'Roboto-Regular.ttf';
+/// Regular-weight Inter font bundled with the app.
+const String _kInterFontFilename = 'Inter-Regular.otf';
 
-/// Relative path from the Flutter SDK root to the material fonts directory.
-const String _kMaterialFontsRelativePath = 'bin/cache/artifacts/material_fonts';
+/// Path within the workspace to the bundled font assets.
+const String _kAppFontsRelativePath = 'assets/fonts';
 
-/// Loads the Roboto font from the Flutter SDK so text renders legibly in
+/// Loads the Inter font so text renders legibly in
 /// golden-file screenshots and widget tests instead of showing as white boxes.
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   TestWidgetsFlutterBinding.ensureInitialized();
-  await _loadRobotoFont();
+  await _loadInterFont();
   await testMain();
 }
 
-Future<void> _loadRobotoFont() async {
+Future<void> _loadInterFont() async {
+  final File fontFile = File('$_kAppFontsRelativePath/$_kInterFontFilename');
+
+  if (!fontFile.existsSync()) {
+    // Fall back to Roboto from the Flutter SDK if Inter hasn't been downloaded yet.
+    await _loadFallbackRoboto();
+    return;
+  }
+
+  final ByteData fontData = ByteData.view(fontFile.readAsBytesSync().buffer);
+  final FontLoader loader = FontLoader(_kDefaultFontFamily)..addFont(Future<ByteData>.value(fontData));
+  await loader.load();
+}
+
+/// Fallback: load Roboto from the Flutter SDK material_fonts cache.
+Future<void> _loadFallbackRoboto() async {
   final String flutterRoot = _findFlutterRoot();
-  final File fontFile = File(
-    '$flutterRoot/$_kMaterialFontsRelativePath/$_kRobotoFontFilename',
-  );
+  final File fontFile = File('$flutterRoot/bin/cache/artifacts/material_fonts/Roboto-Regular.ttf');
 
   if (!fontFile.existsSync()) {
     return;
   }
 
-  final ByteData fontData = ByteData.view(
-    fontFile.readAsBytesSync().buffer,
-  );
+  final ByteData fontData = ByteData.view(fontFile.readAsBytesSync().buffer);
+  // Load it under the Inter family name so it substitutes in tests.
   final FontLoader loader = FontLoader(_kDefaultFontFamily)..addFont(Future<ByteData>.value(fontData));
   await loader.load();
 }

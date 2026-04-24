@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -9,6 +9,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// A widget that displays the top menu of the side panel.
 class SidePanelTopMenu extends StatelessWidget {
@@ -96,7 +97,7 @@ Widget _buildIconButton({
   required final AppIcon icon,
   required final VoidCallback onPressed,
 }) {
-  return IconButton(
+  return AppIconButton(
     key: key,
     tooltip: tooltip,
     icon: AppSvgIcon(icon: icon),

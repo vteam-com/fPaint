@@ -1,13 +1,14 @@
 // ignore: fcheck_one_class_per_file
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/draw_rect.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:vector_math/vector_math_64.dart' as vm64;
 
 /// A widget that displays a magnifying eye dropper for selecting colors from an image.
@@ -109,11 +110,11 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
             height: buttonSize.toDouble(),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Colors.black,
-                border: Border.all(color: Colors.white),
+                color: AppPalette.black,
+                border: Border.all(color: AppPalette.white),
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
-              child: IconButton(
+              child: AppIconButton(
                 key: Keys.magnifyingEyeDropperCloseButton,
                 onPressed: () {
                   widget.onClosed();
@@ -138,12 +139,12 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
                   child: CustomPaint(
                     painter: MagnifyingGlassPainter(
                       croppedImage: croppedImage,
-                      color: _selectedColor ?? Colors.black,
+                      color: _selectedColor ?? AppPalette.black,
                     ),
                   ),
                 ),
                 DashedRectangle(
-                  fillColor: _selectedColor ?? Colors.transparent,
+                  fillColor: _selectedColor ?? AppPalette.transparent,
                   width: AppLayout.magnifierTargetSize,
                   height: AppLayout.magnifierTargetSize,
                 ),
@@ -158,11 +159,11 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
             height: buttonSize.toDouble(),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Colors.black,
-                border: Border.all(color: Colors.white),
+                color: AppPalette.black,
+                border: Border.all(color: AppPalette.white),
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
-              child: IconButton(
+              child: AppIconButton(
                 key: Keys.magnifyingEyeDropperConfirmButton,
                 onPressed: () {
                   widget.onColorPicked(_selectedColor!);
@@ -245,7 +246,7 @@ class MagnifyingGlassPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = AppStroke.regular
-        ..color = Colors.black,
+        ..color = AppPalette.black,
     );
     canvas.drawCircle(
       Offset(size.width / AppMath.pair, size.height / AppMath.pair),
@@ -253,7 +254,7 @@ class MagnifyingGlassPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = AppStroke.regular
-        ..color = Colors.white,
+        ..color = AppPalette.white,
     );
   }
 

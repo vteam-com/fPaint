@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/side_panel/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
@@ -64,15 +64,15 @@ class _SidePanelState extends State<SidePanel> {
 
   @override
   Widget build(final BuildContext context) {
-    return Material(
-      color: AppColors.panelBackground,
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: AppColors.panelBackground),
       child: MultiSplitViewTheme(
         data: MultiSplitViewThemeData(
           dividerPainter: DividerPainters.grooved1(
             animationEnabled: true,
-            backgroundColor: Colors.grey.shade600,
-            highlightedBackgroundColor: Colors.blue,
-            color: Colors.grey.shade800,
+            backgroundColor: AppPalette.grey600,
+            highlightedBackgroundColor: AppPalette.blue,
+            color: AppPalette.grey800,
             thickness: AppStroke.divider,
             highlightedThickness: AppStroke.dividerHighlighted,
             strokeCap: StrokeCap.round,

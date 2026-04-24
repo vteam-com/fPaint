@@ -64,15 +64,22 @@ flutter:
     enable-swift-package-manager: false
 
   generate: true
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
-  uses-material-design: true
   assets:
     - assets/app_icon.png
     - assets/icons/
     - assets/images/platforms/
     - assets/test/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.otf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.otf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.otf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.otf
+          weight: 700
 
 # dart run flutter_launcher_icons
 flutter_launcher_icons:

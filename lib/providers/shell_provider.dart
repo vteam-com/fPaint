@@ -1,7 +1,7 @@
 // Imports
 import 'dart:core';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:provider/provider.dart';
 

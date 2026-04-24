@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/base_picker.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// A widget that allows the user to pick a brush size using a slider.
 class BrushSizePicker extends BasePicker<double> {
@@ -30,12 +31,11 @@ class _BrushSizePickerState extends BasePickerState<double> {
 
   @override
   Widget buildPickerWidget() {
-    return Slider(
+    return AppSlider(
       value: currentValue,
       min: widget.min!,
       max: widget.max!,
       divisions: widget.divisions,
-      label: currentValue.toStringAsFixed(1),
       onChanged: updateValue,
     );
   }

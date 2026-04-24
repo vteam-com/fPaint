@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -9,6 +9,7 @@ import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/top_colors.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
@@ -65,26 +66,31 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
         }
       },
       child: shellProvider.deviceSizeSmall
-          ? Dialog.fullscreen(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: AppSpacing.xxl,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
-                    child: Text(
-                      widget.title,
-                      textAlign: TextAlign.start,
-                      style: Theme.of(context).textTheme.titleLarge,
+          ? SizedBox.expand(
+              child: DecoratedBox(
+                decoration: const BoxDecoration(color: AppColors.surface),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: AppSpacing.xxl,
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      child: Text(
+                        widget.title,
+                        textAlign: TextAlign.start,
+                        style: const TextStyle(
+                          color: AppPalette.white,
+                          fontSize: AppFontSize.titleHero,
+                        ),
+                      ),
                     ),
-                  ),
-                  _buildContent(layersModel),
-                ],
+                    _buildContent(layersModel),
+                  ],
+                ),
               ),
             )
-          : AlertDialog(
+          : AppDialog(
               title: Text(widget.title),
-              contentPadding: const EdgeInsets.all(AppSpacing.thin),
               content: SizedBox(
                 width: AppLayout.sliderDialogWidth,
                 child: _buildContent(layersModel),
@@ -142,12 +148,12 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               for (final Color color in <Color>[
-                Colors.red,
-                Colors.orange,
-                Colors.yellow,
-                Colors.green,
-                Colors.blue,
-                Colors.purple,
+                AppPalette.red,
+                AppPalette.orange,
+                AppPalette.yellow,
+                AppPalette.green,
+                AppPalette.blue,
+                AppPalette.purple,
               ])
                 GestureDetector(
                   onTap: () {
@@ -163,7 +169,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                       color: color,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.grey.shade300,
+                        color: AppPalette.grey300,
                         width: 1,
                       ),
                     ),
@@ -194,7 +200,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              IconButton(
+              AppIconButton(
                 icon: const AppSvgIcon(icon: AppIcon.paste),
                 onPressed: () async {
                   final ClipboardData? data = await Clipboard.getData(_plainTextMimeType);
@@ -214,12 +220,9 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               ),
               SizedBox(
                 width: AppLayout.inputFieldWidth,
-                child: TextField(
+                child: AppTextField(
                   controller: _hexController,
-                  decoration: InputDecoration(
-                    labelText: l10n.hexColor,
-                    border: const OutlineInputBorder(),
-                  ),
+                  hintText: l10n.hexColor,
                   onChanged: (final String value) {
                     try {
                       final Color color = getColorFromString(value);
@@ -232,7 +235,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                   },
                 ),
               ),
-              IconButton(
+              AppIconButton(
                 icon: const AppSvgIcon(icon: AppIcon.copy),
                 onPressed: () {
                   Clipboard.setData(
@@ -253,11 +256,11 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
-              TextButton(
+              AppTextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(l10n.cancel),
               ),
-              TextButton(
+              AppTextButton(
                 onPressed: () {
                   widget.onColorChanged(_currentColor);
                   Navigator.of(context).pop();
@@ -279,7 +282,7 @@ void showColorPicker({
   required final Color color,
   required final ValueChanged<Color> onSelectedColor,
 }) {
-  showDialog<dynamic>(
+  showAppDialog<dynamic>(
     context: context,
     builder: (final BuildContext _) {
       return ColorPickerDialog(

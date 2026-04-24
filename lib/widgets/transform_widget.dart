@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -228,17 +228,17 @@ class _TransformWidgetState extends State<TransformWidget> {
               children: <Widget>[
                 buildOverlayCircleButton(
                   tooltip: l10n.apply,
-                  color: Colors.green,
+                  color: AppPalette.green,
                   cursor: SystemMouseCursors.click,
                   onTap: onConfirm,
-                  child: const AppSvgIcon(icon: AppIcon.check, color: Colors.white, size: AppLayout.iconSize),
+                  child: const AppSvgIcon(icon: AppIcon.check, color: AppPalette.white, size: AppLayout.iconSize),
                 ),
                 buildOverlayCircleButton(
                   tooltip: l10n.cancel,
-                  color: Colors.red,
+                  color: AppPalette.red,
                   cursor: SystemMouseCursors.click,
                   onTap: onCancel,
-                  child: const AppSvgIcon(icon: AppIcon.close, color: Colors.white, size: AppLayout.iconSize),
+                  child: const AppSvgIcon(icon: AppIcon.close, color: AppPalette.white, size: AppLayout.iconSize),
                 ),
               ],
             ),
@@ -343,11 +343,11 @@ class _TransformWidgetState extends State<TransformWidget> {
                   model.endScaleGesture();
                   onChanged();
                 },
-                child: const AppSvgIcon(icon: AppIcon.openInFull, size: AppLayout.iconSize, color: Colors.white),
+                child: const AppSvgIcon(icon: AppIcon.openInFull, size: AppLayout.iconSize, color: AppPalette.white),
               ),
               buildOverlayCircleButton(
                 tooltip: l10n.resizeRotate,
-                color: Colors.green,
+                color: AppPalette.green,
                 cursor: SystemMouseCursors.grab,
                 onTap: () {
                   if (!model.isRotateMode) {
@@ -385,7 +385,7 @@ class _TransformWidgetState extends State<TransformWidget> {
                   model.endRotateGesture();
                   onChanged();
                 },
-                child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: Colors.white),
+                child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppPalette.white),
               ),
               buildOverlayCircleButton(
                 tooltip: l10n.transform,

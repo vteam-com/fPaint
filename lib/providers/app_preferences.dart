@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:logging/logging.dart';
@@ -41,8 +41,8 @@ class AppPreferences extends ChangeNotifier {
   // Default values
   double _sidePanelDistance = AppLayout.sidePanelTopDefault;
   double _brushSize = AppDefaults.brushSize;
-  Color _brushColor = Colors.black;
-  Color _fillColor = Colors.blue;
+  Color _brushColor = AppPalette.black;
+  Color _fillColor = AppPalette.blue;
   bool _useApplePencil = true;
   String? _languageCode;
 
@@ -193,9 +193,9 @@ class AppPreferences extends ChangeNotifier {
     _brushSize = _prefs!.getDouble(keyBrushSize) ?? AppDefaults.brushSize;
 
     // Load last used color
-    _brushColor = Color(_prefs!.getInt(keyLastBrushColor) ?? Colors.black.toARGB32());
+    _brushColor = Color(_prefs!.getInt(keyLastBrushColor) ?? AppPalette.black.toARGB32());
 
-    _fillColor = Color(_prefs!.getInt(keyLastFillColor) ?? Colors.blue.toARGB32());
+    _fillColor = Color(_prefs!.getInt(keyLastFillColor) ?? AppPalette.blue.toARGB32());
 
     _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? AppDefaults.useApplePencil;
 
