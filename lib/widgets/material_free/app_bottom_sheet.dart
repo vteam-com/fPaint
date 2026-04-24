@@ -34,7 +34,13 @@ Future<T?> showAppBottomSheet<T>({
                     width: AppStroke.thin,
                   ),
                 ),
-                child: builder(dialogContext),
+                child: DefaultTextStyle(
+                  style: const TextStyle(
+                    fontFamily: appFontFamily,
+                    color: AppPalette.white,
+                  ),
+                  child: builder(dialogContext),
+                ),
               ),
             ),
           );
