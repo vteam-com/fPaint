@@ -24,3 +24,4 @@
 
 - When a test performs a tap (via `tapLikeHuman`, `tapByKey`, or `tapByTooltip`), a red target overlay must be drawn at the tap position and the frame saved to the video when a `UnitTestVideoRecorder` is active.
 - Any new tap helper must call `UnitTestVideoRecorder.captureAfterInteraction(tester)` after performing the tap and recording the interaction.
+- Before each tap or gesture in a test helper, capture a video frame with `UnitTestVideoRecorder.captureAfterInteraction(tester)` so the state before the interaction is visible in the recorded video.

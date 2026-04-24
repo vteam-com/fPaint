@@ -595,8 +595,9 @@ class _EffectIntensityDialogState extends State<_EffectIntensityDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(widget.l10n.effectIntensity),
+          Text('${widget.l10n.effectIntensity} (${(_strength * AppMath.percentScale).round()}%)'),
           AppSlider(
+            key: Keys.effectIntensityDialogSlider,
             value: _strength,
             min: AppEffects.minIntensity,
             max: AppEffects.maxIntensity,

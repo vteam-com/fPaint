@@ -24,7 +24,11 @@ class AppTextButton extends StatelessWidget {
             vertical: AppSpacing.md,
           ),
           child: DefaultTextStyle(
-            style: const TextStyle(color: AppColors.primary, fontSize: AppFontSize.titleHero),
+            style: const TextStyle(
+              fontFamily: appFontFamily,
+              color: AppColors.primary,
+              fontSize: AppFontSize.titleHero,
+            ),
             child: child,
           ),
         ),
@@ -59,7 +63,11 @@ class AppElevatedButton extends StatelessWidget {
               vertical: AppSpacing.md,
             ),
             child: DefaultTextStyle(
-              style: const TextStyle(color: AppPalette.white, fontSize: AppFontSize.titleHero),
+              style: const TextStyle(
+                fontFamily: appFontFamily,
+                color: AppPalette.white,
+                fontSize: AppFontSize.titleHero,
+              ),
               child: child,
             ),
           ),

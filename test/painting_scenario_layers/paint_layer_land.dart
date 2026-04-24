@@ -21,12 +21,9 @@ Future<void> paintLayerLand(final PaintingScenarioSession session) async {
     endPosition: session.canvasCenter + _landBottomRight + const Offset(_landSelectionMargin, _landSelectionMargin),
   );
 
-  for (int i = 0; i < _landGrassDistortionPasses; i++) {
-    await applyEffectViaUi(session.tester, SelectionEffect.noise);
-    await applyEffectViaUi(session.tester, SelectionEffect.pixelate);
-  }
-  await applyEffectViaUi(session.tester, SelectionEffect.blur);
-  await applyEffectViaUi(session.tester, SelectionEffect.noise);
+  await applyEffectViaUi(session.tester, SelectionEffect.noise, strength: 1.0);
+  await applyEffectViaUi(session.tester, SelectionEffect.pixelate, strength: 1);
+  await applyEffectViaUi(session.tester, SelectionEffect.soften, strength: 1);
 
   final BuildContext landContext = session.tester.element(find.byType(MainView));
   final AppProvider landAppProvider = AppProvider.of(landContext, listen: false);

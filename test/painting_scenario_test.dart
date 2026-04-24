@@ -35,6 +35,7 @@ part 'painting_scenario_layers/paint_layer_fence.dart';
 part 'painting_scenario_layers/paint_layer_birds.dart';
 part 'painting_scenario_layers/paint_layer_signature.dart';
 part 'painting_scenario_layers/scenario_crop_canvas.dart';
+part 'painting_scenario_layers/scenario_post_crop_vignette.dart';
 part 'painting_scenario_layers/scenario_validate_scene.dart';
 part 'painting_scenario_layers/scenario_export_outputs.dart';
 
@@ -74,6 +75,7 @@ const double _mountainDuplicateLargeScaleFactor = 1.35;
 const Offset _mountainDuplicateLargeMoveDelta = Offset(-170, -24);
 const double _mountainDuplicateSmallScaleFactor = 0.7;
 const Offset _mountainDuplicateSmallMoveDelta = Offset(210, 14);
+const double _mountainBlurIntensity = 0.2;
 const List<Offset> _mountain1SelectionPoints = <Offset>[
   _mountain1BaseLeft,
   _mountain1PeakLeftCurve,
@@ -106,6 +108,7 @@ const double _sunRadius = 50.0;
 const Color _sunRayColorCenter = Color.fromARGB(100, 255, 242, 1);
 const Color _sunRayColorEdge = Color.fromARGB(0, 198, 242, 0);
 const Color _sunBodyColor = Color.fromARGB(179, 241, 226, 179);
+const double _sunSoftenIntensity = 0.5;
 
 // Land layer
 const String _landLayerName = 'Land';
@@ -115,7 +118,6 @@ const Offset _landTopLeft = Offset(-300, _landTopY);
 const Offset _landBottomRight = Offset(300, _landBottomY);
 const double _landBorderBrushSize = 8.0;
 const double _landSelectionMargin = 4.0;
-const int _landGrassDistortionPasses = 4;
 
 // Lake layer (temporary layer merged into land)
 const String _pondDraftLayerName = 'Lake Draft';
@@ -245,6 +247,9 @@ const Offset _birdLine4End = Offset(56, 18);
 
 // Signature
 const String _signatureLayerName = 'Signature';
+
+// Post-crop vignette
+const double _vignetteIntensity = 0.4;
 const String _signatureText = 'fPaint';
 const String _signatureFontFamily = 'Inter';
 const double _signatureFontSize = 24.0;
@@ -394,6 +399,7 @@ void main() {
       await paintLayerBirds(session);
 
       final LayersProvider layersProvider = await cropScenarioCanvas(session);
+      await applyPostCropVignette(session);
       await paintLayerSignature(session, layersProvider: layersProvider);
       await validateScenarioScene(session, layersProvider: layersProvider);
       await exportScenarioOutputs(session);
