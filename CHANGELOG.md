@@ -4,6 +4,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-04-24
+
+### Refactor
+
+- Removed all `package:flutter/material.dart` and `package:flutter/cupertino.dart` dependencies from `lib/`
+- Introduced custom zero-Material widget library (`lib/widgets/material_free/`) replacing all Material widgets
+- Switched default UI font from Roboto to Inter (SIL OFL, screen-optimized, Apple SF Pro equivalent)
+
 ## [1.4.1] - 2026-04-23
 
 ### Refactor

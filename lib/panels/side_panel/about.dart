@@ -5,7 +5,7 @@ import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const String _repoUrl = 'https://github.com/your-repo-url';
+const String _repoUrl = 'https://github.com/vteam-com/fPaint';
 const String _applicationLegalese = '(c) 2025 VTeam';
 
 /// Displays an about dialog with information about the application.
