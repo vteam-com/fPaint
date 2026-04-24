@@ -75,6 +75,7 @@
   "editText": "Modifier le texte",
   "effectBlur": "Flou",
   "effectGrayscale": "Niveaux de gris",
+  "effectIntensity": "Intensité",
   "effectNoise": "Bruit",
   "effectPixelate": "Pixéliser",
   "effects": "Effets",

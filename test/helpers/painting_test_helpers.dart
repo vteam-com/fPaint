@@ -27,7 +27,6 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
@@ -38,6 +37,9 @@ import 'package:image/image.dart' as img;
 
 /// Number of incremental steps used in human-like drag gestures.
 const double _humanDragSteps = 3;
+
+/// Duration in milliseconds to pump past showGeneralDialog transitions.
+const int _dialogTransitionMs = 300;
 
 /// Minimum number of vertices required to form a lasso selection polygon.
 const int _lassoSelectionMinimumPointCount = 3;
@@ -707,21 +709,12 @@ Future<void> invertCurrentSelection(final WidgetTester tester) async {
   await tester.pump();
 }
 
-/// Effects whose [SelectionEffect.apply] uses byte-level pixel manipulation
-/// (e.g. `toByteData`, `ImmutableBuffer`, codec) and must run inside
-/// [WidgetTester.runAsync] to avoid deadlocking the fake-async test zone.
-const Set<SelectionEffect> _effectsRequiringRunAsync = <SelectionEffect>{
-  SelectionEffect.noise,
-  SelectionEffect.sharpen,
-};
-
 /// Applies a [SelectionEffect] by tapping its button in the tools panel,
 /// recording the interaction for the test video.
 ///
 /// Switches to the selector tool and selects all if no selection is active,
 /// since the effect buttons are only visible under the selector tool.
-/// Effects that need byte-level image processing are re-applied inside
-/// [WidgetTester.runAsync] after the tap so the pixel operations can complete.
+/// Shows the intensity dialog and taps Apply with default strength.
 Future<void> applyEffectViaUi(
   final WidgetTester tester,
   final SelectionEffect effect,
@@ -730,30 +723,47 @@ Future<void> applyEffectViaUi(
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Ensure the selector tool is active so the effect buttons are visible.
-  // If no selection exists, select all as a fallback.
+  // The bottom controls (including effects button) only render when:
+  // 1. enableMoveAndResize=true (requires selectedAction==selector && !transformMode)
+  // 2. isDrawing=false
+  // 3. path1 exists
   appProvider.selectedAction = ActionType.selector;
+  appProvider.transformModel.isVisible = false;
+  appProvider.selectorModel.isDrawing = false;
+
   if (!appProvider.selectorModel.isVisible) {
-    appProvider.selectAll();
+    appProvider.selectorModel.isVisible = true;
+    appProvider.selectorModel.path1 = Path()
+      ..addRect(
+        Rect.fromPoints(Offset.zero, Offset(appProvider.layers.width, appProvider.layers.height)),
+      );
   }
   appProvider.update();
+  // Use pump() instead of pumpAndSettle() because the selection overlay
+  // includes AnimatedMarchingAntsPath, a repeating animation that never settles.
+  await tester.pump();
   await tester.pump();
 
   final AppLocalizations l10n = AppLocalizations.of(context)!;
-  final String tooltip = effectLabel(l10n, effect);
+  final String effectLabel_ = effectLabel(l10n, effect);
 
-  await tapByTooltip(tester, tooltip);
+  // Tap the Effects button (by key) to open the popup menu.
+  await tapByKey(tester, Keys.effectsButton);
+  // Pump past the showGeneralDialog transition animation.
   await tester.pump();
+  await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
 
-  if (_effectsRequiringRunAsync.contains(effect)) {
-    // The tap fired applyEffect as fire-and-forget; byte-level operations
-    // cannot complete in the fake-async zone. Re-apply inside runAsync so
-    // the pixel processing resolves. The stuck future from the tap never
-    // modified state (it blocked before replaceRegion), so this is safe.
-    await tester.runAsync(() async {
-      await appProvider.applyEffect(effect);
-    });
-    await tester.pump();
-  }
+  // Tap the effect name from the popup menu to open the intensity dialog.
+  await tester.tap(find.text(effectLabel_));
+  // The menu dismisses and the intensity dialog opens; pump past both transitions.
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
+
+  // The intensity dialog is now open. Tap Apply (by key).
+  await tapByKey(tester, Keys.effectIntensityApplyButton);
+  // Pump to process the effect application and dialog dismissal.
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
 }
 
 /// Drags one overlay handle of the current selection by [delta].

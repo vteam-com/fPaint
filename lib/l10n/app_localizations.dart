@@ -432,6 +432,12 @@ abstract class AppLocalizations {
   /// **'Edge Soften'**
   String get effectSoften;
 
+  /// No description provided for @effectIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Intensity'**
+  String get effectIntensity;
+
   /// No description provided for @effectVignette.
   ///
   /// In en, this message translates to:

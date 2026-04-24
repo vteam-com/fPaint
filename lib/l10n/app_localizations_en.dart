@@ -188,6 +188,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get effectSharpen => 'Sharpen';
 
   @override
+  String get effectIntensity => 'Intensity';
+
+  @override
   String get effectSoften => 'Edge Soften';
 
   @override

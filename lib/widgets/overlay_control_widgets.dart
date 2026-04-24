@@ -13,6 +13,7 @@ Widget buildOverlayCircleButton({
   required final Color color,
   required final MouseCursor cursor,
   required final String tooltip,
+  final Key? key,
   final VoidCallback? onTap,
   final GestureDragStartCallback? onPanStart,
   final GestureDragUpdateCallback? onPanUpdate,
@@ -20,6 +21,7 @@ Widget buildOverlayCircleButton({
   final GestureDragCancelCallback? onPanCancel,
 }) {
   return AppTooltip(
+    key: key,
     message: tooltip,
     child: GestureDetector(
       onTap: onTap,
