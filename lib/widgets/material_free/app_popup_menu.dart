@@ -78,7 +78,10 @@ Future<T?> showAppMenu<T>({
                                     vertical: AppSpacing.md,
                                   ),
                                   child: DefaultTextStyle(
-                                    style: const TextStyle(color: AppPalette.white),
+                                    style: const TextStyle(
+                                      fontFamily: appFontFamily,
+                                      color: AppPalette.white,
+                                    ),
                                     child: item.child,
                                   ),
                                 ),
