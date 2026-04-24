@@ -3,6 +3,7 @@ part of '../painting_scenario_test.dart';
 Future<void> paintLayerHouse(final PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _houseLayerName);
 
+  // Draw house body, door, and window first.
   await drawRectangleWithHumanGestures(
     session.tester,
     startPosition: session.canvasCenter + _houseBodyStart,
@@ -30,33 +31,26 @@ Future<void> paintLayerHouse(final PaintingScenarioSession session) async {
     fillColor: Colors.grey,
   );
 
-  await drawLineWithHumanGestures(
-    session.tester,
-    startPosition: session.canvasCenter + _roofLeft,
-    endPosition: session.canvasCenter + _roofPeak,
-    brushSize: AppStroke.regular,
-    brushColor: Colors.orange,
-  );
-  await drawLineWithHumanGestures(
-    session.tester,
-    startPosition: session.canvasCenter + _roofRight,
-    endPosition: session.canvasCenter + _roofPeak,
-    brushSize: AppStroke.regular,
-    brushColor: Colors.orange,
-  );
-  await drawLineWithHumanGestures(
-    session.tester,
-    startPosition: session.canvasCenter + _roofLeft,
-    endPosition: session.canvasCenter + _roofRight,
-    brushSize: AppStroke.regular,
-    brushColor: Colors.orange,
-  );
+  // Draw converging roof stripes on top of the house body so they are visible.
+  final double baseWidth = _roofBaseRight - _roofBaseLeft;
+  final double topWidth = _roofTopRight - _roofTopLeft;
 
-  await performFloodFillSolidAtCanvasPosition(
-    session.tester,
-    canvasPosition: _roofFillCanvasPosition,
-    color: _roofFillColor,
-    tolerance: 0,
-  );
+  for (int i = 0; i < _roofStripeCount; i++) {
+    final double t = i / (_roofStripeCount - 1);
+    final double bottomX = _roofBaseLeft + t * baseWidth;
+    final double topX = _roofTopLeft + t * topWidth;
+    final Color color = i.isEven
+        ? const ui.Color.fromARGB(255, 206, 169, 75)
+        : const ui.Color.fromARGB(255, 177, 139, 63);
+
+    await drawLineWithHumanGestures(
+      session.tester,
+      startPosition: session.canvasCenter + Offset(bottomX, _roofBaseY),
+      endPosition: session.canvasCenter + Offset(topX, _roofTopY),
+      brushSize: _roofStripeBrushSize,
+      brushColor: color,
+    );
+  }
+
   await session.videoRecorder.captureFrame();
 }

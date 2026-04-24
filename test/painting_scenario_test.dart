@@ -197,14 +197,18 @@ const Offset _houseDoorStart = Offset(130, 24);
 const Offset _houseDoorEnd = Offset(180, 100);
 const Offset _houseWindowStart = Offset(20, 30);
 const Offset _houseWindowEnd = Offset(80, 50);
-const Offset _roofLeft = Offset(-5, 0);
-const Offset _roofPeak = Offset(100, -100);
-const Offset _roofRight = Offset(205, 0);
-const Offset _roofFillCanvasPosition = Offset(
-  AppLayout.canvasDefaultWidth / 2 + 50,
-  AppLayout.canvasDefaultHeight / 2 - 50,
-);
-const Color _roofFillColor = Color.fromARGB(255, 183, 104, 19);
+
+// Roof — converging vertical stripes drawn on the House layer.
+// Bottom edge of the roof (wider).
+const double _roofBaseLeft = -10.0;
+const double _roofBaseRight = 210.0;
+const double _roofBaseY = 2.0;
+// Top edge of the roof (narrower, creating perspective).
+const double _roofTopLeft = 45.0;
+const double _roofTopRight = 155.0;
+const double _roofTopY = -108.0;
+const int _roofStripeCount = 18;
+const double _roofStripeBrushSize = 14.0;
 
 // Fence shadow via wand-select + fill + skew
 const Color _shadowColor = Color.fromARGB(50, 100, 0, 180);
