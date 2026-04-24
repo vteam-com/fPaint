@@ -189,6 +189,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get effectSoften => 'Suavizar bordes';
 
   @override
+  String get effectIntensity => 'Intensidad';
+
+  @override
   String get effectVignette => 'Viñeta';
 
   @override

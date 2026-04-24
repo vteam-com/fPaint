@@ -101,35 +101,32 @@ class ToolsPanel extends StatelessWidget {
   }
 
   /// Adds a tool option for color tolerance.
-  void addToolOptionTolerance(
-    final List<Widget> widgets,
+  Widget addToolOptionTolerance(
     final BuildContext context,
     final AppProvider appProvider,
   ) {
     final AppLocalizations l10n = context.l10n;
 
-    widgets.add(
-      ToolAttributeWidget(
-        minimal: minimal,
-        name: 'Color Tolerance',
-        childLeft: AppIconButton(
-          icon: const AppSvgIcon(icon: AppIcon.support),
-          onPressed: () {
-            showTolerancePicker(context, appProvider.tolerance, (final int newValue) {
-              appProvider.tolerance = newValue;
-            });
-          },
-        ),
-        childRight: minimal
-            ? null
-            : TolerancePicker(
-                title: l10n.tolerance,
-                value: appProvider.tolerance,
-                onChanged: (final int value) {
-                  appProvider.tolerance = value;
-                },
-              ),
+    return ToolAttributeWidget(
+      minimal: minimal,
+      name: 'Color Tolerance',
+      childLeft: AppIconButton(
+        icon: const AppSvgIcon(icon: AppIcon.support),
+        onPressed: () {
+          showTolerancePicker(context, appProvider.tolerance, (final int newValue) {
+            appProvider.tolerance = newValue;
+          });
+        },
       ),
+      childRight: minimal
+          ? null
+          : TolerancePicker(
+              title: l10n.tolerance,
+              value: appProvider.tolerance,
+              onChanged: (final int value) {
+                appProvider.tolerance = value;
+              },
+            ),
     );
   }
 
@@ -371,7 +368,7 @@ class ToolsPanel extends StatelessWidget {
           ),
         );
         addToolOptionColor(widgets, appProvider, context, false);
-        addToolOptionTolerance(widgets, context, appProvider);
+        widgets.add(addToolOptionTolerance(context, appProvider));
         addToolOptionTopColors(widgets, layers, appProvider, minimal);
         break;
 
@@ -455,6 +452,8 @@ class ToolsPanel extends StatelessWidget {
                   },
                 ),
 
+                if (appProvider.selectorModel.mode == SelectorMode.wand) addToolOptionTolerance(context, appProvider),
+
                 if (appProvider.selectorModel.isVisible) const AppDivider(),
 
                 if (appProvider.selectorModel.isVisible)
@@ -537,17 +536,12 @@ class ToolsPanel extends StatelessWidget {
                     },
                   ),
 
-                if (appProvider.selectorModel.isVisible) const AppDivider(),
-
-                for (final SelectionEffect effect in SelectionEffect.values)
-                  ToolPanelPicker(
+                if (appProvider.selectorModel.isVisible)
+                  _EffectsSection(
                     minimal: minimal,
-                    name: effectLabel(l10n, effect),
-                    image: AppSvgIcon(icon: effect.icon, isSelected: false),
-                    onPressed: () => appProvider.applyEffect(effect),
+                    l10n: l10n,
+                    appProvider: appProvider,
                   ),
-
-                if (appProvider.selectorModel.isVisible) const AppDivider(),
 
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
@@ -568,9 +562,6 @@ class ToolsPanel extends StatelessWidget {
           ),
         );
 
-        if (appProvider.selectorModel.mode == SelectorMode.wand) {
-          addToolOptionTolerance(widgets, context, appProvider);
-        }
         break;
 
       default:
@@ -659,7 +650,7 @@ class ToolsPanel extends StatelessWidget {
 
         // Color Tolerance used by Fill and Magic wand
         if (selectedTool.isSupported(ActionOptions.tolerance)) {
-          addToolOptionTolerance(widgets, context, appProvider);
+          widgets.add(addToolOptionTolerance(context, appProvider));
         }
 
         // Top colors
@@ -732,4 +723,62 @@ Widget separator() {
     height: AppStroke.thin,
     color: AppPalette.black,
   );
+}
+
+/// Side-panel section listing all [SelectionEffect] buttons with an intensity
+/// slider so the user can choose the strength before tapping an effect.
+class _EffectsSection extends StatefulWidget {
+  const _EffectsSection({
+    required this.minimal,
+    required this.l10n,
+    required this.appProvider,
+  });
+
+  final AppProvider appProvider;
+  final AppLocalizations l10n;
+  final bool minimal;
+
+  @override
+  State<_EffectsSection> createState() => _EffectsSectionState();
+}
+
+class _EffectsSectionState extends State<_EffectsSection> {
+  double _strength = AppEffects.defaultIntensity;
+
+  @override
+  Widget build(final BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            for (final SelectionEffect effect in SelectionEffect.values)
+              ToolPanelPicker(
+                minimal: widget.minimal,
+                name: effectLabel(widget.l10n, effect),
+                image: AppSvgIcon(icon: effect.icon, isSelected: false),
+                onPressed: () => widget.appProvider.applyEffect(effect, strength: _strength),
+              ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(widget.l10n.effectIntensity),
+              AppSlider(
+                key: Keys.effectIntensitySlider,
+                value: _strength,
+                min: AppEffects.minIntensity,
+                max: AppEffects.maxIntensity,
+                onChanged: (final double value) => setState(() => _strength = value),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }

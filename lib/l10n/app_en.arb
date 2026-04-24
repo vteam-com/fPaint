@@ -82,6 +82,7 @@
   "editText": "Edit Text",
   "effectBlur": "Blur",
   "effectGrayscale": "Grayscale",
+  "effectIntensity": "Intensity",
   "effectNoise": "Noise",
   "effectPixelate": "Pixelate",
   "effects": "Effects",

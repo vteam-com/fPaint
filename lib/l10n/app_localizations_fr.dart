@@ -189,6 +189,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get effectSharpen => 'Netteté';
 
   @override
+  String get effectIntensity => 'Intensité';
+
+  @override
   String get effectSoften => 'Adoucir les bords';
 
   @override

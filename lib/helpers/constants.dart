@@ -296,6 +296,15 @@ class AppEffects {
 
   /// ITU-R BT.601 luma coefficient for the blue channel.
   static const double lumaBlue = 0.0722;
+
+  /// Default effect intensity shown to the user when the slider first opens (full effect).
+  static const double defaultIntensity = 1.0;
+
+  /// Minimum effect intensity (no visible change).
+  static const double minIntensity = 0.0;
+
+  /// Maximum effect intensity (full effect as authored).
+  static const double maxIntensity = 1.0;
 }
 
 /// Shared persisted/default app values.
@@ -637,4 +646,8 @@ class Keys {
   static Key toolPanelBrushColor1 = const Key('toolPanelBrushColor1');
   static Key toolPanelFontColor = const Key('toolPanelFontColor');
   static Key toolTransform = const Key('tool-transform');
+
+  static Key effectsButton = const Key('effects-button');
+  static Key effectIntensityApplyButton = const Key('effect-intensity-apply-button');
+  static Key effectIntensitySlider = const Key('effect-intensity-slider');
 }

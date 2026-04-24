@@ -140,7 +140,8 @@ class MainViewState extends State<MainView> {
               },
               onCopy: () => appProvider.regionCopy(),
               onDuplicate: () => appProvider.regionDuplicate(),
-              onApplyEffect: (final SelectionEffect effect) => appProvider.applyEffect(effect),
+              onApplyEffect: (final SelectionEffect effect, final double strength) =>
+                  appProvider.applyEffect(effect, strength: strength),
             ),
 
           //

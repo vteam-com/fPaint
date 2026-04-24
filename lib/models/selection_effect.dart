@@ -21,22 +21,28 @@ enum SelectionEffect {
   final AppIcon icon;
 
   /// Applies this effect to the given [image] and returns the processed result.
-  Future<ui.Image> apply(final ui.Image image) async {
+  ///
+  /// [strength] controls how strongly the effect is applied (0.0 = none,
+  /// 1.0 = full authored strength).
+  Future<ui.Image> apply(
+    final ui.Image image, {
+    final double strength = AppEffects.defaultIntensity,
+  }) async {
     switch (this) {
       case SelectionEffect.blur:
-        return applyGaussianBlur(image, AppEffects.blurSigma);
+        return applyGaussianBlur(image, AppEffects.blurSigma, strength: strength);
       case SelectionEffect.sharpen:
-        return applySharpen(image);
+        return applySharpen(image, strength: strength);
       case SelectionEffect.pixelate:
-        return applyPixelate(image);
+        return applyPixelate(image, strength: strength);
       case SelectionEffect.grayscale:
-        return applyGrayscale(image);
+        return applyGrayscale(image, strength: strength);
       case SelectionEffect.noise:
-        return applyNoise(image);
+        return applyNoise(image, strength: strength);
       case SelectionEffect.soften:
-        return applyGaussianBlur(image, AppEffects.softenSigma);
+        return applyGaussianBlur(image, AppEffects.softenSigma, strength: strength);
       case SelectionEffect.vignette:
-        return applyVignette(image);
+        return applyVignette(image, strength: strength);
     }
   }
 }
