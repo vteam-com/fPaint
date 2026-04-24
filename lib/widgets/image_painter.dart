@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 
 /// A custom painter that displays an image, scaling and centering it to fit within the available space.

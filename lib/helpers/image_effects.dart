@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 
 /// Applies a Gaussian blur with the given [sigma] to [image].
@@ -193,8 +193,8 @@ Future<ui.Image> applyVignette(final ui.Image image) async {
   final Paint vignettePaint = Paint()
     ..shader = RadialGradient(
       colors: <Color>[
-        Colors.transparent,
-        Colors.black.withValues(alpha: AppEffects.vignetteStrength),
+        AppPalette.transparent,
+        AppPalette.black.withValues(alpha: AppEffects.vignetteStrength),
       ],
     ).createShader(rect);
   canvas.drawRect(rect, vignettePaint);

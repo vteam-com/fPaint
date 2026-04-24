@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 
 /// Wraps a [Widget] in a transparent paper-like container with a rounded border.
@@ -94,7 +94,7 @@ void drawTransaparentBackgroundOffsetAndSize({
   );
 
   canvas.clipRect(containerRect);
-  final Paint paintBackground = Paint()..color = Colors.grey.shade300;
+  final Paint paintBackground = Paint()..color = AppPalette.grey300;
   canvas.drawRect(containerRect, paintBackground);
 
   for (double x = 0; x < size.width; x += cellSize) {
@@ -107,7 +107,7 @@ void drawTransaparentBackgroundOffsetAndSize({
             cellSize,
             cellSize,
           ),
-          Paint()..color = Colors.grey.shade400,
+          Paint()..color = AppPalette.grey400,
         );
       }
     }

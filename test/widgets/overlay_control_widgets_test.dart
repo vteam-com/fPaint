@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 
 void main() {
@@ -31,7 +32,11 @@ void main() {
 
     expect(find.text('125%'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Confirm'));
+    await tester.tap(
+      find.byWidgetPredicate(
+        (final Widget w) => w is AppTooltip && w.message == 'Confirm',
+      ),
+    );
     await tester.pump();
 
     expect(tapCount, 1);

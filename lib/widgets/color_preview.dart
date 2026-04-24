@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 /// Creates a color preview with a transparent paper background.
@@ -82,46 +83,49 @@ class ColorPreview extends StatelessWidget {
 
     final String text = this.text ?? colorToHexString(color);
 
-    return Tooltip(
+    return AppTooltip(
       message: tooltipText ?? text,
-      child: InkWell(
+      child: GestureDetector(
         key: super.key,
         onTap: onPressed,
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Stack(
-            alignment: AlignmentDirectional.center,
-            children: <Widget>[
-              //--------------------------------
-              // Rectangle of the final color
-              //
-              Positioned(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: color,
-                    border: border ? Border.all(color: Colors.grey) : null,
-                    borderRadius: const BorderRadius.all(Radius.circular(AppRadius.sm)),
-                  ),
-                ),
-              ),
-
-              //--------------------------------
-              // Hex color
-              //
-              if (!minimal)
-                Center(
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    text,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: AppSpacing.sm + AppStroke.thin,
-                      color: color.computeLuminance() > AppVisual.half ? Colors.black : Colors.white,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Stack(
+              alignment: AlignmentDirectional.center,
+              children: <Widget>[
+                //--------------------------------
+                // Rectangle of the final color
+                //
+                Positioned(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: color,
+                      border: border ? Border.all(color: AppPalette.grey) : null,
+                      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.sm)),
                     ),
                   ),
                 ),
-            ],
+
+                //--------------------------------
+                // Hex color
+                //
+                if (!minimal)
+                  Center(
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      text,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: AppSpacing.sm + AppStroke.thin,
+                        color: color.computeLuminance() > AppVisual.half ? AppPalette.black : AppPalette.white,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

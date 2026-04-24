@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// Modal dialog used to create a new text object with style settings.
 class TextEditorDialog extends StatefulWidget {
@@ -57,7 +58,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
   Widget build(final BuildContext context) {
     final AppLocalizations l10n = context.l10n;
 
-    return AlertDialog(
+    return AppDialog(
       title: Text(l10n.addText),
       content: SizedBox(
         width: AppLayout.dialogWidth,
@@ -66,15 +67,12 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             // Text input field
-            TextField(
+            AppTextField(
               controller: _controller,
               autofocus: true,
               maxLines: null,
               keyboardType: TextInputType.multiline,
-              decoration: InputDecoration(
-                hintText: l10n.enterYourTextHere,
-                border: const OutlineInputBorder(),
-              ),
+              hintText: l10n.enterYourTextHere,
               style: TextStyle(
                 fontSize: _fontSize,
                 color: _textColor,
@@ -86,7 +84,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
 
             // Font size control
             Text(l10n.fontSizeValue(_fontSize.round())),
-            Slider(
+            AppSlider(
               value: _fontSize,
               min: AppSpacing.sm + AppMath.pair.toDouble(),
               max: AppLimits.textSizeMax.toDouble(),
@@ -103,11 +101,11 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
             Row(
               children: <Widget>[
                 // Bold toggle
-                IconButton(
+                AppIconButton(
                   key: Keys.textEditorBoldButton,
                   icon: AppSvgIcon(
                     icon: AppIcon.formatBold,
-                    color: _fontWeight == FontWeight.bold ? Colors.blue : Colors.grey,
+                    color: _fontWeight == FontWeight.bold ? AppPalette.blue : AppPalette.grey,
                   ),
                   onPressed: () {
                     setState(() {
@@ -117,10 +115,10 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                 ),
 
                 // Italic toggle
-                IconButton(
+                AppIconButton(
                   icon: AppSvgIcon(
                     icon: AppIcon.formatItalic,
-                    color: _fontStyle == FontStyle.italic ? Colors.blue : Colors.grey,
+                    color: _fontStyle == FontStyle.italic ? AppPalette.blue : AppPalette.grey,
                   ),
                   onPressed: () {
                     setState(() {
@@ -137,11 +135,11 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                   height: AppSpacing.huge,
                   decoration: BoxDecoration(
                     color: _textColor,
-                    border: Border.all(color: Colors.grey),
+                    border: Border.all(color: AppPalette.grey),
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
-                  child: IconButton(
-                    icon: const AppSvgIcon(icon: AppIcon.colorLens, color: Colors.white),
+                  child: AppIconButton(
+                    icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppPalette.white),
                     onPressed: () async {
                       showColorPicker(
                         context: context,
@@ -162,13 +160,13 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
         ),
       ),
       actions: <Widget>[
-        TextButton(
+        AppTextButton(
           child: Text(l10n.cancel),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
-        TextButton(
+        AppTextButton(
           child: Text(l10n.addText),
           onPressed: () {
             if (_controller.text.isNotEmpty) {

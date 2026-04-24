@@ -1,7 +1,8 @@
 // ignore: fcheck_one_class_per_file
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/list_helper.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 /// A widget that allows the user to select a color using HSV sliders.
@@ -56,7 +57,7 @@ class _ColorSelectorState extends State<ColorSelector> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
-          color: Colors.grey,
+          color: AppPalette.grey,
           width: AppStroke.thin,
         ),
       ),
@@ -72,12 +73,11 @@ class _ColorSelectorState extends State<ColorSelector> {
                 height: AppLayout.sliderHeight,
                 child: CustomPaint(
                   painter: HueGradientPainter(),
-                  child: Slider(
+                  child: AppSlider(
                     value: hue,
                     min: 0,
                     max: maxHue,
                     divisions: AppLimits.hueDivisions * AppMath.pair,
-                    label: hue.floor().toString(),
                     onChanged: (final double value) {
                       setState(() {
                         hue = value;
@@ -94,12 +94,11 @@ class _ColorSelectorState extends State<ColorSelector> {
                 height: AppLayout.sliderHeight,
                 child: CustomPaint(
                   painter: BrightnessGradientPainter(hue: hue),
-                  child: Slider(
+                  child: AppSlider(
                     value: brightness,
                     min: 0,
                     max: 1,
                     divisions: AppLimits.sliderDivisions,
-                    label: (brightness * AppLimits.percentMax).round().toString(),
                     onChanged: (final double value) {
                       setState(() {
                         brightness = value;
@@ -120,12 +119,11 @@ class _ColorSelectorState extends State<ColorSelector> {
                         hue: hue,
                         brightness: brightness,
                       ),
-                      child: Slider(
+                      child: AppSlider(
                         value: alpha,
                         min: 0,
                         max: 1,
                         divisions: AppLimits.sliderDivisions,
-                        label: (alpha * AppLimits.percentMax).round().toString(),
                         onChanged: (final double value) {
                           setState(() {
                             alpha = value;

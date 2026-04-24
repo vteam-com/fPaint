@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/canvas_resize.dart';
@@ -28,7 +28,7 @@ class NineGridSelector extends StatelessWidget {
       width: AppLayout.gridSelectorSize,
       height: AppLayout.gridSelectorSize,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
+        border: Border.all(color: AppPalette.grey),
         borderRadius: BorderRadius.circular(AppRadius.md),
       ),
       child: GridView.builder(
@@ -44,7 +44,7 @@ class NineGridSelector extends StatelessWidget {
             onTap: () => onPositionSelected(CanvasResizePosition.values[index]),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: selectedPosition == CanvasResizePosition.values[index] ? Colors.blue : Colors.grey.shade800,
+                color: selectedPosition == CanvasResizePosition.values[index] ? AppPalette.blue : AppPalette.grey800,
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
               child: AppSvgIcon(

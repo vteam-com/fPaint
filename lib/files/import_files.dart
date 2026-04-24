@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/constants.dart';
@@ -13,6 +13,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:logging/logging.dart';
 
 const String _defaultCanvasDimension = '800';
@@ -46,27 +47,27 @@ Future<void> onFileNew(final BuildContext context) async {
   final bool offNewDocFromClipboard = await clipboardHasImage();
 
   if (context.mounted) {
-    await showDialog<Size>(
+    await showAppDialog<Size>(
       context: context,
       builder: (final BuildContext context) {
         final TextEditingController widthController = TextEditingController(text: _defaultCanvasDimension);
         final TextEditingController heightController = TextEditingController(text: _defaultCanvasDimension);
 
-        return AlertDialog(
+        return AppDialog(
           title: Text(l10n.newCanvasSize),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             spacing: AppSpacing.xxl,
             children: <Widget>[
-              TextField(
+              AppTextField(
                 controller: widthController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: l10n.width),
+                hintText: l10n.width,
               ),
-              TextField(
+              AppTextField(
                 controller: heightController,
                 keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: l10n.height),
+                hintText: l10n.height,
               ),
             ],
           ),
@@ -74,7 +75,7 @@ Future<void> onFileNew(final BuildContext context) async {
             if (offNewDocFromClipboard)
               Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.xxl),
-                child: ElevatedButton(
+                child: AppElevatedButton(
                   onPressed: () {
                     // Handle creating new document from clipboard image
                     appProvider.newDocumentFromClipboardImage();
@@ -83,13 +84,13 @@ Future<void> onFileNew(final BuildContext context) async {
                   child: Text(l10n.newFromClipboard),
                 ),
               ),
-            TextButton(
+            AppTextButton(
               onPressed: () {
                 Navigator.of(context).pop(null);
               },
               child: Text(l10n.cancel),
             ),
-            TextButton(
+            AppTextButton(
               onPressed: () {
                 final double? width = double.tryParse(widthController.text);
                 final double? height = double.tryParse(heightController.text);
@@ -341,19 +342,19 @@ Future<bool> readImageFileFromBytes(
 ///   - context: The [BuildContext] used to display the dialog.
 Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
   final AppLocalizations l10n = context.l10n;
-  final bool? discardCurrentFile = await showDialog<bool>(
+  final bool? discardCurrentFile = await showAppDialog<bool>(
     context: context,
     builder: (final BuildContext context) {
-      return AlertDialog(
+      return AppDialog(
         title: Text(l10n.discardCurrentDocumentQuestion),
         actions: <Widget>[
-          TextButton(
+          AppTextButton(
             onPressed: () {
               Navigator.of(context).pop(true);
             },
             child: Text(l10n.discard),
           ),
-          TextButton(
+          AppTextButton(
             onPressed: () {
               Navigator.of(context).pop(false);
             },
@@ -405,19 +406,19 @@ Future<void> onFileDropped({
   );
 
   if (canvasHasContent) {
-    final DropFileAction? action = await showDialog<DropFileAction>(
+    final DropFileAction? action = await showAppDialog<DropFileAction>(
       context: context,
       builder: (final BuildContext dialogContext) {
         final AppLocalizations l10n = dialogContext.l10n;
-        return AlertDialog(
+        return AppDialog(
           title: Text(l10n.dropFileTitle),
           content: Text(l10n.dropFilePrompt),
           actions: <Widget>[
-            TextButton(
+            AppTextButton(
               onPressed: () => Navigator.pop(dialogContext, DropFileAction.addLayer),
               child: Text(l10n.dropFileAddLayer),
             ),
-            TextButton(
+            AppTextButton(
               onPressed: () => Navigator.pop(dialogContext, DropFileAction.open),
               child: Text(l10n.dropFileOpen),
             ),

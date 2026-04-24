@@ -1,5 +1,5 @@
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 
 /// A custom slider widget that allows users to adjust a value by dragging horizontally within a container.
@@ -89,7 +89,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
       },
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: Colors.grey,
+          color: AppPalette.grey,
           borderRadius: BorderRadius.circular(AppStroke.emphasis),
         ),
         child: Stack(
@@ -101,7 +101,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
               child: Container(
                 padding: const EdgeInsets.all(1),
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(AppLayout.overlayAlpha + AppSpacing.lg.toInt()),
+                  color: AppPalette.black.withAlpha(AppLayout.overlayAlpha + AppSpacing.lg.toInt()),
                   borderRadius: BorderRadius.circular(AppSpacing.thin),
                 ),
                 child: Text(

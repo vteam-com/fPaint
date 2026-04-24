@@ -26,19 +26,6 @@ flutter pub get > /dev/null || { echo "Pub get failed"; exit 1; }
 echo --- Pub Outdated
 flutter pub outdated
 
-echo --- Analyze
-flutter analyze lib test --no-pub | sed 's/^/    /'
-
-echo --- Test
-echo "    Running tests..."
-test_output="$(flutter test --reporter=compact --coverage --no-pub 2>&1)" || {
-	echo "$test_output"
-	exit "$CHECK_FAILURE_EXIT_CODE"
-}
-
-echo --- Coverage Summary
-"$ROOT_DIR/tool/update_coverage_summary.sh" || exit "$CHECK_FAILURE_EXIT_CODE"
-
 echo --- fCheck
 # Install the pinned version into the isolated cache, then run it.
 # Note: `dart pub cache exec` doesn't exist on all Dart SDK versions; `pub global run` does.
@@ -71,3 +58,14 @@ if [ "$fcheck_exit_code" -ne 0 ]; then
 	exit "$CHECK_FAILURE_EXIT_CODE"
 fi
 
+echo --- Analyze
+flutter analyze lib test --no-pub | sed 's/^/    /'
+
+echo --- Test
+test_output="$(flutter test --reporter=compact --coverage --no-pub 2>&1)" || {
+	echo "$test_output"
+	exit "$CHECK_FAILURE_EXIT_CODE"
+}
+
+echo --- Coverage Summary
+"$ROOT_DIR/tool/update_coverage_summary.sh" || exit "$CHECK_FAILURE_EXIT_CODE"

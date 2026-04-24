@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
@@ -196,12 +196,12 @@ class MainViewState extends State<MainView> {
   /// canvas, applying the necessary transformations for panning and scaling.
   Widget _displayCanvas(final AppProvider appProvider) {
     return DecoratedBox(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: RadialGradient(
           center: Alignment.topCenter,
           colors: <Color>[
-            Colors.grey.shade50,
-            Colors.grey.shade500,
+            AppPalette.grey50,
+            AppPalette.grey500,
           ],
           stops: <double>[0, 1],
         ),

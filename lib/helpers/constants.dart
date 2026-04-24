@@ -1,9 +1,58 @@
 // ignore: fcheck_one_class_per_file
 // ignore: fcheck_magic_numbers
-import 'package:flutter/material.dart';
+import 'dart:ui' show Color;
+
+import 'package:flutter/foundation.dart' show Key;
 
 /// The application display name.
 const String appName = 'fPaint';
+
+/// Default font family used throughout the app.
+///
+/// Inter is an open-source sans-serif designed for screens, visually close to
+/// Apple San Francisco. Licensed under the SIL Open Font License 1.1.
+/// Bundle fonts by running `bash tool/download_fonts.sh` once.
+const String appFontFamily = 'Inter';
+
+/// Barrier label used by [showGeneralDialog] overlays to dismiss on tap outside.
+const String barrierLabelDismiss = 'Dismiss';
+
+/// Raw color palette replacing Material `Colors.*` references.
+///
+/// These values mirror the Material Design defaults so existing visuals are
+/// preserved while eliminating the dependency on `package:flutter/material.dart`.
+class AppPalette {
+  // Core
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color black = Color(0xFF000000);
+  static const Color transparent = Color(0x00000000);
+
+  // Primary hues
+  static const Color red = Color(0xFFF44336);
+  static const Color blue = Color(0xFF2196F3);
+  static const Color blueShade100 = Color(0xFFBBDEFB);
+  static const Color green = Color(0xFF4CAF50);
+  static const Color orange = Color(0xFFFF9800);
+  static const Color yellow = Color(0xFFFFEB3B);
+  static const Color purple = Color(0xFF9C27B0);
+
+  // Grey scale (matching Material grey swatch)
+  static const Color grey = Color(0xFF9E9E9E);
+  static const Color grey50 = Color(0xFFFAFAFA);
+  static const Color grey300 = Color(0xFFE0E0E0);
+  static const Color grey400 = Color(0xFFBDBDBD);
+  static const Color grey500 = Color(0xFF9E9E9E);
+  static const Color grey600 = Color(0xFF757575);
+  static const Color grey700 = Color(0xFF616161);
+  static const Color grey800 = Color(0xFF424242);
+
+  // Overlay colors
+  /// Semi-transparent white used for overlay/dialog border strokes.
+  static const Color overlayBorder = Color(0x59FFFFFF);
+
+  /// Semi-transparent black scrim used as dialog barrier background.
+  static const Color scrim = Color(0x80000000);
+}
 
 /// Non-user-facing key prefix for identifying SVG icons in widget tests.
 const String appIconKeyPrefix = 'app_icon_';
@@ -26,7 +75,7 @@ class AppColors {
 
   // Button colors
   static const Color floatingButtonBackground = Color(0xFF424242); // Floating button background
-  static const Color floatingButtonForeground = Colors.white;
+  static const Color floatingButtonForeground = AppPalette.white;
 
   // ITU-R BT.601 luma coefficients for perceived brightness
   static const double lumaRedWeight = 0.299;
@@ -34,7 +83,7 @@ class AppColors {
   static const double lumaBlueWeight = 0.114;
 
   // Text colors
-  static const Color textPrimary = Colors.white;
+  static const Color textPrimary = AppPalette.white;
   static const Color textSecondary = Color(0xFFB3B3B3);
   static const Color textDisabled = Color(0xFF666666);
 
@@ -172,6 +221,9 @@ class AppMath {
   static const double degreesPerFullTurn = 360.0;
   static const double percentScale = 100.0;
   static const double tinyPercentage = 0.01;
+
+  /// Approximation of π used for radian/degree conversions.
+  static const double pi = 3.14159;
 
   /// Angle increment for rotation snap haptic feedback.
   static const double rotationSnapInterval = 45.0;

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -19,6 +19,7 @@ import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
@@ -50,8 +51,8 @@ class ToolsPanel extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: getListOfTools(context),
           ),
-          const Divider(
-            color: Colors.black,
+          const AppDivider(
+            color: AppPalette.black,
           ),
           Wrap(
             runSpacing: minimal ? AppSpacing.sm : AppSpacing.thin,
@@ -111,9 +112,8 @@ class ToolsPanel extends StatelessWidget {
       ToolAttributeWidget(
         minimal: minimal,
         name: 'Color Tolerance',
-        childLeft: IconButton(
+        childLeft: AppIconButton(
           icon: const AppSvgIcon(icon: AppIcon.support),
-          color: Colors.grey.shade500,
           onPressed: () {
             showTolerancePicker(context, appProvider.tolerance, (final int newValue) {
               appProvider.tolerance = newValue;
@@ -293,7 +293,7 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: l10n.paste,
-        image: AppSvgIcon(icon: AppIcon.paste, color: IconTheme.of(context).color),
+        image: const AppSvgIcon(icon: AppIcon.paste, color: AppColors.textPrimary),
         onPressed: () => appProvider.paste(),
       ),
     ];
@@ -455,7 +455,7 @@ class ToolsPanel extends StatelessWidget {
                   },
                 ),
 
-                if (appProvider.selectorModel.isVisible) const Divider(),
+                if (appProvider.selectorModel.isVisible) const AppDivider(),
 
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
@@ -499,7 +499,7 @@ class ToolsPanel extends StatelessWidget {
                     },
                   ),
 
-                if (appProvider.selectorModel.isVisible) const Divider(),
+                if (appProvider.selectorModel.isVisible) const AppDivider(),
 
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
@@ -537,7 +537,7 @@ class ToolsPanel extends StatelessWidget {
                     },
                   ),
 
-                if (appProvider.selectorModel.isVisible) const Divider(),
+                if (appProvider.selectorModel.isVisible) const AppDivider(),
 
                 for (final SelectionEffect effect in SelectionEffect.values)
                   ToolPanelPicker(
@@ -547,7 +547,7 @@ class ToolsPanel extends StatelessWidget {
                     onPressed: () => appProvider.applyEffect(effect),
                   ),
 
-                if (appProvider.selectorModel.isVisible) const Divider(),
+                if (appProvider.selectorModel.isVisible) const AppDivider(),
 
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
@@ -585,10 +585,9 @@ class ToolsPanel extends StatelessWidget {
               key: const Key('tool_brush_size_tool'),
               minimal: minimal,
               name: title,
-              childLeft: IconButton(
+              childLeft: AppIconButton(
                 key: const Key('tool_brush_size_button'),
                 icon: const AppSvgIcon(icon: AppIcon.lineWeight),
-                color: Colors.grey.shade500,
                 constraints: minimal ? const BoxConstraints() : null,
                 padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
                 onPressed: () {
@@ -626,9 +625,8 @@ class ToolsPanel extends StatelessWidget {
             ToolAttributeWidget(
               minimal: minimal,
               name: 'Brush Style',
-              childLeft: IconButton(
+              childLeft: AppIconButton(
                 icon: const AppSvgIcon(icon: AppIcon.lineStyle),
-                color: Colors.grey.shade500,
                 constraints: minimal ? const BoxConstraints() : null,
                 padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
                 onPressed: () {
@@ -711,7 +709,7 @@ class ToolsPanel extends StatelessWidget {
                 );
               },
             ),
-            IconButton(
+            AppIconButton(
               icon: const AppSvgIcon(icon: AppIcon.colorize),
               onPressed: onPickFromCanvas,
             ),
@@ -730,9 +728,8 @@ class ToolsPanel extends StatelessWidget {
 
 /// Returns a widget that displays a separator.
 Widget separator() {
-  return const Divider(
-    thickness: AppStroke.thin,
-    height: AppLayout.separatorHeight,
-    color: Colors.black,
+  return const AppDivider(
+    height: AppStroke.thin,
+    color: AppPalette.black,
   );
 }

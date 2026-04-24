@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -8,6 +8,7 @@ import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
 
 /// Renders font size and color controls for the text tool.
@@ -30,9 +31,8 @@ class TextAttributesWidget extends StatelessWidget {
         ToolAttributeWidget(
           minimal: minimal,
           name: l10n.fontSizeLabel,
-          childLeft: IconButton(
+          childLeft: AppIconButton(
             icon: const AppSvgIcon(icon: AppIcon.formatSize),
-            color: Colors.grey.shade500,
             constraints: minimal ? const BoxConstraints() : null,
             padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
             onPressed: () {
@@ -92,9 +92,8 @@ class TextAttributesWidget extends StatelessWidget {
 
 /// Builds a visual divider between text attribute controls.
 Widget separator() {
-  return const Divider(
-    thickness: AppStroke.thin,
-    height: AppLayout.separatorHeight,
-    color: Colors.black,
+  return const AppDivider(
+    height: AppStroke.thin,
+    color: AppPalette.black,
   );
 }

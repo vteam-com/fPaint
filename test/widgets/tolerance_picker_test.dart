@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 
 void main() {
@@ -48,7 +49,7 @@ void main() {
       );
 
       expect(find.textContaining('Tolerance'), findsOneWidget);
-      expect(find.byType(Slider), findsOneWidget);
+      expect(find.byType(AppSlider), findsOneWidget);
     });
 
     testWidgets('TolerancePicker slider has correct properties', (final WidgetTester tester) async {
@@ -66,7 +67,7 @@ void main() {
         ),
       );
 
-      final Slider slider = tester.widget<Slider>(find.byType(Slider));
+      final AppSlider slider = tester.widget<AppSlider>(find.byType(AppSlider));
       expect(slider.value, 50.0);
       expect(slider.min, 1.0);
       expect(slider.max, 100.0);
@@ -116,7 +117,7 @@ void main() {
 
       // Note: Testing the actual slider interaction would require more complex setup
       // This test verifies the widget can be created and has the expected structure
-      expect(find.byType(Slider), findsOneWidget);
+      expect(find.byType(AppSlider), findsOneWidget);
       expect(changedValue, isNull); // Should not have changed yet
     });
   });

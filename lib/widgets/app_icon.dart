@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -22,8 +22,8 @@ class AppSvgIcon extends StatelessWidget {
   Widget build(final BuildContext context) {
     final double resolvedSize = size ?? AppLayout.iconSize;
     final Color resolvedColor = isSelected != null
-        ? (isSelected! ? Colors.blue : Colors.white)
-        : color ?? IconTheme.of(context).color ?? Colors.white;
+        ? (isSelected! ? AppPalette.blue : AppPalette.white)
+        : color ?? AppPalette.white;
 
     return SvgPicture.asset(
       icon.assetPath,

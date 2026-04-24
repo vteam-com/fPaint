@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:fpaint/helpers/constants.dart';
 
 /// Defines the different styles for a brush.
 enum BrushStyle {
@@ -13,7 +14,7 @@ enum BrushStyle {
 class MyBrush {
   MyBrush({
     this.style = BrushStyle.solid,
-    this.color = Colors.black,
+    this.color = AppPalette.black,
     this.size = 1,
   });
 

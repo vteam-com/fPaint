@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';

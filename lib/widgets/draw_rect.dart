@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 
 /// A widget that draws a rectangle with dashed borders and a specified fill color.
@@ -62,12 +62,12 @@ class _DashedRectanglePainter extends CustomPainter {
 
     // Create paint objects for the black and white dashed borders
     final Paint blackPaint = Paint()
-      ..color = Colors.black
+      ..color = AppPalette.black
       ..strokeWidth = AppStroke.regular
       ..style = PaintingStyle.stroke;
 
     final Paint whitePaint = Paint()
-      ..color = Colors.white
+      ..color = AppPalette.white
       ..strokeWidth = AppStroke.regular
       ..style = PaintingStyle.stroke;
 

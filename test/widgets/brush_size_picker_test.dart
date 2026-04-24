@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 void main() {
   group('BrushSizePicker Widget Tests', () {
@@ -27,9 +28,9 @@ void main() {
 
       expect(find.text('$title: ${initialValue.toStringAsFixed(1)}'), findsOneWidget);
 
-      final Finder slider = find.byType(Slider);
+      final Finder slider = find.byType(AppSlider);
       expect(slider, findsOneWidget);
-      final Slider sliderWidget = tester.widget(slider);
+      final AppSlider sliderWidget = tester.widget(slider);
       expect(sliderWidget.value, initialValue);
       expect(sliderWidget.min, minValue);
       expect(sliderWidget.max, maxValue);
@@ -63,7 +64,7 @@ void main() {
         ),
       );
 
-      final Finder sliderFinder = find.byType(Slider);
+      final Finder sliderFinder = find.byType(AppSlider);
       expect(sliderFinder, findsOneWidget);
 
       // Drag slider to a new value
@@ -73,18 +74,18 @@ void main() {
       expect(reportedValue, isNotNull);
       // currentValue should have been updated by the ValueChanged callback in StatefulBuilder
       expect(find.text('$title: ${currentValue.toStringAsFixed(1)}'), findsOneWidget);
-      final Slider updatedSliderWidget = tester.widget(sliderFinder);
+      final AppSlider updatedSliderWidget = tester.widget(sliderFinder);
       expect(updatedSliderWidget.value, currentValue);
 
       // More precise value setting using onChanged directly
-      final Slider sliderWidget = tester.widget(sliderFinder);
+      final AppSlider sliderWidget = tester.widget(sliderFinder);
       sliderWidget.onChanged!(35.5);
       await tester.pumpAndSettle();
 
       expect(reportedValue, 35.5);
       expect(currentValue, 35.5);
       expect(find.text('$title: ${currentValue.toStringAsFixed(1)}'), findsOneWidget);
-      final Slider finalSliderWidget = tester.widget(sliderFinder);
+      final AppSlider finalSliderWidget = tester.widget(sliderFinder);
       expect(finalSliderWidget.value, 35.5);
     });
 
@@ -104,7 +105,7 @@ void main() {
         ),
       );
 
-      Slider sliderWidget = tester.widget(find.byType(Slider));
+      AppSlider sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 10.0);
       expect(find.text('Test: 10.0'), findsOneWidget);
 
@@ -124,7 +125,7 @@ void main() {
         ),
       );
 
-      sliderWidget = tester.widget(find.byType(Slider));
+      sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 25.0);
       expect(find.text('Test: 25.0'), findsOneWidget);
     });
@@ -144,7 +145,7 @@ void main() {
           ),
         ),
       );
-      Slider sliderWidget = tester.widget(find.byType(Slider));
+      AppSlider sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 5.0); // Should be clamped to min
       expect(find.text('Clamped: 5.0'), findsOneWidget);
 
@@ -161,7 +162,7 @@ void main() {
           ),
         ),
       );
-      sliderWidget = tester.widget(find.byType(Slider));
+      sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 20.0); // Should be clamped to max
       expect(find.text('Clamped: 20.0'), findsOneWidget);
 
@@ -179,7 +180,7 @@ void main() {
           ),
         ),
       );
-      sliderWidget = tester.widget(find.byType(Slider));
+      sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 10.0);
 
       // Update with value below new min
@@ -196,7 +197,7 @@ void main() {
           ),
         ),
       );
-      sliderWidget = tester.widget(find.byType(Slider));
+      sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 4.0); // Clamped to new min
       expect(find.text('ClampedUpdate: 4.0'), findsOneWidget);
     });
@@ -237,7 +238,7 @@ void main() {
       await tester.tap(find.text('Show Size Picker'));
       await tester.pumpAndSettle(); // Allow dialog to show
 
-      expect(find.byType(AlertDialog), findsOneWidget);
+      expect(find.byType(AppDialog), findsOneWidget);
       expect(find.text('Select Dialog Test'), findsOneWidget); // Dialog title
       expect(find.byType(BrushSizePicker), findsOneWidget);
 
@@ -247,20 +248,20 @@ void main() {
       expect(pickerInDialog.value, 25.0);
 
       // Simulate changing value in the dialog's picker
-      final Finder sliderInDialog = find.descendant(of: find.byType(AlertDialog), matching: find.byType(Slider));
+      final Finder sliderInDialog = find.descendant(of: find.byType(AppDialog), matching: find.byType(AppSlider));
       expect(sliderInDialog, findsOneWidget);
 
       // Directly call onChanged on the slider inside the dialog
-      final Slider sliderWidget = tester.widget(sliderInDialog);
+      final AppSlider sliderWidget = tester.widget(sliderInDialog);
       sliderWidget.onChanged!(33.0);
       await tester.pumpAndSettle(); // For AlertDialog content update if any
 
       expect(changedValue, 33.0); // Check if the callback was propagated
 
       // Close dialog
-      Navigator.of(tester.element(find.byType(AlertDialog))).pop();
+      Navigator.of(tester.element(find.byType(AppDialog))).pop();
       await tester.pumpAndSettle();
-      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(AppDialog), findsNothing);
     });
   });
 }

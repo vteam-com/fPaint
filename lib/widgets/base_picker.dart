@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// A generic base picker widget that can handle different value types.
 abstract class BasePicker<T> extends StatefulWidget {
@@ -98,10 +99,10 @@ Future<void> showPickerDialog({
   required final String title,
   required final Widget child,
 }) async {
-  await showDialog<void>(
+  await showAppDialog<void>(
     context: context,
     builder: (final BuildContext _) {
-      return AlertDialog(
+      return AppDialog(
         title: Text(title),
         content: IntrinsicHeight(child: child),
       );

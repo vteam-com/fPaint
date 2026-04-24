@@ -246,7 +246,7 @@ const Offset _birdLine4End = Offset(56, 18);
 // Signature
 const String _signatureLayerName = 'Signature';
 const String _signatureText = 'fPaint';
-const String _signatureFontFamily = 'Roboto';
+const String _signatureFontFamily = 'Inter';
 const double _signatureFontSize = 24.0;
 const double _signatureMarginRight = 10.0;
 const double _signatureMarginBottom = 10.0;

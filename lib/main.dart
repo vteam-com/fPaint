@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/constants.dart';
@@ -14,6 +14,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -179,20 +180,20 @@ Future<void> _handleFileOpened(final String filePath) async {
   // Check if there are unsaved changes before clearing
   if (mainApp.appProvider.layers.hasChanged) {
     final bool shouldProceed =
-        await showDialog<bool>(
+        await showAppDialog<bool>(
           context: mainApp.navigatorKey.currentContext!,
           builder: (final BuildContext context) {
             final AppLocalizations l10n = context.l10n;
 
-            return AlertDialog(
+            return AppDialog(
               title: Text(l10n.unsavedChanges),
               content: Text(l10n.unsavedChangesDiscardAndOpenPrompt),
               actions: <Widget>[
-                TextButton(
+                AppTextButton(
                   onPressed: () => Navigator.pop(context, false),
                   child: Text(l10n.cancel),
                 ),
-                TextButton(
+                AppTextButton(
                   onPressed: () => Navigator.pop(context, true),
                   child: Text(l10n.discardAndOpen),
                 ),
@@ -254,16 +255,6 @@ class MyApp extends StatelessWidget {
   final UndoProvider undoProvider = UndoProvider();
   @override
   Widget build(final BuildContext context) {
-    final BorderSide popupBorder = BorderSide(
-      color: Colors.white.withValues(alpha: AppVisual.popupBorderAlpha),
-      width: AppStroke.thin,
-    );
-
-    final RoundedRectangleBorder popupShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      side: popupBorder,
-    );
-
     return MultiProvider(
       providers: <SingleChildWidget>[
         Provider<DraftRecoveryController>.value(value: draftRecoveryController),
@@ -289,14 +280,24 @@ class MyApp extends StatelessWidget {
             ) {
               return RepaintBoundary(
                 key: Keys.appScreenshotBoundary,
-                child: MaterialApp(
+                child: WidgetsApp(
                   debugShowCheckedModeBanner: false,
                   navigatorKey: navigatorKey,
                   title: appName,
+                  color: AppColors.primary,
+                  pageRouteBuilder: <T>(final RouteSettings settings, final WidgetBuilder builder) {
+                    return PageRouteBuilder<T>(
+                      settings: settings,
+                      pageBuilder:
+                          (
+                            final BuildContext context,
+                            final Animation<double> _,
+                            final Animation<double> _,
+                          ) => builder(context),
+                    );
+                  },
                   localizationsDelegates: <LocalizationsDelegate<dynamic>>[
                     AppLocalizations.delegate,
-                    GlobalMaterialLocalizations.delegate,
-                    GlobalCupertinoLocalizations.delegate,
                     GlobalWidgetsLocalizations.delegate,
                   ],
                   supportedLocales: AppLocalizations.supportedLocales,
@@ -314,31 +315,6 @@ class MyApp extends StatelessWidget {
 
                     return const Locale('en');
                   },
-                  theme: ThemeData.dark().copyWith(
-                    colorScheme: const ColorScheme.dark(
-                      primary: AppColors.primary,
-                      secondary: AppColors.secondary,
-                    ),
-                    dialogTheme: DialogThemeData(
-                      backgroundColor: AppColors.surface,
-                      shape: popupShape,
-                    ),
-                    popupMenuTheme: PopupMenuThemeData(
-                      color: AppColors.surface,
-                      shape: popupShape,
-                    ),
-                    bottomSheetTheme: BottomSheetThemeData(
-                      backgroundColor: AppColors.surface,
-                      modalBackgroundColor: AppColors.surface,
-                      shape: popupShape,
-                    ),
-                    sliderTheme: SliderThemeData(
-                      activeTrackColor: AppColors.secondary,
-                      inactiveTrackColor: AppColors.surfaceVariant,
-                      thumbColor: AppColors.accent,
-                      overlayColor: AppColors.primary.withAlpha(AppLimits.percentMax),
-                    ),
-                  ),
                   routes: <String, WidgetBuilder>{
                     '/': (final BuildContext context) => shortCutsForMainApp(
                       context,
@@ -348,6 +324,12 @@ class MyApp extends StatelessWidget {
                     ),
                     '/settings': (final _) => const SettingsPage(),
                     '/platforms': (final _) => const PlatformsPage(),
+                  },
+                  builder: (final BuildContext _, final Widget? child) {
+                    return DefaultTextStyle(
+                      style: const TextStyle(fontFamily: appFontFamily),
+                      child: child ?? const SizedBox.shrink(),
+                    );
                   },
                 ),
               );

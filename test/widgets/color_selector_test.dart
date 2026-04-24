@@ -8,6 +8,7 @@ import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -31,7 +32,7 @@ void main() {
       );
 
       // Find sliders (there are 3: Hue, Brightness, Alpha)
-      final Finder sliders = find.byType(Slider);
+      final Finder sliders = find.byType(AppSlider);
       expect(sliders, findsNWidgets(3));
 
       // Verify slider positions based on initialColor (Red: H=0, S=1, V=1 or L=0.5 for HSL)
@@ -39,13 +40,13 @@ void main() {
       // Red: H=0, L=0.5, A=1.0
       final HSLColor hslColor = HSLColor.fromColor(initialColor);
 
-      final Slider hueSlider = tester.widget(sliders.at(0));
+      final AppSlider hueSlider = tester.widget(sliders.at(0));
       expect(hueSlider.value, closeTo(hslColor.hue, 0.1));
 
-      final Slider brightnessSlider = tester.widget(sliders.at(1));
+      final AppSlider brightnessSlider = tester.widget(sliders.at(1));
       expect(brightnessSlider.value, closeTo(hslColor.lightness, 0.01));
 
-      final Slider alphaSlider = tester.widget(sliders.at(2));
+      final AppSlider alphaSlider = tester.widget(sliders.at(2));
       expect(alphaSlider.value, closeTo(hslColor.alpha, 0.01));
     });
 
@@ -73,7 +74,7 @@ void main() {
         ),
       );
 
-      final Finder sliders = find.byType(Slider);
+      final Finder sliders = find.byType(AppSlider);
       expect(sliders, findsNWidgets(3));
 
       // Change Hue to 120 (Green)
@@ -82,7 +83,7 @@ void main() {
 
       // For more precise value setting:
       final Finder hueSliderFinder = sliders.at(0);
-      final Slider hueSliderWidget = tester.widget(hueSliderFinder);
+      final AppSlider hueSliderWidget = tester.widget(hueSliderFinder);
       final double targetHue = 120.0;
       // Call onChanged directly, as drag is imprecise for exact value verification
       hueSliderWidget.onChanged!(targetHue);
@@ -119,8 +120,8 @@ void main() {
         ),
       );
 
-      final Finder brightnessSliderFinder = find.byType(Slider).at(1);
-      final Slider brightnessSliderWidget = tester.widget(brightnessSliderFinder);
+      final Finder brightnessSliderFinder = find.byType(AppSlider).at(1);
+      final AppSlider brightnessSliderWidget = tester.widget(brightnessSliderFinder);
       brightnessSliderWidget.onChanged!(0.8); // Change brightness
       await tester.pumpAndSettle();
 
@@ -145,8 +146,8 @@ void main() {
         ),
       );
 
-      final Finder alphaSliderFinder = find.byType(Slider).at(2);
-      final Slider alphaSliderWidget = tester.widget(alphaSliderFinder);
+      final Finder alphaSliderFinder = find.byType(AppSlider).at(2);
+      final AppSlider alphaSliderWidget = tester.widget(alphaSliderFinder);
       alphaSliderWidget.onChanged!(0.5); // Change alpha
       await tester.pumpAndSettle();
 
@@ -170,12 +171,12 @@ void main() {
         );
 
         // Verify initial slider state for Colors.cyan.
-        Finder sliders = find.byType(Slider);
+        Finder sliders = find.byType(AppSlider);
         final HSLColor initialCyanHsl = HSLColor.fromColor(Colors.cyan); // Actual HSL for Colors.cyan
-        Slider hueSliderWidget = tester.widget(sliders.at(0));
+        AppSlider hueSliderWidget = tester.widget(sliders.at(0));
         expect(hueSliderWidget.value, closeTo(initialCyanHsl.hue, 0.1));
-        expect(tester.widget<Slider>(sliders.at(1)).value, closeTo(initialCyanHsl.lightness, 0.01));
-        expect(tester.widget<Slider>(sliders.at(2)).value, closeTo(Colors.cyan.a, 0.01));
+        expect(tester.widget<AppSlider>(sliders.at(1)).value, closeTo(initialCyanHsl.lightness, 0.01));
+        expect(tester.widget<AppSlider>(sliders.at(2)).value, closeTo(Colors.cyan.a, 0.01));
 
         // Change color property and rebuild to Orange
         testColor = Colors.orange; // Orange: H~30-38, L~0.5, A=1.0
@@ -190,13 +191,13 @@ void main() {
           ),
         );
 
-        sliders = find.byType(Slider);
+        sliders = find.byType(AppSlider);
         final HSLColor orangeHsl = HSLColor.fromColor(Colors.orange);
         // Verify state for Colors.orange.
         hueSliderWidget = tester.widget(sliders.at(0)); // Re-fetch slider
         expect(hueSliderWidget.value, closeTo(orangeHsl.hue, 0.1));
-        expect(tester.widget<Slider>(sliders.at(1)).value, closeTo(orangeHsl.lightness, 0.01));
-        expect(tester.widget<Slider>(sliders.at(2)).value, closeTo(Colors.orange.a, 0.01));
+        expect(tester.widget<AppSlider>(sliders.at(1)).value, closeTo(orangeHsl.lightness, 0.01));
+        expect(tester.widget<AppSlider>(sliders.at(2)).value, closeTo(Colors.orange.a, 0.01));
       },
       // Re-enabled: verify hue/init update behavior directly.
     );
@@ -290,11 +291,11 @@ void main() {
         // Simulate selecting a color by interacting with the ColorSelector's slider inside the dialog
         final Finder sliderInDialogFinder = find.descendant(
           of: find.byType(ColorPickerDialog),
-          matching: find.byType(Slider),
+          matching: find.byType(AppSlider),
         );
         expect(sliderInDialogFinder, findsNWidgets(3)); // Hue, Brightness, Alpha sliders
 
-        final Slider hueSliderInDialog = tester.widget(sliderInDialogFinder.at(0));
+        final AppSlider hueSliderInDialog = tester.widget(sliderInDialogFinder.at(0));
 
         // Simulate changing hue to 120.0 (Greenish) while preserving lightness/alpha from input color.
         final HSLColor initialHsl = HSLColor.fromColor(Colors.red);

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/widgets/app_icon.dart';
@@ -52,7 +53,7 @@ void main() {
       bool hasBlueSelected = false;
       for (final DecoratedBox decoratedBox in decoratedBoxes) {
         final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
-        if (decoration.color == Colors.blue) {
+        if (decoration.color == AppPalette.blue) {
           hasBlueSelected = true;
           break;
         }

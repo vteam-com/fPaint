@@ -1,7 +1,7 @@
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/floating_buttons.dart';
 import 'package:fpaint/helpers/constants.dart';
@@ -11,6 +11,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
 /// The main screen of the application, which extends the `StatelessWidget` class.
@@ -29,16 +30,13 @@ class MainScreen extends StatelessWidget {
     final AppProvider appProvider = AppProvider.of(context, listen: true);
 
     if (appPreferences.isLoaded == false) {
-      return const Scaffold(
-        backgroundColor: Colors.grey,
+      return const AppScaffold(
+        backgroundColor: AppPalette.grey,
         body: Center(
           child: SizedBox(
             width: AppLayout.loaderRadius,
             height: AppLayout.loaderRadius,
-            child: CircularProgressIndicator(
-              strokeWidth: AppLayout.loaderStrokeWidth,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-            ),
+            child: AppProgressIndicator(),
           ),
         ),
       );
@@ -53,35 +51,43 @@ class MainScreen extends StatelessWidget {
       onDragDone: (final DropDoneDetails details) {
         _handleDroppedFiles(context, details);
       },
-      child: Scaffold(
-        backgroundColor: Colors.grey,
-        body: shellMode == ShellMode.hidden
-            ? _buildMainContent(context, shellProvider, appPreferences)
-            : MultiSplitViewTheme(
-                data: MultiSplitViewThemeData(
-                  dividerPainter: DividerPainters.grooved1(
-                    animationEnabled: true,
-                    backgroundColor: Colors.grey.shade600,
-                    highlightedBackgroundColor: Colors.blue,
-                    color: Colors.grey.shade800,
-                    thickness: AppStroke.divider,
-                    highlightedThickness: AppStroke.dividerHighlighted,
-                    strokeCap: StrokeCap.round,
+      child: AppScaffold(
+        backgroundColor: AppPalette.grey,
+        body: Stack(
+          children: <Widget>[
+            shellMode == ShellMode.hidden
+                ? _buildMainContent(context, shellProvider, appPreferences)
+                : MultiSplitViewTheme(
+                    data: MultiSplitViewThemeData(
+                      dividerPainter: DividerPainters.grooved1(
+                        animationEnabled: true,
+                        backgroundColor: AppPalette.grey600,
+                        highlightedBackgroundColor: AppPalette.blue,
+                        color: AppPalette.grey800,
+                        thickness: AppStroke.divider,
+                        highlightedThickness: AppStroke.dividerHighlighted,
+                        strokeCap: StrokeCap.round,
+                      ),
+                    ),
+                    child: _buildMainContent(context, shellProvider, appPreferences),
                   ),
-                ),
-                child: _buildMainContent(context, shellProvider, appPreferences),
-              ),
-        floatingActionButton: shellMode == ShellMode.hidden
-            ? myFloatButton(
-                icon: AppIcon.moreVert,
-                onPressed: () {
-                  Future<void>.microtask(() {
-                    shellProvider.shellMode = ShellMode.full;
-                    shellProvider.update();
-                  });
-                },
-              )
-            : floatingActionButtons(context, shellProvider, appProvider),
+            Positioned(
+              right: AppSpacing.xl,
+              bottom: AppSpacing.xl,
+              child: shellMode == ShellMode.hidden
+                  ? myFloatButton(
+                      icon: AppIcon.moreVert,
+                      onPressed: () {
+                        Future<void>.microtask(() {
+                          shellProvider.shellMode = ShellMode.full;
+                          shellProvider.update();
+                        });
+                      },
+                    )
+                  : floatingActionButtons(context, shellProvider, appProvider),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -155,7 +161,7 @@ class MainScreen extends StatelessWidget {
                 shellProvider.update();
               },
               child: Container(
-                color: Colors.black.withAlpha(AppLayout.overlayAlpha),
+                color: AppPalette.black.withAlpha(AppLayout.overlayAlpha),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: SizedBox(

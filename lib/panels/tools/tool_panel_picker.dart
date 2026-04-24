@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// Represents a selectable tool in the user interface.
 ///
@@ -32,7 +33,7 @@ class ToolPanelPicker extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    return IconButton(
+    return AppIconButton(
       icon: image,
       onPressed: onPressed,
       tooltip: name,

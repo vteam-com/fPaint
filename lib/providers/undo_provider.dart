@@ -1,6 +1,6 @@
 // ignore: fcheck_one_class_per_file
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:logging/logging.dart';

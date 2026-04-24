@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// Coordinate format template for handle labels.
 const String _coordinatesFormat = '{x}\n{y}';
@@ -18,7 +19,7 @@ Widget buildOverlayCircleButton({
   final GestureDragEndCallback? onPanEnd,
   final GestureDragCancelCallback? onPanCancel,
 }) {
-  return Tooltip(
+  return AppTooltip(
     message: tooltip,
     child: GestureDetector(
       onTap: onTap,
@@ -34,7 +35,7 @@ Widget buildOverlayCircleButton({
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.white, width: AppStroke.regular),
+            border: Border.all(color: AppPalette.white, width: AppStroke.regular),
           ),
           child: Center(child: child),
         ),
@@ -53,12 +54,12 @@ Widget buildOverlayFeedbackBubble({required final String label}) {
     decoration: BoxDecoration(
       color: AppColors.surface.withValues(alpha: AppVisual.disabled),
       borderRadius: BorderRadius.circular(AppRadius.md),
-      border: Border.all(color: Colors.white, width: AppStroke.thin),
+      border: Border.all(color: AppPalette.white, width: AppStroke.thin),
     ),
     child: Text(
       label,
       style: const TextStyle(
-        color: Colors.white,
+        color: AppPalette.white,
         fontWeight: FontWeight.bold,
       ),
     ),
@@ -117,8 +118,8 @@ class OverlayDragHandle extends StatelessWidget {
             width: activeSize,
             height: activeSize,
             decoration: BoxDecoration(
-              color: Colors.blue,
-              border: Border.all(color: Colors.white, width: AppStroke.regular),
+              color: AppPalette.blue,
+              border: Border.all(color: AppPalette.white, width: AppStroke.regular),
               borderRadius: BorderRadius.circular(borderRadius),
             ),
             child: showCoordinates
@@ -128,7 +129,7 @@ class OverlayDragHandle extends StatelessWidget {
                           .replaceFirst(_placeholderX, position.dx.toInt().toString())
                           .replaceFirst(_placeholderY, position.dy.toInt().toString()),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: AppSpacing.sm, color: Colors.white),
+                      style: const TextStyle(fontSize: AppSpacing.sm, color: AppPalette.white),
                     ),
                   )
                 : null,

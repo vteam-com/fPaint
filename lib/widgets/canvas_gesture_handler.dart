@@ -3,7 +3,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -17,6 +17,7 @@ import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
 /// Handles pointer, pan, and zoom gestures over the canvas widget tree.
@@ -415,7 +416,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// When the user finishes editing, the resulting [TextObject] is recorded
   /// as a drawing action on the currently selected layer.
   void _showTextDialog(final AppProvider appProvider, final Offset position) {
-    showDialog<void>(
+    showAppDialog<void>(
       context: context,
       builder: (final BuildContext _) {
         return TextEditorDialog(

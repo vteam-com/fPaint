@@ -2,7 +2,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
@@ -179,7 +179,7 @@ class LayersProvider extends ChangeNotifier {
   /// Adds a white background layer to the canvas.
   LayerProvider addWhiteBackgroundLayer([final String? name]) {
     final LayerProvider firstLayer = newLayer(name ?? _defaultBackgroundName);
-    firstLayer.backgroundColor = Colors.white;
+    firstLayer.backgroundColor = AppPalette.white;
     _list.add(firstLayer);
     return firstLayer;
   }
@@ -421,8 +421,8 @@ class LayersProvider extends ChangeNotifier {
   // Top Colors used
   /// The list of top colors used in the canvas.
   List<ColorUsage> topColors = <ColorUsage>[
-    ColorUsage(Colors.white, 1),
-    ColorUsage(Colors.black, 1),
+    ColorUsage(AppPalette.white, 1),
+    ColorUsage(AppPalette.black, 1),
   ];
 
   /// Evaluates the top colors used in the canvas.

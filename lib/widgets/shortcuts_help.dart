@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 const String _titleKeyboardShortcuts = 'Keyboard Shortcuts';
 const String _categoryFileOperations = 'File Operations';
@@ -53,7 +55,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
   Widget build(final BuildContext context) {
     final String mod = _getPlatformModifier(context);
 
-    return AlertDialog(
+    return AppDialog(
       title: const Text(_titleKeyboardShortcuts),
       content: SingleChildScrollView(
         child: Wrap(
@@ -114,7 +116,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
         ),
       ),
       actions: <Widget>[
-        TextButton(
+        AppTextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: const Text(_labelClose),
         ),
@@ -131,9 +133,9 @@ class ShortcutsHelpDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
             decoration: BoxDecoration(
-              color: Colors.grey.shade800,
+              color: AppPalette.grey800,
               borderRadius: BorderRadius.circular(AppRadius.sm),
-              border: Border.all(color: Colors.grey.shade600),
+              border: Border.all(color: AppPalette.grey600),
             ),
             child: Text(
               keys,
@@ -183,9 +185,8 @@ class ShortcutsHelpDialog extends StatelessWidget {
     );
   }
 
-  String _getPlatformModifier(final BuildContext context) {
-    final bool isMacOS =
-        Theme.of(context).platform == TargetPlatform.macOS || Theme.of(context).platform == TargetPlatform.iOS;
+  String _getPlatformModifier(final BuildContext _) {
+    final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
     return isMacOS ? _platformCmd : _platformCtrl;
   }
 }

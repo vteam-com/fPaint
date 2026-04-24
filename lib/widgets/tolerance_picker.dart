@@ -1,8 +1,9 @@
 // ignore: fcheck_one_class_per_file
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/base_picker.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// A widget that allows the user to pick a tolerance value using a slider.
 class TolerancePicker extends BasePicker<int> {
@@ -27,12 +28,11 @@ class TolerancePickerState extends BasePickerState<int> {
 
   @override
   Widget buildPickerWidget() {
-    return Slider(
+    return AppSlider(
       value: currentValue.toDouble(),
       min: 1,
       max: AppLimits.percentMax.toDouble(),
       divisions: AppLimits.sliderDivisions,
-      label: currentValue.toStringAsFixed(0),
       onChanged: (final double value) => updateValue(value.toInt()),
     );
   }

@@ -1,5 +1,5 @@
 // ignore: fcheck_one_class_per_file
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:fpaint/models/visible_model.dart';
 
 // Exports
