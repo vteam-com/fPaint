@@ -50,10 +50,14 @@ Future<void> paintLayerHouseShadow(final PaintingScenarioSession session) async 
 
   // Move the house shadow layer below the house layer.
   final LayersProvider layersProvider = LayersProvider.of(context);
-  final int shadowIndex = layersProvider.selectedLayerIndex;
-  final LayerProvider shadowLayer = layersProvider.get(shadowIndex);
+  final LayerProvider shadowLayer = layersProvider.list.firstWhere(
+    (final LayerProvider layer) => layer.name == _houseShadowLayerName,
+  );
   layersProvider.remove(shadowLayer);
-  layersProvider.insert(shadowIndex + 1, shadowLayer);
+  final int houseIdx = layersProvider.list.indexWhere(
+    (final LayerProvider layer) => layer.name == _houseLayerName,
+  );
+  layersProvider.insert(houseIdx + 1, shadowLayer);
   layersProvider.selectedLayerIndex = layersProvider.getLayerIndex(shadowLayer);
   layersProvider.update();
   await session.tester.pump();
