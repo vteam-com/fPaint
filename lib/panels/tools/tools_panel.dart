@@ -631,6 +631,7 @@ class ToolsPanel extends StatelessWidget {
               childRight: minimal
                   ? null
                   : brushStyleDropDown(
+                      context,
                       appProvider.brushStyle,
                       (final BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
                     ),

@@ -8,6 +8,15 @@ enum BrushStyle {
 
   /// A dashed brush style.
   dash,
+
+  /// A dotted brush style.
+  dotted,
+
+  /// An alternating dash-dot brush style.
+  dashDot,
+
+  /// A slash brush style that draws forward slashes along the path.
+  slash,
 }
 
 /// Represents a brush with a specific style, color, and size.

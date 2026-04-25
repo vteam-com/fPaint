@@ -88,6 +88,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get brushStyle => 'Brush Style';
 
   @override
+  String get brushStyleDash => 'Dash';
+
+  @override
+  String get brushStyleDashDot => 'Dash-Dot';
+
+  @override
+  String get brushStyleDotted => 'Dotted';
+
+  @override
+  String get brushStyleSlash => 'Slash';
+
+  @override
+  String get brushStyleSolid => 'Solid';
+
+  @override
   String get cancel => 'Cancel';
 
   @override

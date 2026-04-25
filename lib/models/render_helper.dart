@@ -259,16 +259,39 @@ void drawPathWithBrushStyle(
   final BrushStyle brushStyle,
   final double brushSize,
 ) {
-  if (brushStyle == BrushStyle.dash) {
-    drawPathDash(
-      path,
-      canvas,
-      paint,
-      brushSize * AppMath.triple,
-      brushSize * AppMath.pair,
-    );
-  } else {
-    canvas.drawPath(path, paint);
+  switch (brushStyle) {
+    case BrushStyle.solid:
+      canvas.drawPath(path, paint);
+    case BrushStyle.dash:
+      drawPathDash(
+        path,
+        canvas,
+        paint,
+        brushSize * AppStroke.dashWidthFactor,
+        brushSize * AppStroke.dashGapFactor,
+      );
+    case BrushStyle.dotted:
+      _drawPathDots(
+        path,
+        canvas,
+        paint,
+        brushSize,
+      );
+    case BrushStyle.dashDot:
+      _drawPathDashDot(
+        path,
+        canvas,
+        paint,
+        brushSize,
+        dotCount: 1,
+      );
+    case BrushStyle.slash:
+      _drawPathSlashes(
+        path,
+        canvas,
+        paint,
+        brushSize,
+      );
   }
 }
 
@@ -320,6 +343,105 @@ Path createDashedPath(
     }
   }
   return dashedPath;
+}
+
+/// Draws circular dots along a [path].
+///
+/// Each dot is a filled circle with radius equal to half the stroke width.
+void _drawPathDots(
+  final Path path,
+  final Canvas canvas,
+  final Paint paint,
+  final double brushSize,
+) {
+  final double radius = paint.strokeWidth / AppMath.pair;
+  final double gap = brushSize * AppStroke.dashGapFactor;
+  final Paint dotPaint = Paint()
+    ..color = paint.color
+    ..style = PaintingStyle.fill;
+
+  for (final ui.PathMetric metric in path.computeMetrics()) {
+    double distance = 0.0;
+    while (distance < metric.length) {
+      final ui.Tangent? tangent = metric.getTangentForOffset(distance);
+      if (tangent != null) {
+        canvas.drawCircle(tangent.position, radius, dotPaint);
+      }
+      distance += gap;
+    }
+  }
+}
+
+/// Draws a dash-dot pattern on [canvas].
+///
+/// Each cycle consists of one dash followed by [dotCount] dots,
+/// separated by gaps proportional to [brushSize].
+void _drawPathDashDot(
+  final Path path,
+  final Canvas canvas,
+  final Paint paint,
+  final double brushSize, {
+  required final int dotCount,
+}) {
+  final double dashWidth = brushSize * AppStroke.dashWidthFactor;
+  final double radius = paint.strokeWidth / AppMath.pair;
+  final double gap = brushSize * AppStroke.dashGapFactor;
+  final Paint dotPaint = Paint()
+    ..color = paint.color
+    ..style = PaintingStyle.fill;
+
+  final Path dashPath = Path();
+  for (final ui.PathMetric metric in path.computeMetrics()) {
+    double distance = 0.0;
+    while (distance < metric.length) {
+      // Dash segment
+      final double dashEnd = (distance + dashWidth).clamp(0.0, metric.length);
+      dashPath.addPath(metric.extractPath(distance, dashEnd), Offset.zero);
+      distance = dashEnd + gap;
+
+      // Dot segments (circles)
+      for (int i = 0; i < dotCount && distance < metric.length; i++) {
+        final ui.Tangent? tangent = metric.getTangentForOffset(distance);
+        if (tangent != null) {
+          canvas.drawCircle(tangent.position, radius, dotPaint);
+        }
+        distance += gap;
+      }
+    }
+  }
+  canvas.drawPath(dashPath, paint);
+}
+
+/// Draws forward-slash marks along a [path].
+///
+/// Each slash is a short line segment perpendicular-ish to the path direction,
+/// spaced evenly along the path.
+void _drawPathSlashes(
+  final Path path,
+  final Canvas canvas,
+  final Paint paint,
+  final double brushSize,
+) {
+  final double slashLength = paint.strokeWidth * AppStroke.dashWidthFactor;
+  final double gap = brushSize * AppStroke.dashGapFactor;
+  final double halfSlash = slashLength / AppMath.pair;
+
+  for (final ui.PathMetric metric in path.computeMetrics()) {
+    double distance = 0.0;
+    while (distance < metric.length) {
+      final ui.Tangent? tangent = metric.getTangentForOffset(distance);
+      if (tangent != null) {
+        final Offset center = tangent.position;
+        // Draw a forward slash (/) — tilted line from bottom-left to top-right
+        canvas.drawLine(
+          Offset(center.dx - halfSlash, center.dy + halfSlash),
+          Offset(center.dx + halfSlash, center.dy - halfSlash),
+          paint,
+        );
+      }
+      distance += gap;
+    }
+  }
 }
 
 /// Renders text on the canvas.

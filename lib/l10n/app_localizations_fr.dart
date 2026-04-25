@@ -89,6 +89,21 @@ class AppLocalizationsFr extends AppLocalizations {
   String get brushStyle => 'Style de pinceau';
 
   @override
+  String get brushStyleDash => 'Tiret';
+
+  @override
+  String get brushStyleDashDot => 'Tiret-point';
+
+  @override
+  String get brushStyleDotted => 'Pointille';
+
+  @override
+  String get brushStyleSlash => 'Barre oblique';
+
+  @override
+  String get brushStyleSolid => 'Continu';
+
+  @override
   String get cancel => 'Annuler';
 
   @override
