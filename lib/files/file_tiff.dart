@@ -495,9 +495,9 @@ class _LayerMeta {
 /// when the tag is missing or not JSON.
 _LayerMeta _extractLayerMeta(final img.TiffInfo tiffInfo, final int frameIndex) {
   String layerName = _fallbackLayerName(frameIndex);
-  final double opacity = 1.0;
-  final ui.BlendMode blendMode = ui.BlendMode.srcOver;
-  final bool visible = true;
+  const double opacity = 1.0;
+  const ui.BlendMode blendMode = ui.BlendMode.srcOver;
+  const bool visible = true;
 
   if (frameIndex < tiffInfo.images.length) {
     final img.TiffImage tiffImage = tiffInfo.images[frameIndex];

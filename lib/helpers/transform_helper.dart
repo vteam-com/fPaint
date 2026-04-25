@@ -25,8 +25,8 @@ void drawPerspectiveImage(
 
   final int gridSize = subdivisions + 1;
   final int vertexCount = gridSize * gridSize;
-  final int trianglesPerCell = 2;
-  final int verticesPerTriangle = 3;
+  const int trianglesPerCell = 2;
+  const int verticesPerTriangle = 3;
   final int indexCount = subdivisions * subdivisions * trianglesPerCell * verticesPerTriangle;
 
   final Float32List positions = Float32List(vertexCount * AppMath.pair);
@@ -143,7 +143,7 @@ void triggerRotationSnapHaptic(
   final double previousDegrees,
   final double currentDegrees,
 ) {
-  final double interval = AppMath.rotationSnapInterval;
+  const double interval = AppMath.rotationSnapInterval;
 
   // Which snap bucket each value falls in (floor towards −∞).
   final int prevSlot = (previousDegrees / interval).floor();
@@ -163,7 +163,7 @@ void triggerScaleSnapHaptic(
   final double previousPercent,
   final double currentPercent,
 ) {
-  final double interval = AppMath.scaleSnapInterval;
+  const double interval = AppMath.scaleSnapInterval;
 
   // Which snap bucket each value falls in (floor towards −∞).
   final int prevSlot = (previousPercent / interval).floor();

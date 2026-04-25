@@ -229,9 +229,9 @@ class _TransformWidgetState extends State<TransformWidget> {
     required final Offset screenCenter,
     required final List<Offset> screenCorners,
   }) {
-    final double buttonSize = AppInteraction.imagePlacementButtonSize;
-    final double spacing = AppInteraction.imagePlacementButtonSpacing;
-    final double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
+    const double buttonSize = AppInteraction.imagePlacementButtonSize;
+    const double spacing = AppInteraction.imagePlacementButtonSpacing;
+    const double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
     final double controlsTop = _screenQuadTop(screenCorners) - buttonSize - AppInteraction.imagePlacementHandleSize;
     final double controlsLeft = screenCenter.dx - controlsWidth / AppMath.pair;
     final Offset scaleHandleCenter = Offset(

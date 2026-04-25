@@ -73,7 +73,7 @@ class _FillWidgetState extends State<FillWidget> {
     // For linear gradients, show center dot at midpoint
     if (widget.fillModel.mode == FillMode.linear) {
       final Offset midPoint = widget.fillModel.centerPoint;
-      final double centerDot = AppSpacing.sm;
+      const double centerDot = AppSpacing.sm;
       stackChildren.add(
         Positioned(
           left: midPoint.dx - (centerDot / AppMath.pair),

@@ -16,8 +16,8 @@ void main() {
 
     group('anchorTranslate() calculation', () {
       test('Top-left anchor: no offset when expanding to larger canvas', () {
-        final Size oldSize = const Size(100, 100);
-        final Size newSize = const Size(200, 200);
+        const Size oldSize = Size(100, 100);
+        const Size newSize = Size(200, 200);
         final Offset offset = anchorTranslate(CanvasResizePosition.topLeft, oldSize, newSize);
 
         expect(offset.dx, 0.0);
@@ -25,8 +25,8 @@ void main() {
       });
 
       test('Center anchor: centers content when expanding', () {
-        final Size oldSize = const Size(100, 100);
-        final Size newSize = const Size(300, 300);
+        const Size oldSize = Size(100, 100);
+        const Size newSize = Size(300, 300);
         final Offset offset = anchorTranslate(CanvasResizePosition.center, oldSize, newSize);
 
         // Centered: (300-100)/2 = 100 offset for both x and y
@@ -35,8 +35,8 @@ void main() {
       });
 
       test('Bottom-right anchor: offset content up-left', () {
-        final Size oldSize = const Size(100, 100);
-        final Size newSize = const Size(300, 300);
+        const Size oldSize = Size(100, 100);
+        const Size newSize = Size(300, 300);
         final Offset offset = anchorTranslate(CanvasResizePosition.bottomRight, oldSize, newSize);
 
         // Bottom-right: offset = (newSize - oldSize)
@@ -45,8 +45,8 @@ void main() {
       });
 
       test('Top-right anchor: offset x only', () {
-        final Size oldSize = const Size(100, 100);
-        final Size newSize = const Size(300, 300);
+        const Size oldSize = Size(100, 100);
+        const Size newSize = Size(300, 300);
         final Offset offset = anchorTranslate(CanvasResizePosition.topRight, oldSize, newSize);
 
         expect(offset.dx, 200.0);
@@ -54,8 +54,8 @@ void main() {
       });
 
       test('Center anchor: negative offset when shrinking', () {
-        final Size oldSize = const Size(300, 300);
-        final Size newSize = const Size(100, 100);
+        const Size oldSize = Size(300, 300);
+        const Size newSize = Size(100, 100);
         final Offset offset = anchorTranslate(CanvasResizePosition.center, oldSize, newSize);
 
         // Centered shrink: (100-300)/2 = -100 offset for both x and y

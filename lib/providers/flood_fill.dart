@@ -33,7 +33,7 @@ class Point {
 }
 
 /// The number of bytes per pixel in the image data (assumed to be 4 for RGBA).
-final int bytesPerPixel = AppMath.bytesPerPixel;
+const int bytesPerPixel = AppMath.bytesPerPixel;
 
 /// Calculates the index of a pixel in a byte array representing image data.
 ///
