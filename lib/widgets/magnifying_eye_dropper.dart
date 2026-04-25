@@ -207,7 +207,7 @@ class MagnifyingGlassPainter extends CustomPainter {
 
   @override
   void paint(final Canvas canvas, final Size size) {
-    final double scaleFactor = AppInteraction.magnifierImageScale;
+    const double scaleFactor = AppInteraction.magnifierImageScale;
 
     final Paint paint = Paint()
       ..shader = ImageShader(

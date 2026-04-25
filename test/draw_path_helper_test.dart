@@ -7,7 +7,7 @@ import 'package:fpaint/helpers/draw_path_helper.dart';
 void main() {
   test('expandPathInDirectionWithOffset expands path to the left', () {
     final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
-    final Offset offset = const Offset(-20, 0);
+    const Offset offset = Offset(-20, 0);
     final Path result = expandPathInDirectionWithOffset(path, offset, NineGridHandle.left);
 
     final Rect resultBounds = result.getBounds();
@@ -17,7 +17,7 @@ void main() {
 
   test('expandPathInDirectionWithOffset expands path to the right', () {
     final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
-    final Offset offset = const Offset(20, 0);
+    const Offset offset = Offset(20, 0);
     final Path result = expandPathInDirectionWithOffset(path, offset, NineGridHandle.right);
 
     final Rect resultBounds = result.getBounds();
@@ -27,7 +27,7 @@ void main() {
 
   test('expandPathInDirectionWithOffset expands path to the top', () {
     final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
-    final Offset offset = const Offset(0, -20);
+    const Offset offset = Offset(0, -20);
     final Path result = expandPathInDirectionWithOffset(path, offset, NineGridHandle.top);
 
     final Rect resultBounds = result.getBounds();
@@ -37,7 +37,7 @@ void main() {
 
   test('expandPathInDirectionWithOffset expands path to the bottom', () {
     final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
-    final Offset offset = const Offset(0, 20);
+    const Offset offset = Offset(0, 20);
     final Path result = expandPathInDirectionWithOffset(path, offset, NineGridHandle.bottom);
 
     final Rect resultBounds = result.getBounds();
@@ -47,7 +47,7 @@ void main() {
 
   test('expandPathInDirectionWithOffset expands path to the top left', () {
     final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
-    final Offset offset = const Offset(-20, -20);
+    const Offset offset = Offset(-20, -20);
     final Path result = expandPathInDirectionWithOffset(path, offset, NineGridHandle.topLeft);
 
     final Rect resultBounds = result.getBounds();
@@ -59,7 +59,7 @@ void main() {
 
   test('expandPathInDirectionWithOffset expands path to the top right', () {
     final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
-    final Offset offset = const Offset(20, -20);
+    const Offset offset = Offset(20, -20);
     final Path result = expandPathInDirectionWithOffset(
       path,
       offset,
@@ -75,7 +75,7 @@ void main() {
 
   test('expandPathInDirectionWithOffset expands path to the bottom left', () {
     final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
-    final Offset offset = const Offset(-20, 20);
+    const Offset offset = Offset(-20, 20);
     final Path result = expandPathInDirectionWithOffset(
       path,
       offset,
@@ -91,7 +91,7 @@ void main() {
 
   test('expandPathInDirectionWithOffset expands path to the bottom right', () {
     final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
-    final Offset offset = const Offset(20, 20);
+    const Offset offset = Offset(20, 20);
     final Path result = expandPathInDirectionWithOffset(
       path,
       offset,

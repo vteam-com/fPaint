@@ -32,8 +32,8 @@ Future<void> paintLayerHouse(final PaintingScenarioSession session) async {
   );
 
   // Draw converging roof stripes on top of the house body so they are visible.
-  final double baseWidth = _roofBaseRight - _roofBaseLeft;
-  final double topWidth = _roofTopRight - _roofTopLeft;
+  const double baseWidth = _roofBaseRight - _roofBaseLeft;
+  const double topWidth = _roofTopRight - _roofTopLeft;
 
   for (int i = 0; i < _roofStripeCount; i++) {
     final double t = i / (_roofStripeCount - 1);

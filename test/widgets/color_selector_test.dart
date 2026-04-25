@@ -84,7 +84,7 @@ void main() {
       // For more precise value setting:
       final Finder hueSliderFinder = sliders.at(0);
       final AppSlider hueSliderWidget = tester.widget(hueSliderFinder);
-      final double targetHue = 120.0;
+      const double targetHue = 120.0;
       // Call onChanged directly, as drag is imprecise for exact value verification
       hueSliderWidget.onChanged!(targetHue);
       await tester.pumpAndSettle();
@@ -104,7 +104,7 @@ void main() {
     });
 
     testWidgets('Brightness slider interaction calls onColorChanged', (final WidgetTester tester) async {
-      final Color currentColor = const Color.fromARGB(255, 255, 0, 0); // Initial Red
+      const Color currentColor = Color.fromARGB(255, 255, 0, 0); // Initial Red
       Color? newColorReported;
 
       await tester.pumpWidget(
@@ -130,7 +130,7 @@ void main() {
     });
 
     testWidgets('Alpha slider interaction calls onColorChanged', (final WidgetTester tester) async {
-      final Color currentColor = const Color.fromARGB(255, 255, 0, 0); // Initial Red
+      const Color currentColor = Color.fromARGB(255, 255, 0, 0); // Initial Red
       Color? newColorReported;
 
       await tester.pumpWidget(

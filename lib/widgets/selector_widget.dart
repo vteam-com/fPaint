@@ -171,9 +171,9 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
 
     final AppLocalizations l10n = context.l10n;
     final Rect bounds = widget.path1!.getBounds();
-    final double modeToggleSize = AppInteraction.imagePlacementButtonSize;
-    final double modeToggleSpacing = AppInteraction.imagePlacementButtonSpacing;
-    final double controlsWidth = modeToggleSize * AppMath.triple + modeToggleSpacing * AppMath.pair;
+    const double modeToggleSize = AppInteraction.imagePlacementButtonSize;
+    const double modeToggleSpacing = AppInteraction.imagePlacementButtonSpacing;
+    const double controlsWidth = modeToggleSize * AppMath.triple + modeToggleSpacing * AppMath.pair;
     final double width = max(
       bounds.left + bounds.width + defaultHandleSize,
       bounds.center.dx + controlsWidth / AppMath.pair,
@@ -248,9 +248,9 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     final Rect bounds,
     final AppLocalizations l10n,
   ) {
-    final double buttonSize = AppInteraction.imagePlacementButtonSize;
-    final double spacing = AppInteraction.imagePlacementButtonSpacing;
-    final double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
+    const double buttonSize = AppInteraction.imagePlacementButtonSize;
+    const double spacing = AppInteraction.imagePlacementButtonSpacing;
+    const double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
     final double controlsTop = bounds.bottom + AppInteraction.imagePlacementButtonSpacing;
 
     return Positioned(
@@ -287,9 +287,9 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     final Rect bounds,
     final AppLocalizations l10n,
   ) {
-    final double buttonSize = AppInteraction.imagePlacementButtonSize;
-    final double spacing = AppInteraction.imagePlacementButtonSpacing;
-    final double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
+    const double buttonSize = AppInteraction.imagePlacementButtonSize;
+    const double spacing = AppInteraction.imagePlacementButtonSpacing;
+    const double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
     final double controlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
     final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
     final Offset scaleHandleCenter = Offset(

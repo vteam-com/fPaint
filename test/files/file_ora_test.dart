@@ -94,7 +94,7 @@ void main() {
   });
 
   test('buildLayers creates correct XML structure with group', () async {
-    final String input = '''<?xml version="1.0" encoding="UTF-8"?>
+    const String input = '''<?xml version="1.0" encoding="UTF-8"?>
           <image version="0.0.1" w="1920" h="1080">
             <stack>
               <stack name="Fruits">

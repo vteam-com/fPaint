@@ -299,7 +299,7 @@ class MyApp extends StatelessWidget {
                           ) => builder(context),
                     );
                   },
-                  localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+                  localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
                     AppLocalizations.delegate,
                     GlobalWidgetsLocalizations.delegate,
                   ],
