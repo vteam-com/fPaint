@@ -3,7 +3,8 @@ import 'dart:ui' as ui;
 import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/files/file_exceptions.dart';
+import 'package:fpaint/files/file_operation_exception.dart';
+
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:xml/xml.dart';
@@ -32,7 +33,7 @@ void main() {
     );
   });
 
-  test('createOraAchive creates valid archive structure', () async {
+  test('createOraArchive creates valid archive structure', () async {
     final LayersProvider layers = LayersProvider();
     layers.size = const ui.Size(100, 100);
 
@@ -98,7 +99,7 @@ void main() {
             <stack>
               <stack name="Fruits">
                 <layer name="Orange" visibility="visible" opacity="1.00000" src="data/layer-0.png" x="0" y="0"/>
-                <layer name="Banna" visibility="hidden" opacity="1.00000" src="data/layer-1.png" x="0" y="0"/>
+                <layer name="Banana" visibility="hidden" opacity="1.00000" src="data/layer-1.png" x="0" y="0"/>
               </stack>
               <layer name="Pasted Layer" visibility="visible" opacity="1.00000" src="data/layer-2.png" x="0" y="0"/>
               <layer name="Background" visibility="visible" opacity="1.00000" src="data/layer-3.png" x="0" y="0"/>
@@ -151,7 +152,7 @@ void main() {
     expect(layers.length, 4);
     expect(layers.list[0].name, 'Orange');
     expect(layers.list[0].isVisible, isTrue);
-    expect(layers.list[1].name, 'Banna');
+    expect(layers.list[1].name, 'Banana');
     expect(layers.list[1].isVisible, isFalse);
     expect(layers.list[2].name, 'Pasted Layer');
     expect(layers.list[2].isVisible, isTrue);

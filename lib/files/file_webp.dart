@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:fpaint/files/file_exceptions.dart';
+import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/webp_encoder.dart';
 
 const String _errorFailedToGetWebpRgbaBytes = 'Failed to get raw RGBA bytes from image.';

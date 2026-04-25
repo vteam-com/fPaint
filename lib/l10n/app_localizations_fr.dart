@@ -426,4 +426,127 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get width => 'Largeur';
+
+  @override
+  String get toolPencil => 'Crayon';
+
+  @override
+  String get toolBrush => 'Pinceau';
+
+  @override
+  String get toolLine => 'Ligne';
+
+  @override
+  String get toolRectangle => 'Rectangulaire';
+
+  @override
+  String get toolCircle => 'Cercle';
+
+  @override
+  String get toolPaintBucket => 'Pot de peinture';
+
+  @override
+  String get toolEraser => 'Gomme';
+
+  @override
+  String get toolText => 'Texte';
+
+  @override
+  String get toolSelector => 'Sélecteur';
+
+  @override
+  String get toolFill => 'Remplissage';
+
+  @override
+  String get toolSolid => 'Uni';
+
+  @override
+  String get toolLinearGradient => 'Dégradé linéaire';
+
+  @override
+  String get toolRadialGradient => 'Dégradé radial';
+
+  @override
+  String get toolLasso => 'Lasso libre';
+
+  @override
+  String get toolMagic => 'Magique';
+
+  @override
+  String get toolReplace => 'Remplacer';
+
+  @override
+  String get toolAdd => 'Ajouter';
+
+  @override
+  String get toolRemove => 'Retirer';
+
+  @override
+  String get toolInvert => 'Inverser';
+
+  @override
+  String get toolCrop => 'Recadrer';
+
+  @override
+  String get brushColor => 'Couleur du pinceau';
+
+  @override
+  String get fillColor => 'Couleur de remplissage';
+
+  @override
+  String get pencilSize => 'Taille du crayon';
+
+  @override
+  String get brushSize => 'Taille du pinceau';
+
+  @override
+  String get layerHidden => 'Masqué';
+
+  @override
+  String get layerOpacity => 'Opacité : ';
+
+  @override
+  String get layerBlend => 'Fusion : ';
+
+  @override
+  String get layerNameTitle => 'Nom du calque';
+
+  @override
+  String get layerAddAbove => 'Ajouter un calque au-dessus';
+
+  @override
+  String get layerDelete => 'Supprimer ce calque';
+
+  @override
+  String get layerMergeBelow => 'Fusionner avec le calque inférieur';
+
+  @override
+  String get layerBlendMode => 'Mode de fusion';
+
+  @override
+  String get layerBackgroundColor => "Couleur d'arrière-plan";
+
+  @override
+  String get layerToggleVisibility => 'Masquer/Afficher ce calque';
+
+  @override
+  String get layerRename => 'Renommer le calque';
+
+  @override
+  String get layerChangeBlendMode => 'Changer le mode de fusion';
+
+  @override
+  String get layerHideAllOthers => 'Masquer tous les autres calques';
+
+  @override
+  String get layerShowAll => 'Afficher tous les calques';
+
+  @override
+  String get layerHide => 'Masquer le calque';
+
+  @override
+  String get layerShow => 'Afficher le calque';
+
+  @override
+  String get layerAdd => 'Ajouter un calque';
 }

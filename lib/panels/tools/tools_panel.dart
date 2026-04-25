@@ -71,7 +71,8 @@ class ToolsPanel extends StatelessWidget {
     final BuildContext context,
     final bool isBrush,
   ) {
-    final String name = isBrush ? 'Brush Color' : 'Fill Color';
+    final AppLocalizations l10n = context.l10n;
+    final String name = isBrush ? l10n.brushColor : l10n.fillColor;
     final Key previewKey = isBrush ? Keys.toolPanelBrushColor1 : Keys.toolPanelFillColor;
     final Color color = isBrush ? appProvider.brushColor : appProvider.fillColor;
     _addToolOptionColor(
@@ -109,7 +110,7 @@ class ToolsPanel extends StatelessWidget {
 
     return ToolAttributeWidget(
       minimal: minimal,
-      name: 'Color Tolerance',
+      name: l10n.colorTolerance,
       childLeft: AppIconButton(
         icon: const AppSvgIcon(icon: AppIcon.support),
         onPressed: () {
@@ -165,125 +166,65 @@ class ToolsPanel extends StatelessWidget {
     final ActionType selectedTool = appProvider.selectedAction;
 
     final List<Widget> tools = <Widget>[
-      // Pencil
-      ToolPanelPicker(
-        minimal: minimal,
-        name: 'Pencil',
-        image: AppSvgIcon(
-          icon: ActionType.pencil.icon,
-          isSelected: selectedTool == ActionType.pencil,
-        ),
-        onPressed: () {
-          appProvider.selectedAction = ActionType.pencil;
-        },
+      _buildActionPicker(
+        action: ActionType.pencil,
+        name: l10n.toolPencil,
+        selectedTool: selectedTool,
+        appProvider: appProvider,
       ),
-
-      // Brush
-      ToolPanelPicker(
-        minimal: minimal,
-        name: 'Brush',
-        image: AppSvgIcon(
-          icon: ActionType.brush.icon,
-          isSelected: selectedTool == ActionType.brush,
-        ),
-        onPressed: () {
-          appProvider.selectedAction = ActionType.brush;
-        },
+      _buildActionPicker(
+        action: ActionType.brush,
+        name: l10n.toolBrush,
+        selectedTool: selectedTool,
+        appProvider: appProvider,
       ),
-
-      // Line
-      ToolPanelPicker(
+      _buildActionPicker(
         key: Keys.toolLine,
-        minimal: minimal,
-        name: 'Line',
-        image: AppSvgIcon(
-          icon: ActionType.line.icon,
-          isSelected: selectedTool == ActionType.line,
-        ),
-        onPressed: () {
-          appProvider.selectedAction = ActionType.line;
-        },
+        action: ActionType.line,
+        name: l10n.toolLine,
+        selectedTool: selectedTool,
+        appProvider: appProvider,
       ),
-
-      // Rectangle
-      ToolPanelPicker(
+      _buildActionPicker(
         key: Keys.toolRectangle,
-        minimal: minimal,
-        name: 'Rectangle',
-        image: AppSvgIcon(
-          icon: ActionType.rectangle.icon,
-          isSelected: selectedTool == ActionType.rectangle,
-        ),
-        onPressed: () {
-          appProvider.selectedAction = ActionType.rectangle;
-        },
+        action: ActionType.rectangle,
+        name: l10n.toolRectangle,
+        selectedTool: selectedTool,
+        appProvider: appProvider,
       ),
-
-      // Circle
-      ToolPanelPicker(
+      _buildActionPicker(
         key: Keys.toolCircle,
-        minimal: minimal,
-        name: 'Circle',
-        image: AppSvgIcon(
-          icon: ActionType.circle.icon,
-          isSelected: selectedTool == ActionType.circle,
-        ),
-        onPressed: () {
-          appProvider.selectedAction = ActionType.circle;
-        },
+        action: ActionType.circle,
+        name: l10n.toolCircle,
+        selectedTool: selectedTool,
+        appProvider: appProvider,
       ),
-
-      // Paint Bucket
-      ToolPanelPicker(
+      _buildActionPicker(
         key: Keys.toolFill,
-        minimal: minimal,
-        name: 'Paint Bucket',
-        image: AppSvgIcon(
-          icon: ActionType.fill.icon,
-          isSelected: selectedTool == ActionType.fill,
-        ),
-        onPressed: () {
-          appProvider.selectedAction = ActionType.fill;
-        },
+        action: ActionType.fill,
+        name: l10n.toolPaintBucket,
+        selectedTool: selectedTool,
+        appProvider: appProvider,
       ),
-
-      ToolPanelPicker(
-        minimal: minimal,
-        name: 'Eraser',
-        image: AppSvgIcon(
-          icon: ActionType.eraser.icon,
-          isSelected: selectedTool == ActionType.eraser,
-        ),
-        onPressed: () {
-          appProvider.selectedAction = ActionType.eraser;
-        },
+      _buildActionPicker(
+        action: ActionType.eraser,
+        name: l10n.toolEraser,
+        selectedTool: selectedTool,
+        appProvider: appProvider,
       ),
-
-      // Text
-      ToolPanelPicker(
+      _buildActionPicker(
         key: Keys.toolText,
-        minimal: minimal,
-        name: 'Text',
-        image: AppSvgIcon(
-          icon: ActionType.text.icon,
-          isSelected: selectedTool == ActionType.text,
-        ),
-        onPressed: () {
-          appProvider.selectedAction = ActionType.text;
-        },
+        action: ActionType.text,
+        name: l10n.toolText,
+        selectedTool: selectedTool,
+        appProvider: appProvider,
       ),
-
-      ToolPanelPicker(
+      _buildActionPicker(
         key: Keys.toolSelector,
-        minimal: minimal,
-        name: 'Selector',
-        image: AppSvgIcon(
-          icon: ActionType.selector.icon,
-          isSelected: selectedTool == ActionType.selector,
-        ),
-        onPressed: () {
-          appProvider.selectedAction = ActionType.selector;
-        },
+        action: ActionType.selector,
+        name: l10n.toolSelector,
+        selectedTool: selectedTool,
+        appProvider: appProvider,
       ),
 
       // Paste from clipboard
@@ -312,7 +253,7 @@ class ToolsPanel extends StatelessWidget {
         widgets.add(
           ToolAttributeWidget(
             minimal: minimal,
-            name: 'Fill',
+            name: l10n.toolFill,
             childRight: Wrap(
               alignment: WrapAlignment.center,
               children: <Widget>[
@@ -322,7 +263,7 @@ class ToolsPanel extends StatelessWidget {
                 ToolPanelPicker(
                   key: Keys.toolFillModeSolid,
                   minimal: minimal,
-                  name: 'Solid',
+                  name: l10n.toolSolid,
                   image: AppSvgIcon(icon: AppIcon.square, isSelected: appProvider.fillModel.mode == FillMode.solid),
                   onPressed: () {
                     appProvider.fillModel.mode = FillMode.solid;
@@ -335,7 +276,7 @@ class ToolsPanel extends StatelessWidget {
                 ToolPanelPicker(
                   key: Keys.toolFillModeLinear,
                   minimal: minimal,
-                  name: 'Linear Gradient',
+                  name: l10n.toolLinearGradient,
                   image: AppSvgIcon(
                     icon: AppIcon.fillLinear,
                     isSelected: appProvider.fillModel.mode == FillMode.linear,
@@ -352,7 +293,7 @@ class ToolsPanel extends StatelessWidget {
                 ToolPanelPicker(
                   key: Keys.toolFillModeRadial,
                   minimal: minimal,
-                  name: 'Radial Gradient',
+                  name: l10n.toolRadialGradient,
                   image: AppSvgIcon(
                     icon: AppIcon.fillRadial,
                     isSelected: appProvider.fillModel.mode == FillMode.radial,
@@ -383,7 +324,7 @@ class ToolsPanel extends StatelessWidget {
         widgets.add(
           ToolAttributeWidget(
             minimal: minimal,
-            name: 'Selector',
+            name: l10n.toolSelector,
             childRight: Wrap(
               alignment: WrapAlignment.center,
               children: <Widget>[
@@ -393,7 +334,7 @@ class ToolsPanel extends StatelessWidget {
                 ToolPanelPicker(
                   key: Keys.toolSelectorModeRectangle,
                   minimal: minimal,
-                  name: 'Rectangle',
+                  name: l10n.toolRectangle,
                   image: AppSvgIcon(
                     icon: AppIcon.selectorSquare,
                     isSelected: appProvider.selectorModel.mode == SelectorMode.rectangle,
@@ -409,7 +350,7 @@ class ToolsPanel extends StatelessWidget {
                 ToolPanelPicker(
                   key: Keys.toolSelectorModeCircle,
                   minimal: minimal,
-                  name: 'Circle',
+                  name: l10n.toolCircle,
                   image: AppSvgIcon(
                     icon: AppIcon.selectorCircle,
                     isSelected: appProvider.selectorModel.mode == SelectorMode.circle,
@@ -425,7 +366,7 @@ class ToolsPanel extends StatelessWidget {
                 ToolPanelPicker(
                   key: Keys.toolSelectorModeLasso,
                   minimal: minimal,
-                  name: 'Lasso',
+                  name: l10n.toolLasso,
                   image: AppSvgIcon(
                     icon: AppIcon.lasso,
                     isSelected: appProvider.selectorModel.mode == SelectorMode.lasso,
@@ -441,7 +382,7 @@ class ToolsPanel extends StatelessWidget {
                 ToolPanelPicker(
                   key: Keys.toolSelectorModeWand,
                   minimal: minimal,
-                  name: 'Magic',
+                  name: l10n.toolMagic,
                   image: AppSvgIcon(
                     icon: AppIcon.autoFixHigh,
                     isSelected: appProvider.selectorModel.mode == SelectorMode.wand,
@@ -459,7 +400,7 @@ class ToolsPanel extends StatelessWidget {
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
-                    name: 'Replace',
+                    name: l10n.toolReplace,
                     image: AppSvgIcon(
                       icon: AppIcon.selectorReplace,
                       isSelected: appProvider.selectorModel.math == SelectorMath.replace,
@@ -473,7 +414,7 @@ class ToolsPanel extends StatelessWidget {
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
-                    name: 'Add',
+                    name: l10n.toolAdd,
                     image: AppSvgIcon(
                       icon: AppIcon.selectorAdd,
                       isSelected: appProvider.selectorModel.math == SelectorMath.add,
@@ -487,7 +428,7 @@ class ToolsPanel extends StatelessWidget {
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
-                    name: 'Remove',
+                    name: l10n.toolRemove,
                     image: AppSvgIcon(
                       icon: AppIcon.selectorRemove,
                       isSelected: appProvider.selectorModel.math == SelectorMath.remove,
@@ -503,7 +444,7 @@ class ToolsPanel extends StatelessWidget {
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
-                    name: 'Invert',
+                    name: l10n.toolInvert,
                     image: const AppSvgIcon(
                       icon: AppIcon.selectorInvert,
                       isSelected: false,
@@ -524,7 +465,7 @@ class ToolsPanel extends StatelessWidget {
                 if (appProvider.selectorModel.isVisible)
                   ToolPanelPicker(
                     minimal: minimal,
-                    name: 'Crop',
+                    name: l10n.toolCrop,
                     image: const AppSvgIcon(icon: AppIcon.canvasCrop, isSelected: false),
                     onPressed: () {
                       final ShellProvider shellProvider = ShellProvider.of(context);
@@ -547,7 +488,7 @@ class ToolsPanel extends StatelessWidget {
                   ToolPanelPicker(
                     key: Keys.toolSelectorCancel,
                     minimal: minimal,
-                    name: 'Cancel',
+                    name: l10n.cancel,
                     image: const AppSvgIcon(
                       icon: AppIcon.close,
                       isSelected: false,
@@ -565,7 +506,7 @@ class ToolsPanel extends StatelessWidget {
         break;
 
       default:
-        final String title = appProvider.selectedAction == ActionType.pencil ? 'Pencil Size' : 'Brush Size';
+        final String title = appProvider.selectedAction == ActionType.pencil ? l10n.pencilSize : l10n.brushSize;
         final double min = appProvider.selectedAction == ActionType.pencil ? 1 : AppInteraction.minCanvasScale;
         final double max = AppLimits.percentMax.toDouble();
 
@@ -573,11 +514,11 @@ class ToolsPanel extends StatelessWidget {
         if (selectedTool.isSupported(ActionOptions.brushSize)) {
           widgets.add(
             ToolAttributeWidget(
-              key: const Key('tool_brush_size_tool'),
+              key: Keys.toolBrushSizeTool,
               minimal: minimal,
               name: title,
               childLeft: AppIconButton(
-                key: const Key('tool_brush_size_button'),
+                key: Keys.toolBrushSizeButton,
                 icon: const AppSvgIcon(icon: AppIcon.lineWeight),
                 constraints: minimal ? const BoxConstraints() : null,
                 padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
@@ -597,7 +538,7 @@ class ToolsPanel extends StatelessWidget {
               childRight: minimal
                   ? null
                   : BrushSizePicker(
-                      key: const Key('tool_brush_size_slider'),
+                      key: Keys.toolBrushSizeSlider,
                       title: title,
                       value: appProvider.brushSize,
                       min: min,
@@ -615,7 +556,7 @@ class ToolsPanel extends StatelessWidget {
           widgets.add(
             ToolAttributeWidget(
               minimal: minimal,
-              name: 'Brush Style',
+              name: l10n.brushStyle,
               childLeft: AppIconButton(
                 icon: const AppSvgIcon(icon: AppIcon.lineStyle),
                 constraints: minimal ? const BoxConstraints() : null,
@@ -714,6 +655,28 @@ class ToolsPanel extends StatelessWidget {
                 onColorChanged: onColorChanged,
               ),
       ),
+    );
+  }
+
+  /// Builds a [ToolPanelPicker] for a standard drawing action.
+  Widget _buildActionPicker({
+    final Key? key,
+    required final ActionType action,
+    required final String name,
+    required final ActionType selectedTool,
+    required final AppProvider appProvider,
+  }) {
+    return ToolPanelPicker(
+      key: key,
+      minimal: minimal,
+      name: name,
+      image: AppSvgIcon(
+        icon: action.icon,
+        isSelected: selectedTool == action,
+      ),
+      onPressed: () {
+        appProvider.selectedAction = action;
+      },
     );
   }
 }

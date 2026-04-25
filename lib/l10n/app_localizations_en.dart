@@ -424,4 +424,127 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get width => 'Width';
+
+  @override
+  String get toolPencil => 'Pencil';
+
+  @override
+  String get toolBrush => 'Brush';
+
+  @override
+  String get toolLine => 'Line';
+
+  @override
+  String get toolRectangle => 'Rectangle';
+
+  @override
+  String get toolCircle => 'Circle';
+
+  @override
+  String get toolPaintBucket => 'Paint Bucket';
+
+  @override
+  String get toolEraser => 'Eraser';
+
+  @override
+  String get toolText => 'Text';
+
+  @override
+  String get toolSelector => 'Selector';
+
+  @override
+  String get toolFill => 'Fill';
+
+  @override
+  String get toolSolid => 'Solid';
+
+  @override
+  String get toolLinearGradient => 'Linear Gradient';
+
+  @override
+  String get toolRadialGradient => 'Radial Gradient';
+
+  @override
+  String get toolLasso => 'Lasso';
+
+  @override
+  String get toolMagic => 'Magic';
+
+  @override
+  String get toolReplace => 'Replace';
+
+  @override
+  String get toolAdd => 'Add';
+
+  @override
+  String get toolRemove => 'Remove';
+
+  @override
+  String get toolInvert => 'Invert';
+
+  @override
+  String get toolCrop => 'Crop';
+
+  @override
+  String get brushColor => 'Brush Color';
+
+  @override
+  String get fillColor => 'Fill Color';
+
+  @override
+  String get pencilSize => 'Pencil Size';
+
+  @override
+  String get brushSize => 'Brush Size';
+
+  @override
+  String get layerHidden => 'Hidden';
+
+  @override
+  String get layerOpacity => 'Opacity: ';
+
+  @override
+  String get layerBlend => 'Blend: ';
+
+  @override
+  String get layerNameTitle => 'Layer Name';
+
+  @override
+  String get layerAddAbove => 'Add a layer above';
+
+  @override
+  String get layerDelete => 'Delete this layer';
+
+  @override
+  String get layerMergeBelow => 'Merge to below layer';
+
+  @override
+  String get layerBlendMode => 'Blend Mode';
+
+  @override
+  String get layerBackgroundColor => 'Background Color';
+
+  @override
+  String get layerToggleVisibility => 'Hide/Show this layer';
+
+  @override
+  String get layerRename => 'Rename layer';
+
+  @override
+  String get layerChangeBlendMode => 'Change Blend Mode';
+
+  @override
+  String get layerHideAllOthers => 'Hide all other layers';
+
+  @override
+  String get layerShowAll => 'Show all layers';
+
+  @override
+  String get layerHide => 'Hide layer';
+
+  @override
+  String get layerShow => 'Show layer';
+
+  @override
+  String get layerAdd => 'Add Layer';
 }
