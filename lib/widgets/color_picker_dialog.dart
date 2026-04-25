@@ -201,7 +201,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               AppIconButton(
-                icon: const AppSvgIcon(icon: AppIcon.paste),
+                icon: const AppSvgIcon(icon: AppIcon.clipboardPaste),
                 onPressed: () async {
                   final ClipboardData? data = await Clipboard.getData(_plainTextMimeType);
 

@@ -289,7 +289,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
             color: AppColors.selected,
             cursor: SystemMouseCursors.click,
             onTap: widget.onCopy,
-            child: const AppSvgIcon(icon: AppIcon.contentPasteGo, size: AppLayout.iconSize, color: AppPalette.white),
+            child: const AppSvgIcon(icon: AppIcon.clipboardCopy, size: AppLayout.iconSize, color: AppPalette.white),
           ),
           buildOverlayCircleButton(
             tooltip: l10n.duplicate,
