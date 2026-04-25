@@ -1,13 +1,12 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/files/import_files.dart';
-import 'package:fpaint/files/save.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/shortcuts_help.dart';
 
@@ -24,8 +23,9 @@ Widget shortCutsForMainApp(
   final BuildContext context,
   final ShellProvider shellProvider,
   final AppProvider appProvider,
-  final Widget child,
-) {
+  final Widget child, {
+  required final Future<void> Function() onSave,
+}) {
   return Shortcuts(
     shortcuts: <ShortcutActivator, Intent>{
       // Undo
@@ -164,7 +164,7 @@ Widget shortCutsForMainApp(
           onInvoke: (final RedoIntent _) => appProvider.redoAction(),
         ),
         SaveIntent: CallbackAction<SaveIntent>(
-          onInvoke: (final SaveIntent _) async => await saveFile(shellProvider, appProvider.layers),
+          onInvoke: (final SaveIntent _) async => await onSave(),
         ),
         CutIntent: CallbackAction<CutIntent>(
           onInvoke: (final CutIntent _) async => appProvider.regionCut(),

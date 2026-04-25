@@ -6,27 +6,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_en.dart';
 import 'package:fpaint/l10n/app_localizations_es.dart';
 import 'package:fpaint/l10n/app_localizations_fr.dart';
-import 'package:fpaint/widgets/material_free/app_snackbar.dart';
 import 'package:intl/intl.dart' as intl;
 
 // ignore_for_file: type=lint
 
-/// Shared `BuildContext` helpers for localization and transient app messages.
+/// Shared `BuildContext` helpers for localization.
 extension AppLocalizationsBuildContextX on BuildContext {
   /// Returns the localized strings for this context.
   AppLocalizations get l10n => AppLocalizations.of(this)!;
-
-  /// Shows a notification overlay message if the context is still mounted.
-  void showSnackBarMessage(
-    final String message, {
-    final Duration? duration,
-  }) {
-    if (!mounted) {
-      return;
-    }
-
-    AppNotificationOverlay.show(this, message, duration: duration);
-  }
 }
 
 /// Callers can lookup localized strings with an instance of AppLocalizations

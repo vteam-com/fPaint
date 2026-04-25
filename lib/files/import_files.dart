@@ -13,6 +13,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:logging/logging.dart';
 
@@ -326,46 +327,6 @@ Future<bool> readImageFileFromBytes(
   final String imageName = _loadedImageDefaultName,
 }) async {
   return await _decodeAndApplyImage(layers, bytes, context, imageName: imageName);
-}
-
-/// Displays a confirmation dialog to the user asking if they want to discard
-/// their current work.
-///
-/// This function is typically used when there are unsaved changes, and the user
-/// attempts to navigate away or perform an action that would result in losing
-/// their progress.
-///
-/// Returns a [Future] that resolves to `true` if the user confirms they want to
-/// discard their work, or `false` if they cancel.
-///
-/// - Parameters:
-///   - context: The [BuildContext] used to display the dialog.
-Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
-  final AppLocalizations l10n = context.l10n;
-  final bool? discardCurrentFile = await showAppDialog<bool>(
-    context: context,
-    builder: (final BuildContext context) {
-      return AppDialog(
-        title: Text(l10n.discardCurrentDocumentQuestion),
-        actions: <Widget>[
-          AppTextButton(
-            onPressed: () {
-              Navigator.of(context).pop(true);
-            },
-            child: Text(l10n.discard),
-          ),
-          AppTextButton(
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-            child: Text(l10n.no),
-          ),
-        ],
-      );
-    },
-  );
-
-  return discardCurrentFile == true;
 }
 
 /// The result chosen by the user when dropping a file onto a canvas that
