@@ -150,16 +150,7 @@ class ImagePlacementWidget extends StatelessWidget {
         position: screenBounds.bottomRight,
         cursor: SystemMouseCursors.resizeDownRight,
         onPanUpdate: (final DragUpdateDetails details) {
-          final double dx = details.delta.dx / canvasScale;
-          final double dy = details.delta.dy / canvasScale;
-          // Use the larger movement axis to keep aspect ratio
-          final double delta = dx.abs() > dy.abs() ? dx : dy;
-          final double newScale = (model.scale + delta / (model.image!.width.toDouble())).clamp(
-            AppInteraction.imagePlacementMinScale,
-            AppInteraction.imagePlacementMaxScale,
-          );
-          model.scale = newScale;
-          onChanged();
+          _applyCornerScale(details, signX: 1, signY: 1);
         },
       ),
       // Top-left: scale from opposite corner
@@ -167,22 +158,14 @@ class ImagePlacementWidget extends StatelessWidget {
         position: screenBounds.topLeft,
         cursor: SystemMouseCursors.resizeUpLeft,
         onPanUpdate: (final DragUpdateDetails details) {
-          final double dx = details.delta.dx / canvasScale;
-          final double dy = details.delta.dy / canvasScale;
-          final double delta = dx.abs() > dy.abs() ? -dx : -dy;
           final double oldWidth = model.displayWidth;
           final double oldHeight = model.displayHeight;
-          final double newScale = (model.scale + delta / (model.image!.width.toDouble())).clamp(
-            AppInteraction.imagePlacementMinScale,
-            AppInteraction.imagePlacementMaxScale,
-          );
-          model.scale = newScale;
+          _applyCornerScale(details, signX: -1, signY: -1);
           // Adjust position so the bottom-right corner stays fixed
           model.position += Offset(
             oldWidth - model.displayWidth,
             oldHeight - model.displayHeight,
           );
-          onChanged();
         },
       ),
       // Top-right
@@ -190,18 +173,10 @@ class ImagePlacementWidget extends StatelessWidget {
         position: screenBounds.topRight,
         cursor: SystemMouseCursors.resizeUpRight,
         onPanUpdate: (final DragUpdateDetails details) {
-          final double dx = details.delta.dx / canvasScale;
-          final double dy = details.delta.dy / canvasScale;
-          final double delta = dx.abs() > dy.abs() ? dx : -dy;
           final double oldHeight = model.displayHeight;
-          final double newScale = (model.scale + delta / (model.image!.width.toDouble())).clamp(
-            AppInteraction.imagePlacementMinScale,
-            AppInteraction.imagePlacementMaxScale,
-          );
-          model.scale = newScale;
+          _applyCornerScale(details, signX: 1, signY: -1);
           // Bottom-left stays fixed: only Y shifts
           model.position += Offset(0, oldHeight - model.displayHeight);
-          onChanged();
         },
       ),
       // Bottom-left
@@ -209,21 +184,31 @@ class ImagePlacementWidget extends StatelessWidget {
         position: screenBounds.bottomLeft,
         cursor: SystemMouseCursors.resizeDownLeft,
         onPanUpdate: (final DragUpdateDetails details) {
-          final double dx = details.delta.dx / canvasScale;
-          final double dy = details.delta.dy / canvasScale;
-          final double delta = dx.abs() > dy.abs() ? -dx : dy;
           final double oldWidth = model.displayWidth;
-          final double newScale = (model.scale + delta / (model.image!.width.toDouble())).clamp(
-            AppInteraction.imagePlacementMinScale,
-            AppInteraction.imagePlacementMaxScale,
-          );
-          model.scale = newScale;
+          _applyCornerScale(details, signX: -1, signY: 1);
           // Top-right stays fixed: only X shifts
           model.position += Offset(oldWidth - model.displayWidth, 0);
-          onChanged();
         },
       ),
     ];
+  }
+
+  /// Computes a uniform scale delta from the drag gesture and applies it to
+  /// [model]. The [signX] and [signY] values flip the drag axis so that
+  /// dragging outward always enlarges the image regardless of corner.
+  void _applyCornerScale(
+    final DragUpdateDetails details, {
+    required final int signX,
+    required final int signY,
+  }) {
+    final double dx = details.delta.dx / canvasScale * signX;
+    final double dy = details.delta.dy / canvasScale * signY;
+    final double delta = dx.abs() > dy.abs() ? dx : dy;
+    model.scale = (model.scale + delta / model.image!.width.toDouble()).clamp(
+      AppInteraction.imagePlacementMinScale,
+      AppInteraction.imagePlacementMaxScale,
+    );
+    onChanged();
   }
 
   /// Builds a single draggable handle at [position] with the given mouse
