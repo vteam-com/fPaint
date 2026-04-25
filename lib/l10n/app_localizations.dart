@@ -233,6 +233,36 @@ abstract class AppLocalizations {
   /// **'Brush Style'**
   String get brushStyle;
 
+  /// No description provided for @brushStyleDash.
+  ///
+  /// In en, this message translates to:
+  /// **'Dash'**
+  String get brushStyleDash;
+
+  /// No description provided for @brushStyleDashDot.
+  ///
+  /// In en, this message translates to:
+  /// **'Dash-Dot'**
+  String get brushStyleDashDot;
+
+  /// No description provided for @brushStyleDotted.
+  ///
+  /// In en, this message translates to:
+  /// **'Dotted'**
+  String get brushStyleDotted;
+
+  /// No description provided for @brushStyleSlash.
+  ///
+  /// In en, this message translates to:
+  /// **'Slash'**
+  String get brushStyleSlash;
+
+  /// No description provided for @brushStyleSolid.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid'**
+  String get brushStyleSolid;
+
   /// No description provided for @cancel.
   ///
   /// In en, this message translates to:
