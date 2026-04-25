@@ -1,13 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:fpaint/files/export_file_name.dart';
-import 'package:fpaint/files/file_jpeg.dart';
-import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/export_prepare.dart';
 import 'package:fpaint/files/file_tiff.dart';
-import 'package:fpaint/files/file_webp.dart' show convertImageToWebp;
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
@@ -44,23 +41,11 @@ Future<void> onExportAsPng(
 }
 
 /// Saves the current painter content as a PNG image file.
-///
-/// Captures the painter's current state as image bytes and writes them
-/// to the specified file path.
-///
-/// Parameters:
-/// - `layers`: The `LayersProvider` containing the current painter state.
-/// - `filePath`: The destination file path where the PNG image will be saved.
-///
-/// Returns:
-/// - A `Future<void>` that completes when the image has been written to disk.
 Future<void> saveAsPng(
   final LayersProvider layers,
   final String filePath,
 ) async {
-  // Capture the image bytes
-  final Uint8List bytes = await layers.capturePainterToImageBytes();
-  await File(filePath).writeAsBytes(bytes);
+  await File(filePath).writeAsBytes(await preparePngBytes(layers));
 }
 
 /// Exports the current painter content as a JPG image file.
@@ -93,28 +78,12 @@ Future<void> onExportAsJpeg(
 }
 
 /// Saves the current painter content as a JPEG image file.
-///
-/// Captures the painter's current state as image bytes, converts them to JPEG format,
-/// and writes the resulting bytes to the specified file path.
-///
-/// Parameters:
-/// - `layers`: The `LayersProvider` containing the current painter state.
-/// - `filePath`: The destination file path where the JPEG image will be saved.
-///
-/// Returns:
-/// - A `Future<void>` that completes when the image has been written to disk.
-/// Only saves the file if a valid file path is provided.
 Future<void> saveAsJpeg(
   final LayersProvider layers,
   final String? filePath,
 ) async {
   if (filePath != null) {
-    // Capture the image bytes
-    final Uint8List imageBytes = await layers.capturePainterToImageBytes();
-
-    // Convert the image bytes to JPG format
-    final Uint8List outputBytes = await convertToJpg(imageBytes);
-    await File(filePath).writeAsBytes(outputBytes);
+    await File(filePath).writeAsBytes(await prepareJpegBytes(layers));
   }
 }
 
@@ -140,24 +109,12 @@ Future<void> onExportAsOra(
 }
 
 /// Saves the current project as an ORA (OpenRaster) file.
-///
-/// Converts the current project layers into an ORA file format and writes
-/// the encoded data to the specified file path.
-///
-/// Parameters:
-/// - `layers`: The `LayersProvider` containing the current project layers.
-/// - `filePath`: The destination file path where the ORA file will be saved.
-///
-/// Returns:
-/// - A `Future<void>` that completes when the ORA file has been written to disk.
-/// Only saves the file if a valid file path is provided.
 Future<void> saveAsOra(
   final LayersProvider layers,
   final String? filePath,
 ) async {
   if (filePath != null) {
-    final List<int> encodedData = await createOraArchive(layers);
-    await File(filePath).writeAsBytes(encodedData);
+    await File(filePath).writeAsBytes(await prepareOraBytes(layers));
   }
 }
 
@@ -223,20 +180,11 @@ Future<void> saveAsTiff(
 }
 
 /// Saves the current painter content as a WebP image file.
-///
-/// Captures the painter's current state as image bytes, converts them to WebP
-/// format, and writes the resulting bytes to the specified file path.
-///
-/// Parameters:
-/// - `layers`: The `LayersProvider` containing the current painter state.
-/// - `filePath`: The destination file path where the WebP image will be saved.
 Future<void> saveAsWebp(
   final LayersProvider layers,
   final String? filePath,
 ) async {
   if (filePath != null) {
-    final ui.Image image = await layers.capturePainterToImage();
-    final Uint8List outputBytes = await convertImageToWebp(image);
-    await File(filePath).writeAsBytes(outputBytes);
+    await File(filePath).writeAsBytes(await prepareWebpBytes(layers));
   }
 }
