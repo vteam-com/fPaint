@@ -4,11 +4,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/draw_rect.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:vector_math/vector_math_64.dart' as vm64;
 
 /// A widget that displays a magnifying eye dropper for selecting colors from an image.
@@ -69,7 +70,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   late final double totalHeightOfTheWidget = buttonSize + spacer + regionSize + spacer + buttonSize;
 
   /// The width of the widget.
-  final double widgewidgetWidth = AppLayout.magnifierWidgetWidth;
+  final double widgetWidth = AppLayout.magnifierWidgetWidth;
 
   @override
   void initState() {
@@ -84,7 +85,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
 
     _updateColor();
 
-    final double offsetFromCenter = (widgewidgetWidth / 2) / magnifyFactor;
+    final double offsetFromCenter = (widgetWidth / 2) / magnifyFactor;
 
     final ui.Rect region = Rect.fromLTWH(
       widget.pixelPosition.dx - offsetFromCenter,
@@ -97,7 +98,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
 
     // Magnifying Glass Effect
     return Positioned(
-      left: widget.pointerPosition.dx - (widgewidgetWidth),
+      left: widget.pointerPosition.dx - (widgetWidth),
       top: widget.pointerPosition.dy - (totalHeightOfTheWidget / AppMath.pair),
       child: Column(
         spacing: spacer.toDouble(),
@@ -106,22 +107,13 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
           //
           // Cancel 'X'
           //
-          SizedBox(
-            height: buttonSize.toDouble(),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppPalette.black,
-                border: Border.all(color: AppPalette.white),
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              child: AppIconButton(
-                key: Keys.magnifyingEyeDropperCloseButton,
-                onPressed: () {
-                  widget.onClosed();
-                },
-                icon: const AppSvgIcon(icon: AppIcon.close),
-              ),
-            ),
+          buildOverlayCircleButton(
+            key: Keys.magnifyingEyeDropperCloseButton,
+            tooltip: context.l10n.cancel,
+            color: AppPalette.red,
+            cursor: SystemMouseCursors.click,
+            onTap: widget.onClosed,
+            child: const AppSvgIcon(icon: AppIcon.close, color: AppPalette.white, size: AppLayout.iconSize),
           ),
 
           //
@@ -155,22 +147,13 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
           //
           // Confirmed CheckBox
           //
-          SizedBox(
-            height: buttonSize.toDouble(),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppPalette.black,
-                border: Border.all(color: AppPalette.white),
-                borderRadius: BorderRadius.circular(AppRadius.md),
-              ),
-              child: AppIconButton(
-                key: Keys.magnifyingEyeDropperConfirmButton,
-                onPressed: () {
-                  widget.onColorPicked(_selectedColor!);
-                },
-                icon: const AppSvgIcon(icon: AppIcon.check),
-              ),
-            ),
+          buildOverlayCircleButton(
+            key: Keys.magnifyingEyeDropperConfirmButton,
+            tooltip: context.l10n.apply,
+            color: AppPalette.green,
+            cursor: SystemMouseCursors.click,
+            onTap: () => widget.onColorPicked(_selectedColor!),
+            child: const AppSvgIcon(icon: AppIcon.check, color: AppPalette.white, size: AppLayout.iconSize),
           ),
         ],
       ),
