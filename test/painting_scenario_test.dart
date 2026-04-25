@@ -50,7 +50,6 @@ const Map<String, Object> _testPreferences = <String, Object>{
   AppPreferences.keySidePanelDistance: _testSidePanelSplitHeight,
 };
 
-const String _scenarioTestName = 'Painting scenario runs entirely in unit tests without a simulator';
 const double _scenarioViewportHeightScale = 1.5;
 
 // Sky layer
@@ -363,7 +362,7 @@ void main() {
   SharedPreferences.setMockInitialValues(_testPreferences);
 
   group('Painting Scenario (Unit Test)', () {
-    testWidgets(_scenarioTestName, (final WidgetTester tester) async {
+    testWidgets('Painting scenario runs entirely in unit tests without a simulator', (final WidgetTester tester) async {
       // ---------------------------------------------------------------
       // Boot the full app — no simulator, no emulator, just widget test
       // ---------------------------------------------------------------
