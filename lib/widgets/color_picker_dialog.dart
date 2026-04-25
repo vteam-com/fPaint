@@ -85,6 +85,10 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                       ),
                     ),
                     _buildContent(layersModel),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: _buildActions(),
+                    ),
                   ],
                 ),
               ),
@@ -95,8 +99,28 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 width: AppLayout.sliderDialogWidth,
                 child: _buildContent(layersModel),
               ),
+              actions: _buildActions(),
             ),
     );
+  }
+
+  /// Builds the Cancel / Apply action buttons used by both the dialog and
+  /// the small-device layout.
+  List<Widget> _buildActions() {
+    final AppLocalizations l10n = context.l10n;
+    return <Widget>[
+      AppTextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: Text(l10n.cancel),
+      ),
+      AppElevatedButton(
+        onPressed: () {
+          widget.onColorChanged(_currentColor);
+          Navigator.of(context).pop();
+        },
+        child: Text(l10n.apply),
+      ),
+    ];
   }
 
   /// Builds the content of the dialog.
@@ -247,25 +271,6 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                     l10n.hexColorCopiedToClipboard,
                   );
                 },
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: AppSpacing.huge,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              AppTextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.cancel),
-              ),
-              AppTextButton(
-                onPressed: () {
-                  widget.onColorChanged(_currentColor);
-                  Navigator.of(context).pop();
-                },
-                child: Text(l10n.apply),
               ),
             ],
           ),
