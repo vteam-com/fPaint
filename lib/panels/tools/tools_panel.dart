@@ -290,7 +290,7 @@ class ToolsPanel extends StatelessWidget {
       ToolPanelPicker(
         minimal: minimal,
         name: l10n.paste,
-        image: const AppSvgIcon(icon: AppIcon.paste, color: AppColors.textPrimary),
+        image: const AppSvgIcon(icon: AppIcon.clipboardPaste, color: AppColors.textPrimary),
         onPressed: () => appProvider.paste(),
       ),
     ];

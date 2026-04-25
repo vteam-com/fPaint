@@ -25,7 +25,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   archive: ^4.0.9
-  desktop_drop: ^0.5.0
+  desktop_drop: ^0.7.1
   file_picker: ^11.0.2
   flutter:
     sdk: flutter

@@ -38,7 +38,7 @@ class MainMenu extends StatelessWidget {
         buildMenuItem(
           value: MenuIds.newFromClipboard,
           text: l10n.newFromClipboard,
-          icon: AppIcon.contentPasteGo,
+          icon: AppIcon.clipboardPaste,
         ),
         buildMenuItem(
           value: MenuIds.openFile,
