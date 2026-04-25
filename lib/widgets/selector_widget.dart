@@ -87,6 +87,77 @@ class SelectionRectWidget extends StatefulWidget {
 
 const double defaultHandleSize = AppInteraction.selectionHandleSize;
 
+/// Metadata describing one resize handle of the selection rectangle.
+class _HandleDescriptor {
+  const _HandleDescriptor({
+    required this.handle,
+    required this.cursor,
+    required this.position,
+  });
+
+  /// The mouse cursor to show while hovering.
+  final MouseCursor cursor;
+
+  /// Which grid handle this represents.
+  final NineGridHandle handle;
+
+  /// Computes the screen position from the selection bounds.
+  final Offset Function(Rect bounds) position;
+}
+
+/// All eight resize handles around the selection rectangle.
+const List<_HandleDescriptor> _resizeHandles = <_HandleDescriptor>[
+  _HandleDescriptor(
+    handle: NineGridHandle.topLeft,
+    cursor: SystemMouseCursors.resizeUpLeft,
+    position: _topLeft,
+  ),
+  _HandleDescriptor(
+    handle: NineGridHandle.topRight,
+    cursor: SystemMouseCursors.resizeUpRight,
+    position: _topRight,
+  ),
+  _HandleDescriptor(
+    handle: NineGridHandle.bottomLeft,
+    cursor: SystemMouseCursors.resizeDownLeft,
+    position: _bottomLeft,
+  ),
+  _HandleDescriptor(
+    handle: NineGridHandle.bottomRight,
+    cursor: SystemMouseCursors.resizeDownRight,
+    position: _bottomRight,
+  ),
+  _HandleDescriptor(
+    handle: NineGridHandle.left,
+    cursor: SystemMouseCursors.resizeLeft,
+    position: _centerLeft,
+  ),
+  _HandleDescriptor(
+    handle: NineGridHandle.right,
+    cursor: SystemMouseCursors.resizeRight,
+    position: _centerRight,
+  ),
+  _HandleDescriptor(
+    handle: NineGridHandle.top,
+    cursor: SystemMouseCursors.resizeUp,
+    position: _centerTop,
+  ),
+  _HandleDescriptor(
+    handle: NineGridHandle.bottom,
+    cursor: SystemMouseCursors.resizeDown,
+    position: _centerBottom,
+  ),
+];
+
+Offset _topLeft(final Rect b) => b.topLeft;
+Offset _topRight(final Rect b) => b.topRight;
+Offset _bottomLeft(final Rect b) => b.bottomLeft;
+Offset _bottomRight(final Rect b) => b.bottomRight;
+Offset _centerLeft(final Rect b) => Offset(b.left, b.center.dy);
+Offset _centerRight(final Rect b) => Offset(b.right, b.center.dy);
+Offset _centerTop(final Rect b) => Offset(b.center.dx, b.top);
+Offset _centerBottom(final Rect b) => Offset(b.center.dx, b.bottom);
+
 class _SelectionRectWidgetState extends State<SelectionRectWidget> {
   Size _activeResizeDimensions = Size.zero;
   double _activeRotationDegrees = 0;
@@ -123,8 +194,8 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     ];
 
     if (widget.enableMoveAndResize) {
-      stackChildren.addAll(<Widget>[
-        // Center handle for moving
+      // Center handle for moving
+      stackChildren.add(
         OverlayDragHandle(
           position: bounds.center,
           cursor: SystemMouseCursors.move,
@@ -136,111 +207,24 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
           },
           onPanEnd: _endHandleDrag,
         ),
+      );
 
-        // Top Left
-        OverlayDragHandle(
-          position: bounds.topLeft,
-          cursor: SystemMouseCursors.resizeUpLeft,
-          showCoordinates: _showCoordinates,
-          onPanUpdate: (final DragUpdateDetails details) {
-            _beginHandleDrag();
-            widget.onResize(NineGridHandle.topLeft, details.delta);
-            _updateResizeFeedback();
-          },
-          onPanEnd: _endHandleDrag,
-        ),
-
-        // Top Right
-        OverlayDragHandle(
-          position: bounds.topRight,
-          cursor: SystemMouseCursors.resizeUpRight,
-          showCoordinates: _showCoordinates,
-          onPanUpdate: (final DragUpdateDetails details) {
-            _beginHandleDrag();
-            widget.onResize(NineGridHandle.topRight, details.delta);
-            _updateResizeFeedback();
-          },
-          onPanEnd: _endHandleDrag,
-        ),
-
-        // Bottom Left
-        OverlayDragHandle(
-          position: bounds.bottomLeft,
-          cursor: SystemMouseCursors.resizeDownLeft,
-          showCoordinates: _showCoordinates,
-          onPanUpdate: (final DragUpdateDetails details) {
-            _beginHandleDrag();
-            widget.onResize(NineGridHandle.bottomLeft, details.delta);
-            _updateResizeFeedback();
-          },
-          onPanEnd: _endHandleDrag,
-        ),
-
-        // Bottom right
-        OverlayDragHandle(
-          position: bounds.bottomRight,
-          cursor: SystemMouseCursors.resizeDownRight,
-          showCoordinates: _showCoordinates,
-          onPanUpdate: (final DragUpdateDetails details) {
-            _beginHandleDrag();
-            widget.onResize(NineGridHandle.bottomRight, details.delta);
-            _updateResizeFeedback();
-          },
-          onPanEnd: _endHandleDrag,
-        ),
-
-        // Side Left
-        OverlayDragHandle(
-          position: Offset(bounds.left, bounds.center.dy),
-          cursor: SystemMouseCursors.resizeLeft,
-          showCoordinates: _showCoordinates,
-          onPanUpdate: (final DragUpdateDetails details) {
-            _beginHandleDrag();
-            widget.onResize(NineGridHandle.left, details.delta);
-            _updateResizeFeedback();
-          },
-          onPanEnd: _endHandleDrag,
-        ),
-
-        // Side Right
-        OverlayDragHandle(
-          position: Offset(bounds.right, bounds.center.dy),
-          cursor: SystemMouseCursors.resizeRight,
-          showCoordinates: _showCoordinates,
-          onPanUpdate: (final DragUpdateDetails details) {
-            _beginHandleDrag();
-            widget.onResize(NineGridHandle.right, details.delta);
-            _updateResizeFeedback();
-          },
-          onPanEnd: _endHandleDrag,
-        ),
-
-        // Center Top
-        OverlayDragHandle(
-          position: Offset(bounds.center.dx, bounds.top),
-          cursor: SystemMouseCursors.resizeUp,
-          showCoordinates: _showCoordinates,
-          onPanUpdate: (final DragUpdateDetails details) {
-            _beginHandleDrag();
-            widget.onResize(NineGridHandle.top, details.delta);
-            _updateResizeFeedback();
-          },
-          onPanEnd: _endHandleDrag,
-        ),
-
-        // Center Bottom
-        OverlayDragHandle(
-          position: Offset(bounds.center.dx, bounds.bottom),
-          cursor: SystemMouseCursors.resizeDown,
-          showCoordinates: _showCoordinates,
-          onPanUpdate: (final DragUpdateDetails details) {
-            _beginHandleDrag();
-            widget.onResize(NineGridHandle.bottom, details.delta);
-            _updateResizeFeedback();
-          },
-          onPanEnd: _endHandleDrag,
-        ),
-      ]);
+      // Resize handles driven by metadata
+      for (final _HandleDescriptor desc in _resizeHandles) {
+        stackChildren.add(
+          OverlayDragHandle(
+            position: desc.position(bounds),
+            cursor: desc.cursor,
+            showCoordinates: _showCoordinates,
+            onPanUpdate: (final DragUpdateDetails details) {
+              _beginHandleDrag();
+              widget.onResize(desc.handle, details.delta);
+              _updateResizeFeedback();
+            },
+            onPanEnd: _endHandleDrag,
+          ),
+        );
+      }
     }
 
     return SizedBox(

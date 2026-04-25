@@ -1,5 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// Coordinate format template for handle labels.
@@ -65,6 +68,35 @@ Widget buildOverlayFeedbackBubble({required final String label}) {
         fontWeight: FontWeight.bold,
       ),
     ),
+  );
+}
+
+/// Builds the standard Apply (green check) and Cancel (red X) button row
+/// used by canvas overlays such as transform, image placement, and eye dropper.
+Widget buildOverlayConfirmCancelButtons({
+  required final AppLocalizations l10n,
+  required final VoidCallback onConfirm,
+  required final VoidCallback onCancel,
+}) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    spacing: AppInteraction.imagePlacementButtonSpacing,
+    children: <Widget>[
+      buildOverlayCircleButton(
+        tooltip: l10n.apply,
+        color: AppPalette.green,
+        cursor: SystemMouseCursors.click,
+        onTap: onConfirm,
+        child: const AppSvgIcon(icon: AppIcon.check, color: AppPalette.white, size: AppLayout.iconSize),
+      ),
+      buildOverlayCircleButton(
+        tooltip: l10n.cancel,
+        color: AppPalette.red,
+        cursor: SystemMouseCursors.click,
+        onTap: onCancel,
+        child: const AppSvgIcon(icon: AppIcon.close, color: AppPalette.white, size: AppLayout.iconSize),
+      ),
+    ],
   );
 }
 
