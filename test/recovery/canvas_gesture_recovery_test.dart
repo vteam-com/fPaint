@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -33,6 +34,7 @@ void main() {
       MultiProvider(
         providers: <SingleChildWidget>[
           Provider<DraftRecoveryController>.value(value: controller),
+          Provider<DraftFlusher>.value(value: controller),
           ChangeNotifierProvider<AppPreferences>.value(value: preferences),
           ChangeNotifierProvider<AppProvider>.value(value: appProvider),
           ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),

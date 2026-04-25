@@ -62,3 +62,18 @@ class AppNotificationOverlay {
     _activeEntry = null;
   }
 }
+
+/// Convenience extension so any [BuildContext] can show a notification overlay.
+extension AppSnackBarBuildContextX on BuildContext {
+  /// Shows a notification overlay message if the context is still mounted.
+  void showSnackBarMessage(
+    final String message, {
+    final Duration? duration,
+  }) {
+    if (!mounted) {
+      return;
+    }
+
+    AppNotificationOverlay.show(this, message, duration: duration);
+  }
+}

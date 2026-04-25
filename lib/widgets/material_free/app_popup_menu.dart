@@ -7,10 +7,12 @@ class AppPopupMenuItem<T> {
   const AppPopupMenuItem({
     required this.value,
     required this.child,
+    this.key,
   });
 
   final T value;
   final Widget child;
+  final Key? key;
 }
 
 /// Shows a popup menu at the given position, replacing Material [showMenu].
@@ -70,6 +72,7 @@ Future<T?> showAppMenu<T>({
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: items.map((final AppPopupMenuItem<T> item) {
                               return GestureDetector(
+                                key: item.key,
                                 onTap: () {
                                   selectedValue = item.value;
                                   Navigator.pop(dialogContext);

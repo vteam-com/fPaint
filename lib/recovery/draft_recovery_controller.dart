@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -14,6 +15,7 @@ import 'package:fpaint/recovery/draft_recovery_storage.dart';
 import 'package:fpaint/recovery/draft_recovery_storage_io.dart'
     if (dart.library.html) 'package:fpaint/recovery/draft_recovery_storage_web.dart'
     as draft_storage;
+import 'package:fpaint/widgets/material_free/app_snackbar.dart';
 import 'package:logging/logging.dart';
 
 typedef DraftRecoveryEncoder = Future<List<int>> Function(LayersProvider layers);
@@ -22,7 +24,7 @@ typedef DraftRecoveryRestorer = Future<void> Function(LayersProvider layers, Uin
 final Logger _log = Logger(logNameDraftRecovery);
 
 /// Manages autosave snapshots and restoration of unsaved draft artwork.
-class DraftRecoveryController with WidgetsBindingObserver {
+class DraftRecoveryController with WidgetsBindingObserver implements DraftFlusher {
   /// Creates a [DraftRecoveryController].
   DraftRecoveryController({
     required this.preferences,
@@ -90,6 +92,7 @@ class DraftRecoveryController with WidgetsBindingObserver {
   }
 
   /// Saves or clears the recovery draft immediately without waiting for debounce.
+  @override
   Future<void> flushNow() async {
     _saveTimer?.cancel();
     await _reconcileDraft();

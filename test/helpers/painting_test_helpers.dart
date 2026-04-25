@@ -1412,10 +1412,16 @@ Future<void> resizeCanvasViaUI(
   await tapByKey(tester, Keys.mainMenuButton);
   await pumpForUnitTestUiSettle(tester);
 
-  // Tap the canvas settings menu item.
+  // Tap the canvas settings menu item (inside a scrollable popup overlay,
+  // so we use ensureVisible + direct tap instead of tapByKey which requires
+  // hitTestable).
   final Finder canvasMenuItem = find.byKey(Keys.mainMenuCanvasSize);
   expect(canvasMenuItem, findsOneWidget, reason: 'Should find the canvas settings menu item');
-  await tester.tap(canvasMenuItem);
+  await tester.ensureVisible(canvasMenuItem);
+  await pumpForUnitTestUiSettle(tester);
+  InteractionTracker.recordTap(tester.getCenter(canvasMenuItem));
+  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+  await tester.tap(canvasMenuItem, warnIfMissed: false);
   await pumpForUnitTestUiSettle(tester);
 
   // The canvas settings bottom sheet is now visible.
