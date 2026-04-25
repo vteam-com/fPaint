@@ -111,7 +111,6 @@ class OverlayDragHandle extends StatelessWidget {
     required this.cursor,
     required this.onPanUpdate,
     this.onPanEnd,
-    this.showCoordinates = false,
     this.size = AppInteraction.selectionHandleSize,
     this.borderRadius = AppRadius.lg,
   });
@@ -131,14 +130,11 @@ class OverlayDragHandle extends StatelessWidget {
   /// Screen-space position of the handle center.
   final Offset position;
 
-  /// Whether to display coordinate labels inside the handle.
-  final bool showCoordinates;
-
   /// Base size of the handle in logical pixels.
   final double size;
   @override
   Widget build(final BuildContext context) {
-    final double activeSize = showCoordinates ? size * AppVisual.previewTextScale : size;
+    final double activeSize = size * AppVisual.previewTextScale;
 
     return Positioned(
       left: position.dx - activeSize / AppMath.pair,
@@ -152,21 +148,19 @@ class OverlayDragHandle extends StatelessWidget {
             width: activeSize,
             height: activeSize,
             decoration: BoxDecoration(
-              color: AppPalette.blue,
-              border: Border.all(color: AppPalette.white, width: AppStroke.regular),
+              color: AppPalette.overlayDark,
+              border: Border.all(color: AppPalette.overlayLight, width: AppStroke.regular),
               borderRadius: BorderRadius.circular(borderRadius),
             ),
-            child: showCoordinates
-                ? Center(
-                    child: Text(
-                      _coordinatesFormat
-                          .replaceFirst(_placeholderX, position.dx.toInt().toString())
-                          .replaceFirst(_placeholderY, position.dy.toInt().toString()),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: AppSpacing.sm, color: AppPalette.white),
-                    ),
-                  )
-                : null,
+            child: Center(
+              child: Text(
+                _coordinatesFormat
+                    .replaceFirst(_placeholderX, position.dx.toInt().toString())
+                    .replaceFirst(_placeholderY, position.dy.toInt().toString()),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: AppSpacing.sm, color: AppPalette.white),
+              ),
+            ),
           ),
         ),
       ),

@@ -47,6 +47,12 @@ class AppPalette {
   static const Color grey800 = Color(0xFF424242);
 
   // Overlay colors
+  /// Semi-transparent black for overlay controls (handles, marching ants, etc.).
+  static const Color overlayDark = Color(0xC8000000);
+
+  /// Semi-transparent white for overlay controls (handles, marching ants, etc.).
+  static const Color overlayLight = Color(0xC8FFFFFF);
+
   /// Semi-transparent white used for overlay/dialog border strokes.
   static const Color overlayBorder = Color(0x59FFFFFF);
 

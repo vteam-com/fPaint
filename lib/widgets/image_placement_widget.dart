@@ -141,6 +141,24 @@ class ImagePlacementWidget extends StatelessWidget {
     );
   }
 
+  /// Computes a uniform scale delta from the drag gesture and applies it to
+  /// [model]. The [signX] and [signY] values flip the drag axis so that
+  /// dragging outward always enlarges the image regardless of corner.
+  void _applyCornerScale(
+    final DragUpdateDetails details, {
+    required final int signX,
+    required final int signY,
+  }) {
+    final double dx = details.delta.dx / canvasScale * signX;
+    final double dy = details.delta.dy / canvasScale * signY;
+    final double delta = dx.abs() > dy.abs() ? dx : dy;
+    model.scale = (model.scale + delta / model.image!.width.toDouble()).clamp(
+      AppInteraction.imagePlacementMinScale,
+      AppInteraction.imagePlacementMaxScale,
+    );
+    onChanged();
+  }
+
   /// Builds the four corner handles that let the user uniformly scale the
   /// image while keeping the opposite corner anchored.
   List<Widget> _buildCornerHandles(final Rect screenBounds) {
@@ -191,24 +209,6 @@ class ImagePlacementWidget extends StatelessWidget {
         },
       ),
     ];
-  }
-
-  /// Computes a uniform scale delta from the drag gesture and applies it to
-  /// [model]. The [signX] and [signY] values flip the drag axis so that
-  /// dragging outward always enlarges the image regardless of corner.
-  void _applyCornerScale(
-    final DragUpdateDetails details, {
-    required final int signX,
-    required final int signY,
-  }) {
-    final double dx = details.delta.dx / canvasScale * signX;
-    final double dy = details.delta.dy / canvasScale * signY;
-    final double delta = dx.abs() > dy.abs() ? dx : dy;
-    model.scale = (model.scale + delta / model.image!.width.toDouble()).clamp(
-      AppInteraction.imagePlacementMinScale,
-      AppInteraction.imagePlacementMaxScale,
-    );
-    onChanged();
   }
 
   /// Builds a single draggable handle at [position] with the given mouse

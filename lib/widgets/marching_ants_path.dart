@@ -98,9 +98,9 @@ class MarchingAntsPainter extends CustomPainter {
 
   @override
   void paint(final Canvas canvas, final Size size) {
-    // First, draw a solid white rectangle border
+    // First, draw a solid border
     final Paint paint = Paint()
-      ..color = AppPalette.white
+      ..color = AppPalette.overlayLight
       ..strokeWidth = AppStroke.regular
       // ..blendMode = BlendMode.difference
       ..style = PaintingStyle.stroke;
@@ -108,9 +108,9 @@ class MarchingAntsPainter extends CustomPainter {
     if (path != null) {
       canvas.drawPath(path!, paint);
 
-      // Now, draw the black dashes on top
+      // Now, draw the dashes on top
 
-      paint.color = AppPalette.black;
+      paint.color = AppPalette.overlayDark;
       paint.strokeCap = StrokeCap.round;
 
       final Path dashPath = Path();
@@ -130,12 +130,12 @@ class MarchingAntsPainter extends CustomPainter {
         }
       }
 
-      // Draw black dashes over the white border
+      // Draw dashes over the border
       canvas.drawPath(dashPath, paint);
     }
 
     if (linePointStart != null && linePointEnd != null) {
-      paint.color = AppPalette.white;
+      paint.color = AppPalette.overlayLight;
       paint.strokeWidth = AppStroke.regular;
       canvas.drawLine(linePointStart!, linePointEnd!, paint);
 

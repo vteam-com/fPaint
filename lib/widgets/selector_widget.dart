@@ -163,7 +163,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
   double _activeRotationDegrees = 0;
   double _activeScalePercent = AppMath.percentScale;
   _SelectionOverlayFeedbackMode _feedbackMode = _SelectionOverlayFeedbackMode.none;
-  bool _showCoordinates = false;
   @override
   Widget build(final BuildContext context) {
     if (widget.path1 == null) {
@@ -199,13 +198,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
         OverlayDragHandle(
           position: bounds.center,
           cursor: SystemMouseCursors.move,
-          showCoordinates: _showCoordinates,
           onPanUpdate: (final DragUpdateDetails details) {
-            _beginHandleDrag();
             widget.onDrag(details.delta);
             _updateResizeFeedback();
           },
-          onPanEnd: _endHandleDrag,
+          onPanEnd: _endFeedback,
         ),
       );
 
@@ -215,13 +212,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
           OverlayDragHandle(
             position: desc.position(bounds),
             cursor: desc.cursor,
-            showCoordinates: _showCoordinates,
             onPanUpdate: (final DragUpdateDetails details) {
-              _beginHandleDrag();
               widget.onResize(desc.handle, details.delta);
               _updateResizeFeedback();
             },
-            onPanEnd: _endHandleDrag,
+            onPanEnd: _endFeedback,
           ),
         );
       }
@@ -232,10 +227,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       height: height < 0 ? 0 : height,
       child: Stack(children: stackChildren),
     );
-  }
-
-  void _beginHandleDrag() {
-    setState(() => _showCoordinates = true);
   }
 
   void _beginRotateFeedback() {
@@ -386,11 +377,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       _activeRotationDegrees = 0;
       _activeResizeDimensions = Size.zero;
     });
-  }
-
-  void _endHandleDrag() {
-    setState(() => _showCoordinates = false);
-    _endFeedback();
   }
 
   /// Returns the localized label for the active feedback bubble.

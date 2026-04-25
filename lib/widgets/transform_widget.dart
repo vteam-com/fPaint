@@ -47,7 +47,6 @@ class TransformWidget extends StatefulWidget {
 }
 
 class _TransformWidgetState extends State<TransformWidget> {
-  bool _showCoordinates = false;
   @override
   Widget build(final BuildContext context) {
     final ui.Image? image = model.sourceImage;
@@ -93,66 +92,49 @@ class _TransformWidgetState extends State<TransformWidget> {
             OverlayDragHandle(
               position: screenCorners[TransformModel.topLeftIndex],
               cursor: SystemMouseCursors.grab,
-              showCoordinates: _showCoordinates,
               onPanUpdate: (final DragUpdateDetails details) {
-                _beginHandleDrag();
                 model.moveCorner(TransformModel.topLeftIndex, details.delta / canvasScale);
                 onChanged();
               },
-              onPanEnd: _endHandleDrag,
             ),
             OverlayDragHandle(
               position: screenCorners[TransformModel.topRightIndex],
               cursor: SystemMouseCursors.grab,
-              showCoordinates: _showCoordinates,
               onPanUpdate: (final DragUpdateDetails details) {
-                _beginHandleDrag();
                 model.moveCorner(TransformModel.topRightIndex, details.delta / canvasScale);
                 onChanged();
               },
-              onPanEnd: _endHandleDrag,
             ),
             OverlayDragHandle(
               position: screenCorners[TransformModel.bottomRightIndex],
               cursor: SystemMouseCursors.grab,
-              showCoordinates: _showCoordinates,
               onPanUpdate: (final DragUpdateDetails details) {
-                _beginHandleDrag();
                 model.moveCorner(TransformModel.bottomRightIndex, details.delta / canvasScale);
                 onChanged();
               },
-              onPanEnd: _endHandleDrag,
             ),
             OverlayDragHandle(
               position: screenCorners[TransformModel.bottomLeftIndex],
               cursor: SystemMouseCursors.grab,
-              showCoordinates: _showCoordinates,
               onPanUpdate: (final DragUpdateDetails details) {
-                _beginHandleDrag();
                 model.moveCorner(TransformModel.bottomLeftIndex, details.delta / canvasScale);
                 onChanged();
               },
-              onPanEnd: _endHandleDrag,
             ),
 
             // Edge midpoint handles (skew)
             OverlayDragHandle(
               position: topMid,
               cursor: SystemMouseCursors.grab,
-              showCoordinates: _showCoordinates,
               onPanUpdate: (final DragUpdateDetails details) {
-                _beginHandleDrag();
                 model.moveEdge(TransformModel.topLeftIndex, TransformModel.topRightIndex, details.delta / canvasScale);
                 onChanged();
               },
-              onPanEnd: _endHandleDrag,
             ),
             OverlayDragHandle(
               position: rightMid,
               cursor: SystemMouseCursors.grab,
-              showCoordinates: _showCoordinates,
               onPanUpdate: (final DragUpdateDetails details) {
-                _beginHandleDrag();
                 model.moveEdge(
                   TransformModel.topRightIndex,
                   TransformModel.bottomRightIndex,
@@ -160,14 +142,11 @@ class _TransformWidgetState extends State<TransformWidget> {
                 );
                 onChanged();
               },
-              onPanEnd: _endHandleDrag,
             ),
             OverlayDragHandle(
               position: bottomMid,
               cursor: SystemMouseCursors.grab,
-              showCoordinates: _showCoordinates,
               onPanUpdate: (final DragUpdateDetails details) {
-                _beginHandleDrag();
                 model.moveEdge(
                   TransformModel.bottomRightIndex,
                   TransformModel.bottomLeftIndex,
@@ -175,14 +154,11 @@ class _TransformWidgetState extends State<TransformWidget> {
                 );
                 onChanged();
               },
-              onPanEnd: _endHandleDrag,
             ),
             OverlayDragHandle(
               position: leftMid,
               cursor: SystemMouseCursors.grab,
-              showCoordinates: _showCoordinates,
               onPanUpdate: (final DragUpdateDetails details) {
-                _beginHandleDrag();
                 model.moveEdge(
                   TransformModel.bottomLeftIndex,
                   TransformModel.topLeftIndex,
@@ -190,20 +166,16 @@ class _TransformWidgetState extends State<TransformWidget> {
                 );
                 onChanged();
               },
-              onPanEnd: _endHandleDrag,
             ),
 
             // Center handle (move)
             OverlayDragHandle(
               position: screenCenter,
               cursor: SystemMouseCursors.move,
-              showCoordinates: _showCoordinates,
               onPanUpdate: (final DragUpdateDetails details) {
-                _beginHandleDrag();
                 model.moveAll(details.delta / canvasScale);
                 onChanged();
               },
-              onPanEnd: _endHandleDrag,
             ),
           ],
 
@@ -250,9 +222,6 @@ class _TransformWidgetState extends State<TransformWidget> {
 
   /// Called when the user commits the transform.
   VoidCallback get onConfirm => widget.onConfirm;
-  void _beginHandleDrag() {
-    setState(() => _showCoordinates = true);
-  }
 
   /// Builds the transform mode controls and their live feedback bubble.
   Widget _buildModeControls({
@@ -389,10 +358,6 @@ class _TransformWidgetState extends State<TransformWidget> {
         ],
       ),
     );
-  }
-
-  void _endHandleDrag() {
-    setState(() => _showCoordinates = false);
   }
 
   /// Returns the lowest on-screen Y value of the transformed quad.
