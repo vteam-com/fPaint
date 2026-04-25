@@ -9,6 +9,15 @@ import 'package:url_launcher/url_launcher.dart';
 const String _platformWindows = 'Windows';
 const String _platformAndroid = 'Android';
 const String _platformLinux = 'Linux';
+const String _platformMacOS = 'macOS';
+const String _platformIOS = 'iOS';
+
+const String _urlMacOSDownload = 'https://paint.vteam.com/downloads/flutter-macos-app.zip';
+const String _urlWindowsDownload = 'https://paint.vteam.com/downloads/flutter-windows-app.zip';
+const String _urlLinuxDownload = 'https://paint.vteam.com/downloads/flutter-linux-app.zip';
+const String _urlIOSApp = 'https://apps.apple.com/us/app/cooking-timer-by-vteam/id1188460815';
+const String _urlAndroidApp = 'https://play.google.com/store/apps/details?id=com.vteam.cookingtimerflutter';
+const String _urlWebApp = 'https://paint.vteam.com';
 
 /// A page that displays the available platforms for the application.
 class PlatformsPage extends StatelessWidget {
@@ -52,37 +61,37 @@ class PlatformsPage extends StatelessWidget {
                   child: Column(
                     children: <Widget>[
                       platformItem(
-                        'macOS',
+                        _platformMacOS,
                         'assets/images/platforms/platformDesktopMacOS.png',
                         l10n.desktopSoftware,
-                        'https://paint.vteam.com/downloads/flutter-macos-app.zip',
+                        _urlMacOSDownload,
                       ),
                       platformItem(
                         _platformWindows,
                         'assets/images/platforms/platformDesktopWindows.png',
                         l10n.desktopSoftware,
-                        'https://paint.vteam.com/downloads/flutter-windows-app.zip',
+                        _urlWindowsDownload,
                       ),
                       platformItem(
                         _platformLinux,
                         'assets/images/platforms/platformDesktopLinux.png',
                         l10n.desktopSoftware,
-                        'https://paint.vteam.com/downloads/flutter-linux-app.zip',
+                        _urlLinuxDownload,
                       ),
                       const SizedBox(
                         height: AppSpacing.huge,
                       ),
                       platformItem(
-                        'iOS',
+                        _platformIOS,
                         'assets/images/platforms/platformMobileIOS.png',
                         l10n.mobileApp,
-                        'https://apps.apple.com/us/app/cooking-timer-by-vteam/id1188460815',
+                        _urlIOSApp,
                       ),
                       platformItem(
                         _platformAndroid,
                         'assets/images/platforms/platformMobileAndroid.png',
                         l10n.mobileApp,
-                        'https://play.google.com/store/apps/details?id=com.vteam.cookingtimerflutter',
+                        _urlAndroidApp,
                       ),
                       const SizedBox(
                         height: AppSpacing.huge,
@@ -91,7 +100,7 @@ class PlatformsPage extends StatelessWidget {
                         l10n.webBrowser,
                         'assets/images/platforms/platformWeb.png',
                         l10n.runOnMostBrowsers,
-                        'https://paint.vteam.com',
+                        _urlWebApp,
                       ),
                     ],
                   ),

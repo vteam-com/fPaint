@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
-import 'package:fpaint/files/file_exceptions.dart';
+import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -177,12 +177,12 @@ Future<void> importStack(
 ) async {
   if (xmlElementTopStack != null) {
     final String stackName = xmlElementTopStack.getAttribute(_oraAttrName) ?? '';
-    for (final XmlElement xmlElementchild in xmlElementTopStack.childElements) {
-      if (xmlElementchild.localName == _oraElementStack) {
-        await importStack(archive, layers, xmlElementchild);
+    for (final XmlElement xmlElementChild in xmlElementTopStack.childElements) {
+      if (xmlElementChild.localName == _oraElementStack) {
+        await importStack(archive, layers, xmlElementChild);
       } else {
-        if (xmlElementchild.localName == _oraElementLayer) {
-          await addLayer(archive, layers, stackName, xmlElementchild);
+        if (xmlElementChild.localName == _oraElementLayer) {
+          await addLayer(archive, layers, stackName, xmlElementChild);
         }
       }
     }

@@ -17,7 +17,7 @@ class _AppProgressIndicatorState extends State<AppProgressIndicator> with Single
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
+      duration: AppDefaults.animationLoopDuration,
     )..repeat();
   }
 

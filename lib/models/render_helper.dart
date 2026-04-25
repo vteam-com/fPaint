@@ -479,7 +479,9 @@ void renderText(
   final ui.Paragraph paragraph = paragraphBuilder.build();
 
   // Use a more reasonable max width for text layout
-  final double maxWidth = textObject.text.length > 50 ? 800 : 1000;
+  final double maxWidth = textObject.text.length > AppLayout.textLengthThreshold
+      ? AppLayout.textMaxWidthCompact
+      : AppLayout.textMaxWidthNormal;
   paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
 
   canvas.drawParagraph(paragraph, textObject.position);

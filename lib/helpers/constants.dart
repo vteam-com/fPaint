@@ -162,6 +162,9 @@ class AppLayout {
   static const double shortcutGroupWidth = 250.0;
   static const double separatorHeight = 15.0;
   static const double inputFieldWidth = 150.0;
+  static const int textLengthThreshold = 50;
+  static const double textMaxWidthCompact = 800.0;
+  static const double textMaxWidthNormal = 1000.0;
 }
 
 /// Shared font size tokens for consistent typography across the app.
@@ -325,6 +328,7 @@ class AppDefaults {
   static const int tolerance = 50;
   static const bool useApplePencil = false;
   static const Duration debounceDuration = Duration(seconds: 1);
+  static const Duration animationLoopDuration = Duration(seconds: 1);
   static const Duration clipboardAccessTimeout = Duration(seconds: 2);
   static const Duration recoverySaveDebounce = Duration(seconds: 2);
   static const Duration integrationEvidenceCollectionDelay = Duration(seconds: 2);
@@ -663,4 +667,8 @@ class Keys {
   static Key effectIntensityApplyButton = const Key('effect-intensity-apply-button');
   static Key effectIntensitySlider = const Key('effect-intensity-slider');
   static Key effectIntensityDialogSlider = const Key('effect-intensity-dialog-slider');
+
+  static Key toolBrushSizeTool = const Key('tool-brush-size-tool');
+  static Key toolBrushSizeButton = const Key('tool-brush-size-button');
+  static Key toolBrushSizeSlider = const Key('tool-brush-size-slider');
 }

@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/files/file_exceptions.dart';
+import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -35,7 +35,7 @@ Future<Uint8List> convertLayersToTiff(final LayersProvider layers) async {
   );
 }
 
-/// Serialises layer properties into a JSON string for ImageDescription.
+/// Serializes layer properties into a JSON string for ImageDescription.
 String _encodeLayerMetadata(final LayerProvider layer) {
   return jsonEncode(<String, dynamic>{
     TiffConstants.metaKeyName: layer.name,
@@ -277,7 +277,7 @@ List<_DecodedTiffLayer>? _tryDecodeSubIfdLayers(
     }
 
     if (_readIntTag(subIfdImage, TiffConstants.tagExtraSamples) == TiffConstants.extraSamplesAssociatedAlpha) {
-      _unpremultiplyAlpha(decodedImage);
+      _unMultiplyAlpha(decodedImage);
     }
 
     decodedLayers.add(
@@ -423,7 +423,7 @@ String? _readTextTag(
 }
 
 /// Converts associated-alpha TIFF pixels into straight-alpha PNG pixels.
-void _unpremultiplyAlpha(final img.Image image) {
+void _unMultiplyAlpha(final img.Image image) {
   for (int y = 0; y < image.height; y++) {
     for (int x = 0; x < image.width; x++) {
       final img.Pixel pixel = image.getPixel(x, y);
@@ -440,14 +440,14 @@ void _unpremultiplyAlpha(final img.Image image) {
         continue;
       }
 
-      pixel.r = _unpremultiplyChannel(pixel.r.toInt(), alpha);
-      pixel.g = _unpremultiplyChannel(pixel.g.toInt(), alpha);
-      pixel.b = _unpremultiplyChannel(pixel.b.toInt(), alpha);
+      pixel.r = _unMultiplyChannel(pixel.r.toInt(), alpha);
+      pixel.g = _unMultiplyChannel(pixel.g.toInt(), alpha);
+      pixel.b = _unMultiplyChannel(pixel.b.toInt(), alpha);
     }
   }
 }
 
-int _unpremultiplyChannel(
+int _unMultiplyChannel(
   final int channel,
   final int alpha,
 ) {

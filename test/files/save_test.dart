@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/files/file_exceptions.dart';
+import 'package:fpaint/files/file_operation_exception.dart';
+
 import 'package:fpaint/files/save.dart';
 
 // Mock classes to test saveFile routing logic and saveAsTiff

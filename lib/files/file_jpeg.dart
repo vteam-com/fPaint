@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:fpaint/files/file_exceptions.dart';
+import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:image/image.dart' as img;
 
 const String _errorFailedToDecodePngForJpeg = 'Failed to decode image bytes for JPEG conversion.';

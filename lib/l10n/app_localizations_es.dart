@@ -422,4 +422,127 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get width => 'Ancho';
+
+  @override
+  String get toolPencil => 'Lápiz';
+
+  @override
+  String get toolBrush => 'Pincel';
+
+  @override
+  String get toolLine => 'Línea';
+
+  @override
+  String get toolRectangle => 'Rectángulo';
+
+  @override
+  String get toolCircle => 'Círculo';
+
+  @override
+  String get toolPaintBucket => 'Bote de pintura';
+
+  @override
+  String get toolEraser => 'Borrador';
+
+  @override
+  String get toolText => 'Texto';
+
+  @override
+  String get toolSelector => 'Seleccionador';
+
+  @override
+  String get toolFill => 'Relleno';
+
+  @override
+  String get toolSolid => 'Sólido';
+
+  @override
+  String get toolLinearGradient => 'Degradado lineal';
+
+  @override
+  String get toolRadialGradient => 'Degradado radial';
+
+  @override
+  String get toolLasso => 'Lazo';
+
+  @override
+  String get toolMagic => 'Mágico';
+
+  @override
+  String get toolReplace => 'Reemplazar';
+
+  @override
+  String get toolAdd => 'Agregar';
+
+  @override
+  String get toolRemove => 'Quitar';
+
+  @override
+  String get toolInvert => 'Invertir';
+
+  @override
+  String get toolCrop => 'Recortar';
+
+  @override
+  String get brushColor => 'Color del pincel';
+
+  @override
+  String get fillColor => 'Color de relleno';
+
+  @override
+  String get pencilSize => 'Tamaño del lápiz';
+
+  @override
+  String get brushSize => 'Tamaño del pincel';
+
+  @override
+  String get layerHidden => 'Oculta';
+
+  @override
+  String get layerOpacity => 'Opacidad: ';
+
+  @override
+  String get layerBlend => 'Mezcla: ';
+
+  @override
+  String get layerNameTitle => 'Nombre de la capa';
+
+  @override
+  String get layerAddAbove => 'Agregar una capa encima';
+
+  @override
+  String get layerDelete => 'Eliminar esta capa';
+
+  @override
+  String get layerMergeBelow => 'Fusionar con la capa inferior';
+
+  @override
+  String get layerBlendMode => 'Modo de mezcla';
+
+  @override
+  String get layerBackgroundColor => 'Color de fondo';
+
+  @override
+  String get layerToggleVisibility => 'Ocultar/Mostrar esta capa';
+
+  @override
+  String get layerRename => 'Renombrar capa';
+
+  @override
+  String get layerChangeBlendMode => 'Cambiar modo de mezcla';
+
+  @override
+  String get layerHideAllOthers => 'Ocultar todas las demás capas';
+
+  @override
+  String get layerShowAll => 'Mostrar todas las capas';
+
+  @override
+  String get layerHide => 'Ocultar capa';
+
+  @override
+  String get layerShow => 'Mostrar capa';
+
+  @override
+  String get layerAdd => 'Agregar capa';
 }
