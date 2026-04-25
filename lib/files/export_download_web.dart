@@ -1,13 +1,10 @@
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:js_interop';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:fpaint/files/export_file_name.dart';
-import 'package:fpaint/files/file_jpeg.dart';
-import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/export_prepare.dart';
 import 'package:fpaint/files/file_tiff.dart';
-import 'package:fpaint/files/file_webp.dart' show convertImageToWebp;
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:web/web.dart' as web;
 
@@ -31,10 +28,7 @@ Future<void> saveAsPng(
   final LayersProvider layers,
   final String filePath,
 ) async {
-  final Uint8List imageBytes = await layers.capturePainterToImageBytes();
-
-  // Create a Blob from the image bytes
-  downloadBlob(imageBytes, filePath);
+  downloadBlob(await preparePngBytes(layers), filePath);
 }
 
 /// Exports the current painter as a JPG image and triggers a download.
@@ -50,24 +44,12 @@ Future<void> onExportAsJpeg(
   await saveAsJpeg(layers, fileName);
 }
 
-/// Saves the current content as a JPEG file.
-///
-/// This function allows exporting the current content in JPEG format,
-/// suitable for downloading or sharing on the web.
-///
-/// Throws:
-/// - An exception if the saving process fails.
+/// Saves the current content as a JPEG file and triggers a browser download.
 Future<void> saveAsJpeg(
   final LayersProvider layers,
   final String filePath,
 ) async {
-  final Uint8List imageBytes = await layers.capturePainterToImageBytes();
-
-  // Convert the image bytes to JPG format
-  final Uint8List outputBytes = await convertToJpg(imageBytes);
-
-  // Create a Blob from the image bytes
-  downloadBlob(outputBytes, filePath);
+  downloadBlob(await prepareJpegBytes(layers), filePath);
 }
 
 /// Exports the current painter as an ORA file and triggers a download.
@@ -83,25 +65,12 @@ Future<void> onExportAsOra(
   await saveAsOra(layers, fileName);
 }
 
-/// Saves the current project as an ORA (OpenRaster) file.
-///
-/// This function handles the process of exporting the project data
-/// into the ORA format, which is commonly used for layered image files.
-/// It ensures that the file is properly structured and ready for download
-/// in a web environment.
-///
-/// Throws:
-/// - `Exception` if the export process fails.
-///
-/// Returns:
-/// A `Future` that completes when the file has been successfully saved.
+/// Saves the current project as an ORA (OpenRaster) file and triggers a browser download.
 Future<void> saveAsOra(
   final LayersProvider layers,
   final String filePath,
 ) async {
-  final List<int> image = await createOraArchive(layers);
-  // Create a Blob from the image bytes
-  downloadBlob(Uint8List.fromList(image), filePath);
+  downloadBlob(await prepareOraBytes(layers), filePath);
 }
 
 /// Exports the current painter as a WebP image and triggers a download.
@@ -127,9 +96,7 @@ Future<void> saveAsWebp(
   final LayersProvider layers,
   final String filePath,
 ) async {
-  final ui.Image image = await layers.capturePainterToImage();
-  final Uint8List outputBytes = await convertImageToWebp(image);
-  downloadBlob(outputBytes, filePath);
+  downloadBlob(await prepareWebpBytes(layers), filePath);
 }
 
 /// Downloads a file represented by the given image bytes and file name.
