@@ -5,43 +5,41 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
-import 'package:mockito/mockito.dart';
 
-// Mock classes
-class MockLayersProvider extends Mock implements LayersProvider {
+// Fake that overrides only the members used by the widget under test.
+class FakeLayersProvider extends Fake implements LayersProvider {
   @override
   ui.Image? cachedImage;
 
   @override
   Future<Color?> getColorAtOffset(final Offset offset) async {
-    // Return a mock color for testing
     return Colors.red;
   }
 }
 
 void main() {
   group('MagnifyingEyeDropper', () {
-    late MockLayersProvider mockLayersProvider;
+    late FakeLayersProvider fakeLayersProvider;
     late Color pickedColor;
     late bool closedCalled;
     late bool colorPickedCalled;
 
     setUp(() {
-      mockLayersProvider = MockLayersProvider();
+      fakeLayersProvider = FakeLayersProvider();
       pickedColor = Colors.transparent;
       closedCalled = false;
       colorPickedCalled = false;
     });
 
     testWidgets('renders nothing when cachedImage is null', (final WidgetTester tester) async {
-      mockLayersProvider.cachedImage = null;
+      fakeLayersProvider.cachedImage = null;
 
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: MagnifyingEyeDropper(
-            layers: mockLayersProvider,
+            layers: fakeLayersProvider,
             pointerPosition: const Offset(100, 100),
             pixelPosition: const Offset(50, 50),
             onColorPicked: (final Color color) {
@@ -63,7 +61,7 @@ void main() {
     testWidgets('renders magnifying eye dropper when cachedImage exists', (final WidgetTester tester) async {
       // Create a mock image
       final ui.Image mockImage = await createMockImage(100, 100);
-      mockLayersProvider.cachedImage = mockImage;
+      fakeLayersProvider.cachedImage = mockImage;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -72,7 +70,7 @@ void main() {
           home: Stack(
             children: <Widget>[
               MagnifyingEyeDropper(
-                layers: mockLayersProvider,
+                layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
                 onColorPicked: (final Color color) {
@@ -99,7 +97,7 @@ void main() {
 
     testWidgets('calls onClosed when cancel button is pressed', (final WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
-      mockLayersProvider.cachedImage = mockImage;
+      fakeLayersProvider.cachedImage = mockImage;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -108,7 +106,7 @@ void main() {
           home: Stack(
             children: <Widget>[
               MagnifyingEyeDropper(
-                layers: mockLayersProvider,
+                layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
                 onColorPicked: (final Color color) {
@@ -134,7 +132,7 @@ void main() {
 
     testWidgets('calls onColorPicked when confirm button is pressed', (final WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
-      mockLayersProvider.cachedImage = mockImage;
+      fakeLayersProvider.cachedImage = mockImage;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -143,7 +141,7 @@ void main() {
           home: Stack(
             children: <Widget>[
               MagnifyingEyeDropper(
-                layers: mockLayersProvider,
+                layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
                 onColorPicked: (final Color color) {
@@ -165,12 +163,12 @@ void main() {
       await tester.pump();
 
       expect(colorPickedCalled, true);
-      expect(pickedColor, Colors.red); // Mock color from getColorAtOffset
+      expect(pickedColor, Colors.red); // Fake color from getColorAtOffset
     });
 
     testWidgets('positions widget correctly relative to pointer', (final WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
-      mockLayersProvider.cachedImage = mockImage;
+      fakeLayersProvider.cachedImage = mockImage;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -182,7 +180,7 @@ void main() {
             child: Stack(
               children: <Widget>[
                 MagnifyingEyeDropper(
-                  layers: mockLayersProvider,
+                  layers: fakeLayersProvider,
                   pointerPosition: const Offset(200, 200),
                   pixelPosition: const Offset(50, 50),
                   onColorPicked: (final Color color) {},
@@ -204,7 +202,7 @@ void main() {
 
     testWidgets('displays magnified image in custom paint', (final WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
-      mockLayersProvider.cachedImage = mockImage;
+      fakeLayersProvider.cachedImage = mockImage;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -213,7 +211,7 @@ void main() {
           home: Stack(
             children: <Widget>[
               MagnifyingEyeDropper(
-                layers: mockLayersProvider,
+                layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
                 onColorPicked: (final Color color) {},
@@ -238,7 +236,7 @@ void main() {
 
     testWidgets('shows selected color in dashed rectangle', (final WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
-      mockLayersProvider.cachedImage = mockImage;
+      fakeLayersProvider.cachedImage = mockImage;
 
       await tester.pumpWidget(
         MaterialApp(
@@ -247,7 +245,7 @@ void main() {
           home: Stack(
             children: <Widget>[
               MagnifyingEyeDropper(
-                layers: mockLayersProvider,
+                layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
                 onColorPicked: (final Color color) {},
