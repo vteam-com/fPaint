@@ -66,34 +66,26 @@ class MainViewState extends State<MainView> {
           // Color selection from image
           //
           if (appProvider.eyeDropPositionForBrush != null)
-            MagnifyingEyeDropper(
-              layers: appProvider.layers,
-              pointerPosition: appProvider.eyeDropPositionForBrush!,
-              pixelPosition: appProvider.toCanvas(appProvider.eyeDropPositionForBrush!),
-              onColorPicked: (final Color color) async {
+            _buildEyeDropper(
+              appProvider: appProvider,
+              position: appProvider.eyeDropPositionForBrush!,
+              onColorPicked: (final Color color) {
                 appProvider.brushColor = color;
-                appProvider.eyeDropPositionForBrush = null;
-                appProvider.update();
               },
-              onClosed: () {
+              onDismiss: () {
                 appProvider.eyeDropPositionForBrush = null;
-                appProvider.update();
               },
             ),
 
           if (appProvider.eyeDropPositionForFill != null)
-            MagnifyingEyeDropper(
-              layers: appProvider.layers,
-              pointerPosition: appProvider.eyeDropPositionForFill!,
-              pixelPosition: appProvider.toCanvas(appProvider.eyeDropPositionForFill!),
-              onColorPicked: (final Color color) async {
+            _buildEyeDropper(
+              appProvider: appProvider,
+              position: appProvider.eyeDropPositionForFill!,
+              onColorPicked: (final Color color) {
                 appProvider.fillColor = color;
-                appProvider.eyeDropPositionForFill = null;
-                appProvider.update();
               },
-              onClosed: () {
+              onDismiss: () {
                 appProvider.eyeDropPositionForFill = null;
-                appProvider.update();
               },
             ),
 
@@ -188,6 +180,29 @@ class MainViewState extends State<MainView> {
             ),
         ],
       ),
+    );
+  }
+
+  /// Builds a [MagnifyingEyeDropper] for either brush or fill color picking.
+  Widget _buildEyeDropper({
+    required final AppProvider appProvider,
+    required final Offset position,
+    required final ValueChanged<Color> onColorPicked,
+    required final VoidCallback onDismiss,
+  }) {
+    return MagnifyingEyeDropper(
+      layers: appProvider.layers,
+      pointerPosition: position,
+      pixelPosition: appProvider.toCanvas(position),
+      onColorPicked: (final Color color) async {
+        onColorPicked(color);
+        onDismiss();
+        appProvider.update();
+      },
+      onClosed: () {
+        onDismiss();
+        appProvider.update();
+      },
     );
   }
 

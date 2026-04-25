@@ -14,25 +14,14 @@ class AppTextButton extends StatelessWidget {
   final VoidCallback onPressed;
   @override
   Widget build(final BuildContext context) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.md,
-          ),
-          child: DefaultTextStyle(
-            style: const TextStyle(
-              fontFamily: appFontFamily,
-              color: AppColors.primary,
-              fontSize: AppFontSize.titleHero,
-            ),
-            child: child,
-          ),
-        ),
+    return _AppButtonBase(
+      onPressed: onPressed,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.md,
       ),
+      textColor: AppColors.primary,
+      child: child,
     );
   }
 }
@@ -48,30 +37,65 @@ class AppElevatedButton extends StatelessWidget {
   final VoidCallback onPressed;
   @override
   Widget build(final BuildContext context) {
+    return _AppButtonBase(
+      onPressed: onPressed,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.md,
+      ),
+      textColor: AppPalette.white,
+      backgroundColor: AppColors.primary,
+      borderRadius: AppRadius.sm,
+      child: child,
+    );
+  }
+}
+
+/// Shared base for [AppTextButton] and [AppElevatedButton].
+class _AppButtonBase extends StatelessWidget {
+  const _AppButtonBase({
+    required this.onPressed,
+    required this.padding,
+    required this.textColor,
+    required this.child,
+    this.backgroundColor,
+    this.borderRadius,
+  });
+  final Color? backgroundColor;
+  final double? borderRadius;
+  final Widget child;
+  final VoidCallback onPressed;
+  final EdgeInsetsGeometry padding;
+  final Color textColor;
+  @override
+  Widget build(final BuildContext context) {
+    Widget content = Padding(
+      padding: padding,
+      child: DefaultTextStyle(
+        style: TextStyle(
+          fontFamily: appFontFamily,
+          color: textColor,
+          fontSize: AppFontSize.titleHero,
+        ),
+        child: child,
+      ),
+    );
+
+    if (backgroundColor != null) {
+      content = DecoratedBox(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(borderRadius ?? 0),
+        ),
+        child: content,
+      );
+    }
+
     return GestureDetector(
       onTap: onPressed,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xl,
-              vertical: AppSpacing.md,
-            ),
-            child: DefaultTextStyle(
-              style: const TextStyle(
-                fontFamily: appFontFamily,
-                color: AppPalette.white,
-                fontSize: AppFontSize.titleHero,
-              ),
-              child: child,
-            ),
-          ),
-        ),
+        child: content,
       ),
     );
   }

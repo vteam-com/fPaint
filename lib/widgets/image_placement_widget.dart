@@ -130,25 +130,10 @@ class ImagePlacementWidget extends StatelessWidget {
                 screenBounds.bottom +
                 AppInteraction.imagePlacementButtonSpacing +
                 AppInteraction.imagePlacementHandleSize,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: AppInteraction.imagePlacementButtonSpacing,
-              children: <Widget>[
-                buildOverlayCircleButton(
-                  tooltip: l10n.apply,
-                  color: AppPalette.green,
-                  cursor: SystemMouseCursors.click,
-                  onTap: onConfirm,
-                  child: const AppSvgIcon(icon: AppIcon.check, color: AppPalette.white, size: AppLayout.iconSize),
-                ),
-                buildOverlayCircleButton(
-                  tooltip: l10n.cancel,
-                  color: AppPalette.red,
-                  cursor: SystemMouseCursors.click,
-                  onTap: onCancel,
-                  child: const AppSvgIcon(icon: AppIcon.close, color: AppPalette.white, size: AppLayout.iconSize),
-                ),
-              ],
+            child: buildOverlayConfirmCancelButtons(
+              l10n: l10n,
+              onConfirm: onConfirm,
+              onCancel: onCancel,
             ),
           ),
         ],
