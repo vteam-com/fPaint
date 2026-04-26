@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
+import 'package:fpaint/files/tiff_constants.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
