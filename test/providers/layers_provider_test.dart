@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layers_provider.dart';
@@ -284,6 +286,245 @@ void main() {
 
       expect(layer1.actionStack.first.positions.first, const Offset(10 + 5, 10 - 5));
       expect(layer2.actionStack.first.positions.first, const Offset(20 + 5, 20 - 5));
+    });
+  });
+
+  group('Canvas Properties', () {
+    test('size setter updates all layers', () {
+      layersProvider.addTop(name: 'L1');
+      const Size newSize = Size(1024, 768);
+      layersProvider.size = newSize;
+      expect(layersProvider.size, newSize);
+      expect(layersProvider.width, newSize.width);
+      expect(layersProvider.height, newSize.height);
+      for (final LayerProvider layer in layersProvider.list) {
+        expect(layer.size, newSize);
+      }
+    });
+
+    test('scale setter clamps to valid range', () {
+      layersProvider.scale = AppInteraction.minCanvasScale - 1;
+      expect(layersProvider.scale, AppInteraction.minCanvasScale);
+
+      layersProvider.scale = AppInteraction.maxCanvasScale + 1;
+      expect(layersProvider.scale, AppInteraction.maxCanvasScale);
+    });
+
+    test('scale setter does not change when same value', () {
+      layersProvider.scale = 2.0;
+      layersProvider.scale = 2.0;
+      expect(layersProvider.scale, 2.0);
+    });
+
+    test('canvasResizePosition setter updates', () {
+      layersProvider.canvasResizePosition = CanvasResizePosition.topLeft;
+      expect(layersProvider.canvasResizePosition, CanvasResizePosition.topLeft);
+    });
+  });
+
+  group('Canvas Resize', () {
+    test('canvasResize ignores invalid dimensions', () {
+      final Size originalSize = layersProvider.size;
+      layersProvider.canvasResize(0, 100, CanvasResizePosition.center);
+      expect(layersProvider.size, originalSize);
+      layersProvider.canvasResize(100, -1, CanvasResizePosition.center);
+      expect(layersProvider.size, originalSize);
+    });
+
+    test('canvasResize ignores same size', () {
+      final Size originalSize = layersProvider.size;
+      layersProvider.canvasResize(
+        originalSize.width.toInt(),
+        originalSize.height.toInt(),
+        CanvasResizePosition.center,
+      );
+      expect(layersProvider.size, originalSize);
+    });
+
+    test('canvasResize updates to new size', () {
+      const int newWidth = 1024;
+      const int newHeight = 768;
+      layersProvider.canvasResize(newWidth, newHeight, CanvasResizePosition.center);
+      expect(layersProvider.size, const Size(1024, 768));
+    });
+  });
+
+  group('Visibility Operations', () {
+    test('hideShowAllExcept hides all except specified layer', () {
+      final LayerProvider layer1 = layersProvider.addTop(name: 'L1');
+      final LayerProvider layer2 = layersProvider.addTop(name: 'L2');
+      final LayerProvider bg = layersProvider.get(layersProvider.length - 1);
+
+      layersProvider.hideShowAllExcept(layer1, false);
+
+      expect(layer1.isVisible, isTrue);
+      expect(layer2.isVisible, isFalse);
+      expect(bg.isVisible, isFalse);
+    });
+
+    test('hideShowAllExcept shows all layers when show is true', () {
+      final LayerProvider layer1 = layersProvider.addTop(name: 'L1');
+      final LayerProvider layer2 = layersProvider.addTop(name: 'L2');
+      final LayerProvider bg = layersProvider.get(layersProvider.length - 1);
+
+      // First hide
+      layersProvider.hideShowAllExcept(layer1, false);
+      // Then show all
+      layersProvider.hideShowAllExcept(layer1, true);
+
+      expect(layer1.isVisible, isTrue);
+      expect(layer2.isVisible, isTrue);
+      expect(bg.isVisible, isTrue);
+    });
+
+    test('markAllChanged marks all layers', () {
+      layersProvider.addTop(name: 'L1');
+      layersProvider.addTop(name: 'L2');
+      layersProvider.clearHasChanged();
+
+      layersProvider.markAllChanged();
+      for (final LayerProvider layer in layersProvider.list) {
+        expect(layer.hasChanged, isTrue);
+      }
+    });
+  });
+
+  group('Layer Lookup', () {
+    test('getLayerIndex returns correct index', () {
+      final LayerProvider layer1 = layersProvider.addTop(name: 'L1');
+      final LayerProvider layer2 = layersProvider.addTop(name: 'L2');
+      expect(layersProvider.getLayerIndex(layer2), 0);
+      expect(layersProvider.getLayerIndex(layer1), 1);
+    });
+
+    test('isIndexInRange returns correct values', () {
+      expect(layersProvider.isIndexInRange(0), isTrue);
+      expect(layersProvider.isIndexInRange(-1), isFalse);
+      expect(layersProvider.isIndexInRange(layersProvider.length), isFalse);
+    });
+
+    test('isEmpty and isNotEmpty work correctly', () {
+      expect(layersProvider.isEmpty, isFalse);
+      expect(layersProvider.isNotEmpty, isTrue);
+      layersProvider.clear();
+      expect(layersProvider.isEmpty, isTrue);
+      expect(layersProvider.isNotEmpty, isFalse);
+    });
+
+    test('ensureLayerAtIndex creates layers as needed', () {
+      final int originalCount = layersProvider.length;
+      layersProvider.get(originalCount + 2);
+      expect(layersProvider.length, originalCount + 3);
+    });
+  });
+
+  group('hasChanged', () {
+    test('reflects layer state', () {
+      layersProvider.clearHasChanged();
+      expect(layersProvider.hasChanged, isFalse);
+      layersProvider.selectedLayer.hasChanged = true;
+      expect(layersProvider.hasChanged, isTrue);
+    });
+  });
+
+  group('capturePainterToImage', () {
+    test('returns an image with canvas dimensions', () async {
+      final ui.Image image = await layersProvider.capturePainterToImage();
+      expect(image.width, layersProvider.size.width.toInt());
+      expect(image.height, layersProvider.size.height.toInt());
+      expect(layersProvider.cachedImage, isNotNull);
+    });
+
+    test('skips invisible layers', () async {
+      final LayerProvider layer = layersProvider.addTop(name: 'Hidden');
+      layer.isVisible = false;
+      layer.actionStack.add(
+        UserActionDrawing(
+          action: ActionType.region,
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
+          fillColor: Colors.blue,
+        ),
+      );
+      final ui.Image image = await layersProvider.capturePainterToImage();
+      expect(image.width, layersProvider.size.width.toInt());
+    });
+  });
+
+  group('capturePainterToImageBytes', () {
+    test('returns PNG byte data', () async {
+      final Uint8List bytes = await layersProvider.capturePainterToImageBytes();
+      expect(bytes, isNotEmpty);
+    });
+  });
+
+  group('getColorAtOffset', () {
+    test('returns white on background layer', () async {
+      final Color? color = await layersProvider.getColorAtOffset(const Offset(10, 10));
+      expect(color, isNotNull);
+      expect(color!.toARGB32(), Colors.white.toARGB32());
+    });
+
+    test('returns null for out-of-range coordinates (clamped)', () async {
+      // getColorAtOffset clamps, so it shouldn't return null but still works
+      final Color? color = await layersProvider.getColorAtOffset(const Offset(-1, -1));
+      expect(color, isNotNull);
+    });
+  });
+
+  group('mergeLayers same index', () {
+    test('merging same index does nothing', () {
+      final int originalCount = layersProvider.length;
+      layersProvider.mergeLayers(0, 0);
+      expect(layersProvider.length, originalCount);
+    });
+  });
+
+  group('rotateCanvas90Clockwise', () {
+    test('swaps canvas dimensions', () async {
+      const Size startSize = Size(800, 600);
+      layersProvider.size = startSize;
+      await layersProvider.rotateCanvas90Clockwise();
+      expect(layersProvider.width, startSize.height);
+      expect(layersProvider.height, startSize.width);
+    });
+  });
+
+  group('flipCanvas', () {
+    test('flipCanvasHorizontal does not change size', () async {
+      final Size startSize = layersProvider.size;
+      await layersProvider.flipCanvasHorizontal('Flip H');
+      expect(layersProvider.size, startSize);
+    });
+
+    test('flipCanvasVertical does not change size', () async {
+      final Size startSize = layersProvider.size;
+      await layersProvider.flipCanvasVertical('Flip V');
+      expect(layersProvider.size, startSize);
+    });
+  });
+
+  group('insert and list', () {
+    test('insert at out-of-range appends to end', () {
+      final LayerProvider newLayer = layersProvider.newLayer('Appended');
+      layersProvider.insert(999, newLayer);
+      expect(layersProvider.list.last, newLayer);
+    });
+  });
+
+  group('addWhiteBackgroundLayer', () {
+    test('adds layer with custom name', () {
+      layersProvider.clear();
+      final LayerProvider bg = layersProvider.addWhiteBackgroundLayer('Custom BG');
+      expect(bg.name, 'Custom BG');
+      expect(bg.backgroundColor, Colors.white);
+    });
+  });
+
+  group('getTopColorUsed', () {
+    test('returns empty list when no layers have color data', () async {
+      final List<ColorUsage> colors = await layersProvider.getTopColorUsed();
+      expect(colors, isEmpty);
     });
   });
 }

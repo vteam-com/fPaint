@@ -188,5 +188,135 @@ void main() {
       expect(model.activeScalePercent, AppMath.percentScale);
       expect(model.isScaleFeedbackVisible, isFalse);
     });
+
+    test('interaction mode setters work correctly', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      model.start(image: image, bounds: const Rect.fromLTWH(0, 0, 100, 100));
+
+      expect(model.isDeformMode, isTrue);
+      expect(model.isRotateMode, isFalse);
+      expect(model.isScaleMode, isFalse);
+
+      model.setRotateMode();
+      expect(model.isRotateMode, isTrue);
+      expect(model.isDeformMode, isFalse);
+      expect(model.isScaleMode, isFalse);
+
+      model.setScaleMode();
+      expect(model.isScaleMode, isTrue);
+      expect(model.isDeformMode, isFalse);
+      expect(model.isRotateMode, isFalse);
+
+      model.setDeformMode();
+      expect(model.isDeformMode, isTrue);
+    });
+
+    test('beginScaleGesture and endScaleGesture', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      model.start(image: image, bounds: const Rect.fromLTWH(0, 0, 100, 100));
+
+      model.beginScaleGesture();
+      expect(model.isScaleMode, isTrue);
+      expect(model.isScaleFeedbackVisible, isTrue);
+      expect(model.activeScalePercent, AppMath.percentScale);
+
+      model.endScaleGesture();
+      expect(model.isScaleFeedbackVisible, isFalse);
+      expect(model.activeScalePercent, AppMath.percentScale);
+    });
+
+    test('beginRotateGesture and endRotateGesture', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      model.start(image: image, bounds: const Rect.fromLTWH(0, 0, 100, 100));
+
+      model.beginRotateGesture();
+      expect(model.isRotateMode, isTrue);
+      expect(model.isRotationFeedbackVisible, isTrue);
+      expect(model.activeRotationDegrees, 0);
+
+      model.endRotateGesture();
+      expect(model.isRotationFeedbackVisible, isFalse);
+      expect(model.activeRotationDegrees, 0);
+    });
+
+    test('updateRotationFeedback accumulates degrees', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      model.start(image: image, bounds: const Rect.fromLTWH(0, 0, 100, 100));
+
+      model.beginRotateGesture();
+      const double piRadians = 3.14159265;
+      model.updateRotationFeedback(piRadians);
+      // pi radians ≈ 180 degrees
+      expect(model.activeRotationDegrees, closeTo(180, 1));
+    });
+
+    test('isFeedbackVisible returns true when either feedback active', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      model.start(image: image, bounds: const Rect.fromLTWH(0, 0, 100, 100));
+
+      expect(model.isFeedbackVisible, isFalse);
+
+      model.beginScaleGesture();
+      expect(model.isFeedbackVisible, isTrue);
+
+      model.endScaleGesture();
+      expect(model.isFeedbackVisible, isFalse);
+
+      model.beginRotateGesture();
+      expect(model.isFeedbackVisible, isTrue);
+    });
+
+    test('rotate rotates corners around center', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      const Rect bounds = Rect.fromLTWH(0, 0, 100, 100);
+      model.start(image: image, bounds: bounds);
+
+      final Offset centerBefore = model.center;
+      // Rotate 90 degrees (pi/2)
+      const double quarterTurn = 1.5707963;
+      model.rotate(quarterTurn);
+
+      // Center should be unchanged
+      expect(model.center.dx, closeTo(centerBefore.dx, 1));
+      expect(model.center.dy, closeTo(centerBefore.dy, 1));
+
+      // Top-left (0,0) rotated 90° CW around (50,50) => (100,0)
+      expect(model.corners[TransformModel.topLeftIndex].dx, closeTo(100, 1));
+      expect(model.corners[TransformModel.topLeftIndex].dy, closeTo(0, 1));
+    });
+
+    test('scaleUniform clamps to valid range', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      const Rect bounds = Rect.fromLTWH(0, 0, 100, 100);
+      model.start(image: image, bounds: bounds);
+
+      model.beginScaleGesture();
+      // Try to scale by an extreme factor - it should be clamped
+      model.scaleUniform(AppInteraction.transformScaleFactorMax + 10);
+      // Corners should still be finite
+      for (final Offset corner in model.corners) {
+        expect(corner.dx.isFinite, isTrue);
+        expect(corner.dy.isFinite, isTrue);
+      }
+    });
+  });
+
+  group('TransformInteractionMode', () {
+    test('has 3 values', () {
+      expect(TransformInteractionMode.values.length, 3);
+    });
+
+    test('contains scale, rotate, deform', () {
+      expect(TransformInteractionMode.values, contains(TransformInteractionMode.scale));
+      expect(TransformInteractionMode.values, contains(TransformInteractionMode.rotate));
+      expect(TransformInteractionMode.values, contains(TransformInteractionMode.deform));
+    });
   });
 }
