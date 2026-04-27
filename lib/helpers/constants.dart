@@ -187,6 +187,7 @@ class AppFontSize {
 class AppTextStyle {
   /// Titles, headings, list tiles, text fields — large bold white.
   static const TextStyle title = TextStyle(
+    fontFamily: appFontFamily,
     color: AppPalette.white,
     fontSize: AppFontSize.large,
     fontWeight: FontWeight.bold,
@@ -194,29 +195,34 @@ class AppTextStyle {
 
   /// Default body text — white, inherits size from parent.
   static const TextStyle body = TextStyle(
+    fontFamily: appFontFamily,
     color: AppPalette.white,
   );
 
   /// Emphasized body text — medium bold, inherits color from parent.
   static const TextStyle bodyBold = TextStyle(
+    fontFamily: appFontFamily,
     fontSize: AppFontSize.medium,
     fontWeight: FontWeight.bold,
   );
 
   /// Tooltips, overlay coordinates — small white.
   static const TextStyle label = TextStyle(
+    fontFamily: appFontFamily,
     color: AppPalette.white,
     fontSize: AppFontSize.small,
   );
 
   /// Subtitles, list-tile descriptions, blend-mode hints — medium secondary.
   static const TextStyle subtitle = TextStyle(
+    fontFamily: appFontFamily,
     color: AppColors.textSecondary,
     fontSize: AppFontSize.small,
   );
 
   /// Interactive elements — blue accent color, large font.
   static const TextStyle button = TextStyle(
+    fontFamily: appFontFamily,
     color: AppPalette.blue,
     fontSize: AppFontSize.large,
   );
