@@ -118,7 +118,7 @@ class ColorPreview extends StatelessWidget {
                     child: AppText(
                       text,
                       textAlign: TextAlign.center,
-                      variant: AppTextVariant.labelBold,
+                      variant: AppTextVariant.label,
                       color: color.computeLuminance() > AppVisual.half ? AppPalette.black : AppPalette.white,
                     ),
                   ),
