@@ -65,6 +65,7 @@
         "fflags",
         "fpaint",
         "grayscale",
+        "libheif",
         "libx",
         "LTWH",
         "luma",

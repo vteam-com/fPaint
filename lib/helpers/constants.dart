@@ -346,6 +346,7 @@ class FileExtensions {
   static const String ora = 'ora';
   static const String tif = 'tif';
   static const String tiff = 'tiff';
+  static const String heic = 'heic';
 }
 
 /// Shared widget keys used by tests and UI lookups across the app.

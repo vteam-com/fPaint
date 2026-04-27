@@ -4,6 +4,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-04-27
+
+### Add
+
+- HEIC image import support (all platforms)
+- HEIC image export support (macOS via sips)
+- Intensity of Special effects
+
 ## [1.5.1] - 2026-04-25
 
 ### Add

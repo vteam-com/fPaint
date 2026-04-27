@@ -242,6 +242,11 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String fileFormatNotSupportedOnPlatform(Object extension) {
+    return 'El formato .$extension no es compatible en esta plataforma';
+  }
+
+  @override
   String get fontColor => 'Color de fuente';
 
   @override

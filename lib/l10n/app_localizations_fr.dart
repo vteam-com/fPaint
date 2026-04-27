@@ -245,6 +245,11 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String fileFormatNotSupportedOnPlatform(Object extension) {
+    return 'Le format .$extension n\'est pas pris en charge sur cette plateforme';
+  }
+
+  @override
   String get fontColor => 'Couleur de police';
 
   @override

@@ -54,6 +54,22 @@ void main() {
     });
   });
 
+  group('HeicConversionException', () {
+    test('is a FileOperationException', () {
+      const HeicConversionException exception = HeicConversionException('heic error');
+      expect(exception, isA<FileOperationException>());
+    });
+
+    test('toString includes cause when present', () {
+      const HeicConversionException exception = HeicConversionException(
+        'heic error',
+        cause: 'platform unsupported',
+      );
+      expect(exception.toString(), contains('heic error'));
+      expect(exception.toString(), contains('platform unsupported'));
+    });
+  });
+
   group('OraFileException', () {
     test('is a FileOperationException', () {
       const OraFileException exception = OraFileException('ora error');

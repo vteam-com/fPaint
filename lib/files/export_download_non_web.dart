@@ -10,6 +10,7 @@ import 'package:fpaint/providers/layers_provider.dart';
 
 const String _fpaintSaveImageTitle = 'fPaint Save Image';
 const String _fpaintSaveImageAsTiffTitle = 'fPaint Save Image as TIFF';
+const String _fpaintSaveImageAsHeicTitle = 'fPaint Save Image as HEIC';
 
 /// Exports the current painter content as a PNG image file.
 ///
@@ -186,5 +187,28 @@ Future<void> saveAsWebp(
 ) async {
   if (filePath != null) {
     await File(filePath).writeAsBytes(await prepareWebpBytes(layers));
+  }
+}
+
+/// Opens a save dialog and exports the current canvas as a HEIC image file.
+Future<void> onExportAsHeic(
+  final LayersProvider layers, [
+  final String fileName = 'image.heic',
+]) async {
+  await _exportWithFilePicker(
+    dialogTitle: _fpaintSaveImageAsHeicTitle,
+    fileName: fileName,
+    allowedExtensions: <String>[FileExtensions.heic],
+    onFileSelected: (final String filePath) => saveAsHeic(layers, filePath),
+  );
+}
+
+/// Saves the current painter content as a HEIC image file.
+Future<void> saveAsHeic(
+  final LayersProvider layers,
+  final String? filePath,
+) async {
+  if (filePath != null) {
+    await File(filePath).writeAsBytes(await prepareHeicBytes(layers));
   }
 }

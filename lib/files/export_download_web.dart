@@ -99,6 +99,22 @@ Future<void> saveAsWebp(
   downloadBlob(await prepareWebpBytes(layers), filePath);
 }
 
+/// Exports the current painter as a HEIC image and triggers a download.
+Future<void> onExportAsHeic(
+  final LayersProvider layers, [
+  final String fileName = 'image.heic',
+]) async {
+  await saveAsHeic(layers, fileName);
+}
+
+/// Saves the current content as a HEIC file and triggers a browser download.
+Future<void> saveAsHeic(
+  final LayersProvider layers,
+  final String filePath,
+) async {
+  downloadBlob(await prepareHeicBytes(layers), filePath);
+}
+
 /// Downloads a file represented by the given image bytes and file name.
 ///
 /// This function creates a Blob from the provided image bytes, generates an
