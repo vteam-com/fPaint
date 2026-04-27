@@ -264,9 +264,7 @@ class LayerSelector extends StatelessWidget {
             },
             child: Text(
               layer.name,
-              style: TextStyle(
-                fontSize: AppFontSize.large,
-                fontWeight: FontWeight.bold,
+              style: AppTextStyle.bodyBold.copyWith(
                 color: isSelected ? AppPalette.blueShade100 : AppPalette.grey400,
               ),
             ),

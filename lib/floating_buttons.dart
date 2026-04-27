@@ -137,11 +137,9 @@ Widget floatingActionButtons(
               .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
               .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
               .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
-          textAlign: TextAlign.right,
-          style: const TextStyle(
+          textAlign: TextAlign.center,
+          style: AppTextStyle.labelBold.copyWith(
             color: AppColors.floatingButtonForeground,
-            fontWeight: FontWeight.bold,
-            fontSize: AppFontSize.medium,
           ),
         ),
       ),
