@@ -156,7 +156,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: AppText(
         title,
-        variant: AppTextVariant.titleBold,
+        variant: AppTextVariant.title,
       ),
     );
   }

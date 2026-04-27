@@ -43,7 +43,7 @@ class AppListTile extends StatelessWidget {
                   ),
                 if (subtitle != null)
                   DefaultTextStyle(
-                    style: AppTextStyle.caption,
+                    style: AppTextStyle.subtitle,
                     child: subtitle!,
                   ),
               ],

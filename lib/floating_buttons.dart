@@ -139,7 +139,7 @@ Widget floatingActionButtons(
               .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
               .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
           textAlign: TextAlign.center,
-          variant: AppTextVariant.labelBold,
+          variant: AppTextVariant.label,
           color: AppColors.floatingButtonForeground,
         ),
       ),

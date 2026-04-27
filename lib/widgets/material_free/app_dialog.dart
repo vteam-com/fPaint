@@ -40,7 +40,7 @@ class AppDialog extends StatelessWidget {
               children: <Widget>[
                 if (title != null)
                   DefaultTextStyle(
-                    style: AppTextStyle.titleBold,
+                    style: AppTextStyle.title,
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                       child: titleIcon != null
@@ -58,7 +58,7 @@ class AppDialog extends StatelessWidget {
                   Flexible(
                     child: SingleChildScrollView(
                       child: DefaultTextStyle(
-                        style: AppTextStyle.secondary,
+                        style: AppTextStyle.body,
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                           child: content!,

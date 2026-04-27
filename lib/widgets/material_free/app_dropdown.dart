@@ -114,7 +114,7 @@ class AppDropdown<T> extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   const Text(
                     '▼',
-                    style: AppTextStyle.caption,
+                    style: AppTextStyle.label,
                   ),
                 ],
               ),

@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
@@ -118,12 +117,9 @@ Future<BlendMode> showBlendModeMenu({
                   entry.key,
                   variant: selectedBlendMode == menuFlutterBlendMode ? AppTextVariant.accent : AppTextVariant.inherited,
                 ),
-                Text(
+                AppText(
                   entry.value['description'] as String,
-                  style: AppTextStyle.caption.copyWith(
-                    fontSize: AppFontSize.medium,
-                    color: AppPalette.grey500,
-                  ),
+                  variant: AppTextVariant.subtitle,
                 ),
               ],
             ),

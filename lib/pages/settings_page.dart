@@ -44,7 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   const SizedBox(width: AppSpacing.sm),
                   AppText(
                     l10n.settings,
-                    variant: AppTextVariant.titleBold,
+                    variant: AppTextVariant.title,
                   ),
                 ],
               ),

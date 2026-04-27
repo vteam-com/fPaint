@@ -167,7 +167,7 @@ AppPopupMenuItem<int> buildMenuItem({
                 const SizedBox(height: AppSpacing.thin),
                 AppText(
                   subtitle,
-                  variant: AppTextVariant.caption,
+                  variant: AppTextVariant.subtitle,
                 ),
               ],
             ],

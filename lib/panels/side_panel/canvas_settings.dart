@@ -51,7 +51,7 @@ void showCanvasSettings(final BuildContext context) {
             children: <Widget>[
               AppText(
                 l10n.canvasSizeTitle,
-                variant: AppTextVariant.titleBold,
+                variant: AppTextVariant.title,
               ),
               const SizedBox(
                 height: AppSpacing.xxxl,

@@ -13,9 +13,6 @@ enum AppTextVariant {
   inherited,
 
   /// Page titles, dialog titles, section headings.
-  titleBold,
-
-  /// List-tile titles, text-field defaults.
   title,
 
   /// Default body text.
@@ -27,14 +24,8 @@ enum AppTextVariant {
   /// Tooltips, overlay coordinates.
   label,
 
-  /// Truncated file names.
-  labelBold,
-
-  /// Subtitles, menu hints.
-  caption,
-
-  /// Dialog content, secondary descriptions.
-  secondary,
+  /// Subtitles, list-tile descriptions, blend-mode hints.
+  subtitle,
 
   /// Active / selected items.
   accent,
@@ -74,14 +65,11 @@ class AppText extends StatelessWidget {
   Widget build(final BuildContext context) {
     TextStyle? style = switch (variant) {
       AppTextVariant.inherited => null,
-      AppTextVariant.titleBold => AppTextStyle.titleBold,
       AppTextVariant.title => AppTextStyle.title,
       AppTextVariant.body => AppTextStyle.body,
       AppTextVariant.bodyBold => AppTextStyle.bodyBold,
       AppTextVariant.label => AppTextStyle.label,
-      AppTextVariant.labelBold => AppTextStyle.labelBold,
-      AppTextVariant.caption => AppTextStyle.caption,
-      AppTextVariant.secondary => AppTextStyle.secondary,
+      AppTextVariant.subtitle => AppTextStyle.subtitle,
       AppTextVariant.accent => AppTextStyle.accent,
       AppTextVariant.link => AppTextStyle.link,
     };

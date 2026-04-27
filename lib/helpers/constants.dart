@@ -185,17 +185,11 @@ class AppFontSize {
 /// Styles are named by semantic role and follow a 3-tier size system
 /// (small / medium / large) combined with normal or bold weight.
 class AppTextStyle {
-  /// Page titles, dialog titles, section headings — large bold white.
-  static const TextStyle titleBold = TextStyle(
-    color: AppPalette.white,
-    fontSize: AppFontSize.large,
-    fontWeight: FontWeight.bold,
-  );
-
-  /// List tile titles, text field defaults — large white.
+  /// Titles, headings, list tiles, text fields — large bold white.
   static const TextStyle title = TextStyle(
     color: AppPalette.white,
     fontSize: AppFontSize.large,
+    fontWeight: FontWeight.bold,
   );
 
   /// Default body text — white, inherits size from parent.
@@ -215,21 +209,10 @@ class AppTextStyle {
     fontSize: AppFontSize.small,
   );
 
-  /// Truncated file names — small bold, inherits color from parent.
-  static const TextStyle labelBold = TextStyle(
-    fontSize: AppFontSize.small,
-    fontWeight: FontWeight.bold,
-  );
-
-  /// Subtitles, menu hints, dropdown indicators — small secondary.
-  static const TextStyle caption = TextStyle(
+  /// Subtitles, list-tile descriptions, blend-mode hints — medium secondary.
+  static const TextStyle subtitle = TextStyle(
     color: AppColors.textSecondary,
     fontSize: AppFontSize.small,
-  );
-
-  /// Dialog content, secondary descriptions — secondary color.
-  static const TextStyle secondary = TextStyle(
-    color: AppColors.textSecondary,
   );
 
   /// Active or selected items — blue accent color.

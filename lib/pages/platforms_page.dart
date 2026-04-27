@@ -44,7 +44,7 @@ class PlatformsPage extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   AppText(
                     l10n.availablePlatforms,
-                    variant: AppTextVariant.titleBold,
+                    variant: AppTextVariant.title,
                   ),
                 ],
               ),
