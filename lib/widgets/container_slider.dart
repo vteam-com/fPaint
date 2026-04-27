@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/app_text.dart';
 
 /// A custom slider widget that allows users to adjust a value by dragging horizontally within a container.
 class ContainerSlider extends StatefulWidget {
@@ -104,9 +105,9 @@ class _ContainerSliderState extends State<ContainerSlider> {
                   color: AppPalette.black.withAlpha(AppLayout.overlayAlpha + AppSpacing.lg.toInt()),
                   borderRadius: BorderRadius.circular(AppSpacing.thin),
                 ),
-                child: Text(
+                child: AppText(
                   '${(currentValue * AppLimits.percentMax).toStringAsFixed(1)}%',
-                  style: AppTextStyle.bodyBold,
+                  variant: AppTextVariant.bodyBold,
                 ),
               ),
             ),

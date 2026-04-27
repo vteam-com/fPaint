@@ -7,6 +7,7 @@ import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/container_slider.dart';
@@ -97,7 +98,7 @@ class LayerSelector extends StatelessWidget {
     final String? newName = await showAppDialog<String>(
       context: context,
       builder: (final BuildContext dialogContext) => AppDialog(
-        title: Text(l10n.layerNameTitle),
+        title: l10n.layerNameTitle,
         content: AppTextField(
           key: Keys.layerRenameTextField,
           controller: controller,
@@ -107,7 +108,7 @@ class LayerSelector extends StatelessWidget {
         actions: <Widget>[
           AppTextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(l10n.cancel),
+            child: AppText(l10n.cancel),
           ),
           AppTextButton(
             key: Keys.layerRenameApplyButton,
@@ -115,7 +116,7 @@ class LayerSelector extends StatelessWidget {
               Navigator.pop(dialogContext, controller.text);
               LayersProvider.of(dialogContext).update();
             },
-            child: Text(l10n.apply),
+            child: AppText(l10n.apply),
           ),
         ],
       ),
@@ -255,18 +256,17 @@ class LayerSelector extends StatelessWidget {
         if (layer.parentGroupName.isNotEmpty)
           Opacity(
             opacity: AppVisual.half,
-            child: Text('${layer.parentGroupName}.'),
+            child: AppText('${layer.parentGroupName}.'),
           ),
         Expanded(
           child: GestureDetector(
             onLongPress: () async {
               await renameLayer();
             },
-            child: Text(
+            child: AppText(
               layer.name,
-              style: AppTextStyle.bodyBold.copyWith(
-                color: isSelected ? AppPalette.blueShade100 : AppPalette.grey400,
-              ),
+              variant: AppTextVariant.bodyBold,
+              color: isSelected ? AppPalette.blueShade100 : AppPalette.grey400,
             ),
           ),
         ),
@@ -292,7 +292,7 @@ class LayerSelector extends StatelessWidget {
           children: <Widget>[
             const AppSvgIcon(icon: AppIcon.edit),
             const SizedBox(width: AppSpacing.sm),
-            Text(l10n.layerRename),
+            AppText(l10n.layerRename),
           ],
         ),
       ),
@@ -302,7 +302,7 @@ class LayerSelector extends StatelessWidget {
           children: <Widget>[
             const AppSvgIcon(icon: AppIcon.playlistAdd),
             const SizedBox(width: AppSpacing.sm),
-            Text(l10n.layerAddAbove),
+            AppText(l10n.layerAddAbove),
           ],
         ),
       ),
@@ -313,7 +313,7 @@ class LayerSelector extends StatelessWidget {
             children: <Widget>[
               const AppSvgIcon(icon: AppIcon.playlistRemove),
               const SizedBox(width: AppSpacing.sm),
-              Text(l10n.layerDelete),
+              AppText(l10n.layerDelete),
             ],
           ),
         ),
@@ -324,7 +324,7 @@ class LayerSelector extends StatelessWidget {
             children: <Widget>[
               const AppSvgIcon(icon: AppIcon.layers),
               const SizedBox(width: AppSpacing.sm),
-              Text(l10n.layerMergeBelow),
+              AppText(l10n.layerMergeBelow),
             ],
           ),
         ),
@@ -335,7 +335,7 @@ class LayerSelector extends StatelessWidget {
             children: <Widget>[
               const AppSvgIcon(icon: AppIcon.blender),
               const SizedBox(width: AppSpacing.sm),
-              Text(l10n.layerChangeBlendMode),
+              AppText(l10n.layerChangeBlendMode),
             ],
           ),
         ),
@@ -348,7 +348,7 @@ class LayerSelector extends StatelessWidget {
               color: layer.isVisible ? AppPalette.blue : AppColors.layerHiddenWarning,
             ),
             const SizedBox(width: AppSpacing.sm),
-            Text(layer.isVisible ? l10n.layerHide : l10n.layerShow),
+            AppText(layer.isVisible ? l10n.layerHide : l10n.layerShow),
           ],
         ),
       ),
@@ -358,7 +358,7 @@ class LayerSelector extends StatelessWidget {
           children: <Widget>[
             const AppSvgIcon(icon: AppIcon.visibilityOff),
             const SizedBox(width: AppSpacing.sm),
-            Text(l10n.layerHideAllOthers),
+            AppText(l10n.layerHideAllOthers),
           ],
         ),
       ),
@@ -368,7 +368,7 @@ class LayerSelector extends StatelessWidget {
           children: <Widget>[
             const AppSvgIcon(icon: AppIcon.visibility),
             const SizedBox(width: AppSpacing.sm),
-            Text(l10n.layerShowAll),
+            AppText(l10n.layerShowAll),
           ],
         ),
       ),

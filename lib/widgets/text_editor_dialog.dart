@@ -4,6 +4,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
@@ -59,7 +60,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
     final AppLocalizations l10n = context.l10n;
 
     return AppDialog(
-      title: Text(l10n.addText),
+      title: l10n.addText,
       content: SizedBox(
         width: AppLayout.dialogWidth,
         child: Column(
@@ -83,7 +84,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
             const SizedBox(height: AppSpacing.xxl),
 
             // Font size control
-            Text(l10n.fontSizeValue(_fontSize.round())),
+            AppText(l10n.fontSizeValue(_fontSize.round())),
             AppSlider(
               value: _fontSize,
               min: AppSpacing.sm + AppMath.pair.toDouble(),
@@ -161,13 +162,13 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
       ),
       actions: <Widget>[
         AppTextButton(
-          child: Text(l10n.cancel),
+          child: AppText(l10n.cancel),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         AppTextButton(
-          child: Text(l10n.addText),
+          child: AppText(l10n.addText),
           onPressed: () {
             if (_controller.text.isNotEmpty) {
               widget.onFinished(

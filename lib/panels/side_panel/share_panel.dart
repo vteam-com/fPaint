@@ -8,6 +8,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
@@ -17,9 +18,9 @@ import 'package:super_clipboard/super_clipboard.dart';
 /// Otherwise, it will be "Save as [fileName]".
 Widget textAction(final String fileName, final AppLocalizations l10n) {
   if (kIsWeb) {
-    return Text(l10n.downloadAsFile(fileName));
+    return AppText(l10n.downloadAsFile(fileName));
   }
-  return Text(l10n.saveAsFile(fileName));
+  return AppText(l10n.saveAsFile(fileName));
 }
 
 Future<void> _runSharePanelAction(
@@ -61,7 +62,7 @@ Future<dynamic> sharePanel(
               children: <Widget>[
                 AppListTile(
                   leading: const AppSvgIcon(icon: AppIcon.clipboardCopy),
-                  title: Text(l10n.copyToClipboard),
+                  title: AppText(l10n.copyToClipboard),
                   onTap: () async {
                     await _runSharePanelAction(
                       context,

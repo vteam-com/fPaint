@@ -14,6 +14,7 @@ import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -731,7 +732,7 @@ class _EffectsSectionState extends State<_EffectsSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text('${widget.l10n.effectIntensity} (${(_strength * AppMath.percentScale).round()}%)'),
+              AppText('${widget.l10n.effectIntensity} (${(_strength * AppMath.percentScale).round()}%)'),
               AppSlider(
                 key: Keys.effectIntensitySlider,
                 value: _strength,

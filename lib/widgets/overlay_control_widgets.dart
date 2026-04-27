@@ -3,6 +3,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// Coordinate format template for handle labels.
@@ -61,9 +62,10 @@ Widget buildOverlayFeedbackBubble({required final String label}) {
       borderRadius: BorderRadius.circular(AppRadius.md),
       border: Border.all(color: AppPalette.white, width: AppStroke.thin),
     ),
-    child: Text(
+    child: AppText(
       label,
-      style: AppTextStyle.body.copyWith(fontWeight: FontWeight.bold),
+      variant: AppTextVariant.bodyBold,
+      color: AppPalette.white,
     ),
   );
 }
@@ -150,12 +152,12 @@ class OverlayDragHandle extends StatelessWidget {
               borderRadius: BorderRadius.circular(borderRadius),
             ),
             child: Center(
-              child: Text(
+              child: AppText(
                 _coordinatesFormat
                     .replaceFirst(_placeholderX, position.dx.toInt().toString())
                     .replaceFirst(_placeholderY, position.dy.toInt().toString()),
                 textAlign: TextAlign.center,
-                style: AppTextStyle.label,
+                variant: AppTextVariant.label,
               ),
             ),
           ),

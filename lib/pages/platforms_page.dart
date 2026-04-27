@@ -3,6 +3,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -41,9 +42,9 @@ class PlatformsPage extends StatelessWidget {
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
+                  AppText(
                     l10n.availablePlatforms,
-                    style: AppTextStyle.titleBold,
+                    variant: AppTextVariant.titleBold,
                   ),
                 ],
               ),
@@ -145,12 +146,12 @@ class PlatformsPage extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: Text(name, style: AppTextStyle.title),
+                    child: AppText(name, variant: AppTextVariant.title),
                   ),
                   Expanded(
                     child: Opacity(
                       opacity: AppVisual.disabled,
-                      child: Text(description),
+                      child: AppText(description),
                     ),
                   ),
                 ],

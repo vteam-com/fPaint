@@ -7,6 +7,7 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
@@ -75,10 +76,10 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.all(AppSpacing.sm),
-                      child: Text(
+                      child: AppText(
                         widget.title,
                         textAlign: TextAlign.start,
-                        style: AppTextStyle.title,
+                        variant: AppTextVariant.title,
                       ),
                     ),
                     _buildContent(layersModel),
@@ -91,7 +92,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
               ),
             )
           : AppDialog(
-              title: Text(widget.title),
+              title: widget.title,
               content: SizedBox(
                 width: AppLayout.sliderDialogWidth,
                 child: _buildContent(layersModel),
@@ -108,14 +109,14 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     return <Widget>[
       AppTextButton(
         onPressed: () => Navigator.of(context).pop(),
-        child: Text(l10n.cancel),
+        child: AppText(l10n.cancel),
       ),
       AppElevatedButton(
         onPressed: () {
           widget.onColorChanged(_currentColor);
           Navigator.of(context).pop();
         },
-        child: Text(l10n.apply),
+        child: AppText(l10n.apply),
       ),
     ];
   }

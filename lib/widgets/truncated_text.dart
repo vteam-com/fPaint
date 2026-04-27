@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/app_text.dart';
 
 /// A widget that displays a truncated version of a given text.
 ///
@@ -30,9 +31,9 @@ class TruncatedTextWidget extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity, // Ensure the text has a bounded width
-      child: Text(
+      child: AppText(
         truncatedText,
-        style: AppTextStyle.labelBold,
+        variant: AppTextVariant.labelBold,
       ),
     );
   }

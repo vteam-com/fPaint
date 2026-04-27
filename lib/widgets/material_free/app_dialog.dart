@@ -6,12 +6,18 @@ class AppDialog extends StatelessWidget {
   const AppDialog({
     super.key,
     this.title,
+    this.titleIcon,
     this.content,
     this.actions,
   });
   final List<Widget>? actions;
   final Widget? content;
-  final Widget? title;
+
+  /// The dialog title displayed as bold text.
+  final String? title;
+
+  /// An optional icon shown before the title text.
+  final Widget? titleIcon;
   @override
   Widget build(final BuildContext context) {
     return Center(
@@ -37,7 +43,15 @@ class AppDialog extends StatelessWidget {
                     style: AppTextStyle.titleBold,
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-                      child: title!,
+                      child: titleIcon != null
+                          ? Row(
+                              spacing: AppSpacing.md,
+                              children: <Widget>[
+                                titleIcon!,
+                                Text(title!),
+                              ],
+                            )
+                          : Text(title!),
                     ),
                   ),
                 if (content != null)

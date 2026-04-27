@@ -4,6 +4,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 
@@ -41,9 +42,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Text(
+                  AppText(
                     l10n.settings,
-                    style: AppTextStyle.titleBold,
+                    variant: AppTextVariant.titleBold,
                   ),
                 ],
               ),
@@ -59,8 +60,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     spacing: AppSpacing.xxl,
                     children: <Widget>[
                       AppListTile(
-                        title: Text(l10n.languageLabel),
-                        subtitle: Text(l10n.languageSubtitle),
+                        title: AppText(l10n.languageLabel),
+                        subtitle: AppText(l10n.languageSubtitle),
                         trailing: AppDropdown<String>(
                           value: selectedLanguage,
                           onChanged: (final String? value) {
@@ -74,27 +75,27 @@ class _SettingsPageState extends State<SettingsPage> {
                           items: <AppDropdownItem<String>>[
                             AppDropdownItem<String>(
                               value: _systemLanguage,
-                              child: Text(l10n.languageSystem),
+                              child: AppText(l10n.languageSystem),
                             ),
                             AppDropdownItem<String>(
                               value: _languageCodeEn,
-                              child: Text(l10n.languageEnglish),
+                              child: AppText(l10n.languageEnglish),
                             ),
                             AppDropdownItem<String>(
                               value: _languageCodeFr,
-                              child: Text(l10n.languageFrench),
+                              child: AppText(l10n.languageFrench),
                             ),
                             AppDropdownItem<String>(
                               value: _languageCodeEs,
-                              child: Text(l10n.languageSpanish),
+                              child: AppText(l10n.languageSpanish),
                             ),
                           ],
                         ),
                       ),
                       const AppDivider(),
                       AppListTile(
-                        title: Text(l10n.useApplePencilOnlyTitle),
-                        subtitle: Text(l10n.useApplePencilOnlySubtitle),
+                        title: AppText(l10n.useApplePencilOnlyTitle),
+                        subtitle: AppText(l10n.useApplePencilOnlySubtitle),
                         trailing: AppToggleSwitch(
                           value: appPreferences.useApplePencil,
                           onChanged: (final bool value) {
@@ -114,7 +115,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         onPressed: () {
                           showShortcutsHelp(context);
                         },
-                        child: Text(l10n.keyboardShortcuts),
+                        child: AppText(l10n.keyboardShortcuts),
                       ),
                     ],
                   ),

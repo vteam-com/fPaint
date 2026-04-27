@@ -5,6 +5,7 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 
@@ -48,9 +49,9 @@ void showCanvasSettings(final BuildContext context) {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
+              AppText(
                 l10n.canvasSizeTitle,
-                style: AppTextStyle.titleBold,
+                variant: AppTextVariant.titleBold,
               ),
               const SizedBox(
                 height: AppSpacing.xxxl,
@@ -125,7 +126,7 @@ void showCanvasSettings(final BuildContext context) {
               Column(
                 spacing: AppSpacing.md,
                 children: <Widget>[
-                  Text(l10n.contentAlignment),
+                  AppText(l10n.contentAlignment),
                   NineGridSelector(
                     selectedPosition: layers.canvasResizePosition,
                     onPositionSelected: (final CanvasResizePosition newPosition) {
@@ -164,7 +165,7 @@ void showCanvasSettings(final BuildContext context) {
                       Navigator.pop(context);
                     }
                   },
-                  child: Text(l10n.apply),
+                  child: AppText(l10n.apply),
                 ),
               ),
             ],

@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,7 +30,7 @@ Future<void> showAboutBox(final BuildContext context) async {
     context: context,
     builder: (final BuildContext dialogContext) {
       return AppDialog(
-        title: Text('$appName ${packageInfo.version}'),
+        title: '$appName ${packageInfo.version}',
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,17 +41,17 @@ Future<void> showAboutBox(final BuildContext context) async {
               height: AppLayout.appIconSize,
             ),
             const SizedBox(height: AppSpacing.md),
-            const Text(_applicationLegalese),
+            const AppText(_applicationLegalese),
             const SizedBox(height: AppSpacing.xxl),
-            Text(l10n.deviceScreenResolution(screenResolution)),
+            AppText(l10n.deviceScreenResolution(screenResolution)),
             const SizedBox(height: AppSpacing.xxl),
             GestureDetector(
               onTap: () => launchUrl(Uri.parse(_repoUrl)),
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
-                child: Text(
+                child: AppText(
                   l10n.githubRepo,
-                  style: AppTextStyle.link,
+                  variant: AppTextVariant.link,
                 ),
               ),
             ),
@@ -59,7 +60,7 @@ Future<void> showAboutBox(final BuildContext context) async {
         actions: <Widget>[
           AppTextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(l10n.cancel),
+            child: AppText(l10n.cancel),
           ),
         ],
       );
