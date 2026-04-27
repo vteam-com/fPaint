@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_webp.dart' show convertImageToWebp;
@@ -27,4 +28,10 @@ Future<Uint8List> prepareOraBytes(final LayersProvider layers) async {
 Future<Uint8List> prepareWebpBytes(final LayersProvider layers) async {
   final ui.Image image = await layers.capturePainterToImage();
   return convertImageToWebp(image);
+}
+
+/// Captures the current canvas and converts to HEIC-encoded bytes.
+Future<Uint8List> prepareHeicBytes(final LayersProvider layers) async {
+  final Uint8List pngBytes = await layers.capturePainterToImageBytes();
+  return encodeToHeic(pngBytes);
 }

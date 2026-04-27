@@ -21,7 +21,8 @@ enum SaveFileFormat {
   jpeg,
   ora,
   tiff,
-  webp
+  webp,
+  heic
   ;
 
   /// Resolves a save format from a file name.
@@ -40,6 +41,8 @@ enum SaveFileFormat {
         return SaveFileFormat.tiff;
       case FileExtensions.webp:
         return SaveFileFormat.webp;
+      case FileExtensions.heic:
+        return SaveFileFormat.heic;
       default:
         return null;
     }
@@ -105,6 +108,9 @@ Future<void> saveFile(
       break;
     case SaveFileFormat.webp:
       await saveAsWebp(layers, fileName);
+      break;
+    case SaveFileFormat.heic:
+      await saveAsHeic(layers, fileName);
       break;
   }
 }

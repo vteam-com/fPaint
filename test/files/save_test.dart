@@ -73,6 +73,11 @@ void main() {
       expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), SaveFileFormat.webp);
     });
 
+    test('saveFile routes HEIC files correctly', () async {
+      mockShell.loadedFileName = 'test.heic';
+      expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), SaveFileFormat.heic);
+    });
+
     test('saveFile throws for unsupported extensions', () async {
       mockShell.loadedFileName = 'test.gif';
       expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), isNull);

@@ -24,6 +24,11 @@ class FileSaveException extends FileOperationException {
   const FileSaveException(super.message, {super.cause});
 }
 
+/// HEIC conversion failure.
+class HeicConversionException extends FileOperationException {
+  const HeicConversionException(super.message, {super.cause});
+}
+
 /// JPEG conversion failure.
 class JpegConversionException extends FileOperationException {
   const JpegConversionException(super.message, {super.cause});

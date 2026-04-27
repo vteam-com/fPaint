@@ -509,6 +509,12 @@ abstract class AppLocalizations {
   /// **'File format .{extension} is not supported'**
   String fileFormatNotSupported(Object extension);
 
+  /// No description provided for @fileFormatNotSupportedOnPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'File format .{extension} is not supported on this platform'**
+  String fileFormatNotSupportedOnPlatform(Object extension);
+
   /// No description provided for @fontColor.
   ///
   /// In en, this message translates to:

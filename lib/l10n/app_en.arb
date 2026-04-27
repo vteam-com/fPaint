@@ -123,6 +123,12 @@
       "extension": {}
     }
   },
+  "fileFormatNotSupportedOnPlatform": "File format .{extension} is not supported on this platform",
+  "@fileFormatNotSupportedOnPlatform": {
+    "placeholders": {
+      "extension": {}
+    }
+  },
   "fillColor": "Fill Color",
   "flipHorizontalTooltip": "Flip Horizontal",
   "flipVerticalTooltip": "Flip Vertical",

@@ -11,7 +11,7 @@ repository: https://github.com/vteam-com/fPaint
 homepage: https://github.com/vteam-com/fPaint
 issue_tracker: https://github.com/vteam-com/fPaint/issues
 
-version: 1.5.1+1
+version: 1.6.0+1
 
 environment:
   sdk: ">=3.11.4"
@@ -26,6 +26,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_svg: ^2.2.4
+  heic_to_png_jpg: ^0.1.1
   image: ^4.8.0
   intl: any
   logging: any

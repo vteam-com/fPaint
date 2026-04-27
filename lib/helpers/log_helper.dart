@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 // Logger name constants for each module.
 const String logNameAppPreferences = 'AppPreferences';
 const String logNameAppProvider = 'AppProvider';
+const String logNameFileHeic = 'FileHeic';
 const String logNameFileOra = 'FileOra';
 const String logNameFileTiff = 'FileTiff';
 const String logNameImageHelper = 'ImageHelper';

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
+import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -59,7 +60,7 @@ Future<dynamic> sharePanel(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.copy),
+                  leading: const AppSvgIcon(icon: AppIcon.clipboardCopy),
                   title: Text(l10n.copyToClipboard),
                   onTap: () async {
                     await _runSharePanelAction(
@@ -70,7 +71,7 @@ Future<dynamic> sharePanel(
                   },
                 ),
                 AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.download),
+                  leading: const AppSvgIcon(icon: AppIcon.iosShare),
                   title: textAction('image.PNG', l10n),
                   onTap: () async {
                     await _runSharePanelAction(
@@ -81,7 +82,7 @@ Future<dynamic> sharePanel(
                   },
                 ),
                 AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.download),
+                  leading: const AppSvgIcon(icon: AppIcon.iosShare),
                   title: textAction('image.JPG', l10n),
                   onTap: () async {
                     await _runSharePanelAction(
@@ -92,7 +93,7 @@ Future<dynamic> sharePanel(
                   },
                 ),
                 AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.download),
+                  leading: const AppSvgIcon(icon: AppIcon.iosShare),
                   title: textAction('image.ORA', l10n),
                   onTap: () async {
                     await _runSharePanelAction(
@@ -103,7 +104,7 @@ Future<dynamic> sharePanel(
                   },
                 ),
                 AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.download),
+                  leading: const AppSvgIcon(icon: AppIcon.iosShare),
                   title: textAction('image.WEBP', l10n),
                   onTap: () async {
                     await _runSharePanelAction(
@@ -114,7 +115,7 @@ Future<dynamic> sharePanel(
                   },
                 ),
                 AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.download),
+                  leading: const AppSvgIcon(icon: AppIcon.iosShare),
                   title: textAction('image.TIF', l10n),
                   onTap: () async {
                     await _runSharePanelAction(
@@ -124,6 +125,18 @@ Future<dynamic> sharePanel(
                     );
                   },
                 ),
+                if (isHeicExportSupported)
+                  AppListTile(
+                    leading: const AppSvgIcon(icon: AppIcon.iosShare),
+                    title: textAction('image.HEIC', l10n),
+                    onTap: () async {
+                      await _runSharePanelAction(
+                        context,
+                        () => onExportAsHeic(layers),
+                        dismissOnAction,
+                      );
+                    },
+                  ),
               ],
             ),
           ),

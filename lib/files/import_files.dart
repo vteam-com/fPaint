@@ -4,6 +4,8 @@ import 'dart:ui' as ui;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
+import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/constants.dart';
@@ -25,6 +27,7 @@ const String _fileExtensionPng = 'png';
 const String _fileExtensionWebp = 'webp';
 const String _fileExtensionJpg = 'jpg';
 const String _fileExtensionJpeg = 'jpeg';
+const String _fileExtensionHeic = 'heic';
 const String _loadedImageDefaultName = 'Loaded Image';
 
 final Logger _log = Logger(logNameImportFiles);
@@ -154,6 +157,9 @@ Future<void> onFileOpen(final BuildContext context) async {
         } else if (extension == _fileExtensionTif || extension == _fileExtensionTiff) {
           // Assuming readTiffFileFromBytes handles its own clearing and sizing or needs similar refactor
           await readTiffFileFromBytes(layers, bytes);
+        } else if (extension == _fileExtensionHeic) {
+          // ignore: use_build_context_synchronously
+          await _readHeicFromBytes(layers, bytes, context, imageName: fileName);
         } else if (isFileExtensionSupported(extension)) {
           // Pass context and filename
           // ignore: use_build_context_synchronously
@@ -211,6 +217,9 @@ Future<bool> openFileFromPath({
       } else if (extension == _fileExtensionTif || extension == _fileExtensionTiff) {
         await readTiffFromFilePath(layers, path);
         return true;
+      } else if (extension == _fileExtensionHeic) {
+        final String fileName = path.split(Platform.pathSeparator).last;
+        return await _readHeicFromFilePath(layers, path, context, imageName: fileName);
       } else {
         final String fileName = path.split(Platform.pathSeparator).last;
         return await readImageFromFilePath(layers, path, context, imageName: fileName);
@@ -248,6 +257,7 @@ final List<String> supportedImageFileExtensions = <String>[
   _fileExtensionWebp,
   _fileExtensionJpg,
   _fileExtensionJpeg,
+  _fileExtensionHeic,
 ];
 
 /// Checks if the given file extension is supported.
@@ -327,6 +337,64 @@ Future<bool> readImageFileFromBytes(
   final String imageName = _loadedImageDefaultName,
 }) async {
   return await _decodeAndApplyImage(layers, bytes, context, imageName: imageName);
+}
+
+/// Reads a HEIC file from disk, decodes it via the platform-specific decoder,
+/// and applies the result to [layers].
+Future<bool> _readHeicFromFilePath(
+  final LayersProvider layers,
+  final String path,
+  final BuildContext context, {
+  final String imageName = _loadedImageDefaultName,
+}) async {
+  try {
+    final Uint8List fileBytes = await File(path).readAsBytes();
+    final Uint8List decodableBytes = await decodeHeicBytes(fileBytes);
+    // ignore: use_build_context_synchronously
+    return await _decodeAndApplyImage(layers, decodableBytes, context, imageName: imageName);
+  } on HeicConversionException {
+    // ignore: use_build_context_synchronously
+    if (context.mounted) {
+      context.showSnackBarMessage(
+        context.l10n.fileFormatNotSupportedOnPlatform(_fileExtensionHeic),
+        duration: const Duration(seconds: AppMath.triple),
+      );
+    }
+    return false;
+  } catch (e) {
+    // ignore: use_build_context_synchronously
+    if (context.mounted) {
+      context.showSnackBarMessage(
+        context.l10n.errorReadingFile(e.toString()),
+        duration: const Duration(seconds: AppMath.triple),
+      );
+    }
+    return false;
+  }
+}
+
+/// Reads a HEIC image from bytes, decodes it via the platform-specific decoder,
+/// and applies the result to [layers].
+Future<bool> _readHeicFromBytes(
+  final LayersProvider layers,
+  final Uint8List bytes,
+  final BuildContext context, {
+  final String imageName = _loadedImageDefaultName,
+}) async {
+  try {
+    final Uint8List decodableBytes = await decodeHeicBytes(bytes);
+    // ignore: use_build_context_synchronously
+    return await _decodeAndApplyImage(layers, decodableBytes, context, imageName: imageName);
+  } on HeicConversionException {
+    // ignore: use_build_context_synchronously
+    if (context.mounted) {
+      context.showSnackBarMessage(
+        context.l10n.fileFormatNotSupportedOnPlatform(_fileExtensionHeic),
+        duration: const Duration(seconds: AppMath.triple),
+      );
+    }
+    return false;
+  }
 }
 
 /// The result chosen by the user when dropping a file onto a canvas that

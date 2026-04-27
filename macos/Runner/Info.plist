@@ -66,6 +66,18 @@
 					<string>public.ora</string>
 				</array>
 			</dict>
+			<dict>
+				<key>CFBundleTypeName</key>
+				<string>HEIC Image</string>
+				<key>CFBundleTypeRole</key>
+				<string>Viewer</string>
+				<key>LSHandlerRank</key>
+				<string>Alternate</string>
+				<key>LSItemContentTypes</key>
+				<array>
+					<string>public.heic</string>
+				</array>
+			</dict>
 		</array>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>

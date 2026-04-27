@@ -117,6 +117,12 @@
       "extension": {}
     }
   },
+  "fileFormatNotSupportedOnPlatform": "El formato .{extension} no es compatible en esta plataforma",
+  "@fileFormatNotSupportedOnPlatform": {
+    "placeholders": {
+      "extension": {}
+    }
+  },
   "fillColor": "Color de relleno",
   "flipHorizontalTooltip": "Voltear horizontalmente",
   "flipVerticalTooltip": "Voltear verticalmente",

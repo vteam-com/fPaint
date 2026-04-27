@@ -30,6 +30,7 @@ void main() {
     test('all constants are non-empty strings', () {
       expect(logNameAppPreferences.isNotEmpty, isTrue);
       expect(logNameAppProvider.isNotEmpty, isTrue);
+      expect(logNameFileHeic.isNotEmpty, isTrue);
       expect(logNameFileOra.isNotEmpty, isTrue);
       expect(logNameFileTiff.isNotEmpty, isTrue);
       expect(logNameImageHelper.isNotEmpty, isTrue);

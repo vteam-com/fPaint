@@ -16,7 +16,7 @@ To create a **free alternative to expensive commercial graphics software** throu
 - **Layer Management** - Full layer system with blending modes, opacity, and organization
 - **Selection Tools** - Magic Wand, lasso, rectangle, and advanced selection capabilities
 - **Color Management** - Professional color picker with palettes, gradients, and color harmony
-- **File Format Support** - PNG, JPEG, TIFF, OpenRaster (ORA), and more
+- **File Format Support** - PNG, JPEG, TIFF, WEBP, HEIC, OpenRaster (ORA), and more
 - **Cross-Platform** - Consistent experience across all major platforms
 - **Undo/Redo** - Robust history system for creative freedom
 - **Responsive UI** - Optimized for touch, mouse, and stylus input
