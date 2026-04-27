@@ -80,22 +80,22 @@ Future<void> onFileNew(final BuildContext context) async {
             if (offNewDocFromClipboard)
               Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.xxl),
-                child: AppElevatedButton(
+                child: AppButtonPrimary(
                   onPressed: () {
                     // Handle creating new document from clipboard image
                     appProvider.newDocumentFromClipboardImage();
                     Navigator.of(context).pop();
                   },
-                  child: AppText(l10n.newFromClipboard),
+                  text: l10n.newFromClipboard,
                 ),
               ),
-            AppTextButton(
+            AppButtonText(
               onPressed: () {
                 Navigator.of(context).pop(null);
               },
-              child: AppText(l10n.cancel),
+              text: l10n.cancel,
             ),
-            AppTextButton(
+            AppButtonText(
               onPressed: () {
                 final double? width = double.tryParse(widthController.text);
                 final double? height = double.tryParse(heightController.text);
@@ -107,7 +107,7 @@ Future<void> onFileNew(final BuildContext context) async {
                   context.showSnackBarMessage(l10n.invalidSize);
                 }
               },
-              child: AppText(l10n.create),
+              text: l10n.create,
             ),
           ],
         );
@@ -444,13 +444,13 @@ Future<void> onFileDropped({
           title: l10n.dropFileTitle,
           content: AppText(l10n.dropFilePrompt),
           actions: <Widget>[
-            AppTextButton(
+            AppButtonText(
               onPressed: () => Navigator.pop(dialogContext, DropFileAction.addLayer),
-              child: AppText(l10n.dropFileAddLayer),
+              text: l10n.dropFileAddLayer,
             ),
-            AppTextButton(
+            AppButtonText(
               onPressed: () => Navigator.pop(dialogContext, DropFileAction.open),
-              child: AppText(l10n.dropFileOpen),
+              text: l10n.dropFileOpen,
             ),
           ],
         );

@@ -5,13 +5,8 @@ import 'package:fpaint/helpers/constants.dart';
 
 /// Semantic text-style variant for [AppText].
 ///
-/// Each value maps to a corresponding [AppTextStyle] constant, except
-/// [inherited] which applies no explicit style and inherits from the nearest
-/// [DefaultTextStyle] ancestor.
+/// Each value maps to a corresponding [AppTextStyle] constant.
 enum AppTextVariant {
-  /// No explicit style — inherits from [DefaultTextStyle].
-  inherited,
-
   /// Page titles, dialog titles, section headings.
   title,
 
@@ -27,11 +22,8 @@ enum AppTextVariant {
   /// Subtitles, list-tile descriptions, blend-mode hints.
   subtitle,
 
-  /// Active / selected items.
-  accent,
-
-  /// Tappable hyperlinks.
-  link,
+  /// Interactive elements — buttons, selected items, links.
+  button,
 }
 
 /// A [Text] wrapper that selects its [TextStyle] from [AppTextStyle] by
@@ -44,7 +36,7 @@ class AppText extends StatelessWidget {
   const AppText(
     this.data, {
     super.key,
-    this.variant = AppTextVariant.inherited,
+    this.variant = AppTextVariant.body,
     this.color,
     this.textAlign,
   });
@@ -63,19 +55,17 @@ class AppText extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    TextStyle? style = switch (variant) {
-      AppTextVariant.inherited => null,
+    TextStyle style = switch (variant) {
       AppTextVariant.title => AppTextStyle.title,
       AppTextVariant.body => AppTextStyle.body,
       AppTextVariant.bodyBold => AppTextStyle.bodyBold,
       AppTextVariant.label => AppTextStyle.label,
       AppTextVariant.subtitle => AppTextStyle.subtitle,
-      AppTextVariant.accent => AppTextStyle.accent,
-      AppTextVariant.link => AppTextStyle.link,
+      AppTextVariant.button => AppTextStyle.button,
     };
 
     if (color != null) {
-      style = (style ?? const TextStyle()).copyWith(color: color);
+      style = style.copyWith(color: color);
     }
 
     return Text(data, style: style, textAlign: textAlign);

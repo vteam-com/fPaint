@@ -97,7 +97,7 @@ Widget _buildIconButton({
   required final AppIcon icon,
   required final VoidCallback onPressed,
 }) {
-  return AppIconButton(
+  return AppButtonIcon(
     key: key,
     tooltip: tooltip,
     icon: AppSvgIcon(icon: icon),

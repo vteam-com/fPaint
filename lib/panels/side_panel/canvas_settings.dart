@@ -79,7 +79,7 @@ void showCanvasSettings(final BuildContext context) {
                       },
                     ),
                   ),
-                  AppIconButton(
+                  AppButtonIcon(
                     key: Keys.canvasSettingsAspectRatioToggleButton,
                     icon: AppSvgIcon(
                       icon: layers.canvasResizeLockAspectRatio ? AppIcon.link : AppIcon.linkOff,
@@ -137,7 +137,7 @@ void showCanvasSettings(final BuildContext context) {
               ),
               Align(
                 alignment: Alignment.centerRight,
-                child: AppElevatedButton(
+                child: AppButtonPrimary(
                   key: Keys.canvasSettingsApplyButton,
                   onPressed: () {
                     final double width = double.tryParse(widthController.text) ?? -1;
@@ -165,7 +165,7 @@ void showCanvasSettings(final BuildContext context) {
                       Navigator.pop(context);
                     }
                   },
-                  child: AppText(l10n.apply),
+                  text: l10n.apply,
                 ),
               ),
             ],

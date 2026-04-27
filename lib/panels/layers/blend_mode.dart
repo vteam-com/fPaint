@@ -115,7 +115,7 @@ Future<BlendMode> showBlendModeMenu({
               children: <Widget>[
                 AppText(
                   entry.key,
-                  variant: selectedBlendMode == menuFlutterBlendMode ? AppTextVariant.accent : AppTextVariant.inherited,
+                  variant: selectedBlendMode == menuFlutterBlendMode ? AppTextVariant.button : AppTextVariant.body,
                 ),
                 AppText(
                   entry.value['description'] as String,

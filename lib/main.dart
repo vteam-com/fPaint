@@ -192,13 +192,13 @@ Future<void> _handleFileOpened(final String filePath) async {
               title: l10n.unsavedChanges,
               content: AppText(l10n.unsavedChangesDiscardAndOpenPrompt),
               actions: <Widget>[
-                AppTextButton(
+                AppButtonText(
                   onPressed: () => Navigator.pop(context, false),
-                  child: AppText(l10n.cancel),
+                  text: l10n.cancel,
                 ),
-                AppTextButton(
+                AppButtonText(
                   onPressed: () => Navigator.pop(context, true),
-                  child: AppText(l10n.discardAndOpen),
+                  text: l10n.discardAndOpen,
                 ),
               ],
             );

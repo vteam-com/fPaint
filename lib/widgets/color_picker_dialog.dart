@@ -107,16 +107,16 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   List<Widget> _buildActions() {
     final AppLocalizations l10n = context.l10n;
     return <Widget>[
-      AppTextButton(
+      AppButtonText(
         onPressed: () => Navigator.of(context).pop(),
-        child: AppText(l10n.cancel),
+        text: l10n.cancel,
       ),
-      AppElevatedButton(
+      AppButtonPrimary(
         onPressed: () {
           widget.onColorChanged(_currentColor);
           Navigator.of(context).pop();
         },
-        child: AppText(l10n.apply),
+        text: l10n.apply,
       ),
     ];
   }
@@ -222,7 +222,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              AppIconButton(
+              AppButtonIcon(
                 icon: const AppSvgIcon(icon: AppIcon.clipboardPaste),
                 onPressed: () async {
                   final ClipboardData? data = await Clipboard.getData(_plainTextMimeType);
@@ -257,7 +257,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                   },
                 ),
               ),
-              AppIconButton(
+              AppButtonIcon(
                 icon: const AppSvgIcon(icon: AppIcon.copy),
                 onPressed: () {
                   Clipboard.setData(

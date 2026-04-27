@@ -3,7 +3,7 @@
 import 'dart:ui' show Color, FontWeight;
 
 import 'package:flutter/foundation.dart' show Key;
-import 'package:flutter/painting.dart' show TextDecoration, TextStyle;
+import 'package:flutter/painting.dart' show TextStyle;
 
 /// The application display name.
 const String appName = 'fPaint';
@@ -215,15 +215,10 @@ class AppTextStyle {
     fontSize: AppFontSize.small,
   );
 
-  /// Active or selected items — blue accent color.
-  static const TextStyle accent = TextStyle(
+  /// Interactive elements — blue accent color, large font.
+  static const TextStyle button = TextStyle(
     color: AppPalette.blue,
-  );
-
-  /// Tappable hyperlinks — blue accent with underline.
-  static const TextStyle link = TextStyle(
-    color: AppPalette.blue,
-    decoration: TextDecoration.underline,
+    fontSize: AppFontSize.large,
   );
 }
 

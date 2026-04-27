@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="2381.0" height="5766.0" viewBox="0 0 2381.0 5766.0" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+<svg width="2378.0" height="5766.0" viewBox="0 0 2378.0 5766.0" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
 <defs>
   <filter id="whiteShadow" x="-20%" y="-20%" width="140%" height="140%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
@@ -671,12 +671,12 @@
 <rect x="336.0" y="2936.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/brush_size_picker.dart</title></rect>
 <rect x="336.0" y="2968.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/color_selector.dart</title></rect>
 <rect x="336.0" y="3000.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/shortcuts_help.dart</title></rect>
-<rect x="336.0" y="3032.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/confirm_discard_dialog.dart</title></rect>
-<rect x="336.0" y="3064.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/base_picker.dart</title></rect>
-<rect x="336.0" y="3096.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/canvas_panel.dart</title></rect>
-<rect x="336.0" y="3128.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/canvas_panel_painter.dart</title></rect>
-<rect x="336.0" y="3160.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/container_slider.dart</title></rect>
-<rect x="336.0" y="3192.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/truncated_text.dart</title></rect>
+<rect x="336.0" y="3032.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/base_picker.dart</title></rect>
+<rect x="336.0" y="3064.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/canvas_panel.dart</title></rect>
+<rect x="336.0" y="3096.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/canvas_panel_painter.dart</title></rect>
+<rect x="336.0" y="3128.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/container_slider.dart</title></rect>
+<rect x="336.0" y="3160.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/truncated_text.dart</title></rect>
+<rect x="336.0" y="3192.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/confirm_discard_dialog.dart</title></rect>
 <rect x="336.0" y="3224.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/tool_attribute_widget.dart</title></rect>
 <rect x="336.0" y="3256.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/app_icon.dart</title></rect>
 <rect x="336.0" y="3288.0" width="244.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: widgets/draw_rect.dart</title></rect>
@@ -734,7 +734,7 @@
   <title>widgets/material_free/app_list_tile.dart ▶ widgets/material_free/app_switch.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3212.0 H 616.0 Q 622.0 3212.0 622.0 3218.0 V 3451.0 Q 622.0 3457.0 616.0 3457.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 3180.0 H 616.0 Q 622.0 3180.0 622.0 3186.0 V 3451.0 Q 622.0 3457.0 616.0 3457.0 H 572.0" class="edgeVertical"/>
   <title>widgets/truncated_text.dart ▶ widgets/app_text.dart</title>
 </g>
 <g>
@@ -754,12 +754,12 @@
   <title>widgets/canvas_gesture_handler.dart ▶ widgets/text_editor_dialog.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2956.0 H 616.0 Q 622.0 2956.0 622.0 2962.0 V 3067.0 Q 622.0 3073.0 616.0 3073.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/brush_size_picker.dart ▶ widgets/base_picker.dart</title>
-</g>
-<g>
   <path d="M 600.0 5342.0 H 616.0 Q 622.0 5342.0 622.0 5348.0 V 5421.0 Q 622.0 5427.0 616.0 5427.0 H 596.0" class="edgeVertical"/>
   <title>helpers/image_helper.dart ▶ helpers/color_helper.dart</title>
+</g>
+<g>
+  <path d="M 576.0 2956.0 H 616.0 Q 622.0 2956.0 622.0 2962.0 V 3035.0 Q 622.0 3041.0 616.0 3041.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/brush_size_picker.dart ▶ widgets/base_picker.dart</title>
 </g>
 <g>
   <path d="M 600.0 1662.0 H 616.0 Q 622.0 1662.0 622.0 1668.0 V 1709.0 Q 622.0 1715.0 616.0 1715.0 H 596.0" class="edgeVertical"/>
@@ -850,7 +850,7 @@
   <title>recovery/draft_recovery_storage_web.dart ▶ recovery/draft_recovery_storage.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3116.0 H 616.0 Q 622.0 3116.0 622.0 3122.0 V 3131.0 Q 622.0 3137.0 616.0 3137.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 3084.0 H 616.0 Q 622.0 3084.0 622.0 3090.0 V 3099.0 Q 622.0 3105.0 616.0 3105.0 H 572.0" class="edgeVertical"/>
   <title>widgets/canvas_panel.dart ▶ widgets/canvas_panel_painter.dart</title>
 </g>
 <g>
@@ -878,7 +878,7 @@
   <title>widgets/transform_widget.dart ▶ widgets/overlay_control_widgets.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3148.0 H 619.0 Q 625.0 3148.0 625.0 3154.0 V 3419.0 Q 625.0 3425.0 619.0 3425.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 3116.0 H 619.0 Q 625.0 3116.0 625.0 3122.0 V 3419.0 Q 625.0 3425.0 619.0 3425.0 H 572.0" class="edgeVertical"/>
   <title>widgets/canvas_panel_painter.dart ▶ widgets/transparent_background.dart</title>
 </g>
 <g>
@@ -898,7 +898,7 @@
   <title>models/fill_model.dart ▶ models/visible_model.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2924.0 H 619.0 Q 625.0 2924.0 625.0 2930.0 V 3067.0 Q 625.0 3073.0 619.0 3073.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 2924.0 H 619.0 Q 625.0 2924.0 625.0 2930.0 V 3035.0 Q 625.0 3041.0 619.0 3041.0 H 572.0" class="edgeVertical"/>
   <title>widgets/tolerance_picker.dart ▶ widgets/base_picker.dart</title>
 </g>
 <g>
@@ -966,7 +966,7 @@
   <title>providers/layers_provider.dart ▶ providers/layer_provider.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3180.0 H 622.0 Q 628.0 3180.0 628.0 3186.0 V 3451.0 Q 628.0 3457.0 622.0 3457.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 3148.0 H 622.0 Q 628.0 3148.0 628.0 3154.0 V 3451.0 Q 628.0 3457.0 622.0 3457.0 H 572.0" class="edgeVertical"/>
   <title>widgets/container_slider.dart ▶ widgets/app_text.dart</title>
 </g>
 <g>
@@ -1070,11 +1070,11 @@
   <title>main_screen.dart ▶ panels/side_panel/side_panel.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3084.0 H 628.0 Q 634.0 3084.0 634.0 3090.0 V 3451.0 Q 634.0 3457.0 628.0 3457.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/base_picker.dart ▶ widgets/app_text.dart</title>
+  <path d="M 576.0 3212.0 H 628.0 Q 634.0 3212.0 634.0 3218.0 V 3573.0 Q 634.0 3579.0 628.0 3579.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/confirm_discard_dialog.dart ▶ widgets/material_free/material_free.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2732.0 H 628.0 Q 634.0 2732.0 634.0 2738.0 V 3067.0 Q 634.0 3073.0 628.0 3073.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 2732.0 H 628.0 Q 634.0 2732.0 634.0 2738.0 V 3035.0 Q 634.0 3041.0 628.0 3041.0 H 572.0" class="edgeVertical"/>
   <title>widgets/brush_style_picker.dart ▶ widgets/base_picker.dart</title>
 </g>
 <g>
@@ -1155,7 +1155,7 @@
 </g>
 <g>
   <path d="M 576.0 3052.0 H 634.0 Q 640.0 3052.0 640.0 3058.0 V 3451.0 Q 640.0 3457.0 634.0 3457.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/confirm_discard_dialog.dart ▶ widgets/app_text.dart</title>
+  <title>widgets/base_picker.dart ▶ widgets/app_text.dart</title>
 </g>
 <g>
   <path d="M 600.0 1854.0 H 634.0 Q 640.0 1854.0 640.0 1860.0 V 2125.0 Q 640.0 2131.0 634.0 2131.0 H 596.0" class="edgeVertical"/>
@@ -1270,7 +1270,7 @@
   <title>panels/side_panel/share_panel.dart ▶ files/export_download_web.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3084.0 H 646.0 Q 652.0 3084.0 652.0 3090.0 V 3573.0 Q 652.0 3579.0 646.0 3579.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 3052.0 H 646.0 Q 652.0 3052.0 652.0 3058.0 V 3573.0 Q 652.0 3579.0 646.0 3579.0 H 572.0" class="edgeVertical"/>
   <title>widgets/base_picker.dart ▶ widgets/material_free/material_free.dart</title>
 </g>
 <g>
@@ -1298,8 +1298,8 @@
   <title>main.dart ▶ pages/settings_page.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3052.0 H 649.0 Q 655.0 3052.0 655.0 3058.0 V 3573.0 Q 655.0 3579.0 649.0 3579.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/confirm_discard_dialog.dart ▶ widgets/material_free/material_free.dart</title>
+  <path d="M 576.0 3020.0 H 649.0 Q 655.0 3020.0 655.0 3026.0 V 3573.0 Q 655.0 3579.0 649.0 3579.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/shortcuts_help.dart ▶ widgets/material_free/material_free.dart</title>
 </g>
 <g>
   <path d="M 600.0 4842.0 H 649.0 Q 655.0 4842.0 655.0 4848.0 V 5357.0 Q 655.0 5363.0 649.0 5363.0 H 596.0" class="edgeVertical"/>
@@ -1326,8 +1326,8 @@
   <title>main.dart ▶ pages/platforms_page.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2604.0 H 652.0 Q 658.0 2604.0 658.0 2610.0 V 3035.0 Q 658.0 3041.0 652.0 3041.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/shortcuts.dart ▶ widgets/confirm_discard_dialog.dart</title>
+  <path d="M 576.0 2796.0 H 652.0 Q 658.0 2796.0 658.0 2802.0 V 3259.0 Q 658.0 3265.0 652.0 3265.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/color_picker_dialog.dart ▶ widgets/app_icon.dart</title>
 </g>
 <g>
   <path d="M 576.0 3590.0 H 652.0 Q 658.0 3590.0 658.0 3596.0 V 3989.0 Q 658.0 3995.0 652.0 3995.0 H 572.0" class="edgeVertical"/>
@@ -1354,8 +1354,12 @@
   <title>models/canvas_resize.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2796.0 H 655.0 Q 661.0 2796.0 661.0 2802.0 V 3259.0 Q 661.0 3265.0 655.0 3265.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/color_picker_dialog.dart ▶ widgets/app_icon.dart</title>
+  <path d="M 576.0 2988.0 H 655.0 Q 661.0 2988.0 661.0 2994.0 V 3573.0 Q 661.0 3579.0 655.0 3579.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/color_selector.dart ▶ widgets/material_free/material_free.dart</title>
+</g>
+<g>
+  <path d="M 576.0 2476.0 H 655.0 Q 661.0 2476.0 661.0 2482.0 V 2939.0 Q 661.0 2945.0 655.0 2945.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/text_attributes_widget.dart ▶ widgets/brush_size_picker.dart</title>
 </g>
 <g>
   <path d="M 576.0 3622.0 H 655.0 Q 661.0 3622.0 661.0 3628.0 V 4053.0 Q 661.0 4059.0 655.0 4059.0 H 572.0" class="edgeVertical"/>
@@ -1374,12 +1378,8 @@
   <title>recovery/draft_recovery_controller.dart ▶ files/file_ora.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3020.0 H 658.0 Q 664.0 3020.0 664.0 3026.0 V 3573.0 Q 664.0 3579.0 658.0 3579.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/shortcuts_help.dart ▶ widgets/material_free/material_free.dart</title>
-</g>
-<g>
-  <path d="M 576.0 2476.0 H 658.0 Q 664.0 2476.0 664.0 2482.0 V 2939.0 Q 664.0 2945.0 658.0 2945.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/text_attributes_widget.dart ▶ widgets/brush_size_picker.dart</title>
+  <path d="M 576.0 2476.0 H 658.0 Q 664.0 2476.0 664.0 2482.0 V 2971.0 Q 664.0 2977.0 658.0 2977.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/text_attributes_widget.dart ▶ widgets/color_selector.dart</title>
 </g>
 <g>
   <path d="M 576.0 3590.0 H 658.0 Q 664.0 3590.0 664.0 3596.0 V 4021.0 Q 664.0 4027.0 658.0 4027.0 H 572.0" class="edgeVertical"/>
@@ -1394,12 +1394,8 @@
   <title>main.dart ▶ files/import_files.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2988.0 H 661.0 Q 667.0 2988.0 667.0 2994.0 V 3573.0 Q 667.0 3579.0 661.0 3579.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/color_selector.dart ▶ widgets/material_free/material_free.dart</title>
-</g>
-<g>
-  <path d="M 576.0 2476.0 H 661.0 Q 667.0 2476.0 667.0 2482.0 V 2971.0 Q 667.0 2977.0 661.0 2977.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/text_attributes_widget.dart ▶ widgets/color_selector.dart</title>
+  <path d="M 576.0 2860.0 H 661.0 Q 667.0 2860.0 667.0 2866.0 V 3419.0 Q 667.0 3425.0 661.0 3425.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/color_preview.dart ▶ widgets/transparent_background.dart</title>
 </g>
 <g>
   <path d="M 576.0 3590.0 H 661.0 Q 667.0 3590.0 667.0 3596.0 V 4053.0 Q 667.0 4059.0 661.0 4059.0 H 572.0" class="edgeVertical"/>
@@ -1426,8 +1422,8 @@
   <title>models/transform_model.dart ▶ helpers/transform_helper.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2860.0 H 664.0 Q 670.0 2860.0 670.0 2866.0 V 3419.0 Q 670.0 3425.0 664.0 3425.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/color_preview.dart ▶ widgets/transparent_background.dart</title>
+  <path d="M 576.0 2700.0 H 664.0 Q 670.0 2700.0 670.0 2706.0 V 3259.0 Q 670.0 3265.0 664.0 3265.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/overlay_control_widgets.dart ▶ widgets/app_icon.dart</title>
 </g>
 <g>
   <path d="M 600.0 4336.0 H 664.0 Q 670.0 4336.0 670.0 4342.0 V 4761.0 Q 670.0 4767.0 664.0 4767.0 H 596.0" class="edgeVertical"/>
@@ -1442,8 +1438,8 @@
   <title>models/brush_style.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2700.0 H 667.0 Q 673.0 2700.0 673.0 2706.0 V 3259.0 Q 673.0 3265.0 667.0 3265.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/overlay_control_widgets.dart ▶ widgets/app_icon.dart</title>
+  <path d="M 576.0 2860.0 H 667.0 Q 673.0 2860.0 673.0 2866.0 V 3451.0 Q 673.0 3457.0 667.0 3457.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/color_preview.dart ▶ widgets/app_text.dart</title>
 </g>
 <g>
   <path d="M 600.0 4432.0 H 667.0 Q 673.0 4432.0 673.0 4438.0 V 4857.0 Q 673.0 4863.0 667.0 4863.0 H 596.0" class="edgeVertical"/>
@@ -1458,8 +1454,8 @@
   <title>models/fill_model.dart ▶ helpers/draw_path_helper.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2860.0 H 670.0 Q 676.0 2860.0 676.0 2866.0 V 3451.0 Q 676.0 3457.0 670.0 3457.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/color_preview.dart ▶ widgets/app_text.dart</title>
+  <path d="M 576.0 2604.0 H 670.0 Q 676.0 2604.0 676.0 2610.0 V 3195.0 Q 676.0 3201.0 670.0 3201.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/shortcuts.dart ▶ widgets/confirm_discard_dialog.dart</title>
 </g>
 <g>
   <path d="M 600.0 4240.0 H 670.0 Q 676.0 4240.0 676.0 4246.0 V 4697.0 Q 676.0 4703.0 670.0 4703.0 H 596.0" class="edgeVertical"/>
@@ -1582,72 +1578,76 @@
   <title>widgets/color_picker_dialog.dart ▶ widgets/app_text.dart</title>
 </g>
 <g>
-  <path d="M 576.0 992.0 H 700.0 Q 706.0 992.0 706.0 998.0 V 2459.0 Q 706.0 2465.0 700.0 2465.0 H 572.0" class="edgeVertical"/>
-  <title>panels/tools/tools_panel.dart ▶ widgets/text_attributes_widget.dart</title>
+  <path d="M 600.0 222.0 H 700.0 Q 706.0 222.0 706.0 228.0 V 2363.0 Q 706.0 2369.0 700.0 2369.0 H 572.0" class="edgeVertical"/>
+  <title>main_screen.dart ▶ widgets/main_view.dart</title>
+</g>
+<g>
+  <path d="M 576.0 3084.0 H 700.0 Q 706.0 3084.0 706.0 3090.0 V 4351.0 Q 706.0 4357.0 700.0 4357.0 H 596.0" class="edgeVertical"/>
+  <title>widgets/canvas_panel.dart ▶ providers/layers_provider.dart</title>
 </g>
 <g>
   <path d="M 600.0 4778.0 H 700.0 Q 706.0 4778.0 706.0 4784.0 V 5581.0 Q 706.0 5587.0 700.0 5587.0 H 596.0" class="edgeVertical"/>
   <title>models/transform_model.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2572.0 H 700.0 Q 706.0 2572.0 706.0 2578.0 V 3259.0 Q 706.0 3265.0 700.0 3265.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/text_editor_dialog.dart ▶ widgets/app_icon.dart</title>
+  <path d="M 576.0 2380.0 H 700.0 Q 706.0 2380.0 706.0 2386.0 V 3067.0 Q 706.0 3073.0 700.0 3073.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/main_view.dart ▶ widgets/canvas_panel.dart</title>
 </g>
 <g>
-  <path d="M 576.0 1146.0 H 703.0 Q 709.0 1146.0 709.0 1152.0 V 2779.0 Q 709.0 2785.0 703.0 2785.0 H 572.0" class="edgeVertical"/>
-  <title>panels/layers/layer_selector.dart ▶ widgets/color_picker_dialog.dart</title>
+  <path d="M 576.0 992.0 H 703.0 Q 709.0 992.0 709.0 998.0 V 2459.0 Q 709.0 2465.0 703.0 2465.0 H 572.0" class="edgeVertical"/>
+  <title>panels/tools/tools_panel.dart ▶ widgets/text_attributes_widget.dart</title>
 </g>
 <g>
   <path d="M 600.0 4746.0 H 703.0 Q 709.0 4746.0 709.0 4752.0 V 5581.0 Q 709.0 5587.0 703.0 5587.0 H 596.0" class="edgeVertical"/>
   <title>models/render_helper.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2860.0 H 703.0 Q 709.0 2860.0 709.0 2866.0 V 3573.0 Q 709.0 3579.0 703.0 3579.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 2572.0 H 703.0 Q 709.0 2572.0 709.0 2578.0 V 3259.0 Q 709.0 3265.0 703.0 3265.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/text_editor_dialog.dart ▶ widgets/app_icon.dart</title>
+</g>
+<g>
+  <path d="M 576.0 1146.0 H 706.0 Q 712.0 1146.0 712.0 1152.0 V 2779.0 Q 712.0 2785.0 706.0 2785.0 H 572.0" class="edgeVertical"/>
+  <title>panels/layers/layer_selector.dart ▶ widgets/color_picker_dialog.dart</title>
+</g>
+<g>
+  <path d="M 576.0 2860.0 H 706.0 Q 712.0 2860.0 712.0 2866.0 V 3573.0 Q 712.0 3579.0 706.0 3579.0 H 572.0" class="edgeVertical"/>
   <title>widgets/color_preview.dart ▶ widgets/material_free/material_free.dart</title>
 </g>
 <g>
-  <path d="M 576.0 992.0 H 706.0 Q 712.0 992.0 712.0 998.0 V 2715.0 Q 712.0 2721.0 706.0 2721.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 992.0 H 709.0 Q 715.0 992.0 715.0 998.0 V 2715.0 Q 715.0 2721.0 709.0 2721.0 H 572.0" class="edgeVertical"/>
   <title>panels/tools/tools_panel.dart ▶ widgets/brush_style_picker.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2732.0 H 706.0 Q 712.0 2732.0 712.0 2738.0 V 3451.0 Q 712.0 3457.0 706.0 3457.0 H 572.0" class="edgeVertical"/>
+  <path d="M 600.0 4682.0 H 709.0 Q 715.0 4682.0 715.0 4688.0 V 5517.0 Q 715.0 5523.0 709.0 5523.0 H 596.0" class="edgeVertical"/>
+  <title>models/selector_model.dart ▶ helpers/draw_path_helper.dart</title>
+</g>
+<g>
+  <path d="M 600.0 4682.0 H 709.0 Q 715.0 4682.0 715.0 4688.0 V 5517.0 Q 715.0 5523.0 709.0 5523.0 H 596.0" class="edgeVertical"/>
+  <title>models/selector_model.dart ▶ helpers/draw_path_helper.dart</title>
+</g>
+<g>
+  <path d="M 576.0 2732.0 H 709.0 Q 715.0 2732.0 715.0 2738.0 V 3451.0 Q 715.0 3457.0 709.0 3457.0 H 572.0" class="edgeVertical"/>
   <title>widgets/brush_style_picker.dart ▶ widgets/app_text.dart</title>
 </g>
 <g>
-  <path d="M 600.0 222.0 H 709.0 Q 715.0 222.0 715.0 228.0 V 2363.0 Q 715.0 2369.0 709.0 2369.0 H 572.0" class="edgeVertical"/>
-  <title>main_screen.dart ▶ widgets/main_view.dart</title>
-</g>
-<g>
-  <path d="M 600.0 4682.0 H 709.0 Q 715.0 4682.0 715.0 4688.0 V 5517.0 Q 715.0 5523.0 709.0 5523.0 H 596.0" class="edgeVertical"/>
-  <title>models/selector_model.dart ▶ helpers/draw_path_helper.dart</title>
-</g>
-<g>
-  <path d="M 600.0 4682.0 H 709.0 Q 715.0 4682.0 715.0 4688.0 V 5517.0 Q 715.0 5523.0 709.0 5523.0 H 596.0" class="edgeVertical"/>
-  <title>models/selector_model.dart ▶ helpers/draw_path_helper.dart</title>
-</g>
-<g>
-  <path d="M 576.0 2636.0 H 709.0 Q 715.0 2636.0 715.0 2642.0 V 3355.0 Q 715.0 3361.0 709.0 3361.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/image_placement_widget.dart ▶ widgets/rotation_handle_widgets.dart</title>
+  <path d="M 600.0 190.0 H 712.0 Q 718.0 190.0 718.0 196.0 V 2587.0 Q 718.0 2593.0 712.0 2593.0 H 572.0" class="edgeVertical"/>
+  <title>main.dart ▶ widgets/shortcuts.dart</title>
 </g>
 <g>
   <path d="M 600.0 4464.0 H 712.0 Q 718.0 4464.0 718.0 4470.0 V 5325.0 Q 718.0 5331.0 712.0 5331.0 H 596.0" class="edgeVertical"/>
   <title>providers/flood_fill.dart ▶ helpers/image_helper.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2540.0 H 712.0 Q 718.0 2540.0 718.0 2546.0 V 3259.0 Q 718.0 3265.0 712.0 3265.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/magnifying_eye_dropper.dart ▶ widgets/app_icon.dart</title>
-</g>
-<g>
-  <path d="M 576.0 3116.0 H 715.0 Q 721.0 3116.0 721.0 3122.0 V 4351.0 Q 721.0 4357.0 715.0 4357.0 H 596.0" class="edgeVertical"/>
-  <title>widgets/canvas_panel.dart ▶ providers/layers_provider.dart</title>
+  <path d="M 576.0 2636.0 H 712.0 Q 718.0 2636.0 718.0 2642.0 V 3355.0 Q 718.0 3361.0 712.0 3361.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/image_placement_widget.dart ▶ widgets/rotation_handle_widgets.dart</title>
 </g>
 <g>
   <path d="M 600.0 4682.0 H 715.0 Q 721.0 4682.0 721.0 4688.0 V 5581.0 Q 721.0 5587.0 715.0 5587.0 H 596.0" class="edgeVertical"/>
   <title>models/selector_model.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2380.0 H 715.0 Q 721.0 2380.0 721.0 2386.0 V 3099.0 Q 721.0 3105.0 715.0 3105.0 H 572.0" class="edgeVertical"/>
-  <title>widgets/main_view.dart ▶ widgets/canvas_panel.dart</title>
+  <path d="M 576.0 2540.0 H 715.0 Q 721.0 2540.0 721.0 2546.0 V 3259.0 Q 721.0 3265.0 715.0 3265.0 H 572.0" class="edgeVertical"/>
+  <title>widgets/magnifying_eye_dropper.dart ▶ widgets/app_icon.dart</title>
 </g>
 <g>
   <path d="M 576.0 992.0 H 718.0 Q 724.0 992.0 724.0 998.0 V 2779.0 Q 724.0 2785.0 718.0 2785.0 H 572.0" class="edgeVertical"/>
@@ -1668,10 +1668,6 @@
 <g>
   <path d="M 576.0 2540.0 H 721.0 Q 727.0 2540.0 727.0 2546.0 V 3291.0 Q 727.0 3297.0 721.0 3297.0 H 572.0" class="edgeVertical"/>
   <title>widgets/magnifying_eye_dropper.dart ▶ widgets/draw_rect.dart</title>
-</g>
-<g>
-  <path d="M 600.0 190.0 H 724.0 Q 730.0 190.0 730.0 196.0 V 2587.0 Q 730.0 2593.0 724.0 2593.0 H 572.0" class="edgeVertical"/>
-  <title>main.dart ▶ widgets/shortcuts.dart</title>
 </g>
 <g>
   <path d="M 600.0 4528.0 H 724.0 Q 730.0 4528.0 730.0 4534.0 V 5549.0 Q 730.0 5555.0 724.0 5555.0 H 596.0" class="edgeVertical"/>
@@ -1822,16 +1818,16 @@
   <title>widgets/canvas_gesture_handler.dart ▶ widgets/material_free/material_free.dart</title>
 </g>
 <g>
-  <path d="M 600.0 1534.0 H 778.0 Q 784.0 1534.0 784.0 1540.0 V 3035.0 Q 784.0 3041.0 778.0 3041.0 H 572.0" class="edgeVertical"/>
-  <title>files/import_files.dart ▶ widgets/confirm_discard_dialog.dart</title>
+  <path d="M 576.0 1146.0 H 778.0 Q 784.0 1146.0 784.0 1152.0 V 2843.0 Q 784.0 2849.0 778.0 2849.0 H 572.0" class="edgeVertical"/>
+  <title>panels/layers/layer_selector.dart ▶ widgets/color_preview.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3148.0 H 778.0 Q 784.0 3148.0 784.0 3154.0 V 4383.0 Q 784.0 4389.0 778.0 4389.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 3116.0 H 778.0 Q 784.0 3116.0 784.0 3122.0 V 4383.0 Q 784.0 4389.0 778.0 4389.0 H 596.0" class="edgeVertical"/>
   <title>widgets/canvas_panel_painter.dart ▶ providers/layer_provider.dart</title>
 </g>
 <g>
-  <path d="M 576.0 1146.0 H 781.0 Q 787.0 1146.0 787.0 1152.0 V 2843.0 Q 787.0 2849.0 781.0 2849.0 H 572.0" class="edgeVertical"/>
-  <title>panels/layers/layer_selector.dart ▶ widgets/color_preview.dart</title>
+  <path d="M 600.0 1534.0 H 781.0 Q 787.0 1534.0 787.0 1540.0 V 3195.0 Q 787.0 3201.0 781.0 3201.0 H 572.0" class="edgeVertical"/>
+  <title>files/import_files.dart ▶ widgets/confirm_discard_dialog.dart</title>
 </g>
 <g>
   <path d="M 576.0 4038.0 H 781.0 Q 787.0 4038.0 787.0 4044.0 V 5581.0 Q 787.0 5587.0 781.0 5587.0 H 596.0" class="edgeVertical"/>
@@ -1922,7 +1918,7 @@
   <title>widgets/material_free/app_divider.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
-  <path d="M 576.0 1146.0 H 823.0 Q 829.0 1146.0 829.0 1152.0 V 3163.0 Q 829.0 3169.0 823.0 3169.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 1146.0 H 823.0 Q 829.0 1146.0 829.0 1152.0 V 3131.0 Q 829.0 3137.0 823.0 3137.0 H 572.0" class="edgeVertical"/>
   <title>panels/layers/layer_selector.dart ▶ widgets/container_slider.dart</title>
 </g>
 <g>
@@ -1942,8 +1938,8 @@
   <title>widgets/text_editor.dart ▶ providers/app_provider.dart</title>
 </g>
 <g>
-  <path d="M 576.0 838.0 H 835.0 Q 841.0 838.0 841.0 844.0 V 2875.0 Q 841.0 2881.0 835.0 2881.0 H 572.0" class="edgeVertical"/>
-  <title>panels/side_panel/canvas_settings.dart ▶ widgets/nine_grid_selector.dart</title>
+  <path d="M 576.0 1146.0 H 835.0 Q 841.0 1146.0 841.0 1152.0 V 3163.0 Q 841.0 3169.0 835.0 3169.0 H 572.0" class="edgeVertical"/>
+  <title>panels/layers/layer_selector.dart ▶ widgets/truncated_text.dart</title>
 </g>
 <g>
   <path d="M 576.0 3750.0 H 835.0 Q 841.0 3750.0 841.0 3756.0 V 5581.0 Q 841.0 5587.0 835.0 5587.0 H 596.0" class="edgeVertical"/>
@@ -1962,8 +1958,8 @@
   <title>widgets/text_attributes_widget.dart ▶ providers/app_provider.dart</title>
 </g>
 <g>
-  <path d="M 600.0 1534.0 H 847.0 Q 853.0 1534.0 853.0 1540.0 V 3573.0 Q 853.0 3579.0 847.0 3579.0 H 572.0" class="edgeVertical"/>
-  <title>files/import_files.dart ▶ widgets/material_free/material_free.dart</title>
+  <path d="M 576.0 838.0 H 847.0 Q 853.0 838.0 853.0 844.0 V 2875.0 Q 853.0 2881.0 847.0 2881.0 H 572.0" class="edgeVertical"/>
+  <title>panels/side_panel/canvas_settings.dart ▶ widgets/nine_grid_selector.dart</title>
 </g>
 <g>
   <path d="M 576.0 3718.0 H 847.0 Q 853.0 3718.0 853.0 3724.0 V 5581.0 Q 853.0 5587.0 847.0 5587.0 H 596.0" class="edgeVertical"/>
@@ -1978,8 +1974,8 @@
   <title>widgets/main_view.dart ▶ providers/app_provider_canvas.dart</title>
 </g>
 <g>
-  <path d="M 600.0 1412.0 H 856.0 Q 862.0 1412.0 862.0 1418.0 V 3451.0 Q 862.0 3457.0 856.0 3457.0 H 572.0" class="edgeVertical"/>
-  <title>pages/platforms_page.dart ▶ widgets/app_text.dart</title>
+  <path d="M 600.0 1534.0 H 856.0 Q 862.0 1534.0 862.0 1540.0 V 3573.0 Q 862.0 3579.0 856.0 3579.0 H 572.0" class="edgeVertical"/>
+  <title>files/import_files.dart ▶ widgets/material_free/material_free.dart</title>
 </g>
 <g>
   <path d="M 576.0 3686.0 H 856.0 Q 862.0 3686.0 862.0 3692.0 V 5581.0 Q 862.0 5587.0 856.0 5587.0 H 596.0" class="edgeVertical"/>
@@ -1994,8 +1990,8 @@
   <title>widgets/main_view.dart ▶ providers/app_provider_selection.dart</title>
 </g>
 <g>
-  <path d="M 576.0 1146.0 H 865.0 Q 871.0 1146.0 871.0 1152.0 V 3195.0 Q 871.0 3201.0 865.0 3201.0 H 572.0" class="edgeVertical"/>
-  <title>panels/layers/layer_selector.dart ▶ widgets/truncated_text.dart</title>
+  <path d="M 600.0 1412.0 H 865.0 Q 871.0 1412.0 871.0 1418.0 V 3451.0 Q 871.0 3457.0 865.0 3457.0 H 572.0" class="edgeVertical"/>
+  <title>pages/platforms_page.dart ▶ widgets/app_text.dart</title>
 </g>
 <g>
   <path d="M 576.0 3654.0 H 865.0 Q 871.0 3654.0 871.0 3660.0 V 5581.0 Q 871.0 5587.0 865.0 5587.0 H 596.0" class="edgeVertical"/>
@@ -2018,48 +2014,48 @@
   <title>widgets/material_free/app_buttons.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2892.0 H 877.0 Q 883.0 2892.0 883.0 2898.0 V 4953.0 Q 883.0 4959.0 877.0 4959.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 3212.0 H 877.0 Q 883.0 3212.0 883.0 3218.0 V 5203.0 Q 883.0 5209.0 877.0 5209.0 H 596.0" class="edgeVertical"/>
+  <title>widgets/confirm_discard_dialog.dart ▶ l10n/app_localizations.dart</title>
+</g>
+<g>
+  <path d="M 576.0 2892.0 H 880.0 Q 886.0 2892.0 886.0 2898.0 V 4953.0 Q 886.0 4959.0 880.0 4959.0 H 596.0" class="edgeVertical"/>
   <title>widgets/nine_grid_selector.dart ▶ models/canvas_resize.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2764.0 H 880.0 Q 886.0 2764.0 886.0 2770.0 V 4857.0 Q 886.0 4863.0 880.0 4863.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2764.0 H 883.0 Q 889.0 2764.0 889.0 2770.0 V 4857.0 Q 889.0 4863.0 883.0 4863.0 H 596.0" class="edgeVertical"/>
   <title>widgets/fill_widget.dart ▶ models/fill_model.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2604.0 H 883.0 Q 889.0 2604.0 889.0 2610.0 V 4697.0 Q 889.0 4703.0 883.0 4703.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2604.0 H 886.0 Q 892.0 2604.0 892.0 2610.0 V 4697.0 Q 892.0 4703.0 886.0 4703.0 H 596.0" class="edgeVertical"/>
   <title>widgets/shortcuts.dart ▶ models/user_action_drawing.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2668.0 H 886.0 Q 892.0 2668.0 892.0 2674.0 V 4761.0 Q 892.0 4767.0 886.0 4767.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2668.0 H 889.0 Q 895.0 2668.0 895.0 2674.0 V 4761.0 Q 895.0 4767.0 889.0 4767.0 H 596.0" class="edgeVertical"/>
   <title>widgets/transform_widget.dart ▶ models/transform_model.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2412.0 H 889.0 Q 895.0 2412.0 895.0 2418.0 V 4511.0 Q 895.0 4517.0 889.0 4517.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2412.0 H 892.0 Q 898.0 2412.0 898.0 2418.0 V 4511.0 Q 898.0 4517.0 892.0 4517.0 H 596.0" class="edgeVertical"/>
   <title>widgets/canvas_gesture_handler.dart ▶ providers/app_preferences.dart</title>
 </g>
 <g>
-  <path d="M 576.0 1146.0 H 892.0 Q 898.0 1146.0 898.0 1152.0 V 3259.0 Q 898.0 3265.0 892.0 3265.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 1146.0 H 895.0 Q 901.0 1146.0 901.0 1152.0 V 3259.0 Q 901.0 3265.0 895.0 3265.0 H 572.0" class="edgeVertical"/>
   <title>panels/layers/layer_selector.dart ▶ widgets/app_icon.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3468.0 H 892.0 Q 898.0 3468.0 898.0 3474.0 V 5581.0 Q 898.0 5587.0 892.0 5587.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 3468.0 H 895.0 Q 901.0 3468.0 901.0 3474.0 V 5581.0 Q 901.0 5587.0 895.0 5587.0 H 596.0" class="edgeVertical"/>
   <title>widgets/app_text.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3436.0 H 895.0 Q 901.0 3436.0 901.0 3442.0 V 5581.0 Q 901.0 5587.0 895.0 5587.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 3436.0 H 898.0 Q 904.0 3436.0 904.0 3442.0 V 5581.0 Q 904.0 5587.0 898.0 5587.0 H 596.0" class="edgeVertical"/>
   <title>widgets/transparent_background.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
-  <path d="M 576.0 1210.0 H 895.0 Q 901.0 1210.0 901.0 1216.0 V 3323.0 Q 901.0 3329.0 895.0 3329.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 1210.0 H 898.0 Q 904.0 1210.0 904.0 1216.0 V 3323.0 Q 904.0 3329.0 898.0 3329.0 H 572.0" class="edgeVertical"/>
   <title>panels/layers/layer_thumbnail.dart ▶ widgets/image_painter.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2412.0 H 898.0 Q 904.0 2412.0 904.0 2418.0 V 4543.0 Q 904.0 4549.0 898.0 4549.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2412.0 H 901.0 Q 907.0 2412.0 907.0 2418.0 V 4543.0 Q 907.0 4549.0 901.0 4549.0 H 596.0" class="edgeVertical"/>
   <title>widgets/canvas_gesture_handler.dart ▶ providers/shell_provider.dart</title>
-</g>
-<g>
-  <path d="M 576.0 3052.0 H 901.0 Q 907.0 3052.0 907.0 3058.0 V 5203.0 Q 907.0 5209.0 901.0 5209.0 H 596.0" class="edgeVertical"/>
-  <title>widgets/confirm_discard_dialog.dart ▶ l10n/app_localizations.dart</title>
 </g>
 <g>
   <path d="M 600.0 1412.0 H 904.0 Q 910.0 1412.0 910.0 1418.0 V 3573.0 Q 910.0 3579.0 904.0 3579.0 H 572.0" class="edgeVertical"/>
@@ -2178,44 +2174,44 @@
   <title>widgets/selector_widget.dart ▶ models/effect_labels.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3212.0 H 976.0 Q 982.0 3212.0 982.0 3218.0 V 5581.0 Q 982.0 5587.0 976.0 5587.0 H 596.0" class="edgeVertical"/>
-  <title>widgets/truncated_text.dart ▶ helpers/constants.dart</title>
-</g>
-<g>
-  <path d="M 576.0 2828.0 H 979.0 Q 985.0 2828.0 985.0 2834.0 V 5203.0 Q 985.0 5209.0 979.0 5209.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2828.0 H 976.0 Q 982.0 2828.0 982.0 2834.0 V 5203.0 Q 982.0 5209.0 976.0 5209.0 H 596.0" class="edgeVertical"/>
   <title>widgets/top_colors.dart ▶ l10n/app_localizations.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2700.0 H 982.0 Q 988.0 2700.0 988.0 2706.0 V 5081.0 Q 988.0 5087.0 982.0 5087.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2700.0 H 979.0 Q 985.0 2700.0 985.0 2706.0 V 5081.0 Q 985.0 5087.0 979.0 5087.0 H 596.0" class="edgeVertical"/>
   <title>widgets/overlay_control_widgets.dart ▶ models/app_icon_enum.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2444.0 H 985.0 Q 991.0 2444.0 991.0 2450.0 V 4825.0 Q 991.0 4831.0 985.0 4831.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2444.0 H 982.0 Q 988.0 2444.0 988.0 2450.0 V 4825.0 Q 988.0 4831.0 982.0 4831.0 H 596.0" class="edgeVertical"/>
   <title>widgets/selector_widget.dart ▶ models/selection_effect.dart</title>
 </g>
 <g>
-  <path d="M 576.0 1178.0 H 988.0 Q 994.0 1178.0 994.0 1184.0 V 3573.0 Q 994.0 3579.0 988.0 3579.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 1178.0 H 985.0 Q 991.0 1178.0 991.0 1184.0 V 3573.0 Q 991.0 3579.0 985.0 3579.0 H 572.0" class="edgeVertical"/>
   <title>panels/layers/blend_mode.dart ▶ widgets/material_free/material_free.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3180.0 H 991.0 Q 997.0 3180.0 997.0 3186.0 V 5581.0 Q 997.0 5587.0 991.0 5587.0 H 596.0" class="edgeVertical"/>
-  <title>widgets/container_slider.dart ▶ helpers/constants.dart</title>
+  <path d="M 576.0 3180.0 H 988.0 Q 994.0 3180.0 994.0 3186.0 V 5581.0 Q 994.0 5587.0 988.0 5587.0 H 596.0" class="edgeVertical"/>
+  <title>widgets/truncated_text.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2796.0 H 994.0 Q 1000.0 2796.0 1000.0 2802.0 V 5203.0 Q 1000.0 5209.0 994.0 5209.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2796.0 H 991.0 Q 997.0 2796.0 997.0 2802.0 V 5203.0 Q 997.0 5209.0 991.0 5209.0 H 596.0" class="edgeVertical"/>
   <title>widgets/color_picker_dialog.dart ▶ l10n/app_localizations.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2572.0 H 997.0 Q 1003.0 2572.0 1003.0 2578.0 V 4985.0 Q 1003.0 4991.0 997.0 4991.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2572.0 H 994.0 Q 1000.0 2572.0 1000.0 2578.0 V 4985.0 Q 1000.0 4991.0 994.0 4991.0 H 596.0" class="edgeVertical"/>
   <title>widgets/text_editor_dialog.dart ▶ models/text_object.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2668.0 H 1000.0 Q 1006.0 2668.0 1006.0 2674.0 V 5081.0 Q 1006.0 5087.0 1000.0 5087.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2668.0 H 997.0 Q 1003.0 2668.0 1003.0 2674.0 V 5081.0 Q 1003.0 5087.0 997.0 5087.0 H 596.0" class="edgeVertical"/>
   <title>widgets/transform_widget.dart ▶ models/app_icon_enum.dart</title>
 </g>
 <g>
-  <path d="M 576.0 1146.0 H 1003.0 Q 1009.0 1146.0 1009.0 1152.0 V 3573.0 Q 1009.0 3579.0 1003.0 3579.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 1146.0 H 1000.0 Q 1006.0 1146.0 1006.0 1152.0 V 3573.0 Q 1006.0 3579.0 1000.0 3579.0 H 572.0" class="edgeVertical"/>
   <title>panels/layers/layer_selector.dart ▶ widgets/material_free/material_free.dart</title>
+</g>
+<g>
+  <path d="M 576.0 3148.0 H 1003.0 Q 1009.0 3148.0 1009.0 3154.0 V 5581.0 Q 1009.0 5587.0 1003.0 5587.0 H 596.0" class="edgeVertical"/>
+  <title>widgets/container_slider.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
   <path d="M 576.0 2764.0 H 1006.0 Q 1012.0 2764.0 1012.0 2770.0 V 5203.0 Q 1012.0 5209.0 1006.0 5209.0 H 596.0" class="edgeVertical"/>
@@ -2254,20 +2250,20 @@
   <title>widgets/text_editor.dart ▶ models/text_object.dart</title>
 </g>
 <g>
-  <path d="M 576.0 3084.0 H 1033.0 Q 1039.0 3084.0 1039.0 3090.0 V 5581.0 Q 1039.0 5587.0 1033.0 5587.0 H 596.0" class="edgeVertical"/>
-  <title>widgets/base_picker.dart ▶ helpers/constants.dart</title>
-</g>
-<g>
-  <path d="M 576.0 2700.0 H 1036.0 Q 1042.0 2700.0 1042.0 2706.0 V 5203.0 Q 1042.0 5209.0 1036.0 5209.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2700.0 H 1033.0 Q 1039.0 2700.0 1039.0 2706.0 V 5203.0 Q 1039.0 5209.0 1033.0 5209.0 H 596.0" class="edgeVertical"/>
   <title>widgets/overlay_control_widgets.dart ▶ l10n/app_localizations.dart</title>
 </g>
 <g>
-  <path d="M 576.0 2572.0 H 1039.0 Q 1045.0 2572.0 1045.0 2578.0 V 5081.0 Q 1045.0 5087.0 1039.0 5087.0 H 596.0" class="edgeVertical"/>
+  <path d="M 576.0 2572.0 H 1036.0 Q 1042.0 2572.0 1042.0 2578.0 V 5081.0 Q 1042.0 5087.0 1036.0 5087.0 H 596.0" class="edgeVertical"/>
   <title>widgets/text_editor_dialog.dart ▶ models/app_icon_enum.dart</title>
 </g>
 <g>
-  <path d="M 576.0 742.0 H 1042.0 Q 1048.0 742.0 1048.0 748.0 V 3259.0 Q 1048.0 3265.0 1042.0 3265.0 H 572.0" class="edgeVertical"/>
+  <path d="M 576.0 742.0 H 1039.0 Q 1045.0 742.0 1045.0 748.0 V 3259.0 Q 1045.0 3265.0 1039.0 3265.0 H 572.0" class="edgeVertical"/>
   <title>panels/side_panel/side_panel_top_menu.dart ▶ widgets/app_icon.dart</title>
+</g>
+<g>
+  <path d="M 576.0 3052.0 H 1042.0 Q 1048.0 3052.0 1048.0 3058.0 V 5581.0 Q 1048.0 5587.0 1042.0 5587.0 H 596.0" class="edgeVertical"/>
+  <title>widgets/base_picker.dart ▶ helpers/constants.dart</title>
 </g>
 <g>
   <path d="M 576.0 2668.0 H 1045.0 Q 1051.0 2668.0 1051.0 2674.0 V 5203.0 Q 1051.0 5209.0 1045.0 5209.0 H 596.0" class="edgeVertical"/>
@@ -3841,45 +3837,44 @@
 3. widgets/material_free/material_free.dart</title></g><text x="450.0" y="3014.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">shortcuts_help.dart</text>
 <g class="badge incomingBadge">
   <path d="M 566.0,3041.0 L 578.0,3034.0 Q 581.0,3034.0 581.0,3037.0 L 581.0,3045.0 Q 581.0,3048.0 578.0,3048.0 Z" fill="#3b82f6"/>
-  <text x="576.32" y="3042.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. files/import_files.dart
-2. widgets/shortcuts.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 582.0,3052.0 L 570.0,3045.0 Q 567.0,3045.0 567.0,3048.0 L 567.0,3056.0 Q 567.0,3059.0 570.0,3059.0 Z" fill="#10b981"/>
-  <text x="571.68" y="3053.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. l10n/app_localizations.dart
-2. widgets/app_text.dart
-3. widgets/material_free/material_free.dart</title></g><text x="450.0" y="3046.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">confirm_discard_dialog.dart</text>
-<g class="badge incomingBadge">
-  <path d="M 566.0,3073.0 L 578.0,3066.0 Q 581.0,3066.0 581.0,3069.0 L 581.0,3077.0 Q 581.0,3080.0 578.0,3080.0 Z" fill="#3b82f6"/>
-  <text x="576.32" y="3074.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. widgets/brush_size_picker.dart
+  <text x="576.32" y="3042.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. widgets/brush_size_picker.dart
 2. widgets/brush_style_picker.dart
 3. widgets/tolerance_picker.dart</title></g><g class="badge outgoingBadge">
-  <path d="M 582.0,3084.0 L 570.0,3077.0 Q 567.0,3077.0 567.0,3080.0 L 567.0,3088.0 Q 567.0,3091.0 570.0,3091.0 Z" fill="#10b981"/>
-  <text x="571.68" y="3085.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. helpers/constants.dart
+  <path d="M 582.0,3052.0 L 570.0,3045.0 Q 567.0,3045.0 567.0,3048.0 L 567.0,3056.0 Q 567.0,3059.0 570.0,3059.0 Z" fill="#10b981"/>
+  <text x="571.68" y="3053.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. helpers/constants.dart
 2. widgets/app_text.dart
-3. widgets/material_free/material_free.dart</title></g><text x="450.0" y="3078.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">base_picker.dart</text>
+3. widgets/material_free/material_free.dart</title></g><text x="450.0" y="3046.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">base_picker.dart</text>
+<g class="badge incomingBadge">
+  <path d="M 566.0,3073.0 L 578.0,3066.0 Q 581.0,3066.0 581.0,3069.0 L 581.0,3077.0 Q 581.0,3080.0 578.0,3080.0 Z" fill="#3b82f6"/>
+  <text x="576.32" y="3074.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. widgets/main_view.dart</title></g><g class="badge outgoingBadge">
+  <path d="M 582.0,3084.0 L 570.0,3077.0 Q 567.0,3077.0 567.0,3080.0 L 567.0,3088.0 Q 567.0,3091.0 570.0,3091.0 Z" fill="#10b981"/>
+  <text x="571.68" y="3085.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. providers/layers_provider.dart
+2. widgets/canvas_panel_painter.dart</title></g><text x="450.0" y="3078.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">canvas_panel.dart</text>
 <g class="badge incomingBadge">
   <path d="M 566.0,3105.0 L 578.0,3098.0 Q 581.0,3098.0 581.0,3101.0 L 581.0,3109.0 Q 581.0,3112.0 578.0,3112.0 Z" fill="#3b82f6"/>
-  <text x="576.32" y="3106.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. widgets/main_view.dart</title></g><g class="badge outgoingBadge">
+  <text x="576.32" y="3106.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. widgets/canvas_panel.dart</title></g><g class="badge outgoingBadge">
   <path d="M 582.0,3116.0 L 570.0,3109.0 Q 567.0,3109.0 567.0,3112.0 L 567.0,3120.0 Q 567.0,3123.0 570.0,3123.0 Z" fill="#10b981"/>
-  <text x="571.68" y="3117.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. providers/layers_provider.dart
-2. widgets/canvas_panel_painter.dart</title></g><text x="450.0" y="3110.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">canvas_panel.dart</text>
+  <text x="571.68" y="3117.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. providers/layer_provider.dart
+2. widgets/transparent_background.dart</title></g><text x="450.0" y="3110.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">canvas_panel_painter.dart</text>
 <g class="badge incomingBadge">
   <path d="M 566.0,3137.0 L 578.0,3130.0 Q 581.0,3130.0 581.0,3133.0 L 581.0,3141.0 Q 581.0,3144.0 578.0,3144.0 Z" fill="#3b82f6"/>
-  <text x="576.32" y="3138.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. widgets/canvas_panel.dart</title></g><g class="badge outgoingBadge">
+  <text x="576.32" y="3138.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/layers/layer_selector.dart</title></g><g class="badge outgoingBadge">
   <path d="M 582.0,3148.0 L 570.0,3141.0 Q 567.0,3141.0 567.0,3144.0 L 567.0,3152.0 Q 567.0,3155.0 570.0,3155.0 Z" fill="#10b981"/>
-  <text x="571.68" y="3149.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. providers/layer_provider.dart
-2. widgets/transparent_background.dart</title></g><text x="450.0" y="3142.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">canvas_panel_painter.dart</text>
+  <text x="571.68" y="3149.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. helpers/constants.dart
+2. widgets/app_text.dart</title></g><text x="450.0" y="3142.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">container_slider.dart</text>
 <g class="badge incomingBadge">
   <path d="M 566.0,3169.0 L 578.0,3162.0 Q 581.0,3162.0 581.0,3165.0 L 581.0,3173.0 Q 581.0,3176.0 578.0,3176.0 Z" fill="#3b82f6"/>
   <text x="576.32" y="3170.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/layers/layer_selector.dart</title></g><g class="badge outgoingBadge">
   <path d="M 582.0,3180.0 L 570.0,3173.0 Q 567.0,3173.0 567.0,3176.0 L 567.0,3184.0 Q 567.0,3187.0 570.0,3187.0 Z" fill="#10b981"/>
   <text x="571.68" y="3181.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. helpers/constants.dart
-2. widgets/app_text.dart</title></g><text x="450.0" y="3174.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">container_slider.dart</text>
+2. widgets/app_text.dart</title></g><text x="450.0" y="3174.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">truncated_text.dart</text>
 <g class="badge incomingBadge">
   <path d="M 566.0,3201.0 L 578.0,3194.0 Q 581.0,3194.0 581.0,3197.0 L 581.0,3205.0 Q 581.0,3208.0 578.0,3208.0 Z" fill="#3b82f6"/>
-  <text x="576.32" y="3202.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. panels/layers/layer_selector.dart</title></g><g class="badge outgoingBadge">
+  <text x="576.32" y="3202.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. files/import_files.dart
+2. widgets/shortcuts.dart</title></g><g class="badge outgoingBadge">
   <path d="M 582.0,3212.0 L 570.0,3205.0 Q 567.0,3205.0 567.0,3208.0 L 567.0,3216.0 Q 567.0,3219.0 570.0,3219.0 Z" fill="#10b981"/>
-  <text x="571.68" y="3213.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. helpers/constants.dart
-2. widgets/app_text.dart</title></g><text x="450.0" y="3206.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">truncated_text.dart</text>
+  <text x="571.68" y="3213.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. l10n/app_localizations.dart
+2. widgets/material_free/material_free.dart</title></g><text x="450.0" y="3206.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">confirm_discard_dialog.dart</text>
 <g class="badge incomingBadge">
   <path d="M 566.0,3233.0 L 578.0,3226.0 Q 581.0,3226.0 581.0,3229.0 L 581.0,3237.0 Q 581.0,3240.0 578.0,3240.0 Z" fill="#3b82f6"/>
   <text x="576.32" y="3234.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. panels/tools/tools_panel.dart
@@ -3945,7 +3940,7 @@
   <text x="571.68" y="3437.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. helpers/constants.dart</title></g><text x="450.0" y="3430.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">transparent_background.dart</text>
 <g class="badge incomingBadge">
   <path d="M 564.0,3457.0 L 580.0,3449.4 Q 583.0,3449.4 583.0,3452.4 L 583.0,3461.6 Q 583.0,3464.6 580.0,3464.6 Z" fill="#3b82f6"/>
-  <text x="577.28" y="3458.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">25</text><title>1. files/import_files.dart
+  <text x="577.28" y="3458.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">24</text><title>1. files/import_files.dart
 2. floating_buttons.dart
 3. main.dart
 4. pages/platforms_page.dart
@@ -3961,15 +3956,14 @@
 14. widgets/brush_style_picker.dart
 15. widgets/color_picker_dialog.dart
 16. widgets/color_preview.dart
-17. widgets/confirm_discard_dialog.dart
-18. widgets/container_slider.dart
-19. widgets/overlay_control_widgets.dart
-20. widgets/selector_widget.dart
-21. widgets/shortcuts_help.dart
-22. widgets/text_editor.dart
-23. widgets/text_editor_dialog.dart
-24. widgets/top_colors.dart
-25. widgets/truncated_text.dart</title></g><g class="badge outgoingBadge">
+17. widgets/container_slider.dart
+18. widgets/overlay_control_widgets.dart
+19. widgets/selector_widget.dart
+20. widgets/shortcuts_help.dart
+21. widgets/text_editor.dart
+22. widgets/text_editor_dialog.dart
+23. widgets/top_colors.dart
+24. widgets/truncated_text.dart</title></g><g class="badge outgoingBadge">
   <path d="M 582.0,3468.0 L 570.0,3461.0 Q 567.0,3461.0 567.0,3464.0 L 567.0,3472.0 Q 567.0,3475.0 570.0,3475.0 Z" fill="#10b981"/>
   <text x="571.68" y="3469.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. helpers/constants.dart</title></g><text x="450.0" y="3462.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">app_text.dart</text>
 <g class="badge incomingBadge">

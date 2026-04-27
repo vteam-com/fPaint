@@ -37,7 +37,7 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
               child: Row(
                 children: <Widget>[
-                  AppIconButton(
+                  AppButtonIcon(
                     icon: const AppSvgIcon(icon: AppIcon.arrowLeft),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -61,7 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     children: <Widget>[
                       AppListTile(
                         title: AppText(l10n.languageLabel),
-                        subtitle: AppText(l10n.languageSubtitle),
+                        subtitle: AppText(l10n.languageSubtitle, variant: AppTextVariant.subtitle),
                         trailing: AppDropdown<String>(
                           value: selectedLanguage,
                           onChanged: (final String? value) {
@@ -95,7 +95,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       const AppDivider(),
                       AppListTile(
                         title: AppText(l10n.useApplePencilOnlyTitle),
-                        subtitle: AppText(l10n.useApplePencilOnlySubtitle),
+                        subtitle: AppText(l10n.useApplePencilOnlySubtitle, variant: AppTextVariant.subtitle),
                         trailing: AppToggleSwitch(
                           value: appPreferences.useApplePencil,
                           onChanged: (final bool value) {
@@ -111,11 +111,11 @@ class _SettingsPageState extends State<SettingsPage> {
                         },
                       ),
                       const AppDivider(),
-                      AppTextButton(
+                      AppButtonText(
                         onPressed: () {
                           showShortcutsHelp(context);
                         },
-                        child: AppText(l10n.keyboardShortcuts),
+                        text: l10n.keyboardShortcuts,
                       ),
                     ],
                   ),
