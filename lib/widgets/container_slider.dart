@@ -107,7 +107,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
                 child: Text(
                   '${(currentValue * AppLimits.percentMax).toStringAsFixed(1)}%',
                   style: const TextStyle(
-                    fontSize: AppSpacing.lg,
+                    fontSize: AppFontSize.medium,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

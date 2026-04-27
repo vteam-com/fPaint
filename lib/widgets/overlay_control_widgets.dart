@@ -158,7 +158,7 @@ class OverlayDragHandle extends StatelessWidget {
                     .replaceFirst(_placeholderX, position.dx.toInt().toString())
                     .replaceFirst(_placeholderY, position.dy.toInt().toString()),
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: AppSpacing.sm, color: AppPalette.white),
+                style: AppTextStyle.label,
               ),
             ),
           ),

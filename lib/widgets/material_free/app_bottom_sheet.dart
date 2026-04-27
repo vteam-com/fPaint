@@ -35,10 +35,7 @@ Future<T?> showAppBottomSheet<T>({
                   ),
                 ),
                 child: DefaultTextStyle(
-                  style: const TextStyle(
-                    fontFamily: appFontFamily,
-                    color: AppPalette.white,
-                  ),
+                  style: AppTextStyle.body,
                   child: builder(dialogContext),
                 ),
               ),

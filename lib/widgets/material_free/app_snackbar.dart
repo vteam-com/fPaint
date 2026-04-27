@@ -42,7 +42,7 @@ class AppNotificationOverlay {
                 ),
                 child: Text(
                   message,
-                  style: const TextStyle(color: AppPalette.white),
+                  style: AppTextStyle.body,
                 ),
               ),
             ),

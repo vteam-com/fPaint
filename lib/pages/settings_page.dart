@@ -43,11 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     l10n.settings,
-                    style: const TextStyle(
-                      color: AppPalette.white,
-                      fontSize: AppFontSize.titleHero,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTextStyle.titleBold,
                   ),
                 ],
               ),

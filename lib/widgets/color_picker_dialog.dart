@@ -78,10 +78,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                       child: Text(
                         widget.title,
                         textAlign: TextAlign.start,
-                        style: const TextStyle(
-                          color: AppPalette.white,
-                          fontSize: AppFontSize.titleHero,
-                        ),
+                        style: AppTextStyle.title,
                       ),
                     ),
                     _buildContent(layersModel),

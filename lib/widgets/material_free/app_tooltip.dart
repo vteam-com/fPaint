@@ -61,7 +61,7 @@ class _AppTooltipState extends State<AppTooltip> {
                 ),
                 child: Text(
                   widget.message,
-                  style: const TextStyle(color: AppPalette.white, fontSize: AppFontSize.subtitle),
+                  style: AppTextStyle.label,
                 ),
               ),
             ),

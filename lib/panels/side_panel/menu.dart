@@ -27,7 +27,7 @@ class MainMenu extends StatelessWidget {
     return AppPopupMenuButton<int>(
       key: Keys.mainMenuButton,
       tooltip: l10n.menuTooltip,
-      icon: const AppSvgIcon(icon: AppIcon.menu),
+      icon: const AppSvgIcon(icon: AppIcon.moreVert),
       onSelected: (final int result) => onDropDownMenuSelection(context, result),
       itemBuilder: (final BuildContext _) => <AppPopupMenuItem<int>>[
         buildMenuItem(
@@ -167,10 +167,7 @@ AppPopupMenuItem<int> buildMenuItem({
                 Text(
                   subtitle,
                   softWrap: true,
-                  style: const TextStyle(
-                    fontSize: AppFontSize.subtitle,
-                    color: AppColors.textSecondary,
-                  ),
+                  style: AppTextStyle.caption,
                 ),
               ],
             ],

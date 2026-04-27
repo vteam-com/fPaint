@@ -38,20 +38,12 @@ class AppListTile extends StatelessWidget {
               children: <Widget>[
                 if (title != null)
                   DefaultTextStyle(
-                    style: const TextStyle(
-                      fontFamily: appFontFamily,
-                      color: AppPalette.white,
-                      fontSize: AppFontSize.titleHero,
-                    ),
+                    style: AppTextStyle.title,
                     child: title!,
                   ),
                 if (subtitle != null)
                   DefaultTextStyle(
-                    style: const TextStyle(
-                      fontFamily: appFontFamily,
-                      color: AppColors.textSecondary,
-                      fontSize: AppFontSize.subtitle,
-                    ),
+                    style: AppTextStyle.caption,
                     child: subtitle!,
                   ),
               ],
