@@ -63,10 +63,7 @@ Widget buildOverlayFeedbackBubble({required final String label}) {
     ),
     child: Text(
       label,
-      style: const TextStyle(
-        color: AppPalette.white,
-        fontWeight: FontWeight.bold,
-      ),
+      style: AppTextStyle.body.copyWith(fontWeight: FontWeight.bold),
     ),
   );
 }

@@ -50,10 +50,7 @@ Future<void> showAboutBox(final BuildContext context) async {
                 cursor: SystemMouseCursors.click,
                 child: Text(
                   l10n.githubRepo,
-                  style: const TextStyle(
-                    color: AppPalette.blue,
-                    decoration: TextDecoration.underline,
-                  ),
+                  style: AppTextStyle.link,
                 ),
               ),
             ),

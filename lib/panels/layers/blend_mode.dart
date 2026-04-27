@@ -115,11 +115,11 @@ Future<BlendMode> showBlendModeMenu({
               children: <Widget>[
                 Text(
                   entry.key,
-                  style: selectedBlendMode == menuFlutterBlendMode ? const TextStyle(color: AppPalette.blue) : null,
+                  style: selectedBlendMode == menuFlutterBlendMode ? AppTextStyle.accent : null,
                 ),
                 Text(
                   entry.value['description'] as String,
-                  style: const TextStyle(
+                  style: AppTextStyle.caption.copyWith(
                     fontSize: AppFontSize.medium,
                     color: AppPalette.grey500,
                   ),

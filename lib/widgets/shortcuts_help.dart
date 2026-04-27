@@ -139,9 +139,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
             ),
             child: Text(
               keys,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTextStyle.bodyBold,
             ),
           ),
           const SizedBox(width: AppSpacing.xl),
@@ -157,10 +155,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Text(
         title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: AppFontSize.large,
-        ),
+        style: AppTextStyle.titleBold,
       ),
     );
   }

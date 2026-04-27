@@ -3,7 +3,7 @@
 import 'dart:ui' show Color, FontWeight;
 
 import 'package:flutter/foundation.dart' show Key;
-import 'package:flutter/painting.dart' show TextStyle;
+import 'package:flutter/painting.dart' show TextDecoration, TextStyle;
 
 /// The application display name.
 const String appName = 'fPaint';
@@ -203,6 +203,12 @@ class AppTextStyle {
     color: AppPalette.white,
   );
 
+  /// Emphasized body text — medium bold, inherits color from parent.
+  static const TextStyle bodyBold = TextStyle(
+    fontSize: AppFontSize.medium,
+    fontWeight: FontWeight.bold,
+  );
+
   /// Tooltips, overlay coordinates — small white.
   static const TextStyle label = TextStyle(
     color: AppPalette.white,
@@ -224,6 +230,17 @@ class AppTextStyle {
   /// Dialog content, secondary descriptions — secondary color.
   static const TextStyle secondary = TextStyle(
     color: AppColors.textSecondary,
+  );
+
+  /// Active or selected items — blue accent color.
+  static const TextStyle accent = TextStyle(
+    color: AppPalette.blue,
+  );
+
+  /// Tappable hyperlinks — blue accent with underline.
+  static const TextStyle link = TextStyle(
+    color: AppPalette.blue,
+    decoration: TextDecoration.underline,
   );
 }
 

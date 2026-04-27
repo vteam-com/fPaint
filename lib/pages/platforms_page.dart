@@ -145,7 +145,7 @@ class PlatformsPage extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: Text(name, style: const TextStyle(fontSize: AppFontSize.large)),
+                    child: Text(name, style: AppTextStyle.title),
                   ),
                   Expanded(
                     child: Opacity(
