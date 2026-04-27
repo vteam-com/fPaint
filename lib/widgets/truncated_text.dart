@@ -32,7 +32,7 @@ class TruncatedTextWidget extends StatelessWidget {
       width: double.infinity, // Ensure the text has a bounded width
       child: Text(
         truncatedText,
-        style: const TextStyle(fontSize: AppSpacing.md, fontWeight: FontWeight.bold),
+        style: AppTextStyle.labelBold,
       ),
     );
   }

@@ -73,9 +73,8 @@ class _AppButtonBase extends StatelessWidget {
       padding: padding,
       child: DefaultTextStyle(
         style: TextStyle(
-          fontFamily: appFontFamily,
           color: textColor,
-          fontSize: AppFontSize.titleHero,
+          fontSize: AppFontSize.large,
         ),
         child: child,
       ),

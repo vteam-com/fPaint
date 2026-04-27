@@ -141,7 +141,7 @@ Widget floatingActionButtons(
           style: const TextStyle(
             color: AppColors.floatingButtonForeground,
             fontWeight: FontWeight.bold,
-            fontSize: AppSpacing.lg,
+            fontSize: AppFontSize.medium,
           ),
         ),
       ),

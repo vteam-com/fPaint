@@ -120,7 +120,7 @@ Future<BlendMode> showBlendModeMenu({
                 Text(
                   entry.value['description'] as String,
                   style: const TextStyle(
-                    fontSize: AppSpacing.lg,
+                    fontSize: AppFontSize.medium,
                     color: AppPalette.grey500,
                   ),
                 ),

@@ -119,7 +119,7 @@ class ColorPreview extends StatelessWidget {
                       text,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: AppSpacing.sm + AppStroke.thin,
+                        fontSize: AppFontSize.small,
                         color: color.computeLuminance() > AppVisual.half ? AppPalette.black : AppPalette.white,
                       ),
                     ),

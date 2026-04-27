@@ -43,11 +43,7 @@ class PlatformsPage extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     l10n.availablePlatforms,
-                    style: const TextStyle(
-                      color: AppPalette.white,
-                      fontSize: AppFontSize.titleHero,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTextStyle.titleBold,
                   ),
                 ],
               ),
@@ -149,7 +145,7 @@ class PlatformsPage extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: Text(name, style: const TextStyle(fontSize: AppFontSize.titleHero)),
+                    child: Text(name, style: const TextStyle(fontSize: AppFontSize.large)),
                   ),
                   Expanded(
                     child: Opacity(

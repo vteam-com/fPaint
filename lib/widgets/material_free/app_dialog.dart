@@ -34,12 +34,7 @@ class AppDialog extends StatelessWidget {
               children: <Widget>[
                 if (title != null)
                   DefaultTextStyle(
-                    style: const TextStyle(
-                      fontFamily: appFontFamily,
-                      color: AppPalette.white,
-                      fontSize: AppFontSize.titleHero,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: AppTextStyle.titleBold,
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                       child: title!,
@@ -49,10 +44,7 @@ class AppDialog extends StatelessWidget {
                   Flexible(
                     child: SingleChildScrollView(
                       child: DefaultTextStyle(
-                        style: const TextStyle(
-                          fontFamily: appFontFamily,
-                          color: AppColors.textSecondary,
-                        ),
+                        style: AppTextStyle.secondary,
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                           child: content!,

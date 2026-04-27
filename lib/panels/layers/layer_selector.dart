@@ -265,7 +265,7 @@ class LayerSelector extends StatelessWidget {
             child: Text(
               layer.name,
               style: TextStyle(
-                fontSize: AppFontSize.title * AppVisual.titleScale,
+                fontSize: AppFontSize.large,
                 fontWeight: FontWeight.bold,
                 color: isSelected ? AppPalette.blueShade100 : AppPalette.grey400,
               ),

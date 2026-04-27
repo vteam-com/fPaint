@@ -72,7 +72,7 @@ class AppDropdown<T> extends StatelessWidget {
                                       vertical: AppSpacing.md,
                                     ),
                                     child: DefaultTextStyle(
-                                      style: const TextStyle(fontFamily: appFontFamily, color: AppPalette.white),
+                                      style: AppTextStyle.body,
                                       child: item.child,
                                     ),
                                   ),
@@ -108,13 +108,13 @@ class AppDropdown<T> extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   DefaultTextStyle(
-                    style: const TextStyle(fontFamily: appFontFamily, color: AppPalette.white),
+                    style: AppTextStyle.body,
                     child: selected?.child ?? const SizedBox.shrink(),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   const Text(
                     '▼',
-                    style: TextStyle(color: AppColors.textSecondary, fontSize: AppFontSize.subtitle),
+                    style: AppTextStyle.caption,
                   ),
                 ],
               ),

@@ -140,7 +140,6 @@ class ShortcutsHelpDialog extends StatelessWidget {
             child: Text(
               keys,
               style: const TextStyle(
-                fontFamily: 'monospace',
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -160,7 +159,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
         title,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: AppSpacing.xl,
+          fontSize: AppFontSize.large,
         ),
       ),
     );

@@ -50,11 +50,7 @@ void showCanvasSettings(final BuildContext context) {
             children: <Widget>[
               Text(
                 l10n.canvasSizeTitle,
-                style: const TextStyle(
-                  color: AppPalette.white,
-                  fontSize: AppFontSize.titleHero,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTextStyle.titleBold,
               ),
               const SizedBox(
                 height: AppSpacing.xxxl,

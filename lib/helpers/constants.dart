@@ -1,8 +1,9 @@
 // ignore: fcheck_one_class_per_file
 // ignore: fcheck_magic_numbers
-import 'dart:ui' show Color;
+import 'dart:ui' show Color, FontWeight;
 
 import 'package:flutter/foundation.dart' show Key;
+import 'package:flutter/painting.dart' show TextStyle;
 
 /// The application display name.
 const String appName = 'fPaint';
@@ -169,9 +170,61 @@ class AppLayout {
 
 /// Shared font size tokens for consistent typography across the app.
 class AppFontSize {
-  static const double title = 12.0;
-  static const double titleHero = 15.0;
-  static const double subtitle = 10.0;
+  /// Small text — tooltips, subtitles, truncated file names, hints.
+  static const double small = 10.0;
+
+  /// Medium text — body content, slider labels, descriptions, info readouts.
+  static const double medium = 12.0;
+
+  /// Large text — page titles, dialog titles, buttons, list tile titles, inputs.
+  static const double large = 15.0;
+}
+
+/// Shared text style constants for consistent typography.
+///
+/// Styles are named by semantic role and follow a 3-tier size system
+/// (small / medium / large) combined with normal or bold weight.
+class AppTextStyle {
+  /// Page titles, dialog titles, section headings — large bold white.
+  static const TextStyle titleBold = TextStyle(
+    color: AppPalette.white,
+    fontSize: AppFontSize.large,
+    fontWeight: FontWeight.bold,
+  );
+
+  /// List tile titles, text field defaults — large white.
+  static const TextStyle title = TextStyle(
+    color: AppPalette.white,
+    fontSize: AppFontSize.large,
+  );
+
+  /// Default body text — white, inherits size from parent.
+  static const TextStyle body = TextStyle(
+    color: AppPalette.white,
+  );
+
+  /// Tooltips, overlay coordinates — small white.
+  static const TextStyle label = TextStyle(
+    color: AppPalette.white,
+    fontSize: AppFontSize.small,
+  );
+
+  /// Truncated file names — small bold, inherits color from parent.
+  static const TextStyle labelBold = TextStyle(
+    fontSize: AppFontSize.small,
+    fontWeight: FontWeight.bold,
+  );
+
+  /// Subtitles, menu hints, dropdown indicators — small secondary.
+  static const TextStyle caption = TextStyle(
+    color: AppColors.textSecondary,
+    fontSize: AppFontSize.small,
+  );
+
+  /// Dialog content, secondary descriptions — secondary color.
+  static const TextStyle secondary = TextStyle(
+    color: AppColors.textSecondary,
+  );
 }
 
 /// Shared divider and border tokens.
@@ -201,7 +254,6 @@ class AppVisual {
   static const double shrink = 0.9;
   static const double enlarge = 1.1;
   static const double iconScale = 1.2;
-  static const double titleScale = 1.3;
   static const double previewTextScale = 1.5;
 }
 
