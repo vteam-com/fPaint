@@ -31,7 +31,7 @@ class TextAttributesWidget extends StatelessWidget {
         ToolAttributeWidget(
           minimal: minimal,
           name: l10n.fontSizeLabel,
-          childLeft: AppIconButton(
+          childLeft: AppButtonIcon(
             icon: const AppSvgIcon(icon: AppIcon.formatSize),
             constraints: minimal ? const BoxConstraints() : null,
             padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),

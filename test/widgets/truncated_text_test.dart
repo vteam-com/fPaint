@@ -73,7 +73,7 @@ void main() {
 
       final Text textWidget = tester.widget<Text>(find.text('Test'));
       expect(textWidget.style?.fontSize, 10.0);
-      expect(textWidget.style?.fontWeight, FontWeight.bold);
+      expect(textWidget.style?.color, const Color(0xFFFFFFFF));
     });
 
     testWidgets('uses SizedBox with infinite width', (final WidgetTester tester) async {

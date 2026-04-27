@@ -112,7 +112,7 @@ class ToolsPanel extends StatelessWidget {
     return ToolAttributeWidget(
       minimal: minimal,
       name: l10n.colorTolerance,
-      childLeft: AppIconButton(
+      childLeft: AppButtonIcon(
         icon: const AppSvgIcon(icon: AppIcon.support),
         onPressed: () {
           showTolerancePicker(context, appProvider.tolerance, (final int newValue) {
@@ -518,7 +518,7 @@ class ToolsPanel extends StatelessWidget {
               key: Keys.toolBrushSizeTool,
               minimal: minimal,
               name: title,
-              childLeft: AppIconButton(
+              childLeft: AppButtonIcon(
                 key: Keys.toolBrushSizeButton,
                 icon: const AppSvgIcon(icon: AppIcon.lineWeight),
                 constraints: minimal ? const BoxConstraints() : null,
@@ -558,7 +558,7 @@ class ToolsPanel extends StatelessWidget {
             ToolAttributeWidget(
               minimal: minimal,
               name: l10n.brushStyle,
-              childLeft: AppIconButton(
+              childLeft: AppButtonIcon(
                 icon: const AppSvgIcon(icon: AppIcon.lineStyle),
                 constraints: minimal ? const BoxConstraints() : null,
                 padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
@@ -643,7 +643,7 @@ class ToolsPanel extends StatelessWidget {
                 );
               },
             ),
-            AppIconButton(
+            AppButtonIcon(
               icon: const AppSvgIcon(icon: AppIcon.colorize),
               onPressed: onPickFromCanvas,
             ),

@@ -39,7 +39,7 @@ void main() {
 
     expect(preferences.useApplePencil, isTrue);
 
-    await tester.tap(find.widgetWithText(AppTextButton, 'Keyboard Shortcuts'));
+    await tester.tap(find.widgetWithText(AppButtonText, 'Keyboard Shortcuts'));
     await tester.pumpAndSettle();
 
     expect(find.byType(AppDialog), findsOneWidget);

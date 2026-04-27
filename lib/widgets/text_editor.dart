@@ -108,7 +108,7 @@ class _TextEditorState extends State<TextEditor> {
                     Row(
                       children: <Widget>[
                         // Bold toggle
-                        AppIconButton(
+                        AppButtonIcon(
                           icon: AppSvgIcon(
                             icon: AppIcon.formatBold,
                             color: fontWeight == FontWeight.bold ? AppPalette.blue : AppPalette.grey,
@@ -121,7 +121,7 @@ class _TextEditorState extends State<TextEditor> {
                         ),
 
                         // Italic toggle
-                        AppIconButton(
+                        AppButtonIcon(
                           icon: AppSvgIcon(
                             icon: AppIcon.formatItalic,
                             color: fontStyle == FontStyle.italic ? AppPalette.blue : AppPalette.grey,
@@ -144,7 +144,7 @@ class _TextEditorState extends State<TextEditor> {
                             border: Border.all(color: AppPalette.grey),
                             borderRadius: BorderRadius.circular(AppRadius.md),
                           ),
-                          child: AppIconButton(
+                          child: AppButtonIcon(
                             icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppPalette.white),
                             onPressed: () {
                               showColorPicker(
@@ -166,23 +166,23 @@ class _TextEditorState extends State<TextEditor> {
                 ),
               ),
               actions: <Widget>[
-                AppTextButton(
-                  child: AppText(l10n.delete),
+                AppButtonText(
+                  text: l10n.delete,
                   onPressed: () {
                     _deleteText();
                     Navigator.of(context).pop();
                   },
                 ),
-                AppTextButton(
-                  child: AppText(l10n.cancel),
+                AppButtonText(
+                  text: l10n.cancel,
                   onPressed: () {
                     appProvider.selectedTextObject = null;
                     appProvider.update();
                     Navigator.of(context).pop();
                   },
                 ),
-                AppTextButton(
-                  child: AppText(l10n.apply),
+                AppButtonText(
+                  text: l10n.apply,
                   onPressed: () {
                     if (controller.text.isNotEmpty) {
                       textObject.text = controller.text;

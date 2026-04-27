@@ -80,7 +80,7 @@ class TopColors extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             if (!minimal) AppText(l10n.topColors(colorUsages.length)),
-            AppIconButton(
+            AppButtonIcon(
               icon: const AppSvgIcon(icon: AppIcon.refresh),
               onPressed: onRefresh,
             ),

@@ -33,7 +33,7 @@ class ToolPanelPicker extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    return AppIconButton(
+    return AppButtonIcon(
       icon: image,
       onPressed: onPressed,
       tooltip: name,

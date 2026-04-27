@@ -37,7 +37,7 @@ class PlatformsPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
               child: Row(
                 children: <Widget>[
-                  AppIconButton(
+                  AppButtonIcon(
                     icon: const AppSvgIcon(icon: AppIcon.arrowLeft),
                     onPressed: () => Navigator.pop(context),
                   ),

@@ -106,17 +106,17 @@ class LayerSelector extends StatelessWidget {
           hintText: l10n.layerNameTitle,
         ),
         actions: <Widget>[
-          AppTextButton(
+          AppButtonText(
             onPressed: () => Navigator.pop(dialogContext),
-            child: AppText(l10n.cancel),
+            text: l10n.cancel,
           ),
-          AppTextButton(
+          AppButtonText(
             key: Keys.layerRenameApplyButton,
             onPressed: () {
               Navigator.pop(dialogContext, controller.text);
               LayersProvider.of(dialogContext).update();
             },
-            child: AppText(l10n.apply),
+            text: l10n.apply,
           ),
         ],
       ),
@@ -185,20 +185,20 @@ class LayerSelector extends StatelessWidget {
     return Wrap(
       alignment: WrapAlignment.center,
       children: <Widget>[
-        AppIconButton(
+        AppButtonIcon(
           key: Keys.layerAddAboveButton,
           tooltip: l10n.layerAddAbove,
           icon: const AppSvgIcon(icon: AppIcon.playlistAdd),
           onPressed: () => _onAddLayer(layers),
         ),
         if (allowRemoveLayer)
-          AppIconButton(
+          AppButtonIcon(
             tooltip: l10n.layerDelete,
             icon: const AppSvgIcon(icon: AppIcon.playlistRemove),
             onPressed: () => layers.remove(layer),
           ),
         if (allowRemoveLayer)
-          AppIconButton(
+          AppButtonIcon(
             tooltip: l10n.layerMergeBelow,
             icon: const AppSvgIcon(icon: AppIcon.layers),
             onPressed: layer == layers.list.last
@@ -210,7 +210,7 @@ class LayerSelector extends StatelessWidget {
                   ),
           ),
         if (allowRemoveLayer)
-          AppIconButton(
+          AppButtonIcon(
             tooltip: '${l10n.layerBlendMode}\n"${blendModeToText(layer.blendMode, AppLocalizations.of(context))}"',
             icon: const AppSvgIcon(icon: AppIcon.blender),
             onPressed: () async {
@@ -270,7 +270,7 @@ class LayerSelector extends StatelessWidget {
             ),
           ),
         ),
-        AppIconButton(
+        AppButtonIcon(
           tooltip: l10n.layerToggleVisibility,
           icon: AppSvgIcon(
             icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,

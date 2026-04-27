@@ -572,17 +572,17 @@ class _EffectIntensityDialogState extends State<_EffectIntensityDialog> {
         ],
       ),
       actions: <Widget>[
-        AppTextButton(
+        AppButtonText(
           onPressed: () => Navigator.of(context).pop(),
-          child: AppText(widget.l10n.cancel),
+          text: widget.l10n.cancel,
         ),
-        AppElevatedButton(
+        AppButtonPrimary(
           key: Keys.effectIntensityApplyButton,
           onPressed: () {
             Navigator.of(context).pop(_strength);
             widget.onApply(_strength);
           },
-          child: AppText(widget.l10n.apply),
+          text: widget.l10n.apply,
         ),
       ],
     );

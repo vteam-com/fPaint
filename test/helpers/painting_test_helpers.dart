@@ -1378,7 +1378,7 @@ Future<void> placeTextViaUI(
   // Tap the "Add Text" action button (find the TextButton, not the title).
   final Finder addTextButton = find.descendant(
     of: dialogFinder,
-    matching: find.widgetWithText(AppTextButton, 'Add Text'),
+    matching: find.widgetWithText(AppButtonText, 'Add Text'),
   );
   await tester.tap(addTextButton.first);
   await tester.pumpAndSettle();

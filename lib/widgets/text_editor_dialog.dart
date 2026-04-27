@@ -102,7 +102,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
             Row(
               children: <Widget>[
                 // Bold toggle
-                AppIconButton(
+                AppButtonIcon(
                   key: Keys.textEditorBoldButton,
                   icon: AppSvgIcon(
                     icon: AppIcon.formatBold,
@@ -116,7 +116,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                 ),
 
                 // Italic toggle
-                AppIconButton(
+                AppButtonIcon(
                   icon: AppSvgIcon(
                     icon: AppIcon.formatItalic,
                     color: _fontStyle == FontStyle.italic ? AppPalette.blue : AppPalette.grey,
@@ -139,7 +139,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                     border: Border.all(color: AppPalette.grey),
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
-                  child: AppIconButton(
+                  child: AppButtonIcon(
                     icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppPalette.white),
                     onPressed: () async {
                       showColorPicker(
@@ -161,14 +161,14 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
         ),
       ),
       actions: <Widget>[
-        AppTextButton(
-          child: AppText(l10n.cancel),
+        AppButtonText(
+          text: l10n.cancel,
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
-        AppTextButton(
-          child: AppText(l10n.addText),
+        AppButtonText(
+          text: l10n.addText,
           onPressed: () {
             if (_controller.text.isNotEmpty) {
               widget.onFinished(

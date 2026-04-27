@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
-import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// Asks the user whether they want to discard their current unsaved work.
@@ -17,17 +16,17 @@ Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
       return AppDialog(
         title: l10n.discardCurrentDocumentQuestion,
         actions: <Widget>[
-          AppTextButton(
+          AppButtonText(
             onPressed: () {
               Navigator.of(context).pop(true);
             },
-            child: AppText(l10n.discard),
+            text: l10n.discard,
           ),
-          AppTextButton(
+          AppButtonText(
             onPressed: () {
               Navigator.of(context).pop(false);
             },
-            child: AppText(l10n.no),
+            text: l10n.no,
           ),
         ],
       );

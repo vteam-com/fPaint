@@ -51,16 +51,16 @@ Future<void> showAboutBox(final BuildContext context) async {
                 cursor: SystemMouseCursors.click,
                 child: AppText(
                   l10n.githubRepo,
-                  variant: AppTextVariant.link,
+                  variant: AppTextVariant.button,
                 ),
               ),
             ),
           ],
         ),
         actions: <Widget>[
-          AppTextButton(
+          AppButtonText(
             onPressed: () => Navigator.pop(dialogContext),
-            child: AppText(l10n.cancel),
+            text: l10n.cancel,
           ),
         ],
       );
