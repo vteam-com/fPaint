@@ -16,6 +16,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/single_child_widget.dart';
@@ -188,16 +189,16 @@ Future<void> _handleFileOpened(final String filePath) async {
             final AppLocalizations l10n = context.l10n;
 
             return AppDialog(
-              title: Text(l10n.unsavedChanges),
-              content: Text(l10n.unsavedChangesDiscardAndOpenPrompt),
+              title: l10n.unsavedChanges,
+              content: AppText(l10n.unsavedChangesDiscardAndOpenPrompt),
               actions: <Widget>[
                 AppTextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: Text(l10n.cancel),
+                  child: AppText(l10n.cancel),
                 ),
                 AppTextButton(
                   onPressed: () => Navigator.pop(context, true),
-                  child: Text(l10n.discardAndOpen),
+                  child: AppText(l10n.discardAndOpen),
                 ),
               ],
             );

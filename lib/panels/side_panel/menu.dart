@@ -13,6 +13,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// A widget that displays the main menu.
@@ -161,13 +162,12 @@ AppPopupMenuItem<int> buildMenuItem({
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(text),
+              AppText(text),
               if (subtitle != null) ...<Widget>[
                 const SizedBox(height: AppSpacing.thin),
-                Text(
+                AppText(
                   subtitle,
-                  softWrap: true,
-                  style: AppTextStyle.caption,
+                  variant: AppTextVariant.caption,
                 ),
               ],
             ],

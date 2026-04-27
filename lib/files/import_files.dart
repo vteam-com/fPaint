@@ -15,6 +15,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:logging/logging.dart';
@@ -58,7 +59,7 @@ Future<void> onFileNew(final BuildContext context) async {
         final TextEditingController heightController = TextEditingController(text: _defaultCanvasDimension);
 
         return AppDialog(
-          title: Text(l10n.newCanvasSize),
+          title: l10n.newCanvasSize,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             spacing: AppSpacing.xxl,
@@ -85,14 +86,14 @@ Future<void> onFileNew(final BuildContext context) async {
                     appProvider.newDocumentFromClipboardImage();
                     Navigator.of(context).pop();
                   },
-                  child: Text(l10n.newFromClipboard),
+                  child: AppText(l10n.newFromClipboard),
                 ),
               ),
             AppTextButton(
               onPressed: () {
                 Navigator.of(context).pop(null);
               },
-              child: Text(l10n.cancel),
+              child: AppText(l10n.cancel),
             ),
             AppTextButton(
               onPressed: () {
@@ -106,7 +107,7 @@ Future<void> onFileNew(final BuildContext context) async {
                   context.showSnackBarMessage(l10n.invalidSize);
                 }
               },
-              child: Text(l10n.create),
+              child: AppText(l10n.create),
             ),
           ],
         );
@@ -440,16 +441,16 @@ Future<void> onFileDropped({
       builder: (final BuildContext dialogContext) {
         final AppLocalizations l10n = dialogContext.l10n;
         return AppDialog(
-          title: Text(l10n.dropFileTitle),
-          content: Text(l10n.dropFilePrompt),
+          title: l10n.dropFileTitle,
+          content: AppText(l10n.dropFilePrompt),
           actions: <Widget>[
             AppTextButton(
               onPressed: () => Navigator.pop(dialogContext, DropFileAction.addLayer),
-              child: Text(l10n.dropFileAddLayer),
+              child: AppText(l10n.dropFileAddLayer),
             ),
             AppTextButton(
               onPressed: () => Navigator.pop(dialogContext, DropFileAction.open),
-              child: Text(l10n.dropFileOpen),
+              child: AppText(l10n.dropFileOpen),
             ),
           ],
         );

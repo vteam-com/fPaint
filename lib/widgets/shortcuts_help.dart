@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
 const String _titleKeyboardShortcuts = 'Keyboard Shortcuts';
@@ -56,7 +57,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
     final String mod = _getPlatformModifier(context);
 
     return AppDialog(
-      title: const Text(_titleKeyboardShortcuts),
+      title: _titleKeyboardShortcuts,
       content: SingleChildScrollView(
         child: Wrap(
           spacing: AppSpacing.xxl,
@@ -118,7 +119,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
       actions: <Widget>[
         AppTextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text(_labelClose),
+          child: const AppText(_labelClose),
         ),
       ],
     );
@@ -137,13 +138,13 @@ class ShortcutsHelpDialog extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppRadius.sm),
               border: Border.all(color: AppPalette.grey600),
             ),
-            child: Text(
+            child: AppText(
               keys,
-              style: AppTextStyle.bodyBold,
+              variant: AppTextVariant.bodyBold,
             ),
           ),
           const SizedBox(width: AppSpacing.xl),
-          Expanded(child: Text(description)),
+          Expanded(child: AppText(description)),
         ],
       ),
     );
@@ -153,9 +154,9 @@ class ShortcutsHelpDialog extends StatelessWidget {
   Widget _buildShortcutCategory(final String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Text(
+      child: AppText(
         title,
-        style: AppTextStyle.titleBold,
+        variant: AppTextVariant.titleBold,
       ),
     );
   }

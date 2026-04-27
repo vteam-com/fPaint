@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
 const String _blendModeNormalFallback = 'Normal';
@@ -113,9 +114,9 @@ Future<BlendMode> showBlendModeMenu({
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
+                AppText(
                   entry.key,
-                  style: selectedBlendMode == menuFlutterBlendMode ? AppTextStyle.accent : null,
+                  variant: selectedBlendMode == menuFlutterBlendMode ? AppTextVariant.accent : AppTextVariant.inherited,
                 ),
                 Text(
                   entry.value['description'] as String,

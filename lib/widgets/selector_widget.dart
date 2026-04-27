@@ -10,6 +10,7 @@ import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
@@ -503,7 +504,7 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
                     icon: effect.icon,
                     size: AppLayout.iconSize,
                   ),
-                  Text(effectLabel(widget.l10n, effect)),
+                  AppText(effectLabel(widget.l10n, effect)),
                 ],
               ),
             ),
@@ -554,18 +555,13 @@ class _EffectIntensityDialogState extends State<_EffectIntensityDialog> {
   @override
   Widget build(final BuildContext context) {
     return AppDialog(
-      title: Row(
-        spacing: AppSpacing.md,
-        children: <Widget>[
-          AppSvgIcon(icon: widget.effect.icon, size: AppLayout.iconSize),
-          Text(effectLabel(widget.l10n, widget.effect)),
-        ],
-      ),
+      title: effectLabel(widget.l10n, widget.effect),
+      titleIcon: AppSvgIcon(icon: widget.effect.icon, size: AppLayout.iconSize),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text('${widget.l10n.effectIntensity} (${(_strength * AppMath.percentScale).round()}%)'),
+          AppText('${widget.l10n.effectIntensity} (${(_strength * AppMath.percentScale).round()}%)'),
           AppSlider(
             key: Keys.effectIntensityDialogSlider,
             value: _strength,
@@ -578,7 +574,7 @@ class _EffectIntensityDialogState extends State<_EffectIntensityDialog> {
       actions: <Widget>[
         AppTextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(widget.l10n.cancel),
+          child: AppText(widget.l10n.cancel),
         ),
         AppElevatedButton(
           key: Keys.effectIntensityApplyButton,
@@ -586,7 +582,7 @@ class _EffectIntensityDialogState extends State<_EffectIntensityDialog> {
             Navigator.of(context).pop(_strength);
             widget.onApply(_strength);
           },
-          child: Text(widget.l10n.apply),
+          child: AppText(widget.l10n.apply),
         ),
       ],
     );

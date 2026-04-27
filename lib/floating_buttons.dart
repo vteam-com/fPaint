@@ -6,6 +6,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
@@ -132,15 +133,14 @@ Widget floatingActionButtons(
             appProvider.update();
           });
         },
-        child: Text(
+        child: AppText(
           _canvasZoomAndSizeFormat
               .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
               .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
               .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
           textAlign: TextAlign.center,
-          style: AppTextStyle.labelBold.copyWith(
-            color: AppColors.floatingButtonForeground,
-          ),
+          variant: AppTextVariant.labelBold,
+          color: AppColors.floatingButtonForeground,
         ),
       ),
 
