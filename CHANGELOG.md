@@ -4,6 +4,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.1] - 2026-04-28
+
+### Fix
+
+- AHEM font handling in text rendering and tests
+
+### Refactor
+
+- Unified app text styles for more consistent typography across the custom widget set
+- Moved the former `material_free` widget implementations into `lib/widgets/`
+
 ## [1.6.0] - 2026-04-27
 
 ### Add
