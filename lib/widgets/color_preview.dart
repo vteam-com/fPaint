@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 

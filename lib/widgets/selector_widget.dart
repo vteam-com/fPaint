@@ -10,7 +10,6 @@ import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
@@ -561,8 +560,9 @@ class _EffectIntensityDialogState extends State<_EffectIntensityDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          AppText('${widget.l10n.effectIntensity} (${(_strength * AppMath.percentScale).round()}%)'),
           AppSlider(
+            label: widget.l10n.effectIntensity,
+            valueLabel: '${(_strength * AppMath.percentScale).round()}%',
             key: Keys.effectIntensityDialogSlider,
             value: _strength,
             min: AppEffects.minIntensity,

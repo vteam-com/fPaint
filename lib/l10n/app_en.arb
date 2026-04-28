@@ -134,12 +134,6 @@
   "flipVerticalTooltip": "Flip Vertical",
   "fontColor": "Font Color",
   "fontSizeLabel": "Font Size",
-  "fontSizeValue": "Font Size: {value}",
-  "@fontSizeValue": {
-    "placeholders": {
-      "value": {}
-    }
-  },
   "fpaintLoadImage": "fPaint Load Image",
   "githubRepo": "GitHub Repo",
   "gradientPointColor": "Gradient Point Color",

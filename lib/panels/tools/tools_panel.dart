@@ -14,7 +14,6 @@ import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -110,7 +109,7 @@ class ToolsPanel extends StatelessWidget {
     final AppLocalizations l10n = context.l10n;
 
     return ToolAttributeWidget(
-      minimal: minimal,
+      compact: minimal,
       name: l10n.colorTolerance,
       childLeft: AppButtonIcon(
         icon: const AppSvgIcon(icon: AppIcon.support),
@@ -253,7 +252,7 @@ class ToolsPanel extends StatelessWidget {
       case ActionType.fill:
         widgets.add(
           ToolAttributeWidget(
-            minimal: minimal,
+            compact: minimal,
             name: l10n.toolFill,
             childRight: Wrap(
               alignment: WrapAlignment.center,
@@ -324,7 +323,7 @@ class ToolsPanel extends StatelessWidget {
       case ActionType.selector:
         widgets.add(
           ToolAttributeWidget(
-            minimal: minimal,
+            compact: minimal,
             name: l10n.toolSelector,
             childRight: Wrap(
               alignment: WrapAlignment.center,
@@ -516,7 +515,7 @@ class ToolsPanel extends StatelessWidget {
           widgets.add(
             ToolAttributeWidget(
               key: Keys.toolBrushSizeTool,
-              minimal: minimal,
+              compact: minimal,
               name: title,
               childLeft: AppButtonIcon(
                 key: Keys.toolBrushSizeButton,
@@ -556,7 +555,7 @@ class ToolsPanel extends StatelessWidget {
         if (selectedTool.isSupported(ActionOptions.brushStyle)) {
           widgets.add(
             ToolAttributeWidget(
-              minimal: minimal,
+              compact: minimal,
               name: l10n.brushStyle,
               childLeft: AppButtonIcon(
                 icon: const AppSvgIcon(icon: AppIcon.lineStyle),
@@ -626,7 +625,7 @@ class ToolsPanel extends StatelessWidget {
   }) {
     widgets.add(
       ToolAttributeWidget(
-        minimal: minimal,
+        compact: minimal,
         name: name,
         childLeft: Column(
           children: <Widget>[
@@ -643,10 +642,11 @@ class ToolsPanel extends StatelessWidget {
                 );
               },
             ),
-            AppButtonIcon(
-              icon: const AppSvgIcon(icon: AppIcon.colorize),
-              onPressed: onPickFromCanvas,
-            ),
+            if (!minimal)
+              AppButtonIcon(
+                icon: const AppSvgIcon(icon: AppIcon.colorize),
+                onPressed: onPickFromCanvas,
+              ),
           ],
         ),
         childRight: minimal
@@ -732,8 +732,9 @@ class _EffectsSectionState extends State<_EffectsSection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              AppText('${widget.l10n.effectIntensity} (${(_strength * AppMath.percentScale).round()}%)'),
               AppSlider(
+                label: widget.l10n.effectIntensity,
+                valueLabel: '${(_strength * AppMath.percentScale).round()}%',
                 key: Keys.effectIntensitySlider,
                 value: _strength,
                 min: AppEffects.minIntensity,

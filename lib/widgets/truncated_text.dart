@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/widgets/app_text.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// A widget that displays a truncated version of a given text.
 ///

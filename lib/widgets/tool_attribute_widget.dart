@@ -7,7 +7,7 @@ class ToolAttributeWidget extends StatelessWidget {
   const ToolAttributeWidget({
     super.key,
     required this.name,
-    required this.minimal,
+    required this.compact,
     this.childLeft,
     this.childRight,
   });
@@ -19,14 +19,14 @@ class ToolAttributeWidget extends StatelessWidget {
   final Widget? childRight;
 
   /// Whether the widget is in minimal mode.
-  final bool minimal;
+  final bool compact;
 
   /// The name of the tool attribute.
   final String name;
 
   @override
   Widget build(final BuildContext context) {
-    if (minimal && childRight == null) {
+    if (compact && childRight == null) {
       return SizedBox(
         width: AppLayout.toolbarButtonSize,
         height: AppLayout.toolbarButtonSize,
@@ -34,7 +34,7 @@ class ToolAttributeWidget extends StatelessWidget {
       );
     }
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: minimal ? 0 : AppSpacing.sm),
+      padding: EdgeInsets.all(compact ? 0 : AppSpacing.sm),
       child: AppTooltip(
         message: name,
         child: Row(
