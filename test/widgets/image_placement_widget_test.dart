@@ -6,7 +6,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/image_placement_model.dart';
 import 'package:fpaint/widgets/image_placement_widget.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 const double _hostWidth = 400.0;
 const double _hostHeight = 400.0;

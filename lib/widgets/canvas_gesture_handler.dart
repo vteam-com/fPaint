@@ -17,7 +17,7 @@ import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
 /// Handles pointer, pan, and zoom gestures over the canvas widget tree.

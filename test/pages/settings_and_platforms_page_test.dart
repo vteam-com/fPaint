@@ -4,7 +4,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/providers/app_preferences.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

@@ -15,7 +15,7 @@ import 'package:fpaint/recovery/draft_recovery_storage.dart';
 import 'package:fpaint/recovery/draft_recovery_storage_io.dart'
     if (dart.library.html) 'package:fpaint/recovery/draft_recovery_storage_web.dart'
     as draft_storage;
-import 'package:fpaint/widgets/material_free/app_snackbar.dart';
+import 'package:fpaint/widgets/app_snackbar.dart';
 import 'package:logging/logging.dart';
 
 typedef DraftRecoveryEncoder = Future<List<int>> Function(LayersProvider layers);

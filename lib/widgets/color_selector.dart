@@ -2,7 +2,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/list_helper.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 /// A widget that allows the user to select a color using HSV sliders.

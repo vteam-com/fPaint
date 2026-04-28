@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 
 void main() {

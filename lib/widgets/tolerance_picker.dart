@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/base_picker.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 /// A widget that allows the user to pick a tolerance value using a slider.
 class TolerancePicker extends BasePicker<int> {

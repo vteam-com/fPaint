@@ -7,7 +7,7 @@ import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/shortcuts_help.dart';
 
 /// Wraps the given [child] widget with [Shortcuts] and [Actions] to provide keyboard shortcuts for the main application.

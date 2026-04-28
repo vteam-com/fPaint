@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 /// A generic base picker widget that can handle different value types.
 abstract class BasePicker<T> extends StatefulWidget {

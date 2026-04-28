@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 const String _titleKeyboardShortcuts = 'Keyboard Shortcuts';
 const String _categoryFileOperations = 'File Operations';

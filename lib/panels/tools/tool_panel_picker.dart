@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 /// Represents a selectable tool in the user interface.
 ///

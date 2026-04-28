@@ -30,7 +30,7 @@ import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:image/image.dart' as img;

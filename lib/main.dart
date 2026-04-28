@@ -16,7 +16,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/single_child_widget.dart';
 

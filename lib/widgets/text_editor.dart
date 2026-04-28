@@ -7,7 +7,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 /// Opens the text editing flow for the currently selected text object.
 class TextEditor extends StatefulWidget {

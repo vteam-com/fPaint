@@ -5,7 +5,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_preview.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
 /// A widget that displays the top colors used in the application.

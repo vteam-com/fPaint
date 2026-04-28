@@ -1,7 +1,7 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/widgets/material_free/app_switch.dart';
+import 'package:fpaint/widgets/app_switch.dart';
 
 /// A row widget replacing Material [ListTile].
 class AppListTile extends StatelessWidget {
