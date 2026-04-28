@@ -26,7 +26,8 @@ void main() {
         ),
       );
 
-      expect(find.text('$title: ${initialValue.toStringAsFixed(1)}'), findsOneWidget);
+      expect(find.text(title), findsOneWidget);
+      expect(find.text(initialValue.toStringAsFixed(1)), findsOneWidget);
 
       final Finder slider = find.byType(AppSlider);
       expect(slider, findsOneWidget);
@@ -73,7 +74,8 @@ void main() {
 
       expect(reportedValue, isNotNull);
       // currentValue should have been updated by the ValueChanged callback in StatefulBuilder
-      expect(find.text('$title: ${currentValue.toStringAsFixed(1)}'), findsOneWidget);
+      expect(find.text(title), findsOneWidget);
+      expect(find.text(currentValue.toStringAsFixed(1)), findsOneWidget);
       final AppSlider updatedSliderWidget = tester.widget(sliderFinder);
       expect(updatedSliderWidget.value, currentValue);
 
@@ -84,7 +86,8 @@ void main() {
 
       expect(reportedValue, 35.5);
       expect(currentValue, 35.5);
-      expect(find.text('$title: ${currentValue.toStringAsFixed(1)}'), findsOneWidget);
+      expect(find.text(title), findsOneWidget);
+      expect(find.text(currentValue.toStringAsFixed(1)), findsOneWidget);
       final AppSlider finalSliderWidget = tester.widget(sliderFinder);
       expect(finalSliderWidget.value, 35.5);
     });
@@ -107,7 +110,8 @@ void main() {
 
       AppSlider sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 10.0);
-      expect(find.text('Test: 10.0'), findsOneWidget);
+      expect(find.text('Test'), findsOneWidget);
+      expect(find.text('10.0'), findsOneWidget);
 
       // Change value and rebuild
       value = 25.0;
@@ -127,7 +131,8 @@ void main() {
 
       sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 25.0);
-      expect(find.text('Test: 25.0'), findsOneWidget);
+      expect(find.text('Test'), findsOneWidget);
+      expect(find.text('25.0'), findsOneWidget);
     });
 
     testWidgets('Value is clamped to min/max on init and update', (final WidgetTester tester) async {
@@ -147,7 +152,8 @@ void main() {
       );
       AppSlider sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 5.0); // Should be clamped to min
-      expect(find.text('Clamped: 5.0'), findsOneWidget);
+      expect(find.text('Clamped'), findsOneWidget);
+      expect(find.text('5.0'), findsOneWidget);
 
       await tester.pumpWidget(
         MaterialApp(
@@ -164,7 +170,8 @@ void main() {
       );
       sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 20.0); // Should be clamped to max
-      expect(find.text('Clamped: 20.0'), findsOneWidget);
+      expect(find.text('Clamped'), findsOneWidget);
+      expect(find.text('20.0'), findsOneWidget);
 
       // Test clamping on update
       await tester.pumpWidget(
@@ -199,7 +206,8 @@ void main() {
       );
       sliderWidget = tester.widget(find.byType(AppSlider));
       expect(sliderWidget.value, 4.0); // Clamped to new min
-      expect(find.text('ClampedUpdate: 4.0'), findsOneWidget);
+      expect(find.text('ClampedUpdate'), findsOneWidget);
+      expect(find.text('4.0'), findsOneWidget);
     });
   });
 

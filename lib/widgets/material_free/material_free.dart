@@ -17,5 +17,6 @@ export 'app_scaffold.dart';
 export 'app_slider.dart';
 export 'app_snackbar.dart';
 export 'app_switch.dart';
+export 'app_text.dart';
 export 'app_text_field.dart';
 export 'app_tooltip.dart';

@@ -128,12 +128,6 @@
   "flipVerticalTooltip": "Voltear verticalmente",
   "fontColor": "Color de fuente",
   "fontSizeLabel": "Tamano de fuente",
-  "fontSizeValue": "Tamano de fuente: {value}",
-  "@fontSizeValue": {
-    "placeholders": {
-      "value": {}
-    }
-  },
   "fpaintLoadImage": "fPaint Cargar imagen",
   "githubRepo": "Repositorio GitHub",
   "gradientPointColor": "Color del punto de degradado",

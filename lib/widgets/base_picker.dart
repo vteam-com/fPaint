@@ -1,6 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
 /// A generic base picker widget that can handle different value types.
@@ -63,10 +61,15 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
   @override
   Widget build(final BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: AppSpacing.xxl,
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        AppText('${widget.title}: ${formatValue(_value)}'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            AppText(widget.title),
+            AppText(formatValue(_value)),
+          ],
+        ),
         buildPickerWidget(),
       ],
     );
@@ -105,7 +108,7 @@ Future<void> showPickerDialog({
     builder: (final BuildContext _) {
       return AppDialog(
         title: title,
-        content: IntrinsicHeight(child: child),
+        content: child,
       );
     },
   );

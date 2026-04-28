@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
-import 'package:fpaint/widgets/app_text.dart';
+import 'package:fpaint/widgets/material_free/material_free.dart';
 
 void main() {
   group('textAction', () {

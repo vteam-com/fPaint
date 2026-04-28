@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/material_free/app_text.dart';
 
 /// A slider widget replacing Material [Slider].
 ///
@@ -14,37 +15,61 @@ class AppSlider extends StatelessWidget {
     this.divisions,
     this.activeColor,
     this.inactiveColor,
+    this.label,
+    this.valueLabel,
   });
   final Color? activeColor;
   final int? divisions;
   final Color? inactiveColor;
+
+  /// Optional title shown above the slider on the left.
+  final String? label;
   final double max;
   final double min;
   final ValueChanged<double>? onChanged;
   final double value;
+
+  /// Optional dynamic value shown above the slider on the right.
+  final String? valueLabel;
   @override
   Widget build(final BuildContext context) {
-    return SizedBox(
-      height: AppLayout.sliderHeight,
-      child: LayoutBuilder(
-        builder: (final BuildContext _, final BoxConstraints constraints) {
-          final double trackWidth = constraints.maxWidth;
-          final double fraction = (value - min) / (max - min);
+    final Widget slider = LayoutBuilder(
+      builder: (final BuildContext _, final BoxConstraints constraints) {
+        final double trackWidth = constraints.maxWidth;
+        final double fraction = (value - min) / (max - min);
 
-          return GestureDetector(
-            onPanStart: (final DragStartDetails details) => _handleDrag(details.localPosition.dx, trackWidth),
-            onPanUpdate: (final DragUpdateDetails details) => _handleDrag(details.localPosition.dx, trackWidth),
-            child: CustomPaint(
-              size: Size(trackWidth, AppLayout.sliderHeight),
-              painter: _SliderPainter(
-                fraction: fraction,
-                activeColor: activeColor ?? AppColors.secondary,
-                inactiveColor: inactiveColor ?? AppColors.surfaceVariant,
-              ),
+        return GestureDetector(
+          onPanStart: (final DragStartDetails details) => _handleDrag(details.localPosition.dx, trackWidth),
+          onPanUpdate: (final DragUpdateDetails details) => _handleDrag(details.localPosition.dx, trackWidth),
+          child: CustomPaint(
+            size: Size(trackWidth, AppLayout.sliderHeight),
+            painter: _SliderPainter(
+              fraction: fraction,
+              activeColor: activeColor ?? AppColors.secondary,
+              inactiveColor: inactiveColor ?? AppColors.surfaceVariant,
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
+    );
+
+    if (label == null && valueLabel == null) {
+      return slider;
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            if (label != null) AppText(label!),
+            if (valueLabel != null) AppText(valueLabel!),
+          ],
+        ),
+        slider,
+      ],
     );
   }
 

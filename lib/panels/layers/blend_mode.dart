@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
-import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
 const String _blendModeNormalFallback = 'Normal';

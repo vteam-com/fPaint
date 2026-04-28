@@ -29,7 +29,7 @@ class TextAttributesWidget extends StatelessWidget {
       children: <Widget>[
         // Font size
         ToolAttributeWidget(
-          minimal: minimal,
+          compact: minimal,
           name: l10n.fontSizeLabel,
           childLeft: AppButtonIcon(
             icon: const AppSvgIcon(icon: AppIcon.formatSize),
@@ -63,7 +63,7 @@ class TextAttributesWidget extends StatelessWidget {
         separator(),
         // Font color
         ToolAttributeWidget(
-          minimal: minimal,
+          compact: minimal,
           name: l10n.fontColor,
           childLeft: colorPreviewWithTransparentPaper(
             key: Keys.toolPanelFontColor,

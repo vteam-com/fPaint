@@ -127,12 +127,6 @@
   "flipVerticalTooltip": "Retourner verticalement",
   "fontColor": "Couleur de police",
   "fontSizeLabel": "Taille de police",
-  "fontSizeValue": "Taille de police : {value}",
-  "@fontSizeValue": {
-    "placeholders": {
-      "value": {}
-    }
-  },
   "fpaintLoadImage": "fPaint Charger une image",
   "githubRepo": "Depot GitHub",
   "gradientPointColor": "Couleur du point de degrade",

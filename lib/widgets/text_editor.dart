@@ -6,7 +6,6 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/material_free/material_free.dart';
 
@@ -90,8 +89,9 @@ class _TextEditorState extends State<TextEditor> {
                     const SizedBox(height: AppSpacing.xxl),
 
                     // Font size control
-                    AppText(l10n.fontSizeValue(fontSize.round())),
                     AppSlider(
+                      label: l10n.fontSizeLabel,
+                      valueLabel: fontSize.round().toString(),
                       value: fontSize,
                       min: AppSpacing.sm + AppMath.pair.toDouble(),
                       max: AppLimits.textSizeMax.toDouble(),
