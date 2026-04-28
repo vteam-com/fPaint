@@ -1,7 +1,7 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/widgets/material_free/app_tooltip.dart';
+import 'package:fpaint/widgets/app_tooltip.dart';
 
 /// A text-only button replacing Material [TextButton].
 class AppButtonText extends StatelessWidget {

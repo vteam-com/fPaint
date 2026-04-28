@@ -7,7 +7,7 @@ import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 const String _canvasZoomAndSizeFormat = '{zoom}%\n{width}\n{height}';
 const String _placeholderZoom = '{zoom}';

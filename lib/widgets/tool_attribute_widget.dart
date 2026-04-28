@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 /// A widget that displays a tool attribute with a label and a child widget.
 class ToolAttributeWidget extends StatelessWidget {

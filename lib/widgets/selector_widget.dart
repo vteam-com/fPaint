@@ -11,7 +11,7 @@ import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 
 enum _SelectionOverlayFeedbackMode {

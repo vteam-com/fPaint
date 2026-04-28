@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/widgets/material_free/app_snackbar.dart';
+import 'package:fpaint/widgets/app_snackbar.dart';
 
 void main() {
   group('AppNotificationOverlay', () {

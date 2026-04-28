@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/widgets/base_picker.dart';
-import 'package:fpaint/widgets/material_free/material_free.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 /// A widget that allows the user to pick a brush style from a dropdown menu.
 class BrushStylePicker extends BasePicker<BrushStyle> {
