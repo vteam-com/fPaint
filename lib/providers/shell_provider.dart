@@ -53,6 +53,16 @@ class ShellProvider extends ChangeNotifier {
   /// The canvas auto placement setting.
   CanvasAutoPlacement canvasPlacement = CanvasAutoPlacement.fit;
 
+  /// Requests the canvas to auto-fit within the viewport on the next frame.
+  ///
+  /// Centralises the pattern of setting [canvasPlacement] to
+  /// [CanvasAutoPlacement.fit] and notifying listeners so the
+  /// [MainView] layout builder re-centres / re-scales the canvas.
+  void requestCanvasFit() {
+    canvasPlacement = CanvasAutoPlacement.fit;
+    update();
+  }
+
   //=============================================================================
   // Shell
   /// The current shell mode.

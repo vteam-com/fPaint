@@ -191,6 +191,59 @@ void main() {
       expect(layers.get(0).name, 'Existing');
     });
 
+    test('readTiffFromFilePath throws for non-existent file', () async {
+      final LayersProvider layers = LayersProvider();
+      layers.clear();
+
+      await expectLater(
+        () => readTiffFromFilePath(layers, '/does/not/exist.tif'),
+        throwsA(
+          isA<TiffFileException>().having(
+            (final TiffFileException e) => e.message,
+            'message',
+            contains('not found'),
+          ),
+        ),
+      );
+    });
+
+    test('readTiffFromFilePath throws for corrupt file', () async {
+      final LayersProvider layers = LayersProvider();
+      layers.clear();
+
+      // Create a temp file with invalid content.
+      final Directory tempDir = await Directory.systemTemp.createTemp('tiff_test_');
+      final File tempFile = File('${tempDir.path}/corrupt.tif');
+      await tempFile.writeAsBytes(<int>[0x49, 0x49, 0x2A, 0x00, 0xFF, 0xFF, 0xFF, 0xFF]);
+
+      try {
+        await expectLater(
+          () => readTiffFromFilePath(layers, tempFile.path),
+          throwsA(isA<TiffFileException>()),
+        );
+      } finally {
+        await tempDir.delete(recursive: true);
+      }
+    });
+
+    test('TIFF with valid header but no frames throws', () async {
+      final LayersProvider layers = LayersProvider();
+      layers.clear();
+
+      // Create a minimal valid TIFF header pointing to offset 0 (no IFDs).
+      // Little-endian TIFF header: 'II' + 42 + offset 0.
+      final Uint8List minimalTiff = Uint8List.fromList(<int>[
+        0x49, 0x49, // Little-endian
+        0x2A, 0x00, // TIFF magic
+        0x00, 0x00, 0x00, 0x00, // IFD offset = 0 (no IFDs)
+      ]);
+
+      await expectLater(
+        () => readTiffFileFromBytes(layers, minimalTiff),
+        throwsA(isA<TiffFileException>()),
+      );
+    });
+
     // Note: readTiffFileFromBytes and readTiffFromFilePath are complex functions that
     // involve LayersProvider and file operations, making them suitable for
     // integration testing rather than unit testing.

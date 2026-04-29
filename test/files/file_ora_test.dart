@@ -159,4 +159,94 @@ void main() {
     expect(layers.list[3].name, 'Background');
     expect(layers.list[3].isVisible, isTrue);
   });
+
+  test('readOraFileFromBytes throws for archive missing stack.xml', () async {
+    final LayersProvider layers = LayersProvider();
+
+    // Create a valid ZIP with no stack.xml
+    final Archive archive = Archive()
+      ..addFile(ArchiveFile.bytes('mimetype', Uint8List.fromList('image/openraster'.codeUnits)));
+    final Uint8List zipBytes = Uint8List.fromList(ZipEncoder().encode(archive));
+
+    expect(
+      () => readOraFileFromBytes(layers, zipBytes),
+      throwsA(isA<OraFileException>()),
+    );
+  });
+
+  test('readOraFileFromBytes throws for stack.xml missing image element', () async {
+    final LayersProvider layers = LayersProvider();
+
+    final Archive archive = Archive()
+      ..addFile(
+        ArchiveFile.bytes(
+          'stack.xml',
+          Uint8List.fromList('<?xml version="1.0"?><root/>'.codeUnits),
+        ),
+      );
+    final Uint8List zipBytes = Uint8List.fromList(ZipEncoder().encode(archive));
+
+    expect(
+      () => readOraFileFromBytes(layers, zipBytes),
+      throwsA(isA<OraFileException>()),
+    );
+  });
+
+  test('readOraFileFromBytes throws for image element missing dimensions', () async {
+    final LayersProvider layers = LayersProvider();
+
+    const String xml = '<?xml version="1.0"?><image version="0.0.1"><stack/></image>';
+    final Archive archive = Archive()
+      ..addFile(
+        ArchiveFile.bytes(
+          'stack.xml',
+          Uint8List.fromList(xml.codeUnits),
+        ),
+      );
+    final Uint8List zipBytes = Uint8List.fromList(ZipEncoder().encode(archive));
+
+    expect(
+      () => readOraFileFromBytes(layers, zipBytes),
+      throwsA(isA<OraFileException>()),
+    );
+  });
+
+  test('importFromOraXml handles layer with missing src gracefully', () async {
+    const String input = '''<?xml version="1.0" encoding="UTF-8"?>
+          <image version="0.0.1" w="100" h="100">
+            <stack>
+              <layer name="NoSrc" visibility="visible" opacity="1.0" x="0" y="0"/>
+            </stack>
+          </image>''';
+
+    final Archive archive = Archive();
+    final LayersProvider layers = LayersProvider();
+    layers.list.clear();
+
+    final XmlDocument xmlDoc = XmlDocument.parse(input);
+    await importFromOraXml(archive, layers, xmlDoc);
+
+    // Layer without src should still be created but with no image data.
+    expect(layers.length, 1);
+    expect(layers.list[0].name, 'NoSrc');
+  });
+
+  test('importFromOraXml handles layer with missing png in archive', () async {
+    const String input = '''<?xml version="1.0" encoding="UTF-8"?>
+          <image version="0.0.1" w="100" h="100">
+            <stack>
+              <layer name="MissingPng" visibility="visible" opacity="1.0" src="data/missing.png" x="0" y="0"/>
+            </stack>
+          </image>''';
+
+    final Archive archive = Archive();
+    final LayersProvider layers = LayersProvider();
+    layers.list.clear();
+
+    final XmlDocument xmlDoc = XmlDocument.parse(input);
+    await importFromOraXml(archive, layers, xmlDoc);
+
+    // Layer with missing PNG should be created without image.
+    expect(layers.length, 1);
+  });
 }

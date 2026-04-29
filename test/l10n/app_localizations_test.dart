@@ -11,6 +11,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.about, isNotEmpty);
   expect(l10n.activeTool, isNotEmpty);
   expect(l10n.addText, isNotEmpty);
+  expect(l10n.addAsNewLayer, isNotEmpty);
   expect(l10n.apply, isNotEmpty);
   expect(l10n.availablePlatforms, isNotEmpty);
   expect(l10n.blendModeColorBurnDescription, isNotEmpty);
@@ -29,6 +30,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.blendModeSaturationDescription, isNotEmpty);
   expect(l10n.blendModeScreenDescription, isNotEmpty);
   expect(l10n.blendModeSoftLightDescription, isNotEmpty);
+  expect(l10n.browseFiles, isNotEmpty);
   expect(l10n.brush, isNotEmpty);
   expect(l10n.brushStyle, isNotEmpty);
   expect(l10n.brushStyleDash, isNotEmpty);
@@ -95,6 +97,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.paste, isNotEmpty);
   expect(l10n.platforms, isNotEmpty);
   expect(l10n.resizeRotate, isNotEmpty);
+  expect(l10n.recentFilesLabel, isNotEmpty);
   expect(l10n.flipHorizontalTooltip, isNotEmpty);
   expect(l10n.flipVerticalTooltip, isNotEmpty);
   expect(l10n.rotateCanvasTooltip, isNotEmpty);
@@ -170,6 +173,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.errorReadingFile('err'), isNotEmpty);
   expect(l10n.failedToLoadImage('err'), isNotEmpty);
   expect(l10n.fileFormatNotSupported('bmp'), isNotEmpty);
+  expect(l10n.fileFormatNotSupportedOnPlatform('bmp'), isNotEmpty);
   expect(l10n.fontSizeValue('12'), isNotEmpty);
   expect(l10n.percentageValue('50'), isNotEmpty);
   expect(l10n.saveAsFile('image.PNG'), isNotEmpty);

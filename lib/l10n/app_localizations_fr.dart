@@ -285,6 +285,15 @@ class AppLocalizationsFr extends AppLocalizations {
   String get importTooltip => 'Importer...';
 
   @override
+  String get addAsNewLayer => 'Ajouter comme nouveau calque';
+
+  @override
+  String get browseFiles => 'Parcourir...';
+
+  @override
+  String get recentFilesLabel => 'R\u00e9cents';
+
+  @override
   String get invalidImageSizeDimensionsMustBeNumbers =>
       'Taille d\'image invalide: les dimensions doivent etre des nombres.';
 

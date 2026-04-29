@@ -11,6 +11,42 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
+/// Callback signature for export-format handlers.
+typedef _ExportHandler = Future<void> Function(LayersProvider layers);
+
+/// A single export-format row in the share panel.
+class _ShareExportEntry {
+  const _ShareExportEntry(this.displayFileName, this.onExport);
+
+  /// File-name label shown in the share panel (e.g. 'image.PNG').
+  final String displayFileName;
+
+  /// Callback that triggers the export / download.
+  final _ExportHandler onExport;
+}
+
+/// Display file names shown in the share panel for each export format.
+const String _displayPng = 'image.PNG';
+const String _displayJpg = 'image.JPG';
+const String _displayOra = 'image.ORA';
+const String _displayWebp = 'image.WEBP';
+const String _displayTif = 'image.TIF';
+const String _displayHeic = 'image.HEIC';
+
+/// All export formats available in the share panel.
+///
+/// HEIC is conditionally included based on platform support.
+List<_ShareExportEntry> _exportEntries({
+  required final bool includeHeic,
+}) => <_ShareExportEntry>[
+  const _ShareExportEntry(_displayPng, onExportAsPng),
+  const _ShareExportEntry(_displayJpg, onExportAsJpeg),
+  const _ShareExportEntry(_displayOra, onExportAsOra),
+  const _ShareExportEntry(_displayWebp, onExportAsWebp),
+  const _ShareExportEntry(_displayTif, onExportAsTiff),
+  if (includeHeic) const _ShareExportEntry(_displayHeic, onExportAsHeic),
+];
+
 /// Returns a Text widget with the appropriate action text based on the platform.
 ///
 /// If the app is running on the web, the action text will be "Download as [fileName]".
@@ -70,69 +106,16 @@ Future<dynamic> sharePanel(
                     );
                   },
                 ),
-                AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.iosShare),
-                  title: textAction('image.PNG', l10n),
-                  onTap: () async {
-                    await _runSharePanelAction(
-                      context,
-                      () => onExportAsPng(layers),
-                      dismissOnAction,
-                    );
-                  },
-                ),
-                AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.iosShare),
-                  title: textAction('image.JPG', l10n),
-                  onTap: () async {
-                    await _runSharePanelAction(
-                      context,
-                      () => onExportAsJpeg(layers),
-                      dismissOnAction,
-                    );
-                  },
-                ),
-                AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.iosShare),
-                  title: textAction('image.ORA', l10n),
-                  onTap: () async {
-                    await _runSharePanelAction(
-                      context,
-                      () => onExportAsOra(layers),
-                      dismissOnAction,
-                    );
-                  },
-                ),
-                AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.iosShare),
-                  title: textAction('image.WEBP', l10n),
-                  onTap: () async {
-                    await _runSharePanelAction(
-                      context,
-                      () => onExportAsWebp(layers),
-                      dismissOnAction,
-                    );
-                  },
-                ),
-                AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.iosShare),
-                  title: textAction('image.TIF', l10n),
-                  onTap: () async {
-                    await _runSharePanelAction(
-                      context,
-                      () => onExportAsTiff(layers),
-                      dismissOnAction,
-                    );
-                  },
-                ),
-                if (isHeicExportSupported)
+                for (final _ShareExportEntry entry in _exportEntries(
+                  includeHeic: isHeicExportSupported,
+                ))
                   AppListTile(
                     leading: const AppSvgIcon(icon: AppIcon.iosShare),
-                    title: textAction('image.HEIC', l10n),
+                    title: textAction(entry.displayFileName, l10n),
                     onTap: () async {
                       await _runSharePanelAction(
                         context,
-                        () => onExportAsHeic(layers),
+                        () => entry.onExport(layers),
                         dismissOnAction,
                       );
                     },

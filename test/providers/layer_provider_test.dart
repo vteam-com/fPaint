@@ -557,6 +557,35 @@ void main() {
       // Image dimensions should be swapped
       expect(layer.actionStack.first.image!.width, 10);
       expect(layer.actionStack.first.image!.height, 20);
+      // Image origin must stay within the canvas (0,0 for full-canvas images)
+      // Canvas was 800x600, new canvas is 600x800
+      // Origin (0,0) with image height 10 -> (600-0-10, 0) = (590, 0)
+      expect(layer.actionStack.first.positions.first.dx, closeTo(590, 1));
+      expect(layer.actionStack.first.positions.first.dy, closeTo(0, 1));
+    });
+
+    test('rotates image at offset to correct position', () async {
+      final LayerProvider layer = _createLayer();
+      final ui.PictureRecorder imgRec = ui.PictureRecorder();
+      Canvas(imgRec).drawRect(
+        const Rect.fromLTWH(0, 0, 40, 30),
+        Paint()..color = const Color(0xFF00FF00),
+      );
+      final ui.Image testImage = imgRec.endRecording().toImageSync(40, 30);
+
+      layer.appendDrawingAction(
+        UserActionDrawing(
+          action: ActionType.image,
+          positions: <Offset>[const Offset(50, 100), const Offset(90, 130)],
+          image: testImage,
+        ),
+      );
+
+      await layer.rotate90Clockwise(_defaultSize);
+
+      // Origin (50, 100) with imgH=30 → (600-100-30, 50) = (470, 50)
+      expect(layer.actionStack.first.positions.first.dx, closeTo(470, 1));
+      expect(layer.actionStack.first.positions.first.dy, closeTo(50, 1));
     });
 
     test('rotates text object position', () async {
@@ -645,7 +674,7 @@ void main() {
       layer.appendDrawingAction(
         UserActionDrawing(
           action: ActionType.image,
-          positions: <Offset>[const Offset(0, 0), const Offset(20, 10)],
+          positions: <Offset>[const Offset(50, 30), const Offset(70, 40)],
           image: testImage,
         ),
       );
@@ -653,6 +682,9 @@ void main() {
       await layer.flipHorizontal(_defaultSize);
 
       expect(layer.actionStack.first.image, isNotNull);
+      // Horizontal flip: origin x' = width - x - imgW = 800 - 50 - 20 = 730
+      expect(layer.actionStack.first.positions.first.dx, closeTo(730, 1));
+      expect(layer.actionStack.first.positions.first.dy, closeTo(30, 1));
     });
 
     test('flips text object', () async {
@@ -712,6 +744,31 @@ void main() {
       await layer.flipVertical(_defaultSize);
 
       expect(layer.actionStack.first.textObject, isNotNull);
+    });
+
+    test('flips image vertically to correct position', () async {
+      final LayerProvider layer = _createLayer();
+      final ui.PictureRecorder imgRec = ui.PictureRecorder();
+      Canvas(imgRec).drawRect(
+        const Rect.fromLTWH(0, 0, 20, 10),
+        Paint()..color = const Color(0xFFFF0000),
+      );
+      final ui.Image testImage = imgRec.endRecording().toImageSync(20, 10);
+
+      layer.appendDrawingAction(
+        UserActionDrawing(
+          action: ActionType.image,
+          positions: <Offset>[const Offset(50, 30), const Offset(70, 40)],
+          image: testImage,
+        ),
+      );
+
+      await layer.flipVertical(_defaultSize);
+
+      expect(layer.actionStack.first.image, isNotNull);
+      // Vertical flip: origin y' = height - y - imgH = 600 - 30 - 10 = 560
+      expect(layer.actionStack.first.positions.first.dx, closeTo(50, 1));
+      expect(layer.actionStack.first.positions.first.dy, closeTo(560, 1));
     });
   });
 

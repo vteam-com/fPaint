@@ -214,5 +214,67 @@ void main() {
       await prefs2.getPref();
       expect(prefs2.useApplePencil, isFalse);
     });
+
+    test('loads saved recentFiles on re-init', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyRecentFiles: <String>['/tmp/a.png', '/tmp/b.ora'],
+      });
+      final AppPreferences prefs2 = AppPreferences();
+      await prefs2.getPref();
+      expect(prefs2.recentFiles, <String>['/tmp/a.png', '/tmp/b.ora']);
+    });
+  });
+
+  group('recentFiles', () {
+    test('defaults to empty list', () {
+      expect(preferences.recentFiles, isEmpty);
+    });
+
+    test('addRecentFile adds a path', () async {
+      await preferences.addRecentFile('/tmp/test.png');
+      expect(preferences.recentFiles, <String>['/tmp/test.png']);
+    });
+
+    test('addRecentFile moves duplicate to front', () async {
+      await preferences.addRecentFile('/tmp/a.png');
+      await preferences.addRecentFile('/tmp/b.png');
+      await preferences.addRecentFile('/tmp/a.png');
+      expect(preferences.recentFiles, <String>['/tmp/a.png', '/tmp/b.png']);
+    });
+
+    test('addRecentFile caps at maxRecentFiles', () async {
+      for (int i = 0; i < AppLimits.maxRecentFiles + 5; i++) {
+        await preferences.addRecentFile('/tmp/file_$i.png');
+      }
+      expect(preferences.recentFiles.length, AppLimits.maxRecentFiles);
+      // Most recent should be first
+      expect(
+        preferences.recentFiles.first,
+        '/tmp/file_${AppLimits.maxRecentFiles + 4}.png',
+      );
+    });
+
+    test('addRecentFile persists to SharedPreferences', () async {
+      await preferences.addRecentFile('/tmp/test.png');
+      final SharedPreferences prefs = await preferences.getPref();
+      expect(
+        prefs.getStringList(AppPreferences.keyRecentFiles),
+        <String>['/tmp/test.png'],
+      );
+    });
+
+    test('addRecentFile notifies listeners', () async {
+      int notifyCount = 0;
+      preferences.addListener(() => notifyCount++);
+      await preferences.addRecentFile('/tmp/test.png');
+      expect(notifyCount, 1);
+    });
+
+    test('recentFiles list is unmodifiable', () {
+      expect(
+        () => preferences.recentFiles.add('/tmp/hack.png'),
+        throwsUnsupportedError,
+      );
+    });
   });
 }

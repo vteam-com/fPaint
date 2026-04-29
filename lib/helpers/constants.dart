@@ -274,6 +274,8 @@ class AppLimits {
   static const int opacityPrecision = 5;
   static const int sliderDivisions = 100;
   static const int hueDivisions = 360;
+  static const int maxRecentFiles = 10;
+  static const int recentFilesDisplayCount = 5;
 }
 
 /// Shared geometry and math helpers for repeated factors.
@@ -404,6 +406,8 @@ class FileExtensions {
 
 /// Shared widget keys used by tests and UI lookups across the app.
 class Keys {
+  static Key floatActionUndo = const Key('floating_action_undo');
+  static Key floatActionRedo = const Key('floating_action_redo');
   static Key floatActionZoomIn = const Key('floating_action_zoom_in');
   static Key floatActionZoomOut = const Key('floating_action_zoom_out');
   static Key floatActionCenter = const Key('floating_action_center');

@@ -4,6 +4,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.2] - 2026-04-29
+
+### Add
+
+- Most Recently Used (MRU) file list for quick access to recent artwork
+
+### Fix
+
+- Runtime crash on rotate
+- Undo feature reliability in painting scenarios
+- Code coverage improved to 85%
+
 ## [1.6.1] - 2026-04-28
 
 ### Fix

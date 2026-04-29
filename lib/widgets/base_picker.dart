@@ -61,7 +61,7 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
   @override
   Widget build(final BuildContext context) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

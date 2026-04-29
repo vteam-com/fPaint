@@ -5,39 +5,52 @@ library;
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/main.dart';
 import 'package:fpaint/main_screen.dart';
-import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
+import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
+import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/main_view.dart';
+import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/tolerance_picker.dart';
+import 'package:fpaint/widgets/top_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/painting_test_helpers.dart';
 
-part 'painting_scenario_layers/paint_layer_sky.dart';
-part 'painting_scenario_layers/paint_layer_mountains.dart';
-part 'painting_scenario_layers/paint_layer_clouds.dart';
-part 'painting_scenario_layers/paint_layer_sun.dart';
-part 'painting_scenario_layers/paint_layer_land.dart';
-part 'painting_scenario_layers/paint_layer_lake.dart';
-part 'painting_scenario_layers/paint_layer_shadows.dart';
-part 'painting_scenario_layers/paint_layer_house.dart';
-part 'painting_scenario_layers/paint_layer_fence.dart';
 part 'painting_scenario_layers/paint_layer_birds.dart';
+part 'painting_scenario_layers/paint_layer_clouds.dart';
+part 'painting_scenario_layers/paint_layer_fence.dart';
+part 'painting_scenario_layers/paint_layer_house.dart';
+part 'painting_scenario_layers/paint_layer_lake.dart';
+part 'painting_scenario_layers/paint_layer_land.dart';
+part 'painting_scenario_layers/paint_layer_mountains.dart';
+part 'painting_scenario_layers/paint_layer_shadows.dart';
 part 'painting_scenario_layers/paint_layer_signature.dart';
+part 'painting_scenario_layers/paint_layer_sky.dart';
+part 'painting_scenario_layers/paint_layer_sun.dart';
+part 'painting_scenario_layers/scenario_coverage_exercises.dart';
 part 'painting_scenario_layers/scenario_crop_canvas.dart';
+part 'painting_scenario_layers/scenario_export_outputs.dart';
 part 'painting_scenario_layers/scenario_post_crop_vignette.dart';
 part 'painting_scenario_layers/scenario_validate_scene.dart';
-part 'painting_scenario_layers/scenario_export_outputs.dart';
 
 // ---------------------------------------------------------------------------
 // Test constants
@@ -51,6 +64,7 @@ const Map<String, Object> _testPreferences = <String, Object>{
 };
 
 const double _scenarioViewportHeightScale = 1.5;
+const int _coverageDialogTransitionMs = 300;
 
 // Sky layer
 const String _skyLayerName = 'Sky';
@@ -362,7 +376,8 @@ void main() {
   SharedPreferences.setMockInitialValues(_testPreferences);
 
   group('Painting Scenario (Unit Test)', () {
-    testWidgets('Painting scenario runs entirely in unit tests without a simulator', (final WidgetTester tester) async {
+    /// Painting scenario runs entirely in unit tests without a simulator
+    testWidgets('Draw house', (final WidgetTester tester) async {
       // ---------------------------------------------------------------
       // Boot the full app — no simulator, no emulator, just widget test
       // ---------------------------------------------------------------
@@ -406,6 +421,48 @@ void main() {
       await paintLayerSignature(session, layersProvider: layersProvider);
       await validateScenarioScene(session, layersProvider: layersProvider);
       await exportScenarioOutputs(session);
+
+      // Capture the scene state before coverage exercises.
+      final int layerCountBefore = layersProvider.length;
+      final double canvasWidthBefore = layersProvider.width;
+      final double canvasHeightBefore = layersProvider.height;
+      final List<String> layerNamesBefore = <String>[
+        for (int i = 0; i < layersProvider.length; i++) layersProvider.get(i).name,
+      ];
+      final List<int> actionCountsBefore = <int>[
+        for (int i = 0; i < layersProvider.length; i++) layersProvider.get(i).actionStack.length,
+      ];
+
+      await exerciseCoverageScenarios(session);
+
+      // Each exercise cleans up after itself. Verify the scene is unchanged.
+      expect(layersProvider.length, layerCountBefore);
+      expect(layersProvider.width, canvasWidthBefore);
+      expect(layersProvider.height, canvasHeightBefore);
+      for (int i = 0; i < layerCountBefore; i++) {
+        expect(layersProvider.get(i).name, layerNamesBefore[i]);
+        expect(
+          layersProvider.get(i).isVisible,
+          isTrue,
+          reason: 'Layer "${layersProvider.get(i).name}" at index $i should be visible',
+        );
+        expect(
+          layersProvider.get(i).actionStack.length,
+          actionCountsBefore[i],
+          reason:
+              'Layer "${layersProvider.get(i).name}" actionStack changed from ${actionCountsBefore[i]} to ${layersProvider.get(i).actionStack.length}',
+        );
+      }
+
+      // Reset the view so the final video frame shows the restored house.
+      final AppProvider appProvider = AppProvider.of(
+        tester.element(find.byType(MainView)),
+        listen: false,
+      );
+      appProvider.resetView();
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
 
       await videoRecorder.stop();
 

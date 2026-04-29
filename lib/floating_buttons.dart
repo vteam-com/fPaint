@@ -29,6 +29,7 @@ Widget floatingActionButtons(
   final AppLocalizations l10n = context.l10n;
 
   final Widget undoButton = myFloatButton(
+    key: Keys.floatActionUndo,
     icon: AppIcon.undo,
     tooltip: appProvider.undoProvider.getHistoryStringForUndo(),
     onPressed: () {
@@ -37,6 +38,7 @@ Widget floatingActionButtons(
   );
 
   final Widget redo = myFloatButton(
+    key: Keys.floatActionRedo,
     icon: AppIcon.redo,
     tooltip: appProvider.undoProvider.getHistoryStringForRedo(),
     onPressed: () {

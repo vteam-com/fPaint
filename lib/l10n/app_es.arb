@@ -1,6 +1,7 @@
 {
   "@@locale": "es",
   "about": "Acerca de...",
+  "addAsNewLayer": "Agregar como nueva capa",
   "addText": "Agregar texto",
   "apply": "Aplicar",
   "availablePlatforms": "Plataformas disponibles",
@@ -20,6 +21,7 @@
   "blendModeSaturationDescription": "Usa la saturación del origen y el tono y luminancia del destino.",
   "blendModeScreenDescription": "Multiplica los inversos del origen y destino, produciendo una salida más clara.",
   "blendModeSoftLightDescription": "Suaviza el contraste oscureciendo o aclarando el destino según el origen.",
+  "browseFiles": "Explorar archivos...",
   "brush": "Pincel",
   "brushColor": "Color del pincel",
   "brushSize": "Tamaño del pincel",
@@ -176,6 +178,7 @@
     }
   },
   "platforms": "Disponible en...",
+  "recentFilesLabel": "Recientes",
   "resizeRotate": "Redimensionar / Girar",
   "rotateCanvasTooltip": "Girar lienzo 90 grados en sentido horario",
   "runOnMostBrowsers": "Funciona en la mayoria de navegadores.",

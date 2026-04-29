@@ -220,6 +220,9 @@ Future<void> _handleFileOpened(final String filePath) async {
   // Update the shell provider with the file name if successful
   if (success) {
     mainApp.shellProvider.loadedFileName = filePath;
+    await AppPreferences.of(
+      mainApp.navigatorKey.currentContext!,
+    ).addRecentFile(filePath);
   }
 }
 

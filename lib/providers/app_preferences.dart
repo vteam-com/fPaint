@@ -37,6 +37,7 @@ class AppPreferences extends ChangeNotifier {
   static const String keyUseApplePencil = 'keyUseApplePencil';
   static const String keyLanguageCode = 'keyLanguageCode';
   static const String keyRecoveryDraftSourceFilePath = 'keyRecoveryDraftSourceFilePath';
+  static const String keyRecentFiles = 'keyRecentFiles';
 
   // Default values
   double _sidePanelDistance = AppLayout.sidePanelTopDefault;
@@ -45,6 +46,7 @@ class AppPreferences extends ChangeNotifier {
   Color _fillColor = AppPalette.blue;
   bool _useApplePencil = true;
   String? _languageCode;
+  List<String> _recentFiles = <String>[];
 
   // Getters
 
@@ -72,6 +74,9 @@ class AppPreferences extends ChangeNotifier {
   ///
   /// Returns null to use system locale.
   Locale? get preferredLocale => _languageCode == null ? null : Locale(_languageCode!);
+
+  /// Gets the list of recently opened file paths (most recent first).
+  List<String> get recentFiles => List<String>.unmodifiable(_recentFiles);
 
   /// Gets the SharedPreferences instance.
   Future<SharedPreferences> getPref() async {
@@ -150,6 +155,20 @@ class AppPreferences extends ChangeNotifier {
     await (await getPref()).remove(keyRecoveryDraftSourceFilePath);
   }
 
+  /// Adds a file path to the recent files list.
+  ///
+  /// The path is moved to the front if already present. The list is capped at
+  /// [AppLimits.maxRecentFiles].
+  Future<void> addRecentFile(final String path) async {
+    _recentFiles.remove(path);
+    _recentFiles.insert(0, path);
+    if (_recentFiles.length > AppLimits.maxRecentFiles) {
+      _recentFiles = _recentFiles.sublist(0, AppLimits.maxRecentFiles);
+    }
+    await (await getPref()).setStringList(keyRecentFiles, _recentFiles);
+    notifyListeners();
+  }
+
   /// Ensures preferences are loaded once before any persisted value is read.
   ///
   /// Concurrent callers share the same in-flight load future so
@@ -200,5 +219,7 @@ class AppPreferences extends ChangeNotifier {
     _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? AppDefaults.useApplePencil;
 
     _languageCode = _prefs!.getString(keyLanguageCode);
+
+    _recentFiles = _prefs!.getStringList(keyRecentFiles) ?? <String>[];
   }
 }

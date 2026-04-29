@@ -527,6 +527,39 @@ void main() {
       expect(colors, isEmpty);
     });
   });
+
+  group('replaceAll', () {
+    test('clears layers, sets size, runs addLayers, selects first, clears changed', () async {
+      // Add some pre-existing content
+      layersProvider.addTop(name: 'Old Layer');
+      layersProvider.selectedLayer.hasChanged = true;
+
+      const Size newSize = Size(500, 300);
+
+      await layersProvider.replaceAll(
+        canvasSize: newSize,
+        addLayers: () async {
+          layersProvider.addTop(name: 'Imported A');
+          layersProvider.addTop(name: 'Imported B');
+        },
+      );
+
+      expect(layersProvider.size, newSize);
+      expect(layersProvider.length, 2);
+      expect(layersProvider.selectedLayerIndex, 0);
+      expect(layersProvider.hasChanged, isFalse);
+    });
+
+    test('handles empty addLayers gracefully', () async {
+      await layersProvider.replaceAll(
+        canvasSize: const Size(100, 100),
+        addLayers: () async {},
+      );
+
+      expect(layersProvider.isEmpty, isTrue);
+      expect(layersProvider.size, const Size(100, 100));
+    });
+  });
 }
 
 Future<Color> _pixelColorAt(final ui.Image image, final int x, final int y) async {

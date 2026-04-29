@@ -1,8 +1,10 @@
-import 'dart:ui';
-
+import 'package:flutter/material.dart' show MaterialApp, Scaffold;
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 void main() {
   group('getSupportedBlendModes', () {
@@ -120,6 +122,85 @@ void main() {
       final String result = blendModeToText(BlendMode.colorBurn);
       expect(result[0], result[0].toUpperCase());
       expect(result.isNotEmpty, isTrue);
+    });
+  });
+
+  group('showBlendModeMenu widget test', () {
+    testWidgets('shows and selects blend mode', (final WidgetTester tester) async {
+      BlendMode? selectedMode;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (final BuildContext context) {
+                return GestureDetector(
+                  onTap: () async {
+                    selectedMode = await showBlendModeMenu(
+                      context: context,
+                      position: const Offset(100, 100),
+                      selectedBlendMode: BlendMode.srcOver,
+                    );
+                  },
+                  child: const AppText('Trigger'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Tap to trigger the menu.
+      await tester.tap(find.text('Trigger'));
+      await tester.pumpAndSettle();
+
+      // Menu should show blend mode entries.
+      expect(find.text('Normal'), findsWidgets);
+      expect(find.text('Multiply'), findsWidgets);
+
+      // Tap on Multiply.
+      await tester.tap(find.text('Multiply').last);
+      await tester.pumpAndSettle();
+
+      expect(selectedMode, BlendMode.multiply);
+    });
+
+    testWidgets('returns srcOver when cancelled', (final WidgetTester tester) async {
+      BlendMode? selectedMode;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Builder(
+              builder: (final BuildContext context) {
+                return GestureDetector(
+                  onTap: () async {
+                    selectedMode = await showBlendModeMenu(
+                      context: context,
+                      position: const Offset(100, 100),
+                    );
+                  },
+                  child: const AppText('Trigger'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Tap to trigger.
+      await tester.tap(find.text('Trigger'));
+      await tester.pumpAndSettle();
+
+      // Dismiss by tapping outside (press Escape).
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+
+      expect(selectedMode, BlendMode.srcOver);
     });
   });
 }

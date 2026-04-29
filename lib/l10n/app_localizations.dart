@@ -581,6 +581,24 @@ abstract class AppLocalizations {
   /// **'Import...'**
   String get importTooltip;
 
+  /// No description provided for @addAsNewLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add as new layer'**
+  String get addAsNewLayer;
+
+  /// No description provided for @browseFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Files...'**
+  String get browseFiles;
+
+  /// No description provided for @recentFilesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recentFilesLabel;
+
   /// No description provided for @invalidImageSizeDimensionsMustBeNumbers.
   ///
   /// In en, this message translates to:

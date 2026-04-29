@@ -4,6 +4,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
+import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
@@ -39,7 +40,12 @@ class SidePanelTopMenu extends StatelessWidget {
           _buildIconButton(
             tooltip: l10n.importTooltip,
             icon: AppIcon.fileDownload,
-            onPressed: () => onFileOpen(context),
+            onPressed: () => showAppDialog<void>(
+              context: context,
+              builder: (final BuildContext _) {
+                return ImportDialog(parentContext: context);
+              },
+            ),
           ),
         if (shellProvider.isSidePanelExpanded)
           _buildIconButton(
@@ -55,6 +61,7 @@ class SidePanelTopMenu extends StatelessWidget {
             onPressed: () async {
               final AppProvider appProvider = AppProvider.of(context);
               await appProvider.rotateCanvas90(l10n.rotateCanvasTooltip);
+              shellProvider.requestCanvasFit();
             },
           ),
         if (shellProvider.isSidePanelExpanded)
@@ -64,6 +71,7 @@ class SidePanelTopMenu extends StatelessWidget {
             onPressed: () async {
               final AppProvider appProvider = AppProvider.of(context);
               await appProvider.flipCanvasHorizontal(l10n.flipHorizontalTooltip);
+              shellProvider.requestCanvasFit();
             },
           ),
         if (shellProvider.isSidePanelExpanded)
@@ -73,6 +81,7 @@ class SidePanelTopMenu extends StatelessWidget {
             onPressed: () async {
               final AppProvider appProvider = AppProvider.of(context);
               await appProvider.flipCanvasVertical(l10n.flipVerticalTooltip);
+              shellProvider.requestCanvasFit();
             },
           ),
         if (!shellProvider.showMenu)

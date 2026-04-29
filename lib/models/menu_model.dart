@@ -25,5 +25,5 @@ class MenuIds {
   static const int newFromClipboard = 7;
 
   /// The ID for the about menu item.
-  static const int about = 10;
+  static const int about = 9;
 }

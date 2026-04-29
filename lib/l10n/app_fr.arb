@@ -1,6 +1,7 @@
 {
   "@@locale": "fr",
   "about": "A propos...",
+  "addAsNewLayer": "Ajouter comme nouveau calque",
   "addText": "Ajouter du texte",
   "apply": "Appliquer",
   "availablePlatforms": "Plateformes disponibles",
@@ -20,6 +21,7 @@
   "blendModeSaturationDescription": "Utilise la saturation de la source et la teinte et luminance de la destination.",
   "blendModeScreenDescription": "Multiplie les inverses de la source et de la destination, produisant une sortie plus claire.",
   "blendModeSoftLightDescription": "Adoucit le contraste en assombrissant ou éclaircissant la destination selon la source.",
+  "browseFiles": "Parcourir...",
   "brush": "Pinceau",
   "brushColor": "Couleur du pinceau",
   "brushSize": "Taille du pinceau",
@@ -175,6 +177,7 @@
     }
   },
   "platforms": "Disponible sur...",
+  "recentFilesLabel": "Récents",
   "resizeRotate": "Redimensionner / Pivoter",
   "rotateCanvasTooltip": "Pivoter la toile de 90 degres sens horaire",
   "runOnMostBrowsers": "Fonctionne sur la plupart des navigateurs.",

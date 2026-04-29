@@ -215,6 +215,26 @@ class LayerProvider extends ChangeNotifier {
         newPositions[i] = Offset(oldCanvasHeight - oldPos.dy, oldPos.dx);
       }
 
+      // For image actions the draw origin must be the top-left of the
+      // rotated bounding box, not the raw point-transform of the old origin.
+      if (oldAction.action == ActionType.image && oldAction.image != null) {
+        final double imageWidth = oldAction.image!.width.toDouble();
+        final double imageHeight = oldAction.image!.height.toDouble();
+        final Offset oldOrigin = oldAction.positions.first;
+        // After 90° CW the image dimensions swap: newW = oldH, newH = oldW.
+        final Offset newOrigin = Offset(
+          oldCanvasHeight - oldOrigin.dy - imageHeight,
+          oldOrigin.dx,
+        );
+        newPositions[0] = newOrigin;
+        if (newPositions.length > 1) {
+          newPositions[1] = Offset(
+            newOrigin.dx + imageHeight,
+            newOrigin.dy + imageWidth,
+          );
+        }
+      }
+
       ui.Path? newPath = oldAction.path;
       if (oldAction.path != null) {
         // Matrix for: x' = H - y; y' = x
@@ -323,6 +343,24 @@ class LayerProvider extends ChangeNotifier {
       for (int i = 0; i < newPositions.length; i++) {
         final Offset oldPos = newPositions[i];
         newPositions[i] = isHorizontal ? Offset(extent - oldPos.dx, oldPos.dy) : Offset(oldPos.dx, extent - oldPos.dy);
+      }
+
+      // For image actions the draw origin must be the top-left of the
+      // mirrored bounding box, not the raw point-mirror of the old origin.
+      if (oldAction.action == ActionType.image && oldAction.image != null) {
+        final double imageWidth = oldAction.image!.width.toDouble();
+        final double imageHeight = oldAction.image!.height.toDouble();
+        final Offset oldOrigin = oldAction.positions.first;
+        final Offset newOrigin = isHorizontal
+            ? Offset(extent - oldOrigin.dx - imageWidth, oldOrigin.dy)
+            : Offset(oldOrigin.dx, extent - oldOrigin.dy - imageHeight);
+        newPositions[0] = newOrigin;
+        if (newPositions.length > 1) {
+          newPositions[1] = Offset(
+            newOrigin.dx + imageWidth,
+            newOrigin.dy + imageHeight,
+          );
+        }
       }
 
       final ui.Path? newPath = _transformPath(oldAction.path, extent, isHorizontal: isHorizontal);
