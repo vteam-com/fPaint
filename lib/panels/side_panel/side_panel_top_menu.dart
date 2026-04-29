@@ -29,7 +29,6 @@ class SidePanelTopMenu extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        const MainMenu(),
         if (shellProvider.isSidePanelExpanded)
           _buildIconButton(
             tooltip: l10n.startOverTooltip,
@@ -94,6 +93,7 @@ class SidePanelTopMenu extends StatelessWidget {
               shellProvider.isSidePanelExpanded = !shellProvider.isSidePanelExpanded;
             },
           ),
+        const MainMenu(),
       ],
     );
   }
