@@ -7,10 +7,14 @@ import 'package:fpaint/models/app_icon_enum.dart';
 /// Effects that can be applied to a selected region.
 enum SelectionEffect {
   blur(AppIcon.effectBlur),
-  sharpen(AppIcon.effectSharpen),
-  pixelate(AppIcon.effectPixelate),
+  brightness(AppIcon.effectBrightness),
+  contrast(AppIcon.effectContrast),
   grayscale(AppIcon.effectGrayscale),
+  hueSaturation(AppIcon.effectHueSaturation),
   noise(AppIcon.effectNoise),
+  pixelate(AppIcon.effectPixelate),
+  shadow(AppIcon.effectShadow),
+  sharpen(AppIcon.effectSharpen),
   soften(AppIcon.effectSoften),
   vignette(AppIcon.effectVignette),
   ;
@@ -31,14 +35,22 @@ enum SelectionEffect {
     switch (this) {
       case SelectionEffect.blur:
         return applyGaussianBlur(image, AppEffects.blurSigma, strength: strength);
-      case SelectionEffect.sharpen:
-        return applySharpen(image, strength: strength);
-      case SelectionEffect.pixelate:
-        return applyPixelate(image, strength: strength);
+      case SelectionEffect.brightness:
+        return applyBrightness(image, strength: strength);
+      case SelectionEffect.contrast:
+        return applyContrast(image, strength: strength);
       case SelectionEffect.grayscale:
         return applyGrayscale(image, strength: strength);
+      case SelectionEffect.hueSaturation:
+        return applyHueSaturation(image, strength: strength);
       case SelectionEffect.noise:
         return applyNoise(image, strength: strength);
+      case SelectionEffect.pixelate:
+        return applyPixelate(image, strength: strength);
+      case SelectionEffect.shadow:
+        return applyShadow(image, strength: strength);
+      case SelectionEffect.sharpen:
+        return applySharpen(image, strength: strength);
       case SelectionEffect.soften:
         return applyGaussianBlur(image, AppEffects.softenSigma, strength: strength);
       case SelectionEffect.vignette:

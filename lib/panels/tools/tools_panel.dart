@@ -715,8 +715,10 @@ class _EffectsSectionState extends State<_EffectsSection> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Wrap(
+          spacing: widget.minimal ? AppSpacing.thin : AppSpacing.xs,
+          runSpacing: widget.minimal ? AppSpacing.thin : AppSpacing.xs,
+          alignment: WrapAlignment.center,
           children: <Widget>[
             for (final SelectionEffect effect in SelectionEffect.values)
               ToolPanelPicker(

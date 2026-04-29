@@ -280,6 +280,24 @@ class AppLimits {
 
 /// Shared geometry and math helpers for repeated factors.
 class AppMath {
+  /// Offset for red channel in RGBA pixel data.
+  static const int rgbChannelRed = 0;
+
+  /// Offset for green channel in RGBA pixel data.
+  static const int rgbChannelGreen = 1;
+
+  /// Offset for blue channel in RGBA pixel data.
+  static const int rgbChannelBlue = 2;
+
+  static const double degrees60 = 60.0;
+  static const double degrees120 = 120.0;
+  static const double degrees180 = 180.0;
+  static const double degrees240 = 240.0;
+  static const double degrees300 = 300.0;
+  static const int zero = 0;
+  static const int two = 2;
+  static const int four = 4;
+  static const int six = 6;
   static const int pair = 2;
   static const int triple = 3;
   static const int bytesPerPixel = 4;
@@ -357,6 +375,24 @@ class AppEffects {
 
   /// Strength of the vignette darkening at the edges (0 = none, 1 = full black).
   static const double vignetteStrength = 0.75;
+
+  /// Maximum brightness offset added per channel (0–255 scale).
+  static const int brightnessOffset = 100;
+
+  /// Maximum contrast multiplier applied to each channel.
+  static const double contrastMax = 2.0;
+
+  /// Maximum hue rotation in degrees.
+  static const double hueRotationMax = 180.0;
+
+  /// Degrees in a full hue rotation.
+  static const double hueFullCircle = 360.0;
+
+  /// Maximum shadow darkening strength.
+  static const double shadowDarkening = 0.6;
+
+  /// Shadow midtone threshold (0–255), below which darkening is applied.
+  static const int shadowMidtone = 128;
 
   /// ITU-R BT.601 luma coefficient for the red channel.
   static const double lumaRed = 0.2126;
