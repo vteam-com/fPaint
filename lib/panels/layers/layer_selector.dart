@@ -247,11 +247,6 @@ class LayerSelector extends StatelessWidget {
     final AppLocalizations l10n = context.l10n;
     return Row(
       children: <Widget>[
-        AppPopupMenuButton<String>(
-          icon: const AppSvgIcon(icon: AppIcon.moreVert),
-          itemBuilder: (final BuildContext _) => _buildPopupMenuItems(),
-          onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
-        ),
         if (layer.parentGroupName.isNotEmpty)
           Opacity(
             opacity: AppVisual.half,
@@ -276,6 +271,11 @@ class LayerSelector extends StatelessWidget {
             color: layer.isVisible ? AppPalette.blue : AppColors.layerHiddenWarning,
           ),
           onPressed: () => layers.layersToggleVisibility(layer),
+        ),
+        AppPopupMenuButton<String>(
+          icon: const AppSvgIcon(icon: AppIcon.moreVert),
+          itemBuilder: (final BuildContext _) => _buildPopupMenuItems(),
+          onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
         ),
       ],
     );
