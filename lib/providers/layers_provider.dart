@@ -191,6 +191,26 @@ class LayersProvider extends ChangeNotifier {
     _list.clear();
   }
 
+  /// Replaces the entire layer stack with freshly-imported content.
+  ///
+  /// Clears existing layers, sets [size], invokes [addLayers] to populate
+  /// the stack, selects the first layer, clears the dirty flag, and
+  /// notifies listeners exactly once at the end.
+  Future<void> replaceAll({
+    required final Size canvasSize,
+    required final Future<void> Function() addLayers,
+  }) async {
+    clear();
+    _size = canvasSize;
+    await addLayers();
+    _selectedLayerIndex = 0;
+    if (isNotEmpty) {
+      get(0).isSelected = true;
+    }
+    clearHasChanged();
+    // clearHasChanged already calls notifyListeners
+  }
+
   /// Gets the number of layers in the canvas.
   int get length => _list.length;
 

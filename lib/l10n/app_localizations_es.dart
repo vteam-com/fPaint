@@ -282,6 +282,15 @@ class AppLocalizationsEs extends AppLocalizations {
   String get importTooltip => 'Importar...';
 
   @override
+  String get addAsNewLayer => 'Agregar como nueva capa';
+
+  @override
+  String get browseFiles => 'Explorar archivos...';
+
+  @override
+  String get recentFilesLabel => 'Recientes';
+
+  @override
   String get invalidImageSizeDimensionsMustBeNumbers => 'Tamano de imagen invalido: las dimensiones deben ser numeros.';
 
   @override

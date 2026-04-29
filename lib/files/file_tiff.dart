@@ -152,15 +152,14 @@ Future<void> readTiffFileFromBytes(
 ) async {
   final _DecodedTiffDocument decodedDocument = _decodeTiffDocument(bytes);
 
-  layers.clear();
-  layers.size = decodedDocument.size;
-
-  for (final _DecodedTiffLayer layer in decodedDocument.layers) {
-    await _appendDecodedTiffLayer(layers, meta: layer.meta, image: layer.image, offset: layer.offset);
-  }
-
-  layers.selectedLayerIndex = 0;
-  layers.clearHasChanged();
+  await layers.replaceAll(
+    canvasSize: decodedDocument.size,
+    addLayers: () async {
+      for (final _DecodedTiffLayer layer in decodedDocument.layers) {
+        await _appendDecodedTiffLayer(layers, meta: layer.meta, image: layer.image, offset: layer.offset);
+      }
+    },
+  );
 }
 
 /// Decodes [bytes] into a validated TIFF document model ready to apply.

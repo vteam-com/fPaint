@@ -12,6 +12,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -41,6 +42,7 @@ final Logger _log = Logger(logNameImportFiles);
 /// [context] The BuildContext of the widget that invokes this function.
 Future<void> onFileNew(final BuildContext context) async {
   final AppProvider appProvider = AppProvider.of(context);
+  final ShellProvider shellProvider = ShellProvider.of(context);
   final AppLocalizations l10n = context.l10n;
 
   if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
@@ -83,6 +85,7 @@ Future<void> onFileNew(final BuildContext context) async {
                   onPressed: () {
                     // Handle creating new document from clipboard image
                     appProvider.newDocumentFromClipboardImage();
+                    shellProvider.requestCanvasFit();
                     Navigator.of(context).pop();
                   },
                   text: l10n.newFromClipboard,
@@ -100,6 +103,7 @@ Future<void> onFileNew(final BuildContext context) async {
                 final double? height = double.tryParse(heightController.text);
                 if (width != null && height != null) {
                   appProvider.canvasClear(Size(width, height));
+                  shellProvider.requestCanvasFit();
                   Navigator.of(context).pop();
                 } else {
                   // Show error message if input is invalid
@@ -176,8 +180,11 @@ Future<void> onFileOpen(final BuildContext context) async {
           );
         }
         shellProvider.loadedFileName = path;
+        // ignore: use_build_context_synchronously
+        await AppPreferences.of(context).addRecentFile(path);
       }
       layers.clearHasChanged();
+      shellProvider.requestCanvasFit();
     }
   } catch (e) {
     // Handle any errors that occur during file picking/loading
@@ -287,11 +294,13 @@ Future<bool> _decodeAndApplyImage(
   try {
     final ui.Image image = await decodeImageFromList(imageBytes);
 
-    layers.clear(); // Clear layers only after successful decoding
-    layers.size = Size(image.width.toDouble(), image.height.toDouble());
-    layers.addTop(name: imageName); // Add a new layer with the image name
-    layers.selectedLayer.addImage(imageToAdd: image);
-    layers.update(); // Notify listeners of all changes
+    await layers.replaceAll(
+      canvasSize: Size(image.width.toDouble(), image.height.toDouble()),
+      addLayers: () async {
+        layers.addTop(name: imageName);
+        layers.selectedLayer.addImage(imageToAdd: image);
+      },
+    );
 
     return true; // Success
   } catch (e) {
@@ -461,7 +470,7 @@ Future<void> onFileDropped({
     }
 
     if (action == DropFileAction.addLayer) {
-      await _addDroppedFileAsLayer(
+      await addFileAsLayer(
         context: context,
         layers: layers,
         path: path,
@@ -475,12 +484,15 @@ Future<void> onFileDropped({
     await openFileFromPath(context: context, layers: layers, path: path);
     shellProvider.loadedFileName = path;
     layers.clearHasChanged();
+    shellProvider.requestCanvasFit();
+    // ignore: use_build_context_synchronously
+    await AppPreferences.of(context).addRecentFile(path);
   }
 }
 
 /// Decodes the image at [path] and adds it as a new layer on top of the
 /// current layer stack.
-Future<void> _addDroppedFileAsLayer({
+Future<void> addFileAsLayer({
   required final BuildContext context,
   required final LayersProvider layers,
   required final String path,

@@ -127,6 +127,12 @@ void main() {
       provider.canvasPlacement = CanvasAutoPlacement.fit;
       expect(provider.canvasPlacement, CanvasAutoPlacement.fit);
     });
+
+    test('requestCanvasFit sets placement to fit', () {
+      provider.canvasPlacement = CanvasAutoPlacement.manual;
+      provider.requestCanvasFit();
+      expect(provider.canvasPlacement, CanvasAutoPlacement.fit);
+    });
   });
 
   group('deviceSizeSmall', () {

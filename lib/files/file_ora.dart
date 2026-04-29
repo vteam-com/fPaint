@@ -124,12 +124,33 @@ Future<void> readOraFileFromBytes(
       String.fromCharCodes(stackFile.content),
     );
 
-    await importFromOraXml(archive, layers, xmlDoc);
+    final ui.Size canvasSize = _extractOraCanvasSize(xmlDoc);
+
+    await layers.replaceAll(
+      canvasSize: canvasSize,
+      addLayers: () => importFromOraXml(archive, layers, xmlDoc),
+    );
   } on OraFileException {
     rethrow;
   } catch (error, stackTrace) {
     _throwOraException(_errorOraReadBytes, error, stackTrace);
   }
+}
+
+/// Extracts the canvas size from the ORA XML document.
+ui.Size _extractOraCanvasSize(final XmlDocument xmlDoc) {
+  final XmlElement? xmlElementImage = xmlDoc.getElement(_oraElementImage);
+  if (xmlElementImage == null) {
+    throw const OraFileException(_errorOraMissingImageElement);
+  }
+
+  final String? width = xmlElementImage.getAttribute(_oraAttrWidth);
+  final String? height = xmlElementImage.getAttribute(_oraAttrHeight);
+  if (width == null || height == null) {
+    throw const OraFileException(_errorOraMissingDimensions);
+  }
+
+  return ui.Size(double.parse(width), double.parse(height));
 }
 
 /// Imports image metadata and root stack information from an ORA XML document.

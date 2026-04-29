@@ -8,6 +8,7 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/menu_model.dart';
 import 'package:fpaint/panels/side_panel/about.dart';
 import 'package:fpaint/panels/side_panel/canvas_settings.dart';
+import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
@@ -97,7 +98,13 @@ void onDropDownMenuSelection(
       onFileNew(context);
       break;
     case MenuIds.openFile:
-      onFileOpen(context);
+      showAppDialog<void>(
+        context: context,
+        builder: (final BuildContext _) {
+          return ImportDialog(parentContext: context);
+        },
+      );
+
       break;
     case MenuIds.newFromClipboard:
       AppProvider.of(context).newDocumentFromClipboardImage();

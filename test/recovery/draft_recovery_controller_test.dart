@@ -138,6 +138,139 @@ void main() {
 
     controller.dispose();
   });
+
+  testWidgets('restoreDraftIfAvailable clears pref when no draft exists', (final WidgetTester tester) async {
+    final AppPreferences preferences = await _createPreferences();
+    final LayersProvider layers = _resetLayers();
+    final ShellProvider shellProvider = ShellProvider();
+    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage();
+    final AppProvider appProvider = AppProvider(preferences: preferences);
+    final DraftRecoveryController controller = DraftRecoveryController(
+      preferences: preferences,
+      layers: layers,
+      shellProvider: shellProvider,
+      storage: storage,
+      saveDebounce: Duration.zero,
+    );
+
+    await preferences.setRecoveryDraftSourceFilePath('/tmp/phantom.ora');
+    await controller.initialize();
+    await controller.restoreDraftIfAvailable(appProvider: appProvider);
+    await tester.pump();
+
+    expect(await preferences.getRecoveryDraftSourceFilePath(), isNull);
+    controller.dispose();
+  });
+
+  testWidgets('discardDraft clears storage and preferences', (final WidgetTester tester) async {
+    final AppPreferences preferences = await _createPreferences();
+    final LayersProvider layers = _resetLayers();
+    final ShellProvider shellProvider = ShellProvider();
+    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
+      bytes: Uint8List.fromList(<int>[1, 2, 3]),
+    );
+    final DraftRecoveryController controller = DraftRecoveryController(
+      preferences: preferences,
+      layers: layers,
+      shellProvider: shellProvider,
+      storage: storage,
+      saveDebounce: Duration.zero,
+    );
+
+    await preferences.setRecoveryDraftSourceFilePath('/tmp/discard_me.ora');
+    await controller.initialize();
+    await controller.discardDraft();
+    await tester.pump();
+
+    expect(storage.bytes, isNull);
+    expect(await preferences.getRecoveryDraftSourceFilePath(), isNull);
+    controller.dispose();
+  });
+
+  testWidgets('didChangeAppLifecycleState flushes on paused', (final WidgetTester tester) async {
+    final AppPreferences preferences = await _createPreferences();
+    final LayersProvider layers = _resetLayers();
+    final ShellProvider shellProvider = ShellProvider()..loadedFileName = '/tmp/lifecycle.ora';
+    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage();
+    final DraftRecoveryController controller = DraftRecoveryController(
+      preferences: preferences,
+      layers: layers,
+      shellProvider: shellProvider,
+      storage: storage,
+      encoder: (final LayersProvider _) async => <int>[4, 5, 6],
+      saveDebounce: const Duration(seconds: 60),
+    );
+
+    await controller.initialize();
+
+    // Mark changed but don't trigger flush via debounce.
+    layers.markAllChanged();
+    // Simulate lifecycle event.
+    controller.didChangeAppLifecycleState(AppLifecycleState.paused);
+    await tester.pump();
+
+    expect(storage.bytes, isNotNull);
+    controller.dispose();
+  });
+
+  testWidgets('reconcileDraft skips delete during startup when no writes occurred', (final WidgetTester tester) async {
+    final AppPreferences preferences = await _createPreferences();
+    final LayersProvider layers = _resetLayers();
+    final ShellProvider shellProvider = ShellProvider();
+    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
+      bytes: Uint8List.fromList(<int>[1, 2, 3]),
+    );
+    final DraftRecoveryController controller = DraftRecoveryController(
+      preferences: preferences,
+      layers: layers,
+      shellProvider: shellProvider,
+      storage: storage,
+      saveDebounce: Duration.zero,
+    );
+
+    await controller.initialize();
+    // layers.hasChanged is false and startup check is pending — reconcile should skip delete.
+    await controller.flushNow();
+    await tester.pump();
+
+    // The draft should NOT be deleted because startup recovery check is still pending.
+    expect(storage.bytes, isNotNull);
+    controller.dispose();
+  });
+
+  testWidgets('reconcileDraft deletes draft when not changed after startup check', (final WidgetTester tester) async {
+    final AppPreferences preferences = await _createPreferences();
+    final LayersProvider layers = _resetLayers();
+    final ShellProvider shellProvider = ShellProvider();
+    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
+      bytes: Uint8List.fromList(<int>[1, 2, 3]),
+    );
+    final AppProvider appProvider = AppProvider(preferences: preferences);
+    final DraftRecoveryController controller = DraftRecoveryController(
+      preferences: preferences,
+      layers: layers,
+      shellProvider: shellProvider,
+      storage: storage,
+      encoder: (final LayersProvider _) async => <int>[7, 8, 9],
+      restorer: (final LayersProvider targetLayers, final Uint8List bytes) async {
+        targetLayers.addBottom('Restored');
+      },
+      saveDebounce: Duration.zero,
+    );
+
+    await controller.initialize();
+    // Complete the startup recovery check.
+    await controller.restoreDraftIfAvailable(appProvider: appProvider);
+    await tester.pump();
+
+    // Now clear changes and flush — should delete draft.
+    layers.clearHasChanged();
+    await controller.flushNow();
+    await tester.pump();
+
+    expect(storage.bytes, isNull);
+    controller.dispose();
+  });
 }
 
 Future<AppPreferences> _createPreferences() async {

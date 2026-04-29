@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "about": "About...",
+  "addAsNewLayer": "Add as new layer",
   "addText": "Add Text",
   "apply": "Apply",
   "availablePlatforms": "Available Platforms",
@@ -23,6 +24,7 @@
   "blendModeSaturationDescription": "Uses the source's saturation and the destination's hue and luminance.",
   "blendModeScreenDescription": "Multiplies the inverses of the source and destination, resulting in a lighter output.",
   "blendModeSoftLightDescription": "Softens the contrast by darkening or lightening the destination depending on the source.",
+  "browseFiles": "Browse Files...",
   "brush": "Brush",
   "brushColor": "Brush Color",
   "brushSize": "Brush Size",
@@ -185,6 +187,7 @@
     }
   },
   "platforms": "Available on...",
+  "recentFilesLabel": "Recent",
   "resizeRotate": "Resize / Rotate",
   "rotateCanvasTooltip": "Rotate Canvas 90° CW",
   "runOnMostBrowsers": "Run on any OS with most browsers.",

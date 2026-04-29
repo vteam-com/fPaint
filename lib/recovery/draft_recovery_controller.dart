@@ -140,7 +140,7 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
       await _restorer(layers, bytes);
       layers.markAllChanged();
       shellProvider.loadedFileName = sourceFilePath ?? '';
-      shellProvider.update();
+      shellProvider.requestCanvasFit();
       appProvider.resetView();
       appProvider.update();
     } catch (error, stackTrace) {
