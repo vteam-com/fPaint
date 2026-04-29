@@ -392,7 +392,21 @@ class ToolsPanel extends StatelessWidget {
                     appProvider.update();
                   },
                 ),
-
+                if (appProvider.selectorModel.isVisible)
+                  ToolPanelPicker(
+                    key: Keys.toolSelectorCancel,
+                    minimal: minimal,
+                    name: l10n.cancel,
+                    image: const AppSvgIcon(
+                      icon: AppIcon.close,
+                      isSelected: false,
+                      color: AppColors.layerHiddenWarning,
+                    ),
+                    onPressed: () {
+                      appProvider.selectorModel.clear();
+                      appProvider.update();
+                    },
+                  ),
                 if (appProvider.selectorModel.mode == SelectorMode.wand) addToolOptionTolerance(context, appProvider),
 
                 if (appProvider.selectorModel.isVisible) const AppDivider(),
@@ -482,21 +496,6 @@ class ToolsPanel extends StatelessWidget {
                     minimal: minimal,
                     l10n: l10n,
                     appProvider: appProvider,
-                  ),
-
-                if (appProvider.selectorModel.isVisible)
-                  ToolPanelPicker(
-                    key: Keys.toolSelectorCancel,
-                    minimal: minimal,
-                    name: l10n.cancel,
-                    image: const AppSvgIcon(
-                      icon: AppIcon.close,
-                      isSelected: false,
-                    ),
-                    onPressed: () {
-                      appProvider.selectorModel.clear();
-                      appProvider.update();
-                    },
                   ),
               ],
             ),

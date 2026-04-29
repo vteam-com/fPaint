@@ -21,16 +21,25 @@ class AppSvgIcon extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final double resolvedSize = size ?? AppLayout.iconSize;
-    final Color resolvedColor = isSelected != null
-        ? (isSelected! ? AppPalette.blue : AppPalette.white)
-        : color ?? AppPalette.white;
 
     return SvgPicture.asset(
       icon.assetPath,
       key: key,
       width: resolvedSize,
       height: resolvedSize,
-      colorFilter: ColorFilter.mode(resolvedColor, BlendMode.srcATop),
+      colorFilter: ColorFilter.mode(defaultColor, BlendMode.srcATop),
     );
+  }
+
+  /// Calculates the default color based on the [color] property and selection state.
+  Color get defaultColor {
+    if (color == null) {
+      if (isSelected == null || isSelected == false) {
+        return AppPalette.white;
+      } else {
+        return AppPalette.blue;
+      }
+    }
+    return color!;
   }
 }
