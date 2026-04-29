@@ -189,7 +189,19 @@ class AppLocalizationsEs extends AppLocalizations {
   String get effectBlur => 'Desenfoque';
 
   @override
+  String get effectBrightness => 'Brillo';
+
+  @override
+  String get effectContrast => 'Contraste';
+
+  @override
   String get effectGrayscale => 'Escala de grises';
+
+  @override
+  String get effectHueSaturation => 'Cambio de tono';
+
+  @override
+  String get effectIntensity => 'Intensidad';
 
   @override
   String get effectNoise => 'Ruido';
@@ -198,13 +210,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get effectPixelate => 'Pixelar';
 
   @override
+  String get effectShadow => 'Sombra';
+
+  @override
   String get effectSharpen => 'Nitidez';
 
   @override
   String get effectSoften => 'Suavizar bordes';
-
-  @override
-  String get effectIntensity => 'Intensidad';
 
   @override
   String get effectVignette => 'Viñeta';

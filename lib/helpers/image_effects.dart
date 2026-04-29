@@ -303,3 +303,215 @@ Future<ui.Image> _blendOver(
   );
   return recorder.endRecording().toImage(bottom.width, bottom.height);
 }
+
+/// Adjusts the brightness of [image] by adding a per-channel offset.
+///
+/// [strength] ranges from 0.0 (no change) to 1.0 (maximum brightening).
+Future<ui.Image> applyBrightness(
+  final ui.Image image, {
+  final double strength = AppEffects.defaultIntensity,
+}) async {
+  if (strength <= AppEffects.minIntensity) {
+    return image;
+  }
+  final int offset = (AppEffects.brightnessOffset * strength).round();
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  if (byteData == null) {
+    return image;
+  }
+
+  final Uint8List pixels = byteData.buffer.asUint8List();
+
+  for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
+    for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
+      pixels[i + c] = (pixels[i + c] + offset).clamp(0, AppLimits.rgbChannelMax);
+    }
+  }
+
+  return _imageFromPixels(pixels, image.width, image.height);
+}
+
+/// Adjusts the contrast of [image] by scaling each channel around the midpoint.
+///
+/// [strength] ranges from 0.0 (no change) to 1.0 (maximum contrast boost).
+Future<ui.Image> applyContrast(
+  final ui.Image image, {
+  final double strength = AppEffects.defaultIntensity,
+}) async {
+  if (strength <= AppEffects.minIntensity) {
+    return image;
+  }
+  final double factor = 1.0 + (AppEffects.contrastMax - 1.0) * strength;
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  if (byteData == null) {
+    return image;
+  }
+
+  final Uint8List pixels = byteData.buffer.asUint8List();
+
+  for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
+    for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
+      final int v = pixels[i + c];
+      pixels[i + c] = ((factor * (v - AppEffects.shadowMidtone)) + AppEffects.shadowMidtone).round().clamp(
+        0,
+        AppLimits.rgbChannelMax,
+      );
+    }
+  }
+
+  return _imageFromPixels(pixels, image.width, image.height);
+}
+
+/// Rotates the hue of [image] by up to [AppEffects.hueRotationMax] degrees.
+///
+/// [strength] ranges from 0.0 (no hue shift) to 1.0 (maximum rotation).
+Future<ui.Image> applyHueSaturation(
+  final ui.Image image, {
+  final double strength = AppEffects.defaultIntensity,
+}) async {
+  if (strength <= AppEffects.minIntensity) {
+    return image;
+  }
+  final double hueShift = AppEffects.hueRotationMax * strength;
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  if (byteData == null) {
+    return image;
+  }
+
+  final Uint8List pixels = byteData.buffer.asUint8List();
+
+  for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
+    final int r = pixels[i + AppMath.rgbChannelRed];
+    final int g = pixels[i + AppMath.rgbChannelGreen];
+    final int b = pixels[i + AppMath.rgbChannelBlue];
+    final List<double> hsl = _rgbToHsl(r, g, b);
+    hsl[0] = (hsl[0] + hueShift) % AppEffects.hueFullCircle;
+    final List<int> rgb = _hslToRgb(
+      hsl[AppMath.rgbChannelRed],
+      hsl[AppMath.rgbChannelGreen],
+      hsl[AppMath.rgbChannelBlue],
+    );
+    pixels[i + AppMath.rgbChannelRed] = rgb[AppMath.rgbChannelRed];
+    pixels[i + AppMath.rgbChannelGreen] = rgb[AppMath.rgbChannelGreen];
+    pixels[i + AppMath.rgbChannelBlue] = rgb[AppMath.rgbChannelBlue];
+  }
+
+  return _imageFromPixels(pixels, image.width, image.height);
+}
+
+/// Darkens shadow (dark) regions of [image].
+///
+/// [strength] ranges from 0.0 (no change) to 1.0 (maximum darkening of shadows).
+Future<ui.Image> applyShadow(
+  final ui.Image image, {
+  final double strength = AppEffects.defaultIntensity,
+}) async {
+  if (strength <= AppEffects.minIntensity) {
+    return image;
+  }
+  final double darken = AppEffects.shadowDarkening * strength;
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  if (byteData == null) {
+    return image;
+  }
+
+  final Uint8List pixels = byteData.buffer.asUint8List();
+
+  for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
+    final int r = pixels[i];
+    final int g = pixels[i + 1];
+    final int b = pixels[i + AppMath.rgbChannelBlue];
+    final double luma = AppEffects.lumaRed * r + AppEffects.lumaGreen * g + AppEffects.lumaBlue * b;
+    if (luma < AppEffects.shadowMidtone) {
+      final double shadowFactor = 1.0 - darken * (1.0 - luma / AppEffects.shadowMidtone);
+      pixels[i] = (r * shadowFactor).round().clamp(0, AppLimits.rgbChannelMax);
+      pixels[i + AppMath.rgbChannelGreen] = (g * shadowFactor).round().clamp(0, AppLimits.rgbChannelMax);
+      pixels[i + AppMath.rgbChannelBlue] = (b * shadowFactor).round().clamp(0, AppLimits.rgbChannelMax);
+    }
+  }
+
+  return _imageFromPixels(pixels, image.width, image.height);
+}
+
+/// Creates a [ui.Image] from raw RGBA pixel data.
+Future<ui.Image> _imageFromPixels(
+  final Uint8List pixels,
+  final int width,
+  final int height,
+) async {
+  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(pixels);
+  final ui.ImageDescriptor descriptor = ui.ImageDescriptor.raw(
+    buffer,
+    width: width,
+    height: height,
+    pixelFormat: ui.PixelFormat.rgba8888,
+  );
+  final ui.Codec codec = await descriptor.instantiateCodec();
+  final ui.FrameInfo frame = await codec.getNextFrame();
+  return frame.image;
+}
+
+/// Converts RGB (0–255) to HSL (h: 0–360, s: 0–1, l: 0–1).
+List<double> _rgbToHsl(final int r, final int g, final int b) {
+  final double rn = r / AppLimits.rgbChannelMax;
+  final double gn = g / AppLimits.rgbChannelMax;
+  final double bn = b / AppLimits.rgbChannelMax;
+  final double cMax = max(rn, max(gn, bn));
+  final double cMin = min(rn, min(gn, bn));
+  final double delta = cMax - cMin;
+  final double l = (cMax + cMin) / AppMath.pair;
+  if (delta == AppMath.zero.toDouble()) {
+    return <double>[AppMath.zero.toDouble(), AppMath.zero.toDouble(), l];
+  }
+  final double s = delta / (1 - (AppMath.pair * l - 1).abs());
+  double h;
+  if (cMax == rn) {
+    h = AppMath.degrees60 * (((gn - bn) / delta) % AppMath.six);
+  } else if (cMax == gn) {
+    h = AppMath.degrees60 * ((bn - rn) / delta + AppMath.two);
+  } else {
+    h = AppMath.degrees60 * ((rn - gn) / delta + AppMath.four);
+  }
+  if (h < AppMath.zero.toDouble()) {
+    h += AppEffects.hueFullCircle;
+  }
+  return <double>[h, s, l];
+}
+
+/// Converts HSL (h: 0–360, s: 0–1, l: 0–1) to RGB (0–255).
+List<int> _hslToRgb(final double h, final double s, final double l) {
+  final double c = (1 - (AppMath.pair * l - 1).abs()) * s;
+  final double x = c * (1 - ((h / AppMath.degrees60) % AppMath.two - 1).abs());
+  final double m = l - c / AppMath.pair;
+  double rn, gn, bn;
+  if (h < AppMath.degrees60) {
+    rn = c;
+    gn = x;
+    bn = AppMath.zero.toDouble();
+  } else if (h < AppMath.degrees120) {
+    rn = x;
+    gn = c;
+    bn = AppMath.zero.toDouble();
+  } else if (h < AppMath.degrees180) {
+    rn = AppMath.zero.toDouble();
+    gn = c;
+    bn = x;
+  } else if (h < AppMath.degrees240) {
+    rn = AppMath.zero.toDouble();
+    gn = x;
+    bn = c;
+  } else if (h < AppMath.degrees300) {
+    rn = x;
+    gn = AppMath.zero.toDouble();
+    bn = c;
+  } else {
+    rn = c;
+    gn = AppMath.zero.toDouble();
+    bn = x;
+  }
+  return <int>[
+    ((rn + m) * AppLimits.rgbChannelMax).round().clamp(AppMath.zero, AppLimits.rgbChannelMax),
+    ((gn + m) * AppLimits.rgbChannelMax).round().clamp(AppMath.zero, AppLimits.rgbChannelMax),
+    ((bn + m) * AppLimits.rgbChannelMax).round().clamp(AppMath.zero, AppLimits.rgbChannelMax),
+  ];
+}

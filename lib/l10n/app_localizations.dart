@@ -419,11 +419,35 @@ abstract class AppLocalizations {
   /// **'Blur'**
   String get effectBlur;
 
+  /// No description provided for @effectBrightness.
+  ///
+  /// In en, this message translates to:
+  /// **'Brightness'**
+  String get effectBrightness;
+
+  /// No description provided for @effectContrast.
+  ///
+  /// In en, this message translates to:
+  /// **'Contrast'**
+  String get effectContrast;
+
   /// No description provided for @effectGrayscale.
   ///
   /// In en, this message translates to:
   /// **'Grayscale'**
   String get effectGrayscale;
+
+  /// No description provided for @effectHueSaturation.
+  ///
+  /// In en, this message translates to:
+  /// **'Hue Shift'**
+  String get effectHueSaturation;
+
+  /// No description provided for @effectIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Intensity'**
+  String get effectIntensity;
 
   /// No description provided for @effectNoise.
   ///
@@ -437,6 +461,12 @@ abstract class AppLocalizations {
   /// **'Pixelate'**
   String get effectPixelate;
 
+  /// No description provided for @effectShadow.
+  ///
+  /// In en, this message translates to:
+  /// **'Shadow'**
+  String get effectShadow;
+
   /// No description provided for @effectSharpen.
   ///
   /// In en, this message translates to:
@@ -448,12 +478,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edge Soften'**
   String get effectSoften;
-
-  /// No description provided for @effectIntensity.
-  ///
-  /// In en, this message translates to:
-  /// **'Intensity'**
-  String get effectIntensity;
 
   /// No description provided for @effectVignette.
   ///

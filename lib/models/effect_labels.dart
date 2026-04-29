@@ -9,14 +9,22 @@ String effectLabel(
   switch (effect) {
     case SelectionEffect.blur:
       return l10n.effectBlur;
-    case SelectionEffect.sharpen:
-      return l10n.effectSharpen;
-    case SelectionEffect.pixelate:
-      return l10n.effectPixelate;
+    case SelectionEffect.brightness:
+      return l10n.effectBrightness;
+    case SelectionEffect.contrast:
+      return l10n.effectContrast;
     case SelectionEffect.grayscale:
       return l10n.effectGrayscale;
+    case SelectionEffect.hueSaturation:
+      return l10n.effectHueSaturation;
     case SelectionEffect.noise:
       return l10n.effectNoise;
+    case SelectionEffect.pixelate:
+      return l10n.effectPixelate;
+    case SelectionEffect.shadow:
+      return l10n.effectShadow;
+    case SelectionEffect.sharpen:
+      return l10n.effectSharpen;
     case SelectionEffect.soften:
       return l10n.effectSoften;
     case SelectionEffect.vignette:
