@@ -98,7 +98,7 @@ class AppColors {
   static const Color hover = Color(0xFF333333);
   static const Color selected = Color(0xFF2196F3);
   static const Color pressed = Color(0xFF1976D2);
-  static const Color layerHiddenWarning = Color.fromARGB(255, 135, 9, 9);
+  static const Color layerHiddenWarning = Color.fromARGB(255, 241, 85, 85);
 
   // Transform handle colors
   static const Color transformCornerHandle = Color(0xFFFF9800);
