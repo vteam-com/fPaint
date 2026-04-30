@@ -5,11 +5,12 @@ import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/widgets/material_free.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../helpers/recovery_test_helpers.dart';
 
 void main() {
   testWidgets('SettingsPage updates preferences and opens shortcuts help', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
 
     await tester.pumpWidget(
       ChangeNotifierProvider<AppPreferences>.value(
@@ -79,11 +80,4 @@ void main() {
     expect(find.text('Android'), findsOneWidget);
     expect(find.text('Web Browser'), findsOneWidget);
   });
-}
-
-Future<AppPreferences> _createPreferences() async {
-  SharedPreferences.setMockInitialValues(<String, Object>{});
-  final AppPreferences preferences = AppPreferences();
-  await preferences.getPref();
-  return preferences;
 }

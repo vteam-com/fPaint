@@ -33,6 +33,14 @@ const String _loadedImageDefaultName = 'Loaded Image';
 
 final Logger _log = Logger(logNameImportFiles);
 
+void _showImportFeedback(
+  final BuildContext context,
+  final String message, {
+  final Duration duration = AppDefaults.fileImportFeedbackDuration,
+}) {
+  showSnackBarIfMounted(context, message, duration: duration);
+}
+
 /// Handles the creation of a new file within the application.
 ///
 /// This asynchronous function is triggered when the user opts to create a
@@ -234,22 +242,13 @@ Future<bool> openFileFromPath({
     } catch (e) {
       // General error catch, readImageFromFilePath might have already shown a SnackBar for decode errors
       // ignore: use_build_context_synchronously
-      if (context.mounted) {
-        context.showSnackBarMessage(
-          context.l10n.errorProcessingFile(e.toString()),
-        );
-      }
+      _showImportFeedback(context, context.l10n.errorProcessingFile(e.toString()));
       return false;
     }
   } else {
     // Show unsupported format message
     // ignore: use_build_context_synchronously
-    if (context.mounted) {
-      context.showSnackBarMessage(
-        context.l10n.fileFormatNotSupported(extension),
-        duration: const Duration(seconds: AppMath.triple),
-      );
-    }
+    _showImportFeedback(context, context.l10n.fileFormatNotSupported(extension));
     return false; // Return false regardless of context.mounted if format is not supported
   }
   // Removed duplicated else block
@@ -305,12 +304,7 @@ Future<bool> _decodeAndApplyImage(
     return true; // Success
   } catch (e) {
     // ignore: use_build_context_synchronously
-    if (context.mounted) {
-      context.showSnackBarMessage(
-        context.l10n.failedToLoadImage(e.toString()),
-        duration: const Duration(seconds: AppMath.triple),
-      );
-    }
+    _showImportFeedback(context, context.l10n.failedToLoadImage(e.toString()));
     return false; // Failure
   }
 }
@@ -328,12 +322,7 @@ Future<bool> readImageFromFilePath(
     return await _decodeAndApplyImage(layers, fileBytes, context, imageName: imageName);
   } catch (e) {
     // ignore: use_build_context_synchronously
-    if (context.mounted) {
-      context.showSnackBarMessage(
-        context.l10n.errorReadingFile(e.toString()),
-        duration: const Duration(seconds: AppMath.triple),
-      );
-    }
+    _showImportFeedback(context, context.l10n.errorReadingFile(e.toString()));
     return false;
   }
 }
@@ -363,21 +352,11 @@ Future<bool> _readHeicFromFilePath(
     return await _decodeAndApplyImage(layers, decodableBytes, context, imageName: imageName);
   } on HeicConversionException {
     // ignore: use_build_context_synchronously
-    if (context.mounted) {
-      context.showSnackBarMessage(
-        context.l10n.fileFormatNotSupportedOnPlatform(_fileExtensionHeic),
-        duration: const Duration(seconds: AppMath.triple),
-      );
-    }
+    _showImportFeedback(context, context.l10n.fileFormatNotSupportedOnPlatform(_fileExtensionHeic));
     return false;
   } catch (e) {
     // ignore: use_build_context_synchronously
-    if (context.mounted) {
-      context.showSnackBarMessage(
-        context.l10n.errorReadingFile(e.toString()),
-        duration: const Duration(seconds: AppMath.triple),
-      );
-    }
+    _showImportFeedback(context, context.l10n.errorReadingFile(e.toString()));
     return false;
   }
 }
@@ -396,12 +375,7 @@ Future<bool> _readHeicFromBytes(
     return await _decodeAndApplyImage(layers, decodableBytes, context, imageName: imageName);
   } on HeicConversionException {
     // ignore: use_build_context_synchronously
-    if (context.mounted) {
-      context.showSnackBarMessage(
-        context.l10n.fileFormatNotSupportedOnPlatform(_fileExtensionHeic),
-        duration: const Duration(seconds: AppMath.triple),
-      );
-    }
+    _showImportFeedback(context, context.l10n.fileFormatNotSupportedOnPlatform(_fileExtensionHeic));
     return false;
   }
 }
@@ -430,12 +404,7 @@ Future<void> onFileDropped({
 
   final String extension = path.split('.').last.toLowerCase();
   if (!isFileExtensionSupported(extension)) {
-    if (context.mounted) {
-      context.showSnackBarMessage(
-        context.l10n.fileFormatNotSupported(extension),
-        duration: const Duration(seconds: AppMath.triple),
-      );
-    }
+    _showImportFeedback(context, context.l10n.fileFormatNotSupported(extension));
     return;
   }
 
@@ -498,6 +467,7 @@ Future<void> addFileAsLayer({
   required final String path,
 }) async {
   final String fileName = path.split(Platform.pathSeparator).last;
+  final AppLocalizations l10n = context.l10n;
 
   try {
     final Uint8List fileBytes = await File(path).readAsBytes();
@@ -507,11 +477,9 @@ Future<void> addFileAsLayer({
     layers.selectedLayer.addImage(imageToAdd: image);
     layers.update();
   } catch (e) {
-    if (context.mounted) {
-      context.showSnackBarMessage(
-        context.l10n.failedToLoadImage(e.toString()),
-        duration: const Duration(seconds: AppMath.triple),
-      );
+    if (!context.mounted) {
+      return;
     }
+    _showImportFeedback(context, l10n.failedToLoadImage(e.toString()));
   }
 }

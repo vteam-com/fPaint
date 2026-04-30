@@ -425,6 +425,7 @@ class AppDefaults {
   static const Duration recoverySaveDebounce = Duration(seconds: 2);
   static const Duration integrationEvidenceCollectionDelay = Duration(seconds: 2);
   static const Duration integrationVisualCheckpointDelay = Duration(milliseconds: 700);
+  static const Duration fileImportFeedbackDuration = Duration(seconds: AppMath.triple);
   static const int integrationEvidenceJpegQuality = 95;
   static const double renderedScreenshotPixelRatio = 1.0;
 }

@@ -7,17 +7,17 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
-import 'package:fpaint/recovery/draft_recovery_storage.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:provider/single_child_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+import '../helpers/recovery_test_helpers.dart';
 
 void main() {
   testWidgets('pointer up flushes a recovery draft immediately', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
     final AppProvider appProvider = AppProvider(preferences: preferences);
     final ShellProvider shellProvider = ShellProvider();
-    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage();
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage();
     final DraftRecoveryController controller = DraftRecoveryController(
       preferences: preferences,
       layers: appProvider.layers,
@@ -27,7 +27,7 @@ void main() {
       saveDebounce: const Duration(seconds: 10),
     );
 
-    _resetLayers(appProvider);
+    resetAppProviderLayersForRecovery(appProvider);
     await controller.initialize();
 
     await tester.pumpWidget(
@@ -69,43 +69,4 @@ void main() {
 
     controller.dispose();
   });
-}
-
-Future<AppPreferences> _createPreferences() async {
-  SharedPreferences.setMockInitialValues(<String, Object>{});
-  final AppPreferences preferences = AppPreferences();
-  await preferences.getPref();
-  return preferences;
-}
-
-void _resetLayers(final AppProvider appProvider) {
-  appProvider.layers.list.clear();
-  appProvider.layers.size = const Size(100, 100);
-  appProvider.layers.addWhiteBackgroundLayer();
-  appProvider.layers.selectedLayerIndex = 0;
-  appProvider.layers.clearHasChanged();
-}
-
-class _MemoryDraftRecoveryStorage implements DraftRecoveryStorage {
-  Uint8List? bytes;
-
-  @override
-  Future<void> deleteDraft() async {
-    bytes = null;
-  }
-
-  @override
-  Future<bool> hasDraft() async {
-    return bytes != null;
-  }
-
-  @override
-  Future<Uint8List?> readDraft() async {
-    return bytes;
-  }
-
-  @override
-  Future<void> writeDraft(final Uint8List nextBytes) async {
-    bytes = nextBytes;
-  }
 }
