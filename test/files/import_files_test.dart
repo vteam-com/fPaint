@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/files/file_heic.dart';
 import 'package:fpaint/files/import_files.dart';
 
 /// Path to the HEIC test asset relative to the project root.
@@ -105,9 +106,10 @@ void main() {
         );
       });
 
-      test('test.heic can be decoded by Flutter', () async {
+      test('test.heic can be decoded by the import pipeline', () async {
         final Uint8List bytes = await File(_testHeicPath).readAsBytes();
-        final ui.Codec codec = await ui.instantiateImageCodec(bytes);
+        final Uint8List decodableBytes = await decodeHeicBytes(bytes);
+        final ui.Codec codec = await ui.instantiateImageCodec(decodableBytes);
         final ui.FrameInfo frameInfo = await codec.getNextFrame();
         final ui.Image image = frameInfo.image;
 
