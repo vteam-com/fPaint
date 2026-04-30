@@ -443,6 +443,7 @@ class FileExtensions {
 
 /// Shared widget keys used by tests and UI lookups across the app.
 class Keys {
+  static Key floatActionSelector = const Key('floating_action_selector');
   static Key floatActionUndo = const Key('floating_action_undo');
   static Key floatActionRedo = const Key('floating_action_redo');
   static Key floatActionZoomIn = const Key('floating_action_zoom_in');
