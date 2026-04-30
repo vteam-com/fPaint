@@ -173,6 +173,7 @@ extension AppProviderSelection on AppProvider {
 
   /// Begins a perspective/skew transform on the current selection.
   Future<void> startTransform() async {
+    cancelEffectPreview();
     if (!selectorModel.isVisible || selectorModel.path1 == null) {
       return;
     }
@@ -202,6 +203,7 @@ extension AppProviderSelection on AppProvider {
   /// Commits the current transform, erasing the original selection region
   /// and placing the warped result as a new image action.
   Future<void> confirmTransform() async {
+    cancelEffectPreview();
     final ui.Image? sourceImage = transformModel.sourceImage;
     if (sourceImage == null) {
       transformModel.clear();
@@ -233,7 +235,105 @@ extension AppProviderSelection on AppProvider {
 
   /// Cancels an in-progress transform operation.
   void cancelTransform() {
+    cancelEffectPreview();
     transformModel.clear();
+    update();
+  }
+
+  /// Starts live preview mode for the selected [effect] and [strength].
+  Future<void> startEffectPreview(
+    final SelectionEffect effect, {
+    final double strength = AppEffects.defaultIntensity,
+  }) async {
+    _ensureSelection();
+
+    final ui.Image? clippedImage = await createSelectionImage();
+    if (clippedImage == null) {
+      return;
+    }
+
+    final Path selectionPath = Path.from(selectorModel.path1!);
+    final Rect bounds = selectorModel.path1!.getBounds();
+
+    effectPreviewModel.start(
+      selectedEffect: effect,
+      selectionImage: clippedImage,
+      selectionPath: selectionPath,
+      selectionBounds: bounds,
+      initialStrength: strength,
+    );
+
+    await _renderEffectPreview();
+  }
+
+  /// Updates the active preview intensity and re-renders the effect live.
+  Future<void> updateEffectPreviewStrength(final double strength) async {
+    if (!effectPreviewModel.isVisible) {
+      return;
+    }
+
+    effectPreviewModel.strength = strength;
+    await _renderEffectPreview();
+  }
+
+  /// Commits the current effect preview as a single undoable action.
+  Future<void> confirmEffectPreview() async {
+    if (!effectPreviewModel.isVisible ||
+        effectPreviewModel.effect == null ||
+        effectPreviewModel.sourceImage == null ||
+        effectPreviewModel.erasePath == null ||
+        effectPreviewModel.bounds == null) {
+      return;
+    }
+
+    final SelectionEffect effect = effectPreviewModel.effect!;
+    final ui.Image sourceImage = effectPreviewModel.sourceImage!;
+    final Path erasePath = Path.from(effectPreviewModel.erasePath!);
+    final Rect bounds = effectPreviewModel.bounds!;
+    final double strength = effectPreviewModel.strength;
+
+    final ui.Image processedImage = await effect.apply(sourceImage, strength: strength);
+
+    effectPreviewModel.clear();
+
+    replaceRegion(
+      name: effect.name,
+      erasePath: erasePath,
+      replacement: processedImage,
+      offset: Offset(bounds.left, bounds.top),
+    );
+
+    update();
+  }
+
+  /// Cancels the active effect preview without committing changes.
+  void cancelEffectPreview() {
+    if (!effectPreviewModel.isVisible) {
+      return;
+    }
+
+    effectPreviewModel.clear();
+    effectPreviewRenderVersion++;
+    update();
+  }
+
+  /// Renders the effect preview image and updates overlay listeners.
+  Future<void> _renderEffectPreview() async {
+    final SelectionEffect? effect = effectPreviewModel.effect;
+    final ui.Image? sourceImage = effectPreviewModel.sourceImage;
+    if (!effectPreviewModel.isVisible || effect == null || sourceImage == null) {
+      return;
+    }
+
+    final int requestVersion = ++effectPreviewRenderVersion;
+    final double strength = effectPreviewModel.strength;
+    final ui.Image previewImage = await effect.apply(sourceImage, strength: strength);
+
+    if (!effectPreviewModel.isVisible || requestVersion != effectPreviewRenderVersion) {
+      return;
+    }
+
+    effectPreviewModel.previewImage = previewImage;
     update();
   }
 
@@ -249,6 +349,7 @@ extension AppProviderSelection on AppProvider {
     final SelectionEffect effect, {
     final double strength = AppEffects.defaultIntensity,
   }) async {
+    cancelEffectPreview();
     _ensureSelection();
 
     final ui.Image? clippedImage = await createSelectionImage();
@@ -379,6 +480,7 @@ extension AppProviderSelection on AppProvider {
 
   /// Starts a selector creation.
   void selectorCreationStart(final Offset position) {
+    cancelEffectPreview();
     selectorModel.isDrawing = true;
     if (selectorModel.mode == SelectorMode.wand) {
       getRegionPathFromLayerImage(position).then((final FillRegion region) {
@@ -423,6 +525,7 @@ extension AppProviderSelection on AppProvider {
 
   /// Selects all.
   void selectAll() {
+    cancelEffectPreview();
     selectorModel.isVisible = true;
     selectorCreationStart(Offset.zero);
     selectorModel.path1 = Path()
@@ -453,6 +556,7 @@ extension AppProviderSelection on AppProvider {
 
   /// Crops the canvas to the current selection bounds.
   Future<void> crop() async {
+    cancelEffectPreview();
     final Path? selectionPath = selectorModel.path1;
     if (selectionPath == null) {
       return;
