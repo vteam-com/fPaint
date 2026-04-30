@@ -443,60 +443,61 @@ class FileExtensions {
 
 /// Shared widget keys used by tests and UI lookups across the app.
 class Keys {
-  static Key floatActionSelector = const Key('floating_action_selector');
-  static Key floatActionUndo = const Key('floating_action_undo');
-  static Key floatActionRedo = const Key('floating_action_redo');
-  static Key floatActionZoomIn = const Key('floating_action_zoom_in');
-  static Key floatActionZoomOut = const Key('floating_action_zoom_out');
-  static Key floatActionCenter = const Key('floating_action_center');
-  static Key floatActionToggle = const Key('floating_action_toggle');
-  static Key mainMenuButton = const Key('main-menu-button');
-  static Key mainMenuCanvasSize = const Key('main-menu-canvas-size');
-  static Key sidePanelExportButton = const Key('side-panel-export-button');
-  static Key appScreenshotBoundary = const Key('app-screenshot-boundary');
-  static Key mainViewScreenshotBoundary = const Key('main-view-screenshot-boundary');
-  static String gradientHandleKeyPrefixText = 'gradient_handle_';
-  static Key layerAddAboveButton = const Key('layer-add-above-button');
-  static Key layerRenameTextField = const Key('layer-rename-text-field');
-  static Key layerRenameApplyButton = const Key('layer-rename-apply-button');
-  static Key canvasSettingsWidthField = const Key('canvas-settings-width-field');
-  static Key canvasSettingsHeightField = const Key('canvas-settings-height-field');
-  static Key canvasSettingsAspectRatioToggleButton = const Key('canvas-settings-aspect-ratio-toggle-button');
-  static Key canvasSettingsApplyButton = const Key('canvas-settings-apply-button');
-  static Key textEditorBoldButton = const Key('text-editor-bold-button');
-  static Key magnifyingEyeDropperCloseButton = const Key('magnifying-eye-dropper-close-button');
-  static Key magnifyingEyeDropperConfirmButton = const Key('magnifying-eye-dropper-confirm-button');
+  static const Key floatActionSelector = Key('floating_action_selector');
+  static const Key floatActionUndo = Key('floating_action_undo');
+  static const Key floatActionRedo = Key('floating_action_redo');
+  static const Key floatActionMenuToggle = Key('floating_action_menu_toggle');
+  static const Key floatActionZoomIn = Key('floating_action_zoom_in');
+  static const Key floatActionZoomOut = Key('floating_action_zoom_out');
+  static const Key floatActionCenter = Key('floating_action_center');
+  static const Key floatActionToggle = Key('floating_action_toggle');
+  static const Key mainMenuButton = Key('main-menu-button');
+  static const Key mainMenuCanvasSize = Key('main-menu-canvas-size');
+  static const Key sidePanelExportButton = Key('side-panel-export-button');
+  static const Key appScreenshotBoundary = Key('app-screenshot-boundary');
+  static const Key mainViewScreenshotBoundary = Key('main-view-screenshot-boundary');
+  static const String gradientHandleKeyPrefixText = 'gradient_handle_';
+  static const Key layerAddAboveButton = Key('layer-add-above-button');
+  static const Key layerRenameTextField = Key('layer-rename-text-field');
+  static const Key layerRenameApplyButton = Key('layer-rename-apply-button');
+  static const Key canvasSettingsWidthField = Key('canvas-settings-width-field');
+  static const Key canvasSettingsHeightField = Key('canvas-settings-height-field');
+  static const Key canvasSettingsAspectRatioToggleButton = Key('canvas-settings-aspect-ratio-toggle-button');
+  static const Key canvasSettingsApplyButton = Key('canvas-settings-apply-button');
+  static const Key textEditorBoldButton = Key('text-editor-bold-button');
+  static const Key magnifyingEyeDropperCloseButton = Key('magnifying-eye-dropper-close-button');
+  static const Key magnifyingEyeDropperConfirmButton = Key('magnifying-eye-dropper-confirm-button');
 
-  static Key toolLine = const Key('tool-line');
-  static Key toolRectangle = const Key('tool-rectangle');
-  static Key toolCircle = const Key('tool-circle');
-  static Key toolText = const Key('tool-text');
+  static const Key toolLine = Key('tool-line');
+  static const Key toolRectangle = Key('tool-rectangle');
+  static const Key toolCircle = Key('tool-circle');
+  static const Key toolText = Key('tool-text');
 
-  static Key toolFill = const Key('tool-fill');
-  static Key toolFillModeSolid = const Key('tool-fill-mode-solid');
-  static Key toolFillModeLinear = const Key('tool-fill-mode-linear');
-  static Key toolFillModeRadial = const Key('tool-fill-mode-radial');
+  static const Key toolFill = Key('tool-fill');
+  static const Key toolFillModeSolid = Key('tool-fill-mode-solid');
+  static const Key toolFillModeLinear = Key('tool-fill-mode-linear');
+  static const Key toolFillModeRadial = Key('tool-fill-mode-radial');
 
-  static Key toolSelector = const Key('tool-selector');
-  static Key toolSelectorModeRectangle = const Key('tool-selector-mode-rectangle');
-  static Key toolSelectorModeCircle = const Key('tool-selector-mode-circle');
-  static Key toolSelectorModeLasso = const Key('tool-selector-mode-lasso');
-  static Key toolSelectorModeWand = const Key('tool-selector-mode-wand');
-  static Key toolSelectorCancel = const Key('tool-selector-cancel');
+  static const Key toolSelector = Key('tool-selector');
+  static const Key toolSelectorModeRectangle = Key('tool-selector-mode-rectangle');
+  static const Key toolSelectorModeCircle = Key('tool-selector-mode-circle');
+  static const Key toolSelectorModeLasso = Key('tool-selector-mode-lasso');
+  static const Key toolSelectorModeWand = Key('tool-selector-mode-wand');
+  static const Key toolSelectorCancel = Key('tool-selector-cancel');
 
-  static Key toolPanelFillColor = const Key('toolPanelFillColor');
-  static Key toolPanelBrushColor1 = const Key('toolPanelBrushColor1');
-  static Key toolPanelFontColor = const Key('toolPanelFontColor');
-  static Key toolTransform = const Key('tool-transform');
+  static const Key toolPanelFillColor = Key('toolPanelFillColor');
+  static const Key toolPanelBrushColor1 = Key('toolPanelBrushColor1');
+  static const Key toolPanelFontColor = Key('toolPanelFontColor');
+  static const Key toolTransform = Key('tool-transform');
 
-  static Key effectsButton = const Key('effects-button');
-  static Key effectIntensityPanelApplyButton = const Key('effect-intensity-panel-apply-button');
-  static Key effectIntensityApplyButton = const Key('effect-intensity-apply-button');
-  static Key effectIntensityCancelButton = const Key('effect-intensity-cancel-button');
-  static Key effectIntensitySlider = const Key('effect-intensity-slider');
-  static Key effectIntensityDialogSlider = const Key('effect-intensity-dialog-slider');
+  static const Key effectsButton = Key('effects-button');
+  static const Key effectIntensityPanelApplyButton = Key('effect-intensity-panel-apply-button');
+  static const Key effectIntensityApplyButton = Key('effect-intensity-apply-button');
+  static const Key effectIntensityCancelButton = Key('effect-intensity-cancel-button');
+  static const Key effectIntensitySlider = Key('effect-intensity-slider');
+  static const Key effectIntensityDialogSlider = Key('effect-intensity-dialog-slider');
 
-  static Key toolBrushSizeTool = const Key('tool-brush-size-tool');
-  static Key toolBrushSizeButton = const Key('tool-brush-size-button');
-  static Key toolBrushSizeSlider = const Key('tool-brush-size-slider');
+  static const Key toolBrushSizeTool = Key('tool-brush-size-tool');
+  static const Key toolBrushSizeButton = Key('tool-brush-size-button');
+  static const Key toolBrushSizeSlider = Key('tool-brush-size-slider');
 }

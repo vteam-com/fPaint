@@ -13,6 +13,17 @@ import 'package:vector_math/vector_math_64.dart';
 
 /// Selection, region, transform, effect, and crop operations.
 extension AppProviderSelection on AppProvider {
+  /// Toggles selection overlay behavior from the FAB without coupling to tool state.
+  void toggleSelectionOverlayFromFab() {
+    if (selectorModel.isVisible) {
+      cancelEffectPreview();
+      selectorModel.clear();
+      update();
+      return;
+    }
+    selectedAction = ActionType.selector;
+  }
+
   /// Erases a region on the canvas.
   void regionErase() {
     if (selectorModel.path1 != null) {
