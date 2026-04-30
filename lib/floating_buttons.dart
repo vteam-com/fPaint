@@ -2,8 +2,10 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -27,6 +29,22 @@ Widget floatingActionButtons(
   final AppProvider appProvider,
 ) {
   final AppLocalizations l10n = context.l10n;
+  final bool selectorModeEnabled = appProvider.selectedAction == ActionType.selector;
+
+  final Widget selectorToggleButton = myFloatButton(
+    key: Keys.floatActionSelector,
+    icon: selectorModeEnabled ? AppIcon.selectorCancel : AppIcon.selector,
+    tooltip: selectorModeEnabled ? l10n.cancel : l10n.toolSelector,
+    onPressed: () {
+      if (selectorModeEnabled) {
+        appProvider.cancelEffectPreview();
+        appProvider.selectorModel.clear();
+        appProvider.selectedAction = ActionType.brush;
+        return;
+      }
+      appProvider.selectedAction = ActionType.selector;
+    },
+  );
 
   final Widget undoButton = myFloatButton(
     key: Keys.floatActionUndo,
@@ -107,6 +125,7 @@ Widget floatingActionButtons(
     mainAxisAlignment: MainAxisAlignment.end,
     spacing: AppSpacing.xs,
     children: <Widget>[
+      selectorToggleButton,
       undoButton,
       redo,
 

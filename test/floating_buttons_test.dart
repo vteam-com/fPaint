@@ -4,9 +4,11 @@ import 'package:fpaint/floating_buttons.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -52,6 +54,23 @@ void main() {
 
       // Desktop layout uses Column
       expect(find.byType(Column), findsWidgets);
+    });
+
+    testWidgets('renders selector button with correct key', (final WidgetTester tester) async {
+      shellProvider.deviceSizeSmall = false;
+
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: Builder(
+            builder: (final BuildContext context) {
+              return floatingActionButtons(context, shellProvider, appProvider);
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
     });
 
     testWidgets('renders zoom in button with correct key', (final WidgetTester tester) async {
@@ -159,6 +178,95 @@ void main() {
       await tester.pump();
 
       expect(shellProvider.shellMode, ShellMode.hidden);
+    });
+
+    testWidgets('selector button enables selector mode on tap', (final WidgetTester tester) async {
+      shellProvider.deviceSizeSmall = false;
+      appProvider.selectedAction = ActionType.brush;
+
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: Builder(
+            builder: (final BuildContext context) {
+              return floatingActionButtons(context, shellProvider, appProvider);
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byKey(Keys.floatActionSelector));
+      await tester.pump();
+
+      expect(appProvider.selectedAction, ActionType.selector);
+    });
+
+    testWidgets('selector button disables selector mode and clears selection on tap', (
+      final WidgetTester tester,
+    ) async {
+      shellProvider.deviceSizeSmall = false;
+      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectorModel.isVisible = true;
+
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: Builder(
+            builder: (final BuildContext context) {
+              return floatingActionButtons(context, shellProvider, appProvider);
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byKey(Keys.floatActionSelector));
+      await tester.pump();
+
+      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.selectorModel.isVisible, isFalse);
+    });
+
+    testWidgets('selector button switches icon based on selector mode', (final WidgetTester tester) async {
+      shellProvider.deviceSizeSmall = false;
+
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: Builder(
+            builder: (final BuildContext context) {
+              return floatingActionButtons(context, shellProvider, appProvider);
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      AppSvgIcon selectorIcon = tester.widget<AppSvgIcon>(
+        find.descendant(
+          of: find.byKey(Keys.floatActionSelector),
+          matching: find.byType(AppSvgIcon),
+        ),
+      );
+      expect(selectorIcon.icon, AppIcon.selector);
+
+      appProvider.selectedAction = ActionType.selector;
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: Builder(
+            builder: (final BuildContext context) {
+              return floatingActionButtons(context, shellProvider, appProvider);
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      selectorIcon = tester.widget<AppSvgIcon>(
+        find.descendant(
+          of: find.byKey(Keys.floatActionSelector),
+          matching: find.byType(AppSvgIcon),
+        ),
+      );
+      expect(selectorIcon.icon, AppIcon.selectorCancel);
     });
 
     testWidgets('zoom in changes canvas placement to manual', (final WidgetTester tester) async {
