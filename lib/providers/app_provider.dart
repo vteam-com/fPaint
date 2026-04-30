@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/models/effect_preview_model.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/image_placement_model.dart';
 import 'package:fpaint/models/selector_model.dart';
@@ -141,6 +142,11 @@ class AppProvider extends ChangeNotifier {
   set selectedAction(final ActionType value) {
     _selectedAction = value;
 
+    if (value != ActionType.selector && effectPreviewModel.isVisible) {
+      effectPreviewModel.clear();
+      effectPreviewRenderVersion++;
+    }
+
     if (value != ActionType.fill) {
       fillModel.clear();
     }
@@ -237,6 +243,12 @@ class AppProvider extends ChangeNotifier {
 
   /// The transform model for perspective/skew operations.
   final TransformModel transformModel = TransformModel();
+
+  /// The effect preview model for live selection-effect intensity updates.
+  final EffectPreviewModel effectPreviewModel = EffectPreviewModel();
+
+  /// Monotonic token that invalidates stale async effect preview renders.
+  int effectPreviewRenderVersion = 0;
 
   /// The selected text object.
   TextObject? selectedTextObject;

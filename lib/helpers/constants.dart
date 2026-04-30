@@ -488,7 +488,9 @@ class Keys {
   static Key toolTransform = const Key('tool-transform');
 
   static Key effectsButton = const Key('effects-button');
+  static Key effectIntensityPanelApplyButton = const Key('effect-intensity-panel-apply-button');
   static Key effectIntensityApplyButton = const Key('effect-intensity-apply-button');
+  static Key effectIntensityCancelButton = const Key('effect-intensity-cancel-button');
   static Key effectIntensitySlider = const Key('effect-intensity-slider');
   static Key effectIntensityDialogSlider = const Key('effect-intensity-dialog-slider');
 

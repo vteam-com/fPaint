@@ -403,6 +403,7 @@ class ToolsPanel extends StatelessWidget {
                       color: AppColors.layerHiddenWarning,
                     ),
                     onPressed: () {
+                      appProvider.cancelEffectPreview();
                       appProvider.selectorModel.clear();
                       appProvider.update();
                     },
@@ -711,6 +712,9 @@ class _EffectsSectionState extends State<_EffectsSection> {
 
   @override
   Widget build(final BuildContext context) {
+    final SelectionEffect? selectedEffect = widget.appProvider.effectPreviewModel.effect;
+    final bool hasEffectPreview = widget.appProvider.effectPreviewModel.isVisible;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -723,28 +727,55 @@ class _EffectsSectionState extends State<_EffectsSection> {
               ToolPanelPicker(
                 minimal: widget.minimal,
                 name: effectLabel(widget.l10n, effect),
-                image: AppSvgIcon(icon: effect.icon, isSelected: false),
-                onPressed: () => widget.appProvider.applyEffect(effect, strength: _strength),
+                image: AppSvgIcon(icon: effect.icon, isSelected: selectedEffect == effect),
+                onPressed: () async {
+                  await widget.appProvider.startEffectPreview(effect, strength: _strength);
+                },
               ),
           ],
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              AppSlider(
-                label: widget.l10n.effectIntensity,
-                valueLabel: '${(_strength * AppMath.percentScale).round()}%',
-                key: Keys.effectIntensitySlider,
-                value: _strength,
-                min: AppEffects.minIntensity,
-                max: AppEffects.maxIntensity,
-                onChanged: (final double value) => setState(() => _strength = value),
-              ),
-            ],
+        if (hasEffectPreview)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                AppSlider(
+                  label: widget.l10n.effectIntensity,
+                  valueLabel: '${(_strength * AppMath.percentScale).round()}%',
+                  key: Keys.effectIntensitySlider,
+                  value: _strength,
+                  min: AppEffects.minIntensity,
+                  max: AppEffects.maxIntensity,
+                  onChanged: (final double value) async {
+                    setState(() => _strength = value);
+                    await widget.appProvider.updateEffectPreviewStrength(value);
+                  },
+                ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: AppButtonText(
+                        key: Keys.effectIntensityCancelButton,
+                        onPressed: () => widget.appProvider.cancelEffectPreview(),
+                        text: widget.l10n.cancel,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: AppButtonPrimary(
+                        key: Keys.effectIntensityPanelApplyButton,
+                        onPressed: () async {
+                          await widget.appProvider.confirmEffectPreview();
+                        },
+                        text: widget.l10n.apply,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }

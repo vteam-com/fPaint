@@ -62,6 +62,24 @@ class MainViewState extends State<MainView> {
                 },
           ),
 
+          if (appProvider.effectPreviewModel.isVisible &&
+              appProvider.effectPreviewModel.previewImage != null &&
+              appProvider.effectPreviewModel.bounds != null)
+            Positioned(
+              left:
+                  appProvider.canvasOffset.dx + appProvider.effectPreviewModel.bounds!.left * appProvider.layers.scale,
+              top: appProvider.canvasOffset.dy + appProvider.effectPreviewModel.bounds!.top * appProvider.layers.scale,
+              child: SizedBox(
+                width: appProvider.effectPreviewModel.bounds!.width * appProvider.layers.scale,
+                height: appProvider.effectPreviewModel.bounds!.height * appProvider.layers.scale,
+                child: RawImage(
+                  image: appProvider.effectPreviewModel.previewImage,
+                  fit: BoxFit.fill,
+                  filterQuality: FilterQuality.high,
+                ),
+              ),
+            ),
+
           //
           // Color selection from image
           //
