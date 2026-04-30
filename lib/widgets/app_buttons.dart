@@ -110,9 +110,11 @@ class _AppButtonBase extends StatelessWidget {
   Widget build(final BuildContext context) {
     Widget content = Padding(
       padding: padding,
-      child: DefaultTextStyle(
-        style: AppTextStyle.button.copyWith(color: textColor),
-        child: child,
+      child: Center(
+        child: DefaultTextStyle(
+          style: AppTextStyle.button.copyWith(color: textColor),
+          child: child,
+        ),
       ),
     );
 

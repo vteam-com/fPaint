@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -8,8 +9,10 @@ import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_bottom_sheet.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/canvas_panel.dart';
+import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
 import 'package:fpaint/widgets/image_placement_widget.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
@@ -150,8 +153,18 @@ class MainViewState extends State<MainView> {
               },
               onCopy: () => appProvider.regionCopy(),
               onDuplicate: () => appProvider.regionDuplicate(),
-              onApplyEffect: (final SelectionEffect effect, final double strength) =>
-                  appProvider.applyEffect(effect, strength: strength),
+              onEffectSelected: (final SelectionEffect effect, final BuildContext _) async {
+                await appProvider.startEffectPreview(effect);
+                if (!mounted) {
+                  return;
+                }
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted || !appProvider.effectPreviewModel.isVisible) {
+                    return;
+                  }
+                  _showEffectPreviewBottomSheet(context, appProvider: appProvider, l10n: context.l10n);
+                });
+              },
             ),
 
           //
@@ -257,6 +270,35 @@ class MainViewState extends State<MainView> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Shows a transparent-barrier bottom sheet containing [EffectIntensityControls]
+  /// so the user can adjust the live effect preview while keeping the canvas visible.
+  void _showEffectPreviewBottomSheet(
+    final BuildContext context, {
+    required final AppProvider appProvider,
+    required final AppLocalizations l10n,
+  }) {
+    showAppBottomSheet<void>(
+      context: context,
+      barrierColor: AppPalette.transparent,
+      builder: (final BuildContext sheetCtx) => Padding(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: AppLayout.effectBottomSheetMaxWidth,
+          ),
+          child: EffectIntensityControls(
+            appProvider: appProvider,
+            l10n: l10n,
+            sliderKey: Keys.effectIntensityDialogSlider,
+            applyButtonKey: Keys.effectIntensityApplyButton,
+            cancelButtonKey: Keys.effectIntensityCancelButton,
+            onDismiss: () => Navigator.of(sheetCtx).pop(),
+          ),
         ),
       ),
     );

@@ -41,7 +41,7 @@ class SelectionRectWidget extends StatefulWidget {
     required this.onToggleTransformMode,
     required this.onCopy,
     required this.onDuplicate,
-    required this.onApplyEffect,
+    required this.onEffectSelected,
     this.enableMoveAndResize = true,
     this.isDrawing = false,
   });
@@ -52,9 +52,6 @@ class SelectionRectWidget extends StatefulWidget {
   /// Whether a new selection is actively being drawn.
   final bool isDrawing;
 
-  /// A callback that applies a [SelectionEffect] to the selected region at the given strength.
-  final void Function(SelectionEffect effect, double strength) onApplyEffect;
-
   /// A callback that copies the selection to the clipboard.
   final VoidCallback onCopy;
 
@@ -63,6 +60,11 @@ class SelectionRectWidget extends StatefulWidget {
 
   /// A callback that duplicates the selection (copy then paste).
   final VoidCallback onDuplicate;
+
+  /// Called when the user selects an effect from the popup menu.
+  /// Receives the chosen [SelectionEffect] and the [BuildContext] of the
+  /// popup button so the caller can start a live preview and show a bottom sheet.
+  final Future<void> Function(SelectionEffect effect, BuildContext context) onEffectSelected;
 
   /// A callback that is called when the selection rectangle is resized.
   final void Function(NineGridHandle, Offset) onResize;
@@ -275,7 +277,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
           ),
           _EffectsPopupButton(
             l10n: l10n,
-            onApplyEffect: widget.onApplyEffect,
+            onEffectSelected: widget.onEffectSelected,
           ),
         ],
       ),
@@ -450,10 +452,10 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
 class _EffectsPopupButton extends StatefulWidget {
   const _EffectsPopupButton({
     required this.l10n,
-    required this.onApplyEffect,
+    required this.onEffectSelected,
   });
   final AppLocalizations l10n;
-  final void Function(SelectionEffect effect, double strength) onApplyEffect;
+  final Future<void> Function(SelectionEffect effect, BuildContext context) onEffectSelected;
 
   @override
   State<_EffectsPopupButton> createState() => _EffectsPopupButtonState();
@@ -512,79 +514,8 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
     ).then((final SelectionEffect? selected) {
       if (mounted && selected != null) {
         // ignore: use_build_context_synchronously
-        _showIntensityDialog(context, selected);
+        widget.onEffectSelected(selected, context);
       }
     });
-  }
-
-  /// Shows a dialog with a slider so the user can choose the effect intensity
-  /// before it is applied.
-  void _showIntensityDialog(final BuildContext context, final SelectionEffect effect) {
-    showAppDialog<double>(
-      context: context,
-      builder: (final BuildContext _) => _EffectIntensityDialog(
-        l10n: widget.l10n,
-        effect: effect,
-        onApply: (final double strength) => widget.onApplyEffect(effect, strength),
-      ),
-    );
-  }
-}
-
-/// Dialog that lets the user set an effect's intensity via a slider before
-/// the effect is committed to the canvas.
-class _EffectIntensityDialog extends StatefulWidget {
-  const _EffectIntensityDialog({
-    required this.l10n,
-    required this.effect,
-    required this.onApply,
-  });
-  final SelectionEffect effect;
-  final AppLocalizations l10n;
-
-  /// Called with the chosen strength (0.0–1.0) when the user taps Apply.
-  final void Function(double strength) onApply;
-  @override
-  State<_EffectIntensityDialog> createState() => _EffectIntensityDialogState();
-}
-
-class _EffectIntensityDialogState extends State<_EffectIntensityDialog> {
-  double _strength = AppEffects.defaultIntensity;
-
-  @override
-  Widget build(final BuildContext context) {
-    return AppDialog(
-      title: effectLabel(widget.l10n, widget.effect),
-      titleIcon: AppSvgIcon(icon: widget.effect.icon, size: AppLayout.iconSize),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          AppSlider(
-            label: widget.l10n.effectIntensity,
-            valueLabel: '${(_strength * AppMath.percentScale).round()}%',
-            key: Keys.effectIntensityDialogSlider,
-            value: _strength,
-            min: AppEffects.minIntensity,
-            max: AppEffects.maxIntensity,
-            onChanged: (final double value) => setState(() => _strength = value),
-          ),
-        ],
-      ),
-      actions: <Widget>[
-        AppButtonText(
-          onPressed: () => Navigator.of(context).pop(),
-          text: widget.l10n.cancel,
-        ),
-        AppButtonPrimary(
-          key: Keys.effectIntensityApplyButton,
-          onPressed: () {
-            Navigator.of(context).pop(_strength);
-            widget.onApply(_strength);
-          },
-          text: widget.l10n.apply,
-        ),
-      ],
-    );
   }
 }

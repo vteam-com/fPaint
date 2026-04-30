@@ -2,15 +2,19 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 
 /// Shows a modal bottom sheet replacing Material [showModalBottomSheet].
+///
+/// Pass [barrierColor] as [AppPalette.transparent] to leave the background
+/// fully visible (e.g. when the canvas should remain in view during the sheet).
 Future<T?> showAppBottomSheet<T>({
   required final BuildContext context,
   required final WidgetBuilder builder,
+  final Color barrierColor = AppPalette.scrim,
 }) {
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: true,
     barrierLabel: barrierLabelDismiss,
-    barrierColor: AppPalette.scrim,
+    barrierColor: barrierColor,
     pageBuilder:
         (
           final BuildContext dialogContext,

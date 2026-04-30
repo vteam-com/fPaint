@@ -19,6 +19,7 @@ import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
@@ -708,8 +709,6 @@ class _EffectsSection extends StatefulWidget {
 }
 
 class _EffectsSectionState extends State<_EffectsSection> {
-  double _strength = AppEffects.defaultIntensity;
-
   @override
   Widget build(final BuildContext context) {
     final SelectionEffect? selectedEffect = widget.appProvider.effectPreviewModel.effect;
@@ -733,52 +732,19 @@ class _EffectsSectionState extends State<_EffectsSection> {
                     widget.appProvider.cancelEffectPreview();
                     return;
                   }
-                  await widget.appProvider.startEffectPreview(effect, strength: _strength);
+                  await widget.appProvider.startEffectPreview(effect);
                 },
               ),
           ],
         ),
         if (hasEffectPreview)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                AppSlider(
-                  label: widget.l10n.effectIntensity,
-                  valueLabel: '${(_strength * AppMath.percentScale).round()}%',
-                  key: Keys.effectIntensitySlider,
-                  value: _strength,
-                  min: AppEffects.minIntensity,
-                  max: AppEffects.maxIntensity,
-                  onChanged: (final double value) async {
-                    setState(() => _strength = value);
-                    await widget.appProvider.updateEffectPreviewStrength(value);
-                  },
-                ),
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: AppButtonText(
-                        key: Keys.effectIntensityCancelButton,
-                        onPressed: () => widget.appProvider.cancelEffectPreview(),
-                        text: widget.l10n.cancel,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.xs),
-                    Expanded(
-                      child: AppButtonPrimary(
-                        key: Keys.effectIntensityPanelApplyButton,
-                        onPressed: () async {
-                          await widget.appProvider.confirmEffectPreview();
-                        },
-                        text: widget.l10n.apply,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          EffectIntensityControls(
+            key: ValueKey<SelectionEffect?>(selectedEffect),
+            appProvider: widget.appProvider,
+            l10n: widget.l10n,
+            sliderKey: Keys.effectIntensitySlider,
+            applyButtonKey: Keys.effectIntensityPanelApplyButton,
+            cancelButtonKey: Keys.effectIntensityCancelButton,
           ),
       ],
     );
