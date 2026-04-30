@@ -54,8 +54,8 @@ void main() {
       await tester.pump();
 
       // Should have two gradient handles
-      expect(find.byKey(Key('${Keys.gradientHandleKeyPrefixText}0')), findsOneWidget);
-      expect(find.byKey(Key('${Keys.gradientHandleKeyPrefixText}1')), findsOneWidget);
+      expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}0')), findsOneWidget);
+      expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}1')), findsOneWidget);
     });
 
     testWidgets('renders radial gradient with handles', (final WidgetTester tester) async {
@@ -69,8 +69,8 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byKey(Key('${Keys.gradientHandleKeyPrefixText}0')), findsOneWidget);
-      expect(find.byKey(Key('${Keys.gradientHandleKeyPrefixText}1')), findsOneWidget);
+      expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}0')), findsOneWidget);
+      expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}1')), findsOneWidget);
     });
 
     testWidgets('dragging handle calls onUpdate', (final WidgetTester tester) async {
@@ -85,7 +85,7 @@ void main() {
       );
       await tester.pump();
 
-      final Finder handle = find.byKey(Key('${Keys.gradientHandleKeyPrefixText}0'));
+      final Finder handle = find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}0'));
       final Offset center = tester.getCenter(handle);
       final TestGesture gesture = await tester.startGesture(center);
       await tester.pump();
@@ -111,7 +111,7 @@ void main() {
       );
       await tester.pump();
 
-      final Finder handle = find.byKey(Key('${Keys.gradientHandleKeyPrefixText}0'));
+      final Finder handle = find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}0'));
 
       // Tap to trigger tapDown/tapUp via manual gesture
       final Offset tapCenter = tester.getCenter(handle);

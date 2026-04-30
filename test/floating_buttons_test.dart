@@ -38,65 +38,60 @@ void main() {
     );
   }
 
+  Widget fabUnderTest() {
+    return Builder(
+      builder: (final BuildContext context) {
+        return floatingActionButtons(context, shellProvider, appProvider);
+      },
+    );
+  }
+
+  Future<void> pumpFloatingButtons(
+    final WidgetTester tester, {
+    final bool? isSmall,
+    final bool? showMenu,
+  }) async {
+    if (isSmall != null) {
+      shellProvider.deviceSizeSmall = isSmall;
+    }
+    if (showMenu != null) {
+      shellProvider.showMenu = showMenu;
+    }
+
+    await tester.pumpWidget(
+      buildTestWidget(
+        child: fabUnderTest(),
+      ),
+    );
+    await tester.pump();
+  }
+
   group('floatingActionButtons - desktop layout', () {
     testWidgets('does not render undo button when undo is unavailable', (final WidgetTester tester) async {
-      shellProvider.deviceSizeSmall = false;
-
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (final BuildContext context) {
-              return floatingActionButtons(context, shellProvider, appProvider);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
+      await pumpFloatingButtons(tester, isSmall: false);
 
       expect(find.byKey(Keys.floatActionUndo), findsNothing);
     });
 
     testWidgets('renders undo button when undo is available', (final WidgetTester tester) async {
-      shellProvider.deviceSizeSmall = false;
       appProvider.undoProvider.executeAction(
         name: 'undo-test',
         forward: () {},
         backward: () {},
       );
 
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (final BuildContext context) {
-              return floatingActionButtons(context, shellProvider, appProvider);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
+      await pumpFloatingButtons(tester, isSmall: false);
 
       expect(find.byKey(Keys.floatActionUndo), findsOneWidget);
     });
 
     testWidgets('does not render redo button when redo is unavailable', (final WidgetTester tester) async {
-      shellProvider.deviceSizeSmall = false;
-
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (final BuildContext context) {
-              return floatingActionButtons(context, shellProvider, appProvider);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
+      await pumpFloatingButtons(tester, isSmall: false);
 
       expect(find.byKey(Keys.floatActionRedo), findsNothing);
     });
 
     testWidgets('renders redo button when redo is available', (final WidgetTester tester) async {
-      shellProvider.deviceSizeSmall = false;
       appProvider.undoProvider.executeAction(
         name: 'redo-test',
         forward: () {},
@@ -104,33 +99,13 @@ void main() {
       );
       appProvider.undoProvider.undo();
 
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (final BuildContext context) {
-              return floatingActionButtons(context, shellProvider, appProvider);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
+      await pumpFloatingButtons(tester, isSmall: false);
 
       expect(find.byKey(Keys.floatActionRedo), findsOneWidget);
     });
 
     testWidgets('renders selector button with correct key', (final WidgetTester tester) async {
-      shellProvider.deviceSizeSmall = false;
-
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (final BuildContext context) {
-              return floatingActionButtons(context, shellProvider, appProvider);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
+      await pumpFloatingButtons(tester, isSmall: false);
 
       expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
     });
@@ -263,11 +238,11 @@ void main() {
       expect(appProvider.selectedAction, ActionType.selector);
     });
 
-    testWidgets('selector button disables selector mode and clears selection on tap', (
+    testWidgets('selector button clears active selection without changing active tool', (
       final WidgetTester tester,
     ) async {
       shellProvider.deviceSizeSmall = false;
-      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectedAction = ActionType.pencil;
       appProvider.selectorModel.isVisible = true;
 
       await tester.pumpWidget(
@@ -284,11 +259,11 @@ void main() {
       await tester.tap(find.byKey(Keys.floatActionSelector));
       await tester.pump();
 
-      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.selectedAction, ActionType.pencil);
       expect(appProvider.selectorModel.isVisible, isFalse);
     });
 
-    testWidgets('selector button switches icon based on selector mode', (final WidgetTester tester) async {
+    testWidgets('selector button switches icon based on active selection', (final WidgetTester tester) async {
       shellProvider.deviceSizeSmall = false;
 
       await tester.pumpWidget(
@@ -310,7 +285,7 @@ void main() {
       );
       expect(selectorIcon.icon, AppIcon.selector);
 
-      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectorModel.isVisible = true;
       await tester.pumpWidget(
         buildTestWidget(
           child: Builder(
@@ -329,6 +304,47 @@ void main() {
         ),
       );
       expect(selectorIcon.icon, AppIcon.selectorCancel);
+    });
+
+    testWidgets('undo and redo are positioned above selector in vertical layout', (final WidgetTester tester) async {
+      shellProvider.deviceSizeSmall = false;
+      appProvider.undoProvider.executeAction(
+        name: 'desktop-order-test-a',
+        forward: () {},
+        backward: () {},
+      );
+      appProvider.undoProvider.executeAction(
+        name: 'desktop-order-test-b',
+        forward: () {},
+        backward: () {},
+      );
+      appProvider.undoProvider.undo();
+
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: Builder(
+            builder: (final BuildContext context) {
+              return floatingActionButtons(context, shellProvider, appProvider);
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder undoFinder = find.byKey(Keys.floatActionUndo);
+      final Finder redoFinder = find.byKey(Keys.floatActionRedo);
+      final Finder selectorFinder = find.byKey(Keys.floatActionSelector);
+
+      expect(undoFinder, findsOneWidget);
+      expect(redoFinder, findsOneWidget);
+      expect(selectorFinder, findsOneWidget);
+
+      final double undoY = tester.getCenter(undoFinder).dy;
+      final double redoY = tester.getCenter(redoFinder).dy;
+      final double selectorY = tester.getCenter(selectorFinder).dy;
+
+      expect(undoY, lessThan(selectorY));
+      expect(redoY, lessThan(selectorY));
     });
 
     testWidgets('zoom in changes canvas placement to manual', (final WidgetTester tester) async {
@@ -399,27 +415,31 @@ void main() {
 
   group('floatingActionButtons - mobile layout', () {
     testWidgets('renders Row layout when deviceSizeSmall is true', (final WidgetTester tester) async {
-      shellProvider.deviceSizeSmall = true;
-      shellProvider.showMenu = false;
-
-      await tester.pumpWidget(
-        buildTestWidget(
-          child: Builder(
-            builder: (final BuildContext context) {
-              return floatingActionButtons(context, shellProvider, appProvider);
-            },
-          ),
-        ),
-      );
-      await tester.pump();
+      await pumpFloatingButtons(tester, isSmall: true, showMenu: false);
 
       // Mobile layout uses Row
       expect(find.byType(Row), findsOneWidget);
     });
 
     testWidgets('hides undo and redo when menu is hidden without history', (final WidgetTester tester) async {
+      await pumpFloatingButtons(tester, isSmall: true, showMenu: false);
+
+      expect(find.byKey(Keys.floatActionUndo), findsNothing);
+      expect(find.byKey(Keys.floatActionRedo), findsNothing);
+    });
+
+    testWidgets('shows selector button when menu is hidden', (final WidgetTester tester) async {
+      await pumpFloatingButtons(tester, isSmall: true, showMenu: false);
+
+      expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
+    });
+
+    testWidgets('selector button enables selector mode and clears active selection on mobile', (
+      final WidgetTester tester,
+    ) async {
       shellProvider.deviceSizeSmall = true;
       shellProvider.showMenu = false;
+      appProvider.selectedAction = ActionType.brush;
 
       await tester.pumpWidget(
         buildTestWidget(
@@ -432,8 +452,27 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byKey(Keys.floatActionUndo), findsNothing);
-      expect(find.byKey(Keys.floatActionRedo), findsNothing);
+      await tester.tap(find.byKey(Keys.floatActionSelector));
+      await tester.pump();
+      expect(appProvider.selectedAction, ActionType.selector);
+
+      appProvider.selectedAction = ActionType.pencil;
+      appProvider.selectorModel.isVisible = true;
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: Builder(
+            builder: (final BuildContext context) {
+              return floatingActionButtons(context, shellProvider, appProvider);
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byKey(Keys.floatActionSelector));
+      await tester.pump();
+      expect(appProvider.selectedAction, ActionType.pencil);
+      expect(appProvider.selectorModel.isVisible, isFalse);
     });
 
     testWidgets('shows undo and redo when menu is hidden with history', (final WidgetTester tester) async {
@@ -459,6 +498,48 @@ void main() {
 
       expect(find.byKey(Keys.floatActionUndo), findsNothing);
       expect(find.byKey(Keys.floatActionRedo), findsOneWidget);
+    });
+
+    testWidgets('undo and redo are positioned left of menu toggle on mobile', (final WidgetTester tester) async {
+      shellProvider.deviceSizeSmall = true;
+      shellProvider.showMenu = false;
+      appProvider.undoProvider.executeAction(
+        name: 'mobile-order-test-a',
+        forward: () {},
+        backward: () {},
+      );
+      appProvider.undoProvider.executeAction(
+        name: 'mobile-order-test-b',
+        forward: () {},
+        backward: () {},
+      );
+      appProvider.undoProvider.undo();
+
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: Builder(
+            builder: (final BuildContext context) {
+              return floatingActionButtons(context, shellProvider, appProvider);
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final Finder undoFinder = find.byKey(Keys.floatActionUndo);
+      final Finder redoFinder = find.byKey(Keys.floatActionRedo);
+      final Finder menuToggleFinder = find.byKey(Keys.floatActionMenuToggle);
+
+      expect(undoFinder, findsOneWidget);
+      expect(redoFinder, findsOneWidget);
+      expect(menuToggleFinder, findsOneWidget);
+
+      final double undoX = tester.getCenter(undoFinder).dx;
+      final double redoX = tester.getCenter(redoFinder).dx;
+      final double menuToggleX = tester.getCenter(menuToggleFinder).dx;
+
+      expect(undoX, lessThan(menuToggleX));
+      expect(redoX, lessThan(menuToggleX));
     });
 
     testWidgets('shows close button when menu is visible', (final WidgetTester tester) async {
