@@ -26,15 +26,12 @@ const String _defaultLayerPrefix = 'Layer';
 /// The class also provides methods for performing transformations on the layers, such as offsetting and scaling
 /// the layers, as well as a method to get the top color usage across all layers.
 class LayersProvider extends ChangeNotifier {
-  factory LayersProvider() {
-    return _instance;
-  }
-
-  LayersProvider._internal() {
+  LayersProvider({UndoProvider? undoProvider}) : _undoProvider = undoProvider ?? UndoProvider() {
     addWhiteBackgroundLayer();
     clearHasChanged();
   }
-  static final LayersProvider _instance = LayersProvider._internal();
+
+  final UndoProvider _undoProvider;
 
   /// Retrieves the [LayersProvider] instance from the given [BuildContext].
   ///
@@ -128,8 +125,6 @@ class LayersProvider extends ChangeNotifier {
       return;
     }
 
-    final UndoProvider undoProvider = UndoProvider();
-
     final Size oldSize = this.size;
     final Size newCurrentSize = Size(newWidth.toDouble(), newHeight.toDouble());
 
@@ -137,7 +132,7 @@ class LayersProvider extends ChangeNotifier {
       return;
     }
 
-    undoProvider.executeAction(
+    _undoProvider.executeAction(
       name: 'Resize Canvas',
       forward: () {
         // 1. Calculate the offset using old and new size
@@ -402,8 +397,6 @@ class LayersProvider extends ChangeNotifier {
       return;
     }
 
-    final UndoProvider undoProvider = UndoProvider();
-
     final int currentSelectedIndex = this.selectedLayerIndex;
     final LayerProvider layerFrom = this.get(indexFrom);
 
@@ -413,7 +406,7 @@ class LayersProvider extends ChangeNotifier {
 
     final int numberOfActionAdded = actionsToAppend.length;
 
-    undoProvider.executeAction(
+    _undoProvider.executeAction(
       name: 'Merge Layer',
       forward: () {
         // Step 1 - Merge 2 layers
@@ -534,7 +527,6 @@ class LayersProvider extends ChangeNotifier {
 
   /// Rotates the entire canvas and all its layers 90 degrees clockwise.
   Future<void> rotateCanvas90Clockwise() async {
-    final UndoProvider undoProvider = UndoProvider();
     final Size oldSize = Size(width, height);
     final Size newSize = Size(height, width); // Swapped dimensions
 
@@ -543,7 +535,7 @@ class LayersProvider extends ChangeNotifier {
     // For a true undo, we'd need to implement rotate90CounterClockwise or store/restore actionStacks.
     // For now, the backward action will rotate 3 more times to get back to original.
 
-    undoProvider.executeAction(
+    _undoProvider.executeAction(
       name: 'Rotate Canvas 90° clock wise',
       forward: () async {
         for (final LayerProvider layer in _list) {
@@ -588,7 +580,6 @@ class LayersProvider extends ChangeNotifier {
     required final bool isHorizontal,
     required final String actionName,
   }) async {
-    final UndoProvider undoProvider = UndoProvider();
     final Size canvasSize = Size(width, height);
 
     Future<void> applyFlip() async {
@@ -602,7 +593,7 @@ class LayersProvider extends ChangeNotifier {
       this.update();
     }
 
-    undoProvider.executeAction(
+    _undoProvider.executeAction(
       name: actionName,
       forward: applyFlip,
       backward: applyFlip,

@@ -368,11 +368,11 @@ void main() {
     });
   });
 
-  group('singleton behavior', () {
-    test('factory returns the same instance', () {
+  group('multiple instances', () {
+    test('constructor creates different instances', () {
       final UndoProvider a = UndoProvider();
       final UndoProvider b = UndoProvider();
-      expect(identical(a, b), isTrue);
+      expect(identical(a, b), isFalse);
     });
   });
 }

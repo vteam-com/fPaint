@@ -38,7 +38,11 @@ class _AppTooltipState extends State<AppTooltip> {
 
   /// Inserts an [OverlayEntry] positioned below this widget to display the tooltip message.
   void _show() {
-    final RenderBox box = context.findRenderObject()! as RenderBox;
+    final RenderObject? renderObject = context.findRenderObject();
+    if (renderObject == null || renderObject is! RenderBox) {
+      return;
+    }
+    final RenderBox box = renderObject;
     final Offset target = box.localToGlobal(
       Offset(box.size.width / AppMath.pair, box.size.height),
     );

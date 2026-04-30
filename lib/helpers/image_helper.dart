@@ -96,7 +96,9 @@ Future<void> copyImageToClipboard(final ui.Image image) async {
     item.add(Formats.png(pngBytes));
     try {
       await clipboard.write(<DataWriterItem>[item]).timeout(AppDefaults.clipboardAccessTimeout);
-    } catch (_) {}
+    } catch (e) {
+      _log.warning('Failed to copy image to clipboard: $e');
+    }
   }
 }
 
@@ -108,7 +110,9 @@ Future<ui.Image?> getImageFromClipboard() async {
 
   try {
     bytes = await Pasteboard.image.timeout(AppDefaults.clipboardAccessTimeout);
-  } catch (_) {}
+  } catch (e) {
+    _log.warning('Failed to retrieve image from clipboard: $e');
+  }
 
   bytes ??= _sessionClipboardImageBytes;
 
@@ -129,7 +133,8 @@ Future<bool> clipboardHasImage() async {
   try {
     final Uint8List? bytes = await Pasteboard.image.timeout(AppDefaults.clipboardAccessTimeout);
     return bytes != null || _sessionClipboardImageBytes != null;
-  } catch (_) {
+  } catch (e) {
+    _log.warning('Failed to check clipboard for image: $e');
     return _sessionClipboardImageBytes != null;
   }
 }

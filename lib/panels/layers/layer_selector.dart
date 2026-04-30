@@ -517,7 +517,7 @@ class LayerSelector extends StatelessWidget {
   /// Method to insert a new layer above the currently selected one
   void _onAddLayer(final LayersProvider layers) {
     final AppLocalizations l10n = context.l10n;
-    final UndoProvider undoProvider = UndoProvider();
+    final UndoProvider undoProvider = UndoProvider.of(context);
 
     final int currentIndex = layers.selectedLayerIndex;
 

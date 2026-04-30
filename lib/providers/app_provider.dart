@@ -26,7 +26,13 @@ export 'package:fpaint/providers/layers_provider.dart';
 /// with the canvas, such as clearing the canvas, converting between canvas and screen
 /// coordinates, and performing region-based operations like erasing and cutting.
 class AppProvider extends ChangeNotifier {
-  AppProvider({final AppPreferences? preferences}) : preferences = preferences ?? AppPreferences() {
+  AppProvider({
+    final AppPreferences? preferences,
+    final LayersProvider? layersProvider,
+    final UndoProvider? undoProvider,
+  }) : preferences = preferences ?? AppPreferences(),
+       layers = layersProvider ?? LayersProvider(),
+       _undoProvider = undoProvider ?? UndoProvider() {
     this.preferences.addListener(_handlePreferencesChanged);
     _initCanvas();
   }
@@ -55,7 +61,7 @@ class AppProvider extends ChangeNotifier {
     update();
   }
 
-  final UndoProvider _undoProvider = UndoProvider();
+  final UndoProvider _undoProvider;
 
   /// Gets the undo provider.
   UndoProvider get undoProvider => _undoProvider;
@@ -100,7 +106,7 @@ class AppProvider extends ChangeNotifier {
   // All things Layers
 
   /// The layers provider.
-  LayersProvider layers = LayersProvider(); // this is a singleton
+  final LayersProvider layers;
 
   /// Records and executes a drawing action to the selected layer.
   void recordExecuteDrawingActionToSelectedLayer({

@@ -226,16 +226,18 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 onPressed: () async {
                   final ClipboardData? data = await Clipboard.getData(_plainTextMimeType);
 
+                  if (data?.text == null || data!.text is! String) {
+                    return;
+                  }
+
                   try {
-                    final Color color = getColorFromString(
-                      data?.text! as String,
-                    ); // #FF00FF00
+                    final Color color = getColorFromString(data.text as String);
                     setState(() {
                       _currentColor = color;
                       _hexController.text = colorToHexString(color);
                     });
                   } catch (_) {
-                    // Invalid hex color format
+                    // Invalid hex color format - silently ignore
                   }
                 },
               ),
@@ -251,13 +253,13 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                         _currentColor = color;
                       });
                     } catch (_) {
-                      // Invalid hex color format
+                      // Invalid hex color format - silently ignore as user is still typing
                     }
                   },
                 ),
               ),
               AppButtonIcon(
-                icon: const AppSvgIcon(icon: AppIcon.copy),
+                icon: const AppSvgIcon(icon: AppIcon.clipboardCopy),
                 onPressed: () {
                   Clipboard.setData(
                     ClipboardData(
