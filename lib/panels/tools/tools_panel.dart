@@ -399,7 +399,7 @@ class ToolsPanel extends StatelessWidget {
                     minimal: minimal,
                     name: l10n.cancel,
                     image: const AppSvgIcon(
-                      icon: AppIcon.close,
+                      icon: AppIcon.selectorCancel,
                       isSelected: false,
                       color: AppColors.layerHiddenWarning,
                     ),
