@@ -28,165 +28,172 @@ Widget floatingActionButtons(
   final ShellProvider shellProvider,
   final AppProvider appProvider,
 ) {
-  final AppLocalizations l10n = context.l10n;
-  final bool selectorModeEnabled = appProvider.selectedAction == ActionType.selector;
+  return ListenableBuilder(
+    listenable: appProvider.undoProvider,
+    builder: (final BuildContext _, final Widget? _) {
+      final AppLocalizations l10n = context.l10n;
+      final bool selectorModeEnabled = appProvider.selectedAction == ActionType.selector;
+      final bool canUndo = appProvider.undoProvider.canUndo;
+      final bool canRedo = appProvider.undoProvider.canRedo;
 
-  final Widget selectorToggleButton = myFloatButton(
-    key: Keys.floatActionSelector,
-    icon: selectorModeEnabled ? AppIcon.selectorCancel : AppIcon.selector,
-    tooltip: selectorModeEnabled ? l10n.cancel : l10n.toolSelector,
-    onPressed: () {
-      if (selectorModeEnabled) {
-        appProvider.cancelEffectPreview();
-        appProvider.selectorModel.clear();
-        appProvider.selectedAction = ActionType.brush;
-        return;
-      }
-      appProvider.selectedAction = ActionType.selector;
-    },
-  );
+      final Widget selectorToggleButton = myFloatButton(
+        key: Keys.floatActionSelector,
+        icon: selectorModeEnabled ? AppIcon.selectorCancel : AppIcon.selector,
+        tooltip: selectorModeEnabled ? l10n.cancel : l10n.toolSelector,
+        onPressed: () {
+          if (selectorModeEnabled) {
+            appProvider.cancelEffectPreview();
+            appProvider.selectorModel.clear();
+            appProvider.selectedAction = ActionType.brush;
+            return;
+          }
+          appProvider.selectedAction = ActionType.selector;
+        },
+      );
 
-  final Widget undoButton = myFloatButton(
-    key: Keys.floatActionUndo,
-    icon: AppIcon.undo,
-    tooltip: appProvider.undoProvider.getHistoryStringForUndo(),
-    onPressed: () {
-      Future<void>.microtask(() => appProvider.undoAction());
-    },
-  );
+      final Widget undoButton = myFloatButton(
+        key: Keys.floatActionUndo,
+        icon: AppIcon.undo,
+        tooltip: appProvider.undoProvider.getHistoryStringForUndo(),
+        onPressed: () {
+          Future<void>.microtask(() => appProvider.undoAction());
+        },
+      );
 
-  final Widget redo = myFloatButton(
-    key: Keys.floatActionRedo,
-    icon: AppIcon.redo,
-    tooltip: appProvider.undoProvider.getHistoryStringForRedo(),
-    onPressed: () {
-      Future<void>.microtask(() => appProvider.redoAction());
-    },
-  );
+      final Widget redo = myFloatButton(
+        key: Keys.floatActionRedo,
+        icon: AppIcon.redo,
+        tooltip: appProvider.undoProvider.getHistoryStringForRedo(),
+        onPressed: () {
+          Future<void>.microtask(() => appProvider.redoAction());
+        },
+      );
 
-  if (shellProvider.deviceSizeSmall) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      spacing: AppSpacing.sm - AppStroke.thin,
-      children: <Widget>[
-        if (!shellProvider.showMenu)
-          GestureDetector(
-            onTap: () {
-              shellProvider.showMenu = !shellProvider.showMenu;
-            },
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: SizedBox(
-                width: AppLayout.toolbarButtonSize,
-                height: AppLayout.toolbarButtonSize,
-                child: DecoratedBox(
-                  decoration: const BoxDecoration(
-                    color: AppColors.floatingButtonBackground,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: AppSvgIcon(icon: appProvider.selectedAction.icon, isSelected: false),
+      if (shellProvider.deviceSizeSmall) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          spacing: AppSpacing.sm - AppStroke.thin,
+          children: <Widget>[
+            if (!shellProvider.showMenu)
+              GestureDetector(
+                onTap: () {
+                  shellProvider.showMenu = !shellProvider.showMenu;
+                },
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: SizedBox(
+                    width: AppLayout.toolbarButtonSize,
+                    height: AppLayout.toolbarButtonSize,
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(
+                        color: AppColors.floatingButtonBackground,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: AppSvgIcon(icon: appProvider.selectedAction.icon, isSelected: false),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-        if (!shellProvider.showMenu)
-          myFloatButton(
-            icon: AppIcon.colorLens,
-            foregroundColor: appProvider.brushColor,
-            tooltip: l10n.colorLabel,
-            onPressed: () {
-              showColorPicker(
-                context: context,
-                title: l10n.colorLabel,
-                color: appProvider.brushColor,
-                onSelectedColor: (final Color color) {
-                  appProvider.brushColor = color;
+            if (!shellProvider.showMenu)
+              myFloatButton(
+                icon: AppIcon.colorLens,
+                foregroundColor: appProvider.brushColor,
+                tooltip: l10n.colorLabel,
+                onPressed: () {
+                  showColorPicker(
+                    context: context,
+                    title: l10n.colorLabel,
+                    color: appProvider.brushColor,
+                    onSelectedColor: (final Color color) {
+                      appProvider.brushColor = color;
+                    },
+                  );
                 },
+              ),
+            if (!shellProvider.showMenu && canUndo) undoButton,
+            if (!shellProvider.showMenu && canRedo) redo,
+            if (shellProvider.showMenu)
+              myFloatButton(
+                icon: AppIcon.close,
+                onPressed: () {
+                  shellProvider.showMenu = !shellProvider.showMenu;
+                },
+              ),
+          ],
+        );
+      }
+
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        spacing: AppSpacing.xs,
+        children: <Widget>[
+          selectorToggleButton,
+          if (canUndo) undoButton,
+          if (canRedo) redo,
+
+          // Zoom in
+          myFloatButton(
+            key: Keys.floatActionZoomIn,
+            onPressed: () {
+              shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+              appProvider.applyScaleToCanvas(
+                scaleDelta: AppVisual.enlarge,
+                anchorPoint: appProvider.canvasCenter,
               );
             },
+            icon: AppIcon.zoomIn,
           ),
-        if (!shellProvider.showMenu) undoButton,
-        if (!shellProvider.showMenu) redo,
-        if (shellProvider.showMenu)
+
+          /// Center and fit image
           myFloatButton(
-            icon: AppIcon.close,
+            key: Keys.floatActionCenter,
             onPressed: () {
-              shellProvider.showMenu = !shellProvider.showMenu;
+              shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
+              appProvider.update();
+              // Its still unclear why but this is needed to update the canvas and the Selectors/Fill widget correctly
+              Future<void>.delayed(const Duration(milliseconds: AppLimits.percentMax), () {
+                appProvider.update();
+              });
             },
+            child: AppText(
+              _canvasZoomAndSizeFormat
+                  .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
+                  .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
+                  .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
+              textAlign: TextAlign.center,
+              variant: AppTextVariant.label,
+              color: AppColors.floatingButtonForeground,
+            ),
           ),
-      ],
-    );
-  }
 
-  return Column(
-    mainAxisAlignment: MainAxisAlignment.end,
-    spacing: AppSpacing.xs,
-    children: <Widget>[
-      selectorToggleButton,
-      undoButton,
-      redo,
+          /// Zoom out
+          myFloatButton(
+            key: Keys.floatActionZoomOut,
+            onPressed: () {
+              shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+              appProvider.applyScaleToCanvas(
+                scaleDelta: AppVisual.shrink,
+                anchorPoint: appProvider.canvasCenter,
+              );
+            },
+            icon: AppIcon.zoomOut,
+          ),
 
-      // Zoom in
-      myFloatButton(
-        key: Keys.floatActionZoomIn,
-        onPressed: () {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-          appProvider.applyScaleToCanvas(
-            scaleDelta: AppVisual.enlarge,
-            anchorPoint: appProvider.canvasCenter,
-          );
-        },
-        icon: AppIcon.zoomIn,
-      ),
-
-      /// Center and fit image
-      myFloatButton(
-        key: Keys.floatActionCenter,
-        onPressed: () {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
-          appProvider.update();
-          // Its still unclear why but this is needed to update the canvas and the Selectors/Fill widget correctly
-          Future<void>.delayed(const Duration(milliseconds: AppLimits.percentMax), () {
-            appProvider.update();
-          });
-        },
-        child: AppText(
-          _canvasZoomAndSizeFormat
-              .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
-              .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
-              .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
-          textAlign: TextAlign.center,
-          variant: AppTextVariant.label,
-          color: AppColors.floatingButtonForeground,
-        ),
-      ),
-
-      /// Zoom out
-      myFloatButton(
-        key: Keys.floatActionZoomOut,
-        onPressed: () {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-          appProvider.applyScaleToCanvas(
-            scaleDelta: AppVisual.shrink,
-            anchorPoint: appProvider.canvasCenter,
-          );
-        },
-        icon: AppIcon.zoomOut,
-      ),
-
-      /// Show/Hide floating action panel
-      myFloatButton(
-        key: Keys.floatActionToggle,
-        onPressed: () {
-          shellProvider.shellMode = ShellMode.hidden;
-          shellProvider.update();
-        },
-        icon: AppIcon.arrowDropDown,
-      ),
-    ],
+          /// Show/Hide floating action panel
+          myFloatButton(
+            key: Keys.floatActionToggle,
+            onPressed: () {
+              shellProvider.shellMode = ShellMode.hidden;
+              shellProvider.update();
+            },
+            icon: AppIcon.arrowDropDown,
+          ),
+        ],
+      );
+    },
   );
 }
 

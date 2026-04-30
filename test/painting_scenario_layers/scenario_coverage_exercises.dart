@@ -4,6 +4,7 @@ part of '../painting_scenario_test.dart';
 // Coverage exercise constants
 // ---------------------------------------------------------------------------
 const String _coverageRenamedLayerName = 'Renamed Layer';
+const String _coverageFloatingUndoActionName = 'floating-buttons-undo';
 const double _coverageSelectionMargin = 50.0;
 const double _coverageBrushSize = 6.0;
 const double _coverageEraserBrushSize = 10.0;
@@ -1354,6 +1355,25 @@ Future<void> _exerciseFloatingButtons(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
+  final ShellProvider shellProvider = ShellProvider.of(context);
+
+  shellProvider.shellMode = ShellMode.full;
+  shellProvider.deviceSizeSmall = false;
+  shellProvider.showMenu = false;
+  shellProvider.update();
+  await tester.pump();
+  await tester.pump();
+
+  appProvider.undoProvider.clear();
+  appProvider.undoProvider.executeAction(
+    name: _coverageFloatingUndoActionName,
+    forward: () {},
+    backward: () {},
+  );
+  await tester.pump();
+  await tester.pump();
 
   // Tap undo floating button.
   await tapByKey(tester, Keys.floatActionUndo);
@@ -1366,6 +1386,8 @@ Future<void> _exerciseFloatingButtons(
   await tester.pump();
   await tester.pump();
   await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+
+  appProvider.undoProvider.clear();
 
   // Tap zoom in.
   await tapByKey(tester, Keys.floatActionZoomIn);
