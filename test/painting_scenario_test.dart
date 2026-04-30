@@ -130,8 +130,8 @@ const double _landTopY = 10.0;
 const double _landBottomY = 300.0;
 const Offset _landTopLeft = Offset(-300, _landTopY);
 const Offset _landBottomRight = Offset(300, _landBottomY);
-const double _landBorderBrushSize = 8.0;
-const double _landSelectionMargin = 4.0;
+const double _landBorderBrushSize = 0.0;
+const double _landNoiseIntensity = 1.0;
 
 // Lake layer (temporary layer merged into land)
 const String _pondDraftLayerName = 'Lake Draft';
@@ -178,6 +178,40 @@ const Color _pondColorMid = Color.fromARGB(255, 49, 132, 206);
 const Color _pondColorDark = Color.fromARGB(255, 8, 58, 132);
 const double _pondHighlightBrushSize = AppStroke.thin;
 const Color _pondHighlightColor = Color.fromARGB(200, 255, 255, 255);
+const double _pondSunReflectionCenterX = (-200.0 + _pondCenterX) / AppMath.pair;
+const Color _pondSunReflectionColor = Color.fromARGB(150, 255, 245, 190);
+const double _pondSunReflectionBrushSize = 8.0;
+const double _pondRippleSoftenIntensity = 0.6;
+const double _pondReflectionPixelateIntensity = 0.6;
+const double _pondReflectionBlurIntensity = 0.7;
+const List<Offset> _pondSunReflectionStreak1 = <Offset>[
+  Offset(_pondSunReflectionCenterX - 55, 46),
+  Offset(_pondSunReflectionCenterX - 30, 52),
+  Offset(_pondSunReflectionCenterX, 49),
+  Offset(_pondSunReflectionCenterX + 30, 55),
+  Offset(_pondSunReflectionCenterX + 55, 51),
+];
+const List<Offset> _pondSunReflectionStreak2 = <Offset>[
+  Offset(_pondSunReflectionCenterX - 65, 64),
+  Offset(_pondSunReflectionCenterX - 35, 70),
+  Offset(_pondSunReflectionCenterX, 67),
+  Offset(_pondSunReflectionCenterX + 35, 72),
+  Offset(_pondSunReflectionCenterX + 65, 68),
+];
+const List<Offset> _pondSunReflectionStreak3 = <Offset>[
+  Offset(_pondSunReflectionCenterX - 70, 84),
+  Offset(_pondSunReflectionCenterX - 38, 90),
+  Offset(_pondSunReflectionCenterX, 87),
+  Offset(_pondSunReflectionCenterX + 38, 92),
+  Offset(_pondSunReflectionCenterX + 70, 88),
+];
+const List<Offset> _pondSunReflectionStreak4 = <Offset>[
+  Offset(_pondSunReflectionCenterX - 60, 104),
+  Offset(_pondSunReflectionCenterX - 32, 110),
+  Offset(_pondSunReflectionCenterX, 107),
+  Offset(_pondSunReflectionCenterX + 32, 112),
+  Offset(_pondSunReflectionCenterX + 60, 108),
+];
 const List<Offset> _pondHighlightWave1 = <Offset>[
   Offset(-236, 63),
   Offset(-220, 57),
@@ -205,21 +239,22 @@ const List<Offset> _pondHighlightWave3 = <Offset>[
 
 // House layer
 const String _houseLayerName = 'House';
-const Offset _houseBodyStart = Offset(0, 0);
-const Offset _houseBodyEnd = Offset(200, 100);
-const Offset _houseDoorStart = Offset(130, 24);
-const Offset _houseDoorEnd = Offset(180, 100);
-const Offset _houseWindowStart = Offset(20, 30);
-const Offset _houseWindowEnd = Offset(80, 50);
+const double _houseHorizontalShift = 20.0;
+const Offset _houseBodyStart = Offset(_houseHorizontalShift, 0);
+const Offset _houseBodyEnd = Offset(200 + _houseHorizontalShift, 100);
+const Offset _houseDoorStart = Offset(130 + _houseHorizontalShift, 24);
+const Offset _houseDoorEnd = Offset(180 + _houseHorizontalShift, 100);
+const Offset _houseWindowStart = Offset(20 + _houseHorizontalShift, 30);
+const Offset _houseWindowEnd = Offset(80 + _houseHorizontalShift, 50);
 
 // Roof — converging vertical stripes drawn on the House layer.
 // Bottom edge of the roof (wider).
-const double _roofBaseLeft = -10.0;
-const double _roofBaseRight = 210.0;
+const double _roofBaseLeft = -10.0 + _houseHorizontalShift;
+const double _roofBaseRight = 210.0 + _houseHorizontalShift;
 const double _roofBaseY = 2.0;
 // Top edge of the roof (narrower, creating perspective).
-const double _roofTopLeft = 45.0;
-const double _roofTopRight = 155.0;
+const double _roofTopLeft = 45.0 + _houseHorizontalShift;
+const double _roofTopRight = 155.0 + _houseHorizontalShift;
 const double _roofTopY = -108.0;
 const int _roofStripeCount = 18;
 const double _roofStripeBrushSize = 14.0;
@@ -241,9 +276,10 @@ final Offset _houseShadowWandTapOffset = Offset(
 // Birds layer
 const String _birdsLayerName = 'Birds';
 const double _birdBrushSize = 4.0;
-const Offset _bird1Offset = Offset(-20, -170);
-const Offset _bird2Offset = Offset(80, -210);
-const Offset _bird3Offset = Offset(150, -150);
+const double _birdsVerticalShiftUp = 80.0;
+const Offset _bird1Offset = Offset(-20, -170 - _birdsVerticalShiftUp);
+const Offset _bird2Offset = Offset(80, -210 - _birdsVerticalShiftUp);
+const Offset _bird3Offset = Offset(150, -150 - _birdsVerticalShiftUp);
 const Offset _birdPivot = Offset(30, 11);
 const double _bird1Scale = 0.9;
 const double _bird2Scale = 0.65;

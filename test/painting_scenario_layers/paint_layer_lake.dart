@@ -61,6 +61,41 @@ Future<void> paintLayerLake(final PaintingScenarioSession session) async {
     );
   }
 
+  // Add a warm broken reflection band under the sun to make the water read as reflective.
+  for (final List<Offset> reflectionStreak in <List<Offset>>[
+    _pondSunReflectionStreak1,
+    _pondSunReflectionStreak2,
+    _pondSunReflectionStreak3,
+    _pondSunReflectionStreak4,
+  ]) {
+    await drawFreehandStrokeWithHumanGestures(
+      session.tester,
+      points: reflectionStreak.map((final Offset point) => session.canvasCenter + point).toList(),
+      brushSize: _pondSunReflectionBrushSize,
+      brushColor: _pondSunReflectionColor,
+    );
+  }
+
+  // Pixelate → blur → soften edges for a convincing blurred-water look on the reflection.
+  await applyEffectViaUi(
+    session.tester,
+    SelectionEffect.pixelate,
+    strength: _pondReflectionPixelateIntensity,
+  );
+
+  await applyEffectViaUi(
+    session.tester,
+    SelectionEffect.blur,
+    strength: _pondReflectionBlurIntensity,
+  );
+
+  // Soften edges while the lake selection is active for a natural blend.
+  await applyEffectViaUi(
+    session.tester,
+    SelectionEffect.soften,
+    strength: _pondRippleSoftenIntensity,
+  );
+
   expect(
     sceneAppProvider.selectorModel.isVisible,
     isTrue,

@@ -726,6 +726,8 @@ Future<void> applyEffectViaUi(
   final WidgetTester tester,
   final SelectionEffect effect, {
   final double strength = AppEffects.defaultIntensity,
+  final bool requireApply = false,
+  final bool forceFullSelection = false,
 }) async {
   final BuildContext context = tester.element(find.byType(MainView));
   final AppProvider appProvider = AppProvider.of(context, listen: false);
@@ -739,7 +741,7 @@ Future<void> applyEffectViaUi(
   appProvider.transformModel.isVisible = false;
   appProvider.selectorModel.isDrawing = false;
 
-  if (!appProvider.selectorModel.isVisible) {
+  if (forceFullSelection || !appProvider.selectorModel.isVisible) {
     appProvider.selectorModel.isVisible = true;
     appProvider.selectorModel.path1 = Path()
       ..addRect(
@@ -770,18 +772,25 @@ Future<void> applyEffectViaUi(
 
   // --- 2. Tap the effect name from the popup menu ---
   final Finder menuItem = find.text(effectLabel_);
-  expect(menuItem, findsOneWidget, reason: 'Effect menu item "$effectLabel_" should be visible');
-  await tester.ensureVisible(menuItem);
+  expect(menuItem, findsAtLeastNWidgets(1), reason: 'Effect menu item "$effectLabel_" should be visible');
+  await tester.ensureVisible(menuItem.last);
   await tester.pump();
-  final Finder tappableMenuItem = menuItem.hitTestable();
-  final Finder menuTapTarget = tappableMenuItem.evaluate().isNotEmpty ? tappableMenuItem : menuItem;
+
+  final Finder menuItemTapContainer = find.ancestor(
+    of: menuItem.last,
+    matching: find.byType(GestureDetector),
+  );
+
+  final Finder tappableMenuItem = menuItemTapContainer.hitTestable();
+  final Finder menuTapTarget = tappableMenuItem.evaluate().isNotEmpty ? tappableMenuItem : menuItemTapContainer;
+  expect(menuTapTarget, findsAtLeastNWidgets(1), reason: 'Menu tap target for "$effectLabel_" should exist');
   InteractionTracker.recordTap(tester.getCenter(menuTapTarget.first));
   await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
 
   if (tappableMenuItem.evaluate().isNotEmpty) {
     await tapLikeHuman(tester, tester.getCenter(tappableMenuItem.first));
   } else {
-    await tester.tap(menuItem.first, warnIfMissed: false);
+    await tester.tap(menuTapTarget.first, warnIfMissed: false);
     await tester.pump();
     await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
   }
@@ -790,8 +799,15 @@ Future<void> applyEffectViaUi(
 
   final Finder bottomSheetApplyBtn = find.byKey(Keys.effectIntensityApplyButton);
   final Finder sidePanelApplyBtn = find.byKey(Keys.effectIntensityPanelApplyButton);
+
+  bool hasApplyControls() {
+    return bottomSheetApplyBtn.evaluate().isNotEmpty || sidePanelApplyBtn.evaluate().isNotEmpty;
+  }
+
+  // Wait for the async preview flow to complete and for controls to appear.
+  // In real usage the user cannot apply an effect until these controls are visible.
   for (int i = 0; i < _effectControlsWaitPumpCount; i++) {
-    if (bottomSheetApplyBtn.evaluate().isNotEmpty || sidePanelApplyBtn.evaluate().isNotEmpty) {
+    if (hasApplyControls()) {
       break;
     }
     await tester.pump(_effectControlsWaitPumpDuration);
@@ -799,8 +815,33 @@ Future<void> applyEffectViaUi(
 
   // Some selections can resolve to an empty clipped image in widget tests.
   // In that case no effect controls are presented and applying has no effect.
-  if (bottomSheetApplyBtn.evaluate().isEmpty && sidePanelApplyBtn.evaluate().isEmpty) {
-    return;
+  if (!hasApplyControls()) {
+    if (requireApply) {
+      // UX-faithful fallback: trigger the same effect from the tools panel
+      // button (tooltip label) and wait again for the Apply controls.
+      try {
+        await tapByTooltip(tester, effectLabel_);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
+
+        for (int i = 0; i < _effectControlsWaitPumpCount; i++) {
+          if (hasApplyControls()) {
+            break;
+          }
+          await tester.pump(_effectControlsWaitPumpDuration);
+        }
+      } catch (_) {
+        // Keep the strict failure below if controls still do not appear.
+      }
+    }
+
+    if (!hasApplyControls() && requireApply) {
+      fail('Effect controls were not shown for "$effectLabel_", but apply is required.');
+    }
+
+    if (!hasApplyControls()) {
+      return;
+    }
   }
 
   // --- 3. Adjust intensity slider if a custom strength was requested ---
