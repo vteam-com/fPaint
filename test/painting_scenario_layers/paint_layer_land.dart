@@ -12,24 +12,25 @@ Future<void> paintLayerLand(final PaintingScenarioSession session) async {
     fillColor: Colors.green,
   );
 
-  // Select the land area with a small margin to cover border edges,
-  // then repeat noise + pixelation for distortion,
-  // followed by a final blur for a natural grass texture.
   await selectRectangleArea(
     session.tester,
-    startPosition: session.canvasCenter + _landTopLeft - const Offset(_landSelectionMargin, _landSelectionMargin),
-    endPosition: session.canvasCenter + _landBottomRight + const Offset(_landSelectionMargin, _landSelectionMargin),
+    startPosition: session.canvasCenter + _landTopLeft,
+    endPosition: session.canvasCenter + _landBottomRight,
   );
 
-  await applyEffectViaUi(session.tester, SelectionEffect.noise, strength: 1.0);
-  await applyEffectViaUi(session.tester, SelectionEffect.pixelate, strength: 1);
-  await applyEffectViaUi(session.tester, SelectionEffect.soften, strength: 1);
+  await applyEffectViaUi(
+    session.tester,
+    SelectionEffect.noise,
+    strength: _landNoiseIntensity,
+    requireApply: true,
+  );
 
   final BuildContext landContext = session.tester.element(find.byType(MainView));
   final AppProvider landAppProvider = AppProvider.of(landContext, listen: false);
   landAppProvider.selectorModel.clear();
+  landAppProvider.selectedAction = ActionType.brush;
   landAppProvider.update();
-  await session.tester.pump();
+  await pumpForUnitTestUiSettle(session.tester);
 
   await session.videoRecorder.captureFrame();
 }
