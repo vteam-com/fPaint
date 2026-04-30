@@ -238,7 +238,11 @@ class MyApp extends StatelessWidget {
   final AppPreferences appPreferences = AppPreferences();
 
   /// Provides application-level functionalities and states.
-  late final AppProvider appProvider = AppProvider(preferences: appPreferences);
+  late final AppProvider appProvider = AppProvider(
+    preferences: appPreferences,
+    layersProvider: layersProvider,
+    undoProvider: undoProvider,
+  );
 
   /// Manages autosave snapshots and startup draft recovery.
   late final DraftRecoveryController draftRecoveryController = DraftRecoveryController(
@@ -248,7 +252,7 @@ class MyApp extends StatelessWidget {
   );
 
   /// Provides functionalities and states for managing layers.
-  final LayersProvider layersProvider = LayersProvider();
+  late final LayersProvider layersProvider = LayersProvider(undoProvider: undoProvider);
 
   /// Global navigator key to access context from outside of the widget tree
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -270,8 +274,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (final BuildContext _) => appPreferences),
         // ignore: always_specify_types
         ChangeNotifierProvider(create: (final BuildContext _) => appProvider),
-        // The layers provider is a shared singleton; provide the existing
-        // instance without transferring disposal ownership to Provider.
+        // Provide the existing shared instance without transferring
+        // disposal ownership to Provider.
         ChangeNotifierProvider<LayersProvider>.value(value: layersProvider),
         // ignore: always_specify_types
         ChangeNotifierProvider(create: (final BuildContext _) => undoProvider),

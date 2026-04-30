@@ -14,13 +14,8 @@ const String _errorFallback = 'error';
 /// undoing actions, and redoing actions. It also provides methods for
 /// clearing the undo and redo stacks, and for getting the history of actions.
 class UndoProvider extends ChangeNotifier {
-  factory UndoProvider() {
-    return _instance;
-  }
-
-  UndoProvider._internal();
+  UndoProvider();
   static final Logger _log = Logger(logNameUndoProvider);
-  static final UndoProvider _instance = UndoProvider._internal();
 
   /// Retrieves the [UndoProvider] instance from the given [BuildContext].
   ///

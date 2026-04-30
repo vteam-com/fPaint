@@ -14,10 +14,12 @@ import '../helpers/layers_provider_test_helper.dart';
 void main() {
   group('LayersProvider undo coverage', () {
     late LayersProvider layers;
+    late UndoProvider undoProvider;
 
     setUp(() {
-      layers = createInitializedLayersProvider();
-      UndoProvider().clear();
+      undoProvider = UndoProvider();
+      undoProvider.clear();
+      layers = createInitializedLayersProvider(undoProvider: undoProvider);
     });
 
     test('canvasResize undo restores original size', () {
@@ -25,7 +27,7 @@ void main() {
       layers.canvasResize(400, 300, CanvasResizePosition.center);
       expect(layers.size, const Size(400, 300));
 
-      UndoProvider().undo();
+      undoProvider.undo();
       expect(layers.size, originalSize);
     });
 
@@ -34,7 +36,7 @@ void main() {
       layers.canvasResize(400, 300, CanvasResizePosition.top);
       expect(layers.size, const Size(400, 300));
 
-      UndoProvider().undo();
+      undoProvider.undo();
       expect(layers.size, originalSize);
     });
 
@@ -43,7 +45,7 @@ void main() {
       layers.canvasResize(600, 400, CanvasResizePosition.bottomRight);
       expect(layers.size, const Size(600, 400));
 
-      UndoProvider().undo();
+      undoProvider.undo();
       expect(layers.size, originalSize);
     });
 
@@ -55,14 +57,14 @@ void main() {
         CanvasResizePosition.center,
       );
       expect(layers.size, originalSize);
-      expect(UndoProvider().canUndo, false);
+      expect(undoProvider.canUndo, false);
     });
 
     test('canvasResize no-op when dimensions are zero or negative', () {
       layers.canvasResize(0, 300, CanvasResizePosition.center);
-      expect(UndoProvider().canUndo, false);
+      expect(undoProvider.canUndo, false);
       layers.canvasResize(300, -1, CanvasResizePosition.center);
-      expect(UndoProvider().canUndo, false);
+      expect(undoProvider.canUndo, false);
     });
 
     test('mergeLayers undo restores both layers', () {
@@ -85,13 +87,13 @@ void main() {
       expect(layers.length, 1);
 
       // Undo.
-      UndoProvider().undo();
+      undoProvider.undo();
       expect(layers.length, 2);
     });
 
     test('mergeLayers same index is no-op', () {
       layers.mergeLayers(0, 0);
-      expect(UndoProvider().canUndo, false);
+      expect(undoProvider.canUndo, false);
     });
 
     test('getTopColorUsed aggregates colors across visible layers', () async {
@@ -335,7 +337,7 @@ void main() {
 
     test('rotateCanvas90Clockwise undo runs backward', () async {
       await layers.rotateCanvas90Clockwise();
-      UndoProvider().undo();
+      undoProvider.undo();
       // Just verify it doesn't crash; async backward may not complete immediately
     });
 
@@ -344,14 +346,14 @@ void main() {
       await layers.flipCanvasHorizontal('Flip H');
       // Just verify it runs without error
       expect(layers.length, greaterThan(0));
-      UndoProvider().undo();
+      undoProvider.undo();
     });
 
     test('flipCanvasVertical flips and undoes', () async {
       layers.addTop(name: 'FlipV');
       await layers.flipCanvasVertical('Flip V');
       expect(layers.length, greaterThan(0));
-      UndoProvider().undo();
+      undoProvider.undo();
     });
 
     test('capturePainterToImage returns image', () async {
@@ -392,7 +394,7 @@ void main() {
       layers.addTop(name: 'To');
       final int initialLength = layers.length;
       layers.mergeLayers(0, 1);
-      UndoProvider().undo();
+      undoProvider.undo();
       expect(layers.length, initialLength);
     });
 
