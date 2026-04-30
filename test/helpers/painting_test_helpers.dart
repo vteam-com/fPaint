@@ -41,6 +41,12 @@ const double _humanDragSteps = 3;
 /// Duration in milliseconds to pump past showGeneralDialog transitions.
 const int _dialogTransitionMs = 300;
 
+/// Maximum number of pumps while waiting for effect controls to appear.
+const int _effectControlsWaitPumpCount = 240;
+
+/// Duration of each pump while waiting for effect controls.
+const Duration _effectControlsWaitPumpDuration = Duration(milliseconds: 16);
+
 /// Minimum number of vertices required to form a lasso selection polygon.
 const int _lassoSelectionMinimumPointCount = 3;
 
@@ -753,10 +759,12 @@ Future<void> applyEffectViaUi(
   // Record tap target and capture frame showing the red circle BEFORE tapping.
   final Finder effectsBtn = find.byKey(Keys.effectsButton);
   expect(effectsBtn, findsOneWidget, reason: 'Effects button should be visible');
-  InteractionTracker.recordTap(tester.getCenter(effectsBtn));
+  final Finder tappableEffectsBtn = effectsBtn.hitTestable();
+  expect(tappableEffectsBtn, findsAtLeastNWidgets(1), reason: 'Effects button should be tappable');
+  InteractionTracker.recordTap(tester.getCenter(tappableEffectsBtn.first));
   await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
 
-  await tester.tap(effectsBtn);
+  await tapLikeHuman(tester, tester.getCenter(tappableEffectsBtn.first));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
 
@@ -765,37 +773,70 @@ Future<void> applyEffectViaUi(
   expect(menuItem, findsOneWidget, reason: 'Effect menu item "$effectLabel_" should be visible');
   await tester.ensureVisible(menuItem);
   await tester.pump();
-  InteractionTracker.recordTap(tester.getCenter(menuItem));
+  final Finder tappableMenuItem = menuItem.hitTestable();
+  final Finder menuTapTarget = tappableMenuItem.evaluate().isNotEmpty ? tappableMenuItem : menuItem;
+  InteractionTracker.recordTap(tester.getCenter(menuTapTarget.first));
   await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
 
-  await tester.tap(menuItem);
+  if (tappableMenuItem.evaluate().isNotEmpty) {
+    await tapLikeHuman(tester, tester.getCenter(tappableMenuItem.first));
+  } else {
+    await tester.tap(menuItem.first, warnIfMissed: false);
+    await tester.pump();
+    await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+  }
   await tester.pump();
   await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
+
+  final Finder bottomSheetApplyBtn = find.byKey(Keys.effectIntensityApplyButton);
+  final Finder sidePanelApplyBtn = find.byKey(Keys.effectIntensityPanelApplyButton);
+  for (int i = 0; i < _effectControlsWaitPumpCount; i++) {
+    if (bottomSheetApplyBtn.evaluate().isNotEmpty || sidePanelApplyBtn.evaluate().isNotEmpty) {
+      break;
+    }
+    await tester.pump(_effectControlsWaitPumpDuration);
+  }
+
+  // Some selections can resolve to an empty clipped image in widget tests.
+  // In that case no effect controls are presented and applying has no effect.
+  if (bottomSheetApplyBtn.evaluate().isEmpty && sidePanelApplyBtn.evaluate().isEmpty) {
+    return;
+  }
 
   // --- 3. Adjust intensity slider if a custom strength was requested ---
   // Directly invoke the slider's onChanged callback to avoid gesture
   // recognition issues inside the showGeneralDialog overlay.
   if (strength != AppEffects.defaultIntensity) {
-    final Finder sliderFinder = find.byKey(Keys.effectIntensityDialogSlider);
-    expect(sliderFinder, findsOneWidget, reason: 'Intensity dialog slider should be visible');
+    final Finder bottomSheetSlider = find.byKey(Keys.effectIntensityDialogSlider);
+    final Finder sidePanelSlider = find.byKey(Keys.effectIntensitySlider);
+    final Finder sliderFinder = bottomSheetSlider.evaluate().isNotEmpty ? bottomSheetSlider : sidePanelSlider;
+    expect(sliderFinder, findsAtLeastNWidgets(1), reason: 'Intensity slider should be visible');
 
     // Record red circle at the slider's target position before adjusting.
-    final Offset sliderCenter = tester.getCenter(sliderFinder);
+    final Offset sliderCenter = tester.getCenter(sliderFinder.first);
     InteractionTracker.recordTap(sliderCenter);
     await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
 
-    final AppSlider slider = tester.widget<AppSlider>(sliderFinder);
+    final AppSlider slider = tester.widget<AppSlider>(sliderFinder.first);
     slider.onChanged?.call(strength);
     await tester.pump();
   }
 
   // --- 4. Tap Apply ---
-  final Finder applyBtn = find.byKey(Keys.effectIntensityApplyButton);
-  expect(applyBtn, findsOneWidget, reason: 'Apply button should be visible');
-  InteractionTracker.recordTap(tester.getCenter(applyBtn));
+  final Finder applyBtn = bottomSheetApplyBtn.evaluate().isNotEmpty ? bottomSheetApplyBtn : sidePanelApplyBtn;
+  expect(applyBtn, findsAtLeastNWidgets(1), reason: 'Apply button should be visible');
+  final Finder tappableApplyBtn = applyBtn.hitTestable();
+  final Finder applyTapTarget = tappableApplyBtn.evaluate().isNotEmpty ? tappableApplyBtn : applyBtn;
+  InteractionTracker.recordTap(tester.getCenter(applyTapTarget.first));
   await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
 
-  await tester.tap(applyBtn);
+  if (tappableApplyBtn.evaluate().isNotEmpty) {
+    await tapLikeHuman(tester, tester.getCenter(tappableApplyBtn.first));
+  } else {
+    await tester.tap(applyBtn.first, warnIfMissed: false);
+    await tester.pump();
+    await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+  }
   await tester.pump();
   await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
 }

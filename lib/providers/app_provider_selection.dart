@@ -337,40 +337,6 @@ extension AppProviderSelection on AppProvider {
     update();
   }
 
-  /// Applies a [SelectionEffect] to the pixels under the current selection,
-  /// replacing the original region with the processed result.
-  ///
-  /// [strength] controls how strongly the effect is applied (0.0 = none,
-  /// 1.0 = full authored strength).
-  ///
-  /// When no selection exists the entire active layer is used as the
-  /// implicit target (auto-select-all).
-  Future<void> applyEffect(
-    final SelectionEffect effect, {
-    final double strength = AppEffects.defaultIntensity,
-  }) async {
-    cancelEffectPreview();
-    _ensureSelection();
-
-    final ui.Image? clippedImage = await createSelectionImage();
-    if (clippedImage == null) {
-      return;
-    }
-
-    final Rect bounds = selectorModel.path1!.getBounds();
-
-    final ui.Image processedImage = await effect.apply(clippedImage, strength: strength);
-
-    replaceRegion(
-      name: effect.name,
-      erasePath: Path.from(selectorModel.path1!),
-      replacement: processedImage,
-      offset: Offset(bounds.left, bounds.top),
-    );
-
-    update();
-  }
-
   /// Flips the selected region horizontally (left ↔ right).
   ///
   /// When no selection exists the entire active layer is used as the

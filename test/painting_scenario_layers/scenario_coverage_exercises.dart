@@ -1805,11 +1805,14 @@ Future<void> _exerciseSelectionAdvanced(
   appProvider.update();
   await tester.pump();
 
-  // Exercise applyEffect with a selection.
+  // Exercise effect preview with a selection.
   appProvider.selectAll();
   await tester.pump();
 
-  await appProvider.applyEffect(SelectionEffect.blur);
+  await appProvider.startEffectPreview(SelectionEffect.blur);
+  await tester.pump();
+
+  await appProvider.confirmEffectPreview();
   await tester.pump();
 
   // Undo the effect.

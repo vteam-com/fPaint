@@ -8,8 +8,8 @@ import 'package:fpaint/models/selection_effect.dart';
 
 void main() {
   group('SelectionEffect enum', () {
-    test('has 7 values', () {
-      expect(SelectionEffect.values.length, 7);
+    test('has 11 values', () {
+      expect(SelectionEffect.values.length, 11);
     });
 
     test('each has an icon', () {

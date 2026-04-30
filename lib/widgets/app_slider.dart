@@ -15,21 +15,26 @@ class AppSlider extends StatelessWidget {
     this.divisions,
     this.activeColor,
     this.inactiveColor,
+    this.icon,
     this.label,
     this.valueLabel,
   });
   final Color? activeColor;
   final int? divisions;
+
+  /// Optional icon shown to the left of [label] in the header row.
+  final Widget? icon;
+
   final Color? inactiveColor;
 
-  /// Optional title shown above the slider on the left.
+  /// Optional title shown in the header row on the left (after [icon]).
   final String? label;
   final double max;
   final double min;
   final ValueChanged<double>? onChanged;
   final double value;
 
-  /// Optional dynamic value shown above the slider on the right.
+  /// Optional dynamic value shown in the header row on the right.
   final String? valueLabel;
   @override
   Widget build(final BuildContext context) {
@@ -53,7 +58,7 @@ class AppSlider extends StatelessWidget {
       },
     );
 
-    if (label == null && valueLabel == null) {
+    if (label == null && valueLabel == null && icon == null) {
       return slider;
     }
 
@@ -64,7 +69,13 @@ class AppSlider extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            if (label != null) AppText(label!),
+            Row(
+              spacing: AppSpacing.md,
+              children: <Widget>[
+                ?icon,
+                if (label != null) AppText(label!),
+              ],
+            ),
             if (valueLabel != null) AppText(valueLabel!),
           ],
         ),
