@@ -20,6 +20,10 @@ const int _rgbaRedOffset = 0;
 const int _rgbaGreenOffset = 1;
 const int _rgbaBlueOffset = 2;
 const int _rgbaAlphaOffset = 3;
+const int _firstLayerIndex = 0;
+const int _secondLayerIndex = 1;
+const int _thirdLayerIndex = 2;
+const int _outOfRangeIndex = 999;
 
 // Mock LayerProvider if its methods are too complex or have external deps for these tests.
 // For now, we'll use real LayerProvider instances, assuming their basic state changes are testable.
@@ -121,6 +125,47 @@ void main() {
       layersProvider.remove(layerToRemove);
       expect(layersProvider.selectedLayerIndex, 0); // L1 is now 0
       expect(layersProvider.selectedLayer.name, 'L1');
+    });
+  });
+
+  group('Layer Operations: Reordering', () {
+    test('reorderLayer moving down inserts after drop target item', () {
+      layersProvider.addTop(name: 'LayerC');
+      layersProvider.addTop(name: 'LayerB');
+      layersProvider.addTop(name: 'LayerA');
+      // Current order: [LayerA, LayerB, LayerC, Background]
+
+      layersProvider.reorderLayer(fromIndex: _firstLayerIndex, toIndex: _thirdLayerIndex);
+
+      expect(layersProvider.get(_firstLayerIndex).name, 'LayerB');
+      expect(layersProvider.get(_secondLayerIndex).name, 'LayerC');
+      expect(layersProvider.get(_thirdLayerIndex).name, 'LayerA');
+      expect(layersProvider.selectedLayerIndex, _thirdLayerIndex);
+    });
+
+    test('reorderLayer moving up inserts at drop target index', () {
+      layersProvider.addTop(name: 'LayerC');
+      layersProvider.addTop(name: 'LayerB');
+      layersProvider.addTop(name: 'LayerA');
+      // Current order: [LayerA, LayerB, LayerC, Background]
+
+      layersProvider.reorderLayer(fromIndex: _thirdLayerIndex, toIndex: _firstLayerIndex);
+
+      expect(layersProvider.get(_firstLayerIndex).name, 'LayerC');
+      expect(layersProvider.get(_secondLayerIndex).name, 'LayerA');
+      expect(layersProvider.get(_thirdLayerIndex).name, 'LayerB');
+      expect(layersProvider.selectedLayerIndex, _firstLayerIndex);
+    });
+
+    test('reorderLayer ignores out-of-range indexes', () {
+      layersProvider.addTop(name: 'LayerA');
+      final List<String> namesBefore = layersProvider.list.map((final LayerProvider l) => l.name).toList();
+
+      layersProvider.reorderLayer(fromIndex: _outOfRangeIndex, toIndex: _firstLayerIndex);
+      layersProvider.reorderLayer(fromIndex: _firstLayerIndex, toIndex: _outOfRangeIndex);
+
+      final List<String> namesAfter = layersProvider.list.map((final LayerProvider l) => l.name).toList();
+      expect(namesAfter, namesBefore);
     });
   });
 

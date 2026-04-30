@@ -336,6 +336,28 @@ class LayersProvider extends ChangeNotifier {
     }
   }
 
+  /// Reorders a layer from [fromIndex] to [toIndex] within the layer stack.
+  ///
+  /// The drop target index is interpreted as the item being dropped onto.
+  void reorderLayer({
+    required final int fromIndex,
+    required final int toIndex,
+  }) {
+    if (!isIndexInRange(fromIndex) || !isIndexInRange(toIndex)) {
+      return;
+    }
+
+    if (fromIndex == toIndex) {
+      selectedLayerIndex = toIndex;
+      return;
+    }
+
+    final LayerProvider movedLayer = _list.removeAt(fromIndex);
+    final int insertIndex = toIndex;
+    _list.insert(insertIndex, movedLayer);
+    selectedLayerIndex = insertIndex;
+  }
+
   bool _sourceLayerRequiresRasterizedMerge(final LayerProvider layer) {
     if (layer.backgroundColor != null || layer.blendMode != ui.BlendMode.srcOver || layer.opacity != AppVisual.full) {
       return true;
