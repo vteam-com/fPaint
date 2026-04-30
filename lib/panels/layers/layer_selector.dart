@@ -134,21 +134,39 @@ class LayerSelector extends StatelessWidget {
     final LayerProvider layer,
     final bool allowRemoveLayer,
   ) {
-    return Row(
-      children: <Widget>[
-        Expanded(
-          child: Column(
-            children: <Widget>[
-              _buildLayerName(layers),
-              if (isSelected) _buildLayerControls(context, layers, layer, allowRemoveLayer),
-            ],
-          ),
-        ),
-        _buildThumbnailPreviewAndVisibility(
-          layers,
-          layer,
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (final BuildContext _, final BoxConstraints constraints) {
+        final bool hasBoundedWidth = constraints.hasBoundedWidth;
+        return Row(
+          mainAxisSize: hasBoundedWidth ? MainAxisSize.max : MainAxisSize.min,
+          children: <Widget>[
+            if (hasBoundedWidth)
+              Expanded(
+                child: Column(
+                  children: <Widget>[
+                    _buildLayerName(layers),
+                    if (isSelected) _buildLayerControls(context, layers, layer, allowRemoveLayer),
+                  ],
+                ),
+              )
+            else
+              Flexible(
+                fit: FlexFit.loose,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    _buildLayerName(layers),
+                    if (isSelected) _buildLayerControls(context, layers, layer, allowRemoveLayer),
+                  ],
+                ),
+              ),
+            _buildThumbnailPreviewAndVisibility(
+              layers,
+              layer,
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -245,39 +263,60 @@ class LayerSelector extends StatelessWidget {
   /// Builds the layer name widget.
   Widget _buildLayerName(final LayersProvider layers) {
     final AppLocalizations l10n = context.l10n;
-    return Row(
-      children: <Widget>[
-        if (layer.parentGroupName.isNotEmpty)
-          Opacity(
-            opacity: AppVisual.half,
-            child: AppText('${layer.parentGroupName}.'),
-          ),
-        Expanded(
-          child: GestureDetector(
-            onLongPress: () async {
-              await renameLayer();
-            },
-            child: AppText(
-              layer.name,
-              variant: AppTextVariant.bodyBold,
-              color: isSelected ? AppPalette.blueShade100 : AppPalette.grey400,
+    return LayoutBuilder(
+      builder: (final BuildContext _, final BoxConstraints constraints) {
+        final bool hasBoundedWidth = constraints.hasBoundedWidth;
+        return Row(
+          mainAxisSize: hasBoundedWidth ? MainAxisSize.max : MainAxisSize.min,
+          children: <Widget>[
+            if (layer.parentGroupName.isNotEmpty)
+              Opacity(
+                opacity: AppVisual.half,
+                child: AppText('${layer.parentGroupName}.'),
+              ),
+            if (hasBoundedWidth)
+              Expanded(
+                child: GestureDetector(
+                  onLongPress: () async {
+                    await renameLayer();
+                  },
+                  child: AppText(
+                    layer.name,
+                    variant: AppTextVariant.bodyBold,
+                    color: isSelected ? AppPalette.blueShade100 : AppPalette.grey400,
+                  ),
+                ),
+              )
+            else
+              Flexible(
+                fit: FlexFit.loose,
+                child: GestureDetector(
+                  onLongPress: () async {
+                    await renameLayer();
+                  },
+                  child: AppText(
+                    layer.name,
+                    variant: AppTextVariant.bodyBold,
+                    color: isSelected ? AppPalette.blueShade100 : AppPalette.grey400,
+                  ),
+                ),
+              ),
+            AppButtonIcon(
+              tooltip: l10n.layerToggleVisibility,
+              icon: AppSvgIcon(
+                icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
+                color: layer.isVisible ? AppPalette.blue : AppColors.layerHiddenWarning,
+              ),
+              onPressed: () => layers.layersToggleVisibility(layer),
             ),
-          ),
-        ),
-        AppButtonIcon(
-          tooltip: l10n.layerToggleVisibility,
-          icon: AppSvgIcon(
-            icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
-            color: layer.isVisible ? AppPalette.blue : AppColors.layerHiddenWarning,
-          ),
-          onPressed: () => layers.layersToggleVisibility(layer),
-        ),
-        AppPopupMenuButton<String>(
-          icon: const AppSvgIcon(icon: AppIcon.moreVert),
-          itemBuilder: (final BuildContext _) => _buildPopupMenuItems(),
-          onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
-        ),
-      ],
+            AppPopupMenuButton<String>(
+              icon: const AppSvgIcon(icon: AppIcon.moreVert),
+              itemBuilder: (final BuildContext _) => _buildPopupMenuItems(),
+              onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
+            ),
+          ],
+        );
+      },
     );
   }
 

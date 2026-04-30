@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
@@ -56,7 +57,6 @@ class _ReorderableLayerList extends StatefulWidget {
 
 class _ReorderableLayerListState extends State<_ReorderableLayerList> {
   int? _draggedIndex;
-
   @override
   Widget build(final BuildContext context) {
     return ListView.builder(
@@ -75,6 +75,33 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
           ),
         );
 
+        final Widget dropTarget = DragTarget<int>(
+          onWillAcceptWithDetails: (final DragTargetDetails<int> details) => details.data != index,
+          onAcceptWithDetails: (final DragTargetDetails<int> details) {
+            final int oldIndex = details.data;
+            final int newIndex = index;
+            widget.layers.reorderLayer(fromIndex: oldIndex, toIndex: newIndex);
+          },
+          builder: (final BuildContext _, final List<int?> _, final List<dynamic> _) {
+            return Opacity(
+              opacity: _draggedIndex == index ? AppVisual.low : AppVisual.full,
+              child: child,
+            );
+          },
+        );
+
+        if (_useImmediateDrag) {
+          return Draggable<int>(
+            key: Key('$index'),
+            data: index,
+            feedback: Opacity(opacity: AppVisual.medium, child: child),
+            childWhenDragging: Opacity(opacity: AppVisual.low, child: child),
+            onDragStarted: () => setState(() => _draggedIndex = index),
+            onDragEnd: (final _) => setState(() => _draggedIndex = null),
+            child: dropTarget,
+          );
+        }
+
         return LongPressDraggable<int>(
           key: Key('$index'),
           data: index,
@@ -82,26 +109,15 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
           childWhenDragging: Opacity(opacity: AppVisual.low, child: child),
           onDragStarted: () => setState(() => _draggedIndex = index),
           onDragEnd: (final _) => setState(() => _draggedIndex = null),
-          child: DragTarget<int>(
-            onWillAcceptWithDetails: (final DragTargetDetails<int> details) => details.data != index,
-            onAcceptWithDetails: (final DragTargetDetails<int> details) {
-              final int oldIndex = details.data;
-              final int newIndex = index;
-              final int adjustedIndex = newIndex > oldIndex ? newIndex : newIndex;
-              final LayerProvider movedLayer = widget.layers.get(oldIndex);
-              widget.layers.removeByIndex(oldIndex);
-              widget.layers.insert(adjustedIndex, movedLayer);
-              widget.layers.selectedLayerIndex = adjustedIndex;
-            },
-            builder: (final BuildContext _, final List<int?> _, final List<dynamic> _) {
-              return Opacity(
-                opacity: _draggedIndex == index ? AppVisual.low : AppVisual.full,
-                child: child,
-              );
-            },
-          ),
+          child: dropTarget,
         );
       },
     );
+  }
+
+  bool get _useImmediateDrag {
+    return defaultTargetPlatform == TargetPlatform.linux ||
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.windows;
   }
 }
