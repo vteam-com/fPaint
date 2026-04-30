@@ -63,6 +63,19 @@ class AppNotificationOverlay {
   }
 }
 
+/// Shows a notification overlay only when [context] is still mounted.
+void showSnackBarIfMounted(
+  final BuildContext context,
+  final String message, {
+  final Duration? duration,
+}) {
+  if (!context.mounted) {
+    return;
+  }
+
+  AppNotificationOverlay.show(context, message, duration: duration);
+}
+
 /// Convenience extension so any [BuildContext] can show a notification overlay.
 extension AppSnackBarBuildContextX on BuildContext {
   /// Shows a notification overlay message if the context is still mounted.
@@ -70,10 +83,6 @@ extension AppSnackBarBuildContextX on BuildContext {
     final String message, {
     final Duration? duration,
   }) {
-    if (!mounted) {
-      return;
-    }
-
-    AppNotificationOverlay.show(this, message, duration: duration);
+    showSnackBarIfMounted(this, message, duration: duration);
   }
 }

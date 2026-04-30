@@ -6,15 +6,14 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
-import 'package:fpaint/recovery/draft_recovery_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../helpers/recovery_test_helpers.dart';
 
 void main() {
   testWidgets('autosave writes and clears the recovery draft', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
-    final LayersProvider layers = _resetLayers();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider()..loadedFileName = '/tmp/example.ora';
-    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage();
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage();
     final DraftRecoveryController controller = DraftRecoveryController(
       preferences: preferences,
       layers: layers,
@@ -42,10 +41,10 @@ void main() {
   });
 
   testWidgets('restore loads the stored recovery draft', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
-    final LayersProvider layers = _resetLayers();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
-    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage(
       bytes: Uint8List.fromList(<int>[9, 8, 7]),
     );
     final AppProvider appProvider = AppProvider(preferences: preferences);
@@ -77,10 +76,10 @@ void main() {
   });
 
   testWidgets('automatic restore loads the stored recovery draft without a prompt', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
-    final LayersProvider layers = _resetLayers();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
-    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage(
       bytes: Uint8List.fromList(<int>[6, 5, 4]),
     );
     final AppProvider appProvider = AppProvider(preferences: preferences);
@@ -113,10 +112,10 @@ void main() {
   });
 
   testWidgets('restore discards empty stored recovery drafts', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
-    final LayersProvider layers = _resetLayers();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
-    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage(
       bytes: Uint8List(0),
     );
     final AppProvider appProvider = AppProvider(preferences: preferences);
@@ -140,10 +139,10 @@ void main() {
   });
 
   testWidgets('restoreDraftIfAvailable clears pref when no draft exists', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
-    final LayersProvider layers = _resetLayers();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
-    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage();
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage();
     final AppProvider appProvider = AppProvider(preferences: preferences);
     final DraftRecoveryController controller = DraftRecoveryController(
       preferences: preferences,
@@ -163,10 +162,10 @@ void main() {
   });
 
   testWidgets('discardDraft clears storage and preferences', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
-    final LayersProvider layers = _resetLayers();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
-    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage(
       bytes: Uint8List.fromList(<int>[1, 2, 3]),
     );
     final DraftRecoveryController controller = DraftRecoveryController(
@@ -188,10 +187,10 @@ void main() {
   });
 
   testWidgets('didChangeAppLifecycleState flushes on paused', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
-    final LayersProvider layers = _resetLayers();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider()..loadedFileName = '/tmp/lifecycle.ora';
-    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage();
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage();
     final DraftRecoveryController controller = DraftRecoveryController(
       preferences: preferences,
       layers: layers,
@@ -214,10 +213,10 @@ void main() {
   });
 
   testWidgets('reconcileDraft skips delete during startup when no writes occurred', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
-    final LayersProvider layers = _resetLayers();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
-    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage(
       bytes: Uint8List.fromList(<int>[1, 2, 3]),
     );
     final DraftRecoveryController controller = DraftRecoveryController(
@@ -239,10 +238,10 @@ void main() {
   });
 
   testWidgets('reconcileDraft deletes draft when not changed after startup check', (final WidgetTester tester) async {
-    final AppPreferences preferences = await _createPreferences();
-    final LayersProvider layers = _resetLayers();
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
-    final _MemoryDraftRecoveryStorage storage = _MemoryDraftRecoveryStorage(
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage(
       bytes: Uint8List.fromList(<int>[1, 2, 3]),
     );
     final AppProvider appProvider = AppProvider(preferences: preferences);
@@ -271,47 +270,4 @@ void main() {
     expect(storage.bytes, isNull);
     controller.dispose();
   });
-}
-
-Future<AppPreferences> _createPreferences() async {
-  SharedPreferences.setMockInitialValues(<String, Object>{});
-  final AppPreferences preferences = AppPreferences();
-  await preferences.getPref();
-  return preferences;
-}
-
-LayersProvider _resetLayers() {
-  final LayersProvider layers = LayersProvider();
-  layers.list.clear();
-  layers.size = const Size(100, 100);
-  layers.addWhiteBackgroundLayer();
-  layers.selectedLayerIndex = 0;
-  layers.clearHasChanged();
-  return layers;
-}
-
-class _MemoryDraftRecoveryStorage implements DraftRecoveryStorage {
-  _MemoryDraftRecoveryStorage({this.bytes});
-
-  Uint8List? bytes;
-
-  @override
-  Future<void> deleteDraft() async {
-    bytes = null;
-  }
-
-  @override
-  Future<bool> hasDraft() async {
-    return bytes != null;
-  }
-
-  @override
-  Future<Uint8List?> readDraft() async {
-    return bytes;
-  }
-
-  @override
-  Future<void> writeDraft(final Uint8List nextBytes) async {
-    bytes = nextBytes;
-  }
 }
