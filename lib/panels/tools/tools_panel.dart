@@ -729,6 +729,10 @@ class _EffectsSectionState extends State<_EffectsSection> {
                 name: effectLabel(widget.l10n, effect),
                 image: AppSvgIcon(icon: effect.icon, isSelected: selectedEffect == effect),
                 onPressed: () async {
+                  if (hasEffectPreview && selectedEffect == effect) {
+                    widget.appProvider.cancelEffectPreview();
+                    return;
+                  }
                   await widget.appProvider.startEffectPreview(effect, strength: _strength);
                 },
               ),
