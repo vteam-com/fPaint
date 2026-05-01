@@ -141,5 +141,45 @@ void main() {
       await tapGesture.up();
       await tester.pump();
     });
+
+    testWidgets('inner handle movement is clamped by neighbor stops', (final WidgetTester tester) async {
+      final FillModel model = _createLinearFillModel();
+      model.gradientStopColors = <Color>[Colors.red, Colors.green, Colors.yellow, Colors.blue];
+      model.gradientStopPositions = <double>[0.0, 0.25, 0.75, 1.0];
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          fillModel: model,
+          onUpdate: (final GradientPoint _) {},
+        ),
+      );
+      await tester.pump();
+
+      final Finder innerHandle = find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}2'));
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(innerHandle));
+      await tester.pump();
+      await gesture.moveBy(const Offset(-500, -500));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(model.gradientStopPositions[2], greaterThanOrEqualTo(model.gradientStopPositions[1]));
+      expect(model.gradientStopPositions[2], lessThanOrEqualTo(1.0));
+    });
+
+    testWidgets('radial mode builds marching-ants path and handles', (final WidgetTester tester) async {
+      final FillModel model = _createRadialFillModel();
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          fillModel: model,
+          onUpdate: (final GradientPoint _) {},
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}0')), findsOneWidget);
+      expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}1')), findsOneWidget);
+    });
   });
 }

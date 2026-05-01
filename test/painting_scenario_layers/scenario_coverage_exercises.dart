@@ -19,7 +19,14 @@ Future<void> _undoTimes(
   final int count,
 ) async {
   for (int i = 0; i < count; i++) {
-    await tapByKey(tester, Keys.floatActionUndo);
+    final Finder undoButton = find.byKey(Keys.floatActionUndo);
+    if (undoButton.evaluate().isNotEmpty) {
+      await tapByKey(tester, Keys.floatActionUndo);
+    } else {
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.meta);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyZ);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.meta);
+    }
     await tester.pump();
     await tester.pump();
     await tester.pump();
