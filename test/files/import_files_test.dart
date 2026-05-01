@@ -106,17 +106,21 @@ void main() {
         );
       });
 
-      test('test.heic can be decoded by the import pipeline', () async {
-        final Uint8List bytes = await File(_testHeicPath).readAsBytes();
-        final Uint8List decodableBytes = await decodeHeicBytes(bytes);
-        final ui.Codec codec = await ui.instantiateImageCodec(decodableBytes);
-        final ui.FrameInfo frameInfo = await codec.getNextFrame();
-        final ui.Image image = frameInfo.image;
+      test(
+        'test.heic can be decoded by the import pipeline',
+        () async {
+          final Uint8List bytes = await File(_testHeicPath).readAsBytes();
+          final Uint8List decodableBytes = await decodeHeicBytes(bytes);
+          final ui.Codec codec = await ui.instantiateImageCodec(decodableBytes);
+          final ui.FrameInfo frameInfo = await codec.getNextFrame();
+          final ui.Image image = frameInfo.image;
 
-        expect(image.width, greaterThan(0));
-        expect(image.height, greaterThan(0));
-        image.dispose();
-      });
+          expect(image.width, greaterThan(0));
+          expect(image.height, greaterThan(0));
+          image.dispose();
+        },
+        skip: !Platform.isMacOS && !Platform.isIOS && !Platform.isAndroid,
+      );
     });
 
     // Note: Other functions in import_files.dart involve UI components and file I/O,

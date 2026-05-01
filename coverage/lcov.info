@@ -3211,7 +3211,7 @@ LF:83
 LH:74
 end_of_record
 SF:lib/files/file_operation_exception.dart
-DA:7,3
+DA:7,4
 DA:12,1
 DA:14,1
 DA:15,1
@@ -3219,7 +3219,7 @@ DA:18,3
 DA:24,0
 DA:29,0
 DA:34,0
-DA:39,2
+DA:39,3
 DA:44,1
 DA:49,0
 DA:56,0
