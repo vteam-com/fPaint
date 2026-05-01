@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -330,7 +329,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
                   offset: appProvider.fromCanvas(
                     adjustedPosition + const Offset(-AppInteraction.linearFillHandleOffset, 0),
                   ),
-                  color: adjustBrightness(appProvider.fillColor, AppVisual.low),
+                  color: appProvider.fillModel.gradientStopColors.first,
                 ),
               );
               appProvider.fillModel.addPoint(
@@ -338,14 +337,14 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
                   offset: appProvider.fromCanvas(
                     adjustedPosition + const Offset(AppInteraction.linearFillHandleOffset, 0),
                   ),
-                  color: adjustBrightness(appProvider.fillColor, AppVisual.medium),
+                  color: appProvider.fillModel.gradientStopColors.last,
                 ),
               );
             } else if (appProvider.fillModel.mode == FillMode.radial) {
               appProvider.fillModel.addPoint(
                 GradientPoint(
                   offset: appProvider.fromCanvas(adjustedPosition),
-                  color: adjustBrightness(appProvider.fillColor, AppVisual.low),
+                  color: appProvider.fillModel.gradientStopColors.first,
                 ),
               );
               appProvider.fillModel.addPoint(
@@ -354,7 +353,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
                     adjustedPosition +
                         const Offset(AppInteraction.radialFillHandleOffset, AppInteraction.radialFillHandleOffset),
                   ),
-                  color: adjustBrightness(appProvider.fillColor, AppVisual.medium),
+                  color: appProvider.fillModel.gradientStopColors.last,
                 ),
               );
             }

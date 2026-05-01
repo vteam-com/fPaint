@@ -164,6 +164,7 @@ class AppLayout {
   static const double shortcutGroupWidth = 250.0;
   static const double separatorHeight = 15.0;
   static const double inputFieldWidth = 150.0;
+  static const double gradientStopPositionFieldWidth = 52.0;
   static const int textLengthThreshold = 50;
   static const double textMaxWidthCompact = 800.0;
   static const double textMaxWidthNormal = 1000.0;
@@ -489,6 +490,9 @@ class Keys {
   static const Key toolPanelFillColor = Key('toolPanelFillColor');
   static const Key toolPanelBrushColor1 = Key('toolPanelBrushColor1');
   static const Key toolPanelFontColor = Key('toolPanelFontColor');
+  static const String gradientStopColorKeyPrefixText = 'gradient_stop_color_';
+  static const Key gradientStopAddButton = Key('gradient_stop_add');
+  static const String gradientStopPositionKeyPrefixText = 'gradient_stop_pos_';
   static const Key toolTransform = Key('tool-transform');
 
   static const Key effectsButton = Key('effects-button');

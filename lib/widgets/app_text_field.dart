@@ -1,5 +1,9 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+
+/// Keyboard cause used for text selection shortcut intents.
+const SelectionChangedCause _kKeyboardSelectionCause = SelectionChangedCause.keyboard;
 
 /// A text input field replacing Material [TextField].
 ///
@@ -103,18 +107,26 @@ class _AppTextFieldState extends State<AppTextField> {
                   style: effectiveStyle.copyWith(color: AppColors.textDisabled),
                 ),
               ),
-            EditableText(
-              controller: _controller,
-              focusNode: _focusNode,
-              style: effectiveStyle,
-              cursorColor: AppColors.primary,
-              backgroundCursorColor: AppColors.surfaceVariant,
-              maxLines: widget.maxLines,
-              minLines: widget.minLines,
-              autofocus: widget.autofocus,
-              textAlign: widget.textAlign,
-              keyboardType: widget.keyboardType,
-              onSubmitted: widget.onSubmitted,
+            Shortcuts(
+              shortcuts: const <ShortcutActivator, Intent>{
+                SingleActivator(LogicalKeyboardKey.backspace): DeleteCharacterIntent(forward: false),
+                SingleActivator(LogicalKeyboardKey.delete): DeleteCharacterIntent(forward: true),
+                SingleActivator(LogicalKeyboardKey.keyA, meta: true): SelectAllTextIntent(_kKeyboardSelectionCause),
+                SingleActivator(LogicalKeyboardKey.keyA, control: true): SelectAllTextIntent(_kKeyboardSelectionCause),
+              },
+              child: EditableText(
+                controller: _controller,
+                focusNode: _focusNode,
+                style: effectiveStyle,
+                cursorColor: AppColors.primary,
+                backgroundCursorColor: AppColors.surfaceVariant,
+                maxLines: widget.maxLines,
+                minLines: widget.minLines,
+                autofocus: widget.autofocus,
+                textAlign: widget.textAlign,
+                keyboardType: widget.keyboardType,
+                onSubmitted: widget.onSubmitted,
+              ),
             ),
           ],
         ),

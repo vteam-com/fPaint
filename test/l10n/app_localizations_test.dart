@@ -9,7 +9,6 @@ import 'package:fpaint/l10n/app_localizations.dart';
 void _exerciseAllStrings(final AppLocalizations l10n) {
   // Simple getters ---------------------------------------------------------
   expect(l10n.about, isNotEmpty);
-  expect(l10n.activeTool, isNotEmpty);
   expect(l10n.addText, isNotEmpty);
   expect(l10n.addAsNewLayer, isNotEmpty);
   expect(l10n.apply, isNotEmpty);
@@ -64,7 +63,6 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.effectPixelate, isNotEmpty);
   expect(l10n.effectSharpen, isNotEmpty);
   expect(l10n.effectSoften, isNotEmpty);
-  expect(l10n.effectIntensity, isNotEmpty);
   expect(l10n.effectVignette, isNotEmpty);
   expect(l10n.effects, isNotEmpty);
   expect(l10n.enterYourTextHere, isNotEmpty);
@@ -75,6 +73,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.fpaintLoadImage, isNotEmpty);
   expect(l10n.githubRepo, isNotEmpty);
   expect(l10n.gradientPointColor, isNotEmpty);
+  expect(l10n.gradientStopPosition, isNotEmpty);
   expect(l10n.height, isNotEmpty);
   expect(l10n.hexColor, isNotEmpty);
   expect(l10n.hexColorCopiedToClipboard, isNotEmpty);
@@ -102,10 +101,6 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.flipVerticalTooltip, isNotEmpty);
   expect(l10n.rotateCanvasTooltip, isNotEmpty);
   expect(l10n.runOnMostBrowsers, isNotEmpty);
-  expect(l10n.restoreRecoveryDraft, isNotEmpty);
-  expect(l10n.discardRecoveryDraft, isNotEmpty);
-  expect(l10n.restoreRecoveryDraftTitle, isNotEmpty);
-  expect(l10n.restoreRecoveryDraftMessage, isNotEmpty);
   expect(l10n.saveLabel, isNotEmpty);
   expect(l10n.scale, isNotEmpty);
   expect(l10n.selectionIsHidden, isNotEmpty);
@@ -174,7 +169,6 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.failedToLoadImage('err'), isNotEmpty);
   expect(l10n.fileFormatNotSupported('bmp'), isNotEmpty);
   expect(l10n.fileFormatNotSupportedOnPlatform('bmp'), isNotEmpty);
-  expect(l10n.fontSizeValue('12'), isNotEmpty);
   expect(l10n.percentageValue('50'), isNotEmpty);
   expect(l10n.saveAsFile('image.PNG'), isNotEmpty);
   expect(l10n.savedMessage('image.png'), isNotEmpty);

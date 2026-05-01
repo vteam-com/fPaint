@@ -38,9 +38,11 @@ This document lists the features currently available in fPaint.
 
 ## Fill Modes and Color Workflows
 
-- Solid fill
-- Linear gradient fill
-- Radial gradient fill
+- Solid fill with a single color
+- Linear gradient fill with 2 or more color stops
+- Radial gradient fill with 2 or more color stops
+- Side-panel gradient color list editor: add, remove (minimum 2), and reorder color stops
+- Long-press on a canvas gradient handle to change its color directly on the canvas
 - Color picker workflows, including eyedropper support
 - Palette/color panel workflows for brush, fill, and text colors
 

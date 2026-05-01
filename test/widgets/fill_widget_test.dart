@@ -58,6 +58,27 @@ void main() {
       expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}1')), findsOneWidget);
     });
 
+    testWidgets('renders all gradient stop handles when there are inner colors', (final WidgetTester tester) async {
+      final FillModel model = _createLinearFillModel();
+      model.gradientStopColors = <Color>[
+        Colors.red,
+        Colors.green,
+        Colors.blue,
+      ];
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          fillModel: model,
+          onUpdate: (final GradientPoint _) {},
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}0')), findsOneWidget);
+      expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}1')), findsOneWidget);
+      expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}2')), findsOneWidget);
+    });
+
     testWidgets('renders radial gradient with handles', (final WidgetTester tester) async {
       final FillModel model = _createRadialFillModel();
 

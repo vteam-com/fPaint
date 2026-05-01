@@ -42,14 +42,18 @@ extension AppProviderTools on AppProvider {
 
   /// Appends a line from the last user action.
   void appendLineFromLastUserAction(final Offset positionEndOfNewLine) {
+    final UserActionDrawing? last = layers.selectedLayer.lastUserAction;
+    if (last == null || last.positions.isEmpty) {
+      return;
+    }
     recordExecuteDrawingActionToSelectedLayer(
       action: UserActionDrawing(
         positions: <ui.Offset>[
-          layers.selectedLayer.lastUserAction!.positions.last,
+          last.positions.last,
           positionEndOfNewLine,
         ],
-        action: layers.selectedLayer.lastUserAction!.action,
-        brush: layers.selectedLayer.lastUserAction!.brush,
+        action: last.action,
+        brush: last.brush,
         clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
       ),
     );

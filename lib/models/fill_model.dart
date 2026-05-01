@@ -41,6 +41,34 @@ class FillModel extends VisibleModel {
 
   List<GradientPoint> gradientPoints = <GradientPoint>[];
 
+  /// The ordered list of color stops for the gradient (minimum 2).
+  ///
+  /// This is the authoritative color list used for rendering and the side-panel
+  /// editor.  The first entry corresponds to the start handle color and the
+  /// last entry corresponds to the end/outer handle color.  Intermediate entries
+  /// produce additional color stops that are distributed evenly between the two
+  /// handles.
+  List<Color> gradientStopColors = <Color>[
+    gradientStopDefaultStart,
+    gradientStopDefaultEnd,
+  ];
+
+  /// Default start color used when no gradient has been applied yet.
+  static const Color gradientStopDefaultStart = Color(0xFF4FC3F7); // light blue
+
+  /// Default end color used when no gradient has been applied yet.
+  static const Color gradientStopDefaultEnd = Color(0xFF0D47A1); // dark blue
+
+  /// The ordered list of stop positions for the gradient (values 0.0–1.0).
+  ///
+  /// Must have the same length as [gradientStopColors].  The first value is
+  /// always `0.0` and the last is always `1.0`.  Inner values must be strictly
+  /// between the surrounding values so the gradient always renders correctly.
+  List<double> gradientStopPositions = <double>[0.0, 1.0];
+
+  /// Minimum number of color stops for a gradient.
+  static const int gradientStopMin = 2;
+
   /// Clears the gradient points and hides the fill.
   @override
   void clear() {

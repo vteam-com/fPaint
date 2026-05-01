@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About...';
 
   @override
-  String get activeTool => 'Active tool';
+  String get addAsNewLayer => 'Add as new layer';
 
   @override
   String get addText => 'Add Text';
@@ -82,7 +82,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'Softens the contrast by darkening or lightening the destination depending on the source.';
 
   @override
+  String get browseFiles => 'Browse Files...';
+
+  @override
   String get brush => 'Brush';
+
+  @override
+  String get brushColor => 'Brush Color';
+
+  @override
+  String get brushSize => 'Brush Size';
 
   @override
   String get brushStyle => 'Brush Style';
@@ -132,9 +141,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copyToClipboard => 'Copy to clipboard';
 
   @override
-  String get duplicate => 'Duplicate';
-
-  @override
   String get create => 'Create';
 
   @override
@@ -168,6 +174,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discardCurrentDocumentQuestion => 'Discard current document?';
 
   @override
+  String downloadAsFile(Object fileName) {
+    return 'Download as $fileName';
+  }
+
+  @override
   String get dropFileAddLayer => 'Add as New Layer';
 
   @override
@@ -180,9 +191,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dropFileTitle => 'File Dropped';
 
   @override
-  String downloadAsFile(Object fileName) {
-    return 'Download as $fileName';
-  }
+  String get duplicate => 'Duplicate';
 
   @override
   String get editText => 'Edit Text';
@@ -203,13 +212,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get effectHueSaturation => 'Hue Shift';
 
   @override
-  String get effectIntensity => 'Intensity';
-
-  @override
   String get effectNoise => 'Noise';
 
   @override
   String get effectPixelate => 'Pixelate';
+
+  @override
+  String get effects => 'Effects';
 
   @override
   String get effectShadow => 'Shadow';
@@ -222,9 +231,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get effectVignette => 'Vignette';
-
-  @override
-  String get effects => 'Effects';
 
   @override
   String get enterYourTextHere => 'Enter your text here...';
@@ -261,21 +267,37 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get fillColor => 'Fill Color';
+
+  @override
+  String get flipHorizontalTooltip => 'Flip Horizontal';
+
+  @override
+  String get flipVerticalTooltip => 'Flip Vertical';
+
+  @override
   String get fontColor => 'Font Color';
 
   @override
   String get fontSizeLabel => 'Font Size';
 
   @override
-  String fontSizeValue(Object value) {
-    return 'Font Size: $value';
-  }
-
-  @override
   String get fpaintLoadImage => 'fPaint Load Image';
 
   @override
   String get githubRepo => 'GitHub Repo';
+
+  @override
+  String get gradientColorAdd => 'Add color stop';
+
+  @override
+  String get gradientColorRemove => 'Remove color stop';
+
+  @override
+  String get gradientColors => 'Gradient Colors';
+
+  @override
+  String get gradientStopPosition => 'Position';
 
   @override
   String get gradientPointColor => 'Gradient Point Color';
@@ -294,15 +316,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importTooltip => 'Import...';
-
-  @override
-  String get addAsNewLayer => 'Add as new layer';
-
-  @override
-  String get browseFiles => 'Browse Files...';
-
-  @override
-  String get recentFilesLabel => 'Recent';
 
   @override
   String get invalidImageSizeDimensionsMustBeNumbers => 'Invalid image size: Dimensions must be numbers.';
@@ -332,6 +345,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageSystem => 'System default';
 
   @override
+  String get layerAdd => 'Add Layer';
+
+  @override
+  String get layerAddAbove => 'Add a layer above';
+
+  @override
+  String get layerBackgroundColor => 'Background Color';
+
+  @override
+  String get layerBlend => 'Blend: ';
+
+  @override
+  String get layerBlendMode => 'Blend Mode';
+
+  @override
+  String get layerChangeBlendMode => 'Change Blend Mode';
+
+  @override
+  String get layerDelete => 'Delete this layer';
+
+  @override
+  String get layerHidden => 'Hidden';
+
+  @override
+  String get layerHide => 'Hide layer';
+
+  @override
+  String get layerHideAllOthers => 'Hide all other layers';
+
+  @override
+  String get layerMergeBelow => 'Merge to below layer';
+
+  @override
+  String get layerNameTitle => 'Layer Name';
+
+  @override
+  String get layerOpacity => 'Opacity: ';
+
+  @override
+  String get layerRename => 'Rename layer';
+
+  @override
+  String get layerShow => 'Show layer';
+
+  @override
+  String get layerShowAll => 'Show all layers';
+
+  @override
+  String get layerToggleVisibility => 'Hide/Show this layer';
+
+  @override
   String get menuTooltip => 'Menu';
 
   @override
@@ -350,6 +414,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paste => 'Paste';
 
   @override
+  String get pencilSize => 'Pencil Size';
+
+  @override
   String percentageValue(Object value) {
     return '$value%';
   }
@@ -358,13 +425,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get platforms => 'Available on...';
 
   @override
+  String get recentFilesLabel => 'Recent';
+
+  @override
   String get resizeRotate => 'Resize / Rotate';
-
-  @override
-  String get flipHorizontalTooltip => 'Flip Horizontal';
-
-  @override
-  String get flipVerticalTooltip => 'Flip Vertical';
 
   @override
   String get rotateCanvasTooltip => 'Rotate Canvas 90° CW';
@@ -381,19 +445,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String savedMessage(Object fileName) {
     return 'Saved $fileName';
   }
-
-  @override
-  String get restoreRecoveryDraft => 'Restore';
-
-  @override
-  String get discardRecoveryDraft => 'Discard';
-
-  @override
-  String get restoreRecoveryDraftTitle => 'Restore unsaved work?';
-
-  @override
-  String get restoreRecoveryDraftMessage =>
-      'fPaint found a recovery draft from your last session. Restore it now or discard it.';
 
   @override
   String get saveLabel => 'Save';
@@ -425,6 +476,66 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tolerance => 'Tolerance';
 
   @override
+  String get toolAdd => 'Add';
+
+  @override
+  String get toolBrush => 'Brush';
+
+  @override
+  String get toolCircle => 'Circle';
+
+  @override
+  String get toolCrop => 'Crop';
+
+  @override
+  String get toolEraser => 'Eraser';
+
+  @override
+  String get toolFill => 'Fill';
+
+  @override
+  String get toolInvert => 'Invert';
+
+  @override
+  String get toolLasso => 'Lasso';
+
+  @override
+  String get toolLine => 'Line';
+
+  @override
+  String get toolLinearGradient => 'Linear Gradient';
+
+  @override
+  String get toolMagic => 'Magic';
+
+  @override
+  String get toolPaintBucket => 'Paint Bucket';
+
+  @override
+  String get toolPencil => 'Pencil';
+
+  @override
+  String get toolRadialGradient => 'Radial Gradient';
+
+  @override
+  String get toolRectangle => 'Rectangle';
+
+  @override
+  String get toolRemove => 'Remove';
+
+  @override
+  String get toolReplace => 'Replace';
+
+  @override
+  String get toolSelector => 'Selector';
+
+  @override
+  String get toolSolid => 'Solid';
+
+  @override
+  String get toolText => 'Text';
+
+  @override
   String topColors(Object count) {
     return 'Top $count colors';
   }
@@ -450,127 +561,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get width => 'Width';
-
-  @override
-  String get toolPencil => 'Pencil';
-
-  @override
-  String get toolBrush => 'Brush';
-
-  @override
-  String get toolLine => 'Line';
-
-  @override
-  String get toolRectangle => 'Rectangle';
-
-  @override
-  String get toolCircle => 'Circle';
-
-  @override
-  String get toolPaintBucket => 'Paint Bucket';
-
-  @override
-  String get toolEraser => 'Eraser';
-
-  @override
-  String get toolText => 'Text';
-
-  @override
-  String get toolSelector => 'Selector';
-
-  @override
-  String get toolFill => 'Fill';
-
-  @override
-  String get toolSolid => 'Solid';
-
-  @override
-  String get toolLinearGradient => 'Linear Gradient';
-
-  @override
-  String get toolRadialGradient => 'Radial Gradient';
-
-  @override
-  String get toolLasso => 'Lasso';
-
-  @override
-  String get toolMagic => 'Magic';
-
-  @override
-  String get toolReplace => 'Replace';
-
-  @override
-  String get toolAdd => 'Add';
-
-  @override
-  String get toolRemove => 'Remove';
-
-  @override
-  String get toolInvert => 'Invert';
-
-  @override
-  String get toolCrop => 'Crop';
-
-  @override
-  String get brushColor => 'Brush Color';
-
-  @override
-  String get fillColor => 'Fill Color';
-
-  @override
-  String get pencilSize => 'Pencil Size';
-
-  @override
-  String get brushSize => 'Brush Size';
-
-  @override
-  String get layerHidden => 'Hidden';
-
-  @override
-  String get layerOpacity => 'Opacity: ';
-
-  @override
-  String get layerBlend => 'Blend: ';
-
-  @override
-  String get layerNameTitle => 'Layer Name';
-
-  @override
-  String get layerAddAbove => 'Add a layer above';
-
-  @override
-  String get layerDelete => 'Delete this layer';
-
-  @override
-  String get layerMergeBelow => 'Merge to below layer';
-
-  @override
-  String get layerBlendMode => 'Blend Mode';
-
-  @override
-  String get layerBackgroundColor => 'Background Color';
-
-  @override
-  String get layerToggleVisibility => 'Hide/Show this layer';
-
-  @override
-  String get layerRename => 'Rename layer';
-
-  @override
-  String get layerChangeBlendMode => 'Change Blend Mode';
-
-  @override
-  String get layerHideAllOthers => 'Hide all other layers';
-
-  @override
-  String get layerShowAll => 'Show all layers';
-
-  @override
-  String get layerHide => 'Hide layer';
-
-  @override
-  String get layerShow => 'Show layer';
-
-  @override
-  String get layerAdd => 'Add Layer';
 }

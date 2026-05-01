@@ -20,6 +20,7 @@ import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/effect_intensity_controls.dart';
+import 'package:fpaint/widgets/gradient_color_list_editor.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
@@ -309,7 +310,13 @@ class ToolsPanel extends StatelessWidget {
             ),
           ),
         );
-        addToolOptionColor(widgets, appProvider, context, false);
+        // For solid mode show a single fill-color picker.
+        // For gradient modes show the multi-stop color list editor.
+        if (appProvider.fillModel.mode == FillMode.solid) {
+          addToolOptionColor(widgets, appProvider, context, false);
+        } else {
+          _addGradientColorEditor(widgets, appProvider, context);
+        }
         widgets.add(addToolOptionTolerance(context, appProvider));
         addToolOptionTopColors(widgets, layers, appProvider, minimal);
         break;
@@ -612,6 +619,48 @@ class ToolsPanel extends StatelessWidget {
     }
 
     return widgets;
+  }
+
+  /// Adds the gradient color list editor for linear/radial fill modes.
+  void _addGradientColorEditor(
+    final List<Widget> widgets,
+    final AppProvider appProvider,
+    final BuildContext context,
+  ) {
+    final AppLocalizations l10n = context.l10n;
+    widgets.add(
+      ToolAttributeWidget(
+        compact: minimal,
+        name: l10n.gradientColors,
+        childLeft: minimal
+            ? colorPreviewWithTransparentPaper(
+                key: Keys.toolPanelFillColor,
+                minimal: minimal,
+                color: appProvider.fillModel.gradientStopColors.first,
+                onPressed: () {
+                  showColorPicker(
+                    context: context,
+                    title: l10n.gradientColors,
+                    color: appProvider.fillModel.gradientStopColors.first,
+                    onSelectedColor: (final Color picked) {
+                      appProvider.fillModel.gradientStopColors[0] = picked;
+                      if (appProvider.fillModel.gradientPoints.isNotEmpty) {
+                        appProvider.fillModel.gradientPoints.first.color = picked;
+                      }
+                      appProvider.updateGradientFill();
+                    },
+                  );
+                },
+              )
+            : null,
+        childRight: minimal
+            ? null
+            : GradientColorListEditor(
+                fillModel: appProvider.fillModel,
+                onChanged: appProvider.updateGradientFill,
+              ),
+      ),
+    );
   }
 
   /// Adds a color-related tool option row with preview, picker, and selector.
