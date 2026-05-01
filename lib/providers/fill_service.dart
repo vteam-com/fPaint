@@ -83,12 +83,18 @@ class FillService {
     }
 
     final Gradient gradient;
+    // Use the authoritative gradient stop colors and positions from the model.
+    // Both lists may have more than two entries for multi-stop gradients.
+    final List<Color> gradientColors = fillModel.gradientStopColors;
+    final List<double> gradientStops = fillModel.gradientStopPositions;
+
     if (fillModel.mode == FillMode.radial) {
       // For radial gradients, the center is the location of the first gradient handle
       final ui.Offset centerPoint = toCanvas(fillModel.gradientPoints.first.offset);
 
       gradient = RadialGradient(
-        colors: fillModel.gradientPoints.map((final GradientPoint point) => point.color).toList(),
+        colors: gradientColors,
+        stops: gradientStops,
         center: Alignment(
           ((centerPoint.dx - bounds.left) / bounds.width) * AppMath.pair - 1,
           ((centerPoint.dy - bounds.top) / bounds.height) * AppMath.pair - 1,
@@ -97,7 +103,8 @@ class FillService {
       );
     } else {
       gradient = LinearGradient(
-        colors: fillModel.gradientPoints.map((final GradientPoint point) => point.color).toList(),
+        colors: gradientColors,
+        stops: gradientStops,
         begin: Alignment(
           (toCanvas(fillModel.gradientPoints.first.offset).dx / bounds.width) * AppMath.pair - 1,
           (toCanvas(fillModel.gradientPoints.first.offset).dy / bounds.height) * AppMath.pair - 1,

@@ -59,13 +59,24 @@ class _FillWidgetState extends State<FillWidget> {
       );
     }
 
-    for (int handleIndex = 0; handleIndex < widget.fillModel.gradientPoints.length; handleIndex++) {
-      final GradientPoint gp = widget.fillModel.gradientPoints[handleIndex];
+    final int stopCount = widget.fillModel.gradientStopColors.length;
+    for (int stopIndex = 0; stopIndex < stopCount; stopIndex++) {
+      final bool isStartHandle = stopIndex == 0;
+      final bool isEndHandle = stopIndex == stopCount - 1;
+      final bool isEndpointHandle = isStartHandle || isEndHandle;
+      final GradientPoint? draggablePoint = isStartHandle
+          ? widget.fillModel.gradientPoints.first
+          : (isEndHandle ? widget.fillModel.gradientPoints.last : null);
+
       stackChildren.add(
         _builFillKnob(
-          key: Key('${Keys.gradientHandleKeyPrefixText}$handleIndex'),
+          key: Key('${Keys.gradientHandleKeyPrefixText}$stopIndex'),
           context: context,
-          point: gp,
+          handleIndex: stopIndex,
+          handleCount: stopCount,
+          color: widget.fillModel.gradientStopColors[stopIndex],
+          point: draggablePoint,
+          canDragEndpoint: isEndpointHandle,
         ),
       );
     }
@@ -102,22 +113,40 @@ class _FillWidgetState extends State<FillWidget> {
   Widget _builFillKnob({
     required final Key key,
     required final BuildContext context,
-    required final GradientPoint point,
+    required final Color color,
+    required final int handleIndex,
+    required final int handleCount,
+    required final GradientPoint? point,
+    required final bool canDragEndpoint,
   }) {
     final int handleSize = (showDetails ? (defaultHandleSize * AppVisual.previewTextScale) : defaultHandleSize).toInt();
+    final Offset handleOffset = _handleOffsetForStop(
+      stopIndex: handleIndex,
+      stopCount: handleCount,
+    );
+    final bool isInnerHandle = handleIndex > 0 && handleIndex < handleCount - 1;
 
     return Positioned(
-      left: point.offset.dx - (handleSize / AppMath.pair),
-      top: point.offset.dy - (handleSize / AppMath.pair),
+      left: handleOffset.dx - (handleSize / AppMath.pair),
+      top: handleOffset.dy - (handleSize / AppMath.pair),
       child: GestureDetector(
         key: key,
-        onPanUpdate: (final DragUpdateDetails details) {
-          setState(() {
-            showDetails = true;
-            point.offset += details.delta;
-            widget.onUpdate(point);
-          });
-        },
+        onPanUpdate: canDragEndpoint
+            ? (final DragUpdateDetails details) {
+                setState(() {
+                  showDetails = true;
+                  point!.offset += details.delta;
+                  widget.onUpdate(point);
+                });
+              }
+            : isInnerHandle
+            ? (final DragUpdateDetails details) {
+                _moveInnerHandleByDelta(
+                  stopIndex: handleIndex,
+                  delta: details.delta,
+                );
+              }
+            : null,
         onPanEnd: (final DragEndDetails _) => setState(() => showDetails = false),
         onTapDown: (final TapDownDetails _) {
           setState(() {
@@ -140,22 +169,35 @@ class _FillWidgetState extends State<FillWidget> {
           showColorPicker(
             context: context,
             title: l10n.gradientPointColor,
-            color: point.color,
-            onSelectedColor: (final Color color) {
+            color: color,
+            onSelectedColor: (final Color selectedColor) {
               setState(() {
-                point.color = color;
-                widget.onUpdate(point);
+                // Sync the changed color back into gradientStopColors so the
+                // side-panel editor reflects the pick made on the canvas handle.
+                final List<Color> stops = widget.fillModel.gradientStopColors;
+                if (stops.isNotEmpty) {
+                  stops[handleIndex] = selectedColor;
+                }
+
+                // Keep endpoint handle colors in sync with the first/last stop
+                // so dragging handles still displays the selected colors.
+                if (canDragEndpoint && point != null) {
+                  point.color = selectedColor;
+                  widget.onUpdate(point);
+                } else if (widget.fillModel.gradientPoints.isNotEmpty) {
+                  widget.onUpdate(widget.fillModel.gradientPoints.first);
+                }
               });
             },
           );
         },
         child: MouseRegion(
-          cursor: SystemMouseCursors.move,
+          cursor: canDragEndpoint || isInnerHandle ? SystemMouseCursors.move : SystemMouseCursors.click,
           child: Container(
             width: handleSize.toDouble(),
             height: handleSize.toDouble(),
             decoration: BoxDecoration(
-              color: point.color,
+              color: color,
               border: Border.all(color: AppPalette.white, width: AppStroke.thin),
               borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
@@ -169,5 +211,71 @@ class _FillWidgetState extends State<FillWidget> {
         ),
       ),
     );
+  }
+
+  /// Computes the on-canvas position for a color-stop handle.
+  ///
+  /// For both linear and radial gradients, inner handles are placed according
+  /// to [FillModel.gradientStopPositions].
+  Offset _handleOffsetForStop({
+    required final int stopIndex,
+    required final int stopCount,
+  }) {
+    if (widget.fillModel.gradientPoints.length < AppMath.pair) {
+      return Offset.zero;
+    }
+
+    final Offset startOffset = widget.fillModel.gradientPoints.first.offset;
+    final Offset endOffset = widget.fillModel.gradientPoints.last.offset;
+
+    if (stopIndex == 0) {
+      return startOffset;
+    }
+
+    if (stopIndex == stopCount - 1) {
+      return endOffset;
+    }
+
+    final List<double> positions = widget.fillModel.gradientStopPositions;
+    final double ratio = stopIndex < positions.length
+        ? positions[stopIndex].clamp(AppMath.zero.toDouble(), AppVisual.full)
+        : stopIndex / (stopCount - 1);
+    return Offset.lerp(startOffset, endOffset, ratio) ?? startOffset;
+  }
+
+  /// Moves an inner stop by projecting [delta] onto the gradient axis.
+  void _moveInnerHandleByDelta({
+    required final int stopIndex,
+    required final Offset delta,
+  }) {
+    if (widget.fillModel.gradientPoints.length < AppMath.pair) {
+      return;
+    }
+    final List<double> positions = widget.fillModel.gradientStopPositions;
+    if (stopIndex <= 0 || stopIndex >= positions.length - 1) {
+      return;
+    }
+
+    final Offset startOffset = widget.fillModel.gradientPoints.first.offset;
+    final Offset endOffset = widget.fillModel.gradientPoints.last.offset;
+    final Offset axis = endOffset - startOffset;
+    final double axisLenSquared = (axis.dx * axis.dx) + (axis.dy * axis.dy);
+    if (axisLenSquared <= 0) {
+      return;
+    }
+
+    final double deltaProjected = ((delta.dx * axis.dx) + (delta.dy * axis.dy)) / axisLenSquared;
+    final double lowerBound = positions[stopIndex - 1];
+    final double upperBound = positions[stopIndex + 1];
+
+    setState(() {
+      showDetails = true;
+      final double next = positions[stopIndex] + deltaProjected;
+      positions[stopIndex] = next.clamp(lowerBound, upperBound);
+      positions[0] = AppMath.zero.toDouble();
+      positions[positions.length - 1] = AppVisual.full;
+    });
+
+    widget.onUpdate(widget.fillModel.gradientPoints.first);
   }
 }

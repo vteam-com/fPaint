@@ -82,13 +82,16 @@ abstract class AppLocalizations {
   /// delegates.
   ///
   /// Returns a list of localizations delegates containing this delegate along with
-  /// GlobalWidgetsLocalizations.delegate.
+  /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
+  /// and GlobalWidgetsLocalizations.delegate.
   ///
   /// Additional delegates can be added by appending to this list in
-  /// WidgetsApp. This list does not have to be used at all if a custom list
+  /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
   ];
 
@@ -101,11 +104,11 @@ abstract class AppLocalizations {
   /// **'About...'**
   String get about;
 
-  /// No description provided for @activeTool.
+  /// No description provided for @addAsNewLayer.
   ///
   /// In en, this message translates to:
-  /// **'Active tool'**
-  String get activeTool;
+  /// **'Add as new layer'**
+  String get addAsNewLayer;
 
   /// No description provided for @addText.
   ///
@@ -221,11 +224,29 @@ abstract class AppLocalizations {
   /// **'Softens the contrast by darkening or lightening the destination depending on the source.'**
   String get blendModeSoftLightDescription;
 
+  /// No description provided for @browseFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse Files...'**
+  String get browseFiles;
+
   /// No description provided for @brush.
   ///
   /// In en, this message translates to:
   /// **'Brush'**
   String get brush;
+
+  /// No description provided for @brushColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Brush Color'**
+  String get brushColor;
+
+  /// No description provided for @brushSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Brush Size'**
+  String get brushSize;
 
   /// No description provided for @brushStyle.
   ///
@@ -317,12 +338,6 @@ abstract class AppLocalizations {
   /// **'Copy to clipboard'**
   String get copyToClipboard;
 
-  /// No description provided for @duplicate.
-  ///
-  /// In en, this message translates to:
-  /// **'Duplicate'**
-  String get duplicate;
-
   /// No description provided for @create.
   ///
   /// In en, this message translates to:
@@ -377,6 +392,12 @@ abstract class AppLocalizations {
   /// **'Discard current document?'**
   String get discardCurrentDocumentQuestion;
 
+  /// No description provided for @downloadAsFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Download as {fileName}'**
+  String downloadAsFile(Object fileName);
+
   /// No description provided for @dropFileAddLayer.
   ///
   /// In en, this message translates to:
@@ -401,11 +422,11 @@ abstract class AppLocalizations {
   /// **'File Dropped'**
   String get dropFileTitle;
 
-  /// No description provided for @downloadAsFile.
+  /// No description provided for @duplicate.
   ///
   /// In en, this message translates to:
-  /// **'Download as {fileName}'**
-  String downloadAsFile(Object fileName);
+  /// **'Duplicate'**
+  String get duplicate;
 
   /// No description provided for @editText.
   ///
@@ -443,12 +464,6 @@ abstract class AppLocalizations {
   /// **'Hue Shift'**
   String get effectHueSaturation;
 
-  /// No description provided for @effectIntensity.
-  ///
-  /// In en, this message translates to:
-  /// **'Intensity'**
-  String get effectIntensity;
-
   /// No description provided for @effectNoise.
   ///
   /// In en, this message translates to:
@@ -460,6 +475,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pixelate'**
   String get effectPixelate;
+
+  /// No description provided for @effects.
+  ///
+  /// In en, this message translates to:
+  /// **'Effects'**
+  String get effects;
 
   /// No description provided for @effectShadow.
   ///
@@ -484,12 +505,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vignette'**
   String get effectVignette;
-
-  /// No description provided for @effects.
-  ///
-  /// In en, this message translates to:
-  /// **'Effects'**
-  String get effects;
 
   /// No description provided for @enterYourTextHere.
   ///
@@ -539,6 +554,24 @@ abstract class AppLocalizations {
   /// **'File format .{extension} is not supported on this platform'**
   String fileFormatNotSupportedOnPlatform(Object extension);
 
+  /// No description provided for @fillColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill Color'**
+  String get fillColor;
+
+  /// No description provided for @flipHorizontalTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Flip Horizontal'**
+  String get flipHorizontalTooltip;
+
+  /// No description provided for @flipVerticalTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Flip Vertical'**
+  String get flipVerticalTooltip;
+
   /// No description provided for @fontColor.
   ///
   /// In en, this message translates to:
@@ -551,12 +584,6 @@ abstract class AppLocalizations {
   /// **'Font Size'**
   String get fontSizeLabel;
 
-  /// No description provided for @fontSizeValue.
-  ///
-  /// In en, this message translates to:
-  /// **'Font Size: {value}'**
-  String fontSizeValue(Object value);
-
   /// No description provided for @fpaintLoadImage.
   ///
   /// In en, this message translates to:
@@ -568,6 +595,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'GitHub Repo'**
   String get githubRepo;
+
+  /// No description provided for @gradientColorAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add color stop'**
+  String get gradientColorAdd;
+
+  /// No description provided for @gradientColorRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove color stop'**
+  String get gradientColorRemove;
+
+  /// No description provided for @gradientColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Gradient Colors'**
+  String get gradientColors;
+
+  /// No description provided for @gradientStopPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get gradientStopPosition;
 
   /// No description provided for @gradientPointColor.
   ///
@@ -604,24 +655,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import...'**
   String get importTooltip;
-
-  /// No description provided for @addAsNewLayer.
-  ///
-  /// In en, this message translates to:
-  /// **'Add as new layer'**
-  String get addAsNewLayer;
-
-  /// No description provided for @browseFiles.
-  ///
-  /// In en, this message translates to:
-  /// **'Browse Files...'**
-  String get browseFiles;
-
-  /// No description provided for @recentFilesLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent'**
-  String get recentFilesLabel;
 
   /// No description provided for @invalidImageSizeDimensionsMustBeNumbers.
   ///
@@ -677,6 +710,108 @@ abstract class AppLocalizations {
   /// **'System default'**
   String get languageSystem;
 
+  /// No description provided for @layerAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Layer'**
+  String get layerAdd;
+
+  /// No description provided for @layerAddAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a layer above'**
+  String get layerAddAbove;
+
+  /// No description provided for @layerBackgroundColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Background Color'**
+  String get layerBackgroundColor;
+
+  /// No description provided for @layerBlend.
+  ///
+  /// In en, this message translates to:
+  /// **'Blend: '**
+  String get layerBlend;
+
+  /// No description provided for @layerBlendMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Blend Mode'**
+  String get layerBlendMode;
+
+  /// No description provided for @layerChangeBlendMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Blend Mode'**
+  String get layerChangeBlendMode;
+
+  /// No description provided for @layerDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this layer'**
+  String get layerDelete;
+
+  /// No description provided for @layerHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get layerHidden;
+
+  /// No description provided for @layerHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide layer'**
+  String get layerHide;
+
+  /// No description provided for @layerHideAllOthers.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide all other layers'**
+  String get layerHideAllOthers;
+
+  /// No description provided for @layerMergeBelow.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge to below layer'**
+  String get layerMergeBelow;
+
+  /// No description provided for @layerNameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Layer Name'**
+  String get layerNameTitle;
+
+  /// No description provided for @layerOpacity.
+  ///
+  /// In en, this message translates to:
+  /// **'Opacity: '**
+  String get layerOpacity;
+
+  /// No description provided for @layerRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename layer'**
+  String get layerRename;
+
+  /// No description provided for @layerShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show layer'**
+  String get layerShow;
+
+  /// No description provided for @layerShowAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all layers'**
+  String get layerShowAll;
+
+  /// No description provided for @layerToggleVisibility.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide/Show this layer'**
+  String get layerToggleVisibility;
+
   /// No description provided for @menuTooltip.
   ///
   /// In en, this message translates to:
@@ -713,6 +848,12 @@ abstract class AppLocalizations {
   /// **'Paste'**
   String get paste;
 
+  /// No description provided for @pencilSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Pencil Size'**
+  String get pencilSize;
+
   /// No description provided for @percentageValue.
   ///
   /// In en, this message translates to:
@@ -725,23 +866,17 @@ abstract class AppLocalizations {
   /// **'Available on...'**
   String get platforms;
 
+  /// No description provided for @recentFilesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get recentFilesLabel;
+
   /// No description provided for @resizeRotate.
   ///
   /// In en, this message translates to:
   /// **'Resize / Rotate'**
   String get resizeRotate;
-
-  /// No description provided for @flipHorizontalTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Flip Horizontal'**
-  String get flipHorizontalTooltip;
-
-  /// No description provided for @flipVerticalTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Flip Vertical'**
-  String get flipVerticalTooltip;
 
   /// No description provided for @rotateCanvasTooltip.
   ///
@@ -766,30 +901,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved {fileName}'**
   String savedMessage(Object fileName);
-
-  /// No description provided for @restoreRecoveryDraft.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore'**
-  String get restoreRecoveryDraft;
-
-  /// No description provided for @discardRecoveryDraft.
-  ///
-  /// In en, this message translates to:
-  /// **'Discard'**
-  String get discardRecoveryDraft;
-
-  /// No description provided for @restoreRecoveryDraftTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore unsaved work?'**
-  String get restoreRecoveryDraftTitle;
-
-  /// No description provided for @restoreRecoveryDraftMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'fPaint found a recovery draft from your last session. Restore it now or discard it.'**
-  String get restoreRecoveryDraftMessage;
 
   /// No description provided for @saveLabel.
   ///
@@ -845,6 +956,126 @@ abstract class AppLocalizations {
   /// **'Tolerance'**
   String get tolerance;
 
+  /// No description provided for @toolAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get toolAdd;
+
+  /// No description provided for @toolBrush.
+  ///
+  /// In en, this message translates to:
+  /// **'Brush'**
+  String get toolBrush;
+
+  /// No description provided for @toolCircle.
+  ///
+  /// In en, this message translates to:
+  /// **'Circle'**
+  String get toolCircle;
+
+  /// No description provided for @toolCrop.
+  ///
+  /// In en, this message translates to:
+  /// **'Crop'**
+  String get toolCrop;
+
+  /// No description provided for @toolEraser.
+  ///
+  /// In en, this message translates to:
+  /// **'Eraser'**
+  String get toolEraser;
+
+  /// No description provided for @toolFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill'**
+  String get toolFill;
+
+  /// No description provided for @toolInvert.
+  ///
+  /// In en, this message translates to:
+  /// **'Invert'**
+  String get toolInvert;
+
+  /// No description provided for @toolLasso.
+  ///
+  /// In en, this message translates to:
+  /// **'Lasso'**
+  String get toolLasso;
+
+  /// No description provided for @toolLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Line'**
+  String get toolLine;
+
+  /// No description provided for @toolLinearGradient.
+  ///
+  /// In en, this message translates to:
+  /// **'Linear Gradient'**
+  String get toolLinearGradient;
+
+  /// No description provided for @toolMagic.
+  ///
+  /// In en, this message translates to:
+  /// **'Magic'**
+  String get toolMagic;
+
+  /// No description provided for @toolPaintBucket.
+  ///
+  /// In en, this message translates to:
+  /// **'Paint Bucket'**
+  String get toolPaintBucket;
+
+  /// No description provided for @toolPencil.
+  ///
+  /// In en, this message translates to:
+  /// **'Pencil'**
+  String get toolPencil;
+
+  /// No description provided for @toolRadialGradient.
+  ///
+  /// In en, this message translates to:
+  /// **'Radial Gradient'**
+  String get toolRadialGradient;
+
+  /// No description provided for @toolRectangle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rectangle'**
+  String get toolRectangle;
+
+  /// No description provided for @toolRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get toolRemove;
+
+  /// No description provided for @toolReplace.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace'**
+  String get toolReplace;
+
+  /// No description provided for @toolSelector.
+  ///
+  /// In en, this message translates to:
+  /// **'Selector'**
+  String get toolSelector;
+
+  /// No description provided for @toolSolid.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid'**
+  String get toolSolid;
+
+  /// No description provided for @toolText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get toolText;
+
   /// No description provided for @topColors.
   ///
   /// In en, this message translates to:
@@ -892,252 +1123,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Width'**
   String get width;
-
-  /// No description provided for @toolPencil.
-  ///
-  /// In en, this message translates to:
-  /// **'Pencil'**
-  String get toolPencil;
-
-  /// No description provided for @toolBrush.
-  ///
-  /// In en, this message translates to:
-  /// **'Brush'**
-  String get toolBrush;
-
-  /// No description provided for @toolLine.
-  ///
-  /// In en, this message translates to:
-  /// **'Line'**
-  String get toolLine;
-
-  /// No description provided for @toolRectangle.
-  ///
-  /// In en, this message translates to:
-  /// **'Rectangle'**
-  String get toolRectangle;
-
-  /// No description provided for @toolCircle.
-  ///
-  /// In en, this message translates to:
-  /// **'Circle'**
-  String get toolCircle;
-
-  /// No description provided for @toolPaintBucket.
-  ///
-  /// In en, this message translates to:
-  /// **'Paint Bucket'**
-  String get toolPaintBucket;
-
-  /// No description provided for @toolEraser.
-  ///
-  /// In en, this message translates to:
-  /// **'Eraser'**
-  String get toolEraser;
-
-  /// No description provided for @toolText.
-  ///
-  /// In en, this message translates to:
-  /// **'Text'**
-  String get toolText;
-
-  /// No description provided for @toolSelector.
-  ///
-  /// In en, this message translates to:
-  /// **'Selector'**
-  String get toolSelector;
-
-  /// No description provided for @toolFill.
-  ///
-  /// In en, this message translates to:
-  /// **'Fill'**
-  String get toolFill;
-
-  /// No description provided for @toolSolid.
-  ///
-  /// In en, this message translates to:
-  /// **'Solid'**
-  String get toolSolid;
-
-  /// No description provided for @toolLinearGradient.
-  ///
-  /// In en, this message translates to:
-  /// **'Linear Gradient'**
-  String get toolLinearGradient;
-
-  /// No description provided for @toolRadialGradient.
-  ///
-  /// In en, this message translates to:
-  /// **'Radial Gradient'**
-  String get toolRadialGradient;
-
-  /// No description provided for @toolLasso.
-  ///
-  /// In en, this message translates to:
-  /// **'Lasso'**
-  String get toolLasso;
-
-  /// No description provided for @toolMagic.
-  ///
-  /// In en, this message translates to:
-  /// **'Magic'**
-  String get toolMagic;
-
-  /// No description provided for @toolReplace.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace'**
-  String get toolReplace;
-
-  /// No description provided for @toolAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Add'**
-  String get toolAdd;
-
-  /// No description provided for @toolRemove.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove'**
-  String get toolRemove;
-
-  /// No description provided for @toolInvert.
-  ///
-  /// In en, this message translates to:
-  /// **'Invert'**
-  String get toolInvert;
-
-  /// No description provided for @toolCrop.
-  ///
-  /// In en, this message translates to:
-  /// **'Crop'**
-  String get toolCrop;
-
-  /// No description provided for @brushColor.
-  ///
-  /// In en, this message translates to:
-  /// **'Brush Color'**
-  String get brushColor;
-
-  /// No description provided for @fillColor.
-  ///
-  /// In en, this message translates to:
-  /// **'Fill Color'**
-  String get fillColor;
-
-  /// No description provided for @pencilSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Pencil Size'**
-  String get pencilSize;
-
-  /// No description provided for @brushSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Brush Size'**
-  String get brushSize;
-
-  /// No description provided for @layerHidden.
-  ///
-  /// In en, this message translates to:
-  /// **'Hidden'**
-  String get layerHidden;
-
-  /// No description provided for @layerOpacity.
-  ///
-  /// In en, this message translates to:
-  /// **'Opacity: '**
-  String get layerOpacity;
-
-  /// No description provided for @layerBlend.
-  ///
-  /// In en, this message translates to:
-  /// **'Blend: '**
-  String get layerBlend;
-
-  /// No description provided for @layerNameTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Layer Name'**
-  String get layerNameTitle;
-
-  /// No description provided for @layerAddAbove.
-  ///
-  /// In en, this message translates to:
-  /// **'Add a layer above'**
-  String get layerAddAbove;
-
-  /// No description provided for @layerDelete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete this layer'**
-  String get layerDelete;
-
-  /// No description provided for @layerMergeBelow.
-  ///
-  /// In en, this message translates to:
-  /// **'Merge to below layer'**
-  String get layerMergeBelow;
-
-  /// No description provided for @layerBlendMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Blend Mode'**
-  String get layerBlendMode;
-
-  /// No description provided for @layerBackgroundColor.
-  ///
-  /// In en, this message translates to:
-  /// **'Background Color'**
-  String get layerBackgroundColor;
-
-  /// No description provided for @layerToggleVisibility.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide/Show this layer'**
-  String get layerToggleVisibility;
-
-  /// No description provided for @layerRename.
-  ///
-  /// In en, this message translates to:
-  /// **'Rename layer'**
-  String get layerRename;
-
-  /// No description provided for @layerChangeBlendMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Change Blend Mode'**
-  String get layerChangeBlendMode;
-
-  /// No description provided for @layerHideAllOthers.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide all other layers'**
-  String get layerHideAllOthers;
-
-  /// No description provided for @layerShowAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Show all layers'**
-  String get layerShowAll;
-
-  /// No description provided for @layerHide.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide layer'**
-  String get layerHide;
-
-  /// No description provided for @layerShow.
-  ///
-  /// In en, this message translates to:
-  /// **'Show layer'**
-  String get layerShow;
-
-  /// No description provided for @layerAdd.
-  ///
-  /// In en, this message translates to:
-  /// **'Add Layer'**
-  String get layerAdd;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

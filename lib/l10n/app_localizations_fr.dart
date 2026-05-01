@@ -12,7 +12,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get about => 'A propos...';
 
   @override
-  String get activeTool => 'Outil actif';
+  String get addAsNewLayer => 'Ajouter comme nouveau calque';
 
   @override
   String get addText => 'Ajouter du texte';
@@ -83,7 +83,16 @@ class AppLocalizationsFr extends AppLocalizations {
       'Adoucit le contraste en assombrissant ou éclaircissant la destination selon la source.';
 
   @override
+  String get browseFiles => 'Parcourir...';
+
+  @override
   String get brush => 'Pinceau';
+
+  @override
+  String get brushColor => 'Couleur du pinceau';
+
+  @override
+  String get brushSize => 'Taille du pinceau';
 
   @override
   String get brushStyle => 'Style de pinceau';
@@ -133,9 +142,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get copyToClipboard => 'Copier dans le presse-papiers';
 
   @override
-  String get duplicate => 'Dupliquer';
-
-  @override
   String get create => 'Creer';
 
   @override
@@ -169,6 +175,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get discardCurrentDocumentQuestion => 'Ignorer le document actuel ?';
 
   @override
+  String downloadAsFile(Object fileName) {
+    return 'Telecharger en tant que $fileName';
+  }
+
+  @override
   String get dropFileAddLayer => 'Ajouter comme nouveau calque';
 
   @override
@@ -181,9 +192,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get dropFileTitle => 'Fichier déposé';
 
   @override
-  String downloadAsFile(Object fileName) {
-    return 'Telecharger en tant que $fileName';
-  }
+  String get duplicate => 'Dupliquer';
 
   @override
   String get editText => 'Modifier le texte';
@@ -204,13 +213,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get effectHueSaturation => 'Décalage de teinte';
 
   @override
-  String get effectIntensity => 'Intensité';
-
-  @override
   String get effectNoise => 'Bruit';
 
   @override
   String get effectPixelate => 'Pixéliser';
+
+  @override
+  String get effects => 'Effets';
 
   @override
   String get effectShadow => 'Ombre';
@@ -223,9 +232,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get effectVignette => 'Vignetage';
-
-  @override
-  String get effects => 'Effets';
 
   @override
   String get enterYourTextHere => 'Saisissez votre texte ici...';
@@ -262,21 +268,37 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get fillColor => 'Couleur de remplissage';
+
+  @override
+  String get flipHorizontalTooltip => 'Retourner horizontalement';
+
+  @override
+  String get flipVerticalTooltip => 'Retourner verticalement';
+
+  @override
   String get fontColor => 'Couleur de police';
 
   @override
   String get fontSizeLabel => 'Taille de police';
 
   @override
-  String fontSizeValue(Object value) {
-    return 'Taille de police : $value';
-  }
-
-  @override
   String get fpaintLoadImage => 'fPaint Charger une image';
 
   @override
   String get githubRepo => 'Depot GitHub';
+
+  @override
+  String get gradientColorAdd => 'Ajouter une étape de couleur';
+
+  @override
+  String get gradientColorRemove => 'Supprimer une étape de couleur';
+
+  @override
+  String get gradientColors => 'Couleurs du dégradé';
+
+  @override
+  String get gradientStopPosition => 'Emplacement';
 
   @override
   String get gradientPointColor => 'Couleur du point de degrade';
@@ -295,15 +317,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importTooltip => 'Importer...';
-
-  @override
-  String get addAsNewLayer => 'Ajouter comme nouveau calque';
-
-  @override
-  String get browseFiles => 'Parcourir...';
-
-  @override
-  String get recentFilesLabel => 'R\u00e9cents';
 
   @override
   String get invalidImageSizeDimensionsMustBeNumbers =>
@@ -334,6 +347,57 @@ class AppLocalizationsFr extends AppLocalizations {
   String get languageSystem => 'Systeme';
 
   @override
+  String get layerAdd => 'Ajouter un calque';
+
+  @override
+  String get layerAddAbove => 'Ajouter un calque au-dessus';
+
+  @override
+  String get layerBackgroundColor => 'Couleur d\'arrière-plan';
+
+  @override
+  String get layerBlend => 'Fusion : ';
+
+  @override
+  String get layerBlendMode => 'Mode de fusion';
+
+  @override
+  String get layerChangeBlendMode => 'Changer le mode de fusion';
+
+  @override
+  String get layerDelete => 'Supprimer ce calque';
+
+  @override
+  String get layerHidden => 'Masqué';
+
+  @override
+  String get layerHide => 'Masquer le calque';
+
+  @override
+  String get layerHideAllOthers => 'Masquer tous les autres calques';
+
+  @override
+  String get layerMergeBelow => 'Fusionner avec le calque inférieur';
+
+  @override
+  String get layerNameTitle => 'Nom du calque';
+
+  @override
+  String get layerOpacity => 'Opacité : ';
+
+  @override
+  String get layerRename => 'Renommer le calque';
+
+  @override
+  String get layerShow => 'Afficher le calque';
+
+  @override
+  String get layerShowAll => 'Afficher tous les calques';
+
+  @override
+  String get layerToggleVisibility => 'Masquer/Afficher ce calque';
+
+  @override
   String get menuTooltip => 'Menu principal';
 
   @override
@@ -352,6 +416,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paste => 'Coller';
 
   @override
+  String get pencilSize => 'Taille du crayon';
+
+  @override
   String percentageValue(Object value) {
     return 'Echelle : $value %';
   }
@@ -360,13 +427,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get platforms => 'Disponible sur...';
 
   @override
+  String get recentFilesLabel => 'Récents';
+
+  @override
   String get resizeRotate => 'Redimensionner / Pivoter';
-
-  @override
-  String get flipHorizontalTooltip => 'Retourner horizontalement';
-
-  @override
-  String get flipVerticalTooltip => 'Retourner verticalement';
 
   @override
   String get rotateCanvasTooltip => 'Pivoter la toile de 90 degres sens horaire';
@@ -383,19 +447,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String savedMessage(Object fileName) {
     return 'Enregistre $fileName';
   }
-
-  @override
-  String get restoreRecoveryDraft => 'Restaurer';
-
-  @override
-  String get discardRecoveryDraft => 'Ignorer';
-
-  @override
-  String get restoreRecoveryDraftTitle => 'Restaurer le travail non enregistre ?';
-
-  @override
-  String get restoreRecoveryDraftMessage =>
-      'fPaint a trouve un brouillon de recuperation de votre derniere session. Restaurez-le maintenant ou ignorez-le.';
 
   @override
   String get saveLabel => 'Enregistrer';
@@ -427,6 +478,66 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tolerance => 'Tolérance';
 
   @override
+  String get toolAdd => 'Ajouter';
+
+  @override
+  String get toolBrush => 'Pinceau';
+
+  @override
+  String get toolCircle => 'Cercle';
+
+  @override
+  String get toolCrop => 'Recadrer';
+
+  @override
+  String get toolEraser => 'Gomme';
+
+  @override
+  String get toolFill => 'Remplissage';
+
+  @override
+  String get toolInvert => 'Inverser';
+
+  @override
+  String get toolLasso => 'Lasso libre';
+
+  @override
+  String get toolLine => 'Ligne';
+
+  @override
+  String get toolLinearGradient => 'Dégradé linéaire';
+
+  @override
+  String get toolMagic => 'Magique';
+
+  @override
+  String get toolPaintBucket => 'Pot de peinture';
+
+  @override
+  String get toolPencil => 'Crayon';
+
+  @override
+  String get toolRadialGradient => 'Dégradé radial';
+
+  @override
+  String get toolRectangle => 'Rectangulaire';
+
+  @override
+  String get toolRemove => 'Retirer';
+
+  @override
+  String get toolReplace => 'Remplacer';
+
+  @override
+  String get toolSelector => 'Sélecteur';
+
+  @override
+  String get toolSolid => 'Uni';
+
+  @override
+  String get toolText => 'Texte';
+
+  @override
   String topColors(Object count) {
     return 'Top $count couleurs';
   }
@@ -452,127 +563,4 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get width => 'Largeur';
-
-  @override
-  String get toolPencil => 'Crayon';
-
-  @override
-  String get toolBrush => 'Pinceau';
-
-  @override
-  String get toolLine => 'Ligne';
-
-  @override
-  String get toolRectangle => 'Rectangulaire';
-
-  @override
-  String get toolCircle => 'Cercle';
-
-  @override
-  String get toolPaintBucket => 'Pot de peinture';
-
-  @override
-  String get toolEraser => 'Gomme';
-
-  @override
-  String get toolText => 'Texte';
-
-  @override
-  String get toolSelector => 'Sélecteur';
-
-  @override
-  String get toolFill => 'Remplissage';
-
-  @override
-  String get toolSolid => 'Uni';
-
-  @override
-  String get toolLinearGradient => 'Dégradé linéaire';
-
-  @override
-  String get toolRadialGradient => 'Dégradé radial';
-
-  @override
-  String get toolLasso => 'Lasso libre';
-
-  @override
-  String get toolMagic => 'Magique';
-
-  @override
-  String get toolReplace => 'Remplacer';
-
-  @override
-  String get toolAdd => 'Ajouter';
-
-  @override
-  String get toolRemove => 'Retirer';
-
-  @override
-  String get toolInvert => 'Inverser';
-
-  @override
-  String get toolCrop => 'Recadrer';
-
-  @override
-  String get brushColor => 'Couleur du pinceau';
-
-  @override
-  String get fillColor => 'Couleur de remplissage';
-
-  @override
-  String get pencilSize => 'Taille du crayon';
-
-  @override
-  String get brushSize => 'Taille du pinceau';
-
-  @override
-  String get layerHidden => 'Masqué';
-
-  @override
-  String get layerOpacity => 'Opacité : ';
-
-  @override
-  String get layerBlend => 'Fusion : ';
-
-  @override
-  String get layerNameTitle => 'Nom du calque';
-
-  @override
-  String get layerAddAbove => 'Ajouter un calque au-dessus';
-
-  @override
-  String get layerDelete => 'Supprimer ce calque';
-
-  @override
-  String get layerMergeBelow => 'Fusionner avec le calque inférieur';
-
-  @override
-  String get layerBlendMode => 'Mode de fusion';
-
-  @override
-  String get layerBackgroundColor => "Couleur d'arrière-plan";
-
-  @override
-  String get layerToggleVisibility => 'Masquer/Afficher ce calque';
-
-  @override
-  String get layerRename => 'Renommer le calque';
-
-  @override
-  String get layerChangeBlendMode => 'Changer le mode de fusion';
-
-  @override
-  String get layerHideAllOthers => 'Masquer tous les autres calques';
-
-  @override
-  String get layerShowAll => 'Afficher tous les calques';
-
-  @override
-  String get layerHide => 'Masquer le calque';
-
-  @override
-  String get layerShow => 'Afficher le calque';
-
-  @override
-  String get layerAdd => 'Ajouter un calque';
 }

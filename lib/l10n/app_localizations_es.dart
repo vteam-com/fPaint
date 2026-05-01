@@ -12,7 +12,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get about => 'Acerca de...';
 
   @override
-  String get activeTool => 'Herramienta activa';
+  String get addAsNewLayer => 'Agregar como nueva capa';
 
   @override
   String get addText => 'Agregar texto';
@@ -80,7 +80,16 @@ class AppLocalizationsEs extends AppLocalizations {
       'Suaviza el contraste oscureciendo o aclarando el destino según el origen.';
 
   @override
+  String get browseFiles => 'Explorar archivos...';
+
+  @override
   String get brush => 'Pincel';
+
+  @override
+  String get brushColor => 'Color del pincel';
+
+  @override
+  String get brushSize => 'Tamaño del pincel';
 
   @override
   String get brushStyle => 'Estilo de pincel';
@@ -130,9 +139,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get copyToClipboard => 'Copiar al portapapeles';
 
   @override
-  String get duplicate => 'Duplicar';
-
-  @override
   String get create => 'Crear';
 
   @override
@@ -166,6 +172,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get discardCurrentDocumentQuestion => 'Descartar el documento actual?';
 
   @override
+  String downloadAsFile(Object fileName) {
+    return 'Descargar como $fileName';
+  }
+
+  @override
   String get dropFileAddLayer => 'Agregar como nueva capa';
 
   @override
@@ -178,9 +189,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dropFileTitle => 'Archivo soltado';
 
   @override
-  String downloadAsFile(Object fileName) {
-    return 'Descargar como $fileName';
-  }
+  String get duplicate => 'Duplicar';
 
   @override
   String get editText => 'Editar texto';
@@ -201,13 +210,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get effectHueSaturation => 'Cambio de tono';
 
   @override
-  String get effectIntensity => 'Intensidad';
-
-  @override
   String get effectNoise => 'Ruido';
 
   @override
   String get effectPixelate => 'Pixelar';
+
+  @override
+  String get effects => 'Efectos';
 
   @override
   String get effectShadow => 'Sombra';
@@ -220,9 +229,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get effectVignette => 'Viñeta';
-
-  @override
-  String get effects => 'Efectos';
 
   @override
   String get enterYourTextHere => 'Escribe tu texto aqui...';
@@ -259,21 +265,37 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get fillColor => 'Color de relleno';
+
+  @override
+  String get flipHorizontalTooltip => 'Voltear horizontalmente';
+
+  @override
+  String get flipVerticalTooltip => 'Voltear verticalmente';
+
+  @override
   String get fontColor => 'Color de fuente';
 
   @override
   String get fontSizeLabel => 'Tamano de fuente';
 
   @override
-  String fontSizeValue(Object value) {
-    return 'Tamano de fuente: $value';
-  }
-
-  @override
   String get fpaintLoadImage => 'fPaint Cargar imagen';
 
   @override
   String get githubRepo => 'Repositorio GitHub';
+
+  @override
+  String get gradientColorAdd => 'Agregar punto de color';
+
+  @override
+  String get gradientColorRemove => 'Quitar punto de color';
+
+  @override
+  String get gradientColors => 'Colores del degradado';
+
+  @override
+  String get gradientStopPosition => 'Posición';
 
   @override
   String get gradientPointColor => 'Color del punto de degradado';
@@ -292,15 +314,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get importTooltip => 'Importar...';
-
-  @override
-  String get addAsNewLayer => 'Agregar como nueva capa';
-
-  @override
-  String get browseFiles => 'Explorar archivos...';
-
-  @override
-  String get recentFilesLabel => 'Recientes';
 
   @override
   String get invalidImageSizeDimensionsMustBeNumbers => 'Tamano de imagen invalido: las dimensiones deben ser numeros.';
@@ -330,6 +343,57 @@ class AppLocalizationsEs extends AppLocalizations {
   String get languageSystem => 'Predeterminado del sistema';
 
   @override
+  String get layerAdd => 'Agregar capa';
+
+  @override
+  String get layerAddAbove => 'Agregar una capa encima';
+
+  @override
+  String get layerBackgroundColor => 'Color de fondo';
+
+  @override
+  String get layerBlend => 'Mezcla: ';
+
+  @override
+  String get layerBlendMode => 'Modo de mezcla';
+
+  @override
+  String get layerChangeBlendMode => 'Cambiar modo de mezcla';
+
+  @override
+  String get layerDelete => 'Eliminar esta capa';
+
+  @override
+  String get layerHidden => 'Oculta';
+
+  @override
+  String get layerHide => 'Ocultar capa';
+
+  @override
+  String get layerHideAllOthers => 'Ocultar todas las demás capas';
+
+  @override
+  String get layerMergeBelow => 'Fusionar con la capa inferior';
+
+  @override
+  String get layerNameTitle => 'Nombre de la capa';
+
+  @override
+  String get layerOpacity => 'Opacidad: ';
+
+  @override
+  String get layerRename => 'Renombrar capa';
+
+  @override
+  String get layerShow => 'Mostrar capa';
+
+  @override
+  String get layerShowAll => 'Mostrar todas las capas';
+
+  @override
+  String get layerToggleVisibility => 'Ocultar/Mostrar esta capa';
+
+  @override
   String get menuTooltip => 'Menu principal';
 
   @override
@@ -348,6 +412,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get paste => 'Pegar';
 
   @override
+  String get pencilSize => 'Tamaño del lápiz';
+
+  @override
   String percentageValue(Object value) {
     return 'Escala: $value%';
   }
@@ -356,13 +423,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get platforms => 'Disponible en...';
 
   @override
+  String get recentFilesLabel => 'Recientes';
+
+  @override
   String get resizeRotate => 'Redimensionar / Girar';
-
-  @override
-  String get flipHorizontalTooltip => 'Voltear horizontalmente';
-
-  @override
-  String get flipVerticalTooltip => 'Voltear verticalmente';
 
   @override
   String get rotateCanvasTooltip => 'Girar lienzo 90 grados en sentido horario';
@@ -379,19 +443,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String savedMessage(Object fileName) {
     return 'Guardado $fileName';
   }
-
-  @override
-  String get restoreRecoveryDraft => 'Restaurar';
-
-  @override
-  String get discardRecoveryDraft => 'Descartar';
-
-  @override
-  String get restoreRecoveryDraftTitle => 'Restaurar trabajo no guardado?';
-
-  @override
-  String get restoreRecoveryDraftMessage =>
-      'fPaint encontro un borrador de recuperacion de tu ultima sesion. Restauralo ahora o descartalo.';
 
   @override
   String get saveLabel => 'Guardar';
@@ -423,6 +474,66 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tolerance => 'Tolerancia';
 
   @override
+  String get toolAdd => 'Agregar';
+
+  @override
+  String get toolBrush => 'Pincel';
+
+  @override
+  String get toolCircle => 'Círculo';
+
+  @override
+  String get toolCrop => 'Recortar';
+
+  @override
+  String get toolEraser => 'Borrador';
+
+  @override
+  String get toolFill => 'Relleno';
+
+  @override
+  String get toolInvert => 'Invertir';
+
+  @override
+  String get toolLasso => 'Lazo';
+
+  @override
+  String get toolLine => 'Línea';
+
+  @override
+  String get toolLinearGradient => 'Degradado lineal';
+
+  @override
+  String get toolMagic => 'Mágico';
+
+  @override
+  String get toolPaintBucket => 'Bote de pintura';
+
+  @override
+  String get toolPencil => 'Lápiz';
+
+  @override
+  String get toolRadialGradient => 'Degradado radial';
+
+  @override
+  String get toolRectangle => 'Rectángulo';
+
+  @override
+  String get toolRemove => 'Quitar';
+
+  @override
+  String get toolReplace => 'Reemplazar';
+
+  @override
+  String get toolSelector => 'Seleccionador';
+
+  @override
+  String get toolSolid => 'Sólido';
+
+  @override
+  String get toolText => 'Texto';
+
+  @override
   String topColors(Object count) {
     return 'Top $count colores';
   }
@@ -448,127 +559,4 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get width => 'Ancho';
-
-  @override
-  String get toolPencil => 'Lápiz';
-
-  @override
-  String get toolBrush => 'Pincel';
-
-  @override
-  String get toolLine => 'Línea';
-
-  @override
-  String get toolRectangle => 'Rectángulo';
-
-  @override
-  String get toolCircle => 'Círculo';
-
-  @override
-  String get toolPaintBucket => 'Bote de pintura';
-
-  @override
-  String get toolEraser => 'Borrador';
-
-  @override
-  String get toolText => 'Texto';
-
-  @override
-  String get toolSelector => 'Seleccionador';
-
-  @override
-  String get toolFill => 'Relleno';
-
-  @override
-  String get toolSolid => 'Sólido';
-
-  @override
-  String get toolLinearGradient => 'Degradado lineal';
-
-  @override
-  String get toolRadialGradient => 'Degradado radial';
-
-  @override
-  String get toolLasso => 'Lazo';
-
-  @override
-  String get toolMagic => 'Mágico';
-
-  @override
-  String get toolReplace => 'Reemplazar';
-
-  @override
-  String get toolAdd => 'Agregar';
-
-  @override
-  String get toolRemove => 'Quitar';
-
-  @override
-  String get toolInvert => 'Invertir';
-
-  @override
-  String get toolCrop => 'Recortar';
-
-  @override
-  String get brushColor => 'Color del pincel';
-
-  @override
-  String get fillColor => 'Color de relleno';
-
-  @override
-  String get pencilSize => 'Tamaño del lápiz';
-
-  @override
-  String get brushSize => 'Tamaño del pincel';
-
-  @override
-  String get layerHidden => 'Oculta';
-
-  @override
-  String get layerOpacity => 'Opacidad: ';
-
-  @override
-  String get layerBlend => 'Mezcla: ';
-
-  @override
-  String get layerNameTitle => 'Nombre de la capa';
-
-  @override
-  String get layerAddAbove => 'Agregar una capa encima';
-
-  @override
-  String get layerDelete => 'Eliminar esta capa';
-
-  @override
-  String get layerMergeBelow => 'Fusionar con la capa inferior';
-
-  @override
-  String get layerBlendMode => 'Modo de mezcla';
-
-  @override
-  String get layerBackgroundColor => 'Color de fondo';
-
-  @override
-  String get layerToggleVisibility => 'Ocultar/Mostrar esta capa';
-
-  @override
-  String get layerRename => 'Renombrar capa';
-
-  @override
-  String get layerChangeBlendMode => 'Cambiar modo de mezcla';
-
-  @override
-  String get layerHideAllOthers => 'Ocultar todas las demás capas';
-
-  @override
-  String get layerShowAll => 'Mostrar todas las capas';
-
-  @override
-  String get layerHide => 'Ocultar capa';
-
-  @override
-  String get layerShow => 'Mostrar capa';
-
-  @override
-  String get layerAdd => 'Agregar capa';
 }
