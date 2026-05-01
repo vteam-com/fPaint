@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_jpeg.dart';
@@ -534,9 +535,19 @@ Future<void> tapByTooltip(
   final WidgetTester tester,
   final String tooltip,
 ) async {
-  final Finder found = find.byWidgetPredicate(
+  Finder found = find.byWidgetPredicate(
     (final Widget w) => w is AppTooltip && w.message == tooltip,
   );
+
+  // Retry once after toggling shell mode in case the tool strip is hidden.
+  if (found.evaluate().isEmpty) {
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    found = find.byWidgetPredicate(
+      (final Widget w) => w is AppTooltip && w.message == tooltip,
+    );
+  }
+
   expect(found, findsOneWidget, reason: 'Should find widget with tooltip: $tooltip');
   await tapLikeHuman(tester, tester.getCenter(found.first));
   await tester.pump();
@@ -1228,15 +1239,29 @@ Future<void> performFloodFillSolidAtCanvasPosition(
 
 /// Performs a gradient flood fill with the specified [gradientMode] and [gradientPoints].
 ///
-/// Selects the fill tool and gradient mode via UI taps, then executes the fill
-/// inside [WidgetTester.runAsync] for the same reason as [performFloodFillSolid].
+/// Selects the fill tool and gradient mode via UI taps, then configures the
+/// color stops through the side-panel editor:
+///   * Endpoint colors are seeded directly on [AppProvider.fillModel] (same
+///     convention as [performFloodFillSolid] uses for [AppProvider.fillColor],
+///     because color-picker dialog interaction is fragile in automated tests).
+///   * Extra inner stops are added by tapping [Keys.gradientStopAddButton].
+///   * Inner stop positions are entered via the panel's percentage text fields.
+///
+/// The fill is then executed via [FillService] against the live
+/// [AppProvider.fillModel] inside [WidgetTester.runAsync] so that the async
+/// image byte-data read completes outside the fake-async zone.
+///
+/// The optional [gradientStopPositions] list sets the 0.0–1.0 stop positions
+/// for each entry in [gradientPoints].  When omitted the positions are
+/// distributed evenly (0.0 for the first stop, 1.0 for the last).
 Future<void> performFloodFillGradient(
   final WidgetTester tester, {
   required final FillMode gradientMode,
   required final List<GradientPoint> gradientPoints,
+  List<double>? gradientStopPositions,
   Offset Function(Offset)? toCanvas,
 }) async {
-  // Select fill tool and gradient mode via UI
+  // 1. Select fill tool and gradient mode via UI taps.
   await tapByKey(tester, Keys.toolFill);
   final Key modeKey = gradientMode == FillMode.linear ? Keys.toolFillModeLinear : Keys.toolFillModeRadial;
   await tapByKey(tester, modeKey);
@@ -1244,26 +1269,72 @@ Future<void> performFloodFillGradient(
   final BuildContext context = tester.element(find.byType(MainView));
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
-  // Record tap at first gradient point for video overlay
+  final int stopCount = gradientPoints.length;
+  final List<Color> stopColors = gradientPoints.map((final GradientPoint p) => p.color).toList();
+  final List<double> resolvedPositions =
+      gradientStopPositions ??
+      List<double>.generate(
+        stopCount,
+        (final int i) => stopCount <= 1 ? 0.0 : i / (stopCount - 1),
+      );
+
+  // 2. Seed the live fill model's endpoint colors and reset to two stops.
+  appProvider.fillModel.gradientStopColors
+    ..clear()
+    ..addAll(<Color>[stopColors.first, stopColors.last]);
+  appProvider.fillModel.gradientStopPositions
+    ..clear()
+    ..addAll(<double>[0.0, 1.0]);
+  appProvider.update();
+  await tester.pump();
+
+  // 3. Add and configure inner stops through the side-panel editor.
+  //    Each iteration taps the Add button, overrides the auto-blended color,
+  //    then enters the target position via the panel's percentage text field.
+  for (int i = 1; i < stopCount - 1; i++) {
+    await tapByKey(tester, Keys.gradientStopAddButton);
+
+    // Override the auto-blended color with the requested color.
+    appProvider.fillModel.gradientStopColors[i] = stopColors[i];
+    appProvider.update();
+    await tester.pump();
+
+    // Enter the percentage in the position text field and submit.
+    final int posPercent = (resolvedPositions[i] * AppLimits.percentMax).round();
+    final Key posKey = Key('${Keys.gradientStopPositionKeyPrefixText}$i');
+    await tester.ensureVisible(find.byKey(posKey));
+    await tester.pump();
+    await tester.enterText(find.byKey(posKey), posPercent.toString());
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump();
+  }
+
+  // Release keyboard focus so later key events are not captured by the
+  // now-inactive AppTextField position field.
+  tester.binding.focusManager.primaryFocus?.unfocus();
+  await tester.pump();
+
+  // 4. Record tap at first gradient point for video overlay.
   if (gradientPoints.isNotEmpty) {
     InteractionTracker.recordTap(gradientPoints.first.offset);
   }
 
-  final FillModel fillModel = FillModel();
-  fillModel.mode = gradientMode;
-  for (final GradientPoint point in gradientPoints) {
-    fillModel.gradientPoints.add(
-      GradientPoint(offset: point.offset, color: point.color),
-    );
-  }
+  // 5. Set the gradient line handles on the live fill model.
+  //    Only first and last points define the gradient axis; any intermediate
+  //    points in the caller's list are purely positional hints for test setup.
+  appProvider.fillModel.gradientPoints.clear();
+  appProvider.fillModel.gradientPoints
+    ..add(GradientPoint(offset: gradientPoints.first.offset, color: stopColors.first))
+    ..add(GradientPoint(offset: gradientPoints.last.offset, color: stopColors.last));
 
+  // 6. Execute the gradient fill via tester.runAsync so the async image
+  //    byte-data read completes outside the fake-async zone.
   final ui.Image sourceImage = appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
-
   await tester.runAsync(() async {
     final FillService fillService = FillService();
     final UserActionDrawing action = await fillService.createFloodFillGradientAction(
       sourceImage: sourceImage,
-      fillModel: fillModel,
+      fillModel: appProvider.fillModel,
       tolerance: appProvider.tolerance,
       clipPath: null,
       toCanvas: toCanvas ?? appProvider.toCanvas,

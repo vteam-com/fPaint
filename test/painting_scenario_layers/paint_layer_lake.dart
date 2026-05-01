@@ -38,6 +38,8 @@ Future<void> paintLayerLake(final PaintingScenarioSession session) async {
     tolerance: _pondWandTolerance,
   );
 
+  // Three-stop gradient with explicit positions: light at left edge (0%),
+  // mid-tone shifted past centre (65%), deep blue at the right edge (100%).
   await performFloodFillGradient(
     session.tester,
     gradientMode: FillMode.linear,
@@ -46,6 +48,7 @@ Future<void> paintLayerLake(final PaintingScenarioSession session) async {
       GradientPoint(color: _pondColorMid, offset: pondCenter),
       GradientPoint(color: _pondColorDark, offset: session.canvasCenter + _pondGradientEnd),
     ],
+    gradientStopPositions: <double>[0.0, _pondMidStopPosition, 1.0],
   );
 
   for (final List<Offset> wavePoints in <List<Offset>>[
