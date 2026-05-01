@@ -4,6 +4,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.4] - 2026-05-01
+
+### Add
+
+- Multi-stop gradient editing on canvas with draggable inner handles and stop-position support
+- Side panel gradient stop percentage editing for inner stops with fixed endpoints (0% and 100%)
+- Expanded widget/unit test coverage for gradient stop editor, selection overlay, import dialog, and window state helpers
+
+### Fix
+
+- Gradient stop ordering now swaps both stop colors and stop percentages consistently
+- Adding or removing inner gradient stops now preserves existing stop percentages
+- New stop insertion color now blends neighboring stop colors for smoother gradients
+- Keyboard shortcut handling in text fields no longer blocks expected editing behavior
+- Scenario test visual consistency updates for sky and mountain gradients
+
+### Update
+
+- Painting scenario helper flow now configures gradient stops through interactive side-panel behavior
+- Project coverage increased to 86.0%
+
 ## [1.6.2] - 2026-04-29
 
 ### Add
