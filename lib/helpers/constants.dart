@@ -420,6 +420,7 @@ class AppDefaults {
   static const double brushSize = 5.0;
   static const int tolerance = 50;
   static const bool useApplePencil = false;
+  static const Duration buttonTapAnimationDuration = Duration(milliseconds: 100);
   static const Duration debounceDuration = Duration(seconds: 1);
   static const Duration animationLoopDuration = Duration(seconds: 1);
   static const Duration clipboardAccessTimeout = Duration(seconds: 2);

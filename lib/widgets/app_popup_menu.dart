@@ -1,6 +1,7 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/app_buttons.dart';
 
 /// A popup menu item replacing Material [PopupMenuItem].
 class AppPopupMenuItem<T> {
@@ -125,8 +126,10 @@ class AppPopupMenuButton<T> extends StatelessWidget {
   final String? tooltip;
   @override
   Widget build(final BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
+    return AppButtonIcon(
+      icon: icon ?? const SizedBox.shrink(),
+      tooltip: tooltip,
+      onPressed: () async {
         final RenderBox button = context.findRenderObject()! as RenderBox;
         final Offset offset = button.localToGlobal(
           Offset(0, button.size.height),
@@ -145,10 +148,6 @@ class AppPopupMenuButton<T> extends StatelessWidget {
           onSelected(value);
         }
       },
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: icon ?? const SizedBox.shrink(),
-      ),
     );
   }
 }

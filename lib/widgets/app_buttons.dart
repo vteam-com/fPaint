@@ -52,7 +52,7 @@ class AppButtonPrimary extends StatelessWidget {
 }
 
 /// An icon button replacing Material [IconButton].
-class AppButtonIcon extends StatelessWidget {
+class AppButtonIcon extends StatefulWidget {
   const AppButtonIcon({
     super.key,
     required this.icon,
@@ -66,32 +66,78 @@ class AppButtonIcon extends StatelessWidget {
   final VoidCallback onPressed;
   final EdgeInsetsGeometry? padding;
   final String? tooltip;
+
+  @override
+  State<AppButtonIcon> createState() => _AppButtonIconState();
+}
+
+class _AppButtonIconState extends State<AppButtonIcon> {
+  bool _isHovered = false;
+  bool _isPressed = false;
   @override
   Widget build(final BuildContext context) {
     Widget button = GestureDetector(
-      onTap: onPressed,
+      onTapDown: (final TapDownDetails _) => _setPressed(true),
+      onTapUp: (final TapUpDetails _) => _setPressed(false),
+      onTapCancel: () => _setPressed(false),
+      onTap: widget.onPressed,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: ConstrainedBox(
-          constraints: constraints ?? const BoxConstraints(),
-          child: Padding(
-            padding: padding ?? const EdgeInsets.all(AppSpacing.sm),
-            child: icon,
+        onEnter: (_) => _setHovered(true),
+        onExit: (_) => _setHovered(false),
+        child: AnimatedScale(
+          scale: _scale,
+          duration: AppDefaults.buttonTapAnimationDuration,
+          curve: Curves.easeOut,
+          child: ConstrainedBox(
+            constraints: widget.constraints ?? const BoxConstraints(),
+            child: Padding(
+              padding: widget.padding ?? const EdgeInsets.all(AppSpacing.sm),
+              child: widget.icon,
+            ),
           ),
         ),
       ),
     );
 
-    if (tooltip != null) {
-      button = AppTooltip(message: tooltip!, child: button);
+    if (widget.tooltip != null) {
+      button = AppTooltip(message: widget.tooltip!, child: button);
     }
 
     return button;
   }
+
+  double get _scale {
+    if (_isPressed) {
+      return AppVisual.shrink;
+    }
+    if (_isHovered) {
+      return AppVisual.enlarge;
+    }
+    return AppVisual.full;
+  }
+
+  void _setHovered(final bool isHovered) {
+    if (_isHovered == isHovered) {
+      return;
+    }
+    setState(() {
+      _isHovered = isHovered;
+    });
+  }
+
+  void _setPressed(final bool isPressed) {
+    if (_isPressed == isPressed) {
+      return;
+    }
+    setState(() {
+      _isPressed = isPressed;
+    });
+  }
 }
 
 /// Shared base for [AppButtonText] and [AppButtonPrimary].
-class _AppButtonBase extends StatelessWidget {
+class _AppButtonBase extends StatefulWidget {
   const _AppButtonBase({
     required this.onPressed,
     required this.padding,
@@ -106,34 +152,60 @@ class _AppButtonBase extends StatelessWidget {
   final VoidCallback onPressed;
   final EdgeInsetsGeometry padding;
   final Color textColor;
+
+  @override
+  State<_AppButtonBase> createState() => _AppButtonBaseState();
+}
+
+class _AppButtonBaseState extends State<_AppButtonBase> {
+  bool _isPressed = false;
   @override
   Widget build(final BuildContext context) {
     Widget content = Padding(
-      padding: padding,
+      padding: widget.padding,
       child: Center(
         child: DefaultTextStyle(
-          style: AppTextStyle.button.copyWith(color: textColor),
-          child: child,
+          style: AppTextStyle.button.copyWith(color: widget.textColor),
+          child: widget.child,
         ),
       ),
     );
 
-    if (backgroundColor != null) {
+    if (widget.backgroundColor != null) {
       content = DecoratedBox(
         decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(borderRadius ?? 0),
+          color: widget.backgroundColor,
+          borderRadius: BorderRadius.circular(widget.borderRadius ?? 0),
         ),
         child: content,
       );
     }
 
+    content = AnimatedScale(
+      scale: _isPressed ? AppVisual.shrink : AppVisual.full,
+      duration: AppDefaults.buttonTapAnimationDuration,
+      curve: Curves.easeOut,
+      child: content,
+    );
+
     return GestureDetector(
-      onTap: onPressed,
+      onTapDown: (final TapDownDetails _) => _setPressed(true),
+      onTapUp: (final TapUpDetails _) => _setPressed(false),
+      onTapCancel: () => _setPressed(false),
+      onTap: widget.onPressed,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: content,
       ),
     );
+  }
+
+  void _setPressed(final bool isPressed) {
+    if (_isPressed == isPressed) {
+      return;
+    }
+    setState(() {
+      _isPressed = isPressed;
+    });
   }
 }
