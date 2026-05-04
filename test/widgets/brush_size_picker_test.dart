@@ -246,9 +246,8 @@ void main() {
       await tester.tap(find.text('Show Size Picker'));
       await tester.pumpAndSettle(); // Allow dialog to show
 
-      expect(find.byType(AppDialog), findsOneWidget);
-      expect(find.text('Select Dialog Test'), findsOneWidget); // Dialog title
       expect(find.byType(BrushSizePicker), findsOneWidget);
+      expect(find.text('Select Dialog Test'), findsOneWidget); // Dialog title
 
       // Check if BrushSizePicker inside dialog has correct initial values
       final BrushSizePicker pickerInDialog = tester.widget(find.byType(BrushSizePicker));
@@ -256,7 +255,7 @@ void main() {
       expect(pickerInDialog.value, 25.0);
 
       // Simulate changing value in the dialog's picker
-      final Finder sliderInDialog = find.descendant(of: find.byType(AppDialog), matching: find.byType(AppSlider));
+      final Finder sliderInDialog = find.descendant(of: find.byType(BrushSizePicker), matching: find.byType(AppSlider));
       expect(sliderInDialog, findsOneWidget);
 
       // Directly call onChanged on the slider inside the dialog
@@ -267,9 +266,9 @@ void main() {
       expect(changedValue, 33.0); // Check if the callback was propagated
 
       // Close dialog
-      Navigator.of(tester.element(find.byType(AppDialog))).pop();
+      Navigator.of(tester.element(find.byType(BrushSizePicker))).pop();
       await tester.pumpAndSettle();
-      expect(find.byType(AppDialog), findsNothing);
+      expect(find.byType(BrushSizePicker), findsNothing);
     });
   });
 }

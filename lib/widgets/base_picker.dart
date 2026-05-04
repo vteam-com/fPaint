@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 /// A generic base picker widget that can handle different value types.
@@ -97,18 +98,39 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
   }
 }
 
-/// Shows a standard alert dialog wrapper for picker widgets.
+/// Shows a modal bottom sheet wrapper for picker widgets.
 Future<void> showPickerDialog({
   required final BuildContext context,
   required final String title,
   required final Widget child,
 }) async {
-  await showAppDialog<void>(
+  await showAppBottomSheet<void>(
     context: context,
+    barrierColor: AppPalette.transparent,
     builder: (final BuildContext _) {
-      return AppDialog(
-        title: title,
-        content: child,
+      return SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xxl),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: AppLayout.sliderDialogWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    AppText(
+                      title,
+                      variant: AppTextVariant.title,
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
+                    child,
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       );
     },
   );

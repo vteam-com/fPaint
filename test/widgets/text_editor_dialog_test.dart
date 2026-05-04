@@ -26,7 +26,7 @@ void main() {
       await tester.enterText(textField, 'Hello');
       await tester.pump();
 
-      final Finder addTextButton = find.widgetWithText(AppButtonText, 'Add Text');
+      final Finder addTextButton = find.widgetWithText(AppButtonPrimary, 'Add Text');
       expect(addTextButton, findsOneWidget);
       await tester.tap(addTextButton);
       await tester.pump();
@@ -75,7 +75,7 @@ void main() {
       await tester.enterText(find.byType(AppTextField), 'Bold');
       await tester.pump();
 
-      await tester.tap(find.widgetWithText(AppButtonText, 'Add Text'));
+      await tester.tap(find.widgetWithText(AppButtonPrimary, 'Add Text'));
       await tester.pump();
 
       expect(result, isNotNull);
@@ -101,7 +101,7 @@ void main() {
       await tester.enterText(find.byType(AppTextField), 'Centered');
       await tester.pump();
 
-      await tester.tap(find.widgetWithText(AppButtonText, 'Add Text'));
+      await tester.tap(find.widgetWithText(AppButtonPrimary, 'Add Text'));
       await tester.pump();
 
       expect(result, isNotNull);
@@ -119,7 +119,7 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.widgetWithText(AppButtonText, 'Add Text'));
+      await tester.tap(find.widgetWithText(AppButtonPrimary, 'Add Text'));
       await tester.pump();
 
       expect(result, isNull);

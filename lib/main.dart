@@ -195,7 +195,7 @@ Future<void> _handleFileOpened(final String filePath) async {
                   onPressed: () => Navigator.pop(context, false),
                   text: l10n.cancel,
                 ),
-                AppButtonText(
+                AppButtonPrimary(
                   onPressed: () => Navigator.pop(context, true),
                   text: l10n.discardAndOpen,
                 ),

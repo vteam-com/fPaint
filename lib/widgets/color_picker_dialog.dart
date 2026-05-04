@@ -5,7 +5,6 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
@@ -13,7 +12,7 @@ import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/top_colors.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
-/// A dialog that allows the user to pick a color.
+/// A bottom sheet that allows the user to pick a color.
 class ColorPickerDialog extends StatefulWidget {
   /// Creates a [ColorPickerDialog].
   const ColorPickerDialog({
@@ -29,7 +28,7 @@ class ColorPickerDialog extends StatefulWidget {
   /// A callback that is called when the user picks a color.
   final ValueChanged<Color> onColorChanged;
 
-  /// The title of the dialog.
+  /// The title of the sheet.
   final String title;
 
   @override
@@ -55,7 +54,6 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
   @override
   Widget build(final BuildContext context) {
-    final ShellProvider shellProvider = ShellProvider.of(context);
     final LayersProvider layersModel = LayersProvider.of(context);
 
     return PopScope(
@@ -65,22 +63,23 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           widget.onColorChanged(_currentColor);
         }
       },
-      child: shellProvider.deviceSizeSmall
-          ? SizedBox.expand(
-              child: DecoratedBox(
-                decoration: const BoxDecoration(color: AppColors.surface),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.xxl),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: AppLayout.sliderDialogWidth),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: AppSpacing.xxl,
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      child: AppText(
-                        widget.title,
-                        textAlign: TextAlign.start,
-                        variant: AppTextVariant.title,
-                      ),
+                    AppText(
+                      widget.title,
+                      textAlign: TextAlign.start,
+                      variant: AppTextVariant.title,
                     ),
+                    const SizedBox(height: AppSpacing.xxl),
                     _buildContent(layersModel),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -89,15 +88,10 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                   ],
                 ),
               ),
-            )
-          : AppDialog(
-              title: widget.title,
-              content: SizedBox(
-                width: AppLayout.sliderDialogWidth,
-                child: _buildContent(layersModel),
-              ),
-              actions: _buildActions(),
             ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -279,15 +273,16 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   }
 }
 
-/// Displays a color picker dialog with the given title and initial color.
+/// Displays a color picker bottom sheet with the given title and initial color.
 void showColorPicker({
   required final BuildContext context,
   required final String title,
   required final Color color,
   required final ValueChanged<Color> onSelectedColor,
 }) {
-  showAppDialog<dynamic>(
+  showAppBottomSheet<dynamic>(
     context: context,
+    barrierColor: AppPalette.transparent,
     builder: (final BuildContext _) {
       return ColorPickerDialog(
         title: title,

@@ -89,7 +89,7 @@ Future<void> onFileNew(final BuildContext context) async {
             if (offNewDocFromClipboard)
               Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.xxl),
-                child: AppButtonPrimary(
+                child: AppButtonText(
                   onPressed: () {
                     // Handle creating new document from clipboard image
                     appProvider.newDocumentFromClipboardImage();
@@ -105,7 +105,7 @@ Future<void> onFileNew(final BuildContext context) async {
               },
               text: l10n.cancel,
             ),
-            AppButtonText(
+            AppButtonPrimary(
               onPressed: () {
                 final double? width = double.tryParse(widthController.text);
                 final double? height = double.tryParse(heightController.text);
@@ -425,7 +425,7 @@ Future<void> onFileDropped({
               onPressed: () => Navigator.pop(dialogContext, DropFileAction.addLayer),
               text: l10n.dropFileAddLayer,
             ),
-            AppButtonText(
+            AppButtonPrimary(
               onPressed: () => Navigator.pop(dialogContext, DropFileAction.open),
               text: l10n.dropFileOpen,
             ),

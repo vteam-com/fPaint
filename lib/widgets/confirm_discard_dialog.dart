@@ -16,7 +16,7 @@ Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
       return AppDialog(
         title: l10n.discardCurrentDocumentQuestion,
         actions: <Widget>[
-          AppButtonText(
+          AppButtonPrimary(
             onPressed: () {
               Navigator.of(context).pop(true);
             },

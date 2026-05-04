@@ -47,13 +47,11 @@ void showCanvasSettings(final BuildContext context) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
+            spacing: AppSpacing.md,
             children: <Widget>[
               AppText(
                 l10n.canvasSizeTitle,
                 variant: AppTextVariant.title,
-              ),
-              const SizedBox(
-                height: AppSpacing.xxxl,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -119,9 +117,6 @@ void showCanvasSettings(final BuildContext context) {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: AppSpacing.xxxl,
-              ),
               Column(
                 spacing: AppSpacing.md,
                 children: <Widget>[
@@ -134,38 +129,40 @@ void showCanvasSettings(final BuildContext context) {
                   ),
                 ],
               ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: AppButtonPrimary(
-                  key: Keys.canvasSettingsApplyButton,
-                  onPressed: () {
-                    final double width = double.tryParse(widthController.text) ?? -1;
-                    final double height = double.tryParse(heightController.text) ?? -1;
-                    if (width == -1 || height == -1) {
-                      context.showSnackBarMessage(
-                        l10n.invalidImageSizeDimensionsMustBeNumbers,
-                      );
-                    } else if (width <= 0 || height <= 0) {
-                      context.showSnackBarMessage(
-                        l10n.canvasDimensionsMustBePositive,
-                      );
-                    } else {
-                      layers.canvasResize(
-                        width.toInt(),
-                        height.toInt(),
-                        layers.canvasResizePosition,
-                      );
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  AppButtonPrimary(
+                    key: Keys.canvasSettingsApplyButton,
+                    onPressed: () {
+                      final double width = double.tryParse(widthController.text) ?? -1;
+                      final double height = double.tryParse(heightController.text) ?? -1;
+                      if (width == -1 || height == -1) {
+                        context.showSnackBarMessage(
+                          l10n.invalidImageSizeDimensionsMustBeNumbers,
+                        );
+                      } else if (width <= 0 || height <= 0) {
+                        context.showSnackBarMessage(
+                          l10n.canvasDimensionsMustBePositive,
+                        );
+                      } else {
+                        layers.canvasResize(
+                          width.toInt(),
+                          height.toInt(),
+                          layers.canvasResizePosition,
+                        );
 
-                      final ShellProvider shellProvider = ShellProvider.of(context, listen: false);
-                      shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-                      shellProvider.update();
+                        final ShellProvider shellProvider = ShellProvider.of(context, listen: false);
+                        shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+                        shellProvider.update();
 
-                      AppProvider.of(context, listen: false).update(); // <-- Add this line
-                      Navigator.pop(context);
-                    }
-                  },
-                  text: l10n.apply,
-                ),
+                        AppProvider.of(context, listen: false).update(); // <-- Add this line
+                        Navigator.pop(context);
+                      }
+                    },
+                    text: l10n.apply,
+                  ),
+                ],
               ),
             ],
           ),

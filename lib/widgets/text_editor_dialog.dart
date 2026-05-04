@@ -8,7 +8,7 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
-/// Modal dialog used to create or edit text with shared style controls.
+/// Bottom-sheet content used to create or edit text with shared style controls.
 class TextEditorDialog extends StatefulWidget {
   const TextEditorDialog({
     super.key,
@@ -36,7 +36,6 @@ class TextEditorDialog extends StatefulWidget {
 class _TextEditorDialogState extends State<TextEditorDialog> {
   late final TextEditingController _controller;
   late TextToolState _style;
-
   @override
   void initState() {
     super.initState();
@@ -54,162 +53,184 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
   Widget build(final BuildContext context) {
     final AppLocalizations l10n = context.l10n;
 
-    return AppDialog(
-      title: widget.title,
-      content: SizedBox(
-        width: AppLayout.dialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            AppTextField(
-              controller: _controller,
-              autofocus: true,
-              maxLines: null,
-              keyboardType: TextInputType.multiline,
-              hintText: l10n.enterYourTextHere,
-              textAlign: _style.textAlign,
-              style: TextStyle(
-                fontSize: _style.size,
-                color: _style.color,
-                fontWeight: _style.fontWeight,
-                fontStyle: _style.fontStyle,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xxl),
-            AppSlider(
-              label: l10n.fontSizeLabel,
-              valueLabel: _style.size.round().toString(),
-              value: _style.size,
-              min: AppSpacing.sm + AppMath.pair.toDouble(),
-              max: AppLimits.textSizeMax.toDouble(),
-              divisions: AppLimits.textSizeDivisions,
-              onChanged: (final double value) {
-                setState(() {
-                  _style.size = value;
-                });
-              },
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                AppButtonIcon(
-                  key: Keys.textEditorBoldButton,
-                  icon: AppSvgIcon(
-                    icon: AppIcon.formatBold,
-                    color: _style.fontWeight == FontWeight.bold ? AppPalette.blue : AppPalette.grey,
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xxl),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: AppLayout.sliderDialogWidth),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  AppText(
+                    widget.title,
+                    variant: AppTextVariant.title,
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _style.fontWeight = _style.fontWeight == FontWeight.bold ? FontWeight.normal : FontWeight.bold;
-                    });
-                  },
-                ),
-                AppButtonIcon(
-                  key: Keys.textEditorItalicButton,
-                  icon: AppSvgIcon(
-                    icon: AppIcon.formatItalic,
-                    color: _style.fontStyle == FontStyle.italic ? AppPalette.blue : AppPalette.grey,
+                  const SizedBox(height: AppSpacing.xl),
+                  AppTextField(
+                    controller: _controller,
+                    autofocus: true,
+                    maxLines: null,
+                    keyboardType: TextInputType.multiline,
+                    hintText: l10n.enterYourTextHere,
+                    textAlign: _style.textAlign,
+                    style: TextStyle(
+                      fontSize: _style.size,
+                      color: _style.color,
+                      fontWeight: _style.fontWeight,
+                      fontStyle: _style.fontStyle,
+                    ),
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _style.fontStyle = _style.fontStyle == FontStyle.italic ? FontStyle.normal : FontStyle.italic;
-                    });
-                  },
-                ),
-                const SizedBox(width: AppSpacing.md),
-                SizedBox(
-                  width: AppLayout.inputFieldWidth,
-                  child: AppDropdown<TextAlign>(
-                    key: Keys.textEditorAlignmentDropdown,
-                    value: _style.textAlign,
-                    items: <AppDropdownItem<TextAlign>>[
-                      AppDropdownItem<TextAlign>(
-                        value: TextAlign.left,
-                        child: Text(l10n.textAlignLeft),
-                      ),
-                      AppDropdownItem<TextAlign>(
-                        value: TextAlign.center,
-                        child: Text(l10n.textAlignCenter),
-                      ),
-                      AppDropdownItem<TextAlign>(
-                        value: TextAlign.right,
-                        child: Text(l10n.textAlignRight),
-                      ),
-                    ],
-                    onChanged: (final TextAlign? value) {
-                      if (value == null) {
-                        return;
-                      }
+                  const SizedBox(height: AppSpacing.xxl),
+                  AppSlider(
+                    label: l10n.fontSizeLabel,
+                    valueLabel: _style.size.round().toString(),
+                    value: _style.size,
+                    min: AppSpacing.sm + AppMath.pair.toDouble(),
+                    max: AppLimits.textSizeMax.toDouble(),
+                    divisions: AppLimits.textSizeDivisions,
+                    onChanged: (final double value) {
                       setState(() {
-                        _style.textAlign = value;
+                        _style.size = value;
                       });
                     },
                   ),
-                ),
-                const Spacer(),
-                Container(
-                  width: AppSpacing.huge,
-                  height: AppSpacing.huge,
-                  decoration: BoxDecoration(
-                    color: _style.color,
-                    border: Border.all(color: AppPalette.grey),
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                  ),
-                  child: AppButtonIcon(
-                    icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppPalette.white),
-                    onPressed: () {
-                      showColorPicker(
-                        context: context,
-                        title: l10n.textColor,
-                        color: _style.color,
-                        onSelectedColor: (final Color color) {
+                  const SizedBox(height: AppSpacing.sm),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      AppButtonIcon(
+                        key: Keys.textEditorBoldButton,
+                        icon: AppSvgIcon(
+                          icon: AppIcon.formatBold,
+                          color: _style.fontWeight == FontWeight.bold ? AppPalette.blue : AppPalette.grey,
+                        ),
+                        onPressed: () {
                           setState(() {
-                            _style.color = color;
+                            _style.fontWeight = _style.fontWeight == FontWeight.bold
+                                ? FontWeight.normal
+                                : FontWeight.bold;
                           });
                         },
-                      );
-                    },
+                      ),
+                      AppButtonIcon(
+                        key: Keys.textEditorItalicButton,
+                        icon: AppSvgIcon(
+                          icon: AppIcon.formatItalic,
+                          color: _style.fontStyle == FontStyle.italic ? AppPalette.blue : AppPalette.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _style.fontStyle = _style.fontStyle == FontStyle.italic
+                                ? FontStyle.normal
+                                : FontStyle.italic;
+                          });
+                        },
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      SizedBox(
+                        width: AppLayout.inputFieldWidth,
+                        child: AppDropdown<TextAlign>(
+                          key: Keys.textEditorAlignmentDropdown,
+                          value: _style.textAlign,
+                          items: <AppDropdownItem<TextAlign>>[
+                            AppDropdownItem<TextAlign>(
+                              value: TextAlign.left,
+                              child: Text(l10n.textAlignLeft),
+                            ),
+                            AppDropdownItem<TextAlign>(
+                              value: TextAlign.center,
+                              child: Text(l10n.textAlignCenter),
+                            ),
+                            AppDropdownItem<TextAlign>(
+                              value: TextAlign.right,
+                              child: Text(l10n.textAlignRight),
+                            ),
+                          ],
+                          onChanged: (final TextAlign? value) {
+                            if (value == null) {
+                              return;
+                            }
+                            setState(() {
+                              _style.textAlign = value;
+                            });
+                          },
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        width: AppSpacing.huge,
+                        height: AppSpacing.huge,
+                        decoration: BoxDecoration(
+                          color: _style.color,
+                          border: Border.all(color: AppPalette.grey),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: AppButtonIcon(
+                          icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppPalette.white),
+                          onPressed: () {
+                            showColorPicker(
+                              context: context,
+                              title: l10n.textColor,
+                              color: _style.color,
+                              onSelectedColor: (final Color color) {
+                                setState(() {
+                                  _style.color = color;
+                                });
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: AppSpacing.xl),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      if (widget.onDelete != null)
+                        AppButtonText(
+                          text: l10n.delete,
+                          onPressed: () {
+                            widget.onDelete!.call();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      AppButtonText(
+                        text: l10n.cancel,
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      AppButtonPrimary(
+                        text: widget.submitLabel,
+                        onPressed: _submitAndClose,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         ),
       ),
-      actions: <Widget>[
-        if (widget.onDelete != null)
-          AppButtonText(
-            text: l10n.delete,
-            onPressed: () {
-              widget.onDelete!.call();
-              Navigator.of(context).pop();
-            },
-          ),
-        AppButtonText(
-          text: l10n.cancel,
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        AppButtonText(
-          text: widget.submitLabel,
-          onPressed: () {
-            if (_controller.text.isNotEmpty) {
-              widget.onSubmitted(
-                _style.buildTextObject(
-                  text: _controller.text,
-                  position: widget.position,
-                ),
-              );
-            } else if (widget.onDelete != null) {
-              widget.onDelete!.call();
-            }
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
     );
+  }
+
+  /// Submits the current text (or triggers delete fallback) and closes.
+  void _submitAndClose() {
+    if (_controller.text.isNotEmpty) {
+      widget.onSubmitted(
+        _style.buildTextObject(
+          text: _controller.text,
+          position: widget.position,
+        ),
+      );
+    } else if (widget.onDelete != null) {
+      widget.onDelete!.call();
+    }
+    Navigator.of(context).pop();
   }
 }

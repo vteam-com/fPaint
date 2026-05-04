@@ -10,7 +10,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
-import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/text_editor_dialog.dart';
 import 'package:provider/single_child_widget.dart';
 
 import '../helpers/recovery_test_helpers.dart';
@@ -119,7 +119,7 @@ void main() {
 
     await tester.tap(find.byType(CanvasGestureHandler));
     await tester.pumpAndSettle();
-    expect(find.byType(AppDialog), findsOneWidget);
+    expect(find.byType(TextEditorDialog), findsOneWidget);
 
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();

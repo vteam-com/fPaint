@@ -116,7 +116,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
         ),
       ),
       actions: <Widget>[
-        AppButtonText(
+        AppButtonPrimary(
           onPressed: () => Navigator.of(context).pop(),
           text: _labelClose,
         ),
