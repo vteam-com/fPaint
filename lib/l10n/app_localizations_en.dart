@@ -473,6 +473,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get textColor => 'Text Color';
 
   @override
+  String get textAlignLeft => 'Left';
+
+  @override
+  String get textAlignCenter => 'Center';
+
+  @override
+  String get textAlignRight => 'Right';
+
+  @override
   String get tolerance => 'Tolerance';
 
   @override

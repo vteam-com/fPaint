@@ -638,6 +638,24 @@ abstract class AppLocalizations {
   /// **'Hex Color'**
   String get hexColor;
 
+  /// No description provided for @textAlignLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get textAlignLeft;
+
+  /// No description provided for @textAlignCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Center'**
+  String get textAlignCenter;
+
+  /// No description provided for @textAlignRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Right'**
+  String get textAlignRight;
+
   /// No description provided for @hexColorCopiedToClipboard.
   ///
   /// In en, this message translates to:
