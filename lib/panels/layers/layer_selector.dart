@@ -109,7 +109,7 @@ class LayerSelector extends StatelessWidget {
             onPressed: () => Navigator.pop(dialogContext),
             text: l10n.cancel,
           ),
-          AppButtonText(
+          AppButtonPrimary(
             key: Keys.layerRenameApplyButton,
             onPressed: () {
               Navigator.pop(dialogContext, controller.text);

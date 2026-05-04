@@ -57,7 +57,7 @@ Future<void> showAboutBox(final BuildContext context) async {
           ],
         ),
         actions: <Widget>[
-          AppButtonText(
+          AppButtonPrimary(
             onPressed: () => Navigator.pop(dialogContext),
             text: l10n.cancel,
           ),

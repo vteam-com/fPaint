@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/text_tool_state.dart';
@@ -52,8 +53,9 @@ class _TextEditorState extends State<TextEditor> {
   void _showEditTextDialog() {
     final AppLocalizations l10n = context.l10n;
 
-    showAppDialog<void>(
+    showAppBottomSheet<void>(
       context: context,
+      barrierColor: AppPalette.transparent,
       builder: (final BuildContext _) {
         return TextEditorDialog(
           title: l10n.editText,

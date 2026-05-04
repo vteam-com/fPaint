@@ -34,6 +34,7 @@ import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
+import 'package:fpaint/widgets/text_editor_dialog.dart';
 import 'package:image/image.dart' as img;
 
 /// Number of incremental steps used in human-like drag gestures.
@@ -1506,9 +1507,9 @@ Future<void> placeTextViaUI(
   await tapLikeHuman(tester, screenPosition);
   await tester.pumpAndSettle();
 
-  // Interact with the TextEditorDialog.
-  final Finder dialogFinder = find.byType(AppDialog);
-  expect(dialogFinder, findsOneWidget, reason: 'Text editor dialog should be visible');
+  // Interact with the text editor bottom sheet content.
+  final Finder dialogFinder = find.byType(TextEditorDialog);
+  expect(dialogFinder, findsOneWidget, reason: 'Text editor should be visible');
 
   // Enter text into the text field.
   final Finder textField = find.descendant(
@@ -1531,7 +1532,7 @@ Future<void> placeTextViaUI(
   // Tap the "Add Text" action button (find the TextButton, not the title).
   final Finder addTextButton = find.descendant(
     of: dialogFinder,
-    matching: find.widgetWithText(AppButtonText, 'Add Text'),
+    matching: find.widgetWithText(AppButtonPrimary, 'Add Text'),
   );
   await tester.tap(addTextButton.first);
   await tester.pumpAndSettle();

@@ -51,6 +51,9 @@ class MagnifyingEyeDropper extends StatefulWidget {
 
 /// The state for [MagnifyingEyeDropper].
 class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
+  /// Monotonic id used to ignore stale async color-sampling results.
+  int _colorSampleRequestId = 0;
+
   /// The selected color.
   Color? _selectedColor;
 
@@ -71,10 +74,19 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
 
   /// The width of the widget.
   final double widgetWidth = AppLayout.magnifierWidgetWidth;
-
   @override
   void initState() {
     super.initState();
+    _updateColor();
+  }
+
+  @override
+  void didUpdateWidget(covariant final MagnifyingEyeDropper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.pixelPosition != widget.pixelPosition || oldWidget.layers.cachedImage != widget.layers.cachedImage) {
+      _updateColor();
+    }
   }
 
   @override
@@ -82,8 +94,6 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
     if (widget.layers.cachedImage == null) {
       return const SizedBox();
     }
-
-    _updateColor();
 
     final double offsetFromCenter = (widgetWidth / 2) / magnifyFactor;
 
@@ -152,7 +162,13 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
             tooltip: context.l10n.apply,
             color: AppPalette.green,
             cursor: SystemMouseCursors.click,
-            onTap: () => widget.onColorPicked(_selectedColor!),
+            onTap: () {
+              final Color? selectedColor = _selectedColor;
+              if (selectedColor == null) {
+                return;
+              }
+              widget.onColorPicked(selectedColor);
+            },
             child: const AppSvgIcon(icon: AppIcon.check, color: AppPalette.white, size: AppLayout.iconSize),
           ),
         ],
@@ -163,10 +179,21 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   /// Updates the selected color.
   void _updateColor() async {
     if (widget.layers.cachedImage == null) {
+      if (mounted && _selectedColor != null) {
+        setState(() {
+          _selectedColor = null;
+        });
+      }
       return;
     }
 
+    final int requestId = ++_colorSampleRequestId;
+
     final Color? color = await widget.layers.getColorAtOffset(widget.pixelPosition);
+
+    if (!mounted || requestId != _colorSampleRequestId || color == _selectedColor) {
+      return;
+    }
 
     setState(() {
       _selectedColor = color;
