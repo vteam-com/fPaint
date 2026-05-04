@@ -467,6 +467,8 @@ class Keys {
   static const Key canvasSettingsAspectRatioToggleButton = Key('canvas-settings-aspect-ratio-toggle-button');
   static const Key canvasSettingsApplyButton = Key('canvas-settings-apply-button');
   static const Key textEditorBoldButton = Key('text-editor-bold-button');
+  static const Key textEditorItalicButton = Key('text-editor-italic-button');
+  static const Key textEditorAlignmentDropdown = Key('text-editor-alignment-dropdown');
   static const Key magnifyingEyeDropperCloseButton = Key('magnifying-eye-dropper-close-button');
   static const Key magnifyingEyeDropperConfirmButton = Key('magnifying-eye-dropper-confirm-button');
 

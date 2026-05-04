@@ -300,7 +300,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       if (appProvider.selectedAction == ActionType.text) {
         TextObject? selectedText;
 
-        for (final UserActionDrawing action in appProvider.layers.selectedLayer.actionStack) {
+        for (final UserActionDrawing action in appProvider.layers.selectedLayer.actionStack.reversed) {
           if (action.textObject != null && action.textObject!.containsPoint(adjustedPosition)) {
             selectedText = action.textObject;
             break;
@@ -308,11 +308,22 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         }
 
         if (selectedText != null) {
+          // Text selection is handled fully on pointer down; release active pointer
+          // in case the subsequent pointer up is consumed by the modal dialog.
+          _activePointerId = -1;
+          appProvider.textToolState.size = selectedText.size;
+          appProvider.textToolState.color = selectedText.color;
+          appProvider.textToolState.fontWeight = selectedText.fontWeight;
+          appProvider.textToolState.fontStyle = selectedText.fontStyle;
+          appProvider.textToolState.textAlign = selectedText.textAlign;
           appProvider.selectedTextObject = selectedText;
           appProvider.update();
           return;
         }
 
+        // Text creation opens a dialog on pointer down, so pointer up may not
+        // reach this listener. Clear active pointer to avoid locking tools.
+        _activePointerId = -1;
         _showTextDialog(appProvider, adjustedPosition);
         return;
       }
@@ -419,10 +430,13 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       context: context,
       builder: (final BuildContext _) {
         return TextEditorDialog(
-          initialFontSize: appProvider.brushSize,
-          initialColor: appProvider.brushColor,
+          title: context.l10n.addText,
+          submitLabel: context.l10n.addText,
           position: position,
-          onFinished: (final TextObject textObject) {
+          initialText: '',
+          initialStyle: appProvider.textToolState.copy(),
+          onSubmitted: (final TextObject textObject) {
+            appProvider.adoptTextToolStateFromObject(textObject);
             appProvider.recordExecuteDrawingActionToSelectedLayer(
               action: UserActionDrawing(
                 action: ActionType.text,

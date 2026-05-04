@@ -11,6 +11,7 @@ import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/image_placement_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
+import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -229,6 +230,22 @@ class AppProvider extends ChangeNotifier {
 
   /// The fill model.
   FillModel fillModel = FillModel();
+
+  /// The shared style state for the text tool.
+  late final TextToolState textToolState = TextToolState(
+    size: preferences.brushSize,
+    color: preferences.brushColor,
+  );
+
+  /// Copies the style of [textObject] into the shared text tool state.
+  void adoptTextToolStateFromObject(final TextObject textObject) {
+    textToolState.size = textObject.size;
+    textToolState.color = textObject.color;
+    textToolState.fontWeight = textObject.fontWeight;
+    textToolState.fontStyle = textObject.fontStyle;
+    textToolState.textAlign = textObject.textAlign;
+    update();
+  }
 
   //-------------------------
   /// The eye drop position for the brush.

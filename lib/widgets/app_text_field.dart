@@ -39,6 +39,7 @@ class AppTextField extends StatefulWidget {
 class _AppTextFieldState extends State<AppTextField> {
   late TextEditingController _controller;
   late FocusNode _focusNode;
+  late bool _isTextEmpty;
   bool _ownsController = false;
   @override
   void initState() {
@@ -50,6 +51,7 @@ class _AppTextFieldState extends State<AppTextField> {
       _ownsController = true;
     }
     _focusNode = FocusNode();
+    _isTextEmpty = _controller.text.isEmpty;
     _controller.addListener(_onTextChanged);
   }
 
@@ -78,6 +80,7 @@ class _AppTextFieldState extends State<AppTextField> {
         _controller = TextEditingController();
         _ownsController = true;
       }
+      _isTextEmpty = _controller.text.isEmpty;
       _controller.addListener(_onTextChanged);
     }
   }
@@ -100,7 +103,7 @@ class _AppTextFieldState extends State<AppTextField> {
         child: Stack(
           alignment: Alignment.centerLeft,
           children: <Widget>[
-            if (_controller.text.isEmpty && widget.hintText != null)
+            if (_isTextEmpty && widget.hintText != null)
               IgnorePointer(
                 child: Text(
                   widget.hintText!,
@@ -135,6 +138,12 @@ class _AppTextFieldState extends State<AppTextField> {
   }
 
   void _onTextChanged() {
+    final bool nextIsEmpty = _controller.text.isEmpty;
+    if (_isTextEmpty != nextIsEmpty) {
+      setState(() {
+        _isTextEmpty = nextIsEmpty;
+      });
+    }
     widget.onChanged?.call(_controller.text);
   }
 }

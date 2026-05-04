@@ -85,5 +85,26 @@ void main() {
       await tester.pump();
       expect(submitted, 'Submit me');
     });
+
+    testWidgets('hint text hides while typing and returns when cleared', (final WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: AppTextField(hintText: 'Enter text'),
+        ),
+      );
+
+      expect(find.text('Enter text'), findsOneWidget);
+
+      await tester.enterText(find.byType(EditableText), 'Hello');
+      await tester.pump();
+
+      expect(find.text('Enter text'), findsNothing);
+
+      await tester.enterText(find.byType(EditableText), '');
+      await tester.pump();
+
+      expect(find.text('Enter text'), findsOneWidget);
+    });
   });
 }

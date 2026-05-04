@@ -3,49 +3,45 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/text_object.dart';
+import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
-/// Modal dialog used to create a new text object with style settings.
+/// Modal dialog used to create or edit text with shared style controls.
 class TextEditorDialog extends StatefulWidget {
   const TextEditorDialog({
     super.key,
-    required this.initialFontSize,
-    required this.initialColor,
+    required this.title,
+    required this.submitLabel,
     required this.position,
-    required this.onFinished,
+    required this.initialText,
+    required this.initialStyle,
+    required this.onSubmitted,
+    this.onDelete,
   });
 
-  final Color initialColor;
-
-  final double initialFontSize;
-
-  final ValueChanged<TextObject> onFinished;
-
+  final TextToolState initialStyle;
+  final String initialText;
+  final VoidCallback? onDelete;
+  final ValueChanged<TextObject> onSubmitted;
   final Offset position;
+  final String submitLabel;
+  final String title;
 
   @override
   State<TextEditorDialog> createState() => _TextEditorDialogState();
 }
 
 class _TextEditorDialogState extends State<TextEditorDialog> {
-  late TextEditingController _controller;
-
-  late double _fontSize;
-
-  FontStyle _fontStyle = FontStyle.normal;
-
-  FontWeight _fontWeight = FontWeight.normal;
-
-  late Color _textColor;
+  late final TextEditingController _controller;
+  late TextToolState _style;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
-    _fontSize = widget.initialFontSize;
-    _textColor = widget.initialColor;
+    _controller = TextEditingController(text: widget.initialText);
+    _style = widget.initialStyle.copy();
   }
 
   @override
@@ -59,96 +55,118 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
     final AppLocalizations l10n = context.l10n;
 
     return AppDialog(
-      title: l10n.addText,
+      title: widget.title,
       content: SizedBox(
         width: AppLayout.dialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            // Text input field
             AppTextField(
               controller: _controller,
               autofocus: true,
               maxLines: null,
               keyboardType: TextInputType.multiline,
               hintText: l10n.enterYourTextHere,
+              textAlign: _style.textAlign,
               style: TextStyle(
-                fontSize: _fontSize,
-                color: _textColor,
-                fontWeight: _fontWeight,
-                fontStyle: _fontStyle,
+                fontSize: _style.size,
+                color: _style.color,
+                fontWeight: _style.fontWeight,
+                fontStyle: _style.fontStyle,
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
-
-            // Font size control
             AppSlider(
               label: l10n.fontSizeLabel,
-              valueLabel: _fontSize.round().toString(),
-              value: _fontSize,
+              valueLabel: _style.size.round().toString(),
+              value: _style.size,
               min: AppSpacing.sm + AppMath.pair.toDouble(),
               max: AppLimits.textSizeMax.toDouble(),
               divisions: AppLimits.textSizeDivisions,
               onChanged: (final double value) {
                 setState(() {
-                  _fontSize = value;
+                  _style.size = value;
                 });
               },
             ),
             const SizedBox(height: AppSpacing.sm),
-
-            // Style controls
             Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                // Bold toggle
                 AppButtonIcon(
                   key: Keys.textEditorBoldButton,
                   icon: AppSvgIcon(
                     icon: AppIcon.formatBold,
-                    color: _fontWeight == FontWeight.bold ? AppPalette.blue : AppPalette.grey,
+                    color: _style.fontWeight == FontWeight.bold ? AppPalette.blue : AppPalette.grey,
                   ),
                   onPressed: () {
                     setState(() {
-                      _fontWeight = _fontWeight == FontWeight.bold ? FontWeight.normal : FontWeight.bold;
+                      _style.fontWeight = _style.fontWeight == FontWeight.bold ? FontWeight.normal : FontWeight.bold;
                     });
                   },
                 ),
-
-                // Italic toggle
                 AppButtonIcon(
+                  key: Keys.textEditorItalicButton,
                   icon: AppSvgIcon(
                     icon: AppIcon.formatItalic,
-                    color: _fontStyle == FontStyle.italic ? AppPalette.blue : AppPalette.grey,
+                    color: _style.fontStyle == FontStyle.italic ? AppPalette.blue : AppPalette.grey,
                   ),
                   onPressed: () {
                     setState(() {
-                      _fontStyle = _fontStyle == FontStyle.italic ? FontStyle.normal : FontStyle.italic;
+                      _style.fontStyle = _style.fontStyle == FontStyle.italic ? FontStyle.normal : FontStyle.italic;
                     });
                   },
                 ),
-
+                const SizedBox(width: AppSpacing.md),
+                SizedBox(
+                  width: AppLayout.inputFieldWidth,
+                  child: AppDropdown<TextAlign>(
+                    key: Keys.textEditorAlignmentDropdown,
+                    value: _style.textAlign,
+                    items: <AppDropdownItem<TextAlign>>[
+                      AppDropdownItem<TextAlign>(
+                        value: TextAlign.left,
+                        child: Text(l10n.textAlignLeft),
+                      ),
+                      AppDropdownItem<TextAlign>(
+                        value: TextAlign.center,
+                        child: Text(l10n.textAlignCenter),
+                      ),
+                      AppDropdownItem<TextAlign>(
+                        value: TextAlign.right,
+                        child: Text(l10n.textAlignRight),
+                      ),
+                    ],
+                    onChanged: (final TextAlign? value) {
+                      if (value == null) {
+                        return;
+                      }
+                      setState(() {
+                        _style.textAlign = value;
+                      });
+                    },
+                  ),
+                ),
                 const Spacer(),
-
-                // Color picker button
                 Container(
                   width: AppSpacing.huge,
                   height: AppSpacing.huge,
                   decoration: BoxDecoration(
-                    color: _textColor,
+                    color: _style.color,
                     border: Border.all(color: AppPalette.grey),
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: AppButtonIcon(
                     icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppPalette.white),
-                    onPressed: () async {
+                    onPressed: () {
                       showColorPicker(
                         context: context,
                         title: l10n.textColor,
-                        color: _textColor,
+                        color: _style.color,
                         onSelectedColor: (final Color color) {
                           setState(() {
-                            _textColor = color;
+                            _style.color = color;
                           });
                         },
                       );
@@ -161,6 +179,14 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
         ),
       ),
       actions: <Widget>[
+        if (widget.onDelete != null)
+          AppButtonText(
+            text: l10n.delete,
+            onPressed: () {
+              widget.onDelete!.call();
+              Navigator.of(context).pop();
+            },
+          ),
         AppButtonText(
           text: l10n.cancel,
           onPressed: () {
@@ -168,19 +194,17 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
           },
         ),
         AppButtonText(
-          text: l10n.addText,
+          text: widget.submitLabel,
           onPressed: () {
             if (_controller.text.isNotEmpty) {
-              widget.onFinished(
-                TextObject(
+              widget.onSubmitted(
+                _style.buildTextObject(
                   text: _controller.text,
                   position: widget.position,
-                  color: _textColor,
-                  size: _fontSize,
-                  fontWeight: _fontWeight,
-                  fontStyle: _fontStyle,
                 ),
               );
+            } else if (widget.onDelete != null) {
+              widget.onDelete!.call();
             }
             Navigator.of(context).pop();
           },

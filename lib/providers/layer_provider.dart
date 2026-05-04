@@ -298,6 +298,7 @@ class LayerProvider extends ChangeNotifier {
           fontFamily: t.fontFamily,
           fontWeight: t.fontWeight,
           fontStyle: t.fontStyle,
+          textAlign: t.textAlign,
         );
       }
 
@@ -443,6 +444,7 @@ class LayerProvider extends ChangeNotifier {
       fontFamily: textObject.fontFamily,
       fontWeight: textObject.fontWeight,
       fontStyle: textObject.fontStyle,
+      textAlign: textObject.textAlign,
     );
   }
 

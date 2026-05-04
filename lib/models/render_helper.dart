@@ -452,37 +452,11 @@ void renderText(
   final Canvas canvas,
   final TextObject textObject,
 ) {
-  if (textObject.text.isEmpty || textObject.text == 'Type here...') {
+  if (textObject.text.isEmpty) {
     return; // Don't render empty or placeholder text
   }
 
-  final ui.ParagraphBuilder paragraphBuilder =
-      ui.ParagraphBuilder(
-          ui.ParagraphStyle(
-            textAlign: TextAlign.left,
-            fontFamily: textObject.fontFamily,
-            fontSize: textObject.size,
-            height: AppVisual.iconScale, // Better line height for readability
-          ),
-        )
-        ..pushStyle(
-          ui.TextStyle(
-            color: textObject.color,
-            fontFamily: textObject.fontFamily,
-            fontWeight: textObject.fontWeight,
-            fontStyle: textObject.fontStyle,
-            fontSize: textObject.size,
-          ),
-        )
-        ..addText(textObject.text);
-
-  final ui.Paragraph paragraph = paragraphBuilder.build();
-
-  // Use a more reasonable max width for text layout
-  final double maxWidth = textObject.text.length > AppLayout.textLengthThreshold
-      ? AppLayout.textMaxWidthCompact
-      : AppLayout.textMaxWidthNormal;
-  paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
+  final ui.Paragraph paragraph = textObject.layoutParagraph();
 
   canvas.drawParagraph(paragraph, textObject.position);
 }
