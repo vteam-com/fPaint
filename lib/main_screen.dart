@@ -10,6 +10,7 @@ import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:multi_split_view/multi_split_view.dart';
@@ -75,14 +76,31 @@ class MainScreen extends StatelessWidget {
               right: AppSpacing.xl,
               bottom: AppSpacing.xl,
               child: shellMode == ShellMode.hidden
-                  ? myFloatButton(
-                      icon: AppIcon.moreVert,
+                  ? AppButtonIcon(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints.tightFor(
+                        width: AppLayout.toolbarButtonSize,
+                        height: AppLayout.toolbarButtonSize,
+                      ),
                       onPressed: () {
                         Future<void>.microtask(() {
                           shellProvider.shellMode = ShellMode.full;
                           shellProvider.update();
                         });
                       },
+                      icon: const SizedBox(
+                        width: AppLayout.toolbarButtonSize,
+                        height: AppLayout.toolbarButtonSize,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: AppColors.floatingButtonBackground,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: AppSvgIcon(icon: AppIcon.moreVert),
+                          ),
+                        ),
+                      ),
                     )
                   : floatingActionButtons(context, shellProvider, appProvider),
             ),

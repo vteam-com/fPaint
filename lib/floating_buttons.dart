@@ -70,40 +70,68 @@ Widget floatingActionButtons(
   );
 }
 
+/// Builds the selector toggle floating action button.
 Widget _buildSelectorToggleButton({
   required final AppProvider appProvider,
   required final AppLocalizations l10n,
   required final bool hasActiveSelection,
 }) {
-  return myFloatButton(
+  return AppButtonIcon(
     key: Keys.floatActionSelector,
-    icon: hasActiveSelection ? AppIcon.selectorCancel : AppIcon.selector,
     tooltip: hasActiveSelection ? l10n.cancel : l10n.toolSelector,
-    onPressed: appProvider.toggleSelectionOverlayFromFab,
+    padding: EdgeInsets.zero,
+    constraints: const BoxConstraints.tightFor(
+      width: AppLayout.toolbarButtonSize,
+      height: AppLayout.toolbarButtonSize,
+    ),
+    onPressed: () {
+      Future<void>.microtask(() => appProvider.toggleSelectionOverlayFromFab());
+    },
+    icon: _floatingButtonContent(
+      icon: hasActiveSelection ? AppIcon.selectorCancel : AppIcon.selector,
+    ),
   );
 }
 
 /// Builds the undo FAB using current undo history tooltip content.
 Widget _buildUndoButton(final AppProvider appProvider) {
-  return myFloatButton(
+  return _buildHistoryButton(
     key: Keys.floatActionUndo,
     icon: AppIcon.undo,
     tooltip: appProvider.undoProvider.getHistoryStringForUndo(),
-    onPressed: () {
-      Future<void>.microtask(() => appProvider.undoAction());
-    },
+    action: appProvider.undoAction,
   );
 }
 
 /// Builds the redo FAB using current redo history tooltip content.
 Widget _buildRedoButton(final AppProvider appProvider) {
-  return myFloatButton(
+  return _buildHistoryButton(
     key: Keys.floatActionRedo,
     icon: AppIcon.redo,
     tooltip: appProvider.undoProvider.getHistoryStringForRedo(),
+    action: appProvider.redoAction,
+  );
+}
+
+/// Builds a shared floating action button for undo/redo history actions.
+Widget _buildHistoryButton({
+  required final Key key,
+  required final AppIcon icon,
+  required final String tooltip,
+  required final void Function() action,
+}) {
+  return AppButtonIcon(
+    key: key,
+    tooltip: tooltip,
+    padding: EdgeInsets.zero,
+    constraints: const BoxConstraints.tightFor(
+      width: AppLayout.toolbarButtonSize,
+      height: AppLayout.toolbarButtonSize,
+    ),
     onPressed: () {
-      Future<void>.microtask(() => appProvider.redoAction());
+      Future<void>.microtask(action);
     },
+    icon: _floatingButtonContent(icon: icon),
   );
 }
 
@@ -127,18 +155,30 @@ Widget _buildMobileFabRow({
       if (!shellProvider.showMenu && canUndo) undoButton,
       if (!shellProvider.showMenu && canRedo) redoButton,
       if (!shellProvider.showMenu)
-        myFloatButton(
+        AppButtonIcon(
           key: Keys.floatActionMenuToggle,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(
+            width: AppLayout.toolbarButtonSize,
+            height: AppLayout.toolbarButtonSize,
+          ),
           onPressed: () {
-            shellProvider.showMenu = !shellProvider.showMenu;
+            Future<void>.microtask(() {
+              shellProvider.showMenu = !shellProvider.showMenu;
+            });
           },
-          child: AppSvgIcon(icon: appProvider.selectedAction.icon, isSelected: false),
+          icon: _floatingButtonContent(
+            child: AppSvgIcon(icon: appProvider.selectedAction.icon, isSelected: false),
+          ),
         ),
       if (!shellProvider.showMenu)
-        myFloatButton(
-          icon: AppIcon.colorLens,
-          foregroundColor: appProvider.brushColor,
+        AppButtonIcon(
           tooltip: l10n.colorLabel,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(
+            width: AppLayout.toolbarButtonSize,
+            height: AppLayout.toolbarButtonSize,
+          ),
           onPressed: () {
             showColorPicker(
               context: context,
@@ -149,14 +189,25 @@ Widget _buildMobileFabRow({
               },
             );
           },
+          icon: _floatingButtonContent(
+            icon: AppIcon.colorLens,
+            foregroundColor: appProvider.brushColor,
+          ),
         ),
       if (!shellProvider.showMenu) selectorToggleButton,
       if (shellProvider.showMenu)
-        myFloatButton(
-          icon: AppIcon.close,
+        AppButtonIcon(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints.tightFor(
+            width: AppLayout.toolbarButtonSize,
+            height: AppLayout.toolbarButtonSize,
+          ),
           onPressed: () {
-            shellProvider.showMenu = !shellProvider.showMenu;
+            Future<void>.microtask(() {
+              shellProvider.showMenu = !shellProvider.showMenu;
+            });
           },
+          icon: _floatingButtonContent(icon: AppIcon.close),
         ),
     ],
   );
@@ -181,105 +232,113 @@ Widget _buildVerticalFabColumn({
       selectorToggleButton,
 
       // Zoom in
-      myFloatButton(
+      AppButtonIcon(
         key: Keys.floatActionZoomIn,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(
+          width: AppLayout.toolbarButtonSize,
+          height: AppLayout.toolbarButtonSize,
+        ),
         onPressed: () {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-          appProvider.applyScaleToCanvas(
-            scaleDelta: AppVisual.enlarge,
-            anchorPoint: appProvider.canvasCenter,
-          );
+          Future<void>.microtask(() {
+            shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+            appProvider.applyScaleToCanvas(
+              scaleDelta: AppVisual.enlarge,
+              anchorPoint: appProvider.canvasCenter,
+            );
+          });
         },
-        icon: AppIcon.zoomIn,
+        icon: _floatingButtonContent(icon: AppIcon.zoomIn),
       ),
 
       /// Center and fit image
-      myFloatButton(
+      AppButtonIcon(
         key: Keys.floatActionCenter,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(
+          width: AppLayout.toolbarButtonSize,
+          height: AppLayout.toolbarButtonSize,
+        ),
         onPressed: () {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
-          appProvider.update();
-          // Its still unclear why but this is needed to update the canvas and the Selectors/Fill widget correctly
-          Future<void>.delayed(const Duration(milliseconds: AppLimits.percentMax), () {
+          Future<void>.microtask(() {
+            shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
             appProvider.update();
+            // Its still unclear why but this is needed to update the canvas and the Selectors/Fill widget correctly
+            Future<void>.delayed(const Duration(milliseconds: AppLimits.percentMax), () {
+              appProvider.update();
+            });
           });
         },
-        child: AppText(
-          _canvasZoomAndSizeFormat
-              .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
-              .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
-              .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
-          textAlign: TextAlign.center,
-          variant: AppTextVariant.label,
-          color: AppColors.floatingButtonForeground,
+        icon: _floatingButtonContent(
+          child: AppText(
+            _canvasZoomAndSizeFormat
+                .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
+                .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
+                .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
+            textAlign: TextAlign.center,
+            variant: AppTextVariant.label,
+            color: AppColors.floatingButtonForeground,
+          ),
         ),
       ),
 
       /// Zoom out
-      myFloatButton(
+      AppButtonIcon(
         key: Keys.floatActionZoomOut,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(
+          width: AppLayout.toolbarButtonSize,
+          height: AppLayout.toolbarButtonSize,
+        ),
         onPressed: () {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-          appProvider.applyScaleToCanvas(
-            scaleDelta: AppVisual.shrink,
-            anchorPoint: appProvider.canvasCenter,
-          );
+          Future<void>.microtask(() {
+            shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+            appProvider.applyScaleToCanvas(
+              scaleDelta: AppVisual.shrink,
+              anchorPoint: appProvider.canvasCenter,
+            );
+          });
         },
-        icon: AppIcon.zoomOut,
+        icon: _floatingButtonContent(icon: AppIcon.zoomOut),
       ),
 
       /// Show/Hide floating action panel
-      myFloatButton(
+      AppButtonIcon(
         key: Keys.floatActionToggle,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(
+          width: AppLayout.toolbarButtonSize,
+          height: AppLayout.toolbarButtonSize,
+        ),
         onPressed: () {
-          shellProvider.shellMode = ShellMode.hidden;
-          shellProvider.update();
+          Future<void>.microtask(() {
+            shellProvider.shellMode = ShellMode.hidden;
+            shellProvider.update();
+          });
         },
-        icon: AppIcon.arrowDropDown,
+        icon: _floatingButtonContent(icon: AppIcon.arrowDropDown),
       ),
     ],
   );
 }
 
-/// Creates a customized floating action button with specified properties.
-///
-/// The [icon] parameter specifies the icon to display on the button.
-/// The [foregroundColor] parameter specifies the color of the icon.
-/// The [tooltip] parameter specifies the text to display when the button is hovered over.
-/// The [onPressed] parameter specifies the callback function to execute when the button is pressed.
-/// The [child] parameter specifies an optional widget to display on the button instead of an icon.
-Widget myFloatButton({
-  final Key? key,
+/// Builds the shared circular visual content used by floating action buttons.
+Widget _floatingButtonContent({
   final AppIcon? icon,
   final Color foregroundColor = AppPalette.white,
-  final String? tooltip,
-  required final void Function() onPressed,
   final Widget? child,
 }) {
-  final Widget button = GestureDetector(
-    key: key,
-    onTap: () {
-      Future<void>.microtask(() => onPressed());
-    },
-    child: MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: SizedBox(
-        width: AppLayout.toolbarButtonSize,
-        height: AppLayout.toolbarButtonSize,
-        child: DecoratedBox(
-          decoration: const BoxDecoration(
-            color: AppColors.floatingButtonBackground,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: child ?? AppSvgIcon(icon: icon!, color: foregroundColor),
-          ),
-        ),
+  return SizedBox(
+    width: AppLayout.toolbarButtonSize,
+    height: AppLayout.toolbarButtonSize,
+    child: DecoratedBox(
+      decoration: const BoxDecoration(
+        color: AppColors.floatingButtonBackground,
+        shape: BoxShape.circle,
+      ),
+      child: Center(
+        child: child ?? AppSvgIcon(icon: icon!, color: foregroundColor),
       ),
     ),
   );
-  if (tooltip != null) {
-    return AppTooltip(message: tooltip, child: button);
-  }
-  return button;
 }

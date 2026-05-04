@@ -8,6 +8,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -562,11 +563,46 @@ void main() {
     });
   });
 
-  group('myFloatButton', () {
+  Widget buildFloatingIconButtonForTest({
+    final Key? key,
+    final AppIcon? icon,
+    final Color foregroundColor = AppPalette.white,
+    final String? tooltip,
+    required final VoidCallback onPressed,
+    final Widget? child,
+  }) {
+    return AppButtonIcon(
+      key: key,
+      tooltip: tooltip,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(
+        width: AppLayout.toolbarButtonSize,
+        height: AppLayout.toolbarButtonSize,
+      ),
+      onPressed: () {
+        Future<void>.microtask(onPressed);
+      },
+      icon: SizedBox(
+        width: AppLayout.toolbarButtonSize,
+        height: AppLayout.toolbarButtonSize,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            color: AppColors.floatingButtonBackground,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: child ?? AppSvgIcon(icon: icon!, color: foregroundColor),
+          ),
+        ),
+      ),
+    );
+  }
+
+  group('floating action AppButtonIcon', () {
     testWidgets('renders with icon', (final WidgetTester tester) async {
       await tester.pumpWidget(
         buildTestWidget(
-          child: myFloatButton(
+          child: buildFloatingIconButtonForTest(
             icon: AppIcon.undo,
             onPressed: () {},
           ),
@@ -580,7 +616,7 @@ void main() {
     testWidgets('renders with custom child widget', (final WidgetTester tester) async {
       await tester.pumpWidget(
         buildTestWidget(
-          child: myFloatButton(
+          child: buildFloatingIconButtonForTest(
             onPressed: () {},
             child: const Text('Test'),
           ),
@@ -595,7 +631,7 @@ void main() {
       bool pressed = false;
       await tester.pumpWidget(
         buildTestWidget(
-          child: myFloatButton(
+          child: buildFloatingIconButtonForTest(
             icon: AppIcon.redo,
             onPressed: () => pressed = true,
           ),
@@ -613,7 +649,7 @@ void main() {
       const Key testKey = Key('test-float-btn');
       await tester.pumpWidget(
         buildTestWidget(
-          child: myFloatButton(
+          child: buildFloatingIconButtonForTest(
             key: testKey,
             icon: AppIcon.zoomIn,
             onPressed: () {},
@@ -628,7 +664,7 @@ void main() {
     testWidgets('wraps in tooltip when tooltip is provided', (final WidgetTester tester) async {
       await tester.pumpWidget(
         buildTestWidget(
-          child: myFloatButton(
+          child: buildFloatingIconButtonForTest(
             icon: AppIcon.undo,
             tooltip: 'Undo action',
             onPressed: () {},
@@ -644,7 +680,7 @@ void main() {
     testWidgets('has circular decoration', (final WidgetTester tester) async {
       await tester.pumpWidget(
         buildTestWidget(
-          child: myFloatButton(
+          child: buildFloatingIconButtonForTest(
             icon: AppIcon.redo,
             onPressed: () {},
           ),
@@ -663,7 +699,7 @@ void main() {
     testWidgets('has correct button size', (final WidgetTester tester) async {
       await tester.pumpWidget(
         buildTestWidget(
-          child: myFloatButton(
+          child: buildFloatingIconButtonForTest(
             icon: AppIcon.undo,
             onPressed: () {},
           ),
