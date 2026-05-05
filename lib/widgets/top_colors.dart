@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
@@ -17,7 +18,7 @@ import 'package:fpaint/widgets/transparent_background.dart';
 ///
 /// The widget can be displayed in a minimal mode, which removes some
 /// of the UI elements.
-class TopColors extends StatelessWidget {
+class TopColors extends StatefulWidget {
   /// Creates a [TopColors] widget.
   ///
   /// The [colorUsages] parameter specifies the list of [ColorUsage] objects to display.
@@ -30,7 +31,13 @@ class TopColors extends StatelessWidget {
     required this.onRefresh,
     required this.onColorPicked,
     this.minimal = false,
+    this.showHeader = true,
+    this.autoRefreshOnIdle = false,
+    this.refreshRevision = 0,
   });
+
+  /// Whether the widget should refresh automatically after idle.
+  final bool autoRefreshOnIdle;
 
   /// The list of [ColorUsage] objects to display.
   final List<ColorUsage> colorUsages;
@@ -43,6 +50,39 @@ class TopColors extends StatelessWidget {
 
   /// A callback that is called when the user refreshes the list of colors.
   final VoidCallback onRefresh;
+
+  /// Monotonic token that changes when canvas content affecting top colors changes.
+  final int refreshRevision;
+
+  /// Whether to display the title and refresh row.
+  final bool showHeader;
+  @override
+  State<TopColors> createState() => _TopColorsState();
+}
+
+class _TopColorsState extends State<TopColors> {
+  final Debouncer _refreshDebouncer = Debouncer();
+  int _scheduledRefreshRevision = 0;
+  @override
+  void initState() {
+    super.initState();
+    _scheduleAutoRefreshIfNeeded();
+  }
+
+  @override
+  void dispose() {
+    _refreshDebouncer.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(final TopColors oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.refreshRevision != widget.refreshRevision ||
+        oldWidget.autoRefreshOnIdle != widget.autoRefreshOnIdle) {
+      _scheduleAutoRefreshIfNeeded();
+    }
+  }
 
   @override
   Widget build(final BuildContext context) {
@@ -63,32 +103,32 @@ class TopColors extends StatelessWidget {
 
       return ColorPreview(
         color: colorUsed.color,
-        minimal: minimal,
+        minimal: widget.minimal,
         text: colorAsHex,
         tooltipText: tooltipText,
         onPressed: () {
-          onColorPicked(colorUsed.color);
+          widget.onColorPicked(colorUsed.color);
         },
       );
     }).toList();
 
     return Column(
       children: <Widget>[
-        if (minimal) const AppDivider(color: AppColors.black),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            if (!minimal) AppText(l10n.topColors(colorUsages.length)),
-            AppButtonIcon(
-              icon: const AppSvgIcon(icon: AppIcon.refresh),
-              onPressed: onRefresh,
-            ),
-          ],
-        ),
+        if (widget.showHeader)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (!widget.minimal) AppText(l10n.topColors(widget.colorUsages.length)),
+              AppButtonIcon(
+                icon: const AppSvgIcon(icon: AppIcon.refresh),
+                onPressed: widget.onRefresh,
+              ),
+            ],
+          ),
         IntrinsicHeight(
           child: transparentPaperContainer(
             Padding(
-              padding: EdgeInsets.all(minimal ? 0 : AppSpacing.small),
+              padding: EdgeInsets.all(widget.minimal ? 0 : AppSpacing.small),
               child: Wrap(
                 spacing: 1,
                 runSpacing: 1,
@@ -112,7 +152,7 @@ class TopColors extends StatelessWidget {
     final Map<int, List<ColorUsage>> groupedByHue = <int, List<ColorUsage>>{};
 
     // Group colors by hue similarity (using a 15-degree threshold)
-    for (final ColorUsage usage in colorUsages) {
+    for (final ColorUsage usage in widget.colorUsages) {
       final double hue = HSVColor.fromColor(usage.color).hue;
       final int hueKey = (hue / 15).round() * 15; // Grouping by 15-degree steps
 
@@ -149,5 +189,21 @@ class TopColors extends StatelessWidget {
 
     // Flatten the sorted groups into a final sorted list
     return sortedGroups.expand((final List<ColorUsage> group) => group).toList();
+  }
+
+  /// Debounces a refresh so the top-colors list updates after canvas edits go idle.
+  void _scheduleAutoRefreshIfNeeded() {
+    if (!widget.autoRefreshOnIdle || widget.refreshRevision <= _scheduledRefreshRevision) {
+      return;
+    }
+
+    final int refreshRevision = widget.refreshRevision;
+    _refreshDebouncer.run(() {
+      if (!mounted || refreshRevision < widget.refreshRevision) {
+        return;
+      }
+      _scheduledRefreshRevision = refreshRevision;
+      widget.onRefresh();
+    });
   }
 }

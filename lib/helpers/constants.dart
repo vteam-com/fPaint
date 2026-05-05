@@ -70,6 +70,11 @@ class AppColors {
   static const Color panelBackground = Color(0xFF2D2D2D); // Side panel background
   static const Color divider = grey800; // Divider color
 
+  // Shell chrome colors (main frame + split dividers)
+  static const Color shellChromeBackground = background;
+  static const Color shellChromeDivider = divider;
+  static const Color shellChromeDividerHighlight = grey700;
+
   // Button colors
   static const Color floatingButtonBackground = Color(0xFF424242); // Floating button background
   static const Color floatingButtonForeground = white;

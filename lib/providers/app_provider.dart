@@ -129,12 +129,14 @@ class AppProvider extends ChangeNotifier {
   /// Undoes an action.
   void undoAction() {
     _undoProvider.undo();
+    layers.update();
     update();
   }
 
   /// Redoes an action.
   void redoAction() {
     _undoProvider.redo();
+    layers.update();
     update();
   }
 

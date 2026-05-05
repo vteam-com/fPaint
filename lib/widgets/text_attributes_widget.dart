@@ -62,7 +62,7 @@ class TextAttributesWidget extends StatelessWidget {
                   },
                 ),
         ),
-        separator(),
+
         ToolAttributeWidget(
           compact: minimal,
           name: l10n.contentAlignment,
@@ -125,7 +125,7 @@ class TextAttributesWidget extends StatelessWidget {
                   },
                 ),
         ),
-        separator(),
+
         // Font color
         ToolAttributeWidget(
           compact: minimal,
@@ -159,12 +159,4 @@ class TextAttributesWidget extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Builds a visual divider between text attribute controls.
-Widget separator() {
-  return const AppDivider(
-    height: AppStroke.thin,
-    color: AppColors.black,
-  );
 }

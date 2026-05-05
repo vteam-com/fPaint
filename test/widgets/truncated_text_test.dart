@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/widgets/truncated_text.dart';
 
 void main() {
@@ -72,8 +73,8 @@ void main() {
       );
 
       final Text textWidget = tester.widget<Text>(find.text('Test'));
-      expect(textWidget.style?.fontSize, 10.0);
-      expect(textWidget.style?.color, const Color(0xFFFFFFFF));
+      expect(textWidget.style?.fontSize, AppFontSize.small);
+      expect(textWidget.style?.color, AppColors.white);
     });
 
     testWidgets('uses SizedBox with infinite width', (final WidgetTester tester) async {
