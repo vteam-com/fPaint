@@ -537,6 +537,7 @@ class ToolsPanel extends StatelessWidget {
                     },
                   ),
 
+                if (appProvider.selectorModel.isVisible) const AppDivider(),
                 if (appProvider.selectorModel.isVisible)
                   _EffectsSection(
                     minimal: minimal,
@@ -810,6 +811,7 @@ class _EffectsSectionState extends State<_EffectsSection> {
               ),
           ],
         ),
+        if (hasEffectPreview) const AppDivider(),
         if (hasEffectPreview)
           EffectIntensityControls(
             key: ValueKey<SelectionEffect?>(selectedEffect),

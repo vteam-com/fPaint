@@ -308,7 +308,9 @@ const Offset _birdLine4End = Offset(56, 18);
 const String _signatureLayerName = 'Signature';
 
 // Post-crop vignette
-const double _vignetteIntensity = 0.4;
+const double _vignetteIntensity = 0.3;
+
+// Text
 const String _signatureText = 'fPaint';
 const String _signatureFontFamily = 'Inter';
 const double _signatureFontSize = 24.0;

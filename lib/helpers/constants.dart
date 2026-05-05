@@ -397,14 +397,22 @@ class AppEffects {
   /// ITU-R BT.601 luma coefficient for the blue channel.
   static const double lumaBlue = 0.0722;
 
-  /// Default effect intensity shown to the user when the slider first opens (full effect).
-  static const double defaultIntensity = 1.0;
+  /// Default effect intensity shown to the user when the slider first opens.
+  ///
+  /// UI range is 0.0-1.0, where 0.5 maps to the previously authored full strength.
+  static const double defaultIntensity = 0.5;
 
   /// Minimum effect intensity (no visible change).
   static const double minIntensity = 0.0;
 
-  /// Maximum effect intensity (full effect as authored).
+  /// Maximum effect intensity shown in the UI slider.
   static const double maxIntensity = 1.0;
+
+  /// Multiplier that maps UI intensity to the actual effect strength.
+  ///
+  /// With this mapping, 50% UI intensity equals the previously authored full strength,
+  /// and 100% UI intensity applies 2x that strength when effect math supports it.
+  static const double intensityAppliedScale = 2.0;
 }
 
 /// Shared persisted/default app values.

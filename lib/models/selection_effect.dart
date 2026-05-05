@@ -32,29 +32,31 @@ enum SelectionEffect {
     final ui.Image image, {
     final double strength = AppEffects.defaultIntensity,
   }) async {
+    final double appliedStrength = strength * AppEffects.intensityAppliedScale;
+
     switch (this) {
       case SelectionEffect.blur:
-        return applyGaussianBlur(image, AppEffects.blurSigma, strength: strength);
+        return applyGaussianBlur(image, AppEffects.blurSigma, strength: appliedStrength);
       case SelectionEffect.brightness:
-        return applyBrightness(image, strength: strength);
+        return applyBrightness(image, strength: appliedStrength);
       case SelectionEffect.contrast:
-        return applyContrast(image, strength: strength);
+        return applyContrast(image, strength: appliedStrength);
       case SelectionEffect.grayscale:
-        return applyGrayscale(image, strength: strength);
+        return applyGrayscale(image, strength: appliedStrength);
       case SelectionEffect.hueSaturation:
-        return applyHueSaturation(image, strength: strength);
+        return applyHueSaturation(image, strength: appliedStrength);
       case SelectionEffect.noise:
-        return applyNoise(image, strength: strength);
+        return applyNoise(image, strength: appliedStrength);
       case SelectionEffect.pixelate:
-        return applyPixelate(image, strength: strength);
+        return applyPixelate(image, strength: appliedStrength);
       case SelectionEffect.shadow:
-        return applyShadow(image, strength: strength);
+        return applyShadow(image, strength: appliedStrength);
       case SelectionEffect.sharpen:
-        return applySharpen(image, strength: strength);
+        return applySharpen(image, strength: appliedStrength);
       case SelectionEffect.soften:
-        return applyGaussianBlur(image, AppEffects.softenSigma, strength: strength);
+        return applyGaussianBlur(image, AppEffects.softenSigma, strength: appliedStrength);
       case SelectionEffect.vignette:
-        return applyVignette(image, strength: strength);
+        return applyVignette(image, strength: appliedStrength);
     }
   }
 }
