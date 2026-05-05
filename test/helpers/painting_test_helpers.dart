@@ -1754,10 +1754,8 @@ Future<void> saveUnitTestTiff(
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   await tester.runAsync(() async {
-    debugPrint('📦 Unit test TIFF save starting');
     final String normalizedFileName = normalizeTiffExportFileName(filename);
     final Uint8List tiffBytes = await convertLayersToTiff(layersProvider);
-    debugPrint('📦 Unit test TIFF bytes ready');
     final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
     await outputDir.create(recursive: true);
     final File outputFile = File('${outputDir.path}/$normalizedFileName');

@@ -42,6 +42,9 @@ class ToolsPanel extends StatelessWidget {
   final bool minimal;
   @override
   Widget build(final BuildContext context) {
+    final AppProvider appProvider = AppProvider.of(context, listen: true);
+    final ActionType selectedTool = appProvider.selectedAction;
+
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
@@ -56,10 +59,28 @@ class ToolsPanel extends StatelessWidget {
           const AppDivider(
             color: AppPalette.black,
           ),
-          Wrap(
-            runSpacing: minimal ? AppSpacing.sm : AppSpacing.thin,
-            alignment: WrapAlignment.center,
-            children: getWidgetForSelectedTool(context: context),
+          AnimatedSwitcher(
+            duration: AppDefaults.toolPanelRevealAnimationDuration,
+            reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (final Widget child, final Animation<double> animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SizeTransition(
+                  sizeFactor: animation,
+                  child: child,
+                ),
+              );
+            },
+            child: KeyedSubtree(
+              key: ValueKey<ActionType>(selectedTool),
+              child: Wrap(
+                runSpacing: minimal ? AppSpacing.sm : AppSpacing.thin,
+                alignment: WrapAlignment.center,
+                children: getWidgetForSelectedTool(context: context),
+              ),
+            ),
           ),
         ],
       ),
@@ -735,8 +756,8 @@ class ToolsPanel extends StatelessWidget {
 /// Returns a widget that displays a separator.
 Widget separator() {
   return const AppDivider(
-    height: AppStroke.thin,
-    color: AppPalette.black,
+    height: AppStroke.regular,
+    color: AppPalette.overlayBorder,
   );
 }
 

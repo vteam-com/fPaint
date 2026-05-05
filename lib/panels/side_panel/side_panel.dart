@@ -65,7 +65,7 @@ class _SidePanelState extends State<SidePanel> {
   @override
   Widget build(final BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(color: AppColors.panelBackground),
+      decoration: const BoxDecoration(color: AppColors.background),
       child: MultiSplitViewTheme(
         data: MultiSplitViewThemeData(
           dividerPainter: DividerPainters.grooved1(
