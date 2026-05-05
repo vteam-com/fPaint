@@ -9,7 +9,6 @@ import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 /// A widget that displays the top menu of the side panel.
@@ -30,13 +29,13 @@ class SidePanelTopMenu extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         if (shellProvider.isSidePanelExpanded)
-          _buildIconButton(
+          AppButtonIcon(
             tooltip: l10n.startOverTooltip,
             icon: AppIcon.powerSettingsNew,
             onPressed: () => onFileNew(context),
           ),
         if (shellProvider.isSidePanelExpanded)
-          _buildIconButton(
+          AppButtonIcon(
             tooltip: l10n.importTooltip,
             icon: AppIcon.fileDownload,
             onPressed: () => showAppDialog<void>(
@@ -47,14 +46,14 @@ class SidePanelTopMenu extends StatelessWidget {
             ),
           ),
         if (shellProvider.isSidePanelExpanded)
-          _buildIconButton(
+          AppButtonIcon(
             key: Keys.sidePanelExportButton,
             tooltip: l10n.exportTooltip,
             icon: AppIcon.iosShare,
             onPressed: () => sharePanel(context),
           ),
         if (shellProvider.isSidePanelExpanded) // Show when panel is expanded
-          _buildIconButton(
+          AppButtonIcon(
             tooltip: l10n.rotateCanvasTooltip,
             icon: AppIcon.rotate90DegreesCw,
             onPressed: () async {
@@ -64,7 +63,7 @@ class SidePanelTopMenu extends StatelessWidget {
             },
           ),
         if (shellProvider.isSidePanelExpanded)
-          _buildIconButton(
+          AppButtonIcon(
             tooltip: l10n.flipHorizontalTooltip,
             icon: AppIcon.flipHorizontal,
             onPressed: () async {
@@ -74,7 +73,7 @@ class SidePanelTopMenu extends StatelessWidget {
             },
           ),
         if (shellProvider.isSidePanelExpanded)
-          _buildIconButton(
+          AppButtonIcon(
             tooltip: l10n.flipVerticalTooltip,
             icon: AppIcon.flipVertical,
             onPressed: () async {
@@ -84,7 +83,7 @@ class SidePanelTopMenu extends StatelessWidget {
             },
           ),
         if (!shellProvider.showMenu)
-          _buildIconButton(
+          AppButtonIcon(
             tooltip: l10n.exportTooltip,
             icon: shellProvider.isSidePanelExpanded
                 ? AppIcon.keyboardDoubleArrowLeft
@@ -97,19 +96,4 @@ class SidePanelTopMenu extends StatelessWidget {
       ],
     );
   }
-}
-
-/// Builds an icon button.
-Widget _buildIconButton({
-  final Key? key,
-  required final String tooltip,
-  required final AppIcon icon,
-  required final VoidCallback onPressed,
-}) {
-  return AppButtonIcon(
-    key: key,
-    tooltip: tooltip,
-    icon: AppSvgIcon(icon: icon),
-    onPressed: onPressed,
-  );
 }

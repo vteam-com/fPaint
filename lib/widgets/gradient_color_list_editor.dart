@@ -4,7 +4,6 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_text_field.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
@@ -117,7 +116,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
       padding: const EdgeInsets.only(top: AppSpacing.small),
       child: AppButtonIcon(
         key: Keys.gradientStopAddButton,
-        icon: const AppSvgIcon(icon: AppIcon.playlistAdd),
+        icon: AppIcon.playlistAdd,
         tooltip: l10n.gradientColorAdd,
         onPressed: _addStop,
       ),
@@ -213,10 +212,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
           if (canRemove)
             AppButtonIcon(
               key: Key('${Keys.gradientStopColorKeyPrefixText}${index}_remove'),
-              icon: const AppSvgIcon(
-                icon: AppIcon.close,
-                isSelected: false,
-              ),
+              icon: AppIcon.close,
               tooltip: l10n.gradientColorRemove,
               constraints: const BoxConstraints(),
               padding: const EdgeInsets.all(AppSpacing.small),
@@ -369,7 +365,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
       opacity: enabled ? AppVisual.full : AppVisual.disabled,
       child: AppButtonIcon(
         key: key,
-        icon: AppSvgIcon(icon: icon, isSelected: false),
+        icon: icon,
         tooltip: null,
         constraints: const BoxConstraints(),
         padding: const EdgeInsets.all(AppSpacing.small),

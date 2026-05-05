@@ -1,6 +1,8 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_tooltip.dart';
 
 /// A text-only button replacing Material [TextButton].
@@ -52,23 +54,60 @@ class AppButtonPrimary extends StatelessWidget {
 }
 
 /// An icon button replacing Material [IconButton].
-class AppButtonIcon extends StatefulWidget {
+class AppButtonIcon extends StatelessWidget {
   const AppButtonIcon({
     super.key,
     required this.icon,
+    required this.onPressed,
+    this.isSelected = false,
+    this.color,
+    this.size,
+    this.tooltip,
+    this.constraints,
+    this.padding,
+  });
+  final Color? color;
+  final BoxConstraints? constraints;
+  final AppIcon icon;
+  final bool isSelected;
+  final VoidCallback onPressed;
+  final EdgeInsetsGeometry? padding;
+  final double? size;
+  final String? tooltip;
+  @override
+  Widget build(final BuildContext context) {
+    return AppButton(
+      onPressed: onPressed,
+      tooltip: tooltip,
+      constraints: constraints,
+      padding: padding,
+      child: AppSvgIcon(
+        icon: icon,
+        isSelected: isSelected,
+        color: color,
+        size: size,
+      ),
+    );
+  }
+}
+
+/// A generic image button variant for custom icon widgets.
+class AppButton extends StatefulWidget {
+  const AppButton({
+    super.key,
+    required this.child,
     required this.onPressed,
     this.tooltip,
     this.constraints,
     this.padding,
   });
+  final Widget child;
   final BoxConstraints? constraints;
-  final Widget icon;
   final VoidCallback onPressed;
   final EdgeInsetsGeometry? padding;
   final String? tooltip;
-
   @override
-  State<AppButtonIcon> createState() => _AppButtonIconState();
+  State<AppButton> createState() => _AppButtonState();
 }
 
 /// Shares minimum press-duration behavior across button variants so quick taps
@@ -101,7 +140,7 @@ mixin _MinimumPressDurationStateMixin<T extends StatefulWidget> on State<T> {
   }
 }
 
-class _AppButtonIconState extends State<AppButtonIcon> with _MinimumPressDurationStateMixin<AppButtonIcon> {
+class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMixin<AppButton> {
   bool _isHovered = false;
   bool _isPressed = false;
   @override
@@ -123,7 +162,7 @@ class _AppButtonIconState extends State<AppButtonIcon> with _MinimumPressDuratio
             constraints: widget.constraints ?? const BoxConstraints(),
             child: Padding(
               padding: widget.padding ?? const EdgeInsets.all(AppSpacing.small),
-              child: widget.icon,
+              child: widget.child,
             ),
           ),
         ),

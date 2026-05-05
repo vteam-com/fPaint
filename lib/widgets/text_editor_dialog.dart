@@ -4,7 +4,6 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/text_tool_state.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
@@ -97,10 +96,8 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
             children: <Widget>[
               AppButtonIcon(
                 key: Keys.textEditorBoldButton,
-                icon: AppSvgIcon(
-                  icon: AppIcon.formatBold,
-                  color: _style.fontWeight == FontWeight.bold ? AppColors.blue : AppColors.grey,
-                ),
+                icon: AppIcon.formatBold,
+                color: _style.fontWeight == FontWeight.bold ? AppColors.blue : AppColors.grey,
                 onPressed: () {
                   setState(() {
                     _style.fontWeight = _style.fontWeight == FontWeight.bold ? FontWeight.normal : FontWeight.bold;
@@ -109,10 +106,8 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
               ),
               AppButtonIcon(
                 key: Keys.textEditorItalicButton,
-                icon: AppSvgIcon(
-                  icon: AppIcon.formatItalic,
-                  color: _style.fontStyle == FontStyle.italic ? AppColors.blue : AppColors.grey,
-                ),
+                icon: AppIcon.formatItalic,
+                color: _style.fontStyle == FontStyle.italic ? AppColors.blue : AppColors.grey,
                 onPressed: () {
                   setState(() {
                     _style.fontStyle = _style.fontStyle == FontStyle.italic ? FontStyle.normal : FontStyle.italic;
@@ -159,7 +154,8 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                   borderRadius: BorderRadius.circular(AppRadius.medium),
                 ),
                 child: AppButtonIcon(
-                  icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppColors.white),
+                  icon: AppIcon.colorLens,
+                  color: AppColors.white,
                   onPressed: () {
                     showColorPicker(
                       context: context,

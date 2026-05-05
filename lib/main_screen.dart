@@ -76,7 +76,7 @@ class MainScreen extends StatelessWidget {
               right: AppSpacing.large,
               bottom: AppSpacing.large,
               child: shellMode == ShellMode.hidden
-                  ? AppButtonIcon(
+                  ? AppButton(
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints.tightFor(
                         width: AppLayout.toolbarButtonSize,
@@ -88,7 +88,7 @@ class MainScreen extends StatelessWidget {
                           shellProvider.update();
                         });
                       },
-                      icon: const SizedBox(
+                      child: const SizedBox(
                         width: AppLayout.toolbarButtonSize,
                         height: AppLayout.toolbarButtonSize,
                         child: DecoratedBox(

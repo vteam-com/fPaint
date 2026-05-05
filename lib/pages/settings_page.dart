@@ -3,7 +3,6 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_preferences.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 
@@ -37,7 +36,7 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Row(
                 children: <Widget>[
                   AppButtonIcon(
-                    icon: const AppSvgIcon(icon: AppIcon.arrowLeft),
+                    icon: AppIcon.arrowLeft,
                     onPressed: () => Navigator.pop(context),
                   ),
                   const SizedBox(width: AppSpacing.small),

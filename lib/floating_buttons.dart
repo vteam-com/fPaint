@@ -76,7 +76,7 @@ Widget _buildSelectorToggleButton({
   required final AppLocalizations l10n,
   required final bool hasActiveSelection,
 }) {
-  return AppButtonIcon(
+  return AppButton(
     key: Keys.floatActionSelector,
     tooltip: hasActiveSelection ? l10n.cancel : l10n.toolSelector,
     padding: EdgeInsets.zero,
@@ -87,7 +87,7 @@ Widget _buildSelectorToggleButton({
     onPressed: () {
       Future<void>.microtask(() => appProvider.toggleSelectionOverlayFromFab());
     },
-    icon: _floatingButtonContent(
+    child: _floatingButtonContent(
       icon: hasActiveSelection ? AppIcon.selectorCancel : AppIcon.selector,
     ),
   );
@@ -120,7 +120,7 @@ Widget _buildHistoryButton({
   required final String tooltip,
   required final void Function() action,
 }) {
-  return AppButtonIcon(
+  return AppButton(
     key: key,
     tooltip: tooltip,
     padding: EdgeInsets.zero,
@@ -131,7 +131,7 @@ Widget _buildHistoryButton({
     onPressed: () {
       Future<void>.microtask(action);
     },
-    icon: _floatingButtonContent(icon: icon),
+    child: _floatingButtonContent(icon: icon),
   );
 }
 
@@ -155,7 +155,7 @@ Widget _buildMobileFabRow({
       if (!shellProvider.showMenu && canRedo) redoButton,
       if (!shellProvider.showMenu && canUndo) undoButton,
       if (!shellProvider.showMenu)
-        AppButtonIcon(
+        AppButton(
           key: Keys.floatActionMenuToggle,
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints.tightFor(
@@ -167,12 +167,12 @@ Widget _buildMobileFabRow({
               shellProvider.showMenu = !shellProvider.showMenu;
             });
           },
-          icon: _floatingButtonContent(
+          child: _floatingButtonContent(
             child: AppSvgIcon(icon: appProvider.selectedAction.icon, isSelected: false),
           ),
         ),
       if (!shellProvider.showMenu)
-        AppButtonIcon(
+        AppButton(
           tooltip: l10n.colorLabel,
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints.tightFor(
@@ -189,14 +189,14 @@ Widget _buildMobileFabRow({
               },
             );
           },
-          icon: _floatingButtonContent(
+          child: _floatingButtonContent(
             icon: AppIcon.colorLens,
             foregroundColor: appProvider.brushColor,
           ),
         ),
       if (!shellProvider.showMenu) selectorToggleButton,
       if (shellProvider.showMenu)
-        AppButtonIcon(
+        AppButton(
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints.tightFor(
             width: AppLayout.toolbarButtonSize,
@@ -207,7 +207,7 @@ Widget _buildMobileFabRow({
               shellProvider.showMenu = !shellProvider.showMenu;
             });
           },
-          icon: _floatingButtonContent(icon: AppIcon.close),
+          child: _floatingButtonContent(icon: AppIcon.close),
         ),
     ],
   );
@@ -232,7 +232,7 @@ Widget _buildVerticalFabColumn({
       selectorToggleButton,
 
       // Zoom in
-      AppButtonIcon(
+      AppButton(
         key: Keys.floatActionZoomIn,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints.tightFor(
@@ -248,11 +248,11 @@ Widget _buildVerticalFabColumn({
             );
           });
         },
-        icon: _floatingButtonContent(icon: AppIcon.zoomIn),
+        child: _floatingButtonContent(icon: AppIcon.zoomIn),
       ),
 
       /// Center and fit image
-      AppButtonIcon(
+      AppButton(
         key: Keys.floatActionCenter,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints.tightFor(
@@ -269,7 +269,7 @@ Widget _buildVerticalFabColumn({
             });
           });
         },
-        icon: _floatingButtonContent(
+        child: _floatingButtonContent(
           child: AppText(
             _canvasZoomAndSizeFormat
                 .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
@@ -283,7 +283,7 @@ Widget _buildVerticalFabColumn({
       ),
 
       /// Zoom out
-      AppButtonIcon(
+      AppButton(
         key: Keys.floatActionZoomOut,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints.tightFor(
@@ -299,11 +299,11 @@ Widget _buildVerticalFabColumn({
             );
           });
         },
-        icon: _floatingButtonContent(icon: AppIcon.zoomOut),
+        child: _floatingButtonContent(icon: AppIcon.zoomOut),
       ),
 
       /// Show/Hide floating action panel
-      AppButtonIcon(
+      AppButton(
         key: Keys.floatActionToggle,
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints.tightFor(
@@ -316,7 +316,7 @@ Widget _buildVerticalFabColumn({
             shellProvider.update();
           });
         },
-        icon: _floatingButtonContent(icon: AppIcon.arrowDropDown),
+        child: _floatingButtonContent(icon: AppIcon.arrowDropDown),
       ),
     ],
   );

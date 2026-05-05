@@ -205,19 +205,19 @@ class LayerSelector extends StatelessWidget {
         AppButtonIcon(
           key: Keys.layerAddAboveButton,
           tooltip: l10n.layerAddAbove,
-          icon: const AppSvgIcon(icon: AppIcon.playlistAdd),
+          icon: AppIcon.playlistAdd,
           onPressed: () => _onAddLayer(layers),
         ),
         if (allowRemoveLayer)
           AppButtonIcon(
             tooltip: l10n.layerDelete,
-            icon: const AppSvgIcon(icon: AppIcon.playlistRemove),
+            icon: AppIcon.playlistRemove,
             onPressed: () => layers.remove(layer),
           ),
         if (allowRemoveLayer)
           AppButtonIcon(
             tooltip: l10n.layerMergeBelow,
-            icon: const AppSvgIcon(icon: AppIcon.layers),
+            icon: AppIcon.layers,
             onPressed: layer == layers.list.last
                 ? () {}
                 : () => _onMergeLayer(
@@ -229,7 +229,7 @@ class LayerSelector extends StatelessWidget {
         if (allowRemoveLayer)
           AppButtonIcon(
             tooltip: '${l10n.layerBlendMode}\n"${blendModeToText(layer.blendMode, AppLocalizations.of(context))}"',
-            icon: const AppSvgIcon(icon: AppIcon.blender),
+            icon: AppIcon.blender,
             onPressed: () async {
               layer.blendMode = await showBlendModeMenu(
                 context: context,
@@ -303,16 +303,14 @@ class LayerSelector extends StatelessWidget {
               ),
             AppButtonIcon(
               tooltip: l10n.layerToggleVisibility,
-              icon: AppSvgIcon(
-                icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
-                color: layer.isVisible ? AppColors.blue : AppColors.layerHiddenWarning,
-              ),
+              icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
+              color: layer.isVisible ? AppColors.blue : AppColors.layerHiddenWarning,
               onPressed: () => layers.layersToggleVisibility(layer),
             ),
             AppPopupMenuButton<String>(
-              icon: const AppSvgIcon(icon: AppIcon.moreVert),
               itemBuilder: (final BuildContext _) => _buildPopupMenuItems(),
               onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
+              child: const AppSvgIcon(icon: AppIcon.moreVert),
             ),
           ],
         );
