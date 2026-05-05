@@ -285,19 +285,21 @@ class MainViewState extends State<MainView> {
     showAppBottomSheet<void>(
       context: context,
       barrierColor: AppColors.transparent,
-      builder: (final BuildContext sheetCtx) => Padding(
-        padding: const EdgeInsets.all(AppSpacing.small),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            maxWidth: AppLayout.effectBottomSheetMaxWidth,
-          ),
-          child: EffectIntensityControls(
-            appProvider: appProvider,
-            l10n: l10n,
-            sliderKey: Keys.effectIntensityDialogSlider,
-            applyButtonKey: Keys.effectIntensityApplyButton,
-            cancelButtonKey: Keys.effectIntensityCancelButton,
-            onDismiss: () => Navigator.of(sheetCtx).pop(),
+      builder: (final BuildContext sheetCtx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.small),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppLayout.modalSheetContentMaxWidth,
+            ),
+            child: EffectIntensityControls(
+              appProvider: appProvider,
+              l10n: l10n,
+              sliderKey: Keys.effectIntensityDialogSlider,
+              applyButtonKey: Keys.effectIntensityApplyButton,
+              cancelButtonKey: Keys.effectIntensityCancelButton,
+              onDismiss: () => Navigator.of(sheetCtx).pop(),
+            ),
           ),
         ),
       ),

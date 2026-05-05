@@ -53,168 +53,154 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
   Widget build(final BuildContext context) {
     final AppLocalizations l10n = context.l10n;
 
-    return SafeArea(
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.large),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: AppLayout.sliderDialogWidth),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  AppText(
-                    widget.title,
-                    variant: AppTextVariant.title,
-                  ),
-                  const SizedBox(height: AppSpacing.large),
-                  AppTextField(
-                    controller: _controller,
-                    autofocus: true,
-                    maxLines: null,
-                    keyboardType: TextInputType.multiline,
-                    hintText: l10n.enterYourTextHere,
-                    textAlign: _style.textAlign,
-                    style: TextStyle(
-                      fontSize: _style.size,
-                      color: _style.color,
-                      fontWeight: _style.fontWeight,
-                      fontStyle: _style.fontStyle,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.large),
-                  AppSlider(
-                    label: l10n.fontSizeLabel,
-                    valueLabel: _style.size.round().toString(),
-                    value: _style.size,
-                    min: AppSpacing.small + AppMath.pair.toDouble(),
-                    max: AppLimits.textSizeMax.toDouble(),
-                    divisions: AppLimits.textSizeDivisions,
-                    onChanged: (final double value) {
-                      setState(() {
-                        _style.size = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.small),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      AppButtonIcon(
-                        key: Keys.textEditorBoldButton,
-                        icon: AppSvgIcon(
-                          icon: AppIcon.formatBold,
-                          color: _style.fontWeight == FontWeight.bold ? AppColors.blue : AppColors.grey,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _style.fontWeight = _style.fontWeight == FontWeight.bold
-                                ? FontWeight.normal
-                                : FontWeight.bold;
-                          });
-                        },
-                      ),
-                      AppButtonIcon(
-                        key: Keys.textEditorItalicButton,
-                        icon: AppSvgIcon(
-                          icon: AppIcon.formatItalic,
-                          color: _style.fontStyle == FontStyle.italic ? AppColors.blue : AppColors.grey,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _style.fontStyle = _style.fontStyle == FontStyle.italic
-                                ? FontStyle.normal
-                                : FontStyle.italic;
-                          });
-                        },
-                      ),
-                      const SizedBox(width: AppSpacing.medium),
-                      SizedBox(
-                        width: AppLayout.inputFieldWidth,
-                        child: AppDropdown<TextAlign>(
-                          key: Keys.textEditorAlignmentDropdown,
-                          value: _style.textAlign,
-                          items: <AppDropdownItem<TextAlign>>[
-                            AppDropdownItem<TextAlign>(
-                              value: TextAlign.left,
-                              child: Text(l10n.textAlignLeft),
-                            ),
-                            AppDropdownItem<TextAlign>(
-                              value: TextAlign.center,
-                              child: Text(l10n.textAlignCenter),
-                            ),
-                            AppDropdownItem<TextAlign>(
-                              value: TextAlign.right,
-                              child: Text(l10n.textAlignRight),
-                            ),
-                          ],
-                          onChanged: (final TextAlign? value) {
-                            if (value == null) {
-                              return;
-                            }
-                            setState(() {
-                              _style.textAlign = value;
-                            });
-                          },
-                        ),
-                      ),
-                      const Spacer(),
-                      Container(
-                        width: AppSpacing.largest,
-                        height: AppSpacing.largest,
-                        decoration: BoxDecoration(
-                          color: _style.color,
-                          border: Border.all(color: AppColors.grey),
-                          borderRadius: BorderRadius.circular(AppRadius.medium),
-                        ),
-                        child: AppButtonIcon(
-                          icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppColors.white),
-                          onPressed: () {
-                            showColorPicker(
-                              context: context,
-                              title: l10n.textColor,
-                              color: _style.color,
-                              onSelectedColor: (final Color color) {
-                                setState(() {
-                                  _style.color = color;
-                                });
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.large),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      if (widget.onDelete != null)
-                        AppButtonText(
-                          text: l10n.delete,
-                          onPressed: () {
-                            widget.onDelete!.call();
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      AppButtonText(
-                        text: l10n.cancel,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      AppButtonPrimary(
-                        text: widget.submitLabel,
-                        onPressed: _submitAndClose,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+    return AppBottomSheetContent(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          AppText(
+            widget.title,
+            variant: AppTextVariant.title,
+          ),
+          const SizedBox(height: AppSpacing.large),
+          AppTextField(
+            controller: _controller,
+            autofocus: true,
+            maxLines: null,
+            keyboardType: TextInputType.multiline,
+            hintText: l10n.enterYourTextHere,
+            textAlign: _style.textAlign,
+            style: TextStyle(
+              fontSize: _style.size,
+              color: _style.color,
+              fontWeight: _style.fontWeight,
+              fontStyle: _style.fontStyle,
             ),
           ),
-        ),
+          const SizedBox(height: AppSpacing.large),
+          AppSlider(
+            label: l10n.fontSizeLabel,
+            valueLabel: _style.size.round().toString(),
+            value: _style.size,
+            min: AppSpacing.small + AppMath.pair.toDouble(),
+            max: AppLimits.textSizeMax.toDouble(),
+            divisions: AppLimits.textSizeDivisions,
+            onChanged: (final double value) {
+              setState(() {
+                _style.size = value;
+              });
+            },
+          ),
+          const SizedBox(height: AppSpacing.small),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              AppButtonIcon(
+                key: Keys.textEditorBoldButton,
+                icon: AppSvgIcon(
+                  icon: AppIcon.formatBold,
+                  color: _style.fontWeight == FontWeight.bold ? AppColors.blue : AppColors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _style.fontWeight = _style.fontWeight == FontWeight.bold ? FontWeight.normal : FontWeight.bold;
+                  });
+                },
+              ),
+              AppButtonIcon(
+                key: Keys.textEditorItalicButton,
+                icon: AppSvgIcon(
+                  icon: AppIcon.formatItalic,
+                  color: _style.fontStyle == FontStyle.italic ? AppColors.blue : AppColors.grey,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _style.fontStyle = _style.fontStyle == FontStyle.italic ? FontStyle.normal : FontStyle.italic;
+                  });
+                },
+              ),
+              const SizedBox(width: AppSpacing.medium),
+              SizedBox(
+                width: AppLayout.inputFieldWidth,
+                child: AppDropdown<TextAlign>(
+                  key: Keys.textEditorAlignmentDropdown,
+                  value: _style.textAlign,
+                  items: <AppDropdownItem<TextAlign>>[
+                    AppDropdownItem<TextAlign>(
+                      value: TextAlign.left,
+                      child: Text(l10n.textAlignLeft),
+                    ),
+                    AppDropdownItem<TextAlign>(
+                      value: TextAlign.center,
+                      child: Text(l10n.textAlignCenter),
+                    ),
+                    AppDropdownItem<TextAlign>(
+                      value: TextAlign.right,
+                      child: Text(l10n.textAlignRight),
+                    ),
+                  ],
+                  onChanged: (final TextAlign? value) {
+                    if (value == null) {
+                      return;
+                    }
+                    setState(() {
+                      _style.textAlign = value;
+                    });
+                  },
+                ),
+              ),
+              const Spacer(),
+              Container(
+                width: AppSpacing.largest,
+                height: AppSpacing.largest,
+                decoration: BoxDecoration(
+                  color: _style.color,
+                  border: Border.all(color: AppColors.grey),
+                  borderRadius: BorderRadius.circular(AppRadius.medium),
+                ),
+                child: AppButtonIcon(
+                  icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppColors.white),
+                  onPressed: () {
+                    showColorPicker(
+                      context: context,
+                      title: l10n.textColor,
+                      color: _style.color,
+                      onSelectedColor: (final Color color) {
+                        setState(() {
+                          _style.color = color;
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.large),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (widget.onDelete != null)
+                AppButtonText(
+                  text: l10n.delete,
+                  onPressed: () {
+                    widget.onDelete!.call();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              AppButtonText(
+                text: l10n.cancel,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              AppButtonPrimary(
+                text: widget.submitLabel,
+                onPressed: _submitAndClose,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

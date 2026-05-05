@@ -27,7 +27,7 @@ bool initOnce = false;
 /// The [context] parameter is the [BuildContext] used to display the modal.
 void showCanvasSettings(final BuildContext context) {
   initOnce = true;
-  showAppBottomSheet<dynamic>(
+  showAppBottomSheet<void>(
     context: context,
     builder: (final BuildContext context) {
       final AppLocalizations l10n = context.l10n;
