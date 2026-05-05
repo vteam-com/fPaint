@@ -26,16 +26,18 @@ Future<T?> showAppBottomSheet<T>({
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(dialogContext).size.height * AppLayout.modalSheetMaxHeightFactor,
+                maxWidth: AppLayout.modalSheetMaxWidth,
               ),
               child: DecoratedBox(
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: const BorderRadius.vertical(
+                  borderRadius: BorderRadius.vertical(
                     top: Radius.circular(AppRadius.medium),
                   ),
-                  border: Border.all(
-                    color: AppColors.overlayBorder,
-                    width: AppStroke.thin,
+                  border: Border(
+                    left: BorderSide(color: AppColors.overlayBorder, width: AppStroke.thin),
+                    top: BorderSide(color: AppColors.overlayBorder, width: AppStroke.thin),
+                    right: BorderSide(color: AppColors.overlayBorder, width: AppStroke.thin),
                   ),
                 ),
                 child: DefaultTextStyle(
