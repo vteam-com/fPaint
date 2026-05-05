@@ -571,7 +571,7 @@ void main() {
     required final VoidCallback onPressed,
     final Widget? child,
   }) {
-    return AppButtonIcon(
+    return AppButton(
       key: key,
       tooltip: tooltip,
       padding: EdgeInsets.zero,
@@ -582,7 +582,7 @@ void main() {
       onPressed: () {
         Future<void>.microtask(onPressed);
       },
-      icon: SizedBox(
+      child: SizedBox(
         width: AppLayout.toolbarButtonSize,
         height: AppLayout.toolbarButtonSize,
         child: DecoratedBox(

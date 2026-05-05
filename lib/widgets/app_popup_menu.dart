@@ -117,17 +117,16 @@ class AppPopupMenuButton<T> extends StatelessWidget {
     super.key,
     required this.itemBuilder,
     required this.onSelected,
-    this.icon,
+    required this.child,
     this.tooltip,
   });
-  final Widget? icon;
+  final Widget child;
   final List<AppPopupMenuItem<T>> Function(BuildContext context) itemBuilder;
   final void Function(T value) onSelected;
   final String? tooltip;
   @override
   Widget build(final BuildContext context) {
-    return AppButtonIcon(
-      icon: icon ?? const SizedBox.shrink(),
+    return AppButton(
       tooltip: tooltip,
       onPressed: () async {
         final RenderBox button = context.findRenderObject()! as RenderBox;
@@ -148,6 +147,7 @@ class AppPopupMenuButton<T> extends StatelessWidget {
           onSelected(value);
         }
       },
+      child: child,
     );
   }
 }

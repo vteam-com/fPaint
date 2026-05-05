@@ -3,7 +3,6 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
@@ -33,7 +32,7 @@ class TextAttributesWidget extends StatelessWidget {
           compact: minimal,
           name: l10n.fontSizeLabel,
           childLeft: AppButtonIcon(
-            icon: const AppSvgIcon(icon: AppIcon.formatSize),
+            icon: AppIcon.formatSize,
             constraints: minimal ? const BoxConstraints() : null,
             padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.small),
             onPressed: () {
@@ -72,10 +71,8 @@ class TextAttributesWidget extends StatelessWidget {
             children: <Widget>[
               AppButtonIcon(
                 key: Keys.textEditorBoldButton,
-                icon: AppSvgIcon(
-                  icon: AppIcon.formatBold,
-                  color: appProvider.textToolState.fontWeight == FontWeight.bold ? AppColors.blue : AppColors.grey,
-                ),
+                icon: AppIcon.formatBold,
+                color: appProvider.textToolState.fontWeight == FontWeight.bold ? AppColors.blue : AppColors.grey,
                 onPressed: () {
                   appProvider.textToolState.fontWeight = appProvider.textToolState.fontWeight == FontWeight.bold
                       ? FontWeight.normal
@@ -85,10 +82,8 @@ class TextAttributesWidget extends StatelessWidget {
               ),
               AppButtonIcon(
                 key: Keys.textEditorItalicButton,
-                icon: AppSvgIcon(
-                  icon: AppIcon.formatItalic,
-                  color: appProvider.textToolState.fontStyle == FontStyle.italic ? AppColors.blue : AppColors.grey,
-                ),
+                icon: AppIcon.formatItalic,
+                color: appProvider.textToolState.fontStyle == FontStyle.italic ? AppColors.blue : AppColors.grey,
                 onPressed: () {
                   appProvider.textToolState.fontStyle = appProvider.textToolState.fontStyle == FontStyle.italic
                       ? FontStyle.normal

@@ -4,7 +4,6 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 
@@ -78,9 +77,7 @@ void showCanvasSettings(final BuildContext context) {
                   ),
                   AppButtonIcon(
                     key: Keys.canvasSettingsAspectRatioToggleButton,
-                    icon: AppSvgIcon(
-                      icon: layers.canvasResizeLockAspectRatio ? AppIcon.link : AppIcon.linkOff,
-                    ),
+                    icon: layers.canvasResizeLockAspectRatio ? AppIcon.link : AppIcon.linkOff,
                     onPressed: () {
                       final bool newLockState = !layers.canvasResizeLockAspectRatio;
                       if (newLockState) {
