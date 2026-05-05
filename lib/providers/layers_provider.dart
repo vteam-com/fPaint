@@ -44,7 +44,17 @@ class LayersProvider extends ChangeNotifier {
 
   /// Notifies listeners that the layers have been updated.
   void update() {
+    _markTopColorsDirty();
     notifyListeners();
+  }
+
+  int _topColorsRefreshRevision = 1;
+
+  /// Tracks canvas changes that require recomputing the cached top colors.
+  int get topColorsRefreshRevision => _topColorsRefreshRevision;
+
+  void _markTopColorsDirty() {
+    _topColorsRefreshRevision++;
   }
 
   Size _size = const Size(AppLayout.canvasDefaultWidth, AppLayout.canvasDefaultHeight);
@@ -464,6 +474,7 @@ class LayersProvider extends ChangeNotifier {
   void evaluateTopColor() {
     this.getTopColorUsed().then((final List<ColorUsage> topColorsFound) {
       topColors = topColorsFound;
+      notifyListeners();
     });
   }
 

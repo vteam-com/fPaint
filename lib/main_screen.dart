@@ -32,7 +32,7 @@ class MainScreen extends StatelessWidget {
 
     if (appPreferences.isLoaded == false) {
       return const AppScaffold(
-        backgroundColor: AppColors.grey,
+        backgroundColor: AppColors.shellChromeBackground,
         body: Center(
           child: SizedBox(
             width: AppLayout.loaderRadius,
@@ -53,7 +53,7 @@ class MainScreen extends StatelessWidget {
         _handleDroppedFiles(context, details);
       },
       child: AppScaffold(
-        backgroundColor: AppColors.grey,
+        backgroundColor: AppColors.shellChromeBackground,
         body: Stack(
           children: <Widget>[
             shellMode == ShellMode.hidden
@@ -62,9 +62,9 @@ class MainScreen extends StatelessWidget {
                     data: MultiSplitViewThemeData(
                       dividerPainter: DividerPainters.grooved1(
                         animationEnabled: true,
-                        backgroundColor: AppColors.grey600,
-                        highlightedBackgroundColor: AppColors.blue,
-                        color: AppColors.grey800,
+                        backgroundColor: AppColors.shellChromeBackground,
+                        highlightedBackgroundColor: AppColors.shellChromeDividerHighlight,
+                        color: AppColors.shellChromeDivider,
                         thickness: AppStroke.divider,
                         highlightedThickness: AppStroke.dividerHighlighted,
                         strokeCap: StrokeCap.round,

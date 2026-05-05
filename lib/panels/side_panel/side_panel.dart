@@ -65,14 +65,14 @@ class _SidePanelState extends State<SidePanel> {
   @override
   Widget build(final BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(color: AppColors.background),
+      decoration: const BoxDecoration(color: AppColors.shellChromeBackground),
       child: MultiSplitViewTheme(
         data: MultiSplitViewThemeData(
           dividerPainter: DividerPainters.grooved1(
             animationEnabled: true,
-            backgroundColor: AppColors.grey600,
-            highlightedBackgroundColor: AppColors.blue,
-            color: AppColors.grey800,
+            backgroundColor: AppColors.shellChromeBackground,
+            highlightedBackgroundColor: AppColors.shellChromeDividerHighlight,
+            color: AppColors.shellChromeDivider,
             thickness: AppStroke.divider,
             highlightedThickness: AppStroke.dividerHighlighted,
             strokeCap: StrokeCap.round,

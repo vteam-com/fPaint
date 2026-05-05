@@ -35,7 +35,10 @@ class ToolAttributeWidget extends StatelessWidget {
     }
     return Container(
       padding: EdgeInsets.all(compact ? 0 : AppSpacing.small),
-      color: AppColors.panelBackground,
+      decoration: BoxDecoration(
+        color: AppColors.panelBackground,
+        borderRadius: BorderRadius.circular(AppRadius.medium),
+      ),
       child: AppTooltip(
         message: name,
         child: Row(

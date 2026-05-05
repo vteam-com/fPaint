@@ -56,9 +56,6 @@ class ToolsPanel extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: getListOfTools(context),
           ),
-          const AppDivider(
-            color: AppColors.black,
-          ),
           AnimatedSwitcher(
             duration: AppDefaults.toolPanelRevealAnimationDuration,
             reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
@@ -75,10 +72,13 @@ class ToolsPanel extends StatelessWidget {
             },
             child: KeyedSubtree(
               key: ValueKey<ActionType>(selectedTool),
-              child: Wrap(
-                runSpacing: minimal ? AppSpacing.small : AppSpacing.thin,
-                alignment: WrapAlignment.center,
-                children: getWidgetForSelectedTool(context: context),
+              child: Padding(
+                padding: const EdgeInsets.only(left: AppSpacing.medium),
+                child: Wrap(
+                  runSpacing: minimal ? AppSpacing.small : AppSpacing.thin,
+                  alignment: WrapAlignment.center,
+                  children: getWidgetForSelectedTool(context: context),
+                ),
               ),
             ),
           ),
@@ -160,22 +160,34 @@ class ToolsPanel extends StatelessWidget {
     final LayersProvider layers,
     final AppProvider appProvider,
     final bool minimal,
+    final AppLocalizations l10n,
   ) {
     widgets.add(
-      TopColors(
-        colorUsages: layers.topColors,
-        onRefresh: () {
-          layers.evaluateTopColor();
-          appProvider.update();
-        },
-        onColorPicked: (final Color color) {
-          (appProvider.selectedAction == ActionType.rectangle ||
-                  appProvider.selectedAction == ActionType.circle ||
-                  appProvider.selectedAction == ActionType.fill)
-              ? appProvider.fillColor = color
-              : appProvider.brushColor = color;
-        },
-        minimal: minimal,
+      ToolAttributeWidget(
+        compact: minimal,
+        name: l10n.topColors(layers.topColors.length),
+        childRight: ListenableBuilder(
+          listenable: layers,
+          builder: (final BuildContext _, final Widget? _) {
+            return TopColors(
+              colorUsages: layers.topColors,
+              onRefresh: layers.evaluateTopColor,
+              onColorPicked: (final Color color) {
+                if (appProvider.selectedAction == ActionType.rectangle ||
+                    appProvider.selectedAction == ActionType.circle ||
+                    appProvider.selectedAction == ActionType.fill) {
+                  appProvider.fillColor = color;
+                } else {
+                  appProvider.brushColor = color;
+                }
+              },
+              minimal: minimal,
+              showHeader: false,
+              autoRefreshOnIdle: true,
+              refreshRevision: layers.topColorsRefreshRevision,
+            );
+          },
+        ),
       ),
     );
   }
@@ -339,7 +351,7 @@ class ToolsPanel extends StatelessWidget {
           _addGradientColorEditor(widgets, appProvider, context);
         }
         widgets.add(addToolOptionTolerance(context, appProvider));
-        addToolOptionTopColors(widgets, layers, appProvider, minimal);
+        addToolOptionTopColors(widgets, layers, appProvider, minimal, l10n);
         break;
 
       case ActionType.text:
@@ -626,17 +638,8 @@ class ToolsPanel extends StatelessWidget {
 
         // Top colors
         if (selectedTool.isSupported(ActionOptions.topColors)) {
-          addToolOptionTopColors(widgets, layers, appProvider, minimal);
+          addToolOptionTopColors(widgets, layers, appProvider, minimal, l10n);
         }
-    }
-    // Add a separator between each element
-    if (!minimal) {
-      final List<Widget> separatedWidgets = <Widget>[];
-      for (int i = 0; i < widgets.length; i++) {
-        separatedWidgets.add(widgets[i]);
-        separatedWidgets.add(separator());
-      }
-      return separatedWidgets;
     }
 
     return widgets;
@@ -751,14 +754,6 @@ class ToolsPanel extends StatelessWidget {
       },
     );
   }
-}
-
-/// Returns a widget that displays a separator.
-Widget separator() {
-  return const AppDivider(
-    height: AppStroke.regular,
-    color: AppColors.overlayBorder,
-  );
 }
 
 /// Side-panel section listing all [SelectionEffect] buttons with an intensity
