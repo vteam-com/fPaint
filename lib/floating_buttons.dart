@@ -152,8 +152,8 @@ Widget _buildMobileFabRow({
     crossAxisAlignment: CrossAxisAlignment.end,
     spacing: AppSpacing.small - AppStroke.thin,
     children: <Widget>[
-      if (!shellProvider.showMenu && canUndo) undoButton,
       if (!shellProvider.showMenu && canRedo) redoButton,
+      if (!shellProvider.showMenu && canUndo) undoButton,
       if (!shellProvider.showMenu)
         AppButtonIcon(
           key: Keys.floatActionMenuToggle,
@@ -227,8 +227,8 @@ Widget _buildVerticalFabColumn({
     mainAxisAlignment: MainAxisAlignment.end,
     spacing: AppSpacing.small,
     children: <Widget>[
-      if (canUndo) undoButton,
       if (canRedo) redoButton,
+      if (canUndo) undoButton,
       selectorToggleButton,
 
       // Zoom in
