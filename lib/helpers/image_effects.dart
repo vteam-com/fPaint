@@ -123,7 +123,8 @@ Future<ui.Image> applyGrayscale(
       0,
     ]);
   // Overlay grayscale at opacity = strength for a linear blend.
-  final int opacityByte = (strength * AppLimits.rgbChannelMax).round();
+  final int opacityByte = (strength.clamp(AppEffects.minIntensity, AppEffects.maxIntensity) * AppLimits.rgbChannelMax)
+      .round();
   canvas.saveLayer(
     null,
     Paint()
@@ -256,7 +257,10 @@ Future<ui.Image> applyVignette(
   if (strength <= AppEffects.minIntensity) {
     return image;
   }
-  final double effectiveStrength = AppEffects.vignetteStrength * strength;
+  final double effectiveStrength = (AppEffects.vignetteStrength * strength).clamp(
+    AppEffects.minIntensity,
+    AppEffects.maxIntensity,
+  );
   final int w = image.width;
   final int h = image.height;
   final Rect rect = Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble());
@@ -289,7 +293,8 @@ Future<ui.Image> _blendOver(
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final Canvas canvas = Canvas(recorder);
   canvas.drawImage(bottom, Offset.zero, Paint());
-  final int opacityByte = (opacity * AppLimits.rgbChannelMax).round();
+  final int opacityByte = (opacity.clamp(AppEffects.minIntensity, AppEffects.maxIntensity) * AppLimits.rgbChannelMax)
+      .round();
   canvas.drawImage(
     top,
     Offset.zero,
