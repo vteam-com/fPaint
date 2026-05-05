@@ -132,8 +132,7 @@ class AppLayout {
   static const double desktopBreakpoint = 600.0;
   static const double appIconSize = 100.0;
   static const double dialogWidth = 400.0;
-  static const double sliderDialogWidth = 600.0;
-  static const double effectBottomSheetMaxWidth = 500.0;
+  static const double modalSheetContentMaxWidth = 600.0;
   static const double platformPageWidth = 400.0;
   static const double loaderRadius = 40.0;
   static const double loaderStrokeWidth = 4.0;

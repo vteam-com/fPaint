@@ -426,13 +426,14 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// When the user finishes editing, the resulting [TextObject] is recorded
   /// as a drawing action on the currently selected layer.
   void _showTextDialog(final AppProvider appProvider, final Offset position) {
+    final AppLocalizations l10n = context.l10n;
     showAppBottomSheet<void>(
       context: context,
       barrierColor: AppColors.transparent,
       builder: (final BuildContext _) {
         return TextEditorDialog(
-          title: context.l10n.addText,
-          submitLabel: context.l10n.addText,
+          title: l10n.addText,
+          submitLabel: l10n.addText,
           position: position,
           initialText: '',
           initialStyle: appProvider.textToolState.copy(),

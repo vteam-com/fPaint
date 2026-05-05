@@ -63,33 +63,23 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           widget.onColorChanged(_currentColor);
         }
       },
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.large),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: AppLayout.sliderDialogWidth),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    AppText(
-                      widget.title,
-                      textAlign: TextAlign.start,
-                      variant: AppTextVariant.title,
-                    ),
-                    const SizedBox(height: AppSpacing.large),
-                    _buildContent(layersModel),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: _buildActions(),
-                    ),
-                  ],
-                ),
-              ),
+      child: AppBottomSheetContent(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            AppText(
+              widget.title,
+              textAlign: TextAlign.start,
+              variant: AppTextVariant.title,
             ),
-          ),
+            const SizedBox(height: AppSpacing.large),
+            _buildContent(layersModel),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: _buildActions(),
+            ),
+          ],
         ),
       ),
     );
@@ -280,7 +270,7 @@ void showColorPicker({
   required final Color color,
   required final ValueChanged<Color> onSelectedColor,
 }) {
-  showAppBottomSheet<dynamic>(
+  showAppBottomSheet<void>(
     context: context,
     barrierColor: AppColors.transparent,
     builder: (final BuildContext _) {

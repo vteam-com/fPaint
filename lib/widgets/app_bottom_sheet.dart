@@ -50,3 +50,36 @@ Future<T?> showAppBottomSheet<T>({
         },
   );
 }
+
+/// Standard content wrapper for [showAppBottomSheet] children.
+///
+/// Wraps [child] in [SafeArea], [SingleChildScrollView], standard padding,
+/// centering, and a consistent max-width constraint so every sheet has the
+/// same inner layout without repeating scaffolding at each call site.
+class AppBottomSheetContent extends StatelessWidget {
+  /// Creates an [AppBottomSheetContent].
+  const AppBottomSheetContent({
+    super.key,
+    required this.child,
+  });
+
+  /// The content to display inside the sheet scaffolding.
+  final Widget child;
+
+  @override
+  Widget build(final BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.large),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: AppLayout.modalSheetContentMaxWidth),
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

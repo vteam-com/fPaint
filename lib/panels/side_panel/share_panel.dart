@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
-import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -78,55 +77,46 @@ Future<void> _runSharePanelAction(
 /// - Download as ORA
 ///
 /// The [context] parameter is the [BuildContext] used to display the modal.
-Future<dynamic> sharePanel(
+Future<void> sharePanel(
   final BuildContext context, {
   final bool dismissOnAction = true,
 }) {
   final LayersProvider layers = LayersProvider.of(context);
-  return showAppBottomSheet<dynamic>(
+  return showAppBottomSheet<void>(
     context: context,
     builder: (final BuildContext context) {
       final AppLocalizations l10n = context.l10n;
 
-      return SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.large + AppSpacing.thin),
-            child: Center(
-              child: IntrinsicWidth(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    AppListTile(
-                      leading: const AppSvgIcon(icon: AppIcon.clipboardCopy),
-                      title: AppText(l10n.copyToClipboard),
-                      onTap: () async {
-                        await _runSharePanelAction(
-                          context,
-                          () => _onExportToClipboard(context),
-                          dismissOnAction,
-                        );
-                      },
-                    ),
-                    for (final _ShareExportEntry entry in _exportEntries(
-                      includeHeic: isHeicExportSupported,
-                    ))
-                      AppListTile(
-                        leading: const AppSvgIcon(icon: AppIcon.iosShare),
-                        title: textAction(entry.displayFileName, l10n),
-                        onTap: () async {
-                          await _runSharePanelAction(
-                            context,
-                            () => entry.onExport(layers),
-                            dismissOnAction,
-                          );
-                        },
-                      ),
-                  ],
-                ),
-              ),
+      return AppBottomSheetContent(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            AppListTile(
+              leading: const AppSvgIcon(icon: AppIcon.clipboardCopy),
+              title: AppText(l10n.copyToClipboard),
+              onTap: () async {
+                await _runSharePanelAction(
+                  context,
+                  () => _onExportToClipboard(context),
+                  dismissOnAction,
+                );
+              },
             ),
-          ),
+            for (final _ShareExportEntry entry in _exportEntries(
+              includeHeic: isHeicExportSupported,
+            ))
+              AppListTile(
+                leading: const AppSvgIcon(icon: AppIcon.iosShare),
+                title: textAction(entry.displayFileName, l10n),
+                onTap: () async {
+                  await _runSharePanelAction(
+                    context,
+                    () => entry.onExport(layers),
+                    dismissOnAction,
+                  );
+                },
+              ),
+          ],
         ),
       );
     },
