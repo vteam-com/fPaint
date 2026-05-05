@@ -4,6 +4,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-05-05
+
+### Add
+
+- Animated button interactions with improved trackpad-tap support
+- Side-panel transition animations for a smoother editing workflow
+
+### Update
+
+- Refined bottom sheet visual consistency across dialogs and panels
+- Unified button architecture by splitting icon-only behavior from main button components
+- Improved text tool input experience and overall UI consistency (colors and typography)
+- Increased special effects intensity controls for stronger visual output
+
+### Fix
+
+- Eyedropper workflow usability improvements
+- Undo/Redo control placement and behavior polish
+
 ## [1.6.4] - 2026-05-01
 
 ### Add
