@@ -71,15 +71,45 @@ class AppButtonIcon extends StatefulWidget {
   State<AppButtonIcon> createState() => _AppButtonIconState();
 }
 
-class _AppButtonIconState extends State<AppButtonIcon> {
+/// Shares minimum press-duration behavior across button variants so quick taps
+/// still paint at least one visible pressed frame.
+mixin _MinimumPressDurationStateMixin<T extends StatefulWidget> on State<T> {
+  int _pressToken = 0;
+
+  /// Marks the beginning of a new press cycle.
+  void markPressed() {
+    _pressToken++;
+  }
+
+  /// Defers release to the next frame so quick taps still paint the pressed
+  /// state at least once without introducing timer-based test flakiness.
+  void releasePressedOnNextFrame({
+    required final bool isPressed,
+    required final bool Function() isStillPressed,
+    required final VoidCallback release,
+  }) {
+    if (!isPressed) {
+      return;
+    }
+    final int token = _pressToken;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || token != _pressToken || !isStillPressed()) {
+        return;
+      }
+      release();
+    });
+  }
+}
+
+class _AppButtonIconState extends State<AppButtonIcon> with _MinimumPressDurationStateMixin<AppButtonIcon> {
   bool _isHovered = false;
   bool _isPressed = false;
   @override
   Widget build(final BuildContext context) {
     Widget button = GestureDetector(
       onTapDown: (final TapDownDetails _) => _setPressed(true),
-      onTapUp: (final TapUpDetails _) => _setPressed(false),
-      onTapCancel: () => _setPressed(false),
+      onTapUp: (final TapUpDetails _) => _releasePressedWithMinimumDuration(),
+      onTapCancel: _releasePressedWithMinimumDuration,
       onTap: widget.onPressed,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
@@ -107,6 +137,15 @@ class _AppButtonIconState extends State<AppButtonIcon> {
     return button;
   }
 
+  /// Releases icon pressed state while guaranteeing a visible press frame.
+  void _releasePressedWithMinimumDuration() {
+    releasePressedOnNextFrame(
+      isPressed: _isPressed,
+      isStillPressed: () => _isPressed,
+      release: () => _setPressed(false),
+    );
+  }
+
   double get _scale {
     if (_isPressed) {
       return AppVisual.shrink;
@@ -126,9 +165,13 @@ class _AppButtonIconState extends State<AppButtonIcon> {
     });
   }
 
+  /// Toggles icon pressed state and tracks press-cycle metadata.
   void _setPressed(final bool isPressed) {
     if (_isPressed == isPressed) {
       return;
+    }
+    if (isPressed) {
+      markPressed();
     }
     setState(() {
       _isPressed = isPressed;
@@ -157,7 +200,7 @@ class _AppButtonBase extends StatefulWidget {
   State<_AppButtonBase> createState() => _AppButtonBaseState();
 }
 
-class _AppButtonBaseState extends State<_AppButtonBase> {
+class _AppButtonBaseState extends State<_AppButtonBase> with _MinimumPressDurationStateMixin<_AppButtonBase> {
   bool _isPressed = false;
   @override
   Widget build(final BuildContext context) {
@@ -190,8 +233,8 @@ class _AppButtonBaseState extends State<_AppButtonBase> {
 
     return GestureDetector(
       onTapDown: (final TapDownDetails _) => _setPressed(true),
-      onTapUp: (final TapUpDetails _) => _setPressed(false),
-      onTapCancel: () => _setPressed(false),
+      onTapUp: (final TapUpDetails _) => _releasePressedWithMinimumDuration(),
+      onTapCancel: _releasePressedWithMinimumDuration,
       onTap: widget.onPressed,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
@@ -200,9 +243,22 @@ class _AppButtonBaseState extends State<_AppButtonBase> {
     );
   }
 
+  /// Releases base button pressed state while guaranteeing a visible press frame.
+  void _releasePressedWithMinimumDuration() {
+    releasePressedOnNextFrame(
+      isPressed: _isPressed,
+      isStillPressed: () => _isPressed,
+      release: () => _setPressed(false),
+    );
+  }
+
+  /// Toggles base button pressed state and tracks press-cycle metadata.
   void _setPressed(final bool isPressed) {
     if (_isPressed == isPressed) {
       return;
+    }
+    if (isPressed) {
+      markPressed();
     }
     setState(() {
       _isPressed = isPressed;
