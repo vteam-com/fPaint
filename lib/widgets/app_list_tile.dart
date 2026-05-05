@@ -38,7 +38,7 @@ class AppListTile extends StatelessWidget {
               children: <Widget>[
                 if (title != null)
                   DefaultTextStyle(
-                    style: AppTextStyle.title,
+                    style: AppTextStyle.bodyBold,
                     child: title!,
                   ),
                 if (subtitle != null)

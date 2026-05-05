@@ -62,12 +62,12 @@ class AppColors {
   static const Color accent = Color(0xFF42A5F5); // Lighter blue
 
   // Background colors
-  static const Color background = Color(0xFF121212); // Dark background
-  static const Color surface = Color(0xFF1E1E1E); // Surface color
-  static const Color surfaceVariant = Color(0xFF2D2D2D); // Variant surface
+  static const Color background = Color.fromARGB(255, 21, 21, 21); // Dark background
+  static const Color surface = Color.fromARGB(255, 30, 30, 30); // Surface color
+  static const Color surfaceVariant = Color.fromARGB(255, 45, 45, 45); // Variant surface
 
   // Panel colors
-  static const Color panelBackground = Color(0xFF2D2D2D); // Side panel background
+  static const Color panelBackground = Color.fromARGB(255, 45, 45, 45); // Side panel background
   static const Color divider = grey800; // Divider color
 
   // Shell chrome colors (main frame + split dividers)
@@ -126,6 +126,7 @@ class AppLayout {
   static const double sidePanelExpandedMax = 600.0;
   static const double sidePanelTopDefault = 200.0;
   static const double modalSheetMaxHeightFactor = 0.9;
+  static const double modalSheetMaxWidth = 800.0;
   static const double mobileMenuWidthFactor = 0.85;
   static const int overlayAlpha = 128;
   static const double desktopBreakpoint = 600.0;

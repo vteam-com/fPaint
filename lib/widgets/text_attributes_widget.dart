@@ -26,6 +26,7 @@ class TextAttributesWidget extends StatelessWidget {
     final AppLocalizations l10n = context.l10n;
 
     return Column(
+      spacing: AppSpacing.thin,
       children: <Widget>[
         // Font size
         ToolAttributeWidget(

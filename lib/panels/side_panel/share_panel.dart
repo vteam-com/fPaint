@@ -92,35 +92,39 @@ Future<dynamic> sharePanel(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.only(top: AppSpacing.large + AppSpacing.thin),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                AppListTile(
-                  leading: const AppSvgIcon(icon: AppIcon.clipboardCopy),
-                  title: AppText(l10n.copyToClipboard),
-                  onTap: () async {
-                    await _runSharePanelAction(
-                      context,
-                      () => _onExportToClipboard(context),
-                      dismissOnAction,
-                    );
-                  },
+            child: Center(
+              child: IntrinsicWidth(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    AppListTile(
+                      leading: const AppSvgIcon(icon: AppIcon.clipboardCopy),
+                      title: AppText(l10n.copyToClipboard),
+                      onTap: () async {
+                        await _runSharePanelAction(
+                          context,
+                          () => _onExportToClipboard(context),
+                          dismissOnAction,
+                        );
+                      },
+                    ),
+                    for (final _ShareExportEntry entry in _exportEntries(
+                      includeHeic: isHeicExportSupported,
+                    ))
+                      AppListTile(
+                        leading: const AppSvgIcon(icon: AppIcon.iosShare),
+                        title: textAction(entry.displayFileName, l10n),
+                        onTap: () async {
+                          await _runSharePanelAction(
+                            context,
+                            () => entry.onExport(layers),
+                            dismissOnAction,
+                          );
+                        },
+                      ),
+                  ],
                 ),
-                for (final _ShareExportEntry entry in _exportEntries(
-                  includeHeic: isHeicExportSupported,
-                ))
-                  AppListTile(
-                    leading: const AppSvgIcon(icon: AppIcon.iosShare),
-                    title: textAction(entry.displayFileName, l10n),
-                    onTap: () async {
-                      await _runSharePanelAction(
-                        context,
-                        () => entry.onExport(layers),
-                        dismissOnAction,
-                      );
-                    },
-                  ),
-              ],
+              ),
             ),
           ),
         ),
