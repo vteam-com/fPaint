@@ -30,7 +30,7 @@ Widget buildRotationStem(final Rect bounds, {final double? handleSize}) {
       child: Container(
         width: AppInteraction.rotationHandleLineWidth,
         height: stemHeight,
-        color: AppPalette.blue,
+        color: AppColors.blue,
       ),
     ),
   );

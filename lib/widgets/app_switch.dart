@@ -37,7 +37,7 @@ class AppSwitch extends StatelessWidget {
                   height: _thumbSize,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: AppPalette.white,
+                      color: AppColors.white,
                       shape: BoxShape.circle,
                     ),
                   ),

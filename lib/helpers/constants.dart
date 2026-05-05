@@ -18,17 +18,20 @@ const String appFontFamily = 'Inter';
 /// Barrier label used by [showGeneralDialog] overlays to dismiss on tap outside.
 const String barrierLabelDismiss = 'Dismiss';
 
-/// Raw color palette replacing Material `Colors.*` references.
+/// Non-user-facing key prefix for identifying SVG icons in widget tests.
+const String appIconKeyPrefix = 'app_icon_';
+
+/// Raw color palette and semantic color constants for consistent theming.
 ///
-/// These values mirror the Material Design defaults so existing visuals are
-/// preserved while eliminating the dependency on `package:flutter/material.dart`.
-class AppPalette {
-  // Core
+/// Palette values mirror Material defaults and semantic values map those
+/// colors to application roles.
+class AppColors {
+  // Core palette
   static const Color white = Color(0xFFFFFFFF);
   static const Color black = Color(0xFF000000);
   static const Color transparent = Color(0x00000000);
 
-  // Primary hues
+  // Base hues
   static const Color red = Color(0xFFF44336);
   static const Color blue = Color(0xFF2196F3);
   static const Color blueShade100 = Color(0xFFBBDEFB);
@@ -37,7 +40,7 @@ class AppPalette {
   static const Color yellow = Color(0xFFFFEB3B);
   static const Color purple = Color(0xFF9C27B0);
 
-  // Grey scale (matching Material grey swatch)
+  // Grey scale
   static const Color grey = Color(0xFF9E9E9E);
   static const Color grey50 = Color(0xFFFAFAFA);
   static const Color grey300 = Color(0xFFE0E0E0);
@@ -47,27 +50,14 @@ class AppPalette {
   static const Color grey700 = Color(0xFF616161);
   static const Color grey800 = Color(0xFF424242);
 
-  // Overlay colors
-  /// Semi-transparent black for overlay controls (handles, marching ants, etc.).
+  // Overlays
   static const Color overlayDark = Color(0xC8000000);
-
-  /// Semi-transparent white for overlay controls (handles, marching ants, etc.).
   static const Color overlayLight = Color(0xC8FFFFFF);
-
-  /// Semi-transparent white used for overlay/dialog border strokes.
   static const Color overlayBorder = Color(0x59FFFFFF);
-
-  /// Semi-transparent black scrim used as dialog barrier background.
   static const Color scrim = Color(0x80000000);
-}
 
-/// Non-user-facing key prefix for identifying SVG icons in widget tests.
-const String appIconKeyPrefix = 'app_icon_';
-
-/// Application color constants for consistent theming
-class AppColors {
   // Primary colors
-  static const Color primary = Color(0xFF2196F3); // Light blue
+  static const Color primary = blue; // Light blue
   static const Color secondary = Color(0xFF1976D2); // Blue
   static const Color accent = Color(0xFF42A5F5); // Lighter blue
 
@@ -78,11 +68,11 @@ class AppColors {
 
   // Panel colors
   static const Color panelBackground = Color(0xFF2D2D2D); // Side panel background
-  static const Color divider = Color(0xFF424242); // Divider color
+  static const Color divider = grey800; // Divider color
 
   // Button colors
   static const Color floatingButtonBackground = Color(0xFF424242); // Floating button background
-  static const Color floatingButtonForeground = AppPalette.white;
+  static const Color floatingButtonForeground = white;
 
   // ITU-R BT.601 luma coefficients for perceived brightness
   static const double lumaRedWeight = 0.299;
@@ -90,7 +80,7 @@ class AppColors {
   static const double lumaBlueWeight = 0.114;
 
   // Text colors
-  static const Color textPrimary = AppPalette.white;
+  static const Color textPrimary = white;
   static const Color textSecondary = Color(0xFFB3B3B3);
   static const Color textDisabled = Color(0xFF666666);
 
@@ -108,21 +98,18 @@ class AppColors {
 /// Shared spacing tokens used across dialogs, panels, and controls.
 class AppSpacing {
   static const double thin = 2.0;
-  static const double xs = 4.0;
-  static const double sm = 6.0;
-  static const double md = 10.0;
-  static const double lg = 12.0;
-  static const double xl = 16.0;
-  static const double xxl = 20.0;
-  static const double xxxl = 30.0;
-  static const double huge = 40.0;
+  static const double small = 5.0;
+  static const double medium = 8.0;
+  static const double big = 13.0;
+  static const double large = 21.0;
+  static const double largest = 33.0;
 }
 
 /// Shared corner radius tokens.
 class AppRadius {
-  static const double sm = 4.0;
-  static const double md = 8.0;
-  static const double lg = 10.0;
+  static const double small = 3.0;
+  static const double medium = 8.0;
+  static const double large = 13.0;
 }
 
 /// Shared layout and sizing tokens.
@@ -173,13 +160,13 @@ class AppLayout {
 /// Shared font size tokens for consistent typography across the app.
 class AppFontSize {
   /// Small text — tooltips, subtitles, truncated file names, hints.
-  static const double small = 10.0;
+  static const double small = 8.0;
 
-  /// Medium text — body content, slider labels, descriptions, info readouts.
-  static const double medium = 12.0;
+  /// Medium text — body content, slider labels, descriptions, buttons, info readouts.
+  static const double medium = 13.0;
 
-  /// Large text — page titles, dialog titles, buttons, list tile titles, inputs.
-  static const double large = 15.0;
+  /// Large text — page titles, dialog titles, list tile titles.
+  static const double large = 21.0;
 }
 
 /// Shared text style constants for consistent typography.
@@ -190,7 +177,7 @@ class AppTextStyle {
   /// Titles, headings, list tiles, text fields — large bold white.
   static const TextStyle title = TextStyle(
     fontFamily: appFontFamily,
-    color: AppPalette.white,
+    color: AppColors.white,
     fontSize: AppFontSize.large,
     fontWeight: FontWeight.bold,
   );
@@ -198,7 +185,7 @@ class AppTextStyle {
   /// Default body text — white, inherits size from parent.
   static const TextStyle body = TextStyle(
     fontFamily: appFontFamily,
-    color: AppPalette.white,
+    color: AppColors.white,
   );
 
   /// Emphasized body text — medium bold, inherits color from parent.
@@ -211,7 +198,7 @@ class AppTextStyle {
   /// Tooltips, overlay coordinates — small white.
   static const TextStyle label = TextStyle(
     fontFamily: appFontFamily,
-    color: AppPalette.white,
+    color: AppColors.white,
     fontSize: AppFontSize.small,
   );
 
@@ -225,8 +212,8 @@ class AppTextStyle {
   /// Interactive elements — blue accent color, large font.
   static const TextStyle button = TextStyle(
     fontFamily: appFontFamily,
-    color: AppPalette.blue,
-    fontSize: AppFontSize.large,
+    color: AppColors.blue,
+    fontSize: AppFontSize.medium,
   );
 }
 
@@ -235,7 +222,7 @@ class AppStroke {
   static const double thin = 1.0;
   static const double regular = 2.0;
   static const double emphasis = 3.0;
-  static const double divider = 6.0;
+  static const double divider = 5.0;
   static const double dividerHighlighted = 8.0;
 
   /// Dash-width multiplier relative to brush size for dashed patterns.
@@ -249,7 +236,7 @@ class AppStroke {
 class AppVisual {
   static const double full = 1.0;
   static const double half = 0.5;
-  static const double popupBorderAlpha = 0.35;
+  static const double popupBorderAlpha = 0.33;
   static const double low = 0.3;
   static const double medium = 0.7;
   static const double disabled = 0.8;

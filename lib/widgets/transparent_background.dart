@@ -15,7 +15,7 @@ import 'package:fpaint/helpers/constants.dart';
 /// )
 Widget transparentPaperContainer(
   final Widget child, {
-  final double radius = AppRadius.md,
+  final double radius = AppRadius.medium,
 }) {
   return ClipRRect(
     borderRadius: BorderRadius.circular(radius),
@@ -62,7 +62,7 @@ class _TransparentBackgroundPainter extends CustomPainter {
   @override
   void paint(final Canvas canvas, final Size size) {
     if (size.isFinite) {
-      drawTransaparentBackgroundOffsetAndSize(
+      drawTransparentBackgroundOffsetAndSize(
         canvas: canvas,
         size: size,
         patternSize: patternSize,
@@ -78,7 +78,7 @@ class _TransparentBackgroundPainter extends CustomPainter {
 /// The grid is composed of alternating grey and transparent squares,
 /// with the size of each square determined by the canvas size and a fixed cell size.
 /// The grid is clipped to the canvas bounds and is drawn using the provided Canvas object.
-void drawTransaparentBackgroundOffsetAndSize({
+void drawTransparentBackgroundOffsetAndSize({
   required final Canvas canvas,
   required final Size size,
   final Offset offset = Offset.zero,
@@ -94,7 +94,7 @@ void drawTransaparentBackgroundOffsetAndSize({
   );
 
   canvas.clipRect(containerRect);
-  final Paint paintBackground = Paint()..color = AppPalette.grey300;
+  final Paint paintBackground = Paint()..color = AppColors.grey300;
   canvas.drawRect(containerRect, paintBackground);
 
   for (double x = 0; x < size.width; x += cellSize) {
@@ -107,7 +107,7 @@ void drawTransaparentBackgroundOffsetAndSize({
             cellSize,
             cellSize,
           ),
-          Paint()..color = AppPalette.grey400,
+          Paint()..color = AppColors.grey400,
         );
       }
     }

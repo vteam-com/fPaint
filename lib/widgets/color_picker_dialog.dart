@@ -66,7 +66,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
       child: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xxl),
+            padding: const EdgeInsets.all(AppSpacing.large),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: AppLayout.sliderDialogWidth),
@@ -79,7 +79,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                       textAlign: TextAlign.start,
                       variant: AppTextVariant.title,
                     ),
-                    const SizedBox(height: AppSpacing.xxl),
+                    const SizedBox(height: AppSpacing.large),
                     _buildContent(layersModel),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -119,23 +119,23 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     final AppLocalizations l10n = context.l10n;
 
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+      padding: const EdgeInsets.all(AppSpacing.large),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
-        spacing: AppSpacing.xxxl,
+        spacing: AppSpacing.largest,
         children: <Widget>[
           //----------------------------
           // Color preview and selection sliders
           Row(
-            spacing: AppSpacing.sm,
+            spacing: AppSpacing.small,
             children: <Widget>[
               SizedBox(
                 height: AppLayout.layerPreviewSize,
                 width: AppLayout.layerPreviewSize,
                 child: transparentPaperContainer(
                   Padding(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    padding: const EdgeInsets.all(AppSpacing.small),
                     child: ColorPreview(
                       color: _currentColor,
                       border: false,
@@ -163,12 +163,12 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               for (final Color color in <Color>[
-                AppPalette.red,
-                AppPalette.orange,
-                AppPalette.yellow,
-                AppPalette.green,
-                AppPalette.blue,
-                AppPalette.purple,
+                AppColors.red,
+                AppColors.orange,
+                AppColors.yellow,
+                AppColors.green,
+                AppColors.blue,
+                AppColors.purple,
               ])
                 GestureDetector(
                   onTap: () {
@@ -178,13 +178,13 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                     });
                   },
                   child: Container(
-                    width: AppSpacing.huge,
-                    height: AppSpacing.huge,
+                    width: AppSpacing.largest,
+                    height: AppSpacing.largest,
                     decoration: BoxDecoration(
                       color: color,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppPalette.grey300,
+                        color: AppColors.grey300,
                         width: 1,
                       ),
                     ),
@@ -282,7 +282,7 @@ void showColorPicker({
 }) {
   showAppBottomSheet<dynamic>(
     context: context,
-    barrierColor: AppPalette.transparent,
+    barrierColor: AppColors.transparent,
     builder: (final BuildContext _) {
       return ColorPickerDialog(
         title: title,

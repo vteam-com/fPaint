@@ -33,14 +33,14 @@ class _SettingsPageState extends State<SettingsPage> {
           DecoratedBox(
             decoration: const BoxDecoration(color: AppColors.surface),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.small, vertical: AppSpacing.small),
               child: Row(
                 children: <Widget>[
                   AppButtonIcon(
                     icon: const AppSvgIcon(icon: AppIcon.arrowLeft),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
+                  const SizedBox(width: AppSpacing.small),
                   AppText(
                     l10n.settings,
                     variant: AppTextVariant.title,
@@ -56,7 +56,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: AppSpacing.xxl,
+                    spacing: AppSpacing.large,
                     children: <Widget>[
                       AppListTile(
                         title: AppText(l10n.languageLabel),

@@ -266,14 +266,14 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
             color: AppColors.selected,
             cursor: SystemMouseCursors.click,
             onTap: widget.onCopy,
-            child: const AppSvgIcon(icon: AppIcon.clipboardCopy, size: AppLayout.iconSize, color: AppPalette.white),
+            child: const AppSvgIcon(icon: AppIcon.clipboardCopy, size: AppLayout.iconSize, color: AppColors.white),
           ),
           buildOverlayCircleButton(
             tooltip: l10n.duplicate,
             color: AppColors.selected,
             cursor: SystemMouseCursors.click,
             onTap: widget.onDuplicate,
-            child: const AppSvgIcon(icon: AppIcon.copy, size: AppLayout.iconSize, color: AppPalette.white),
+            child: const AppSvgIcon(icon: AppIcon.copy, size: AppLayout.iconSize, color: AppColors.white),
           ),
           _EffectsPopupButton(
             l10n: l10n,
@@ -333,11 +333,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
                 },
                 onPanEnd: (final DragEndDetails _) => _endFeedback(),
                 onPanCancel: _endFeedback,
-                child: const AppSvgIcon(icon: AppIcon.openInFull, size: AppLayout.iconSize, color: AppPalette.white),
+                child: const AppSvgIcon(icon: AppIcon.openInFull, size: AppLayout.iconSize, color: AppColors.white),
               ),
               buildOverlayCircleButton(
                 tooltip: l10n.resizeRotate,
-                color: AppPalette.green,
+                color: AppColors.green,
                 cursor: SystemMouseCursors.grab,
                 onPanStart: (final DragStartDetails _) => _beginRotateFeedback(),
                 onPanUpdate: (final DragUpdateDetails details) {
@@ -356,7 +356,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
                 },
                 onPanEnd: (final DragEndDetails _) => _endFeedback(),
                 onPanCancel: _endFeedback,
-                child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppPalette.white),
+                child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppColors.white),
               ),
               buildOverlayCircleButton(
                 tooltip: l10n.transform,
@@ -473,7 +473,7 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
       child: const AppSvgIcon(
         icon: AppIcon.autoFixHigh,
         size: AppLayout.iconSize,
-        color: AppPalette.white,
+        color: AppColors.white,
       ),
     );
   }
@@ -499,7 +499,7 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
             (final SelectionEffect effect) => AppPopupMenuItem<SelectionEffect>(
               value: effect,
               child: Row(
-                spacing: AppSpacing.md,
+                spacing: AppSpacing.medium,
                 children: <Widget>[
                   AppSvgIcon(
                     icon: effect.icon,

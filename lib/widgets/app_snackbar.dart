@@ -26,19 +26,19 @@ class AppNotificationOverlay {
     _activeEntry = OverlayEntry(
       builder: (final BuildContext _) {
         return Positioned(
-          bottom: AppSpacing.xxl,
-          left: AppSpacing.xxl,
-          right: AppSpacing.xxl,
+          bottom: AppSpacing.large,
+          left: AppSpacing.large,
+          right: AppSpacing.large,
           child: Center(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: AppColors.surfaceVariant,
-                borderRadius: BorderRadius.circular(AppRadius.md),
+                borderRadius: BorderRadius.circular(AppRadius.medium),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.xl,
-                  vertical: AppSpacing.lg,
+                  horizontal: AppSpacing.large,
+                  vertical: AppSpacing.big,
                 ),
                 child: Text(
                   message,

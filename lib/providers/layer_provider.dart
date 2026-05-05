@@ -474,10 +474,10 @@ class LayerProvider extends ChangeNotifier {
         ),
       ],
       brush: MyBrush(
-        color: AppPalette.transparent,
+        color: AppColors.transparent,
         size: 0,
       ),
-      fillColor: AppPalette.transparent,
+      fillColor: AppColors.transparent,
       image: imageToAdd,
     );
 
@@ -601,7 +601,7 @@ class LayerProvider extends ChangeNotifier {
   void renderLayer(final Canvas canvas) {
     // Save a layer with opacity and blend mode applied
     final Paint layerPaint = Paint();
-    layerPaint.color = AppPalette.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt());
+    layerPaint.color = AppColors.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt());
     layerPaint.blendMode = blendMode;
 
     canvas.saveLayer(null, layerPaint);

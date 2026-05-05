@@ -24,11 +24,11 @@ void main() {
     });
 
     test('brushColor defaults to black', () {
-      expect(preferences.brushColor, AppPalette.black);
+      expect(preferences.brushColor, AppColors.black);
     });
 
     test('fillColor defaults to blue', () {
-      expect(preferences.fillColor, AppPalette.blue);
+      expect(preferences.fillColor, AppColors.blue);
     });
 
     test('useApplePencil defaults to AppDefaults value', () {

@@ -106,12 +106,12 @@ Future<void> showPickerDialog({
 }) async {
   await showAppBottomSheet<void>(
     context: context,
-    barrierColor: AppPalette.transparent,
+    barrierColor: AppColors.transparent,
     builder: (final BuildContext _) {
       return SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xxl),
+            padding: const EdgeInsets.all(AppSpacing.large),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: AppLayout.sliderDialogWidth),
@@ -123,7 +123,7 @@ Future<void> showPickerDialog({
                       title,
                       variant: AppTextVariant.title,
                     ),
-                    const SizedBox(height: AppSpacing.xl),
+                    const SizedBox(height: AppSpacing.large),
                     child,
                   ],
                 ),

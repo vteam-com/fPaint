@@ -70,7 +70,7 @@ class AppSlider extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             Row(
-              spacing: AppSpacing.md,
+              spacing: AppSpacing.medium,
               children: <Widget>[
                 ?icon,
                 if (label != null) AppText(label!),

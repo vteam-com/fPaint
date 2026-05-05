@@ -121,7 +121,7 @@ Color contrastColor(final Color color) {
   final double alphaFactor = color.a;
 
   // Determine whether to make the contrast color black or white based on the luminance and alpha
-  final Color contrastColor = (luminance * alphaFactor) > AppVisual.half ? AppPalette.black : AppPalette.white;
+  final Color contrastColor = (luminance * alphaFactor) > AppVisual.half ? AppColors.black : AppColors.white;
 
   return contrastColor;
 }
@@ -144,7 +144,7 @@ Color getColorFromString(final String hexColor) {
   if (newHexColor.length == AppLimits.hexArgbLength) {
     return Color(int.parse('0x$newHexColor'));
   }
-  return AppPalette.transparent;
+  return AppColors.transparent;
 }
 
 /// Converts HSV (Hue, Saturation, Value) color representation to a [Color] object.
@@ -171,7 +171,7 @@ Color hsvToColor(final double hue, final double brightness) {
 /// tracked and managed, such as in UI design or data visualization.
 class ColorUsage {
   ColorUsage(this.color, this.percentage);
-  Color color = AppPalette.black;
+  Color color = AppColors.black;
   double percentage = 1.0; // from 0 to 1
 
   /// Returns this usage value formatted as a percentage string.

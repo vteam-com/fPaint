@@ -34,7 +34,7 @@ class TextAttributesWidget extends StatelessWidget {
           childLeft: AppButtonIcon(
             icon: const AppSvgIcon(icon: AppIcon.formatSize),
             constraints: minimal ? const BoxConstraints() : null,
-            padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
+            padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.small),
             onPressed: () {
               showBrushSizePicker(
                 context: context,
@@ -73,7 +73,7 @@ class TextAttributesWidget extends StatelessWidget {
                 key: Keys.textEditorBoldButton,
                 icon: AppSvgIcon(
                   icon: AppIcon.formatBold,
-                  color: appProvider.textToolState.fontWeight == FontWeight.bold ? AppPalette.blue : AppPalette.grey,
+                  color: appProvider.textToolState.fontWeight == FontWeight.bold ? AppColors.blue : AppColors.grey,
                 ),
                 onPressed: () {
                   appProvider.textToolState.fontWeight = appProvider.textToolState.fontWeight == FontWeight.bold
@@ -86,7 +86,7 @@ class TextAttributesWidget extends StatelessWidget {
                 key: Keys.textEditorItalicButton,
                 icon: AppSvgIcon(
                   icon: AppIcon.formatItalic,
-                  color: appProvider.textToolState.fontStyle == FontStyle.italic ? AppPalette.blue : AppPalette.grey,
+                  color: appProvider.textToolState.fontStyle == FontStyle.italic ? AppColors.blue : AppColors.grey,
                 ),
                 onPressed: () {
                   appProvider.textToolState.fontStyle = appProvider.textToolState.fontStyle == FontStyle.italic
@@ -165,6 +165,6 @@ class TextAttributesWidget extends StatelessWidget {
 Widget separator() {
   return const AppDivider(
     height: AppStroke.thin,
-    color: AppPalette.black,
+    color: AppColors.black,
   );
 }

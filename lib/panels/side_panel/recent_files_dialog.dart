@@ -51,7 +51,7 @@ class _ImportDialogState extends State<ImportDialog> {
                 });
               },
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.big),
             AppButtonPrimary(
               onPressed: () {
                 Navigator.pop(context);
@@ -64,9 +64,9 @@ class _ImportDialogState extends State<ImportDialog> {
               text: l10n.browseFiles,
             ),
             if (!kIsWeb && recentFiles.isNotEmpty) ...<Widget>[
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.large),
               AppText(l10n.recentFilesLabel, variant: AppTextVariant.subtitle),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.small),
               for (final String path in recentFiles)
                 _RecentFileEntry(
                   path: path,
@@ -221,7 +221,7 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.small),
           child: Row(
             children: <Widget>[
               SizedBox(
@@ -229,7 +229,7 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
                 height: AppLayout.thumbnailMaxHeight,
                 child: _buildThumbnail(),
               ),
-              const SizedBox(width: AppSpacing.md),
+              const SizedBox(width: AppSpacing.medium),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

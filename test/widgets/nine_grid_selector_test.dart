@@ -53,7 +53,7 @@ void main() {
       bool hasBlueSelected = false;
       for (final DecoratedBox decoratedBox in decoratedBoxes) {
         final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
-        if (decoration.color == AppPalette.blue) {
+        if (decoration.color == AppColors.blue) {
           hasBlueSelected = true;
           break;
         }

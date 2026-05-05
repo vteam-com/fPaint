@@ -74,8 +74,8 @@ void main() {
       final UserActionDrawing action = UserActionDrawing(
         action: ActionType.pencil,
         positions: <Offset>[const Offset(0, 0), const Offset(10, 10)],
-        brush: MyBrush(color: AppPalette.black, size: 2),
-        fillColor: AppPalette.transparent,
+        brush: MyBrush(color: AppColors.black, size: 2),
+        fillColor: AppColors.transparent,
       );
       layer.appendDrawingAction(action);
       expect(layer.count, 1);
@@ -90,8 +90,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(0, 0), const Offset(5, 5)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       expect(layer.count, 1);
@@ -123,8 +123,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.brush,
           positions: <Offset>[const Offset(0, 0)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       layer.lastActionAppendPosition(position: const Offset(20, 20));
@@ -157,8 +157,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(10, 10), const Offset(20, 20)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       layer.offset(const Offset(5, 5));
@@ -173,8 +173,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.region,
           positions: <Offset>[const Offset(10, 10)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.red,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.red,
           path: path,
         ),
       );
@@ -190,8 +190,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(10, 10), const Offset(20, 20)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
           clipPath: clipPath,
         ),
       );
@@ -205,12 +205,12 @@ void main() {
         UserActionDrawing(
           action: ActionType.text,
           positions: <Offset>[const Offset(10, 10)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
           textObject: TextObject(
             text: 'Hello',
             position: const Offset(10, 10),
-            color: AppPalette.black,
+            color: AppColors.black,
             size: 16,
           ),
         ),
@@ -225,8 +225,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(10, 10), const Offset(20, 20)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       layer.scale(2.0);
@@ -240,8 +240,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(0, 0), const Offset(50, 50)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       final ui.Image img = layer.toImageForStorage(const Size(100, 100));
@@ -258,7 +258,7 @@ void main() {
 
     test('renderLayer with backgroundColor', () {
       final LayerProvider layer = _createLayer();
-      layer.backgroundColor = AppPalette.white;
+      layer.backgroundColor = AppColors.white;
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final Canvas canvas = Canvas(recorder);
       layer.renderLayer(canvas);
@@ -271,8 +271,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(0, 0), const Offset(50, 50)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -291,8 +291,8 @@ void main() {
             const Offset(10, 10),
             const Offset(20, 20),
           ],
-          brush: MyBrush(color: AppPalette.blue, size: 4),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.blue, size: 4),
+          fillColor: AppColors.transparent,
         ),
       );
       final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -307,8 +307,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.line,
           positions: <Offset>[const Offset(0, 0), const Offset(80, 80)],
-          brush: MyBrush(color: AppPalette.black, size: 3),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 3),
+          fillColor: AppColors.transparent,
         ),
       );
       final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -323,8 +323,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.circle,
           positions: <Offset>[const Offset(10, 10), const Offset(50, 50)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.red,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.red,
         ),
       );
       final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -339,8 +339,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.rectangle,
           positions: <Offset>[const Offset(5, 5), const Offset(90, 90)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.green,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.green,
         ),
       );
       final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -356,8 +356,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.region,
           positions: <Offset>[const Offset(10, 10)],
-          brush: MyBrush(color: AppPalette.black, size: 0),
-          fillColor: AppPalette.yellow,
+          brush: MyBrush(color: AppColors.black, size: 0),
+          fillColor: AppColors.yellow,
           path: regionPath,
         ),
       );
@@ -373,8 +373,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.eraser,
           positions: <Offset>[const Offset(5, 5), const Offset(50, 50)],
-          brush: MyBrush(color: AppPalette.transparent, size: 10),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.transparent, size: 10),
+          fillColor: AppColors.transparent,
         ),
       );
       final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -390,8 +390,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.cut,
           positions: <Offset>[const Offset(0, 0)],
-          brush: MyBrush(color: AppPalette.transparent, size: 0),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.transparent, size: 0),
+          fillColor: AppColors.transparent,
           path: cutPath,
         ),
       );
@@ -417,12 +417,12 @@ void main() {
         UserActionDrawing(
           action: ActionType.text,
           positions: <Offset>[const Offset(10, 10)],
-          brush: MyBrush(color: AppPalette.black, size: 0),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 0),
+          fillColor: AppColors.transparent,
           textObject: TextObject(
             text: 'Test',
             position: const Offset(10, 10),
-            color: AppPalette.black,
+            color: AppColors.black,
             size: 14,
           ),
         ),
@@ -439,8 +439,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.selector,
           positions: <Offset>[const Offset(10, 10), const Offset(50, 50)],
-          brush: MyBrush(color: AppPalette.black, size: 0),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 0),
+          fillColor: AppColors.transparent,
         ),
       );
       final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -455,8 +455,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.fill,
           positions: <Offset>[const Offset(10, 10)],
-          brush: MyBrush(color: AppPalette.black, size: 0),
-          fillColor: AppPalette.red,
+          brush: MyBrush(color: AppColors.black, size: 0),
+          fillColor: AppColors.red,
         ),
       );
       final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -472,8 +472,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(5, 5), const Offset(40, 40)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
           clipPath: clipPath,
         ),
       );
@@ -491,8 +491,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(0, 0), const Offset(50, 50)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -536,8 +536,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(10, 20), const Offset(30, 40)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       await layer.rotate90Clockwise(const Size(100, 200));
@@ -552,8 +552,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.region,
           positions: <Offset>[const Offset(10, 10)],
-          brush: MyBrush(color: AppPalette.black, size: 0),
-          fillColor: AppPalette.red,
+          brush: MyBrush(color: AppColors.black, size: 0),
+          fillColor: AppColors.red,
           path: path,
         ),
       );
@@ -568,8 +568,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(5, 5), const Offset(40, 40)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
           clipPath: clipPath,
         ),
       );
@@ -592,12 +592,12 @@ void main() {
         UserActionDrawing(
           action: ActionType.text,
           positions: <Offset>[const Offset(10, 20)],
-          brush: MyBrush(color: AppPalette.black, size: 0),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 0),
+          fillColor: AppColors.transparent,
           textObject: TextObject(
             text: 'Rotate',
             position: const Offset(10, 20),
-            color: AppPalette.black,
+            color: AppColors.black,
             size: 14,
           ),
         ),
@@ -612,8 +612,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(10, 20), const Offset(30, 40)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       await layer.flipHorizontal(const Size(100, 100));
@@ -627,8 +627,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(10, 20), const Offset(30, 40)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       await layer.flipVertical(const Size(100, 100));
@@ -643,8 +643,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.region,
           positions: <Offset>[const Offset(10, 10)],
-          brush: MyBrush(color: AppPalette.black, size: 0),
-          fillColor: AppPalette.red,
+          brush: MyBrush(color: AppColors.black, size: 0),
+          fillColor: AppColors.red,
           path: path,
         ),
       );
@@ -659,8 +659,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(5, 5), const Offset(40, 40)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
           clipPath: clipPath,
         ),
       );
@@ -690,12 +690,12 @@ void main() {
         UserActionDrawing(
           action: ActionType.text,
           positions: <Offset>[const Offset(10, 20)],
-          brush: MyBrush(color: AppPalette.black, size: 0),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 0),
+          fillColor: AppColors.transparent,
           textObject: TextObject(
             text: 'FlipH',
             position: const Offset(10, 20),
-            color: AppPalette.black,
+            color: AppColors.black,
             size: 14,
           ),
         ),
@@ -710,12 +710,12 @@ void main() {
         UserActionDrawing(
           action: ActionType.text,
           positions: <Offset>[const Offset(10, 20)],
-          brush: MyBrush(color: AppPalette.black, size: 0),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 0),
+          fillColor: AppColors.transparent,
           textObject: TextObject(
             text: 'FlipV',
             position: const Offset(10, 20),
-            color: AppPalette.black,
+            color: AppColors.black,
             size: 14,
           ),
         ),
@@ -730,8 +730,8 @@ void main() {
         UserActionDrawing(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(0, 0), const Offset(50, 50)],
-          brush: MyBrush(color: AppPalette.black, size: 2),
-          fillColor: AppPalette.transparent,
+          brush: MyBrush(color: AppColors.black, size: 2),
+          fillColor: AppColors.transparent,
         ),
       );
       await layer.updateThumbnail();
@@ -751,7 +751,7 @@ Future<ui.Image> _createTestImage(int width, int height) async {
   final Canvas canvas = Canvas(recorder);
   canvas.drawRect(
     Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
-    Paint()..color = AppPalette.red,
+    Paint()..color = AppColors.red,
   );
   return recorder.endRecording().toImage(width, height);
 }

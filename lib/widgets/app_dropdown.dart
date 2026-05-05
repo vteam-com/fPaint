@@ -52,9 +52,9 @@ class AppDropdown<T> extends StatelessWidget {
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(AppRadius.md),
+                            borderRadius: BorderRadius.circular(AppRadius.medium),
                             border: Border.all(
-                              color: AppPalette.overlayBorder,
+                              color: AppColors.overlayBorder,
                               width: AppStroke.thin,
                             ),
                           ),
@@ -68,8 +68,8 @@ class AppDropdown<T> extends StatelessWidget {
                                   cursor: SystemMouseCursors.click,
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSpacing.xl,
-                                      vertical: AppSpacing.md,
+                                      horizontal: AppSpacing.large,
+                                      vertical: AppSpacing.medium,
                                     ),
                                     child: DefaultTextStyle(
                                       style: AppTextStyle.body,
@@ -97,12 +97,12 @@ class AppDropdown<T> extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               border: Border.all(color: AppColors.divider),
-              borderRadius: BorderRadius.circular(AppRadius.sm),
+              borderRadius: BorderRadius.circular(AppRadius.small),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
+                horizontal: AppSpacing.medium,
+                vertical: AppSpacing.small,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
@@ -111,7 +111,7 @@ class AppDropdown<T> extends StatelessWidget {
                     style: AppTextStyle.body,
                     child: selected?.child ?? const SizedBox.shrink(),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
+                  const SizedBox(width: AppSpacing.small),
                   const Text(
                     '▼',
                     style: AppTextStyle.label,

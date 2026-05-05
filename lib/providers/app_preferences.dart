@@ -42,8 +42,8 @@ class AppPreferences extends ChangeNotifier {
   // Default values
   double _sidePanelDistance = AppLayout.sidePanelTopDefault;
   double _brushSize = AppDefaults.brushSize;
-  Color _brushColor = AppPalette.black;
-  Color _fillColor = AppPalette.blue;
+  Color _brushColor = AppColors.black;
+  Color _fillColor = AppColors.blue;
   bool _useApplePencil = true;
   String? _languageCode;
   List<String> _recentFiles = <String>[];
@@ -212,9 +212,9 @@ class AppPreferences extends ChangeNotifier {
     _brushSize = _prefs!.getDouble(keyBrushSize) ?? AppDefaults.brushSize;
 
     // Load last used color
-    _brushColor = Color(_prefs!.getInt(keyLastBrushColor) ?? AppPalette.black.toARGB32());
+    _brushColor = Color(_prefs!.getInt(keyLastBrushColor) ?? AppColors.black.toARGB32());
 
-    _fillColor = Color(_prefs!.getInt(keyLastFillColor) ?? AppPalette.blue.toARGB32());
+    _fillColor = Color(_prefs!.getInt(keyLastFillColor) ?? AppColors.blue.toARGB32());
 
     _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? AppDefaults.useApplePencil;
 

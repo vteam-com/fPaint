@@ -71,7 +71,7 @@ Future<void> onFileNew(final BuildContext context) async {
           title: l10n.newCanvasSize,
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            spacing: AppSpacing.xxl,
+            spacing: AppSpacing.large,
             children: <Widget>[
               AppTextField(
                 controller: widthController,
@@ -88,7 +88,7 @@ Future<void> onFileNew(final BuildContext context) async {
           actions: <Widget>[
             if (offNewDocFromClipboard)
               Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.xxl),
+                padding: const EdgeInsets.only(right: AppSpacing.large),
                 child: AppButtonText(
                   onPressed: () {
                     // Handle creating new document from clipboard image

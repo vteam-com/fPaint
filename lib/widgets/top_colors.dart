@@ -74,7 +74,7 @@ class TopColors extends StatelessWidget {
 
     return Column(
       children: <Widget>[
-        if (minimal) const AppDivider(color: AppPalette.black),
+        if (minimal) const AppDivider(color: AppColors.black),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -88,7 +88,7 @@ class TopColors extends StatelessWidget {
         IntrinsicHeight(
           child: transparentPaperContainer(
             Padding(
-              padding: EdgeInsets.all(minimal ? 0 : AppSpacing.xs),
+              padding: EdgeInsets.all(minimal ? 0 : AppSpacing.small),
               child: Wrap(
                 spacing: 1,
                 runSpacing: 1,

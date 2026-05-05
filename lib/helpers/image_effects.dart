@@ -271,8 +271,8 @@ Future<ui.Image> applyVignette(
   final Paint vignettePaint = Paint()
     ..shader = RadialGradient(
       colors: <Color>[
-        AppPalette.transparent,
-        AppPalette.black.withValues(alpha: effectiveStrength),
+        AppColors.transparent,
+        AppColors.black.withValues(alpha: effectiveStrength),
       ],
     ).createShader(rect);
   canvas.drawRect(rect, vignettePaint);

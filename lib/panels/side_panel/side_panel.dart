@@ -44,7 +44,7 @@ class _SidePanelState extends State<SidePanel> {
       Area(
         min: AppLayout.minPanelExtent,
         builder: (final BuildContext _, final Area _) => Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.sm),
+          padding: const EdgeInsets.only(top: AppSpacing.small),
           child: ToolsPanel(
             minimal: widget.minimal,
           ),
@@ -70,9 +70,9 @@ class _SidePanelState extends State<SidePanel> {
         data: MultiSplitViewThemeData(
           dividerPainter: DividerPainters.grooved1(
             animationEnabled: true,
-            backgroundColor: AppPalette.grey600,
-            highlightedBackgroundColor: AppPalette.blue,
-            color: AppPalette.grey800,
+            backgroundColor: AppColors.grey600,
+            highlightedBackgroundColor: AppColors.blue,
+            color: AppColors.grey800,
             thickness: AppStroke.divider,
             highlightedThickness: AppStroke.dividerHighlighted,
             strokeCap: StrokeCap.round,

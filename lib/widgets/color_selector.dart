@@ -55,16 +55,16 @@ class _ColorSelectorState extends State<ColorSelector> {
     }
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        borderRadius: BorderRadius.circular(AppRadius.medium),
         border: Border.all(
-          color: AppPalette.grey,
+          color: AppColors.grey,
           width: AppStroke.thin,
         ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppStroke.thin),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppSpacing.sm - AppStroke.thin), // Same radius as container
+          borderRadius: BorderRadius.circular(AppSpacing.small - AppStroke.thin), // Same radius as container
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.stretch,

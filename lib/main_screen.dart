@@ -32,7 +32,7 @@ class MainScreen extends StatelessWidget {
 
     if (appPreferences.isLoaded == false) {
       return const AppScaffold(
-        backgroundColor: AppPalette.grey,
+        backgroundColor: AppColors.grey,
         body: Center(
           child: SizedBox(
             width: AppLayout.loaderRadius,
@@ -53,7 +53,7 @@ class MainScreen extends StatelessWidget {
         _handleDroppedFiles(context, details);
       },
       child: AppScaffold(
-        backgroundColor: AppPalette.grey,
+        backgroundColor: AppColors.grey,
         body: Stack(
           children: <Widget>[
             shellMode == ShellMode.hidden
@@ -62,9 +62,9 @@ class MainScreen extends StatelessWidget {
                     data: MultiSplitViewThemeData(
                       dividerPainter: DividerPainters.grooved1(
                         animationEnabled: true,
-                        backgroundColor: AppPalette.grey600,
-                        highlightedBackgroundColor: AppPalette.blue,
-                        color: AppPalette.grey800,
+                        backgroundColor: AppColors.grey600,
+                        highlightedBackgroundColor: AppColors.blue,
+                        color: AppColors.grey800,
                         thickness: AppStroke.divider,
                         highlightedThickness: AppStroke.dividerHighlighted,
                         strokeCap: StrokeCap.round,
@@ -73,8 +73,8 @@ class MainScreen extends StatelessWidget {
                     child: _buildMainContent(context, shellProvider, appPreferences),
                   ),
             Positioned(
-              right: AppSpacing.xl,
-              bottom: AppSpacing.xl,
+              right: AppSpacing.large,
+              bottom: AppSpacing.large,
               child: shellMode == ShellMode.hidden
                   ? AppButtonIcon(
                       padding: EdgeInsets.zero,
@@ -179,7 +179,7 @@ class MainScreen extends StatelessWidget {
                 shellProvider.update();
               },
               child: Container(
-                color: AppPalette.black.withAlpha(AppLayout.overlayAlpha),
+                color: AppColors.black.withAlpha(AppLayout.overlayAlpha),
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: SizedBox(

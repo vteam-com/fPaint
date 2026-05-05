@@ -22,14 +22,14 @@ class AppListTile extends StatelessWidget {
   Widget build(final BuildContext context) {
     final Widget row = Padding(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xl,
-        vertical: AppSpacing.md,
+        horizontal: AppSpacing.large,
+        vertical: AppSpacing.medium,
       ),
       child: Row(
         children: <Widget>[
           if (leading != null) ...<Widget>[
             leading!,
-            const SizedBox(width: AppSpacing.xl),
+            const SizedBox(width: AppSpacing.large),
           ],
           Expanded(
             child: Column(

@@ -24,9 +24,9 @@ Widget colorPreviewWithTransparentPaper({
     height: minimal ? AppLayout.layerPreviewCompactSize : AppLayout.layerPreviewSize,
     width: minimal ? AppLayout.layerPreviewCompactSize : AppLayout.layerPreviewSize,
     child: transparentPaperContainer(
-      radius: minimal ? AppRadius.lg : AppRadius.md,
+      radius: minimal ? AppRadius.large : AppRadius.medium,
       Padding(
-        padding: const EdgeInsets.all(AppSpacing.sm),
+        padding: const EdgeInsets.all(AppSpacing.small),
         child: ColorPreview(
           color: color,
           onPressed: onPressed,
@@ -79,7 +79,7 @@ class ColorPreview extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final double size = minimal ? AppSpacing.huge : AppLayout.layerPreviewCompactSize;
+    final double size = minimal ? AppSpacing.largest : AppLayout.layerPreviewCompactSize;
 
     final String text = this.text ?? colorToHexString(color);
 
@@ -103,8 +103,8 @@ class ColorPreview extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: color,
-                      border: border ? Border.all(color: AppPalette.grey) : null,
-                      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.sm)),
+                      border: border ? Border.all(color: AppColors.grey) : null,
+                      borderRadius: const BorderRadius.all(Radius.circular(AppRadius.small)),
                     ),
                   ),
                 ),
@@ -118,7 +118,7 @@ class ColorPreview extends StatelessWidget {
                       text,
                       textAlign: TextAlign.center,
                       variant: AppTextVariant.label,
-                      color: color.computeLuminance() > AppVisual.half ? AppPalette.black : AppPalette.white,
+                      color: color.computeLuminance() > AppVisual.half ? AppColors.black : AppColors.white,
                     ),
                   ),
               ],

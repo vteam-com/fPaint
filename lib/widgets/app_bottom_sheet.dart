@@ -3,12 +3,12 @@ import 'package:fpaint/helpers/constants.dart';
 
 /// Shows a modal bottom sheet replacing Material [showModalBottomSheet].
 ///
-/// Pass [barrierColor] as [AppPalette.transparent] to leave the background
+/// Pass [barrierColor] as [AppColors.transparent] to leave the background
 /// fully visible (e.g. when the canvas should remain in view during the sheet).
 Future<T?> showAppBottomSheet<T>({
   required final BuildContext context,
   required final WidgetBuilder builder,
-  final Color barrierColor = AppPalette.scrim,
+  final Color barrierColor = AppColors.scrim,
 }) {
   return showGeneralDialog<T>(
     context: context,
@@ -31,10 +31,10 @@ Future<T?> showAppBottomSheet<T>({
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(AppRadius.md),
+                    top: Radius.circular(AppRadius.medium),
                   ),
                   border: Border.all(
-                    color: AppPalette.overlayBorder,
+                    color: AppColors.overlayBorder,
                     width: AppStroke.thin,
                   ),
                 ),

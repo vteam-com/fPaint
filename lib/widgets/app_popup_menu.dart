@@ -59,14 +59,14 @@ Future<T?> showAppMenu<T>({
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        borderRadius: BorderRadius.circular(AppRadius.medium),
                         border: Border.all(
-                          color: AppPalette.overlayBorder,
+                          color: AppColors.overlayBorder,
                           width: AppStroke.thin,
                         ),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.small),
                         child: SingleChildScrollView(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -82,8 +82,8 @@ Future<T?> showAppMenu<T>({
                                   cursor: SystemMouseCursors.click,
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSpacing.xl,
-                                      vertical: AppSpacing.md,
+                                      horizontal: AppSpacing.large,
+                                      vertical: AppSpacing.medium,
                                     ),
                                     child: DefaultTextStyle(
                                       style: AppTextStyle.body,

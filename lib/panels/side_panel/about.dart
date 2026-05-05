@@ -39,11 +39,11 @@ Future<void> showAboutBox(final BuildContext context) async {
               width: AppLayout.appIconSize,
               height: AppLayout.appIconSize,
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.medium),
             const AppText(_applicationLegalese),
-            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.large),
             AppText(l10n.deviceScreenResolution(screenResolution)),
-            const SizedBox(height: AppSpacing.xxl),
+            const SizedBox(height: AppSpacing.large),
             GestureDetector(
               onTap: () => launchUrl(Uri.parse(_repoUrl)),
               child: MouseRegion(

@@ -26,14 +26,14 @@ class AppDialog extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderRadius: BorderRadius.circular(AppRadius.medium),
             border: Border.all(
-              color: AppPalette.overlayBorder,
+              color: AppColors.overlayBorder,
               width: AppStroke.thin,
             ),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xxl),
+            padding: const EdgeInsets.all(AppSpacing.large),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -42,10 +42,10 @@ class AppDialog extends StatelessWidget {
                   DefaultTextStyle(
                     style: AppTextStyle.title,
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+                      padding: const EdgeInsets.only(bottom: AppSpacing.large),
                       child: titleIcon != null
                           ? Row(
-                              spacing: AppSpacing.md,
+                              spacing: AppSpacing.medium,
                               children: <Widget>[
                                 titleIcon!,
                                 Text(title!),
@@ -60,7 +60,7 @@ class AppDialog extends StatelessWidget {
                       child: DefaultTextStyle(
                         style: AppTextStyle.body,
                         child: Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+                          padding: const EdgeInsets.only(bottom: AppSpacing.large),
                           child: content!,
                         ),
                       ),
@@ -90,7 +90,7 @@ Future<T?> showAppDialog<T>({
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierLabelDismiss,
-    barrierColor: AppPalette.scrim,
+    barrierColor: AppColors.scrim,
     pageBuilder:
         (
           final BuildContext dialogContext,

@@ -22,7 +22,7 @@ class CanvasPanelPainter extends CustomPainter {
     }
 
     if (includeTransparentBackground) {
-      drawTransaparentBackgroundOffsetAndSize(
+      drawTransparentBackgroundOffsetAndSize(
         canvas: canvas,
         size: size,
       );

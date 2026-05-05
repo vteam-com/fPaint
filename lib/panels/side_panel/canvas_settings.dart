@@ -43,11 +43,11 @@ void showCanvasSettings(final BuildContext context) {
 
       return SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
+          padding: const EdgeInsets.all(AppSpacing.large),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
-            spacing: AppSpacing.md,
+            spacing: AppSpacing.medium,
             children: <Widget>[
               AppText(
                 l10n.canvasSizeTitle,
@@ -118,7 +118,7 @@ void showCanvasSettings(final BuildContext context) {
                 ],
               ),
               Column(
-                spacing: AppSpacing.md,
+                spacing: AppSpacing.medium,
                 children: <Widget>[
                   AppText(l10n.contentAlignment),
                   NineGridSelector(
