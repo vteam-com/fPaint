@@ -98,12 +98,16 @@ class ToolsPanel extends StatelessWidget {
     final String name = isBrush ? l10n.brushColor : l10n.fillColor;
     final Key previewKey = isBrush ? Keys.toolPanelBrushColor1 : Keys.toolPanelFillColor;
     final Color color = isBrush ? appProvider.brushColor : appProvider.fillColor;
+    final bool isPickFromCanvasActive = isBrush
+        ? appProvider.eyeDropPositionForBrush != null
+        : appProvider.eyeDropPositionForFill != null;
     _addToolOptionColor(
       widgets: widgets,
       context: context,
       name: name,
       previewKey: previewKey,
       color: color,
+      isPickFromCanvasActive: isPickFromCanvasActive,
       onColorChanged: (final Color selectedColor) {
         if (isBrush) {
           appProvider.brushColor = selectedColor;
@@ -694,6 +698,7 @@ class ToolsPanel extends StatelessWidget {
     required final String name,
     required final Key previewKey,
     required final Color color,
+    required final bool isPickFromCanvasActive,
     required final ValueChanged<Color> onColorChanged,
     required final VoidCallback onPickFromCanvas,
   }) {
@@ -718,7 +723,10 @@ class ToolsPanel extends StatelessWidget {
             ),
             if (!minimal)
               AppButtonIcon(
-                icon: const AppSvgIcon(icon: AppIcon.colorize),
+                icon: AppSvgIcon(
+                  icon: AppIcon.eyedropper,
+                  isSelected: isPickFromCanvasActive,
+                ),
                 onPressed: onPickFromCanvas,
               ),
           ],

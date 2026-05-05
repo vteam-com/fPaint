@@ -18,7 +18,7 @@ enum AppIcon {
   circle('assets/icons/circle.svg'),
   close('assets/icons/close.svg'),
   colorLens('assets/icons/color_lens.svg'),
-  colorize('assets/icons/colorize.svg'),
+  eyedropper('assets/icons/eyedropper.svg'),
   clipboardCopy('assets/icons/clipboard_copy.svg'),
   clipboardPaste('assets/icons/clipboard_paste.svg'),
   copy('assets/icons/copy.svg'),

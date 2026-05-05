@@ -56,10 +56,6 @@ class _ColorSelectorState extends State<ColorSelector> {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppRadius.medium),
-        border: Border.all(
-          color: AppColors.grey,
-          width: AppStroke.thin,
-        ),
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppStroke.thin),

@@ -149,6 +149,12 @@ class AppProvider extends ChangeNotifier {
 
   /// Sets the selected action.
   set selectedAction(final ActionType value) {
+    // Switching tools exits eyedropper mode so pointer interactions follow the new tool.
+    if (value != _selectedAction) {
+      eyeDropPositionForBrush = null;
+      eyeDropPositionForFill = null;
+    }
+
     _selectedAction = value;
 
     if (value != ActionType.selector && effectPreviewModel.isVisible) {
