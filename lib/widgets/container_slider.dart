@@ -90,7 +90,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
       },
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: AppPalette.grey,
+          color: AppColors.grey,
           borderRadius: BorderRadius.circular(AppStroke.emphasis),
         ),
         child: Stack(
@@ -102,7 +102,7 @@ class _ContainerSliderState extends State<ContainerSlider> {
               child: Container(
                 padding: const EdgeInsets.all(1),
                 decoration: BoxDecoration(
-                  color: AppPalette.black.withAlpha(AppLayout.overlayAlpha + AppSpacing.lg.toInt()),
+                  color: AppColors.black.withAlpha(AppLayout.overlayAlpha + AppSpacing.big.toInt()),
                   borderRadius: BorderRadius.circular(AppSpacing.thin),
                 ),
                 child: AppText(

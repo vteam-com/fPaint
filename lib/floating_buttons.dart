@@ -150,7 +150,7 @@ Widget _buildMobileFabRow({
   return Row(
     mainAxisAlignment: MainAxisAlignment.end,
     crossAxisAlignment: CrossAxisAlignment.end,
-    spacing: AppSpacing.sm - AppStroke.thin,
+    spacing: AppSpacing.small - AppStroke.thin,
     children: <Widget>[
       if (!shellProvider.showMenu && canUndo) undoButton,
       if (!shellProvider.showMenu && canRedo) redoButton,
@@ -225,7 +225,7 @@ Widget _buildVerticalFabColumn({
 }) {
   return Column(
     mainAxisAlignment: MainAxisAlignment.end,
-    spacing: AppSpacing.xs,
+    spacing: AppSpacing.small,
     children: <Widget>[
       if (canUndo) undoButton,
       if (canRedo) redoButton,
@@ -325,7 +325,7 @@ Widget _buildVerticalFabColumn({
 /// Builds the shared circular visual content used by floating action buttons.
 Widget _floatingButtonContent({
   final AppIcon? icon,
-  final Color foregroundColor = AppPalette.white,
+  final Color foregroundColor = AppColors.white,
   final Widget? child,
 }) {
   return SizedBox(

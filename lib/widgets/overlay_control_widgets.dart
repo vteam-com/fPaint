@@ -40,7 +40,7 @@ Widget buildOverlayCircleButton({
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
-            border: Border.all(color: AppPalette.white, width: AppStroke.regular),
+            border: Border.all(color: AppColors.white, width: AppStroke.regular),
           ),
           child: Center(child: child),
         ),
@@ -53,18 +53,18 @@ Widget buildOverlayCircleButton({
 Widget buildOverlayFeedbackBubble({required final String label}) {
   return Container(
     padding: const EdgeInsets.symmetric(
-      horizontal: AppSpacing.sm,
-      vertical: AppSpacing.xs,
+      horizontal: AppSpacing.small,
+      vertical: AppSpacing.small,
     ),
     decoration: BoxDecoration(
       color: AppColors.surface.withValues(alpha: AppVisual.disabled),
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      border: Border.all(color: AppPalette.white, width: AppStroke.thin),
+      borderRadius: BorderRadius.circular(AppRadius.medium),
+      border: Border.all(color: AppColors.white, width: AppStroke.thin),
     ),
     child: AppText(
       label,
       variant: AppTextVariant.bodyBold,
-      color: AppPalette.white,
+      color: AppColors.white,
     ),
   );
 }
@@ -82,17 +82,17 @@ Widget buildOverlayConfirmCancelButtons({
     children: <Widget>[
       buildOverlayCircleButton(
         tooltip: l10n.apply,
-        color: AppPalette.green,
+        color: AppColors.green,
         cursor: SystemMouseCursors.click,
         onTap: onConfirm,
-        child: const AppSvgIcon(icon: AppIcon.check, color: AppPalette.white, size: AppLayout.iconSize),
+        child: const AppSvgIcon(icon: AppIcon.check, color: AppColors.white, size: AppLayout.iconSize),
       ),
       buildOverlayCircleButton(
         tooltip: l10n.cancel,
-        color: AppPalette.red,
+        color: AppColors.red,
         cursor: SystemMouseCursors.click,
         onTap: onCancel,
-        child: const AppSvgIcon(icon: AppIcon.close, color: AppPalette.white, size: AppLayout.iconSize),
+        child: const AppSvgIcon(icon: AppIcon.close, color: AppColors.white, size: AppLayout.iconSize),
       ),
     ],
   );
@@ -110,7 +110,7 @@ class OverlayDragHandle extends StatelessWidget {
     required this.onPanUpdate,
     this.onPanEnd,
     this.size = AppInteraction.selectionHandleSize,
-    this.borderRadius = AppRadius.lg,
+    this.borderRadius = AppRadius.large,
   });
 
   /// Corner radius of the handle box.
@@ -146,8 +146,8 @@ class OverlayDragHandle extends StatelessWidget {
             width: activeSize,
             height: activeSize,
             decoration: BoxDecoration(
-              color: AppPalette.overlayDark,
-              border: Border.all(color: AppPalette.overlayLight, width: AppStroke.regular),
+              color: AppColors.overlayDark,
+              border: Border.all(color: AppColors.overlayLight, width: AppStroke.regular),
               borderRadius: BorderRadius.circular(borderRadius),
             ),
             child: Center(

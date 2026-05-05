@@ -297,11 +297,11 @@ class _TransformWidgetState extends State<TransformWidget> {
                   model.endScaleGesture();
                   onChanged();
                 },
-                child: const AppSvgIcon(icon: AppIcon.openInFull, size: AppLayout.iconSize, color: AppPalette.white),
+                child: const AppSvgIcon(icon: AppIcon.openInFull, size: AppLayout.iconSize, color: AppColors.white),
               ),
               buildOverlayCircleButton(
                 tooltip: l10n.resizeRotate,
-                color: AppPalette.green,
+                color: AppColors.green,
                 cursor: SystemMouseCursors.grab,
                 onTap: () {
                   if (!model.isRotateMode) {
@@ -339,7 +339,7 @@ class _TransformWidgetState extends State<TransformWidget> {
                   model.endRotateGesture();
                   onChanged();
                 },
-                child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppPalette.white),
+                child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppColors.white),
               ),
               buildOverlayCircleButton(
                 tooltip: l10n.transform,

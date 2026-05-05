@@ -56,7 +56,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xxl),
+          padding: const EdgeInsets.all(AppSpacing.large),
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: AppLayout.sliderDialogWidth),
@@ -68,7 +68,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                     widget.title,
                     variant: AppTextVariant.title,
                   ),
-                  const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.large),
                   AppTextField(
                     controller: _controller,
                     autofocus: true,
@@ -83,12 +83,12 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                       fontStyle: _style.fontStyle,
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.xxl),
+                  const SizedBox(height: AppSpacing.large),
                   AppSlider(
                     label: l10n.fontSizeLabel,
                     valueLabel: _style.size.round().toString(),
                     value: _style.size,
-                    min: AppSpacing.sm + AppMath.pair.toDouble(),
+                    min: AppSpacing.small + AppMath.pair.toDouble(),
                     max: AppLimits.textSizeMax.toDouble(),
                     divisions: AppLimits.textSizeDivisions,
                     onChanged: (final double value) {
@@ -97,7 +97,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                       });
                     },
                   ),
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.small),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
@@ -105,7 +105,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                         key: Keys.textEditorBoldButton,
                         icon: AppSvgIcon(
                           icon: AppIcon.formatBold,
-                          color: _style.fontWeight == FontWeight.bold ? AppPalette.blue : AppPalette.grey,
+                          color: _style.fontWeight == FontWeight.bold ? AppColors.blue : AppColors.grey,
                         ),
                         onPressed: () {
                           setState(() {
@@ -119,7 +119,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                         key: Keys.textEditorItalicButton,
                         icon: AppSvgIcon(
                           icon: AppIcon.formatItalic,
-                          color: _style.fontStyle == FontStyle.italic ? AppPalette.blue : AppPalette.grey,
+                          color: _style.fontStyle == FontStyle.italic ? AppColors.blue : AppColors.grey,
                         ),
                         onPressed: () {
                           setState(() {
@@ -129,7 +129,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                           });
                         },
                       ),
-                      const SizedBox(width: AppSpacing.md),
+                      const SizedBox(width: AppSpacing.medium),
                       SizedBox(
                         width: AppLayout.inputFieldWidth,
                         child: AppDropdown<TextAlign>(
@@ -161,15 +161,15 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                       ),
                       const Spacer(),
                       Container(
-                        width: AppSpacing.huge,
-                        height: AppSpacing.huge,
+                        width: AppSpacing.largest,
+                        height: AppSpacing.largest,
                         decoration: BoxDecoration(
                           color: _style.color,
-                          border: Border.all(color: AppPalette.grey),
-                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(color: AppColors.grey),
+                          borderRadius: BorderRadius.circular(AppRadius.medium),
                         ),
                         child: AppButtonIcon(
-                          icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppPalette.white),
+                          icon: const AppSvgIcon(icon: AppIcon.colorLens, color: AppColors.white),
                           onPressed: () {
                             showColorPicker(
                               context: context,
@@ -186,7 +186,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.large),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[

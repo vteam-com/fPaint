@@ -36,7 +36,7 @@ void main() {
       recorder = ui.PictureRecorder();
       canvas = Canvas(recorder);
       paint = Paint()
-        ..color = AppPalette.black
+        ..color = AppColors.black
         ..strokeWidth = 4.0
         ..style = PaintingStyle.stroke;
       path = Path()
@@ -74,7 +74,7 @@ void main() {
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final Canvas canvas = Canvas(recorder);
       final Paint paint = Paint()
-        ..color = AppPalette.black
+        ..color = AppColors.black
         ..strokeWidth = 2.0
         ..style = PaintingStyle.stroke;
       final Path path = Path()
@@ -99,7 +99,7 @@ void main() {
     });
 
     test('renderPencil draws a line', () {
-      final MyBrush brush = MyBrush(color: AppPalette.black, size: 2.0);
+      final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0);
       renderPencil(canvas, const Offset(0, 0), const Offset(50, 50), brush);
     });
 
@@ -109,64 +109,64 @@ void main() {
     });
 
     test('renderRectangle with solid brush', () {
-      final MyBrush brush = MyBrush(color: AppPalette.black, size: 2.0);
-      renderRectangle(canvas, const Offset(10, 10), const Offset(100, 100), brush, AppPalette.red);
+      final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0);
+      renderRectangle(canvas, const Offset(10, 10), const Offset(100, 100), brush, AppColors.red);
     });
 
     test('renderRectangle with dash brush', () {
-      final MyBrush brush = MyBrush(color: AppPalette.black, size: 2.0, style: BrushStyle.dash);
-      renderRectangle(canvas, const Offset(10, 10), const Offset(100, 100), brush, AppPalette.blue);
+      final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0, style: BrushStyle.dash);
+      renderRectangle(canvas, const Offset(10, 10), const Offset(100, 100), brush, AppColors.blue);
     });
 
     test('renderCircle with solid brush', () {
-      final MyBrush brush = MyBrush(color: AppPalette.black, size: 2.0);
-      renderCircle(canvas, const Offset(50, 50), const Offset(100, 100), brush, AppPalette.green);
+      final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0);
+      renderCircle(canvas, const Offset(50, 50), const Offset(100, 100), brush, AppColors.green);
     });
 
     test('renderCircle with dotted brush', () {
-      final MyBrush brush = MyBrush(color: AppPalette.black, size: 3.0, style: BrushStyle.dotted);
-      renderCircle(canvas, const Offset(50, 50), const Offset(100, 100), brush, AppPalette.green);
+      final MyBrush brush = MyBrush(color: AppColors.black, size: 3.0, style: BrushStyle.dotted);
+      renderCircle(canvas, const Offset(50, 50), const Offset(100, 100), brush, AppColors.green);
     });
 
     test('renderLine with solid brush', () {
-      final MyBrush brush = MyBrush(color: AppPalette.black, size: 2.0);
-      renderLine(canvas, const Offset(0, 0), const Offset(100, 100), brush, AppPalette.transparent);
+      final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0);
+      renderLine(canvas, const Offset(0, 0), const Offset(100, 100), brush, AppColors.transparent);
     });
 
     test('renderLine with slash brush', () {
-      final MyBrush brush = MyBrush(color: AppPalette.black, size: 2.0, style: BrushStyle.slash);
-      renderLine(canvas, const Offset(0, 0), const Offset(100, 100), brush, AppPalette.transparent);
+      final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0, style: BrushStyle.slash);
+      renderLine(canvas, const Offset(0, 0), const Offset(100, 100), brush, AppColors.transparent);
     });
 
     test('renderPath with multiple points', () {
-      final MyBrush brush = MyBrush(color: AppPalette.black, size: 2.0);
+      final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0);
       renderPath(
         canvas,
         const <Offset>[Offset(0, 0), Offset(50, 50), Offset(100, 0)],
         brush,
-        AppPalette.transparent,
+        AppColors.transparent,
       );
     });
 
     test('renderPath with dashDot brush', () {
-      final MyBrush brush = MyBrush(color: AppPalette.black, size: 2.0, style: BrushStyle.dashDot);
+      final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0, style: BrushStyle.dashDot);
       renderPath(
         canvas,
         const <Offset>[Offset(0, 0), Offset(50, 50), Offset(100, 0)],
         brush,
-        AppPalette.transparent,
+        AppColors.transparent,
       );
     });
 
     test('renderRegion with solid fill', () {
       final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
-      renderRegion(canvas, path, AppPalette.red, null);
+      renderRegion(canvas, path, AppColors.red, null);
     });
 
     test('renderRegion with gradient fill', () {
       final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
       const LinearGradient gradient = LinearGradient(
-        colors: <Color>[AppPalette.red, AppPalette.blue],
+        colors: <Color>[AppColors.red, AppColors.blue],
       );
       renderRegion(canvas, path, null, gradient);
     });
@@ -194,7 +194,7 @@ void main() {
       final TextObject textObject = TextObject(
         text: 'Hello World',
         position: const Offset(10, 20),
-        color: AppPalette.black,
+        color: AppColors.black,
         size: 16.0,
       );
       renderText(canvas, textObject);
@@ -204,7 +204,7 @@ void main() {
       final TextObject textObject = TextObject(
         text: '',
         position: const Offset(10, 20),
-        color: AppPalette.black,
+        color: AppColors.black,
         size: 16.0,
       );
       renderText(canvas, textObject);
@@ -214,7 +214,7 @@ void main() {
       final TextObject textObject = TextObject(
         text: 'Type here...',
         position: const Offset(10, 20),
-        color: AppPalette.black,
+        color: AppColors.black,
         size: 16.0,
       );
       renderText(canvas, textObject);
@@ -224,7 +224,7 @@ void main() {
       final TextObject textObject = TextObject(
         text: 'A' * 60,
         position: const Offset(0, 0),
-        color: AppPalette.black,
+        color: AppColors.black,
         size: 14.0,
       );
       renderText(canvas, textObject);
@@ -234,7 +234,7 @@ void main() {
       final TextObject textObject = TextObject(
         text: 'Styled',
         position: const Offset(0, 0),
-        color: AppPalette.red,
+        color: AppColors.red,
         size: 20.0,
         fontWeight: FontWeight.bold,
         fontStyle: FontStyle.italic,

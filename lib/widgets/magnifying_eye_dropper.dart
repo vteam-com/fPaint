@@ -58,7 +58,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   Color? _selectedColor;
 
   /// The size of the button.
-  final double buttonSize = AppSpacing.huge;
+  final double buttonSize = AppSpacing.largest;
 
   /// The magnification factor.
   final double magnifyFactor = AppInteraction.magnifierScale;
@@ -67,7 +67,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   final double regionSize = AppLayout.previewRegionSize;
 
   /// The size of the spacer.
-  final double spacer = AppSpacing.xs;
+  final double spacer = AppSpacing.small;
 
   /// The total height of the widget.
   late final double totalHeightOfTheWidget = buttonSize + spacer + regionSize + spacer + buttonSize;
@@ -120,10 +120,10 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
           buildOverlayCircleButton(
             key: Keys.magnifyingEyeDropperCloseButton,
             tooltip: context.l10n.cancel,
-            color: AppPalette.red,
+            color: AppColors.red,
             cursor: SystemMouseCursors.click,
             onTap: widget.onClosed,
-            child: const AppSvgIcon(icon: AppIcon.close, color: AppPalette.white, size: AppLayout.iconSize),
+            child: const AppSvgIcon(icon: AppIcon.close, color: AppColors.white, size: AppLayout.iconSize),
           ),
 
           //
@@ -141,12 +141,12 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
                   child: CustomPaint(
                     painter: MagnifyingGlassPainter(
                       croppedImage: croppedImage,
-                      color: _selectedColor ?? AppPalette.black,
+                      color: _selectedColor ?? AppColors.black,
                     ),
                   ),
                 ),
                 DashedRectangle(
-                  fillColor: _selectedColor ?? AppPalette.transparent,
+                  fillColor: _selectedColor ?? AppColors.transparent,
                   width: AppLayout.magnifierTargetSize,
                   height: AppLayout.magnifierTargetSize,
                 ),
@@ -160,7 +160,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
           buildOverlayCircleButton(
             key: Keys.magnifyingEyeDropperConfirmButton,
             tooltip: context.l10n.apply,
-            color: AppPalette.green,
+            color: AppColors.green,
             cursor: SystemMouseCursors.click,
             onTap: () {
               final Color? selectedColor = _selectedColor;
@@ -169,7 +169,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
               }
               widget.onColorPicked(selectedColor);
             },
-            child: const AppSvgIcon(icon: AppIcon.check, color: AppPalette.white, size: AppLayout.iconSize),
+            child: const AppSvgIcon(icon: AppIcon.check, color: AppColors.white, size: AppLayout.iconSize),
           ),
         ],
       ),
@@ -256,7 +256,7 @@ class MagnifyingGlassPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = AppStroke.regular
-        ..color = AppPalette.black,
+        ..color = AppColors.black,
     );
     canvas.drawCircle(
       Offset(size.width / AppMath.pair, size.height / AppMath.pair),
@@ -264,7 +264,7 @@ class MagnifyingGlassPainter extends CustomPainter {
       Paint()
         ..style = PaintingStyle.stroke
         ..strokeWidth = AppStroke.regular
-        ..color = AppPalette.white,
+        ..color = AppColors.white,
     );
   }
 

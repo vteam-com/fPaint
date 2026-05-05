@@ -33,14 +33,14 @@ class PlatformsPage extends StatelessWidget {
           DecoratedBox(
             decoration: const BoxDecoration(color: AppColors.surface),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.small, vertical: AppSpacing.small),
               child: Row(
                 children: <Widget>[
                   AppButtonIcon(
                     icon: const AppSvgIcon(icon: AppIcon.arrowLeft),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const SizedBox(width: AppSpacing.sm),
+                  const SizedBox(width: AppSpacing.small),
                   AppText(
                     l10n.availablePlatforms,
                     variant: AppTextVariant.title,
@@ -75,7 +75,7 @@ class PlatformsPage extends StatelessWidget {
                         _urlLinuxDownload,
                       ),
                       const SizedBox(
-                        height: AppSpacing.huge,
+                        height: AppSpacing.largest,
                       ),
                       platformItem(
                         _platformIOS,
@@ -90,7 +90,7 @@ class PlatformsPage extends StatelessWidget {
                         _urlAndroidApp,
                       ),
                       const SizedBox(
-                        height: AppSpacing.huge,
+                        height: AppSpacing.largest,
                       ),
                       platformItem(
                         l10n.webBrowser,
@@ -117,7 +117,7 @@ class PlatformsPage extends StatelessWidget {
     final String url,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm, horizontal: AppSpacing.xl),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.small, horizontal: AppSpacing.large),
       child: AppCard(
         child: GestureDetector(
           onTap: () {
@@ -130,16 +130,16 @@ class PlatformsPage extends StatelessWidget {
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: const EdgeInsets.all(AppSpacing.large),
               child: Row(
-                spacing: AppSpacing.xxl,
+                spacing: AppSpacing.large,
                 children: <Widget>[
                   ClipOval(
                     child: SizedBox(
                       width: AppLayout.iconSize * AppVisual.previewTextScale,
                       height: AppLayout.iconSize * AppVisual.previewTextScale,
                       child: DecoratedBox(
-                        decoration: const BoxDecoration(color: AppPalette.white),
+                        decoration: const BoxDecoration(color: AppColors.white),
                         child: Image.asset(image),
                       ),
                     ),

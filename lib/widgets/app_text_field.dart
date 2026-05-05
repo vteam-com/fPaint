@@ -92,13 +92,13 @@ class _AppTextFieldState extends State<AppTextField> {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.background,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderRadius: BorderRadius.circular(AppRadius.small),
         border: Border.all(color: AppColors.divider),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.xs,
+          horizontal: AppSpacing.medium,
+          vertical: AppSpacing.small,
         ),
         child: Stack(
           alignment: Alignment.centerLeft,

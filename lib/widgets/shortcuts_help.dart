@@ -59,8 +59,8 @@ class ShortcutsHelpDialog extends StatelessWidget {
       title: _titleKeyboardShortcuts,
       content: SingleChildScrollView(
         child: Wrap(
-          spacing: AppSpacing.xxl,
-          runSpacing: AppSpacing.xxl,
+          spacing: AppSpacing.large,
+          runSpacing: AppSpacing.large,
           children: <Widget>[
             _buildShortcutGroup(
               _categoryFileOperations,
@@ -127,22 +127,22 @@ class ShortcutsHelpDialog extends StatelessWidget {
   /// Builds a single shortcut row with key caps and description text.
   Widget _buildShortcut(final String keys, final String description) {
     return Padding(
-      padding: const EdgeInsets.only(left: AppSpacing.xl, bottom: AppSpacing.sm),
+      padding: const EdgeInsets.only(left: AppSpacing.large, bottom: AppSpacing.small),
       child: Row(
         children: <Widget>[
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.small, vertical: AppSpacing.small),
             decoration: BoxDecoration(
-              color: AppPalette.grey800,
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-              border: Border.all(color: AppPalette.grey600),
+              color: AppColors.grey800,
+              borderRadius: BorderRadius.circular(AppRadius.small),
+              border: Border.all(color: AppColors.grey600),
             ),
             child: AppText(
               keys,
               variant: AppTextVariant.bodyBold,
             ),
           ),
-          const SizedBox(width: AppSpacing.xl),
+          const SizedBox(width: AppSpacing.large),
           Expanded(child: AppText(description)),
         ],
       ),
@@ -152,7 +152,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
   /// Builds the section title for a shortcut category.
   Widget _buildShortcutCategory(final String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.only(bottom: AppSpacing.small),
       child: AppText(
         title,
         variant: AppTextVariant.title,

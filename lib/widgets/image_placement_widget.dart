@@ -90,7 +90,7 @@ class ImagePlacementWidget extends StatelessWidget {
                   height: screenHeight,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: AppPalette.blue,
+                      color: AppColors.blue,
                       width: AppStroke.thin,
                     ),
                   ),
@@ -230,9 +230,9 @@ class ImagePlacementWidget extends StatelessWidget {
             width: handleSize,
             height: handleSize,
             decoration: BoxDecoration(
-              color: AppPalette.blue,
-              border: Border.all(color: AppPalette.white, width: AppStroke.regular),
-              borderRadius: BorderRadius.circular(AppRadius.sm),
+              color: AppColors.blue,
+              border: Border.all(color: AppColors.white, width: AppStroke.regular),
+              borderRadius: BorderRadius.circular(AppRadius.small),
             ),
           ),
         ),
@@ -259,7 +259,7 @@ class ImagePlacementWidget extends StatelessWidget {
       top: handleCenter.dy - handleSize / AppMath.pair,
       child: buildOverlayCircleButton(
         tooltip: l10n.resizeRotate,
-        color: AppPalette.green,
+        color: AppColors.green,
         cursor: SystemMouseCursors.grab,
         onPanUpdate: (final DragUpdateDetails details) {
           final Offset pointer = handleCenter + details.delta;
@@ -274,7 +274,7 @@ class ImagePlacementWidget extends StatelessWidget {
           model.rotation += currentAngle - previousAngle;
           onChanged();
         },
-        child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppPalette.white),
+        child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppColors.white),
       ),
     );
   }

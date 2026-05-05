@@ -64,7 +64,7 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.small),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -94,7 +94,7 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
                   text: widget.l10n.cancel,
                 ),
               ),
-              const SizedBox(width: AppSpacing.xs),
+              const SizedBox(width: AppSpacing.small),
               Expanded(
                 child: AppButtonPrimary(
                   key: widget.applyButtonKey,

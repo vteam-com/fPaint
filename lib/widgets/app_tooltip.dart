@@ -51,17 +51,17 @@ class _AppTooltipState extends State<AppTooltip> {
       builder: (final BuildContext _) {
         return Positioned(
           left: target.dx - AppLayout.toolbarButtonSize,
-          top: target.dy + AppSpacing.xs,
+          top: target.dy + AppSpacing.small,
           child: IgnorePointer(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: AppColors.surface,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
+                borderRadius: BorderRadius.circular(AppRadius.small),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.xs,
+                  horizontal: AppSpacing.medium,
+                  vertical: AppSpacing.small,
                 ),
                 child: Text(
                   widget.message,

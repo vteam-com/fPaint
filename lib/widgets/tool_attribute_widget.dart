@@ -34,13 +34,13 @@ class ToolAttributeWidget extends StatelessWidget {
       );
     }
     return Container(
-      padding: EdgeInsets.all(compact ? 0 : AppSpacing.sm),
+      padding: EdgeInsets.all(compact ? 0 : AppSpacing.small),
       color: AppColors.panelBackground,
       child: AppTooltip(
         message: name,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          spacing: AppSpacing.md,
+          spacing: AppSpacing.medium,
           children: <Widget>[
             // ignore: use_null_aware_elements
             if (childLeft != null) childLeft!,

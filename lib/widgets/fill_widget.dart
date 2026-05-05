@@ -84,7 +84,7 @@ class _FillWidgetState extends State<FillWidget> {
     // For linear gradients, show center dot at midpoint
     if (widget.fillModel.mode == FillMode.linear) {
       final Offset midPoint = widget.fillModel.centerPoint;
-      const double centerDot = AppSpacing.sm;
+      const double centerDot = AppSpacing.small;
       stackChildren.add(
         Positioned(
           left: midPoint.dx - (centerDot / AppMath.pair),
@@ -93,9 +93,9 @@ class _FillWidgetState extends State<FillWidget> {
             width: centerDot,
             height: centerDot,
             decoration: BoxDecoration(
-              color: AppPalette.black,
+              color: AppColors.black,
               shape: BoxShape.rectangle,
-              border: Border.all(color: AppPalette.white, width: AppStroke.thin),
+              border: Border.all(color: AppColors.white, width: AppStroke.thin),
               borderRadius: BorderRadius.circular(centerDot),
             ),
           ),
@@ -198,13 +198,13 @@ class _FillWidgetState extends State<FillWidget> {
             height: handleSize.toDouble(),
             decoration: BoxDecoration(
               color: color,
-              border: Border.all(color: AppPalette.white, width: AppStroke.thin),
-              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: AppColors.white, width: AppStroke.thin),
+              borderRadius: BorderRadius.circular(AppRadius.large),
             ),
             child: Container(
               decoration: BoxDecoration(
-                border: Border.all(color: AppPalette.black, width: AppStroke.thin),
-                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: AppColors.black, width: AppStroke.thin),
+                borderRadius: BorderRadius.circular(AppRadius.large),
               ),
             ),
           ),

@@ -52,15 +52,15 @@ class LayerSelector extends StatelessWidget {
   Widget build(final BuildContext context) {
     final LayersProvider layers = LayersProvider.of(context);
     return Container(
-      margin: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.xs),
-      padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.sm),
+      margin: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
+      padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
       decoration: BoxDecoration(
-        color: layer.isVisible ? null : AppPalette.grey600,
+        color: layer.isVisible ? null : AppColors.grey600,
         border: Border.all(
-          color: layer.isSelected ? AppPalette.blue : AppPalette.grey700,
+          color: layer.isSelected ? AppColors.blue : AppColors.grey700,
           width: AppStroke.emphasis,
         ),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+        borderRadius: BorderRadius.circular(AppRadius.small),
       ),
       child: minimal
           ? _buildForSmallSurface(
@@ -181,7 +181,7 @@ class LayerSelector extends StatelessWidget {
       message: information(),
       child: Column(
         children: <Widget>[
-          TruncatedTextWidget(text: layer.name, maxLength: AppSpacing.md.toInt()),
+          TruncatedTextWidget(text: layer.name, maxLength: AppSpacing.medium.toInt()),
           _buildThumbnailPreviewAndVisibility(
             layers,
             layer,
@@ -239,14 +239,14 @@ class LayerSelector extends StatelessWidget {
           ),
         if (this.layer.backgroundColor != null)
           Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.huge),
+            padding: const EdgeInsets.only(left: AppSpacing.largest),
             child: ColorPreview(
-              color: this.layer.backgroundColor ?? AppPalette.transparent,
+              color: this.layer.backgroundColor ?? AppColors.transparent,
               onPressed: () {
                 showColorPicker(
                   context: context,
                   title: l10n.layerBackgroundColor,
-                  color: this.layer.backgroundColor ?? AppPalette.transparent,
+                  color: this.layer.backgroundColor ?? AppColors.transparent,
                   onSelectedColor: (final Color color) {
                     this.layer.backgroundColor = color;
                     layer.clearCache();
@@ -283,7 +283,7 @@ class LayerSelector extends StatelessWidget {
                   child: AppText(
                     layer.name,
                     variant: AppTextVariant.bodyBold,
-                    color: isSelected ? AppPalette.blueShade100 : AppPalette.grey400,
+                    color: isSelected ? AppColors.blueShade100 : AppColors.grey400,
                   ),
                 ),
               )
@@ -297,7 +297,7 @@ class LayerSelector extends StatelessWidget {
                   child: AppText(
                     layer.name,
                     variant: AppTextVariant.bodyBold,
-                    color: isSelected ? AppPalette.blueShade100 : AppPalette.grey400,
+                    color: isSelected ? AppColors.blueShade100 : AppColors.grey400,
                   ),
                 ),
               ),
@@ -305,7 +305,7 @@ class LayerSelector extends StatelessWidget {
               tooltip: l10n.layerToggleVisibility,
               icon: AppSvgIcon(
                 icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
-                color: layer.isVisible ? AppPalette.blue : AppColors.layerHiddenWarning,
+                color: layer.isVisible ? AppColors.blue : AppColors.layerHiddenWarning,
               ),
               onPressed: () => layers.layersToggleVisibility(layer),
             ),
@@ -329,7 +329,7 @@ class LayerSelector extends StatelessWidget {
         child: Row(
           children: <Widget>[
             const AppSvgIcon(icon: AppIcon.edit),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.small),
             AppText(l10n.layerRename),
           ],
         ),
@@ -339,7 +339,7 @@ class LayerSelector extends StatelessWidget {
         child: Row(
           children: <Widget>[
             const AppSvgIcon(icon: AppIcon.playlistAdd),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.small),
             AppText(l10n.layerAddAbove),
           ],
         ),
@@ -350,7 +350,7 @@ class LayerSelector extends StatelessWidget {
           child: Row(
             children: <Widget>[
               const AppSvgIcon(icon: AppIcon.playlistRemove),
-              const SizedBox(width: AppSpacing.sm),
+              const SizedBox(width: AppSpacing.small),
               AppText(l10n.layerDelete),
             ],
           ),
@@ -361,7 +361,7 @@ class LayerSelector extends StatelessWidget {
           child: Row(
             children: <Widget>[
               const AppSvgIcon(icon: AppIcon.layers),
-              const SizedBox(width: AppSpacing.sm),
+              const SizedBox(width: AppSpacing.small),
               AppText(l10n.layerMergeBelow),
             ],
           ),
@@ -372,7 +372,7 @@ class LayerSelector extends StatelessWidget {
           child: Row(
             children: <Widget>[
               const AppSvgIcon(icon: AppIcon.blender),
-              const SizedBox(width: AppSpacing.sm),
+              const SizedBox(width: AppSpacing.small),
               AppText(l10n.layerChangeBlendMode),
             ],
           ),
@@ -383,9 +383,9 @@ class LayerSelector extends StatelessWidget {
           children: <Widget>[
             AppSvgIcon(
               icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
-              color: layer.isVisible ? AppPalette.blue : AppColors.layerHiddenWarning,
+              color: layer.isVisible ? AppColors.blue : AppColors.layerHiddenWarning,
             ),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.small),
             AppText(layer.isVisible ? l10n.layerHide : l10n.layerShow),
           ],
         ),
@@ -395,7 +395,7 @@ class LayerSelector extends StatelessWidget {
         child: Row(
           children: <Widget>[
             const AppSvgIcon(icon: AppIcon.visibilityOff),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.small),
             AppText(l10n.layerHideAllOthers),
           ],
         ),
@@ -405,7 +405,7 @@ class LayerSelector extends StatelessWidget {
         child: Row(
           children: <Widget>[
             const AppSvgIcon(icon: AppIcon.visibility),
-            const SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.small),
             AppText(l10n.layerShowAll),
           ],
         ),
@@ -462,7 +462,7 @@ class LayerSelector extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: <Widget>[
           _buildThumbnailPreview(layers, layer),
-          if (minimal && !layer.isVisible) const AppSvgIcon(icon: AppIcon.visibilityOff, color: AppPalette.red),
+          if (minimal && !layer.isVisible) const AppSvgIcon(icon: AppIcon.visibilityOff, color: AppColors.red),
         ],
       ),
     );

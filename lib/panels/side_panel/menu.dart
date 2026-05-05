@@ -161,8 +161,8 @@ AppPopupMenuItem<int> buildMenuItem({
       key: key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (icon != null) AppSvgIcon(icon: icon, size: AppSpacing.xl),
-        if (icon != null) const SizedBox(width: AppSpacing.sm),
+        if (icon != null) AppSvgIcon(icon: icon, size: AppSpacing.large),
+        if (icon != null) const SizedBox(width: AppSpacing.small),
         Flexible(
           child: Column(
             mainAxisSize: MainAxisSize.min,

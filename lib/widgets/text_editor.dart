@@ -55,7 +55,7 @@ class _TextEditorState extends State<TextEditor> {
 
     showAppBottomSheet<void>(
       context: context,
-      barrierColor: AppPalette.transparent,
+      barrierColor: AppColors.transparent,
       builder: (final BuildContext _) {
         return TextEditorDialog(
           title: l10n.editText,

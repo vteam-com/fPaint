@@ -35,9 +35,9 @@ class AppSvgIcon extends StatelessWidget {
   Color get defaultColor {
     if (color == null) {
       if (isSelected == null || isSelected == false) {
-        return AppPalette.white;
+        return AppColors.white;
       } else {
-        return AppPalette.blue;
+        return AppColors.blue;
       }
     }
     return color!;

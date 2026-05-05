@@ -174,7 +174,7 @@ class LayersProvider extends ChangeNotifier {
   /// Adds a white background layer to the canvas.
   LayerProvider addWhiteBackgroundLayer([final String? name]) {
     final LayerProvider firstLayer = newLayer(name ?? _defaultBackgroundName);
-    firstLayer.backgroundColor = AppPalette.white;
+    firstLayer.backgroundColor = AppColors.white;
     _list.add(firstLayer);
     return firstLayer;
   }
@@ -456,8 +456,8 @@ class LayersProvider extends ChangeNotifier {
   // Top Colors used
   /// The list of top colors used in the canvas.
   List<ColorUsage> topColors = <ColorUsage>[
-    ColorUsage(AppPalette.white, 1),
-    ColorUsage(AppPalette.black, 1),
+    ColorUsage(AppColors.white, 1),
+    ColorUsage(AppColors.black, 1),
   ];
 
   /// Evaluates the top colors used in the canvas.

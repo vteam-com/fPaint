@@ -28,15 +28,15 @@ class NineGridSelector extends StatelessWidget {
       width: AppLayout.gridSelectorSize,
       height: AppLayout.gridSelectorSize,
       decoration: BoxDecoration(
-        border: Border.all(color: AppPalette.grey),
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: AppColors.grey),
+        borderRadius: BorderRadius.circular(AppRadius.medium),
       ),
       child: GridView.builder(
-        padding: const EdgeInsets.all(AppSpacing.sm),
+        padding: const EdgeInsets.all(AppSpacing.small),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: AppMath.triple,
-          crossAxisSpacing: AppSpacing.xs,
-          mainAxisSpacing: AppSpacing.xs,
+          crossAxisSpacing: AppSpacing.small,
+          mainAxisSpacing: AppSpacing.small,
         ),
         itemCount: AppMath.triple * AppMath.triple,
         itemBuilder: (final BuildContext _, final int index) {
@@ -44,8 +44,8 @@ class NineGridSelector extends StatelessWidget {
             onTap: () => onPositionSelected(CanvasResizePosition.values[index]),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: selectedPosition == CanvasResizePosition.values[index] ? AppPalette.blue : AppPalette.grey800,
-                borderRadius: BorderRadius.circular(AppRadius.sm),
+                color: selectedPosition == CanvasResizePosition.values[index] ? AppColors.blue : AppColors.grey800,
+                borderRadius: BorderRadius.circular(AppRadius.small),
               ),
               child: AppSvgIcon(
                 icon: selectedPosition == CanvasResizePosition.values[index] ? AppIcon.image : getDirectionIcon(index),

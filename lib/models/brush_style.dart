@@ -23,7 +23,7 @@ enum BrushStyle {
 class MyBrush {
   MyBrush({
     this.style = BrushStyle.solid,
-    this.color = AppPalette.black,
+    this.color = AppColors.black,
     this.size = 1,
   });
 

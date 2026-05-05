@@ -91,7 +91,7 @@ Future<dynamic> sharePanel(
       return SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.xl + AppSpacing.thin),
+            padding: const EdgeInsets.only(top: AppSpacing.large + AppSpacing.thin),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[

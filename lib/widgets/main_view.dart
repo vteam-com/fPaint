@@ -247,8 +247,8 @@ class MainViewState extends State<MainView> {
         gradient: RadialGradient(
           center: Alignment.topCenter,
           colors: <Color>[
-            AppPalette.grey50,
-            AppPalette.grey500,
+            AppColors.grey50,
+            AppColors.grey500,
           ],
           stops: <double>[0, 1],
         ),
@@ -284,9 +284,9 @@ class MainViewState extends State<MainView> {
   }) {
     showAppBottomSheet<void>(
       context: context,
-      barrierColor: AppPalette.transparent,
+      barrierColor: AppColors.transparent,
       builder: (final BuildContext sheetCtx) => Padding(
-        padding: const EdgeInsets.all(AppSpacing.sm),
+        padding: const EdgeInsets.all(AppSpacing.small),
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             maxWidth: AppLayout.effectBottomSheetMaxWidth,

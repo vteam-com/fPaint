@@ -51,13 +51,13 @@ class ToolsPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Wrap(
-            spacing: minimal ? AppSpacing.thin : AppSpacing.xs,
-            runSpacing: minimal ? AppSpacing.thin : AppSpacing.xs,
+            spacing: minimal ? AppSpacing.thin : AppSpacing.small,
+            runSpacing: minimal ? AppSpacing.thin : AppSpacing.small,
             alignment: WrapAlignment.center,
             children: getListOfTools(context),
           ),
           const AppDivider(
-            color: AppPalette.black,
+            color: AppColors.black,
           ),
           AnimatedSwitcher(
             duration: AppDefaults.toolPanelRevealAnimationDuration,
@@ -76,7 +76,7 @@ class ToolsPanel extends StatelessWidget {
             child: KeyedSubtree(
               key: ValueKey<ActionType>(selectedTool),
               child: Wrap(
-                runSpacing: minimal ? AppSpacing.sm : AppSpacing.thin,
+                runSpacing: minimal ? AppSpacing.small : AppSpacing.thin,
                 alignment: WrapAlignment.center,
                 children: getWidgetForSelectedTool(context: context),
               ),
@@ -550,7 +550,7 @@ class ToolsPanel extends StatelessWidget {
                 key: Keys.toolBrushSizeButton,
                 icon: const AppSvgIcon(icon: AppIcon.lineWeight),
                 constraints: minimal ? const BoxConstraints() : null,
-                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
+                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.small),
                 onPressed: () {
                   showBrushSizePicker(
                     context: context,
@@ -589,7 +589,7 @@ class ToolsPanel extends StatelessWidget {
               childLeft: AppButtonIcon(
                 icon: const AppSvgIcon(icon: AppIcon.lineStyle),
                 constraints: minimal ? const BoxConstraints() : null,
-                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.sm),
+                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.small),
                 onPressed: () {
                   showBrushStylePicker(
                     context,
@@ -757,7 +757,7 @@ class ToolsPanel extends StatelessWidget {
 Widget separator() {
   return const AppDivider(
     height: AppStroke.regular,
-    color: AppPalette.overlayBorder,
+    color: AppColors.overlayBorder,
   );
 }
 
@@ -788,8 +788,8 @@ class _EffectsSectionState extends State<_EffectsSection> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Wrap(
-          spacing: widget.minimal ? AppSpacing.thin : AppSpacing.xs,
-          runSpacing: widget.minimal ? AppSpacing.thin : AppSpacing.xs,
+          spacing: widget.minimal ? AppSpacing.thin : AppSpacing.small,
+          runSpacing: widget.minimal ? AppSpacing.thin : AppSpacing.small,
           alignment: WrapAlignment.center,
           children: <Widget>[
             for (final SelectionEffect effect in SelectionEffect.values)

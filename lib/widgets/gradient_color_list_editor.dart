@@ -114,7 +114,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   /// Builds the "Add color stop" button shown beneath the stop list.
   Widget _buildAddButton(final AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      padding: const EdgeInsets.only(top: AppSpacing.small),
       child: AppButtonIcon(
         key: Keys.gradientStopAddButton,
         icon: const AppSvgIcon(icon: AppIcon.playlistAdd),
@@ -172,7 +172,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
     final bool canMoveDown = index < _stops.length - AppMath.pair;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.small),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -190,7 +190,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
             enabled: canMoveDown,
             onPressed: () => _moveDown(index),
           ),
-          const SizedBox(width: AppSpacing.xs),
+          const SizedBox(width: AppSpacing.small),
           // Color swatch
           colorPreviewWithTransparentPaper(
             key: Key('${Keys.gradientStopColorKeyPrefixText}$index'),
@@ -205,10 +205,10 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
               );
             },
           ),
-          const SizedBox(width: AppSpacing.xs),
+          const SizedBox(width: AppSpacing.small),
           // Position percentage field
           _buildPositionField(index, isEndpoint, l10n),
-          const SizedBox(width: AppSpacing.xs),
+          const SizedBox(width: AppSpacing.small),
           // Remove button
           if (canRemove)
             AppButtonIcon(
@@ -219,7 +219,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
               ),
               tooltip: l10n.gradientColorRemove,
               constraints: const BoxConstraints(),
-              padding: const EdgeInsets.all(AppSpacing.xs),
+              padding: const EdgeInsets.all(AppSpacing.small),
               onPressed: () => _removeStop(index),
             )
           else
@@ -372,7 +372,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
         icon: AppSvgIcon(icon: icon, isSelected: false),
         tooltip: null,
         constraints: const BoxConstraints(),
-        padding: const EdgeInsets.all(AppSpacing.xs),
+        padding: const EdgeInsets.all(AppSpacing.small),
         onPressed: enabled ? onPressed : () {},
       ),
     );

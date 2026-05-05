@@ -428,7 +428,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   void _showTextDialog(final AppProvider appProvider, final Offset position) {
     showAppBottomSheet<void>(
       context: context,
-      barrierColor: AppPalette.transparent,
+      barrierColor: AppColors.transparent,
       builder: (final BuildContext _) {
         return TextEditorDialog(
           title: context.l10n.addText,

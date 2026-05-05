@@ -62,12 +62,12 @@ class _DashedRectanglePainter extends CustomPainter {
 
     // Create paint objects for the black and white dashed borders
     final Paint blackPaint = Paint()
-      ..color = AppPalette.black
+      ..color = AppColors.black
       ..strokeWidth = AppStroke.regular
       ..style = PaintingStyle.stroke;
 
     final Paint whitePaint = Paint()
-      ..color = AppPalette.white
+      ..color = AppColors.white
       ..strokeWidth = AppStroke.regular
       ..style = PaintingStyle.stroke;
 

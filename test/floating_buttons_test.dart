@@ -566,7 +566,7 @@ void main() {
   Widget buildFloatingIconButtonForTest({
     final Key? key,
     final AppIcon? icon,
-    final Color foregroundColor = AppPalette.white,
+    final Color foregroundColor = AppColors.white,
     final String? tooltip,
     required final VoidCallback onPressed,
     final Widget? child,

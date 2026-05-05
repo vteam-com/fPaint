@@ -17,8 +17,8 @@ class AppButtonText extends StatelessWidget {
     return _AppButtonBase(
       onPressed: onPressed,
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
+        horizontal: AppSpacing.big,
+        vertical: AppSpacing.medium,
       ),
       textColor: AppColors.primary,
       child: Text(text),
@@ -40,12 +40,12 @@ class AppButtonPrimary extends StatelessWidget {
     return _AppButtonBase(
       onPressed: onPressed,
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xl,
-        vertical: AppSpacing.md,
+        horizontal: AppSpacing.large,
+        vertical: AppSpacing.medium,
       ),
-      textColor: AppPalette.white,
+      textColor: AppColors.white,
       backgroundColor: AppColors.primary,
-      borderRadius: AppRadius.sm,
+      borderRadius: AppRadius.small,
       child: Text(text),
     );
   }
@@ -92,7 +92,7 @@ class _AppButtonIconState extends State<AppButtonIcon> {
           child: ConstrainedBox(
             constraints: widget.constraints ?? const BoxConstraints(),
             child: Padding(
-              padding: widget.padding ?? const EdgeInsets.all(AppSpacing.sm),
+              padding: widget.padding ?? const EdgeInsets.all(AppSpacing.small),
               child: widget.icon,
             ),
           ),
