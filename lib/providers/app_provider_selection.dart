@@ -597,21 +597,25 @@ extension AppProviderSelection on AppProvider {
     }
 
     final ui.Image image = layers.selectedLayer.toImageForStorage(layers.size);
-    final Uint8List? pixels = await convertImageToUint8List(image);
-    if (pixels == null) {
-      return null;
+    try {
+      final Uint8List? pixels = await convertImageToUint8List(image);
+      if (pixels == null) {
+        return null;
+      }
+
+      cachedWandSourceSignature = signature;
+      cachedWandSourcePixels = pixels;
+      cachedWandSourceWidth = image.width;
+      cachedWandSourceHeight = image.height;
+
+      return FillImageData(
+        pixels: pixels,
+        width: image.width,
+        height: image.height,
+      );
+    } finally {
+      image.dispose();
     }
-
-    cachedWandSourceSignature = signature;
-    cachedWandSourcePixels = pixels;
-    cachedWandSourceWidth = image.width;
-    cachedWandSourceHeight = image.height;
-
-    return FillImageData(
-      pixels: pixels,
-      width: image.width,
-      height: image.height,
-    );
   }
 
   /// Creates a stable fingerprint for selected-layer raster cache invalidation.
