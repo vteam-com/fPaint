@@ -102,12 +102,12 @@ class _SpanStack {
     }
     _x[_size] = x;
     _y[_size] = y;
-    _size += AppMath.rgbChannelGreen;
+    _size += AppMath.one;
   }
 
   /// Pops the most recently pushed candidate coordinate.
   Point pop() {
-    _size -= AppMath.rgbChannelGreen;
+    _size -= AppMath.one;
     return Point(_x[_size], _y[_size]);
   }
 
