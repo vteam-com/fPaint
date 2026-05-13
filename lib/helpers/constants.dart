@@ -283,12 +283,16 @@ class AppMath {
   /// Offset for blue channel in RGBA pixel data.
   static const int rgbChannelBlue = 2;
 
+  /// Offset for alpha channel in RGBA pixel data.
+  static const int rgbChannelAlpha = 3;
+
   static const double degrees60 = 60.0;
   static const double degrees120 = 120.0;
   static const double degrees180 = 180.0;
   static const double degrees240 = 240.0;
   static const double degrees300 = 300.0;
   static const int zero = 0;
+  static const int one = 1;
   static const int two = 2;
   static const int four = 4;
   static const int six = 6;
@@ -336,6 +340,16 @@ class AppInteraction {
   static const double transformScaleFactorMin = 0.1;
   static const double transformScaleFactorMax = 10.0;
   static const int transformGridSubdivisions = 10;
+}
+
+/// Shared flood-fill tuning values and data-layout constants.
+class AppFloodFill {
+  static const int visitedMarker = 1;
+  static const int runStride = 3;
+  static const int rowPixelHeight = 1;
+  static const int toleranceDenominatorPercent = 100;
+  static const int initialSpanStackCapacity = 1024;
+  static const int initialRunCapacity = 4096;
 }
 
 /// Constants for selection region effects.
