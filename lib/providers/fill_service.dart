@@ -20,7 +20,11 @@ class FillRegion {
   final Offset offset;
 }
 
-/// Immutable raster payload used for repeated flood-fill queries.
+/// Immutable raster payload used for repeated flood-fill queries via signature-based caching.
+///
+/// **Immutability Contract:** Callers must treat [pixels] as read-only after construction.
+/// Mutations to the byte buffer will corrupt the cache. The cache layer validates correctness
+/// via [cachedWandSourceSignature], but this relies on pixels remaining unchanged.
 class FillImageData {
   const FillImageData({
     required this.pixels,
@@ -28,8 +32,13 @@ class FillImageData {
     required this.height,
   });
 
+  /// Raster bytes in RGBA format. Must not be modified after construction.
   final Uint8List pixels;
+
+  /// Width of the raster in pixels.
   final int width;
+
+  /// Height of the raster in pixels.
   final int height;
 }
 

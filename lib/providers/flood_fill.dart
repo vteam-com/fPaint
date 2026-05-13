@@ -414,26 +414,7 @@ Path _buildPathFromRuns({
     while (i < batchEnd) {
       final int y = runs[i] - top;
       final int startX = runs[i + AppMath.rgbChannelGreen] - left;
-      int endX = runs[i + AppMath.rgbChannelBlue] - left;
-
-      // Merge consecutive runs on the same y
-      int nextIdx = i + AppFloodFill.runStride;
-      while (nextIdx < batchEnd) {
-        final int nextY = runs[nextIdx] - top;
-        if (nextY != y) {
-          break;
-        }
-
-        final int nextStartX = runs[nextIdx + AppMath.rgbChannelGreen] - left;
-        final int nextEndX = runs[nextIdx + AppMath.rgbChannelBlue] - left;
-
-        if (nextStartX <= endX + AppMath.rgbChannelGreen) {
-          endX = (nextEndX > endX) ? nextEndX : endX;
-          nextIdx += AppFloodFill.runStride;
-        } else {
-          break;
-        }
-      }
+      final int endX = runs[i + AppMath.rgbChannelBlue] - left;
 
       final int runWidth = endX - startX + AppMath.rgbChannelGreen;
       if (runWidth > AppMath.zero) {
@@ -447,7 +428,7 @@ Path _buildPathFromRuns({
         );
       }
 
-      i = nextIdx;
+      i += AppFloodFill.runStride;
     }
 
     batchedPaths.add(batchPath);
@@ -456,7 +437,7 @@ Path _buildPathFromRuns({
   // Sequentially union all batches
   if (batchedPaths.isNotEmpty) {
     unifiedPath = batchedPaths[AppMath.zero];
-    for (int k = AppMath.rgbChannelGreen; k < batchedPaths.length; k++) {
+    for (int k = AppMath.one; k < batchedPaths.length; k++) {
       try {
         unifiedPath = Path.combine(
           PathOperation.union,
