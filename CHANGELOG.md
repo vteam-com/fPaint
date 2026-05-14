@@ -4,6 +4,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.3] - 2026-05-14
+
+### Fix
+
+- MRU
+  - **macOS sandbox file access:** Recent files now use security-scoped bookmarks to maintain persistent access across sessions
+  - Import dialog now shows appropriate placeholders for missing or unloadable files (e.g., TIFF, ORA)
+  - Error feedback displayed when opening missing or unloadable recent files
+  - Thumbnail loading distinguishes between "File not found" and "Preview unavailable" states
+  - Discard button available for both missing and unloadable recent file entries
+
+## [1.7.2] - 2026-05-10
+
+### Update
+
+- Update packages
+
+## [1.7.1] - 2026-05-06
+
+### Update
+
+- improve flood fill
+
 ## [1.7.0] - 2026-05-05
 
 ### Add
