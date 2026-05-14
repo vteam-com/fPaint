@@ -69,8 +69,8 @@ const int _coverageDialogTransitionMs = 300;
 
 // Sky layer
 const String _skyLayerName = 'Sky';
-const Offset _skyGradientTop = Offset(0, -240);
-const Offset _skyGradientBottom = Offset(0, -20);
+const Offset _skyGradientTop = Offset(0, -20);
+const Offset _skyGradientBottom = Offset(0, -240);
 const Color _skyColorTop = ui.Color.fromARGB(255, 14, 52, 120); // deep navy at zenith
 const Color _skyColorUpperMid = Color.fromARGB(255, 27, 87, 155); // royal blue (upper third)
 const Color _skyColorLowerMid = Color.fromARGB(255, 56, 119, 200); // medium sky blue (lower two-thirds)

@@ -87,7 +87,7 @@ class LayerProvider extends ChangeNotifier {
   ui.BlendMode blendMode = ui.BlendMode.srcOver;
 
   ///-------------------------------------------
-  /// Modifed state
+  /// Modified state
 
   /// Whether the layer has been modified.
   bool hasChanged = false;
@@ -119,8 +119,8 @@ class LayerProvider extends ChangeNotifier {
   /// Caches the top colors used in the layer.
   void _cacheTopColorsUsed() async {
     topColorsUsed = <ColorUsage>[];
-    if (_cachedThumnailImage != null) {
-      final List<ColorUsage> imageColors = await getImageColors(_cachedThumnailImage!);
+    if (_cachedThumbnailImage != null) {
+      final List<ColorUsage> imageColors = await getImageColors(_cachedThumbnailImage!);
 
       for (final ColorUsage colorUsage in imageColors) {
         if (!topColorsUsed.any((final ColorUsage c) => c.color == colorUsage.color)) {
@@ -515,10 +515,10 @@ class LayerProvider extends ChangeNotifier {
   ui.Image? _cachedImage;
 
   /// The cached thumbnail image of the layer.
-  ui.Image? _cachedThumnailImage;
+  ui.Image? _cachedThumbnailImage;
 
   /// Gets the thumbnail image of the layer.
-  ui.Image? get thumbnailImage => _cachedThumnailImage;
+  ui.Image? get thumbnailImage => _cachedThumbnailImage;
 
   /// Updates the thumbnail image of the layer.
   Future<void> updateThumbnail() async {
@@ -534,7 +534,7 @@ class LayerProvider extends ChangeNotifier {
     );
 
     // Cache the thumbnail version
-    _cachedThumnailImage = await resizeImage(
+    _cachedThumbnailImage = await resizeImage(
       _cachedImage!,
       scaleSizeTo(size, maxHeight: AppLayout.thumbnailMaxHeight),
     );
@@ -548,7 +548,7 @@ class LayerProvider extends ChangeNotifier {
   /// Clears the cached image and thumbnail, and updates the thumbnail.
   void clearCache() {
     _cachedImage = null;
-    _cachedThumnailImage = null;
+    _cachedThumbnailImage = null;
     _debounceTimer.run(() async {
       await updateThumbnail();
       notifyListeners();

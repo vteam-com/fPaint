@@ -141,6 +141,7 @@ class AppLayout {
   static const double toolbarButtonSize = 50.0;
   static const double toolbarButtonWidth = 60.0;
   static const double iconSize = 24.0;
+  static const double recentFileMissingIconSize = 32.0;
   static const double sliderHeight = 30.0;
   static const double gridSelectorSize = 120.0;
   static const double previewRegionSize = 100.0;
