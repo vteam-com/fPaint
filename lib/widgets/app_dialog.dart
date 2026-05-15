@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/app_button_row.dart';
 
 /// Dialog content container replacing Material [AlertDialog].
 class AppDialog extends StatelessWidget {
@@ -67,9 +68,8 @@ class AppDialog extends StatelessWidget {
                     ),
                   ),
                 if (actions != null && actions!.isNotEmpty)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: actions!,
+                  AppButtonRow(
+                    actions: actions!,
                   ),
               ],
             ),

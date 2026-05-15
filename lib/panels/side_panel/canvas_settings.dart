@@ -126,10 +126,9 @@ void showCanvasSettings(final BuildContext context) {
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  AppButtonPrimary(
+              AppButtonRow(
+                actions: <Widget>[
+                  AppRowPrimaryButton(
                     key: Keys.canvasSettingsApplyButton,
                     onPressed: () {
                       final double width = double.tryParse(widthController.text) ?? -1;

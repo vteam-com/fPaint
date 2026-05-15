@@ -87,25 +87,22 @@ Future<void> onFileNew(final BuildContext context) async {
           ),
           actions: <Widget>[
             if (offNewDocFromClipboard)
-              Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.large),
-                child: AppButtonText(
-                  onPressed: () {
-                    // Handle creating new document from clipboard image
-                    appProvider.newDocumentFromClipboardImage();
-                    shellProvider.requestCanvasFit();
-                    Navigator.of(context).pop();
-                  },
-                  text: l10n.newFromClipboard,
-                ),
+              AppRowSecondaryButton(
+                onPressed: () {
+                  // Handle creating new document from clipboard image
+                  appProvider.newDocumentFromClipboardImage();
+                  shellProvider.requestCanvasFit();
+                  Navigator.of(context).pop();
+                },
+                text: l10n.newFromClipboard,
               ),
-            AppButtonText(
+            AppRowSecondaryButton(
               onPressed: () {
                 Navigator.of(context).pop(null);
               },
               text: l10n.cancel,
             ),
-            AppButtonPrimary(
+            AppRowPrimaryButton(
               onPressed: () {
                 final double? width = double.tryParse(widthController.text);
                 final double? height = double.tryParse(heightController.text);
@@ -421,11 +418,11 @@ Future<void> onFileDropped({
           title: l10n.dropFileTitle,
           content: AppText(l10n.dropFilePrompt),
           actions: <Widget>[
-            AppButtonText(
+            AppRowSecondaryButton(
               onPressed: () => Navigator.pop(dialogContext, DropFileAction.addLayer),
               text: l10n.dropFileAddLayer,
             ),
-            AppButtonPrimary(
+            AppRowPrimaryButton(
               onPressed: () => Navigator.pop(dialogContext, DropFileAction.open),
               text: l10n.dropFileOpen,
             ),

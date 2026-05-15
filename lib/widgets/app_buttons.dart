@@ -5,6 +5,8 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_tooltip.dart';
 
+const int _subtleButtonBackgroundAlpha = 25;
+
 /// A text-only button replacing Material [TextButton].
 class AppButtonText extends StatelessWidget {
   const AppButtonText({
@@ -16,14 +18,33 @@ class AppButtonText extends StatelessWidget {
   final String text;
   @override
   Widget build(final BuildContext context) {
-    return _AppButtonBase(
+    return _AppLabelButton(
       onPressed: onPressed,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.big,
-        vertical: AppSpacing.medium,
-      ),
-      textColor: AppColors.primary,
-      child: Text(text),
+      backgroundColor: AppColors.primary.withAlpha(_subtleButtonBackgroundAlpha),
+      text: text,
+      textColor: AppColors.white,
+      horizontalPadding: AppSpacing.big,
+    );
+  }
+}
+
+/// A destructive text button for irreversible or risky actions.
+class AppButtonDanger extends StatelessWidget {
+  const AppButtonDanger({
+    super.key,
+    required this.onPressed,
+    required this.text,
+  });
+  final VoidCallback onPressed;
+  final String text;
+  @override
+  Widget build(final BuildContext context) {
+    return _AppLabelButton(
+      onPressed: onPressed,
+      backgroundColor: AppColors.red.withAlpha(_subtleButtonBackgroundAlpha),
+      text: text,
+      textColor: AppColors.red,
+      horizontalPadding: AppSpacing.big,
     );
   }
 }
@@ -39,14 +60,41 @@ class AppButtonPrimary extends StatelessWidget {
   final String text;
   @override
   Widget build(final BuildContext context) {
+    return _AppLabelButton(
+      onPressed: onPressed,
+      backgroundColor: AppColors.primary,
+      text: text,
+      textColor: AppColors.white,
+      horizontalPadding: AppSpacing.large,
+    );
+  }
+}
+
+class _AppLabelButton extends StatelessWidget {
+  const _AppLabelButton({
+    required this.backgroundColor,
+    required this.horizontalPadding,
+    required this.onPressed,
+    required this.text,
+    required this.textColor,
+  });
+
+  final Color backgroundColor;
+  final double horizontalPadding;
+  final VoidCallback onPressed;
+  final String text;
+  final Color textColor;
+
+  @override
+  Widget build(final BuildContext context) {
     return _AppButtonBase(
       onPressed: onPressed,
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.large,
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
         vertical: AppSpacing.medium,
       ),
-      textColor: AppColors.white,
-      backgroundColor: AppColors.primary,
+      textColor: textColor,
+      backgroundColor: backgroundColor,
       borderRadius: AppRadius.small,
       child: Text(text),
     );

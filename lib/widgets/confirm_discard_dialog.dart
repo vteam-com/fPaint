@@ -16,13 +16,13 @@ Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
       return AppDialog(
         title: l10n.discardCurrentDocumentQuestion,
         actions: <Widget>[
-          AppButtonPrimary(
+          AppRowDangerButton(
             onPressed: () {
               Navigator.of(context).pop(true);
             },
             text: l10n.discard,
           ),
-          AppButtonText(
+          AppRowSecondaryButton(
             onPressed: () {
               Navigator.of(context).pop(false);
             },

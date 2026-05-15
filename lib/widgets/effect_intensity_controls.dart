@@ -5,7 +5,7 @@ import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
-import 'package:fpaint/widgets/app_buttons.dart';
+import 'package:fpaint/widgets/app_button_row.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_slider.dart';
 
@@ -82,28 +82,23 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
               await widget.appProvider.updateEffectPreviewStrength(value);
             },
           ),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: AppButtonText(
-                  key: widget.cancelButtonKey,
-                  onPressed: () {
-                    widget.appProvider.cancelEffectPreview();
-                    widget.onDismiss?.call();
-                  },
-                  text: widget.l10n.cancel,
-                ),
+          AppButtonRow(
+            actions: <Widget>[
+              AppRowSecondaryButton(
+                key: widget.cancelButtonKey,
+                onPressed: () {
+                  widget.appProvider.cancelEffectPreview();
+                  widget.onDismiss?.call();
+                },
+                text: widget.l10n.cancel,
               ),
-              const SizedBox(width: AppSpacing.small),
-              Expanded(
-                child: AppButtonPrimary(
-                  key: widget.applyButtonKey,
-                  onPressed: () async {
-                    await widget.appProvider.confirmEffectPreview();
-                    widget.onDismiss?.call();
-                  },
-                  text: widget.l10n.apply,
-                ),
+              AppRowPrimaryButton(
+                key: widget.applyButtonKey,
+                onPressed: () async {
+                  await widget.appProvider.confirmEffectPreview();
+                  widget.onDismiss?.call();
+                },
+                text: widget.l10n.apply,
               ),
             ],
           ),
