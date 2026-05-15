@@ -46,6 +46,77 @@ class TransformWidget extends StatefulWidget {
   State<TransformWidget> createState() => _TransformWidgetState();
 }
 
+/// Invisible drag target aligned to a transform edge segment.
+class TransformEdgeDragZone extends StatelessWidget {
+  /// Creates a [TransformEdgeDragZone].
+  const TransformEdgeDragZone({
+    super.key,
+    required this.edgeIndex,
+    required this.cursor,
+    required this.onDragDelta,
+    required this.segmentStart,
+    required this.segmentEnd,
+  });
+
+  /// Mouse cursor shown when hovering.
+  final MouseCursor cursor;
+
+  /// The logical transform edge this zone belongs to.
+  final int edgeIndex;
+
+  /// Called on every drag update with the delta converted to screen space.
+  final ValueChanged<Offset> onDragDelta;
+
+  /// End point of the draggable edge segment in screen coordinates.
+  final Offset segmentEnd;
+
+  /// Start point of the draggable edge segment in screen coordinates.
+  final Offset segmentStart;
+  @override
+  Widget build(final BuildContext context) {
+    final Offset segmentDelta = segmentEnd - segmentStart;
+    final double zoneThickness = max(
+      AppInteraction.selectionHandleSize,
+      AppInteraction.transformEdgeHandleSize * AppVisual.previewTextScale,
+    );
+    final double zoneLength = max(segmentDelta.distance, zoneThickness);
+    final Offset zoneCenter = Offset(
+      (segmentStart.dx + segmentEnd.dx) / AppMath.pair,
+      (segmentStart.dy + segmentEnd.dy) / AppMath.pair,
+    );
+    final double zoneAngle = atan2(segmentDelta.dy, segmentDelta.dx);
+
+    return Positioned(
+      left: zoneCenter.dx - zoneLength / AppMath.pair,
+      top: zoneCenter.dy - zoneThickness / AppMath.pair,
+      child: Transform.rotate(
+        angle: zoneAngle,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onPanUpdate: (final DragUpdateDetails details) {
+            onDragDelta(_toScreenDelta(details.delta, zoneAngle));
+          },
+          child: MouseRegion(
+            cursor: cursor,
+            child: SizedBox(width: zoneLength, height: zoneThickness),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Converts the rotated drag-zone local delta back into screen space.
+  Offset _toScreenDelta(final Offset localDelta, final double angle) {
+    final double cosine = cos(angle);
+    final double sine = sin(angle);
+
+    return Offset(
+      (localDelta.dx * cosine) - (localDelta.dy * sine),
+      (localDelta.dx * sine) + (localDelta.dy * cosine),
+    );
+  }
+}
+
 class _TransformWidgetState extends State<TransformWidget> {
   @override
   Widget build(final BuildContext context) {
@@ -58,6 +129,7 @@ class _TransformWidgetState extends State<TransformWidget> {
 
     // Convert corners to screen space
     final List<Offset> screenCorners = model.corners.map((final Offset c) => _toScreen(c)).toList();
+    final List<Offset> screenEdgeMidpoints = model.edgeMidpoints.map((final Offset c) => _toScreen(c)).toList();
     final List<Offset> screenBoundaryPoints = model.boundaryPoints.map((final Offset c) => _toScreen(c)).toList();
 
     final Offset screenCenter = _toScreen(model.center);
@@ -85,12 +157,17 @@ class _TransformWidgetState extends State<TransformWidget> {
             painter: _TransformPreviewPainter(
               image: image,
               screenCorners: screenCorners,
-              screenEdgeMidpoints: model.edgeMidpoints.map((final Offset c) => _toScreen(c)).toList(),
+              screenEdgeMidpoints: screenEdgeMidpoints,
               screenBoundaryPoints: screenBoundaryPoints,
             ),
           ),
 
           if (model.isDeformMode) ...<Widget>[
+            ..._buildEdgeDragZones(
+              screenCorners: screenCorners,
+              screenEdgeMidpoints: screenEdgeMidpoints,
+            ),
+
             // Corner handles (perspective)
             OverlayDragHandle(
               position: screenCorners[TransformModel.topLeftIndex],
@@ -213,6 +290,73 @@ class _TransformWidgetState extends State<TransformWidget> {
 
   /// Called when the user commits the transform.
   VoidCallback get onConfirm => widget.onConfirm;
+
+  /// Builds one invisible drag target for a single edge segment.
+  Widget _buildEdgeDragZone({
+    required final int edgeIndex,
+    required final Offset segmentStart,
+    required final Offset segmentEnd,
+  }) {
+    return TransformEdgeDragZone(
+      edgeIndex: edgeIndex,
+      cursor: SystemMouseCursors.grab,
+      onDragDelta: (final Offset delta) {
+        model.moveConnectedEdge(edgeIndex, delta / canvasScale);
+        onChanged();
+      },
+      segmentStart: segmentStart,
+      segmentEnd: segmentEnd,
+    );
+  }
+
+  /// Builds drag targets along each visible edge segment of the transform mesh.
+  List<Widget> _buildEdgeDragZones({
+    required final List<Offset> screenCorners,
+    required final List<Offset> screenEdgeMidpoints,
+  }) {
+    return <Widget>[
+      _buildEdgeDragZone(
+        edgeIndex: TransformModel.topEdgeIndex,
+        segmentStart: screenCorners[TransformModel.topLeftIndex],
+        segmentEnd: screenEdgeMidpoints[TransformModel.topEdgeIndex],
+      ),
+      _buildEdgeDragZone(
+        edgeIndex: TransformModel.topEdgeIndex,
+        segmentStart: screenEdgeMidpoints[TransformModel.topEdgeIndex],
+        segmentEnd: screenCorners[TransformModel.topRightIndex],
+      ),
+      _buildEdgeDragZone(
+        edgeIndex: TransformModel.rightEdgeIndex,
+        segmentStart: screenCorners[TransformModel.topRightIndex],
+        segmentEnd: screenEdgeMidpoints[TransformModel.rightEdgeIndex],
+      ),
+      _buildEdgeDragZone(
+        edgeIndex: TransformModel.rightEdgeIndex,
+        segmentStart: screenEdgeMidpoints[TransformModel.rightEdgeIndex],
+        segmentEnd: screenCorners[TransformModel.bottomRightIndex],
+      ),
+      _buildEdgeDragZone(
+        edgeIndex: TransformModel.bottomEdgeIndex,
+        segmentStart: screenCorners[TransformModel.bottomRightIndex],
+        segmentEnd: screenEdgeMidpoints[TransformModel.bottomEdgeIndex],
+      ),
+      _buildEdgeDragZone(
+        edgeIndex: TransformModel.bottomEdgeIndex,
+        segmentStart: screenEdgeMidpoints[TransformModel.bottomEdgeIndex],
+        segmentEnd: screenCorners[TransformModel.bottomLeftIndex],
+      ),
+      _buildEdgeDragZone(
+        edgeIndex: TransformModel.leftEdgeIndex,
+        segmentStart: screenCorners[TransformModel.bottomLeftIndex],
+        segmentEnd: screenEdgeMidpoints[TransformModel.leftEdgeIndex],
+      ),
+      _buildEdgeDragZone(
+        edgeIndex: TransformModel.leftEdgeIndex,
+        segmentStart: screenEdgeMidpoints[TransformModel.leftEdgeIndex],
+        segmentEnd: screenCorners[TransformModel.topLeftIndex],
+      ),
+    ];
+  }
 
   /// Builds the transform mode controls and their live feedback bubble.
   Widget _buildModeControls({

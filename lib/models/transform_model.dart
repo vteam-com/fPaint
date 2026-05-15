@@ -85,6 +85,19 @@ class TransformModel extends VisibleModel {
     edgeMidpoints[index] = edgeMidpoints[index] + delta;
   }
 
+  /// Moves an entire edge by [delta], keeping its two corners and midpoint in sync.
+  void moveConnectedEdge(final int index, final Offset delta) {
+    final (int, int)? cornerIndices = _cornerIndicesForEdge(index);
+    if (cornerIndices == null || index < 0 || index >= edgeMidpoints.length) {
+      return;
+    }
+
+    final (int firstCornerIndex, int secondCornerIndex) = cornerIndices;
+    corners[firstCornerIndex] = corners[firstCornerIndex] + delta;
+    corners[secondCornerIndex] = corners[secondCornerIndex] + delta;
+    edgeMidpoints[index] = edgeMidpoints[index] + delta;
+  }
+
   /// Moves all corners by [delta] in canvas coordinates (translate).
   void moveAll(final Offset delta) {
     for (int i = 0; i < corners.length; i++) {
@@ -302,6 +315,22 @@ class TransformModel extends VisibleModel {
       return leftEdgeIndex;
     }
     return null;
+  }
+
+  /// Maps an edge midpoint index onto the two corner indices it connects.
+  (int, int)? _cornerIndicesForEdge(final int edgeIndex) {
+    switch (edgeIndex) {
+      case topEdgeIndex:
+        return (topLeftIndex, topRightIndex);
+      case rightEdgeIndex:
+        return (topRightIndex, bottomRightIndex);
+      case bottomEdgeIndex:
+        return (bottomRightIndex, bottomLeftIndex);
+      case leftEdgeIndex:
+        return (bottomLeftIndex, topLeftIndex);
+      default:
+        return null;
+    }
   }
 
   @override

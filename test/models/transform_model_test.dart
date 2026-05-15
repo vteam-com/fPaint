@@ -88,6 +88,23 @@ void main() {
       expect(model.corners[TransformModel.bottomLeftIndex], const Offset(0, 100));
     });
 
+    test('moveConnectedEdge moves the linked corners and midpoint together', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      const Rect bounds = Rect.fromLTWH(0, 0, 100, 100);
+      model.start(image: image, bounds: bounds);
+
+      model.moveConnectedEdge(TransformModel.topEdgeIndex, const Offset(10, -5));
+
+      expect(model.corners[TransformModel.topLeftIndex], const Offset(10, -5));
+      expect(model.corners[TransformModel.topRightIndex], const Offset(110, -5));
+      expect(model.edgeMidpoints[TransformModel.topEdgeIndex], const Offset(60, -5));
+      expect(model.corners[TransformModel.bottomLeftIndex], const Offset(0, 100));
+      expect(model.corners[TransformModel.bottomRightIndex], const Offset(100, 100));
+      expect(model.edgeMidpoints[TransformModel.leftEdgeIndex], const Offset(0, 50));
+      expect(model.edgeMidpoints[TransformModel.rightEdgeIndex], const Offset(100, 50));
+    });
+
     test('moveAll translates all corners', () async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
