@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -226,6 +228,7 @@ extension AppProviderSelection on AppProvider {
       sourceImage,
       transformModel.corners,
       AppInteraction.transformGridSubdivisions,
+      edgeMidpoints: transformModel.effectiveEdgeMidpoints,
     );
 
     final Path erasePath = Path.from(selectorModel.path1!);
@@ -460,15 +463,9 @@ extension AppProviderSelection on AppProvider {
     cancelEffectPreview();
     selectorModel.isDrawing = true;
     if (selectorModel.mode == SelectorMode.wand) {
-      getRegionPathFromLayerImage(position).then((final FillRegion region) {
-        selectorModel.isVisible = true;
-        if (selectorModel.math == SelectorMath.replace) {
-          selectorModel.path1 = region.path.shift(region.offset);
-        } else {
-          selectorModel.path2 = region.path.shift(region.offset);
-        }
-        update();
-      });
+      wandSelectionRequestVersion += AppMath.one;
+      pendingWandSelectionPosition = position;
+      unawaited(_processPendingWandSelectionRequests());
     } else {
       selectorModel.addP1(position);
       update();
@@ -487,6 +484,12 @@ extension AppProviderSelection on AppProvider {
 
   /// Ends the selector creation.
   void selectorCreationEnd() {
+    if (selectorModel.mode == SelectorMode.wand) {
+      selectorModel.isDrawing = false;
+      update();
+      return;
+    }
+
     selectorModel.isDrawing = false;
     selectorModel.applyMath();
     update();
@@ -503,12 +506,18 @@ extension AppProviderSelection on AppProvider {
   /// Selects all.
   void selectAll() {
     cancelEffectPreview();
+    wandSelectionRequestVersion += AppMath.one;
+    pendingWandSelectionPosition = null;
     selectorModel.isVisible = true;
-    selectorCreationStart(Offset.zero);
+    selectorModel.isDrawing = false;
     selectorModel.path1 = Path()
       ..addRect(
         Rect.fromPoints(Offset.zero, Offset(layers.width, layers.height)),
       );
+    selectorModel.path2 = null;
+    selectorModel.points.clear();
+    selectorModel.math = SelectorMath.replace;
+    update();
   }
 
   /// Gets the path adjusted to the canvas size and position.
@@ -524,10 +533,103 @@ extension AppProviderSelection on AppProvider {
 
   /// Gets the region path from a layer image.
   Future<FillRegion> getRegionPathFromLayerImage(final ui.Offset position) async {
+    final FillImageData? imageData = await _getSelectedLayerFillImageData();
+    if (imageData == null) {
+      return FillRegion(path: Path(), offset: Offset.zero);
+    }
+
     return fillService.getRegionPathFromImage(
-      image: layers.selectedLayer.toImageForStorage(layers.size),
+      imageData: imageData,
       position: position,
       tolerance: tolerance,
+    );
+  }
+
+  /// Processes queued wand requests in order while applying only the latest valid result.
+  Future<void> _processPendingWandSelectionRequests() async {
+    if (isWandSelectionInProgress) {
+      return;
+    }
+
+    isWandSelectionInProgress = true;
+    try {
+      while (pendingWandSelectionPosition != null) {
+        final Offset requestPosition = pendingWandSelectionPosition!;
+        final int requestVersion = wandSelectionRequestVersion;
+        pendingWandSelectionPosition = null;
+
+        final FillRegion region = await getRegionPathFromLayerImage(requestPosition);
+
+        if (requestVersion != wandSelectionRequestVersion) {
+          continue;
+        }
+
+        if (selectedAction != ActionType.selector || selectorModel.mode != SelectorMode.wand) {
+          continue;
+        }
+
+        selectorModel.isVisible = true;
+        if (selectorModel.math == SelectorMath.replace) {
+          selectorModel.path1 = region.path.shift(region.offset);
+        } else {
+          selectorModel.path2 = region.path.shift(region.offset);
+        }
+        selectorModel.isDrawing = false;
+        selectorModel.applyMath();
+        update();
+      }
+    } finally {
+      isWandSelectionInProgress = false;
+    }
+  }
+
+  /// Returns cached selected-layer RGBA bytes, refreshing cache when signature changes.
+  Future<FillImageData?> _getSelectedLayerFillImageData() async {
+    final int signature = _createSelectedLayerFloodSourceSignature();
+    if (signature == cachedWandSourceSignature &&
+        cachedWandSourcePixels != null &&
+        cachedWandSourceWidth > AppMath.zero &&
+        cachedWandSourceHeight > AppMath.zero) {
+      return FillImageData(
+        pixels: cachedWandSourcePixels!,
+        width: cachedWandSourceWidth,
+        height: cachedWandSourceHeight,
+      );
+    }
+
+    final ui.Image image = layers.selectedLayer.toImageForStorage(layers.size);
+    try {
+      final Uint8List? pixels = await convertImageToUint8List(image);
+      if (pixels == null) {
+        return null;
+      }
+
+      cachedWandSourceSignature = signature;
+      cachedWandSourcePixels = pixels;
+      cachedWandSourceWidth = image.width;
+      cachedWandSourceHeight = image.height;
+
+      return FillImageData(
+        pixels: pixels,
+        width: image.width,
+        height: image.height,
+      );
+    } finally {
+      image.dispose();
+    }
+  }
+
+  /// Creates a stable fingerprint for selected-layer raster cache invalidation.
+  int _createSelectedLayerFloodSourceSignature() {
+    final LayerProvider layer = layers.selectedLayer;
+    return Object.hash(
+      layer,
+      layers.selectedLayerIndex,
+      layers.width.toInt(),
+      layers.height.toInt(),
+      layer.actionStack.length,
+      layer.redoStack.length,
+      layer.lastUserAction,
     );
   }
 

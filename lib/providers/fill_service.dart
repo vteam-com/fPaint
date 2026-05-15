@@ -1,8 +1,10 @@
 // ignore: fcheck_one_class_per_file
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/flood_fill.dart';
@@ -16,6 +18,28 @@ class FillRegion {
 
   final Path path;
   final Offset offset;
+}
+
+/// Immutable raster payload used for repeated flood-fill queries via signature-based caching.
+///
+/// **Immutability Contract:** Callers must treat [pixels] as read-only after construction.
+/// Mutations to the byte buffer will corrupt the cache. The cache layer validates correctness
+/// via [cachedWandSourceSignature], but this relies on pixels remaining unchanged.
+class FillImageData {
+  const FillImageData({
+    required this.pixels,
+    required this.width,
+    required this.height,
+  });
+
+  /// Raster bytes in RGBA format. Must not be modified after construction.
+  final Uint8List pixels;
+
+  /// Width of the raster in pixels.
+  final int width;
+
+  /// Height of the raster in pixels.
+  final int height;
 }
 
 /// Builds fill actions from image-based flood-fill regions.
@@ -130,9 +154,10 @@ class FillService {
 
   /// Gets the region path from a layer image.
   Future<FillRegion> getRegionPathFromImage({
-    required final ui.Image image,
+    final ui.Image? image,
     required final ui.Offset position,
     required final int tolerance,
+    final FillImageData? imageData,
   }) async {
     // Guard against NaN or infinite coordinates
     if (position.dx.isNaN || position.dy.isNaN || position.dx.isInfinite || position.dy.isInfinite) {
@@ -142,14 +167,21 @@ class FillService {
     final int x = position.dx.toInt();
     final int y = position.dy.toInt();
 
+    final FillImageData? source = imageData ?? await _buildFillImageData(image);
+    if (source == null) {
+      return FillRegion(path: ui.Path(), offset: ui.Offset.zero);
+    }
+
     // Guard against out-of-bounds or invalid coordinates
-    if (x < 0 || y < 0 || x >= image.width || y >= image.height) {
+    if (x < AppMath.zero || y < AppMath.zero || x >= source.width || y >= source.height) {
       return FillRegion(path: ui.Path(), offset: ui.Offset.zero);
     }
 
     // Perform flood fill at the clicked position
-    final Region region = await extractRegionByColorEdgeAndOffset(
-      image: image,
+    final Region region = await extractRegionByColorEdgeAndOffsetFromPixels(
+      pixels: source.pixels,
+      width: source.width,
+      height: source.height,
       x: x,
       y: y,
       tolerance: tolerance,
@@ -157,6 +189,24 @@ class FillService {
     return FillRegion(
       path: region.path,
       offset: region.offset,
+    );
+  }
+
+  /// Builds a reusable flood-fill raster payload from [image].
+  Future<FillImageData?> _buildFillImageData(final ui.Image? image) async {
+    if (image == null) {
+      return null;
+    }
+
+    final Uint8List? pixels = await convertImageToUint8List(image);
+    if (pixels == null) {
+      return null;
+    }
+
+    return FillImageData(
+      pixels: pixels,
+      width: image.width,
+      height: image.height,
     );
   }
 }

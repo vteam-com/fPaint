@@ -127,6 +127,7 @@
       "extension": {}
     }
   },
+  "fileNotFound": "Fichier non trouvé",
   "fillColor": "Couleur de remplissage",
   "flipHorizontalTooltip": "Retourner horizontalement",
   "flipVerticalTooltip": "Retourner verticalement",
@@ -184,6 +185,7 @@
     }
   },
   "platforms": "Disponible sur...",
+  "previewUnavailable": "Aperçu indisponible",
   "recentFilesLabel": "Récents",
   "resizeRotate": "Redimensionner / Pivoter",
   "rotateCanvasTooltip": "Pivoter la toile de 90 degres sens horaire",

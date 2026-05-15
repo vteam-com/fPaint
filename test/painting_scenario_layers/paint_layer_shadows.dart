@@ -30,13 +30,31 @@ Future<void> paintLayerHouseShadow(final PaintingScenarioSession session) async 
   await tapByKey(session.tester, Keys.toolSelector);
   await session.tester.pump();
 
-  // Skew: drag both top handles down so the shadow lands on the ground,
-  // with a slight horizontal lean — same technique as the fence shadow.
+  // Match the previous straight-edge projection by moving the top boundary and
+  // re-centering the side edge midpoints onto the old bilinear edge lines.
   await deformSelectionWithTransformOverlay(
     session.tester,
     handleDeltas: <TransformOverlayHandle, Offset>{
-      TransformOverlayHandle.topLeft: const Offset(20, _houseShadowTopHandleDelta),
-      TransformOverlayHandle.topRight: const Offset(30, _houseShadowTopHandleDelta),
+      TransformOverlayHandle.topLeft: const Offset(
+        _houseShadowTopLeftHandleXDelta,
+        _houseShadowTopHandleDelta,
+      ),
+      TransformOverlayHandle.top: const Offset(
+        _houseShadowTopEdgeHandleXDelta,
+        _houseShadowTopHandleDelta,
+      ),
+      TransformOverlayHandle.topRight: const Offset(
+        _houseShadowTopRightHandleXDelta,
+        _houseShadowTopHandleDelta,
+      ),
+      TransformOverlayHandle.right: const Offset(
+        _houseShadowRightEdgeHandleXDelta,
+        _houseShadowSideEdgeHandleYDelta,
+      ),
+      TransformOverlayHandle.left: const Offset(
+        _houseShadowLeftEdgeHandleXDelta,
+        _houseShadowSideEdgeHandleYDelta,
+      ),
     },
   );
 

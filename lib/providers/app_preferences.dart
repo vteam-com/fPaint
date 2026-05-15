@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
+import 'package:fpaint/helpers/macos_bookmark_service.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,6 +39,10 @@ class AppPreferences extends ChangeNotifier {
   static const String keyLanguageCode = 'keyLanguageCode';
   static const String keyRecoveryDraftSourceFilePath = 'keyRecoveryDraftSourceFilePath';
   static const String keyRecentFiles = 'keyRecentFiles';
+  static const String keyRecentFileBookmarks = 'keyRecentFileBookmarks';
+
+  /// Separator used between path and bookmark data in stored pairs.
+  static const String _bookmarkSeparator = '\x00';
 
   // Default values
   double _sidePanelDistance = AppLayout.sidePanelTopDefault;
@@ -47,6 +52,9 @@ class AppPreferences extends ChangeNotifier {
   bool _useApplePencil = true;
   String? _languageCode;
   List<String> _recentFiles = <String>[];
+
+  /// macOS security-scoped bookmarks keyed by file path.
+  Map<String, String> _recentFileBookmarks = <String, String>{};
 
   // Getters
 
@@ -77,6 +85,9 @@ class AppPreferences extends ChangeNotifier {
 
   /// Gets the list of recently opened file paths (most recent first).
   List<String> get recentFiles => List<String>.unmodifiable(_recentFiles);
+
+  /// Returns the macOS security-scoped bookmark string for [path], or null.
+  String? getBookmark(final String path) => _recentFileBookmarks[path];
 
   /// Gets the SharedPreferences instance.
   Future<SharedPreferences> getPref() async {
@@ -158,14 +169,38 @@ class AppPreferences extends ChangeNotifier {
   /// Adds a file path to the recent files list.
   ///
   /// The path is moved to the front if already present. The list is capped at
-  /// [AppLimits.maxRecentFiles].
+  /// [AppLimits.maxRecentFiles]. On macOS a security-scoped bookmark is created
+  /// and stored so the file can be re-opened across sessions.
   Future<void> addRecentFile(final String path) async {
     _recentFiles.remove(path);
     _recentFiles.insert(0, path);
     if (_recentFiles.length > AppLimits.maxRecentFiles) {
       _recentFiles = _recentFiles.sublist(0, AppLimits.maxRecentFiles);
     }
-    await (await getPref()).setStringList(keyRecentFiles, _recentFiles);
+    final SharedPreferences prefs = await getPref();
+    await prefs.setStringList(keyRecentFiles, _recentFiles);
+    // Store a security-scoped bookmark for macOS sandbox support.
+    final String? bookmark = await MacOsBookmarkService.createBookmark(path);
+    if (bookmark != null) {
+      _recentFileBookmarks[path] = bookmark;
+      final List<String> bookmarkPairs = _recentFiles
+          .map((final String p) => '$p$_bookmarkSeparator${_recentFileBookmarks[p] ?? ''}')
+          .toList();
+      await prefs.setStringList(keyRecentFileBookmarks, bookmarkPairs);
+    }
+    notifyListeners();
+  }
+
+  /// Removes a file path from the recent files list.
+  Future<void> removeRecentFile(final String path) async {
+    _recentFiles.remove(path);
+    _recentFileBookmarks.remove(path);
+    final SharedPreferences prefs = await getPref();
+    await prefs.setStringList(keyRecentFiles, _recentFiles);
+    final List<String> bookmarkPairs = _recentFiles
+        .map((final String p) => '$p$_bookmarkSeparator${_recentFileBookmarks[p] ?? ''}')
+        .toList();
+    await prefs.setStringList(keyRecentFileBookmarks, bookmarkPairs);
     notifyListeners();
   }
 
@@ -221,5 +256,18 @@ class AppPreferences extends ChangeNotifier {
     _languageCode = _prefs!.getString(keyLanguageCode);
 
     _recentFiles = _prefs!.getStringList(keyRecentFiles) ?? <String>[];
+    // Load bookmarks stored as 'path\x00base64bookmark' pairs.
+    final List<String> bookmarkPairs = _prefs!.getStringList(keyRecentFileBookmarks) ?? <String>[];
+    _recentFileBookmarks = <String, String>{};
+    for (final String pair in bookmarkPairs) {
+      final int sep = pair.indexOf(_bookmarkSeparator);
+      if (sep > 0) {
+        final String p = pair.substring(0, sep);
+        final String b = pair.substring(sep + 1);
+        if (b.isNotEmpty) {
+          _recentFileBookmarks[p] = b;
+        }
+      }
+    }
   }
 }

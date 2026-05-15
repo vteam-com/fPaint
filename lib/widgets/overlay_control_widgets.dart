@@ -107,11 +107,19 @@ class OverlayDragHandle extends StatelessWidget {
     super.key,
     required this.position,
     required this.cursor,
-    required this.onPanUpdate,
+    this.onPanUpdate,
     this.onPanEnd,
     this.size = AppInteraction.selectionHandleSize,
     this.borderRadius = AppRadius.large,
+    this.backgroundColor = AppColors.overlayDark,
+    this.borderColor = AppColors.overlayLight,
   });
+
+  /// Background color of the handle box.
+  final Color backgroundColor;
+
+  /// Border color of the handle box.
+  final Color borderColor;
 
   /// Corner radius of the handle box.
   final double borderRadius;
@@ -123,7 +131,7 @@ class OverlayDragHandle extends StatelessWidget {
   final VoidCallback? onPanEnd;
 
   /// Called on every drag update.
-  final void Function(DragUpdateDetails) onPanUpdate;
+  final void Function(DragUpdateDetails)? onPanUpdate;
 
   /// Screen-space position of the handle center.
   final Offset position;
@@ -146,8 +154,8 @@ class OverlayDragHandle extends StatelessWidget {
             width: activeSize,
             height: activeSize,
             decoration: BoxDecoration(
-              color: AppColors.overlayDark,
-              border: Border.all(color: AppColors.overlayLight, width: AppStroke.regular),
+              color: backgroundColor,
+              border: Border.all(color: borderColor, width: AppStroke.regular),
               borderRadius: BorderRadius.circular(borderRadius),
             ),
             child: Center(

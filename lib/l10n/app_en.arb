@@ -134,6 +134,7 @@
       "extension": {}
     }
   },
+  "fileNotFound": "File not found",
   "fillColor": "Fill Color",
   "flipHorizontalTooltip": "Flip Horizontal",
   "flipVerticalTooltip": "Flip Vertical",
@@ -194,6 +195,7 @@
     }
   },
   "platforms": "Available on...",
+  "previewUnavailable": "Preview unavailable",
   "recentFilesLabel": "Recent",
   "resizeRotate": "Resize / Rotate",
   "rotateCanvasTooltip": "Rotate Canvas 90° CW",

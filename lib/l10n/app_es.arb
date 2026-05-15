@@ -128,6 +128,7 @@
       "extension": {}
     }
   },
+  "fileNotFound": "Archivo no encontrado",
   "fillColor": "Color de relleno",
   "flipHorizontalTooltip": "Voltear horizontalmente",
   "flipVerticalTooltip": "Voltear verticalmente",
@@ -185,6 +186,7 @@
     }
   },
   "platforms": "Disponible en...",
+  "previewUnavailable": "Vista previa no disponible",
   "recentFilesLabel": "Recientes",
   "resizeRotate": "Redimensionar / Girar",
   "rotateCanvasTooltip": "Girar lienzo 90 grados en sentido horario",

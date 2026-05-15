@@ -53,6 +53,74 @@ void main() {
       expect(model.corners[TransformModel.topRightIndex], bounds.topRight);
       expect(model.corners[TransformModel.bottomRightIndex], bounds.bottomRight);
       expect(model.corners[TransformModel.bottomLeftIndex], bounds.bottomLeft);
+      expect(model.edgeMidpoints.length, TransformModel.edgeHandleCount);
+      expect(model.edgeMidpoints[TransformModel.topEdgeIndex], bounds.topCenter);
+      expect(model.edgeMidpoints[TransformModel.rightEdgeIndex], bounds.centerRight);
+      expect(model.edgeMidpoints[TransformModel.bottomEdgeIndex], bounds.bottomCenter);
+      expect(model.edgeMidpoints[TransformModel.leftEdgeIndex], bounds.centerLeft);
+      expect(model.handleSet, TransformHandleSet.corners);
+      expect(model.areCornerHandlesEnabled, isTrue);
+      expect(model.areEdgeHandlesEnabled, isFalse);
+      expect(model.isCenterHandleEnabled, isFalse);
+    });
+
+    test('cycleHandleSet rotates corners, edges, and all handles', () {
+      final TransformModel model = TransformModel();
+
+      expect(model.handleSet, TransformHandleSet.corners);
+
+      model.cycleHandleSet();
+      expect(model.handleSet, TransformHandleSet.edges);
+      expect(model.areCornerHandlesEnabled, isFalse);
+      expect(model.areEdgeHandlesEnabled, isTrue);
+      expect(model.isCenterHandleEnabled, isFalse);
+
+      model.cycleHandleSet();
+      expect(model.handleSet, TransformHandleSet.all);
+      expect(model.areCornerHandlesEnabled, isTrue);
+      expect(model.areEdgeHandlesEnabled, isTrue);
+      expect(model.isCenterHandleEnabled, isTrue);
+
+      model.cycleHandleSet();
+      expect(model.handleSet, TransformHandleSet.corners);
+      expect(model.areCornerHandlesEnabled, isTrue);
+      expect(model.areEdgeHandlesEnabled, isFalse);
+      expect(model.isCenterHandleEnabled, isFalse);
+    });
+
+    test('setDeformMode resets the default handle set to corners', () {
+      final TransformModel model = TransformModel();
+
+      model.cycleHandleSet();
+      model.cycleHandleSet();
+      expect(model.handleSet, TransformHandleSet.all);
+
+      model.setRotateMode();
+      model.setDeformMode();
+
+      expect(model.isDeformMode, isTrue);
+      expect(model.handleSet, TransformHandleSet.corners);
+      expect(model.areCornerHandlesEnabled, isTrue);
+      expect(model.areEdgeHandlesEnabled, isFalse);
+      expect(model.isCenterHandleEnabled, isFalse);
+    });
+
+    test('disabled edge handles do not affect the active warp controls', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      const Rect bounds = Rect.fromLTWH(10, 20, 100, 50);
+      model.start(image: image, bounds: bounds);
+
+      model.moveEdgeHandle(TransformModel.bottomEdgeIndex, const Offset(0, 30));
+
+      expect(model.edgeMidpoints[TransformModel.bottomEdgeIndex], const Offset(60, 100));
+      expect(model.effectiveEdgeMidpoints[TransformModel.bottomEdgeIndex], const Offset(60, 70));
+      expect(model.quadBounds.bottom, 70);
+
+      model.cycleHandleSet();
+
+      expect(model.effectiveEdgeMidpoints[TransformModel.bottomEdgeIndex], const Offset(60, 100));
+      expect(model.quadBounds.bottom, 100);
     });
 
     test('moveCorner moves a single corner', () async {
@@ -70,24 +138,34 @@ void main() {
       expect(model.corners[TransformModel.bottomLeftIndex], const Offset(0, 100));
     });
 
-    test('moveEdge moves two corners on the edge', () async {
+    test('moveEdgeHandle moves only the midpoint control', () async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
       const Rect bounds = Rect.fromLTWH(0, 0, 100, 100);
       model.start(image: image, bounds: bounds);
 
-      // Move top edge (topLeft + topRight) by (5, -10)
-      model.moveEdge(
-        TransformModel.topLeftIndex,
-        TransformModel.topRightIndex,
-        const Offset(5, -10),
-      );
+      model.moveEdgeHandle(TransformModel.leftEdgeIndex, const Offset(-15, 20));
 
-      expect(model.corners[TransformModel.topLeftIndex], const Offset(5, -10));
-      expect(model.corners[TransformModel.topRightIndex], const Offset(105, -10));
-      // Bottom corners unchanged
+      expect(model.edgeMidpoints[TransformModel.leftEdgeIndex], const Offset(-15, 70));
+      expect(model.corners[TransformModel.topLeftIndex], Offset.zero);
+      expect(model.corners[TransformModel.bottomLeftIndex], const Offset(0, 100));
+    });
+
+    test('moveConnectedEdge moves the linked corners and midpoint together', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      const Rect bounds = Rect.fromLTWH(0, 0, 100, 100);
+      model.start(image: image, bounds: bounds);
+
+      model.moveConnectedEdge(TransformModel.topEdgeIndex, const Offset(10, -5));
+
+      expect(model.corners[TransformModel.topLeftIndex], const Offset(10, -5));
+      expect(model.corners[TransformModel.topRightIndex], const Offset(110, -5));
+      expect(model.edgeMidpoints[TransformModel.topEdgeIndex], const Offset(60, -5));
       expect(model.corners[TransformModel.bottomLeftIndex], const Offset(0, 100));
       expect(model.corners[TransformModel.bottomRightIndex], const Offset(100, 100));
+      expect(model.edgeMidpoints[TransformModel.leftEdgeIndex], const Offset(0, 50));
+      expect(model.edgeMidpoints[TransformModel.rightEdgeIndex], const Offset(100, 50));
     });
 
     test('moveAll translates all corners', () async {
@@ -165,6 +243,22 @@ void main() {
       expect(quad.bottom, 70); // bottomRight.dy = 70
     });
 
+    test('quadBounds includes edge midpoint controls when edge handles are enabled', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      const Rect bounds = Rect.fromLTWH(10, 20, 100, 50);
+      model.start(image: image, bounds: bounds);
+
+      model.moveEdgeHandle(TransformModel.bottomEdgeIndex, const Offset(0, 30));
+      model.cycleHandleSet();
+
+      final Rect quad = model.quadBounds;
+      expect(quad.left, 10);
+      expect(quad.top, 20);
+      expect(quad.right, 110);
+      expect(quad.bottom, 100);
+    });
+
     test('quadBounds returns Rect.zero when corners empty', () {
       final TransformModel model = TransformModel();
       expect(model.quadBounds, Rect.zero);
@@ -184,6 +278,7 @@ void main() {
       expect(model.sourceImage, isNull);
       expect(model.sourceBounds, Rect.zero);
       expect(model.corners, isEmpty);
+      expect(model.edgeMidpoints, isEmpty);
       expect(model.isDeformMode, isTrue);
       expect(model.activeScalePercent, AppMath.percentScale);
       expect(model.isScaleFeedbackVisible, isFalse);

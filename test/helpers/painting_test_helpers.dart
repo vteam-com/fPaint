@@ -70,6 +70,9 @@ const int _freehandStrokeMinimumPointCount = 2;
 /// Total number of deform handles shown by the transform overlay.
 const int _transformOverlayHandleCount = 9;
 
+/// Maximum number of transform-mode taps needed to reach all deform handles.
+const int _transformOverlayModeCycleAttemptCount = 3;
+
 /// Build-order index for the transform overlay's top-left corner handle.
 const int _transformOverlayHandleTopLeftIndex = 0;
 
@@ -900,6 +903,10 @@ Future<void> dragSelectionHandle(
   required final TransformOverlayHandle handle,
   required final Offset delta,
 }) async {
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppLocalizations l10n = context.l10n;
+  await _ensureAllTransformHandlesVisible(tester, l10n: l10n);
+
   final Finder handles = find.byType(OverlayDragHandle);
   expect(
     handles.evaluate().length,
@@ -946,6 +953,8 @@ Future<void> deformSelectionWithTransformOverlay(
   await tapByTooltip(tester, l10n.transform);
   await pumpForUnitTestUiSettle(tester);
 
+  await _ensureAllTransformHandlesVisible(tester, l10n: l10n);
+
   final Finder handles = find.byType(OverlayDragHandle);
   expect(
     handles.evaluate().length,
@@ -961,6 +970,28 @@ Future<void> deformSelectionWithTransformOverlay(
 
   await tapByTooltip(tester, l10n.apply);
   await pumpForUnitTestUiSettle(tester);
+}
+
+/// Cycles the transform overlay until all deform handles are visible.
+Future<void> _ensureAllTransformHandlesVisible(
+  final WidgetTester tester, {
+  required final AppLocalizations l10n,
+}) async {
+  final Finder handles = find.byType(OverlayDragHandle);
+
+  for (int attempt = 0; attempt < _transformOverlayModeCycleAttemptCount; attempt++) {
+    if (handles.evaluate().length == _transformOverlayHandleCount) {
+      return;
+    }
+    await tapByTooltip(tester, l10n.transform);
+    await pumpForUnitTestUiSettle(tester);
+  }
+
+  expect(
+    handles.evaluate().length,
+    _transformOverlayHandleCount,
+    reason: 'Transform overlay should expose all deform handles',
+  );
 }
 
 // ---------------------------------------------------------------------------
