@@ -15,6 +15,13 @@ class TransformModel extends VisibleModel {
   static const int bottomLeftIndex = 3;
   static const int cornerCount = 4;
 
+  /// Index constants for independently draggable edge midpoint handles.
+  static const int topEdgeIndex = 0;
+  static const int rightEdgeIndex = 1;
+  static const int bottomEdgeIndex = 2;
+  static const int leftEdgeIndex = 3;
+  static const int edgeHandleCount = 4;
+
   /// The captured source image from the selection.
   ui.Image? sourceImage;
 
@@ -24,6 +31,10 @@ class TransformModel extends VisibleModel {
   /// The 4 corner points defining the destination quadrilateral in canvas coordinates.
   /// Order: topLeft, topRight, bottomRight, bottomLeft.
   List<Offset> corners = <Offset>[];
+
+  /// The 4 independently draggable edge midpoint control points.
+  /// Order: top, right, bottom, left.
+  List<Offset> edgeMidpoints = <Offset>[];
 
   /// The active interaction mode for the transform overlay.
   TransformInteractionMode interactionMode = TransformInteractionMode.deform;
@@ -54,6 +65,12 @@ class TransformModel extends VisibleModel {
       bounds.bottomRight,
       bounds.bottomLeft,
     ];
+    edgeMidpoints = <Offset>[
+      bounds.topCenter,
+      bounds.centerRight,
+      bounds.bottomCenter,
+      bounds.centerLeft,
+    ];
     setDeformMode();
     isVisible = true;
   }
@@ -63,16 +80,18 @@ class TransformModel extends VisibleModel {
     corners[index] = corners[index] + delta;
   }
 
-  /// Moves two corners on an edge by [delta] in canvas coordinates.
-  void moveEdge(final int index1, final int index2, final Offset delta) {
-    corners[index1] = corners[index1] + delta;
-    corners[index2] = corners[index2] + delta;
+  /// Moves one edge midpoint control handle by [delta] in canvas coordinates.
+  void moveEdgeHandle(final int index, final Offset delta) {
+    edgeMidpoints[index] = edgeMidpoints[index] + delta;
   }
 
   /// Moves all corners by [delta] in canvas coordinates (translate).
   void moveAll(final Offset delta) {
     for (int i = 0; i < corners.length; i++) {
       corners[i] = corners[i] + delta;
+    }
+    for (int i = 0; i < edgeMidpoints.length; i++) {
+      edgeMidpoints[i] = edgeMidpoints[i] + delta;
     }
   }
 
@@ -156,6 +175,10 @@ class TransformModel extends VisibleModel {
       final Offset vector = corner - scaleCenter;
       return scaleCenter + (vector * clampedFactor);
     }).toList();
+    edgeMidpoints = edgeMidpoints.map((final Offset midpoint) {
+      final Offset vector = midpoint - scaleCenter;
+      return scaleCenter + (vector * clampedFactor);
+    }).toList();
 
     final double previousPercent = activeScalePercent;
     activeScalePercent *= clampedFactor;
@@ -170,6 +193,13 @@ class TransformModel extends VisibleModel {
 
     corners = corners.map((final Offset corner) {
       final Offset vector = corner - rotationCenter;
+      return Offset(
+        rotationCenter.dx + (vector.dx * cosine) - (vector.dy * sine),
+        rotationCenter.dy + (vector.dx * sine) + (vector.dy * cosine),
+      );
+    }).toList();
+    edgeMidpoints = edgeMidpoints.map((final Offset midpoint) {
+      final Offset vector = midpoint - rotationCenter;
       return Offset(
         rotationCenter.dx + (vector.dx * cosine) - (vector.dy * sine),
         rotationCenter.dy + (vector.dx * sine) + (vector.dy * cosine),
@@ -195,36 +225,83 @@ class TransformModel extends VisibleModel {
 
   /// Returns the midpoint of an edge between two corners.
   Offset edgeMidpoint(final int index1, final int index2) {
+    final int? edgeIndex = _edgeIndexForCorners(index1, index2);
+    if (edgeIndex != null && edgeMidpoints.length == edgeHandleCount) {
+      return edgeMidpoints[edgeIndex];
+    }
     return Offset(
       (corners[index1].dx + corners[index2].dx) / AppMath.pair,
       (corners[index1].dy + corners[index2].dy) / AppMath.pair,
     );
   }
 
+  /// Returns the ordered boundary control points for the current mesh.
+  List<Offset> get boundaryPoints {
+    if (corners.length != cornerCount || edgeMidpoints.length != edgeHandleCount) {
+      return List<Offset>.from(corners);
+    }
+
+    return <Offset>[
+      corners[topLeftIndex],
+      edgeMidpoints[topEdgeIndex],
+      corners[topRightIndex],
+      edgeMidpoints[rightEdgeIndex],
+      corners[bottomRightIndex],
+      edgeMidpoints[bottomEdgeIndex],
+      corners[bottomLeftIndex],
+      edgeMidpoints[leftEdgeIndex],
+    ];
+  }
+
   /// Returns the bounding rect of the quad in canvas coordinates.
   Rect get quadBounds {
-    if (corners.isEmpty) {
+    if (corners.isEmpty && edgeMidpoints.isEmpty) {
       return Rect.zero;
     }
-    double minX = corners[0].dx;
-    double maxX = corners[0].dx;
-    double minY = corners[0].dy;
-    double maxY = corners[0].dy;
-    for (final Offset corner in corners) {
-      if (corner.dx < minX) {
-        minX = corner.dx;
+    final List<Offset> controlPoints = <Offset>[
+      ...corners,
+      ...edgeMidpoints,
+    ];
+    double minX = controlPoints.first.dx;
+    double maxX = controlPoints.first.dx;
+    double minY = controlPoints.first.dy;
+    double maxY = controlPoints.first.dy;
+    for (final Offset point in controlPoints) {
+      if (point.dx < minX) {
+        minX = point.dx;
       }
-      if (corner.dx > maxX) {
-        maxX = corner.dx;
+      if (point.dx > maxX) {
+        maxX = point.dx;
       }
-      if (corner.dy < minY) {
-        minY = corner.dy;
+      if (point.dy < minY) {
+        minY = point.dy;
       }
-      if (corner.dy > maxY) {
-        maxY = corner.dy;
+      if (point.dy > maxY) {
+        maxY = point.dy;
       }
     }
     return Rect.fromLTRB(minX, minY, maxX, maxY);
+  }
+
+  /// Maps a corner-pair edge query onto the stored edge midpoint index.
+  int? _edgeIndexForCorners(final int index1, final int index2) {
+    final Set<int> indices = <int>{index1, index2};
+    if (indices.length != AppMath.pair) {
+      return null;
+    }
+    if (indices.contains(topLeftIndex) && indices.contains(topRightIndex)) {
+      return topEdgeIndex;
+    }
+    if (indices.contains(topRightIndex) && indices.contains(bottomRightIndex)) {
+      return rightEdgeIndex;
+    }
+    if (indices.contains(bottomRightIndex) && indices.contains(bottomLeftIndex)) {
+      return bottomEdgeIndex;
+    }
+    if (indices.contains(bottomLeftIndex) && indices.contains(topLeftIndex)) {
+      return leftEdgeIndex;
+    }
+    return null;
   }
 
   @override
@@ -234,6 +311,7 @@ class TransformModel extends VisibleModel {
     sourceBounds = Rect.zero;
     setDeformMode();
     corners.clear();
+    edgeMidpoints.clear();
   }
 }
 

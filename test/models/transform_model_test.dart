@@ -53,6 +53,11 @@ void main() {
       expect(model.corners[TransformModel.topRightIndex], bounds.topRight);
       expect(model.corners[TransformModel.bottomRightIndex], bounds.bottomRight);
       expect(model.corners[TransformModel.bottomLeftIndex], bounds.bottomLeft);
+      expect(model.edgeMidpoints.length, TransformModel.edgeHandleCount);
+      expect(model.edgeMidpoints[TransformModel.topEdgeIndex], bounds.topCenter);
+      expect(model.edgeMidpoints[TransformModel.rightEdgeIndex], bounds.centerRight);
+      expect(model.edgeMidpoints[TransformModel.bottomEdgeIndex], bounds.bottomCenter);
+      expect(model.edgeMidpoints[TransformModel.leftEdgeIndex], bounds.centerLeft);
     });
 
     test('moveCorner moves a single corner', () async {
@@ -70,24 +75,17 @@ void main() {
       expect(model.corners[TransformModel.bottomLeftIndex], const Offset(0, 100));
     });
 
-    test('moveEdge moves two corners on the edge', () async {
+    test('moveEdgeHandle moves only the midpoint control', () async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
       const Rect bounds = Rect.fromLTWH(0, 0, 100, 100);
       model.start(image: image, bounds: bounds);
 
-      // Move top edge (topLeft + topRight) by (5, -10)
-      model.moveEdge(
-        TransformModel.topLeftIndex,
-        TransformModel.topRightIndex,
-        const Offset(5, -10),
-      );
+      model.moveEdgeHandle(TransformModel.leftEdgeIndex, const Offset(-15, 20));
 
-      expect(model.corners[TransformModel.topLeftIndex], const Offset(5, -10));
-      expect(model.corners[TransformModel.topRightIndex], const Offset(105, -10));
-      // Bottom corners unchanged
+      expect(model.edgeMidpoints[TransformModel.leftEdgeIndex], const Offset(-15, 70));
+      expect(model.corners[TransformModel.topLeftIndex], Offset.zero);
       expect(model.corners[TransformModel.bottomLeftIndex], const Offset(0, 100));
-      expect(model.corners[TransformModel.bottomRightIndex], const Offset(100, 100));
     });
 
     test('moveAll translates all corners', () async {
@@ -165,6 +163,21 @@ void main() {
       expect(quad.bottom, 70); // bottomRight.dy = 70
     });
 
+    test('quadBounds includes edge midpoint controls', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      const Rect bounds = Rect.fromLTWH(10, 20, 100, 50);
+      model.start(image: image, bounds: bounds);
+
+      model.moveEdgeHandle(TransformModel.bottomEdgeIndex, const Offset(0, 30));
+
+      final Rect quad = model.quadBounds;
+      expect(quad.left, 10);
+      expect(quad.top, 20);
+      expect(quad.right, 110);
+      expect(quad.bottom, 100);
+    });
+
     test('quadBounds returns Rect.zero when corners empty', () {
       final TransformModel model = TransformModel();
       expect(model.quadBounds, Rect.zero);
@@ -184,6 +197,7 @@ void main() {
       expect(model.sourceImage, isNull);
       expect(model.sourceBounds, Rect.zero);
       expect(model.corners, isEmpty);
+      expect(model.edgeMidpoints, isEmpty);
       expect(model.isDeformMode, isTrue);
       expect(model.activeScalePercent, AppMath.percentScale);
       expect(model.isScaleFeedbackVisible, isFalse);

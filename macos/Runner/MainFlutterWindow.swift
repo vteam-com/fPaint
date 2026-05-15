@@ -49,12 +49,17 @@ class MainFlutterWindow: NSWindow {
           )
           result(bookmarkData.base64EncodedString())
         } catch {
-          result(FlutterError(code: "BOOKMARK_FAILED", message: error.localizedDescription, details: nil))
+          result(
+            FlutterError(code: "BOOKMARK_FAILED", message: error.localizedDescription, details: nil)
+          )
         }
       } else if call.method == resolveBookmarkMethod {
         guard let base64 = call.arguments as? String,
-              let data = Data(base64Encoded: base64) else {
-          result(FlutterError(code: "INVALID_ARGS", message: "Expected base64 bookmark string", details: nil))
+          let data = Data(base64Encoded: base64)
+        else {
+          result(
+            FlutterError(
+              code: "INVALID_ARGS", message: "Expected base64 bookmark string", details: nil))
           return
         }
         var isStale = false
@@ -69,7 +74,8 @@ class MainFlutterWindow: NSWindow {
           activeScopedURLs[url.path] = url
           result(url.path)
         } catch {
-          result(FlutterError(code: "RESOLVE_FAILED", message: error.localizedDescription, details: nil))
+          result(
+            FlutterError(code: "RESOLVE_FAILED", message: error.localizedDescription, details: nil))
         }
       } else if call.method == releaseBookmarkMethod {
         guard let path = call.arguments as? String else {
@@ -84,27 +90,6 @@ class MainFlutterWindow: NSWindow {
         result(FlutterMethodNotImplemented)
       }
     }
-
-    hapticChannel = FlutterMethodChannel(
-      name: hapticChannelName,
-      binaryMessenger: flutterViewController.engine.binaryMessenger
-    )
-    hapticChannel?.setMethodCallHandler { (call, result) in
-      if call.method == hapticChannelMethod {
-        NSHapticFeedbackManager.defaultPerformer.perform(
-          .alignment,
-          performanceTime: .now
-        )
-        result(nil)
-      } else {
-        result(FlutterMethodNotImplemented)
-      }
-    }
-
-    super.awakeFromNib()
-  }
-}
-
 
     hapticChannel = FlutterMethodChannel(
       name: hapticChannelName,

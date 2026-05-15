@@ -58,6 +58,7 @@ class _TransformWidgetState extends State<TransformWidget> {
 
     // Convert corners to screen space
     final List<Offset> screenCorners = model.corners.map((final Offset c) => _toScreen(c)).toList();
+    final List<Offset> screenBoundaryPoints = model.boundaryPoints.map((final Offset c) => _toScreen(c)).toList();
 
     final Offset screenCenter = _toScreen(model.center);
 
@@ -84,6 +85,8 @@ class _TransformWidgetState extends State<TransformWidget> {
             painter: _TransformPreviewPainter(
               image: image,
               screenCorners: screenCorners,
+              screenEdgeMidpoints: model.edgeMidpoints.map((final Offset c) => _toScreen(c)).toList(),
+              screenBoundaryPoints: screenBoundaryPoints,
             ),
           ),
 
@@ -127,7 +130,7 @@ class _TransformWidgetState extends State<TransformWidget> {
               position: topMid,
               cursor: SystemMouseCursors.grab,
               onPanUpdate: (final DragUpdateDetails details) {
-                model.moveEdge(TransformModel.topLeftIndex, TransformModel.topRightIndex, details.delta / canvasScale);
+                model.moveEdgeHandle(TransformModel.topEdgeIndex, details.delta / canvasScale);
                 onChanged();
               },
             ),
@@ -135,11 +138,7 @@ class _TransformWidgetState extends State<TransformWidget> {
               position: rightMid,
               cursor: SystemMouseCursors.grab,
               onPanUpdate: (final DragUpdateDetails details) {
-                model.moveEdge(
-                  TransformModel.topRightIndex,
-                  TransformModel.bottomRightIndex,
-                  details.delta / canvasScale,
-                );
+                model.moveEdgeHandle(TransformModel.rightEdgeIndex, details.delta / canvasScale);
                 onChanged();
               },
             ),
@@ -147,11 +146,7 @@ class _TransformWidgetState extends State<TransformWidget> {
               position: bottomMid,
               cursor: SystemMouseCursors.grab,
               onPanUpdate: (final DragUpdateDetails details) {
-                model.moveEdge(
-                  TransformModel.bottomRightIndex,
-                  TransformModel.bottomLeftIndex,
-                  details.delta / canvasScale,
-                );
+                model.moveEdgeHandle(TransformModel.bottomEdgeIndex, details.delta / canvasScale);
                 onChanged();
               },
             ),
@@ -159,11 +154,7 @@ class _TransformWidgetState extends State<TransformWidget> {
               position: leftMid,
               cursor: SystemMouseCursors.grab,
               onPanUpdate: (final DragUpdateDetails details) {
-                model.moveEdge(
-                  TransformModel.bottomLeftIndex,
-                  TransformModel.topLeftIndex,
-                  details.delta / canvasScale,
-                );
+                model.moveEdgeHandle(TransformModel.leftEdgeIndex, details.delta / canvasScale);
                 onChanged();
               },
             ),
@@ -182,7 +173,7 @@ class _TransformWidgetState extends State<TransformWidget> {
           _buildModeControls(
             l10n: l10n,
             screenCenter: screenCenter,
-            screenCorners: screenCorners,
+            screenCorners: screenBoundaryPoints,
           ),
 
           // Confirm / Cancel buttons
@@ -392,10 +383,14 @@ class _TransformPreviewPainter extends CustomPainter {
   _TransformPreviewPainter({
     required this.image,
     required this.screenCorners,
+    required this.screenEdgeMidpoints,
+    required this.screenBoundaryPoints,
   });
 
   final ui.Image image;
   final List<Offset> screenCorners;
+  final List<Offset> screenEdgeMidpoints;
+  final List<Offset> screenBoundaryPoints;
 
   @override
   void paint(final Canvas canvas, final Size size) {
@@ -405,6 +400,7 @@ class _TransformPreviewPainter extends CustomPainter {
       image,
       screenCorners,
       AppInteraction.transformGridSubdivisions,
+      edgeMidpoints: screenEdgeMidpoints,
     );
 
     // Draw quad outline
@@ -413,12 +409,11 @@ class _TransformPreviewPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = AppStroke.regular;
 
-    final Path outlinePath = Path()
-      ..moveTo(screenCorners[TransformModel.topLeftIndex].dx, screenCorners[TransformModel.topLeftIndex].dy)
-      ..lineTo(screenCorners[TransformModel.topRightIndex].dx, screenCorners[TransformModel.topRightIndex].dy)
-      ..lineTo(screenCorners[TransformModel.bottomRightIndex].dx, screenCorners[TransformModel.bottomRightIndex].dy)
-      ..lineTo(screenCorners[TransformModel.bottomLeftIndex].dx, screenCorners[TransformModel.bottomLeftIndex].dy)
-      ..close();
+    final Path outlinePath = Path()..moveTo(screenBoundaryPoints.first.dx, screenBoundaryPoints.first.dy);
+    for (int i = 1; i < screenBoundaryPoints.length; i++) {
+      outlinePath.lineTo(screenBoundaryPoints[i].dx, screenBoundaryPoints[i].dy);
+    }
+    outlinePath.close();
 
     canvas.drawPath(outlinePath, outlinePaint);
   }

@@ -26,6 +26,13 @@ final Offset _fenceShadowWandTapOffset = Offset(
 );
 const double _fenceShadowGroundOffset = 100.0;
 const double _fenceShadowTopHandleDelta = _fenceHeight + _fenceShadowGroundOffset;
+const double _fenceShadowTopLeftHandleXDelta = 20.0;
+const double _fenceShadowTopRightHandleXDelta = 30.0;
+const double _fenceShadowTopEdgeHandleXDelta =
+    (_fenceShadowTopLeftHandleXDelta + _fenceShadowTopRightHandleXDelta) / AppMath.pair;
+const double _fenceShadowLeftEdgeHandleXDelta = _fenceShadowTopLeftHandleXDelta / AppMath.pair;
+const double _fenceShadowRightEdgeHandleXDelta = _fenceShadowTopRightHandleXDelta / AppMath.pair;
+const double _fenceShadowSideEdgeHandleYDelta = _fenceShadowTopHandleDelta / AppMath.pair;
 
 Future<void> paintLayerFence(final PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _fenceLayerName);
@@ -99,13 +106,31 @@ Future<void> paintLayerFenceShadow(final PaintingScenarioSession session) async 
   await tapByKey(session.tester, Keys.toolSelector);
   await session.tester.pump();
 
-  // Skew: drag both top handles down so the tip of the shadow lands
-  // _fenceShadowGroundOffset px below the fence base — casting it on the ground.
+  // Match the previous straight-edge projection by moving the top boundary and
+  // re-centering the side edge midpoints onto the old bilinear edge lines.
   await deformSelectionWithTransformOverlay(
     session.tester,
     handleDeltas: <TransformOverlayHandle, Offset>{
-      TransformOverlayHandle.topLeft: const Offset(20, _fenceShadowTopHandleDelta),
-      TransformOverlayHandle.topRight: const Offset(30, _fenceShadowTopHandleDelta),
+      TransformOverlayHandle.topLeft: const Offset(
+        _fenceShadowTopLeftHandleXDelta,
+        _fenceShadowTopHandleDelta,
+      ),
+      TransformOverlayHandle.top: const Offset(
+        _fenceShadowTopEdgeHandleXDelta,
+        _fenceShadowTopHandleDelta,
+      ),
+      TransformOverlayHandle.topRight: const Offset(
+        _fenceShadowTopRightHandleXDelta,
+        _fenceShadowTopHandleDelta,
+      ),
+      TransformOverlayHandle.right: const Offset(
+        _fenceShadowRightEdgeHandleXDelta,
+        _fenceShadowSideEdgeHandleYDelta,
+      ),
+      TransformOverlayHandle.left: const Offset(
+        _fenceShadowLeftEdgeHandleXDelta,
+        _fenceShadowSideEdgeHandleYDelta,
+      ),
     },
   );
 

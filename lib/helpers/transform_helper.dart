@@ -7,6 +7,16 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 
+const int _topLeftCornerIndex = 0;
+const int _topRightCornerIndex = 1;
+const int _bottomRightCornerIndex = 2;
+const int _bottomLeftCornerIndex = 3;
+
+const int _topEdgeMidpointIndex = 0;
+const int _rightEdgeMidpointIndex = 1;
+const int _bottomEdgeMidpointIndex = 2;
+const int _leftEdgeMidpointIndex = 3;
+
 /// Renders a perspective-warped image by subdividing the destination quad
 /// into a grid of triangles mapped with texture coordinates from the source image.
 ///
@@ -18,8 +28,9 @@ void drawPerspectiveImage(
   final Canvas canvas,
   final ui.Image image,
   final List<Offset> corners,
-  final int subdivisions,
-) {
+  final int subdivisions, {
+  final List<Offset>? edgeMidpoints,
+}) {
   final double imageWidth = image.width.toDouble();
   final double imageHeight = image.height.toDouble();
 
@@ -39,15 +50,12 @@ void drawPerspectiveImage(
     for (int i = 0; i <= subdivisions; i++) {
       final double u = i / subdivisions;
       final double v = j / subdivisions;
+      final Offset destinationPoint = edgeMidpoints == null || edgeMidpoints.length != AppMath.four
+          ? _interpolateBilinear(corners: corners, u: u, v: v)
+          : _interpolateCoonsPatch(corners: corners, edgeMidpoints: edgeMidpoints, u: u, v: v);
 
-      // Bilinear interpolation of the 4 corners
-      final double topX = corners[0].dx + (corners[1].dx - corners[0].dx) * u;
-      final double topY = corners[0].dy + (corners[1].dy - corners[0].dy) * u;
-      final double bottomX = corners[3].dx + (corners[2].dx - corners[3].dx) * u;
-      final double bottomY = corners[3].dy + (corners[2].dy - corners[3].dy) * u;
-
-      positions[posIndex] = topX + (bottomX - topX) * v;
-      positions[posIndex + 1] = topY + (bottomY - topY) * v;
+      positions[posIndex] = destinationPoint.dx;
+      positions[posIndex + 1] = destinationPoint.dy;
 
       texCoords[posIndex] = u * imageWidth;
       texCoords[posIndex + 1] = v * imageHeight;
@@ -101,17 +109,22 @@ void drawPerspectiveImage(
 Future<ui.Image> renderTransformedImage(
   final ui.Image sourceImage,
   final List<Offset> corners,
-  final int subdivisions,
-) async {
-  double minX = corners[0].dx;
-  double maxX = corners[0].dx;
-  double minY = corners[0].dy;
-  double maxY = corners[0].dy;
-  for (final Offset corner in corners) {
-    minX = min(minX, corner.dx);
-    maxX = max(maxX, corner.dx);
-    minY = min(minY, corner.dy);
-    maxY = max(maxY, corner.dy);
+  final int subdivisions, {
+  final List<Offset>? edgeMidpoints,
+}) async {
+  final List<Offset> controlPoints = <Offset>[
+    ...corners,
+    ...?edgeMidpoints,
+  ];
+  double minX = controlPoints[0].dx;
+  double maxX = controlPoints[0].dx;
+  double minY = controlPoints[0].dy;
+  double maxY = controlPoints[0].dy;
+  for (final Offset point in controlPoints) {
+    minX = min(minX, point.dx);
+    maxX = max(maxX, point.dx);
+    minY = min(minY, point.dy);
+    maxY = max(maxY, point.dy);
   }
 
   final double width = maxX - minX;
@@ -123,12 +136,100 @@ Future<ui.Image> renderTransformedImage(
   // Translate so the quad's top-left is at (0,0)
   canvas.translate(-minX, -minY);
 
-  drawPerspectiveImage(canvas, sourceImage, corners, subdivisions);
+  drawPerspectiveImage(
+    canvas,
+    sourceImage,
+    corners,
+    subdivisions,
+    edgeMidpoints: edgeMidpoints,
+  );
 
   return recorder.endRecording().toImage(
     max(1, width.ceil()),
     max(1, height.ceil()),
   );
+}
+
+/// Bilinearly interpolates a point inside the quad defined by [corners].
+Offset _interpolateBilinear({
+  required final List<Offset> corners,
+  required final double u,
+  required final double v,
+}) {
+  final double topX =
+      corners[_topLeftCornerIndex].dx + (corners[_topRightCornerIndex].dx - corners[_topLeftCornerIndex].dx) * u;
+  final double topY =
+      corners[_topLeftCornerIndex].dy + (corners[_topRightCornerIndex].dy - corners[_topLeftCornerIndex].dy) * u;
+  final double bottomX =
+      corners[_bottomLeftCornerIndex].dx +
+      (corners[_bottomRightCornerIndex].dx - corners[_bottomLeftCornerIndex].dx) * u;
+  final double bottomY =
+      corners[_bottomLeftCornerIndex].dy +
+      (corners[_bottomRightCornerIndex].dy - corners[_bottomLeftCornerIndex].dy) * u;
+
+  return Offset(
+    topX + (bottomX - topX) * v,
+    topY + (bottomY - topY) * v,
+  );
+}
+
+/// Blends the four corner points with the four draggable edge midpoints.
+///
+/// This uses a Coons patch so the interior follows the independently dragged
+/// top, right, bottom, and left edge controls instead of collapsing them back
+/// to straight corner-to-corner edges.
+Offset _interpolateCoonsPatch({
+  required final List<Offset> corners,
+  required final List<Offset> edgeMidpoints,
+  required final double u,
+  required final double v,
+}) {
+  final Offset topPoint = _interpolatePiecewiseLinear(
+    start: corners[_topLeftCornerIndex],
+    midpoint: edgeMidpoints[_topEdgeMidpointIndex],
+    end: corners[_topRightCornerIndex],
+    t: u,
+  );
+  final Offset bottomPoint = _interpolatePiecewiseLinear(
+    start: corners[_bottomLeftCornerIndex],
+    midpoint: edgeMidpoints[_bottomEdgeMidpointIndex],
+    end: corners[_bottomRightCornerIndex],
+    t: u,
+  );
+  final Offset leftPoint = _interpolatePiecewiseLinear(
+    start: corners[_topLeftCornerIndex],
+    midpoint: edgeMidpoints[_leftEdgeMidpointIndex],
+    end: corners[_bottomLeftCornerIndex],
+    t: v,
+  );
+  final Offset rightPoint = _interpolatePiecewiseLinear(
+    start: corners[_topRightCornerIndex],
+    midpoint: edgeMidpoints[_rightEdgeMidpointIndex],
+    end: corners[_bottomRightCornerIndex],
+    t: v,
+  );
+
+  final Offset blendedBoundary = (topPoint * (1 - v)) + (bottomPoint * v) + (leftPoint * (1 - u)) + (rightPoint * u);
+  final Offset bilinearCorners =
+      (corners[_topLeftCornerIndex] * ((1 - u) * (1 - v))) +
+      (corners[_topRightCornerIndex] * (u * (1 - v))) +
+      (corners[_bottomLeftCornerIndex] * ((1 - u) * v)) +
+      (corners[_bottomRightCornerIndex] * (u * v));
+
+  return blendedBoundary - bilinearCorners;
+}
+
+/// Interpolates along one boundary segment split into start-midpoint-end spans.
+Offset _interpolatePiecewiseLinear({
+  required final Offset start,
+  required final Offset midpoint,
+  required final Offset end,
+  required final double t,
+}) {
+  if (t <= AppVisual.half) {
+    return Offset.lerp(start, midpoint, t / AppVisual.half)!;
+  }
+  return Offset.lerp(midpoint, end, (t - AppVisual.half) / AppVisual.half)!;
 }
 
 /// Platform channel for macOS trackpad haptic feedback.

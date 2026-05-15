@@ -228,6 +228,7 @@ extension AppProviderSelection on AppProvider {
       sourceImage,
       transformModel.corners,
       AppInteraction.transformGridSubdivisions,
+      edgeMidpoints: transformModel.edgeMidpoints,
     );
 
     final Path erasePath = Path.from(selectorModel.path1!);

@@ -273,6 +273,13 @@ const int _houseShadowWandTolerance = 75;
 const double _houseHeight = 200.0;
 const double _houseShadowGroundOffset = 100.0;
 const double _houseShadowTopHandleDelta = _houseHeight + _houseShadowGroundOffset;
+const double _houseShadowTopLeftHandleXDelta = 20.0;
+const double _houseShadowTopRightHandleXDelta = 30.0;
+const double _houseShadowTopEdgeHandleXDelta =
+    (_houseShadowTopLeftHandleXDelta + _houseShadowTopRightHandleXDelta) / AppMath.pair;
+const double _houseShadowLeftEdgeHandleXDelta = _houseShadowTopLeftHandleXDelta / AppMath.pair;
+const double _houseShadowRightEdgeHandleXDelta = _houseShadowTopRightHandleXDelta / AppMath.pair;
+const double _houseShadowSideEdgeHandleYDelta = _houseShadowTopHandleDelta / AppMath.pair;
 final Offset _houseShadowWandTapOffset = Offset(
   (_houseBodyStart.dx + _houseBodyEnd.dx) / AppMath.pair,
   (_houseBodyStart.dy + _houseBodyEnd.dy) / AppMath.pair,
