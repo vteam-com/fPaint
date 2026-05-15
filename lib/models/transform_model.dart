@@ -39,6 +39,9 @@ class TransformModel extends VisibleModel {
   /// The active interaction mode for the transform overlay.
   TransformInteractionMode interactionMode = TransformInteractionMode.deform;
 
+  /// Which deform handles are currently enabled for fine tuning.
+  TransformHandleSet handleSet = TransformHandleSet.corners;
+
   /// The cumulative scale percentage for the active scale drag gesture.
   double activeScalePercent = AppMath.percentScale;
 
@@ -71,6 +74,7 @@ class TransformModel extends VisibleModel {
       bounds.bottomCenter,
       bounds.centerLeft,
     ];
+    handleSet = TransformHandleSet.corners;
     setDeformMode();
     isVisible = true;
   }
@@ -117,14 +121,52 @@ class TransformModel extends VisibleModel {
   /// Whether the overlay is currently in uniform scale mode.
   bool get isScaleMode => interactionMode == TransformInteractionMode.scale;
 
+  /// Whether the corner handles are currently enabled.
+  bool get areCornerHandlesEnabled => handleSet == TransformHandleSet.corners || handleSet == TransformHandleSet.all;
+
+  /// Whether the edge midpoint handles are currently enabled.
+  bool get areEdgeHandlesEnabled => handleSet == TransformHandleSet.edges || handleSet == TransformHandleSet.all;
+
+  /// Whether the center move handle is currently enabled.
+  bool get isCenterHandleEnabled => handleSet == TransformHandleSet.all;
+
+  /// The edge midpoint controls currently applied to the warp mesh.
+  List<Offset> get effectiveEdgeMidpoints {
+    if (corners.length != cornerCount) {
+      return List<Offset>.from(edgeMidpoints);
+    }
+    if (areEdgeHandlesEnabled && edgeMidpoints.length == edgeHandleCount) {
+      return List<Offset>.from(edgeMidpoints);
+    }
+    return <Offset>[
+      _straightEdgeMidpoint(topLeftIndex, topRightIndex),
+      _straightEdgeMidpoint(topRightIndex, bottomRightIndex),
+      _straightEdgeMidpoint(bottomRightIndex, bottomLeftIndex),
+      _straightEdgeMidpoint(bottomLeftIndex, topLeftIndex),
+    ];
+  }
+
   /// Whether a live feedback bubble should be shown.
   bool get isFeedbackVisible => isScaleFeedbackVisible || isRotationFeedbackVisible;
 
-  /// Sets deform mode and clears any transient scale feedback.
+  /// Sets deform mode, resets to corner handles, and clears transient feedback.
   void setDeformMode() {
+    handleSet = TransformHandleSet.corners;
     interactionMode = TransformInteractionMode.deform;
     endScaleGesture();
     endRotateGesture();
+  }
+
+  /// Cycles the enabled transform handles from corners, to edges, to all controls.
+  void cycleHandleSet() {
+    switch (handleSet) {
+      case TransformHandleSet.corners:
+        handleSet = TransformHandleSet.edges;
+      case TransformHandleSet.edges:
+        handleSet = TransformHandleSet.all;
+      case TransformHandleSet.all:
+        handleSet = TransformHandleSet.corners;
+    }
   }
 
   /// Sets rotate mode and clears any transient scale feedback.
@@ -239,30 +281,29 @@ class TransformModel extends VisibleModel {
   /// Returns the midpoint of an edge between two corners.
   Offset edgeMidpoint(final int index1, final int index2) {
     final int? edgeIndex = _edgeIndexForCorners(index1, index2);
-    if (edgeIndex != null && edgeMidpoints.length == edgeHandleCount) {
-      return edgeMidpoints[edgeIndex];
+    final List<Offset> activeEdgeMidpoints = effectiveEdgeMidpoints;
+    if (edgeIndex != null && activeEdgeMidpoints.length == edgeHandleCount) {
+      return activeEdgeMidpoints[edgeIndex];
     }
-    return Offset(
-      (corners[index1].dx + corners[index2].dx) / AppMath.pair,
-      (corners[index1].dy + corners[index2].dy) / AppMath.pair,
-    );
+    return _straightEdgeMidpoint(index1, index2);
   }
 
   /// Returns the ordered boundary control points for the current mesh.
   List<Offset> get boundaryPoints {
-    if (corners.length != cornerCount || edgeMidpoints.length != edgeHandleCount) {
+    final List<Offset> activeEdgeMidpoints = effectiveEdgeMidpoints;
+    if (corners.length != cornerCount || activeEdgeMidpoints.length != edgeHandleCount) {
       return List<Offset>.from(corners);
     }
 
     return <Offset>[
       corners[topLeftIndex],
-      edgeMidpoints[topEdgeIndex],
+      activeEdgeMidpoints[topEdgeIndex],
       corners[topRightIndex],
-      edgeMidpoints[rightEdgeIndex],
+      activeEdgeMidpoints[rightEdgeIndex],
       corners[bottomRightIndex],
-      edgeMidpoints[bottomEdgeIndex],
+      activeEdgeMidpoints[bottomEdgeIndex],
       corners[bottomLeftIndex],
-      edgeMidpoints[leftEdgeIndex],
+      activeEdgeMidpoints[leftEdgeIndex],
     ];
   }
 
@@ -271,9 +312,10 @@ class TransformModel extends VisibleModel {
     if (corners.isEmpty && edgeMidpoints.isEmpty) {
       return Rect.zero;
     }
+    final List<Offset> activeEdgeMidpoints = effectiveEdgeMidpoints;
     final List<Offset> controlPoints = <Offset>[
       ...corners,
-      ...edgeMidpoints,
+      ...activeEdgeMidpoints,
     ];
     double minX = controlPoints.first.dx;
     double maxX = controlPoints.first.dx;
@@ -317,6 +359,14 @@ class TransformModel extends VisibleModel {
     return null;
   }
 
+  /// Returns the straight midpoint between two corners.
+  Offset _straightEdgeMidpoint(final int index1, final int index2) {
+    return Offset(
+      (corners[index1].dx + corners[index2].dx) / AppMath.pair,
+      (corners[index1].dy + corners[index2].dy) / AppMath.pair,
+    );
+  }
+
   /// Maps an edge midpoint index onto the two corner indices it connects.
   (int, int)? _cornerIndicesForEdge(final int edgeIndex) {
     switch (edgeIndex) {
@@ -338,10 +388,18 @@ class TransformModel extends VisibleModel {
     super.clear();
     sourceImage = null;
     sourceBounds = Rect.zero;
+    handleSet = TransformHandleSet.corners;
     setDeformMode();
     corners.clear();
     edgeMidpoints.clear();
   }
+}
+
+/// Which deform handles are active in the transform overlay.
+enum TransformHandleSet {
+  corners,
+  edges,
+  all,
 }
 
 /// Interaction modes available in the transform overlay.

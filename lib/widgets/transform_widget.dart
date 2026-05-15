@@ -129,8 +129,14 @@ class _TransformWidgetState extends State<TransformWidget> {
 
     // Convert corners to screen space
     final List<Offset> screenCorners = model.corners.map((final Offset c) => _toScreen(c)).toList();
-    final List<Offset> screenEdgeMidpoints = model.edgeMidpoints.map((final Offset c) => _toScreen(c)).toList();
+    final List<Offset> screenEdgeMidpoints = model.effectiveEdgeMidpoints
+        .map((final Offset c) => _toScreen(c))
+        .toList();
     final List<Offset> screenBoundaryPoints = model.boundaryPoints.map((final Offset c) => _toScreen(c)).toList();
+    final bool areCornerHandlesEnabled = model.areCornerHandlesEnabled;
+    final bool areEdgeHandlesEnabled = model.areEdgeHandlesEnabled;
+    final bool areEdgeDragZonesEnabled = areCornerHandlesEnabled || areEdgeHandlesEnabled;
+    final bool isCenterHandleEnabled = model.isCenterHandleEnabled;
 
     final Offset screenCenter = _toScreen(model.center);
 
@@ -163,88 +169,94 @@ class _TransformWidgetState extends State<TransformWidget> {
           ),
 
           if (model.isDeformMode) ...<Widget>[
-            ..._buildEdgeDragZones(
-              screenCorners: screenCorners,
-              screenEdgeMidpoints: screenEdgeMidpoints,
-            ),
+            if (areEdgeDragZonesEnabled)
+              ..._buildEdgeDragZones(
+                screenCorners: screenCorners,
+                screenEdgeMidpoints: screenEdgeMidpoints,
+              ),
 
-            // Corner handles (perspective)
-            OverlayDragHandle(
-              position: screenCorners[TransformModel.topLeftIndex],
-              cursor: SystemMouseCursors.grab,
-              onPanUpdate: (final DragUpdateDetails details) {
-                model.moveCorner(TransformModel.topLeftIndex, details.delta / canvasScale);
-                onChanged();
-              },
-            ),
-            OverlayDragHandle(
-              position: screenCorners[TransformModel.topRightIndex],
-              cursor: SystemMouseCursors.grab,
-              onPanUpdate: (final DragUpdateDetails details) {
-                model.moveCorner(TransformModel.topRightIndex, details.delta / canvasScale);
-                onChanged();
-              },
-            ),
-            OverlayDragHandle(
-              position: screenCorners[TransformModel.bottomRightIndex],
-              cursor: SystemMouseCursors.grab,
-              onPanUpdate: (final DragUpdateDetails details) {
-                model.moveCorner(TransformModel.bottomRightIndex, details.delta / canvasScale);
-                onChanged();
-              },
-            ),
-            OverlayDragHandle(
-              position: screenCorners[TransformModel.bottomLeftIndex],
-              cursor: SystemMouseCursors.grab,
-              onPanUpdate: (final DragUpdateDetails details) {
-                model.moveCorner(TransformModel.bottomLeftIndex, details.delta / canvasScale);
-                onChanged();
-              },
-            ),
+            if (areCornerHandlesEnabled) ...<Widget>[
+              // Corner handles (perspective)
+              OverlayDragHandle(
+                position: screenCorners[TransformModel.topLeftIndex],
+                cursor: SystemMouseCursors.grab,
+                onPanUpdate: (final DragUpdateDetails details) {
+                  model.moveCorner(TransformModel.topLeftIndex, details.delta / canvasScale);
+                  onChanged();
+                },
+              ),
+              OverlayDragHandle(
+                position: screenCorners[TransformModel.topRightIndex],
+                cursor: SystemMouseCursors.grab,
+                onPanUpdate: (final DragUpdateDetails details) {
+                  model.moveCorner(TransformModel.topRightIndex, details.delta / canvasScale);
+                  onChanged();
+                },
+              ),
+              OverlayDragHandle(
+                position: screenCorners[TransformModel.bottomRightIndex],
+                cursor: SystemMouseCursors.grab,
+                onPanUpdate: (final DragUpdateDetails details) {
+                  model.moveCorner(TransformModel.bottomRightIndex, details.delta / canvasScale);
+                  onChanged();
+                },
+              ),
+              OverlayDragHandle(
+                position: screenCorners[TransformModel.bottomLeftIndex],
+                cursor: SystemMouseCursors.grab,
+                onPanUpdate: (final DragUpdateDetails details) {
+                  model.moveCorner(TransformModel.bottomLeftIndex, details.delta / canvasScale);
+                  onChanged();
+                },
+              ),
+            ],
 
-            // Edge midpoint handles (skew)
-            OverlayDragHandle(
-              position: topMid,
-              cursor: SystemMouseCursors.grab,
-              onPanUpdate: (final DragUpdateDetails details) {
-                model.moveEdgeHandle(TransformModel.topEdgeIndex, details.delta / canvasScale);
-                onChanged();
-              },
-            ),
-            OverlayDragHandle(
-              position: rightMid,
-              cursor: SystemMouseCursors.grab,
-              onPanUpdate: (final DragUpdateDetails details) {
-                model.moveEdgeHandle(TransformModel.rightEdgeIndex, details.delta / canvasScale);
-                onChanged();
-              },
-            ),
-            OverlayDragHandle(
-              position: bottomMid,
-              cursor: SystemMouseCursors.grab,
-              onPanUpdate: (final DragUpdateDetails details) {
-                model.moveEdgeHandle(TransformModel.bottomEdgeIndex, details.delta / canvasScale);
-                onChanged();
-              },
-            ),
-            OverlayDragHandle(
-              position: leftMid,
-              cursor: SystemMouseCursors.grab,
-              onPanUpdate: (final DragUpdateDetails details) {
-                model.moveEdgeHandle(TransformModel.leftEdgeIndex, details.delta / canvasScale);
-                onChanged();
-              },
-            ),
+            if (areEdgeHandlesEnabled) ...<Widget>[
+              // Edge midpoint handles (skew)
+              OverlayDragHandle(
+                position: topMid,
+                cursor: SystemMouseCursors.grab,
+                onPanUpdate: (final DragUpdateDetails details) {
+                  model.moveEdgeHandle(TransformModel.topEdgeIndex, details.delta / canvasScale);
+                  onChanged();
+                },
+              ),
+              OverlayDragHandle(
+                position: rightMid,
+                cursor: SystemMouseCursors.grab,
+                onPanUpdate: (final DragUpdateDetails details) {
+                  model.moveEdgeHandle(TransformModel.rightEdgeIndex, details.delta / canvasScale);
+                  onChanged();
+                },
+              ),
+              OverlayDragHandle(
+                position: bottomMid,
+                cursor: SystemMouseCursors.grab,
+                onPanUpdate: (final DragUpdateDetails details) {
+                  model.moveEdgeHandle(TransformModel.bottomEdgeIndex, details.delta / canvasScale);
+                  onChanged();
+                },
+              ),
+              OverlayDragHandle(
+                position: leftMid,
+                cursor: SystemMouseCursors.grab,
+                onPanUpdate: (final DragUpdateDetails details) {
+                  model.moveEdgeHandle(TransformModel.leftEdgeIndex, details.delta / canvasScale);
+                  onChanged();
+                },
+              ),
+            ],
 
-            // Center handle (move)
-            OverlayDragHandle(
-              position: screenCenter,
-              cursor: SystemMouseCursors.move,
-              onPanUpdate: (final DragUpdateDetails details) {
-                model.moveAll(details.delta / canvasScale);
-                onChanged();
-              },
-            ),
+            if (isCenterHandleEnabled)
+              // Center handle (move)
+              OverlayDragHandle(
+                position: screenCenter,
+                cursor: SystemMouseCursors.move,
+                onPanUpdate: (final DragUpdateDetails details) {
+                  model.moveAll(details.delta / canvasScale);
+                  onChanged();
+                },
+              ),
           ],
 
           _buildModeControls(
@@ -483,8 +495,10 @@ class _TransformWidgetState extends State<TransformWidget> {
                 onTap: () {
                   if (!model.isDeformMode) {
                     model.setDeformMode();
-                    onChanged();
+                  } else {
+                    model.cycleHandleSet();
                   }
+                  onChanged();
                 },
                 child: const AppSvgIcon(icon: AppIcon.transform),
               ),

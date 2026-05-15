@@ -58,6 +58,69 @@ void main() {
       expect(model.edgeMidpoints[TransformModel.rightEdgeIndex], bounds.centerRight);
       expect(model.edgeMidpoints[TransformModel.bottomEdgeIndex], bounds.bottomCenter);
       expect(model.edgeMidpoints[TransformModel.leftEdgeIndex], bounds.centerLeft);
+      expect(model.handleSet, TransformHandleSet.corners);
+      expect(model.areCornerHandlesEnabled, isTrue);
+      expect(model.areEdgeHandlesEnabled, isFalse);
+      expect(model.isCenterHandleEnabled, isFalse);
+    });
+
+    test('cycleHandleSet rotates corners, edges, and all handles', () {
+      final TransformModel model = TransformModel();
+
+      expect(model.handleSet, TransformHandleSet.corners);
+
+      model.cycleHandleSet();
+      expect(model.handleSet, TransformHandleSet.edges);
+      expect(model.areCornerHandlesEnabled, isFalse);
+      expect(model.areEdgeHandlesEnabled, isTrue);
+      expect(model.isCenterHandleEnabled, isFalse);
+
+      model.cycleHandleSet();
+      expect(model.handleSet, TransformHandleSet.all);
+      expect(model.areCornerHandlesEnabled, isTrue);
+      expect(model.areEdgeHandlesEnabled, isTrue);
+      expect(model.isCenterHandleEnabled, isTrue);
+
+      model.cycleHandleSet();
+      expect(model.handleSet, TransformHandleSet.corners);
+      expect(model.areCornerHandlesEnabled, isTrue);
+      expect(model.areEdgeHandlesEnabled, isFalse);
+      expect(model.isCenterHandleEnabled, isFalse);
+    });
+
+    test('setDeformMode resets the default handle set to corners', () {
+      final TransformModel model = TransformModel();
+
+      model.cycleHandleSet();
+      model.cycleHandleSet();
+      expect(model.handleSet, TransformHandleSet.all);
+
+      model.setRotateMode();
+      model.setDeformMode();
+
+      expect(model.isDeformMode, isTrue);
+      expect(model.handleSet, TransformHandleSet.corners);
+      expect(model.areCornerHandlesEnabled, isTrue);
+      expect(model.areEdgeHandlesEnabled, isFalse);
+      expect(model.isCenterHandleEnabled, isFalse);
+    });
+
+    test('disabled edge handles do not affect the active warp controls', () async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      const Rect bounds = Rect.fromLTWH(10, 20, 100, 50);
+      model.start(image: image, bounds: bounds);
+
+      model.moveEdgeHandle(TransformModel.bottomEdgeIndex, const Offset(0, 30));
+
+      expect(model.edgeMidpoints[TransformModel.bottomEdgeIndex], const Offset(60, 100));
+      expect(model.effectiveEdgeMidpoints[TransformModel.bottomEdgeIndex], const Offset(60, 70));
+      expect(model.quadBounds.bottom, 70);
+
+      model.cycleHandleSet();
+
+      expect(model.effectiveEdgeMidpoints[TransformModel.bottomEdgeIndex], const Offset(60, 100));
+      expect(model.quadBounds.bottom, 100);
     });
 
     test('moveCorner moves a single corner', () async {
@@ -180,13 +243,14 @@ void main() {
       expect(quad.bottom, 70); // bottomRight.dy = 70
     });
 
-    test('quadBounds includes edge midpoint controls', () async {
+    test('quadBounds includes edge midpoint controls when edge handles are enabled', () async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
       const Rect bounds = Rect.fromLTWH(10, 20, 100, 50);
       model.start(image: image, bounds: bounds);
 
       model.moveEdgeHandle(TransformModel.bottomEdgeIndex, const Offset(0, 30));
+      model.cycleHandleSet();
 
       final Rect quad = model.quadBounds;
       expect(quad.left, 10);
