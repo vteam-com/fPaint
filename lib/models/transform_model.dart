@@ -15,6 +15,13 @@ class TransformModel extends VisibleModel {
   static const int bottomLeftIndex = 3;
   static const int cornerCount = 4;
 
+  /// Index constants for independently draggable edge midpoint handles.
+  static const int topEdgeIndex = 0;
+  static const int rightEdgeIndex = 1;
+  static const int bottomEdgeIndex = 2;
+  static const int leftEdgeIndex = 3;
+  static const int edgeHandleCount = 4;
+
   /// The captured source image from the selection.
   ui.Image? sourceImage;
 
@@ -25,8 +32,15 @@ class TransformModel extends VisibleModel {
   /// Order: topLeft, topRight, bottomRight, bottomLeft.
   List<Offset> corners = <Offset>[];
 
+  /// The 4 independently draggable edge midpoint control points.
+  /// Order: top, right, bottom, left.
+  List<Offset> edgeMidpoints = <Offset>[];
+
   /// The active interaction mode for the transform overlay.
   TransformInteractionMode interactionMode = TransformInteractionMode.deform;
+
+  /// Which deform handles are currently enabled for fine tuning.
+  TransformHandleSet handleSet = TransformHandleSet.corners;
 
   /// The cumulative scale percentage for the active scale drag gesture.
   double activeScalePercent = AppMath.percentScale;
@@ -54,6 +68,13 @@ class TransformModel extends VisibleModel {
       bounds.bottomRight,
       bounds.bottomLeft,
     ];
+    edgeMidpoints = <Offset>[
+      bounds.topCenter,
+      bounds.centerRight,
+      bounds.bottomCenter,
+      bounds.centerLeft,
+    ];
+    handleSet = TransformHandleSet.corners;
     setDeformMode();
     isVisible = true;
   }
@@ -63,16 +84,31 @@ class TransformModel extends VisibleModel {
     corners[index] = corners[index] + delta;
   }
 
-  /// Moves two corners on an edge by [delta] in canvas coordinates.
-  void moveEdge(final int index1, final int index2, final Offset delta) {
-    corners[index1] = corners[index1] + delta;
-    corners[index2] = corners[index2] + delta;
+  /// Moves one edge midpoint control handle by [delta] in canvas coordinates.
+  void moveEdgeHandle(final int index, final Offset delta) {
+    edgeMidpoints[index] = edgeMidpoints[index] + delta;
+  }
+
+  /// Moves an entire edge by [delta], keeping its two corners and midpoint in sync.
+  void moveConnectedEdge(final int index, final Offset delta) {
+    final (int, int)? cornerIndices = _cornerIndicesForEdge(index);
+    if (cornerIndices == null || index < 0 || index >= edgeMidpoints.length) {
+      return;
+    }
+
+    final (int firstCornerIndex, int secondCornerIndex) = cornerIndices;
+    corners[firstCornerIndex] = corners[firstCornerIndex] + delta;
+    corners[secondCornerIndex] = corners[secondCornerIndex] + delta;
+    edgeMidpoints[index] = edgeMidpoints[index] + delta;
   }
 
   /// Moves all corners by [delta] in canvas coordinates (translate).
   void moveAll(final Offset delta) {
     for (int i = 0; i < corners.length; i++) {
       corners[i] = corners[i] + delta;
+    }
+    for (int i = 0; i < edgeMidpoints.length; i++) {
+      edgeMidpoints[i] = edgeMidpoints[i] + delta;
     }
   }
 
@@ -85,14 +121,52 @@ class TransformModel extends VisibleModel {
   /// Whether the overlay is currently in uniform scale mode.
   bool get isScaleMode => interactionMode == TransformInteractionMode.scale;
 
+  /// Whether the corner handles are currently enabled.
+  bool get areCornerHandlesEnabled => handleSet == TransformHandleSet.corners || handleSet == TransformHandleSet.all;
+
+  /// Whether the edge midpoint handles are currently enabled.
+  bool get areEdgeHandlesEnabled => handleSet == TransformHandleSet.edges || handleSet == TransformHandleSet.all;
+
+  /// Whether the center move handle is currently enabled.
+  bool get isCenterHandleEnabled => handleSet == TransformHandleSet.all;
+
+  /// The edge midpoint controls currently applied to the warp mesh.
+  List<Offset> get effectiveEdgeMidpoints {
+    if (corners.length != cornerCount) {
+      return List<Offset>.from(edgeMidpoints);
+    }
+    if (areEdgeHandlesEnabled && edgeMidpoints.length == edgeHandleCount) {
+      return List<Offset>.from(edgeMidpoints);
+    }
+    return <Offset>[
+      _straightEdgeMidpoint(topLeftIndex, topRightIndex),
+      _straightEdgeMidpoint(topRightIndex, bottomRightIndex),
+      _straightEdgeMidpoint(bottomRightIndex, bottomLeftIndex),
+      _straightEdgeMidpoint(bottomLeftIndex, topLeftIndex),
+    ];
+  }
+
   /// Whether a live feedback bubble should be shown.
   bool get isFeedbackVisible => isScaleFeedbackVisible || isRotationFeedbackVisible;
 
-  /// Sets deform mode and clears any transient scale feedback.
+  /// Sets deform mode, resets to corner handles, and clears transient feedback.
   void setDeformMode() {
+    handleSet = TransformHandleSet.corners;
     interactionMode = TransformInteractionMode.deform;
     endScaleGesture();
     endRotateGesture();
+  }
+
+  /// Cycles the enabled transform handles from corners, to edges, to all controls.
+  void cycleHandleSet() {
+    switch (handleSet) {
+      case TransformHandleSet.corners:
+        handleSet = TransformHandleSet.edges;
+      case TransformHandleSet.edges:
+        handleSet = TransformHandleSet.all;
+      case TransformHandleSet.all:
+        handleSet = TransformHandleSet.corners;
+    }
   }
 
   /// Sets rotate mode and clears any transient scale feedback.
@@ -156,6 +230,10 @@ class TransformModel extends VisibleModel {
       final Offset vector = corner - scaleCenter;
       return scaleCenter + (vector * clampedFactor);
     }).toList();
+    edgeMidpoints = edgeMidpoints.map((final Offset midpoint) {
+      final Offset vector = midpoint - scaleCenter;
+      return scaleCenter + (vector * clampedFactor);
+    }).toList();
 
     final double previousPercent = activeScalePercent;
     activeScalePercent *= clampedFactor;
@@ -170,6 +248,13 @@ class TransformModel extends VisibleModel {
 
     corners = corners.map((final Offset corner) {
       final Offset vector = corner - rotationCenter;
+      return Offset(
+        rotationCenter.dx + (vector.dx * cosine) - (vector.dy * sine),
+        rotationCenter.dy + (vector.dx * sine) + (vector.dy * cosine),
+      );
+    }).toList();
+    edgeMidpoints = edgeMidpoints.map((final Offset midpoint) {
+      final Offset vector = midpoint - rotationCenter;
       return Offset(
         rotationCenter.dx + (vector.dx * cosine) - (vector.dy * sine),
         rotationCenter.dy + (vector.dx * sine) + (vector.dy * cosine),
@@ -195,36 +280,107 @@ class TransformModel extends VisibleModel {
 
   /// Returns the midpoint of an edge between two corners.
   Offset edgeMidpoint(final int index1, final int index2) {
+    final int? edgeIndex = _edgeIndexForCorners(index1, index2);
+    final List<Offset> activeEdgeMidpoints = effectiveEdgeMidpoints;
+    if (edgeIndex != null && activeEdgeMidpoints.length == edgeHandleCount) {
+      return activeEdgeMidpoints[edgeIndex];
+    }
+    return _straightEdgeMidpoint(index1, index2);
+  }
+
+  /// Returns the ordered boundary control points for the current mesh.
+  List<Offset> get boundaryPoints {
+    final List<Offset> activeEdgeMidpoints = effectiveEdgeMidpoints;
+    if (corners.length != cornerCount || activeEdgeMidpoints.length != edgeHandleCount) {
+      return List<Offset>.from(corners);
+    }
+
+    return <Offset>[
+      corners[topLeftIndex],
+      activeEdgeMidpoints[topEdgeIndex],
+      corners[topRightIndex],
+      activeEdgeMidpoints[rightEdgeIndex],
+      corners[bottomRightIndex],
+      activeEdgeMidpoints[bottomEdgeIndex],
+      corners[bottomLeftIndex],
+      activeEdgeMidpoints[leftEdgeIndex],
+    ];
+  }
+
+  /// Returns the bounding rect of the quad in canvas coordinates.
+  Rect get quadBounds {
+    if (corners.isEmpty && edgeMidpoints.isEmpty) {
+      return Rect.zero;
+    }
+    final List<Offset> activeEdgeMidpoints = effectiveEdgeMidpoints;
+    final List<Offset> controlPoints = <Offset>[
+      ...corners,
+      ...activeEdgeMidpoints,
+    ];
+    double minX = controlPoints.first.dx;
+    double maxX = controlPoints.first.dx;
+    double minY = controlPoints.first.dy;
+    double maxY = controlPoints.first.dy;
+    for (final Offset point in controlPoints) {
+      if (point.dx < minX) {
+        minX = point.dx;
+      }
+      if (point.dx > maxX) {
+        maxX = point.dx;
+      }
+      if (point.dy < minY) {
+        minY = point.dy;
+      }
+      if (point.dy > maxY) {
+        maxY = point.dy;
+      }
+    }
+    return Rect.fromLTRB(minX, minY, maxX, maxY);
+  }
+
+  /// Maps a corner-pair edge query onto the stored edge midpoint index.
+  int? _edgeIndexForCorners(final int index1, final int index2) {
+    final Set<int> indices = <int>{index1, index2};
+    if (indices.length != AppMath.pair) {
+      return null;
+    }
+    if (indices.contains(topLeftIndex) && indices.contains(topRightIndex)) {
+      return topEdgeIndex;
+    }
+    if (indices.contains(topRightIndex) && indices.contains(bottomRightIndex)) {
+      return rightEdgeIndex;
+    }
+    if (indices.contains(bottomRightIndex) && indices.contains(bottomLeftIndex)) {
+      return bottomEdgeIndex;
+    }
+    if (indices.contains(bottomLeftIndex) && indices.contains(topLeftIndex)) {
+      return leftEdgeIndex;
+    }
+    return null;
+  }
+
+  /// Returns the straight midpoint between two corners.
+  Offset _straightEdgeMidpoint(final int index1, final int index2) {
     return Offset(
       (corners[index1].dx + corners[index2].dx) / AppMath.pair,
       (corners[index1].dy + corners[index2].dy) / AppMath.pair,
     );
   }
 
-  /// Returns the bounding rect of the quad in canvas coordinates.
-  Rect get quadBounds {
-    if (corners.isEmpty) {
-      return Rect.zero;
+  /// Maps an edge midpoint index onto the two corner indices it connects.
+  (int, int)? _cornerIndicesForEdge(final int edgeIndex) {
+    switch (edgeIndex) {
+      case topEdgeIndex:
+        return (topLeftIndex, topRightIndex);
+      case rightEdgeIndex:
+        return (topRightIndex, bottomRightIndex);
+      case bottomEdgeIndex:
+        return (bottomRightIndex, bottomLeftIndex);
+      case leftEdgeIndex:
+        return (bottomLeftIndex, topLeftIndex);
+      default:
+        return null;
     }
-    double minX = corners[0].dx;
-    double maxX = corners[0].dx;
-    double minY = corners[0].dy;
-    double maxY = corners[0].dy;
-    for (final Offset corner in corners) {
-      if (corner.dx < minX) {
-        minX = corner.dx;
-      }
-      if (corner.dx > maxX) {
-        maxX = corner.dx;
-      }
-      if (corner.dy < minY) {
-        minY = corner.dy;
-      }
-      if (corner.dy > maxY) {
-        maxY = corner.dy;
-      }
-    }
-    return Rect.fromLTRB(minX, minY, maxX, maxY);
   }
 
   @override
@@ -232,9 +388,18 @@ class TransformModel extends VisibleModel {
     super.clear();
     sourceImage = null;
     sourceBounds = Rect.zero;
+    handleSet = TransformHandleSet.corners;
     setDeformMode();
     corners.clear();
+    edgeMidpoints.clear();
   }
+}
+
+/// Which deform handles are active in the transform overlay.
+enum TransformHandleSet {
+  corners,
+  edges,
+  all,
 }
 
 /// Interaction modes available in the transform overlay.

@@ -6,10 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/macos_bookmark_service.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
@@ -70,12 +73,25 @@ class _ImportDialogState extends State<ImportDialog> {
               for (final String path in recentFiles)
                 _RecentFileEntry(
                   path: path,
+                  bookmark: prefs.getBookmark(path),
                   onTap: () {
+                    final String? bookmark = prefs.getBookmark(path);
                     Navigator.pop(context);
                     if (_addAsLayer) {
-                      _addRecentAsLayer(widget.parentContext, path);
+                      _addRecentAsLayer(widget.parentContext, path, bookmark);
                     } else {
-                      _openRecentFile(widget.parentContext, path);
+                      _openRecentFile(widget.parentContext, path, bookmark);
+                    }
+                  },
+                  onDiscard: () async {
+                    try {
+                      await AppPreferences.of(widget.parentContext).removeRecentFile(path);
+                      if (mounted) {
+                        setState(() {});
+                      }
+                    } catch (e) {
+                      // Silently fail if unable to remove the file
+                      debugPrint('Failed to remove recent file: $e');
                     }
                   },
                 ),
@@ -127,6 +143,7 @@ Future<void> _browseAndAddAsLayer(final BuildContext context) async {
 Future<void> _openRecentFile(
   final BuildContext context,
   final String path,
+  final String? bookmark,
 ) async {
   final LayersProvider layers = LayersProvider.of(context);
   final ShellProvider shellProvider = ShellProvider.of(context);
@@ -135,23 +152,18 @@ Future<void> _openRecentFile(
     return;
   }
 
-  if (!File(path).existsSync()) {
-    if (context.mounted) {
-      context.showSnackBarMessage(
-        context.l10n.errorReadingFile(path),
-      );
-    }
-    return;
-  }
-
   if (!context.mounted) {
     return;
   }
 
-  final bool success = await openFileFromPath(
-    context: context,
-    layers: layers,
-    path: path,
+  final bool success = await MacOsBookmarkService.withResolvedBookmark(
+    bookmarkBase64: bookmark,
+    fallbackPath: path,
+    action: (final String resolvedPath) => openFileFromPath(
+      context: context,
+      layers: layers,
+      path: resolvedPath,
+    ),
   );
 
   if (success) {
@@ -161,6 +173,8 @@ Future<void> _openRecentFile(
     if (context.mounted) {
       await AppPreferences.of(context).addRecentFile(path);
     }
+  } else if (context.mounted) {
+    context.showSnackBarMessage(context.l10n.errorReadingFile(path));
   }
 }
 
@@ -168,23 +182,19 @@ Future<void> _openRecentFile(
 Future<void> _addRecentAsLayer(
   final BuildContext context,
   final String path,
+  final String? bookmark,
 ) async {
   final LayersProvider layers = LayersProvider.of(context);
-
-  if (!File(path).existsSync()) {
-    if (context.mounted) {
-      context.showSnackBarMessage(
-        context.l10n.errorReadingFile(path),
-      );
-    }
-    return;
-  }
 
   if (!context.mounted) {
     return;
   }
 
-  await addFileAsLayer(context: context, layers: layers, path: path);
+  await MacOsBookmarkService.withResolvedBookmark(
+    bookmarkBase64: bookmark,
+    fallbackPath: path,
+    action: (final String resolvedPath) => addFileAsLayer(context: context, layers: layers, path: resolvedPath),
+  );
   if (context.mounted) {
     await AppPreferences.of(context).addRecentFile(path);
   }
@@ -194,16 +204,20 @@ Future<void> _addRecentAsLayer(
 class _RecentFileEntry extends StatefulWidget {
   const _RecentFileEntry({
     required this.path,
+    required this.bookmark,
     required this.onTap,
+    required this.onDiscard,
   });
+  final String? bookmark;
+  final Future<void> Function() onDiscard;
   final VoidCallback onTap;
   final String path;
-
   @override
   State<_RecentFileEntry> createState() => _RecentFileEntryState();
 }
 
 class _RecentFileEntryState extends State<_RecentFileEntry> {
+  bool _fileExists = true;
   bool _loadFailed = false;
   ui.Image? _thumbnail;
   @override
@@ -215,6 +229,7 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
   @override
   Widget build(final BuildContext context) {
     final String fileName = widget.path.split(Platform.pathSeparator).last;
+    final AppLocalizations l10n = context.l10n;
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -242,6 +257,14 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
                   ],
                 ),
               ),
+
+              AppButtonIcon(
+                tooltip: l10n.delete,
+                icon: AppIcon.playlistRemove,
+                onPressed: () {
+                  widget.onDiscard();
+                },
+              ),
             ],
           ),
         ),
@@ -259,8 +282,30 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
       );
     }
     if (_loadFailed) {
-      return const DecoratedBox(
-        decoration: BoxDecoration(color: AppColors.surface),
+      final AppLocalizations l10n = context.l10n;
+      final String label = _fileExists ? l10n.previewUnavailable : l10n.fileNotFound;
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.divider, width: 1),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              const AppSvgIcon(
+                icon: AppIcon.image,
+                size: AppLayout.recentFileMissingIconSize,
+              ),
+              const SizedBox(height: AppSpacing.small),
+              AppText(
+                label,
+                variant: AppTextVariant.subtitle,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       );
     }
     return const AppProgressIndicator();
@@ -269,26 +314,33 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
   /// Asynchronously decodes the image file and scales it to a thumbnail.
   Future<void> _loadThumbnail() async {
     try {
-      final File file = File(widget.path);
-      if (!file.existsSync()) {
-        if (mounted) {
-          setState(() {
-            _loadFailed = true;
-          });
-        }
-        return;
-      }
-      final Uint8List bytes = await file.readAsBytes();
-      final ui.Codec codec = await ui.instantiateImageCodec(
-        bytes,
-        targetHeight: AppLayout.thumbnailMaxHeight.toInt(),
+      await MacOsBookmarkService.withResolvedBookmark(
+        bookmarkBase64: widget.bookmark,
+        fallbackPath: widget.path,
+        action: (final String resolvedPath) async {
+          final File file = File(resolvedPath);
+          if (!file.existsSync()) {
+            if (mounted) {
+              setState(() {
+                _fileExists = false;
+                _loadFailed = true;
+              });
+            }
+            return;
+          }
+          final Uint8List bytes = await file.readAsBytes();
+          final ui.Codec codec = await ui.instantiateImageCodec(
+            bytes,
+            targetHeight: AppLayout.thumbnailMaxHeight.toInt(),
+          );
+          final ui.FrameInfo frame = await codec.getNextFrame();
+          if (mounted) {
+            setState(() {
+              _thumbnail = frame.image;
+            });
+          }
+        },
       );
-      final ui.FrameInfo frame = await codec.getNextFrame();
-      if (mounted) {
-        setState(() {
-          _thumbnail = frame.image;
-        });
-      }
     } catch (_) {
       if (mounted) {
         setState(() {

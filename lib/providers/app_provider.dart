@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
@@ -165,6 +166,15 @@ class AppProvider extends ChangeNotifier {
     if (value != ActionType.fill) {
       fillModel.clear();
     }
+
+    if (value != ActionType.selector) {
+      wandSelectionRequestVersion += AppMath.one;
+      pendingWandSelectionPosition = null;
+      cachedWandSourceSignature = -AppMath.one;
+      cachedWandSourcePixels = null;
+      cachedWandSourceWidth = AppMath.zero;
+      cachedWandSourceHeight = AppMath.zero;
+    }
     update();
   }
 
@@ -280,6 +290,27 @@ class AppProvider extends ChangeNotifier {
 
   /// Monotonic token that invalidates stale async effect preview renders.
   int effectPreviewRenderVersion = 0;
+
+  /// Monotonic token that invalidates stale async magic-wand computations.
+  int wandSelectionRequestVersion = 0;
+
+  /// Whether a magic-wand computation is currently running.
+  bool isWandSelectionInProgress = false;
+
+  /// Latest pointer position requested for magic-wand selection.
+  Offset? pendingWandSelectionPosition;
+
+  /// Fingerprint of the cached raster bytes used by magic-wand/fill extraction.
+  int cachedWandSourceSignature = -AppMath.one;
+
+  /// Cached rasterized bytes for the active selected layer.
+  Uint8List? cachedWandSourcePixels;
+
+  /// Width of [cachedWandSourcePixels].
+  int cachedWandSourceWidth = AppMath.zero;
+
+  /// Height of [cachedWandSourcePixels].
+  int cachedWandSourceHeight = AppMath.zero;
 
   /// The selected text object.
   TextObject? selectedTextObject;

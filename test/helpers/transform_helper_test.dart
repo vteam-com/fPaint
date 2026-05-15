@@ -79,6 +79,31 @@ void main() {
       expect(result.width, 100);
       expect(result.height, 100);
     });
+
+    test('draws without error when edge midpoint controls bend the mesh', () async {
+      final ui.Image image = await _createTestImage();
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+
+      final List<Offset> corners = <Offset>[
+        Offset.zero,
+        const Offset(100, 0),
+        const Offset(100, 100),
+        const Offset(0, 100),
+      ];
+      final List<Offset> edgeMidpoints = <Offset>[
+        const Offset(50, -20),
+        const Offset(120, 50),
+        const Offset(50, 120),
+        const Offset(-20, 50),
+      ];
+
+      drawPerspectiveImage(canvas, image, corners, 8, edgeMidpoints: edgeMidpoints);
+
+      final ui.Image result = await recorder.endRecording().toImage(140, 140);
+      expect(result.width, 140);
+      expect(result.height, 140);
+    });
   });
 
   group('renderTransformedImage', () {
@@ -115,6 +140,33 @@ void main() {
       // Quad bounds: x[0..140], y[0..100] → 140x100
       expect(result.width, 140);
       expect(result.height, 100);
+    });
+
+    test('includes edge midpoint controls in output bounds', () async {
+      final ui.Image source = await _createTestImage();
+
+      final List<Offset> corners = <Offset>[
+        const Offset(10, 10),
+        const Offset(110, 10),
+        const Offset(110, 110),
+        const Offset(10, 110),
+      ];
+      final List<Offset> edgeMidpoints = <Offset>[
+        const Offset(60, -20),
+        const Offset(140, 60),
+        const Offset(60, 140),
+        const Offset(-20, 60),
+      ];
+
+      final ui.Image result = await renderTransformedImage(
+        source,
+        corners,
+        4,
+        edgeMidpoints: edgeMidpoints,
+      );
+
+      expect(result.width, 160);
+      expect(result.height, 160);
     });
   });
 }

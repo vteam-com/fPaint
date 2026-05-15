@@ -265,6 +265,12 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get fileNotFound => 'Archivo no encontrado';
+
+  @override
+  String get previewUnavailable => 'Vista previa no disponible';
+
+  @override
   String get fillColor => 'Color de relleno';
 
   @override
@@ -295,10 +301,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gradientColors => 'Colores del degradado';
 
   @override
-  String get gradientStopPosition => 'Posición';
+  String get gradientPointColor => 'Color del punto de degradado';
 
   @override
-  String get gradientPointColor => 'Color del punto de degradado';
+  String get gradientStopPosition => 'Posición';
 
   @override
   String get height => 'Alto';
@@ -468,16 +474,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get startOverTooltip => 'Nuevo...';
 
   @override
-  String get textColor => 'Color de texto';
+  String get textAlignCenter => 'Centro';
 
   @override
   String get textAlignLeft => 'Izquierda';
 
   @override
-  String get textAlignCenter => 'Centro';
+  String get textAlignRight => 'Derecha';
 
   @override
-  String get textAlignRight => 'Derecha';
+  String get textColor => 'Color de texto';
 
   @override
   String get tolerance => 'Tolerancia';

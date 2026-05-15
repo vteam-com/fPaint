@@ -2,6 +2,17 @@
 
 ## Coding Rules
 
+- Use `const` for all compile-time constants and whenever possible for objects, collections, and constructors.
+- Always use explicit, strong type annotations for variables, parameters, and return types. Avoid `var` and `dynamic` unless strictly necessary.
+
+- Apply the DRY principle (Don't Repeat Yourself): Avoid code duplication by extracting reusable logic into functions, classes, or constants.
+- Follow SOLID principles:
+  - Single Responsibility: Each class/module should have one responsibility.
+  - Open/Closed: Code should be open for extension, closed for modification.
+  - Liskov Substitution: Subtypes must be substitutable for their base types.
+  - Interface Segregation: Prefer many small, specific interfaces over large, general ones.
+  - Dependency Inversion: Depend on abstractions, not concretions.
+
 - Never introduce new magic numbers in code.
 - Use named constants in `lib/helpers/constants.dart` (or the most relevant constants file) instead of inline numeric literals.
 - If a numeric literal appears only once, still define a clearly named constant for it when it affects behavior, style, layout, timing, opacity, sizing, or thresholds.

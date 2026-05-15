@@ -159,6 +159,18 @@ The `integration_test/integration_helpers.dart` file provides reusable helper fu
 
 ## Contributing
 
+### Code Principles: DRY & SOLID
+
+We follow the **DRY** (Don't Repeat Yourself) principle—avoid code duplication by extracting reusable logic into functions, classes, or constants.
+
+We also adhere to the **SOLID** principles:
+
+- Single Responsibility: Each class/module should have one responsibility.
+- Open/Closed: Code should be open for extension, closed for modification.
+- Liskov Substitution: Subtypes must be substitutable for their base types.
+- Interface Segregation: Prefer many small, specific interfaces over large, general ones.
+- Dependency Inversion: Depend on abstractions, not concretions.
+
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details on how to get started.
 
 ## CI/CD Pipeline

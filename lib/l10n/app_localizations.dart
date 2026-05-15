@@ -10,12 +10,6 @@ import 'package:intl/intl.dart' as intl;
 
 // ignore_for_file: type=lint
 
-/// Shared `BuildContext` helpers for localization.
-extension AppLocalizationsBuildContextX on BuildContext {
-  /// Returns the localized strings for this context.
-  AppLocalizations get l10n => AppLocalizations.of(this)!;
-}
-
 /// Callers can lookup localized strings with an instance of AppLocalizations
 /// returned by `AppLocalizations.of(context)`.
 ///
@@ -554,6 +548,18 @@ abstract class AppLocalizations {
   /// **'File format .{extension} is not supported on this platform'**
   String fileFormatNotSupportedOnPlatform(Object extension);
 
+  /// No description provided for @fileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'File not found'**
+  String get fileNotFound;
+
+  /// No description provided for @previewUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview unavailable'**
+  String get previewUnavailable;
+
   /// No description provided for @fillColor.
   ///
   /// In en, this message translates to:
@@ -614,17 +620,17 @@ abstract class AppLocalizations {
   /// **'Gradient Colors'**
   String get gradientColors;
 
-  /// No description provided for @gradientStopPosition.
-  ///
-  /// In en, this message translates to:
-  /// **'Position'**
-  String get gradientStopPosition;
-
   /// No description provided for @gradientPointColor.
   ///
   /// In en, this message translates to:
   /// **'Gradient Point Color'**
   String get gradientPointColor;
+
+  /// No description provided for @gradientStopPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get gradientStopPosition;
 
   /// No description provided for @height.
   ///
@@ -637,24 +643,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hex Color'**
   String get hexColor;
-
-  /// No description provided for @textAlignLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'Left'**
-  String get textAlignLeft;
-
-  /// No description provided for @textAlignCenter.
-  ///
-  /// In en, this message translates to:
-  /// **'Center'**
-  String get textAlignCenter;
-
-  /// No description provided for @textAlignRight.
-  ///
-  /// In en, this message translates to:
-  /// **'Right'**
-  String get textAlignRight;
 
   /// No description provided for @hexColorCopiedToClipboard.
   ///
@@ -962,6 +950,24 @@ abstract class AppLocalizations {
   /// **'Start new...'**
   String get startOverTooltip;
 
+  /// No description provided for @textAlignCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'Center'**
+  String get textAlignCenter;
+
+  /// No description provided for @textAlignLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get textAlignLeft;
+
+  /// No description provided for @textAlignRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Right'**
+  String get textAlignRight;
+
   /// No description provided for @textColor.
   ///
   /// In en, this message translates to:
@@ -1175,4 +1181,14 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
     'that was used.',
   );
+}
+
+/// Extension on [BuildContext] to provide convenient access to
+/// [AppLocalizations] via `context.l10n`.
+///
+/// NOTE: This extension is manually maintained. If you re-run `flutter gen-l10n`,
+/// you must re-add this extension to the bottom of this file.
+extension AppLocalizationsBuildContextX on BuildContext {
+  /// Returns the [AppLocalizations] for this [BuildContext].
+  AppLocalizations get l10n => AppLocalizations.of(this)!;
 }
