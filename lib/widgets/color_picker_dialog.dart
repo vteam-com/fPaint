@@ -74,9 +74,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             ),
             const SizedBox(height: AppSpacing.large),
             _buildContent(layersModel),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: _buildActions(),
+            AppButtonRow(
+              actions: _buildActions(),
             ),
           ],
         ),
@@ -89,11 +88,11 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   List<Widget> _buildActions() {
     final AppLocalizations l10n = context.l10n;
     return <Widget>[
-      AppButtonText(
+      AppRowSecondaryButton(
         onPressed: () => Navigator.of(context).pop(),
         text: l10n.cancel,
       ),
-      AppButtonPrimary(
+      AppRowPrimaryButton(
         onPressed: () {
           widget.onColorChanged(_currentColor);
           Navigator.of(context).pop();

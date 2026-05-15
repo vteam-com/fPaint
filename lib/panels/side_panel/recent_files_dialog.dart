@@ -100,7 +100,7 @@ class _ImportDialogState extends State<ImportDialog> {
         ),
       ),
       actions: <Widget>[
-        AppButtonText(
+        AppRowSecondaryButton(
           onPressed: () => Navigator.pop(context),
           text: l10n.cancel,
         ),

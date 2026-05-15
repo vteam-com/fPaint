@@ -173,24 +173,23 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
             ],
           ),
           const SizedBox(height: AppSpacing.large),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
+          AppButtonRow(
+            actions: <Widget>[
               if (widget.onDelete != null)
-                AppButtonText(
+                AppRowDangerButton(
                   text: l10n.delete,
                   onPressed: () {
                     widget.onDelete!.call();
                     Navigator.of(context).pop();
                   },
                 ),
-              AppButtonText(
+              AppRowSecondaryButton(
                 text: l10n.cancel,
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
-              AppButtonPrimary(
+              AppRowPrimaryButton(
                 text: widget.submitLabel,
                 onPressed: _submitAndClose,
               ),
