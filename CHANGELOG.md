@@ -4,6 +4,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.4] - 2026-05-15
+
+### Added
+
+- Enhance Transform
+  - Toggle mode: Corners, Edges-Centers, All
+  - Edges movement
+
 ## [1.7.3] - 2026-05-14
 
 ### Fix
