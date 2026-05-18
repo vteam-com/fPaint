@@ -6,11 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/macos_bookmark_service.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_canvas.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
@@ -18,7 +21,13 @@ import 'package:fpaint/widgets/material_free.dart';
 
 /// The unified import dialog widget.
 class ImportDialog extends StatefulWidget {
-  const ImportDialog({super.key, required this.parentContext});
+  const ImportDialog({
+    super.key,
+    required this.parentContext,
+    this.clipboardImageLoader,
+  });
+
+  final Future<ui.Image?> Function()? clipboardImageLoader;
 
   /// The context from which the dialog was opened, used for provider access
   /// after the dialog closes.
@@ -30,6 +39,12 @@ class ImportDialog extends StatefulWidget {
 
 class _ImportDialogState extends State<ImportDialog> {
   bool _addAsLayer = false;
+  ui.Image? _clipboardPreview;
+  @override
+  void initState() {
+    super.initState();
+    _loadClipboardPreview();
+  }
 
   @override
   Widget build(final BuildContext context) {
@@ -37,76 +52,188 @@ class _ImportDialogState extends State<ImportDialog> {
     final AppLocalizations l10n = context.l10n;
     final List<String> recentFiles = prefs.recentFiles.take(AppLimits.recentFilesDisplayCount).toList();
 
-    return AppDialog(
-      title: l10n.importLabel,
-      content: SizedBox(
-        width: AppLayout.dialogWidth,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            AppSwitchListTile(
-              title: AppText(l10n.addAsNewLayer),
-              value: _addAsLayer,
-              onChanged: (final bool value) {
-                setState(() {
-                  _addAsLayer = value;
-                });
-              },
-            ),
+    return AppBottomSheetContent(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          AppText(
+            l10n.importLabel,
+            variant: AppTextVariant.title,
+          ),
+          const SizedBox(height: AppSpacing.large),
+          AppSwitchListTile(
+            title: AppText(l10n.addAsNewLayer),
+            value: _addAsLayer,
+            onChanged: (final bool value) {
+              setState(() {
+                _addAsLayer = value;
+              });
+            },
+          ),
+          if (_clipboardPreview != null) ...<Widget>[
             const SizedBox(height: AppSpacing.big),
-            AppButtonPrimary(
-              onPressed: () {
-                Navigator.pop(context);
-                if (_addAsLayer) {
-                  _browseAndAddAsLayer(widget.parentContext);
-                } else {
-                  onFileOpen(widget.parentContext);
-                }
-              },
-              text: l10n.browseFiles,
-            ),
-            if (!kIsWeb && recentFiles.isNotEmpty) ...<Widget>[
-              const SizedBox(height: AppSpacing.large),
-              AppText(l10n.recentFilesLabel, variant: AppTextVariant.subtitle),
-              const SizedBox(height: AppSpacing.small),
-              for (final String path in recentFiles)
-                _RecentFileEntry(
-                  path: path,
-                  bookmark: prefs.getBookmark(path),
-                  onTap: () {
-                    final String? bookmark = prefs.getBookmark(path);
-                    Navigator.pop(context);
-                    if (_addAsLayer) {
-                      _addRecentAsLayer(widget.parentContext, path, bookmark);
-                    } else {
-                      _openRecentFile(widget.parentContext, path, bookmark);
-                    }
-                  },
-                  onDiscard: () async {
-                    try {
-                      await AppPreferences.of(widget.parentContext).removeRecentFile(path);
-                      if (mounted) {
-                        setState(() {});
-                      }
-                    } catch (e) {
-                      // Silently fail if unable to remove the file
-                      debugPrint('Failed to remove recent file: $e');
-                    }
-                  },
-                ),
-            ],
+            _buildClipboardTile(l10n),
           ],
+          if (!kIsWeb && recentFiles.isNotEmpty) ...<Widget>[
+            const SizedBox(height: AppSpacing.large),
+            _buildSectionHeader(l10n.recentFilesLabel),
+            const SizedBox(height: AppSpacing.small),
+            for (final String path in recentFiles)
+              _RecentFileEntry(
+                path: path,
+                bookmark: prefs.getBookmark(path),
+                onTap: () {
+                  final String? bookmark = prefs.getBookmark(path);
+                  Navigator.pop(context);
+                  if (_addAsLayer) {
+                    _addRecentAsLayer(widget.parentContext, path, bookmark);
+                  } else {
+                    _openRecentFile(widget.parentContext, path, bookmark);
+                  }
+                },
+                onDiscard: () async {
+                  try {
+                    await AppPreferences.of(widget.parentContext).removeRecentFile(path);
+                    if (mounted) {
+                      setState(() {});
+                    }
+                  } catch (e) {
+                    // Silently fail if unable to remove the file
+                    debugPrint('Failed to remove recent file: $e');
+                  }
+                },
+              ),
+          ],
+          const SizedBox(height: AppSpacing.large),
+          AppButtonRow(
+            actions: <Widget>[
+              AppRowSecondaryButton(
+                onPressed: () => Navigator.pop(context),
+                text: l10n.cancel,
+              ),
+              AppRowPrimaryButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  if (_addAsLayer) {
+                    _browseAndAddAsLayer(widget.parentContext);
+                  } else {
+                    onFileOpen(widget.parentContext);
+                  }
+                },
+                text: l10n.browseFiles,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds the preview graphic shown inside the clipboard import tile.
+  Widget _buildClipboardPreviewGraphic() {
+    if (_clipboardPreview != null) {
+      return RawImage(
+        image: _clipboardPreview,
+        fit: BoxFit.cover,
+      );
+    }
+
+    return const ColoredBox(
+      color: AppColors.surface,
+      child: Center(
+        child: AppSvgIcon(
+          icon: AppIcon.clipboardPaste,
+          size: AppLayout.recentFileMissingIconSize,
         ),
       ),
-      actions: <Widget>[
-        AppRowSecondaryButton(
-          onPressed: () => Navigator.pop(context),
-          text: l10n.cancel,
+    );
+  }
+
+  /// Builds the clickable clipboard source tile shown when an image is available.
+  Widget _buildClipboardTile(final AppLocalizations l10n) {
+    return GestureDetector(
+      onTap: _handleClipboardImport,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: _buildImportTileSurface(
+          child: Row(
+            children: <Widget>[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.small),
+                child: SizedBox(
+                  width: AppLayout.thumbnailMaxHeight,
+                  height: AppLayout.thumbnailMaxHeight,
+                  child: _buildClipboardPreviewGraphic(),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.large),
+              Expanded(
+                child: AppText(
+                  l10n.fromClipboard,
+                  variant: AppTextVariant.bodyBold,
+                ),
+              ),
+              const AppSvgIcon(
+                icon: AppIcon.clipboardPaste,
+                color: AppColors.textSecondary,
+              ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(final String label) {
+    return Row(
+      children: <Widget>[
+        AppText(label, variant: AppTextVariant.subtitle),
+        const SizedBox(width: AppSpacing.medium),
+        const Expanded(child: AppDivider()),
       ],
     );
   }
+
+  void _handleClipboardImport() {
+    Navigator.pop(context);
+    final AppProvider appProvider = AppProvider.of(widget.parentContext);
+    if (_addAsLayer) {
+      appProvider.paste();
+      return;
+    }
+    appProvider.newDocumentFromClipboardImage();
+  }
+
+  /// Loads the current clipboard image once so the dialog can render a preview.
+  Future<void> _loadClipboardPreview() async {
+    final Future<ui.Image?> Function() clipboardImageLoader = widget.clipboardImageLoader ?? getImageFromClipboard;
+    final ui.Image? clipboardImage = await clipboardImageLoader();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _clipboardPreview = clipboardImage;
+    });
+  }
+}
+
+/// Shared surface styling for the import dialog source tiles and recent rows.
+Widget _buildImportTileSurface({required final Widget child}) {
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      color: AppColors.surfaceVariant,
+      borderRadius: BorderRadius.circular(AppRadius.medium),
+      border: Border.all(
+        color: AppColors.overlayBorder,
+        width: AppStroke.thin,
+      ),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(AppSpacing.medium),
+      child: child,
+    ),
+  );
 }
 
 /// Opens the file picker and adds the selected file as a new layer.
@@ -237,35 +364,35 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
         cursor: SystemMouseCursors.click,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.small),
-          child: Row(
-            children: <Widget>[
-              SizedBox(
-                width: AppLayout.thumbnailMaxHeight,
-                height: AppLayout.thumbnailMaxHeight,
-                child: _buildThumbnail(),
-              ),
-              const SizedBox(width: AppSpacing.medium),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    AppText(fileName),
-                    AppText(
-                      widget.path,
-                      variant: AppTextVariant.subtitle,
-                    ),
-                  ],
+          child: _buildImportTileSurface(
+            child: Row(
+              children: <Widget>[
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.small),
+                  child: SizedBox(
+                    width: AppLayout.thumbnailMaxHeight,
+                    height: AppLayout.thumbnailMaxHeight,
+                    child: _buildThumbnail(),
+                  ),
                 ),
-              ),
-
-              AppButtonIcon(
-                tooltip: l10n.delete,
-                icon: AppIcon.playlistRemove,
-                onPressed: () {
-                  widget.onDiscard();
-                },
-              ),
-            ],
+                const SizedBox(width: AppSpacing.large),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      AppText(fileName),
+                    ],
+                  ),
+                ),
+                AppButtonIcon(
+                  tooltip: l10n.delete,
+                  icon: AppIcon.playlistRemove,
+                  onPressed: () {
+                    widget.onDiscard();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

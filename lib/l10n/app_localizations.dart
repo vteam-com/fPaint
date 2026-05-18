@@ -836,6 +836,12 @@ abstract class AppLocalizations {
   /// **'New Canvas Size'**
   String get newCanvasSize;
 
+  /// No description provided for @fromClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'From Clipboard'**
+  String get fromClipboard;
+
   /// No description provided for @newFromClipboard.
   ///
   /// In en, this message translates to:

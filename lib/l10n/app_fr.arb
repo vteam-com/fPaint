@@ -134,6 +134,7 @@
   "fontColor": "Couleur de police",
   "fontSizeLabel": "Taille de police",
   "fpaintLoadImage": "fPaint Charger une image",
+  "fromClipboard": "Depuis le presse-papiers",
   "githubRepo": "Depot GitHub",
   "gradientColorAdd": "Ajouter une étape de couleur",
   "gradientColorRemove": "Supprimer une étape de couleur",

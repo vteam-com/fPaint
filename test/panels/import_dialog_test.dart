@@ -1,8 +1,12 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 class _FakePreferences extends AppPreferences {
   _FakePreferences(this._recent);
@@ -16,7 +20,10 @@ class _FakePreferences extends AppPreferences {
   List<String> get recentFiles => List<String>.unmodifiable(_recent);
 }
 
-Widget _buildHarness({required final AppPreferences prefs}) {
+Widget _buildHarness({
+  required final AppPreferences prefs,
+  final Future<ui.Image?> Function()? clipboardImageLoader,
+}) {
   return ChangeNotifierProvider<AppPreferences>.value(
     value: prefs,
     child: MaterialApp(
@@ -25,11 +32,50 @@ Widget _buildHarness({required final AppPreferences prefs}) {
       home: Builder(
         builder: (final BuildContext context) {
           return Scaffold(
-            body: ImportDialog(parentContext: context),
+            body: ImportDialog(
+              parentContext: context,
+              clipboardImageLoader: clipboardImageLoader,
+            ),
           );
         },
       ),
     ),
+  );
+}
+
+Future<void> _pumpImportDialog(
+  final WidgetTester tester, {
+  required final AppPreferences prefs,
+  final Future<ui.Image?> Function()? clipboardImageLoader,
+}) async {
+  await tester.pumpWidget(
+    _buildHarness(
+      prefs: prefs,
+      clipboardImageLoader: clipboardImageLoader,
+    ),
+  );
+  await tester.pump();
+  await tester.pump();
+}
+
+Future<ui.Image> _buildClipboardTestImage() {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+  final ui.Paint paint = ui.Paint()..color = const Color(0xFF4CAF50);
+
+  canvas.drawRect(
+    const Rect.fromLTWH(
+      0,
+      0,
+      AppLayout.iconSize,
+      AppLayout.iconSize,
+    ),
+    paint,
+  );
+
+  return recorder.endRecording().toImage(
+    AppLayout.iconSize.toInt(),
+    AppLayout.iconSize.toInt(),
   );
 }
 
@@ -41,23 +87,31 @@ void main() {
         '/tmp/non_existing_image_b.png',
       ]);
 
-      await tester.pumpWidget(_buildHarness(prefs: prefs));
-      await tester.pump();
+      await _pumpImportDialog(
+        tester,
+        prefs: prefs,
+        clipboardImageLoader: () async => null,
+      );
 
       final BuildContext context = tester.element(find.byType(ImportDialog));
       final AppLocalizations l10n = AppLocalizations.of(context)!;
 
+      expect(find.byType(AppBottomSheetContent), findsOneWidget);
       expect(find.text(l10n.browseFiles), findsOneWidget);
       expect(find.text(l10n.recentFilesLabel), findsOneWidget);
       expect(find.text('non_existing_image_a.png'), findsOneWidget);
       expect(find.text('non_existing_image_b.png'), findsOneWidget);
+      expect(find.text(l10n.cancel), findsOneWidget);
     });
 
     testWidgets('shows loading then fallback thumbnail for missing recent file', (final WidgetTester tester) async {
       final AppPreferences prefs = _FakePreferences(<String>['/tmp/non_existing_image_c.png']);
 
-      await tester.pumpWidget(_buildHarness(prefs: prefs));
-      await tester.pump();
+      await _pumpImportDialog(
+        tester,
+        prefs: prefs,
+        clipboardImageLoader: () async => null,
+      );
 
       // After async file check fails, thumbnail should switch away from spinner.
       await tester.pump(const Duration(milliseconds: 50));
@@ -69,8 +123,11 @@ void main() {
     testWidgets('add as layer switch toggles in dialog state', (final WidgetTester tester) async {
       final AppPreferences prefs = _FakePreferences(<String>[]);
 
-      await tester.pumpWidget(_buildHarness(prefs: prefs));
-      await tester.pump();
+      await _pumpImportDialog(
+        tester,
+        prefs: prefs,
+        clipboardImageLoader: () async => null,
+      );
 
       final BuildContext context = tester.element(find.byType(ImportDialog));
       final AppLocalizations l10n = AppLocalizations.of(context)!;
@@ -82,6 +139,22 @@ void main() {
 
       // Label remains present and dialog state updates without errors.
       expect(find.text(l10n.addAsNewLayer), findsOneWidget);
+    });
+
+    testWidgets('shows clipboard tile when an image is available', (final WidgetTester tester) async {
+      final AppPreferences prefs = _FakePreferences(<String>[]);
+      final ui.Image clipboardImage = await _buildClipboardTestImage();
+
+      await _pumpImportDialog(
+        tester,
+        prefs: prefs,
+        clipboardImageLoader: () async => clipboardImage,
+      );
+
+      final BuildContext context = tester.element(find.byType(ImportDialog));
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
+
+      expect(find.text(l10n.fromClipboard), findsOneWidget);
     });
   });
 }
