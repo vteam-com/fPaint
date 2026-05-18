@@ -409,6 +409,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get newCanvasSize => 'Tamano del nuevo lienzo';
 
   @override
+  String get fromClipboard => 'Desde el portapapeles';
+
+  @override
   String get newFromClipboard => 'Nuevo desde el portapapeles';
 
   @override

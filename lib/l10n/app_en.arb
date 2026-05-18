@@ -141,6 +141,7 @@
   "fontColor": "Font Color",
   "fontSizeLabel": "Font Size",
   "fpaintLoadImage": "fPaint Load Image",
+  "fromClipboard": "From Clipboard",
   "githubRepo": "GitHub Repo",
   "gradientColorAdd": "Add color stop",
   "gradientColorRemove": "Remove color stop",

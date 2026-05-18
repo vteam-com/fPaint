@@ -413,6 +413,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get newCanvasSize => 'Nouvelle taille de toile';
 
   @override
+  String get fromClipboard => 'Depuis le presse-papiers';
+
+  @override
   String get newFromClipboard => 'Importé du Presse-papiers';
 
   @override

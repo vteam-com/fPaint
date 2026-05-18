@@ -411,6 +411,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newCanvasSize => 'New Canvas Size';
 
   @override
+  String get fromClipboard => 'From Clipboard';
+
+  @override
   String get newFromClipboard => 'New from Clipboard';
 
   @override

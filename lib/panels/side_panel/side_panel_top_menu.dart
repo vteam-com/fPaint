@@ -38,7 +38,7 @@ class SidePanelTopMenu extends StatelessWidget {
           AppButtonIcon(
             tooltip: l10n.importTooltip,
             icon: AppIcon.fileDownload,
-            onPressed: () => showAppDialog<void>(
+            onPressed: () => showAppBottomSheet<void>(
               context: context,
               builder: (final BuildContext _) {
                 return ImportDialog(parentContext: context);

@@ -98,7 +98,7 @@ void onDropDownMenuSelection(
       onFileNew(context);
       break;
     case MenuIds.openFile:
-      showAppDialog<void>(
+      showAppBottomSheet<void>(
         context: context,
         builder: (final BuildContext _) {
           return ImportDialog(parentContext: context);
