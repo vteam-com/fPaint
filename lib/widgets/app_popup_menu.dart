@@ -2,6 +2,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
+import 'package:fpaint/widgets/app_overlay.dart';
 
 /// A popup menu item replacing Material [PopupMenuItem].
 class AppPopupMenuItem<T> {
@@ -25,87 +26,51 @@ Future<T?> showAppMenu<T>({
   final RenderBox overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
   final Size overlaySize = overlay.size;
 
-  T? selectedValue;
-
-  await showGeneralDialog<void>(
+  return showAppOverlay<T>(
     context: context,
-    barrierDismissible: true,
-    barrierLabel: barrierLabelDismiss,
-    barrierColor: const Color(0x00000000),
-    pageBuilder:
-        (
-          final BuildContext dialogContext,
-          final Animation<double> _,
-          final Animation<double> _,
-        ) {
-          return Stack(
-            children: <Widget>[
-              // Tap anywhere to dismiss.
-              Positioned.fill(
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(dialogContext),
-                  behavior: HitTestBehavior.opaque,
+    barrierColor: AppColors.transparent,
+    builder: (final BuildContext dialogContext) {
+      return Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () => Navigator.pop(dialogContext),
+              behavior: HitTestBehavior.opaque,
+            ),
+          ),
+          Positioned(
+            left: position.left.clamp(0, overlaySize.width - _menuMinWidth),
+            top: position.top.clamp(0, overlaySize.height - _menuItemHeight),
+            child: IntrinsicWidth(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: _menuMinWidth,
+                  maxHeight: overlaySize.height - position.top.clamp(0, overlaySize.height - _menuItemHeight),
                 ),
-              ),
-              Positioned(
-                left: position.left.clamp(0, overlaySize.width - _menuMinWidth),
-                top: position.top.clamp(0, overlaySize.height - _menuItemHeight),
-                child: IntrinsicWidth(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minWidth: _menuMinWidth,
-                      maxHeight: overlaySize.height - position.top.clamp(0, overlaySize.height - _menuItemHeight),
-                    ),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(AppRadius.medium),
-                        border: Border.all(
-                          color: AppColors.overlayBorder,
-                          width: AppStroke.thin,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.small),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: items.map((final AppPopupMenuItem<T> item) {
-                              return GestureDetector(
-                                key: item.key,
-                                onTap: () {
-                                  selectedValue = item.value;
-                                  Navigator.pop(dialogContext);
-                                },
-                                child: MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSpacing.large,
-                                      vertical: AppSpacing.medium,
-                                    ),
-                                    child: DefaultTextStyle(
-                                      style: AppTextStyle.body,
-                                      child: item.child,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
+                child: AppOverlaySurface(
+                  borderRadius: BorderRadius.circular(AppRadius.medium),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.small),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: items.map((final AppPopupMenuItem<T> item) {
+                        return AppOverlayMenuItem(
+                          key: item.key,
+                          onTap: () => Navigator.pop(dialogContext, item.value),
+                          child: item.child,
+                        );
+                      }).toList(),
                     ),
                   ),
                 ),
               ),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
+      );
+    },
   );
-
-  return selectedValue;
 }
 
 const double _menuMinWidth = 200.0;

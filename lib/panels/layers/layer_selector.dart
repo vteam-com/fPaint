@@ -58,7 +58,7 @@ class LayerSelector extends StatelessWidget {
       decoration: BoxDecoration(
         color: layer.isVisible ? null : AppColors.grey600,
         border: Border.all(
-          color: layer.isSelected ? AppColors.blue : AppColors.grey700,
+          color: layer.isSelected ? AppColors.selected : AppColors.grey700,
           width: AppStroke.emphasis,
         ),
         borderRadius: BorderRadius.circular(AppRadius.small),
@@ -311,7 +311,7 @@ class LayerSelector extends StatelessWidget {
             AppButtonIcon(
               tooltip: l10n.layerToggleVisibility,
               icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
-              color: layer.isVisible ? AppColors.blue : AppColors.layerHiddenWarning,
+              color: layer.isVisible ? AppColors.primary : AppColors.layerHiddenWarning,
               onPressed: () => layers.layersToggleVisibility(layer),
             ),
             AppPopupMenuButton<String>(
@@ -398,7 +398,7 @@ class LayerSelector extends StatelessWidget {
           children: <Widget>[
             AppSvgIcon(
               icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
-              color: layer.isVisible ? AppColors.blue : AppColors.layerHiddenWarning,
+              color: layer.isVisible ? AppColors.primary : AppColors.layerHiddenWarning,
             ),
             const SizedBox(width: AppSpacing.small),
             AppText(layer.isVisible ? l10n.layerHide : l10n.layerShow),

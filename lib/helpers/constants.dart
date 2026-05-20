@@ -67,7 +67,7 @@ class AppColors {
   static const Color surfaceVariant = Color.fromARGB(255, 45, 45, 45); // Variant surface
 
   // Panel colors
-  static const Color panelBackground = Color.fromARGB(255, 45, 45, 45); // Side panel background
+  static const Color panelBackground = surfaceVariant; // Side panel background
   static const Color divider = grey800; // Divider color
 
   // Shell chrome colors (main frame + split dividers)
@@ -91,8 +91,8 @@ class AppColors {
 
   // Interactive colors
   static const Color hover = Color(0xFF333333);
-  static const Color selected = Color(0xFF2196F3);
-  static const Color pressed = Color(0xFF1976D2);
+  static const Color selected = primary;
+  static const Color pressed = secondary;
   static const Color layerHiddenWarning = Color.fromARGB(255, 241, 85, 85);
 
   // Transform handle colors
@@ -180,12 +180,19 @@ class AppFontSize {
 /// Styles are named by semantic role and follow a 3-tier size system
 /// (small / medium / large) combined with normal or bold weight.
 class AppTextStyle {
-  /// Titles, headings, list tiles, text fields — large bold white.
+  /// Titles, headings, list tiles — large bold white.
   static const TextStyle title = TextStyle(
     fontFamily: appFontFamily,
     color: AppColors.white,
     fontSize: AppFontSize.large,
     fontWeight: FontWeight.bold,
+  );
+
+  /// Editable text fields and form inputs — medium white.
+  static const TextStyle input = TextStyle(
+    fontFamily: appFontFamily,
+    color: AppColors.white,
+    fontSize: AppFontSize.medium,
   );
 
   /// Default body text — white, inherits size from parent.
@@ -218,7 +225,7 @@ class AppTextStyle {
   /// Interactive elements — blue accent color, large font.
   static const TextStyle button = TextStyle(
     fontFamily: appFontFamily,
-    color: AppColors.blue,
+    color: AppColors.primary,
     fontSize: AppFontSize.medium,
   );
 }

@@ -1,6 +1,7 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/app_overlay.dart';
 
 /// A dropdown button replacement for Material [DropdownButton].
 class AppDropdown<T> extends StatelessWidget {
@@ -26,66 +27,40 @@ class AppDropdown<T> extends StatelessWidget {
         final Offset offset = button.localToGlobal(
           Offset(0, button.size.height),
         );
-        final T? result = await showGeneralDialog<T>(
+        final T? result = await showAppOverlay<T>(
           context: context,
-          barrierDismissible: true,
-          barrierLabel: barrierLabelDismiss,
-          barrierColor: const Color(0x00000000),
-          pageBuilder:
-              (
-                final BuildContext dialogContext,
-                final Animation<double> _,
-                final Animation<double> _,
-              ) {
-                return Stack(
-                  children: <Widget>[
-                    Positioned.fill(
-                      child: GestureDetector(
-                        onTap: () => Navigator.pop(dialogContext),
-                        behavior: HitTestBehavior.opaque,
+          barrierColor: AppColors.transparent,
+          builder: (final BuildContext dialogContext) {
+            return Stack(
+              children: <Widget>[
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(dialogContext),
+                    behavior: HitTestBehavior.opaque,
+                  ),
+                ),
+                Positioned(
+                  left: offset.dx,
+                  top: offset.dy,
+                  child: IntrinsicWidth(
+                    child: AppOverlaySurface(
+                      borderRadius: BorderRadius.circular(AppRadius.medium),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: items.map((final AppDropdownItem<T> item) {
+                          return AppOverlayMenuItem(
+                            onTap: () => Navigator.pop(dialogContext, item.value),
+                            child: item.child,
+                          );
+                        }).toList(),
                       ),
                     ),
-                    Positioned(
-                      left: offset.dx,
-                      top: offset.dy,
-                      child: IntrinsicWidth(
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: AppColors.surface,
-                            borderRadius: BorderRadius.circular(AppRadius.medium),
-                            border: Border.all(
-                              color: AppColors.overlayBorder,
-                              width: AppStroke.thin,
-                            ),
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: items.map((final AppDropdownItem<T> item) {
-                              return GestureDetector(
-                                onTap: () => Navigator.pop(dialogContext, item.value),
-                                child: MouseRegion(
-                                  cursor: SystemMouseCursors.click,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: AppSpacing.large,
-                                      vertical: AppSpacing.medium,
-                                    ),
-                                    child: DefaultTextStyle(
-                                      style: AppTextStyle.body,
-                                      child: item.child,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
+                  ),
+                ),
+              ],
+            );
+          },
         );
         if (result != null) {
           onChanged(result);

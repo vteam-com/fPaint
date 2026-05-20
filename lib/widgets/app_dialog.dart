@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/widgets/app_button_row.dart';
+import 'package:fpaint/widgets/app_overlay.dart';
 
 /// Dialog content container replacing Material [AlertDialog].
 class AppDialog extends StatelessWidget {
@@ -24,15 +25,8 @@ class AppDialog extends StatelessWidget {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: AppLayout.dialogWidth),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.medium),
-            border: Border.all(
-              color: AppColors.overlayBorder,
-              width: AppStroke.thin,
-            ),
-          ),
+        child: AppOverlaySurface(
+          borderRadius: BorderRadius.circular(AppRadius.medium),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.large),
             child: Column(
@@ -86,18 +80,9 @@ Future<T?> showAppDialog<T>({
   required final WidgetBuilder builder,
   final bool barrierDismissible = true,
 }) {
-  return showGeneralDialog<T>(
+  return showAppOverlay<T>(
     context: context,
     barrierDismissible: barrierDismissible,
-    barrierLabel: barrierLabelDismiss,
-    barrierColor: AppColors.scrim,
-    pageBuilder:
-        (
-          final BuildContext dialogContext,
-          final Animation<double> _,
-          final Animation<double> _,
-        ) {
-          return builder(dialogContext);
-        },
+    builder: builder,
   );
 }

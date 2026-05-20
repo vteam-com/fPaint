@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/widgets/app_overlay.dart';
 
 /// Shows a modal bottom sheet replacing Material [showModalBottomSheet].
 ///
@@ -10,44 +11,34 @@ Future<T?> showAppBottomSheet<T>({
   required final WidgetBuilder builder,
   final Color barrierColor = AppColors.scrim,
 }) {
-  return showGeneralDialog<T>(
+  return showAppOverlay<T>(
     context: context,
-    barrierDismissible: true,
-    barrierLabel: barrierLabelDismiss,
     barrierColor: barrierColor,
-    pageBuilder:
-        (
-          final BuildContext dialogContext,
-          final Animation<double> _,
-          final Animation<double> _,
-        ) {
-          return Align(
-            alignment: Alignment.bottomCenter,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(dialogContext).size.height * AppLayout.modalSheetMaxHeightFactor,
-                maxWidth: AppLayout.modalSheetMaxWidth,
-              ),
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(AppRadius.medium),
-                  ),
-                  border: Border(
-                    left: BorderSide(color: AppColors.overlayBorder, width: AppStroke.thin),
-                    top: BorderSide(color: AppColors.overlayBorder, width: AppStroke.thin),
-                    right: BorderSide(color: AppColors.overlayBorder, width: AppStroke.thin),
-                  ),
-                ),
-                child: DefaultTextStyle(
-                  style: AppTextStyle.body,
-                  child: builder(dialogContext),
-                ),
-              ),
+    builder: (final BuildContext dialogContext) {
+      return Align(
+        alignment: Alignment.bottomCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(dialogContext).size.height * AppLayout.modalSheetMaxHeightFactor,
+            maxWidth: AppLayout.modalSheetMaxWidth,
+          ),
+          child: AppOverlaySurface(
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppRadius.medium),
             ),
-          );
-        },
+            border: const Border(
+              left: BorderSide(color: AppColors.overlayBorder, width: AppStroke.thin),
+              top: BorderSide(color: AppColors.overlayBorder, width: AppStroke.thin),
+              right: BorderSide(color: AppColors.overlayBorder, width: AppStroke.thin),
+            ),
+            child: DefaultTextStyle(
+              style: AppTextStyle.body,
+              child: builder(dialogContext),
+            ),
+          ),
+        ),
+      );
+    },
   );
 }
 

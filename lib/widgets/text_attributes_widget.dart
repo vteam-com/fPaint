@@ -2,12 +2,14 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/text_formatting_controls.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
 
 /// Renders font size and color controls for the text tool.
@@ -66,58 +68,19 @@ class TextAttributesWidget extends StatelessWidget {
         ToolAttributeWidget(
           compact: minimal,
           name: l10n.contentAlignment,
-          childLeft: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              AppButtonIcon(
-                key: Keys.textEditorBoldButton,
-                icon: AppIcon.formatBold,
-                color: appProvider.textToolState.fontWeight == FontWeight.bold ? AppColors.blue : AppColors.grey,
-                onPressed: () {
-                  appProvider.textToolState.fontWeight = appProvider.textToolState.fontWeight == FontWeight.bold
-                      ? FontWeight.normal
-                      : FontWeight.bold;
-                  appProvider.update();
-                },
-              ),
-              AppButtonIcon(
-                key: Keys.textEditorItalicButton,
-                icon: AppIcon.formatItalic,
-                color: appProvider.textToolState.fontStyle == FontStyle.italic ? AppColors.blue : AppColors.grey,
-                onPressed: () {
-                  appProvider.textToolState.fontStyle = appProvider.textToolState.fontStyle == FontStyle.italic
-                      ? FontStyle.normal
-                      : FontStyle.italic;
-                  appProvider.update();
-                },
-              ),
-            ],
+          childLeft: TextStyleToggleButtons(
+            value: appProvider.textToolState,
+            onChanged: appProvider.applyTextToolState,
           ),
           childRight: minimal
               ? null
-              : AppDropdown<TextAlign>(
-                  key: Keys.textEditorAlignmentDropdown,
+              : TextAlignmentDropdown(
+                  l10n: l10n,
                   value: appProvider.textToolState.textAlign,
-                  items: <AppDropdownItem<TextAlign>>[
-                    AppDropdownItem<TextAlign>(
-                      value: TextAlign.left,
-                      child: Text(l10n.textAlignLeft),
-                    ),
-                    AppDropdownItem<TextAlign>(
-                      value: TextAlign.center,
-                      child: Text(l10n.textAlignCenter),
-                    ),
-                    AppDropdownItem<TextAlign>(
-                      value: TextAlign.right,
-                      child: Text(l10n.textAlignRight),
-                    ),
-                  ],
-                  onChanged: (final TextAlign? value) {
-                    if (value == null) {
-                      return;
-                    }
-                    appProvider.textToolState.textAlign = value;
-                    appProvider.update();
+                  onChanged: (final TextAlign value) {
+                    final TextToolState nextValue = appProvider.textToolState.copy();
+                    nextValue.textAlign = value;
+                    appProvider.applyTextToolState(nextValue);
                   },
                 ),
         ),

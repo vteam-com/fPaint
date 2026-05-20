@@ -414,7 +414,7 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
       return DecoratedBox(
         decoration: BoxDecoration(
           color: AppColors.surface,
-          border: Border.all(color: AppColors.divider, width: 1),
+          border: Border.all(color: AppColors.divider, width: AppStroke.thin),
         ),
         child: Center(
           child: Column(

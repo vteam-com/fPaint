@@ -255,14 +255,19 @@ class AppProvider extends ChangeNotifier {
     color: preferences.brushColor,
   );
 
+  /// Applies a complete text-tool style snapshot and notifies listeners.
+  void applyTextToolState(final TextToolState value) {
+    textToolState.size = value.size;
+    textToolState.color = value.color;
+    textToolState.fontWeight = value.fontWeight;
+    textToolState.fontStyle = value.fontStyle;
+    textToolState.textAlign = value.textAlign;
+    update();
+  }
+
   /// Copies the style of [textObject] into the shared text tool state.
   void adoptTextToolStateFromObject(final TextObject textObject) {
-    textToolState.size = textObject.size;
-    textToolState.color = textObject.color;
-    textToolState.fontWeight = textObject.fontWeight;
-    textToolState.fontStyle = textObject.fontStyle;
-    textToolState.textAlign = textObject.textAlign;
-    update();
+    applyTextToolState(TextToolState.fromTextObject(textObject));
   }
 
   //-------------------------
