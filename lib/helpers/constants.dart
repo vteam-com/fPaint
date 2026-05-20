@@ -276,6 +276,7 @@ class AppLimits {
   static const int opacityPrecision = 5;
   static const int sliderDivisions = 100;
   static const int hueDivisions = 360;
+  static const int hueGroupingStepDegrees = 15;
   static const int maxRecentFiles = 10;
   static const int recentFilesDisplayCount = 5;
 }
