@@ -22,8 +22,7 @@ enum SaveFileFormat {
   ora,
   tiff,
   webp,
-  heic
-  ;
+  heic;
 
   /// Resolves a save format from a file name.
   static SaveFileFormat? fromFileName(final String fileName) {

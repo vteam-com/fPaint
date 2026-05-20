@@ -386,6 +386,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get layerMergeBelow => 'Fusionner avec le calque inférieur';
 
   @override
+  String get layerModify => 'Modifier';
+
+  @override
   String get layerNameTitle => 'Nom du calque';
 
   @override

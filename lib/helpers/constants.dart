@@ -477,6 +477,7 @@ class Keys {
   static const Key mainViewScreenshotBoundary = Key('main-view-screenshot-boundary');
   static const String gradientHandleKeyPrefixText = 'gradient_handle_';
   static const Key layerAddAboveButton = Key('layer-add-above-button');
+  static const Key layerModifyButton = Key('layer-modify-button');
   static const Key layerRenameTextField = Key('layer-rename-text-field');
   static const Key layerRenameApplyButton = Key('layer-rename-apply-button');
   static const Key canvasSettingsWidthField = Key('canvas-settings-width-field');

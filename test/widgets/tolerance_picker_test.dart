@@ -81,18 +81,18 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
             builder: (final BuildContext context) {
-              return ElevatedButton(
+              return AppButtonPrimary(
                 onPressed: () {
                   showTolerancePicker(context, 25, (final int value) {});
                 },
-                child: const Text('Show Picker'),
+                text: 'Show Picker',
               );
             },
           ),
         ),
       );
 
-      await tester.tap(find.byType(ElevatedButton));
+      await tester.tap(find.text('Show Picker'));
       await tester.pumpAndSettle();
 
       expect(find.text('Color Tolerance'), findsOneWidget);

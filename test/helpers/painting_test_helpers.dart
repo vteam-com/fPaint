@@ -1840,8 +1840,7 @@ enum UnitTestExportFormat {
     shareActionFileName: _unitTestWebpShareActionFileName,
     pickerFileName: _unitTestWebpPickerFileName,
     allowedExtensions: _unitTestWebpAllowedExtensions,
-  )
-  ;
+  );
 
   const UnitTestExportFormat({
     required this.shareActionFileName,

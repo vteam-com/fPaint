@@ -39,6 +39,9 @@ class TransformModel extends VisibleModel {
   /// The active interaction mode for the transform overlay.
   TransformInteractionMode interactionMode = TransformInteractionMode.deform;
 
+  /// Where the current transform session originated.
+  TransformSessionSource source = TransformSessionSource.selection;
+
   /// Which deform handles are currently enabled for fine tuning.
   TransformHandleSet handleSet = TransformHandleSet.corners;
 
@@ -59,9 +62,11 @@ class TransformModel extends VisibleModel {
   void start({
     required final ui.Image image,
     required final Rect bounds,
+    final TransformSessionSource source = TransformSessionSource.selection,
   }) {
     sourceImage = image;
     sourceBounds = bounds;
+    this.source = source;
     corners = <Offset>[
       bounds.topLeft,
       bounds.topRight,
@@ -388,6 +393,7 @@ class TransformModel extends VisibleModel {
     super.clear();
     sourceImage = null;
     sourceBounds = Rect.zero;
+    source = TransformSessionSource.selection;
     handleSet = TransformHandleSet.corners;
     setDeformMode();
     corners.clear();
@@ -407,4 +413,10 @@ enum TransformInteractionMode {
   scale,
   rotate,
   deform,
+}
+
+/// Where a transform overlay session was launched from.
+enum TransformSessionSource {
+  selection,
+  imagePlacement,
 }

@@ -1,8 +1,13 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/panels/side_panel/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
 /// The `SidePanel` widget is a stateful widget that represents the side panel of the application.
@@ -28,7 +33,6 @@ class SidePanel extends StatefulWidget {
 
 class _SidePanelState extends State<SidePanel> {
   final MultiSplitViewController _splitController = MultiSplitViewController();
-
   @override
   void initState() {
     super.initState();
@@ -64,6 +68,11 @@ class _SidePanelState extends State<SidePanel> {
 
   @override
   Widget build(final BuildContext context) {
+    final AppProvider appProvider = AppProvider.of(context, listen: true);
+    if (_isModifyMode(appProvider)) {
+      return _buildModifyModePanel(context, appProvider);
+    }
+
     return DecoratedBox(
       decoration: const BoxDecoration(color: AppColors.shellChromeBackground),
       child: MultiSplitViewTheme(
@@ -84,6 +93,61 @@ class _SidePanelState extends State<SidePanel> {
         ),
       ),
     );
+  }
+
+  /// Builds the minimal side panel shown while a layer Modify session is active.
+  Widget _buildModifyModePanel(
+    final BuildContext context,
+    final AppProvider appProvider,
+  ) {
+    final AppLocalizations l10n = context.l10n;
+
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: AppColors.shellChromeBackground),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.large),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            AppText(l10n.layerModify, variant: AppTextVariant.title),
+            const Spacer(),
+            AppButtonRow(
+              actions: <Widget>[
+                AppRowSecondaryButton(
+                  onPressed: () {
+                    Future<void>.microtask(() async {
+                      if (appProvider.transformModel.isVisible) {
+                        appProvider.cancelTransform();
+                        return;
+                      }
+                      appProvider.cancelImagePlacement();
+                    });
+                  },
+                  text: l10n.cancel,
+                ),
+                AppRowPrimaryButton(
+                  onPressed: () {
+                    Future<void>.microtask(() async {
+                      if (appProvider.transformModel.isVisible) {
+                        await appProvider.confirmTransform();
+                        return;
+                      }
+                      await appProvider.confirmImagePlacement();
+                    });
+                  },
+                  text: l10n.apply,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool _isModifyMode(final AppProvider appProvider) {
+    return appProvider.imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&
+        appProvider.imagePlacementModel.layerRestoreState != null;
   }
 
   /// Rebuilds the widget when the split controller changes.

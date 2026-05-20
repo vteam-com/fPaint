@@ -6,8 +6,10 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/fill_service.dart';
@@ -66,6 +68,39 @@ extension AppProviderSelection on AppProvider {
     startImagePlacement(clippedImage);
   }
 
+  /// Floats the entire selected layer into the placement overlay so it can be
+  /// moved, scaled, rotated, and transformed before committing back.
+  Future<void> modifySelectedLayer() async {
+    cancelEffectPreview();
+    selectedAction = ActionType.selector;
+    selectAll();
+
+    final ui.Image? clippedImage = await createSelectionImage();
+    if (clippedImage == null) {
+      return;
+    }
+
+    final LayerProvider targetLayer = layers.selectedLayer;
+    final ImagePlacementLayerRestoreState restoreState = ImagePlacementLayerRestoreState(
+      layerIndex: layers.selectedLayerIndex,
+      originalActions: List<UserActionDrawing>.from(targetLayer.actionStack),
+      originalRedoActions: List<UserActionDrawing>.from(targetLayer.redoStack),
+      originalHasChanged: targetLayer.hasChanged,
+      originalBackgroundColor: targetLayer.backgroundColor,
+    );
+
+    targetLayer.actionStack.clear();
+    targetLayer.redoStack.clear();
+    targetLayer.backgroundColor = null;
+    targetLayer.clearCache();
+
+    startImagePlacement(
+      clippedImage,
+      commitMode: ImagePlacementCommitMode.replaceLayer,
+      layerRestoreState: restoreState,
+    );
+  }
+
   /// Pastes an image from the clipboard onto the canvas.
   Future<void> paste() async {
     final ui.Image? image = await getImageFromClipboard();
@@ -105,7 +140,11 @@ extension AppProviderSelection on AppProvider {
   }
 
   /// Starts interactive placement for [image], centered on the current canvas.
-  void startImagePlacement(final ui.Image image) {
+  void startImagePlacement(
+    final ui.Image image, {
+    final ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
+    final ImagePlacementLayerRestoreState? layerRestoreState,
+  }) {
     final Offset center = Offset(
       layers.size.width / AppMath.pair,
       layers.size.height / AppMath.pair,
@@ -118,6 +157,38 @@ extension AppProviderSelection on AppProvider {
     imagePlacementModel.start(
       imageToPlace: image,
       initialPosition: initialPosition,
+      commitMode: commitMode,
+      layerRestoreState: layerRestoreState,
+    );
+    update();
+  }
+
+  /// Switches the active image placement session into perspective transform mode.
+  Future<void> startImagePlacementTransform() async {
+    final ui.Image? sourceImage = imagePlacementModel.image;
+    if (sourceImage == null) {
+      return;
+    }
+
+    final ui.Image bakedImage = await _renderPlacedImage(
+      sourceImage: sourceImage,
+      outWidth: imagePlacementModel.displayWidth,
+      outHeight: imagePlacementModel.displayHeight,
+      rotation: imagePlacementModel.rotation,
+    );
+
+    final Rect transformBounds = Rect.fromLTWH(
+      imagePlacementModel.position.dx,
+      imagePlacementModel.position.dy,
+      bakedImage.width.toDouble(),
+      bakedImage.height.toDouble(),
+    );
+
+    imagePlacementModel.isVisible = false;
+    transformModel.start(
+      image: bakedImage,
+      bounds: transformBounds,
+      source: TransformSessionSource.imagePlacement,
     );
     update();
   }
@@ -134,26 +205,15 @@ extension AppProviderSelection on AppProvider {
     final double outWidth = imagePlacementModel.displayWidth;
     final double outHeight = imagePlacementModel.displayHeight;
     final double rotation = imagePlacementModel.rotation;
+    final ImagePlacementCommitMode commitMode = imagePlacementModel.commitMode;
+    final ImagePlacementLayerRestoreState? layerRestoreState = imagePlacementModel.layerRestoreState;
 
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-
-    canvas.translate(outWidth / AppMath.pair, outHeight / AppMath.pair);
-    canvas.rotate(rotation);
-    canvas.translate(-outWidth / AppMath.pair, -outHeight / AppMath.pair);
-    canvas.drawImageRect(
-      sourceImage,
-      Rect.fromLTWH(
-        0,
-        0,
-        sourceImage.width.toDouble(),
-        sourceImage.height.toDouble(),
-      ),
-      Rect.fromLTWH(0, 0, outWidth, outHeight),
-      Paint()..filterQuality = FilterQuality.high,
+    final ui.Image bakedImage = await _renderPlacedImage(
+      sourceImage: sourceImage,
+      outWidth: outWidth,
+      outHeight: outHeight,
+      rotation: rotation,
     );
-
-    final ui.Image bakedImage = await recorder.endRecording().toImage(outWidth.ceil(), outHeight.ceil());
 
     final Offset offset = imagePlacementModel.position;
     final int currentIndex = layers.selectedLayerIndex;
@@ -162,12 +222,41 @@ extension AppProviderSelection on AppProvider {
     undoProvider.executeAction(
       name: 'Paste',
       forward: () {
+        if (commitMode == ImagePlacementCommitMode.replaceLayer && layerRestoreState != null) {
+          final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
+          layers.selectedLayerIndex = layerRestoreState.layerIndex;
+          targetLayer.actionStack.clear();
+          targetLayer.redoStack.clear();
+          targetLayer.backgroundColor = null;
+          targetLayer.addImage(imageToAdd: bakedImage, offset: offset);
+          targetLayer.hasChanged = true;
+          targetLayer.clearCache();
+          update();
+          return;
+        }
+
         final LayerProvider newLayer = layers.addTop(name: 'Pasted');
         newLayerIndex = layers.getLayerIndex(newLayer);
         newLayer.addImage(imageToAdd: bakedImage, offset: offset);
         update();
       },
       backward: () {
+        if (commitMode == ImagePlacementCommitMode.replaceLayer && layerRestoreState != null) {
+          final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
+          layers.selectedLayerIndex = layerRestoreState.layerIndex;
+          targetLayer.actionStack
+            ..clear()
+            ..addAll(layerRestoreState.originalActions);
+          targetLayer.redoStack
+            ..clear()
+            ..addAll(layerRestoreState.originalRedoActions);
+          targetLayer.backgroundColor = layerRestoreState.originalBackgroundColor;
+          targetLayer.hasChanged = layerRestoreState.originalHasChanged;
+          targetLayer.clearCache();
+          update();
+          return;
+        }
+
         layers.removeByIndex(newLayerIndex);
         layers.selectedLayerIndex = currentIndex;
         update();
@@ -180,6 +269,21 @@ extension AppProviderSelection on AppProvider {
 
   /// Cancels an in-progress image placement.
   void cancelImagePlacement() {
+    final ImagePlacementLayerRestoreState? layerRestoreState = imagePlacementModel.layerRestoreState;
+    if (imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer && layerRestoreState != null) {
+      final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
+      layers.selectedLayerIndex = layerRestoreState.layerIndex;
+      targetLayer.actionStack
+        ..clear()
+        ..addAll(layerRestoreState.originalActions);
+      targetLayer.redoStack
+        ..clear()
+        ..addAll(layerRestoreState.originalRedoActions);
+      targetLayer.backgroundColor = layerRestoreState.originalBackgroundColor;
+      targetLayer.hasChanged = layerRestoreState.originalHasChanged;
+      targetLayer.clearCache();
+    }
+
     imagePlacementModel.clear();
     update();
   }
@@ -231,8 +335,24 @@ extension AppProviderSelection on AppProvider {
       edgeMidpoints: transformModel.effectiveEdgeMidpoints,
     );
 
-    final Path erasePath = Path.from(selectorModel.path1!);
     final Rect quadBounds = transformModel.quadBounds;
+
+    if (transformModel.source == TransformSessionSource.imagePlacement) {
+      final ImagePlacementCommitMode commitMode = imagePlacementModel.commitMode;
+      final ImagePlacementLayerRestoreState? layerRestoreState = imagePlacementModel.layerRestoreState;
+
+      transformModel.clear();
+      imagePlacementModel.start(
+        imageToPlace: transformedImage,
+        initialPosition: Offset(quadBounds.left, quadBounds.top),
+        commitMode: commitMode,
+        layerRestoreState: layerRestoreState,
+      );
+      update();
+      return;
+    }
+
+    final Path erasePath = Path.from(selectorModel.path1!);
     final Offset imageOffset = Offset(quadBounds.left, quadBounds.top);
 
     replaceRegion(
@@ -250,8 +370,44 @@ extension AppProviderSelection on AppProvider {
   /// Cancels an in-progress transform operation.
   void cancelTransform() {
     cancelEffectPreview();
+
+    if (transformModel.source == TransformSessionSource.imagePlacement && imagePlacementModel.image != null) {
+      transformModel.clear();
+      imagePlacementModel.isVisible = true;
+      update();
+      return;
+    }
+
     transformModel.clear();
     update();
+  }
+
+  /// Renders the current image-placement preview into a baked image.
+  Future<ui.Image> _renderPlacedImage({
+    required final ui.Image sourceImage,
+    required final double outWidth,
+    required final double outHeight,
+    required final double rotation,
+  }) async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+
+    canvas.translate(outWidth / AppMath.pair, outHeight / AppMath.pair);
+    canvas.rotate(rotation);
+    canvas.translate(-outWidth / AppMath.pair, -outHeight / AppMath.pair);
+    canvas.drawImageRect(
+      sourceImage,
+      Rect.fromLTWH(
+        0,
+        0,
+        sourceImage.width.toDouble(),
+        sourceImage.height.toDouble(),
+      ),
+      Rect.fromLTWH(0, 0, outWidth, outHeight),
+      Paint()..filterQuality = FilterQuality.high,
+    );
+
+    return recorder.endRecording().toImage(outWidth.ceil(), outHeight.ceil());
   }
 
   /// Starts live preview mode for the selected [effect] and [strength].

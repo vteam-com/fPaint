@@ -261,7 +261,7 @@ void main() {
               home: Scaffold(
                 body: Builder(
                   builder: (final BuildContext context) {
-                    return ElevatedButton(
+                    return AppButtonPrimary(
                       onPressed: () {
                         showColorPicker(
                           context: context,
@@ -272,7 +272,7 @@ void main() {
                           },
                         );
                       },
-                      child: const Text('Show Picker'),
+                      text: 'Show Picker',
                     );
                   },
                 ),

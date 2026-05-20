@@ -158,13 +158,15 @@ class _TransformWidgetState extends State<TransformWidget> {
       child: Stack(
         children: <Widget>[
           // Warped image preview + outline
-          CustomPaint(
-            size: Size.infinite,
-            painter: _TransformPreviewPainter(
-              image: image,
-              screenCorners: screenCorners,
-              screenEdgeMidpoints: screenEdgeMidpoints,
-              screenBoundaryPoints: screenBoundaryPoints,
+          IgnorePointer(
+            child: CustomPaint(
+              size: Size.infinite,
+              painter: _TransformPreviewPainter(
+                image: image,
+                screenCorners: screenCorners,
+                screenEdgeMidpoints: screenEdgeMidpoints,
+                screenBoundaryPoints: screenBoundaryPoints,
+              ),
             ),
           ),
 

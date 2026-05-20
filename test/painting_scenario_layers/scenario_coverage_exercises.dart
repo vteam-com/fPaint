@@ -372,7 +372,7 @@ Future<void> _exerciseToolSwitching(
 
   // Undo the eraser and pencil strokes.
   // Each freehand stroke with 2 points creates 2 actions (initial + move),
-  // so 2 strokes = 4 undos needed.
+  // so 2 strokes = 4 undo's needed.
   await _undoTimes(tester, 4);
 
   // Switch back to selector.
@@ -392,8 +392,8 @@ Future<void> _exerciseTextEditor(
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = tester.element(find.byType(MainView));
-  final AppProvider appProvider = AppProvider.of(context, listen: false);
   final AppLocalizations l10n = context.l10n;
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Remember the original stack length so we only remove test-added text
   // actions and preserve the Signature layer's original text.
@@ -1530,6 +1530,7 @@ Future<void> _exerciseSelectionViaGesture(
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = tester.element(find.byType(MainView));
+  final AppLocalizations l10n = context.l10n;
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Ensure selector tool is active.
@@ -1561,7 +1562,7 @@ Future<void> _exerciseSelectionViaGesture(
   // The selector should now be visible.
   if (appProvider.selectorModel.isVisible) {
     // Tap the transform button to enter transform mode.
-    await tapByTooltip(tester, context.l10n.transform);
+    await tapByTooltip(tester, l10n.transform);
     await tester.pump();
 
     if (appProvider.transformModel.isVisible) {
@@ -1579,7 +1580,7 @@ Future<void> _exerciseSelectionViaGesture(
       await tester.pump();
 
       // Apply the transform.
-      await tapByTooltip(tester, context.l10n.apply);
+      await tapByTooltip(tester, l10n.apply);
       await tester.pump();
 
       // Undo the transform to restore the drawing.

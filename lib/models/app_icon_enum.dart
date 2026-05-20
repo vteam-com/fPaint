@@ -88,8 +88,7 @@ enum AppIcon {
   visibility('assets/icons/visibility.svg'),
   visibilityOff('assets/icons/visibility_off.svg'),
   zoomIn('assets/icons/zoom_in.svg'),
-  zoomOut('assets/icons/zoom_out.svg')
-  ;
+  zoomOut('assets/icons/zoom_out.svg');
 
   const AppIcon(this.assetPath);
 

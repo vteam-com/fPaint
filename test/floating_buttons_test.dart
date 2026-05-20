@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/floating_buttons.dart';
@@ -11,6 +13,18 @@ import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+const int _testImageDimension = 12;
+
+Future<ui.Image> _createTestImage() async {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+  canvas.drawRect(
+    Rect.fromLTWH(0, 0, _testImageDimension.toDouble(), _testImageDimension.toDouble()),
+    ui.Paint()..color = const Color(0xFF000000),
+  );
+  return recorder.endRecording().toImage(_testImageDimension, _testImageDimension);
+}
 
 void main() {
   late AppProvider appProvider;
@@ -599,6 +613,22 @@ void main() {
   }
 
   group('floating action AppButtonIcon', () {
+    testWidgets('keeps floating controls visible while image placement overlay is active', (
+      final WidgetTester tester,
+    ) async {
+      final ui.Image image = await _createTestImage();
+      addTearDown(image.dispose);
+      appProvider.imagePlacementModel.start(
+        imageToPlace: image,
+        initialPosition: Offset.zero,
+      );
+
+      await pumpFloatingButtons(tester, isSmall: false);
+
+      expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
+      expect(find.byKey(Keys.floatActionZoomIn), findsOneWidget);
+      expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
+    });
     testWidgets('renders with icon', (final WidgetTester tester) async {
       await tester.pumpWidget(
         buildTestWidget(

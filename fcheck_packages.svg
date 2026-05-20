@@ -371,7 +371,7 @@
   <path d="M 280.0 329.0 C 190.0 345.0, 370.0 2416.0, 460.0 2400.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>flutter -> meta v1.17.0</title>
+<title>flutter -> meta v1.18.0</title>
 <g>
   <path d="M 280.0 329.0 C 190.0 345.0, 370.0 3176.0, 460.0 3160.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -391,7 +391,7 @@
   <path d="M 280.0 461.0 C 190.0 477.0, 370.0 3736.0, 460.0 3720.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>flutter_svg -> vector_graphics v1.2.0</title>
+<title>flutter_svg -> vector_graphics v1.2.2</title>
 <g>
   <path d="M 280.0 461.0 C 190.0 477.0, 370.0 3776.0, 460.0 3760.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -401,7 +401,7 @@
   <path d="M 280.0 461.0 C 190.0 477.0, 370.0 3816.0, 460.0 3800.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>flutter_svg -> vector_graphics_compiler v1.2.0</title>
+<title>flutter_svg -> vector_graphics_compiler v1.2.3</title>
 <g>
   <path d="M 280.0 527.0 C 190.0 543.0, 370.0 2096.0, 460.0 2080.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -421,7 +421,7 @@
   <path d="M 280.0 593.0 C 190.0 609.0, 370.0 2416.0, 460.0 2400.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>image -> meta v1.17.0</title>
+<title>image -> meta v1.18.0</title>
 <g>
   <path d="M 280.0 659.0 C 190.0 675.0, 370.0 1816.0, 460.0 1800.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -431,7 +431,7 @@
   <path d="M 280.0 659.0 C 190.0 675.0, 370.0 2416.0, 460.0 2400.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>intl -> meta v1.17.0</title>
+<title>intl -> meta v1.18.0</title>
 <g>
   <path d="M 280.0 659.0 C 190.0 675.0, 370.0 2536.0, 460.0 2520.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -441,7 +441,7 @@
   <path d="M 280.0 791.0 C 190.0 807.0, 370.0 2416.0, 460.0 2400.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>multi_split_view -> meta v1.17.0</title>
+<title>multi_split_view -> meta v1.18.0</title>
 <g>
   <path d="M 280.0 857.0 C 190.0 873.0, 370.0 1816.0, 460.0 1800.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -466,7 +466,7 @@
   <path d="M 280.0 857.0 C 190.0 873.0, 370.0 2416.0, 460.0 2400.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>package_info_plus -> meta v1.17.0</title>
+<title>package_info_plus -> meta v1.18.0</title>
 <g>
   <path d="M 280.0 857.0 C 190.0 873.0, 370.0 2496.0, 460.0 2480.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -571,7 +571,7 @@
   <path d="M 280.0 1187.0 C 190.0 1203.0, 370.0 2416.0, 460.0 2400.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>super_clipboard -> meta v1.17.0</title>
+<title>super_clipboard -> meta v1.18.0</title>
 <g>
   <path d="M 280.0 1187.0 C 190.0 1203.0, 370.0 3296.0, 460.0 3280.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -606,7 +606,7 @@
   <path d="M 280.0 1253.0 C 190.0 1269.0, 370.0 3616.0, 460.0 3600.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>url_launcher -> url_launcher_web v2.4.2</title>
+<title>url_launcher -> url_launcher_web v2.4.3</title>
 <g>
   <path d="M 280.0 1253.0 C 190.0 1269.0, 370.0 3656.0, 460.0 3640.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -631,7 +631,7 @@
   <path d="M 280.0 1517.0 C 190.0 1533.0, 370.0 2416.0, 460.0 2400.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>xml -> meta v1.17.0</title>
+<title>xml -> meta v1.18.0</title>
 <g>
   <path d="M 280.0 1517.0 C 190.0 1533.0, 370.0 2776.0, 460.0 2760.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -656,7 +656,7 @@
   <path d="M 920.0 131.0 C 1010.0 147.0, 830.0 2216.0, 740.0 2200.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>flutter_launcher_icons -> json_annotation v4.11.0</title>
+<title>flutter_launcher_icons -> json_annotation v4.12.0</title>
 <g>
   <path d="M 920.0 131.0 C 1010.0 147.0, 830.0 2536.0, 740.0 2520.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -701,7 +701,7 @@
   <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 2416.0, 740.0 2400.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>flutter_test -> meta v1.17.0</title>
+<title>flutter_test -> meta v1.18.0</title>
 <g>
   <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 2536.0, 740.0 2520.0" class="edgeVertical"/>
   <title> ▶ </title>
@@ -721,7 +721,7 @@
   <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 3336.0, 740.0 3320.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
-<title>flutter_test -> test_api v0.7.10</title>
+<title>flutter_test -> test_api v0.7.11</title>
 <rect x="280.0" y="108.0" width="200.0" height="46.0" rx="8.0" ry="8.0" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1"/>
 <text x="380.0" y="128.0" text-anchor="middle" fill="#0f172a" font-size="13.0">archive</text>
 <text x="380.0" y="141.0" text-anchor="middle" fill="#334155" font-size="10.0">v4.0.9</text>
@@ -955,7 +955,7 @@
   <text x="455.68" y="2161.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text></g>
 <rect x="460.0" y="2186.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
 <text x="468.0" y="2204.0" text-anchor="start" fill="#0f172a" font-size="12.0">json_annotation</text>
-<text x="732.0" y="2204.0" text-anchor="end" fill="#334155" font-size="12.0">^4.11.0</text>
+<text x="732.0" y="2204.0" text-anchor="end" fill="#334155" font-size="12.0">^4.12.0</text>
 <g class="badge incomingBadge">
   <path d="M 734.0,2200.0 L 746.0,2193.0 Q 749.0,2193.0 749.0,2196.0 L 749.0,2204.0 Q 749.0,2207.0 746.0,2207.0 Z" fill="#3b82f6"/>
   <text x="744.32" y="2201.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>
@@ -985,7 +985,7 @@
   <text x="455.68" y="2361.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>
 <rect x="460.0" y="2386.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
 <text x="468.0" y="2404.0" text-anchor="start" fill="#0f172a" font-size="12.0">meta</text>
-<text x="732.0" y="2404.0" text-anchor="end" fill="#334155" font-size="12.0">^1.17.0</text>
+<text x="732.0" y="2404.0" text-anchor="end" fill="#334155" font-size="12.0">^1.18.0</text>
 <g class="badge incomingBadge">
   <path d="M 466.0,2400.0 L 454.0,2393.0 Q 451.0,2393.0 451.0,2396.0 L 451.0,2404.0 Q 451.0,2407.0 454.0,2407.0 Z" fill="#3b82f6"/>
   <text x="455.68" y="2401.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">7</text></g>
@@ -1129,7 +1129,7 @@
   <text x="455.68" y="3281.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>
 <rect x="460.0" y="3306.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
 <text x="468.0" y="3324.0" text-anchor="start" fill="#0f172a" font-size="12.0">test_api</text>
-<text x="732.0" y="3324.0" text-anchor="end" fill="#334155" font-size="12.0">^0.7.10</text>
+<text x="732.0" y="3324.0" text-anchor="end" fill="#334155" font-size="12.0">^0.7.11</text>
 <g class="badge incomingBadge">
   <path d="M 734.0,3320.0 L 746.0,3313.0 Q 749.0,3313.0 749.0,3316.0 L 749.0,3324.0 Q 749.0,3327.0 746.0,3327.0 Z" fill="#3b82f6"/>
   <text x="744.32" y="3321.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>
@@ -1171,7 +1171,7 @@
   <text x="455.68" y="3561.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>
 <rect x="460.0" y="3586.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
 <text x="468.0" y="3604.0" text-anchor="start" fill="#0f172a" font-size="12.0">url_launcher_web</text>
-<text x="732.0" y="3604.0" text-anchor="end" fill="#334155" font-size="12.0">^2.4.2</text>
+<text x="732.0" y="3604.0" text-anchor="end" fill="#334155" font-size="12.0">^2.4.3</text>
 <g class="badge incomingBadge">
   <path d="M 466.0,3600.0 L 454.0,3593.0 Q 451.0,3593.0 451.0,3596.0 L 451.0,3604.0 Q 451.0,3607.0 454.0,3607.0 Z" fill="#3b82f6"/>
   <text x="455.68" y="3601.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>
@@ -1189,7 +1189,7 @@
   <text x="455.68" y="3681.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>
 <rect x="460.0" y="3706.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
 <text x="468.0" y="3724.0" text-anchor="start" fill="#0f172a" font-size="12.0">vector_graphics</text>
-<text x="732.0" y="3724.0" text-anchor="end" fill="#334155" font-size="12.0">^1.2.0</text>
+<text x="732.0" y="3724.0" text-anchor="end" fill="#334155" font-size="12.0">^1.2.2</text>
 <g class="badge incomingBadge">
   <path d="M 466.0,3720.0 L 454.0,3713.0 Q 451.0,3713.0 451.0,3716.0 L 451.0,3724.0 Q 451.0,3727.0 454.0,3727.0 Z" fill="#3b82f6"/>
   <text x="455.68" y="3721.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>
@@ -1201,7 +1201,7 @@
   <text x="455.68" y="3761.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>
 <rect x="460.0" y="3786.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
 <text x="468.0" y="3804.0" text-anchor="start" fill="#0f172a" font-size="12.0">vector_graphics_compiler</text>
-<text x="732.0" y="3804.0" text-anchor="end" fill="#334155" font-size="12.0">^1.2.0</text>
+<text x="732.0" y="3804.0" text-anchor="end" fill="#334155" font-size="12.0">^1.2.3</text>
 <g class="badge incomingBadge">
   <path d="M 466.0,3800.0 L 454.0,3793.0 Q 451.0,3793.0 451.0,3796.0 L 451.0,3804.0 Q 451.0,3807.0 454.0,3807.0 Z" fill="#3b82f6"/>
   <text x="455.68" y="3801.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>

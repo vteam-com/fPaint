@@ -147,6 +147,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.layerAddAbove, isNotEmpty);
   expect(l10n.layerDelete, isNotEmpty);
   expect(l10n.layerMergeBelow, isNotEmpty);
+  expect(l10n.layerModify, isNotEmpty);
   expect(l10n.layerBlendMode, isNotEmpty);
   expect(l10n.layerBackgroundColor, isNotEmpty);
   expect(l10n.layerToggleVisibility, isNotEmpty);
