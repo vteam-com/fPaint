@@ -19,6 +19,9 @@ import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const int _testImageDimension = 12;
+const double _geometryEpsilon = 0.001;
+const Duration _modifyModePreparationDuration = Duration(seconds: 1);
+const Size _desktopTestViewSize = Size(1600, 900);
 
 Future<ui.Image> _createTestImage() async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -49,6 +52,57 @@ Widget _buildHarness({
       home: home ?? const MainScreen(),
     ),
   );
+}
+
+void _expectRectMatches(final Rect actual, final Rect expected) {
+  expect(actual.left, closeTo(expected.left, _geometryEpsilon));
+  expect(actual.top, closeTo(expected.top, _geometryEpsilon));
+  expect(actual.width, closeTo(expected.width, _geometryEpsilon));
+  expect(actual.height, closeTo(expected.height, _geometryEpsilon));
+}
+
+void _expectSelectionOverlayAligned(
+  final WidgetTester tester,
+  final AppProvider appProvider,
+) {
+  final SelectionRectWidget widget = tester.widget<SelectionRectWidget>(
+    find.byType(SelectionRectWidget),
+  );
+  final Path? expectedPath = appProvider.getPathAdjustToCanvasSizeAndPosition(
+    appProvider.selectorModel.path1,
+  );
+
+  expect(expectedPath, isNotNull);
+  expect(widget.path1, isNotNull);
+
+  _expectRectMatches(widget.path1!.getBounds(), expectedPath!.getBounds());
+}
+
+Rect _imagePlacementScreenBounds(final ImagePlacementWidget widget) {
+  return Rect.fromLTWH(
+    widget.canvasOffset.dx + widget.model.position.dx * widget.canvasScale,
+    widget.canvasOffset.dy + widget.model.position.dy * widget.canvasScale,
+    widget.model.displayWidth * widget.canvasScale,
+    widget.model.displayHeight * widget.canvasScale,
+  );
+}
+
+void _expectImagePlacementOverlayAligned(
+  final WidgetTester tester,
+  final AppProvider appProvider,
+) {
+  final ImagePlacementWidget widget = tester.widget<ImagePlacementWidget>(
+    find.byType(ImagePlacementWidget),
+  );
+  final Rect expectedBounds = Rect.fromLTWH(
+    appProvider.canvasOffset.dx + appProvider.imagePlacementModel.position.dx * appProvider.layers.scale,
+    appProvider.canvasOffset.dy + appProvider.imagePlacementModel.position.dy * appProvider.layers.scale,
+    appProvider.imagePlacementModel.displayWidth * appProvider.layers.scale,
+    appProvider.imagePlacementModel.displayHeight * appProvider.layers.scale,
+  );
+
+  _expectRectMatches(_imagePlacementScreenBounds(widget), expectedBounds);
+  expect(widget.canvasScale, closeTo(appProvider.layers.scale, _geometryEpsilon));
 }
 
 void main() {
@@ -131,11 +185,86 @@ void main() {
     expect(find.text('Apply'), findsOneWidget);
   });
 
+  testWidgets('keeps selection overlay aligned while side panel resizes or closes', (
+    final WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = _desktopTestViewSize;
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    appProvider.selectAll();
+    appProvider.update();
+    await tester.pump();
+
+    expect(find.byType(SelectionRectWidget), findsOneWidget);
+    _expectSelectionOverlayAligned(tester, appProvider);
+
+    shellProvider.isSidePanelExpanded = false;
+    await tester.pump();
+    _expectSelectionOverlayAligned(tester, appProvider);
+
+    shellProvider.isSidePanelExpanded = true;
+    await tester.pump();
+    _expectSelectionOverlayAligned(tester, appProvider);
+
+    shellProvider.shellMode = ShellMode.hidden;
+    shellProvider.update();
+    await tester.pump();
+    _expectSelectionOverlayAligned(tester, appProvider);
+  });
+
+  testWidgets('keeps layer modify overlay aligned while side panel resizes or closes', (
+    final WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = _desktopTestViewSize;
+
+    await appProvider.modifySelectedLayer();
+    await tester.pump(_modifyModePreparationDuration);
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(ImagePlacementWidget), findsOneWidget);
+    _expectImagePlacementOverlayAligned(tester, appProvider);
+
+    shellProvider.isSidePanelExpanded = false;
+    await tester.pump();
+    _expectImagePlacementOverlayAligned(tester, appProvider);
+
+    shellProvider.isSidePanelExpanded = true;
+    await tester.pump();
+    _expectImagePlacementOverlayAligned(tester, appProvider);
+
+    shellProvider.shellMode = ShellMode.hidden;
+    shellProvider.update();
+    await tester.pump();
+    _expectImagePlacementOverlayAligned(tester, appProvider);
+  });
+
   testWidgets('uses compact horizontal padding for modify mode in a narrow side panel', (
     final WidgetTester tester,
   ) async {
     await appProvider.modifySelectedLayer();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(_modifyModePreparationDuration);
 
     await tester.pumpWidget(
       _buildHarness(
