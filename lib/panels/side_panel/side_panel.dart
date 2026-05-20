@@ -104,43 +104,60 @@ class _SidePanelState extends State<SidePanel> {
 
     return DecoratedBox(
       decoration: const BoxDecoration(color: AppColors.shellChromeBackground),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.large),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            AppText(l10n.layerModify, variant: AppTextVariant.title),
-            const Spacer(),
-            AppButtonRow(
-              actions: <Widget>[
-                AppRowSecondaryButton(
-                  onPressed: () {
-                    Future<void>.microtask(() async {
-                      if (appProvider.transformModel.isVisible) {
-                        appProvider.cancelTransform();
-                        return;
-                      }
-                      appProvider.cancelImagePlacement();
-                    });
-                  },
-                  text: l10n.cancel,
-                ),
-                AppRowPrimaryButton(
-                  onPressed: () {
-                    Future<void>.microtask(() async {
-                      if (appProvider.transformModel.isVisible) {
-                        await appProvider.confirmTransform();
-                        return;
-                      }
-                      await appProvider.confirmImagePlacement();
-                    });
-                  },
-                  text: l10n.apply,
+      child: LayoutBuilder(
+        builder: (final BuildContext _, final BoxConstraints constraints) {
+          final double horizontalPadding;
+          if (constraints.maxWidth <= AppLayout.sidePanelCollapsed + AppLayout.toolbarButtonWidth) {
+            horizontalPadding = AppSpacing.small;
+          } else if (constraints.maxWidth <=
+              AppLayout.sidePanelCollapsed + AppLayout.toolbarButtonWidth + AppSpacing.large) {
+            horizontalPadding = AppSpacing.medium;
+          } else {
+            horizontalPadding = AppSpacing.large;
+          }
+
+          return Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: AppSpacing.large,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                AppText(l10n.layerModify, variant: AppTextVariant.title),
+                const Spacer(),
+                AppButtonRow(
+                  actions: <Widget>[
+                    AppRowSecondaryButton(
+                      onPressed: () {
+                        Future<void>.microtask(() async {
+                          if (appProvider.transformModel.isVisible) {
+                            appProvider.cancelTransform();
+                            return;
+                          }
+                          appProvider.cancelImagePlacement();
+                        });
+                      },
+                      text: l10n.cancel,
+                    ),
+                    AppRowPrimaryButton(
+                      onPressed: () {
+                        Future<void>.microtask(() async {
+                          if (appProvider.transformModel.isVisible) {
+                            await appProvider.confirmTransform();
+                            return;
+                          }
+                          await appProvider.confirmImagePlacement();
+                        });
+                      },
+                      text: l10n.apply,
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

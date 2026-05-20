@@ -34,6 +34,7 @@ Widget _buildHarness({
   required final AppPreferences preferences,
   required final AppProvider appProvider,
   required final ShellProvider shellProvider,
+  final Widget? home,
 }) {
   return MultiProvider(
     providers: <SingleChildWidget>[
@@ -42,10 +43,10 @@ Widget _buildHarness({
       ChangeNotifierProvider<LayersProvider>.value(value: appProvider.layers),
       ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
     ],
-    child: const MaterialApp(
+    child: MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      home: MainScreen(),
+      home: home ?? const MainScreen(),
     ),
   );
 }
@@ -128,6 +129,83 @@ void main() {
     expect(find.text('Modify'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.text('Apply'), findsOneWidget);
+  });
+
+  testWidgets('uses compact horizontal padding for modify mode in a narrow side panel', (
+    final WidgetTester tester,
+  ) async {
+    await appProvider.modifySelectedLayer();
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: AppLayout.sidePanelCollapsed,
+            height: AppLayout.sidePanelExpandedMin,
+            child: SidePanel(
+              minimal: false,
+              preferences: preferences,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(SidePanel)).width, AppLayout.sidePanelCollapsed);
+
+    expect(
+      find.byWidgetPredicate(
+        (final Widget widget) =>
+            widget is Padding &&
+            widget.padding ==
+                const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.small,
+                  vertical: AppSpacing.large,
+                ),
+      ),
+      findsOneWidget,
+    );
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: AppLayout.sidePanelExpandedMin,
+            height: AppLayout.sidePanelExpandedMin,
+            child: SidePanel(
+              minimal: false,
+              preferences: preferences,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(tester.getSize(find.byType(SidePanel)).width, AppLayout.sidePanelExpandedMin);
+
+    expect(
+      find.byWidgetPredicate(
+        (final Widget widget) =>
+            widget is Padding &&
+            widget.padding ==
+                const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.large,
+                  vertical: AppSpacing.large,
+                ),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets('keeps bottom-right tools visible while transform overlay is active', (

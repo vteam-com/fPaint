@@ -37,17 +37,26 @@ class AppButtonRow extends StatelessWidget {
           if (groups.danger.isNotEmpty)
             Align(
               alignment: Alignment.centerLeft,
-              child: _AppButtonRowGroup(actions: groups.danger),
+              child: _AppButtonRowGroup(
+                actions: groups.danger,
+                verticalAlignment: CrossAxisAlignment.start,
+              ),
             ),
           if (groups.icon.isNotEmpty)
             Align(
               alignment: Alignment.center,
-              child: _AppButtonRowGroup(actions: groups.icon),
+              child: _AppButtonRowGroup(
+                actions: groups.icon,
+                verticalAlignment: CrossAxisAlignment.center,
+              ),
             ),
           if (trailingActions.isNotEmpty)
             Align(
               alignment: Alignment.centerRight,
-              child: _AppButtonRowGroup(actions: trailingActions),
+              child: _AppButtonRowGroup(
+                actions: trailingActions,
+                verticalAlignment: CrossAxisAlignment.end,
+              ),
             ),
         ],
       ),
@@ -174,17 +183,68 @@ class AppRowPrimaryButton extends AppButtonRowWidget {
 }
 
 class _AppButtonRowGroup extends StatelessWidget {
-  const _AppButtonRowGroup({required this.actions});
-
+  const _AppButtonRowGroup({
+    required this.actions,
+    required this.verticalAlignment,
+  });
   final List<Widget> actions;
-
+  final CrossAxisAlignment verticalAlignment;
   @override
   Widget build(final BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: AppSpacing.medium,
-      children: actions,
+    return LayoutBuilder(
+      builder: (final BuildContext _, final BoxConstraints constraints) {
+        if (_shouldStackVertically(constraints.maxWidth)) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: verticalAlignment,
+            spacing: AppSpacing.medium,
+            children: actions,
+          );
+        }
+
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: AppSpacing.medium,
+          children: actions,
+        );
+      },
     );
+  }
+
+  /// Returns a coarse width estimate for [action] so narrow containers can stack safely.
+  double _estimatedActionWidth(final Widget action) {
+    if (action is AppButtonIcon || action is AppRowIconButton) {
+      return AppLayout.toolbarButtonSize;
+    }
+
+    if (action is AppButtonDanger ||
+        action is AppButtonPrimary ||
+        action is AppButtonText ||
+        action is AppRowDangerButton ||
+        action is AppRowPrimaryButton ||
+        action is AppRowSecondaryButton) {
+      return AppLayout.toolbarButtonWidth + AppSpacing.large;
+    }
+
+    return AppLayout.toolbarButtonWidth;
+  }
+
+  /// Estimated minimum width needed to keep all actions on one horizontal line.
+  double get _estimatedHorizontalWidth {
+    if (actions.isEmpty) {
+      return 0.0;
+    }
+
+    final double contentWidth = actions.fold<double>(
+      0.0,
+      (final double total, final Widget action) => total + _estimatedActionWidth(action),
+    );
+    final int gaps = actions.length - 1;
+    return contentWidth + (gaps * AppSpacing.medium);
+  }
+
+  bool _shouldStackVertically(final double maxWidth) {
+    return maxWidth.isFinite && maxWidth < _estimatedHorizontalWidth;
   }
 }
 
