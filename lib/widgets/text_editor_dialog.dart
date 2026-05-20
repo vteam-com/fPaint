@@ -6,6 +6,7 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/text_formatting_controls.dart';
 
 /// Bottom-sheet content used to create or edit text with shared style controls.
 class TextEditorDialog extends StatefulWidget {
@@ -69,7 +70,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
             keyboardType: TextInputType.multiline,
             hintText: l10n.enterYourTextHere,
             textAlign: _style.textAlign,
-            style: TextStyle(
+            style: AppTextStyle.input.copyWith(
               fontSize: _style.size,
               color: _style.color,
               fontWeight: _style.fontWeight,
@@ -94,55 +95,23 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              AppButtonIcon(
-                key: Keys.textEditorBoldButton,
-                icon: AppIcon.formatBold,
-                color: _style.fontWeight == FontWeight.bold ? AppColors.blue : AppColors.grey,
-                onPressed: () {
+              TextStyleToggleButtons(
+                value: _style,
+                onChanged: (final TextToolState value) {
                   setState(() {
-                    _style.fontWeight = _style.fontWeight == FontWeight.bold ? FontWeight.normal : FontWeight.bold;
-                  });
-                },
-              ),
-              AppButtonIcon(
-                key: Keys.textEditorItalicButton,
-                icon: AppIcon.formatItalic,
-                color: _style.fontStyle == FontStyle.italic ? AppColors.blue : AppColors.grey,
-                onPressed: () {
-                  setState(() {
-                    _style.fontStyle = _style.fontStyle == FontStyle.italic ? FontStyle.normal : FontStyle.italic;
+                    _style = value;
                   });
                 },
               ),
               const SizedBox(width: AppSpacing.medium),
-              SizedBox(
-                width: AppLayout.inputFieldWidth,
-                child: AppDropdown<TextAlign>(
-                  key: Keys.textEditorAlignmentDropdown,
-                  value: _style.textAlign,
-                  items: <AppDropdownItem<TextAlign>>[
-                    AppDropdownItem<TextAlign>(
-                      value: TextAlign.left,
-                      child: Text(l10n.textAlignLeft),
-                    ),
-                    AppDropdownItem<TextAlign>(
-                      value: TextAlign.center,
-                      child: Text(l10n.textAlignCenter),
-                    ),
-                    AppDropdownItem<TextAlign>(
-                      value: TextAlign.right,
-                      child: Text(l10n.textAlignRight),
-                    ),
-                  ],
-                  onChanged: (final TextAlign? value) {
-                    if (value == null) {
-                      return;
-                    }
-                    setState(() {
-                      _style.textAlign = value;
-                    });
-                  },
-                ),
+              TextAlignmentDropdown(
+                l10n: l10n,
+                value: _style.textAlign,
+                onChanged: (final TextAlign value) {
+                  setState(() {
+                    _style.textAlign = value;
+                  });
+                },
               ),
               const Spacer(),
               Container(

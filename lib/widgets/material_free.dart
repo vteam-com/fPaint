@@ -12,6 +12,7 @@ export 'app_dialog.dart';
 export 'app_divider.dart';
 export 'app_dropdown.dart';
 export 'app_list_tile.dart';
+export 'app_overlay.dart';
 export 'app_popup_menu.dart';
 export 'app_progress.dart';
 export 'app_scaffold.dart';

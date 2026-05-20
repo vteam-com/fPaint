@@ -87,7 +87,7 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(final BuildContext context) {
-    final TextStyle effectiveStyle = widget.style ?? AppTextStyle.title;
+    final TextStyle effectiveStyle = widget.style ?? AppTextStyle.input;
 
     return DecoratedBox(
       decoration: BoxDecoration(

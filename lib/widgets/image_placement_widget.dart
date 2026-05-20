@@ -94,7 +94,7 @@ class ImagePlacementWidget extends StatelessWidget {
                   height: screenHeight,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: AppColors.blue,
+                      color: AppColors.selected,
                       width: AppStroke.thin,
                     ),
                   ),
@@ -243,7 +243,7 @@ class ImagePlacementWidget extends StatelessWidget {
             width: handleSize,
             height: handleSize,
             decoration: BoxDecoration(
-              color: AppColors.blue,
+              color: AppColors.selected,
               border: Border.all(color: AppColors.white, width: AppStroke.regular),
               borderRadius: BorderRadius.circular(AppRadius.small),
             ),

@@ -44,7 +44,7 @@ class NineGridSelector extends StatelessWidget {
             onTap: () => onPositionSelected(CanvasResizePosition.values[index]),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: selectedPosition == CanvasResizePosition.values[index] ? AppColors.blue : AppColors.grey800,
+                color: selectedPosition == CanvasResizePosition.values[index] ? AppColors.selected : AppColors.grey800,
                 borderRadius: BorderRadius.circular(AppRadius.small),
               ),
               child: AppSvgIcon(

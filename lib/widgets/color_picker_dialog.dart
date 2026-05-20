@@ -173,7 +173,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: AppColors.grey300,
-                        width: 1,
+                        width: AppStroke.thin,
                       ),
                     ),
                   ),
