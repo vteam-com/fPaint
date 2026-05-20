@@ -28,6 +28,7 @@ const String _defaultLayerPrefix = 'Layer';
 class LayersProvider extends ChangeNotifier {
   LayersProvider({UndoProvider? undoProvider}) : _undoProvider = undoProvider ?? UndoProvider() {
     addWhiteBackgroundLayer();
+    _setSelectedLayerIndex(index: 0, notify: false);
     clearHasChanged();
   }
 
@@ -208,9 +209,10 @@ class LayersProvider extends ChangeNotifier {
     clear();
     _size = canvasSize;
     await addLayers();
-    _selectedLayerIndex = 0;
     if (isNotEmpty) {
-      get(0).isSelected = true;
+      _setSelectedLayerIndex(index: 0, notify: false);
+    } else {
+      _selectedLayerIndex = 0;
     }
     clearHasChanged();
     // clearHasChanged already calls notifyListeners
@@ -233,17 +235,26 @@ class LayersProvider extends ChangeNotifier {
   /// Gets the index of the selected layer.
   int get selectedLayerIndex => _selectedLayerIndex;
 
+  /// Synchronizes the selected index, layer ids, and per-layer selection flags.
+  void _setSelectedLayerIndex({
+    required final int index,
+    final bool notify = true,
+  }) {
+    for (int i = 0; i < length; i++) {
+      final LayerProvider layer = get(i);
+      layer.id = (length - i).toString();
+      layer.isSelected = i == index;
+    }
+    _selectedLayerIndex = index;
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
   /// Sets the index of the selected layer.
   set selectedLayerIndex(final int index) {
     if (this.isIndexInRange(index)) {
-      for (int i = 0; i < this.length; i++) {
-        final LayerProvider layer = this.get(i);
-        layer.id = (this.length - i).toString();
-        layer.isSelected = i == index;
-      }
-      _selectedLayerIndex = index;
-      this.get(_selectedLayerIndex).isSelected = true;
-      notifyListeners();
+      _setSelectedLayerIndex(index: index);
     }
   }
 

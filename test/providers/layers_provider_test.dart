@@ -170,6 +170,24 @@ void main() {
   });
 
   group('Layer Operations: Selecting', () {
+    test('replaceAll normalizes selected flags to a single layer', () async {
+      await layersProvider.replaceAll(
+        canvasSize: const Size(200, 100),
+        addLayers: () async {
+          layersProvider.addTop(name: 'Imported 1');
+          layersProvider.addTop(name: 'Imported 2');
+        },
+      );
+
+      final List<LayerProvider> selectedLayers = layersProvider.list
+          .where((final LayerProvider layer) => layer.isSelected)
+          .toList();
+
+      expect(layersProvider.selectedLayerIndex, _firstLayerIndex);
+      expect(selectedLayers, hasLength(1));
+      expect(selectedLayers.single, same(layersProvider.get(_firstLayerIndex)));
+    });
+
     test('selectedLayerIndex setter updates selected layer', () {
       layersProvider.addTop(name: 'Layer2'); // Index 0
       layersProvider.addTop(name: 'Layer3'); // Index 0
