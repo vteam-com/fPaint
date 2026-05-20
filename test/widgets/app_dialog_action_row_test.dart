@@ -69,6 +69,32 @@ void main() {
       final Offset applyCenter = tester.getCenter(find.text('Apply'));
 
       expect(cancelCenter.dx, lessThan(applyCenter.dx));
+      expect((cancelCenter.dy - applyCenter.dy).abs(), lessThanOrEqualTo(AppSpacing.small));
+    });
+
+    testWidgets('stacks trailing actions vertically when width is too small', (final WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: SizedBox(
+              width: 120,
+              child: AppButtonRow(
+                actions: <Widget>[
+                  _TestDialogAction(slot: AppButtonRowSlot.secondary, boxKey: _secondaryKey),
+                  _TestDialogAction(slot: AppButtonRowSlot.primary, boxKey: _primaryKey),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset secondaryCenter = tester.getCenter(find.byKey(_secondaryKey));
+      final Offset primaryCenter = tester.getCenter(find.byKey(_primaryKey));
+
+      expect(secondaryCenter.dy, lessThan(primaryCenter.dy));
+      expect((secondaryCenter.dx - primaryCenter.dx).abs(), lessThanOrEqualTo(AppSpacing.small));
     });
   });
 }
