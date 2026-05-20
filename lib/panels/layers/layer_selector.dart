@@ -4,7 +4,8 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
-import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -14,6 +15,7 @@ import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/truncated_text.dart';
 
 const String _menuActionRename = 'rename';
+const String _menuActionModify = 'modify';
 const String _menuActionAdd = 'add';
 const String _menuActionDelete = 'delete';
 const String _menuActionMerge = 'merge';
@@ -47,7 +49,6 @@ class LayerSelector extends StatelessWidget {
 
   /// Whether to display the layer in minimal mode.
   final bool minimal;
-
   @override
   Widget build(final BuildContext context) {
     final LayersProvider layers = LayersProvider.of(context);
@@ -256,6 +257,12 @@ class LayerSelector extends StatelessWidget {
               },
             ),
           ),
+        AppButtonIcon(
+          key: Keys.layerModifyButton,
+          tooltip: l10n.layerModify,
+          icon: AppIcon.transform,
+          onPressed: () => _onModifyLayer(layers),
+        ),
       ],
     );
   }
@@ -329,6 +336,16 @@ class LayerSelector extends StatelessWidget {
             const AppSvgIcon(icon: AppIcon.edit),
             const SizedBox(width: AppSpacing.small),
             AppText(l10n.layerRename),
+          ],
+        ),
+      ),
+      AppPopupMenuItem<String>(
+        value: _menuActionModify,
+        child: Row(
+          children: <Widget>[
+            const AppSvgIcon(icon: AppIcon.transform),
+            const SizedBox(width: AppSpacing.small),
+            AppText(l10n.layerModify),
           ],
         ),
       ),
@@ -475,6 +492,9 @@ class LayerSelector extends StatelessWidget {
       case _menuActionRename:
         await renameLayer();
         break;
+      case _menuActionModify:
+        await _onModifyLayer(layers);
+        break;
       case _menuActionAdd:
         _onAddLayer(layers);
         break;
@@ -541,5 +561,12 @@ class LayerSelector extends StatelessWidget {
     final int indexTo,
   ) {
     layers.mergeLayers(indexFrom, indexTo);
+  }
+
+  /// Floats the current layer into modify mode.
+  Future<void> _onModifyLayer(final LayersProvider layers) async {
+    final AppProvider appProvider = AppProvider.of(context);
+    layers.selectedLayerIndex = layers.getLayerIndex(layer);
+    await appProvider.modifySelectedLayer();
   }
 }

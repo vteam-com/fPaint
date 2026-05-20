@@ -88,7 +88,7 @@ void main() {
           home: Scaffold(
             body: Builder(
               builder: (final BuildContext context) {
-                return ElevatedButton(
+                return AppButtonPrimary(
                   onPressed: () {
                     showBrushStylePicker(
                       context,
@@ -96,7 +96,7 @@ void main() {
                       (final BrushStyle _) {},
                     );
                   },
-                  child: const Text('Open Picker'),
+                  text: 'Open Picker',
                 );
               },
             ),

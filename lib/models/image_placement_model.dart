@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/visible_model.dart';
 
 /// Holds the state for an image being interactively placed on the canvas
@@ -17,6 +18,12 @@ class ImagePlacementModel extends VisibleModel {
 
   /// Rotation angle in radians.
   double rotation = 0.0;
+
+  /// Controls whether the placement creates a new layer or replaces one.
+  ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer;
+
+  /// Original layer state to restore while using placement as a modify flow.
+  ImagePlacementLayerRestoreState? layerRestoreState;
 
   /// The width of the image in canvas coordinates after scaling.
   double get displayWidth => (image?.width.toDouble() ?? 0) * scale;
@@ -39,11 +46,15 @@ class ImagePlacementModel extends VisibleModel {
   void start({
     required final ui.Image imageToPlace,
     required final Offset initialPosition,
+    final ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
+    final ImagePlacementLayerRestoreState? layerRestoreState,
   }) {
     image = imageToPlace;
     position = initialPosition;
     scale = 1.0;
     rotation = 0.0;
+    this.commitMode = commitMode;
+    this.layerRestoreState = layerRestoreState;
     isVisible = true;
   }
 
@@ -54,5 +65,7 @@ class ImagePlacementModel extends VisibleModel {
     position = Offset.zero;
     scale = 1.0;
     rotation = 0.0;
+    commitMode = ImagePlacementCommitMode.newLayer;
+    layerRestoreState = null;
   }
 }

@@ -20,6 +20,7 @@ class ImagePlacementWidget extends StatelessWidget {
     required this.canvasOffset,
     required this.canvasScale,
     required this.onChanged,
+    required this.onToggleTransformMode,
     required this.onConfirm,
     required this.onCancel,
   });
@@ -41,6 +42,9 @@ class ImagePlacementWidget extends StatelessWidget {
 
   /// Called when the user commits the placement.
   final VoidCallback onConfirm;
+
+  /// Called when the user switches to perspective transform mode.
+  final VoidCallback onToggleTransformMode;
   @override
   Widget build(final BuildContext context) {
     final ui.Image? image = model.image;
@@ -115,27 +119,17 @@ class ImagePlacementWidget extends StatelessWidget {
           // Rotation handle above the top center
           _buildRotationHandle(screenBounds, screenCenter, l10n),
 
+          // Transform mode button aligned with the top selection controls
+          _buildTransformModeButton(screenBounds, l10n),
+
           // Rotation stem line
           buildRotationStem(
             screenBounds,
             handleSize: AppInteraction.imagePlacementButtonSize,
           ),
 
-          // Confirm / Cancel buttons below the image
-          Positioned(
-            left:
-                screenCenter.dx -
-                (AppInteraction.imagePlacementButtonSize + AppInteraction.imagePlacementButtonSpacing / AppMath.pair),
-            top:
-                screenBounds.bottom +
-                AppInteraction.imagePlacementButtonSpacing +
-                AppInteraction.imagePlacementHandleSize,
-            child: buildOverlayConfirmCancelButtons(
-              l10n: l10n,
-              onConfirm: onConfirm,
-              onCancel: onCancel,
-            ),
-          ),
+          // Confirm / Cancel buttons below the image.
+          _buildBottomActionRow(screenBounds, screenCenter, l10n),
         ],
       ),
     );
@@ -157,6 +151,25 @@ class ImagePlacementWidget extends StatelessWidget {
       AppInteraction.imagePlacementMaxScale,
     );
     onChanged();
+  }
+
+  /// Builds the bottom action row shown below the image preview.
+  Widget _buildBottomActionRow(
+    final Rect screenBounds,
+    final Offset screenCenter,
+    final AppLocalizations l10n,
+  ) {
+    return Positioned(
+      left:
+          screenCenter.dx -
+          (AppInteraction.imagePlacementButtonSize + AppInteraction.imagePlacementButtonSpacing / AppMath.pair),
+      top: screenBounds.bottom + AppInteraction.imagePlacementButtonSpacing + AppInteraction.imagePlacementHandleSize,
+      child: buildOverlayConfirmCancelButtons(
+        l10n: l10n,
+        onConfirm: onConfirm,
+        onCancel: onCancel,
+      ),
+    );
   }
 
   /// Builds the four corner handles that let the user uniformly scale the
@@ -275,6 +288,31 @@ class ImagePlacementWidget extends StatelessWidget {
           onChanged();
         },
         child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppColors.white),
+      ),
+    );
+  }
+
+  /// Builds the transform mode button in the same top cluster used by selection.
+  Widget _buildTransformModeButton(
+    final Rect screenBounds,
+    final AppLocalizations l10n,
+  ) {
+    const double buttonSize = AppInteraction.imagePlacementButtonSize;
+    const double spacing = AppInteraction.imagePlacementButtonSpacing;
+    final Offset handleCenter = Offset(
+      screenBounds.center.dx + buttonSize + spacing,
+      screenBounds.top - AppInteraction.rotationHandleDistance,
+    );
+
+    return Positioned(
+      left: handleCenter.dx - buttonSize / AppMath.pair,
+      top: handleCenter.dy - buttonSize / AppMath.pair,
+      child: buildOverlayCircleButton(
+        tooltip: l10n.transform,
+        color: AppColors.transformCornerHandle,
+        cursor: SystemMouseCursors.click,
+        onTap: onToggleTransformMode,
+        child: const AppSvgIcon(icon: AppIcon.transform, size: AppLayout.iconSize, color: AppColors.white),
       ),
     );
   }

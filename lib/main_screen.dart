@@ -6,6 +6,7 @@ import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/floating_buttons.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -45,6 +46,10 @@ class MainScreen extends StatelessWidget {
 
     final ShellProvider shellProvider = ShellProvider.of(context, listen: true);
     final ShellMode shellMode = shellProvider.shellMode;
+    final bool hasActiveTransformOverlay = appProvider.hasActiveTransformOverlay;
+    final bool isModifyMode =
+        appProvider.imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&
+        appProvider.imagePlacementModel.layerRestoreState != null;
 
     shellProvider.deviceSizeSmall = MediaQuery.of(context).size.width < AppLayout.desktopBreakpoint;
 
@@ -57,7 +62,7 @@ class MainScreen extends StatelessWidget {
         body: Stack(
           children: <Widget>[
             shellMode == ShellMode.hidden
-                ? _buildMainContent(context, shellProvider, appPreferences)
+                ? _buildMainContent(context, shellProvider, appPreferences, hasActiveTransformOverlay, isModifyMode)
                 : MultiSplitViewTheme(
                     data: MultiSplitViewThemeData(
                       dividerPainter: DividerPainters.grooved1(
@@ -70,7 +75,13 @@ class MainScreen extends StatelessWidget {
                         strokeCap: StrokeCap.round,
                       ),
                     ),
-                    child: _buildMainContent(context, shellProvider, appPreferences),
+                    child: _buildMainContent(
+                      context,
+                      shellProvider,
+                      appPreferences,
+                      hasActiveTransformOverlay,
+                      isModifyMode,
+                    ),
                   ),
             Positioned(
               right: AppSpacing.large,
@@ -118,7 +129,13 @@ class MainScreen extends StatelessWidget {
     final BuildContext context,
     final ShellProvider shellProvider,
     final AppPreferences appPreferences,
+    final bool hasActiveTransformOverlay,
+    final bool isModifyMode,
   ) {
+    if (hasActiveTransformOverlay && !isModifyMode) {
+      return const MainView();
+    }
+
     if (shellProvider.shellMode == ShellMode.hidden) {
       return const MainView();
     }

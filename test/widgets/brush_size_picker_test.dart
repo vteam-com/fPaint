@@ -222,7 +222,7 @@ void main() {
           home: Scaffold(
             body: Builder(
               builder: (final BuildContext context) {
-                return ElevatedButton(
+                return AppButtonPrimary(
                   onPressed: () {
                     showBrushSizePicker(
                       context: context,
@@ -235,7 +235,7 @@ void main() {
                       },
                     );
                   },
-                  child: const Text('Show Size Picker'),
+                  text: 'Show Size Picker',
                 );
               },
             ),

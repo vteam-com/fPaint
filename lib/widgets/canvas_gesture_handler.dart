@@ -221,6 +221,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final AppProvider appProvider,
     final PointerEvent event,
   ) {
+    if (appProvider.hasActiveTransformOverlay) {
+      return;
+    }
+
     final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
     final bool isSelectionActive =
         appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
@@ -265,6 +269,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final AppProvider appProvider,
     final PointerDownEvent event,
   ) async {
+    if (appProvider.hasActiveTransformOverlay) {
+      return;
+    }
+
     final ui.Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
     final bool isSelectionActive =
         appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;

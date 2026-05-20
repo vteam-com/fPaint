@@ -1,7 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -95,6 +97,94 @@ void main() {
       appProvider.cancelImagePlacement();
       expect(appProvider.imagePlacementModel.image, isNull);
       expect(notifyCount, 1);
+    });
+
+    test('restores modified layer state', () async {
+      const Color originalBackgroundColor = Color(0xFF000000);
+      appProvider.layers.selectedLayer.backgroundColor = originalBackgroundColor;
+
+      await appProvider.modifySelectedLayer();
+
+      expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.replaceLayer);
+      expect(appProvider.layers.selectedLayer.actionStack, isEmpty);
+      expect(appProvider.layers.selectedLayer.backgroundColor, isNull);
+
+      appProvider.cancelImagePlacement();
+
+      expect(appProvider.layers.selectedLayer.backgroundColor, originalBackgroundColor);
+    });
+  });
+
+  group('modifySelectedLayer', () {
+    test('selects all, switches to selector, and opens replace-layer placement', () async {
+      appProvider.layers.selectedLayer.backgroundColor = const Color(0xFF000000);
+
+      await appProvider.modifySelectedLayer();
+
+      expect(appProvider.selectedAction, ActionType.selector);
+      expect(appProvider.selectorModel.isVisible, isTrue);
+      expect(appProvider.selectorModel.path1, isNotNull);
+      expect(appProvider.imagePlacementModel.isVisible, isTrue);
+      expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.replaceLayer);
+    });
+
+    test('confirm replaces the same layer and undo restores original state', () async {
+      const Color originalBackgroundColor = Color(0xFF000000);
+      final int originalLayerCount = appProvider.layers.length;
+      appProvider.layers.selectedLayer.backgroundColor = originalBackgroundColor;
+
+      await appProvider.modifySelectedLayer();
+      await appProvider.confirmImagePlacement();
+
+      expect(appProvider.layers.length, originalLayerCount);
+      expect(appProvider.layers.selectedLayer.actionStack, isNotEmpty);
+      expect(appProvider.layers.selectedLayer.backgroundColor, isNull);
+      expect(appProvider.selectorModel.isVisible, isTrue);
+
+      appProvider.undoAction();
+
+      expect(appProvider.layers.length, originalLayerCount);
+      expect(appProvider.layers.selectedLayer.backgroundColor, originalBackgroundColor);
+    });
+
+    test('can enter transform mode and return to image placement', () async {
+      appProvider.layers.selectedLayer.backgroundColor = const Color(0xFF000000);
+
+      await appProvider.modifySelectedLayer();
+      final Offset originalPosition = appProvider.imagePlacementModel.position;
+
+      await appProvider.startImagePlacementTransform();
+
+      expect(appProvider.imagePlacementModel.isVisible, isFalse);
+      expect(appProvider.transformModel.isVisible, isTrue);
+      expect(appProvider.transformModel.source, TransformSessionSource.imagePlacement);
+
+      appProvider.cancelTransform();
+
+      expect(appProvider.transformModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.isVisible, isTrue);
+      expect(appProvider.imagePlacementModel.position, originalPosition);
+    });
+
+    test('confirming transform returns a transformed image to placement mode', () async {
+      appProvider.layers.selectedLayer.backgroundColor = const Color(0xFF000000);
+
+      await appProvider.modifySelectedLayer();
+      final Offset originalPosition = appProvider.imagePlacementModel.position;
+      await appProvider.startImagePlacementTransform();
+
+      appProvider.transformModel.moveCorner(
+        TransformModel.topLeftIndex,
+        const Offset(-10, -10),
+      );
+
+      await appProvider.confirmTransform();
+
+      expect(appProvider.transformModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.isVisible, isTrue);
+      expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.replaceLayer);
+      expect(appProvider.imagePlacementModel.image, isNotNull);
+      expect(appProvider.imagePlacementModel.position, originalPosition + const Offset(-10, -10));
     });
   });
 

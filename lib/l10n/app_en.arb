@@ -173,6 +173,7 @@
   "layerHide": "Hide layer",
   "layerHideAllOthers": "Hide all other layers",
   "layerMergeBelow": "Merge to below layer",
+  "layerModify": "Modify",
   "layerNameTitle": "Layer Name",
   "layerOpacity": "Opacity: ",
   "layerRename": "Rename layer",

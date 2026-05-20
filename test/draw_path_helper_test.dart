@@ -105,6 +105,44 @@ void main() {
     expect(resultBounds.height, closeTo(120, 0.001));
   });
 
+  test('expandPathInDirectionWithOffset returns original path for zero-width horizontal resize', () {
+    final Path path = Path()
+      ..moveTo(10, 10)
+      ..lineTo(10, 110);
+    final Rect before = path.getBounds();
+
+    final Path result = expandPathInDirectionWithOffset(
+      path,
+      const Offset(20, 0),
+      NineGridHandle.right,
+    );
+
+    final Rect after = result.getBounds();
+    expect(after.left, closeTo(before.left, 0.001));
+    expect(after.top, closeTo(before.top, 0.001));
+    expect(after.width, closeTo(before.width, 0.001));
+    expect(after.height, closeTo(before.height, 0.001));
+  });
+
+  test('expandPathInDirectionWithOffset returns original path for zero-height vertical resize', () {
+    final Path path = Path()
+      ..moveTo(10, 10)
+      ..lineTo(110, 10);
+    final Rect before = path.getBounds();
+
+    final Path result = expandPathInDirectionWithOffset(
+      path,
+      const Offset(0, 20),
+      NineGridHandle.bottom,
+    );
+
+    final Rect after = result.getBounds();
+    expect(after.left, closeTo(before.left, 0.001));
+    expect(after.top, closeTo(before.top, 0.001));
+    expect(after.width, closeTo(before.width, 0.001));
+    expect(after.height, closeTo(before.height, 0.001));
+  });
+
   group('rotatePathAroundCenter', () {
     test('rotating by 0 preserves the path bounds', () {
       final Path path = Path()..addRect(const Rect.fromLTWH(10, 10, 100, 100));

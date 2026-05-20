@@ -285,6 +285,9 @@ class AppProvider extends ChangeNotifier {
   /// The transform model for perspective/skew operations.
   final TransformModel transformModel = TransformModel();
 
+  /// Whether an interactive transform overlay is currently active.
+  bool get hasActiveTransformOverlay => imagePlacementModel.isVisible || transformModel.isVisible;
+
   /// The effect preview model for live selection-effect intensity updates.
   final EffectPreviewModel effectPreviewModel = EffectPreviewModel();
 

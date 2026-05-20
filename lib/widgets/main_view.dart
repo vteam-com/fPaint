@@ -38,6 +38,7 @@ class MainViewState extends State<MainView> {
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: true);
+    final bool hasActiveTransformOverlay = appProvider.hasActiveTransformOverlay;
 
     return RepaintBoundary(
       key: Keys.mainViewScreenshotBoundary,
@@ -65,7 +66,8 @@ class MainViewState extends State<MainView> {
                 },
           ),
 
-          if (appProvider.effectPreviewModel.isVisible &&
+          if (!hasActiveTransformOverlay &&
+              appProvider.effectPreviewModel.isVisible &&
               appProvider.effectPreviewModel.previewImage != null &&
               appProvider.effectPreviewModel.bounds != null)
             Positioned(
@@ -86,7 +88,7 @@ class MainViewState extends State<MainView> {
           //
           // Color selection from image
           //
-          if (appProvider.eyeDropPositionForBrush != null)
+          if (!hasActiveTransformOverlay && appProvider.eyeDropPositionForBrush != null)
             _buildEyeDropper(
               appProvider: appProvider,
               position: appProvider.eyeDropPositionForBrush!,
@@ -98,7 +100,7 @@ class MainViewState extends State<MainView> {
               },
             ),
 
-          if (appProvider.eyeDropPositionForFill != null)
+          if (!hasActiveTransformOverlay && appProvider.eyeDropPositionForFill != null)
             _buildEyeDropper(
               appProvider: appProvider,
               position: appProvider.eyeDropPositionForFill!,
@@ -113,7 +115,7 @@ class MainViewState extends State<MainView> {
           //
           // Selection Widget
           //
-          if (appProvider.selectorModel.isVisible && !appProvider.transformModel.isVisible)
+          if (appProvider.selectorModel.isVisible && !hasActiveTransformOverlay)
             SelectionRectWidget(
               path1: appProvider.getPathAdjustToCanvasSizeAndPosition(
                 appProvider.selectorModel.path1,
@@ -170,7 +172,7 @@ class MainViewState extends State<MainView> {
           //
           // Fill Widget
           //
-          if (appProvider.fillModel.isVisible)
+          if (!hasActiveTransformOverlay && appProvider.fillModel.isVisible)
             SizedBox(
               width: double.infinity,
               height: double.infinity,
@@ -182,7 +184,7 @@ class MainViewState extends State<MainView> {
               ),
             ),
 
-          if (appProvider.selectedTextObject != null) const TextEditor(),
+          if (!hasActiveTransformOverlay && appProvider.selectedTextObject != null) const TextEditor(),
 
           //
           // Image placement overlay (paste with interactive transform)
@@ -193,6 +195,9 @@ class MainViewState extends State<MainView> {
               canvasOffset: appProvider.canvasOffset,
               canvasScale: appProvider.layers.scale,
               onChanged: () => appProvider.update(),
+              onToggleTransformMode: () {
+                appProvider.startImagePlacementTransform();
+              },
               onConfirm: () => appProvider.confirmImagePlacement(),
               onCancel: () => appProvider.cancelImagePlacement(),
             ),

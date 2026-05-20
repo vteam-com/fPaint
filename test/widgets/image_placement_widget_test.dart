@@ -14,6 +14,16 @@ const int _testImageWidth = 100;
 const int _testImageHeight = 60;
 const Offset _initialImagePosition = Offset(80, 120);
 
+Finder _findOverlayButtonByTooltip(
+  final String tooltipMessage,
+) {
+  final Finder tooltip = find.byWidgetPredicate(
+    (final Widget widget) => widget is AppTooltip && widget.message == tooltipMessage,
+  );
+
+  return find.descendant(of: tooltip, matching: find.byType(GestureDetector)).first;
+}
+
 Future<ui.Image> _createTestImage() async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final Canvas canvas = Canvas(recorder);
@@ -47,6 +57,7 @@ void main() {
                 canvasOffset: Offset.zero,
                 canvasScale: 1.0,
                 onChanged: () {},
+                onToggleTransformMode: () {},
                 onConfirm: () {},
                 onCancel: () {},
               ),
@@ -69,5 +80,63 @@ void main() {
         AppInteraction.imagePlacementButtonSize,
       ),
     );
+  });
+
+  testWidgets('image placement transform button invokes the callback', (final WidgetTester tester) async {
+    final ImagePlacementModel model = ImagePlacementModel();
+    final ui.Image image = await _createTestImage();
+    bool didToggleTransformMode = false;
+    model.start(
+      imageToPlace: image,
+      initialPosition: _initialImagePosition,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: _hostWidth,
+              height: _hostHeight,
+              child: ImagePlacementWidget(
+                model: model,
+                canvasOffset: Offset.zero,
+                canvasScale: 1.0,
+                onChanged: () {},
+                onToggleTransformMode: () {
+                  didToggleTransformMode = true;
+                },
+                onConfirm: () {},
+                onCancel: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final Finder transformButton = _findOverlayButtonByTooltip('Transform');
+    final Finder cancelButton = _findOverlayButtonByTooltip('Cancel');
+    final Finder rotateControl = _findOverlayButtonByTooltip('Resize / Rotate');
+
+    expect(transformButton, findsOneWidget);
+    expect(cancelButton, findsOneWidget);
+    expect(rotateControl, findsOneWidget);
+
+    final Offset transformCenter = tester.getCenter(transformButton);
+    final Offset cancelCenter = tester.getCenter(cancelButton);
+    final Offset rotateCenter = tester.getCenter(rotateControl);
+
+    expect(transformCenter.dx, greaterThan(rotateCenter.dx));
+    expect(transformCenter.dy, closeTo(rotateCenter.dy, AppSpacing.small));
+    expect(transformCenter.dy, lessThan(cancelCenter.dy));
+
+    await tester.tap(transformButton);
+    await tester.pump();
+
+    expect(didToggleTransformMode, isTrue);
   });
 }

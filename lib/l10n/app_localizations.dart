@@ -782,6 +782,12 @@ abstract class AppLocalizations {
   /// **'Merge to below layer'**
   String get layerMergeBelow;
 
+  /// No description provided for @layerModify.
+  ///
+  /// In en, this message translates to:
+  /// **'Modify'**
+  String get layerModify;
+
   /// No description provided for @layerNameTitle.
   ///
   /// In en, this message translates to:

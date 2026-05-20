@@ -384,6 +384,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get layerMergeBelow => 'Merge to below layer';
 
   @override
+  String get layerModify => 'Modify';
+
+  @override
   String get layerNameTitle => 'Layer Name';
 
   @override

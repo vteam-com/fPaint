@@ -382,6 +382,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get layerMergeBelow => 'Fusionar con la capa inferior';
 
   @override
+  String get layerModify => 'Modificar';
+
+  @override
   String get layerNameTitle => 'Nombre de la capa';
 
   @override
