@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
+import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:provider/provider.dart';
+
+const List<Color> _presetColors = <Color>[
+  AppColors.black,
+  AppColors.white,
+  AppColors.grey,
+  AppColors.red,
+  AppColors.orange,
+  AppColors.yellow,
+  AppColors.green,
+  AppColors.blue,
+  AppColors.purple,
+];
 
 Widget _buildTestWidget({
   required final Color initialColor,
@@ -44,8 +58,11 @@ void main() {
       );
       await tester.pump();
 
-      // Should show preset color circles.
-      expect(find.byType(GestureDetector), findsWidgets);
+      final Finder presetPreviews = find.byWidgetPredicate(
+        (final Widget widget) => widget is ColorPreview && widget.minimal && _presetColors.contains(widget.color),
+      );
+
+      expect(presetPreviews, findsNWidgets(_presetColors.length));
     });
 
     testWidgets('tapping preset color updates state', (final WidgetTester tester) async {
@@ -59,16 +76,22 @@ void main() {
       );
       await tester.pump();
 
-      // Find colored circles — they are decorated containers inside GestureDetectors.
-      final Finder circles = find.byWidgetPredicate(
-        (final Widget w) =>
-            w is Container && w.decoration is BoxDecoration && (w.decoration as BoxDecoration).shape == BoxShape.circle,
+      final Finder presetPreviews = find.byWidgetPredicate(
+        (final Widget widget) => widget is ColorPreview && widget.minimal && _presetColors.contains(widget.color),
       );
-      expect(circles, findsWidgets);
+      expect(presetPreviews, findsNWidgets(_presetColors.length));
 
-      // Tap first preset color.
-      await tester.tap(circles.first);
+      await tester.tap(
+        find.byWidgetPredicate(
+          (final Widget widget) => widget is ColorPreview && widget.minimal && widget.color == AppColors.orange,
+        ),
+      );
       await tester.pump();
+
+      final ColorPreview preview = tester.widget<ColorPreview>(
+        find.byWidgetPredicate((final Widget widget) => widget is ColorPreview && widget.minimal == false).first,
+      );
+      expect(preview.color, AppColors.orange);
     });
 
     testWidgets('typing hex value updates color', (final WidgetTester tester) async {

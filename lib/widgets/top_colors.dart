@@ -77,9 +77,15 @@ class _TopColorsState extends State<TopColors> {
   @override
   void didUpdateWidget(final TopColors oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.refreshRevision != widget.refreshRevision ||
-        oldWidget.autoRefreshOnIdle != widget.autoRefreshOnIdle) {
-      _scheduleAutoRefreshIfNeeded();
+    final bool refreshSignalChanged = oldWidget.refreshRevision != widget.refreshRevision;
+    final bool autoRefreshModeChanged = oldWidget.autoRefreshOnIdle != widget.autoRefreshOnIdle;
+    final bool staleColorUsages =
+        widget.autoRefreshOnIdle &&
+        oldWidget.refreshRevision == widget.refreshRevision &&
+        identical(oldWidget.colorUsages, widget.colorUsages);
+
+    if (refreshSignalChanged || autoRefreshModeChanged || staleColorUsages) {
+      _scheduleAutoRefreshIfNeeded(force: staleColorUsages);
     }
   }
 
@@ -153,7 +159,7 @@ class _TopColorsState extends State<TopColors> {
     // Group colors by hue similarity (using a 15-degree threshold)
     for (final ColorUsage usage in widget.colorUsages) {
       final double hue = HSVColor.fromColor(usage.color).hue;
-      final int hueKey = (hue / 15).round() * 15; // Grouping by 15-degree steps
+      final int hueKey = (hue / AppLimits.hueGroupingStepDegrees).round() * AppLimits.hueGroupingStepDegrees;
 
       groupedByHue.putIfAbsent(hueKey, () => <ColorUsage>[]);
       groupedByHue[hueKey]!.add(usage);
@@ -191,8 +197,12 @@ class _TopColorsState extends State<TopColors> {
   }
 
   /// Debounces a refresh so the top-colors list updates after canvas edits go idle.
-  void _scheduleAutoRefreshIfNeeded() {
-    if (!widget.autoRefreshOnIdle || widget.refreshRevision <= _scheduledRefreshRevision) {
+  void _scheduleAutoRefreshIfNeeded({final bool force = false}) {
+    if (!widget.autoRefreshOnIdle) {
+      return;
+    }
+
+    if (!force && widget.refreshRevision <= _scheduledRefreshRevision) {
       return;
     }
 

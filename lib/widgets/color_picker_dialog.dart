@@ -147,10 +147,15 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
             ],
           ),
 
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: AppSpacing.small,
+            runSpacing: AppSpacing.small,
             children: <Widget>[
               for (final Color color in <Color>[
+                AppColors.black,
+                AppColors.white,
+                AppColors.grey,
                 AppColors.red,
                 AppColors.orange,
                 AppColors.yellow,
@@ -158,25 +163,16 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 AppColors.blue,
                 AppColors.purple,
               ])
-                GestureDetector(
-                  onTap: () {
+                ColorPreview(
+                  color: color,
+                  border: false,
+                  minimal: true,
+                  onPressed: () {
                     setState(() {
                       _currentColor = color;
                       _hexController.text = colorToHexString(color);
                     });
                   },
-                  child: Container(
-                    width: AppSpacing.largest,
-                    height: AppSpacing.largest,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.grey300,
-                        width: AppStroke.thin,
-                      ),
-                    ),
-                  ),
                 ),
             ],
           ),
@@ -196,6 +192,9 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 _hexController.text = colorToHexString(color);
               });
             },
+            showHeader: false,
+            autoRefreshOnIdle: true,
+            refreshRevision: layers.topColorsRefreshRevision,
           ),
 
           //----------------------------

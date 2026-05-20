@@ -87,6 +87,7 @@ enum AppIcon {
   undo('assets/icons/undo.svg'),
   visibility('assets/icons/visibility.svg'),
   visibilityOff('assets/icons/visibility_off.svg'),
+  waterDrop('assets/icons/water_drop.svg'),
   zoomIn('assets/icons/zoom_in.svg'),
   zoomOut('assets/icons/zoom_out.svg');
 
