@@ -1,5 +1,6 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/visible_model.dart';
 
 // Exports
@@ -49,15 +50,9 @@ class FillModel extends VisibleModel {
   /// produce additional color stops that are distributed evenly between the two
   /// handles.
   List<Color> gradientStopColors = <Color>[
-    gradientStopDefaultStart,
-    gradientStopDefaultEnd,
+    AppColors.gradientDefaultStart,
+    AppColors.gradientDefaultEnd,
   ];
-
-  /// Default start color used when no gradient has been applied yet.
-  static const Color gradientStopDefaultStart = Color(0xFF4FC3F7); // light blue
-
-  /// Default end color used when no gradient has been applied yet.
-  static const Color gradientStopDefaultEnd = Color(0xFF0D47A1); // dark blue
 
   /// The ordered list of stop positions for the gradient (values 0.0–1.0).
   ///

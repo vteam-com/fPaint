@@ -5,9 +5,6 @@ import 'package:fpaint/widgets/material_free.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const String _repoUrl = 'https://github.com/vteam-com/fPaint';
-const String _applicationLegalese = '(c) 2025 VTeam';
-
 /// Displays an about dialog with information about the application.
 ///
 /// This function shows a dialog box that includes the application's name,
@@ -40,12 +37,12 @@ Future<void> showAboutBox(final BuildContext context) async {
               height: AppLayout.appIconSize,
             ),
             const SizedBox(height: AppSpacing.medium),
-            const AppText(_applicationLegalese),
+            const AppText(AppConfig.applicationCopyright),
             const SizedBox(height: AppSpacing.large),
             AppText(l10n.deviceScreenResolution(screenResolution)),
             const SizedBox(height: AppSpacing.large),
             GestureDetector(
-              onTap: () => launchUrl(Uri.parse(_repoUrl)),
+              onTap: () => launchUrl(Uri.parse(AppConfig.repositoryUrl)),
               child: MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: AppText(

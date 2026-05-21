@@ -46,7 +46,7 @@ class MainScreen extends StatelessWidget {
 
     final ShellProvider shellProvider = ShellProvider.of(context, listen: true);
     final ShellMode shellMode = shellProvider.shellMode;
-    final bool hasActiveTransformOverlay = appProvider.hasActiveTransformOverlay;
+    final bool hasActiveTransformOverlay = appProvider.imagePlacementModel.isVisible;
     final bool isModifyMode =
         appProvider.imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&
         appProvider.imagePlacementModel.layerRestoreState != null;

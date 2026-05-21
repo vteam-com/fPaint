@@ -106,8 +106,7 @@ void main() {
       await appProvider.modifySelectedLayer();
 
       expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.replaceLayer);
-      expect(appProvider.layers.selectedLayer.actionStack, isEmpty);
-      expect(appProvider.layers.selectedLayer.backgroundColor, isNull);
+      expect(appProvider.layers.selectedLayer.backgroundColor, originalBackgroundColor);
 
       appProvider.cancelImagePlacement();
 
@@ -116,7 +115,7 @@ void main() {
   });
 
   group('modifySelectedLayer', () {
-    test('selects all, switches to selector, and opens replace-layer placement', () async {
+    test('selects all, switches to selector, and immediately enters transform mode', () async {
       appProvider.layers.selectedLayer.backgroundColor = const Color(0xFF000000);
 
       await appProvider.modifySelectedLayer();
@@ -124,11 +123,12 @@ void main() {
       expect(appProvider.selectedAction, ActionType.selector);
       expect(appProvider.selectorModel.isVisible, isTrue);
       expect(appProvider.selectorModel.path1, isNotNull);
-      expect(appProvider.imagePlacementModel.isVisible, isTrue);
+      expect(appProvider.imagePlacementModel.isVisible, isFalse);
       expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.replaceLayer);
+      expect(appProvider.transformModel.isVisible, isTrue);
     });
 
-    test('confirm replaces the same layer and undo restores original state', () async {
+    test('confirm exits modify session without mutating layer when no transform is applied', () async {
       const Color originalBackgroundColor = Color(0xFF000000);
       final int originalLayerCount = appProvider.layers.length;
       appProvider.layers.selectedLayer.backgroundColor = originalBackgroundColor;
@@ -137,41 +137,30 @@ void main() {
       await appProvider.confirmImagePlacement();
 
       expect(appProvider.layers.length, originalLayerCount);
-      expect(appProvider.layers.selectedLayer.actionStack, isNotEmpty);
-      expect(appProvider.layers.selectedLayer.backgroundColor, isNull);
-      expect(appProvider.selectorModel.isVisible, isTrue);
-
-      appProvider.undoAction();
-
-      expect(appProvider.layers.length, originalLayerCount);
       expect(appProvider.layers.selectedLayer.backgroundColor, originalBackgroundColor);
+      expect(appProvider.selectorModel.isVisible, isTrue);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
     });
 
-    test('can enter transform mode and return to image placement', () async {
+    test('cancel exits immediate transform mode and closes modify session', () async {
       appProvider.layers.selectedLayer.backgroundColor = const Color(0xFF000000);
 
       await appProvider.modifySelectedLayer();
-      final Offset originalPosition = appProvider.imagePlacementModel.position;
 
-      await appProvider.startImagePlacementTransform();
-
-      expect(appProvider.imagePlacementModel.isVisible, isFalse);
       expect(appProvider.transformModel.isVisible, isTrue);
-      expect(appProvider.transformModel.source, TransformSessionSource.imagePlacement);
+      expect(appProvider.transformModel.source, TransformSessionSource.selection);
 
       appProvider.cancelTransform();
 
       expect(appProvider.transformModel.isVisible, isFalse);
-      expect(appProvider.imagePlacementModel.isVisible, isTrue);
-      expect(appProvider.imagePlacementModel.position, originalPosition);
+      expect(appProvider.imagePlacementModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
     });
 
-    test('confirming transform returns a transformed image to placement mode', () async {
+    test('confirming transform applies on selected layer and exits modify session', () async {
       appProvider.layers.selectedLayer.backgroundColor = const Color(0xFF000000);
 
       await appProvider.modifySelectedLayer();
-      final Offset originalPosition = appProvider.imagePlacementModel.position;
-      await appProvider.startImagePlacementTransform();
 
       appProvider.transformModel.moveCorner(
         TransformModel.topLeftIndex,
@@ -181,10 +170,9 @@ void main() {
       await appProvider.confirmTransform();
 
       expect(appProvider.transformModel.isVisible, isFalse);
-      expect(appProvider.imagePlacementModel.isVisible, isTrue);
-      expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.replaceLayer);
-      expect(appProvider.imagePlacementModel.image, isNotNull);
-      expect(appProvider.imagePlacementModel.position, originalPosition + const Offset(-10, -10));
+      expect(appProvider.imagePlacementModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
+      expect(appProvider.undoProvider.canUndo, isTrue);
     });
   });
 

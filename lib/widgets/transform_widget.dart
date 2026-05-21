@@ -7,7 +7,6 @@ import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart' show AppIcon;
 import 'package:fpaint/models/transform_model.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 
 /// An overlay widget that lets the user interactively skew and change
@@ -266,22 +265,6 @@ class _TransformWidgetState extends State<TransformWidget> {
             screenCenter: screenCenter,
             screenCorners: screenBoundaryPoints,
           ),
-
-          // Confirm / Cancel buttons
-          Positioned(
-            left:
-                screenCenter.dx -
-                (AppInteraction.imagePlacementButtonSize + AppInteraction.imagePlacementButtonSpacing / AppMath.pair),
-            top:
-                _screenQuadBottom(screenCorners) +
-                AppInteraction.imagePlacementButtonSpacing +
-                AppInteraction.imagePlacementHandleSize,
-            child: buildOverlayConfirmCancelButtons(
-              l10n: l10n,
-              onConfirm: onConfirm,
-              onCancel: onCancel,
-            ),
-          ),
         ],
       ),
     );
@@ -372,7 +355,8 @@ class _TransformWidgetState extends State<TransformWidget> {
     ];
   }
 
-  /// Builds the transform mode controls and their live feedback bubble.
+  /// Builds the transform mode controls, confirm/cancel buttons, and feedback bubble.
+  /// Groups all controls together at the top of the selection to avoid overlap with handles.
   Widget _buildModeControls({
     required final AppLocalizations l10n,
     required final Offset screenCenter,
@@ -380,9 +364,14 @@ class _TransformWidgetState extends State<TransformWidget> {
   }) {
     const double buttonSize = AppInteraction.imagePlacementButtonSize;
     const double spacing = AppInteraction.imagePlacementButtonSpacing;
-    const double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
+    const double modeButtonsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair; // 3 mode buttons
+    const double confirmCancelWidth = buttonSize * AppMath.pair + spacing; // 2 confirm/cancel buttons
+    const double totalWidth = modeButtonsWidth + spacing + confirmCancelWidth; // All buttons with inter-group spacing
+
+    // Keep controls at the top to avoid overlapping with center handle
     final double controlsTop = _screenQuadTop(screenCorners) - buttonSize - AppInteraction.imagePlacementHandleSize;
-    final double controlsLeft = screenCenter.dx - controlsWidth / AppMath.pair;
+    final double controlsLeft = screenCenter.dx - totalWidth / AppMath.pair;
+
     final Offset scaleHandleCenter = Offset(
       controlsLeft + buttonSize / AppMath.pair,
       controlsTop + buttonSize / AppMath.pair,
@@ -409,9 +398,10 @@ class _TransformWidgetState extends State<TransformWidget> {
             mainAxisSize: MainAxisSize.min,
             spacing: spacing,
             children: <Widget>[
-              buildOverlayCircleButton(
+              buildOverlayModeButton(
                 tooltip: l10n.scale,
-                color: AppColors.selected,
+                icon: AppIcon.openInFull,
+                isSelected: model.isScaleMode,
                 cursor: SystemMouseCursors.grab,
                 onTap: () {
                   if (!model.isScaleMode) {
@@ -446,11 +436,11 @@ class _TransformWidgetState extends State<TransformWidget> {
                   model.endScaleGesture();
                   onChanged();
                 },
-                child: const AppSvgIcon(icon: AppIcon.openInFull, size: AppLayout.iconSize, color: AppColors.white),
               ),
-              buildOverlayCircleButton(
+              buildOverlayModeButton(
                 tooltip: l10n.resizeRotate,
-                color: AppColors.green,
+                icon: AppIcon.rotateRight,
+                isSelected: model.isRotateMode,
                 cursor: SystemMouseCursors.grab,
                 onTap: () {
                   if (!model.isRotateMode) {
@@ -488,11 +478,11 @@ class _TransformWidgetState extends State<TransformWidget> {
                   model.endRotateGesture();
                   onChanged();
                 },
-                child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppColors.white),
               ),
-              buildOverlayCircleButton(
+              buildOverlayModeButton(
                 tooltip: l10n.transform,
-                color: AppColors.transformCornerHandle,
+                icon: AppIcon.transform,
+                isSelected: model.isDeformMode,
                 cursor: SystemMouseCursors.click,
                 onTap: () {
                   if (!model.isDeformMode) {
@@ -502,24 +492,17 @@ class _TransformWidgetState extends State<TransformWidget> {
                   }
                   onChanged();
                 },
-                child: const AppSvgIcon(icon: AppIcon.transform),
+              ),
+              buildOverlayConfirmCancelButtons(
+                l10n: l10n,
+                onConfirm: onConfirm,
+                onCancel: onCancel,
               ),
             ],
           ),
         ],
       ),
     );
-  }
-
-  /// Returns the lowest on-screen Y value of the transformed quad.
-  double _screenQuadBottom(final List<Offset> screenCorners) {
-    double maxY = screenCorners[TransformModel.topLeftIndex].dy;
-    for (final Offset corner in screenCorners) {
-      if (corner.dy > maxY) {
-        maxY = corner.dy;
-      }
-    }
-    return maxY;
   }
 
   /// Returns the highest on-screen Y value of the transformed quad.

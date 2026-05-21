@@ -6,7 +6,6 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/image_placement_model.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/rotation_handle_widgets.dart';
 
@@ -270,9 +269,9 @@ class ImagePlacementWidget extends StatelessWidget {
     return Positioned(
       left: handleCenter.dx - handleSize / AppMath.pair,
       top: handleCenter.dy - handleSize / AppMath.pair,
-      child: buildOverlayCircleButton(
+      child: buildOverlayModeButton(
         tooltip: l10n.resizeRotate,
-        color: AppColors.green,
+        icon: AppIcon.rotateRight,
         cursor: SystemMouseCursors.grab,
         onPanUpdate: (final DragUpdateDetails details) {
           final Offset pointer = handleCenter + details.delta;
@@ -287,7 +286,6 @@ class ImagePlacementWidget extends StatelessWidget {
           model.rotation += currentAngle - previousAngle;
           onChanged();
         },
-        child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppColors.white),
       ),
     );
   }
@@ -307,12 +305,11 @@ class ImagePlacementWidget extends StatelessWidget {
     return Positioned(
       left: handleCenter.dx - buttonSize / AppMath.pair,
       top: handleCenter.dy - buttonSize / AppMath.pair,
-      child: buildOverlayCircleButton(
+      child: buildOverlayModeButton(
         tooltip: l10n.transform,
-        color: AppColors.transformCornerHandle,
+        icon: AppIcon.transform,
         cursor: SystemMouseCursors.click,
         onTap: onToggleTransformMode,
-        child: const AppSvgIcon(icon: AppIcon.transform, size: AppLayout.iconSize, color: AppColors.white),
       ),
     );
   }

@@ -15,6 +15,7 @@ import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/image_placement_widget.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
+import 'package:fpaint/widgets/transform_widget.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -76,33 +77,6 @@ void _expectSelectionOverlayAligned(
   expect(widget.path1, isNotNull);
 
   _expectRectMatches(widget.path1!.getBounds(), expectedPath!.getBounds());
-}
-
-Rect _imagePlacementScreenBounds(final ImagePlacementWidget widget) {
-  return Rect.fromLTWH(
-    widget.canvasOffset.dx + widget.model.position.dx * widget.canvasScale,
-    widget.canvasOffset.dy + widget.model.position.dy * widget.canvasScale,
-    widget.model.displayWidth * widget.canvasScale,
-    widget.model.displayHeight * widget.canvasScale,
-  );
-}
-
-void _expectImagePlacementOverlayAligned(
-  final WidgetTester tester,
-  final AppProvider appProvider,
-) {
-  final ImagePlacementWidget widget = tester.widget<ImagePlacementWidget>(
-    find.byType(ImagePlacementWidget),
-  );
-  final Rect expectedBounds = Rect.fromLTWH(
-    appProvider.canvasOffset.dx + appProvider.imagePlacementModel.position.dx * appProvider.layers.scale,
-    appProvider.canvasOffset.dy + appProvider.imagePlacementModel.position.dy * appProvider.layers.scale,
-    appProvider.imagePlacementModel.displayWidth * appProvider.layers.scale,
-    appProvider.imagePlacementModel.displayHeight * appProvider.layers.scale,
-  );
-
-  _expectRectMatches(_imagePlacementScreenBounds(widget), expectedBounds);
-  expect(widget.canvasScale, closeTo(appProvider.layers.scale, _geometryEpsilon));
 }
 
 void main() {
@@ -170,14 +144,13 @@ void main() {
     await tester.pump();
 
     expect(find.byType(MainView), findsOneWidget);
-    expect(find.byType(ImagePlacementWidget), findsOneWidget);
+    expect(find.byType(SelectionRectWidget), findsNothing);
+    expect(find.byType(TransformWidget), findsOneWidget);
+    expect(find.byType(ImagePlacementWidget), findsNothing);
     expect(find.byType(SidePanel), findsOneWidget);
     expect(find.text('Modify'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.text('Apply'), findsOneWidget);
-
-    await appProvider.startImagePlacementTransform();
-    await tester.pump();
 
     expect(find.byType(SidePanel), findsOneWidget);
     expect(find.text('Modify'), findsOneWidget);
@@ -223,7 +196,7 @@ void main() {
     _expectSelectionOverlayAligned(tester, appProvider);
   });
 
-  testWidgets('keeps layer modify overlay aligned while side panel resizes or closes', (
+  testWidgets('keeps layer modify transform overlay visible while side panel resizes or closes', (
     final WidgetTester tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
@@ -243,21 +216,20 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byType(ImagePlacementWidget), findsOneWidget);
-    _expectImagePlacementOverlayAligned(tester, appProvider);
+    expect(find.byType(TransformWidget), findsOneWidget);
 
     shellProvider.isSidePanelExpanded = false;
     await tester.pump();
-    _expectImagePlacementOverlayAligned(tester, appProvider);
+    expect(find.byType(TransformWidget), findsOneWidget);
 
     shellProvider.isSidePanelExpanded = true;
     await tester.pump();
-    _expectImagePlacementOverlayAligned(tester, appProvider);
+    expect(find.byType(TransformWidget), findsOneWidget);
 
     shellProvider.shellMode = ShellMode.hidden;
     shellProvider.update();
     await tester.pump();
-    _expectImagePlacementOverlayAligned(tester, appProvider);
+    expect(find.byType(TransformWidget), findsOneWidget);
   });
 
   testWidgets('uses compact horizontal padding for modify mode in a narrow side panel', (
@@ -358,7 +330,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(MainView), findsOneWidget);
-    expect(find.byType(SidePanel), findsNothing);
+    expect(find.byType(SidePanel), findsOneWidget);
     expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
     expect(find.byKey(Keys.floatActionZoomIn), findsOneWidget);
   });
