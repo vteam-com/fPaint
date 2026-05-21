@@ -21,7 +21,7 @@ import 'package:provider/provider.dart';
 /// and merging layers.
 class LayerProvider extends ChangeNotifier {
   LayerProvider({
-    required final String name,
+    required this._name,
     required final Size size,
     required this.onThumbnailChanged,
     this.parentGroupName = '',
@@ -29,7 +29,7 @@ class LayerProvider extends ChangeNotifier {
     this.isSelected = false,
     final bool isVisible = true,
     final double opacity = 1.0,
-  }) : _name = name {
+  }) {
     _size = size;
     _isVisible = isVisible;
     _opacity = opacity;
