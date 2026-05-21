@@ -49,6 +49,38 @@ Widget buildOverlayCircleButton({
   );
 }
 
+/// Builds a standardized mode toggle button for canvas overlays.
+///
+/// Visual behavior is consistent across overlays: black by default,
+/// selected-blue when active, and white icon tint.
+Widget buildOverlayModeButton({
+  required final String tooltip,
+  required final AppIcon icon,
+  required final MouseCursor cursor,
+  final bool isSelected = false,
+  final VoidCallback? onTap,
+  final GestureDragStartCallback? onPanStart,
+  final GestureDragUpdateCallback? onPanUpdate,
+  final GestureDragEndCallback? onPanEnd,
+  final GestureDragCancelCallback? onPanCancel,
+}) {
+  return buildOverlayCircleButton(
+    tooltip: tooltip,
+    color: isSelected ? AppColors.selected : AppColors.black,
+    cursor: cursor,
+    onTap: onTap,
+    onPanStart: onPanStart,
+    onPanUpdate: onPanUpdate,
+    onPanEnd: onPanEnd,
+    onPanCancel: onPanCancel,
+    child: AppSvgIcon(
+      icon: icon,
+      color: AppColors.white,
+      size: AppLayout.iconSize,
+    ),
+  );
+}
+
 /// Builds the floating feedback bubble used by selection and transform controls.
 Widget buildOverlayFeedbackBubble({required final String label}) {
   return Container(

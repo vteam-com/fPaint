@@ -315,9 +315,10 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
             mainAxisSize: MainAxisSize.min,
             spacing: spacing,
             children: <Widget>[
-              buildOverlayCircleButton(
+              buildOverlayModeButton(
                 tooltip: l10n.scale,
-                color: AppColors.selected,
+                icon: AppIcon.openInFull,
+                isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.scale,
                 cursor: SystemMouseCursors.grab,
                 onPanStart: (final DragStartDetails _) => _beginScaleFeedback(),
                 onPanUpdate: (final DragUpdateDetails details) {
@@ -333,11 +334,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
                 },
                 onPanEnd: (final DragEndDetails _) => _endFeedback(),
                 onPanCancel: _endFeedback,
-                child: const AppSvgIcon(icon: AppIcon.openInFull, size: AppLayout.iconSize, color: AppColors.white),
               ),
-              buildOverlayCircleButton(
+              buildOverlayModeButton(
                 tooltip: l10n.resizeRotate,
-                color: AppColors.green,
+                icon: AppIcon.rotateRight,
+                isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.rotate,
                 cursor: SystemMouseCursors.grab,
                 onPanStart: (final DragStartDetails _) => _beginRotateFeedback(),
                 onPanUpdate: (final DragUpdateDetails details) {
@@ -356,14 +357,12 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
                 },
                 onPanEnd: (final DragEndDetails _) => _endFeedback(),
                 onPanCancel: _endFeedback,
-                child: const AppSvgIcon(icon: AppIcon.rotateRight, size: AppLayout.iconSize, color: AppColors.white),
               ),
-              buildOverlayCircleButton(
+              buildOverlayModeButton(
                 tooltip: l10n.transform,
-                color: AppColors.transformCornerHandle,
+                icon: AppIcon.transform,
                 cursor: SystemMouseCursors.click,
                 onTap: widget.onToggleTransformMode,
-                child: const AppSvgIcon(icon: AppIcon.transform),
               ),
             ],
           ),

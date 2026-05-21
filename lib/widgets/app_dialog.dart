@@ -34,21 +34,24 @@ class AppDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 if (title != null)
-                  DefaultTextStyle(
-                    style: AppTextStyle.title,
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.large),
-                      child: titleIcon != null
-                          ? Row(
-                              spacing: AppSpacing.medium,
-                              children: <Widget>[
-                                titleIcon!,
-                                Text(title!),
-                              ],
-                            )
-                          : Text(title!),
-                    ),
-                  ),
+                  () {
+                    final String dialogTitle = title!;
+                    return DefaultTextStyle(
+                      style: AppTextStyle.title,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.large),
+                        child: titleIcon != null
+                            ? Row(
+                                spacing: AppSpacing.medium,
+                                children: <Widget>[
+                                  titleIcon!,
+                                  Text(dialogTitle),
+                                ],
+                              )
+                            : Text(dialogTitle),
+                      ),
+                    );
+                  }(),
                 if (content != null)
                   Flexible(
                     child: SingleChildScrollView(

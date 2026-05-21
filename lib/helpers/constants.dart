@@ -98,6 +98,10 @@ class AppColors {
   // Transform handle colors
   static const Color transformCornerHandle = Color(0xFFFF9800);
   static const Color transformEdgeHandle = Color(0xFFFFC107);
+
+  // Gradient defaults
+  static const Color gradientDefaultStart = Color(0xFF4FC3F7); // Light blue
+  static const Color gradientDefaultEnd = Color(0xFF0D47A1); // Dark blue
 }
 
 /// Shared spacing tokens used across dialogs, panels, and controls.
@@ -161,6 +165,14 @@ class AppLayout {
   static const int textLengthThreshold = 50;
   static const double textMaxWidthCompact = 800.0;
   static const double textMaxWidthNormal = 1000.0;
+
+  // Control sizing
+  static const double switchTrackWidth = 48.0;
+  static const double switchTrackHeight = 24.0;
+  static const double switchThumbSize = 20.0;
+  static const double switchThumbInset = 2.0;
+  static const double popupMenuMinWidth = 200.0;
+  static const double popupMenuItemHeight = 48.0;
 }
 
 /// Shared font size tokens for consistent typography across the app.
@@ -228,6 +240,12 @@ class AppTextStyle {
     color: AppColors.primary,
     fontSize: AppFontSize.medium,
   );
+}
+
+/// Application configuration URLs and legal information.
+class AppConfig {
+  static const String repositoryUrl = 'https://github.com/vteam-com/fPaint';
+  static const String applicationCopyright = '(c) 2025 VTeam';
 }
 
 /// Shared divider and border tokens.

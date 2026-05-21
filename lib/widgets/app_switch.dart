@@ -8,10 +8,6 @@ class AppSwitch extends StatelessWidget {
     required this.value,
     required this.onChanged,
   });
-  static const double _thumbInset = 2.0;
-  static const double _thumbSize = 20.0;
-  static const double _trackHeight = 24.0;
-  static const double _trackWidth = 48.0;
   final ValueChanged<bool> onChanged;
   final bool value;
   @override
@@ -21,20 +17,20 @@ class AppSwitch extends StatelessWidget {
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
         child: SizedBox(
-          width: _trackWidth,
-          height: _trackHeight,
+          width: AppLayout.switchTrackWidth,
+          height: AppLayout.switchTrackHeight,
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: value ? AppColors.primary : AppColors.surfaceVariant,
-              borderRadius: BorderRadius.circular(_trackHeight / AppMath.pair),
+              borderRadius: BorderRadius.circular(AppLayout.switchTrackHeight / AppMath.pair),
             ),
             child: Align(
               alignment: value ? Alignment.centerRight : Alignment.centerLeft,
               child: const Padding(
-                padding: EdgeInsets.all(_thumbInset),
+                padding: EdgeInsets.all(AppLayout.switchThumbInset),
                 child: SizedBox(
-                  width: _thumbSize,
-                  height: _thumbSize,
+                  width: AppLayout.switchThumbSize,
+                  height: AppLayout.switchThumbSize,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: AppColors.white,

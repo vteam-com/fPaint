@@ -75,11 +75,6 @@ extension AppProviderSelection on AppProvider {
     selectedAction = ActionType.selector;
     selectAll();
 
-    final ui.Image? clippedImage = await createSelectionImage();
-    if (clippedImage == null) {
-      return;
-    }
-
     final LayerProvider targetLayer = layers.selectedLayer;
     final ImagePlacementLayerRestoreState restoreState = ImagePlacementLayerRestoreState(
       layerIndex: layers.selectedLayerIndex,
@@ -89,16 +84,10 @@ extension AppProviderSelection on AppProvider {
       originalBackgroundColor: targetLayer.backgroundColor,
     );
 
-    targetLayer.actionStack.clear();
-    targetLayer.redoStack.clear();
-    targetLayer.backgroundColor = null;
-    targetLayer.clearCache();
-
-    startImagePlacement(
-      clippedImage,
-      commitMode: ImagePlacementCommitMode.replaceLayer,
-      layerRestoreState: restoreState,
-    );
+    imagePlacementModel.clear();
+    imagePlacementModel.commitMode = ImagePlacementCommitMode.replaceLayer;
+    imagePlacementModel.layerRestoreState = restoreState;
+    await startTransform();
   }
 
   /// Pastes an image from the clipboard onto the canvas.
@@ -163,6 +152,20 @@ extension AppProviderSelection on AppProvider {
     update();
   }
 
+  /// Starts a transform session from [image] constrained to [bounds].
+  void _startTransformSession({
+    required final ui.Image image,
+    required final Rect bounds,
+    final TransformSessionSource source = TransformSessionSource.selection,
+  }) {
+    transformModel.start(
+      image: image,
+      bounds: bounds,
+      source: source,
+    );
+    update();
+  }
+
   /// Switches the active image placement session into perspective transform mode.
   Future<void> startImagePlacementTransform() async {
     final ui.Image? sourceImage = imagePlacementModel.image;
@@ -185,12 +188,11 @@ extension AppProviderSelection on AppProvider {
     );
 
     imagePlacementModel.isVisible = false;
-    transformModel.start(
+    _startTransformSession(
       image: bakedImage,
       bounds: transformBounds,
       source: TransformSessionSource.imagePlacement,
     );
-    update();
   }
 
   /// Commits the interactively placed image to a new layer.
@@ -291,7 +293,8 @@ extension AppProviderSelection on AppProvider {
   /// Begins a perspective/skew transform on the current selection.
   Future<void> startTransform() async {
     cancelEffectPreview();
-    if (!selectorModel.isVisible || selectorModel.path1 == null) {
+    final ui.Image? clippedImage = await createSelectionImage();
+    if (clippedImage == null || selectorModel.path1 == null) {
       return;
     }
 
@@ -300,21 +303,7 @@ extension AppProviderSelection on AppProvider {
       return;
     }
 
-    final ui.Image layerImage = layers.selectedLayer.toImageForStorage(layers.size);
-
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-    canvas.translate(-bounds.left, -bounds.top);
-    canvas.clipPath(selectorModel.path1!);
-    canvas.drawImage(layerImage, Offset.zero, Paint());
-
-    final ui.Image clippedImage = await recorder.endRecording().toImage(
-      bounds.width.ceil(),
-      bounds.height.ceil(),
-    );
-
-    transformModel.start(image: clippedImage, bounds: bounds);
-    update();
+    _startTransformSession(image: clippedImage, bounds: bounds);
   }
 
   /// Commits the current transform, erasing the original selection region
@@ -364,6 +353,9 @@ extension AppProviderSelection on AppProvider {
 
     selectorModel.clear();
     transformModel.clear();
+    if (_isLayerModifySession) {
+      imagePlacementModel.clear();
+    }
     update();
   }
 
@@ -378,9 +370,21 @@ extension AppProviderSelection on AppProvider {
       return;
     }
 
+    if (_isLayerModifySession) {
+      selectorModel.clear();
+      transformModel.clear();
+      imagePlacementModel.clear();
+      update();
+      return;
+    }
+
     transformModel.clear();
     update();
   }
+
+  bool get _isLayerModifySession =>
+      imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&
+      imagePlacementModel.layerRestoreState != null;
 
   /// Renders the current image-placement preview into a baked image.
   Future<ui.Image> _renderPlacedImage({

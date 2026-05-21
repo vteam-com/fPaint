@@ -23,7 +23,12 @@ Future<T?> showAppMenu<T>({
   required final RelativeRect position,
   required final List<AppPopupMenuItem<T>> items,
 }) async {
-  final RenderBox overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;
+  final OverlayState overlayState = Overlay.of(context);
+  final RenderObject? overlayRenderObject = overlayState.context.findRenderObject();
+  if (overlayRenderObject is! RenderBox) {
+    return null;
+  }
+  final RenderBox overlay = overlayRenderObject;
   final Size overlaySize = overlay.size;
 
   return showAppOverlay<T>(
@@ -39,13 +44,14 @@ Future<T?> showAppMenu<T>({
             ),
           ),
           Positioned(
-            left: position.left.clamp(0, overlaySize.width - _menuMinWidth),
-            top: position.top.clamp(0, overlaySize.height - _menuItemHeight),
+            left: position.left.clamp(0, overlaySize.width - AppLayout.popupMenuMinWidth),
+            top: position.top.clamp(0, overlaySize.height - AppLayout.popupMenuItemHeight),
             child: IntrinsicWidth(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minWidth: _menuMinWidth,
-                  maxHeight: overlaySize.height - position.top.clamp(0, overlaySize.height - _menuItemHeight),
+                  minWidth: AppLayout.popupMenuMinWidth,
+                  maxHeight:
+                      overlaySize.height - position.top.clamp(0, overlaySize.height - AppLayout.popupMenuItemHeight),
                 ),
                 child: AppOverlaySurface(
                   borderRadius: BorderRadius.circular(AppRadius.medium),
@@ -73,9 +79,6 @@ Future<T?> showAppMenu<T>({
   );
 }
 
-const double _menuMinWidth = 200.0;
-const double _menuItemHeight = 48.0;
-
 /// A button that opens a popup menu, replacing Material [PopupMenuButton].
 class AppPopupMenuButton<T> extends StatelessWidget {
   const AppPopupMenuButton({
@@ -94,7 +97,11 @@ class AppPopupMenuButton<T> extends StatelessWidget {
     return AppButton(
       tooltip: tooltip,
       onPressed: () async {
-        final RenderBox button = context.findRenderObject()! as RenderBox;
+        final RenderObject? buttonRenderObject = context.findRenderObject();
+        if (buttonRenderObject is! RenderBox) {
+          return;
+        }
+        final RenderBox button = buttonRenderObject;
         final Offset offset = button.localToGlobal(
           Offset(0, button.size.height),
         );
@@ -108,6 +115,9 @@ class AppPopupMenuButton<T> extends StatelessWidget {
           ),
           items: itemBuilder(context),
         );
+        if (!context.mounted) {
+          return;
+        }
         if (value != null) {
           onSelected(value);
         }
