@@ -4,6 +4,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.5] - 2026-05-22
+
+### Fix
+
+- Selection and transform overlay controls now avoid clipping near the viewport edges:
+  - Keep default top placement when there is room
+  - Flip to bottom when top would clip
+  - Fall back to centered placement when both top and bottom would clip
+- Escape key handling now consistently cancels active selector and transform overlays
+
 ## [1.7.4] - 2026-05-15
 
 ### Added
