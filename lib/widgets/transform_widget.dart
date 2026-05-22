@@ -133,7 +133,6 @@ class TransformEdgeDragZone extends StatelessWidget {
 
 class _TransformWidgetState extends State<TransformWidget> {
   late FocusNode _focusNode;
-
   @override
   void initState() {
     super.initState();
@@ -560,14 +559,33 @@ class _TransformWidgetState extends State<TransformWidget> {
     required final Offset screenCenter,
     required final List<Offset> screenCorners,
   }) {
+    const int placementTop = AppMath.zero;
+    const int placementBottom = AppMath.one;
+    const int placementCenter = AppMath.pair;
     const double buttonSize = AppInteraction.imagePlacementButtonSize;
     const double spacing = AppInteraction.imagePlacementButtonSpacing;
     const double modeButtonsWidth = buttonSize * AppMath.four + spacing * AppMath.triple; // 4 mode buttons
     const double confirmCancelWidth = buttonSize * AppMath.pair + spacing; // 2 confirm/cancel buttons
     const double totalWidth = modeButtonsWidth + spacing + confirmCancelWidth; // All buttons with inter-group spacing
+    final double viewportHeight = MediaQuery.sizeOf(context).height;
+    final double controlsHeight = model.isFeedbackVisible
+        ? buttonSize + AppInteraction.imagePlacementButtonSpacing + buttonSize
+        : buttonSize;
 
-    // Keep controls at the top to avoid overlapping with center handle
-    final double controlsTop = _screenQuadTop(screenCorners) - buttonSize - AppInteraction.imagePlacementHandleSize;
+    final double idealControlsTop =
+        _screenQuadTop(screenCorners) - buttonSize - AppInteraction.imagePlacementHandleSize;
+    final double bottomControlsTop = _screenQuadBottom(screenCorners) + AppInteraction.imagePlacementHandleSize;
+    final double topPositionedTop = model.isFeedbackVisible ? idealControlsTop - buttonSize : idealControlsTop;
+    final bool topClips = topPositionedTop < 0;
+    final bool bottomClips = bottomControlsTop + controlsHeight > viewportHeight;
+
+    final int placement = !topClips ? placementTop : (!bottomClips ? placementBottom : placementCenter);
+    final double centeredTop = max(AppMath.zero.toDouble(), (viewportHeight - controlsHeight) / AppMath.pair);
+    final bool isFlippedToBottom = placement == placementBottom;
+    final bool isCentered = placement == placementCenter;
+    final double controlsTop = isCentered
+        ? centeredTop + (model.isFeedbackVisible ? buttonSize + AppInteraction.imagePlacementButtonSpacing : 0)
+        : (isFlippedToBottom ? bottomControlsTop : idealControlsTop);
     final double controlsLeft = screenCenter.dx - totalWidth / AppMath.pair;
 
     final Offset translateHandleCenter = Offset(
@@ -583,154 +601,189 @@ class _TransformWidgetState extends State<TransformWidget> {
       controlsTop + buttonSize / AppMath.pair,
     );
 
+    final Widget feedbackBubble = buildOverlayFeedbackBubble(
+      label: model.isScaleFeedbackVisible
+          ? l10n.percentageValue(model.activeScalePercent.round())
+          : l10n.degreesValue(model.activeRotationDegrees.round()),
+    );
+    final Widget feedbackSpacer = const SizedBox(height: AppInteraction.imagePlacementButtonSpacing);
+    final Widget buttonsRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: spacing,
+      children: <Widget>[
+        buildOverlayModeButton(
+          tooltip: l10n.translate,
+          icon: AppIcon.move,
+          isSelected: model.isTranslateMode,
+          cursor: SystemMouseCursors.move,
+          onTap: () {
+            if (!model.isTranslateMode) {
+              model.setTranslateMode();
+              onChanged();
+            }
+          },
+          onPanStart: (final DragStartDetails _) {
+            if (!model.isTranslateMode) {
+              model.setTranslateMode();
+              onChanged();
+            }
+          },
+          onPanUpdate: (final DragUpdateDetails details) {
+            if (!model.isTranslateMode) {
+              model.setTranslateMode();
+            }
+            final Offset pointer = translateHandleCenter + details.delta;
+            model.moveAll((pointer - translateHandleCenter) / canvasScale);
+            onChanged();
+          },
+        ),
+        buildOverlayModeButton(
+          tooltip: l10n.scale,
+          icon: AppIcon.openInFull,
+          isSelected: model.isScaleMode,
+          cursor: SystemMouseCursors.grab,
+          onTap: () {
+            if (!model.isScaleMode) {
+              model.setScaleMode();
+              onChanged();
+            }
+          },
+          onPanStart: (final DragStartDetails _) {
+            model.beginScaleGesture();
+            onChanged();
+          },
+          onPanUpdate: (final DragUpdateDetails details) {
+            if (!model.isScaleMode || !model.isScaleFeedbackVisible) {
+              model.beginScaleGesture();
+            }
+
+            final double previousDistance = (scaleHandleCenter - screenCenter).distance;
+            final Offset pointer = scaleHandleCenter + details.delta;
+            final double currentDistance = (pointer - screenCenter).distance;
+            if (previousDistance <= AppMath.tinyPercentage) {
+              return;
+            }
+
+            model.scaleUniform(currentDistance / previousDistance);
+            onChanged();
+          },
+          onPanEnd: (final DragEndDetails _) {
+            model.endScaleGesture();
+            onChanged();
+          },
+          onPanCancel: () {
+            model.endScaleGesture();
+            onChanged();
+          },
+        ),
+        buildOverlayModeButton(
+          tooltip: l10n.resizeRotate,
+          icon: AppIcon.rotateRight,
+          isSelected: model.isRotateMode,
+          cursor: SystemMouseCursors.grab,
+          onTap: () {
+            if (!model.isRotateMode) {
+              model.setRotateMode();
+              onChanged();
+            }
+          },
+          onPanStart: (final DragStartDetails _) {
+            model.beginRotateGesture();
+            onChanged();
+          },
+          onPanUpdate: (final DragUpdateDetails details) {
+            if (!model.isRotateMode || !model.isRotationFeedbackVisible) {
+              model.beginRotateGesture();
+            }
+            final double previousAngle = atan2(
+              rotationHandleCenter.dy - screenCenter.dy,
+              rotationHandleCenter.dx - screenCenter.dx,
+            );
+            final Offset pointer = rotationHandleCenter + details.delta;
+            final double currentAngle = atan2(
+              pointer.dy - screenCenter.dy,
+              pointer.dx - screenCenter.dx,
+            );
+            final double angleDelta = currentAngle - previousAngle;
+            model.rotate(angleDelta);
+            model.updateRotationFeedback(angleDelta);
+            onChanged();
+          },
+          onPanEnd: (final DragEndDetails _) {
+            model.endRotateGesture();
+            onChanged();
+          },
+          onPanCancel: () {
+            model.endRotateGesture();
+            onChanged();
+          },
+        ),
+        buildOverlayModeButton(
+          tooltip: l10n.transform,
+          icon: AppIcon.transform,
+          isSelected: model.isDeformMode && !model.isCenterHandleEnabled,
+          cursor: SystemMouseCursors.click,
+          onTap: () {
+            if (!model.isDeformMode) {
+              model.setDeformMode();
+            } else {
+              model.cycleHandleSet();
+            }
+            onChanged();
+          },
+        ),
+        buildOverlayConfirmCancelButtons(
+          l10n: l10n,
+          onConfirm: onConfirm,
+          onCancel: onCancel,
+        ),
+      ],
+    );
+
+    final double positionedTop;
+    final List<Widget> columnChildren;
+    if (isCentered) {
+      positionedTop = centeredTop;
+      columnChildren = <Widget>[
+        if (model.isFeedbackVisible) feedbackBubble,
+        if (model.isFeedbackVisible) feedbackSpacer,
+        buttonsRow,
+      ];
+    } else if (isFlippedToBottom) {
+      positionedTop = controlsTop;
+      columnChildren = <Widget>[
+        buttonsRow,
+        if (model.isFeedbackVisible) feedbackSpacer,
+        if (model.isFeedbackVisible) feedbackBubble,
+      ];
+    } else {
+      positionedTop = model.isFeedbackVisible ? controlsTop - buttonSize : controlsTop;
+      columnChildren = <Widget>[
+        if (model.isFeedbackVisible) feedbackBubble,
+        if (model.isFeedbackVisible) feedbackSpacer,
+        buttonsRow,
+      ];
+    }
+
     return Positioned(
       left: controlsLeft,
-      top: model.isFeedbackVisible ? controlsTop - buttonSize : controlsTop,
+      top: positionedTop,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (model.isFeedbackVisible)
-            buildOverlayFeedbackBubble(
-              label: model.isScaleFeedbackVisible
-                  ? l10n.percentageValue(model.activeScalePercent.round())
-                  : l10n.degreesValue(model.activeRotationDegrees.round()),
-            ),
-          if (model.isFeedbackVisible) const SizedBox(height: AppInteraction.imagePlacementButtonSpacing),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: spacing,
-            children: <Widget>[
-              buildOverlayModeButton(
-                tooltip: l10n.translate,
-                icon: AppIcon.move,
-                isSelected: model.isTranslateMode,
-                cursor: SystemMouseCursors.move,
-                onTap: () {
-                  if (!model.isTranslateMode) {
-                    model.setTranslateMode();
-                    onChanged();
-                  }
-                },
-                onPanStart: (final DragStartDetails _) {
-                  if (!model.isTranslateMode) {
-                    model.setTranslateMode();
-                    onChanged();
-                  }
-                },
-                onPanUpdate: (final DragUpdateDetails details) {
-                  if (!model.isTranslateMode) {
-                    model.setTranslateMode();
-                  }
-                  final Offset pointer = translateHandleCenter + details.delta;
-                  model.moveAll((pointer - translateHandleCenter) / canvasScale);
-                  onChanged();
-                },
-              ),
-              buildOverlayModeButton(
-                tooltip: l10n.scale,
-                icon: AppIcon.openInFull,
-                isSelected: model.isScaleMode,
-                cursor: SystemMouseCursors.grab,
-                onTap: () {
-                  if (!model.isScaleMode) {
-                    model.setScaleMode();
-                    onChanged();
-                  }
-                },
-                onPanStart: (final DragStartDetails _) {
-                  model.beginScaleGesture();
-                  onChanged();
-                },
-                onPanUpdate: (final DragUpdateDetails details) {
-                  if (!model.isScaleMode || !model.isScaleFeedbackVisible) {
-                    model.beginScaleGesture();
-                  }
-
-                  final double previousDistance = (scaleHandleCenter - screenCenter).distance;
-                  final Offset pointer = scaleHandleCenter + details.delta;
-                  final double currentDistance = (pointer - screenCenter).distance;
-                  if (previousDistance <= AppMath.tinyPercentage) {
-                    return;
-                  }
-
-                  model.scaleUniform(currentDistance / previousDistance);
-                  onChanged();
-                },
-                onPanEnd: (final DragEndDetails _) {
-                  model.endScaleGesture();
-                  onChanged();
-                },
-                onPanCancel: () {
-                  model.endScaleGesture();
-                  onChanged();
-                },
-              ),
-              buildOverlayModeButton(
-                tooltip: l10n.resizeRotate,
-                icon: AppIcon.rotateRight,
-                isSelected: model.isRotateMode,
-                cursor: SystemMouseCursors.grab,
-                onTap: () {
-                  if (!model.isRotateMode) {
-                    model.setRotateMode();
-                    onChanged();
-                  }
-                },
-                onPanStart: (final DragStartDetails _) {
-                  model.beginRotateGesture();
-                  onChanged();
-                },
-                onPanUpdate: (final DragUpdateDetails details) {
-                  if (!model.isRotateMode || !model.isRotationFeedbackVisible) {
-                    model.beginRotateGesture();
-                  }
-                  final double previousAngle = atan2(
-                    rotationHandleCenter.dy - screenCenter.dy,
-                    rotationHandleCenter.dx - screenCenter.dx,
-                  );
-                  final Offset pointer = rotationHandleCenter + details.delta;
-                  final double currentAngle = atan2(
-                    pointer.dy - screenCenter.dy,
-                    pointer.dx - screenCenter.dx,
-                  );
-                  final double angleDelta = currentAngle - previousAngle;
-                  model.rotate(angleDelta);
-                  model.updateRotationFeedback(angleDelta);
-                  onChanged();
-                },
-                onPanEnd: (final DragEndDetails _) {
-                  model.endRotateGesture();
-                  onChanged();
-                },
-                onPanCancel: () {
-                  model.endRotateGesture();
-                  onChanged();
-                },
-              ),
-              buildOverlayModeButton(
-                tooltip: l10n.transform,
-                icon: AppIcon.transform,
-                isSelected: model.isDeformMode && !model.isCenterHandleEnabled,
-                cursor: SystemMouseCursors.click,
-                onTap: () {
-                  if (!model.isDeformMode) {
-                    model.setDeformMode();
-                  } else {
-                    model.cycleHandleSet();
-                  }
-                  onChanged();
-                },
-              ),
-              buildOverlayConfirmCancelButtons(
-                l10n: l10n,
-                onConfirm: onConfirm,
-                onCancel: onCancel,
-              ),
-            ],
-          ),
-        ],
+        children: columnChildren,
       ),
     );
+  }
+
+  /// Returns the lowest on-screen Y value of the transformed quad.
+  double _screenQuadBottom(final List<Offset> screenCorners) {
+    double maxY = screenCorners[TransformModel.topLeftIndex].dy;
+    for (final Offset corner in screenCorners) {
+      if (corner.dy > maxY) {
+        maxY = corner.dy;
+      }
+    }
+    return maxY;
   }
 
   /// Returns the highest on-screen Y value of the transformed quad.
