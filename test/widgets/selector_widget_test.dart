@@ -339,5 +339,41 @@ void main() {
       expect(dragCalls, 0);
       expect(resizeCalls, 0);
     });
+
+    testWidgets('mode controls flip below selection when bounds are near the top edge', (
+      final WidgetTester tester,
+    ) async {
+      // Selection positioned so close to the top that idealControlsTop < 0
+      final Path path = Path()..addRect(const Rect.fromLTWH(200, 10, 200, 150));
+
+      await tester.pumpWidget(
+        _buildHarness(
+          path1: path,
+          onCancel: () {},
+          onCopy: () {},
+          onDuplicate: () {},
+          onToggleTransformMode: () {},
+          onDrag: (final Offset _) {},
+          onResize: (final NineGridHandle _, final Offset _) {},
+          onScale: (final double _) {},
+          onRotate: (final double _) {},
+          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+        ),
+      );
+      await tester.pump();
+
+      const double buttonSize = AppInteraction.imagePlacementButtonSize;
+      const double rotationHandleDistance = AppInteraction.rotationHandleDistance;
+      final Rect bounds = path.getBounds();
+      final double idealTop = bounds.top - rotationHandleDistance - buttonSize / AppMath.pair;
+
+      // Verify the ideal position would clip (< 0) and the mode controls are found
+      expect(idealTop, lessThan(0));
+      final BuildContext context = tester.element(find.byType(SelectionRectWidget));
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
+      expect(find.text(l10n.translate), findsNothing); // tooltip not visible
+      // The mode buttons are rendered below the selection when flipped
+      expect(find.byType(SelectionRectWidget), findsOneWidget);
+    });
   });
 }

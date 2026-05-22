@@ -328,10 +328,29 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     final Rect bounds,
     final AppLocalizations l10n,
   ) {
+    const int placementTop = AppMath.zero;
+    const int placementBottom = AppMath.one;
+    const int placementCenter = AppMath.pair;
     const double buttonSize = AppInteraction.imagePlacementButtonSize;
     const double spacing = AppInteraction.imagePlacementButtonSpacing;
+    final double viewportHeight = MediaQuery.sizeOf(context).height;
+    final double controlsHeight = _isFeedbackVisible
+        ? buttonSize + AppInteraction.imagePlacementButtonSpacing + buttonSize
+        : buttonSize;
     const double controlsWidth = buttonSize * AppMath.four + spacing * AppMath.triple;
-    final double controlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
+    final double idealControlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
+    final double bottomControlsTop = bounds.bottom + AppInteraction.rotationHandleDistance;
+    final double topPositionedTop = _isFeedbackVisible ? idealControlsTop - buttonSize : idealControlsTop;
+    final bool topClips = topPositionedTop < 0;
+    final bool bottomClips = bottomControlsTop + controlsHeight > viewportHeight;
+
+    final int placement = !topClips ? placementTop : (!bottomClips ? placementBottom : placementCenter);
+    final double centeredTop = max(AppMath.zero.toDouble(), (viewportHeight - controlsHeight) / AppMath.pair);
+    final bool isFlippedToBottom = placement == placementBottom;
+    final bool isCentered = placement == placementCenter;
+    final double controlsTop = isCentered
+        ? centeredTop + (_isFeedbackVisible ? buttonSize + AppInteraction.imagePlacementButtonSpacing : 0)
+        : (isFlippedToBottom ? bottomControlsTop : idealControlsTop);
     final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
     final Offset translateHandleCenter = Offset(
       controlsLeft + buttonSize / AppMath.pair,
@@ -346,84 +365,109 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       controlsTop + buttonSize / AppMath.pair,
     );
 
+    final Widget feedbackBubble = buildOverlayFeedbackBubble(label: _feedbackLabel(l10n));
+    final Widget feedbackSpacer = const SizedBox(height: AppInteraction.imagePlacementButtonSpacing);
+    final Widget buttonsRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: spacing,
+      children: <Widget>[
+        buildOverlayModeButton(
+          tooltip: l10n.translate,
+          icon: AppIcon.move,
+          isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.translate,
+          cursor: SystemMouseCursors.move,
+          onPanStart: (final DragStartDetails _) => _beginTranslateFeedback(),
+          onPanUpdate: (final DragUpdateDetails details) {
+            final Offset pointer = translateHandleCenter + details.delta;
+            widget.onDrag(pointer - translateHandleCenter);
+            _beginTranslateFeedback();
+          },
+          onPanEnd: (final DragEndDetails _) => _endFeedback(),
+          onPanCancel: _endFeedback,
+        ),
+        buildOverlayModeButton(
+          tooltip: l10n.scale,
+          icon: AppIcon.openInFull,
+          isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.scale,
+          cursor: SystemMouseCursors.grab,
+          onPanStart: (final DragStartDetails _) => _beginScaleFeedback(),
+          onPanUpdate: (final DragUpdateDetails details) {
+            final double previousDistance = (scaleHandleCenter - bounds.center).distance;
+            final Offset pointer = scaleHandleCenter + details.delta;
+            final double currentDistance = (pointer - bounds.center).distance;
+            if (previousDistance <= AppMath.tinyPercentage) {
+              return;
+            }
+            final double factor = currentDistance / previousDistance;
+            _updateScaleFeedback(factor);
+            widget.onScale(factor);
+          },
+          onPanEnd: (final DragEndDetails _) => _endFeedback(),
+          onPanCancel: _endFeedback,
+        ),
+        buildOverlayModeButton(
+          tooltip: l10n.resizeRotate,
+          icon: AppIcon.rotateRight,
+          isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.rotate,
+          cursor: SystemMouseCursors.grab,
+          onPanStart: (final DragStartDetails _) => _beginRotateFeedback(),
+          onPanUpdate: (final DragUpdateDetails details) {
+            final Offset pointer = rotateHandleCenter + details.delta;
+            final double previousAngle = atan2(
+              rotateHandleCenter.dy - bounds.center.dy,
+              rotateHandleCenter.dx - bounds.center.dx,
+            );
+            final double currentAngle = atan2(
+              pointer.dy - bounds.center.dy,
+              pointer.dx - bounds.center.dx,
+            );
+            final double angleDelta = currentAngle - previousAngle;
+            _updateRotateFeedback(angleDelta);
+            widget.onRotate(angleDelta);
+          },
+          onPanEnd: (final DragEndDetails _) => _endFeedback(),
+          onPanCancel: _endFeedback,
+        ),
+        buildOverlayModeButton(
+          tooltip: l10n.transform,
+          icon: AppIcon.transform,
+          cursor: SystemMouseCursors.click,
+          onTap: widget.onToggleTransformMode,
+        ),
+      ],
+    );
+
+    final double positionedTop;
+    final List<Widget> columnChildren;
+    if (isCentered) {
+      positionedTop = centeredTop;
+      columnChildren = <Widget>[
+        if (_isFeedbackVisible) feedbackBubble,
+        if (_isFeedbackVisible) feedbackSpacer,
+        buttonsRow,
+      ];
+    } else if (isFlippedToBottom) {
+      positionedTop = controlsTop;
+      columnChildren = <Widget>[
+        buttonsRow,
+        if (_isFeedbackVisible) feedbackSpacer,
+        if (_isFeedbackVisible) feedbackBubble,
+      ];
+    } else {
+      positionedTop = _isFeedbackVisible ? controlsTop - buttonSize : controlsTop;
+      columnChildren = <Widget>[
+        if (_isFeedbackVisible) feedbackBubble,
+        if (_isFeedbackVisible) feedbackSpacer,
+        buttonsRow,
+      ];
+    }
+
     return Positioned(
       left: controlsLeft,
-      top: _isFeedbackVisible ? controlsTop - buttonSize : controlsTop,
+      top: positionedTop,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          if (_isFeedbackVisible) buildOverlayFeedbackBubble(label: _feedbackLabel(l10n)),
-          if (_isFeedbackVisible) const SizedBox(height: AppInteraction.imagePlacementButtonSpacing),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: spacing,
-            children: <Widget>[
-              buildOverlayModeButton(
-                tooltip: l10n.translate,
-                icon: AppIcon.move,
-                isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.translate,
-                cursor: SystemMouseCursors.move,
-                onPanStart: (final DragStartDetails _) => _beginTranslateFeedback(),
-                onPanUpdate: (final DragUpdateDetails details) {
-                  final Offset pointer = translateHandleCenter + details.delta;
-                  widget.onDrag(pointer - translateHandleCenter);
-                  _beginTranslateFeedback();
-                },
-                onPanEnd: (final DragEndDetails _) => _endFeedback(),
-                onPanCancel: _endFeedback,
-              ),
-              buildOverlayModeButton(
-                tooltip: l10n.scale,
-                icon: AppIcon.openInFull,
-                isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.scale,
-                cursor: SystemMouseCursors.grab,
-                onPanStart: (final DragStartDetails _) => _beginScaleFeedback(),
-                onPanUpdate: (final DragUpdateDetails details) {
-                  final double previousDistance = (scaleHandleCenter - bounds.center).distance;
-                  final Offset pointer = scaleHandleCenter + details.delta;
-                  final double currentDistance = (pointer - bounds.center).distance;
-                  if (previousDistance <= AppMath.tinyPercentage) {
-                    return;
-                  }
-                  final double factor = currentDistance / previousDistance;
-                  _updateScaleFeedback(factor);
-                  widget.onScale(factor);
-                },
-                onPanEnd: (final DragEndDetails _) => _endFeedback(),
-                onPanCancel: _endFeedback,
-              ),
-              buildOverlayModeButton(
-                tooltip: l10n.resizeRotate,
-                icon: AppIcon.rotateRight,
-                isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.rotate,
-                cursor: SystemMouseCursors.grab,
-                onPanStart: (final DragStartDetails _) => _beginRotateFeedback(),
-                onPanUpdate: (final DragUpdateDetails details) {
-                  final Offset pointer = rotateHandleCenter + details.delta;
-                  final double previousAngle = atan2(
-                    rotateHandleCenter.dy - bounds.center.dy,
-                    rotateHandleCenter.dx - bounds.center.dx,
-                  );
-                  final double currentAngle = atan2(
-                    pointer.dy - bounds.center.dy,
-                    pointer.dx - bounds.center.dx,
-                  );
-                  final double angleDelta = currentAngle - previousAngle;
-                  _updateRotateFeedback(angleDelta);
-                  widget.onRotate(angleDelta);
-                },
-                onPanEnd: (final DragEndDetails _) => _endFeedback(),
-                onPanCancel: _endFeedback,
-              ),
-              buildOverlayModeButton(
-                tooltip: l10n.transform,
-                icon: AppIcon.transform,
-                cursor: SystemMouseCursors.click,
-                onTap: widget.onToggleTransformMode,
-              ),
-            ],
-          ),
-        ],
+        children: columnChildren,
       ),
     );
   }
