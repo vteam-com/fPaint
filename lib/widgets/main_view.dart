@@ -152,6 +152,10 @@ class MainViewState extends State<MainView> {
                   },
                   onCopy: () => appProvider.regionCopy(),
                   onDuplicate: () => appProvider.regionDuplicate(),
+                  onCancel: () {
+                    appProvider.selectorModel.clear();
+                    appProvider.update();
+                  },
                   onEffectSelected: (final SelectionEffect effect, final BuildContext _) async {
                     await appProvider.startEffectPreview(effect);
                     if (!mounted) {

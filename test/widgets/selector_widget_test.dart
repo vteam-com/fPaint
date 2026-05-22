@@ -12,6 +12,7 @@ Widget _buildHarness({
   Path? path2,
   bool enableMoveAndResize = true,
   bool isDrawing = false,
+  required final VoidCallback onCancel,
   required final VoidCallback onCopy,
   required final VoidCallback onDuplicate,
   required final VoidCallback onToggleTransformMode,
@@ -32,6 +33,7 @@ Widget _buildHarness({
           path2: path2,
           enableMoveAndResize: enableMoveAndResize,
           isDrawing: isDrawing,
+          onCancel: onCancel,
           onCopy: onCopy,
           onDuplicate: onDuplicate,
           onToggleTransformMode: onToggleTransformMode,
@@ -52,6 +54,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: null,
+          onCancel: () {},
           onCopy: () {},
           onDuplicate: () {},
           onToggleTransformMode: () {},
@@ -73,6 +76,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
+          onCancel: () {},
           onCopy: () {},
           onDuplicate: () {},
           onToggleTransformMode: () {},
@@ -95,6 +99,7 @@ void main() {
         _buildHarness(
           path1: path,
           isDrawing: true,
+          onCancel: () {},
           onCopy: () {},
           onDuplicate: () {},
           onToggleTransformMode: () {},
@@ -117,6 +122,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
+          onCancel: () {},
           onCopy: () {},
           onDuplicate: () {},
           onToggleTransformMode: () {},
@@ -155,6 +161,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
+          onCancel: () {},
           onCopy: () {},
           onDuplicate: () {},
           onToggleTransformMode: () {},
@@ -191,6 +198,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
+          onCancel: () {},
           onCopy: () {
             copyCalls++;
           },
@@ -243,6 +251,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
+          onCancel: () {},
           onCopy: () {},
           onDuplicate: () {},
           onToggleTransformMode: () {},
@@ -305,6 +314,7 @@ void main() {
           path1: path1,
           path2: path2,
           enableMoveAndResize: false,
+          onCancel: () {},
           onCopy: () {},
           onDuplicate: () {},
           onToggleTransformMode: () {},

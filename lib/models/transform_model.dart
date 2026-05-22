@@ -57,6 +57,12 @@ class TransformModel extends VisibleModel {
   /// Whether the rotation feedback should be shown.
   bool isRotationFeedbackVisible = false;
 
+  /// The currently active draggable control, if any.
+  TransformActiveControlType? activeControlType;
+
+  /// The index of the currently active control when applicable.
+  int? activeControlIndex;
+
   /// Begins a transform operation with the given [image] captured from the selection
   /// at the given [bounds].
   void start({
@@ -79,6 +85,7 @@ class TransformModel extends VisibleModel {
       bounds.bottomCenter,
       bounds.centerLeft,
     ];
+    clearActiveControl();
     handleSet = TransformHandleSet.corners;
     setDeformMode();
     isVisible = true;
@@ -138,6 +145,28 @@ class TransformModel extends VisibleModel {
   /// Whether the overlay is in the translate-ready deform state.
   bool get isTranslateMode => isDeformMode && isCenterHandleEnabled;
 
+  /// The currently active boundary edge index, if any.
+  int? get activeEdgeIndex {
+    if (activeControlType == TransformActiveControlType.edgeHandle ||
+        activeControlType == TransformActiveControlType.edgeLine) {
+      return activeControlIndex;
+    }
+    return null;
+  }
+
+  /// Whether the given corner handle is active.
+  bool isCornerActive(final int index) {
+    return activeControlType == TransformActiveControlType.corner && activeControlIndex == index;
+  }
+
+  /// Whether the given edge control is active.
+  bool isEdgeActive(final int index) {
+    return activeEdgeIndex == index;
+  }
+
+  /// Whether the center handle is active.
+  bool get isCenterActive => activeControlType == TransformActiveControlType.center;
+
   /// The edge midpoint controls currently applied to the warp mesh.
   List<Offset> get effectiveEdgeMidpoints {
     if (corners.length != cornerCount) {
@@ -159,6 +188,7 @@ class TransformModel extends VisibleModel {
 
   /// Sets deform mode, resets to corner handles, and clears transient feedback.
   void setDeformMode() {
+    clearActiveControl();
     handleSet = TransformHandleSet.corners;
     interactionMode = TransformInteractionMode.deform;
     endScaleGesture();
@@ -167,6 +197,7 @@ class TransformModel extends VisibleModel {
 
   /// Sets deform mode with all handles enabled so translation is directly available.
   void setTranslateMode() {
+    clearActiveControl();
     handleSet = TransformHandleSet.all;
     interactionMode = TransformInteractionMode.deform;
     endScaleGesture();
@@ -187,6 +218,7 @@ class TransformModel extends VisibleModel {
 
   /// Sets rotate mode and clears any transient scale feedback.
   void setRotateMode() {
+    clearActiveControl();
     interactionMode = TransformInteractionMode.rotate;
     endScaleGesture();
     endRotateGesture();
@@ -194,9 +226,40 @@ class TransformModel extends VisibleModel {
 
   /// Sets uniform scale mode without starting a drag gesture.
   void setScaleMode() {
+    clearActiveControl();
     interactionMode = TransformInteractionMode.scale;
     endScaleGesture();
     endRotateGesture();
+  }
+
+  /// Marks a corner handle as active.
+  void setActiveCorner(final int index) {
+    activeControlType = TransformActiveControlType.corner;
+    activeControlIndex = index;
+  }
+
+  /// Marks an edge handle as active.
+  void setActiveEdgeHandle(final int index) {
+    activeControlType = TransformActiveControlType.edgeHandle;
+    activeControlIndex = index;
+  }
+
+  /// Marks an edge line drag zone as active.
+  void setActiveEdgeLine(final int index) {
+    activeControlType = TransformActiveControlType.edgeLine;
+    activeControlIndex = index;
+  }
+
+  /// Marks the center translate handle as active.
+  void setActiveCenter() {
+    activeControlType = TransformActiveControlType.center;
+    activeControlIndex = null;
+  }
+
+  /// Clears the active draggable control state.
+  void clearActiveControl() {
+    activeControlType = null;
+    activeControlIndex = null;
   }
 
   /// Starts a scale drag gesture and resets the live scale feedback.
@@ -405,11 +468,20 @@ class TransformModel extends VisibleModel {
     sourceImage = null;
     sourceBounds = Rect.zero;
     source = TransformSessionSource.selection;
+    clearActiveControl();
     handleSet = TransformHandleSet.corners;
     setDeformMode();
     corners.clear();
     edgeMidpoints.clear();
   }
+}
+
+/// Which draggable transform control is currently active.
+enum TransformActiveControlType {
+  center,
+  corner,
+  edgeHandle,
+  edgeLine,
 }
 
 /// Which deform handles are active in the transform overlay.

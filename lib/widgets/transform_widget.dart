@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
@@ -51,7 +52,10 @@ class TransformEdgeDragZone extends StatelessWidget {
     super.key,
     required this.edgeIndex,
     required this.cursor,
+    this.onDragStart,
     required this.onDragDelta,
+    this.onDragEnd,
+    this.onDragCancel,
     required this.segmentStart,
     required this.segmentEnd,
   });
@@ -62,8 +66,17 @@ class TransformEdgeDragZone extends StatelessWidget {
   /// The logical transform edge this zone belongs to.
   final int edgeIndex;
 
+  /// Called when the drag is canceled.
+  final VoidCallback? onDragCancel;
+
   /// Called on every drag update with the delta converted to screen space.
   final ValueChanged<Offset> onDragDelta;
+
+  /// Called when the drag ends.
+  final VoidCallback? onDragEnd;
+
+  /// Called when the drag starts.
+  final VoidCallback? onDragStart;
 
   /// End point of the draggable edge segment in screen coordinates.
   final Offset segmentEnd;
@@ -91,9 +104,12 @@ class TransformEdgeDragZone extends StatelessWidget {
         angle: zoneAngle,
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
+          onPanStart: (final DragStartDetails _) => onDragStart?.call(),
           onPanUpdate: (final DragUpdateDetails details) {
             onDragDelta(_toScreenDelta(details.delta, zoneAngle));
           },
+          onPanEnd: (final DragEndDetails _) => onDragEnd?.call(),
+          onPanCancel: onDragCancel,
           child: MouseRegion(
             cursor: cursor,
             child: SizedBox(width: zoneLength, height: zoneThickness),
@@ -116,6 +132,24 @@ class TransformEdgeDragZone extends StatelessWidget {
 }
 
 class _TransformWidgetState extends State<TransformWidget> {
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    // Request focus when the widget is mounted
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(final BuildContext context) {
     final ui.Image? image = model.sourceImage;
@@ -152,119 +186,272 @@ class _TransformWidgetState extends State<TransformWidget> {
       model.edgeMidpoint(TransformModel.bottomLeftIndex, TransformModel.topLeftIndex),
     );
 
-    return SizedBox.expand(
-      child: Stack(
-        children: <Widget>[
-          // Warped image preview + outline
-          IgnorePointer(
-            child: CustomPaint(
-              size: Size.infinite,
-              painter: _TransformPreviewPainter(
-                image: image,
-                screenCorners: screenCorners,
-                screenEdgeMidpoints: screenEdgeMidpoints,
-                screenBoundaryPoints: screenBoundaryPoints,
+    return Focus(
+      focusNode: _focusNode,
+      onKeyEvent: (final FocusNode _, final KeyEvent _) {
+        if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.escape)) {
+          onCancel();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: SizedBox.expand(
+        child: Stack(
+          children: <Widget>[
+            // Warped image preview + outline
+            IgnorePointer(
+              child: CustomPaint(
+                size: Size.infinite,
+                painter: _TransformPreviewPainter(
+                  activeEdgeIndex: model.activeEdgeIndex,
+                  image: image,
+                  screenCorners: screenCorners,
+                  screenEdgeMidpoints: screenEdgeMidpoints,
+                  screenBoundaryPoints: screenBoundaryPoints,
+                ),
               ),
             ),
-          ),
 
-          if (model.isDeformMode) ...<Widget>[
-            if (areEdgeDragZonesEnabled)
-              ..._buildEdgeDragZones(
-                screenCorners: screenCorners,
-                screenEdgeMidpoints: screenEdgeMidpoints,
-              ),
+            if (model.isDeformMode) ...<Widget>[
+              if (areEdgeDragZonesEnabled)
+                ..._buildEdgeDragZones(
+                  screenCorners: screenCorners,
+                  screenEdgeMidpoints: screenEdgeMidpoints,
+                ),
 
-            if (areCornerHandlesEnabled) ...<Widget>[
-              // Corner handles (perspective)
-              OverlayDragHandle(
-                position: screenCorners[TransformModel.topLeftIndex],
-                cursor: SystemMouseCursors.grab,
-                onPanUpdate: (final DragUpdateDetails details) {
-                  model.moveCorner(TransformModel.topLeftIndex, details.delta / canvasScale);
-                  onChanged();
-                },
-              ),
-              OverlayDragHandle(
-                position: screenCorners[TransformModel.topRightIndex],
-                cursor: SystemMouseCursors.grab,
-                onPanUpdate: (final DragUpdateDetails details) {
-                  model.moveCorner(TransformModel.topRightIndex, details.delta / canvasScale);
-                  onChanged();
-                },
-              ),
-              OverlayDragHandle(
-                position: screenCorners[TransformModel.bottomRightIndex],
-                cursor: SystemMouseCursors.grab,
-                onPanUpdate: (final DragUpdateDetails details) {
-                  model.moveCorner(TransformModel.bottomRightIndex, details.delta / canvasScale);
-                  onChanged();
-                },
-              ),
-              OverlayDragHandle(
-                position: screenCorners[TransformModel.bottomLeftIndex],
-                cursor: SystemMouseCursors.grab,
-                onPanUpdate: (final DragUpdateDetails details) {
-                  model.moveCorner(TransformModel.bottomLeftIndex, details.delta / canvasScale);
-                  onChanged();
-                },
-              ),
+              if (areCornerHandlesEnabled) ...<Widget>[
+                // Corner handles (perspective)
+                OverlayDragHandle(
+                  backgroundColor: model.isCornerActive(TransformModel.topLeftIndex)
+                      ? AppColors.selected
+                      : AppColors.overlayDark,
+                  borderColor: AppColors.overlayLight,
+                  position: screenCorners[TransformModel.topLeftIndex],
+                  cursor: SystemMouseCursors.grab,
+                  onPanStart: (final DragStartDetails _) {
+                    model.setActiveCorner(TransformModel.topLeftIndex);
+                    onChanged();
+                  },
+                  onPanUpdate: (final DragUpdateDetails details) {
+                    model.moveCorner(TransformModel.topLeftIndex, details.delta / canvasScale);
+                    onChanged();
+                  },
+                  onPanEnd: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                  onPanCancel: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                ),
+                OverlayDragHandle(
+                  backgroundColor: model.isCornerActive(TransformModel.topRightIndex)
+                      ? AppColors.selected
+                      : AppColors.overlayDark,
+                  borderColor: AppColors.overlayLight,
+                  position: screenCorners[TransformModel.topRightIndex],
+                  cursor: SystemMouseCursors.grab,
+                  onPanStart: (final DragStartDetails _) {
+                    model.setActiveCorner(TransformModel.topRightIndex);
+                    onChanged();
+                  },
+                  onPanUpdate: (final DragUpdateDetails details) {
+                    model.moveCorner(TransformModel.topRightIndex, details.delta / canvasScale);
+                    onChanged();
+                  },
+                  onPanEnd: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                  onPanCancel: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                ),
+                OverlayDragHandle(
+                  backgroundColor: model.isCornerActive(TransformModel.bottomRightIndex)
+                      ? AppColors.selected
+                      : AppColors.overlayDark,
+                  borderColor: AppColors.overlayLight,
+                  position: screenCorners[TransformModel.bottomRightIndex],
+                  cursor: SystemMouseCursors.grab,
+                  onPanStart: (final DragStartDetails _) {
+                    model.setActiveCorner(TransformModel.bottomRightIndex);
+                    onChanged();
+                  },
+                  onPanUpdate: (final DragUpdateDetails details) {
+                    model.moveCorner(TransformModel.bottomRightIndex, details.delta / canvasScale);
+                    onChanged();
+                  },
+                  onPanEnd: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                  onPanCancel: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                ),
+                OverlayDragHandle(
+                  backgroundColor: model.isCornerActive(TransformModel.bottomLeftIndex)
+                      ? AppColors.selected
+                      : AppColors.overlayDark,
+                  borderColor: AppColors.overlayLight,
+                  position: screenCorners[TransformModel.bottomLeftIndex],
+                  cursor: SystemMouseCursors.grab,
+                  onPanStart: (final DragStartDetails _) {
+                    model.setActiveCorner(TransformModel.bottomLeftIndex);
+                    onChanged();
+                  },
+                  onPanUpdate: (final DragUpdateDetails details) {
+                    model.moveCorner(TransformModel.bottomLeftIndex, details.delta / canvasScale);
+                    onChanged();
+                  },
+                  onPanEnd: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                  onPanCancel: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                ),
+              ],
+
+              if (areEdgeHandlesEnabled) ...<Widget>[
+                // Edge midpoint handles (skew)
+                OverlayDragHandle(
+                  backgroundColor: model.isEdgeActive(TransformModel.topEdgeIndex)
+                      ? AppColors.selected
+                      : AppColors.overlayDark,
+                  borderColor: AppColors.overlayLight,
+                  position: topMid,
+                  cursor: SystemMouseCursors.grab,
+                  onPanStart: (final DragStartDetails _) {
+                    model.setActiveEdgeHandle(TransformModel.topEdgeIndex);
+                    onChanged();
+                  },
+                  onPanUpdate: (final DragUpdateDetails details) {
+                    model.moveEdgeHandle(TransformModel.topEdgeIndex, details.delta / canvasScale);
+                    onChanged();
+                  },
+                  onPanEnd: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                  onPanCancel: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                ),
+                OverlayDragHandle(
+                  backgroundColor: model.isEdgeActive(TransformModel.rightEdgeIndex)
+                      ? AppColors.selected
+                      : AppColors.overlayDark,
+                  borderColor: AppColors.overlayLight,
+                  position: rightMid,
+                  cursor: SystemMouseCursors.grab,
+                  onPanStart: (final DragStartDetails _) {
+                    model.setActiveEdgeHandle(TransformModel.rightEdgeIndex);
+                    onChanged();
+                  },
+                  onPanUpdate: (final DragUpdateDetails details) {
+                    model.moveEdgeHandle(TransformModel.rightEdgeIndex, details.delta / canvasScale);
+                    onChanged();
+                  },
+                  onPanEnd: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                  onPanCancel: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                ),
+                OverlayDragHandle(
+                  backgroundColor: model.isEdgeActive(TransformModel.bottomEdgeIndex)
+                      ? AppColors.selected
+                      : AppColors.overlayDark,
+                  borderColor: AppColors.overlayLight,
+                  position: bottomMid,
+                  cursor: SystemMouseCursors.grab,
+                  onPanStart: (final DragStartDetails _) {
+                    model.setActiveEdgeHandle(TransformModel.bottomEdgeIndex);
+                    onChanged();
+                  },
+                  onPanUpdate: (final DragUpdateDetails details) {
+                    model.moveEdgeHandle(TransformModel.bottomEdgeIndex, details.delta / canvasScale);
+                    onChanged();
+                  },
+                  onPanEnd: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                  onPanCancel: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                ),
+                OverlayDragHandle(
+                  backgroundColor: model.isEdgeActive(TransformModel.leftEdgeIndex)
+                      ? AppColors.selected
+                      : AppColors.overlayDark,
+                  borderColor: AppColors.overlayLight,
+                  position: leftMid,
+                  cursor: SystemMouseCursors.grab,
+                  onPanStart: (final DragStartDetails _) {
+                    model.setActiveEdgeHandle(TransformModel.leftEdgeIndex);
+                    onChanged();
+                  },
+                  onPanUpdate: (final DragUpdateDetails details) {
+                    model.moveEdgeHandle(TransformModel.leftEdgeIndex, details.delta / canvasScale);
+                    onChanged();
+                  },
+                  onPanEnd: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                  onPanCancel: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                ),
+              ],
+
+              if (isCenterHandleEnabled)
+                // Center handle (move)
+                OverlayDragHandle(
+                  backgroundColor: model.isCenterActive ? AppColors.selected : AppColors.overlayDark,
+                  borderColor: AppColors.overlayLight,
+                  position: screenCenter,
+                  cursor: SystemMouseCursors.move,
+                  onPanStart: (final DragStartDetails _) {
+                    model.setActiveCenter();
+                    onChanged();
+                  },
+                  onPanUpdate: (final DragUpdateDetails details) {
+                    model.moveAll(details.delta / canvasScale);
+                    onChanged();
+                  },
+                  onPanEnd: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                  onPanCancel: () {
+                    model.clearActiveControl();
+                    onChanged();
+                  },
+                ),
             ],
 
-            if (areEdgeHandlesEnabled) ...<Widget>[
-              // Edge midpoint handles (skew)
-              OverlayDragHandle(
-                position: topMid,
-                cursor: SystemMouseCursors.grab,
-                onPanUpdate: (final DragUpdateDetails details) {
-                  model.moveEdgeHandle(TransformModel.topEdgeIndex, details.delta / canvasScale);
-                  onChanged();
-                },
-              ),
-              OverlayDragHandle(
-                position: rightMid,
-                cursor: SystemMouseCursors.grab,
-                onPanUpdate: (final DragUpdateDetails details) {
-                  model.moveEdgeHandle(TransformModel.rightEdgeIndex, details.delta / canvasScale);
-                  onChanged();
-                },
-              ),
-              OverlayDragHandle(
-                position: bottomMid,
-                cursor: SystemMouseCursors.grab,
-                onPanUpdate: (final DragUpdateDetails details) {
-                  model.moveEdgeHandle(TransformModel.bottomEdgeIndex, details.delta / canvasScale);
-                  onChanged();
-                },
-              ),
-              OverlayDragHandle(
-                position: leftMid,
-                cursor: SystemMouseCursors.grab,
-                onPanUpdate: (final DragUpdateDetails details) {
-                  model.moveEdgeHandle(TransformModel.leftEdgeIndex, details.delta / canvasScale);
-                  onChanged();
-                },
-              ),
-            ],
-
-            if (isCenterHandleEnabled)
-              // Center handle (move)
-              OverlayDragHandle(
-                position: screenCenter,
-                cursor: SystemMouseCursors.move,
-                onPanUpdate: (final DragUpdateDetails details) {
-                  model.moveAll(details.delta / canvasScale);
-                  onChanged();
-                },
-              ),
+            _buildModeControls(
+              l10n: l10n,
+              screenCenter: screenCenter,
+              screenCorners: screenBoundaryPoints,
+            ),
           ],
-
-          _buildModeControls(
-            l10n: l10n,
-            screenCenter: screenCenter,
-            screenCorners: screenBoundaryPoints,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -296,8 +483,20 @@ class _TransformWidgetState extends State<TransformWidget> {
     return TransformEdgeDragZone(
       edgeIndex: edgeIndex,
       cursor: SystemMouseCursors.grab,
+      onDragStart: () {
+        model.setActiveEdgeLine(edgeIndex);
+        onChanged();
+      },
       onDragDelta: (final Offset delta) {
         model.moveConnectedEdge(edgeIndex, delta / canvasScale);
+        onChanged();
+      },
+      onDragEnd: () {
+        model.clearActiveControl();
+        onChanged();
+      },
+      onDragCancel: () {
+        model.clearActiveControl();
         onChanged();
       },
       segmentStart: segmentStart,
@@ -553,16 +752,28 @@ class _TransformWidgetState extends State<TransformWidget> {
 /// Custom painter that renders the perspective-warped image preview and quad outline.
 class _TransformPreviewPainter extends CustomPainter {
   _TransformPreviewPainter({
+    required this.activeEdgeIndex,
     required this.image,
     required this.screenCorners,
     required this.screenEdgeMidpoints,
     required this.screenBoundaryPoints,
   });
 
+  final int? activeEdgeIndex;
+
   final ui.Image image;
   final List<Offset> screenCorners;
   final List<Offset> screenEdgeMidpoints;
   final List<Offset> screenBoundaryPoints;
+
+  static const int _topLeftBoundaryPointIndex = AppMath.zero;
+  static const int _topMidBoundaryPointIndex = AppMath.one;
+  static const int _topRightBoundaryPointIndex = AppMath.two;
+  static const int _rightMidBoundaryPointIndex = AppMath.triple;
+  static const int _bottomRightBoundaryPointIndex = AppMath.four;
+  static const int _bottomMidBoundaryPointIndex = AppMath.four + AppMath.one;
+  static const int _bottomLeftBoundaryPointIndex = AppMath.six;
+  static const int _leftMidBoundaryPointIndex = AppMath.six + AppMath.one;
 
   @override
   void paint(final Canvas canvas, final Size size) {
@@ -575,19 +786,105 @@ class _TransformPreviewPainter extends CustomPainter {
       edgeMidpoints: screenEdgeMidpoints,
     );
 
-    // Draw quad outline
-    final Paint outlinePaint = Paint()
-      ..color = AppColors.transformCornerHandle
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = AppStroke.regular;
-
     final Path outlinePath = Path()..moveTo(screenBoundaryPoints.first.dx, screenBoundaryPoints.first.dy);
     for (int i = 1; i < screenBoundaryPoints.length; i++) {
       outlinePath.lineTo(screenBoundaryPoints[i].dx, screenBoundaryPoints[i].dy);
     }
     outlinePath.close();
 
-    canvas.drawPath(outlinePath, outlinePaint);
+    final Paint outlineBorderPaint = Paint()
+      ..color = AppColors.overlayLight
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = AppStroke.regular * AppMath.pair;
+    final Paint outlineCenterPaint = Paint()
+      ..color = AppColors.overlayDark
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = AppStroke.regular;
+
+    canvas.drawPath(outlinePath, outlineBorderPaint);
+    canvas.drawPath(outlinePath, outlineCenterPaint);
+
+    if (activeEdgeIndex != null) {
+      final Path activeEdgePath = _edgePath(activeEdgeIndex!);
+      final Paint activeEdgeBorderPaint = Paint()
+        ..color = AppColors.overlayLight
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = AppStroke.regular * AppMath.pair;
+      final Paint activeEdgeCenterPaint = Paint()
+        ..color = AppColors.selected
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = AppStroke.regular;
+      canvas.drawPath(activeEdgePath, activeEdgeBorderPaint);
+      canvas.drawPath(activeEdgePath, activeEdgeCenterPaint);
+    }
+  }
+
+  /// Returns the polyline segment for one highlighted boundary edge.
+  ///
+  /// Each transform edge uses three boundary points: corner -> midpoint -> corner.
+  Path _edgePath(final int edgeIndex) {
+    final Path edgePath = Path();
+    switch (edgeIndex) {
+      case TransformModel.topEdgeIndex:
+        edgePath
+          ..moveTo(
+            screenBoundaryPoints[_topLeftBoundaryPointIndex].dx,
+            screenBoundaryPoints[_topLeftBoundaryPointIndex].dy,
+          )
+          ..lineTo(
+            screenBoundaryPoints[_topMidBoundaryPointIndex].dx,
+            screenBoundaryPoints[_topMidBoundaryPointIndex].dy,
+          )
+          ..lineTo(
+            screenBoundaryPoints[_topRightBoundaryPointIndex].dx,
+            screenBoundaryPoints[_topRightBoundaryPointIndex].dy,
+          );
+      case TransformModel.rightEdgeIndex:
+        edgePath
+          ..moveTo(
+            screenBoundaryPoints[_topRightBoundaryPointIndex].dx,
+            screenBoundaryPoints[_topRightBoundaryPointIndex].dy,
+          )
+          ..lineTo(
+            screenBoundaryPoints[_rightMidBoundaryPointIndex].dx,
+            screenBoundaryPoints[_rightMidBoundaryPointIndex].dy,
+          )
+          ..lineTo(
+            screenBoundaryPoints[_bottomRightBoundaryPointIndex].dx,
+            screenBoundaryPoints[_bottomRightBoundaryPointIndex].dy,
+          );
+      case TransformModel.bottomEdgeIndex:
+        edgePath
+          ..moveTo(
+            screenBoundaryPoints[_bottomRightBoundaryPointIndex].dx,
+            screenBoundaryPoints[_bottomRightBoundaryPointIndex].dy,
+          )
+          ..lineTo(
+            screenBoundaryPoints[_bottomMidBoundaryPointIndex].dx,
+            screenBoundaryPoints[_bottomMidBoundaryPointIndex].dy,
+          )
+          ..lineTo(
+            screenBoundaryPoints[_bottomLeftBoundaryPointIndex].dx,
+            screenBoundaryPoints[_bottomLeftBoundaryPointIndex].dy,
+          );
+      case TransformModel.leftEdgeIndex:
+        edgePath
+          ..moveTo(
+            screenBoundaryPoints[_bottomLeftBoundaryPointIndex].dx,
+            screenBoundaryPoints[_bottomLeftBoundaryPointIndex].dy,
+          )
+          ..lineTo(
+            screenBoundaryPoints[_leftMidBoundaryPointIndex].dx,
+            screenBoundaryPoints[_leftMidBoundaryPointIndex].dy,
+          )
+          ..lineTo(
+            screenBoundaryPoints[_topLeftBoundaryPointIndex].dx,
+            screenBoundaryPoints[_topLeftBoundaryPointIndex].dy,
+          );
+      default:
+        edgePath.addPath(Path(), Offset.zero);
+    }
+    return edgePath;
   }
 
   @override

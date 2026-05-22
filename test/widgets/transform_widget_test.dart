@@ -288,6 +288,39 @@ void main() {
       expect(changedCallCount, greaterThan(0));
     });
 
+    testWidgets('active edge state is set during drag and cleared after release', (final WidgetTester tester) async {
+      final TransformModel model = TransformModel();
+      final ui.Image image = await _createTestImage();
+      model.start(image: image, bounds: const Rect.fromLTWH(100, 150, 200, 100));
+
+      await tester.pumpWidget(
+        _buildHarness(
+          model: model,
+          onChanged: () {},
+        ),
+      );
+      await tester.pump();
+
+      final Finder topEdgeZones = find.byWidgetPredicate(
+        (final Widget widget) => widget is TransformEdgeDragZone && widget.edgeIndex == TransformModel.topEdgeIndex,
+      );
+
+      final TestGesture gesture = await tester.startGesture(tester.getCenter(topEdgeZones.first));
+      await tester.pump();
+
+      expect(model.activeEdgeIndex, TransformModel.topEdgeIndex);
+
+      await gesture.moveBy(const Offset(10, 10));
+      await tester.pump();
+
+      expect(model.activeEdgeIndex, TransformModel.topEdgeIndex);
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(model.activeEdgeIndex, isNull);
+    });
+
     testWidgets('dragging a left edge line vertically keeps the movement vertical', (
       final WidgetTester tester,
     ) async {
