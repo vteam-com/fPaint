@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
@@ -39,6 +40,7 @@ class SelectionRectWidget extends StatefulWidget {
     required this.onResize,
     required this.onRotate,
     required this.onToggleTransformMode,
+    required this.onCancel,
     required this.onCopy,
     required this.onDuplicate,
     required this.onEffectSelected,
@@ -51,6 +53,9 @@ class SelectionRectWidget extends StatefulWidget {
 
   /// Whether a new selection is actively being drawn.
   final bool isDrawing;
+
+  /// A callback that cancels the selection.
+  final VoidCallback onCancel;
 
   /// A callback that copies the selection to the clipboard.
   final VoidCallback onCopy;
@@ -165,6 +170,24 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
   double _activeRotationDegrees = 0;
   double _activeScalePercent = AppMath.percentScale;
   _SelectionOverlayFeedbackMode _feedbackMode = _SelectionOverlayFeedbackMode.none;
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    // Request focus when the widget is mounted
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(final BuildContext context) {
     if (widget.path1 == null) {
@@ -224,10 +247,20 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       }
     }
 
-    return SizedBox(
-      width: width < 0 ? 0 : width,
-      height: height < 0 ? 0 : height,
-      child: Stack(children: stackChildren),
+    return Focus(
+      focusNode: _focusNode,
+      onKeyEvent: (final FocusNode _, final KeyEvent _) {
+        if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.escape)) {
+          widget.onCancel();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: SizedBox(
+        width: width < 0 ? 0 : width,
+        height: height < 0 ? 0 : height,
+        child: Stack(children: stackChildren),
+      ),
     );
   }
 

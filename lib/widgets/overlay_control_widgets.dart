@@ -138,8 +138,10 @@ class OverlayDragHandle extends StatelessWidget {
     super.key,
     required this.position,
     required this.cursor,
+    this.onPanStart,
     this.onPanUpdate,
     this.onPanEnd,
+    this.onPanCancel,
     this.size = AppInteraction.selectionHandleSize,
     this.borderRadius = AppRadius.large,
     this.backgroundColor = AppColors.overlayDark,
@@ -158,8 +160,14 @@ class OverlayDragHandle extends StatelessWidget {
   /// Mouse cursor shown when hovering.
   final MouseCursor cursor;
 
+  /// Called when the drag is canceled.
+  final GestureDragCancelCallback? onPanCancel;
+
   /// Called when the drag ends.
   final VoidCallback? onPanEnd;
+
+  /// Called when the drag starts.
+  final GestureDragStartCallback? onPanStart;
 
   /// Called on every drag update.
   final void Function(DragUpdateDetails)? onPanUpdate;
@@ -177,8 +185,10 @@ class OverlayDragHandle extends StatelessWidget {
       left: position.dx - activeSize / AppMath.pair,
       top: position.dy - activeSize / AppMath.pair,
       child: GestureDetector(
+        onPanStart: onPanStart,
         onPanUpdate: onPanUpdate,
         onPanEnd: (final DragEndDetails _) => onPanEnd?.call(),
+        onPanCancel: onPanCancel,
         child: MouseRegion(
           cursor: cursor,
           child: Container(
