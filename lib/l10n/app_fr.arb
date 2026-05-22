@@ -248,6 +248,7 @@
     }
   },
   "transform": "Transformer",
+  "translate": "Deplacer",
   "unsavedChanges": "Modifications non enregistrees",
   "unsavedChangesDiscardAndOpenPrompt": "Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?",
   "useApplePencilOnlySubtitle": "Si active, seul l'Apple Pencil sera utilise pour dessiner.",

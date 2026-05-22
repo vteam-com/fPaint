@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
@@ -16,6 +15,7 @@ import 'package:fpaint/widgets/overlay_control_widgets.dart';
 
 enum _SelectionOverlayFeedbackMode {
   none,
+  translate,
   resize,
   scale,
   rotate,
@@ -171,11 +171,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       return const SizedBox();
     }
 
-    final AppLocalizations l10n = context.l10n;
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final Rect bounds = widget.path1!.getBounds();
     const double modeToggleSize = AppInteraction.imagePlacementButtonSize;
     const double modeToggleSpacing = AppInteraction.imagePlacementButtonSpacing;
-    const double controlsWidth = modeToggleSize * AppMath.triple + modeToggleSpacing * AppMath.pair;
+    const double controlsWidth = modeToggleSize * AppMath.four + modeToggleSpacing * AppMath.triple;
     final double width = max(
       bounds.left + bounds.width + defaultHandleSize,
       bounds.center.dx + controlsWidth / AppMath.pair,
@@ -245,6 +245,12 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     });
   }
 
+  void _beginTranslateFeedback() {
+    setState(() {
+      _feedbackMode = _SelectionOverlayFeedbackMode.translate;
+    });
+  }
+
   /// Builds the copy-to-clipboard control shown below the selection.
   Widget _buildBottomControls(
     final Rect bounds,
@@ -291,15 +297,19 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
   ) {
     const double buttonSize = AppInteraction.imagePlacementButtonSize;
     const double spacing = AppInteraction.imagePlacementButtonSpacing;
-    const double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
+    const double controlsWidth = buttonSize * AppMath.four + spacing * AppMath.triple;
     final double controlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
     final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
-    final Offset scaleHandleCenter = Offset(
+    final Offset translateHandleCenter = Offset(
       controlsLeft + buttonSize / AppMath.pair,
       controlsTop + buttonSize / AppMath.pair,
     );
-    final Offset rotateHandleCenter = Offset(
+    final Offset scaleHandleCenter = Offset(
       controlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
+      controlsTop + buttonSize / AppMath.pair,
+    );
+    final Offset rotateHandleCenter = Offset(
+      controlsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
       controlsTop + buttonSize / AppMath.pair,
     );
 
@@ -315,6 +325,20 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
             mainAxisSize: MainAxisSize.min,
             spacing: spacing,
             children: <Widget>[
+              buildOverlayModeButton(
+                tooltip: l10n.translate,
+                icon: AppIcon.move,
+                isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.translate,
+                cursor: SystemMouseCursors.move,
+                onPanStart: (final DragStartDetails _) => _beginTranslateFeedback(),
+                onPanUpdate: (final DragUpdateDetails details) {
+                  final Offset pointer = translateHandleCenter + details.delta;
+                  widget.onDrag(pointer - translateHandleCenter);
+                  _beginTranslateFeedback();
+                },
+                onPanEnd: (final DragEndDetails _) => _endFeedback(),
+                onPanCancel: _endFeedback,
+              ),
               buildOverlayModeButton(
                 tooltip: l10n.scale,
                 icon: AppIcon.openInFull,
@@ -394,6 +418,8 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
         return l10n.percentageValue(_activeScalePercent.round());
       case _SelectionOverlayFeedbackMode.rotate:
         return l10n.degreesValue(_activeRotationDegrees.round());
+      case _SelectionOverlayFeedbackMode.translate:
+        return '';
       case _SelectionOverlayFeedbackMode.resize:
         return l10n.dimensionsValue(
           _activeResizeDimensions.width.round(),
@@ -404,7 +430,10 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     }
   }
 
-  bool get _isFeedbackVisible => _feedbackMode != _SelectionOverlayFeedbackMode.none || widget.isDrawing;
+  bool get _isFeedbackVisible =>
+      (_feedbackMode != _SelectionOverlayFeedbackMode.none &&
+          _feedbackMode != _SelectionOverlayFeedbackMode.translate) ||
+      widget.isDrawing;
 
   /// Updates the resize dimensions feedback from the current path bounds.
   void _updateResizeFeedback() {

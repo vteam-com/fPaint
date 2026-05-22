@@ -270,9 +270,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fileNotFound => 'File not found';
 
   @override
-  String get previewUnavailable => 'Preview unavailable';
-
-  @override
   String get fillColor => 'Fill Color';
 
   @override
@@ -289,6 +286,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fpaintLoadImage => 'fPaint Load Image';
+
+  @override
+  String get fromClipboard => 'From Clipboard';
 
   @override
   String get githubRepo => 'GitHub Repo';
@@ -414,9 +414,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newCanvasSize => 'New Canvas Size';
 
   @override
-  String get fromClipboard => 'From Clipboard';
-
-  @override
   String get newFromClipboard => 'New from Clipboard';
 
   @override
@@ -435,6 +432,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get platforms => 'Available on...';
+
+  @override
+  String get previewUnavailable => 'Preview unavailable';
 
   @override
   String get recentFilesLabel => 'Recent';
@@ -463,6 +463,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scale => 'Scale';
+
+  @override
+  String get translate => 'Translate';
 
   @override
   String get selectionIsHidden => 'Selection is hidden.';

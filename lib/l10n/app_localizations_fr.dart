@@ -271,9 +271,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get fileNotFound => 'Fichier non trouvé';
 
   @override
-  String get previewUnavailable => 'Aperçu indisponible';
-
-  @override
   String get fillColor => 'Couleur de remplissage';
 
   @override
@@ -290,6 +287,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get fpaintLoadImage => 'fPaint Charger une image';
+
+  @override
+  String get fromClipboard => 'Depuis le presse-papiers';
 
   @override
   String get githubRepo => 'Depot GitHub';
@@ -416,9 +416,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get newCanvasSize => 'Nouvelle taille de toile';
 
   @override
-  String get fromClipboard => 'Depuis le presse-papiers';
-
-  @override
   String get newFromClipboard => 'Importé du Presse-papiers';
 
   @override
@@ -437,6 +434,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get platforms => 'Disponible sur...';
+
+  @override
+  String get previewUnavailable => 'Aperçu indisponible';
 
   @override
   String get recentFilesLabel => 'Récents';
@@ -465,6 +465,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get scale => 'Mettre a l\'echelle';
+
+  @override
+  String get translate => 'Deplacer';
 
   @override
   String get selectionIsHidden => 'La selection est masquee.';

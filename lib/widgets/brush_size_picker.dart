@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/base_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
 

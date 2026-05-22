@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/user_action_drawing.dart';

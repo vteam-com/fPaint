@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/image_placement_model.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';

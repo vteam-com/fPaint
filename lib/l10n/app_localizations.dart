@@ -554,12 +554,6 @@ abstract class AppLocalizations {
   /// **'File not found'**
   String get fileNotFound;
 
-  /// No description provided for @previewUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Preview unavailable'**
-  String get previewUnavailable;
-
   /// No description provided for @fillColor.
   ///
   /// In en, this message translates to:
@@ -595,6 +589,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'fPaint Load Image'**
   String get fpaintLoadImage;
+
+  /// No description provided for @fromClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'From Clipboard'**
+  String get fromClipboard;
 
   /// No description provided for @githubRepo.
   ///
@@ -842,12 +842,6 @@ abstract class AppLocalizations {
   /// **'New Canvas Size'**
   String get newCanvasSize;
 
-  /// No description provided for @fromClipboard.
-  ///
-  /// In en, this message translates to:
-  /// **'From Clipboard'**
-  String get fromClipboard;
-
   /// No description provided for @newFromClipboard.
   ///
   /// In en, this message translates to:
@@ -883,6 +877,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Available on...'**
   String get platforms;
+
+  /// No description provided for @previewUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview unavailable'**
+  String get previewUnavailable;
 
   /// No description provided for @recentFilesLabel.
   ///
@@ -931,6 +931,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scale'**
   String get scale;
+
+  /// No description provided for @translate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get translate;
 
   /// No description provided for @selectionIsHidden.
   ///
@@ -1161,6 +1167,10 @@ abstract class AppLocalizations {
   String get width;
 }
 
+extension AppLocalizationsBuildContext on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this)!;
+}
+
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
@@ -1193,14 +1203,4 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
     'that was used.',
   );
-}
-
-/// Extension on [BuildContext] to provide convenient access to
-/// [AppLocalizations] via `context.l10n`.
-///
-/// NOTE: This extension is manually maintained. If you re-run `flutter gen-l10n`,
-/// you must re-add this extension to the bottom of this file.
-extension AppLocalizationsBuildContextX on BuildContext {
-  /// Returns the [AppLocalizations] for this [BuildContext].
-  AppLocalizations get l10n => AppLocalizations.of(this)!;
 }
