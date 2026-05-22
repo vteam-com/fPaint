@@ -63,6 +63,7 @@ enum AppIcon {
   link('assets/icons/link.svg'),
   linkOff('assets/icons/link_off.svg'),
   menu('assets/icons/menu.svg'),
+  move('assets/icons/move.svg'),
   moreVert('assets/icons/more_vert.svg'),
   openInFull('assets/icons/open_in_full.svg'),
   outbound('assets/icons/outbound.svg'),

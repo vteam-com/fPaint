@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/floating_buttons.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';

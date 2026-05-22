@@ -6,7 +6,6 @@ import 'package:fpaint/files/save.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/helpers/log_helper.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/my_window_manager.dart';
 import 'package:fpaint/pages/platforms_page.dart';

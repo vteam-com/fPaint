@@ -19,7 +19,6 @@ import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/file_webp.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/fill_model.dart';

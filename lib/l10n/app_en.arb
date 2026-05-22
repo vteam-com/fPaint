@@ -258,6 +258,7 @@
     }
   },
   "transform": "Transform",
+  "translate": "Translate",
   "unsavedChanges": "Unsaved Changes",
   "unsavedChangesDiscardAndOpenPrompt": "You have unsaved changes. Do you want to discard them and open the new file?",
   "useApplePencilOnlySubtitle": "If enabled, only the Apple Pencil will be used for drawing.",

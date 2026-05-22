@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
 import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';

@@ -135,6 +135,9 @@ class TransformModel extends VisibleModel {
   /// Whether the center move handle is currently enabled.
   bool get isCenterHandleEnabled => handleSet == TransformHandleSet.all;
 
+  /// Whether the overlay is in the translate-ready deform state.
+  bool get isTranslateMode => isDeformMode && isCenterHandleEnabled;
+
   /// The edge midpoint controls currently applied to the warp mesh.
   List<Offset> get effectiveEdgeMidpoints {
     if (corners.length != cornerCount) {
@@ -157,6 +160,14 @@ class TransformModel extends VisibleModel {
   /// Sets deform mode, resets to corner handles, and clears transient feedback.
   void setDeformMode() {
     handleSet = TransformHandleSet.corners;
+    interactionMode = TransformInteractionMode.deform;
+    endScaleGesture();
+    endRotateGesture();
+  }
+
+  /// Sets deform mode with all handles enabled so translation is directly available.
+  void setTranslateMode() {
+    handleSet = TransformHandleSet.all;
     interactionMode = TransformInteractionMode.deform;
     endScaleGesture();
     endRotateGesture();

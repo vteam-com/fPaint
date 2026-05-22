@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/main.dart';
 import 'package:fpaint/main_screen.dart';
 import 'package:fpaint/models/app_icon_enum.dart';

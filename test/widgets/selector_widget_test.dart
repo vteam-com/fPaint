@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
@@ -235,8 +234,9 @@ void main() {
       expect(transformCalls, 1);
     });
 
-    testWidgets('scale and rotate handle drags invoke callbacks', (final WidgetTester tester) async {
+    testWidgets('translate, scale and rotate handle drags invoke callbacks', (final WidgetTester tester) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(100, 100, 200, 160));
+      int translateCalls = 0;
       int scaleCalls = 0;
       int rotateCalls = 0;
 
@@ -246,7 +246,9 @@ void main() {
           onCopy: () {},
           onDuplicate: () {},
           onToggleTransformMode: () {},
-          onDrag: (final Offset _) {},
+          onDrag: (final Offset _) {
+            translateCalls++;
+          },
           onResize: (final NineGridHandle _, final Offset _) {},
           onScale: (final double _) {
             scaleCalls++;
@@ -262,24 +264,32 @@ void main() {
       final Rect bounds = path.getBounds();
       const double buttonSize = AppInteraction.imagePlacementButtonSize;
       const double spacing = AppInteraction.imagePlacementButtonSpacing;
-      const double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
+      const double controlsWidth = buttonSize * AppMath.four + spacing * AppMath.triple;
       final double controlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
       final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
 
-      final Offset scaleCenter = Offset(
+      final Offset translateCenter = Offset(
         controlsLeft + buttonSize / AppMath.pair,
         controlsTop + buttonSize / AppMath.pair,
       );
-      final Offset rotateCenter = Offset(
+
+      final Offset scaleCenter = Offset(
         controlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
         controlsTop + buttonSize / AppMath.pair,
       );
+      final Offset rotateCenter = Offset(
+        controlsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
+        controlsTop + buttonSize / AppMath.pair,
+      );
 
+      await tester.dragFrom(translateCenter, const Offset(15, 10));
+      await tester.pump();
       await tester.dragFrom(scaleCenter, const Offset(20, 20));
       await tester.pump();
       await tester.dragFrom(rotateCenter, const Offset(30, 10));
       await tester.pump();
 
+      expect(translateCalls, greaterThan(0));
       expect(scaleCalls, greaterThan(0));
       expect(rotateCalls, greaterThan(0));
     });

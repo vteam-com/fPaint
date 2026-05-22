@@ -249,6 +249,7 @@
     }
   },
   "transform": "Transformar",
+  "translate": "Mover",
   "unsavedChanges": "Cambios no guardados",
   "unsavedChangesDiscardAndOpenPrompt": "Tienes cambios no guardados. Quieres descartarlos y abrir el nuevo archivo?",
   "useApplePencilOnlySubtitle": "Si esta activado, solo se usara el Apple Pencil para dibujar.",

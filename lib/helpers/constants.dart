@@ -5,6 +5,8 @@ import 'dart:ui' show Color, FontWeight;
 import 'package:flutter/foundation.dart' show Key;
 import 'package:flutter/painting.dart' show TextStyle;
 
+export 'package:fpaint/l10n/app_localizations.dart';
+
 /// The application display name.
 const String appName = 'fPaint';
 

@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart' show AppIcon;
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
@@ -364,7 +363,7 @@ class _TransformWidgetState extends State<TransformWidget> {
   }) {
     const double buttonSize = AppInteraction.imagePlacementButtonSize;
     const double spacing = AppInteraction.imagePlacementButtonSpacing;
-    const double modeButtonsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair; // 3 mode buttons
+    const double modeButtonsWidth = buttonSize * AppMath.four + spacing * AppMath.triple; // 4 mode buttons
     const double confirmCancelWidth = buttonSize * AppMath.pair + spacing; // 2 confirm/cancel buttons
     const double totalWidth = modeButtonsWidth + spacing + confirmCancelWidth; // All buttons with inter-group spacing
 
@@ -372,12 +371,16 @@ class _TransformWidgetState extends State<TransformWidget> {
     final double controlsTop = _screenQuadTop(screenCorners) - buttonSize - AppInteraction.imagePlacementHandleSize;
     final double controlsLeft = screenCenter.dx - totalWidth / AppMath.pair;
 
-    final Offset scaleHandleCenter = Offset(
+    final Offset translateHandleCenter = Offset(
       controlsLeft + buttonSize / AppMath.pair,
       controlsTop + buttonSize / AppMath.pair,
     );
-    final Offset rotationHandleCenter = Offset(
+    final Offset scaleHandleCenter = Offset(
       controlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
+      controlsTop + buttonSize / AppMath.pair,
+    );
+    final Offset rotationHandleCenter = Offset(
+      controlsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
       controlsTop + buttonSize / AppMath.pair,
     );
 
@@ -398,6 +401,32 @@ class _TransformWidgetState extends State<TransformWidget> {
             mainAxisSize: MainAxisSize.min,
             spacing: spacing,
             children: <Widget>[
+              buildOverlayModeButton(
+                tooltip: l10n.translate,
+                icon: AppIcon.move,
+                isSelected: model.isTranslateMode,
+                cursor: SystemMouseCursors.move,
+                onTap: () {
+                  if (!model.isTranslateMode) {
+                    model.setTranslateMode();
+                    onChanged();
+                  }
+                },
+                onPanStart: (final DragStartDetails _) {
+                  if (!model.isTranslateMode) {
+                    model.setTranslateMode();
+                    onChanged();
+                  }
+                },
+                onPanUpdate: (final DragUpdateDetails details) {
+                  if (!model.isTranslateMode) {
+                    model.setTranslateMode();
+                  }
+                  final Offset pointer = translateHandleCenter + details.delta;
+                  model.moveAll((pointer - translateHandleCenter) / canvasScale);
+                  onChanged();
+                },
+              ),
               buildOverlayModeButton(
                 tooltip: l10n.scale,
                 icon: AppIcon.openInFull,
@@ -482,7 +511,7 @@ class _TransformWidgetState extends State<TransformWidget> {
               buildOverlayModeButton(
                 tooltip: l10n.transform,
                 icon: AppIcon.transform,
-                isSelected: model.isDeformMode,
+                isSelected: model.isDeformMode && !model.isCenterHandleEnabled,
                 cursor: SystemMouseCursors.click,
                 onTap: () {
                   if (!model.isDeformMode) {
