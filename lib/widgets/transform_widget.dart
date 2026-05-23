@@ -476,7 +476,6 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
           ? l10n.percentageValue(model.activeScalePercent.round())
           : l10n.degreesValue(model.activeRotationDegrees.round()),
     );
-    final Widget feedbackSpacer = SizedBox(height: spacing);
     final Widget modeButtons = buildOverlayControlSurface(
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -624,24 +623,13 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
         onCancel: onCancel,
       ),
     );
-    final Widget buttonsRow = Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: spacing,
-      children: <Widget>[modeButtons, commitButtons],
-    );
-
-    return Positioned(
+    return buildPositionedOverlayControls(
       left: controlsLeft,
-      top: placement.positionedTop,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: placement.orderedColumnChildren(
-          buttonsRow: buttonsRow,
-          isFeedbackVisible: model.isFeedbackVisible,
-          feedbackBubble: feedbackBubble,
-          feedbackSpacer: feedbackSpacer,
-        ),
-      ),
+      placement: placement,
+      spacing: spacing,
+      controlGroups: <Widget>[modeButtons, commitButtons],
+      isFeedbackVisible: model.isFeedbackVisible,
+      feedbackBubble: feedbackBubble,
     );
   }
 

@@ -113,9 +113,11 @@ class AppButtonIcon extends StatelessWidget {
     this.tooltip,
     this.constraints,
     this.padding,
+    this.enabled = true,
   });
   final Color? color;
   final BoxConstraints? constraints;
+  final bool enabled;
   final AppIcon icon;
   final bool isSelected;
   final VoidCallback onPressed;
@@ -125,15 +127,18 @@ class AppButtonIcon extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return AppButton(
-      onPressed: onPressed,
-      tooltip: tooltip,
+      onPressed: enabled ? onPressed : () {},
+      tooltip: enabled ? tooltip : null,
       constraints: constraints,
       padding: padding,
-      child: AppSvgIcon(
-        icon: icon,
-        isSelected: isSelected,
-        color: color,
-        size: size,
+      child: Opacity(
+        opacity: enabled ? AppVisual.full : AppVisual.disabled,
+        child: AppSvgIcon(
+          icon: icon,
+          isSelected: isSelected,
+          color: color,
+          size: size,
+        ),
       ),
     );
   }

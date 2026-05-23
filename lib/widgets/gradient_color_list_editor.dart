@@ -360,16 +360,14 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
     required final bool enabled,
     required final VoidCallback onPressed,
   }) {
-    return Opacity(
-      opacity: enabled ? AppVisual.full : AppVisual.disabled,
-      child: AppButtonIcon(
-        key: key,
-        icon: icon,
-        tooltip: null,
-        constraints: const BoxConstraints(),
-        padding: const EdgeInsets.all(AppSpacing.small),
-        onPressed: enabled ? onPressed : () {},
-      ),
+    return AppButtonIcon(
+      key: key,
+      icon: icon,
+      tooltip: null,
+      constraints: const BoxConstraints(),
+      padding: const EdgeInsets.all(AppSpacing.small),
+      enabled: enabled,
+      onPressed: onPressed,
     );
   }
 

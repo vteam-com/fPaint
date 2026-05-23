@@ -327,7 +327,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     );
 
     final Widget feedbackBubble = buildOverlayFeedbackBubble(label: _feedbackLabel(l10n));
-    final Widget feedbackSpacer = SizedBox(height: spacing);
     final Widget modeButtons = buildOverlayControlSurface(
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -455,27 +454,13 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
             ),
           )
         : null;
-    final Widget buttonsRow = Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: spacing,
-      children: <Widget>[
-        modeButtons,
-        ?quickActions,
-      ],
-    );
-
-    return Positioned(
+    return buildPositionedOverlayControls(
       left: controlsLeft,
-      top: placement.positionedTop,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: placement.orderedColumnChildren(
-          buttonsRow: buttonsRow,
-          isFeedbackVisible: _isFeedbackVisible,
-          feedbackBubble: feedbackBubble,
-          feedbackSpacer: feedbackSpacer,
-        ),
-      ),
+      placement: placement,
+      spacing: spacing,
+      controlGroups: <Widget>[modeButtons, ?quickActions],
+      isFeedbackVisible: _isFeedbackVisible,
+      feedbackBubble: feedbackBubble,
     );
   }
 

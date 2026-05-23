@@ -213,20 +213,7 @@ class _AppButtonRowGroup extends StatelessWidget {
 
   /// Returns a coarse width estimate for [action] so narrow containers can stack safely.
   double _estimatedActionWidth(final Widget action) {
-    if (action is AppButtonIcon || action is AppRowIconButton) {
-      return AppLayout.toolbarButtonSize;
-    }
-
-    if (action is AppButtonDanger ||
-        action is AppButtonPrimary ||
-        action is AppButtonText ||
-        action is AppRowDangerButton ||
-        action is AppRowPrimaryButton ||
-        action is AppRowSecondaryButton) {
-      return AppLayout.toolbarButtonWidth + AppSpacing.large;
-    }
-
-    return AppLayout.toolbarButtonWidth;
+    return _describeAppButtonRowAction(action).estimatedWidth;
   }
 
   /// Estimated minimum width needed to keep all actions on one horizontal line.
@@ -256,7 +243,7 @@ class _AppButtonRowGroups {
     final List<Widget> primary = <Widget>[];
 
     for (final Widget action in actions) {
-      switch (_resolveActionSlot(action)) {
+      switch (_describeAppButtonRowAction(action).slot) {
         case AppButtonRowSlot.danger:
           danger.add(action);
         case AppButtonRowSlot.icon:
@@ -286,21 +273,57 @@ class _AppButtonRowGroups {
   final List<Widget> icon;
   final List<Widget> primary;
   final List<Widget> secondary;
+}
 
-  /// Resolves [action] into a dialog slot, including legacy button widgets.
-  static AppButtonRowSlot _resolveActionSlot(final Widget action) {
-    if (action is AppButtonRowWidget) {
-      return action.slot;
-    }
-    if (action is AppButtonDanger) {
-      return AppButtonRowSlot.danger;
-    }
-    if (action is AppButtonPrimary) {
-      return AppButtonRowSlot.primary;
-    }
-    if (action is AppButtonIcon) {
-      return AppButtonRowSlot.icon;
-    }
-    return AppButtonRowSlot.secondary;
+/// Maps each supported action widget to the semantic button-row slot metadata
+/// used by both grouping and width estimation.
+_AppButtonRowActionDescription _describeAppButtonRowAction(final Widget action) {
+  if (action is AppButtonRowWidget) {
+    return _actionDescriptionForButtonRowSlot(action.slot);
   }
+  if (action is AppButtonDanger) {
+    return _actionDescriptionForButtonRowSlot(AppButtonRowSlot.danger);
+  }
+  if (action is AppButtonPrimary) {
+    return _actionDescriptionForButtonRowSlot(AppButtonRowSlot.primary);
+  }
+  if (action is AppButtonIcon) {
+    return _actionDescriptionForButtonRowSlot(AppButtonRowSlot.icon);
+  }
+  return _actionDescriptionForButtonRowSlot(AppButtonRowSlot.secondary);
+}
+
+/// Returns the shared layout metadata for a semantic button-row slot so all
+/// row calculations stay aligned on a single source of truth.
+_AppButtonRowActionDescription _actionDescriptionForButtonRowSlot(
+  final AppButtonRowSlot slot,
+) {
+  return switch (slot) {
+    AppButtonRowSlot.icon => const _AppButtonRowActionDescription(
+      slot: AppButtonRowSlot.icon,
+      estimatedWidth: AppLayout.toolbarButtonSize,
+    ),
+    AppButtonRowSlot.danger => const _AppButtonRowActionDescription(
+      slot: AppButtonRowSlot.danger,
+      estimatedWidth: AppLayout.toolbarButtonWidth + AppSpacing.large,
+    ),
+    AppButtonRowSlot.secondary => const _AppButtonRowActionDescription(
+      slot: AppButtonRowSlot.secondary,
+      estimatedWidth: AppLayout.toolbarButtonWidth + AppSpacing.large,
+    ),
+    AppButtonRowSlot.primary => const _AppButtonRowActionDescription(
+      slot: AppButtonRowSlot.primary,
+      estimatedWidth: AppLayout.toolbarButtonWidth + AppSpacing.large,
+    ),
+  };
+}
+
+class _AppButtonRowActionDescription {
+  const _AppButtonRowActionDescription({
+    required this.slot,
+    required this.estimatedWidth,
+  });
+
+  final double estimatedWidth;
+  final AppButtonRowSlot slot;
 }

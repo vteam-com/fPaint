@@ -87,10 +87,10 @@ void main() {
       expect(find.byKey(Keys.floatActionUndo), findsOneWidget);
       expect(
         find.descendant(
-          of: find.byWidgetPredicate(
+          of: find.byKey(Keys.floatActionUndo),
+          matching: find.byWidgetPredicate(
             (final Widget widget) => widget is Opacity && widget.opacity == AppVisual.disabled,
           ),
-          matching: find.byKey(Keys.floatActionUndo),
         ),
         findsOneWidget,
       );
@@ -114,10 +114,10 @@ void main() {
       expect(find.byKey(Keys.floatActionRedo), findsOneWidget);
       expect(
         find.descendant(
-          of: find.byWidgetPredicate(
+          of: find.byKey(Keys.floatActionRedo),
+          matching: find.byWidgetPredicate(
             (final Widget widget) => widget is Opacity && widget.opacity == AppVisual.disabled,
           ),
-          matching: find.byKey(Keys.floatActionRedo),
         ),
         findsOneWidget,
       );
@@ -441,19 +441,19 @@ void main() {
       expect(find.byKey(Keys.floatActionRedo), findsOneWidget);
       expect(
         find.descendant(
-          of: find.byWidgetPredicate(
+          of: find.byKey(Keys.floatActionUndo),
+          matching: find.byWidgetPredicate(
             (final Widget widget) => widget is Opacity && widget.opacity == AppVisual.disabled,
           ),
-          matching: find.byKey(Keys.floatActionUndo),
         ),
         findsOneWidget,
       );
       expect(
         find.descendant(
-          of: find.byWidgetPredicate(
+          of: find.byKey(Keys.floatActionRedo),
+          matching: find.byWidgetPredicate(
             (final Widget widget) => widget is Opacity && widget.opacity == AppVisual.disabled,
           ),
-          matching: find.byKey(Keys.floatActionRedo),
         ),
         findsOneWidget,
       );
