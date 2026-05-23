@@ -1,3 +1,7 @@
+// ignore: fcheck_one_class_per_file
+import 'dart:math';
+
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -213,4 +217,153 @@ class OverlayDragHandle extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Adds Escape key handling to an overlay [State] class.
+///
+/// Manages a [FocusNode] lifecycle and requests focus when the widget mounts.
+/// When the Escape key is pressed, [onEscapePressed] is called.
+///
+/// Usage:
+/// ```dart
+/// class _MyState extends State<MyWidget> with EscapeFocusMixin {
+///   @override
+///   void onEscapePressed() => widget.onCancel();
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return wrapWithEscapeFocus(child: ...);
+///   }
+/// }
+/// ```
+mixin EscapeFocusMixin<T extends StatefulWidget> on State<T> {
+  late FocusNode _escapeFocusNode;
+
+  /// Called when the user presses the Escape key while this widget has focus.
+  void onEscapePressed();
+
+  @override
+  void initState() {
+    super.initState();
+    _escapeFocusNode = FocusNode();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _escapeFocusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _escapeFocusNode.dispose();
+    super.dispose();
+  }
+
+  /// Wraps [child] in a [Focus] widget that calls [onEscapePressed] on Escape.
+  Widget wrapWithEscapeFocus({required final Widget child}) {
+    return Focus(
+      focusNode: _escapeFocusNode,
+      onKeyEvent: (final FocusNode _, final KeyEvent _) {
+        if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.escape)) {
+          onEscapePressed();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: child,
+    );
+  }
+}
+
+/// Result of [computeOverlayPlacement]: pre-computed vertical positioning
+/// values for an overlay controls row (mode buttons + optional feedback bubble).
+class OverlayPlacement {
+  const OverlayPlacement._({
+    required this.positionedTop,
+    required this.controlsTop,
+    required this.centeredTop,
+    required this.isFlippedToBottom,
+    required this.isCentered,
+  });
+
+  /// Top offset for the outermost [Positioned] widget.
+  final double positionedTop;
+
+  /// Top offset of the buttons row itself (used for handle-centre calculations).
+  final double controlsTop;
+
+  /// Vertical mid-point used when placement falls back to centred.
+  final double centeredTop;
+
+  /// Whether the controls were flipped below the content to avoid top clipping.
+  final bool isFlippedToBottom;
+
+  /// Whether the controls were centred because both top and bottom would clip.
+  final bool isCentered;
+
+  /// Returns the children for a [Column] in the correct order for this placement.
+  ///
+  /// The feedback bubble appears above the buttons row for top/centred placement,
+  /// and below for bottom placement.
+  List<Widget> orderedColumnChildren({
+    required final Widget buttonsRow,
+    required final bool isFeedbackVisible,
+    required final Widget feedbackBubble,
+    required final Widget feedbackSpacer,
+  }) {
+    if (isFlippedToBottom) {
+      return <Widget>[
+        buttonsRow,
+        if (isFeedbackVisible) feedbackSpacer,
+        if (isFeedbackVisible) feedbackBubble,
+      ];
+    }
+    return <Widget>[
+      if (isFeedbackVisible) feedbackBubble,
+      if (isFeedbackVisible) feedbackSpacer,
+      buttonsRow,
+    ];
+  }
+}
+
+/// Computes the vertical placement for an overlay controls row, avoiding
+/// viewport clipping at both top and bottom edges.
+///
+/// Pass [idealTop] (the preferred top-above-content position) and [bottomTop]
+/// (the fallback position below content). When both positions would clip,
+/// the controls are centred within [viewportHeight].
+OverlayPlacement computeOverlayPlacement({
+  required final double viewportHeight,
+  required final double idealTop,
+  required final double bottomTop,
+  required final bool isFeedbackVisible,
+}) {
+  const double buttonSize = AppInteraction.imagePlacementButtonSize;
+  final double controlsHeight = isFeedbackVisible
+      ? buttonSize + AppInteraction.imagePlacementButtonSpacing + buttonSize
+      : buttonSize;
+
+  final double topPositionedTop = isFeedbackVisible ? idealTop - buttonSize : idealTop;
+  final bool topClips = topPositionedTop < 0;
+  final bool bottomClips = bottomTop + controlsHeight > viewportHeight;
+
+  final bool isBottom = topClips && !bottomClips;
+  final bool isCentered = topClips && bottomClips;
+  final double centeredTop = max(AppMath.zero.toDouble(), (viewportHeight - controlsHeight) / AppMath.pair);
+  final double controlsTop = isCentered
+      ? centeredTop + (isFeedbackVisible ? buttonSize + AppInteraction.imagePlacementButtonSpacing : 0)
+      : (isBottom ? bottomTop : idealTop);
+  final double positionedTop = isCentered
+      ? centeredTop
+      : isBottom
+      ? controlsTop
+      : isFeedbackVisible
+      ? controlsTop - buttonSize
+      : controlsTop;
+
+  return OverlayPlacement._(
+    positionedTop: positionedTop,
+    controlsTop: controlsTop,
+    centeredTop: centeredTop,
+    isFlippedToBottom: isBottom,
+    isCentered: isCentered,
+  );
 }

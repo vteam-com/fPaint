@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
@@ -165,29 +164,11 @@ Offset _centerRight(final Rect b) => Offset(b.right, b.center.dy);
 Offset _centerTop(final Rect b) => Offset(b.center.dx, b.top);
 Offset _centerBottom(final Rect b) => Offset(b.center.dx, b.bottom);
 
-class _SelectionRectWidgetState extends State<SelectionRectWidget> {
+class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFocusMixin<SelectionRectWidget> {
   Size _activeResizeDimensions = Size.zero;
   double _activeRotationDegrees = 0;
   double _activeScalePercent = AppMath.percentScale;
   _SelectionOverlayFeedbackMode _feedbackMode = _SelectionOverlayFeedbackMode.none;
-  late FocusNode _focusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode();
-    // Request focus when the widget is mounted
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(final BuildContext context) {
     if (widget.path1 == null) {
@@ -247,15 +228,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       }
     }
 
-    return Focus(
-      focusNode: _focusNode,
-      onKeyEvent: (final FocusNode _, final KeyEvent _) {
-        if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.escape)) {
-          widget.onCancel();
-          return KeyEventResult.handled;
-        }
-        return KeyEventResult.ignored;
-      },
+    return wrapWithEscapeFocus(
       child: SizedBox(
         width: width < 0 ? 0 : width,
         height: height < 0 ? 0 : height,
@@ -264,6 +237,8 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     );
   }
 
+  @override
+  void onEscapePressed() => widget.onCancel();
   void _beginRotateFeedback() {
     setState(() {
       _feedbackMode = _SelectionOverlayFeedbackMode.rotate;
@@ -328,41 +303,30 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
     final Rect bounds,
     final AppLocalizations l10n,
   ) {
-    const int placementTop = AppMath.zero;
-    const int placementBottom = AppMath.one;
-    const int placementCenter = AppMath.pair;
     const double buttonSize = AppInteraction.imagePlacementButtonSize;
     const double spacing = AppInteraction.imagePlacementButtonSpacing;
-    final double viewportHeight = MediaQuery.sizeOf(context).height;
-    final double controlsHeight = _isFeedbackVisible
-        ? buttonSize + AppInteraction.imagePlacementButtonSpacing + buttonSize
-        : buttonSize;
     const double controlsWidth = buttonSize * AppMath.four + spacing * AppMath.triple;
+    final double viewportHeight = MediaQuery.sizeOf(context).height;
     final double idealControlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
     final double bottomControlsTop = bounds.bottom + AppInteraction.rotationHandleDistance;
-    final double topPositionedTop = _isFeedbackVisible ? idealControlsTop - buttonSize : idealControlsTop;
-    final bool topClips = topPositionedTop < 0;
-    final bool bottomClips = bottomControlsTop + controlsHeight > viewportHeight;
-
-    final int placement = !topClips ? placementTop : (!bottomClips ? placementBottom : placementCenter);
-    final double centeredTop = max(AppMath.zero.toDouble(), (viewportHeight - controlsHeight) / AppMath.pair);
-    final bool isFlippedToBottom = placement == placementBottom;
-    final bool isCentered = placement == placementCenter;
-    final double controlsTop = isCentered
-        ? centeredTop + (_isFeedbackVisible ? buttonSize + AppInteraction.imagePlacementButtonSpacing : 0)
-        : (isFlippedToBottom ? bottomControlsTop : idealControlsTop);
+    final OverlayPlacement placement = computeOverlayPlacement(
+      viewportHeight: viewportHeight,
+      idealTop: idealControlsTop,
+      bottomTop: bottomControlsTop,
+      isFeedbackVisible: _isFeedbackVisible,
+    );
     final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
     final Offset translateHandleCenter = Offset(
       controlsLeft + buttonSize / AppMath.pair,
-      controlsTop + buttonSize / AppMath.pair,
+      placement.controlsTop + buttonSize / AppMath.pair,
     );
     final Offset scaleHandleCenter = Offset(
       controlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
-      controlsTop + buttonSize / AppMath.pair,
+      placement.controlsTop + buttonSize / AppMath.pair,
     );
     final Offset rotateHandleCenter = Offset(
       controlsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
-      controlsTop + buttonSize / AppMath.pair,
+      placement.controlsTop + buttonSize / AppMath.pair,
     );
 
     final Widget feedbackBubble = buildOverlayFeedbackBubble(label: _feedbackLabel(l10n));
@@ -437,37 +401,17 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> {
       ],
     );
 
-    final double positionedTop;
-    final List<Widget> columnChildren;
-    if (isCentered) {
-      positionedTop = centeredTop;
-      columnChildren = <Widget>[
-        if (_isFeedbackVisible) feedbackBubble,
-        if (_isFeedbackVisible) feedbackSpacer,
-        buttonsRow,
-      ];
-    } else if (isFlippedToBottom) {
-      positionedTop = controlsTop;
-      columnChildren = <Widget>[
-        buttonsRow,
-        if (_isFeedbackVisible) feedbackSpacer,
-        if (_isFeedbackVisible) feedbackBubble,
-      ];
-    } else {
-      positionedTop = _isFeedbackVisible ? controlsTop - buttonSize : controlsTop;
-      columnChildren = <Widget>[
-        if (_isFeedbackVisible) feedbackBubble,
-        if (_isFeedbackVisible) feedbackSpacer,
-        buttonsRow,
-      ];
-    }
-
     return Positioned(
       left: controlsLeft,
-      top: positionedTop,
+      top: placement.positionedTop,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: columnChildren,
+        children: placement.orderedColumnChildren(
+          buttonsRow: buttonsRow,
+          isFeedbackVisible: _isFeedbackVisible,
+          feedbackBubble: feedbackBubble,
+          feedbackSpacer: feedbackSpacer,
+        ),
       ),
     );
   }

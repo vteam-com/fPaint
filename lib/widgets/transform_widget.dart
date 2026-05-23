@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
@@ -131,24 +130,7 @@ class TransformEdgeDragZone extends StatelessWidget {
   }
 }
 
-class _TransformWidgetState extends State<TransformWidget> {
-  late FocusNode _focusNode;
-  @override
-  void initState() {
-    super.initState();
-    _focusNode = FocusNode();
-    // Request focus when the widget is mounted
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNode.requestFocus();
-    });
-  }
-
-  @override
-  void dispose() {
-    _focusNode.dispose();
-    super.dispose();
-  }
-
+class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin<TransformWidget> {
   @override
   Widget build(final BuildContext context) {
     final ui.Image? image = model.sourceImage;
@@ -185,15 +167,7 @@ class _TransformWidgetState extends State<TransformWidget> {
       model.edgeMidpoint(TransformModel.bottomLeftIndex, TransformModel.topLeftIndex),
     );
 
-    return Focus(
-      focusNode: _focusNode,
-      onKeyEvent: (final FocusNode _, final KeyEvent _) {
-        if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.escape)) {
-          onCancel();
-          return KeyEventResult.handled;
-        }
-        return KeyEventResult.ignored;
-      },
+    return wrapWithEscapeFocus(
       child: SizedBox.expand(
         child: Stack(
           children: <Widget>[
@@ -219,229 +193,20 @@ class _TransformWidgetState extends State<TransformWidget> {
                 ),
 
               if (areCornerHandlesEnabled) ...<Widget>[
-                // Corner handles (perspective)
-                OverlayDragHandle(
-                  backgroundColor: model.isCornerActive(TransformModel.topLeftIndex)
-                      ? AppColors.selected
-                      : AppColors.overlayDark,
-                  borderColor: AppColors.overlayLight,
-                  position: screenCorners[TransformModel.topLeftIndex],
-                  cursor: SystemMouseCursors.grab,
-                  onPanStart: (final DragStartDetails _) {
-                    model.setActiveCorner(TransformModel.topLeftIndex);
-                    onChanged();
-                  },
-                  onPanUpdate: (final DragUpdateDetails details) {
-                    model.moveCorner(TransformModel.topLeftIndex, details.delta / canvasScale);
-                    onChanged();
-                  },
-                  onPanEnd: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                  onPanCancel: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                ),
-                OverlayDragHandle(
-                  backgroundColor: model.isCornerActive(TransformModel.topRightIndex)
-                      ? AppColors.selected
-                      : AppColors.overlayDark,
-                  borderColor: AppColors.overlayLight,
-                  position: screenCorners[TransformModel.topRightIndex],
-                  cursor: SystemMouseCursors.grab,
-                  onPanStart: (final DragStartDetails _) {
-                    model.setActiveCorner(TransformModel.topRightIndex);
-                    onChanged();
-                  },
-                  onPanUpdate: (final DragUpdateDetails details) {
-                    model.moveCorner(TransformModel.topRightIndex, details.delta / canvasScale);
-                    onChanged();
-                  },
-                  onPanEnd: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                  onPanCancel: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                ),
-                OverlayDragHandle(
-                  backgroundColor: model.isCornerActive(TransformModel.bottomRightIndex)
-                      ? AppColors.selected
-                      : AppColors.overlayDark,
-                  borderColor: AppColors.overlayLight,
-                  position: screenCorners[TransformModel.bottomRightIndex],
-                  cursor: SystemMouseCursors.grab,
-                  onPanStart: (final DragStartDetails _) {
-                    model.setActiveCorner(TransformModel.bottomRightIndex);
-                    onChanged();
-                  },
-                  onPanUpdate: (final DragUpdateDetails details) {
-                    model.moveCorner(TransformModel.bottomRightIndex, details.delta / canvasScale);
-                    onChanged();
-                  },
-                  onPanEnd: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                  onPanCancel: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                ),
-                OverlayDragHandle(
-                  backgroundColor: model.isCornerActive(TransformModel.bottomLeftIndex)
-                      ? AppColors.selected
-                      : AppColors.overlayDark,
-                  borderColor: AppColors.overlayLight,
-                  position: screenCorners[TransformModel.bottomLeftIndex],
-                  cursor: SystemMouseCursors.grab,
-                  onPanStart: (final DragStartDetails _) {
-                    model.setActiveCorner(TransformModel.bottomLeftIndex);
-                    onChanged();
-                  },
-                  onPanUpdate: (final DragUpdateDetails details) {
-                    model.moveCorner(TransformModel.bottomLeftIndex, details.delta / canvasScale);
-                    onChanged();
-                  },
-                  onPanEnd: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                  onPanCancel: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                ),
+                _buildCornerHandle(TransformModel.topLeftIndex, screenCorners),
+                _buildCornerHandle(TransformModel.topRightIndex, screenCorners),
+                _buildCornerHandle(TransformModel.bottomRightIndex, screenCorners),
+                _buildCornerHandle(TransformModel.bottomLeftIndex, screenCorners),
               ],
 
               if (areEdgeHandlesEnabled) ...<Widget>[
-                // Edge midpoint handles (skew)
-                OverlayDragHandle(
-                  backgroundColor: model.isEdgeActive(TransformModel.topEdgeIndex)
-                      ? AppColors.selected
-                      : AppColors.overlayDark,
-                  borderColor: AppColors.overlayLight,
-                  position: topMid,
-                  cursor: SystemMouseCursors.grab,
-                  onPanStart: (final DragStartDetails _) {
-                    model.setActiveEdgeHandle(TransformModel.topEdgeIndex);
-                    onChanged();
-                  },
-                  onPanUpdate: (final DragUpdateDetails details) {
-                    model.moveEdgeHandle(TransformModel.topEdgeIndex, details.delta / canvasScale);
-                    onChanged();
-                  },
-                  onPanEnd: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                  onPanCancel: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                ),
-                OverlayDragHandle(
-                  backgroundColor: model.isEdgeActive(TransformModel.rightEdgeIndex)
-                      ? AppColors.selected
-                      : AppColors.overlayDark,
-                  borderColor: AppColors.overlayLight,
-                  position: rightMid,
-                  cursor: SystemMouseCursors.grab,
-                  onPanStart: (final DragStartDetails _) {
-                    model.setActiveEdgeHandle(TransformModel.rightEdgeIndex);
-                    onChanged();
-                  },
-                  onPanUpdate: (final DragUpdateDetails details) {
-                    model.moveEdgeHandle(TransformModel.rightEdgeIndex, details.delta / canvasScale);
-                    onChanged();
-                  },
-                  onPanEnd: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                  onPanCancel: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                ),
-                OverlayDragHandle(
-                  backgroundColor: model.isEdgeActive(TransformModel.bottomEdgeIndex)
-                      ? AppColors.selected
-                      : AppColors.overlayDark,
-                  borderColor: AppColors.overlayLight,
-                  position: bottomMid,
-                  cursor: SystemMouseCursors.grab,
-                  onPanStart: (final DragStartDetails _) {
-                    model.setActiveEdgeHandle(TransformModel.bottomEdgeIndex);
-                    onChanged();
-                  },
-                  onPanUpdate: (final DragUpdateDetails details) {
-                    model.moveEdgeHandle(TransformModel.bottomEdgeIndex, details.delta / canvasScale);
-                    onChanged();
-                  },
-                  onPanEnd: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                  onPanCancel: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                ),
-                OverlayDragHandle(
-                  backgroundColor: model.isEdgeActive(TransformModel.leftEdgeIndex)
-                      ? AppColors.selected
-                      : AppColors.overlayDark,
-                  borderColor: AppColors.overlayLight,
-                  position: leftMid,
-                  cursor: SystemMouseCursors.grab,
-                  onPanStart: (final DragStartDetails _) {
-                    model.setActiveEdgeHandle(TransformModel.leftEdgeIndex);
-                    onChanged();
-                  },
-                  onPanUpdate: (final DragUpdateDetails details) {
-                    model.moveEdgeHandle(TransformModel.leftEdgeIndex, details.delta / canvasScale);
-                    onChanged();
-                  },
-                  onPanEnd: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                  onPanCancel: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                ),
+                _buildEdgeHandle(TransformModel.topEdgeIndex, topMid),
+                _buildEdgeHandle(TransformModel.rightEdgeIndex, rightMid),
+                _buildEdgeHandle(TransformModel.bottomEdgeIndex, bottomMid),
+                _buildEdgeHandle(TransformModel.leftEdgeIndex, leftMid),
               ],
 
-              if (isCenterHandleEnabled)
-                // Center handle (move)
-                OverlayDragHandle(
-                  backgroundColor: model.isCenterActive ? AppColors.selected : AppColors.overlayDark,
-                  borderColor: AppColors.overlayLight,
-                  position: screenCenter,
-                  cursor: SystemMouseCursors.move,
-                  onPanStart: (final DragStartDetails _) {
-                    model.setActiveCenter();
-                    onChanged();
-                  },
-                  onPanUpdate: (final DragUpdateDetails details) {
-                    model.moveAll(details.delta / canvasScale);
-                    onChanged();
-                  },
-                  onPanEnd: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                  onPanCancel: () {
-                    model.clearActiveControl();
-                    onChanged();
-                  },
-                ),
+              if (isCenterHandleEnabled) _buildCenterHandle(screenCenter),
             ],
 
             _buildModeControls(
@@ -472,6 +237,60 @@ class _TransformWidgetState extends State<TransformWidget> {
 
   /// Called when the user commits the transform.
   VoidCallback get onConfirm => widget.onConfirm;
+  @override
+  void onEscapePressed() => onCancel();
+
+  /// Builds the centre move handle at [screenCenter].
+  Widget _buildCenterHandle(final Offset screenCenter) {
+    return OverlayDragHandle(
+      backgroundColor: model.isCenterActive ? AppColors.selected : AppColors.overlayDark,
+      borderColor: AppColors.overlayLight,
+      position: screenCenter,
+      cursor: SystemMouseCursors.move,
+      onPanStart: (final DragStartDetails _) {
+        model.setActiveCenter();
+        onChanged();
+      },
+      onPanUpdate: (final DragUpdateDetails details) {
+        model.moveAll(details.delta / canvasScale);
+        onChanged();
+      },
+      onPanEnd: () {
+        model.clearActiveControl();
+        onChanged();
+      },
+      onPanCancel: () {
+        model.clearActiveControl();
+        onChanged();
+      },
+    );
+  }
+
+  /// Builds a corner perspective-drag handle for [index].
+  Widget _buildCornerHandle(final int index, final List<Offset> screenCorners) {
+    return OverlayDragHandle(
+      backgroundColor: model.isCornerActive(index) ? AppColors.selected : AppColors.overlayDark,
+      borderColor: AppColors.overlayLight,
+      position: screenCorners[index],
+      cursor: SystemMouseCursors.grab,
+      onPanStart: (final DragStartDetails _) {
+        model.setActiveCorner(index);
+        onChanged();
+      },
+      onPanUpdate: (final DragUpdateDetails details) {
+        model.moveCorner(index, details.delta / canvasScale);
+        onChanged();
+      },
+      onPanEnd: () {
+        model.clearActiveControl();
+        onChanged();
+      },
+      onPanCancel: () {
+        model.clearActiveControl();
+        onChanged();
+      },
+    );
+  }
 
   /// Builds one invisible drag target for a single edge segment.
   Widget _buildEdgeDragZone({
@@ -552,6 +371,32 @@ class _TransformWidgetState extends State<TransformWidget> {
     ];
   }
 
+  /// Builds an edge midpoint skew-drag handle for [edgeIndex] at [position].
+  Widget _buildEdgeHandle(final int edgeIndex, final Offset position) {
+    return OverlayDragHandle(
+      backgroundColor: model.isEdgeActive(edgeIndex) ? AppColors.selected : AppColors.overlayDark,
+      borderColor: AppColors.overlayLight,
+      position: position,
+      cursor: SystemMouseCursors.grab,
+      onPanStart: (final DragStartDetails _) {
+        model.setActiveEdgeHandle(edgeIndex);
+        onChanged();
+      },
+      onPanUpdate: (final DragUpdateDetails details) {
+        model.moveEdgeHandle(edgeIndex, details.delta / canvasScale);
+        onChanged();
+      },
+      onPanEnd: () {
+        model.clearActiveControl();
+        onChanged();
+      },
+      onPanCancel: () {
+        model.clearActiveControl();
+        onChanged();
+      },
+    );
+  }
+
   /// Builds the transform mode controls, confirm/cancel buttons, and feedback bubble.
   /// Groups all controls together at the top of the selection to avoid overlap with handles.
   Widget _buildModeControls({
@@ -559,46 +404,35 @@ class _TransformWidgetState extends State<TransformWidget> {
     required final Offset screenCenter,
     required final List<Offset> screenCorners,
   }) {
-    const int placementTop = AppMath.zero;
-    const int placementBottom = AppMath.one;
-    const int placementCenter = AppMath.pair;
     const double buttonSize = AppInteraction.imagePlacementButtonSize;
     const double spacing = AppInteraction.imagePlacementButtonSpacing;
     const double modeButtonsWidth = buttonSize * AppMath.four + spacing * AppMath.triple; // 4 mode buttons
     const double confirmCancelWidth = buttonSize * AppMath.pair + spacing; // 2 confirm/cancel buttons
     const double totalWidth = modeButtonsWidth + spacing + confirmCancelWidth; // All buttons with inter-group spacing
     final double viewportHeight = MediaQuery.sizeOf(context).height;
-    final double controlsHeight = model.isFeedbackVisible
-        ? buttonSize + AppInteraction.imagePlacementButtonSpacing + buttonSize
-        : buttonSize;
 
     final double idealControlsTop =
         _screenQuadTop(screenCorners) - buttonSize - AppInteraction.imagePlacementHandleSize;
     final double bottomControlsTop = _screenQuadBottom(screenCorners) + AppInteraction.imagePlacementHandleSize;
-    final double topPositionedTop = model.isFeedbackVisible ? idealControlsTop - buttonSize : idealControlsTop;
-    final bool topClips = topPositionedTop < 0;
-    final bool bottomClips = bottomControlsTop + controlsHeight > viewportHeight;
-
-    final int placement = !topClips ? placementTop : (!bottomClips ? placementBottom : placementCenter);
-    final double centeredTop = max(AppMath.zero.toDouble(), (viewportHeight - controlsHeight) / AppMath.pair);
-    final bool isFlippedToBottom = placement == placementBottom;
-    final bool isCentered = placement == placementCenter;
-    final double controlsTop = isCentered
-        ? centeredTop + (model.isFeedbackVisible ? buttonSize + AppInteraction.imagePlacementButtonSpacing : 0)
-        : (isFlippedToBottom ? bottomControlsTop : idealControlsTop);
+    final OverlayPlacement placement = computeOverlayPlacement(
+      viewportHeight: viewportHeight,
+      idealTop: idealControlsTop,
+      bottomTop: bottomControlsTop,
+      isFeedbackVisible: model.isFeedbackVisible,
+    );
     final double controlsLeft = screenCenter.dx - totalWidth / AppMath.pair;
 
     final Offset translateHandleCenter = Offset(
       controlsLeft + buttonSize / AppMath.pair,
-      controlsTop + buttonSize / AppMath.pair,
+      placement.controlsTop + buttonSize / AppMath.pair,
     );
     final Offset scaleHandleCenter = Offset(
       controlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
-      controlsTop + buttonSize / AppMath.pair,
+      placement.controlsTop + buttonSize / AppMath.pair,
     );
     final Offset rotationHandleCenter = Offset(
       controlsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
-      controlsTop + buttonSize / AppMath.pair,
+      placement.controlsTop + buttonSize / AppMath.pair,
     );
 
     final Widget feedbackBubble = buildOverlayFeedbackBubble(
@@ -740,37 +574,17 @@ class _TransformWidgetState extends State<TransformWidget> {
       ],
     );
 
-    final double positionedTop;
-    final List<Widget> columnChildren;
-    if (isCentered) {
-      positionedTop = centeredTop;
-      columnChildren = <Widget>[
-        if (model.isFeedbackVisible) feedbackBubble,
-        if (model.isFeedbackVisible) feedbackSpacer,
-        buttonsRow,
-      ];
-    } else if (isFlippedToBottom) {
-      positionedTop = controlsTop;
-      columnChildren = <Widget>[
-        buttonsRow,
-        if (model.isFeedbackVisible) feedbackSpacer,
-        if (model.isFeedbackVisible) feedbackBubble,
-      ];
-    } else {
-      positionedTop = model.isFeedbackVisible ? controlsTop - buttonSize : controlsTop;
-      columnChildren = <Widget>[
-        if (model.isFeedbackVisible) feedbackBubble,
-        if (model.isFeedbackVisible) feedbackSpacer,
-        buttonsRow,
-      ];
-    }
-
     return Positioned(
       left: controlsLeft,
-      top: positionedTop,
+      top: placement.positionedTop,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: columnChildren,
+        children: placement.orderedColumnChildren(
+          buttonsRow: buttonsRow,
+          isFeedbackVisible: model.isFeedbackVisible,
+          feedbackBubble: feedbackBubble,
+          feedbackSpacer: feedbackSpacer,
+        ),
       ),
     );
   }
