@@ -195,6 +195,50 @@ void main() {
     _expectSelectionOverlayAligned(tester, appProvider);
   });
 
+  testWidgets('desktop shell button cycles expanded, narrow, hidden, and expanded', (
+    final WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = _desktopTestViewSize;
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
+    expect(shellProvider.shellMode, ShellMode.full);
+    expect(shellProvider.isSidePanelExpanded, isTrue);
+    expect(find.byType(SidePanel), findsOneWidget);
+
+    await tester.tap(find.byKey(Keys.floatActionToggle));
+    await tester.pump();
+
+    expect(shellProvider.shellMode, ShellMode.full);
+    expect(shellProvider.isSidePanelExpanded, isFalse);
+    expect(find.byType(SidePanel), findsOneWidget);
+
+    await tester.tap(find.byKey(Keys.floatActionToggle));
+    await tester.pump();
+
+    expect(shellProvider.shellMode, ShellMode.hidden);
+    expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
+    expect(find.byType(SidePanel), findsNothing);
+
+    await tester.tap(find.byKey(Keys.floatActionToggle));
+    await tester.pump();
+
+    expect(shellProvider.shellMode, ShellMode.full);
+    expect(shellProvider.isSidePanelExpanded, isTrue);
+    expect(find.byType(SidePanel), findsOneWidget);
+  });
+
   testWidgets('keeps layer modify transform overlay visible while side panel resizes or closes', (
     final WidgetTester tester,
   ) async {
