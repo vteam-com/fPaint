@@ -149,6 +149,37 @@ Widget buildOverlayControlSurface({
   );
 }
 
+/// Builds the shared positioned scaffold for selection and transform overlay controls.
+Widget buildPositionedOverlayControls({
+  required final double left,
+  required final OverlayPlacement placement,
+  required final double spacing,
+  required final List<Widget> controlGroups,
+  required final bool isFeedbackVisible,
+  required final Widget feedbackBubble,
+}) {
+  final Widget feedbackSpacer = SizedBox(height: spacing);
+  final Widget buttonsRow = Row(
+    mainAxisSize: MainAxisSize.min,
+    spacing: spacing,
+    children: controlGroups,
+  );
+
+  return Positioned(
+    left: left,
+    top: placement.positionedTop,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: placement.orderedColumnChildren(
+        buttonsRow: buttonsRow,
+        isFeedbackVisible: isFeedbackVisible,
+        feedbackBubble: feedbackBubble,
+        feedbackSpacer: feedbackSpacer,
+      ),
+    ),
+  );
+}
+
 /// Builds the standard Apply (green check) and Cancel (red X) button row
 /// used by canvas overlays such as transform, image placement, and eye dropper.
 Widget buildOverlayConfirmCancelButtons({

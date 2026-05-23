@@ -445,15 +445,13 @@ Widget _buildToolbarIconButton({
   final bool enabled = true,
   required final VoidCallback onPressed,
 }) {
-  return Opacity(
-    opacity: enabled ? AppVisual.full : AppVisual.disabled,
-    child: AppButtonIcon(
-      key: key,
-      tooltip: enabled ? tooltip : null,
-      icon: icon,
-      size: interactionProfile.iconSize,
-      onPressed: enabled ? onPressed : () {},
-    ),
+  return AppButtonIcon(
+    key: key,
+    tooltip: tooltip,
+    icon: icon,
+    size: interactionProfile.iconSize,
+    enabled: enabled,
+    onPressed: onPressed,
   );
 }
 
