@@ -2,6 +2,7 @@
 import 'dart:core';
 
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:provider/provider.dart';
 
@@ -36,6 +37,18 @@ class ShellProvider extends ChangeNotifier {
     final bool listen = false,
   }) => Provider.of<ShellProvider>(context, listen: listen);
 
+  /// Returns [ShellProvider] when found in the tree, otherwise null.
+  static ShellProvider? maybeOf(
+    final BuildContext context, {
+    final bool listen = false,
+  }) {
+    try {
+      return Provider.of<ShellProvider>(context, listen: listen);
+    } on ProviderNotFoundException {
+      return null;
+    }
+  }
+
   //=============================================================================
   /// Notifies all listeners that the model has been updated.
   /// This method should be called whenever the state of the model changes
@@ -55,13 +68,31 @@ class ShellProvider extends ChangeNotifier {
 
   /// Requests the canvas to auto-fit within the viewport on the next frame.
   ///
-  /// Centralises the pattern of setting [canvasPlacement] to
+  /// Centralizes the pattern of setting [canvasPlacement] to
   /// [CanvasAutoPlacement.fit] and notifying listeners so the
   /// [MainView] layout builder re-centres / re-scales the canvas.
   void requestCanvasFit() {
     canvasPlacement = CanvasAutoPlacement.fit;
     update();
   }
+
+  InteractionInputModality _interactionInputModality = InteractionInputModality.mouse;
+
+  /// Current dominant input modality used to scale interactive controls.
+  InteractionInputModality get interactionInputModality => _interactionInputModality;
+
+  /// Sets [interactionInputModality] and notifies listeners only on change.
+  set interactionInputModality(final InteractionInputModality value) {
+    if (_interactionInputModality == value) {
+      return;
+    }
+    _interactionInputModality = value;
+    update();
+  }
+
+  /// Resolved interaction layout profile for the active [interactionInputModality].
+  InteractionLayoutProfile get interactionLayoutProfile =>
+      AppInteractionProfiles.forModality(_interactionInputModality);
 
   //=============================================================================
   // Shell

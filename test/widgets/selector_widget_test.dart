@@ -92,7 +92,7 @@ void main() {
       expect(find.byKey(Keys.effectsButton), findsOneWidget);
     });
 
-    testWidgets('hides bottom controls while drawing', (final WidgetTester tester) async {
+    testWidgets('hides quick actions while drawing', (final WidgetTester tester) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(100, 100, 200, 160));
 
       await tester.pumpWidget(
@@ -189,8 +189,11 @@ void main() {
       expect(dragCalls + resizeCalls, greaterThan(0));
     });
 
-    testWidgets('copy, duplicate and transform controls invoke callbacks', (final WidgetTester tester) async {
+    testWidgets('copy, duplicate, cancel and transform controls invoke callbacks', (
+      final WidgetTester tester,
+    ) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
+      int cancelCalls = 0;
       int copyCalls = 0;
       int duplicateCalls = 0;
       int transformCalls = 0;
@@ -198,7 +201,9 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {},
+          onCancel: () {
+            cancelCalls++;
+          },
           onCopy: () {
             copyCalls++;
           },
@@ -226,6 +231,9 @@ void main() {
       final Finder duplicateTooltip = find.byWidgetPredicate(
         (final Widget w) => w is AppTooltip && w.message == l10n.duplicate,
       );
+      final Finder cancelTooltip = find.byWidgetPredicate(
+        (final Widget w) => w is AppTooltip && w.message == l10n.cancel,
+      );
       final Finder transformTooltip = find.byWidgetPredicate(
         (final Widget w) => w is AppTooltip && w.message == l10n.transform,
       );
@@ -234,12 +242,54 @@ void main() {
       await tester.pump();
       await tester.tap(duplicateTooltip);
       await tester.pump();
+      await tester.tap(cancelTooltip);
+      await tester.pump();
       await tester.tap(transformTooltip);
       await tester.pump();
 
+      expect(cancelCalls, 1);
       expect(copyCalls, 1);
       expect(duplicateCalls, 1);
       expect(transformCalls, 1);
+    });
+
+    testWidgets('quick action surface stays inside selection overlay bounds', (
+      final WidgetTester tester,
+    ) async {
+      final Path path = Path()..addRect(const Rect.fromLTWH(200, 140, 172, 120));
+
+      await tester.pumpWidget(
+        _buildHarness(
+          path1: path,
+          onCancel: () {},
+          onCopy: () {},
+          onDuplicate: () {},
+          onToggleTransformMode: () {},
+          onDrag: (final Offset _) {},
+          onResize: (final NineGridHandle _, final Offset _) {},
+          onScale: (final double _) {},
+          onRotate: (final double _) {},
+          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+        ),
+      );
+      await tester.pump();
+
+      final BuildContext context = tester.element(find.byType(SelectionRectWidget));
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
+      final Finder selectionStack = find.descendant(
+        of: find.byType(SelectionRectWidget),
+        matching: find.byType(Stack),
+      );
+      final Finder copyTooltip = find.byWidgetPredicate(
+        (final Widget w) => w is AppTooltip && w.message == l10n.copyToClipboard,
+      );
+      final Finder cancelTooltip = find.byWidgetPredicate(
+        (final Widget w) => w is AppTooltip && w.message == l10n.cancel,
+      );
+
+      expect(selectionStack, findsOneWidget);
+      expect(tester.getRect(copyTooltip).left, greaterThanOrEqualTo(tester.getRect(selectionStack).left));
+      expect(tester.getRect(cancelTooltip).right, lessThanOrEqualTo(tester.getRect(selectionStack).right));
     });
 
     testWidgets('translate, scale and rotate handle drags invoke callbacks', (final WidgetTester tester) async {
@@ -273,22 +323,24 @@ void main() {
       final Rect bounds = path.getBounds();
       const double buttonSize = AppInteraction.imagePlacementButtonSize;
       const double spacing = AppInteraction.imagePlacementButtonSpacing;
-      const double controlsWidth = buttonSize * AppMath.four + spacing * AppMath.triple;
+      const double groupWidth = buttonSize * AppMath.four + spacing * AppMath.triple;
+      const double controlsWidth = groupWidth + spacing + groupWidth;
       final double controlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
       final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
+      final double modeControlsLeft = controlsLeft + AppSpacing.small;
 
       final Offset translateCenter = Offset(
-        controlsLeft + buttonSize / AppMath.pair,
-        controlsTop + buttonSize / AppMath.pair,
+        modeControlsLeft + buttonSize / AppMath.pair,
+        controlsTop + AppSpacing.small + buttonSize / AppMath.pair,
       );
 
       final Offset scaleCenter = Offset(
-        controlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
-        controlsTop + buttonSize / AppMath.pair,
+        modeControlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
+        controlsTop + AppSpacing.small + buttonSize / AppMath.pair,
       );
       final Offset rotateCenter = Offset(
-        controlsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
-        controlsTop + buttonSize / AppMath.pair,
+        modeControlsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
+        controlsTop + AppSpacing.small + buttonSize / AppMath.pair,
       );
 
       await tester.dragFrom(translateCenter, const Offset(15, 10));

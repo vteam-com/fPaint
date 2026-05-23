@@ -12,6 +12,9 @@ import 'package:fpaint/widgets/material_free.dart';
 const String _coordinatesFormat = '{x}\n{y}';
 const String _placeholderX = '{x}';
 const String _placeholderY = '{y}';
+const double _overlayControlBorderAlpha = 0.35;
+const double _overlayControlShadowAlpha = 0.2;
+const double _overlayControlSurfaceAlpha = 0.78;
 
 /// Builds a circular control button used by canvas overlays.
 Widget buildOverlayCircleButton({
@@ -19,6 +22,7 @@ Widget buildOverlayCircleButton({
   required final Color color,
   required final MouseCursor cursor,
   required final String tooltip,
+  final double size = AppInteraction.imagePlacementButtonSize,
   final Key? key,
   final VoidCallback? onTap,
   final GestureDragStartCallback? onPanStart,
@@ -38,8 +42,8 @@ Widget buildOverlayCircleButton({
       child: MouseRegion(
         cursor: cursor,
         child: Container(
-          width: AppInteraction.imagePlacementButtonSize,
-          height: AppInteraction.imagePlacementButtonSize,
+          width: size,
+          height: size,
           decoration: BoxDecoration(
             color: color,
             shape: BoxShape.circle,
@@ -60,6 +64,8 @@ Widget buildOverlayModeButton({
   required final String tooltip,
   required final AppIcon icon,
   required final MouseCursor cursor,
+  final double size = AppInteraction.imagePlacementButtonSize,
+  final double iconSize = AppLayout.iconSize,
   final bool isSelected = false,
   final VoidCallback? onTap,
   final GestureDragStartCallback? onPanStart,
@@ -71,6 +77,7 @@ Widget buildOverlayModeButton({
     tooltip: tooltip,
     color: isSelected ? AppColors.selected : AppColors.black,
     cursor: cursor,
+    size: size,
     onTap: onTap,
     onPanStart: onPanStart,
     onPanUpdate: onPanUpdate,
@@ -79,7 +86,7 @@ Widget buildOverlayModeButton({
     child: AppSvgIcon(
       icon: icon,
       color: AppColors.white,
-      size: AppLayout.iconSize,
+      size: iconSize,
     ),
   );
 }
@@ -92,14 +99,52 @@ Widget buildOverlayFeedbackBubble({required final String label}) {
       vertical: AppSpacing.small,
     ),
     decoration: BoxDecoration(
-      color: AppColors.surface.withValues(alpha: AppVisual.disabled),
+      color: AppColors.surface.withValues(alpha: _overlayControlSurfaceAlpha),
       borderRadius: BorderRadius.circular(AppRadius.medium),
-      border: Border.all(color: AppColors.white, width: AppStroke.thin),
+      border: Border.all(
+        color: AppColors.white.withValues(alpha: _overlayControlBorderAlpha),
+        width: AppStroke.thin,
+      ),
+      boxShadow: <BoxShadow>[
+        BoxShadow(
+          color: AppColors.black.withValues(alpha: _overlayControlShadowAlpha),
+          blurRadius: AppSpacing.large,
+          offset: const Offset(0, AppSpacing.small),
+        ),
+      ],
     ),
     child: AppText(
       label,
       variant: AppTextVariant.bodyBold,
       color: AppColors.white,
+    ),
+  );
+}
+
+/// Wraps overlay actions in a shared surface so related controls scan as one unit.
+Widget buildOverlayControlSurface({
+  required final Widget child,
+  final EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.small),
+}) {
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      color: AppColors.overlayDark.withValues(alpha: _overlayControlSurfaceAlpha),
+      borderRadius: BorderRadius.circular(AppRadius.large),
+      border: Border.all(
+        color: AppColors.white.withValues(alpha: _overlayControlBorderAlpha),
+        width: AppStroke.thin,
+      ),
+      boxShadow: <BoxShadow>[
+        BoxShadow(
+          color: AppColors.black.withValues(alpha: _overlayControlShadowAlpha),
+          blurRadius: AppSpacing.large,
+          offset: const Offset(0, AppSpacing.small),
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: padding,
+      child: child,
     ),
   );
 }
@@ -110,24 +155,29 @@ Widget buildOverlayConfirmCancelButtons({
   required final AppLocalizations l10n,
   required final VoidCallback onConfirm,
   required final VoidCallback onCancel,
+  final double buttonSize = AppInteraction.imagePlacementButtonSize,
+  final double spacing = AppInteraction.imagePlacementButtonSpacing,
+  final double iconSize = AppLayout.iconSize,
 }) {
   return Row(
     mainAxisSize: MainAxisSize.min,
-    spacing: AppInteraction.imagePlacementButtonSpacing,
+    spacing: spacing,
     children: <Widget>[
       buildOverlayCircleButton(
         tooltip: l10n.apply,
         color: AppColors.green,
         cursor: SystemMouseCursors.click,
+        size: buttonSize,
         onTap: onConfirm,
-        child: const AppSvgIcon(icon: AppIcon.check, color: AppColors.white, size: AppLayout.iconSize),
+        child: AppSvgIcon(icon: AppIcon.check, color: AppColors.white, size: iconSize),
       ),
       buildOverlayCircleButton(
         tooltip: l10n.cancel,
         color: AppColors.red,
         cursor: SystemMouseCursors.click,
+        size: buttonSize,
         onTap: onCancel,
-        child: const AppSvgIcon(icon: AppIcon.close, color: AppColors.white, size: AppLayout.iconSize),
+        child: AppSvgIcon(icon: AppIcon.close, color: AppColors.white, size: iconSize),
       ),
     ],
   );

@@ -37,7 +37,6 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   double _baseDistance = 0.0;
   final Map<int, Offset> _pointerPositions = <int, ui.Offset>{};
   double _scaleFactor = 1.0;
-
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: false);
@@ -46,6 +45,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
 
     return Listener(
       onPointerSignal: (final PointerSignalEvent event) {
+        _registerInputModality(shellProvider, event.kind);
         if (event is PointerScrollEvent) {
           _handleUserPanningTheCanvas(
             shellProvider,
@@ -64,9 +64,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         }
       },
       onPointerPanZoomStart: (final PointerPanZoomStartEvent _) {
-        // No-op
+        shellProvider.interactionInputModality = InteractionInputModality.mouse;
       },
       onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
+        _registerInputModality(shellProvider, event.kind);
         if (event.scale == 1) {
           // Panning
           _handleUserPanningTheCanvas(
@@ -88,6 +89,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         // No-op
       },
       onPointerDown: (final PointerDownEvent event) {
+        _registerInputModality(shellProvider, event.kind);
         if (event.kind == PointerDeviceKind.touch) {
           _pointerPositions[event.pointer] = event.localPosition;
           _getDistanceBetweenTouchPoints();
@@ -107,6 +109,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         }
       },
       onPointerMove: (final PointerMoveEvent event) {
+        _registerInputModality(shellProvider, event.kind);
         if (event.kind == PointerDeviceKind.touch) {
           _pointerPositions[event.pointer] = event.localPosition;
           _getDistanceBetweenTouchPoints();
@@ -426,6 +429,27 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       scaleDelta: scaleDelta,
       anchorPoint: anchorPoint,
     );
+  }
+
+  /// Updates the shell interaction modality based on the current pointer kind.
+  void _registerInputModality(
+    final ShellProvider shellProvider,
+    final PointerDeviceKind kind,
+  ) {
+    switch (kind) {
+      case PointerDeviceKind.touch:
+        shellProvider.interactionInputModality = InteractionInputModality.touch;
+        return;
+      case PointerDeviceKind.stylus:
+      case PointerDeviceKind.invertedStylus:
+        shellProvider.interactionInputModality = InteractionInputModality.pen;
+        return;
+      case PointerDeviceKind.mouse:
+      case PointerDeviceKind.trackpad:
+      case PointerDeviceKind.unknown:
+        shellProvider.interactionInputModality = InteractionInputModality.mouse;
+        return;
+    }
   }
 
   /// Shows a text editor dialog at the given canvas [position].

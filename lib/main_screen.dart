@@ -3,22 +3,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/import_files.dart';
-import 'package:fpaint/floating_buttons.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/shell_top_bar.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
 /// The main screen of the application, which extends the `StatelessWidget` class.
 /// This screen is responsible for rendering the main content of the app, including
-/// the side panel, main view, and floating action buttons.
+/// the top toolbar, side panel, and main view.
 class MainScreen extends StatelessWidget {
   /// Creates a [MainScreen] widget.
   const MainScreen({super.key});
@@ -59,61 +57,41 @@ class MainScreen extends StatelessWidget {
       },
       child: AppScaffold(
         backgroundColor: AppColors.shellChromeBackground,
-        body: Stack(
+        body: Column(
           children: <Widget>[
-            shellMode == ShellMode.hidden
-                ? _buildMainContent(context, shellProvider, appPreferences, hasActiveTransformOverlay, isModifyMode)
-                : MultiSplitViewTheme(
-                    data: MultiSplitViewThemeData(
-                      dividerPainter: DividerPainters.grooved1(
-                        animationEnabled: true,
-                        backgroundColor: AppColors.shellChromeBackground,
-                        highlightedBackgroundColor: AppColors.shellChromeDividerHighlight,
-                        color: AppColors.shellChromeDivider,
-                        thickness: AppStroke.divider,
-                        highlightedThickness: AppStroke.dividerHighlighted,
-                        strokeCap: StrokeCap.round,
-                      ),
-                    ),
-                    child: _buildMainContent(
+            ShellTopBar(
+              shellProvider: shellProvider,
+              appProvider: appProvider,
+            ),
+            Expanded(
+              child: shellMode == ShellMode.hidden
+                  ? _buildMainContent(
                       context,
                       shellProvider,
                       appPreferences,
                       hasActiveTransformOverlay,
                       isModifyMode,
-                    ),
-                  ),
-            Positioned(
-              right: AppSpacing.large,
-              bottom: AppSpacing.large,
-              child: shellMode == ShellMode.hidden
-                  ? AppButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints.tightFor(
-                        width: AppLayout.toolbarButtonSize,
-                        height: AppLayout.toolbarButtonSize,
-                      ),
-                      onPressed: () {
-                        Future<void>.microtask(() {
-                          shellProvider.shellMode = ShellMode.full;
-                          shellProvider.update();
-                        });
-                      },
-                      child: const SizedBox(
-                        width: AppLayout.toolbarButtonSize,
-                        height: AppLayout.toolbarButtonSize,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: AppColors.floatingButtonBackground,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: AppSvgIcon(icon: AppIcon.moreVert),
-                          ),
+                    )
+                  : MultiSplitViewTheme(
+                      data: MultiSplitViewThemeData(
+                        dividerPainter: DividerPainters.grooved1(
+                          animationEnabled: true,
+                          backgroundColor: AppColors.shellChromeBackground,
+                          highlightedBackgroundColor: AppColors.shellChromeDividerHighlight,
+                          color: AppColors.shellChromeDivider,
+                          thickness: AppStroke.divider,
+                          highlightedThickness: AppStroke.dividerHighlighted,
+                          strokeCap: StrokeCap.round,
                         ),
                       ),
-                    )
-                  : floatingActionButtons(context, shellProvider, appProvider),
+                      child: _buildMainContent(
+                        context,
+                        shellProvider,
+                        appPreferences,
+                        hasActiveTransformOverlay,
+                        isModifyMode,
+                      ),
+                    ),
             ),
           ],
         ),

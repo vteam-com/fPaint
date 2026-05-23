@@ -2,12 +2,11 @@ import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatf
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
-import 'package:fpaint/panels/side_panel/side_panel_top_menu.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:provider/provider.dart';
 
-/// A widget that displays the top menu and layers panel.
+/// A widget that displays the layers panel in the top split of the side panel.
 class TopMenuAndLayersPanel extends StatelessWidget {
   const TopMenuAndLayersPanel({super.key});
 
@@ -17,9 +16,6 @@ class TopMenuAndLayersPanel extends StatelessWidget {
 
     return Column(
       children: <Widget>[
-        // toolbar
-        SidePanelTopMenu(shellProvider: shellProvider),
-
         Consumer<LayersProvider>(
           builder:
               (

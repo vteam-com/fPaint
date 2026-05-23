@@ -8,6 +8,7 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -91,8 +92,6 @@ class SelectionRectWidget extends StatefulWidget {
   State<SelectionRectWidget> createState() => _SelectionRectWidgetState();
 }
 
-const double defaultHandleSize = AppInteraction.selectionHandleSize;
-
 /// Metadata describing one resize handle of the selection rectangle.
 class _HandleDescriptor {
   const _HandleDescriptor({
@@ -155,6 +154,10 @@ const List<_HandleDescriptor> _resizeHandles = <_HandleDescriptor>[
   ),
 ];
 
+const int _selectionModeButtonCount = AppMath.four;
+const int _selectionQuickActionButtonCount = AppMath.four;
+const double _selectionToolbarSurfacePadding = AppSpacing.small;
+
 Offset _topLeft(final Rect b) => b.topLeft;
 Offset _topRight(final Rect b) => b.topRight;
 Offset _bottomLeft(final Rect b) => b.bottomLeft;
@@ -169,6 +172,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
   double _activeRotationDegrees = 0;
   double _activeScalePercent = AppMath.percentScale;
   _SelectionOverlayFeedbackMode _feedbackMode = _SelectionOverlayFeedbackMode.none;
+
   @override
   Widget build(final BuildContext context) {
     if (widget.path1 == null) {
@@ -176,33 +180,45 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     }
 
     final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final ShellProvider? shellProvider = ShellProvider.maybeOf(context);
+    final InteractionLayoutProfile interactionProfile =
+        shellProvider?.interactionLayoutProfile ?? AppInteractionProfiles.mouse;
+    final double modeToggleSize = interactionProfile.buttonSize;
+    final double modeToggleSpacing = interactionProfile.buttonSpacing;
+    final double handleSize = interactionProfile.dragHandleSize;
+    final bool showQuickActions = widget.enableMoveAndResize && !widget.isDrawing;
     final Rect bounds = widget.path1!.getBounds();
-    const double modeToggleSize = AppInteraction.imagePlacementButtonSize;
-    const double modeToggleSpacing = AppInteraction.imagePlacementButtonSpacing;
-    const double controlsWidth = modeToggleSize * AppMath.four + modeToggleSpacing * AppMath.triple;
+    final double contextualToolbarWidth = _selectionToolbarWidth(
+      buttonSize: modeToggleSize,
+      spacing: modeToggleSpacing,
+      showQuickActions: showQuickActions,
+    );
     final double width = max(
-      bounds.left + bounds.width + defaultHandleSize,
-      bounds.center.dx + controlsWidth / AppMath.pair,
+      bounds.left + bounds.width + handleSize,
+      bounds.center.dx + contextualToolbarWidth / AppMath.pair,
     );
 
-    // Extra space above for the rotation handle stem + handle
     final double rotationOverhead = widget.enableMoveAndResize
         ? AppInteraction.rotationHandleDistance + modeToggleSize
         : 0;
-    final double height = bounds.bottom + bounds.height + defaultHandleSize + rotationOverhead;
+    final double height = bounds.bottom + bounds.height + handleSize + rotationOverhead;
 
     final List<Widget> stackChildren = <Widget>[
       AnimatedMarchingAntsPath(path: widget.path1!),
       if (widget.path2 != null) AnimatedMarchingAntsPath(path: widget.path2!),
-      _buildModeControls(bounds, l10n),
-      if (widget.enableMoveAndResize && !widget.isDrawing) _buildBottomControls(bounds, l10n),
+      _buildModeControls(
+        bounds,
+        l10n,
+        interactionProfile,
+        showQuickActions: showQuickActions,
+      ),
     ];
 
     if (widget.enableMoveAndResize) {
-      // Center handle for moving
       stackChildren.add(
         OverlayDragHandle(
           position: bounds.center,
+          size: handleSize,
           cursor: SystemMouseCursors.move,
           onPanUpdate: (final DragUpdateDetails details) {
             widget.onDrag(details.delta);
@@ -212,11 +228,11 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
         ),
       );
 
-      // Resize handles driven by metadata
       for (final _HandleDescriptor desc in _resizeHandles) {
         stackChildren.add(
           OverlayDragHandle(
             position: desc.position(bounds),
+            size: handleSize,
             cursor: desc.cursor,
             onPanUpdate: (final DragUpdateDetails details) {
               widget.onResize(desc.handle, details.delta);
@@ -239,6 +255,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
 
   @override
   void onEscapePressed() => widget.onCancel();
+
   void _beginRotateFeedback() {
     setState(() {
       _feedbackMode = _SelectionOverlayFeedbackMode.rotate;
@@ -259,53 +276,31 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     });
   }
 
-  /// Builds the copy-to-clipboard control shown below the selection.
-  Widget _buildBottomControls(
-    final Rect bounds,
-    final AppLocalizations l10n,
-  ) {
-    const double buttonSize = AppInteraction.imagePlacementButtonSize;
-    const double spacing = AppInteraction.imagePlacementButtonSpacing;
-    const double controlsWidth = buttonSize * AppMath.triple + spacing * AppMath.pair;
-    final double controlsTop = bounds.bottom + AppInteraction.imagePlacementButtonSpacing;
-
-    return Positioned(
-      left: bounds.center.dx - controlsWidth / AppMath.pair,
-      top: controlsTop,
-      child: Row(
-        spacing: spacing,
-        children: <Widget>[
-          buildOverlayCircleButton(
-            tooltip: l10n.copyToClipboard,
-            color: AppColors.selected,
-            cursor: SystemMouseCursors.click,
-            onTap: widget.onCopy,
-            child: const AppSvgIcon(icon: AppIcon.clipboardCopy, size: AppLayout.iconSize, color: AppColors.white),
-          ),
-          buildOverlayCircleButton(
-            tooltip: l10n.duplicate,
-            color: AppColors.selected,
-            cursor: SystemMouseCursors.click,
-            onTap: widget.onDuplicate,
-            child: const AppSvgIcon(icon: AppIcon.copy, size: AppLayout.iconSize, color: AppColors.white),
-          ),
-          _EffectsPopupButton(
-            l10n: l10n,
-            onEffectSelected: widget.onEffectSelected,
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Builds the scale, rotate, and transform mode controls shown above the selection.
+  /// Builds the contextual selection toolbar and feedback bubble.
   Widget _buildModeControls(
     final Rect bounds,
     final AppLocalizations l10n,
-  ) {
-    const double buttonSize = AppInteraction.imagePlacementButtonSize;
-    const double spacing = AppInteraction.imagePlacementButtonSpacing;
-    const double controlsWidth = buttonSize * AppMath.four + spacing * AppMath.triple;
+    final InteractionLayoutProfile interactionProfile, {
+    required final bool showQuickActions,
+  }) {
+    final double buttonSize = interactionProfile.buttonSize;
+    final double spacing = interactionProfile.buttonSpacing;
+    final double iconSize = interactionProfile.iconSize;
+    final double modeControlsWidth = _controlSurfaceWidth(
+      contentWidth: _controlGroupContentWidth(
+        buttonSize: buttonSize,
+        spacing: spacing,
+        buttonCount: _selectionModeButtonCount,
+      ),
+    );
+    final double quickActionsWidth = _controlSurfaceWidth(
+      contentWidth: _controlGroupContentWidth(
+        buttonSize: buttonSize,
+        spacing: spacing,
+        buttonCount: _selectionQuickActionButtonCount,
+      ),
+    );
+    final double controlsWidth = showQuickActions ? modeControlsWidth + spacing + quickActionsWidth : modeControlsWidth;
     final double viewportHeight = MediaQuery.sizeOf(context).height;
     final double idealControlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
     final double bottomControlsTop = bounds.bottom + AppInteraction.rotationHandleDistance;
@@ -316,88 +311,156 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
       isFeedbackVisible: _isFeedbackVisible,
     );
     final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
+    final double modeButtonsLeft = controlsLeft + _selectionToolbarSurfacePadding;
+    final double controlsTop = placement.controlsTop + _selectionToolbarSurfacePadding;
     final Offset translateHandleCenter = Offset(
-      controlsLeft + buttonSize / AppMath.pair,
-      placement.controlsTop + buttonSize / AppMath.pair,
+      modeButtonsLeft + buttonSize / AppMath.pair,
+      controlsTop + buttonSize / AppMath.pair,
     );
     final Offset scaleHandleCenter = Offset(
-      controlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
-      placement.controlsTop + buttonSize / AppMath.pair,
+      modeButtonsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
+      controlsTop + buttonSize / AppMath.pair,
     );
     final Offset rotateHandleCenter = Offset(
-      controlsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
-      placement.controlsTop + buttonSize / AppMath.pair,
+      modeButtonsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
+      controlsTop + buttonSize / AppMath.pair,
     );
 
     final Widget feedbackBubble = buildOverlayFeedbackBubble(label: _feedbackLabel(l10n));
-    final Widget feedbackSpacer = const SizedBox(height: AppInteraction.imagePlacementButtonSpacing);
+    final Widget feedbackSpacer = SizedBox(height: spacing);
+    final Widget modeButtons = buildOverlayControlSurface(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: spacing,
+        children: <Widget>[
+          buildOverlayModeButton(
+            tooltip: l10n.translate,
+            icon: AppIcon.move,
+            size: buttonSize,
+            iconSize: iconSize,
+            isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.translate,
+            cursor: SystemMouseCursors.move,
+            onPanStart: (final DragStartDetails _) => _beginTranslateFeedback(),
+            onPanUpdate: (final DragUpdateDetails details) {
+              final Offset pointer = translateHandleCenter + details.delta;
+              widget.onDrag(pointer - translateHandleCenter);
+              _beginTranslateFeedback();
+            },
+            onPanEnd: (final DragEndDetails _) => _endFeedback(),
+            onPanCancel: _endFeedback,
+          ),
+          buildOverlayModeButton(
+            tooltip: l10n.scale,
+            icon: AppIcon.openInFull,
+            size: buttonSize,
+            iconSize: iconSize,
+            isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.scale,
+            cursor: SystemMouseCursors.grab,
+            onPanStart: (final DragStartDetails _) => _beginScaleFeedback(),
+            onPanUpdate: (final DragUpdateDetails details) {
+              final double previousDistance = (scaleHandleCenter - bounds.center).distance;
+              final Offset pointer = scaleHandleCenter + details.delta;
+              final double currentDistance = (pointer - bounds.center).distance;
+              if (previousDistance <= AppMath.tinyPercentage) {
+                return;
+              }
+              final double factor = currentDistance / previousDistance;
+              _updateScaleFeedback(factor);
+              widget.onScale(factor);
+            },
+            onPanEnd: (final DragEndDetails _) => _endFeedback(),
+            onPanCancel: _endFeedback,
+          ),
+          buildOverlayModeButton(
+            tooltip: l10n.resizeRotate,
+            icon: AppIcon.rotateRight,
+            size: buttonSize,
+            iconSize: iconSize,
+            isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.rotate,
+            cursor: SystemMouseCursors.grab,
+            onPanStart: (final DragStartDetails _) => _beginRotateFeedback(),
+            onPanUpdate: (final DragUpdateDetails details) {
+              final Offset pointer = rotateHandleCenter + details.delta;
+              final double previousAngle = atan2(
+                rotateHandleCenter.dy - bounds.center.dy,
+                rotateHandleCenter.dx - bounds.center.dx,
+              );
+              final double currentAngle = atan2(
+                pointer.dy - bounds.center.dy,
+                pointer.dx - bounds.center.dx,
+              );
+              final double angleDelta = currentAngle - previousAngle;
+              _updateRotateFeedback(angleDelta);
+              widget.onRotate(angleDelta);
+            },
+            onPanEnd: (final DragEndDetails _) => _endFeedback(),
+            onPanCancel: _endFeedback,
+          ),
+          buildOverlayModeButton(
+            tooltip: l10n.transform,
+            icon: AppIcon.transform,
+            size: buttonSize,
+            iconSize: iconSize,
+            cursor: SystemMouseCursors.click,
+            onTap: widget.onToggleTransformMode,
+          ),
+        ],
+      ),
+    );
+    final Widget? quickActions = showQuickActions
+        ? buildOverlayControlSurface(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: spacing,
+              children: <Widget>[
+                buildOverlayCircleButton(
+                  tooltip: l10n.copyToClipboard,
+                  color: AppColors.selected,
+                  cursor: SystemMouseCursors.click,
+                  size: buttonSize,
+                  onTap: widget.onCopy,
+                  child: AppSvgIcon(
+                    icon: AppIcon.clipboardCopy,
+                    size: iconSize,
+                    color: AppColors.white,
+                  ),
+                ),
+                buildOverlayCircleButton(
+                  tooltip: l10n.duplicate,
+                  color: AppColors.selected,
+                  cursor: SystemMouseCursors.click,
+                  size: buttonSize,
+                  onTap: widget.onDuplicate,
+                  child: AppSvgIcon(icon: AppIcon.copy, size: iconSize, color: AppColors.white),
+                ),
+                _EffectsPopupButton(
+                  l10n: l10n,
+                  buttonSize: buttonSize,
+                  iconSize: iconSize,
+                  onEffectSelected: widget.onEffectSelected,
+                ),
+                buildOverlayCircleButton(
+                  tooltip: l10n.cancel,
+                  color: AppColors.selected,
+                  cursor: SystemMouseCursors.click,
+                  size: buttonSize,
+                  onTap: widget.onCancel,
+                  child: AppSvgIcon(
+                    icon: AppIcon.selectorCancel,
+                    size: iconSize,
+                    color: AppColors.white,
+                  ),
+                ),
+              ],
+            ),
+          )
+        : null;
     final Widget buttonsRow = Row(
       mainAxisSize: MainAxisSize.min,
       spacing: spacing,
       children: <Widget>[
-        buildOverlayModeButton(
-          tooltip: l10n.translate,
-          icon: AppIcon.move,
-          isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.translate,
-          cursor: SystemMouseCursors.move,
-          onPanStart: (final DragStartDetails _) => _beginTranslateFeedback(),
-          onPanUpdate: (final DragUpdateDetails details) {
-            final Offset pointer = translateHandleCenter + details.delta;
-            widget.onDrag(pointer - translateHandleCenter);
-            _beginTranslateFeedback();
-          },
-          onPanEnd: (final DragEndDetails _) => _endFeedback(),
-          onPanCancel: _endFeedback,
-        ),
-        buildOverlayModeButton(
-          tooltip: l10n.scale,
-          icon: AppIcon.openInFull,
-          isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.scale,
-          cursor: SystemMouseCursors.grab,
-          onPanStart: (final DragStartDetails _) => _beginScaleFeedback(),
-          onPanUpdate: (final DragUpdateDetails details) {
-            final double previousDistance = (scaleHandleCenter - bounds.center).distance;
-            final Offset pointer = scaleHandleCenter + details.delta;
-            final double currentDistance = (pointer - bounds.center).distance;
-            if (previousDistance <= AppMath.tinyPercentage) {
-              return;
-            }
-            final double factor = currentDistance / previousDistance;
-            _updateScaleFeedback(factor);
-            widget.onScale(factor);
-          },
-          onPanEnd: (final DragEndDetails _) => _endFeedback(),
-          onPanCancel: _endFeedback,
-        ),
-        buildOverlayModeButton(
-          tooltip: l10n.resizeRotate,
-          icon: AppIcon.rotateRight,
-          isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.rotate,
-          cursor: SystemMouseCursors.grab,
-          onPanStart: (final DragStartDetails _) => _beginRotateFeedback(),
-          onPanUpdate: (final DragUpdateDetails details) {
-            final Offset pointer = rotateHandleCenter + details.delta;
-            final double previousAngle = atan2(
-              rotateHandleCenter.dy - bounds.center.dy,
-              rotateHandleCenter.dx - bounds.center.dx,
-            );
-            final double currentAngle = atan2(
-              pointer.dy - bounds.center.dy,
-              pointer.dx - bounds.center.dx,
-            );
-            final double angleDelta = currentAngle - previousAngle;
-            _updateRotateFeedback(angleDelta);
-            widget.onRotate(angleDelta);
-          },
-          onPanEnd: (final DragEndDetails _) => _endFeedback(),
-          onPanCancel: _endFeedback,
-        ),
-        buildOverlayModeButton(
-          tooltip: l10n.transform,
-          icon: AppIcon.transform,
-          cursor: SystemMouseCursors.click,
-          onTap: widget.onToggleTransformMode,
-        ),
+        modeButtons,
+        ?quickActions,
       ],
     );
 
@@ -414,6 +477,21 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
         ),
       ),
     );
+  }
+
+  /// Returns the width of one toolbar group's button content.
+  double _controlGroupContentWidth({
+    required final double buttonSize,
+    required final double spacing,
+    required final int buttonCount,
+  }) {
+    final int gapCount = max(AppMath.zero, buttonCount - AppMath.one);
+    return (buttonSize * buttonCount) + (spacing * gapCount);
+  }
+
+  /// Returns the full grouped-surface width after adding shared panel padding.
+  double _controlSurfaceWidth({required final double contentWidth}) {
+    return contentWidth + (_selectionToolbarSurfacePadding * AppMath.pair);
   }
 
   void _endFeedback() {
@@ -455,6 +533,33 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
       (_feedbackMode != _SelectionOverlayFeedbackMode.none &&
           _feedbackMode != _SelectionOverlayFeedbackMode.translate) ||
       widget.isDrawing;
+
+  /// Returns the total width of the contextual toolbar for the current state.
+  double _selectionToolbarWidth({
+    required final double buttonSize,
+    required final double spacing,
+    required final bool showQuickActions,
+  }) {
+    final double modeControlsWidth = _controlSurfaceWidth(
+      contentWidth: _controlGroupContentWidth(
+        buttonSize: buttonSize,
+        spacing: spacing,
+        buttonCount: _selectionModeButtonCount,
+      ),
+    );
+    if (!showQuickActions) {
+      return modeControlsWidth;
+    }
+
+    final double quickActionsWidth = _controlSurfaceWidth(
+      contentWidth: _controlGroupContentWidth(
+        buttonSize: buttonSize,
+        spacing: spacing,
+        buttonCount: _selectionQuickActionButtonCount,
+      ),
+    );
+    return modeControlsWidth + spacing + quickActionsWidth;
+  }
 
   /// Updates the resize dimensions feedback from the current path bounds.
   void _updateResizeFeedback() {
@@ -501,11 +606,14 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
 class _EffectsPopupButton extends StatefulWidget {
   const _EffectsPopupButton({
     required this.l10n,
+    required this.buttonSize,
+    required this.iconSize,
     required this.onEffectSelected,
   });
+  final double buttonSize;
+  final double iconSize;
   final AppLocalizations l10n;
   final Future<void> Function(SelectionEffect effect, BuildContext context) onEffectSelected;
-
   @override
   State<_EffectsPopupButton> createState() => _EffectsPopupButtonState();
 }
@@ -518,10 +626,11 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
       tooltip: widget.l10n.effects,
       color: AppColors.selected,
       cursor: SystemMouseCursors.click,
+      size: widget.buttonSize,
       onTap: () => _showEffectsMenu(context),
-      child: const AppSvgIcon(
+      child: AppSvgIcon(
         icon: AppIcon.autoFixHigh,
-        size: AppLayout.iconSize,
+        size: widget.iconSize,
         color: AppColors.white,
       ),
     );

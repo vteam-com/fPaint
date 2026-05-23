@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/models/app_icon_enum.dart' show AppIcon;
 import 'package:fpaint/models/transform_model.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 
 /// An overlay widget that lets the user interactively skew and change
@@ -51,6 +52,7 @@ class TransformEdgeDragZone extends StatelessWidget {
     super.key,
     required this.edgeIndex,
     required this.cursor,
+    required this.interactionProfile,
     this.onDragStart,
     required this.onDragDelta,
     this.onDragEnd,
@@ -64,6 +66,9 @@ class TransformEdgeDragZone extends StatelessWidget {
 
   /// The logical transform edge this zone belongs to.
   final int edgeIndex;
+
+  /// Active interaction sizing profile.
+  final InteractionLayoutProfile interactionProfile;
 
   /// Called when the drag is canceled.
   final VoidCallback? onDragCancel;
@@ -86,8 +91,8 @@ class TransformEdgeDragZone extends StatelessWidget {
   Widget build(final BuildContext context) {
     final Offset segmentDelta = segmentEnd - segmentStart;
     final double zoneThickness = max(
-      AppInteraction.selectionHandleSize,
-      AppInteraction.transformEdgeHandleSize * AppVisual.previewTextScale,
+      interactionProfile.dragHandleSize,
+      interactionProfile.edgeHandleSize * AppVisual.previewTextScale,
     );
     final double zoneLength = max(segmentDelta.distance, zoneThickness);
     final Offset zoneCenter = Offset(
@@ -139,6 +144,9 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
     }
 
     final AppLocalizations l10n = context.l10n;
+    final ShellProvider? shellProvider = ShellProvider.maybeOf(context);
+    final InteractionLayoutProfile interactionProfile =
+        shellProvider?.interactionLayoutProfile ?? AppInteractionProfiles.mouse;
 
     // Convert corners to screen space
     final List<Offset> screenCorners = model.corners.map((final Offset c) => _toScreen(c)).toList();
@@ -188,28 +196,30 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
             if (model.isDeformMode) ...<Widget>[
               if (areEdgeDragZonesEnabled)
                 ..._buildEdgeDragZones(
+                  interactionProfile: interactionProfile,
                   screenCorners: screenCorners,
                   screenEdgeMidpoints: screenEdgeMidpoints,
                 ),
 
               if (areCornerHandlesEnabled) ...<Widget>[
-                _buildCornerHandle(TransformModel.topLeftIndex, screenCorners),
-                _buildCornerHandle(TransformModel.topRightIndex, screenCorners),
-                _buildCornerHandle(TransformModel.bottomRightIndex, screenCorners),
-                _buildCornerHandle(TransformModel.bottomLeftIndex, screenCorners),
+                _buildCornerHandle(TransformModel.topLeftIndex, screenCorners, interactionProfile),
+                _buildCornerHandle(TransformModel.topRightIndex, screenCorners, interactionProfile),
+                _buildCornerHandle(TransformModel.bottomRightIndex, screenCorners, interactionProfile),
+                _buildCornerHandle(TransformModel.bottomLeftIndex, screenCorners, interactionProfile),
               ],
 
               if (areEdgeHandlesEnabled) ...<Widget>[
-                _buildEdgeHandle(TransformModel.topEdgeIndex, topMid),
-                _buildEdgeHandle(TransformModel.rightEdgeIndex, rightMid),
-                _buildEdgeHandle(TransformModel.bottomEdgeIndex, bottomMid),
-                _buildEdgeHandle(TransformModel.leftEdgeIndex, leftMid),
+                _buildEdgeHandle(TransformModel.topEdgeIndex, topMid, interactionProfile),
+                _buildEdgeHandle(TransformModel.rightEdgeIndex, rightMid, interactionProfile),
+                _buildEdgeHandle(TransformModel.bottomEdgeIndex, bottomMid, interactionProfile),
+                _buildEdgeHandle(TransformModel.leftEdgeIndex, leftMid, interactionProfile),
               ],
 
-              if (isCenterHandleEnabled) _buildCenterHandle(screenCenter),
+              if (isCenterHandleEnabled) _buildCenterHandle(screenCenter, interactionProfile),
             ],
 
             _buildModeControls(
+              interactionProfile: interactionProfile,
               l10n: l10n,
               screenCenter: screenCenter,
               screenCorners: screenBoundaryPoints,
@@ -241,11 +251,15 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
   void onEscapePressed() => onCancel();
 
   /// Builds the centre move handle at [screenCenter].
-  Widget _buildCenterHandle(final Offset screenCenter) {
+  Widget _buildCenterHandle(
+    final Offset screenCenter,
+    final InteractionLayoutProfile interactionProfile,
+  ) {
     return OverlayDragHandle(
       backgroundColor: model.isCenterActive ? AppColors.selected : AppColors.overlayDark,
       borderColor: AppColors.overlayLight,
       position: screenCenter,
+      size: interactionProfile.dragHandleSize,
       cursor: SystemMouseCursors.move,
       onPanStart: (final DragStartDetails _) {
         model.setActiveCenter();
@@ -267,11 +281,16 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
   }
 
   /// Builds a corner perspective-drag handle for [index].
-  Widget _buildCornerHandle(final int index, final List<Offset> screenCorners) {
+  Widget _buildCornerHandle(
+    final int index,
+    final List<Offset> screenCorners,
+    final InteractionLayoutProfile interactionProfile,
+  ) {
     return OverlayDragHandle(
       backgroundColor: model.isCornerActive(index) ? AppColors.selected : AppColors.overlayDark,
       borderColor: AppColors.overlayLight,
       position: screenCorners[index],
+      size: interactionProfile.dragHandleSize,
       cursor: SystemMouseCursors.grab,
       onPanStart: (final DragStartDetails _) {
         model.setActiveCorner(index);
@@ -295,12 +314,14 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
   /// Builds one invisible drag target for a single edge segment.
   Widget _buildEdgeDragZone({
     required final int edgeIndex,
+    required final InteractionLayoutProfile interactionProfile,
     required final Offset segmentStart,
     required final Offset segmentEnd,
   }) {
     return TransformEdgeDragZone(
       edgeIndex: edgeIndex,
       cursor: SystemMouseCursors.grab,
+      interactionProfile: interactionProfile,
       onDragStart: () {
         model.setActiveEdgeLine(edgeIndex);
         onChanged();
@@ -324,47 +345,56 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
 
   /// Builds drag targets along each visible edge segment of the transform mesh.
   List<Widget> _buildEdgeDragZones({
+    required final InteractionLayoutProfile interactionProfile,
     required final List<Offset> screenCorners,
     required final List<Offset> screenEdgeMidpoints,
   }) {
     return <Widget>[
       _buildEdgeDragZone(
         edgeIndex: TransformModel.topEdgeIndex,
+        interactionProfile: interactionProfile,
         segmentStart: screenCorners[TransformModel.topLeftIndex],
         segmentEnd: screenEdgeMidpoints[TransformModel.topEdgeIndex],
       ),
       _buildEdgeDragZone(
         edgeIndex: TransformModel.topEdgeIndex,
+        interactionProfile: interactionProfile,
         segmentStart: screenEdgeMidpoints[TransformModel.topEdgeIndex],
         segmentEnd: screenCorners[TransformModel.topRightIndex],
       ),
       _buildEdgeDragZone(
         edgeIndex: TransformModel.rightEdgeIndex,
+        interactionProfile: interactionProfile,
         segmentStart: screenCorners[TransformModel.topRightIndex],
         segmentEnd: screenEdgeMidpoints[TransformModel.rightEdgeIndex],
       ),
       _buildEdgeDragZone(
         edgeIndex: TransformModel.rightEdgeIndex,
+        interactionProfile: interactionProfile,
         segmentStart: screenEdgeMidpoints[TransformModel.rightEdgeIndex],
         segmentEnd: screenCorners[TransformModel.bottomRightIndex],
       ),
       _buildEdgeDragZone(
         edgeIndex: TransformModel.bottomEdgeIndex,
+        interactionProfile: interactionProfile,
         segmentStart: screenCorners[TransformModel.bottomRightIndex],
         segmentEnd: screenEdgeMidpoints[TransformModel.bottomEdgeIndex],
       ),
       _buildEdgeDragZone(
         edgeIndex: TransformModel.bottomEdgeIndex,
+        interactionProfile: interactionProfile,
         segmentStart: screenEdgeMidpoints[TransformModel.bottomEdgeIndex],
         segmentEnd: screenCorners[TransformModel.bottomLeftIndex],
       ),
       _buildEdgeDragZone(
         edgeIndex: TransformModel.leftEdgeIndex,
+        interactionProfile: interactionProfile,
         segmentStart: screenCorners[TransformModel.bottomLeftIndex],
         segmentEnd: screenEdgeMidpoints[TransformModel.leftEdgeIndex],
       ),
       _buildEdgeDragZone(
         edgeIndex: TransformModel.leftEdgeIndex,
+        interactionProfile: interactionProfile,
         segmentStart: screenEdgeMidpoints[TransformModel.leftEdgeIndex],
         segmentEnd: screenCorners[TransformModel.topLeftIndex],
       ),
@@ -372,11 +402,16 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
   }
 
   /// Builds an edge midpoint skew-drag handle for [edgeIndex] at [position].
-  Widget _buildEdgeHandle(final int edgeIndex, final Offset position) {
+  Widget _buildEdgeHandle(
+    final int edgeIndex,
+    final Offset position,
+    final InteractionLayoutProfile interactionProfile,
+  ) {
     return OverlayDragHandle(
       backgroundColor: model.isEdgeActive(edgeIndex) ? AppColors.selected : AppColors.overlayDark,
       borderColor: AppColors.overlayLight,
       position: position,
+      size: interactionProfile.dragHandleSize,
       cursor: SystemMouseCursors.grab,
       onPanStart: (final DragStartDetails _) {
         model.setActiveEdgeHandle(edgeIndex);
@@ -400,15 +435,16 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
   /// Builds the transform mode controls, confirm/cancel buttons, and feedback bubble.
   /// Groups all controls together at the top of the selection to avoid overlap with handles.
   Widget _buildModeControls({
+    required final InteractionLayoutProfile interactionProfile,
     required final AppLocalizations l10n,
     required final Offset screenCenter,
     required final List<Offset> screenCorners,
   }) {
-    const double buttonSize = AppInteraction.imagePlacementButtonSize;
-    const double spacing = AppInteraction.imagePlacementButtonSpacing;
-    const double modeButtonsWidth = buttonSize * AppMath.four + spacing * AppMath.triple; // 4 mode buttons
-    const double confirmCancelWidth = buttonSize * AppMath.pair + spacing; // 2 confirm/cancel buttons
-    const double totalWidth = modeButtonsWidth + spacing + confirmCancelWidth; // All buttons with inter-group spacing
+    final double buttonSize = interactionProfile.buttonSize;
+    final double spacing = interactionProfile.buttonSpacing;
+    final double modeButtonsWidth = buttonSize * AppMath.four + spacing * AppMath.triple; // 4 mode buttons
+    final double confirmCancelWidth = buttonSize * AppMath.pair + spacing; // 2 confirm/cancel buttons
+    final double totalWidth = modeButtonsWidth + spacing + confirmCancelWidth; // All buttons with inter-group spacing
     final double viewportHeight = MediaQuery.sizeOf(context).height;
 
     final double idealControlsTop =
@@ -440,138 +476,158 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
           ? l10n.percentageValue(model.activeScalePercent.round())
           : l10n.degreesValue(model.activeRotationDegrees.round()),
     );
-    final Widget feedbackSpacer = const SizedBox(height: AppInteraction.imagePlacementButtonSpacing);
+    final Widget feedbackSpacer = SizedBox(height: spacing);
+    final Widget modeButtons = buildOverlayControlSurface(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: spacing,
+        children: <Widget>[
+          buildOverlayModeButton(
+            tooltip: l10n.translate,
+            icon: AppIcon.move,
+            size: buttonSize,
+            iconSize: interactionProfile.iconSize,
+            isSelected: model.isTranslateMode,
+            cursor: SystemMouseCursors.move,
+            onTap: () {
+              if (!model.isTranslateMode) {
+                model.setTranslateMode();
+                onChanged();
+              }
+            },
+            onPanStart: (final DragStartDetails _) {
+              if (!model.isTranslateMode) {
+                model.setTranslateMode();
+                onChanged();
+              }
+            },
+            onPanUpdate: (final DragUpdateDetails details) {
+              if (!model.isTranslateMode) {
+                model.setTranslateMode();
+              }
+              final Offset pointer = translateHandleCenter + details.delta;
+              model.moveAll((pointer - translateHandleCenter) / canvasScale);
+              onChanged();
+            },
+          ),
+          buildOverlayModeButton(
+            tooltip: l10n.scale,
+            icon: AppIcon.openInFull,
+            size: buttonSize,
+            iconSize: interactionProfile.iconSize,
+            isSelected: model.isScaleMode,
+            cursor: SystemMouseCursors.grab,
+            onTap: () {
+              if (!model.isScaleMode) {
+                model.setScaleMode();
+                onChanged();
+              }
+            },
+            onPanStart: (final DragStartDetails _) {
+              model.beginScaleGesture();
+              onChanged();
+            },
+            onPanUpdate: (final DragUpdateDetails details) {
+              if (!model.isScaleMode || !model.isScaleFeedbackVisible) {
+                model.beginScaleGesture();
+              }
+
+              final double previousDistance = (scaleHandleCenter - screenCenter).distance;
+              final Offset pointer = scaleHandleCenter + details.delta;
+              final double currentDistance = (pointer - screenCenter).distance;
+              if (previousDistance <= AppMath.tinyPercentage) {
+                return;
+              }
+
+              model.scaleUniform(currentDistance / previousDistance);
+              onChanged();
+            },
+            onPanEnd: (final DragEndDetails _) {
+              model.endScaleGesture();
+              onChanged();
+            },
+            onPanCancel: () {
+              model.endScaleGesture();
+              onChanged();
+            },
+          ),
+          buildOverlayModeButton(
+            tooltip: l10n.resizeRotate,
+            icon: AppIcon.rotateRight,
+            size: buttonSize,
+            iconSize: interactionProfile.iconSize,
+            isSelected: model.isRotateMode,
+            cursor: SystemMouseCursors.grab,
+            onTap: () {
+              if (!model.isRotateMode) {
+                model.setRotateMode();
+                onChanged();
+              }
+            },
+            onPanStart: (final DragStartDetails _) {
+              model.beginRotateGesture();
+              onChanged();
+            },
+            onPanUpdate: (final DragUpdateDetails details) {
+              if (!model.isRotateMode || !model.isRotationFeedbackVisible) {
+                model.beginRotateGesture();
+              }
+              final double previousAngle = atan2(
+                rotationHandleCenter.dy - screenCenter.dy,
+                rotationHandleCenter.dx - screenCenter.dx,
+              );
+              final Offset pointer = rotationHandleCenter + details.delta;
+              final double currentAngle = atan2(
+                pointer.dy - screenCenter.dy,
+                pointer.dx - screenCenter.dx,
+              );
+              final double angleDelta = currentAngle - previousAngle;
+              model.rotate(angleDelta);
+              model.updateRotationFeedback(angleDelta);
+              onChanged();
+            },
+            onPanEnd: (final DragEndDetails _) {
+              model.endRotateGesture();
+              onChanged();
+            },
+            onPanCancel: () {
+              model.endRotateGesture();
+              onChanged();
+            },
+          ),
+          buildOverlayModeButton(
+            tooltip: l10n.transform,
+            icon: AppIcon.transform,
+            size: buttonSize,
+            iconSize: interactionProfile.iconSize,
+            isSelected: model.isDeformMode && !model.isCenterHandleEnabled,
+            cursor: SystemMouseCursors.click,
+            onTap: () {
+              if (!model.isDeformMode) {
+                model.setDeformMode();
+              } else {
+                model.cycleHandleSet();
+              }
+              onChanged();
+            },
+          ),
+        ],
+      ),
+    );
+    final Widget commitButtons = buildOverlayControlSurface(
+      child: buildOverlayConfirmCancelButtons(
+        l10n: l10n,
+        buttonSize: buttonSize,
+        spacing: spacing,
+        iconSize: interactionProfile.iconSize,
+        onConfirm: onConfirm,
+        onCancel: onCancel,
+      ),
+    );
     final Widget buttonsRow = Row(
       mainAxisSize: MainAxisSize.min,
       spacing: spacing,
-      children: <Widget>[
-        buildOverlayModeButton(
-          tooltip: l10n.translate,
-          icon: AppIcon.move,
-          isSelected: model.isTranslateMode,
-          cursor: SystemMouseCursors.move,
-          onTap: () {
-            if (!model.isTranslateMode) {
-              model.setTranslateMode();
-              onChanged();
-            }
-          },
-          onPanStart: (final DragStartDetails _) {
-            if (!model.isTranslateMode) {
-              model.setTranslateMode();
-              onChanged();
-            }
-          },
-          onPanUpdate: (final DragUpdateDetails details) {
-            if (!model.isTranslateMode) {
-              model.setTranslateMode();
-            }
-            final Offset pointer = translateHandleCenter + details.delta;
-            model.moveAll((pointer - translateHandleCenter) / canvasScale);
-            onChanged();
-          },
-        ),
-        buildOverlayModeButton(
-          tooltip: l10n.scale,
-          icon: AppIcon.openInFull,
-          isSelected: model.isScaleMode,
-          cursor: SystemMouseCursors.grab,
-          onTap: () {
-            if (!model.isScaleMode) {
-              model.setScaleMode();
-              onChanged();
-            }
-          },
-          onPanStart: (final DragStartDetails _) {
-            model.beginScaleGesture();
-            onChanged();
-          },
-          onPanUpdate: (final DragUpdateDetails details) {
-            if (!model.isScaleMode || !model.isScaleFeedbackVisible) {
-              model.beginScaleGesture();
-            }
-
-            final double previousDistance = (scaleHandleCenter - screenCenter).distance;
-            final Offset pointer = scaleHandleCenter + details.delta;
-            final double currentDistance = (pointer - screenCenter).distance;
-            if (previousDistance <= AppMath.tinyPercentage) {
-              return;
-            }
-
-            model.scaleUniform(currentDistance / previousDistance);
-            onChanged();
-          },
-          onPanEnd: (final DragEndDetails _) {
-            model.endScaleGesture();
-            onChanged();
-          },
-          onPanCancel: () {
-            model.endScaleGesture();
-            onChanged();
-          },
-        ),
-        buildOverlayModeButton(
-          tooltip: l10n.resizeRotate,
-          icon: AppIcon.rotateRight,
-          isSelected: model.isRotateMode,
-          cursor: SystemMouseCursors.grab,
-          onTap: () {
-            if (!model.isRotateMode) {
-              model.setRotateMode();
-              onChanged();
-            }
-          },
-          onPanStart: (final DragStartDetails _) {
-            model.beginRotateGesture();
-            onChanged();
-          },
-          onPanUpdate: (final DragUpdateDetails details) {
-            if (!model.isRotateMode || !model.isRotationFeedbackVisible) {
-              model.beginRotateGesture();
-            }
-            final double previousAngle = atan2(
-              rotationHandleCenter.dy - screenCenter.dy,
-              rotationHandleCenter.dx - screenCenter.dx,
-            );
-            final Offset pointer = rotationHandleCenter + details.delta;
-            final double currentAngle = atan2(
-              pointer.dy - screenCenter.dy,
-              pointer.dx - screenCenter.dx,
-            );
-            final double angleDelta = currentAngle - previousAngle;
-            model.rotate(angleDelta);
-            model.updateRotationFeedback(angleDelta);
-            onChanged();
-          },
-          onPanEnd: (final DragEndDetails _) {
-            model.endRotateGesture();
-            onChanged();
-          },
-          onPanCancel: () {
-            model.endRotateGesture();
-            onChanged();
-          },
-        ),
-        buildOverlayModeButton(
-          tooltip: l10n.transform,
-          icon: AppIcon.transform,
-          isSelected: model.isDeformMode && !model.isCenterHandleEnabled,
-          cursor: SystemMouseCursors.click,
-          onTap: () {
-            if (!model.isDeformMode) {
-              model.setDeformMode();
-            } else {
-              model.cycleHandleSet();
-            }
-            onChanged();
-          },
-        ),
-        buildOverlayConfirmCancelButtons(
-          l10n: l10n,
-          onConfirm: onConfirm,
-          onCancel: onCancel,
-        ),
-      ],
+      children: <Widget>[modeButtons, commitButtons],
     );
 
     return Positioned(

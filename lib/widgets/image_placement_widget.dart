@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/image_placement_model.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/rotation_handle_widgets.dart';
 
@@ -51,6 +52,9 @@ class ImagePlacementWidget extends StatelessWidget {
     }
 
     final AppLocalizations l10n = context.l10n;
+    final ShellProvider? shellProvider = ShellProvider.maybeOf(context);
+    final InteractionLayoutProfile interactionProfile =
+        shellProvider?.interactionLayoutProfile ?? AppInteractionProfiles.mouse;
 
     // Screen-space bounding rect of the image
     final Offset screenTopLeft = _toScreen(model.position);
@@ -103,6 +107,7 @@ class ImagePlacementWidget extends StatelessWidget {
 
           // Move handle (center)
           _buildHandle(
+            interactionProfile: interactionProfile,
             position: screenCenter,
             cursor: SystemMouseCursors.move,
             onPanUpdate: (final DragUpdateDetails details) {
@@ -112,22 +117,22 @@ class ImagePlacementWidget extends StatelessWidget {
           ),
 
           // Corner resize handles
-          ..._buildCornerHandles(screenBounds),
+          ..._buildCornerHandles(screenBounds, interactionProfile),
 
           // Rotation handle above the top center
-          _buildRotationHandle(screenBounds, screenCenter, l10n),
+          _buildRotationHandle(screenBounds, screenCenter, l10n, interactionProfile),
 
           // Transform mode button aligned with the top selection controls
-          _buildTransformModeButton(screenBounds, l10n),
+          _buildTransformModeButton(screenBounds, l10n, interactionProfile),
 
           // Rotation stem line
           buildRotationStem(
             screenBounds,
-            handleSize: AppInteraction.imagePlacementButtonSize,
+            handleSize: interactionProfile.buttonSize,
           ),
 
           // Confirm / Cancel buttons below the image.
-          _buildBottomActionRow(screenBounds, screenCenter, l10n),
+          _buildBottomActionRow(screenBounds, screenCenter, l10n, interactionProfile),
         ],
       ),
     );
@@ -156,26 +161,36 @@ class ImagePlacementWidget extends StatelessWidget {
     final Rect screenBounds,
     final Offset screenCenter,
     final AppLocalizations l10n,
+    final InteractionLayoutProfile interactionProfile,
   ) {
+    final double buttonSize = interactionProfile.buttonSize;
+    final double spacing = interactionProfile.buttonSpacing;
     return Positioned(
-      left:
-          screenCenter.dx -
-          (AppInteraction.imagePlacementButtonSize + AppInteraction.imagePlacementButtonSpacing / AppMath.pair),
-      top: screenBounds.bottom + AppInteraction.imagePlacementButtonSpacing + AppInteraction.imagePlacementHandleSize,
-      child: buildOverlayConfirmCancelButtons(
-        l10n: l10n,
-        onConfirm: onConfirm,
-        onCancel: onCancel,
+      left: screenCenter.dx - (buttonSize + spacing / AppMath.pair),
+      top: screenBounds.bottom + spacing + interactionProfile.imagePlacementHandleSize,
+      child: buildOverlayControlSurface(
+        child: buildOverlayConfirmCancelButtons(
+          l10n: l10n,
+          buttonSize: buttonSize,
+          spacing: spacing,
+          iconSize: interactionProfile.iconSize,
+          onConfirm: onConfirm,
+          onCancel: onCancel,
+        ),
       ),
     );
   }
 
   /// Builds the four corner handles that let the user uniformly scale the
   /// image while keeping the opposite corner anchored.
-  List<Widget> _buildCornerHandles(final Rect screenBounds) {
+  List<Widget> _buildCornerHandles(
+    final Rect screenBounds,
+    final InteractionLayoutProfile interactionProfile,
+  ) {
     return <Widget>[
       // Bottom-right: scale uniformly
       _buildHandle(
+        interactionProfile: interactionProfile,
         position: screenBounds.bottomRight,
         cursor: SystemMouseCursors.resizeDownRight,
         onPanUpdate: (final DragUpdateDetails details) {
@@ -184,6 +199,7 @@ class ImagePlacementWidget extends StatelessWidget {
       ),
       // Top-left: scale from opposite corner
       _buildHandle(
+        interactionProfile: interactionProfile,
         position: screenBounds.topLeft,
         cursor: SystemMouseCursors.resizeUpLeft,
         onPanUpdate: (final DragUpdateDetails details) {
@@ -199,6 +215,7 @@ class ImagePlacementWidget extends StatelessWidget {
       ),
       // Top-right
       _buildHandle(
+        interactionProfile: interactionProfile,
         position: screenBounds.topRight,
         cursor: SystemMouseCursors.resizeUpRight,
         onPanUpdate: (final DragUpdateDetails details) {
@@ -210,6 +227,7 @@ class ImagePlacementWidget extends StatelessWidget {
       ),
       // Bottom-left
       _buildHandle(
+        interactionProfile: interactionProfile,
         position: screenBounds.bottomLeft,
         cursor: SystemMouseCursors.resizeDownLeft,
         onPanUpdate: (final DragUpdateDetails details) {
@@ -225,11 +243,12 @@ class ImagePlacementWidget extends StatelessWidget {
   /// Builds a single draggable handle at [position] with the given mouse
   /// [cursor] and pan-update [onPanUpdate] callback.
   Widget _buildHandle({
+    required final InteractionLayoutProfile interactionProfile,
     required final Offset position,
     required final MouseCursor cursor,
     required final void Function(DragUpdateDetails) onPanUpdate,
   }) {
-    const double handleSize = AppInteraction.imagePlacementHandleSize;
+    final double handleSize = interactionProfile.imagePlacementHandleSize;
     return Positioned(
       left: position.dx - handleSize / AppMath.pair,
       top: position.dy - handleSize / AppMath.pair,
@@ -258,8 +277,9 @@ class ImagePlacementWidget extends StatelessWidget {
     final Rect screenBounds,
     final Offset screenCenter,
     final AppLocalizations l10n,
+    final InteractionLayoutProfile interactionProfile,
   ) {
-    const double handleSize = AppInteraction.imagePlacementButtonSize;
+    final double handleSize = interactionProfile.buttonSize;
     final Offset handleCenter = Offset(
       screenBounds.center.dx,
       screenBounds.top - AppInteraction.rotationHandleDistance,
@@ -271,6 +291,8 @@ class ImagePlacementWidget extends StatelessWidget {
       child: buildOverlayModeButton(
         tooltip: l10n.resizeRotate,
         icon: AppIcon.rotateRight,
+        size: handleSize,
+        iconSize: interactionProfile.iconSize,
         cursor: SystemMouseCursors.grab,
         onPanUpdate: (final DragUpdateDetails details) {
           final Offset pointer = handleCenter + details.delta;
@@ -293,9 +315,10 @@ class ImagePlacementWidget extends StatelessWidget {
   Widget _buildTransformModeButton(
     final Rect screenBounds,
     final AppLocalizations l10n,
+    final InteractionLayoutProfile interactionProfile,
   ) {
-    const double buttonSize = AppInteraction.imagePlacementButtonSize;
-    const double spacing = AppInteraction.imagePlacementButtonSpacing;
+    final double buttonSize = interactionProfile.buttonSize;
+    final double spacing = interactionProfile.buttonSpacing;
     final Offset handleCenter = Offset(
       screenBounds.center.dx + buttonSize + spacing,
       screenBounds.top - AppInteraction.rotationHandleDistance,
@@ -307,6 +330,8 @@ class ImagePlacementWidget extends StatelessWidget {
       child: buildOverlayModeButton(
         tooltip: l10n.transform,
         icon: AppIcon.transform,
+        size: buttonSize,
+        iconSize: interactionProfile.iconSize,
         cursor: SystemMouseCursors.click,
         onTap: onToggleTransformMode,
       ),
