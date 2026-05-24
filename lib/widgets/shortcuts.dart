@@ -153,6 +153,7 @@ Widget shortCutsForMainApp(
       ): const DeleteIntent(),
 
       // Add a help shortcut
+      LogicalKeySet(LogicalKeyboardKey.f1): const HelpIntent(),
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.slash): const HelpIntent(),
     },
     child: Actions(

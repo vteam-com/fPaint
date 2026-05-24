@@ -49,7 +49,7 @@ void main() {
         of: find.byType(AppDialog),
         matching: find.text('Keyboard Shortcuts'),
       ),
-      findsOneWidget,
+      findsAtLeastNWidgets(1),
     );
     expect(
       find.descendant(

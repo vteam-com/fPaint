@@ -221,6 +221,7 @@
   "textAlignLeft": "Izquierda",
   "textAlignRight": "Derecha",
   "textColor": "Color de texto",
+  "toggleShell": "Alternar interfaz",
   "tolerance": "Tolerancia",
   "toolAdd": "Agregar",
   "toolBrush": "Pincel",

@@ -60,3 +60,9 @@ Use the entire surface for drawing, selection, and visual review.
 - Action FAB: Minimal bottom-right trigger.
 - Available action buttons:
   - Open Shell / More Actions
+
+## Shell Visibility Rules
+
+Side panel visibility is explicit shell state. Only the top-left shell button, the desktop splitter bar, or the `Tab` keyboard shortcut may change it.
+
+Canvas gestures, editing overlays, placement/transform gestures, and scrim taps must preserve the current side panel state. See [SCENARIO_SIDE_PANEL_VISIBILITY](scenarios/SCENARIO_SIDE_PANEL_VISIBILITY.md).
