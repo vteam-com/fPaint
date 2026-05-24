@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -44,10 +43,6 @@ class MainScreen extends StatelessWidget {
 
     final ShellProvider shellProvider = ShellProvider.of(context, listen: true);
     final ShellMode shellMode = shellProvider.shellMode;
-    final bool hasActiveTransformOverlay = appProvider.imagePlacementModel.isVisible;
-    final bool isModifyMode =
-        appProvider.imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&
-        appProvider.imagePlacementModel.layerRestoreState != null;
 
     shellProvider.deviceSizeSmall = MediaQuery.of(context).size.width < AppLayout.desktopBreakpoint;
 
@@ -69,8 +64,6 @@ class MainScreen extends StatelessWidget {
                       context,
                       shellProvider,
                       appPreferences,
-                      hasActiveTransformOverlay,
-                      isModifyMode,
                     )
                   : MultiSplitViewTheme(
                       data: MultiSplitViewThemeData(
@@ -88,8 +81,6 @@ class MainScreen extends StatelessWidget {
                         context,
                         shellProvider,
                         appPreferences,
-                        hasActiveTransformOverlay,
-                        isModifyMode,
                       ),
                     ),
             ),
@@ -107,13 +98,7 @@ class MainScreen extends StatelessWidget {
     final BuildContext context,
     final ShellProvider shellProvider,
     final AppPreferences appPreferences,
-    final bool hasActiveTransformOverlay,
-    final bool isModifyMode,
   ) {
-    if (hasActiveTransformOverlay && !isModifyMode) {
-      return const MainView();
-    }
-
     if (shellProvider.shellMode == ShellMode.hidden) {
       return const MainView();
     }

@@ -93,9 +93,14 @@ void main() {
     shellProvider.shellMode = ShellMode.full;
   });
 
-  testWidgets('keeps bottom-right tools visible while regular image placement overlay is active', (
+  testWidgets('keeps side panel visible while regular image placement overlay is active', (
     final WidgetTester tester,
   ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = _desktopTestViewSize;
+
     appProvider.selectAll();
     final ui.Image image = await _createTestImage();
     addTearDown(image.dispose);
@@ -117,9 +122,37 @@ void main() {
     expect(find.byType(MainView), findsOneWidget);
     expect(find.byType(ImagePlacementWidget), findsOneWidget);
     expect(find.byType(SelectionRectWidget), findsNothing);
-    expect(find.byType(SidePanel), findsNothing);
+    expect(find.byType(SidePanel), findsOneWidget);
+    expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
     expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
     expect(find.byKey(Keys.floatActionZoomIn), findsOneWidget);
+  });
+
+  testWidgets('keeps side panel visible when duplicating from an active selection', (
+    final WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = _desktopTestViewSize;
+
+    appProvider.selectAll();
+    await appProvider.regionDuplicate();
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(MainView), findsOneWidget);
+    expect(find.byType(ImagePlacementWidget), findsOneWidget);
+    expect(find.byType(SelectionRectWidget), findsNothing);
+    expect(find.byType(SidePanel), findsOneWidget);
+    expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
   });
 
   testWidgets('keeps side panel visible with modify actions during layer modify mode', (
