@@ -6,8 +6,8 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/draw_rect.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:vector_math/vector_math_64.dart' as vm64;
 
@@ -119,10 +119,10 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
           buildOverlayCircleButton(
             key: Keys.magnifyingEyeDropperCloseButton,
             tooltip: context.l10n.cancel,
-            color: AppColors.red,
+            icon: AppIcon.close,
+            contentSemantic: AppButtonContentSemantic.dangerous,
             cursor: SystemMouseCursors.click,
             onTap: widget.onClosed,
-            child: const AppSvgIcon(icon: AppIcon.close, color: AppColors.white, size: AppLayout.iconSize),
           ),
 
           //
@@ -159,7 +159,8 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
           buildOverlayCircleButton(
             key: Keys.magnifyingEyeDropperConfirmButton,
             tooltip: context.l10n.apply,
-            color: AppColors.green,
+            icon: AppIcon.check,
+            contentSemantic: AppButtonContentSemantic.enabled,
             cursor: SystemMouseCursors.click,
             onTap: () {
               final Color? selectedColor = _selectedColor;
@@ -168,7 +169,6 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
               }
               widget.onColorPicked(selectedColor);
             },
-            child: const AppSvgIcon(icon: AppIcon.check, color: AppColors.white, size: AppLayout.iconSize),
           ),
         ],
       ),

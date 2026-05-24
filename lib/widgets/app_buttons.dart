@@ -6,6 +6,102 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_tooltip.dart';
 
 const int _subtleButtonBackgroundAlpha = 25;
+const String _appButtonContentAssertionMessage = 'AppButton requires exactly one of child or builder.';
+
+/// Shared semantic intents for button labels and icons.
+///
+/// These semantics describe foreground content colors independently from the
+/// button surface, so different button families can share the same content
+/// meaning while keeping their own background treatment.
+enum AppButtonContentSemantic {
+  /// Standard interactive content such as primary actions or neutral tools.
+  enabled,
+
+  /// Muted content for secondary or temporarily unavailable affordance.
+  disabled,
+
+  /// Destructive or cancel-oriented content that should stand out in red.
+  dangerous,
+}
+
+/// Resolves the app-wide foreground color for [AppButtonContentSemantic].
+extension AppButtonContentSemanticColorX on AppButtonContentSemantic {
+  /// Semantic foreground color used by button labels and icons.
+  Color get color {
+    return switch (this) {
+      AppButtonContentSemantic.enabled => AppColors.buttonEnable,
+      AppButtonContentSemantic.disabled => AppColors.buttonDisable,
+      AppButtonContentSemantic.dangerous => AppColors.buttonDanger,
+    };
+  }
+}
+
+/// Shared visual semantics for labeled button surfaces.
+///
+/// This keeps background, foreground, and spacing choices centralized for the
+/// built-in text-button variants.
+enum AppButtonLabelSemantic {
+  /// Subtle emphasis used by lightweight actions.
+  subtle,
+
+  /// Strong filled emphasis used by primary actions.
+  filled,
+
+  /// Destructive emphasis used by risky actions.
+  dangerous,
+}
+
+/// Resolves shared visual tokens for [AppButtonLabelSemantic].
+extension AppButtonLabelSemanticStyleX on AppButtonLabelSemantic {
+  /// Background color used by the labeled button surface.
+  Color get backgroundColor {
+    return switch (this) {
+      AppButtonLabelSemantic.subtle => AppColors.primary.withAlpha(_subtleButtonBackgroundAlpha),
+      AppButtonLabelSemantic.filled => AppColors.primary,
+      AppButtonLabelSemantic.dangerous => AppColors.red.withAlpha(_subtleButtonBackgroundAlpha),
+    };
+  }
+
+  /// Foreground semantic used by the labeled button content.
+  AppButtonContentSemantic get contentSemantic {
+    return switch (this) {
+      AppButtonLabelSemantic.subtle => AppButtonContentSemantic.enabled,
+      AppButtonLabelSemantic.filled => AppButtonContentSemantic.enabled,
+      AppButtonLabelSemantic.dangerous => AppButtonContentSemantic.dangerous,
+    };
+  }
+
+  /// Horizontal padding used by the labeled button surface.
+  double get horizontalPadding {
+    return switch (this) {
+      AppButtonLabelSemantic.subtle => AppSpacing.big,
+      AppButtonLabelSemantic.filled => AppSpacing.large,
+      AppButtonLabelSemantic.dangerous => AppSpacing.big,
+    };
+  }
+}
+
+/// Immutable interaction snapshot passed to [AppButtonBuilder].
+class AppButtonVisualState {
+  /// Creates an [AppButtonVisualState].
+  const AppButtonVisualState({
+    required this.isHovered,
+    required this.isPressed,
+  });
+
+  /// Whether the pointer is hovering over the button.
+  final bool isHovered;
+
+  /// Whether the button is actively pressed.
+  final bool isPressed;
+}
+
+/// Builds button content from the current [AppButtonVisualState].
+typedef AppButtonBuilder =
+    Widget Function(
+      BuildContext context,
+      AppButtonVisualState state,
+    );
 
 /// A text-only button replacing Material [TextButton].
 class AppButtonText extends StatelessWidget {
@@ -19,11 +115,9 @@ class AppButtonText extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return _AppLabelButton(
+      semantic: AppButtonLabelSemantic.subtle,
       onPressed: onPressed,
-      backgroundColor: AppColors.primary.withAlpha(_subtleButtonBackgroundAlpha),
       text: text,
-      textColor: AppColors.white,
-      horizontalPadding: AppSpacing.big,
     );
   }
 }
@@ -40,11 +134,9 @@ class AppButtonDanger extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return _AppLabelButton(
+      semantic: AppButtonLabelSemantic.dangerous,
       onPressed: onPressed,
-      backgroundColor: AppColors.red.withAlpha(_subtleButtonBackgroundAlpha),
       text: text,
-      textColor: AppColors.red,
-      horizontalPadding: AppSpacing.big,
     );
   }
 }
@@ -61,42 +153,48 @@ class AppButtonPrimary extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return _AppLabelButton(
+      semantic: AppButtonLabelSemantic.filled,
       onPressed: onPressed,
-      backgroundColor: AppColors.primary,
       text: text,
-      textColor: AppColors.white,
-      horizontalPadding: AppSpacing.large,
     );
   }
 }
 
 class _AppLabelButton extends StatelessWidget {
   const _AppLabelButton({
-    required this.backgroundColor,
-    required this.horizontalPadding,
     required this.onPressed,
+    required this.semantic,
     required this.text,
-    required this.textColor,
   });
 
-  final Color backgroundColor;
-  final double horizontalPadding;
   final VoidCallback onPressed;
+  final AppButtonLabelSemantic semantic;
   final String text;
-  final Color textColor;
 
   @override
   Widget build(final BuildContext context) {
-    return _AppButtonBase(
+    return AppButton(
       onPressed: onPressed,
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: AppSpacing.medium,
+      hoverScale: AppVisual.full,
+      padding: EdgeInsets.zero,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: semantic.backgroundColor,
+          borderRadius: BorderRadius.circular(AppRadius.small),
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: semantic.horizontalPadding,
+            vertical: AppSpacing.medium,
+          ),
+          child: Center(
+            child: DefaultTextStyle(
+              style: AppTextStyle.button.copyWith(color: semantic.contentSemantic.color),
+              child: Text(text),
+            ),
+          ),
+        ),
       ),
-      textColor: textColor,
-      backgroundColor: backgroundColor,
-      borderRadius: AppRadius.small,
-      child: Text(text),
     );
   }
 }
@@ -127,9 +225,10 @@ class AppButtonIcon extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     return AppButton(
-      onPressed: enabled ? onPressed : () {},
+      onPressed: enabled ? onPressed : null,
       tooltip: enabled ? tooltip : null,
       constraints: constraints,
+      cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
       padding: padding,
       child: Opacity(
         opacity: enabled ? AppVisual.full : AppVisual.disabled,
@@ -144,21 +243,83 @@ class AppButtonIcon extends StatelessWidget {
   }
 }
 
-/// A generic image button variant for custom icon widgets.
+/// Shared base widget for all custom buttons in the app.
+///
+/// Supports either a static [child] or a state-driven [builder], optional
+/// tooltip wrapping, hover and pressed transforms, pointer cursor control, and
+/// both tap and drag gesture callbacks.
 class AppButton extends StatefulWidget {
   const AppButton({
     super.key,
-    required this.child,
-    required this.onPressed,
+    this.child,
+    this.builder,
+    this.onPressed,
     this.tooltip,
+    this.tooltipKey,
     this.constraints,
+    this.cursor = SystemMouseCursors.click,
     this.padding,
-  });
-  final Widget child;
+    this.hoverScale = AppVisual.enlarge,
+    this.pressedScale = AppVisual.shrink,
+    this.pressedOpacity = AppVisual.full,
+    this.animationDuration = AppDefaults.buttonTapAnimationDuration,
+    this.animationCurve = Curves.easeOut,
+    this.onPanStart,
+    this.onPanUpdate,
+    this.onPanEnd,
+    this.onPanCancel,
+  }) : assert(
+         (child == null) != (builder == null),
+         _appButtonContentAssertionMessage,
+       );
+
+  /// Curve used by the scale and opacity transitions.
+  final Curve animationCurve;
+
+  /// Duration used by the scale and opacity transitions.
+  final Duration animationDuration;
+
+  /// Stateful content builder for advanced button variants.
+  final AppButtonBuilder? builder;
+
+  /// Static content for simple button variants.
+  final Widget? child;
+
   final BoxConstraints? constraints;
-  final VoidCallback onPressed;
+
+  /// Mouse cursor shown while hovering.
+  final MouseCursor cursor;
+
+  /// Scale factor applied while hovered.
+  final double hoverScale;
+
+  /// Called when the drag is canceled.
+  final GestureDragCancelCallback? onPanCancel;
+
+  /// Called when a drag ends.
+  final GestureDragEndCallback? onPanEnd;
+
+  /// Called when a drag starts.
+  final GestureDragStartCallback? onPanStart;
+
+  /// Called on each drag update.
+  final GestureDragUpdateCallback? onPanUpdate;
+
+  /// Tap callback for standard button activation.
+  final VoidCallback? onPressed;
+
   final EdgeInsetsGeometry? padding;
+
+  /// Opacity applied while the button is pressed.
+  final double pressedOpacity;
+
+  /// Scale factor applied while pressed.
+  final double pressedScale;
+
   final String? tooltip;
+
+  /// Optional key forwarded to the wrapping tooltip widget.
+  final Key? tooltipKey;
   @override
   State<AppButton> createState() => _AppButtonState();
 }
@@ -198,36 +359,74 @@ class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMi
   bool _isPressed = false;
   @override
   Widget build(final BuildContext context) {
-    Widget button = GestureDetector(
-      onTapDown: (final TapDownDetails _) => _setPressed(true),
-      onTapUp: (final TapUpDetails _) => _releasePressedWithMinimumDuration(),
-      onTapCancel: _releasePressedWithMinimumDuration,
-      onTap: widget.onPressed,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => _setHovered(true),
-        onExit: (_) => _setHovered(false),
-        child: AnimatedScale(
-          scale: _scale,
-          duration: AppDefaults.buttonTapAnimationDuration,
-          curve: Curves.easeOut,
-          child: ConstrainedBox(
-            constraints: widget.constraints ?? const BoxConstraints(),
-            child: Padding(
-              padding: widget.padding ?? const EdgeInsets.all(AppSpacing.small),
-              child: widget.child,
-            ),
+    final AppButtonVisualState state = AppButtonVisualState(
+      isHovered: _isHovered,
+      isPressed: _isPressed,
+    );
+    Widget content = widget.builder?.call(context, state) ?? widget.child!;
+
+    content = AnimatedOpacity(
+      opacity: _opacity,
+      duration: widget.animationDuration,
+      curve: widget.animationCurve,
+      child: AnimatedScale(
+        scale: _scale,
+        duration: widget.animationDuration,
+        curve: widget.animationCurve,
+        child: ConstrainedBox(
+          constraints: widget.constraints ?? const BoxConstraints(),
+          child: Padding(
+            padding: widget.padding ?? const EdgeInsets.all(AppSpacing.small),
+            child: content,
           ),
         ),
       ),
     );
 
+    Widget button = GestureDetector(
+      onTapDown: widget.onPressed == null ? null : (final TapDownDetails _) => _setPressed(true),
+      onTapUp: widget.onPressed == null ? null : (final TapUpDetails _) => _releasePressedWithMinimumDuration(),
+      onTapCancel: widget.onPressed == null ? null : _releasePressedWithMinimumDuration,
+      onTap: widget.onPressed,
+      onPanStart: widget.onPanStart == null ? null : _handlePanStart,
+      onPanUpdate: widget.onPanUpdate,
+      onPanEnd: widget.onPanEnd == null ? null : _handlePanEnd,
+      onPanCancel: widget.onPanCancel == null ? null : _handlePanCancel,
+      child: MouseRegion(
+        cursor: widget.cursor,
+        onEnter: (_) => _setHovered(true),
+        onExit: (_) => _setHovered(false),
+        child: content,
+      ),
+    );
+
     if (widget.tooltip != null) {
-      button = AppTooltip(message: widget.tooltip!, child: button);
+      button = AppTooltip(
+        key: widget.tooltipKey,
+        message: widget.tooltip!,
+        child: button,
+      );
     }
 
     return button;
   }
+
+  void _handlePanCancel() {
+    _setPressed(false);
+    widget.onPanCancel?.call();
+  }
+
+  void _handlePanEnd(final DragEndDetails details) {
+    _setPressed(false);
+    widget.onPanEnd?.call(details);
+  }
+
+  void _handlePanStart(final DragStartDetails details) {
+    _setPressed(true);
+    widget.onPanStart?.call(details);
+  }
+
+  double get _opacity => _isPressed ? widget.pressedOpacity : AppVisual.full;
 
   /// Releases icon pressed state while guaranteeing a visible press frame.
   void _releasePressedWithMinimumDuration() {
@@ -240,10 +439,10 @@ class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMi
 
   double get _scale {
     if (_isPressed) {
-      return AppVisual.shrink;
+      return widget.pressedScale;
     }
     if (_isHovered) {
-      return AppVisual.enlarge;
+      return widget.hoverScale;
     }
     return AppVisual.full;
   }
@@ -258,93 +457,6 @@ class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMi
   }
 
   /// Toggles icon pressed state and tracks press-cycle metadata.
-  void _setPressed(final bool isPressed) {
-    if (_isPressed == isPressed) {
-      return;
-    }
-    if (isPressed) {
-      markPressed();
-    }
-    setState(() {
-      _isPressed = isPressed;
-    });
-  }
-}
-
-/// Shared base for [AppButtonText] and [AppButtonPrimary].
-class _AppButtonBase extends StatefulWidget {
-  const _AppButtonBase({
-    required this.onPressed,
-    required this.padding,
-    required this.textColor,
-    required this.child,
-    this.backgroundColor,
-    this.borderRadius,
-  });
-  final Color? backgroundColor;
-  final double? borderRadius;
-  final Widget child;
-  final VoidCallback onPressed;
-  final EdgeInsetsGeometry padding;
-  final Color textColor;
-
-  @override
-  State<_AppButtonBase> createState() => _AppButtonBaseState();
-}
-
-class _AppButtonBaseState extends State<_AppButtonBase> with _MinimumPressDurationStateMixin<_AppButtonBase> {
-  bool _isPressed = false;
-  @override
-  Widget build(final BuildContext context) {
-    Widget content = Padding(
-      padding: widget.padding,
-      child: Center(
-        child: DefaultTextStyle(
-          style: AppTextStyle.button.copyWith(color: widget.textColor),
-          child: widget.child,
-        ),
-      ),
-    );
-
-    if (widget.backgroundColor != null) {
-      content = DecoratedBox(
-        decoration: BoxDecoration(
-          color: widget.backgroundColor,
-          borderRadius: BorderRadius.circular(widget.borderRadius ?? 0),
-        ),
-        child: content,
-      );
-    }
-
-    content = AnimatedScale(
-      scale: _isPressed ? AppVisual.shrink : AppVisual.full,
-      duration: AppDefaults.buttonTapAnimationDuration,
-      curve: Curves.easeOut,
-      child: content,
-    );
-
-    return GestureDetector(
-      onTapDown: (final TapDownDetails _) => _setPressed(true),
-      onTapUp: (final TapUpDetails _) => _releasePressedWithMinimumDuration(),
-      onTapCancel: _releasePressedWithMinimumDuration,
-      onTap: widget.onPressed,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: content,
-      ),
-    );
-  }
-
-  /// Releases base button pressed state while guaranteeing a visible press frame.
-  void _releasePressedWithMinimumDuration() {
-    releasePressedOnNextFrame(
-      isPressed: _isPressed,
-      isStillPressed: () => _isPressed,
-      release: () => _setPressed(false),
-    );
-  }
-
-  /// Toggles base button pressed state and tracks press-cycle metadata.
   void _setPressed(final bool isPressed) {
     if (_isPressed == isPressed) {
       return;

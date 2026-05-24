@@ -139,6 +139,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get copyToClipboard => 'Copiar al portapapeles';
 
   @override
+  String get copied => 'Copiado';
+
+  @override
   String get create => 'Crear';
 
   @override
@@ -190,6 +193,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get duplicate => 'Duplicar';
+
+  @override
+  String get duplicated => 'Duplicado';
 
   @override
   String get editText => 'Editar texto';

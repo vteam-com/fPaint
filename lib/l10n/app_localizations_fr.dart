@@ -142,6 +142,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get copyToClipboard => 'Copier dans le presse-papiers';
 
   @override
+  String get copied => 'Copie';
+
+  @override
   String get create => 'Creer';
 
   @override
@@ -193,6 +196,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get duplicate => 'Dupliquer';
+
+  @override
+  String get duplicated => 'Duplique';
 
   @override
   String get editText => 'Modifier le texte';

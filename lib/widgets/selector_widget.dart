@@ -58,13 +58,13 @@ class SelectionRectWidget extends StatefulWidget {
   final VoidCallback onCancel;
 
   /// A callback that copies the selection to the clipboard.
-  final VoidCallback onCopy;
+  final Future<void> Function() onCopy;
 
   /// A callback that is called when the selection rectangle is dragged.
   final void Function(Offset) onDrag;
 
   /// A callback that duplicates the selection (copy then paste).
-  final VoidCallback onDuplicate;
+  final Future<void> Function() onDuplicate;
 
   /// Called when the user selects an effect from the popup menu.
   /// Receives the chosen [SelectionEffect] and the [BuildContext] of the
@@ -172,7 +172,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
   double _activeRotationDegrees = 0;
   double _activeScalePercent = AppMath.percentScale;
   _SelectionOverlayFeedbackMode _feedbackMode = _SelectionOverlayFeedbackMode.none;
-
   @override
   Widget build(final BuildContext context) {
     if (widget.path1 == null) {
@@ -255,7 +254,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
 
   @override
   void onEscapePressed() => widget.onCancel();
-
   void _beginRotateFeedback() {
     setState(() {
       _feedbackMode = _SelectionOverlayFeedbackMode.rotate;
@@ -414,23 +412,21 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
               children: <Widget>[
                 buildOverlayCircleButton(
                   tooltip: l10n.copyToClipboard,
-                  color: AppColors.selected,
+                  icon: AppIcon.clipboardCopy,
+                  contentSemantic: AppButtonContentSemantic.enabled,
                   cursor: SystemMouseCursors.click,
                   size: buttonSize,
-                  onTap: widget.onCopy,
-                  child: AppSvgIcon(
-                    icon: AppIcon.clipboardCopy,
-                    size: iconSize,
-                    color: AppColors.white,
-                  ),
+                  iconSize: iconSize,
+                  onTap: () => _handleCopy(l10n),
                 ),
                 buildOverlayCircleButton(
                   tooltip: l10n.duplicate,
-                  color: AppColors.selected,
+                  icon: AppIcon.copy,
+                  contentSemantic: AppButtonContentSemantic.enabled,
                   cursor: SystemMouseCursors.click,
                   size: buttonSize,
-                  onTap: widget.onDuplicate,
-                  child: AppSvgIcon(icon: AppIcon.copy, size: iconSize, color: AppColors.white),
+                  iconSize: iconSize,
+                  onTap: () => _handleDuplicate(l10n),
                 ),
                 _EffectsPopupButton(
                   l10n: l10n,
@@ -440,20 +436,18 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
                 ),
                 buildOverlayCircleButton(
                   tooltip: l10n.cancel,
-                  color: AppColors.selected,
+                  icon: AppIcon.selectorCancel,
+                  contentSemantic: AppButtonContentSemantic.dangerous,
                   cursor: SystemMouseCursors.click,
                   size: buttonSize,
+                  iconSize: iconSize,
                   onTap: widget.onCancel,
-                  child: AppSvgIcon(
-                    icon: AppIcon.selectorCancel,
-                    size: iconSize,
-                    color: AppColors.white,
-                  ),
                 ),
               ],
             ),
           )
         : null;
+
     return buildPositionedOverlayControls(
       left: controlsLeft,
       placement: placement,
@@ -512,6 +506,24 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
       case _SelectionOverlayFeedbackMode.none:
         return '';
     }
+  }
+
+  /// Executes the copy action and confirms it with a transient snackbar.
+  Future<void> _handleCopy(final AppLocalizations l10n) async {
+    await widget.onCopy();
+    if (!mounted) {
+      return;
+    }
+    context.showSnackBarMessage(l10n.copied);
+  }
+
+  /// Executes the duplicate action and confirms it with a transient snackbar.
+  Future<void> _handleDuplicate(final AppLocalizations l10n) async {
+    await widget.onDuplicate();
+    if (!mounted) {
+      return;
+    }
+    context.showSnackBarMessage(l10n.duplicated);
   }
 
   bool get _isFeedbackVisible =>
@@ -609,15 +621,12 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
     return buildOverlayCircleButton(
       key: Keys.effectsButton,
       tooltip: widget.l10n.effects,
-      color: AppColors.selected,
+      icon: AppIcon.autoFixHigh,
+      contentSemantic: AppButtonContentSemantic.enabled,
       cursor: SystemMouseCursors.click,
       size: widget.buttonSize,
+      iconSize: widget.iconSize,
       onTap: () => _showEffectsMenu(context),
-      child: AppSvgIcon(
-        icon: AppIcon.autoFixHigh,
-        size: widget.iconSize,
-        color: AppColors.white,
-      ),
     );
   }
 

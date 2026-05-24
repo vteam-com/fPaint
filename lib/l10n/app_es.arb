@@ -44,6 +44,7 @@
     }
   },
   "contentAlignment": "Alineacion del contenido",
+  "copied": "Copiado",
   "copyToClipboard": "Copiar al portapapeles",
   "create": "Crear",
   "degreesValue": "Giro: {value}°",
@@ -82,6 +83,7 @@
   "dropFilePrompt": "¿Desea agregar esto como una nueva capa o abrir el archivo?",
   "dropFileTitle": "Archivo soltado",
   "duplicate": "Duplicar",
+  "duplicated": "Duplicado",
   "editText": "Editar texto",
   "effectBlur": "Desenfoque",
   "effectBrightness": "Brillo",

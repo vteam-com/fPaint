@@ -50,6 +50,7 @@
     }
   },
   "contentAlignment": "Content Alignment",
+  "copied": "Copied",
   "copyToClipboard": "Copy to clipboard",
   "create": "Create",
   "degreesValue": "{value}°",
@@ -88,6 +89,7 @@
   "dropFilePrompt": "Would you like to add this as a new layer or open the file?",
   "dropFileTitle": "File Dropped",
   "duplicate": "Duplicate",
+  "duplicated": "Duplicated",
   "editText": "Edit Text",
   "effectBlur": "Blur",
   "effectBrightness": "Brightness",
