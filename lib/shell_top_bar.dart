@@ -15,7 +15,6 @@ const String _canvasZoomAndSizeFormat = '{zoom}%\n{width}\n{height}';
 const String _placeholderZoom = '{zoom}';
 const String _placeholderWidth = '{width}';
 const String _placeholderHeight = '{height}';
-const double _centerButtonWidthFactor = 1.8;
 
 /// Full-width top toolbar combining shell actions and canvas controls.
 class ShellTopBar extends StatelessWidget {
@@ -239,6 +238,13 @@ Widget buildCanvasToolbarActions(
         interactionProfile,
         enabled: canRedo,
       );
+      final Widget? shellToggleButton = shellProvider.deviceSizeSmall
+          ? _buildSmallScreenShellToggleButton(
+              shellProvider: shellProvider,
+              tooltip: l10n.menuTooltip,
+              interactionProfile: interactionProfile,
+            )
+          : null;
 
       return _buildToolbarDock(
         shellProvider: shellProvider,
@@ -246,8 +252,26 @@ Widget buildCanvasToolbarActions(
         undoButton: undoButton,
         redoButton: redoButton,
         selectorToggleButton: selectorToggleButton,
+        shellToggleButton: shellToggleButton,
         interactionProfile: interactionProfile,
       );
+    },
+  );
+}
+
+/// Builds the small-screen shell control that toggles between hidden and full.
+Widget _buildSmallScreenShellToggleButton({
+  required final ShellProvider shellProvider,
+  required final String tooltip,
+  required final InteractionLayoutProfile interactionProfile,
+}) {
+  return _buildToolbarIconButton(
+    key: Keys.floatActionToggle,
+    tooltip: tooltip,
+    icon: shellProvider.shellMode == ShellMode.hidden ? AppIcon.menu : AppIcon.close,
+    interactionProfile: interactionProfile,
+    onPressed: () {
+      Future<void>.microtask(() => _toggleSmallScreenShellState(shellProvider));
     },
   );
 }
@@ -330,6 +354,7 @@ Widget _buildToolbarDock({
   required final Widget undoButton,
   required final Widget redoButton,
   required final Widget selectorToggleButton,
+  required final Widget? shellToggleButton,
   required final InteractionLayoutProfile interactionProfile,
 }) {
   return Row(
@@ -339,6 +364,7 @@ Widget _buildToolbarDock({
       undoButton,
       redoButton,
       selectorToggleButton,
+      ?shellToggleButton,
       _buildZoomButton(
         key: Keys.floatActionZoomOut,
         shellProvider: shellProvider,
@@ -347,7 +373,7 @@ Widget _buildToolbarDock({
         icon: AppIcon.zoomOut,
         scaleDelta: AppVisual.shrink,
       ),
-      _buildCenterButton(shellProvider, appProvider, interactionProfile),
+      _buildCenterAndDimensionButton(shellProvider, appProvider),
       _buildZoomButton(
         key: Keys.floatActionZoomIn,
         shellProvider: shellProvider,
@@ -356,7 +382,6 @@ Widget _buildToolbarDock({
         icon: AppIcon.zoomIn,
         scaleDelta: AppVisual.enlarge,
       ),
-      if (shellProvider.deviceSizeSmall) _buildShellToggleButton(shellProvider, interactionProfile),
     ],
   );
 }
@@ -386,15 +411,13 @@ Widget _buildZoomButton({
   );
 }
 
-/// Builds the center/fit control that recenters the canvas and displays zoom and size.
-Widget _buildCenterButton(
+/// Builds the center/fit control that recenter the canvas and displays zoom and size.
+Widget _buildCenterAndDimensionButton(
   final ShellProvider shellProvider,
   final AppProvider appProvider,
-  final InteractionLayoutProfile interactionProfile,
 ) {
-  return _buildToolbarValueButton(
+  return AppButton(
     key: Keys.floatActionCenter,
-    interactionProfile: interactionProfile,
     onPressed: () {
       Future<void>.microtask(() {
         shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
@@ -405,34 +428,16 @@ Widget _buildCenterButton(
         });
       });
     },
-    child: AppText(
-      _canvasZoomAndSizeFormat
-          .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
-          .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
-          .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
-      textAlign: TextAlign.center,
-      variant: AppTextVariant.label,
+    child: Center(
+      child: AppText(
+        _canvasZoomAndSizeFormat
+            .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
+            .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
+            .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
+        textAlign: TextAlign.center,
+        variant: AppTextVariant.label,
+      ),
     ),
-  );
-}
-
-/// Builds the small-screen control used to toggle between full shell and canvas-priority mode.
-Widget _buildShellToggleButton(
-  final ShellProvider shellProvider,
-  final InteractionLayoutProfile interactionProfile,
-) {
-  final bool isShellHidden = shellProvider.shellMode == ShellMode.hidden;
-
-  return _buildToolbarIconButton(
-    key: Keys.floatActionToggle,
-    icon: isShellHidden ? AppIcon.menu : AppIcon.arrowDropDown,
-    interactionProfile: interactionProfile,
-    onPressed: () {
-      Future<void>.microtask(() {
-        shellProvider.shellMode = isShellHidden ? ShellMode.full : ShellMode.hidden;
-        shellProvider.update();
-      });
-    },
   );
 }
 
@@ -455,28 +460,14 @@ Widget _buildToolbarIconButton({
   );
 }
 
-/// Builds a standard value button for the top toolbar.
-Widget _buildToolbarValueButton({
-  required final Key key,
-  required final InteractionLayoutProfile interactionProfile,
-  required final VoidCallback onPressed,
-  required final Widget child,
-}) {
-  return AppButton(
-    key: key,
-    constraints: _centerButtonConstraints(interactionProfile),
-    onPressed: onPressed,
-    child: SizedBox.expand(
-      child: Center(
-        child: child,
-      ),
-    ),
-  );
-}
-
-BoxConstraints _centerButtonConstraints(final InteractionLayoutProfile interactionProfile) {
-  return BoxConstraints.tightFor(
-    width: interactionProfile.floatingButtonSize * _centerButtonWidthFactor,
-    height: interactionProfile.floatingButtonSize,
-  );
+/// Toggles the small-screen shell action between hidden and full states.
+void _toggleSmallScreenShellState(final ShellProvider shellProvider) {
+  switch (shellProvider.shellMode) {
+    case ShellMode.hidden:
+      shellProvider.shellMode = ShellMode.full;
+      break;
+    default:
+      shellProvider.shellMode = ShellMode.hidden;
+  }
+  shellProvider.update();
 }

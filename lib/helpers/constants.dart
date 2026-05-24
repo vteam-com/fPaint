@@ -97,6 +97,14 @@ class AppColors {
   static const Color pressed = secondary;
   static const Color layerHiddenWarning = Color.fromARGB(255, 241, 85, 85);
 
+  // Overlay button colors
+  static const Color buttonBorder = overlayLight;
+  static const Color buttonBackground = overlayDark;
+  static const Color buttonSelected = selected;
+  static const Color buttonEnable = textPrimary;
+  static const Color buttonDisable = grey400;
+  static const Color buttonDanger = red;
+
   // Transform handle colors
   static const Color transformCornerHandle = Color(0xFFFF9800);
   static const Color transformEdgeHandle = Color(0xFFFFC107);

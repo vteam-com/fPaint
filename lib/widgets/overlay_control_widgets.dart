@@ -13,16 +13,33 @@ const String _coordinatesFormat = '{x}\n{y}';
 const String _placeholderX = '{x}';
 const String _placeholderY = '{y}';
 const double _overlayControlBorderAlpha = 0.35;
+const Duration _overlayControlPressAnimationDuration = Duration(milliseconds: 110);
+const double _overlayControlPressedOpacity = 0.88;
+const double _overlayControlPressedScale = 0.94;
 const double _overlayControlShadowAlpha = 0.2;
 const double _overlayControlSurfaceAlpha = 0.78;
+const String _overlayButtonContentAssertionMessage = 'buildOverlayButton requires exactly one of icon or child.';
 
-/// Builds a circular control button used by canvas overlays.
-Widget buildOverlayCircleButton({
-  required final Widget child,
-  required final Color color,
+/// Builds a semantic overlay button.
+///
+/// Callers must pass a localized [tooltip] string, typically from
+/// [AppLocalizations]. Exactly one of [icon] or [child] must be provided.
+/// When [child] is an [AppSvgIcon] or [AppText], the helper re-applies the
+/// semantic content tint automatically. Other child widgets inherit merged
+/// text and icon themes when possible.
+Widget buildOverlayButton({
   required final MouseCursor cursor,
   required final String tooltip,
-  final double size = AppInteraction.imagePlacementButtonSize,
+  final AppIcon? icon,
+  final Widget? child,
+  final AppButtonContentSemantic contentSemantic = AppButtonContentSemantic.enabled,
+  final bool isSelected = false,
+  final bool showBorder = true,
+  final double width = AppInteraction.imagePlacementButtonSize,
+  final double height = AppInteraction.imagePlacementButtonSize,
+  final double iconSize = AppLayout.iconSize,
+  final BoxShape shape = BoxShape.rectangle,
+  final BorderRadiusGeometry borderRadius = const BorderRadius.all(Radius.circular(AppRadius.large)),
   final Key? key,
   final VoidCallback? onTap,
   final GestureDragStartCallback? onPanStart,
@@ -30,36 +47,142 @@ Widget buildOverlayCircleButton({
   final GestureDragEndCallback? onPanEnd,
   final GestureDragCancelCallback? onPanCancel,
 }) {
-  return AppTooltip(
-    key: key,
-    message: tooltip,
-    child: GestureDetector(
-      onTap: onTap,
-      onPanStart: onPanStart,
-      onPanUpdate: onPanUpdate,
-      onPanEnd: onPanEnd,
-      onPanCancel: onPanCancel,
-      child: MouseRegion(
-        cursor: cursor,
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppColors.white, width: AppStroke.regular),
-          ),
-          child: Center(child: child),
+  assert(
+    (icon == null) != (child == null),
+    _overlayButtonContentAssertionMessage,
+  );
+
+  return AppButton(
+    cursor: cursor,
+    tooltip: tooltip,
+    tooltipKey: key,
+    padding: EdgeInsets.zero,
+    hoverScale: AppVisual.full,
+    pressedScale: _overlayControlPressedScale,
+    pressedOpacity: _overlayControlPressedOpacity,
+    animationDuration: _overlayControlPressAnimationDuration,
+    onPressed: onTap,
+    onPanStart: onPanStart,
+    onPanUpdate: onPanUpdate,
+    onPanEnd: onPanEnd,
+    onPanCancel: onPanCancel,
+    builder: (final BuildContext _, final AppButtonVisualState state) {
+      final Color backgroundColor = (isSelected || state.isPressed)
+          ? AppColors.buttonSelected
+          : AppColors.buttonBackground;
+      final Color contentColor = contentSemantic.color;
+
+      return Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          shape: shape,
+          border: showBorder ? Border.all(color: AppColors.buttonBorder, width: AppStroke.thin) : null,
+          borderRadius: shape == BoxShape.circle ? null : borderRadius,
         ),
-      ),
+        child: Center(
+          child: _buildOverlayButtonContent(
+            icon: icon,
+            child: child,
+            contentColor: contentColor,
+            iconSize: iconSize,
+          ),
+        ),
+      );
+    },
+  );
+}
+
+/// Builds a circular control button used by canvas overlays.
+Widget buildOverlayCircleButton({
+  required final MouseCursor cursor,
+  required final String tooltip,
+  final AppIcon? icon,
+  final Widget? child,
+  final AppButtonContentSemantic contentSemantic = AppButtonContentSemantic.enabled,
+  final bool isSelected = false,
+  final bool showBorder = true,
+  final double size = AppInteraction.imagePlacementButtonSize,
+  final double iconSize = AppLayout.iconSize,
+  final Key? key,
+  final VoidCallback? onTap,
+  final GestureDragStartCallback? onPanStart,
+  final GestureDragUpdateCallback? onPanUpdate,
+  final GestureDragEndCallback? onPanEnd,
+  final GestureDragCancelCallback? onPanCancel,
+}) {
+  return buildOverlayButton(
+    key: key,
+    cursor: cursor,
+    tooltip: tooltip,
+    icon: icon,
+    child: child,
+    contentSemantic: contentSemantic,
+    isSelected: isSelected,
+    showBorder: showBorder,
+    width: size,
+    height: size,
+    iconSize: iconSize,
+    shape: BoxShape.circle,
+    onTap: onTap,
+    onPanStart: onPanStart,
+    onPanUpdate: onPanUpdate,
+    onPanEnd: onPanEnd,
+    onPanCancel: onPanCancel,
+  );
+}
+
+/// Builds and semantically tints either the explicit child or the requested
+/// overlay icon so callers do not need to manage content colors manually.
+Widget _buildOverlayButtonContent({
+  required final AppIcon? icon,
+  required final Widget? child,
+  required final Color contentColor,
+  required final double iconSize,
+}) {
+  if (icon != null) {
+    return AppSvgIcon(
+      icon: icon,
+      color: contentColor,
+      size: iconSize,
+    );
+  }
+
+  final Widget resolvedChild = child!;
+  if (resolvedChild is AppSvgIcon) {
+    return AppSvgIcon(
+      key: resolvedChild.key,
+      icon: resolvedChild.icon,
+      color: contentColor,
+      size: resolvedChild.size ?? iconSize,
+      isSelected: resolvedChild.isSelected,
+    );
+  }
+  if (resolvedChild is AppText) {
+    return AppText(
+      resolvedChild.data,
+      key: resolvedChild.key,
+      variant: resolvedChild.variant,
+      color: contentColor,
+      textAlign: resolvedChild.textAlign,
+    );
+  }
+  return IconTheme(
+    data: IconThemeData(color: contentColor, size: iconSize),
+    child: DefaultTextStyle.merge(
+      style: AppTextStyle.body.copyWith(color: contentColor),
+      child: resolvedChild,
     ),
   );
 }
 
 /// Builds a standardized mode toggle button for canvas overlays.
 ///
-/// Visual behavior is consistent across overlays: black by default,
-/// selected-blue when active, and white icon tint.
+/// Visual behavior is consistent across overlays: the shared button background
+/// comes from [AppColors.buttonBackground], selected and pressed buttons use
+/// [AppColors.buttonSelected], and icon tint comes from
+/// [AppButtonContentSemantic.enabled].
 Widget buildOverlayModeButton({
   required final String tooltip,
   required final AppIcon icon,
@@ -75,19 +198,17 @@ Widget buildOverlayModeButton({
 }) {
   return buildOverlayCircleButton(
     tooltip: tooltip,
-    color: isSelected ? AppColors.selected : AppColors.black,
+    icon: icon,
+    contentSemantic: AppButtonContentSemantic.enabled,
     cursor: cursor,
     size: size,
+    iconSize: iconSize,
+    isSelected: isSelected,
     onTap: onTap,
     onPanStart: onPanStart,
     onPanUpdate: onPanUpdate,
     onPanEnd: onPanEnd,
     onPanCancel: onPanCancel,
-    child: AppSvgIcon(
-      icon: icon,
-      color: AppColors.white,
-      size: iconSize,
-    ),
   );
 }
 
@@ -196,19 +317,21 @@ Widget buildOverlayConfirmCancelButtons({
     children: <Widget>[
       buildOverlayCircleButton(
         tooltip: l10n.apply,
-        color: AppColors.green,
+        icon: AppIcon.check,
+        contentSemantic: AppButtonContentSemantic.enabled,
         cursor: SystemMouseCursors.click,
         size: buttonSize,
+        iconSize: iconSize,
         onTap: onConfirm,
-        child: AppSvgIcon(icon: AppIcon.check, color: AppColors.white, size: iconSize),
       ),
       buildOverlayCircleButton(
         tooltip: l10n.cancel,
-        color: AppColors.red,
+        icon: AppIcon.close,
+        contentSemantic: AppButtonContentSemantic.dangerous,
         cursor: SystemMouseCursors.click,
         size: buttonSize,
+        iconSize: iconSize,
         onTap: onCancel,
-        child: AppSvgIcon(icon: AppIcon.close, color: AppColors.white, size: iconSize),
       ),
     ],
   );

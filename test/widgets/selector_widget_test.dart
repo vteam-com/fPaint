@@ -4,8 +4,11 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_tooltip.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
+
+const Duration _snackBarDismissDuration = Duration(seconds: 4);
 
 Widget _buildHarness({
   required final Path? path1,
@@ -13,8 +16,8 @@ Widget _buildHarness({
   bool enableMoveAndResize = true,
   bool isDrawing = false,
   required final VoidCallback onCancel,
-  required final VoidCallback onCopy,
-  required final VoidCallback onDuplicate,
+  required final Future<void> Function() onCopy,
+  required final Future<void> Function() onDuplicate,
   required final VoidCallback onToggleTransformMode,
   required final void Function(Offset) onDrag,
   required final void Function(NineGridHandle, Offset) onResize,
@@ -55,8 +58,8 @@ void main() {
         _buildHarness(
           path1: null,
           onCancel: () {},
-          onCopy: () {},
-          onDuplicate: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
           onToggleTransformMode: () {},
           onDrag: (final Offset _) {},
           onResize: (final NineGridHandle _, final Offset _) {},
@@ -77,8 +80,8 @@ void main() {
         _buildHarness(
           path1: path,
           onCancel: () {},
-          onCopy: () {},
-          onDuplicate: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
           onToggleTransformMode: () {},
           onDrag: (final Offset _) {},
           onResize: (final NineGridHandle _, final Offset _) {},
@@ -100,8 +103,8 @@ void main() {
           path1: path,
           isDrawing: true,
           onCancel: () {},
-          onCopy: () {},
-          onDuplicate: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
           onToggleTransformMode: () {},
           onDrag: (final Offset _) {},
           onResize: (final NineGridHandle _, final Offset _) {},
@@ -123,8 +126,8 @@ void main() {
         _buildHarness(
           path1: path,
           onCancel: () {},
-          onCopy: () {},
-          onDuplicate: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
           onToggleTransformMode: () {},
           onDrag: (final Offset _) {},
           onResize: (final NineGridHandle _, final Offset _) {},
@@ -162,8 +165,8 @@ void main() {
         _buildHarness(
           path1: path,
           onCancel: () {},
-          onCopy: () {},
-          onDuplicate: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
           onToggleTransformMode: () {},
           onDrag: (final Offset _) {
             dragCalls++;
@@ -204,10 +207,10 @@ void main() {
           onCancel: () {
             cancelCalls++;
           },
-          onCopy: () {
+          onCopy: () async {
             copyCalls++;
           },
-          onDuplicate: () {
+          onDuplicate: () async {
             duplicateCalls++;
           },
           onToggleTransformMode: () {
@@ -251,6 +254,99 @@ void main() {
       expect(copyCalls, 1);
       expect(duplicateCalls, 1);
       expect(transformCalls, 1);
+      expect(find.text(l10n.copied), findsNothing);
+      expect(find.text(l10n.duplicated), findsOneWidget);
+
+      await tester.pump(_snackBarDismissDuration);
+      await tester.pump();
+      expect(find.text(l10n.duplicated), findsNothing);
+    });
+
+    testWidgets('quick actions use neutral styling and show snackbar feedback', (
+      final WidgetTester tester,
+    ) async {
+      final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
+
+      await tester.pumpWidget(
+        _buildHarness(
+          path1: path,
+          onCancel: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
+          onToggleTransformMode: () {},
+          onDrag: (final Offset _) {},
+          onResize: (final NineGridHandle _, final Offset _) {},
+          onScale: (final double _) {},
+          onRotate: (final double _) {},
+          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+        ),
+      );
+      await tester.pump();
+
+      final BuildContext context = tester.element(find.byType(SelectionRectWidget));
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
+      final Finder copyTooltip = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppTooltip && widget.message == l10n.copyToClipboard,
+      );
+      final Finder duplicateTooltip = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppTooltip && widget.message == l10n.duplicate,
+      );
+      final Finder cancelTooltip = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppTooltip && widget.message == l10n.cancel,
+      );
+      final Finder effectsButton = find.byKey(Keys.effectsButton);
+
+      final Finder copyScale = find.descendant(of: copyTooltip, matching: find.byType(AnimatedScale));
+      expect(tester.widget<AnimatedScale>(copyScale).scale, 1);
+
+      final TestGesture copyPress = await tester.startGesture(tester.getCenter(copyTooltip));
+      await tester.pump();
+      expect(tester.widget<AnimatedScale>(copyScale).scale, lessThan(1));
+      await copyPress.up();
+      await tester.pump();
+      await tester.pump();
+
+      final Finder copyBackground = find.descendant(
+        of: copyTooltip,
+        matching: find.byWidgetPredicate(
+          (final Widget widget) =>
+              widget is Container &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration! as BoxDecoration).shape == BoxShape.circle,
+        ),
+      );
+      final Finder effectsBackground = find.descendant(
+        of: effectsButton,
+        matching: find.byWidgetPredicate(
+          (final Widget widget) =>
+              widget is Container &&
+              widget.decoration is BoxDecoration &&
+              (widget.decoration! as BoxDecoration).shape == BoxShape.circle,
+        ),
+      );
+      final Finder cancelIcon = find.descendant(of: cancelTooltip, matching: find.byType(AppSvgIcon));
+
+      expect(
+        (tester.widget<Container>(copyBackground).decoration! as BoxDecoration).color,
+        AppColors.buttonBackground,
+      );
+      expect(
+        (tester.widget<Container>(effectsBackground).decoration! as BoxDecoration).color,
+        AppColors.buttonBackground,
+      );
+      expect(tester.widget<AppSvgIcon>(cancelIcon).color, AppColors.buttonDanger);
+
+      await tester.tap(copyTooltip);
+      await tester.pump();
+      expect(find.text(l10n.copied), findsOneWidget);
+
+      await tester.tap(duplicateTooltip);
+      await tester.pump();
+      expect(find.text(l10n.duplicated), findsOneWidget);
+
+      await tester.pump(_snackBarDismissDuration);
+      await tester.pump();
+      expect(find.text(l10n.duplicated), findsNothing);
     });
 
     testWidgets('quick action surface stays inside selection overlay bounds', (
@@ -262,8 +358,8 @@ void main() {
         _buildHarness(
           path1: path,
           onCancel: () {},
-          onCopy: () {},
-          onDuplicate: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
           onToggleTransformMode: () {},
           onDrag: (final Offset _) {},
           onResize: (final NineGridHandle _, final Offset _) {},
@@ -302,8 +398,8 @@ void main() {
         _buildHarness(
           path1: path,
           onCancel: () {},
-          onCopy: () {},
-          onDuplicate: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
           onToggleTransformMode: () {},
           onDrag: (final Offset _) {
             translateCalls++;
@@ -320,34 +416,23 @@ void main() {
       );
       await tester.pump();
 
-      final Rect bounds = path.getBounds();
-      const double buttonSize = AppInteraction.imagePlacementButtonSize;
-      const double spacing = AppInteraction.imagePlacementButtonSpacing;
-      const double groupWidth = buttonSize * AppMath.four + spacing * AppMath.triple;
-      const double controlsWidth = groupWidth + spacing + groupWidth;
-      final double controlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
-      final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
-      final double modeControlsLeft = controlsLeft + AppSpacing.small;
-
-      final Offset translateCenter = Offset(
-        modeControlsLeft + buttonSize / AppMath.pair,
-        controlsTop + AppSpacing.small + buttonSize / AppMath.pair,
+      final BuildContext context = tester.element(find.byType(SelectionRectWidget));
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
+      final Finder translateTooltip = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppTooltip && widget.message == l10n.translate,
+      );
+      final Finder scaleTooltip = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppTooltip && widget.message == l10n.scale,
+      );
+      final Finder rotateTooltip = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppTooltip && widget.message == l10n.resizeRotate,
       );
 
-      final Offset scaleCenter = Offset(
-        modeControlsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
-        controlsTop + AppSpacing.small + buttonSize / AppMath.pair,
-      );
-      final Offset rotateCenter = Offset(
-        modeControlsLeft + (buttonSize + spacing) * AppMath.pair + buttonSize / AppMath.pair,
-        controlsTop + AppSpacing.small + buttonSize / AppMath.pair,
-      );
-
-      await tester.dragFrom(translateCenter, const Offset(15, 10));
+      await tester.dragFrom(tester.getCenter(translateTooltip), const Offset(15, 10));
       await tester.pump();
-      await tester.dragFrom(scaleCenter, const Offset(20, 20));
+      await tester.dragFrom(tester.getCenter(scaleTooltip), const Offset(20, 20));
       await tester.pump();
-      await tester.dragFrom(rotateCenter, const Offset(30, 10));
+      await tester.dragFrom(tester.getCenter(rotateTooltip), const Offset(30, 10));
       await tester.pump();
 
       expect(translateCalls, greaterThan(0));
@@ -367,8 +452,8 @@ void main() {
           path2: path2,
           enableMoveAndResize: false,
           onCancel: () {},
-          onCopy: () {},
-          onDuplicate: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
           onToggleTransformMode: () {},
           onDrag: (final Offset _) {
             dragCalls++;
@@ -402,8 +487,8 @@ void main() {
         _buildHarness(
           path1: path,
           onCancel: () {},
-          onCopy: () {},
-          onDuplicate: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
           onToggleTransformMode: () {},
           onDrag: (final Offset _) {},
           onResize: (final NineGridHandle _, final Offset _) {},

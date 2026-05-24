@@ -141,6 +141,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copyToClipboard => 'Copy to clipboard';
 
   @override
+  String get copied => 'Copied';
+
+  @override
   String get create => 'Create';
 
   @override
@@ -192,6 +195,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get duplicate => 'Duplicate';
+
+  @override
+  String get duplicated => 'Duplicated';
 
   @override
   String get editText => 'Edit Text';
