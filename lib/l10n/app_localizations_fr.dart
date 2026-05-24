@@ -335,6 +335,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get keyboardShortcuts => 'Raccourcis clavier';
 
   @override
+  String get toggleShell => 'Afficher ou masquer l\'interface';
+
+  @override
   String get languageEnglish => 'Anglais';
 
   @override

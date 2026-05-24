@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
-const String _titleKeyboardShortcuts = 'Keyboard Shortcuts';
 const String _categoryFileOperations = 'File Operations';
 const String _categoryEditing = 'Editing';
 const String _categoryView = 'View';
@@ -21,6 +20,7 @@ const String _actionDuplicate = 'Duplicate';
 const String _actionZoomIn = 'Zoom In';
 const String _actionZoomOut = 'Zoom Out';
 const String _actionResetZoom = 'Reset Zoom';
+const String _actionShowKeyboardShortcutsKeys = 'Ctrl /, F1';
 const String _actionBrushTool = 'Brush Tool';
 const String _actionEraserTool = 'Eraser Tool';
 const String _actionSelectionTool = 'Selection Tool';
@@ -41,6 +41,7 @@ const String _keyN = 'N';
 const String _keyO = 'O';
 const String _keyS = 'S';
 const String _keyT = 'T';
+const String _keyTab = 'Tab';
 const String _keyV = 'V';
 const String _keyX = 'X';
 const String _keyY = 'Y';
@@ -54,9 +55,10 @@ class ShortcutsHelpDialog extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final String mod = _getPlatformModifier(context);
+    final AppLocalizations l10n = context.l10n;
 
     return AppDialog(
-      title: _titleKeyboardShortcuts,
+      title: l10n.keyboardShortcuts,
       content: SingleChildScrollView(
         child: Wrap(
           spacing: AppSpacing.large,
@@ -87,6 +89,8 @@ class ShortcutsHelpDialog extends StatelessWidget {
                 <String, String>{'keys': '$mod +', 'description': _actionZoomIn},
                 <String, String>{'keys': '$mod -', 'description': _actionZoomOut},
                 <String, String>{'keys': '$mod 0', 'description': _actionResetZoom},
+                <String, String>{'keys': _keyTab, 'description': l10n.toggleShell},
+                <String, String>{'keys': _actionShowKeyboardShortcutsKeys, 'description': l10n.keyboardShortcuts},
               ],
             ),
             _buildShortcutGroup(

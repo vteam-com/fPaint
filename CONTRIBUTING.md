@@ -1,6 +1,6 @@
 # Contributing to fPaint
 
-## 🚀 Welcome, Future Contributor!
+## 🚀 Welcome, Future Contributor
 
 **Thank you for considering contributing to fPaint!** You're joining a movement to create professional-grade graphics software that's completely free and open source. Your contributions will help democratize creative tools and make high-quality graphics software accessible to everyone.
 
@@ -19,6 +19,7 @@ This project follows a code of conduct to ensure a welcoming environment for all
 ### Reporting Bugs
 
 If you find a bug, please create an issue on GitHub with the following information:
+
 - A clear, descriptive title
 - Steps to reproduce the issue
 - Expected behavior
@@ -29,6 +30,7 @@ If you find a bug, please create an issue on GitHub with the following informati
 ### Suggesting Features
 
 Feature requests are welcome! Please create an issue with:
+
 - A clear, descriptive title
 - Detailed description of the proposed feature
 - Why this feature would be useful
@@ -46,22 +48,26 @@ Feature requests are welcome! Please create an issue with:
 ### Development Setup
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/vteam-com/fPaint.git
    cd fPaint
    ```
 
 2. Install dependencies:
+
    ```bash
    flutter pub get
    ```
 
 3. Run tests:
+
    ```bash
    flutter test
    ```
 
 4. Run the app:
+
    ```bash
    flutter run
    ```
@@ -69,6 +75,7 @@ Feature requests are welcome! Please create an issue with:
 ### Code Style
 
 This project uses:
+
 - Flutter's default linting rules (see `analysis_options.yaml`)
 - Single quotes for strings
 - Trailing commas in multi-line structures
@@ -84,7 +91,8 @@ This project uses:
 ### Commit Messages
 
 Use clear, descriptive commit messages following this format:
-- `feat:` for new features
+
+- `feature:` for new features
 - `fix:` for bug fixes
 - `docs:` for documentation changes
 - `style:` for code style changes
@@ -112,6 +120,7 @@ Use clear, descriptive commit messages following this format:
 ## Getting Help
 
 If you need help or have questions:
+
 - Check existing issues and documentation
 - Create a discussion on GitHub
 - Contact the maintainers

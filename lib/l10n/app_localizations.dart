@@ -680,6 +680,12 @@ abstract class AppLocalizations {
   /// **'Keyboard Shortcuts'**
   String get keyboardShortcuts;
 
+  /// No description provided for @toggleShell.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Shell'**
+  String get toggleShell;
+
   /// No description provided for @languageEnglish.
   ///
   /// In en, this message translates to:

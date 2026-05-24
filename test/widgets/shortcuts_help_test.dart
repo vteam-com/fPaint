@@ -1,7 +1,13 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:fpaint/widgets/shortcuts_help.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   Widget buildTestWidget() {
@@ -26,6 +32,37 @@ void main() {
     );
   }
 
+  Widget buildShortcutHandlerTestWidget({
+    required final AppProvider appProvider,
+    required final ShellProvider shellProvider,
+  }) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Localizations(
+          locale: const Locale('en'),
+          delegates: AppLocalizations.localizationsDelegates,
+          child: Navigator(
+            onGenerateRoute: (final RouteSettings _) {
+              return PageRouteDirectionality(
+                builder: (final BuildContext context) {
+                  return shortCutsForMainApp(
+                    context,
+                    shellProvider,
+                    appProvider,
+                    const SizedBox.shrink(),
+                    onSave: () async {},
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   group('ShortcutsHelpDialog', () {
     testWidgets('renders the dialog', (final WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
@@ -38,7 +75,7 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
-      expect(find.text('Keyboard Shortcuts'), findsOneWidget);
+      expect(find.text('Keyboard Shortcuts'), findsAtLeastNWidgets(1));
     });
 
     testWidgets('shows File Operations category', (final WidgetTester tester) async {
@@ -119,6 +156,45 @@ void main() {
       await tester.pump();
 
       expect(find.text('Eraser Tool'), findsOneWidget);
+    });
+
+    testWidgets('shows Tab shortcut for shell toggle', (final WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+
+      expect(find.text('Tab'), findsOneWidget);
+      expect(find.text('Toggle Shell'), findsOneWidget);
+    });
+
+    testWidgets('shows F1 help shortcut entry', (final WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+
+      expect(find.text('Ctrl /, F1'), findsOneWidget);
+      expect(find.text('Keyboard Shortcuts'), findsAtLeastNWidgets(2));
+    });
+  });
+
+  group('shortCutsForMainApp', () {
+    testWidgets('opens keyboard shortcuts dialog with F1', (final WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+      final ShellProvider shellProvider = ShellProvider();
+
+      await tester.pumpWidget(
+        buildShortcutHandlerTestWidget(
+          appProvider: appProvider,
+          shellProvider: shellProvider,
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.f1);
+      await tester.pump();
+
+      expect(find.byType(ShortcutsHelpDialog), findsOneWidget);
     });
   });
 }

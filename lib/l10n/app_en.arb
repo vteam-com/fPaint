@@ -230,6 +230,7 @@
   "textAlignLeft": "Left",
   "textAlignRight": "Right",
   "textColor": "Text Color",
+  "toggleShell": "Toggle Shell",
   "tolerance": "Tolerance",
   "toolAdd": "Add",
   "toolBrush": "Brush",

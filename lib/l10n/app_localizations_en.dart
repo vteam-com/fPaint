@@ -333,6 +333,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keyboardShortcuts => 'Keyboard Shortcuts';
 
   @override
+  String get toggleShell => 'Toggle Shell';
+
+  @override
   String get languageEnglish => 'English';
 
   @override

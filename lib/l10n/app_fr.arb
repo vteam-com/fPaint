@@ -220,6 +220,7 @@
   "textAlignLeft": "Gauche",
   "textAlignRight": "Droite",
   "textColor": "Couleur du texte",
+  "toggleShell": "Afficher ou masquer l'interface",
   "tolerance": "Tolérance",
   "toolAdd": "Ajouter",
   "toolBrush": "Pinceau",
