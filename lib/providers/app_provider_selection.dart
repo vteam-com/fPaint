@@ -12,6 +12,7 @@ import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_selection_commit.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -61,15 +62,19 @@ extension AppProviderSelection on AppProvider {
   /// Duplicates the current selection without touching system clipboard data.
   Future<void> regionDuplicate() async {
     final ui.Image? clippedImage = await createSelectionImage();
-    if (clippedImage == null) {
+    final Path? selectionPath = selectorModel.path1;
+    if (clippedImage == null || selectionPath == null) {
       return;
     }
 
-    startImagePlacement(clippedImage);
+    await _beginPreparedImageTransform(
+      clippedImage,
+      initialPosition: selectionPath.getBounds().topLeft,
+      source: TransformSessionSource.duplicateSelection,
+    );
   }
 
-  /// Floats the entire selected layer into the placement overlay so it can be
-  /// moved, scaled, rotated, and transformed before committing back.
+  /// Floats the entire selected layer into a transform session before committing back.
   Future<void> modifySelectedLayer() async {
     cancelEffectPreview();
     selectedAction = ActionType.selector;
@@ -97,7 +102,10 @@ extension AppProviderSelection on AppProvider {
       return;
     }
 
-    startImagePlacement(image);
+    await _beginPreparedImageTransform(
+      image,
+      source: TransformSessionSource.clipboardPaste,
+    );
   }
 
   /// Renders the active selection bounds into a standalone clipped image.
@@ -128,9 +136,10 @@ extension AppProviderSelection on AppProvider {
     );
   }
 
-  /// Starts interactive placement for [image], centered on the current canvas.
-  void startImagePlacement(
+  /// Prepares image placement state for follow-up transform or commit flows.
+  void _prepareImagePlacement(
     final ui.Image image, {
+    final Offset? initialPosition,
     final ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
     final ImagePlacementLayerRestoreState? layerRestoreState,
   }) {
@@ -138,18 +147,37 @@ extension AppProviderSelection on AppProvider {
       layers.size.width / AppMath.pair,
       layers.size.height / AppMath.pair,
     );
-    final Offset initialPosition = Offset(
-      center.dx - image.width / AppMath.pair,
-      center.dy - image.height / AppMath.pair,
-    );
+    final Offset resolvedInitialPosition =
+        initialPosition ??
+        Offset(
+          center.dx - image.width / AppMath.pair,
+          center.dy - image.height / AppMath.pair,
+        );
 
     imagePlacementModel.start(
       imageToPlace: image,
-      initialPosition: initialPosition,
+      initialPosition: resolvedInitialPosition,
       commitMode: commitMode,
       layerRestoreState: layerRestoreState,
     );
     update();
+  }
+
+  /// Prepares [image] and immediately enters a transform session from it.
+  Future<void> _beginPreparedImageTransform(
+    final ui.Image image, {
+    required final TransformSessionSource source,
+    final Offset? initialPosition,
+    final ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
+    final ImagePlacementLayerRestoreState? layerRestoreState,
+  }) async {
+    _prepareImagePlacement(
+      image,
+      initialPosition: initialPosition,
+      commitMode: commitMode,
+      layerRestoreState: layerRestoreState,
+    );
+    await _startPreparedImageTransform(source: source);
   }
 
   /// Starts a transform session from [image] constrained to [bounds].
@@ -166,8 +194,10 @@ extension AppProviderSelection on AppProvider {
     update();
   }
 
-  /// Switches the active image placement session into perspective transform mode.
-  Future<void> startImagePlacementTransform() async {
+  /// Starts a transform session from the prepared image placement state.
+  Future<void> _startPreparedImageTransform({
+    required final TransformSessionSource source,
+  }) async {
     final ui.Image? sourceImage = imagePlacementModel.image;
     if (sourceImage == null) {
       return;
@@ -191,8 +221,18 @@ extension AppProviderSelection on AppProvider {
     _startTransformSession(
       image: bakedImage,
       bounds: transformBounds,
-      source: TransformSessionSource.imagePlacement,
+      source: source,
     );
+  }
+
+  /// Confirms the active layer-modify session, even during async startup handoff.
+  Future<void> confirmLayerModifySession() async {
+    if (transformModel.isVisible) {
+      await confirmTransform();
+      return;
+    }
+
+    await confirmImagePlacement();
   }
 
   /// Commits the interactively placed image to a new layer.
@@ -218,51 +258,12 @@ extension AppProviderSelection on AppProvider {
     );
 
     final Offset offset = imagePlacementModel.position;
-    final int currentIndex = layers.selectedLayerIndex;
-    int newLayerIndex = -1;
-
-    undoProvider.executeAction(
-      name: 'Paste',
-      forward: () {
-        if (commitMode == ImagePlacementCommitMode.replaceLayer && layerRestoreState != null) {
-          final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
-          layers.selectedLayerIndex = layerRestoreState.layerIndex;
-          targetLayer.actionStack.clear();
-          targetLayer.redoStack.clear();
-          targetLayer.backgroundColor = null;
-          targetLayer.addImage(imageToAdd: bakedImage, offset: offset);
-          targetLayer.hasChanged = true;
-          targetLayer.clearCache();
-          update();
-          return;
-        }
-
-        final LayerProvider newLayer = layers.addTop(name: 'Pasted');
-        newLayerIndex = layers.getLayerIndex(newLayer);
-        newLayer.addImage(imageToAdd: bakedImage, offset: offset);
-        update();
-      },
-      backward: () {
-        if (commitMode == ImagePlacementCommitMode.replaceLayer && layerRestoreState != null) {
-          final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
-          layers.selectedLayerIndex = layerRestoreState.layerIndex;
-          targetLayer.actionStack
-            ..clear()
-            ..addAll(layerRestoreState.originalActions);
-          targetLayer.redoStack
-            ..clear()
-            ..addAll(layerRestoreState.originalRedoActions);
-          targetLayer.backgroundColor = layerRestoreState.originalBackgroundColor;
-          targetLayer.hasChanged = layerRestoreState.originalHasChanged;
-          targetLayer.clearCache();
-          update();
-          return;
-        }
-
-        layers.removeByIndex(newLayerIndex);
-        layers.selectedLayerIndex = currentIndex;
-        update();
-      },
+    commitPlacedImage(
+      this,
+      image: bakedImage,
+      offset: offset,
+      commitMode: commitMode,
+      layerRestoreState: layerRestoreState,
     );
 
     imagePlacementModel.clear();
@@ -288,6 +289,16 @@ extension AppProviderSelection on AppProvider {
 
     imagePlacementModel.clear();
     update();
+  }
+
+  /// Cancels the active layer-modify session, even during async startup handoff.
+  void cancelLayerModifySession() {
+    if (transformModel.isVisible) {
+      cancelTransform();
+      return;
+    }
+
+    cancelImagePlacement();
   }
 
   /// Begins a perspective/skew transform on the current selection.
@@ -326,17 +337,23 @@ extension AppProviderSelection on AppProvider {
 
     final Rect quadBounds = transformModel.quadBounds;
 
-    if (transformModel.source == TransformSessionSource.imagePlacement) {
+    if (_isPreparedImageTransformSource(transformModel.source)) {
+      final SelectionStateSnapshot selectionSnapshot = captureSelectionState(this);
       final ImagePlacementCommitMode commitMode = imagePlacementModel.commitMode;
       final ImagePlacementLayerRestoreState? layerRestoreState = imagePlacementModel.layerRestoreState;
 
-      transformModel.clear();
-      imagePlacementModel.start(
-        imageToPlace: transformedImage,
-        initialPosition: Offset(quadBounds.left, quadBounds.top),
+      commitPlacedImage(
+        this,
+        image: transformedImage,
+        offset: Offset(quadBounds.left, quadBounds.top),
         commitMode: commitMode,
         layerRestoreState: layerRestoreState,
+        selectionSnapshot: selectionSnapshot,
+        selectionBounds: quadBounds,
       );
+
+      transformModel.clear();
+      imagePlacementModel.clear();
       update();
       return;
     }
@@ -363,9 +380,9 @@ extension AppProviderSelection on AppProvider {
   void cancelTransform() {
     cancelEffectPreview();
 
-    if (transformModel.source == TransformSessionSource.imagePlacement && imagePlacementModel.image != null) {
+    if (_isPreparedImageTransformSource(transformModel.source)) {
       transformModel.clear();
-      imagePlacementModel.isVisible = true;
+      imagePlacementModel.clear();
       update();
       return;
     }
@@ -385,6 +402,10 @@ extension AppProviderSelection on AppProvider {
   bool get _isLayerModifySession =>
       imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&
       imagePlacementModel.layerRestoreState != null;
+
+  bool _isPreparedImageTransformSource(final TransformSessionSource source) {
+    return source == TransformSessionSource.duplicateSelection || source == TransformSessionSource.clipboardPaste;
+  }
 
   /// Renders the current image-placement preview into a baked image.
   Future<ui.Image> _renderPlacedImage({

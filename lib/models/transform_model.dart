@@ -501,5 +501,6 @@ enum TransformInteractionMode {
 /// Where a transform overlay session was launched from.
 enum TransformSessionSource {
   selection,
-  imagePlacement,
+  duplicateSelection,
+  clipboardPaste,
 }

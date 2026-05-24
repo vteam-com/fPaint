@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/main_screen.dart';
+import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -11,7 +12,6 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
-import 'package:fpaint/widgets/image_placement_widget.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/transform_widget.dart';
@@ -31,6 +31,19 @@ Future<ui.Image> _createTestImage() async {
     ui.Paint()..color = const Color(0xFF000000),
   );
   return recorder.endRecording().toImage(_testImageDimension, _testImageDimension);
+}
+
+void _startTransformOverlay(
+  final AppProvider appProvider,
+  final ui.Image image, {
+  final TransformSessionSource source = TransformSessionSource.selection,
+}) {
+  appProvider.transformModel.start(
+    image: image,
+    bounds: Offset.zero & Size(image.width.toDouble(), image.height.toDouble()),
+    source: source,
+  );
+  appProvider.update();
 }
 
 Widget _buildHarness({
@@ -93,7 +106,7 @@ void main() {
     shellProvider.shellMode = ShellMode.full;
   });
 
-  testWidgets('keeps side panel visible while regular image placement overlay is active', (
+  testWidgets('keeps side panel visible while transform overlay is active', (
     final WidgetTester tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
@@ -101,14 +114,13 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = _desktopTestViewSize;
 
-    appProvider.selectAll();
     final ui.Image image = await _createTestImage();
     addTearDown(image.dispose);
-    appProvider.imagePlacementModel.start(
-      imageToPlace: image,
-      initialPosition: Offset.zero,
+    _startTransformOverlay(
+      appProvider,
+      image,
+      source: TransformSessionSource.clipboardPaste,
     );
-    appProvider.update();
 
     await tester.pumpWidget(
       _buildHarness(
@@ -120,7 +132,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(MainView), findsOneWidget);
-    expect(find.byType(ImagePlacementWidget), findsOneWidget);
+    expect(find.byType(TransformWidget), findsOneWidget);
     expect(find.byType(SelectionRectWidget), findsNothing);
     expect(find.byType(SidePanel), findsOneWidget);
     expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
@@ -149,8 +161,39 @@ void main() {
     await tester.pump();
 
     expect(find.byType(MainView), findsOneWidget);
-    expect(find.byType(ImagePlacementWidget), findsOneWidget);
+    expect(find.byType(TransformWidget), findsOneWidget);
     expect(find.byType(SelectionRectWidget), findsNothing);
+    expect(find.byType(SidePanel), findsOneWidget);
+    expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
+  });
+
+  testWidgets('keeps side panel visible when pasting an image from the clipboard', (
+    final WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = _desktopTestViewSize;
+
+    final ui.Image image = await _createTestImage();
+    addTearDown(image.dispose);
+    _startTransformOverlay(
+      appProvider,
+      image,
+      source: TransformSessionSource.clipboardPaste,
+    );
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(MainView), findsOneWidget);
+    expect(find.byType(TransformWidget), findsOneWidget);
     expect(find.byType(SidePanel), findsOneWidget);
     expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
   });
@@ -161,10 +204,10 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     tester.view.devicePixelRatio = 1.0;
-    tester.view.physicalSize = const Size(1600, 900);
+    tester.view.physicalSize = _desktopTestViewSize;
 
     await appProvider.modifySelectedLayer();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(_modifyModePreparationDuration);
 
     await tester.pumpWidget(
       _buildHarness(
@@ -178,12 +221,6 @@ void main() {
     expect(find.byType(MainView), findsOneWidget);
     expect(find.byType(SelectionRectWidget), findsNothing);
     expect(find.byType(TransformWidget), findsOneWidget);
-    expect(find.byType(ImagePlacementWidget), findsNothing);
-    expect(find.byType(SidePanel), findsOneWidget);
-    expect(find.text('Modify'), findsOneWidget);
-    expect(find.text('Cancel'), findsOneWidget);
-    expect(find.text('Apply'), findsOneWidget);
-
     expect(find.byType(SidePanel), findsOneWidget);
     expect(find.text('Modify'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
@@ -390,11 +427,7 @@ void main() {
   ) async {
     final ui.Image image = await _createTestImage();
     addTearDown(image.dispose);
-    appProvider.transformModel.start(
-      image: image,
-      bounds: const Rect.fromLTWH(0, 0, 12, 12),
-    );
-    appProvider.update();
+    _startTransformOverlay(appProvider, image);
 
     await tester.pumpWidget(
       _buildHarness(
@@ -414,11 +447,7 @@ void main() {
   testWidgets('pinch zoom still works while transform overlay is active', (final WidgetTester tester) async {
     final ui.Image image = await _createTestImage();
     addTearDown(image.dispose);
-    appProvider.transformModel.start(
-      image: image,
-      bounds: const Rect.fromLTWH(0, 0, 12, 12),
-    );
-    appProvider.update();
+    _startTransformOverlay(appProvider, image);
 
     await tester.pumpWidget(
       _buildHarness(
@@ -466,11 +495,7 @@ void main() {
     final ui.Image image = await _createTestImage();
     addTearDown(image.dispose);
     appProvider.selectedAction = ActionType.brush;
-    appProvider.transformModel.start(
-      image: image,
-      bounds: const Rect.fromLTWH(0, 0, 12, 12),
-    );
-    appProvider.update();
+    _startTransformOverlay(appProvider, image);
 
     await tester.pumpWidget(
       _buildHarness(

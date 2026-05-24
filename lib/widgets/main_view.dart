@@ -13,7 +13,6 @@ import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/canvas_panel.dart';
 import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
-import 'package:fpaint/widgets/image_placement_widget.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/text_editor.dart';
@@ -186,22 +185,6 @@ class MainViewState extends State<MainView> {
                 ),
 
               if (!hasActiveTransformOverlay && appProvider.selectedTextObject != null) const TextEditor(),
-
-              //
-              // Image placement overlay (paste with interactive transform)
-              //
-              if (appProvider.imagePlacementModel.isVisible)
-                ImagePlacementWidget(
-                  model: appProvider.imagePlacementModel,
-                  canvasOffset: appProvider.canvasOffset,
-                  canvasScale: appProvider.layers.scale,
-                  onChanged: () => appProvider.update(),
-                  onToggleTransformMode: () {
-                    appProvider.startImagePlacementTransform();
-                  },
-                  onConfirm: () => appProvider.confirmImagePlacement(),
-                  onCancel: () => appProvider.cancelImagePlacement(),
-                ),
 
               //
               // Transform overlay (perspective/skew)
