@@ -284,14 +284,14 @@ class AppProvider extends ChangeNotifier {
   /// The selector model.
   SelectorModel selectorModel = SelectorModel();
 
-  /// The image placement model for interactive paste.
+  /// The prepared image placement state used by duplicate, paste, and layer modify sessions.
   final ImagePlacementModel imagePlacementModel = ImagePlacementModel();
 
   /// The transform model for perspective/skew operations.
   final TransformModel transformModel = TransformModel();
 
   /// Whether an interactive transform overlay is currently active.
-  bool get hasActiveTransformOverlay => imagePlacementModel.isVisible || transformModel.isVisible;
+  bool get hasActiveTransformOverlay => transformModel.isVisible;
 
   /// The effect preview model for live selection-effect intensity updates.
   final EffectPreviewModel effectPreviewModel = EffectPreviewModel();

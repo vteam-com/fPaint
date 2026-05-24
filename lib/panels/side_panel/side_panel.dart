@@ -130,11 +130,7 @@ class _SidePanelState extends State<SidePanel> {
                     AppRowSecondaryButton(
                       onPressed: () {
                         Future<void>.microtask(() async {
-                          if (appProvider.transformModel.isVisible) {
-                            appProvider.cancelTransform();
-                            return;
-                          }
-                          appProvider.cancelImagePlacement();
+                          appProvider.cancelLayerModifySession();
                         });
                       },
                       text: l10n.cancel,
@@ -142,11 +138,7 @@ class _SidePanelState extends State<SidePanel> {
                     AppRowPrimaryButton(
                       onPressed: () {
                         Future<void>.microtask(() async {
-                          if (appProvider.transformModel.isVisible) {
-                            await appProvider.confirmTransform();
-                            return;
-                          }
-                          await appProvider.confirmImagePlacement();
+                          await appProvider.confirmLayerModifySession();
                         });
                       },
                       text: l10n.apply,

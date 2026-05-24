@@ -80,11 +80,29 @@ Future<void> _duplicateSelectedMountain(
   await session.tester.pump();
 
   await mountainAppProvider.regionDuplicate();
-  mountainAppProvider.imagePlacementModel.position += moveDelta;
-  mountainAppProvider.imagePlacementModel.scale *= scaleFactor;
+  mountainAppProvider.transformModel.moveAll(moveDelta);
+  _scaleActiveDuplicateTransform(mountainAppProvider, scaleFactor);
   mountainAppProvider.update();
   await session.tester.pump();
 
-  await mountainAppProvider.confirmImagePlacement();
+  await mountainAppProvider.confirmTransform();
   await session.tester.pump();
+}
+
+void _scaleActiveDuplicateTransform(
+  final AppProvider mountainAppProvider,
+  final double scaleFactor,
+) {
+  final Offset transformCenter = mountainAppProvider.transformModel.center;
+
+  mountainAppProvider.transformModel.corners = mountainAppProvider.transformModel.corners.map((final Offset corner) {
+    final Offset vector = corner - transformCenter;
+    return transformCenter + (vector * scaleFactor);
+  }).toList();
+  mountainAppProvider.transformModel.edgeMidpoints = mountainAppProvider.transformModel.edgeMidpoints.map((
+    final Offset midpoint,
+  ) {
+    final Offset vector = midpoint - transformCenter;
+    return transformCenter + (vector * scaleFactor);
+  }).toList();
 }

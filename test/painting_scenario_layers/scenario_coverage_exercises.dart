@@ -308,10 +308,10 @@ Future<void> _exerciseKeyboardShortcuts(
   await tester.sendKeyEvent(LogicalKeyboardKey.escape);
   await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
 
-  // Clean up any lingering state from Cmd+D image placement.
+  // Clean up any lingering state from Cmd+D duplicate transform.
   final BuildContext kbContext = tester.element(find.byType(MainView));
   final AppProvider kbAppProvider = AppProvider.of(kbContext, listen: false);
-  kbAppProvider.cancelImagePlacement();
+  kbAppProvider.cancelTransform();
   kbAppProvider.selectorModel.clear();
   kbAppProvider.undoProvider.clear();
   kbAppProvider.update();
@@ -701,7 +701,7 @@ Future<void> _exerciseSelectionFlipRotate(
 // Selection crop and duplicate
 // ---------------------------------------------------------------------------
 
-/// Exercises regionDuplicate() + confirmImagePlacement(), regionCopy, regionCut.
+/// Exercises regionDuplicate() + confirmTransform(), regionCopy, regionCut.
 Future<void> _exerciseSelectionCropAndDuplicate(
   final PaintingScenarioSession session,
 ) async {
@@ -719,9 +719,9 @@ Future<void> _exerciseSelectionCropAndDuplicate(
   await appProvider.regionDuplicate();
   await tester.pump();
 
-  // Confirm the image placement.
-  if (appProvider.imagePlacementModel.isVisible) {
-    await appProvider.confirmImagePlacement();
+  // Confirm the duplicate from the active transform overlay.
+  if (appProvider.transformModel.isVisible) {
+    await appProvider.confirmTransform();
     await tester.pump();
 
     // Undo the placement.
@@ -1890,7 +1890,7 @@ Future<void> _exerciseSelectionAdvanced(
   final BuildContext context = tester.element(find.byType(MainView));
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
-  // Exercise cancelImagePlacement (no-op if nothing placed).
+  // Exercise cancelImagePlacement (no-op if no prepared placement exists).
   appProvider.cancelImagePlacement();
   await tester.pump();
 
@@ -1956,14 +1956,14 @@ Future<void> _exerciseSelectionAdvanced(
   // Undo the effect.
   await _undoTimes(tester, 1);
 
-  // Exercise regionDuplicate and then confirmImagePlacement.
+  // Exercise regionDuplicate and then confirm the pending duplicate.
   appProvider.selectAll();
   await tester.pump();
 
   await appProvider.regionDuplicate();
   await tester.pump();
 
-  await appProvider.confirmImagePlacement();
+  await appProvider.confirmTransform();
   await tester.pump();
 
   // Undo the paste.

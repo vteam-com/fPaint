@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/transform_model.dart';
@@ -12,6 +13,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   late AppProvider appProvider;
+
+  Future<Image> createClipboardTestImage() async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      const Rect.fromLTWH(0, 0, 12, 12),
+      Paint()..color = const Color(0xFF000000),
+    );
+    return recorder.endRecording().toImage(12, 12);
+  }
 
   setUp(() async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
@@ -108,9 +119,11 @@ void main() {
       expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.replaceLayer);
       expect(appProvider.layers.selectedLayer.backgroundColor, originalBackgroundColor);
 
-      appProvider.cancelImagePlacement();
+      appProvider.cancelLayerModifySession();
 
       expect(appProvider.layers.selectedLayer.backgroundColor, originalBackgroundColor);
+      expect(appProvider.transformModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
     });
   });
 
@@ -134,11 +147,12 @@ void main() {
       appProvider.layers.selectedLayer.backgroundColor = originalBackgroundColor;
 
       await appProvider.modifySelectedLayer();
-      await appProvider.confirmImagePlacement();
+      await appProvider.confirmLayerModifySession();
 
       expect(appProvider.layers.length, originalLayerCount);
       expect(appProvider.layers.selectedLayer.backgroundColor, originalBackgroundColor);
-      expect(appProvider.selectorModel.isVisible, isTrue);
+      expect(appProvider.selectorModel.isVisible, isFalse);
+      expect(appProvider.transformModel.isVisible, isFalse);
       expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
     });
 
@@ -173,6 +187,86 @@ void main() {
       expect(appProvider.imagePlacementModel.isVisible, isFalse);
       expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
       expect(appProvider.undoProvider.canUndo, isTrue);
+    });
+  });
+
+  group('regionDuplicate', () {
+    test('starts duplicate in transform mode at the selection bounds', () async {
+      appProvider.selectAll();
+      final Rect selectionBounds = appProvider.selectorModel.path1!.getBounds();
+
+      await appProvider.regionDuplicate();
+
+      expect(appProvider.imagePlacementModel.image, isNotNull);
+      expect(appProvider.imagePlacementModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.position, selectionBounds.topLeft);
+      expect(appProvider.transformModel.isVisible, isTrue);
+      expect(appProvider.transformModel.source, TransformSessionSource.duplicateSelection);
+      expect(appProvider.transformModel.quadBounds, selectionBounds);
+    });
+
+    test('confirming duplicate transform applies paste directly and keeps result selected', () async {
+      appProvider.selectAll();
+      final Rect selectionBounds = appProvider.selectorModel.path1!.getBounds();
+      final int originalLayerCount = appProvider.layers.length;
+
+      await appProvider.regionDuplicate();
+      await appProvider.confirmTransform();
+
+      expect(appProvider.layers.length, originalLayerCount + 1);
+      expect(appProvider.transformModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.isVisible, isFalse);
+      expect(appProvider.selectorModel.isVisible, isTrue);
+      expect(appProvider.selectorModel.path1!.getBounds(), selectionBounds);
+      expect(appProvider.undoProvider.canUndo, isTrue);
+    });
+
+    test('canceling duplicate transform closes the duplicate without showing image placement', () async {
+      appProvider.selectAll();
+      final Rect selectionBounds = appProvider.selectorModel.path1!.getBounds();
+
+      await appProvider.regionDuplicate();
+      appProvider.cancelTransform();
+
+      expect(appProvider.transformModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.isVisible, isFalse);
+      expect(appProvider.selectorModel.isVisible, isTrue);
+      expect(appProvider.selectorModel.path1!.getBounds(), selectionBounds);
+    });
+  });
+
+  group('paste', () {
+    test('starts clipboard paste in transform mode centered on the canvas', () async {
+      final Image clipboardImage = await createClipboardTestImage();
+      addTearDown(clipboardImage.dispose);
+      await copyImageToClipboard(clipboardImage);
+
+      await appProvider.paste();
+
+      final Rect pasteBounds = appProvider.transformModel.quadBounds;
+      expect(appProvider.transformModel.isVisible, isTrue);
+      expect(appProvider.transformModel.source, TransformSessionSource.clipboardPaste);
+      expect(appProvider.imagePlacementModel.isVisible, isFalse);
+      expect(pasteBounds.width, clipboardImage.width);
+      expect(pasteBounds.height, clipboardImage.height);
+      expect(pasteBounds.center, const Offset(512, 384));
+    });
+
+    test('confirming clipboard paste applies directly and keeps the pasted image selected', () async {
+      final Image clipboardImage = await createClipboardTestImage();
+      addTearDown(clipboardImage.dispose);
+      await copyImageToClipboard(clipboardImage);
+      final int originalLayerCount = appProvider.layers.length;
+
+      await appProvider.paste();
+      final Rect pasteBounds = appProvider.transformModel.quadBounds;
+      await appProvider.confirmTransform();
+
+      expect(appProvider.layers.length, originalLayerCount + 1);
+      expect(appProvider.transformModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.isVisible, isFalse);
+      expect(appProvider.selectorModel.isVisible, isTrue);
+      expect(appProvider.selectorModel.path1!.getBounds(), pasteBounds);
     });
   });
 

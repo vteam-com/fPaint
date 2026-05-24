@@ -657,14 +657,19 @@ void main() {
   }
 
   group('floating action AppButtonIcon', () {
-    testWidgets('keeps floating controls visible while image placement overlay is active', (
+    testWidgets('keeps floating controls visible while transform overlay is active', (
       final WidgetTester tester,
     ) async {
       final ui.Image image = await _createTestImage();
       addTearDown(image.dispose);
-      appProvider.imagePlacementModel.start(
-        imageToPlace: image,
-        initialPosition: Offset.zero,
+      appProvider.transformModel.start(
+        image: image,
+        bounds: Rect.fromLTWH(
+          0,
+          0,
+          image.width.toDouble(),
+          image.height.toDouble(),
+        ),
       );
 
       await pumpFloatingButtons(tester, isSmall: false);
