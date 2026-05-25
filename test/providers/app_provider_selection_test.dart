@@ -205,6 +205,19 @@ void main() {
       expect(appProvider.transformModel.quadBounds, selectionBounds);
     });
 
+    test('starts same-layer duplicate in transform mode at the selection bounds', () async {
+      appProvider.selectAll();
+      final Rect selectionBounds = appProvider.selectorModel.path1!.getBounds();
+
+      await appProvider.regionDuplicateSameLayer();
+
+      expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.selectedLayer);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNotNull);
+      expect(appProvider.transformModel.isVisible, isTrue);
+      expect(appProvider.transformModel.source, TransformSessionSource.duplicateSelection);
+      expect(appProvider.transformModel.quadBounds, selectionBounds);
+    });
+
     test('confirming duplicate transform applies paste directly and keeps result selected', () async {
       appProvider.selectAll();
       final Rect selectionBounds = appProvider.selectorModel.path1!.getBounds();
@@ -214,6 +227,24 @@ void main() {
       await appProvider.confirmTransform();
 
       expect(appProvider.layers.length, originalLayerCount + 1);
+      expect(appProvider.transformModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.isVisible, isFalse);
+      expect(appProvider.selectorModel.isVisible, isTrue);
+      expect(appProvider.selectorModel.path1!.getBounds(), selectionBounds);
+      expect(appProvider.undoProvider.canUndo, isTrue);
+    });
+
+    test('confirming same-layer duplicate transform keeps the result on the selected layer', () async {
+      appProvider.selectAll();
+      final Rect selectionBounds = appProvider.selectorModel.path1!.getBounds();
+      final int originalLayerCount = appProvider.layers.length;
+      final int originalActionCount = appProvider.layers.selectedLayer.actionStack.length;
+
+      await appProvider.regionDuplicateSameLayer();
+      await appProvider.confirmTransform();
+
+      expect(appProvider.layers.length, originalLayerCount);
+      expect(appProvider.layers.selectedLayer.actionStack.length, originalActionCount + 1);
       expect(appProvider.transformModel.isVisible, isFalse);
       expect(appProvider.imagePlacementModel.isVisible, isFalse);
       expect(appProvider.selectorModel.isVisible, isTrue);
@@ -232,6 +263,38 @@ void main() {
       expect(appProvider.imagePlacementModel.isVisible, isFalse);
       expect(appProvider.selectorModel.isVisible, isTrue);
       expect(appProvider.selectorModel.path1!.getBounds(), selectionBounds);
+    });
+
+    test('duplicate move offsets the same-layer transform without latching translate mode', () async {
+      appProvider.selectAll();
+      final Rect selectionBounds = appProvider.selectorModel.path1!.getBounds();
+      const Offset moveOffset = Offset(20, 10);
+
+      await appProvider.regionDuplicateMove(moveOffset, onNewLayer: false);
+
+      expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.selectedLayer);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNotNull);
+      expect(appProvider.transformModel.isVisible, isTrue);
+      expect(appProvider.transformModel.source, TransformSessionSource.duplicateSelection);
+      expect(appProvider.transformModel.isTranslateMode, isFalse);
+      expect(appProvider.transformModel.handleSet, TransformHandleSet.corners);
+      expect(appProvider.transformModel.quadBounds.topLeft, selectionBounds.topLeft + moveOffset);
+    });
+
+    test('duplicate move offsets the new-layer transform without latching translate mode', () async {
+      appProvider.selectAll();
+      final Rect selectionBounds = appProvider.selectorModel.path1!.getBounds();
+      const Offset moveOffset = Offset(20, 10);
+
+      await appProvider.regionDuplicateMove(moveOffset);
+
+      expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.newLayer);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
+      expect(appProvider.transformModel.isVisible, isTrue);
+      expect(appProvider.transformModel.source, TransformSessionSource.duplicateSelection);
+      expect(appProvider.transformModel.isTranslateMode, isFalse);
+      expect(appProvider.transformModel.handleSet, TransformHandleSet.corners);
+      expect(appProvider.transformModel.quadBounds.topLeft, selectionBounds.topLeft + moveOffset);
     });
   });
 

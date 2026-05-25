@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/effect_labels.dart';
@@ -18,6 +20,7 @@ Widget _buildHarness({
   required final VoidCallback onCancel,
   required final Future<void> Function() onCopy,
   required final Future<void> Function() onDuplicate,
+  Future<void> Function(Offset offset, bool duplicateOnNewLayer)? onDuplicateMove,
   required final VoidCallback onToggleTransformMode,
   required final void Function(Offset) onDrag,
   required final void Function(NineGridHandle, Offset) onResize,
@@ -39,6 +42,7 @@ Widget _buildHarness({
           onCancel: onCancel,
           onCopy: onCopy,
           onDuplicate: onDuplicate,
+          onDuplicateMove: onDuplicateMove,
           onToggleTransformMode: onToggleTransformMode,
           onDrag: onDrag,
           onResize: onResize,
@@ -49,6 +53,12 @@ Widget _buildHarness({
       ),
     ),
   );
+}
+
+LogicalKeyboardKey _duplicateMoveModifierKey() {
+  final bool isApplePlatform =
+      defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+  return isApplePlatform ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft;
 }
 
 void main() {
@@ -254,15 +264,14 @@ void main() {
       expect(copyCalls, 1);
       expect(duplicateCalls, 1);
       expect(transformCalls, 1);
-      expect(find.text(l10n.copied), findsNothing);
-      expect(find.text(l10n.duplicated), findsOneWidget);
+      expect(find.text(l10n.copied), findsOneWidget);
 
       await tester.pump(_snackBarDismissDuration);
       await tester.pump();
-      expect(find.text(l10n.duplicated), findsNothing);
+      expect(find.text(l10n.copied), findsNothing);
     });
 
-    testWidgets('quick actions use neutral styling and show snackbar feedback', (
+    testWidgets('quick actions use neutral styling and only copy shows snackbar feedback', (
       final WidgetTester tester,
     ) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
@@ -342,11 +351,11 @@ void main() {
 
       await tester.tap(duplicateTooltip);
       await tester.pump();
-      expect(find.text(l10n.duplicated), findsOneWidget);
+      expect(find.text(l10n.copied), findsOneWidget);
 
       await tester.pump(_snackBarDismissDuration);
       await tester.pump();
-      expect(find.text(l10n.duplicated), findsNothing);
+      expect(find.text(l10n.copied), findsNothing);
     });
 
     testWidgets('quick action surface stays inside selection overlay bounds', (
@@ -438,6 +447,137 @@ void main() {
       expect(translateCalls, greaterThan(0));
       expect(scaleCalls, greaterThan(0));
       expect(rotateCalls, greaterThan(0));
+    });
+
+    testWidgets('modifier-assisted move duplicates instead of translating the current selection', (
+      final WidgetTester tester,
+    ) async {
+      final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
+      int dragCalls = 0;
+      int duplicateMoveCalls = 0;
+      Offset duplicateMoveOffset = Offset.zero;
+      bool? duplicateMoveOnNewLayer;
+
+      await tester.pumpWidget(
+        _buildHarness(
+          path1: path,
+          onCancel: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
+          onDuplicateMove: (final Offset offset, final bool duplicateOnNewLayerValue) async {
+            duplicateMoveCalls++;
+            duplicateMoveOffset += offset;
+            duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
+          },
+          onToggleTransformMode: () {},
+          onDrag: (final Offset _) {
+            dragCalls++;
+          },
+          onResize: (final NineGridHandle _, final Offset _) {},
+          onScale: (final double _) {},
+          onRotate: (final double _) {},
+          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+        ),
+      );
+      await tester.pump();
+
+      final LogicalKeyboardKey modifierKey = _duplicateMoveModifierKey();
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.dragFrom(const Offset(240, 240), const Offset(20, 10));
+      await tester.pump();
+      await tester.sendKeyUpEvent(modifierKey);
+
+      expect(dragCalls, 0);
+      expect(duplicateMoveCalls, greaterThan(0));
+      expect(duplicateMoveOffset, isNot(Offset.zero));
+      expect(duplicateMoveOnNewLayer, isFalse);
+    });
+
+    testWidgets('shift plus modifier-assisted move requests a new-layer duplicate', (
+      final WidgetTester tester,
+    ) async {
+      final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
+      int dragCalls = 0;
+      bool? duplicateMoveOnNewLayer;
+
+      await tester.pumpWidget(
+        _buildHarness(
+          path1: path,
+          onCancel: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
+          onDuplicateMove: (final Offset _, final bool duplicateOnNewLayerValue) async {
+            duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
+          },
+          onToggleTransformMode: () {},
+          onDrag: (final Offset _) {
+            dragCalls++;
+          },
+          onResize: (final NineGridHandle _, final Offset _) {},
+          onScale: (final double _) {},
+          onRotate: (final double _) {},
+          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+        ),
+      );
+      await tester.pump();
+
+      final LogicalKeyboardKey modifierKey = _duplicateMoveModifierKey();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.dragFrom(const Offset(240, 240), const Offset(20, 10));
+      await tester.pump();
+      await tester.sendKeyUpEvent(modifierKey);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+
+      expect(dragCalls, 0);
+      expect(duplicateMoveOnNewLayer, isTrue);
+    });
+
+    testWidgets('modifier-assisted translate handle drag duplicates instead of translating', (
+      final WidgetTester tester,
+    ) async {
+      final Path path = Path()..addRect(const Rect.fromLTWH(100, 100, 200, 160));
+      int translateCalls = 0;
+      int duplicateMoveCalls = 0;
+      bool? duplicateMoveOnNewLayer;
+
+      await tester.pumpWidget(
+        _buildHarness(
+          path1: path,
+          onCancel: () {},
+          onCopy: () async {},
+          onDuplicate: () async {},
+          onDuplicateMove: (final Offset _, final bool duplicateOnNewLayerValue) async {
+            duplicateMoveCalls++;
+            duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
+          },
+          onToggleTransformMode: () {},
+          onDrag: (final Offset _) {
+            translateCalls++;
+          },
+          onResize: (final NineGridHandle _, final Offset _) {},
+          onScale: (final double _) {},
+          onRotate: (final double _) {},
+          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+        ),
+      );
+      await tester.pump();
+
+      final BuildContext context = tester.element(find.byType(SelectionRectWidget));
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
+      final Finder translateTooltip = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppTooltip && widget.message == l10n.translate,
+      );
+
+      final LogicalKeyboardKey modifierKey = _duplicateMoveModifierKey();
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.dragFrom(tester.getCenter(translateTooltip), const Offset(15, 10));
+      await tester.pump();
+      await tester.sendKeyUpEvent(modifierKey);
+
+      expect(translateCalls, 0);
+      expect(duplicateMoveCalls, greaterThan(0));
+      expect(duplicateMoveOnNewLayer, isFalse);
     });
 
     testWidgets('supports secondary path while move/resize is disabled', (final WidgetTester tester) async {

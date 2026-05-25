@@ -61,17 +61,28 @@ extension AppProviderSelection on AppProvider {
 
   /// Duplicates the current selection without touching system clipboard data.
   Future<void> regionDuplicate() async {
-    final ui.Image? clippedImage = await createSelectionImage();
-    final Path? selectionPath = selectorModel.path1;
-    if (clippedImage == null || selectionPath == null) {
+    await _startDuplicateTransform(commitMode: ImagePlacementCommitMode.newLayer);
+  }
+
+  /// Duplicates the current selection into the same selected layer.
+  Future<void> regionDuplicateSameLayer() async {
+    await _startDuplicateTransform(commitMode: ImagePlacementCommitMode.selectedLayer);
+  }
+
+  /// Duplicates the current selection and applies an initial move offset to the
+  /// new transform session without forcing translate mode to stay selected.
+  Future<void> regionDuplicateMove(final Offset offset, {final bool onNewLayer = true}) async {
+    if (onNewLayer) {
+      await regionDuplicate();
+    } else {
+      await regionDuplicateSameLayer();
+    }
+    if (!transformModel.isVisible) {
       return;
     }
 
-    await _beginPreparedImageTransform(
-      clippedImage,
-      initialPosition: selectionPath.getBounds().topLeft,
-      source: TransformSessionSource.duplicateSelection,
-    );
+    transformModel.moveAll(offset);
+    update();
   }
 
   /// Floats the entire selected layer into a transform session before committing back.
@@ -80,14 +91,7 @@ extension AppProviderSelection on AppProvider {
     selectedAction = ActionType.selector;
     selectAll();
 
-    final LayerProvider targetLayer = layers.selectedLayer;
-    final ImagePlacementLayerRestoreState restoreState = ImagePlacementLayerRestoreState(
-      layerIndex: layers.selectedLayerIndex,
-      originalActions: List<UserActionDrawing>.from(targetLayer.actionStack),
-      originalRedoActions: List<UserActionDrawing>.from(targetLayer.redoStack),
-      originalHasChanged: targetLayer.hasChanged,
-      originalBackgroundColor: targetLayer.backgroundColor,
-    );
+    final ImagePlacementLayerRestoreState restoreState = _captureSelectedLayerRestoreState();
 
     imagePlacementModel.clear();
     imagePlacementModel.commitMode = ImagePlacementCommitMode.replaceLayer;
@@ -136,6 +140,19 @@ extension AppProviderSelection on AppProvider {
     );
   }
 
+  /// Captures the selected layer so same-layer duplicate and layer modify undo
+  /// can restore it exactly.
+  ImagePlacementLayerRestoreState _captureSelectedLayerRestoreState() {
+    final LayerProvider targetLayer = layers.selectedLayer;
+    return ImagePlacementLayerRestoreState(
+      layerIndex: layers.selectedLayerIndex,
+      originalActions: List<UserActionDrawing>.from(targetLayer.actionStack),
+      originalRedoActions: List<UserActionDrawing>.from(targetLayer.redoStack),
+      originalHasChanged: targetLayer.hasChanged,
+      originalBackgroundColor: targetLayer.backgroundColor,
+    );
+  }
+
   /// Prepares image placement state for follow-up transform or commit flows.
   void _prepareImagePlacement(
     final ui.Image image, {
@@ -161,6 +178,29 @@ extension AppProviderSelection on AppProvider {
       layerRestoreState: layerRestoreState,
     );
     update();
+  }
+
+  /// Starts a duplicate transform using [commitMode] for the eventual commit.
+  Future<void> _startDuplicateTransform({
+    required final ImagePlacementCommitMode commitMode,
+  }) async {
+    final ui.Image? clippedImage = await createSelectionImage();
+    final Path? selectionPath = selectorModel.path1;
+    if (clippedImage == null || selectionPath == null) {
+      return;
+    }
+
+    final ImagePlacementLayerRestoreState? layerRestoreState = commitMode == ImagePlacementCommitMode.selectedLayer
+        ? _captureSelectedLayerRestoreState()
+        : null;
+
+    await _beginPreparedImageTransform(
+      clippedImage,
+      initialPosition: selectionPath.getBounds().topLeft,
+      source: TransformSessionSource.duplicateSelection,
+      commitMode: commitMode,
+      layerRestoreState: layerRestoreState,
+    );
   }
 
   /// Prepares [image] and immediately enters a transform session from it.
@@ -235,7 +275,7 @@ extension AppProviderSelection on AppProvider {
     await confirmImagePlacement();
   }
 
-  /// Commits the interactively placed image to a new layer.
+  /// Commits the interactively placed image using the active placement mode.
   Future<void> confirmImagePlacement() async {
     final ui.Image? sourceImage = imagePlacementModel.image;
     if (sourceImage == null) {

@@ -108,9 +108,21 @@ Widget shortCutsForMainApp(
       ): const DuplicateIntent(),
 
       LogicalKeySet(
+        LogicalKeyboardKey.control,
+        LogicalKeyboardKey.keyD,
+        LogicalKeyboardKey.shift,
+      ): const DuplicateNewLayerIntent(),
+
+      LogicalKeySet(
         LogicalKeyboardKey.meta,
         LogicalKeyboardKey.keyD,
       ): const DuplicateIntent(),
+
+      LogicalKeySet(
+        LogicalKeyboardKey.meta,
+        LogicalKeyboardKey.keyD,
+        LogicalKeyboardKey.shift,
+      ): const DuplicateNewLayerIntent(),
 
       //-------------------------------------------------
       // Tab key
@@ -186,7 +198,10 @@ Widget shortCutsForMainApp(
           onInvoke: (final PasteIntent _) async => await appProvider.paste(),
         ),
         DuplicateIntent: CallbackAction<DuplicateIntent>(
-          onInvoke: (final DuplicateIntent _) async => await appProvider.regionDuplicate(),
+          onInvoke: (final DuplicateIntent _) async => await appProvider.regionDuplicateSameLayer(),
+        ),
+        DuplicateNewLayerIntent: CallbackAction<DuplicateNewLayerIntent>(
+          onInvoke: (final DuplicateNewLayerIntent _) async => await appProvider.regionDuplicate(),
         ),
 
         //-------------------------------------------------------------
@@ -306,6 +321,12 @@ class PasteIntent extends Intent {
 class DuplicateIntent extends Intent {
   /// Creates a [DuplicateIntent].
   const DuplicateIntent();
+}
+
+/// An [Intent] that triggers the duplicate-to-new-layer action.
+class DuplicateNewLayerIntent extends Intent {
+  /// Creates a [DuplicateNewLayerIntent].
+  const DuplicateNewLayerIntent();
 }
 
 /// An [Intent] that triggers the escape action.

@@ -47,7 +47,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.copyToClipboard, isNotEmpty);
   expect(l10n.copied, isNotEmpty);
   expect(l10n.duplicate, isNotEmpty);
-  expect(l10n.duplicated, isNotEmpty);
+  expect(l10n.duplicatedOnLayer('Layer 1'), isNotEmpty);
   expect(l10n.create, isNotEmpty);
   expect(l10n.delete, isNotEmpty);
   expect(l10n.desktopSoftware, isNotEmpty);

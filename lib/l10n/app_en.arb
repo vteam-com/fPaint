@@ -89,7 +89,12 @@
   "dropFilePrompt": "Would you like to add this as a new layer or open the file?",
   "dropFileTitle": "File Dropped",
   "duplicate": "Duplicate",
-  "duplicated": "Duplicated",
+  "duplicatedOnLayer": "Duplicated on {layerName}",
+  "@duplicatedOnLayer": {
+    "placeholders": {
+      "layerName": {}
+    }
+  },
   "editText": "Edit Text",
   "effectBlur": "Blur",
   "effectBrightness": "Brightness",

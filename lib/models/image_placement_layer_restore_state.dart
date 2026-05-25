@@ -5,6 +5,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 /// Describes how a placed image should be committed.
 enum ImagePlacementCommitMode {
   newLayer,
+  selectedLayer,
   replaceLayer,
 }
 

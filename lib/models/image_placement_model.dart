@@ -19,7 +19,8 @@ class ImagePlacementModel extends VisibleModel {
   /// Rotation angle in radians.
   double rotation = 0.0;
 
-  /// Controls whether the placement creates a new layer or replaces one.
+  /// Controls whether the placement creates a new layer, appends to the
+  /// selected layer, or replaces one.
   ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer;
 
   /// Original layer state to restore while using placement as a modify flow.

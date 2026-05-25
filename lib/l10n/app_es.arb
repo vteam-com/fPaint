@@ -83,7 +83,12 @@
   "dropFilePrompt": "¿Desea agregar esto como una nueva capa o abrir el archivo?",
   "dropFileTitle": "Archivo soltado",
   "duplicate": "Duplicar",
-  "duplicated": "Duplicado",
+  "duplicatedOnLayer": "Duplicado en {layerName}",
+  "@duplicatedOnLayer": {
+    "placeholders": {
+      "layerName": {}
+    }
+  },
   "editText": "Editar texto",
   "effectBlur": "Desenfoque",
   "effectBrightness": "Brillo",

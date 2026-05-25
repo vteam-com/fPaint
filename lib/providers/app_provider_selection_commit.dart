@@ -51,7 +51,24 @@ void selectRectOnCanvas(final AppProvider appProvider, final Rect bounds) {
   appProvider.selectorModel.math = SelectorMath.replace;
 }
 
-/// Commits a placed image as a new layer or layer replacement with undo support.
+/// Restores [targetLayer] from [restoreState] after an image-placement undo.
+void _restoreLayerFromSnapshot({
+  required final LayerProvider targetLayer,
+  required final ImagePlacementLayerRestoreState restoreState,
+}) {
+  targetLayer.actionStack
+    ..clear()
+    ..addAll(restoreState.originalActions);
+  targetLayer.redoStack
+    ..clear()
+    ..addAll(restoreState.originalRedoActions);
+  targetLayer.backgroundColor = restoreState.originalBackgroundColor;
+  targetLayer.hasChanged = restoreState.originalHasChanged;
+  targetLayer.clearCache();
+}
+
+/// Commits a placed image as a new layer, selected-layer append, or layer
+/// replacement with undo support.
 void commitPlacedImage(
   final AppProvider appProvider, {
   required final ui.Image image,
@@ -83,6 +100,18 @@ void commitPlacedImage(
         return;
       }
 
+      if (commitMode == ImagePlacementCommitMode.selectedLayer && layerRestoreState != null) {
+        final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
+        appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
+        targetLayer.redoStack.clear();
+        targetLayer.addImage(imageToAdd: image, offset: offset);
+        if (selectionBounds != null) {
+          selectRectOnCanvas(appProvider, selectionBounds);
+        }
+        appProvider.update();
+        return;
+      }
+
       final LayerProvider newLayer = appProvider.layers.addTop(name: 'Pasted');
       newLayerIndex = appProvider.layers.getLayerIndex(newLayer);
       newLayer.addImage(imageToAdd: image, offset: offset);
@@ -92,18 +121,13 @@ void commitPlacedImage(
       appProvider.update();
     },
     backward: () {
-      if (commitMode == ImagePlacementCommitMode.replaceLayer && layerRestoreState != null) {
+      if (commitMode != ImagePlacementCommitMode.newLayer && layerRestoreState != null) {
         final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
         appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
-        targetLayer.actionStack
-          ..clear()
-          ..addAll(layerRestoreState.originalActions);
-        targetLayer.redoStack
-          ..clear()
-          ..addAll(layerRestoreState.originalRedoActions);
-        targetLayer.backgroundColor = layerRestoreState.originalBackgroundColor;
-        targetLayer.hasChanged = layerRestoreState.originalHasChanged;
-        targetLayer.clearCache();
+        _restoreLayerFromSnapshot(
+          targetLayer: targetLayer,
+          restoreState: layerRestoreState,
+        );
         if (selectionSnapshot != null) {
           restoreSelectionState(appProvider, selectionSnapshot);
         }

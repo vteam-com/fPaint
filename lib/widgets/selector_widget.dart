@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
@@ -22,6 +25,8 @@ enum _SelectionOverlayFeedbackMode {
   rotate,
 }
 
+typedef DuplicateMoveCallback = Future<void> Function(Offset offset, bool duplicateOnNewLayer);
+
 /// A widget that displays a selection rectangle with handles for resizing and moving.
 class SelectionRectWidget extends StatefulWidget {
   /// Creates a [SelectionRectWidget].
@@ -36,6 +41,7 @@ class SelectionRectWidget extends StatefulWidget {
     required this.path1,
     required this.path2,
     required this.onDrag,
+    this.onDuplicateMove,
     required this.onScale,
     required this.onResize,
     required this.onRotate,
@@ -65,6 +71,9 @@ class SelectionRectWidget extends StatefulWidget {
 
   /// A callback that duplicates the selection (copy then paste).
   final Future<void> Function() onDuplicate;
+
+  /// A callback that duplicates the selection and starts moving the duplicate.
+  final DuplicateMoveCallback? onDuplicateMove;
 
   /// Called when the user selects an effect from the popup menu.
   /// Receives the chosen [SelectionEffect] and the [BuildContext] of the
@@ -171,7 +180,10 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
   Size _activeResizeDimensions = Size.zero;
   double _activeRotationDegrees = 0;
   double _activeScalePercent = AppMath.percentScale;
+  bool _duplicateMoveOnNewLayer = false;
   _SelectionOverlayFeedbackMode _feedbackMode = _SelectionOverlayFeedbackMode.none;
+  bool _isDuplicateMovePending = false;
+  Offset _pendingDuplicateMoveDelta = Offset.zero;
   @override
   Widget build(final BuildContext context) {
     if (widget.path1 == null) {
@@ -219,11 +231,10 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
           position: bounds.center,
           size: handleSize,
           cursor: SystemMouseCursors.move,
-          onPanUpdate: (final DragUpdateDetails details) {
-            widget.onDrag(details.delta);
-            _updateResizeFeedback();
-          },
+          onPanStart: (final DragStartDetails _) => _beginTranslateFeedback(),
+          onPanUpdate: (final DragUpdateDetails details) => _handleMoveDelta(details.delta),
           onPanEnd: _endFeedback,
+          onPanCancel: _endFeedback,
         ),
       );
 
@@ -269,6 +280,9 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
   }
 
   void _beginTranslateFeedback() {
+    _duplicateMoveOnNewLayer = false;
+    _pendingDuplicateMoveDelta = Offset.zero;
+    _isDuplicateMovePending = false;
     setState(() {
       _feedbackMode = _SelectionOverlayFeedbackMode.translate;
     });
@@ -311,10 +325,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
     final double modeButtonsLeft = controlsLeft + _selectionToolbarSurfacePadding;
     final double controlsTop = placement.controlsTop + _selectionToolbarSurfacePadding;
-    final Offset translateHandleCenter = Offset(
-      modeButtonsLeft + buttonSize / AppMath.pair,
-      controlsTop + buttonSize / AppMath.pair,
-    );
     final Offset scaleHandleCenter = Offset(
       modeButtonsLeft + buttonSize + spacing + buttonSize / AppMath.pair,
       controlsTop + buttonSize / AppMath.pair,
@@ -338,11 +348,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
             isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.translate,
             cursor: SystemMouseCursors.move,
             onPanStart: (final DragStartDetails _) => _beginTranslateFeedback(),
-            onPanUpdate: (final DragUpdateDetails details) {
-              final Offset pointer = translateHandleCenter + details.delta;
-              widget.onDrag(pointer - translateHandleCenter);
-              _beginTranslateFeedback();
-            },
+            onPanUpdate: (final DragUpdateDetails details) => _handleMoveDelta(details.delta),
             onPanEnd: (final DragEndDetails _) => _endFeedback(),
             onPanCancel: _endFeedback,
           ),
@@ -426,7 +432,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
                   cursor: SystemMouseCursors.click,
                   size: buttonSize,
                   iconSize: iconSize,
-                  onTap: () => _handleDuplicate(l10n),
+                  onTap: _handleDuplicate,
                 ),
                 _EffectsPopupButton(
                   l10n: l10n,
@@ -473,7 +479,15 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     return contentWidth + (_selectionToolbarSurfacePadding * AppMath.pair);
   }
 
+  bool get _duplicateMoveCreatesNewLayer {
+    return HardwareKeyboard.instance.isShiftPressed;
+  }
+
+  /// Clears any transient drag state and hides the current feedback bubble.
   void _endFeedback() {
+    _duplicateMoveOnNewLayer = false;
+    _pendingDuplicateMoveDelta = Offset.zero;
+    _isDuplicateMovePending = false;
     setState(() {
       _feedbackMode = _SelectionOverlayFeedbackMode.none;
       _activeScalePercent = AppMath.percentScale;
@@ -508,6 +522,23 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     }
   }
 
+  /// Drains queued modifier-assisted move deltas into the duplicate-move
+  /// callback so the selection only duplicates once per drag gesture.
+  Future<void> _flushDuplicateMove() async {
+    try {
+      while (_pendingDuplicateMoveDelta != Offset.zero) {
+        final Offset moveDelta = _pendingDuplicateMoveDelta;
+        _pendingDuplicateMoveDelta = Offset.zero;
+        await widget.onDuplicateMove!(moveDelta, _duplicateMoveOnNewLayer);
+        if (!mounted) {
+          return;
+        }
+      }
+    } finally {
+      _isDuplicateMovePending = false;
+    }
+  }
+
   /// Executes the copy action and confirms it with a transient snackbar.
   Future<void> _handleCopy(final AppLocalizations l10n) async {
     await widget.onCopy();
@@ -517,13 +548,33 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     context.showSnackBarMessage(l10n.copied);
   }
 
-  /// Executes the duplicate action and confirms it with a transient snackbar.
-  Future<void> _handleDuplicate(final AppLocalizations l10n) async {
+  /// Executes the duplicate action.
+  Future<void> _handleDuplicate() async {
     await widget.onDuplicate();
-    if (!mounted) {
+  }
+
+  /// Routes move deltas either to marquee translation or, when the platform
+  /// duplicate modifier is held, to the duplicate-and-move handoff callback.
+  void _handleMoveDelta(final Offset delta) {
+    if (_shouldDuplicateMoveGesture) {
+      if (!_isDuplicateMovePending && _pendingDuplicateMoveDelta == Offset.zero) {
+        _duplicateMoveOnNewLayer = _duplicateMoveCreatesNewLayer;
+      }
+      _pendingDuplicateMoveDelta += delta;
+      if (_isDuplicateMovePending) {
+        return;
+      }
+      _isDuplicateMovePending = true;
+      unawaited(_flushDuplicateMove());
       return;
     }
-    context.showSnackBarMessage(l10n.duplicated);
+
+    widget.onDrag(delta);
+    _updateResizeFeedback();
+  }
+
+  bool get _isApplePlatform {
+    return defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
   }
 
   bool get _isFeedbackVisible =>
@@ -556,6 +607,14 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
       ),
     );
     return modeControlsWidth + spacing + quickActionsWidth;
+  }
+
+  bool get _shouldDuplicateMoveGesture {
+    if (widget.onDuplicateMove == null) {
+      return false;
+    }
+    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+    return _isApplePlatform ? keyboard.isAltPressed : keyboard.isControlPressed;
   }
 
   /// Updates the resize dimensions feedback from the current path bounds.

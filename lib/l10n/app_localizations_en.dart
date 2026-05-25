@@ -197,7 +197,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get duplicate => 'Duplicate';
 
   @override
-  String get duplicated => 'Duplicated';
+  String duplicatedOnLayer(Object layerName) {
+    return 'Duplicated on $layerName';
+  }
 
   @override
   String get editText => 'Edit Text';
