@@ -740,6 +740,7 @@ Future<void> applyEffectViaUi(
   final WidgetTester tester,
   final SelectionEffect effect, {
   final double strength = AppEffects.defaultIntensity,
+  final double? size,
   final bool requireApply = false,
   final bool forceFullSelection = false,
 }) async {
@@ -874,6 +875,21 @@ Future<void> applyEffectViaUi(
 
     final AppSlider slider = tester.widget<AppSlider>(sliderFinder.first);
     slider.onChanged?.call(strength);
+    await tester.pump();
+  }
+
+  if (effect.supportsSizeControl && size != null) {
+    final Finder bottomSheetSlider = find.byKey(Keys.effectSizeDialogSlider);
+    final Finder sidePanelSlider = find.byKey(Keys.effectSizeSlider);
+    final Finder sliderFinder = bottomSheetSlider.evaluate().isNotEmpty ? bottomSheetSlider : sidePanelSlider;
+    expect(sliderFinder, findsAtLeastNWidgets(1), reason: 'Size slider should be visible');
+
+    final Offset sliderCenter = tester.getCenter(sliderFinder.first);
+    InteractionTracker.recordTap(sliderCenter);
+    await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+
+    final AppSlider slider = tester.widget<AppSlider>(sliderFinder.first);
+    slider.onChanged?.call(size);
     await tester.pump();
   }
 

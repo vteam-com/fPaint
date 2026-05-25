@@ -435,10 +435,11 @@ extension AppProviderSelection on AppProvider {
     return recorder.endRecording().toImage(outWidth.ceil(), outHeight.ceil());
   }
 
-  /// Starts live preview mode for the selected [effect] and [strength].
+  /// Starts live preview mode for the selected [effect], [strength], and [size].
   Future<void> startEffectPreview(
     final SelectionEffect effect, {
     final double strength = AppEffects.defaultIntensity,
+    final double? size,
   }) async {
     _ensureSelection();
 
@@ -456,6 +457,7 @@ extension AppProviderSelection on AppProvider {
       selectionPath: selectionPath,
       selectionBounds: bounds,
       initialStrength: strength,
+      initialSize: size ?? effect.defaultSize,
     );
 
     await _renderEffectPreview();
@@ -468,6 +470,16 @@ extension AppProviderSelection on AppProvider {
     }
 
     effectPreviewModel.strength = strength;
+    await _renderEffectPreview();
+  }
+
+  /// Updates the active preview size and re-renders the effect live.
+  Future<void> updateEffectPreviewSize(final double size) async {
+    if (!effectPreviewModel.isVisible) {
+      return;
+    }
+
+    effectPreviewModel.size = size;
     await _renderEffectPreview();
   }
 
@@ -486,8 +498,9 @@ extension AppProviderSelection on AppProvider {
     final Path erasePath = Path.from(effectPreviewModel.erasePath!);
     final Rect bounds = effectPreviewModel.bounds!;
     final double strength = effectPreviewModel.strength;
+    final double size = effectPreviewModel.size;
 
-    final ui.Image processedImage = await effect.apply(sourceImage, strength: strength);
+    final ui.Image processedImage = await effect.apply(sourceImage, strength: strength, size: size);
 
     effectPreviewModel.clear();
 
@@ -522,7 +535,8 @@ extension AppProviderSelection on AppProvider {
 
     final int requestVersion = ++effectPreviewRenderVersion;
     final double strength = effectPreviewModel.strength;
-    final ui.Image previewImage = await effect.apply(sourceImage, strength: strength);
+    final double size = effectPreviewModel.size;
+    final ui.Image previewImage = await effect.apply(sourceImage, strength: strength, size: size);
 
     if (!effectPreviewModel.isVisible || requestVersion != effectPreviewRenderVersion) {
       return;

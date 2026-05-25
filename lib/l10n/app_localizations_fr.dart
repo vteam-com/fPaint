@@ -225,6 +225,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get effectPixelate => 'Pixéliser';
 
   @override
+  String get effectSize => 'Taille';
+
+  @override
   String get effects => 'Effets';
 
   @override

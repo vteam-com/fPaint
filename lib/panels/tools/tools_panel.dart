@@ -743,8 +743,8 @@ class ToolsPanel extends StatelessWidget {
   }
 }
 
-/// Side-panel section listing all [SelectionEffect] buttons with an intensity
-/// slider so the user can choose the strength before tapping an effect.
+/// Side-panel section listing all [SelectionEffect] buttons with effect sliders
+/// so the user can tune preview parameters before applying an effect.
 class _EffectsSection extends StatefulWidget {
   const _EffectsSection({
     required this.minimal,

@@ -222,6 +222,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get effectPixelate => 'Pixelar';
 
   @override
+  String get effectSize => 'Tamano';
+
+  @override
   String get effects => 'Efectos';
 
   @override

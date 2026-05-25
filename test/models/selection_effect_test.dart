@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
@@ -44,6 +44,27 @@ void main() {
 
     test('vignette has the vignette icon', () {
       expect(SelectionEffect.vignette.icon, AppIcon.effectVignette);
+    });
+
+    test('only pixelate and noise support size control', () {
+      expect(SelectionEffect.pixelate.supportsSizeControl, isTrue);
+      expect(SelectionEffect.noise.supportsSizeControl, isTrue);
+
+      for (final SelectionEffect effect in SelectionEffect.values.where(
+        (final SelectionEffect effect) => effect != SelectionEffect.pixelate && effect != SelectionEffect.noise,
+      )) {
+        expect(effect.supportsSizeControl, isFalse);
+      }
+    });
+
+    test('pixelate and noise expose stable default size values', () {
+      expect(SelectionEffect.pixelate.defaultSize, AppEffects.pixelateDefaultSize);
+      expect(SelectionEffect.noise.defaultSize, AppEffects.noiseDefaultSize);
+    });
+
+    test('pixelate size mapping preserves the authored default and reaches 100', () {
+      expect(SelectionEffect.pixelate.sizeValue(SelectionEffect.pixelate.defaultSize), AppEffects.pixelateBlockSize);
+      expect(SelectionEffect.pixelate.sizeValue(AppEffects.maxSize), AppEffects.pixelateMaxBlockSize);
     });
   });
 
