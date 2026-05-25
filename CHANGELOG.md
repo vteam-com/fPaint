@@ -4,6 +4,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2026-05-25
+
+### Update
+
+- Adaptive interaction profiles now scale toolbar and on-canvas controls for mouse, pen, and touch input.
+- Toolbar, selector, transform, and overlay action buttons now use more consistent sizing and spacing across pointer modalities.
+
+### Fix
+
+- Custom app buttons now preserve pressed-state feedback more reliably during quick taps.
+- Overlay and floating controls now handle tap and drag interactions more consistently.
+
 ## [1.7.5] - 2026-05-22
 
 ### Fix
