@@ -139,10 +139,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get contentAlignment => 'Alignement du contenu';
 
   @override
-  String get copyToClipboard => 'Copier dans le presse-papiers';
+  String get copied => 'Copie';
 
   @override
-  String get copied => 'Copie';
+  String get copyToClipboard => 'Copier dans le presse-papiers';
 
   @override
   String get create => 'Creer';
@@ -227,9 +227,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get effectPixelate => 'Pixéliser';
 
   @override
-  String get effectSize => 'Taille';
-
-  @override
   String get effects => 'Effets';
 
   @override
@@ -237,6 +234,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get effectSharpen => 'Netteté';
+
+  @override
+  String get effectSize => 'Taille';
 
   @override
   String get effectSoften => 'Adoucir les bords';
@@ -344,9 +344,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get keyboardShortcuts => 'Raccourcis clavier';
-
-  @override
-  String get toggleShell => 'Afficher ou masquer l\'interface';
 
   @override
   String get languageEnglish => 'Anglais';
@@ -481,9 +478,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scale => 'Mettre a l\'echelle';
 
   @override
-  String get translate => 'Deplacer';
-
-  @override
   String get selectionIsHidden => 'La selection est masquee.';
 
   @override
@@ -513,6 +507,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get textColor => 'Couleur du texte';
 
   @override
+  String get toggleShell => 'Afficher ou masquer l\'interface';
+
+  @override
   String get tolerance => 'Tolérance';
 
   @override
@@ -532,6 +529,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get toolFill => 'Remplissage';
+
+  @override
+  String get toolHalftone => 'Demi-teinte';
 
   @override
   String get toolInvert => 'Inverser';
@@ -582,6 +582,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get transform => 'Transformer';
+
+  @override
+  String get translate => 'Deplacer';
 
   @override
   String get unsavedChanges => 'Modifications non enregistrees';

@@ -236,6 +236,7 @@
   "toolCrop": "Recadrer",
   "toolEraser": "Gomme",
   "toolFill": "Remplissage",
+  "toolHalftone": "Demi-teinte",
   "toolInvert": "Inverser",
   "toolLasso": "Lasso libre",
   "toolLine": "Ligne",

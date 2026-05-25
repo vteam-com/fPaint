@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/brush_style.dart';
+import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/text_object.dart';
 export 'package:fpaint/models/brush_style.dart';
 
@@ -15,6 +16,7 @@ class UserActionDrawing {
     this.brush,
     this.fillColor,
     this.gradient,
+    this.halftoneFill,
     this.path,
     this.image,
     this.clipPath,
@@ -35,6 +37,9 @@ class UserActionDrawing {
 
   /// Optional gradient used for the action.
   final Gradient? gradient;
+
+  /// Optional halftone colors used with [gradient] geometry for region fills.
+  final HalftoneFill? halftoneFill;
 
   /// Optional path used for the action.
   ui.Path? path;

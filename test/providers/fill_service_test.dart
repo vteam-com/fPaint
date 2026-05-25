@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/fill_service.dart';
@@ -146,6 +147,24 @@ void main() {
       );
       expect(result.positions.length, 2);
     });
+
+    test('uses the selected solid fill color as the halftone dot color', () async {
+      final ui.Image image = await _createTestImage();
+      final UserActionDrawing result = await fillService.createFloodFillSolidAction(
+        sourceImage: image,
+        position: const Offset(5, 5),
+        fillColor: const Color(0xFFFF0000),
+        halftoneDotColor: const Color(0xFFFF0000),
+        tolerance: 50,
+        clipPath: null,
+      );
+
+      expect(result.action, ActionType.region);
+      expect(result.fillColor, const Color(0xFFFF0000));
+      expect(result.halftoneFill, isNotNull);
+      expect(result.halftoneFill!.backgroundColor, AppColors.transparent);
+      expect(result.halftoneFill!.dotColor, const Color(0xFFFF0000));
+    });
   });
 
   group('createFloodFillGradientAction', () {
@@ -192,6 +211,40 @@ void main() {
       );
       expect(result.action, ActionType.region);
       expect(result.gradient, isA<LinearGradient>());
+      expect(result.halftoneFill, isNull);
+    });
+
+    test('uses first and last gradient stops for halftone flood fill', () async {
+      final ui.Image image = await _createTestImage();
+      final FillModel fillModel = FillModel();
+      fillModel.mode = FillMode.linear;
+      fillModel.halftoneEnabled = true;
+      fillModel.gradientStopColors = const <Color>[
+        Color(0xFFFF0000),
+        Color(0xFF00FF00),
+        Color(0xFF0000FF),
+      ];
+      fillModel.gradientStopPositions = const <double>[0.0, 0.5, 1.0];
+      fillModel.addPoint(
+        GradientPoint(offset: const Offset(2, 2), color: const Color(0xFFFF0000)),
+      );
+      fillModel.addPoint(
+        GradientPoint(offset: const Offset(8, 8), color: const Color(0xFF0000FF)),
+      );
+
+      final UserActionDrawing result = await fillService.createFloodFillGradientAction(
+        sourceImage: image,
+        fillModel: fillModel,
+        tolerance: 50,
+        clipPath: null,
+        toCanvas: (final Offset o) => o,
+      );
+
+      expect(result.action, ActionType.region);
+      expect(result.gradient, isA<LinearGradient>());
+      expect(result.halftoneFill, isNotNull);
+      expect(result.halftoneFill!.backgroundColor, const Color(0xFFFF0000));
+      expect(result.halftoneFill!.dotColor, const Color(0xFF0000FF));
     });
 
     test('returns region action for valid radial gradient', () async {

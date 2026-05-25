@@ -29,6 +29,9 @@ class FillModel extends VisibleModel {
   /// Mode
   FillMode _mode = FillMode.solid;
 
+  /// Whether flood fill should render as a halftone pattern.
+  bool halftoneEnabled = false;
+
   /// Gets the current fill mode.
   FillMode get mode => _mode;
 

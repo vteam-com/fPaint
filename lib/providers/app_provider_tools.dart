@@ -66,6 +66,7 @@ extension AppProviderTools on AppProvider {
       sourceImage: sourceImage,
       position: position,
       fillColor: fillColor,
+      halftoneDotColor: fillModel.halftoneEnabled ? fillColor : null,
       tolerance: tolerance,
       clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
     );

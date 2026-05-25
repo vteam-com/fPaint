@@ -1,9 +1,11 @@
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/brush_style.dart';
+import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/models/text_object.dart';
 
@@ -160,7 +162,7 @@ void main() {
 
     test('renderRegion with solid fill', () {
       final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100));
-      renderRegion(canvas, path, AppColors.red, null);
+      renderRegion(canvas, path, AppColors.red, null, null);
     });
 
     test('renderRegion with gradient fill', () {
@@ -168,13 +170,55 @@ void main() {
       const LinearGradient gradient = LinearGradient(
         colors: <Color>[AppColors.red, AppColors.blue],
       );
-      renderRegion(canvas, path, null, gradient);
+      renderRegion(canvas, path, null, gradient, null);
     });
 
     test('renderRegionErase clears path area', () {
       final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 50, 50));
       renderRegionErase(canvas, path);
     });
+  });
+
+  test('renderRegion with halftone fill follows linear gradient geometry', () async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 40, 20));
+
+    const LinearGradient gradient = LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: <Color>[AppColors.white, AppColors.black],
+    );
+
+    const HalftoneFill halftoneFill = HalftoneFill(
+      backgroundColor: AppColors.white,
+      dotColor: AppColors.black,
+    );
+
+    renderRegion(canvas, path, null, gradient, halftoneFill);
+
+    final ui.Image image = await recorder.endRecording().toImage(40, 20);
+
+    expect((await _pixelColorAt(image, 1, 1)).toARGB32(), AppColors.white.toARGB32());
+    expect((await _pixelColorAt(image, 35, 5)).toARGB32(), AppColors.black.toARGB32());
+  });
+
+  test('renderRegion with solid halftone fill draws uniform dots', () async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20));
+
+    const HalftoneFill halftoneFill = HalftoneFill(
+      backgroundColor: AppColors.transparent,
+      dotColor: AppColors.black,
+    );
+
+    renderRegion(canvas, path, AppColors.white, null, halftoneFill);
+
+    final ui.Image image = await recorder.endRecording().toImage(20, 20);
+
+    expect((await _pixelColorAt(image, 1, 12)).toARGB32(), AppColors.transparent.toARGB32());
+    expect((await _pixelColorAt(image, 5, 5)).toARGB32(), AppColors.black.toARGB32());
   });
 
   group('renderText', () {
@@ -242,4 +286,19 @@ void main() {
       renderText(canvas, textObject);
     });
   });
+}
+
+Future<Color> _pixelColorAt(final ui.Image image, final int x, final int y) async {
+  final ByteData? imageBytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+
+  expect(imageBytes, isNotNull);
+
+  final int pixelOffset = ((y * image.width) + x) * AppMath.four;
+
+  return Color.fromARGB(
+    imageBytes!.getUint8(pixelOffset + AppMath.rgbChannelAlpha),
+    imageBytes.getUint8(pixelOffset + AppMath.rgbChannelRed),
+    imageBytes.getUint8(pixelOffset + AppMath.rgbChannelGreen),
+    imageBytes.getUint8(pixelOffset + AppMath.rgbChannelBlue),
+  );
 }

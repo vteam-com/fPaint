@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/brush_style.dart';
+import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/text_object.dart';
 
 /// Renders a pencil stroke on the canvas.
@@ -209,7 +210,13 @@ void renderRegion(
   final Path path,
   final Color? fillColor,
   final Gradient? gradient,
+  final HalftoneFill? halftoneFill,
 ) {
+  if (halftoneFill != null) {
+    _renderHalftoneRegion(canvas, path, gradient, halftoneFill);
+    return;
+  }
+
   final Paint paint = Paint();
   if (gradient != null) {
     paint.shader = gradient.createShader(path.getBounds());
@@ -218,6 +225,112 @@ void renderRegion(
   }
   paint.style = PaintingStyle.fill;
   canvas.drawPath(path, paint);
+}
+
+/// Renders a two-color halftone fill clipped to [path].
+void _renderHalftoneRegion(
+  final Canvas canvas,
+  final Path path,
+  final Gradient? gradient,
+  final HalftoneFill halftoneFill,
+) {
+  final Rect bounds = path.getBounds();
+  if (bounds.isEmpty) {
+    return;
+  }
+
+  final Paint backgroundPaint = Paint()
+    ..color = halftoneFill.backgroundColor
+    ..style = PaintingStyle.fill;
+  canvas.drawPath(path, backgroundPaint);
+
+  final Paint dotPaint = Paint()
+    ..color = halftoneFill.dotColor
+    ..style = PaintingStyle.fill;
+
+  final double spacing = AppHalftone.dotSpacing;
+  final double halfSpacing = spacing * AppVisual.half;
+  final double maxDotRadius = spacing * AppHalftone.maxDotRadiusFactor;
+
+  canvas.save();
+  canvas.clipPath(path, doAntiAlias: true);
+
+  int rowIndex = AppMath.zero;
+  for (double y = bounds.top + halfSpacing; y < bounds.bottom; y += spacing) {
+    final double rowOffset = rowIndex.isOdd ? halfSpacing : AppMath.zero.toDouble();
+    for (double x = bounds.left + halfSpacing + rowOffset; x < bounds.right; x += spacing) {
+      final Offset point = Offset(x, y);
+      final double intensity = _halftoneIntensityAt(
+        point: point,
+        bounds: bounds,
+        gradient: gradient,
+      );
+      if (intensity < AppHalftone.minDotIntensity) {
+        continue;
+      }
+
+      canvas.drawCircle(point, maxDotRadius * intensity, dotPaint);
+    }
+    rowIndex += AppMath.one;
+  }
+
+  canvas.restore();
+}
+
+/// Samples the halftone intensity at [point] from the region's fill geometry.
+double _halftoneIntensityAt({
+  required final Offset point,
+  required final Rect bounds,
+  required final Gradient? gradient,
+}) {
+  if (gradient == null) {
+    return AppVisual.full;
+  }
+
+  if (gradient case final LinearGradient linearGradient) {
+    final Offset beginPoint = _alignmentToPoint(
+      bounds,
+      linearGradient.begin.resolve(TextDirection.ltr),
+    );
+    final Offset endPoint = _alignmentToPoint(
+      bounds,
+      linearGradient.end.resolve(TextDirection.ltr),
+    );
+    final Offset axis = endPoint - beginPoint;
+    final double axisLengthSquared = (axis.dx * axis.dx) + (axis.dy * axis.dy);
+    if (axisLengthSquared <= AppMath.zero) {
+      return AppVisual.full;
+    }
+
+    final Offset delta = point - beginPoint;
+    final double projection = ((delta.dx * axis.dx) + (delta.dy * axis.dy)) / axisLengthSquared;
+    return projection.clamp(AppMath.zero.toDouble(), AppVisual.full);
+  }
+
+  if (gradient case final RadialGradient radialGradient) {
+    final Offset centerPoint = _alignmentToPoint(
+      bounds,
+      radialGradient.center.resolve(TextDirection.ltr),
+    );
+    final double radius = radialGradient.radius.abs() * bounds.width;
+    if (radius <= AppMath.zero) {
+      return AppVisual.full;
+    }
+
+    return ((point - centerPoint).distance / radius).clamp(AppMath.zero.toDouble(), AppVisual.full);
+  }
+
+  return AppVisual.full;
+}
+
+/// Converts a gradient [alignment] into an absolute point inside [bounds].
+Offset _alignmentToPoint(final Rect bounds, final Alignment alignment) {
+  final double halfWidth = bounds.width * AppVisual.half;
+  final double halfHeight = bounds.height * AppVisual.half;
+  return Offset(
+    bounds.left + ((alignment.x + AppVisual.full) * halfWidth),
+    bounds.top + ((alignment.y + AppVisual.full) * halfHeight),
+  );
 }
 
 /// Renders a region erase on the canvas.

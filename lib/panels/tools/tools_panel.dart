@@ -370,11 +370,14 @@ class ToolsPanel extends StatelessWidget {
           ),
         );
         // For solid mode show a single fill-color picker.
+        // When halftone is enabled, that same color becomes the dot color.
         // For gradient modes show the multi-stop color list editor.
         if (appProvider.fillModel.mode == FillMode.solid) {
           addToolOptionColor(widgets, appProvider, context, false);
+          _addHalftoneToggle(widgets, appProvider, context);
         } else {
           _addGradientColorEditor(widgets, appProvider, context);
+          _addHalftoneToggle(widgets, appProvider, context);
         }
         widgets.add(addToolOptionTolerance(context, appProvider));
         addToolOptionTopColors(widgets, layers, appProvider, minimal, l10n);
@@ -690,6 +693,34 @@ class ToolsPanel extends StatelessWidget {
                 fillModel: appProvider.fillModel,
                 onChanged: appProvider.updateGradientFill,
               ),
+      ),
+    );
+  }
+
+  /// Adds the halftone toggle for flood fills.
+  void _addHalftoneToggle(
+    final List<Widget> widgets,
+    final AppProvider appProvider,
+    final BuildContext context,
+  ) {
+    final AppLocalizations l10n = context.l10n;
+    widgets.add(
+      ToolAttributeWidget(
+        compact: minimal,
+        name: l10n.toolHalftone,
+        childLeft: AppToggleSwitch(
+          key: Keys.toolFillHalftoneToggle,
+          value: appProvider.fillModel.halftoneEnabled,
+          onChanged: (final bool value) {
+            appProvider.fillModel.halftoneEnabled = value;
+            appProvider.updateGradientFill();
+            appProvider.update();
+          },
+        ),
+        childRight: Align(
+          alignment: Alignment.centerLeft,
+          child: AppText(l10n.toolHalftone),
+        ),
       ),
     );
   }
