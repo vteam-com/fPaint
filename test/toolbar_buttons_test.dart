@@ -14,6 +14,11 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const int _testImageDimension = 12;
+const double _narrowToolbarWidth = 170.0;
+const double _wideToolbarWidth = 720.0;
+const double _wideToolbarDistributedGapLowerBound = AppLayout.toolbarButtonSize + AppSpacing.large;
+const double _wideToolbarPrimaryGroupGapLowerBound = AppSpacing.large;
+const double _wideToolbarHistorySelectorGroupGapLowerBound = AppSpacing.large;
 
 Future<ui.Image> _createTestImage() async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -60,6 +65,22 @@ void main() {
     );
   }
 
+  Widget shellTopBarUnderTest({required final double width}) {
+    return ChangeNotifierProvider<ShellProvider>.value(
+      value: shellProvider,
+      child: ChangeNotifierProvider<AppProvider>.value(
+        value: appProvider,
+        child: SizedBox(
+          width: width,
+          child: ShellTopBar(
+            appProvider: appProvider,
+            shellProvider: shellProvider,
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> pumpFloatingButtons(
     final WidgetTester tester, {
     final bool? isSmall,
@@ -75,6 +96,35 @@ void main() {
     await tester.pumpWidget(
       buildTestWidget(
         child: fabUnderTest(),
+      ),
+    );
+    await tester.pump();
+  }
+
+  Future<void> pumpShellTopBar(
+    final WidgetTester tester, {
+    required final double width,
+    final bool? isSmall,
+    final bool? showMenu,
+  }) async {
+    if (isSmall != null) {
+      shellProvider.deviceSizeSmall = isSmall;
+    }
+    if (showMenu != null) {
+      shellProvider.showMenu = showMenu;
+    }
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(size: Size(width, AppLayout.toolbarButtonSize)),
+          child: Localizations(
+            locale: const Locale('en'),
+            delegates: AppLocalizations.localizationsDelegates,
+            child: shellTopBarUnderTest(width: width),
+          ),
+        ),
       ),
     );
     await tester.pump();
@@ -618,6 +668,59 @@ void main() {
 
       expect(undoX, lessThan(selectorX));
       expect(redoX, lessThan(selectorX));
+    });
+  });
+
+  group('ShellTopBar - responsive width', () {
+    testWidgets('keeps first last and important actions when width is narrow', (final WidgetTester tester) async {
+      await pumpShellTopBar(
+        tester,
+        width: _narrowToolbarWidth,
+        isSmall: true,
+        showMenu: false,
+      );
+
+      expect(find.byKey(Keys.floatActionMenuToggle), findsOneWidget);
+      expect(find.byKey(Keys.floatActionToggle), findsNothing);
+      expect(find.byKey(Keys.mainMenuButton), findsOneWidget);
+      expect(find.byKey(Keys.floatActionUndo), findsOneWidget);
+      expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
+      expect(find.byKey(Keys.sidePanelExportButton), findsNothing);
+    });
+
+    testWidgets('restores lower-priority actions on wider desktop widths', (final WidgetTester tester) async {
+      await pumpShellTopBar(
+        tester,
+        width: _wideToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
+      expect(find.byKey(Keys.mainMenuButton), findsOneWidget);
+      expect(find.byKey(Keys.floatActionRedo), findsOneWidget);
+      expect(find.byKey(Keys.sidePanelExportButton), findsOneWidget);
+      expect(find.byKey(Keys.floatActionZoomOut), findsOneWidget);
+
+      final Finder flipVerticalIconFinder = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.flipVertical,
+      );
+      final Finder exportIconFinder = find.byKey(Keys.sidePanelExportButton);
+      final Finder rotateIconFinder = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.rotate90DegreesCw,
+      );
+      final double redoX = tester.getCenter(find.byKey(Keys.floatActionRedo)).dx;
+      final double selectorX = tester.getCenter(find.byKey(Keys.floatActionSelector)).dx;
+      final double flipVerticalX = tester.getCenter(flipVerticalIconFinder).dx;
+      final double undoX = tester.getCenter(find.byKey(Keys.floatActionUndo)).dx;
+      final double exportX = tester.getCenter(exportIconFinder).dx;
+      final double rotateX = tester.getCenter(rotateIconFinder).dx;
+
+      expect(flipVerticalIconFinder, findsOneWidget);
+      expect(rotateIconFinder, findsOneWidget);
+      expect(undoX - flipVerticalX, greaterThan(_wideToolbarDistributedGapLowerBound));
+      expect(rotateX - exportX, greaterThan(_wideToolbarPrimaryGroupGapLowerBound));
+      expect(selectorX - redoX, greaterThan(_wideToolbarHistorySelectorGroupGapLowerBound));
     });
   });
 
