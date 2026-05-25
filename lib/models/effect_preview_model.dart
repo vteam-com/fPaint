@@ -24,6 +24,9 @@ class EffectPreviewModel extends VisibleModel {
   /// Current intensity used for the live preview.
   double strength = AppEffects.defaultIntensity;
 
+  /// Current size setting used for effects that expose a size control.
+  double size = AppEffects.minSize;
+
   /// Starts preview state for [selectedEffect] over [selectionBounds].
   void start({
     required final SelectionEffect selectedEffect,
@@ -31,6 +34,7 @@ class EffectPreviewModel extends VisibleModel {
     required final ui.Path selectionPath,
     required final ui.Rect selectionBounds,
     required final double initialStrength,
+    required final double initialSize,
   }) {
     effect = selectedEffect;
     sourceImage = selectionImage;
@@ -38,6 +42,7 @@ class EffectPreviewModel extends VisibleModel {
     erasePath = selectionPath;
     bounds = selectionBounds;
     strength = initialStrength;
+    size = initialSize;
     isVisible = true;
   }
 
@@ -49,6 +54,7 @@ class EffectPreviewModel extends VisibleModel {
     erasePath = null;
     bounds = null;
     strength = AppEffects.defaultIntensity;
+    size = AppEffects.minSize;
     super.clear();
   }
 }

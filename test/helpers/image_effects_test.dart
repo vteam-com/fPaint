@@ -1,3 +1,5 @@
+import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -21,6 +23,29 @@ Future<ui.Image> _createTestImage({
     Paint()..color = color,
   );
   return recorder.endRecording().toImage(width, height);
+}
+
+Future<ui.Image> _createCheckerImage() async {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+
+  for (int y = 0; y < _testImageHeight; y++) {
+    for (int x = 0; x < _testImageWidth; x++) {
+      final bool isEvenSquare = ((x ~/ AppMath.pair) + (y ~/ AppMath.pair)).isEven;
+      canvas.drawRect(
+        Rect.fromLTWH(x.toDouble(), y.toDouble(), 1, 1),
+        Paint()..color = isEvenSquare ? Colors.white : Colors.black,
+      );
+    }
+  }
+
+  return recorder.endRecording().toImage(_testImageWidth, _testImageHeight);
+}
+
+Future<Uint8List> _imageBytes(final ui.Image image) async {
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+  expect(byteData, isNotNull);
+  return byteData!.buffer.asUint8List();
 }
 
 void main() {
@@ -84,6 +109,22 @@ void main() {
       );
       expect(result.width, original.width);
       expect(result.height, original.height);
+    });
+
+    test('size changes the pixel block size', () async {
+      final ui.Image original = await _createCheckerImage();
+      final ui.Image fineResult = await applyPixelate(
+        original,
+        strength: AppEffects.maxIntensity,
+        size: AppEffects.minSize,
+      );
+      final ui.Image coarseResult = await applyPixelate(
+        original,
+        strength: AppEffects.maxIntensity,
+        size: AppEffects.maxSize,
+      );
+
+      expect(await _imageBytes(fineResult), isNot(equals(await _imageBytes(coarseResult))));
     });
   });
 
@@ -168,6 +209,24 @@ void main() {
       );
       expect(result.width, original.width);
       expect(result.height, original.height);
+    });
+
+    test('size changes the noise grain', () async {
+      final ui.Image original = await _createTestImage(color: Colors.grey);
+      final ui.Image fineResult = await applyNoise(
+        original,
+        strength: AppEffects.maxIntensity,
+        size: AppEffects.minSize,
+        random: Random(7),
+      );
+      final ui.Image coarseResult = await applyNoise(
+        original,
+        strength: AppEffects.maxIntensity,
+        size: AppEffects.maxSize,
+        random: Random(7),
+      );
+
+      expect(await _imageBytes(fineResult), isNot(equals(await _imageBytes(coarseResult))));
     });
   });
 

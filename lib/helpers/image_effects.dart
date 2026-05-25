@@ -42,17 +42,21 @@ Future<ui.Image> applyGaussianBlur(
 ///
 /// [strength] blends the pixelated result over the original: 0.0 = unchanged,
 /// 1.0 = fully pixelated.
+///
+/// [size] controls the block size of the pixelation.
 Future<ui.Image> applyPixelate(
   final ui.Image image, {
   final double strength = AppEffects.defaultIntensity,
+  final double size = AppEffects.pixelateDefaultSize,
 }) async {
   if (strength <= AppEffects.minIntensity) {
     return image;
   }
   final int w = image.width;
   final int h = image.height;
-  final int smallW = max(1, w ~/ AppEffects.pixelateBlockSize);
-  final int smallH = max(1, h ~/ AppEffects.pixelateBlockSize);
+  final int blockSize = _resolvePixelateBlockSize(size);
+  final int smallW = max(1, w ~/ blockSize);
+  final int smallH = max(1, h ~/ blockSize);
 
   // Downscale.
   final ui.PictureRecorder downRecorder = ui.PictureRecorder();
@@ -209,29 +213,48 @@ Future<ui.Image> applySharpen(
 ///
 /// [strength] scales the noise amplitude: 0.0 = no noise,
 /// 1.0 = full authored noise range.
+///
+/// [size] controls the grain size of the noise.
 Future<ui.Image> applyNoise(
   final ui.Image image, {
   final double strength = AppEffects.defaultIntensity,
+  final double size = AppEffects.noiseDefaultSize,
+  final Random? random,
 }) async {
   if (strength <= AppEffects.minIntensity) {
     return image;
   }
   final int effectiveRange = max(1, (AppEffects.noiseRange * strength).round());
   final int effectiveOffset = effectiveRange ~/ 2;
+  final int cellSize = _resolveNoiseCellSize(size);
   final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
   if (byteData == null) {
     return image;
   }
 
   final Uint8List pixels = byteData.buffer.asUint8List();
-  final Random rng = Random();
+  final Random rng = random ?? Random();
 
-  for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
-    for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
-      final int noise = rng.nextInt(effectiveRange) - effectiveOffset;
-      pixels[i + c] = (pixels[i + c] + noise).clamp(0, AppLimits.rgbChannelMax);
+  for (int y = 0; y < image.height; y += cellSize) {
+    final int cellHeight = min(cellSize, image.height - y);
+    for (int x = 0; x < image.width; x += cellSize) {
+      final int cellWidth = min(cellSize, image.width - x);
+      final List<int> channelNoise = <int>[
+        rng.nextInt(effectiveRange) - effectiveOffset,
+        rng.nextInt(effectiveRange) - effectiveOffset,
+        rng.nextInt(effectiveRange) - effectiveOffset,
+      ];
+
+      for (int yOffset = 0; yOffset < cellHeight; yOffset++) {
+        final int rowStart = ((y + yOffset) * image.width + x) * AppMath.bytesPerPixel;
+        for (int xOffset = 0; xOffset < cellWidth; xOffset++) {
+          final int pixelIndex = rowStart + (xOffset * AppMath.bytesPerPixel);
+          for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
+            pixels[pixelIndex + c] = (pixels[pixelIndex + c] + channelNoise[c]).clamp(0, AppLimits.rgbChannelMax);
+          }
+        }
+      }
     }
-    // alpha channel left unchanged
   }
 
   final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(pixels);
@@ -244,6 +267,18 @@ Future<ui.Image> applyNoise(
   final ui.Codec codec = await descriptor.instantiateCodec();
   final ui.FrameInfo frame = await codec.getNextFrame();
   return frame.image;
+}
+
+int _resolvePixelateBlockSize(final double size) {
+  final double clampedSize = size.clamp(AppEffects.minSize, AppEffects.maxSize);
+  final double blockSpan = (AppEffects.pixelateMaxBlockSize - AppEffects.pixelateMinBlockSize).toDouble();
+  return AppEffects.pixelateMinBlockSize + (blockSpan * clampedSize).round();
+}
+
+int _resolveNoiseCellSize(final double size) {
+  final double clampedSize = size.clamp(AppEffects.minSize, AppEffects.maxSize);
+  final double cellSpan = (AppEffects.noiseMaxCellSize - AppEffects.noiseMinCellSize).toDouble();
+  return AppEffects.noiseMinCellSize + (cellSpan * clampedSize).round();
 }
 
 /// Applies a vignette effect — darkening the edges while keeping the center bright.

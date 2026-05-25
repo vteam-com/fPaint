@@ -482,6 +482,12 @@ abstract class AppLocalizations {
   /// **'Pixelate'**
   String get effectPixelate;
 
+  /// No description provided for @effectSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get effectSize;
+
   /// No description provided for @effects.
   ///
   /// In en, this message translates to:

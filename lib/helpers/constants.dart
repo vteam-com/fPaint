@@ -492,11 +492,30 @@ class AppEffects {
   /// Downscale factor for the pixelation effect (pixels are grouped into blocks).
   static const int pixelateBlockSize = 8;
 
+  /// Minimum block size exposed by the pixelation size slider.
+  static const int pixelateMinBlockSize = 2;
+
+  /// Maximum block size exposed by the pixelation size slider.
+  static const int pixelateMaxBlockSize = 100;
+
+  /// Default UI size value for pixelation, mapped to the authored block size.
+  static const double pixelateDefaultSize =
+      (pixelateBlockSize - pixelateMinBlockSize) / (pixelateMaxBlockSize - pixelateMinBlockSize);
+
   /// Total range of random noise values added to each channel.
   static const int noiseRange = 51;
 
   /// Offset subtracted from the random noise to center it around zero.
   static const int noiseOffset = 25;
+
+  /// Minimum noise grain size exposed by the size slider.
+  static const int noiseMinCellSize = 1;
+
+  /// Maximum noise grain size exposed by the size slider.
+  static const int noiseMaxCellSize = 12;
+
+  /// Default UI size value for noise, mapped to the previous per-pixel grain.
+  static const double noiseDefaultSize = 0.0;
 
   /// Number of color channels processed (R, G, B — alpha is preserved).
   static const int rgbChannelCount = 3;
@@ -538,6 +557,12 @@ class AppEffects {
   ///
   /// UI range is 0.0-1.0, where 0.5 maps to the previously authored full strength.
   static const double defaultIntensity = 0.5;
+
+  /// Minimum effect size slider value.
+  static const double minSize = 0.0;
+
+  /// Maximum effect size slider value.
+  static const double maxSize = 1.0;
 
   /// Minimum effect intensity (no visible change).
   static const double minIntensity = 0.0;
@@ -643,6 +668,8 @@ class Keys {
   static const Key effectIntensityCancelButton = Key('effect-intensity-cancel-button');
   static const Key effectIntensitySlider = Key('effect-intensity-slider');
   static const Key effectIntensityDialogSlider = Key('effect-intensity-dialog-slider');
+  static const Key effectSizeSlider = Key('effect-size-slider');
+  static const Key effectSizeDialogSlider = Key('effect-size-dialog-slider');
 
   static const Key toolBrushSizeTool = Key('tool-brush-size-tool');
   static const Key toolBrushSizeButton = Key('tool-brush-size-button');

@@ -101,6 +101,7 @@
   "effects": "Effects",
   "effectShadow": "Shadow",
   "effectSharpen": "Sharpen",
+  "effectSize": "Size",
   "effectSoften": "Edge Soften",
   "effectVignette": "Vignette",
   "enterYourTextHere": "Enter your text here...",

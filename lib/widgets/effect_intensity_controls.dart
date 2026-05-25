@@ -8,10 +8,11 @@ import 'package:fpaint/widgets/app_button_row.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_slider.dart';
 
-/// Shared intensity slider and Apply/Cancel controls for an active effect preview.
+/// Shared effect sliders and Apply/Cancel controls for an active effect preview.
 ///
 /// Displays the selected effect's icon and name as a header, then an intensity
-/// slider that drives a live canvas preview, followed by Apply and Cancel buttons.
+/// slider that drives a live canvas preview. Pixelate and noise also expose a
+/// size slider, followed by Apply and Cancel buttons.
 ///
 /// Used by both the side panel ([_EffectsSection] in tools_panel.dart) and the
 /// bottom sheet shown on tablet or when the side panel is collapsed.
@@ -47,12 +48,13 @@ class EffectIntensityControls extends StatefulWidget {
 }
 
 class _EffectIntensityControlsState extends State<EffectIntensityControls> {
+  late double _size;
   late double _strength;
-
   @override
   void initState() {
     super.initState();
     _strength = widget.appProvider.effectPreviewModel.strength;
+    _size = widget.appProvider.effectPreviewModel.size;
   }
 
   @override
@@ -81,6 +83,21 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
               await widget.appProvider.updateEffectPreviewStrength(value);
             },
           ),
+          if (effect.supportsSizeControl)
+            AppSlider(
+              key: widget.sliderKey == Keys.effectIntensityDialogSlider
+                  ? Keys.effectSizeDialogSlider
+                  : Keys.effectSizeSlider,
+              label: widget.l10n.effectSize,
+              value: _size,
+              valueLabel: '${effect.sizeValue(_size)}',
+              min: AppEffects.minSize,
+              max: AppEffects.maxSize,
+              onChanged: (final double value) async {
+                setState(() => _size = value);
+                await widget.appProvider.updateEffectPreviewSize(value);
+              },
+            ),
           AppButtonRow(
             actions: <Widget>[
               AppRowSecondaryButton(
