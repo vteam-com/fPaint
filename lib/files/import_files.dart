@@ -28,6 +28,7 @@ const String _fileExtensionWebp = 'webp';
 const String _fileExtensionJpg = 'jpg';
 const String _fileExtensionJpeg = 'jpeg';
 const String _fileExtensionHeic = 'heic';
+const String _fileExtensionAvif = 'avif';
 const String _loadedImageDefaultName = 'Loaded Image';
 
 final Logger _log = Logger(logNameImportFiles);
@@ -165,9 +166,17 @@ Future<void> onFileOpen(final BuildContext context) async {
         } else if (extension == _fileExtensionTif || extension == _fileExtensionTiff) {
           // Assuming readTiffFileFromBytes handles its own clearing and sizing or needs similar refactor
           await readTiffFileFromBytes(layers, bytes);
-        } else if (extension == _fileExtensionHeic) {
-          // ignore: use_build_context_synchronously
-          await _readHeicFromBytes(layers, bytes, context, imageName: fileName);
+        } else if (extension == _fileExtensionHeic || extension == _fileExtensionAvif) {
+          if (!context.mounted) {
+            return;
+          }
+          await _readHeifFromBytes(
+            layers,
+            bytes,
+            context,
+            extension: extension,
+            imageName: fileName,
+          );
         } else if (isFileExtensionSupported(extension)) {
           // Pass context and filename
           // ignore: use_build_context_synchronously
@@ -228,9 +237,15 @@ Future<bool> openFileFromPath({
       } else if (extension == _fileExtensionTif || extension == _fileExtensionTiff) {
         await readTiffFromFilePath(layers, path);
         return true;
-      } else if (extension == _fileExtensionHeic) {
+      } else if (extension == _fileExtensionHeic || extension == _fileExtensionAvif) {
         final String fileName = path.split(Platform.pathSeparator).last;
-        return await _readHeicFromFilePath(layers, path, context, imageName: fileName);
+        return await _readHeifFromFilePath(
+          layers,
+          path,
+          context,
+          extension: extension,
+          imageName: fileName,
+        );
       } else {
         final String fileName = path.split(Platform.pathSeparator).last;
         return await readImageFromFilePath(layers, path, context, imageName: fileName);
@@ -260,6 +275,7 @@ final List<String> supportedImageFileExtensions = <String>[
   _fileExtensionJpg,
   _fileExtensionJpeg,
   _fileExtensionHeic,
+  _fileExtensionAvif,
 ];
 
 /// Checks if the given file extension is supported.
@@ -333,12 +349,13 @@ Future<bool> readImageFileFromBytes(
   return await _decodeAndApplyImage(layers, bytes, context, imageName: imageName);
 }
 
-/// Reads a HEIC file from disk, decodes it via the platform-specific decoder,
-/// and applies the result to [layers].
-Future<bool> _readHeicFromFilePath(
+/// Reads a HEIF-family file from disk, decodes it via the platform-specific
+/// decoder, and applies the result to [layers].
+Future<bool> _readHeifFromFilePath(
   final LayersProvider layers,
   final String path,
   final BuildContext context, {
+  required final String extension,
   final String imageName = _loadedImageDefaultName,
 }) async {
   try {
@@ -348,7 +365,7 @@ Future<bool> _readHeicFromFilePath(
     return await _decodeAndApplyImage(layers, decodableBytes, context, imageName: imageName);
   } on HeicConversionException {
     // ignore: use_build_context_synchronously
-    _showImportFeedback(context, context.l10n.fileFormatNotSupportedOnPlatform(_fileExtensionHeic));
+    _showImportFeedback(context, context.l10n.fileFormatNotSupportedOnPlatform(extension));
     return false;
   } catch (e) {
     // ignore: use_build_context_synchronously
@@ -357,12 +374,13 @@ Future<bool> _readHeicFromFilePath(
   }
 }
 
-/// Reads a HEIC image from bytes, decodes it via the platform-specific decoder,
-/// and applies the result to [layers].
-Future<bool> _readHeicFromBytes(
+/// Reads a HEIF-family image from bytes, decodes it via the platform-specific
+/// decoder, and applies the result to [layers].
+Future<bool> _readHeifFromBytes(
   final LayersProvider layers,
   final Uint8List bytes,
   final BuildContext context, {
+  required final String extension,
   final String imageName = _loadedImageDefaultName,
 }) async {
   try {
@@ -371,7 +389,7 @@ Future<bool> _readHeicFromBytes(
     return await _decodeAndApplyImage(layers, decodableBytes, context, imageName: imageName);
   } on HeicConversionException {
     // ignore: use_build_context_synchronously
-    _showImportFeedback(context, context.l10n.fileFormatNotSupportedOnPlatform(_fileExtensionHeic));
+    _showImportFeedback(context, context.l10n.fileFormatNotSupportedOnPlatform(extension));
     return false;
   }
 }

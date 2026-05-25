@@ -9,6 +9,9 @@ import 'package:fpaint/files/import_files.dart';
 /// Path to the HEIC test asset relative to the project root.
 const String _testHeicPath = 'assets/test/test.heic';
 
+/// Path to the AVIF test asset relative to the project root.
+const String _testAvifPath = 'assets/test/test.avif';
+
 /// ISO base media file format box type identifier (ASCII "ftyp").
 const int _ftypByte0 = 0x66; // 'f'
 const int _ftypByte1 = 0x74; // 't'
@@ -27,6 +30,9 @@ const int _majorBrandLength = 4;
 /// Known HEIC/HEIF major brands that identify the file as HEIC-compatible.
 const List<String> _heicBrands = <String>['heic', 'heix', 'hevc', 'mif1'];
 
+/// Known AVIF major brands that identify the file as AVIF-compatible.
+const List<String> _avifBrands = <String>['avif', 'avis'];
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -41,6 +47,7 @@ void main() {
         expect(isFileExtensionSupported('tiff'), isTrue);
         expect(isFileExtensionSupported('webp'), isTrue);
         expect(isFileExtensionSupported('heic'), isTrue);
+        expect(isFileExtensionSupported('avif'), isTrue);
       });
 
       test('returns true for uppercase extensions', () {
@@ -48,11 +55,13 @@ void main() {
         expect(isFileExtensionSupported('JPG'), isTrue);
         expect(isFileExtensionSupported('ORA'), isTrue);
         expect(isFileExtensionSupported('TIF'), isTrue);
+        expect(isFileExtensionSupported('AVIF'), isTrue);
       });
 
       test('returns true for mixed case extensions', () {
         expect(isFileExtensionSupported('JpG'), isTrue);
         expect(isFileExtensionSupported('TiFf'), isTrue);
+        expect(isFileExtensionSupported('AvIf'), isTrue);
       });
 
       test('returns false for unsupported extensions', () {
@@ -92,7 +101,7 @@ void main() {
         expect(bytes[_ftypBoxTypeOffset + 3], _ftypByte3);
       });
 
-      test('test.heic has a recognised HEIC major brand', () async {
+      test('test.heic has a recognized HEIC major brand', () async {
         final Uint8List bytes = await File(_testHeicPath).readAsBytes();
 
         final String majorBrand = String.fromCharCodes(
@@ -110,6 +119,52 @@ void main() {
         'test.heic can be decoded by the import pipeline',
         () async {
           final Uint8List bytes = await File(_testHeicPath).readAsBytes();
+          final Uint8List decodableBytes = await decodeHeicBytes(bytes);
+          final ui.Codec codec = await ui.instantiateImageCodec(decodableBytes);
+          final ui.FrameInfo frameInfo = await codec.getNextFrame();
+          final ui.Image image = frameInfo.image;
+
+          expect(image.width, greaterThan(0));
+          expect(image.height, greaterThan(0));
+          image.dispose();
+        },
+        skip: !Platform.isMacOS && !Platform.isIOS && !Platform.isAndroid,
+      );
+    });
+
+    group('AVIF file import', () {
+      test('test.avif asset exists', () {
+        final File file = File(_testAvifPath);
+        expect(file.existsSync(), isTrue);
+      });
+
+      test('test.avif has valid ftyp box header', () async {
+        final Uint8List bytes = await File(_testAvifPath).readAsBytes();
+
+        expect(bytes[_ftypBoxTypeOffset], _ftypByte0);
+        expect(bytes[_ftypBoxTypeOffset + 1], _ftypByte1);
+        expect(bytes[_ftypBoxTypeOffset + 2], _ftypByte2);
+        expect(bytes[_ftypBoxTypeOffset + 3], _ftypByte3);
+      });
+
+      test('test.avif has a recognised AVIF major brand', () async {
+        final Uint8List bytes = await File(_testAvifPath).readAsBytes();
+
+        final String majorBrand = String.fromCharCodes(
+          bytes.sublist(_majorBrandOffset, _majorBrandOffset + _majorBrandLength),
+        );
+
+        expect(
+          _avifBrands.contains(majorBrand),
+          isTrue,
+          reason: 'Major brand "$majorBrand" is not a known AVIF brand',
+        );
+      });
+
+      test(
+        'test.avif can be decoded by the import pipeline',
+        () async {
+          final Uint8List bytes = await File(_testAvifPath).readAsBytes();
           final Uint8List decodableBytes = await decodeHeicBytes(bytes);
           final ui.Codec codec = await ui.instantiateImageCodec(decodableBytes);
           final ui.FrameInfo frameInfo = await codec.getNextFrame();
