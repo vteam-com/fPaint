@@ -21,6 +21,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const int _testImageDimension = 12;
 const double _geometryEpsilon = 0.001;
 const Duration _modifyModePreparationDuration = Duration(seconds: 1);
+const Duration _snackBarDismissDuration = Duration(seconds: 4);
 const Size _desktopTestViewSize = Size(1600, 900);
 
 Future<ui.Image> _createTestImage() async {
@@ -165,6 +166,41 @@ void main() {
     expect(find.byType(SelectionRectWidget), findsNothing);
     expect(find.byType(SidePanel), findsOneWidget);
     expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
+  });
+
+  testWidgets('shows the target layer in a snackbar after confirming a duplicate', (
+    final WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = _desktopTestViewSize;
+
+    appProvider.selectAll();
+    await appProvider.regionDuplicateSameLayer();
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    final BuildContext context = tester.element(find.byType(MainView));
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final String selectedLayerName = appProvider.layers.selectedLayer.name;
+    final TransformWidget transformWidget = tester.widget<TransformWidget>(find.byType(TransformWidget));
+
+    transformWidget.onConfirm();
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text(l10n.duplicatedOnLayer(selectedLayerName)), findsOneWidget);
+
+    await tester.pump(_snackBarDismissDuration);
+    await tester.pump();
   });
 
   testWidgets('keeps side panel visible when pasting an image from the clipboard', (

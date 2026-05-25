@@ -11,9 +11,11 @@ class AppDialog extends StatelessWidget {
     this.titleIcon,
     this.content,
     this.actions,
+    this.maxWidth = AppLayout.dialogWidth,
   });
   final List<Widget>? actions;
   final Widget? content;
+  final double maxWidth;
 
   /// The dialog title displayed as bold text.
   final String? title;
@@ -24,7 +26,7 @@ class AppDialog extends StatelessWidget {
   Widget build(final BuildContext context) {
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: AppLayout.dialogWidth),
+        constraints: BoxConstraints(maxWidth: maxWidth),
         child: AppOverlaySurface(
           borderRadius: BorderRadius.circular(AppRadius.medium),
           child: Padding(

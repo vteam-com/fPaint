@@ -428,11 +428,11 @@ abstract class AppLocalizations {
   /// **'Duplicate'**
   String get duplicate;
 
-  /// No description provided for @duplicated.
+  /// No description provided for @duplicatedOnLayer.
   ///
   /// In en, this message translates to:
-  /// **'Duplicated'**
-  String get duplicated;
+  /// **'Duplicated on {layerName}'**
+  String duplicatedOnLayer(Object layerName);
 
   /// No description provided for @editText.
   ///

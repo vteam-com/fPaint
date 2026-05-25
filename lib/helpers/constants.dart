@@ -169,6 +169,11 @@ class AppLayout {
   static const double integrationTestTabletLandscapeHeight = 800.0;
   static const double thumbnailMaxHeight = 64.0;
   static const double shortcutGroupWidth = 250.0;
+  static const double shortcutDialogMaxWidth = 760.0;
+  static const double shortcutHelpTwoColumnBreakpoint = 640.0;
+  static const double shortcutHelpRowStackBreakpoint = 360.0;
+  static const int shortcutHelpInlineKeyMaxCharacters = 18;
+  static const double shortcutHelpReadableTextMinWidth = 120.0;
   static const double separatorHeight = 15.0;
   static const double inputFieldWidth = 150.0;
   static const double gradientStopPositionFieldWidth = 52.0;

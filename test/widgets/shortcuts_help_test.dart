@@ -1,20 +1,37 @@
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_dialog.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:fpaint/widgets/shortcuts_help.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  Widget buildTestWidget() {
+  final bool isApplePlatform =
+      defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+  final String duplicateShortcutLabel = '${isApplePlatform ? 'Cmd' : 'Ctrl'} D';
+  final String duplicateNewLayerShortcutLabel = '${isApplePlatform ? 'Cmd' : 'Ctrl'} Shift D';
+  final String duplicateMoveShortcutLabel = '${isApplePlatform ? 'Option' : 'Ctrl'} + Drag Selection';
+  final String duplicateMoveNewLayerShortcutLabel = 'Shift + ${isApplePlatform ? 'Option' : 'Ctrl'} + Drag Selection';
+  const String duplicateSameLayerDescription = 'Duplicate in Same Layer';
+  const String duplicateNewLayerDescription = 'Duplicate on New Layer';
+
+  LogicalKeyboardKey duplicateShortcutModifierKey() {
+    return isApplePlatform ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft;
+  }
+
+  Widget buildTestWidget({final Size size = const Size(1200, 900)}) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
-        data: const MediaQueryData(),
+        data: MediaQueryData(size: size),
         child: Localizations(
           locale: const Locale('en'),
           delegates: AppLocalizations.localizationsDelegates,
@@ -173,6 +190,34 @@ void main() {
       expect(find.text('Ctrl /, F1'), findsOneWidget);
       expect(find.text('Keyboard Shortcuts'), findsAtLeastNWidgets(2));
     });
+
+    testWidgets('shows same-layer and new-layer duplicate shortcut entries', (final WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+
+      expect(find.text(duplicateShortcutLabel), findsOneWidget);
+      expect(find.text(duplicateNewLayerShortcutLabel), findsOneWidget);
+      expect(find.text(duplicateMoveShortcutLabel), findsOneWidget);
+      expect(find.text(duplicateMoveNewLayerShortcutLabel), findsOneWidget);
+      expect(find.text(duplicateSameLayerDescription), findsNWidgets(2));
+      expect(find.text(duplicateNewLayerDescription), findsNWidgets(2));
+    });
+
+    testWidgets('uses a wider adaptive dialog on large screens', (final WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget(size: const Size(1400, 900)));
+      await tester.pump();
+
+      final Size dialogSize = tester.getSize(find.byType(AppDialog));
+      expect(dialogSize.width, greaterThan(AppLayout.dialogWidth));
+    });
+
+    testWidgets('keeps long shortcut descriptions readable on phone-sized screens', (final WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget(size: const Size(360, 800)));
+      await tester.pump();
+
+      final Size descriptionSize = tester.getSize(find.text(duplicateSameLayerDescription).first);
+      expect(descriptionSize.width, greaterThan(AppLayout.shortcutHelpReadableTextMinWidth));
+    });
   });
 
   group('shortCutsForMainApp', () {
@@ -195,6 +240,62 @@ void main() {
       await tester.pump();
 
       expect(find.byType(ShortcutsHelpDialog), findsOneWidget);
+    });
+
+    testWidgets('Cmd/Ctrl+D starts a same-layer duplicate transform', (final WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+      final ShellProvider shellProvider = ShellProvider();
+      appProvider.selectAll();
+
+      await tester.pumpWidget(
+        buildShortcutHandlerTestWidget(
+          appProvider: appProvider,
+          shellProvider: shellProvider,
+        ),
+      );
+      await tester.pump();
+
+      final LogicalKeyboardKey modifierKey = duplicateShortcutModifierKey();
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyD);
+      await tester.sendKeyUpEvent(modifierKey);
+      await tester.pumpAndSettle();
+
+      expect(appProvider.transformModel.isVisible, isTrue);
+      expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.selectedLayer);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNotNull);
+    });
+
+    testWidgets('Shift+Cmd/Ctrl+D starts a new-layer duplicate transform', (final WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+      final ShellProvider shellProvider = ShellProvider();
+      appProvider.selectAll();
+
+      await tester.pumpWidget(
+        buildShortcutHandlerTestWidget(
+          appProvider: appProvider,
+          shellProvider: shellProvider,
+        ),
+      );
+      await tester.pump();
+
+      final LogicalKeyboardKey modifierKey = duplicateShortcutModifierKey();
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyD);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyUpEvent(modifierKey);
+      await tester.pumpAndSettle();
+
+      expect(appProvider.transformModel.isVisible, isTrue);
+      expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.newLayer);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
     });
   });
 }

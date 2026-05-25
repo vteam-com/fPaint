@@ -2,18 +2,19 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
+import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/app_bottom_sheet.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/canvas_panel.dart';
 import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
+import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/text_editor.dart';
 import 'package:fpaint/widgets/transform_widget.dart';
@@ -126,6 +127,12 @@ class MainViewState extends State<MainView> {
                     appProvider.selectorModel.translate(offset / appProvider.layers.scale);
                     appProvider.update();
                   },
+                  onDuplicateMove: (final Offset offset, final bool duplicateOnNewLayer) async {
+                    await appProvider.regionDuplicateMove(
+                      offset / appProvider.layers.scale,
+                      onNewLayer: duplicateOnNewLayer,
+                    );
+                  },
                   onScale: (final double factor) {
                     appProvider.selectorModel.scaleUniform(factor);
                     appProvider.update();
@@ -195,7 +202,18 @@ class MainViewState extends State<MainView> {
                   canvasOffset: appProvider.canvasOffset,
                   canvasScale: appProvider.layers.scale,
                   onChanged: () => appProvider.update(),
-                  onConfirm: () => appProvider.confirmTransform(),
+                  onConfirm: () async {
+                    final TransformSessionSource source = appProvider.transformModel.source;
+                    await appProvider.confirmTransform();
+                    if (!mounted || source != TransformSessionSource.duplicateSelection) {
+                      return;
+                    }
+                    final String targetLayerName = appProvider.layers.selectedLayer.name;
+                    final String duplicateMessage = AppLocalizations.of(this.context)!.duplicatedOnLayer(
+                      targetLayerName,
+                    );
+                    showSnackBarIfMounted(this.context, duplicateMessage);
+                  },
                   onCancel: () => appProvider.cancelTransform(),
                 ),
             ],
