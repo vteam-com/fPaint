@@ -41,8 +41,8 @@ class AppPreferences extends ChangeNotifier {
   static const String keyRecentFiles = 'keyRecentFiles';
   static const String keyRecentFileBookmarks = 'keyRecentFileBookmarks';
 
-  /// Separator used between path and bookmark data in stored pairs.
-  static const String _bookmarkSeparator = '\x00';
+  /// Legacy separator used by the previous path+bookmark serialized format.
+  static const String _legacyBookmarkSeparator = '\x00';
 
   // Default values
   double _sidePanelDistance = AppLayout.sidePanelTopDefault;
@@ -177,17 +177,15 @@ class AppPreferences extends ChangeNotifier {
     if (_recentFiles.length > AppLimits.maxRecentFiles) {
       _recentFiles = _recentFiles.sublist(0, AppLimits.maxRecentFiles);
     }
+    _pruneRecentFileBookmarks();
     final SharedPreferences prefs = await getPref();
     await prefs.setStringList(keyRecentFiles, _recentFiles);
     // Store a security-scoped bookmark for macOS sandbox support.
     final String? bookmark = await MacOsBookmarkService.createBookmark(path);
     if (bookmark != null) {
       _recentFileBookmarks[path] = bookmark;
-      final List<String> bookmarkPairs = _recentFiles
-          .map((final String p) => '$p$_bookmarkSeparator${_recentFileBookmarks[p] ?? ''}')
-          .toList();
-      await prefs.setStringList(keyRecentFileBookmarks, bookmarkPairs);
     }
+    await _persistRecentFileBookmarks(prefs);
     notifyListeners();
   }
 
@@ -197,11 +195,29 @@ class AppPreferences extends ChangeNotifier {
     _recentFileBookmarks.remove(path);
     final SharedPreferences prefs = await getPref();
     await prefs.setStringList(keyRecentFiles, _recentFiles);
-    final List<String> bookmarkPairs = _recentFiles
-        .map((final String p) => '$p$_bookmarkSeparator${_recentFileBookmarks[p] ?? ''}')
-        .toList();
-    await prefs.setStringList(keyRecentFileBookmarks, bookmarkPairs);
+    await _persistRecentFileBookmarks(prefs);
     notifyListeners();
+  }
+
+  /// Removes bookmarks for files that are no longer present in the MRU list.
+  void _pruneRecentFileBookmarks() {
+    _recentFileBookmarks.removeWhere(
+      (final String path, final String _) => !_recentFiles.contains(path),
+    );
+  }
+
+  /// Persists bookmark strings in the same order as [keyRecentFiles].
+  Future<void> _persistRecentFileBookmarks(final SharedPreferences prefs) async {
+    _pruneRecentFileBookmarks();
+    if (_recentFiles.isEmpty) {
+      await prefs.remove(keyRecentFileBookmarks);
+      return;
+    }
+
+    final List<String> bookmarkEntries = _recentFiles
+        .map((final String path) => _recentFileBookmarks[path] ?? '')
+        .toList();
+    await prefs.setStringList(keyRecentFileBookmarks, bookmarkEntries);
   }
 
   /// Ensures preferences are loaded once before any persisted value is read.
@@ -256,18 +272,103 @@ class AppPreferences extends ChangeNotifier {
     _languageCode = _prefs!.getString(keyLanguageCode);
 
     _recentFiles = _prefs!.getStringList(keyRecentFiles) ?? <String>[];
-    // Load bookmarks stored as 'path\x00base64bookmark' pairs.
-    final List<String> bookmarkPairs = _prefs!.getStringList(keyRecentFileBookmarks) ?? <String>[];
-    _recentFileBookmarks = <String, String>{};
-    for (final String pair in bookmarkPairs) {
-      final int sep = pair.indexOf(_bookmarkSeparator);
-      if (sep > 0) {
-        final String p = pair.substring(0, sep);
-        final String b = pair.substring(sep + 1);
-        if (b.isNotEmpty) {
-          _recentFileBookmarks[p] = b;
-        }
-      }
+    final List<String> storedBookmarkEntries = _prefs!.getStringList(keyRecentFileBookmarks) ?? <String>[];
+    final _LoadedRecentFileBookmarks loadedRecentFileBookmarks = _loadRecentFileBookmarks(
+      recentFiles: _recentFiles,
+      storedEntries: storedBookmarkEntries,
+    );
+    _recentFileBookmarks = loadedRecentFileBookmarks.bookmarks;
+    if (loadedRecentFileBookmarks.needsResave) {
+      await _persistRecentFileBookmarks(_prefs!);
     }
   }
+
+  /// Loads bookmark entries and repairs legacy macOS-pref storage formats.
+  static _LoadedRecentFileBookmarks _loadRecentFileBookmarks({
+    required final List<String> recentFiles,
+    required final List<String> storedEntries,
+  }) {
+    final Map<String, String> bookmarks = <String, String>{};
+    final int sharedEntryCount = storedEntries.length < recentFiles.length ? storedEntries.length : recentFiles.length;
+    bool needsResave = storedEntries.length != recentFiles.length;
+
+    for (int index = 0; index < sharedEntryCount; index++) {
+      final _DecodedRecentFileBookmark decodedBookmark = _decodeStoredRecentFileBookmark(
+        entry: storedEntries[index],
+        path: recentFiles[index],
+      );
+      needsResave = needsResave || decodedBookmark.needsResave;
+      final String? bookmark = decodedBookmark.bookmark;
+      if (bookmark != null && bookmark.isNotEmpty) {
+        bookmarks[recentFiles[index]] = bookmark;
+      }
+    }
+
+    return _LoadedRecentFileBookmarks(
+      bookmarks: bookmarks,
+      needsResave: needsResave,
+    );
+  }
+
+  /// Decodes a persisted bookmark entry for a single MRU path.
+  static _DecodedRecentFileBookmark _decodeStoredRecentFileBookmark({
+    required final String entry,
+    required final String path,
+  }) {
+    if (entry.isEmpty) {
+      return const _DecodedRecentFileBookmark(
+        bookmark: null,
+        needsResave: false,
+      );
+    }
+
+    if (entry == path) {
+      return const _DecodedRecentFileBookmark(
+        bookmark: null,
+        needsResave: true,
+      );
+    }
+
+    final int separatorIndex = entry.indexOf(_legacyBookmarkSeparator);
+    if (separatorIndex >= 0) {
+      final String bookmark = entry.substring(separatorIndex + 1);
+      return _DecodedRecentFileBookmark(
+        bookmark: bookmark.isEmpty ? null : bookmark,
+        needsResave: true,
+      );
+    }
+
+    if (entry.startsWith(path)) {
+      final String bookmark = entry.substring(path.length);
+      return _DecodedRecentFileBookmark(
+        bookmark: bookmark.isEmpty ? null : bookmark,
+        needsResave: true,
+      );
+    }
+
+    return _DecodedRecentFileBookmark(
+      bookmark: entry,
+      needsResave: false,
+    );
+  }
+}
+
+class _LoadedRecentFileBookmarks {
+  const _LoadedRecentFileBookmarks({
+    required this.bookmarks,
+    required this.needsResave,
+  });
+
+  final Map<String, String> bookmarks;
+  final bool needsResave;
+}
+
+class _DecodedRecentFileBookmark {
+  const _DecodedRecentFileBookmark({
+    required this.bookmark,
+    required this.needsResave,
+  });
+
+  final String? bookmark;
+  final bool needsResave;
 }
