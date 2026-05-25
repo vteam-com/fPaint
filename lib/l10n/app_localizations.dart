@@ -326,17 +326,17 @@ abstract class AppLocalizations {
   /// **'Content Alignment'**
   String get contentAlignment;
 
-  /// No description provided for @copyToClipboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy to clipboard'**
-  String get copyToClipboard;
-
   /// No description provided for @copied.
   ///
   /// In en, this message translates to:
   /// **'Copied'**
   String get copied;
+
+  /// No description provided for @copyToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy to clipboard'**
+  String get copyToClipboard;
 
   /// No description provided for @create.
   ///
@@ -482,12 +482,6 @@ abstract class AppLocalizations {
   /// **'Pixelate'**
   String get effectPixelate;
 
-  /// No description provided for @effectSize.
-  ///
-  /// In en, this message translates to:
-  /// **'Size'**
-  String get effectSize;
-
   /// No description provided for @effects.
   ///
   /// In en, this message translates to:
@@ -505,6 +499,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sharpen'**
   String get effectSharpen;
+
+  /// No description provided for @effectSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get effectSize;
 
   /// No description provided for @effectSoften.
   ///
@@ -697,12 +697,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keyboard Shortcuts'**
   String get keyboardShortcuts;
-
-  /// No description provided for @toggleShell.
-  ///
-  /// In en, this message translates to:
-  /// **'Toggle Shell'**
-  String get toggleShell;
 
   /// No description provided for @languageEnglish.
   ///
@@ -956,12 +950,6 @@ abstract class AppLocalizations {
   /// **'Scale'**
   String get scale;
 
-  /// No description provided for @translate.
-  ///
-  /// In en, this message translates to:
-  /// **'Translate'**
-  String get translate;
-
   /// No description provided for @selectionIsHidden.
   ///
   /// In en, this message translates to:
@@ -1016,6 +1004,12 @@ abstract class AppLocalizations {
   /// **'Text Color'**
   String get textColor;
 
+  /// No description provided for @toggleShell.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Shell'**
+  String get toggleShell;
+
   /// No description provided for @tolerance.
   ///
   /// In en, this message translates to:
@@ -1057,6 +1051,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Fill'**
   String get toolFill;
+
+  /// No description provided for @toolHalftone.
+  ///
+  /// In en, this message translates to:
+  /// **'Halftone'**
+  String get toolHalftone;
 
   /// No description provided for @toolInvert.
   ///
@@ -1154,6 +1154,12 @@ abstract class AppLocalizations {
   /// **'Transform'**
   String get transform;
 
+  /// No description provided for @translate.
+  ///
+  /// In en, this message translates to:
+  /// **'Translate'**
+  String get translate;
+
   /// No description provided for @unsavedChanges.
   ///
   /// In en, this message translates to:
@@ -1191,10 +1197,6 @@ abstract class AppLocalizations {
   String get width;
 }
 
-extension AppLocalizationsBuildContext on BuildContext {
-  AppLocalizations get l10n => AppLocalizations.of(this)!;
-}
-
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
@@ -1227,4 +1229,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
     'that was used.',
   );
+}
+
+/// Shared BuildContext accessor used throughout the widget tree.
+extension AppLocalizationsBuildContextX on BuildContext {
+  AppLocalizations get l10n => AppLocalizations.of(this)!;
 }

@@ -309,6 +309,7 @@ class LayerProvider extends ChangeNotifier {
           brush: oldAction.brush,
           fillColor: oldAction.fillColor,
           gradient: oldAction.gradient,
+          halftoneFill: oldAction.halftoneFill,
           path: newPath,
           image: newImage,
           clipPath: newClipPath,
@@ -376,6 +377,7 @@ class LayerProvider extends ChangeNotifier {
           brush: oldAction.brush,
           fillColor: oldAction.fillColor,
           gradient: oldAction.gradient,
+          halftoneFill: oldAction.halftoneFill,
           path: newPath,
           image: newImage,
           clipPath: newClipPath,
@@ -707,6 +709,7 @@ class LayerProvider extends ChangeNotifier {
                 userAction.path!,
                 userAction.fillColor,
                 userAction.gradient,
+                userAction.halftoneFill,
               ),
             );
             break;

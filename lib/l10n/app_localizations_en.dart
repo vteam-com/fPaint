@@ -138,10 +138,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contentAlignment => 'Content Alignment';
 
   @override
-  String get copyToClipboard => 'Copy to clipboard';
+  String get copied => 'Copied';
 
   @override
-  String get copied => 'Copied';
+  String get copyToClipboard => 'Copy to clipboard';
 
   @override
   String get create => 'Create';
@@ -226,9 +226,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get effectPixelate => 'Pixelate';
 
   @override
-  String get effectSize => 'Size';
-
-  @override
   String get effects => 'Effects';
 
   @override
@@ -236,6 +233,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get effectSharpen => 'Sharpen';
+
+  @override
+  String get effectSize => 'Size';
 
   @override
   String get effectSoften => 'Edge Soften';
@@ -342,9 +342,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keyboardShortcuts => 'Keyboard Shortcuts';
-
-  @override
-  String get toggleShell => 'Toggle Shell';
 
   @override
   String get languageEnglish => 'English';
@@ -479,9 +476,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scale => 'Scale';
 
   @override
-  String get translate => 'Translate';
-
-  @override
   String get selectionIsHidden => 'Selection is hidden.';
 
   @override
@@ -511,6 +505,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get textColor => 'Text Color';
 
   @override
+  String get toggleShell => 'Toggle Shell';
+
+  @override
   String get tolerance => 'Tolerance';
 
   @override
@@ -530,6 +527,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toolFill => 'Fill';
+
+  @override
+  String get toolHalftone => 'Halftone';
 
   @override
   String get toolInvert => 'Invert';
@@ -580,6 +580,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get transform => 'Transform';
+
+  @override
+  String get translate => 'Translate';
 
   @override
   String get unsavedChanges => 'Unsaved Changes';

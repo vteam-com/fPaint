@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/flood_fill.dart';
 
@@ -49,6 +50,7 @@ class FillService {
     required final ui.Image sourceImage,
     required final Offset position,
     required final Color fillColor,
+    final Color? halftoneDotColor,
     required final int tolerance,
     required final Path? clipPath,
   }) async {
@@ -70,6 +72,12 @@ class FillService {
         bounds.bottomRight,
       ],
       fillColor: fillColor,
+      halftoneFill: halftoneDotColor == null
+          ? null
+          : HalftoneFill(
+              backgroundColor: AppColors.transparent,
+              dotColor: halftoneDotColor,
+            ),
       clipPath: clipPath,
     );
   }
@@ -106,39 +114,13 @@ class FillService {
       );
     }
 
-    final Gradient gradient;
     // Use the authoritative gradient stop colors and positions from the model.
     // Both lists may have more than two entries for multi-stop gradients.
-    final List<Color> gradientColors = fillModel.gradientStopColors;
-    final List<double> gradientStops = fillModel.gradientStopPositions;
-
-    if (fillModel.mode == FillMode.radial) {
-      // For radial gradients, the center is the location of the first gradient handle
-      final ui.Offset centerPoint = toCanvas(fillModel.gradientPoints.first.offset);
-
-      gradient = RadialGradient(
-        colors: gradientColors,
-        stops: gradientStops,
-        center: Alignment(
-          ((centerPoint.dx - bounds.left) / bounds.width) * AppMath.pair - 1,
-          ((centerPoint.dy - bounds.top) / bounds.height) * AppMath.pair - 1,
-        ),
-        radius: (fillModel.gradientPoints.last.offset - fillModel.gradientPoints.first.offset).distance / bounds.width,
-      );
-    } else {
-      gradient = LinearGradient(
-        colors: gradientColors,
-        stops: gradientStops,
-        begin: Alignment(
-          (toCanvas(fillModel.gradientPoints.first.offset).dx / bounds.width) * AppMath.pair - 1,
-          (toCanvas(fillModel.gradientPoints.first.offset).dy / bounds.height) * AppMath.pair - 1,
-        ),
-        end: Alignment(
-          (toCanvas(fillModel.gradientPoints.last.offset).dx / bounds.width) * AppMath.pair - 1,
-          (toCanvas(fillModel.gradientPoints.last.offset).dy / bounds.height) * AppMath.pair - 1,
-        ),
-      );
-    }
+    final Gradient gradient = _buildFloodFillGradient(
+      bounds: bounds,
+      fillModel: fillModel,
+      toCanvas: toCanvas,
+    );
 
     return UserActionDrawing(
       action: ActionType.region,
@@ -148,7 +130,50 @@ class FillService {
         bounds.bottomRight,
       ],
       gradient: gradient,
+      halftoneFill: fillModel.halftoneEnabled
+          ? HalftoneFill(
+              backgroundColor: fillModel.gradientStopColors.first,
+              dotColor: fillModel.gradientStopColors.last,
+            )
+          : null,
       clipPath: clipPath,
+    );
+  }
+
+  /// Builds the gradient geometry used by smooth and halftone flood fills.
+  Gradient _buildFloodFillGradient({
+    required final ui.Rect bounds,
+    required final FillModel fillModel,
+    required final Offset Function(Offset) toCanvas,
+  }) {
+    final List<Color> gradientColors = fillModel.gradientStopColors;
+    final List<double> gradientStops = fillModel.gradientStopPositions;
+
+    if (fillModel.mode == FillMode.radial) {
+      final ui.Offset centerPoint = toCanvas(fillModel.gradientPoints.first.offset);
+
+      return RadialGradient(
+        colors: gradientColors,
+        stops: gradientStops,
+        center: Alignment(
+          ((centerPoint.dx - bounds.left) / bounds.width) * AppMath.pair - AppVisual.full,
+          ((centerPoint.dy - bounds.top) / bounds.height) * AppMath.pair - AppVisual.full,
+        ),
+        radius: (fillModel.gradientPoints.last.offset - fillModel.gradientPoints.first.offset).distance / bounds.width,
+      );
+    }
+
+    return LinearGradient(
+      colors: gradientColors,
+      stops: gradientStops,
+      begin: Alignment(
+        (toCanvas(fillModel.gradientPoints.first.offset).dx / bounds.width) * AppMath.pair - AppVisual.full,
+        (toCanvas(fillModel.gradientPoints.first.offset).dy / bounds.height) * AppMath.pair - AppVisual.full,
+      ),
+      end: Alignment(
+        (toCanvas(fillModel.gradientPoints.last.offset).dx / bounds.width) * AppMath.pair - AppVisual.full,
+        (toCanvas(fillModel.gradientPoints.last.offset).dy / bounds.height) * AppMath.pair - AppVisual.full,
+      ),
     );
   }
 

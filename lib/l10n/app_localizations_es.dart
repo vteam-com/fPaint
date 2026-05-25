@@ -136,10 +136,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get contentAlignment => 'Alineacion del contenido';
 
   @override
-  String get copyToClipboard => 'Copiar al portapapeles';
+  String get copied => 'Copiado';
 
   @override
-  String get copied => 'Copiado';
+  String get copyToClipboard => 'Copiar al portapapeles';
 
   @override
   String get create => 'Crear';
@@ -224,9 +224,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get effectPixelate => 'Pixelar';
 
   @override
-  String get effectSize => 'Tamano';
-
-  @override
   String get effects => 'Efectos';
 
   @override
@@ -234,6 +231,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get effectSharpen => 'Nitidez';
+
+  @override
+  String get effectSize => 'Tamano';
 
   @override
   String get effectSoften => 'Suavizar bordes';
@@ -340,9 +340,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get keyboardShortcuts => 'Atajos de teclado';
-
-  @override
-  String get toggleShell => 'Alternar interfaz';
 
   @override
   String get languageEnglish => 'Ingles';
@@ -477,9 +474,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get scale => 'Escalar';
 
   @override
-  String get translate => 'Mover';
-
-  @override
   String get selectionIsHidden => 'La seleccion esta oculta.';
 
   @override
@@ -509,6 +503,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get textColor => 'Color de texto';
 
   @override
+  String get toggleShell => 'Alternar interfaz';
+
+  @override
   String get tolerance => 'Tolerancia';
 
   @override
@@ -528,6 +525,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get toolFill => 'Relleno';
+
+  @override
+  String get toolHalftone => 'Semitono';
 
   @override
   String get toolInvert => 'Invertir';
@@ -578,6 +578,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get transform => 'Transformar';
+
+  @override
+  String get translate => 'Mover';
 
   @override
   String get unsavedChanges => 'Cambios no guardados';

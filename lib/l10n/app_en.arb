@@ -246,6 +246,7 @@
   "toolCrop": "Crop",
   "toolEraser": "Eraser",
   "toolFill": "Fill",
+  "toolHalftone": "Halftone",
   "toolInvert": "Invert",
   "toolLasso": "Lasso",
   "toolLine": "Line",

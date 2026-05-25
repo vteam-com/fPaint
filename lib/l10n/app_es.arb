@@ -237,6 +237,7 @@
   "toolCrop": "Recortar",
   "toolEraser": "Borrador",
   "toolFill": "Relleno",
+  "toolHalftone": "Semitono",
   "toolInvert": "Invertir",
   "toolLasso": "Lazo",
   "toolLine": "Línea",

@@ -278,6 +278,13 @@ class AppStroke {
   static const double dashGapFactor = 2.0;
 }
 
+/// Shared sizing tokens for halftone fills.
+class AppHalftone {
+  static const double dotSpacing = 10.0;
+  static const double maxDotRadiusFactor = 0.45;
+  static const double minDotIntensity = 0.05;
+}
+
 /// Shared scale tokens.
 class AppVisual {
   static const double full = 1.0;
@@ -651,6 +658,7 @@ class Keys {
   static const Key toolFillModeSolid = Key('tool-fill-mode-solid');
   static const Key toolFillModeLinear = Key('tool-fill-mode-linear');
   static const Key toolFillModeRadial = Key('tool-fill-mode-radial');
+  static const Key toolFillHalftoneToggle = Key('tool-fill-halftone-toggle');
 
   static const Key toolSelector = Key('tool-selector');
   static const Key toolSelectorModeRectangle = Key('tool-selector-mode-rectangle');
@@ -660,6 +668,7 @@ class Keys {
   static const Key toolSelectorCancel = Key('tool-selector-cancel');
 
   static const Key toolPanelFillColor = Key('toolPanelFillColor');
+  static const Key toolPanelHalftoneDotColor = Key('toolPanelHalftoneDotColor');
   static const Key toolPanelBrushColor1 = Key('toolPanelBrushColor1');
   static const Key toolPanelFontColor = Key('toolPanelFontColor');
   static const String gradientStopColorKeyPrefixText = 'gradient_stop_color_';
