@@ -5,6 +5,9 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+const String _testRecentFilePath = '/tmp/a.png';
+const String _testRecentFileBookmark = 'bookmark-a';
+
 void main() {
   late AppPreferences preferences;
 
@@ -274,6 +277,56 @@ void main() {
       expect(
         () => preferences.recentFiles.add('/tmp/hack.png'),
         throwsUnsupportedError,
+      );
+    });
+
+    test('loads bookmarks stored alongside recent files by index', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyRecentFiles: <String>[_testRecentFilePath],
+        AppPreferences.keyRecentFileBookmarks: <String>[_testRecentFileBookmark],
+      });
+
+      final AppPreferences prefs2 = AppPreferences();
+      await prefs2.getPref();
+
+      expect(prefs2.getBookmark(_testRecentFilePath), _testRecentFileBookmark);
+    });
+
+    test('migrates legacy concatenated bookmark entries', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyRecentFiles: <String>[_testRecentFilePath],
+        AppPreferences.keyRecentFileBookmarks: <String>[
+          '$_testRecentFilePath$_testRecentFileBookmark',
+        ],
+      });
+
+      final AppPreferences prefs2 = AppPreferences();
+      await prefs2.getPref();
+      final SharedPreferences prefs = await prefs2.getPref();
+
+      expect(prefs2.getBookmark(_testRecentFilePath), _testRecentFileBookmark);
+      expect(
+        prefs.getStringList(AppPreferences.keyRecentFileBookmarks),
+        <String>[_testRecentFileBookmark],
+      );
+    });
+
+    test('migrates legacy separator bookmark entries', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyRecentFiles: <String>[_testRecentFilePath],
+        AppPreferences.keyRecentFileBookmarks: <String>[
+          '$_testRecentFilePath\x00$_testRecentFileBookmark',
+        ],
+      });
+
+      final AppPreferences prefs2 = AppPreferences();
+      await prefs2.getPref();
+      final SharedPreferences prefs = await prefs2.getPref();
+
+      expect(prefs2.getBookmark(_testRecentFilePath), _testRecentFileBookmark);
+      expect(
+        prefs.getStringList(AppPreferences.keyRecentFileBookmarks),
+        <String>[_testRecentFileBookmark],
       );
     });
   });
