@@ -1,3 +1,4 @@
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -154,4 +155,32 @@ class ToolAttributeWidget extends StatelessWidget {
   }
 
   bool get _showsEnabledToggle => enabled != null && onEnabledChanged != null;
+}
+
+/// Widget preview entry for [ToolAttributeWidget].
+@Preview(name: 'ToolAttributeWidget')
+Widget toolAttributeWidgetPreview() {
+  return SizedBox(
+    width: AppLayout.sidePanelExpandedMin,
+    height: AppLayout.toolAttributeWidgetHeight,
+    child: ToolAttributeWidget(
+      name: 'Banana Effect',
+      compact: false,
+      enabled: _toolAttributeWidgetPreviewEnabled,
+      onEnabledChanged: _noopEnabledChanged,
+      childRight: AppSlider(
+        value: _toolAttributeWidgetPreviewHeight,
+        valueLabel: '${(_toolAttributeWidgetPreviewHeight * AppLimits.percentMax).toStringAsFixed(0)}%',
+        onChanged: (double value) {
+          _toolAttributeWidgetPreviewHeight = value;
+        },
+      ),
+    ),
+  );
+}
+
+double _toolAttributeWidgetPreviewHeight = AppVisual.half;
+bool _toolAttributeWidgetPreviewEnabled = true;
+void _noopEnabledChanged(final bool value) {
+  _toolAttributeWidgetPreviewEnabled != value;
 }
