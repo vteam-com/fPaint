@@ -658,7 +658,7 @@ class Keys {
   static const Key toolFillModeSolid = Key('tool-fill-mode-solid');
   static const Key toolFillModeLinear = Key('tool-fill-mode-linear');
   static const Key toolFillModeRadial = Key('tool-fill-mode-radial');
-  static const Key toolFillHalftoneToggle = Key('tool-fill-halftone-toggle');
+  static const Key toolFillHalftoneSlider = Key('tool-fill-halftone-slider');
 
   static const Key toolSelector = Key('tool-selector');
   static const Key toolSelectorModeRectangle = Key('tool-selector-mode-rectangle');

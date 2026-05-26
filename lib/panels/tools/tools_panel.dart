@@ -18,6 +18,7 @@ import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/gradient_color_list_editor.dart';
+import 'package:fpaint/widgets/halftone_size_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
@@ -374,10 +375,10 @@ class ToolsPanel extends StatelessWidget {
         // For gradient modes show the multi-stop color list editor.
         if (appProvider.fillModel.mode == FillMode.solid) {
           addToolOptionColor(widgets, appProvider, context, false);
-          _addHalftoneToggle(widgets, appProvider, context);
+          _addHalftoneSlider(widgets, appProvider, context);
         } else {
           _addGradientColorEditor(widgets, appProvider, context);
-          _addHalftoneToggle(widgets, appProvider, context);
+          _addHalftoneSlider(widgets, appProvider, context);
         }
         widgets.add(addToolOptionTolerance(context, appProvider));
         addToolOptionTopColors(widgets, layers, appProvider, minimal, l10n);
@@ -697,30 +698,52 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  /// Adds the halftone toggle for flood fills.
-  void _addHalftoneToggle(
+  /// Adds the halftone size slider for flood fills.
+  void _addHalftoneSlider(
     final List<Widget> widgets,
     final AppProvider appProvider,
     final BuildContext context,
   ) {
     final AppLocalizations l10n = context.l10n;
+    final int halftonePercent = appProvider.fillModel.halftoneMaxDotSizePercent;
     widgets.add(
       ToolAttributeWidget(
         compact: minimal,
         name: l10n.toolHalftone,
-        childLeft: AppToggleSwitch(
-          key: Keys.toolFillHalftoneToggle,
-          value: appProvider.fillModel.halftoneEnabled,
-          onChanged: (final bool value) {
-            appProvider.fillModel.halftoneEnabled = value;
-            appProvider.updateGradientFill();
-            appProvider.update();
+        childLeft: AppButtonIcon(
+          icon: AppIcon.checkCircle,
+          isSelected: appProvider.fillModel.halftoneEnabled,
+          constraints: minimal ? const BoxConstraints() : null,
+          padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
+          tooltip: l10n.toolHalftone,
+          onPressed: () {
+            showHalftoneSizePicker(
+              context: context,
+              value: halftonePercent,
+              onChanged: (final int value) {
+                appProvider.fillModel.halftoneMaxDotSizePercent = value;
+                appProvider.updateGradientFill();
+                appProvider.update();
+              },
+            );
           },
         ),
-        childRight: Align(
-          alignment: Alignment.centerLeft,
-          child: AppText(l10n.toolHalftone),
-        ),
+        childRight: minimal
+            ? null
+            : AppSlider(
+                key: Keys.toolFillHalftoneSlider,
+                label: l10n.toolHalftone,
+                valueLabel: l10n.percentageValue(halftonePercent),
+                value: halftonePercent.toDouble(),
+                min: AppMath.zero.toDouble(),
+                max: AppLimits.percentMax.toDouble(),
+                divisions: AppLimits.sliderDivisions,
+                onChanged: (final double value) {
+                  appProvider.fillModel.halftoneMaxDotSizePercent = value.toInt();
+                  appProvider.updateGradientFill();
+                  appProvider.update();
+                },
+              ),
       ),
     );
   }

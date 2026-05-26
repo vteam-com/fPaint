@@ -7,6 +7,9 @@ import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/fill_service.dart';
 
+const Rect _selectionRegionOverrideRect = Rect.fromLTWH(1, 1, 3, 3);
+const Offset _selectionRegionTapPosition = Offset(5, 5);
+
 void main() {
   late FillService fillService;
 
@@ -155,6 +158,7 @@ void main() {
         position: const Offset(5, 5),
         fillColor: const Color(0xFFFF0000),
         halftoneDotColor: const Color(0xFFFF0000),
+        halftoneMaxDotSizeFactor: AppVisual.half,
         tolerance: 50,
         clipPath: null,
       );
@@ -164,6 +168,24 @@ void main() {
       expect(result.halftoneFill, isNotNull);
       expect(result.halftoneFill!.backgroundColor, AppColors.transparent);
       expect(result.halftoneFill!.dotColor, const Color(0xFFFF0000));
+      expect(result.halftoneFill!.maxDotSizeFactor, AppVisual.half);
+    });
+
+    test('uses regionPathOverride instead of the tapped flood-fill origin', () async {
+      final ui.Image image = await _createTestImage();
+      final ui.Path overridePath = ui.Path()..addRect(_selectionRegionOverrideRect);
+
+      final UserActionDrawing result = await fillService.createFloodFillSolidAction(
+        sourceImage: image,
+        position: _selectionRegionTapPosition,
+        fillColor: const Color(0xFFFF0000),
+        tolerance: 50,
+        clipPath: overridePath,
+        regionPathOverride: overridePath,
+      );
+
+      expect(result.path, isNotNull);
+      expect(result.path!.getBounds(), _selectionRegionOverrideRect);
     });
   });
 
@@ -218,7 +240,7 @@ void main() {
       final ui.Image image = await _createTestImage();
       final FillModel fillModel = FillModel();
       fillModel.mode = FillMode.linear;
-      fillModel.halftoneEnabled = true;
+      fillModel.halftoneMaxDotSizePercent = AppLimits.percentMax ~/ AppMath.pair;
       fillModel.gradientStopColors = const <Color>[
         Color(0xFFFF0000),
         Color(0xFF00FF00),
@@ -245,6 +267,7 @@ void main() {
       expect(result.halftoneFill, isNotNull);
       expect(result.halftoneFill!.backgroundColor, const Color(0xFFFF0000));
       expect(result.halftoneFill!.dotColor, const Color(0xFF0000FF));
+      expect(result.halftoneFill!.maxDotSizeFactor, AppVisual.half);
     });
 
     test('returns region action for valid radial gradient', () async {
@@ -291,6 +314,31 @@ void main() {
       expect(result.clipPath, clip);
     });
 
+    test('uses regionPathOverride for gradient fills', () async {
+      final ui.Image image = await _createTestImage();
+      final FillModel fillModel = FillModel();
+      final ui.Path overridePath = ui.Path()..addRect(_selectionRegionOverrideRect);
+      fillModel.mode = FillMode.linear;
+      fillModel.addPoint(
+        GradientPoint(offset: const Offset(2, 2), color: const Color(0xFFFF0000)),
+      );
+      fillModel.addPoint(
+        GradientPoint(offset: const Offset(8, 8), color: const Color(0xFF0000FF)),
+      );
+
+      final UserActionDrawing result = await fillService.createFloodFillGradientAction(
+        sourceImage: image,
+        fillModel: fillModel,
+        tolerance: 50,
+        clipPath: overridePath,
+        toCanvas: (final Offset o) => o,
+        regionPathOverride: overridePath,
+      );
+
+      expect(result.action, ActionType.region);
+      expect(result.path, isNotNull);
+      expect(result.path!.getBounds(), _selectionRegionOverrideRect);
+    });
     test('uses toCanvas callback to transform coordinates', () async {
       final ui.Image image = await _createTestImage();
       final FillModel fillModel = FillModel();

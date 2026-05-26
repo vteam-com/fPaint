@@ -212,7 +212,11 @@ void renderRegion(
   final Gradient? gradient,
   final HalftoneFill? halftoneFill,
 ) {
-  if (halftoneFill != null) {
+  final bool shouldRenderHalftone =
+      halftoneFill != null &&
+      halftoneFill.maxDotSizeFactor.clamp(AppMath.zero.toDouble(), AppVisual.full) > AppMath.zero;
+
+  if (shouldRenderHalftone) {
     _renderHalftoneRegion(canvas, path, gradient, halftoneFill);
     return;
   }
@@ -250,7 +254,14 @@ void _renderHalftoneRegion(
 
   final double spacing = AppHalftone.dotSpacing;
   final double halfSpacing = spacing * AppVisual.half;
-  final double maxDotRadius = spacing * AppHalftone.maxDotRadiusFactor;
+  final double maxDotRadius =
+      spacing *
+      AppHalftone.maxDotRadiusFactor *
+      halftoneFill.maxDotSizeFactor.clamp(AppMath.zero.toDouble(), AppVisual.full);
+
+  if (maxDotRadius <= AppMath.zero) {
+    return;
+  }
 
   canvas.save();
   canvas.clipPath(path, doAntiAlias: true);

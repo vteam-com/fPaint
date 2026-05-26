@@ -193,6 +193,7 @@ void main() {
     const HalftoneFill halftoneFill = HalftoneFill(
       backgroundColor: AppColors.white,
       dotColor: AppColors.black,
+      maxDotSizeFactor: AppVisual.full,
     );
 
     renderRegion(canvas, path, null, gradient, halftoneFill);
@@ -211,6 +212,7 @@ void main() {
     const HalftoneFill halftoneFill = HalftoneFill(
       backgroundColor: AppColors.transparent,
       dotColor: AppColors.black,
+      maxDotSizeFactor: AppVisual.full,
     );
 
     renderRegion(canvas, path, AppColors.white, null, halftoneFill);
@@ -218,6 +220,67 @@ void main() {
     final ui.Image image = await recorder.endRecording().toImage(20, 20);
 
     expect((await _pixelColorAt(image, 1, 12)).toARGB32(), AppColors.transparent.toARGB32());
+    expect((await _pixelColorAt(image, 5, 5)).toARGB32(), AppColors.black.toARGB32());
+  });
+
+  test('renderRegion scales solid halftone dots by max size factor', () async {
+    const int nearDotEdgeSampleX = 8;
+    const int nearDotEdgeSampleY = 5;
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20));
+
+    const HalftoneFill halftoneFill = HalftoneFill(
+      backgroundColor: AppColors.transparent,
+      dotColor: AppColors.black,
+      maxDotSizeFactor: AppVisual.half,
+    );
+
+    renderRegion(canvas, path, AppColors.white, null, halftoneFill);
+
+    final ui.Image image = await recorder.endRecording().toImage(20, 20);
+
+    expect(
+      (await _pixelColorAt(image, nearDotEdgeSampleX, nearDotEdgeSampleY)).toARGB32(),
+      AppColors.transparent.toARGB32(),
+    );
+  });
+
+  test('renderRegion falls back to normal fill when halftone size factor is zero', () async {
+    const int sampleX = 5;
+    const int sampleY = 5;
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20));
+
+    final HalftoneFill halftoneFill = HalftoneFill(
+      backgroundColor: AppColors.transparent,
+      dotColor: AppColors.black,
+      maxDotSizeFactor: AppMath.zero.toDouble(),
+    );
+
+    renderRegion(canvas, path, AppColors.white, null, halftoneFill);
+
+    final ui.Image image = await recorder.endRecording().toImage(20, 20);
+
+    expect((await _pixelColorAt(image, sampleX, sampleY)).toARGB32(), AppColors.white.toARGB32());
+  });
+
+  test('renderRegion defaults halftone max size factor for legacy payloads', () async {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Path path = Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20));
+
+    const HalftoneFill halftoneFill = HalftoneFill(
+      backgroundColor: AppColors.transparent,
+      dotColor: AppColors.black,
+    );
+
+    renderRegion(canvas, path, AppColors.white, null, halftoneFill);
+
+    final ui.Image image = await recorder.endRecording().toImage(20, 20);
+
     expect((await _pixelColorAt(image, 5, 5)).toARGB32(), AppColors.black.toARGB32());
   });
 

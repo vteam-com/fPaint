@@ -51,16 +51,17 @@ class FillService {
     required final Offset position,
     required final Color fillColor,
     final Color? halftoneDotColor,
+    final double? halftoneMaxDotSizeFactor,
     required final int tolerance,
     required final Path? clipPath,
+    final Path? regionPathOverride,
   }) async {
-    final FillRegion region = await getRegionPathFromImage(
-      image: sourceImage,
+    final ui.Path path = await _resolveFloodFillPath(
+      sourceImage: sourceImage,
       position: position,
       tolerance: tolerance,
+      regionPathOverride: regionPathOverride,
     );
-
-    final ui.Path path = region.path.shift(region.offset);
 
     final ui.Rect bounds = path.getBounds();
 
@@ -77,6 +78,7 @@ class FillService {
           : HalftoneFill(
               backgroundColor: AppColors.transparent,
               dotColor: halftoneDotColor,
+              maxDotSizeFactor: halftoneMaxDotSizeFactor ?? AppVisual.full,
             ),
       clipPath: clipPath,
     );
@@ -89,6 +91,7 @@ class FillService {
     required final int tolerance,
     required final Path? clipPath,
     required final Offset Function(Offset) toCanvas,
+    final Path? regionPathOverride,
   }) async {
     // For radial gradients, start flood fill at the first gradient handle position
     // For linear gradients, start at the center between handles
@@ -96,13 +99,12 @@ class FillService {
         ? toCanvas(fillModel.gradientPoints.first.offset)
         : toCanvas(fillModel.centerPoint);
 
-    final FillRegion region = await getRegionPathFromImage(
-      image: sourceImage,
+    final ui.Path path = await _resolveFloodFillPath(
+      sourceImage: sourceImage,
       position: floodFillStartPoint,
       tolerance: tolerance,
+      regionPathOverride: regionPathOverride,
     );
-
-    final ui.Path path = region.path.shift(region.offset);
 
     final ui.Rect bounds = path.getBounds();
 
@@ -134,10 +136,32 @@ class FillService {
           ? HalftoneFill(
               backgroundColor: fillModel.gradientStopColors.first,
               dotColor: fillModel.gradientStopColors.last,
+              maxDotSizeFactor: fillModel.halftoneMaxDotSizeFactor,
             )
           : null,
       clipPath: clipPath,
     );
+  }
+
+  /// Resolves the geometry to fill, either from an explicit override path or
+  /// from the raster flood-fill region sampled at [position].
+  Future<ui.Path> _resolveFloodFillPath({
+    required final ui.Image sourceImage,
+    required final Offset position,
+    required final int tolerance,
+    required final Path? regionPathOverride,
+  }) async {
+    if (regionPathOverride != null) {
+      return Path.from(regionPathOverride);
+    }
+
+    final FillRegion region = await getRegionPathFromImage(
+      image: sourceImage,
+      position: position,
+      tolerance: tolerance,
+    );
+
+    return region.path.shift(region.offset);
   }
 
   /// Builds the gradient geometry used by smooth and halftone flood fills.

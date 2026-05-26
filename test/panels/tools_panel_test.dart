@@ -6,6 +6,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/widgets/app_slider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -38,23 +39,25 @@ void main() {
     await tester.pump();
   }
 
-  group('ToolsPanel fill halftone toggle', () {
+  group('ToolsPanel fill halftone slider', () {
+    const int halfHalftonePercent = AppLimits.percentMax ~/ AppMath.pair;
+
     testWidgets('is shown for solid and gradient fill modes', (final WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
-      expect(find.byKey(Keys.toolFillHalftoneToggle), findsOneWidget);
+      expect(find.byKey(Keys.toolFillHalftoneSlider), findsOneWidget);
 
       appProvider.fillModel.mode = FillMode.linear;
       appProvider.update();
       await tester.pump();
 
-      expect(find.byKey(Keys.toolFillHalftoneToggle), findsOneWidget);
+      expect(find.byKey(Keys.toolFillHalftoneSlider), findsOneWidget);
 
       appProvider.fillModel.mode = FillMode.radial;
       appProvider.update();
       await tester.pump();
 
-      expect(find.byKey(Keys.toolFillHalftoneToggle), findsOneWidget);
+      expect(find.byKey(Keys.toolFillHalftoneSlider), findsOneWidget);
     });
 
     testWidgets('does not show a second solid color control when halftone is enabled', (
@@ -64,7 +67,8 @@ void main() {
 
       expect(find.byKey(Keys.toolPanelHalftoneDotColor), findsNothing);
 
-      await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
+      final AppSlider halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
+      halftoneSlider.onChanged!(halfHalftonePercent.toDouble());
       await tester.pump();
 
       expect(find.byKey(Keys.toolPanelHalftoneDotColor), findsNothing);
@@ -76,15 +80,24 @@ void main() {
       expect(find.byKey(Keys.toolPanelHalftoneDotColor), findsNothing);
     });
 
-    testWidgets('updates the fill model when toggled', (final WidgetTester tester) async {
+    testWidgets('updates the fill model when slider moves', (final WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
+      expect(appProvider.fillModel.halftoneMaxDotSizePercent, AppMath.zero);
       expect(appProvider.fillModel.halftoneEnabled, isFalse);
 
-      await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
+      final AppSlider halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
+      halftoneSlider.onChanged!(halfHalftonePercent.toDouble());
       await tester.pump();
 
+      expect(appProvider.fillModel.halftoneMaxDotSizePercent, halfHalftonePercent);
       expect(appProvider.fillModel.halftoneEnabled, isTrue);
+
+      halftoneSlider.onChanged!(AppMath.zero.toDouble());
+      await tester.pump();
+
+      expect(appProvider.fillModel.halftoneMaxDotSizePercent, AppMath.zero);
+      expect(appProvider.fillModel.halftoneEnabled, isFalse);
     });
   });
 }
