@@ -67,6 +67,9 @@ void main() {
 
       expect(find.byKey(Keys.toolPanelHalftoneDotColor), findsNothing);
 
+      await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
+      await tester.pump();
+
       final AppSlider halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
       halftoneSlider.onChanged!(halfHalftonePercent.toDouble());
       await tester.pump();
@@ -80,24 +83,48 @@ void main() {
       expect(find.byKey(Keys.toolPanelHalftoneDotColor), findsNothing);
     });
 
-    testWidgets('updates the fill model when slider moves', (final WidgetTester tester) async {
+    testWidgets('starts disabled with a retained default slider value', (final WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
-      expect(appProvider.fillModel.halftoneMaxDotSizePercent, AppMath.zero);
-      expect(appProvider.fillModel.halftoneEnabled, isFalse);
-
       final AppSlider halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
+
+      expect(appProvider.fillModel.halftoneMaxDotSizePercent, AppHalftone.defaultDotSizePercent);
+      expect(appProvider.fillModel.halftoneEnabled, isFalse);
+      expect(halftoneSlider.value, AppHalftone.defaultDotSizePercent.toDouble());
+      expect(halftoneSlider.onChanged, isNull);
+    });
+
+    testWidgets('retains the slider value when halftone is toggled off', (final WidgetTester tester) async {
+      await pumpToolsPanel(tester);
+
+      await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
+      await tester.pump();
+
+      AppSlider halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
       halftoneSlider.onChanged!(halfHalftonePercent.toDouble());
       await tester.pump();
 
       expect(appProvider.fillModel.halftoneMaxDotSizePercent, halfHalftonePercent);
       expect(appProvider.fillModel.halftoneEnabled, isTrue);
 
-      halftoneSlider.onChanged!(AppMath.zero.toDouble());
+      await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
       await tester.pump();
 
-      expect(appProvider.fillModel.halftoneMaxDotSizePercent, AppMath.zero);
+      halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
+
+      expect(appProvider.fillModel.halftoneMaxDotSizePercent, halfHalftonePercent);
       expect(appProvider.fillModel.halftoneEnabled, isFalse);
+      expect(halftoneSlider.value, halfHalftonePercent.toDouble());
+      expect(halftoneSlider.onChanged, isNull);
+
+      await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
+      await tester.pump();
+
+      halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
+
+      expect(appProvider.fillModel.halftoneMaxDotSizePercent, halfHalftonePercent);
+      expect(appProvider.fillModel.halftoneEnabled, isTrue);
+      expect(halftoneSlider.onChanged, isNotNull);
     });
   });
 }

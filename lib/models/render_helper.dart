@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -252,7 +253,7 @@ void _renderHalftoneRegion(
     ..color = halftoneFill.dotColor
     ..style = PaintingStyle.fill;
 
-  final double spacing = AppHalftone.dotSpacing;
+  final double spacing = resolveHalftoneSpacing(bounds);
   final double halfSpacing = spacing * AppVisual.half;
   final double maxDotRadius =
       spacing *
@@ -286,6 +287,17 @@ void _renderHalftoneRegion(
   }
 
   canvas.restore();
+}
+
+/// Resolves halftone spacing while capping total dot work for large regions.
+double resolveHalftoneSpacing(final Rect bounds) {
+  final double boundsArea = bounds.width * bounds.height;
+  if (boundsArea <= AppMath.zero) {
+    return AppHalftone.dotSpacing;
+  }
+
+  final double minimumSpacing = math.sqrt(boundsArea / AppHalftone.maxRenderDotCount);
+  return math.max(AppHalftone.dotSpacing, minimumSpacing);
 }
 
 /// Samples the halftone intensity at [point] from the region's fill geometry.

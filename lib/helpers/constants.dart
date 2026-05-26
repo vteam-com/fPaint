@@ -280,6 +280,8 @@ class AppStroke {
 
 /// Shared sizing tokens for halftone fills.
 class AppHalftone {
+  static const int defaultDotSizePercent = AppLimits.percentMax ~/ AppMath.pair;
+  static const int maxRenderDotCount = 4096;
   static const double dotSpacing = 10.0;
   static const double maxDotRadiusFactor = 0.45;
   static const double minDotIntensity = 0.05;
@@ -658,6 +660,7 @@ class Keys {
   static const Key toolFillModeSolid = Key('tool-fill-mode-solid');
   static const Key toolFillModeLinear = Key('tool-fill-mode-linear');
   static const Key toolFillModeRadial = Key('tool-fill-mode-radial');
+  static const Key toolFillHalftoneToggle = Key('tool-fill-halftone-toggle');
   static const Key toolFillHalftoneSlider = Key('tool-fill-halftone-slider');
 
   static const Key toolSelector = Key('tool-selector');

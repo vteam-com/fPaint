@@ -705,14 +705,31 @@ class ToolsPanel extends StatelessWidget {
     final BuildContext context,
   ) {
     final AppLocalizations l10n = context.l10n;
+    final bool halftoneEnabled = appProvider.fillModel.halftoneEnabled;
     final int halftonePercent = appProvider.fillModel.halftoneMaxDotSizePercent;
+
+    void updateHalftonePercent(final int value) {
+      appProvider.fillModel.halftoneMaxDotSizePercent = value;
+      appProvider.updateGradientFill();
+      appProvider.update();
+    }
+
+    void updateHalftoneEnabled(final bool value) {
+      appProvider.fillModel.halftoneEnabled = value;
+      appProvider.updateGradientFill();
+      appProvider.update();
+    }
+
     widgets.add(
       ToolAttributeWidget(
         compact: minimal,
         name: l10n.toolHalftone,
+        enabled: halftoneEnabled,
+        onEnabledChanged: updateHalftoneEnabled,
+        enabledToggleKey: Keys.toolFillHalftoneToggle,
         childLeft: AppButtonIcon(
           icon: AppIcon.checkCircle,
-          isSelected: appProvider.fillModel.halftoneEnabled,
+          isSelected: halftoneEnabled,
           constraints: minimal ? const BoxConstraints() : null,
           padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
           tooltip: l10n.toolHalftone,
@@ -720,11 +737,7 @@ class ToolsPanel extends StatelessWidget {
             showHalftoneSizePicker(
               context: context,
               value: halftonePercent,
-              onChanged: (final int value) {
-                appProvider.fillModel.halftoneMaxDotSizePercent = value;
-                appProvider.updateGradientFill();
-                appProvider.update();
-              },
+              onChanged: updateHalftonePercent,
             );
           },
         ),
@@ -732,17 +745,12 @@ class ToolsPanel extends StatelessWidget {
             ? null
             : AppSlider(
                 key: Keys.toolFillHalftoneSlider,
-                label: l10n.toolHalftone,
                 valueLabel: l10n.percentageValue(halftonePercent),
                 value: halftonePercent.toDouble(),
                 min: AppMath.zero.toDouble(),
                 max: AppLimits.percentMax.toDouble(),
                 divisions: AppLimits.sliderDivisions,
-                onChanged: (final double value) {
-                  appProvider.fillModel.halftoneMaxDotSizePercent = value.toInt();
-                  appProvider.updateGradientFill();
-                  appProvider.update();
-                },
+                onChanged: halftoneEnabled ? (final double value) => updateHalftonePercent(value.toInt()) : null,
               ),
       ),
     );

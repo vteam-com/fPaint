@@ -204,6 +204,23 @@ void main() {
     expect((await _pixelColorAt(image, 35, 5)).toARGB32(), AppColors.black.toARGB32());
   });
 
+  test('resolveHalftoneSpacing caps sample density for large regions', () {
+    const Rect smallBounds = Rect.fromLTWH(0, 0, 40, 20);
+    const Rect largeBounds = Rect.fromLTWH(0, 0, 2000, 2000);
+
+    final double smallSpacing = resolveHalftoneSpacing(smallBounds);
+    final double largeSpacing = resolveHalftoneSpacing(largeBounds);
+
+    expect(smallSpacing, AppHalftone.dotSpacing);
+    expect(largeSpacing, greaterThan(AppHalftone.dotSpacing));
+    expect(
+      largeSpacing * largeSpacing,
+      greaterThanOrEqualTo(
+        (largeBounds.width * largeBounds.height) / AppHalftone.maxRenderDotCount,
+      ),
+    );
+  });
+
   test('renderRegion with solid halftone fill draws uniform dots', () async {
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
