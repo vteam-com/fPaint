@@ -142,6 +142,7 @@ class AppLayout {
   static const double modalSheetMaxHeightFactor = 0.9;
   static const double modalSheetMaxWidth = 800.0;
   static const double mobileMenuWidthFactor = 0.85;
+  static const double toolAttributeWidgetHeight = 100;
   static const int overlayAlpha = 128;
   static const double desktopBreakpoint = 600.0;
   static const double appIconSize = 100.0;
