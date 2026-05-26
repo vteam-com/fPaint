@@ -241,6 +241,7 @@ void main() {
       final FillModel fillModel = FillModel();
       fillModel.mode = FillMode.linear;
       fillModel.halftoneMaxDotSizePercent = AppLimits.percentMax ~/ AppMath.pair;
+      fillModel.halftoneEnabled = true;
       fillModel.gradientStopColors = const <Color>[
         Color(0xFFFF0000),
         Color(0xFF00FF00),
