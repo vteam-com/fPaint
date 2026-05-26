@@ -3,14 +3,40 @@ part of '../painting_scenario_test.dart';
 Future<void> paintLayerHouse(final PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _houseLayerName);
 
-  // Draw house body, door, and window first.
+  final BuildContext context = session.tester.element(find.byType(MainView));
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
+  final Offset canvasCenter = Offset(
+    appProvider.layers.width / AppMath.pair,
+    appProvider.layers.height / AppMath.pair,
+  );
+  final Rect houseBodyRect = Rect.fromPoints(
+    canvasCenter + _houseBodyStart,
+    canvasCenter + _houseBodyEnd,
+  );
+
+  appProvider.recordExecuteDrawingActionToSelectedLayer(
+    action: UserActionDrawing(
+      action: ActionType.region,
+      positions: <ui.Offset>[houseBodyRect.topLeft, houseBodyRect.bottomRight],
+      fillColor: _houseBodyHalftoneBackgroundColor,
+      halftoneFill: const HalftoneFill(
+        backgroundColor: _houseBodyHalftoneBackgroundColor,
+        dotColor: _houseBodyHalftoneDotColor,
+        maxDotSizeFactor: _houseBodyHalftoneMaxDotSizeFactor,
+      ),
+      path: Path()..addRect(houseBodyRect),
+    ),
+  );
+  await session.tester.pump();
+
+  // Draw house outline, door, and window on top of the halftone body.
   await drawRectangleWithHumanGestures(
     session.tester,
     startPosition: session.canvasCenter + _houseBodyStart,
     endPosition: session.canvasCenter + _houseBodyEnd,
     brushSize: AppStroke.thin,
     brushColor: Colors.white,
-    fillColor: const Color.fromARGB(255, 248, 163, 191),
+    fillColor: Colors.transparent,
   );
 
   await drawRectangleWithHumanGestures(

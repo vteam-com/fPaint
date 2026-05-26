@@ -1,13 +1,60 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 
+/// Returns whether the platform-specific modifier requests origin-based flood fill.
+@visibleForTesting
+bool isFloodFillOriginModifierPressedForPlatform({
+  required final TargetPlatform platform,
+  required final bool isAltPressed,
+  required final bool isControlPressed,
+}) {
+  final bool isApplePlatform = platform == TargetPlatform.macOS || platform == TargetPlatform.iOS;
+  return isApplePlatform ? isAltPressed : isControlPressed;
+}
+
+/// Returns whether flood fill should use the active selection path as its region.
+@visibleForTesting
+bool shouldUseSelectionRegionFloodFill({
+  required final bool isSelectionVisible,
+  required final ui.Path? selectionPath,
+  required final bool isOriginFloodFillModifierPressed,
+}) {
+  return isSelectionVisible && selectionPath != null && !isOriginFloodFillModifierPressed;
+}
+
 /// Tool state mutations, drawing actions, and flood-fill operations.
 extension AppProviderTools on AppProvider {
+  bool get _isOriginFloodFillModifierPressed {
+    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+    return isFloodFillOriginModifierPressedForPlatform(
+      platform: defaultTargetPlatform,
+      isAltPressed: keyboard.isAltPressed,
+      isControlPressed: keyboard.isControlPressed,
+    );
+  }
+
+  /// Clones the active selection path when selection-wide fill should override
+  /// origin-based flood-fill sampling.
+  ui.Path? get _selectionRegionFloodFillOverridePath {
+    final ui.Path? selectionPath = selectorModel.path1;
+    final bool useSelectionRegionFloodFill = shouldUseSelectionRegionFloodFill(
+      isSelectionVisible: selectorModel.isVisible,
+      selectionPath: selectionPath,
+      isOriginFloodFillModifierPressed: _isOriginFloodFillModifierPressed,
+    );
+    if (!useSelectionRegionFloodFill || selectionPath == null) {
+      return null;
+    }
+    return ui.Path.from(selectionPath);
+  }
+
   /// Updates an action.
   void updateAction({
     final Offset? start,
@@ -62,13 +109,16 @@ extension AppProviderTools on AppProvider {
   /// Performs a flood fill with a solid color.
   void floodFillSolidAction(final Offset position) async {
     final ui.Image sourceImage = layers.selectedLayer.toImageForStorage(layers.size);
+    final ui.Path? clipPath = selectorModel.isVisible ? selectorModel.path1 : null;
     final UserActionDrawing action = await fillService.createFloodFillSolidAction(
       sourceImage: sourceImage,
       position: position,
       fillColor: fillColor,
       halftoneDotColor: fillModel.halftoneEnabled ? fillColor : null,
+      halftoneMaxDotSizeFactor: fillModel.halftoneMaxDotSizeFactor,
       tolerance: tolerance,
-      clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
+      clipPath: clipPath,
+      regionPathOverride: _selectionRegionFloodFillOverridePath,
     );
 
     recordExecuteDrawingActionToSelectedLayer(action: action);
@@ -77,12 +127,14 @@ extension AppProviderTools on AppProvider {
   /// Performs a flood fill with a gradient.
   void floodFillGradientAction(final FillModel fillModel) async {
     final ui.Image sourceImage = layers.selectedLayer.toImageForStorage(layers.size);
+    final ui.Path? clipPath = selectorModel.isVisible ? selectorModel.path1 : null;
     final UserActionDrawing action = await fillService.createFloodFillGradientAction(
       sourceImage: sourceImage,
       fillModel: fillModel,
       tolerance: tolerance,
-      clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
+      clipPath: clipPath,
       toCanvas: toCanvas,
+      regionPathOverride: _selectionRegionFloodFillOverridePath,
     );
 
     recordExecuteDrawingActionToSelectedLayer(action: action);

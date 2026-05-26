@@ -29,8 +29,26 @@ class FillModel extends VisibleModel {
   /// Mode
   FillMode _mode = FillMode.solid;
 
+  int _halftoneMaxDotSizePercent = AppMath.zero;
+
+  /// Relative maximum dot size for halftone flood fill in percent.
+  int get halftoneMaxDotSizePercent => _halftoneMaxDotSizePercent;
+
+  /// Relative maximum dot size for halftone flood fill in percent.
+  set halftoneMaxDotSizePercent(final int value) {
+    _halftoneMaxDotSizePercent = value.clamp(AppMath.zero, AppLimits.percentMax);
+  }
+
   /// Whether flood fill should render as a halftone pattern.
-  bool halftoneEnabled = false;
+  bool get halftoneEnabled => _halftoneMaxDotSizePercent > AppMath.zero;
+
+  /// Enables or disables halftone flood fill using the full-size preset.
+  set halftoneEnabled(final bool value) {
+    halftoneMaxDotSizePercent = value ? AppLimits.percentMax : AppMath.zero;
+  }
+
+  /// Relative maximum dot radius scale for halftone rendering.
+  double get halftoneMaxDotSizeFactor => _halftoneMaxDotSizePercent / AppLimits.percentMax;
 
   /// Gets the current fill mode.
   FillMode get mode => _mode;
