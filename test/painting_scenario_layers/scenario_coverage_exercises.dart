@@ -603,6 +603,12 @@ Future<void> _exerciseSelectionToolPanel(
     await tester.pump();
   }
 
+  final Finder lineMode = find.byKey(Keys.toolSelectorModeLine);
+  if (lineMode.evaluate().isNotEmpty) {
+    await tester.tap(lineMode);
+    await tester.pump();
+  }
+
   // Tap wand selector mode.
   final Finder wandMode = find.byKey(Keys.toolSelectorModeWand);
   if (wandMode.evaluate().isNotEmpty) {

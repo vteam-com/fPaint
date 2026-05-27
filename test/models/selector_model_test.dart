@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/selector_model.dart';
 
 void main() {
@@ -103,6 +104,77 @@ void main() {
       model.addP1(const Offset(10, 20));
       expect(model.path1, isNotNull);
       expect(model.points.length, 1);
+    });
+  });
+
+  group('addStraightLineRegionPoint', () {
+    test('starts a multi-click region on the first point', () {
+      model.mode = SelectorMode.line;
+      final bool isClosed = model.addStraightLineRegionPoint(
+        const Offset(10, 20),
+        closeDistance: AppInteraction.selectionHandleSize,
+      );
+
+      expect(isClosed, isFalse);
+      expect(model.path1, isNotNull);
+      expect(model.points.length, 1);
+    });
+
+    test('adds vertices until the user clicks back near the first point', () {
+      model.mode = SelectorMode.line;
+
+      expect(
+        model.addStraightLineRegionPoint(
+          const Offset(10, 10),
+          closeDistance: AppInteraction.selectionHandleSize,
+        ),
+        isFalse,
+      );
+      expect(
+        model.addStraightLineRegionPoint(
+          const Offset(60, 10),
+          closeDistance: AppInteraction.selectionHandleSize,
+        ),
+        isFalse,
+      );
+      expect(
+        model.addStraightLineRegionPoint(
+          const Offset(60, 60),
+          closeDistance: AppInteraction.selectionHandleSize,
+        ),
+        isFalse,
+      );
+
+      final bool isClosed = model.addStraightLineRegionPoint(
+        const Offset(12, 12),
+        closeDistance: AppInteraction.selectionHandleSize,
+      );
+
+      expect(isClosed, isTrue);
+      expect(model.path1, isNotNull);
+      expect(model.boundingRect, const Rect.fromLTWH(10, 10, 50, 50));
+    });
+  });
+
+  group('updateStraightLineRegionPreview', () {
+    test('extends the open edge to the hover position', () {
+      model.mode = SelectorMode.line;
+      model.addStraightLineRegionPoint(
+        const Offset(10, 10),
+        closeDistance: AppInteraction.selectionHandleSize,
+      );
+      model.addStraightLineRegionPoint(
+        const Offset(60, 10),
+        closeDistance: AppInteraction.selectionHandleSize,
+      );
+
+      model.updateStraightLineRegionPreview(
+        const Offset(60, 60),
+        closeDistance: AppInteraction.selectionHandleSize,
+      );
+
+      expect(model.path1, isNotNull);
+      expect(model.boundingRect, const Rect.fromLTWH(10, 10, 50, 50));
     });
   });
 
@@ -393,12 +465,13 @@ void main() {
 
   group('SelectorMode enum', () {
     test('has all expected values', () {
-      expect(SelectorMode.values.length, 4);
+      expect(SelectorMode.values.length, 5);
       expect(
         SelectorMode.values,
         containsAll(<SelectorMode>[
           SelectorMode.rectangle,
           SelectorMode.circle,
+          SelectorMode.line,
           SelectorMode.lasso,
           SelectorMode.wand,
         ]),

@@ -3,9 +3,10 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:super_clipboard/super_clipboard.dart';
@@ -86,11 +87,24 @@ Future<void> sharePanel(
     context: context,
     builder: (final BuildContext context) {
       final AppLocalizations l10n = context.l10n;
+      final String loadedFilePath = ShellProvider.of(context).loadedFileName.trim();
 
       return AppBottomSheetContent(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            if (loadedFilePath.isNotEmpty) ...<Widget>[
+              AppListTile(
+                leading: const AppSvgIcon(icon: AppIcon.image),
+                title: Text(
+                  loadedFilePath,
+                  maxLines: AppMath.pair,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subtitle.copyWith(color: AppColors.white),
+                ),
+              ),
+              const AppDivider(),
+            ],
             AppListTile(
               leading: const AppSvgIcon(icon: AppIcon.clipboardCopy),
               title: AppText(l10n.copyToClipboard),
