@@ -9,6 +9,7 @@ import 'package:fpaint/panels/side_panel/about.dart';
 import 'package:fpaint/panels/side_panel/canvas_settings.dart';
 import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -90,6 +91,7 @@ void onDropDownMenuSelection(
 ) {
   final ShellProvider shellProvider = ShellProvider.of(context);
   final LayersProvider layers = LayersProvider.of(context);
+  final AppPreferences preferences = AppPreferences.of(context);
   final AppLocalizations l10n = context.l10n;
 
   switch (result) {
@@ -112,6 +114,7 @@ void onDropDownMenuSelection(
       saveFile(
         shellProvider,
         layers,
+        preferences,
       ).then(
         // ignore: use_build_context_synchronously
         (final _) {

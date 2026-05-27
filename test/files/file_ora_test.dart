@@ -16,11 +16,26 @@ void main() {
       ui.BlendMode.srcOver,
     );
     expect(
+      getBlendModeFromOraCompositOp('svg:src-over'),
+      ui.BlendMode.srcOver,
+    );
+    expect(
       getBlendModeFromOraCompositOp('svg:multiply'),
       ui.BlendMode.multiply,
     );
     expect(getBlendModeFromOraCompositOp('svg:screen'), ui.BlendMode.screen);
     expect(getBlendModeFromOraCompositOp('svg:overlay'), ui.BlendMode.overlay);
+    expect(getBlendModeFromOraCompositOp('svg:plus'), ui.BlendMode.plus);
+    expect(getBlendModeFromOraCompositOp('svg:hue'), ui.BlendMode.hue);
+    expect(
+      getBlendModeFromOraCompositOp('svg:saturation'),
+      ui.BlendMode.saturation,
+    );
+    expect(getBlendModeFromOraCompositOp('svg:color'), ui.BlendMode.color);
+    expect(
+      getBlendModeFromOraCompositOp('svg:luminosity'),
+      ui.BlendMode.luminosity,
+    );
     expect(getBlendModeFromOraCompositOp('unknown'), ui.BlendMode.srcOver);
   });
 
@@ -71,6 +86,7 @@ void main() {
         'name': 'test layer',
         'visibility': 'visible',
         'opacity': '1.00000',
+        'composite-op': 'svg:multiply',
         'src': 'data/layer-0.png',
         'x': 0,
         'y': 0,
@@ -90,7 +106,37 @@ void main() {
     expect(layer.getAttribute('name'), 'test layer');
     expect(layer.getAttribute('visibility'), 'visible');
     expect(layer.getAttribute('opacity'), '1.00000');
+    expect(layer.getAttribute('composite-op'), 'svg:multiply');
     expect(layer.getAttribute('src'), 'data/layer-0.png');
+  });
+
+  test('createOraArchive round-trips non-default layer blend modes', () async {
+    final LayersProvider exportedLayers = LayersProvider();
+    exportedLayers.size = const ui.Size(100, 100);
+    exportedLayers.list[0].blendMode = ui.BlendMode.plus;
+
+    final List<int> archiveData = await createOraArchive(exportedLayers);
+    final Archive archive = ZipDecoder().decodeBytes(archiveData);
+    final ArchiveFile stackFile = archive.files.firstWhere(
+      (final ArchiveFile file) => file.name == 'stack.xml',
+    );
+    final XmlDocument xmlDoc = XmlDocument.parse(
+      String.fromCharCodes(stackFile.content),
+    );
+
+    expect(
+      xmlDoc.findAllElements('layer').single.getAttribute('composite-op'),
+      'svg:plus',
+    );
+
+    final LayersProvider importedLayers = LayersProvider();
+    await readOraFileFromBytes(
+      importedLayers,
+      Uint8List.fromList(archiveData),
+    );
+
+    expect(importedLayers.length, 1);
+    expect(importedLayers.list[0].blendMode, ui.BlendMode.plus);
   });
 
   test('buildLayers creates correct XML structure with group', () async {

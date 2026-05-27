@@ -67,6 +67,11 @@ const String _svgHardLight = 'svg:hard-light';
 const String _svgSoftLight = 'svg:soft-light';
 const String _svgDifference = 'svg:difference';
 const String _svgExclusion = 'svg:exclusion';
+const String _svgPlus = 'svg:plus';
+const String _svgHue = 'svg:hue';
+const String _svgSaturation = 'svg:saturation';
+const String _svgColor = 'svg:color';
+const String _svgLuminosity = 'svg:luminosity';
 const String _svgSrcOverLegacy = 'svg:src-over';
 
 /// Reads an ORA file and updates the provided [AppProvider] with its contents.
@@ -283,6 +288,7 @@ bool _isLayerVisible(final String visibilityAsText) {
 ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
   switch (compositeOp) {
     case _svgSourceOver:
+    case _svgSrcOverLegacy:
       return ui.BlendMode.srcOver;
     case _svgMultiply:
       return ui.BlendMode.multiply;
@@ -306,8 +312,60 @@ ui.BlendMode getBlendModeFromOraCompositOp(final String compositeOp) {
       return ui.BlendMode.difference;
     case _svgExclusion:
       return ui.BlendMode.exclusion;
+    case _svgPlus:
+      return ui.BlendMode.plus;
+    case _svgHue:
+      return ui.BlendMode.hue;
+    case _svgSaturation:
+      return ui.BlendMode.saturation;
+    case _svgColor:
+      return ui.BlendMode.color;
+    case _svgLuminosity:
+      return ui.BlendMode.luminosity;
     default:
       return ui.BlendMode.srcOver;
+  }
+}
+
+/// Encodes a Flutter [ui.BlendMode] as an ORA `composite-op` value.
+String _getOraCompositeOpFromBlendMode(final ui.BlendMode blendMode) {
+  switch (blendMode) {
+    case ui.BlendMode.srcOver:
+      return _svgSourceOver;
+    case ui.BlendMode.multiply:
+      return _svgMultiply;
+    case ui.BlendMode.screen:
+      return _svgScreen;
+    case ui.BlendMode.overlay:
+      return _svgOverlay;
+    case ui.BlendMode.darken:
+      return _svgDarken;
+    case ui.BlendMode.lighten:
+      return _svgLighten;
+    case ui.BlendMode.colorDodge:
+      return _svgColorDodge;
+    case ui.BlendMode.colorBurn:
+      return _svgColorBurn;
+    case ui.BlendMode.hardLight:
+      return _svgHardLight;
+    case ui.BlendMode.softLight:
+      return _svgSoftLight;
+    case ui.BlendMode.difference:
+      return _svgDifference;
+    case ui.BlendMode.exclusion:
+      return _svgExclusion;
+    case ui.BlendMode.plus:
+      return _svgPlus;
+    case ui.BlendMode.hue:
+      return _svgHue;
+    case ui.BlendMode.saturation:
+      return _svgSaturation;
+    case ui.BlendMode.color:
+      return _svgColor;
+    case ui.BlendMode.luminosity:
+      return _svgLuminosity;
+    default:
+      return _svgSourceOver;
   }
 }
 
@@ -422,6 +480,7 @@ Future<List<int>> createOraArchive(final LayersProvider layers) async {
       _oraAttrName: layer.name,
       _oraAttrVisibility: layer.isVisible ? _oraVisibilityVisible : _oraVisibilityHidden,
       _oraAttrOpacity: layer.opacity.toStringAsFixed(AppLimits.opacityPrecision),
+      _oraAttrCompositeOp: _getOraCompositeOpFromBlendMode(layer.blendMode),
       _oraAttrSrc: imageName,
       _oraAttrX: 0,
       _oraAttrY: 0,
@@ -508,12 +567,17 @@ void buildLayers(
   final List<Map<String, dynamic>> layersData,
 ) {
   for (final Map<String, dynamic> layerData in layersData) {
+    final String? compositeOp = layerData[_oraAttrCompositeOp] as String?;
+
     builder.element(
       _oraElementLayer,
       nest: () {
         builder.attribute(_oraAttrName, layerData[_oraAttrName]);
         builder.attribute(_oraAttrVisibility, layerData[_oraAttrVisibility]);
         builder.attribute(_oraAttrOpacity, layerData[_oraAttrOpacity]);
+        if (compositeOp != null) {
+          builder.attribute(_oraAttrCompositeOp, compositeOp);
+        }
         builder.attribute(_oraAttrSrc, layerData[_oraAttrSrc]);
         builder.attribute(_oraAttrX, layerData[_oraAttrX]);
         builder.attribute(_oraAttrY, layerData[_oraAttrY]);

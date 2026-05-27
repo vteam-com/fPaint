@@ -330,7 +330,11 @@ class MyApp extends StatelessWidget {
                       shellProvider,
                       currentAppProvider,
                       const MainScreen(),
-                      onSave: () => saveFile(shellProvider, currentAppProvider.layers),
+                      onSave: () => saveFile(
+                        shellProvider,
+                        currentAppProvider.layers,
+                        currentPreferences,
+                      ),
                     ),
                     '/settings': (final _) => const SettingsPage(),
                     '/platforms': (final _) => const PlatformsPage(),

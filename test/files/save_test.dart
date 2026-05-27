@@ -1,9 +1,19 @@
-import 'dart:typed_data';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 
 import 'package:fpaint/files/save.dart';
+import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/providers/shell_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+const MethodChannel _fileChannel = MethodChannel('com.vteam.fpaint/file');
+const String _bookmarkPath = '/tmp/bookmarked.ora';
+const String _bookmarkValue = 'bookmark-a';
 
 // Mock classes to test saveFile routing logic and saveAsTiff
 class MockLayersProvider {
@@ -31,6 +41,8 @@ class MockShellProvider {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('Save Tests', () {
     // ignore: unused_local_variable
     late MockLayersProvider mockLayers;
@@ -100,5 +112,70 @@ void main() {
     // extensive mocking of Flutter providers and file system operations. The tests
     // above verify the extension routing logic and error handling that can be tested
     // in isolation. File I/O operations are better tested through integration tests.
+  });
+
+  group('saveFile bookmark access', () {
+    late Directory tempDirectory;
+    late String fallbackPath;
+    late String resolvedPath;
+    late AppPreferences preferences;
+    late ShellProvider shellProvider;
+    late LayersProvider layers;
+    late TargetPlatform? previousPlatform;
+    late List<String> methodCalls;
+
+    setUp(() async {
+      previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+
+      tempDirectory = await Directory.systemTemp.createTemp('fpaint_save_test');
+      fallbackPath = '${tempDirectory.path}/fallback.ora';
+      resolvedPath = '${tempDirectory.path}/resolved.ora';
+      methodCalls = <String>[];
+
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyRecentFiles: <String>[_bookmarkPath, fallbackPath],
+        AppPreferences.keyRecentFileBookmarks: <String>[_bookmarkValue, _bookmarkValue],
+      });
+
+      preferences = AppPreferences();
+      await preferences.getPref();
+      shellProvider = ShellProvider()..loadedFileName = fallbackPath;
+      layers = LayersProvider();
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        _fileChannel,
+        (final MethodCall methodCall) async {
+          methodCalls.add(methodCall.method);
+          switch (methodCall.method) {
+            case 'resolveBookmark':
+              return resolvedPath;
+            case 'releaseBookmark':
+              return null;
+            default:
+              return null;
+          }
+        },
+      );
+    });
+
+    tearDown(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        _fileChannel,
+        null,
+      );
+      debugDefaultTargetPlatformOverride = previousPlatform;
+      if (await tempDirectory.exists()) {
+        await tempDirectory.delete(recursive: true);
+      }
+    });
+
+    test('uses the resolved bookmark path when saving', () async {
+      await saveFile(shellProvider, layers, preferences);
+
+      expect(await File(resolvedPath).exists(), isTrue);
+      expect(await File(fallbackPath).exists(), isFalse);
+      expect(methodCalls, <String>['resolveBookmark', 'releaseBookmark']);
+    });
   });
 }
