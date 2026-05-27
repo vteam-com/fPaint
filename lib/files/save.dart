@@ -8,11 +8,14 @@ import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
+import 'package:fpaint/helpers/macos_bookmark_service.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:logging/logging.dart';
 
 final Logger _log = Logger(logNameSave);
+const String _errorFailedToSaveFilePrefix = 'Failed to save file:';
 const String _errorFailedToSaveTiffPrefix = 'Failed to save TIFF file:';
 
 /// Supported save file formats.
@@ -78,6 +81,7 @@ Future<void> saveAsTiff(
 Future<void> saveFile(
   final ShellProvider shellProvider,
   final LayersProvider layers,
+  final AppPreferences preferences,
 ) async {
   final String fileName = shellProvider.loadedFileName;
   final SaveFileFormat? format = SaveFileFormat.fromFileName(fileName);
@@ -87,29 +91,83 @@ Future<void> saveFile(
     throw UnsupportedSaveFormatException(extension);
   }
 
-  switch (format) {
-    case SaveFileFormat.png:
-      await saveAsPng(layers, fileName);
-      break;
-    case SaveFileFormat.jpeg:
-      await saveAsJpeg(layers, fileName);
-      break;
-    case SaveFileFormat.ora:
-      await saveAsOra(layers, fileName);
-      break;
-    case SaveFileFormat.tiff:
-      final String normalizedFileName = normalizeTiffExportFileName(fileName);
-      await saveAsTiff(layers, normalizedFileName);
-      if (shellProvider.loadedFileName != normalizedFileName) {
-        shellProvider.loadedFileName = normalizedFileName;
-        shellProvider.update();
-      }
-      break;
-    case SaveFileFormat.webp:
-      await saveAsWebp(layers, fileName);
-      break;
-    case SaveFileFormat.heic:
-      await saveAsHeic(layers, fileName);
-      break;
+  try {
+    switch (format) {
+      case SaveFileFormat.png:
+        await _saveWithResolvedFileAccess(
+          preferences: preferences,
+          fileName: fileName,
+          saveAction: (final String resolvedFileName) => saveAsPng(layers, resolvedFileName),
+        );
+        break;
+      case SaveFileFormat.jpeg:
+        await _saveWithResolvedFileAccess(
+          preferences: preferences,
+          fileName: fileName,
+          saveAction: (final String resolvedFileName) => saveAsJpeg(layers, resolvedFileName),
+        );
+        break;
+      case SaveFileFormat.ora:
+        await _saveWithResolvedFileAccess(
+          preferences: preferences,
+          fileName: fileName,
+          saveAction: (final String resolvedFileName) => saveAsOra(layers, resolvedFileName),
+        );
+        break;
+      case SaveFileFormat.tiff:
+        final String normalizedFileName = normalizeTiffExportFileName(fileName);
+        await _saveWithResolvedFileAccess(
+          preferences: preferences,
+          fileName: normalizedFileName,
+          saveAction: (final String resolvedFileName) => saveAsTiff(layers, resolvedFileName),
+        );
+        if (shellProvider.loadedFileName != normalizedFileName) {
+          shellProvider.loadedFileName = normalizedFileName;
+          shellProvider.update();
+        }
+        break;
+      case SaveFileFormat.webp:
+        await _saveWithResolvedFileAccess(
+          preferences: preferences,
+          fileName: fileName,
+          saveAction: (final String resolvedFileName) => saveAsWebp(layers, resolvedFileName),
+        );
+        break;
+      case SaveFileFormat.heic:
+        await _saveWithResolvedFileAccess(
+          preferences: preferences,
+          fileName: fileName,
+          saveAction: (final String resolvedFileName) => saveAsHeic(layers, resolvedFileName),
+        );
+        break;
+    }
+  } on FileOperationException {
+    rethrow;
+  } catch (error, stackTrace) {
+    _log.severe('Error saving file to $fileName', error, stackTrace);
+    Error.throwWithStackTrace(
+      FileSaveException('$_errorFailedToSaveFilePrefix "$fileName"', cause: error),
+      stackTrace,
+    );
+  }
+}
+
+/// Saves a file through the macOS security-scoped bookmark when one exists.
+Future<void> _saveWithResolvedFileAccess({
+  required final AppPreferences preferences,
+  required final String fileName,
+  required final Future<void> Function(String) saveAction,
+}) async {
+  final String? existingBookmark = preferences.getBookmark(fileName);
+  final String? bookmark = existingBookmark ?? await MacOsBookmarkService.createBookmark(fileName);
+
+  await MacOsBookmarkService.withResolvedBookmark<void>(
+    bookmarkBase64: bookmark,
+    fallbackPath: fileName,
+    action: (final String resolvedFileName) => saveAction(resolvedFileName),
+  );
+
+  if (existingBookmark == null && bookmark != null) {
+    await preferences.addRecentFile(fileName);
   }
 }
