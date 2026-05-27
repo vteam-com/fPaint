@@ -157,6 +157,8 @@ void main() {
       final Finder innerHandle = find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}2'));
       final TestGesture gesture = await tester.startGesture(tester.getCenter(innerHandle));
       await tester.pump();
+      await gesture.moveBy(const Offset(-20, -20));
+      await tester.pump();
       await gesture.moveBy(const Offset(-500, -500));
       await tester.pump();
       await gesture.up();
@@ -164,6 +166,26 @@ void main() {
 
       expect(model.gradientStopPositions[2], greaterThanOrEqualTo(model.gradientStopPositions[1]));
       expect(model.gradientStopPositions[2], lessThanOrEqualTo(1.0));
+    });
+
+    testWidgets('inner handle movement tolerates out-of-order neighbor positions', (final WidgetTester tester) async {
+      final FillModel model = _createLinearFillModel();
+      model.gradientStopColors = <Color>[Colors.red, Colors.green, Colors.yellow, Colors.orange, Colors.blue];
+      model.gradientStopPositions = <double>[0.0, 0.5, 0.75, 0.25, 1.0];
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          fillModel: model,
+          onUpdate: (final GradientPoint _) {},
+        ),
+      );
+      await tester.pump();
+
+      final Finder innerHandle = find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}2'));
+      await tester.drag(innerHandle, const Offset(-500, -500));
+      expect(tester.takeException(), isNull);
+      expect(model.gradientStopPositions[2], greaterThanOrEqualTo(model.gradientStopPositions[3]));
+      expect(model.gradientStopPositions[2], lessThanOrEqualTo(model.gradientStopPositions[1]));
     });
 
     testWidgets('radial mode builds marching-ants path and handles', (final WidgetTester tester) async {
