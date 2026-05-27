@@ -1,6 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/brush_style.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/base_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
@@ -90,6 +92,7 @@ void showBrushStylePicker(
   showPickerDialog(
     context: context,
     title: l10n.brush,
+    titleIcon: const AppSvgIcon(icon: AppIcon.lineStyle),
     child: BrushStylePicker(
       title: l10n.brushStyle,
       value: brushStyle,

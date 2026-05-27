@@ -4,6 +4,7 @@ import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -18,6 +19,7 @@ class ColorPickerDialog extends StatefulWidget {
     required this.title,
     required this.color,
     required this.onColorChanged,
+    this.titleIcon,
   });
 
   /// The initial color to display in the picker.
@@ -28,6 +30,9 @@ class ColorPickerDialog extends StatefulWidget {
 
   /// The title of the sheet.
   final String title;
+
+  /// Optional icon shown before the title text.
+  final Widget? titleIcon;
 
   @override
   State<ColorPickerDialog> createState() => _ColorPickerDialogState();
@@ -62,16 +67,12 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
         }
       },
       child: AppBottomSheetContent(
+        title: widget.title,
+        titleIcon: widget.titleIcon,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            AppText(
-              widget.title,
-              textAlign: TextAlign.start,
-              variant: AppTextVariant.title,
-            ),
-            const SizedBox(height: AppSpacing.large),
             _buildContent(layersModel),
             AppButtonRow(
               actions: _buildActions(),
@@ -265,6 +266,7 @@ void showColorPicker({
   required final String title,
   required final Color color,
   required final ValueChanged<Color> onSelectedColor,
+  final Widget? titleIcon,
 }) {
   showAppBottomSheet<void>(
     context: context,
@@ -272,6 +274,7 @@ void showColorPicker({
     builder: (final BuildContext _) {
       return ColorPickerDialog(
         title: title,
+        titleIcon: titleIcon ?? AppSvgIcon(icon: AppIcon.waterDrop, color: color),
         color: color,
         onColorChanged: (final Color color) {
           onSelectedColor(color);

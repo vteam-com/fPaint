@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/color_helper.dart' hide hsvToColor;
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -234,6 +236,7 @@ void main() {
       'showColorPicker calls showDialog with ColorPickerDialog',
       (final WidgetTester tester) async {
         Color selectedColorOut = Colors.transparent;
+        const Key titleIconKey = Key('color_picker_title_icon');
         final ShellProvider shellProvider = ShellProvider()..deviceSizeSmall = false;
         final LayersProvider layersProvider = LayersProvider()..topColors = <ColorUsage>[];
 
@@ -266,6 +269,10 @@ void main() {
                         showColorPicker(
                           context: context,
                           title: 'Test Picker',
+                          titleIcon: const AppSvgIcon(
+                            key: titleIconKey,
+                            icon: AppIcon.colorLens,
+                          ),
                           color: Colors.red, // Initial color for the dialog's ColorSelector
                           onSelectedColor: (final Color color) {
                             selectedColorOut = color;
@@ -287,6 +294,12 @@ void main() {
         // Check if ColorPickerDialog is shown
         expect(find.byType(ColorPickerDialog), findsOneWidget);
         expect(find.text('Test Picker'), findsOneWidget);
+        expect(
+          find.byWidgetPredicate(
+            (final Widget widget) => widget is AppSvgIcon && widget.key == titleIconKey,
+          ),
+          findsOneWidget,
+        );
 
         // Simulate selecting a color by interacting with the ColorSelector's slider inside the dialog
         final Finder sliderInDialogFinder = find.descendant(

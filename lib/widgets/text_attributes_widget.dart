@@ -3,6 +3,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
@@ -40,6 +41,7 @@ class TextAttributesWidget extends StatelessWidget {
               showBrushSizePicker(
                 context: context,
                 title: l10n.fontSizeLabel,
+                titleIcon: const AppSvgIcon(icon: AppIcon.formatSize),
                 value: appProvider.textToolState.size,
                 min: 1,
                 max: AppLimits.brushSizeMax.toDouble(),

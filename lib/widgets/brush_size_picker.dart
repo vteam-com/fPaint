@@ -53,11 +53,13 @@ void showBrushSizePicker({
   required final double min,
   required final double max,
   required final ValueChanged<double> onChanged,
+  final Widget? titleIcon,
 }) {
   final AppLocalizations l10n = context.l10n;
   showPickerDialog(
     context: context,
     title: l10n.selectValue(title),
+    titleIcon: titleIcon,
     child: BrushSizePicker(
       title: title,
       value: value,

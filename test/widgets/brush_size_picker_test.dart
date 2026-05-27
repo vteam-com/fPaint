@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
@@ -214,6 +216,7 @@ void main() {
   group('showBrushSizePicker Utility', () {
     testWidgets('showBrushSizePicker calls showDialog with BrushSizePicker', (final WidgetTester tester) async {
       double changedValue = 0;
+      const Key titleIconKey = Key('brush_size_picker_title_icon');
 
       await tester.pumpWidget(
         MaterialApp(
@@ -227,6 +230,10 @@ void main() {
                     showBrushSizePicker(
                       context: context,
                       title: 'Dialog Test',
+                      titleIcon: const AppSvgIcon(
+                        key: titleIconKey,
+                        icon: AppIcon.lineWeight,
+                      ),
                       value: 25.0,
                       min: 1.0,
                       max: 50.0,
@@ -248,6 +255,12 @@ void main() {
 
       expect(find.byType(BrushSizePicker), findsOneWidget);
       expect(find.text('Select Dialog Test'), findsOneWidget); // Dialog title
+      expect(
+        find.byWidgetPredicate(
+          (final Widget widget) => widget is AppSvgIcon && widget.key == titleIconKey,
+        ),
+        findsOneWidget,
+      );
 
       // Check if BrushSizePicker inside dialog has correct initial values
       final BrushSizePicker pickerInDialog = tester.widget(find.byType(BrushSizePicker));
