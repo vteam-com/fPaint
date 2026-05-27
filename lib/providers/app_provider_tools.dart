@@ -4,9 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
+import 'package:fpaint/providers/fill_service.dart';
 
 /// Returns whether the platform-specific modifier requests origin-based flood fill.
 @visibleForTesting
@@ -27,6 +30,16 @@ bool shouldUseSelectionRegionFloodFill({
   required final bool isOriginFloodFillModifierPressed,
 }) {
   return isSelectionVisible && selectionPath != null && !isOriginFloodFillModifierPressed;
+}
+
+/// Returns whether a solid flood-fill tap should first promote the tapped
+/// region into the active selection instead of painting immediately.
+@visibleForTesting
+bool shouldCreateSelectionFromFloodFillTap({
+  required final bool isSelectionVisible,
+  required final ui.Path? selectionPath,
+}) {
+  return !isSelectionVisible || selectionPath == null;
 }
 
 /// Tool state mutations, drawing actions, and flood-fill operations.
@@ -106,8 +119,38 @@ extension AppProviderTools on AppProvider {
     );
   }
 
+  /// Creates a selection from the tapped flood-fill region when no active
+  /// selection exists yet. Returns `true` when the tap was consumed by the new
+  /// selection behavior.
+  Future<bool> prepareFloodFillSelection(final Offset position) async {
+    if (!shouldCreateSelectionFromFloodFillTap(
+      isSelectionVisible: selectorModel.isVisible,
+      selectionPath: selectorModel.path1,
+    )) {
+      return false;
+    }
+
+    final FillRegion region = await getRegionPathFromLayerImage(position);
+    if (region.path.getBounds().isEmpty) {
+      return false;
+    }
+
+    selectorModel.isVisible = true;
+    selectorModel.isDrawing = false;
+    selectorModel.path1 = region.path.shift(region.offset);
+    selectorModel.path2 = null;
+    selectorModel.points.clear();
+    selectorModel.math = SelectorMath.replace;
+    update();
+    return true;
+  }
+
   /// Performs a flood fill with a solid color.
   void floodFillSolidAction(final Offset position) async {
+    if (await prepareFloodFillSelection(position)) {
+      return;
+    }
+
     final ui.Image sourceImage = layers.selectedLayer.toImageForStorage(layers.size);
     final ui.Path? clipPath = selectorModel.isVisible ? selectorModel.path1 : null;
     final UserActionDrawing action = await fillService.createFloodFillSolidAction(

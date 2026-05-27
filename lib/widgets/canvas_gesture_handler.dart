@@ -339,6 +339,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       }
 
       if (appProvider.selectedAction == ActionType.fill) {
+        if (await appProvider.prepareFloodFillSelection(adjustedPosition)) {
+          return;
+        }
+
         if (appProvider.fillModel.mode == FillMode.solid) {
           appProvider.fillModel.gradientPoints.clear();
           appProvider.floodFillSolidAction(adjustedPosition);

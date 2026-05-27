@@ -9,6 +9,8 @@ import 'package:fpaint/providers/fill_service.dart';
 
 const Rect _selectionRegionOverrideRect = Rect.fromLTWH(1, 1, 3, 3);
 const Offset _selectionRegionTapPosition = Offset(5, 5);
+const Rect _offsetGradientRegionOverrideRect = Rect.fromLTWH(10, 20, 20, 20);
+const Size _offsetGradientImageSize = Size(40, 50);
 const Size _ringImageSize = Size(8, 8);
 const Rect _ringOuterRect = Rect.fromLTWH(1, 1, 6, 6);
 const Rect _ringInnerRect = Rect.fromLTWH(3, 3, 2, 2);
@@ -382,6 +384,41 @@ void main() {
       expect(result.path, isNotNull);
       expect(result.path!.getBounds(), _selectionRegionOverrideRect);
     });
+
+    test('uses bounds-relative alignment for linear gradients on offset regions', () async {
+      final ui.Image image = await _recordTestImage(
+        size: _offsetGradientImageSize,
+        painter: (final Canvas canvas) {
+          canvas.drawRect(
+            Rect.fromLTWH(0, 0, _offsetGradientImageSize.width, _offsetGradientImageSize.height),
+            Paint()..color = const Color(0xFFFFFFFF),
+          );
+        },
+      );
+      final FillModel fillModel = FillModel();
+      final ui.Path overridePath = ui.Path()..addRect(_offsetGradientRegionOverrideRect);
+      fillModel.mode = FillMode.linear;
+      fillModel.addPoint(
+        GradientPoint(offset: _offsetGradientRegionOverrideRect.topLeft, color: const Color(0xFFFF0000)),
+      );
+      fillModel.addPoint(
+        GradientPoint(offset: _offsetGradientRegionOverrideRect.bottomRight, color: const Color(0xFF0000FF)),
+      );
+
+      final UserActionDrawing result = await fillService.createFloodFillGradientAction(
+        sourceImage: image,
+        fillModel: fillModel,
+        tolerance: 50,
+        clipPath: null,
+        toCanvas: (final Offset o) => o,
+        regionPathOverride: overridePath,
+      );
+
+      final LinearGradient gradient = result.gradient! as LinearGradient;
+      expect(gradient.begin, const Alignment(-1, -1));
+      expect(gradient.end, const Alignment(1, 1));
+    });
+
     test('uses toCanvas callback to transform coordinates', () async {
       final ui.Image image = await _createTestImage();
       final FillModel fillModel = FillModel();
