@@ -54,6 +54,7 @@ class AppBottomSheetContent extends StatelessWidget {
     required this.child,
     this.title,
     this.titleIcon,
+    this.titleTrailing,
   });
 
   /// The content to display inside the sheet scaffolding.
@@ -64,6 +65,9 @@ class AppBottomSheetContent extends StatelessWidget {
 
   /// Optional icon shown before the title text.
   final Widget? titleIcon;
+
+  /// Optional trailing widget shown on the title row.
+  final Widget? titleTrailing;
 
   @override
   Widget build(final BuildContext context) {
@@ -77,17 +81,16 @@ class AppBottomSheetContent extends StatelessWidget {
                 style: AppTextStyle.title,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: AppSpacing.large),
-                  child: titleIcon == null
-                      ? Text(title!)
-                      : Row(
-                          spacing: AppSpacing.medium,
-                          children: <Widget>[
-                            titleIcon!,
-                            Expanded(
-                              child: Text(title!),
-                            ),
-                          ],
-                        ),
+                  child: Row(
+                    spacing: AppSpacing.medium,
+                    children: <Widget>[
+                      ?titleIcon,
+                      Expanded(
+                        child: Text(title!),
+                      ),
+                      ?titleTrailing,
+                    ],
+                  ),
                 ),
               ),
               child,
