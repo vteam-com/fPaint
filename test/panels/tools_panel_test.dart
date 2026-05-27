@@ -44,10 +44,11 @@ void main() {
   group('ToolsPanel fill halftone slider', () {
     const int halfHalftonePercent = AppLimits.percentMax ~/ AppMath.pair;
 
-    testWidgets('is shown for solid and gradient fill modes', (final WidgetTester tester) async {
+    testWidgets('is available for solid and gradient fill modes while disabled', (final WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
-      expect(find.byKey(Keys.toolFillHalftoneSlider), findsOneWidget);
+      expect(find.byKey(Keys.toolFillHalftoneToggle), findsOneWidget);
+      expect(find.byKey(Keys.toolFillHalftoneSlider), findsNothing);
       expect(
         find.byWidgetPredicate(
           (final Widget widget) => widget is AppButtonIcon && widget.icon == AppIcon.halftone,
@@ -59,13 +60,15 @@ void main() {
       appProvider.update();
       await tester.pump();
 
-      expect(find.byKey(Keys.toolFillHalftoneSlider), findsOneWidget);
+      expect(find.byKey(Keys.toolFillHalftoneToggle), findsOneWidget);
+      expect(find.byKey(Keys.toolFillHalftoneSlider), findsNothing);
 
       appProvider.fillModel.mode = FillMode.radial;
       appProvider.update();
       await tester.pump();
 
-      expect(find.byKey(Keys.toolFillHalftoneSlider), findsOneWidget);
+      expect(find.byKey(Keys.toolFillHalftoneToggle), findsOneWidget);
+      expect(find.byKey(Keys.toolFillHalftoneSlider), findsNothing);
     });
 
     testWidgets('does not show a second solid color control when halftone is enabled', (
@@ -76,7 +79,7 @@ void main() {
       expect(find.byKey(Keys.toolPanelHalftoneDotColor), findsNothing);
 
       await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       final AppSlider halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
       halftoneSlider.onChanged!(halfHalftonePercent.toDouble());
@@ -94,19 +97,25 @@ void main() {
     testWidgets('starts disabled with a retained default slider value', (final WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
-      final AppSlider halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
-
       expect(appProvider.fillModel.halftoneMaxDotSizePercent, AppHalftone.defaultDotSizePercent);
       expect(appProvider.fillModel.halftoneEnabled, isFalse);
+
+      expect(find.byKey(Keys.toolFillHalftoneSlider), findsNothing);
+
+      await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
+      await tester.pumpAndSettle();
+
+      final AppSlider halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
+
       expect(halftoneSlider.value, AppHalftone.defaultDotSizePercent.toDouble());
-      expect(halftoneSlider.onChanged, isNull);
+      expect(halftoneSlider.onChanged, isNotNull);
     });
 
     testWidgets('retains the slider value when halftone is toggled off', (final WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
       await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       AppSlider halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
       halftoneSlider.onChanged!(halfHalftonePercent.toDouble());
@@ -116,17 +125,14 @@ void main() {
       expect(appProvider.fillModel.halftoneEnabled, isTrue);
 
       await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
-      await tester.pump();
-
-      halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
+      await tester.pumpAndSettle();
 
       expect(appProvider.fillModel.halftoneMaxDotSizePercent, halfHalftonePercent);
       expect(appProvider.fillModel.halftoneEnabled, isFalse);
-      expect(halftoneSlider.value, halfHalftonePercent.toDouble());
-      expect(halftoneSlider.onChanged, isNull);
+      expect(find.byKey(Keys.toolFillHalftoneSlider), findsNothing);
 
       await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       halftoneSlider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHalftoneSlider));
 
