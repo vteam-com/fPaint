@@ -4,6 +4,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.1] - 2026-05-27
+
+### Add
+
+- New Halftone and Solid Fill tool icons
+- Duplicate move workflow with updated shortcut help
+- Enable/disable toggle for tool attributes
+
+### Fix
+
+- HEIC decoding now uses the `image` package backend for more reliable imports
+- AVIF file loading
+- macOS MRU file loading
+- Gradient color ordering in the side panel
+- Tool attribute secondary controls now collapse correctly while disabled
+
 ## [1.8.0] - 2026-05-25
 
 ### Update
