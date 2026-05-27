@@ -53,19 +53,64 @@ class HalftoneSizePickerState extends BasePickerState<int> {
 void showHalftoneSizePicker({
   required final BuildContext context,
   required final int value,
+  required final bool enabled,
   required final ValueChanged<int> onChanged,
+  required final ValueChanged<bool> onEnabledChanged,
 }) {
   final AppLocalizations l10n = context.l10n;
-  showPickerDialog(
+  int currentValue = value;
+  bool isEnabled = enabled;
+
+  showAppBottomSheet<void>(
     context: context,
-    title: l10n.toolHalftone,
-    titleIcon: const AppSvgIcon(icon: AppIcon.halftone),
-    child: HalftoneSizePicker(
-      title: l10n.toolHalftone,
-      value: value,
-      onChanged: (final int newValue) {
-        onChanged(newValue);
-      },
-    ),
+    barrierColor: AppColors.transparent,
+    builder: (final BuildContext _) {
+      return StatefulBuilder(
+        builder: (final BuildContext _, final void Function(void Function()) setSheetState) {
+          return AppBottomSheetContent(
+            title: l10n.toolHalftone,
+            titleIcon: const AppSvgIcon(icon: AppIcon.halftone),
+            titleTrailing: AppSwitch(
+              key: Keys.toolFillHalftoneToggle,
+              value: isEnabled,
+              onChanged: (final bool nextValue) {
+                setSheetState(() {
+                  isEnabled = nextValue;
+                });
+                onEnabledChanged(nextValue);
+              },
+            ),
+            child: AnimatedSwitcher(
+              duration: AppDefaults.toolPanelRevealAnimationDuration,
+              reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (final Widget child, final Animation<double> animation) {
+                return ClipRect(
+                  child: FadeTransition(
+                    opacity: animation,
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      child: child,
+                    ),
+                  ),
+                );
+              },
+              child: isEnabled
+                  ? HalftoneSizePicker(
+                      key: const ValueKey<String>('halftone_size_picker_enabled'),
+                      title: l10n.toolHalftone,
+                      value: currentValue,
+                      onChanged: (final int newValue) {
+                        currentValue = newValue;
+                        onChanged(newValue);
+                      },
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          );
+        },
+      );
+    },
   );
 }

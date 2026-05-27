@@ -11,6 +11,7 @@ import 'package:fpaint/widgets/app_bottom_sheet.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_slider.dart';
+import 'package:fpaint/widgets/halftone_size_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -165,6 +166,49 @@ void main() {
           ),
         ),
         findsOneWidget,
+      );
+    });
+
+    testWidgets('shows and drives the halftone toggle inside the bottom sheet', (final WidgetTester tester) async {
+      await pumpToolsPanel(tester, minimal: true);
+
+      expect(appProvider.fillModel.halftoneEnabled, isFalse);
+
+      await tester.tap(
+        find.byWidgetPredicate(
+          (final Widget widget) => widget is AppButtonIcon && widget.icon == AppIcon.halftone,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final Finder sheet = find.byType(AppBottomSheetContent);
+      final Finder sheetToggle = find.descendant(
+        of: sheet,
+        matching: find.byKey(Keys.toolFillHalftoneToggle),
+      );
+
+      expect(sheetToggle, findsOneWidget);
+      expect(
+        find.descendant(of: sheet, matching: find.byType(HalftoneSizePicker)),
+        findsNothing,
+      );
+
+      await tester.tap(sheetToggle);
+      await tester.pumpAndSettle();
+
+      expect(appProvider.fillModel.halftoneEnabled, isTrue);
+      expect(
+        find.descendant(of: sheet, matching: find.byType(HalftoneSizePicker)),
+        findsOneWidget,
+      );
+
+      await tester.tap(sheetToggle);
+      await tester.pumpAndSettle();
+
+      expect(appProvider.fillModel.halftoneEnabled, isFalse);
+      expect(
+        find.descendant(of: sheet, matching: find.byType(HalftoneSizePicker)),
+        findsNothing,
       );
     });
   });

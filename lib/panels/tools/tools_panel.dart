@@ -739,7 +739,9 @@ class ToolsPanel extends StatelessWidget {
             showHalftoneSizePicker(
               context: context,
               value: halftonePercent,
+              enabled: halftoneEnabled,
               onChanged: updateHalftonePercent,
+              onEnabledChanged: updateHalftoneEnabled,
             );
           },
         ),
