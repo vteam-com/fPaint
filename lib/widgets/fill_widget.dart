@@ -264,12 +264,20 @@ class _FillWidgetState extends State<FillWidget> {
     }
 
     final double deltaProjected = ((delta.dx * axis.dx) + (delta.dy * axis.dy)) / axisLenSquared;
-    final double lowerBound = positions[stopIndex - 1];
-    final double upperBound = positions[stopIndex + 1];
+    final double currentPosition = positions[stopIndex];
+    final double previousNeighbor = positions[stopIndex - AppMath.one];
+    final double nextNeighbor = positions[stopIndex + AppMath.one];
+    if (!deltaProjected.isFinite || !currentPosition.isFinite || !previousNeighbor.isFinite || !nextNeighbor.isFinite) {
+      return;
+    }
+
+    final bool neighborsInOrder = previousNeighbor <= nextNeighbor;
+    final double lowerBound = neighborsInOrder ? previousNeighbor : nextNeighbor;
+    final double upperBound = neighborsInOrder ? nextNeighbor : previousNeighbor;
 
     setState(() {
       showDetails = true;
-      final double next = positions[stopIndex] + deltaProjected;
+      final double next = currentPosition + deltaProjected;
       positions[stopIndex] = next.clamp(lowerBound, upperBound);
       positions[0] = AppMath.zero.toDouble();
       positions[positions.length - 1] = AppVisual.full;

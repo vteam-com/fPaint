@@ -166,8 +166,8 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
     final bool isLast = index == _stops.length - 1;
     final bool isEndpoint = isFirst || isLast;
     final bool canRemove = canRemoveAny && !isEndpoint;
-    final bool canMoveUp = index > AppMath.pair - 1;
-    final bool canMoveDown = index < _stops.length - AppMath.pair;
+    final bool canMoveUp = _canMoveUp(index);
+    final bool canMoveDown = _canMoveDown(index);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.small),
@@ -225,6 +225,24 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
     );
   }
 
+  /// Returns whether the stop at [index] can move toward the end.
+  ///
+  /// Any stop except the last can swap with the next slot. When that swap
+  /// touches an endpoint, the endpoint percentages remain anchored at 0% and
+  /// 100% while the adjacent colors exchange places.
+  bool _canMoveDown(final int index) {
+    return index < _stops.length - AppMath.one;
+  }
+
+  /// Returns whether the stop at [index] can move toward the start.
+  ///
+  /// Any stop except the first can swap with the previous slot. When that swap
+  /// touches an endpoint, the endpoint percentages remain anchored at 0% and
+  /// 100% while the adjacent colors exchange places.
+  bool _canMoveUp(final int index) {
+    return index > AppMath.zero;
+  }
+
   void _changeColor(final int index, final Color newColor) {
     setState(() {
       _stops[index] = newColor;
@@ -276,11 +294,11 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
 
   /// Moves the stop at [index] one position toward the end of the list.
   void _moveDown(final int index) {
-    if (index >= _stops.length - AppMath.pair) {
+    if (!_canMoveDown(index)) {
       return;
     }
     setState(() {
-      _swapStops(index, index + 1);
+      _swapAdjacentStops(index, index + AppMath.one);
 
       _ensureEndpointPositions();
     });
@@ -290,11 +308,11 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
 
   /// Moves the stop at [index] one position toward the start of the list.
   void _moveUp(final int index) {
-    if (index <= AppMath.zero + 1) {
+    if (!_canMoveUp(index)) {
       return;
     }
     setState(() {
-      _swapStops(index - 1, index);
+      _swapAdjacentStops(index - AppMath.one, index);
 
       _ensureEndpointPositions();
     });
@@ -363,6 +381,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
     return AppButtonIcon(
       key: key,
       icon: icon,
+      color: enabled ? null : AppButtonContentSemantic.disabled.color,
       tooltip: null,
       constraints: const BoxConstraints(),
       padding: const EdgeInsets.all(AppSpacing.small),
@@ -373,15 +392,15 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
 
   List<Color> get _stops => widget.fillModel.gradientStopColors;
 
-  /// Swaps both color and percentage between indices [a] and [b].
-  void _swapStops(final int a, final int b) {
+  /// Swaps adjacent stop colors between indices [a] and [b].
+  ///
+  /// Stop positions stay anchored to their slots so the gradient stop list
+  /// remains monotonic after reordering and on-canvas handle dragging keeps
+  /// valid neighbor bounds.
+  void _swapAdjacentStops(final int a, final int b) {
     final Color tmpColor = _stops[b];
     _stops[b] = _stops[a];
     _stops[a] = tmpColor;
-
-    final double tmpPos = _positions[b];
-    _positions[b] = _positions[a];
-    _positions[a] = tmpPos;
   }
 
   /// Rebuilds [_posControllers] to match the current positions list.
