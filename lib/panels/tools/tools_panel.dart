@@ -728,7 +728,7 @@ class ToolsPanel extends StatelessWidget {
         onEnabledChanged: updateHalftoneEnabled,
         enabledToggleKey: Keys.toolFillHalftoneToggle,
         childLeft: AppButtonIcon(
-          icon: AppIcon.checkCircle,
+          icon: AppIcon.halftone,
           isSelected: halftoneEnabled,
           constraints: minimal ? const BoxConstraints() : null,
           padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
