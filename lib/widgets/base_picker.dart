@@ -103,24 +103,16 @@ Future<void> showPickerDialog({
   required final BuildContext context,
   required final String title,
   required final Widget child,
+  final Widget? titleIcon,
 }) async {
   await showAppBottomSheet<void>(
     context: context,
     barrierColor: AppColors.transparent,
     builder: (final BuildContext _) {
       return AppBottomSheetContent(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            AppText(
-              title,
-              variant: AppTextVariant.title,
-            ),
-            const SizedBox(height: AppSpacing.large),
-            child,
-          ],
-        ),
+        title: title,
+        titleIcon: titleIcon,
+        child: child,
       );
     },
   );

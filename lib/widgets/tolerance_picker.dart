@@ -1,6 +1,8 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/base_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
@@ -52,6 +54,7 @@ void showTolerancePicker(
   showPickerDialog(
     context: context,
     title: l10n.colorTolerance,
+    titleIcon: const AppSvgIcon(icon: AppIcon.support),
     child: TolerancePicker(
       title: l10n.tolerance,
       value: value.toInt(),

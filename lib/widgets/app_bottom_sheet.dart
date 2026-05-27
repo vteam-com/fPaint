@@ -52,13 +52,48 @@ class AppBottomSheetContent extends StatelessWidget {
   const AppBottomSheetContent({
     super.key,
     required this.child,
+    this.title,
+    this.titleIcon,
   });
 
   /// The content to display inside the sheet scaffolding.
   final Widget child;
 
+  /// Optional title displayed above the sheet content.
+  final String? title;
+
+  /// Optional icon shown before the title text.
+  final Widget? titleIcon;
+
   @override
   Widget build(final BuildContext context) {
+    final Widget content = title == null
+        ? child
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              DefaultTextStyle(
+                style: AppTextStyle.title,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.large),
+                  child: titleIcon == null
+                      ? Text(title!)
+                      : Row(
+                          spacing: AppSpacing.medium,
+                          children: <Widget>[
+                            titleIcon!,
+                            Expanded(
+                              child: Text(title!),
+                            ),
+                          ],
+                        ),
+                ),
+              ),
+              child,
+            ],
+          );
+
     return SafeArea(
       child: SingleChildScrollView(
         child: Padding(
@@ -66,7 +101,7 @@ class AppBottomSheetContent extends StatelessWidget {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: AppLayout.modalSheetContentMaxWidth),
-              child: child,
+              child: content,
             ),
           ),
         ),
