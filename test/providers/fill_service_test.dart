@@ -9,6 +9,20 @@ import 'package:fpaint/providers/fill_service.dart';
 
 const Rect _selectionRegionOverrideRect = Rect.fromLTWH(1, 1, 3, 3);
 const Offset _selectionRegionTapPosition = Offset(5, 5);
+const Size _ringImageSize = Size(8, 8);
+const Rect _ringOuterRect = Rect.fromLTWH(1, 1, 6, 6);
+const Rect _ringInnerRect = Rect.fromLTWH(3, 3, 2, 2);
+const Offset _ringSeedPosition = Offset(1, 1);
+const Rect _ringLocalBounds = Rect.fromLTWH(0, 0, 6, 6);
+const Offset _ringFilledLocalPoint = Offset(0.5, 0.5);
+const Offset _ringHoleLocalPoint = Offset(3, 3);
+const Size _diagonalImageSize = Size(3, 3);
+const Rect _firstDiagonalPixelRect = Rect.fromLTWH(0, 0, 1, 1);
+const Rect _secondDiagonalPixelRect = Rect.fromLTWH(1, 1, 1, 1);
+const Offset _diagonalSeedPosition = Offset.zero;
+const Rect _singlePixelLocalBounds = Rect.fromLTWH(0, 0, 1, 1);
+const Offset _singlePixelLocalPoint = Offset(0.5, 0.5);
+const Offset _diagonalExcludedLocalPoint = Offset(1.5, 1.5);
 
 void main() {
   late FillService fillService;
@@ -109,6 +123,34 @@ void main() {
         tolerance: 50,
       );
       expect(region.path, isNotNull);
+    });
+
+    test('preserves enclosed holes in the traced region path', () async {
+      final ui.Image image = await _createRingTestImage();
+      final FillRegion region = await fillService.getRegionPathFromImage(
+        image: image,
+        position: _ringSeedPosition,
+        tolerance: AppMath.zero,
+      );
+
+      expect(region.offset, _ringOuterRect.topLeft);
+      expect(region.path.getBounds(), _ringLocalBounds);
+      expect(region.path.contains(_ringFilledLocalPoint), isTrue);
+      expect(region.path.contains(_ringHoleLocalPoint), isFalse);
+    });
+
+    test('does not bridge diagonal-only contact into the selected path', () async {
+      final ui.Image image = await _createDiagonalTouchImage();
+      final FillRegion region = await fillService.getRegionPathFromImage(
+        image: image,
+        position: _diagonalSeedPosition,
+        tolerance: AppMath.zero,
+      );
+
+      expect(region.offset, Offset.zero);
+      expect(region.path.getBounds(), _singlePixelLocalBounds);
+      expect(region.path.contains(_singlePixelLocalPoint), isTrue);
+      expect(region.path.contains(_diagonalExcludedLocalPoint), isFalse);
     });
   });
 
@@ -368,12 +410,67 @@ void main() {
 
 /// Creates a small solid-color test image (20x20 white pixels).
 Future<ui.Image> _createTestImage() async {
+  return _recordTestImage(
+    size: const Size(20, 20),
+    painter: (final Canvas canvas) {
+      canvas.drawRect(
+        const Rect.fromLTWH(0, 0, 20, 20),
+        Paint()..color = const Color(0xFFFFFFFF),
+      );
+    },
+  );
+}
+
+/// Creates a white ring with a black hole for contour-path testing.
+Future<ui.Image> _createRingTestImage() async {
+  return _recordTestImage(
+    size: _ringImageSize,
+    painter: (final Canvas canvas) {
+      canvas.drawRect(
+        Rect.fromLTWH(0, 0, _ringImageSize.width, _ringImageSize.height),
+        Paint()..color = const Color(0xFF000000),
+      );
+      canvas.drawRect(
+        _ringOuterRect,
+        Paint()..color = const Color(0xFFFFFFFF),
+      );
+      canvas.drawRect(
+        _ringInnerRect,
+        Paint()..color = const Color(0xFF000000),
+      );
+    },
+  );
+}
+
+/// Creates two white pixels that only touch at one diagonal corner.
+Future<ui.Image> _createDiagonalTouchImage() async {
+  return _recordTestImage(
+    size: _diagonalImageSize,
+    painter: (final Canvas canvas) {
+      canvas.drawRect(
+        Rect.fromLTWH(0, 0, _diagonalImageSize.width, _diagonalImageSize.height),
+        Paint()..color = const Color(0xFF000000),
+      );
+      canvas.drawRect(
+        _firstDiagonalPixelRect,
+        Paint()..color = const Color(0xFFFFFFFF),
+      );
+      canvas.drawRect(
+        _secondDiagonalPixelRect,
+        Paint()..color = const Color(0xFFFFFFFF),
+      );
+    },
+  );
+}
+
+/// Records one synthetic test image at [size] using [painter].
+Future<ui.Image> _recordTestImage({
+  required final Size size,
+  required final void Function(Canvas canvas) painter,
+}) async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final Canvas canvas = Canvas(recorder);
-  canvas.drawRect(
-    const Rect.fromLTWH(0, 0, 20, 20),
-    Paint()..color = const Color(0xFFFFFFFF),
-  );
+  painter(canvas);
   final ui.Picture picture = recorder.endRecording();
-  return picture.toImage(20, 20);
+  return picture.toImage(size.width.toInt(), size.height.toInt());
 }
