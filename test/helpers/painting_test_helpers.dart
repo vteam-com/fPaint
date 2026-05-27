@@ -605,6 +605,31 @@ Future<void> selectCircleArea(
   await tester.pump();
 }
 
+/// Selects a straight-edge region on the canvas by clicking each vertex and
+/// closing the marquee on the starting point.
+Future<void> selectLineRegion(
+  final WidgetTester tester, {
+  required final List<Offset> points,
+}) async {
+  expect(
+    points.length,
+    greaterThanOrEqualTo(_lassoSelectionMinimumPointCount),
+    reason: 'Straight-line region selection requires at least three vertices',
+  );
+
+  await tapByKey(tester, Keys.toolSelector);
+  await tester.pump();
+
+  await tapByKey(tester, Keys.toolSelectorModeLine);
+  await tester.pump();
+
+  for (final Offset point in points) {
+    await tapLikeHuman(tester, point);
+  }
+  await tapLikeHuman(tester, points.first);
+  await tester.pump();
+}
+
 /// Selects a free-style lasso area on the canvas.
 Future<void> selectLassoArea(
   final WidgetTester tester, {

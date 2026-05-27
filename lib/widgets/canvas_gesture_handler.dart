@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -239,6 +240,13 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     if (appProvider.eyeDropPositionForFill != null) {
       appProvider.eyeDropPositionForFill = event.localPosition;
       appProvider.update();
+      return;
+    }
+
+    if (isSelectionActive &&
+        appProvider.selectorModel.mode == SelectorMode.line &&
+        appProvider.selectorModel.isDrawing) {
+      appProvider.selectorCreationPreview(adjustedPosition);
       return;
     }
 

@@ -109,6 +109,9 @@ class SelectorModel extends VisibleModel {
         points.add(p1);
         break;
 
+      case SelectorMode.line:
+        break;
+
       case SelectorMode.lasso:
         points.add(p1);
 
@@ -139,6 +142,9 @@ class SelectorModel extends VisibleModel {
           } else {
             this.path2 = Path()..addOval(Rect.fromPoints(points.first, p2));
           }
+          break;
+
+        case SelectorMode.line:
           break;
 
         case SelectorMode.lasso:
@@ -191,12 +197,97 @@ class SelectorModel extends VisibleModel {
     }
     this.points.clear();
   }
+
+  /// Adds a vertex to the straight-line region selection.
+  ///
+  /// Returns `true` when the new point closes the polygon back to the first
+  /// vertex and the selection can be committed.
+  bool addStraightLineRegionPoint(
+    final Offset position, {
+    required final double closeDistance,
+  }) {
+    isVisible = true;
+
+    if (points.isEmpty) {
+      points.add(position);
+      _setWorkingPath(_buildStraightLineRegionPath());
+      return false;
+    }
+
+    if (_isClosingStraightLineRegion(position, closeDistance: closeDistance)) {
+      _setWorkingPath(_buildStraightLineRegionPath(closePath: true));
+      return true;
+    }
+
+    points.add(position);
+    _setWorkingPath(_buildStraightLineRegionPath());
+    return false;
+  }
+
+  /// Updates the preview edge for the straight-line region selection.
+  void updateStraightLineRegionPreview(
+    final Offset position, {
+    required final double closeDistance,
+  }) {
+    if (points.isEmpty) {
+      return;
+    }
+
+    final bool closePath = _isClosingStraightLineRegion(position, closeDistance: closeDistance);
+    _setWorkingPath(
+      _buildStraightLineRegionPath(
+        previewPoint: closePath ? null : position,
+        closePath: closePath,
+      ),
+    );
+  }
+
+  void _setWorkingPath(final Path path) {
+    if (math == SelectorMath.replace) {
+      path1 = path;
+      path2 = null;
+      return;
+    }
+
+    path2 = path;
+  }
+
+  bool _isClosingStraightLineRegion(
+    final Offset position, {
+    required final double closeDistance,
+  }) {
+    return points.length >= AppMath.triple && (position - points.first).distance <= closeDistance;
+  }
+
+  /// Builds the current straight-line region path from committed vertices plus
+  /// an optional preview edge, closing the polygon only when requested.
+  Path _buildStraightLineRegionPath({
+    final Offset? previewPoint,
+    final bool closePath = false,
+  }) {
+    if (points.isEmpty) {
+      return Path();
+    }
+
+    final Path path = Path()..moveTo(points.first.dx, points.first.dy);
+    for (final Offset point in points.skip(1)) {
+      path.lineTo(point.dx, point.dy);
+    }
+    if (previewPoint != null) {
+      path.lineTo(previewPoint.dx, previewPoint.dy);
+    }
+    if (closePath) {
+      path.close();
+    }
+    return path;
+  }
 }
 
 /// Enum that represents the selector mode.
 enum SelectorMode {
   rectangle,
   circle,
+  line,
   lasso,
   wand,
 }

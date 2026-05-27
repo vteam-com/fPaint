@@ -80,6 +80,7 @@ enum AppIcon {
   selectorCancel('assets/icons/selector_cancel.svg'),
   selectorCircle('assets/icons/selector_circle.svg'),
   selectorInvert('assets/icons/selector_invert.svg'),
+  selectorPolygon('assets/icons/selector_polygon.svg'),
   selectorRemove('assets/icons/selector_remove.svg'),
   selectorReplace('assets/icons/selector_replace.svg'),
   selectorSquare('assets/icons/selector_square.svg'),

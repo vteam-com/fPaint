@@ -18,6 +18,10 @@ import 'package:vector_math/vector_math_64.dart';
 
 /// Selection, region, transform, effect, and crop operations.
 extension AppProviderSelection on AppProvider {
+  double get _straightLineRegionCloseDistance {
+    return AppInteraction.selectionHandleSize / layers.scale;
+  }
+
   /// Toggles selection overlay behavior from the FAB without coupling to tool state.
   void toggleSelectionOverlayFromFab() {
     if (selectorModel.isVisible) {
@@ -696,25 +700,55 @@ extension AppProviderSelection on AppProvider {
   /// Starts a selector creation.
   void selectorCreationStart(final Offset position) {
     cancelEffectPreview();
-    selectorModel.isDrawing = true;
     if (selectorModel.mode == SelectorMode.wand) {
+      selectorModel.isDrawing = true;
       wandSelectionRequestVersion += AppMath.one;
       pendingWandSelectionPosition = position;
       unawaited(_processPendingWandSelectionRequests());
-    } else {
-      selectorModel.addP1(position);
-      update();
+      return;
     }
+
+    if (selectorModel.mode == SelectorMode.line) {
+      final bool isClosed = selectorModel.addStraightLineRegionPoint(
+        position,
+        closeDistance: _straightLineRegionCloseDistance,
+      );
+      selectorModel.isDrawing = !isClosed;
+      if (isClosed) {
+        selectorModel.applyMath();
+      }
+      update();
+      return;
+    }
+
+    selectorModel.isDrawing = true;
+    selectorModel.addP1(position);
+    update();
   }
 
   /// Adds an additional point to the selector creation.
   void selectorCreationAdditionalPoint(final Offset position) {
     if (selectorModel.mode == SelectorMode.wand) {
       // Ignore since the PointerDown already did the job
+    } else if (selectorModel.mode == SelectorMode.line) {
+      // Ignore since straight-line region selection commits only on clicks.
     } else {
       selectorModel.addP2(position);
       update();
     }
+  }
+
+  /// Updates the selector preview while a multi-click straight-line region is in progress.
+  void selectorCreationPreview(final Offset position) {
+    if (selectorModel.mode != SelectorMode.line || !selectorModel.isDrawing) {
+      return;
+    }
+
+    selectorModel.updateStraightLineRegionPreview(
+      position,
+      closeDistance: _straightLineRegionCloseDistance,
+    );
+    update();
   }
 
   /// Ends the selector creation.
@@ -722,6 +756,10 @@ extension AppProviderSelection on AppProvider {
     if (selectorModel.mode == SelectorMode.wand) {
       selectorModel.isDrawing = false;
       update();
+      return;
+    }
+
+    if (selectorModel.mode == SelectorMode.line) {
       return;
     }
 

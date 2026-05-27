@@ -61,6 +61,14 @@ void main() {
       expect(appProvider.selectorModel.isDrawing, isTrue);
     });
 
+    test('line mode creates path on start', () {
+      appProvider.selectorModel.mode = SelectorMode.line;
+      appProvider.selectorCreationStart(const Offset(10, 10));
+      expect(appProvider.selectorModel.isDrawing, isTrue);
+      expect(appProvider.selectorModel.path1, isNotNull);
+      expect(appProvider.selectorModel.points, <Offset>[const Offset(10, 10)]);
+    });
+
     test('lasso mode creates path on start', () {
       appProvider.selectorModel.mode = SelectorMode.lasso;
       appProvider.selectorCreationStart(const Offset(10, 10));
@@ -73,6 +81,16 @@ void main() {
       appProvider.selectorCreationAdditionalPoint(const Offset(50, 50));
       appProvider.selectorCreationEnd();
       expect(appProvider.selectorModel.isDrawing, isFalse);
+    });
+
+    test('line mode stays active after pointer end until it closes', () {
+      appProvider.selectorModel.mode = SelectorMode.line;
+      appProvider.selectorCreationStart(const Offset(10, 10));
+
+      appProvider.selectorCreationEnd();
+
+      expect(appProvider.selectorModel.isDrawing, isTrue);
+      expect(appProvider.selectorModel.points, hasLength(1));
     });
   });
 
@@ -93,11 +111,46 @@ void main() {
       expect(appProvider.selectorModel.points.length, 3);
     });
 
+    test('line mode ignores drag updates between clicks', () {
+      appProvider.selectorModel.mode = SelectorMode.line;
+      appProvider.selectorCreationStart(const Offset(10, 10));
+      appProvider.selectorCreationAdditionalPoint(const Offset(80, 10));
+      expect(appProvider.selectorModel.path1, isNotNull);
+      expect(appProvider.selectorModel.points, <Offset>[const Offset(10, 10)]);
+    });
+
     test('wand mode ignores additional points', () {
       appProvider.selectorModel.mode = SelectorMode.wand;
       // Start doesn't add points for wand (it uses async fill)
       appProvider.selectorCreationAdditionalPoint(const Offset(50, 50));
       // Should not throw
+    });
+  });
+
+  group('selectorCreationPreview', () {
+    test('line mode previews the next edge while drawing', () {
+      appProvider.selectorModel.mode = SelectorMode.line;
+      appProvider.selectorCreationStart(const Offset(10, 10));
+      appProvider.selectorCreationStart(const Offset(80, 10));
+
+      appProvider.selectorCreationPreview(const Offset(80, 80));
+
+      expect(appProvider.selectorModel.path1, isNotNull);
+      expect(appProvider.selectorModel.boundingRect, const Rect.fromLTWH(10, 10, 70, 70));
+    });
+
+    test('line mode closes when clicking back near the first point', () {
+      appProvider.selectorModel.mode = SelectorMode.line;
+      appProvider.selectorCreationStart(const Offset(10, 10));
+      appProvider.selectorCreationStart(const Offset(80, 10));
+      appProvider.selectorCreationStart(const Offset(80, 80));
+
+      appProvider.selectorCreationStart(const Offset(12, 12));
+
+      expect(appProvider.selectorModel.isDrawing, isFalse);
+      expect(appProvider.selectorModel.points, isEmpty);
+      expect(appProvider.selectorModel.path1, isNotNull);
+      expect(appProvider.selectorModel.boundingRect, const Rect.fromLTWH(10, 10, 70, 70));
     });
   });
 

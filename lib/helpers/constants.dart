@@ -667,6 +667,7 @@ class Keys {
   static const Key toolSelector = Key('tool-selector');
   static const Key toolSelectorModeRectangle = Key('tool-selector-mode-rectangle');
   static const Key toolSelectorModeCircle = Key('tool-selector-mode-circle');
+  static const Key toolSelectorModeLine = Key('tool-selector-mode-line');
   static const Key toolSelectorModeLasso = Key('tool-selector-mode-lasso');
   static const Key toolSelectorModeWand = Key('tool-selector-mode-wand');
   static const Key toolSelectorCancel = Key('tool-selector-cancel');

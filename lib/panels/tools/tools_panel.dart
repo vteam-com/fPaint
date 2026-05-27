@@ -429,6 +429,20 @@ class ToolsPanel extends StatelessWidget {
                   },
                 ),
                 //
+                // Selection using line region
+                //
+                _buildActionPicker(
+                  key: Keys.toolSelectorModeLine,
+                  minimal: minimal,
+                  name: l10n.toolLine,
+                  icon: AppIcon.selectorPolygon,
+                  isSelected: appProvider.selectorModel.mode == SelectorMode.line,
+                  onPressed: () {
+                    appProvider.selectorModel.mode = SelectorMode.line;
+                    appProvider.update();
+                  },
+                ),
+                //
                 // Selection using Drawing
                 //
                 _buildActionPicker(
