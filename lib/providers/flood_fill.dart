@@ -1,4 +1,5 @@
 // ignore: fcheck_one_class_per_file
+import 'dart:collection';
 import 'dart:isolate';
 import 'dart:typed_data';
 
@@ -79,6 +80,44 @@ class _FloodFillTaskOutput {
   final int left;
   final int top;
   final bool hasRegion;
+}
+
+/// Immutable run interval for one raster row.
+class _RunSegment {
+  const _RunSegment({
+    required this.startX,
+    required this.endXExclusive,
+  });
+
+  final int startX;
+  final int endXExclusive;
+}
+
+/// Integer grid point used while tracing flood-fill contours.
+class _GridPoint {
+  const _GridPoint(this.x, this.y);
+
+  final int x;
+  final int y;
+
+  @override
+  bool operator ==(final Object other) {
+    return other is _GridPoint && other.x == x && other.y == y;
+  }
+
+  @override
+  int get hashCode => Object.hash(x, y);
+}
+
+/// Directed boundary segment for one contour edge.
+class _BoundarySegment {
+  const _BoundarySegment({
+    required this.start,
+    required this.end,
+  });
+
+  final _GridPoint start;
+  final _GridPoint end;
 }
 
 class _SpanStack {
@@ -391,67 +430,383 @@ _FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
   );
 }
 
-/// Builds a normalized unified path from horizontal run triples.
+/// Builds a normalized contour path from horizontal run triples.
 Path _buildPathFromRuns({
   required final Int32List runs,
   required final int left,
   required final int top,
 }) {
-  const int batchSize = 16;
-  Path unifiedPath = Path();
-  final List<Path> batchedPaths = <Path>[];
+  final SplayTreeMap<int, List<_RunSegment>> groupedRuns = _groupRunsByRow(runs);
+  final List<_BoundarySegment> boundarySegments = _buildBoundarySegments(groupedRuns);
+  return _traceBoundaryPath(
+    segments: boundarySegments,
+    left: left,
+    top: top,
+  );
+}
+
+/// Groups flood-fill runs by row and normalizes them into sorted intervals.
+SplayTreeMap<int, List<_RunSegment>> _groupRunsByRow(final Int32List runs) {
+  final SplayTreeMap<int, List<_RunSegment>> groupedRuns = SplayTreeMap<int, List<_RunSegment>>();
 
   int i = AppMath.zero;
   while (i < runs.length) {
-    final Path batchPath = Path();
-
-    // Add up to batchSize rectangles to this batch
-    final int batchEnd = (i + (batchSize * AppFloodFill.runStride)).clamp(
-      AppMath.zero,
-      runs.length,
-    );
-
-    while (i < batchEnd) {
-      final int y = runs[i] - top;
-      final int startX = runs[i + AppMath.rgbChannelGreen] - left;
-      final int endX = runs[i + AppMath.rgbChannelBlue] - left;
-
-      final int runWidth = endX - startX + AppMath.rgbChannelGreen;
-      if (runWidth > AppMath.zero) {
-        batchPath.addRect(
-          Rect.fromLTWH(
-            startX.toDouble(),
-            y.toDouble(),
-            runWidth.toDouble(),
-            AppFloodFill.rowPixelHeight.toDouble(),
+    final int y = runs[i];
+    final int startX = runs[i + AppMath.rgbChannelGreen];
+    final int endXExclusive = runs[i + AppMath.rgbChannelBlue] + AppMath.one;
+    groupedRuns
+        .putIfAbsent(y, () => <_RunSegment>[])
+        .add(
+          _RunSegment(
+            startX: startX,
+            endXExclusive: endXExclusive,
           ),
         );
-      }
-
-      i += AppFloodFill.runStride;
-    }
-
-    batchedPaths.add(batchPath);
+    i += AppFloodFill.runStride;
   }
 
-  // Sequentially union all batches
-  if (batchedPaths.isNotEmpty) {
-    unifiedPath = batchedPaths[AppMath.zero];
-    for (int k = AppMath.one; k < batchedPaths.length; k++) {
-      try {
-        unifiedPath = Path.combine(
-          PathOperation.union,
-          unifiedPath,
-          batchedPaths[k],
+  for (final MapEntry<int, List<_RunSegment>> entry in groupedRuns.entries) {
+    entry.value.sort((final _RunSegment a, final _RunSegment b) {
+      final int startCompare = a.startX.compareTo(b.startX);
+      if (startCompare != AppMath.zero) {
+        return startCompare;
+      }
+      return a.endXExclusive.compareTo(b.endXExclusive);
+    });
+    final List<_RunSegment> normalizedRuns = _normalizeRowRuns(entry.value);
+    entry.value
+      ..clear()
+      ..addAll(normalizedRuns);
+  }
+
+  return groupedRuns;
+}
+
+/// Merges overlapping or touching row intervals into maximal runs.
+List<_RunSegment> _normalizeRowRuns(final List<_RunSegment> sortedRuns) {
+  if (sortedRuns.isEmpty) {
+    return const <_RunSegment>[];
+  }
+
+  final List<_RunSegment> normalizedRuns = <_RunSegment>[];
+  _RunSegment currentRun = sortedRuns.first;
+  for (final _RunSegment run in sortedRuns.skip(AppMath.one)) {
+    if (run.startX <= currentRun.endXExclusive) {
+      currentRun = _RunSegment(
+        startX: currentRun.startX,
+        endXExclusive: currentRun.endXExclusive >= run.endXExclusive ? currentRun.endXExclusive : run.endXExclusive,
+      );
+      continue;
+    }
+
+    normalizedRuns.add(currentRun);
+    currentRun = run;
+  }
+  normalizedRuns.add(currentRun);
+  return normalizedRuns;
+}
+
+/// Builds directed contour segments without invoking path unions.
+List<_BoundarySegment> _buildBoundarySegments(
+  final SplayTreeMap<int, List<_RunSegment>> groupedRuns,
+) {
+  final List<_BoundarySegment> segments = <_BoundarySegment>[];
+  Map<int, int> activeLeftEdges = <int, int>{};
+  Map<int, int> activeRightEdges = <int, int>{};
+  List<_RunSegment> previousRuns = const <_RunSegment>[];
+  int previousY = AppMath.zero;
+  bool hasPreviousRow = false;
+
+  for (final MapEntry<int, List<_RunSegment>> entry in groupedRuns.entries) {
+    final int currentY = entry.key;
+    final List<_RunSegment> currentRuns = entry.value;
+    final bool isConsecutiveRow = hasPreviousRow && currentY == previousY + AppMath.one;
+
+    if (!hasPreviousRow) {
+      _emitExposedHorizontalSegments(
+        baseRuns: currentRuns,
+        overlapRuns: const <_RunSegment>[],
+        y: currentY,
+        isTopBoundary: true,
+        segments: segments,
+      );
+    } else if (isConsecutiveRow) {
+      _emitExposedHorizontalSegments(
+        baseRuns: previousRuns,
+        overlapRuns: currentRuns,
+        y: previousY + AppMath.one,
+        isTopBoundary: false,
+        segments: segments,
+      );
+      _emitExposedHorizontalSegments(
+        baseRuns: currentRuns,
+        overlapRuns: previousRuns,
+        y: currentY,
+        isTopBoundary: true,
+        segments: segments,
+      );
+    } else {
+      _emitExposedHorizontalSegments(
+        baseRuns: previousRuns,
+        overlapRuns: const <_RunSegment>[],
+        y: previousY + AppMath.one,
+        isTopBoundary: false,
+        segments: segments,
+      );
+      _closeActiveVerticalEdges(
+        activeEdges: activeLeftEdges,
+        endYExclusive: previousY + AppMath.one,
+        isLeftBoundary: true,
+        segments: segments,
+      );
+      _closeActiveVerticalEdges(
+        activeEdges: activeRightEdges,
+        endYExclusive: previousY + AppMath.one,
+        isLeftBoundary: false,
+        segments: segments,
+      );
+      _emitExposedHorizontalSegments(
+        baseRuns: currentRuns,
+        overlapRuns: const <_RunSegment>[],
+        y: currentY,
+        isTopBoundary: true,
+        segments: segments,
+      );
+    }
+
+    activeLeftEdges = _advanceVerticalEdges(
+      currentRuns: currentRuns,
+      activeEdges: activeLeftEdges,
+      currentY: currentY,
+      previousY: previousY,
+      isConsecutiveRow: isConsecutiveRow,
+      isLeftBoundary: true,
+      segments: segments,
+    );
+    activeRightEdges = _advanceVerticalEdges(
+      currentRuns: currentRuns,
+      activeEdges: activeRightEdges,
+      currentY: currentY,
+      previousY: previousY,
+      isConsecutiveRow: isConsecutiveRow,
+      isLeftBoundary: false,
+      segments: segments,
+    );
+
+    previousRuns = currentRuns;
+    previousY = currentY;
+    hasPreviousRow = true;
+  }
+
+  if (!hasPreviousRow) {
+    return segments;
+  }
+
+  _emitExposedHorizontalSegments(
+    baseRuns: previousRuns,
+    overlapRuns: const <_RunSegment>[],
+    y: previousY + AppMath.one,
+    isTopBoundary: false,
+    segments: segments,
+  );
+  _closeActiveVerticalEdges(
+    activeEdges: activeLeftEdges,
+    endYExclusive: previousY + AppMath.one,
+    isLeftBoundary: true,
+    segments: segments,
+  );
+  _closeActiveVerticalEdges(
+    activeEdges: activeRightEdges,
+    endYExclusive: previousY + AppMath.one,
+    isLeftBoundary: false,
+    segments: segments,
+  );
+  return segments;
+}
+
+/// Emits the exposed horizontal edges for [baseRuns] after subtracting [overlapRuns].
+void _emitExposedHorizontalSegments({
+  required final List<_RunSegment> baseRuns,
+  required final List<_RunSegment> overlapRuns,
+  required final int y,
+  required final bool isTopBoundary,
+  required final List<_BoundarySegment> segments,
+}) {
+  int overlapIndex = AppMath.zero;
+
+  for (final _RunSegment baseRun in baseRuns) {
+    int cursor = baseRun.startX;
+    while (overlapIndex < overlapRuns.length && overlapRuns[overlapIndex].endXExclusive <= cursor) {
+      overlapIndex += AppMath.one;
+    }
+
+    int scanIndex = overlapIndex;
+    while (scanIndex < overlapRuns.length && overlapRuns[scanIndex].startX < baseRun.endXExclusive) {
+      final _RunSegment overlapRun = overlapRuns[scanIndex];
+      if (overlapRun.startX > cursor) {
+        _addHorizontalBoundarySegment(
+          startX: cursor,
+          endXExclusive: overlapRun.startX,
+          y: y,
+          isTopBoundary: isTopBoundary,
+          segments: segments,
         );
-      } catch (_) {
-        // If combine fails, continue to next batch
-        // This prevents crashes on edge cases with invalid path geometry
       }
+      if (overlapRun.endXExclusive > cursor) {
+        cursor = overlapRun.endXExclusive;
+      }
+      if (cursor >= baseRun.endXExclusive) {
+        break;
+      }
+      scanIndex += AppMath.one;
+    }
+
+    if (cursor < baseRun.endXExclusive) {
+      _addHorizontalBoundarySegment(
+        startX: cursor,
+        endXExclusive: baseRun.endXExclusive,
+        y: y,
+        isTopBoundary: isTopBoundary,
+        segments: segments,
+      );
+    }
+  }
+}
+
+/// Adds one oriented horizontal contour segment.
+void _addHorizontalBoundarySegment({
+  required final int startX,
+  required final int endXExclusive,
+  required final int y,
+  required final bool isTopBoundary,
+  required final List<_BoundarySegment> segments,
+}) {
+  if (startX >= endXExclusive) {
+    return;
+  }
+
+  final _GridPoint start = isTopBoundary ? _GridPoint(startX, y) : _GridPoint(endXExclusive, y);
+  final _GridPoint end = isTopBoundary ? _GridPoint(endXExclusive, y) : _GridPoint(startX, y);
+  segments.add(_BoundarySegment(start: start, end: end));
+}
+
+/// Advances one set of vertical contour edges by a single row.
+Map<int, int> _advanceVerticalEdges({
+  required final List<_RunSegment> currentRuns,
+  required final Map<int, int> activeEdges,
+  required final int currentY,
+  required final int previousY,
+  required final bool isConsecutiveRow,
+  required final bool isLeftBoundary,
+  required final List<_BoundarySegment> segments,
+}) {
+  final Map<int, int> nextActiveEdges = <int, int>{};
+
+  for (final _RunSegment run in currentRuns) {
+    final int boundaryX = isLeftBoundary ? run.startX : run.endXExclusive;
+    final int? existingStartY = isConsecutiveRow ? activeEdges.remove(boundaryX) : null;
+    nextActiveEdges[boundaryX] = existingStartY ?? currentY;
+  }
+
+  if (activeEdges.isEmpty) {
+    return nextActiveEdges;
+  }
+
+  _closeActiveVerticalEdges(
+    activeEdges: activeEdges,
+    endYExclusive: previousY + AppMath.one,
+    isLeftBoundary: isLeftBoundary,
+    segments: segments,
+  );
+  return nextActiveEdges;
+}
+
+/// Flushes the still-open vertical contour edges into boundary segments.
+void _closeActiveVerticalEdges({
+  required final Map<int, int> activeEdges,
+  required final int endYExclusive,
+  required final bool isLeftBoundary,
+  required final List<_BoundarySegment> segments,
+}) {
+  for (final MapEntry<int, int> entry in activeEdges.entries) {
+    final _GridPoint start = isLeftBoundary ? _GridPoint(entry.key, endYExclusive) : _GridPoint(entry.key, entry.value);
+    final _GridPoint end = isLeftBoundary ? _GridPoint(entry.key, entry.value) : _GridPoint(entry.key, endYExclusive);
+    segments.add(_BoundarySegment(start: start, end: end));
+  }
+}
+
+/// Traces closed contour loops from the directed boundary segments.
+Path _traceBoundaryPath({
+  required final List<_BoundarySegment> segments,
+  required final int left,
+  required final int top,
+}) {
+  final Path path = Path();
+  if (segments.isEmpty) {
+    return path;
+  }
+
+  final Map<_GridPoint, List<int>> outgoingByStart = <_GridPoint, List<int>>{};
+  for (int i = AppMath.zero; i < segments.length; i += AppMath.one) {
+    outgoingByStart.putIfAbsent(segments[i].start, () => <int>[]).add(i);
+  }
+
+  final List<bool> usedSegments = List<bool>.filled(segments.length, false);
+  for (int i = AppMath.zero; i < segments.length; i += AppMath.one) {
+    if (usedSegments[i]) {
+      continue;
+    }
+
+    final _BoundarySegment startSegment = segments[i];
+    path.moveTo(
+      (startSegment.start.x - left).toDouble(),
+      (startSegment.start.y - top).toDouble(),
+    );
+
+    int currentIndex = i;
+    while (true) {
+      final _BoundarySegment segment = segments[currentIndex];
+      usedSegments[currentIndex] = true;
+      path.lineTo(
+        (segment.end.x - left).toDouble(),
+        (segment.end.y - top).toDouble(),
+      );
+
+      if (segment.end == startSegment.start) {
+        path.close();
+        break;
+      }
+
+      final int? nextIndex = _findNextUnusedSegment(
+        candidateIndices: outgoingByStart[segment.end],
+        usedSegments: usedSegments,
+      );
+      if (nextIndex == null) {
+        path.close();
+        break;
+      }
+      currentIndex = nextIndex;
     }
   }
 
-  return unifiedPath;
+  return path;
+}
+
+/// Returns the next unconsumed segment that starts at the current contour point.
+int? _findNextUnusedSegment({
+  required final List<int>? candidateIndices,
+  required final List<bool> usedSegments,
+}) {
+  if (candidateIndices == null) {
+    return null;
+  }
+
+  for (final int index in candidateIndices) {
+    if (!usedSegments[index]) {
+      return index;
+    }
+  }
+  return null;
 }
 
 /// Extracts a region from raw RGBA [pixels] using scan line flood fill.
