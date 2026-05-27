@@ -40,7 +40,6 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_svg: ^2.3.0
-  heic_to_png_jpg: ^0.1.1
   image: ^4.8.0
   intl: any
   logging: any

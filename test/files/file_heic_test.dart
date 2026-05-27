@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/file_heic.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
-import 'package:heic_to_png_jpg/heic_to_png_jpg.dart' show HeicConverter;
 
 /// Path to the HEIC test asset relative to the project root.
 const String _testHeicPath = 'assets/test/test.heic';
@@ -17,6 +16,20 @@ const int _ftypBrandOffset = 8;
 
 /// Length of the major brand identifier in bytes.
 const int _ftypBrandLength = 4;
+
+const int _ftypBoxTypeStart = 4;
+const int _ftypBoxTypeEnd = 8;
+const int _minimumHeicHeaderLength = 12;
+const String _ftypBoxType = 'ftyp';
+
+const Set<String> _heicMajorBrands = <String>{
+  'heic',
+  'heix',
+  'hevc',
+  'hevx',
+  'mif1',
+  'msf1',
+};
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -64,10 +77,10 @@ void main() {
       });
     });
 
-    group('HeicConverter.isHeic', () {
+    group('isHeicBytes', () {
       test('recognises test.heic as valid HEIC', () async {
         final Uint8List heicBytes = await File(_testHeicPath).readAsBytes();
-        expect(HeicConverter.isHeic(heicBytes), isTrue);
+        expect(_isHeicBytes(heicBytes), isTrue);
       });
 
       test('rejects non-HEIC bytes', () {
@@ -76,8 +89,26 @@ void main() {
           0x0D, 0x0A, 0x1A, 0x0A,
           0x00, 0x00, 0x00, 0x0D,
         ]);
-        expect(HeicConverter.isHeic(pngHeader), isFalse);
+        expect(_isHeicBytes(pngHeader), isFalse);
       });
     });
   });
+}
+
+bool _isHeicBytes(final Uint8List data) {
+  if (data.length < _minimumHeicHeaderLength) {
+    return false;
+  }
+
+  final String boxType = String.fromCharCodes(
+    data.sublist(_ftypBoxTypeStart, _ftypBoxTypeEnd),
+  );
+  if (boxType != _ftypBoxType) {
+    return false;
+  }
+
+  final String majorBrand = String.fromCharCodes(
+    data.sublist(_ftypBrandOffset, _ftypBrandOffset + _ftypBrandLength),
+  );
+  return _heicMajorBrands.contains(majorBrand);
 }
