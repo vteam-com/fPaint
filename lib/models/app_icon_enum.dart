@@ -41,6 +41,7 @@ enum AppIcon {
   eraser('assets/icons/eraser.svg'),
   fileDownload('assets/icons/file_download.svg'),
   fillLinear('assets/icons/fill_linear.svg'),
+  fillSolid('assets/icons/fill_solid.svg'),
   fillRadial('assets/icons/fill_radial.svg'),
   flipHorizontal('assets/icons/flip_horizontal.svg'),
   flipVertical('assets/icons/flip_vertical.svg'),
