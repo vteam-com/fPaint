@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fpaint/files/file_operation_exception.dart';
-import 'package:heic_to_png_jpg/heic_to_png_jpg.dart' show HeicConverter;
+import 'package:image/image.dart' as img;
 
 const String _errorConvertPrefix = 'Failed to decode HEIC image';
 const String _errorEncodePrefix = 'Failed to encode HEIC image';
@@ -36,12 +36,7 @@ Future<Uint8List> decodeHeicBytes(final Uint8List heicBytes) async {
     return heicBytes;
   }
 
-  // Desktop fallback via heic_to_png_jpg (package:image).
-  try {
-    return await HeicConverter.convertToPNG(heicData: heicBytes);
-  } catch (e) {
-    throw HeicConversionException(_errorConvertPrefix, cause: e);
-  }
+  return _decodeHeicBytesWithImagePackage(heicBytes);
 }
 
 /// Encodes PNG bytes to HEIC format.
@@ -86,5 +81,24 @@ Future<Uint8List> encodeToHeic(final Uint8List pngBytes) async {
     } catch (_) {
       // Best-effort cleanup of temporary files.
     }
+  }
+}
+
+/// Converts HEIC bytes to PNG using the same minimal desktop fallback strategy
+/// previously supplied by `heic_to_png_jpg`.
+Future<Uint8List> _decodeHeicBytesWithImagePackage(
+  final Uint8List heicBytes,
+) async {
+  try {
+    final img.Image? decodedImage = img.decodeImage(heicBytes);
+    if (decodedImage == null) {
+      throw const HeicConversionException(_errorConvertPrefix);
+    }
+
+    return Uint8List.fromList(img.encodePng(decodedImage));
+  } on HeicConversionException {
+    rethrow;
+  } catch (e) {
+    throw HeicConversionException(_errorConvertPrefix, cause: e);
   }
 }
