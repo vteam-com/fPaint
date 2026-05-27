@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_slider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -46,6 +48,12 @@ void main() {
       await pumpToolsPanel(tester);
 
       expect(find.byKey(Keys.toolFillHalftoneSlider), findsOneWidget);
+      expect(
+        find.byWidgetPredicate(
+          (final Widget widget) => widget is AppButtonIcon && widget.icon == AppIcon.halftone,
+        ),
+        findsOneWidget,
+      );
 
       appProvider.fillModel.mode = FillMode.linear;
       appProvider.update();
