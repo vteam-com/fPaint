@@ -79,7 +79,7 @@ class ToolAttributeWidget extends StatelessWidget {
     );
   }
 
-  /// Builds the main attribute content row, dimming the secondary control when disabled.
+  /// Builds the main attribute content row, collapsing the secondary control when disabled.
   Widget _buildAttributeRow() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -125,18 +125,11 @@ class ToolAttributeWidget extends StatelessWidget {
 
   /// Builds the expanded attribute area, keeping the title toggle in the former caption slot.
   Widget _buildExpandedContent(final Widget childRightWidget) {
-    final Widget effectiveChild = _showsEnabledToggle && enabled == false
-        ? IgnorePointer(
-            child: Opacity(
-              opacity: AppVisual.disabled,
-              child: childRightWidget,
-            ),
-          )
-        : childRightWidget;
-
     if (!_showsEnabledToggle) {
-      return effectiveChild;
+      return childRightWidget;
     }
+
+    final bool showsExpandedControl = enabled == true;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -149,7 +142,24 @@ class ToolAttributeWidget extends StatelessWidget {
             child: _buildEnabledTitleToggle(),
           ),
         ),
-        effectiveChild,
+        AnimatedSwitcher(
+          duration: AppDefaults.toolPanelRevealAnimationDuration,
+          reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (final Widget child, final Animation<double> animation) {
+            return ClipRect(
+              child: FadeTransition(
+                opacity: animation,
+                child: SizeTransition(
+                  sizeFactor: animation,
+                  child: child,
+                ),
+              ),
+            );
+          },
+          child: showsExpandedControl ? childRightWidget : const SizedBox.shrink(),
+        ),
       ],
     );
   }
