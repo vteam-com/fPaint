@@ -323,13 +323,13 @@ class ToolsPanel extends StatelessWidget {
               alignment: WrapAlignment.center,
               children: <Widget>[
                 //
-                // Selection using Rectangle
+                // Fill Solid
                 //
                 _buildActionPicker(
                   key: Keys.toolFillModeSolid,
                   minimal: minimal,
                   name: l10n.toolSolid,
-                  icon: AppIcon.square,
+                  icon: AppIcon.fillSolid,
                   isSelected: appProvider.fillModel.mode == FillMode.solid,
                   onPressed: () {
                     appProvider.fillModel.mode = FillMode.solid;
