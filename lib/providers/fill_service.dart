@@ -179,25 +179,30 @@ class FillService {
       return RadialGradient(
         colors: gradientColors,
         stops: gradientStops,
-        center: Alignment(
-          ((centerPoint.dx - bounds.left) / bounds.width) * AppMath.pair - AppVisual.full,
-          ((centerPoint.dy - bounds.top) / bounds.height) * AppMath.pair - AppVisual.full,
-        ),
+        center: _pointToBoundsAlignment(bounds: bounds, point: centerPoint),
         radius: (fillModel.gradientPoints.last.offset - fillModel.gradientPoints.first.offset).distance / bounds.width,
       );
     }
 
+    final ui.Offset beginPoint = toCanvas(fillModel.gradientPoints.first.offset);
+    final ui.Offset endPoint = toCanvas(fillModel.gradientPoints.last.offset);
+
     return LinearGradient(
       colors: gradientColors,
       stops: gradientStops,
-      begin: Alignment(
-        (toCanvas(fillModel.gradientPoints.first.offset).dx / bounds.width) * AppMath.pair - AppVisual.full,
-        (toCanvas(fillModel.gradientPoints.first.offset).dy / bounds.height) * AppMath.pair - AppVisual.full,
-      ),
-      end: Alignment(
-        (toCanvas(fillModel.gradientPoints.last.offset).dx / bounds.width) * AppMath.pair - AppVisual.full,
-        (toCanvas(fillModel.gradientPoints.last.offset).dy / bounds.height) * AppMath.pair - AppVisual.full,
-      ),
+      begin: _pointToBoundsAlignment(bounds: bounds, point: beginPoint),
+      end: _pointToBoundsAlignment(bounds: bounds, point: endPoint),
+    );
+  }
+
+  /// Converts an absolute [point] inside [bounds] into a gradient alignment.
+  Alignment _pointToBoundsAlignment({
+    required final ui.Rect bounds,
+    required final ui.Offset point,
+  }) {
+    return Alignment(
+      ((point.dx - bounds.left) / bounds.width) * AppMath.pair - AppVisual.full,
+      ((point.dy - bounds.top) / bounds.height) * AppMath.pair - AppVisual.full,
     );
   }
 
