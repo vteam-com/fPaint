@@ -88,11 +88,10 @@ class MainMenu extends StatelessWidget {
 void onDropDownMenuSelection(
   final BuildContext context,
   final int result,
-) {
+) async {
   final ShellProvider shellProvider = ShellProvider.of(context);
   final LayersProvider layers = LayersProvider.of(context);
   final AppPreferences preferences = AppPreferences.of(context);
-  final AppLocalizations l10n = context.l10n;
 
   switch (result) {
     case MenuIds.newFile:
@@ -111,17 +110,14 @@ void onDropDownMenuSelection(
       AppProvider.of(context).newDocumentFromClipboardImage();
       break;
     case MenuIds.save:
-      saveFile(
-        shellProvider,
-        layers,
-        preferences,
-      ).then(
-        // ignore: use_build_context_synchronously
-        (final _) {
-          layers.clearHasChanged();
-          // ignore: use_build_context_synchronously
-          context.showSnackBarMessage(
-            l10n.savedMessage(shellProvider.loadedFileName),
+      await runWithGlobalFileSaveSnackBar<void>(
+        initialFilePath: shellProvider.loadedFileName,
+        completedFilePathBuilder: () => shellProvider.loadedFileName,
+        task: () {
+          return saveFile(
+            shellProvider,
+            layers,
+            preferences,
           );
         },
       );

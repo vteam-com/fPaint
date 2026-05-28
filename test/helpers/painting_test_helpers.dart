@@ -2091,6 +2091,8 @@ Future<void> saveUnitTestArtworkViaExportUi(
       reason: 'The UI export should create ${outputFile.path}',
     );
   } finally {
+    dismissGlobalSnackBarMessage();
+    await tester.pump();
     FilePickerPlatform.instance = originalFilePicker;
   }
 }

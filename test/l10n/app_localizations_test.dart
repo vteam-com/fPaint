@@ -173,13 +173,16 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.downloadAsFile('image.PNG'), isNotEmpty);
   expect(l10n.errorProcessingFile('err'), isNotEmpty);
   expect(l10n.errorReadingFile('err'), isNotEmpty);
+  expect(l10n.exportedLabel, isNotEmpty);
+  expect(l10n.exportingLabel, isNotEmpty);
   expect(l10n.failedToLoadImage('err'), isNotEmpty);
   expect(l10n.fileFormatNotSupported('bmp'), isNotEmpty);
   expect(l10n.fileFormatNotSupportedOnPlatform('bmp'), isNotEmpty);
   expect(l10n.layerLockedForEditing('Layer 1'), isNotEmpty);
   expect(l10n.percentageValue('50'), isNotEmpty);
   expect(l10n.saveAsFile('image.PNG'), isNotEmpty);
-  expect(l10n.savedMessage('image.png'), isNotEmpty);
+  expect(l10n.savedLabel, isNotEmpty);
+  expect(l10n.savingLabel, isNotEmpty);
   expect(l10n.selectValue('all'), isNotEmpty);
   expect(l10n.topColors('5'), isNotEmpty);
 }

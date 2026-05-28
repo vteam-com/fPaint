@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -32,17 +31,13 @@ class _FakePreferences extends AppPreferences {
   }
 }
 
-const int _wideImageWidth = 8;
-const int _wideImageHeight = 4;
-const int _tallImageWidth = 4;
-const int _tallImageHeight = 8;
-const int _squareImageSize = 6;
 const int _thumbnailPumpAttempts = 20;
 const Duration _thumbnailPumpStep = Duration(milliseconds: 50);
 
 Widget _buildHarness({
   required final AppPreferences prefs,
   final Future<ui.Image?> Function()? clipboardImageLoader,
+  final Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader,
 }) {
   return ChangeNotifierProvider<AppPreferences>.value(
     value: prefs,
@@ -55,6 +50,7 @@ Widget _buildHarness({
             body: ImportDialog(
               parentContext: context,
               clipboardImageLoader: clipboardImageLoader,
+              recentFileThumbnailLoader: recentFileThumbnailLoader,
             ),
           );
         },
@@ -67,11 +63,13 @@ Future<void> _pumpImportDialog(
   final WidgetTester tester, {
   required final AppPreferences prefs,
   final Future<ui.Image?> Function()? clipboardImageLoader,
+  final Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader,
 }) async {
   await tester.pumpWidget(
     _buildHarness(
       prefs: prefs,
       clipboardImageLoader: clipboardImageLoader,
+      recentFileThumbnailLoader: recentFileThumbnailLoader,
     ),
   );
   await tester.pump();
@@ -79,53 +77,36 @@ Future<void> _pumpImportDialog(
 }
 
 Future<ui.Image> _buildClipboardTestImage() {
+  return _buildSolidTestImage(
+    color: const Color(0xFF4CAF50),
+    width: AppLayout.iconSize.toInt(),
+    height: AppLayout.iconSize.toInt(),
+  );
+}
+
+Future<ui.Image> _buildSolidTestImage({
+  required final Color color,
+  required final int width,
+  required final int height,
+}) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);
-  final ui.Paint paint = ui.Paint()..color = const Color(0xFF4CAF50);
+  final ui.Paint paint = ui.Paint()..color = color;
 
   canvas.drawRect(
-    const Rect.fromLTWH(
+    Rect.fromLTWH(
       0,
       0,
-      AppLayout.iconSize,
-      AppLayout.iconSize,
+      width.toDouble(),
+      height.toDouble(),
     ),
     paint,
   );
 
   return recorder.endRecording().toImage(
-    AppLayout.iconSize.toInt(),
-    AppLayout.iconSize.toInt(),
+    width,
+    height,
   );
-}
-
-Future<String> _writeTestImage({
-  required final Directory directory,
-  required final String fileName,
-  required final Color color,
-  required final int width,
-  required final int height,
-}) async {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
-  final ui.Paint paint = ui.Paint()..color = color;
-  final Rect bounds = Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble());
-
-  canvas.drawRect(bounds, paint);
-
-  final ui.Image image = await recorder.endRecording().toImage(width, height);
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-  image.dispose();
-
-  if (byteData == null) {
-    throw StateError('Failed to encode test image.');
-  }
-
-  final Uint8List pngBytes = byteData.buffer.asUint8List();
-  final File file = File('${directory.path}${Platform.pathSeparator}$fileName');
-
-  await file.writeAsBytes(pngBytes);
-  return file.path;
 }
 
 Future<void> _pumpUntilThumbnailCount(
@@ -218,30 +199,35 @@ void main() {
     testWidgets('keeps thumbnails attached to the correct recent files after deletion', (
       final WidgetTester tester,
     ) async {
-      final Directory tempDirectory = await Directory.systemTemp.createTemp('fpaint_import_dialog_test_');
+      final int thumbnailHeight = AppLayout.thumbnailMaxHeight.toInt();
+      final List<ui.Image> testThumbnails = <ui.Image>[];
+      final String tempPath = Directory.systemTemp.path;
 
       try {
-        final String widePath = await _writeTestImage(
-          directory: tempDirectory,
-          fileName: 'wide.png',
+        final String widePath = '$tempPath${Platform.pathSeparator}wide.png';
+        final String tallPath = '$tempPath${Platform.pathSeparator}tall.png';
+        final String squarePath = '$tempPath${Platform.pathSeparator}square.png';
+        final ui.Image wideThumbnail = await _buildSolidTestImage(
           color: const Color(0xFFE53935),
-          width: _wideImageWidth,
-          height: _wideImageHeight,
+          width: thumbnailHeight * 2,
+          height: thumbnailHeight,
         );
-        final String tallPath = await _writeTestImage(
-          directory: tempDirectory,
-          fileName: 'tall.png',
+        final ui.Image tallThumbnail = await _buildSolidTestImage(
           color: const Color(0xFF43A047),
-          width: _tallImageWidth,
-          height: _tallImageHeight,
+          width: thumbnailHeight ~/ 2,
+          height: thumbnailHeight,
         );
-        final String squarePath = await _writeTestImage(
-          directory: tempDirectory,
-          fileName: 'square.png',
+        final ui.Image squareThumbnail = await _buildSolidTestImage(
           color: const Color(0xFF1E88E5),
-          width: _squareImageSize,
-          height: _squareImageSize,
+          width: thumbnailHeight,
+          height: thumbnailHeight,
         );
+        testThumbnails.addAll(<ui.Image>[wideThumbnail, tallThumbnail, squareThumbnail]);
+        final Map<String, ui.Image> thumbnailsByPath = <String, ui.Image>{
+          widePath: wideThumbnail,
+          tallPath: tallThumbnail,
+          squarePath: squareThumbnail,
+        };
         final AppPreferences prefs = _FakePreferences(<String>[
           widePath,
           tallPath,
@@ -252,10 +238,9 @@ void main() {
           tester,
           prefs: prefs,
           clipboardImageLoader: () async => null,
+          recentFileThumbnailLoader: (final String path, final String? bookmark) async => thumbnailsByPath[path],
         );
         await _pumpUntilThumbnailCount(tester, expectedCount: 3);
-
-        final int thumbnailHeight = AppLayout.thumbnailMaxHeight.toInt();
 
         _expectThumbnailDimensions(
           tester,
@@ -302,7 +287,9 @@ void main() {
           expectedHeight: thumbnailHeight,
         );
       } finally {
-        await tempDirectory.delete(recursive: true);
+        for (final ui.Image thumbnail in testThumbnails) {
+          thumbnail.dispose();
+        }
       }
     });
 

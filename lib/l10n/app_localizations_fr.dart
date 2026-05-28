@@ -253,12 +253,18 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get exportedLabel => 'Exporté';
+
+  @override
   String errorReadingFile(Object error) {
     return 'Erreur de lecture du fichier : $error';
   }
 
   @override
   String get exportLabel => 'Exporter...';
+
+  @override
+  String get exportingLabel => 'Exportation...';
 
   @override
   String get exportTooltip => 'Exporter...';
@@ -481,9 +487,10 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String savedMessage(Object fileName) {
-    return 'Enregistre $fileName';
-  }
+  String get savedLabel => 'Enregistre';
+
+  @override
+  String get savingLabel => 'Enregistrement...';
 
   @override
   String get saveLabel => 'Enregistrer';

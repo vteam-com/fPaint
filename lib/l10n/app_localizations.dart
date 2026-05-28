@@ -530,6 +530,12 @@ abstract class AppLocalizations {
   /// **'Error processing file: {error}'**
   String errorProcessingFile(Object error);
 
+  /// No description provided for @exportedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported'**
+  String get exportedLabel;
+
   /// No description provided for @errorReadingFile.
   ///
   /// In en, this message translates to:
@@ -541,6 +547,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Export...'**
   String get exportLabel;
+
+  /// No description provided for @exportingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting...'**
+  String get exportingLabel;
 
   /// No description provided for @exportTooltip.
   ///
@@ -956,11 +968,17 @@ abstract class AppLocalizations {
   /// **'Save as {fileName}'**
   String saveAsFile(Object fileName);
 
-  /// No description provided for @savedMessage.
+  /// No description provided for @savedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Saved {fileName}'**
-  String savedMessage(Object fileName);
+  /// **'Saved'**
+  String get savedLabel;
+
+  /// No description provided for @savingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get savingLabel;
 
   /// No description provided for @saveLabel.
   ///

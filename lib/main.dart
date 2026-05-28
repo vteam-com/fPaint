@@ -254,7 +254,7 @@ class MyApp extends StatelessWidget {
   late final LayersProvider layersProvider = LayersProvider(undoProvider: undoProvider);
 
   /// Global navigator key to access context from outside of the widget tree
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> navigatorKey = appSnackBarNavigatorKey;
 
   /// Provides shell-level functionalities and states.
   final ShellProvider shellProvider = ShellProvider();
@@ -330,11 +330,19 @@ class MyApp extends StatelessWidget {
                       shellProvider,
                       currentAppProvider,
                       const MainScreen(),
-                      onSave: () => saveFile(
-                        shellProvider,
-                        currentAppProvider.layers,
-                        currentPreferences,
-                      ),
+                      onSave: () async {
+                        await runWithGlobalFileSaveSnackBar<void>(
+                          initialFilePath: shellProvider.loadedFileName,
+                          completedFilePathBuilder: () => shellProvider.loadedFileName,
+                          task: () {
+                            return saveFile(
+                              shellProvider,
+                              currentAppProvider.layers,
+                              currentPreferences,
+                            );
+                          },
+                        );
+                      },
                     ),
                     '/settings': (final _) => const SettingsPage(),
                     '/platforms': (final _) => const PlatformsPage(),
