@@ -84,6 +84,23 @@ void main() {
       expect(appProvider.selectorModel.isDrawing, isFalse);
     });
 
+    test('end ignores non-finite drag points without throwing', () {
+      appProvider.selectorModel.mode = SelectorMode.rectangle;
+      appProvider.selectorCreationStart(const Offset(10, 10));
+      appProvider.selectorCreationAdditionalPoint(const Offset(40, 40));
+      appProvider.selectorCreationEnd();
+
+      final Rect before = appProvider.selectorModel.boundingRect;
+
+      appProvider.selectorModel.math = SelectorMath.add;
+      appProvider.selectorCreationStart(const Offset(50, 50));
+      appProvider.selectorCreationAdditionalPoint(const Offset(double.nan, 80));
+
+      expect(appProvider.selectorCreationEnd, returnsNormally);
+      expect(appProvider.selectorModel.boundingRect, before);
+      expect(appProvider.selectorModel.isDrawing, isFalse);
+    });
+
     test('line mode stays active after pointer end until it closes', () {
       appProvider.selectorModel.mode = SelectorMode.line;
       appProvider.selectorCreationStart(const Offset(10, 10));

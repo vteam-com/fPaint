@@ -8,6 +8,15 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 // Exports
 export 'package:fpaint/helpers/draw_path_helper.dart';
 
+bool _isFiniteOffset(final Offset offset) {
+  return offset.isFinite;
+}
+
+bool _hasFinitePathBounds(final Path path) {
+  final Rect bounds = path.getBounds();
+  return bounds.left.isFinite && bounds.top.isFinite && bounds.right.isFinite && bounds.bottom.isFinite;
+}
+
 /// A class that represents the selector model.
 class SelectorModel extends VisibleModel {
   SelectorMode mode = SelectorMode.rectangle;
@@ -90,6 +99,10 @@ class SelectorModel extends VisibleModel {
 
   /// Adds the first point to the selection.
   void addP1(final Offset p1) {
+    if (!_isFiniteOffset(p1)) {
+      return;
+    }
+
     isVisible = true;
 
     switch (mode) {
@@ -124,6 +137,10 @@ class SelectorModel extends VisibleModel {
 
   /// Adds the second point to the selection.
   void addP2(final Offset p2) {
+    if (!_isFiniteOffset(p2) || points.any((final Offset point) => !_isFiniteOffset(point))) {
+      return;
+    }
+
     if (points.isNotEmpty) {
       switch (mode) {
         case SelectorMode.rectangle:
@@ -178,18 +195,31 @@ class SelectorModel extends VisibleModel {
       return;
     }
 
+    if (!_hasFinitePathBounds(path1!)) {
+      clear();
+      return;
+    }
+
     switch (math) {
       case SelectorMath.replace:
         // this should already have been take care by addP2() function
         break;
       case SelectorMath.add:
         if (path2 != null) {
+          if (!_hasFinitePathBounds(path2!)) {
+            path2 = null;
+            break;
+          }
           path1 = Path.combine(PathOperation.union, this.path1!, this.path2!);
           path2 = null;
         }
         break;
       case SelectorMath.remove:
         if (path2 != null) {
+          if (!_hasFinitePathBounds(path2!)) {
+            path2 = null;
+            break;
+          }
           path1 = Path.combine(PathOperation.difference, this.path1!, path2!);
           path2 = null;
         }
@@ -206,6 +236,10 @@ class SelectorModel extends VisibleModel {
     final Offset position, {
     required final double closeDistance,
   }) {
+    if (!_isFiniteOffset(position)) {
+      return false;
+    }
+
     isVisible = true;
 
     if (points.isEmpty) {
@@ -229,7 +263,7 @@ class SelectorModel extends VisibleModel {
     final Offset position, {
     required final double closeDistance,
   }) {
-    if (points.isEmpty) {
+    if (points.isEmpty || !_isFiniteOffset(position)) {
       return;
     }
 

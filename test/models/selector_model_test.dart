@@ -461,6 +461,25 @@ void main() {
       model.applyMath();
       expect(model.path1, isNull);
     });
+
+    test('ignores non-finite add path input', () {
+      model.mode = SelectorMode.rectangle;
+      model.math = SelectorMath.replace;
+      model.addP1(const Offset(0, 0));
+      model.addP2(const Offset(50, 50));
+      model.applyMath();
+
+      final Rect before = model.boundingRect;
+
+      model.math = SelectorMath.add;
+      model.addP1(const Offset(30, 30));
+      model.addP2(const Offset(double.nan, 80));
+
+      model.applyMath();
+
+      expect(model.path2, isNull);
+      expect(model.boundingRect, before);
+    });
   });
 
   group('SelectorMode enum', () {
