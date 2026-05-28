@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:archive/archive.dart';
@@ -40,12 +41,21 @@ const String _oraXmlProcessingTarget = 'xml';
 const String _oraXmlEncoding = 'version="1.0" encoding="UTF-8"';
 const String _oraMimetypeEntry = 'mimetype';
 const String _oraStackXmlEntry = 'stack.xml';
+const String _oraMergedImageEntry = 'mergedimage.png';
+const String _oraThumbnailEntry = 'Thumbnails/thumbnail.png';
+const String _oraThumbnailEntryLowercase = 'thumbnails/thumbnail.png';
 const String _errorOraFileNotFoundPrefix = 'ORA file not found:';
 const String _errorOraReadFilePrefix = 'Failed to read ORA file:';
 const String _errorOraReadBytes = 'Failed to read ORA bytes.';
 const String _errorOraMissingStackXml = 'stack.xml not found in ORA file.';
 const String _errorOraMissingImageElement = 'image element not found in ORA stack.xml.';
 const String _errorOraMissingDimensions = 'ORA image dimensions are missing.';
+
+const List<String> _oraPreviewEntries = <String>[
+  _oraThumbnailEntry,
+  _oraThumbnailEntryLowercase,
+  _oraMergedImageEntry,
+];
 
 /// Creates an [ArchiveFile] with a fixed timestamp so archives are
 /// byte-identical across runs when the payload has not changed.
@@ -431,6 +441,45 @@ Future<ui.Image> decodeImage(final List<int> bytes) async {
   return completer.future;
 }
 
+/// Returns the embedded ORA preview PNG when the archive provides one.
+///
+/// This prefers the standard thumbnail entry, then falls back to the merged
+/// preview image used by OpenRaster archives.
+Future<Uint8List?> extractOraPreviewPngBytes(final List<int> archiveBytes) async {
+  try {
+    final Archive archive = ZipDecoder().decodeBytes(archiveBytes);
+    final ArchiveFile? previewFile = _findOraPreviewFile(archive);
+    if (previewFile == null) {
+      return null;
+    }
+
+    final Object content = previewFile.content;
+    if (content is Uint8List) {
+      return content;
+    }
+    if (content is List<int>) {
+      return Uint8List.fromList(content);
+    }
+  } catch (_) {
+    return null;
+  }
+
+  return null;
+}
+
+/// Finds the first standard OpenRaster preview asset present in [archive].
+ArchiveFile? _findOraPreviewFile(final Archive archive) {
+  for (final String entryName in _oraPreviewEntries) {
+    for (final ArchiveFile file in archive.files) {
+      if (file.name == entryName) {
+        return file;
+      }
+    }
+  }
+
+  return null;
+}
+
 /// Creates an ORA (OpenRaster) archive from the provided layers.
 ///
 /// This function takes a [LayersProvider] object, which contains the layers
@@ -490,6 +539,8 @@ Future<List<int>> createOraArchive(final LayersProvider layers) async {
       _oraAttrY: 0,
     });
   }
+
+  await _addOraPreviewFiles(archive: archive, layers: layers);
 
   // Create stack.xml synchronously
   builder.processing(_oraXmlProcessingTarget, _oraXmlEncoding);
@@ -555,6 +606,43 @@ Future<List<int>> createOraArchive(final LayersProvider layers) async {
   // Write archive to file
   final List<int> encodedData = ZipEncoder().encode(archive);
   return encodedData;
+}
+
+/// Writes standard merged and thumbnail preview PNGs into the ORA [archive].
+Future<void> _addOraPreviewFiles({
+  required final Archive archive,
+  required final LayersProvider layers,
+}) async {
+  final ui.Image mergedImage = await layers.capturePainterToImage();
+  final ByteData? mergedPngData = await mergedImage.toByteData(format: ui.ImageByteFormat.png);
+  if (mergedPngData == null) {
+    return;
+  }
+
+  final Uint8List mergedPngBytes = mergedPngData.buffer.asUint8List();
+  archive.addFile(
+    _neutralArchiveFile(
+      _oraMergedImageEntry,
+      mergedPngBytes,
+    ),
+  );
+
+  final ui.Codec thumbnailCodec = await ui.instantiateImageCodec(
+    mergedPngBytes,
+    targetHeight: AppLayout.thumbnailMaxHeight.toInt(),
+  );
+  final ui.FrameInfo thumbnailFrame = await thumbnailCodec.getNextFrame();
+  final ByteData? thumbnailPngData = await thumbnailFrame.image.toByteData(format: ui.ImageByteFormat.png);
+  if (thumbnailPngData == null) {
+    return;
+  }
+
+  archive.addFile(
+    _neutralArchiveFile(
+      _oraThumbnailEntry,
+      thumbnailPngData.buffer.asUint8List(),
+    ),
+  );
 }
 
 /// Builds the layers for the specified file or canvas.
