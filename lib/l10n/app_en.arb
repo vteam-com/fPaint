@@ -177,9 +177,17 @@
   "layerBlendMode": "Blend Mode",
   "layerChangeBlendMode": "Change Blend Mode",
   "layerDelete": "Delete this layer",
+  "layerEditsLocked": "Edits locked",
   "layerHidden": "Hidden",
   "layerHide": "Hide layer",
   "layerHideAllOthers": "Hide all other layers",
+  "layerLockedForEditing": "{layerName} is locked for editing.",
+  "@layerLockedForEditing": {
+    "placeholders": {
+      "layerName": {}
+    }
+  },
+  "layerLockEdits": "Lock layer edits",
   "layerMergeBelow": "Merge to below layer",
   "layerModify": "Modify",
   "layerNameTitle": "Layer Name",
@@ -188,6 +196,7 @@
   "layerShow": "Show layer",
   "layerShowAll": "Show all layers",
   "layerToggleVisibility": "Hide/Show this layer",
+  "layerUnlockEdits": "Unlock layer edits",
   "menuTooltip": "Menu",
   "mobileApp": "Mobile app.",
   "newCanvasSize": "New Canvas Size",

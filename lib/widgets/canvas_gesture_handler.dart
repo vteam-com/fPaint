@@ -315,6 +315,12 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         return;
       }
 
+      if (appProvider.isSelectedLayerLocked) {
+        _activePointerId = -1;
+        _showLockedLayerMessage(appProvider);
+        return;
+      }
+
       if (appProvider.selectedAction == ActionType.text) {
         TextObject? selectedText;
 
@@ -462,6 +468,12 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         shellProvider.interactionInputModality = InteractionInputModality.mouse;
         return;
     }
+  }
+
+  void _showLockedLayerMessage(final AppProvider appProvider) {
+    context.showSnackBarMessage(
+      context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
+    );
   }
 
   /// Shows a text editor dialog at the given canvas [position].

@@ -171,9 +171,17 @@
   "layerBlendMode": "Modo de mezcla",
   "layerChangeBlendMode": "Cambiar modo de mezcla",
   "layerDelete": "Eliminar esta capa",
+  "layerEditsLocked": "Edicion bloqueada",
   "layerHidden": "Oculta",
   "layerHide": "Ocultar capa",
   "layerHideAllOthers": "Ocultar todas las demás capas",
+  "layerLockedForEditing": "La capa {layerName} esta bloqueada para editar.",
+  "@layerLockedForEditing": {
+    "placeholders": {
+      "layerName": {}
+    }
+  },
+  "layerLockEdits": "Bloquear edicion de la capa",
   "layerMergeBelow": "Fusionar con la capa inferior",
   "layerModify": "Modificar",
   "layerNameTitle": "Nombre de la capa",
@@ -182,6 +190,7 @@
   "layerShow": "Mostrar capa",
   "layerShowAll": "Mostrar todas las capas",
   "layerToggleVisibility": "Ocultar/Mostrar esta capa",
+  "layerUnlockEdits": "Desbloquear edicion de la capa",
   "menuTooltip": "Menu principal",
   "mobileApp": "Aplicacion movil.",
   "newCanvasSize": "Tamano del nuevo lienzo",

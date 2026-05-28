@@ -43,6 +43,7 @@ String _encodeLayerMetadata(final LayerProvider layer) {
     TiffConstants.metaKeyOpacity: layer.opacity,
     TiffConstants.metaKeyBlendMode: layer.blendMode.name,
     TiffConstants.metaKeyVisible: layer.isVisible,
+    TiffConstants.metaKeyLocked: layer.isLocked,
   });
 }
 
@@ -341,6 +342,7 @@ _LayerMeta _extractSubIfdLayerMeta(
       opacity: 1.0,
       blendMode: ui.BlendMode.srcOver,
       visible: true,
+      locked: false,
     );
   }
 
@@ -352,6 +354,7 @@ _LayerMeta _extractSubIfdLayerMeta(
     opacity: 1.0,
     blendMode: ui.BlendMode.srcOver,
     visible: true,
+    locked: false,
   );
 }
 
@@ -465,6 +468,7 @@ Future<void> _appendDecodedTiffLayer(
   newLayer.opacity = meta.opacity;
   newLayer.blendMode = meta.blendMode;
   newLayer.isVisible = meta.visible;
+  newLayer.isLocked = meta.locked;
 
   final Uint8List pngBytes = img.encodePng(image);
   final ui.Image uiFrameImage = await _decodeImageFromList(pngBytes);
@@ -482,12 +486,14 @@ class _LayerMeta {
     required this.opacity,
     required this.blendMode,
     required this.visible,
+    required this.locked,
   });
 
   final String name;
   final double opacity;
   final ui.BlendMode blendMode;
   final bool visible;
+  final bool locked;
 }
 
 /// Reads the ImageDescription tag from the [frameIndex]-th frame of
@@ -498,6 +504,7 @@ _LayerMeta _extractLayerMeta(final img.TiffInfo tiffInfo, final int frameIndex) 
   const double opacity = 1.0;
   const ui.BlendMode blendMode = ui.BlendMode.srcOver;
   const bool visible = true;
+  const bool locked = false;
 
   if (frameIndex < tiffInfo.images.length) {
     final img.TiffImage tiffImage = tiffInfo.images[frameIndex];
@@ -519,6 +526,7 @@ _LayerMeta _extractLayerMeta(final img.TiffInfo tiffInfo, final int frameIndex) 
     opacity: opacity,
     blendMode: blendMode,
     visible: visible,
+    locked: locked,
   );
 }
 
@@ -538,6 +546,7 @@ _LayerMeta? _tryParseJsonMeta(final String description, final int frameIndex) {
     final String name = (map[TiffConstants.metaKeyName] as String?) ?? _fallbackLayerName(frameIndex);
     final double opacity = (map[TiffConstants.metaKeyOpacity] as num?)?.toDouble() ?? 1.0;
     final bool visible = (map[TiffConstants.metaKeyVisible] as bool?) ?? true;
+    final bool locked = (map[TiffConstants.metaKeyLocked] as bool?) ?? false;
     final String blendName = (map[TiffConstants.metaKeyBlendMode] as String?) ?? 'srcOver';
 
     ui.BlendMode blendMode = ui.BlendMode.srcOver;
@@ -553,6 +562,7 @@ _LayerMeta? _tryParseJsonMeta(final String description, final int frameIndex) {
       opacity: opacity,
       blendMode: blendMode,
       visible: visible,
+      locked: locked,
     );
   } on FormatException {
     return null;

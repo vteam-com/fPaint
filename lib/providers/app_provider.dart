@@ -110,10 +110,17 @@ class AppProvider extends ChangeNotifier {
   /// The layers provider.
   final LayersProvider layers;
 
+  /// Gets whether the currently selected layer is locked against edits.
+  bool get isSelectedLayerLocked => layers.selectedLayer.isLocked;
+
   /// Records and executes a drawing action to the selected layer.
-  void recordExecuteDrawingActionToSelectedLayer({
+  bool recordExecuteDrawingActionToSelectedLayer({
     required final UserActionDrawing action,
   }) {
+    if (isSelectedLayerLocked) {
+      return false;
+    }
+
     if (selectorModel.isVisible) {
       action.clipPath = selectorModel.path1;
     }
@@ -125,6 +132,7 @@ class AppProvider extends ChangeNotifier {
     );
 
     layers.update();
+    return true;
   }
 
   /// Undoes an action.

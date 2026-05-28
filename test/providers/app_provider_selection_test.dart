@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
+import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -181,6 +182,16 @@ void main() {
   });
 
   group('modifySelectedLayer', () {
+    test('does not enter modify mode when the selected layer is locked', () async {
+      appProvider.layers.selectedLayer.isLocked = true;
+
+      await appProvider.modifySelectedLayer();
+
+      expect(appProvider.selectorModel.isVisible, isFalse);
+      expect(appProvider.transformModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
+    });
+
     test('selects all, switches to selector, and immediately enters transform mode', () async {
       appProvider.layers.selectedLayer.backgroundColor = const Color(0xFF000000);
 
@@ -269,6 +280,16 @@ void main() {
       expect(appProvider.transformModel.isVisible, isTrue);
       expect(appProvider.transformModel.source, TransformSessionSource.duplicateSelection);
       expect(appProvider.transformModel.quadBounds, selectionBounds);
+    });
+
+    test('does not start same-layer duplicate when the selected layer is locked', () async {
+      appProvider.selectAll();
+      appProvider.layers.selectedLayer.isLocked = true;
+
+      await appProvider.regionDuplicateSameLayer();
+
+      expect(appProvider.transformModel.isVisible, isFalse);
+      expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
     });
 
     test('confirming duplicate transform applies paste directly and keeps result selected', () async {
@@ -403,10 +424,41 @@ void main() {
       appProvider.regionErase();
     });
 
+    test('does not record an action when the selected layer is locked', () {
+      appProvider.selectAll();
+      appProvider.layers.selectedLayer.isLocked = true;
+
+      appProvider.regionErase();
+
+      expect(appProvider.undoProvider.canUndo, isFalse);
+    });
+
     test('records an action when path1 exists', () {
       appProvider.selectAll();
       appProvider.regionErase();
       expect(appProvider.undoProvider.canUndo, isTrue);
+    });
+  });
+
+  group('startTransform', () {
+    test('does not start when the selected layer is locked', () async {
+      appProvider.selectAll();
+      appProvider.layers.selectedLayer.isLocked = true;
+
+      await appProvider.startTransform();
+
+      expect(appProvider.transformModel.isVisible, isFalse);
+    });
+  });
+
+  group('startEffectPreview', () {
+    test('does not start when the selected layer is locked', () async {
+      appProvider.selectAll();
+      appProvider.layers.selectedLayer.isLocked = true;
+
+      await appProvider.startEffectPreview(SelectionEffect.blur);
+
+      expect(appProvider.effectPreviewModel.isVisible, isFalse);
     });
   });
 

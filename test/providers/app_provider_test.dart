@@ -204,6 +204,38 @@ void main() {
     });
   });
 
+  group('selected layer lock', () {
+    test('prevents recording drawing actions on the locked selected layer', () {
+      final UserActionDrawing action = UserActionDrawing(
+        action: ActionType.brush,
+        positions: <Offset>[const Offset(0, 0), const Offset(10, 10)],
+        brush: MyBrush(color: const Color(0xFF000000), size: 5),
+      );
+
+      appProvider.layers.selectedLayer.isLocked = true;
+
+      final bool wasRecorded = appProvider.recordExecuteDrawingActionToSelectedLayer(action: action);
+
+      expect(wasRecorded, isFalse);
+      expect(appProvider.layers.selectedLayer.actionStack, isEmpty);
+      expect(appProvider.undoProvider.canUndo, isFalse);
+    });
+
+    test('records drawing actions when the selected layer is unlocked', () {
+      final UserActionDrawing action = UserActionDrawing(
+        action: ActionType.brush,
+        positions: <Offset>[const Offset(0, 0), const Offset(10, 10)],
+        brush: MyBrush(color: const Color(0xFF000000), size: 5),
+      );
+
+      final bool wasRecorded = appProvider.recordExecuteDrawingActionToSelectedLayer(action: action);
+
+      expect(wasRecorded, isTrue);
+      expect(appProvider.layers.selectedLayer.actionStack, hasLength(1));
+      expect(appProvider.undoProvider.canUndo, isTrue);
+    });
+  });
+
   group('update', () {
     test('notifies listeners', () {
       int notifyCount = 0;

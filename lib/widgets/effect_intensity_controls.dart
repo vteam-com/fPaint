@@ -7,6 +7,7 @@ import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/widgets/app_button_row.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_slider.dart';
+import 'package:fpaint/widgets/app_snackbar.dart';
 
 /// Shared effect sliders and Apply/Cancel controls for an active effect preview.
 ///
@@ -111,6 +112,13 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
               AppRowPrimaryButton(
                 key: widget.applyButtonKey,
                 onPressed: () async {
+                  if (widget.appProvider.isSelectedLayerLocked) {
+                    context.showSnackBarMessage(
+                      widget.l10n.layerLockedForEditing(widget.appProvider.layers.selectedLayer.name),
+                    );
+                    return;
+                  }
+
                   await widget.appProvider.confirmEffectPreview();
                   widget.onDismiss?.call();
                 },

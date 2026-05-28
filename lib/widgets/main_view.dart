@@ -130,6 +130,11 @@ class MainViewState extends State<MainView> {
                     appProvider.update();
                   },
                   onDuplicateMove: (final Offset offset, final bool duplicateOnNewLayer) async {
+                    if (!duplicateOnNewLayer && appProvider.isSelectedLayerLocked) {
+                      _showLockedLayerMessage(appProvider);
+                      return;
+                    }
+
                     await appProvider.regionDuplicateMove(
                       offset / appProvider.layers.scale,
                       onNewLayer: duplicateOnNewLayer,
@@ -156,6 +161,11 @@ class MainViewState extends State<MainView> {
                       return;
                     }
 
+                    if (appProvider.isSelectedLayerLocked) {
+                      _showLockedLayerMessage(appProvider);
+                      return;
+                    }
+
                     await appProvider.startTransform();
                   },
                   onCopy: () => appProvider.regionCopy(),
@@ -165,6 +175,11 @@ class MainViewState extends State<MainView> {
                     appProvider.update();
                   },
                   onEffectSelected: (final SelectionEffect effect, final BuildContext _) async {
+                    if (appProvider.isSelectedLayerLocked) {
+                      _showLockedLayerMessage(appProvider);
+                      return;
+                    }
+
                     await appProvider.startEffectPreview(effect);
                     if (!mounted) {
                       return;
@@ -314,6 +329,13 @@ class MainViewState extends State<MainView> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showLockedLayerMessage(final AppProvider appProvider) {
+    showSnackBarIfMounted(
+      context,
+      context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
     );
   }
 }

@@ -59,6 +59,8 @@ enum AppIcon {
   keyboardDoubleArrowRight('assets/icons/keyboard_double_arrow_right.svg'),
   lasso('assets/icons/lasso.svg'),
   layers('assets/icons/layers.svg'),
+  lock('assets/icons/lock.svg'),
+  lockOpen('assets/icons/lock_open.svg'),
   lineAxis('assets/icons/line_axis.svg'),
   lineStyle('assets/icons/line_style.svg'),
   lineWeight('assets/icons/line_weight.svg'),

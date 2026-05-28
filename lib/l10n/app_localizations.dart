@@ -776,6 +776,12 @@ abstract class AppLocalizations {
   /// **'Delete this layer'**
   String get layerDelete;
 
+  /// No description provided for @layerEditsLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Edits locked'**
+  String get layerEditsLocked;
+
   /// No description provided for @layerHidden.
   ///
   /// In en, this message translates to:
@@ -793,6 +799,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide all other layers'**
   String get layerHideAllOthers;
+
+  /// No description provided for @layerLockEdits.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock layer edits'**
+  String get layerLockEdits;
+
+  /// No description provided for @layerLockedForEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'{layerName} is locked for editing.'**
+  String layerLockedForEditing(Object layerName);
 
   /// No description provided for @layerMergeBelow.
   ///
@@ -841,6 +859,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hide/Show this layer'**
   String get layerToggleVisibility;
+
+  /// No description provided for @layerUnlockEdits.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock layer edits'**
+  String get layerUnlockEdits;
 
   /// No description provided for @menuTooltip.
   ///
@@ -1231,7 +1255,11 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   );
 }
 
-/// Shared BuildContext accessor used throughout the widget tree.
+/// Convenience accessor so widgets can read localizations via `context.l10n`.
 extension AppLocalizationsBuildContextX on BuildContext {
-  AppLocalizations get l10n => AppLocalizations.of(this)!;
+  AppLocalizations get l10n {
+    final AppLocalizations? localizations = AppLocalizations.of(this);
+    assert(localizations != null, 'AppLocalizations not found in context.');
+    return localizations!;
+  }
 }

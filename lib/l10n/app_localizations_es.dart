@@ -381,6 +381,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get layerDelete => 'Eliminar esta capa';
 
   @override
+  String get layerEditsLocked => 'Edicion bloqueada';
+
+  @override
   String get layerHidden => 'Oculta';
 
   @override
@@ -388,6 +391,14 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get layerHideAllOthers => 'Ocultar todas las demás capas';
+
+  @override
+  String get layerLockEdits => 'Bloquear edicion de la capa';
+
+  @override
+  String layerLockedForEditing(Object layerName) {
+    return 'La capa $layerName esta bloqueada para editar.';
+  }
 
   @override
   String get layerMergeBelow => 'Fusionar con la capa inferior';
@@ -412,6 +423,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get layerToggleVisibility => 'Ocultar/Mostrar esta capa';
+
+  @override
+  String get layerUnlockEdits => 'Desbloquear edicion de la capa';
 
   @override
   String get menuTooltip => 'Menu principal';

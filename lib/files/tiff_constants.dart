@@ -264,6 +264,9 @@ class TiffConstants {
   /// JSON key for layer visibility in the ImageDescription payload.
   static const String metaKeyVisible = 'visible';
 
+  /// JSON key for layer edit lock in the ImageDescription payload.
+  static const String metaKeyLocked = 'locked';
+
   /// Public `package:image` type string for ASCII TIFF values.
   static const String ifdValueTypeAscii = 'ascii';
 }

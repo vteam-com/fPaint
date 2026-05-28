@@ -385,6 +385,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get layerDelete => 'Supprimer ce calque';
 
   @override
+  String get layerEditsLocked => 'Modification verrouillee';
+
+  @override
   String get layerHidden => 'Masqué';
 
   @override
@@ -392,6 +395,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get layerHideAllOthers => 'Masquer tous les autres calques';
+
+  @override
+  String get layerLockEdits => 'Verrouiller la modification du calque';
+
+  @override
+  String layerLockedForEditing(Object layerName) {
+    return 'Le calque $layerName est verrouille pour la modification.';
+  }
 
   @override
   String get layerMergeBelow => 'Fusionner avec le calque inférieur';
@@ -416,6 +427,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get layerToggleVisibility => 'Masquer/Afficher ce calque';
+
+  @override
+  String get layerUnlockEdits => 'Deverrouiller la modification du calque';
 
   @override
   String get menuTooltip => 'Menu principal';

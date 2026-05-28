@@ -29,6 +29,11 @@ void main() {
       expect(layer.isVisible, isTrue);
     });
 
+    test('default lock state is false', () {
+      final LayerProvider layer = _createLayer();
+      expect(layer.isLocked, isFalse);
+    });
+
     test('default opacity is 1.0', () {
       final LayerProvider layer = _createLayer();
       expect(layer.opacity, 1.0);
@@ -92,6 +97,14 @@ void main() {
       final LayerProvider layer = _createLayer();
       layer.isVisible = false;
       expect(layer.isVisible, isFalse);
+    });
+  });
+
+  group('isLocked setter', () {
+    test('updates lock state', () {
+      final LayerProvider layer = _createLayer();
+      layer.isLocked = true;
+      expect(layer.isLocked, isTrue);
     });
   });
 

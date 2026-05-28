@@ -865,6 +865,12 @@ class _EffectsSectionState extends State<_EffectsSection> {
                     widget.appProvider.cancelEffectPreview();
                     return;
                   }
+
+                  if (widget.appProvider.isSelectedLayerLocked) {
+                    _showLockedLayerMessage();
+                    return;
+                  }
+
                   await widget.appProvider.startEffectPreview(effect);
                 },
               ),
@@ -881,6 +887,12 @@ class _EffectsSectionState extends State<_EffectsSection> {
             cancelButtonKey: Keys.effectIntensityCancelButton,
           ),
       ],
+    );
+  }
+
+  void _showLockedLayerMessage() {
+    context.showSnackBarMessage(
+      widget.l10n.layerLockedForEditing(widget.appProvider.layers.selectedLayer.name),
     );
   }
 }

@@ -48,6 +48,7 @@ void main() {
           TiffConstants.metaKeyOpacity: 0.75,
           TiffConstants.metaKeyBlendMode: ui.BlendMode.multiply.name,
           TiffConstants.metaKeyVisible: false,
+          TiffConstants.metaKeyLocked: true,
         };
         final String encoded = jsonEncode(meta);
         expect(encoded, startsWith('{'));
@@ -57,6 +58,7 @@ void main() {
         expect(decoded[TiffConstants.metaKeyOpacity], 0.75);
         expect(decoded[TiffConstants.metaKeyBlendMode], 'multiply');
         expect(decoded[TiffConstants.metaKeyVisible], false);
+        expect(decoded[TiffConstants.metaKeyLocked], true);
       });
 
       test('defaults are sensible when fields are missing', () {
@@ -70,6 +72,7 @@ void main() {
         expect(decoded[TiffConstants.metaKeyOpacity], isNull);
         expect(decoded[TiffConstants.metaKeyBlendMode], isNull);
         expect(decoded[TiffConstants.metaKeyVisible], isNull);
+        expect(decoded[TiffConstants.metaKeyLocked], isNull);
       });
     });
 
@@ -116,6 +119,7 @@ void main() {
       );
       hiddenLayer.backgroundColor = Colors.blue;
       hiddenLayer.isVisible = false;
+      hiddenLayer.isLocked = true;
 
       final Uint8List bytes = await convertLayersToTiff(layers);
 
@@ -139,6 +143,8 @@ void main() {
       }
 
       expect(layers.get(0).isVisible, isFalse);
+      expect(layers.get(0).isLocked, isTrue);
+      expect(layers.get(1).isLocked, isFalse);
     });
 
     test('exports cropped layer rasters with preserved offsets', () async {

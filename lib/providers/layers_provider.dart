@@ -267,6 +267,12 @@ class LayersProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Toggles the edit lock of a layer.
+  void layersToggleLock(final LayerProvider layer) {
+    layer.isLocked = !layer.isLocked;
+    notifyListeners();
+  }
+
   /// Clears the hasChanged flag for all layers.
   void clearHasChanged() {
     for (final LayerProvider layer in _list) {

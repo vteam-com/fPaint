@@ -30,6 +30,7 @@ const String _oraAttrX = 'x';
 const String _oraAttrY = 'y';
 const String _oraAttrCompositeOp = 'composite-op';
 const String _oraAttrAlphaPreserve = 'alpha-preserve';
+const String _oraAttrEditLocked = 'edit-locked';
 const String _oraVisibilityVisible = 'visible';
 const String _oraVisibilityHidden = 'hidden';
 const String _oraVisibilityInherit = 'inherit';
@@ -228,10 +229,12 @@ Future<void> addLayer(
   final String compositeOp = xmlLayer.getAttribute(_oraAttrCompositeOp) ?? _svgSrcOverLegacy;
 
   final bool preserveAlpha = xmlLayer.getAttribute(_oraAttrAlphaPreserve) == _booleanTextTrue;
+  final bool isLocked = xmlLayer.getAttribute(_oraAttrEditLocked) == _booleanTextTrue;
 
   final LayerProvider newLayer = layers.addBottom(name);
   newLayer.parentGroupName = stackName;
   newLayer.isVisible = _isLayerVisible(visibleAsText);
+  newLayer.isLocked = isLocked;
   newLayer.opacity = double.parse(opacityAsText);
 
   // is there an image on this layer?
@@ -481,6 +484,7 @@ Future<List<int>> createOraArchive(final LayersProvider layers) async {
       _oraAttrVisibility: layer.isVisible ? _oraVisibilityVisible : _oraVisibilityHidden,
       _oraAttrOpacity: layer.opacity.toStringAsFixed(AppLimits.opacityPrecision),
       _oraAttrCompositeOp: _getOraCompositeOpFromBlendMode(layer.blendMode),
+      _oraAttrEditLocked: layer.isLocked,
       _oraAttrSrc: imageName,
       _oraAttrX: 0,
       _oraAttrY: 0,
@@ -568,6 +572,7 @@ void buildLayers(
 ) {
   for (final Map<String, dynamic> layerData in layersData) {
     final String? compositeOp = layerData[_oraAttrCompositeOp] as String?;
+    final bool isLocked = layerData[_oraAttrEditLocked] as bool? ?? false;
 
     builder.element(
       _oraElementLayer,
@@ -577,6 +582,9 @@ void buildLayers(
         builder.attribute(_oraAttrOpacity, layerData[_oraAttrOpacity]);
         if (compositeOp != null) {
           builder.attribute(_oraAttrCompositeOp, compositeOp);
+        }
+        if (isLocked) {
+          builder.attribute(_oraAttrEditLocked, _booleanTextTrue);
         }
         builder.attribute(_oraAttrSrc, layerData[_oraAttrSrc]);
         builder.attribute(_oraAttrX, layerData[_oraAttrX]);
