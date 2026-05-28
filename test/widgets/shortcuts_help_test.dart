@@ -52,6 +52,7 @@ void main() {
   Widget buildShortcutHandlerTestWidget({
     required final AppProvider appProvider,
     required final ShellProvider shellProvider,
+    final Future<void> Function()? onSave,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -69,7 +70,7 @@ void main() {
                     shellProvider,
                     appProvider,
                     const SizedBox.shrink(),
-                    onSave: () async {},
+                    onSave: onSave ?? () async {},
                   );
                 },
               );
@@ -296,6 +297,34 @@ void main() {
       expect(appProvider.transformModel.isVisible, isTrue);
       expect(appProvider.imagePlacementModel.commitMode, ImagePlacementCommitMode.newLayer);
       expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
+    });
+
+    testWidgets('Cmd/Ctrl+S invokes onSave', (final WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+      final ShellProvider shellProvider = ShellProvider();
+      int saveCount = 0;
+
+      await tester.pumpWidget(
+        buildShortcutHandlerTestWidget(
+          appProvider: appProvider,
+          shellProvider: shellProvider,
+          onSave: () async {
+            saveCount += 1;
+          },
+        ),
+      );
+      await tester.pump();
+
+      final LogicalKeyboardKey modifierKey = duplicateShortcutModifierKey();
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
+      await tester.sendKeyUpEvent(modifierKey);
+      await tester.pumpAndSettle();
+
+      expect(saveCount, 1);
     });
   });
 }

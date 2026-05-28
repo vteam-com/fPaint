@@ -45,7 +45,14 @@ class SelectorModel extends VisibleModel {
   void invert(final Rect containerRect) {
     if (path1 != null) {
       final Path outerPath = Path()..addRect(containerRect);
-      path1 = Path.combine(PathOperation.difference, outerPath, path1!);
+      final Path? invertedPath = _combinePathsSafely(
+        PathOperation.difference,
+        outerPath,
+        path1!,
+      );
+      if (invertedPath != null) {
+        path1 = invertedPath;
+      }
     }
   }
 
@@ -206,26 +213,63 @@ class SelectorModel extends VisibleModel {
         break;
       case SelectorMath.add:
         if (path2 != null) {
-          if (!_hasFinitePathBounds(path2!)) {
-            path2 = null;
-            break;
+          final Path? combinedPath = _combinePathsSafely(
+            PathOperation.union,
+            path1!,
+            path2!,
+          );
+          if (combinedPath != null) {
+            path1 = combinedPath;
           }
-          path1 = Path.combine(PathOperation.union, this.path1!, this.path2!);
           path2 = null;
         }
         break;
       case SelectorMath.remove:
         if (path2 != null) {
-          if (!_hasFinitePathBounds(path2!)) {
-            path2 = null;
-            break;
+          final Path? combinedPath = _combinePathsSafely(
+            PathOperation.difference,
+            path1!,
+            path2!,
+          );
+          if (combinedPath != null) {
+            path1 = combinedPath;
           }
-          path1 = Path.combine(PathOperation.difference, this.path1!, path2!);
           path2 = null;
         }
         break;
     }
     this.points.clear();
+  }
+
+  /// Attempts to combine two paths and ignores invalid geometry results.
+  Path? _combinePathsSafely(
+    final PathOperation operation,
+    final Path firstPath,
+    final Path secondPath,
+  ) {
+    if (!_hasFinitePathBounds(firstPath) || !_hasFinitePathBounds(secondPath)) {
+      return null;
+    }
+
+    try {
+      final Path combinedPath = combinePaths(operation, firstPath, secondPath);
+      if (!_hasFinitePathBounds(combinedPath)) {
+        return null;
+      }
+      return combinedPath;
+    } on StateError {
+      return null;
+    }
+  }
+
+  @visibleForTesting
+  /// Combines two paths using the provided [operation].
+  Path combinePaths(
+    final PathOperation operation,
+    final Path firstPath,
+    final Path secondPath,
+  ) {
+    return Path.combine(operation, firstPath, secondPath);
   }
 
   /// Adds a vertex to the straight-line region selection.

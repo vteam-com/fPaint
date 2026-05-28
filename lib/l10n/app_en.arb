@@ -122,6 +122,8 @@
       "error": {}
     }
   },
+  "exportedLabel": "Exported",
+  "exportingLabel": "Exporting...",
   "exportLabel": "Export...",
   "exportTooltip": "Export...",
   "failedToLoadImage": "Failed to load image: {error}",
@@ -225,13 +227,9 @@
       "fileName": {}
     }
   },
-  "savedMessage": "Saved {fileName}",
-  "@savedMessage": {
-    "placeholders": {
-      "fileName": {}
-    }
-  },
+  "savedLabel": "Saved",
   "saveLabel": "Save",
+  "savingLabel": "Saving...",
   "scale": "Scale",
   "selectionIsHidden": "Selection is hidden.",
   "selectValue": "Select {value}",

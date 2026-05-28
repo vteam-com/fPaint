@@ -141,6 +141,8 @@ Future<void> saveFile(
         );
         break;
     }
+
+    layers.clearHasChanged();
   } on FileOperationException {
     rethrow;
   } catch (error, stackTrace) {

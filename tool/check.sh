@@ -2,7 +2,7 @@
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CHECK_FAILURE_EXIT_CODE="1"
-FCHECK_VERSION="1.3.0"
+FCHECK_VERSION="1.3.1"
 ANSI_RED="$(printf '\033[31m')"
 ANSI_BOLD="$(printf '\033[1m')"
 ANSI_BLINK="$(printf '\033[5m')"

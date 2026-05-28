@@ -90,6 +90,38 @@ Future<void> _runSharePanelAction(
   }
 }
 
+/// Runs a share-panel export while showing global export progress feedback.
+Future<void> _runSharePanelExportAction({
+  required final BuildContext context,
+  required final Future<void> Function() onAction,
+  required final String displayFileName,
+  required final bool dismissOnAction,
+}) async {
+  final AppLocalizations l10n = context.l10n;
+
+  await _runSharePanelAction(
+    context,
+    () {
+      return runWithGlobalProgressSnackBar<void>(
+        showInProgress: () {
+          showGlobalProgressSnackBarMessage(
+            l10n.exportingLabel,
+            subtitle: displayFileName,
+          );
+        },
+        showOnSuccess: () {
+          showGlobalSnackBarMessage(
+            l10n.exportedLabel,
+            subtitle: displayFileName,
+          );
+        },
+        task: onAction,
+      );
+    },
+    dismissOnAction,
+  );
+}
+
 /// Displays a modal bottom sheet with options to share the canvas.
 ///
 /// This function presents a list of options to the user, including:
@@ -146,10 +178,11 @@ Future<void> sharePanel(
                 leading: const AppSvgIcon(icon: AppIcon.iosShare),
                 title: textAction(entry.displayFileName, l10n),
                 onTap: () async {
-                  await _runSharePanelAction(
-                    context,
-                    () => entry.onExport(layers),
-                    dismissOnAction,
+                  await _runSharePanelExportAction(
+                    context: context,
+                    onAction: () => entry.onExport(layers),
+                    displayFileName: entry.displayFileName,
+                    dismissOnAction: dismissOnAction,
                   );
                 },
               ),

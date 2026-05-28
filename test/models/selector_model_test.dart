@@ -5,6 +5,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/selector_model.dart';
 
+class _ThrowingCombineSelectorModel extends SelectorModel {
+  @override
+  Path combinePaths(
+    final PathOperation operation,
+    final Path firstPath,
+    final Path secondPath,
+  ) {
+    throw StateError('Path.combine() failed');
+  }
+}
+
 void main() {
   late SelectorModel model;
 
@@ -479,6 +490,24 @@ void main() {
 
       expect(model.path2, isNull);
       expect(model.boundingRect, before);
+    });
+
+    test('ignores combine failures during remove math', () {
+      final SelectorModel throwingModel = _ThrowingCombineSelectorModel();
+      throwingModel.mode = SelectorMode.rectangle;
+      throwingModel.math = SelectorMath.replace;
+      throwingModel.addP1(const Offset(0, 0));
+      throwingModel.addP2(const Offset(100, 100));
+
+      final Rect before = throwingModel.boundingRect;
+
+      throwingModel.math = SelectorMath.remove;
+      throwingModel.addP1(const Offset(25, 25));
+      throwingModel.addP2(const Offset(75, 75));
+
+      expect(throwingModel.applyMath, returnsNormally);
+      expect(throwingModel.path2, isNull);
+      expect(throwingModel.boundingRect, before);
     });
   });
 

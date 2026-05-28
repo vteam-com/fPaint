@@ -43,14 +43,14 @@ class ImportDialog extends StatefulWidget {
     super.key,
     required this.parentContext,
     this.clipboardImageLoader,
+    this.recentFileThumbnailLoader,
   });
-
   final Future<ui.Image?> Function()? clipboardImageLoader;
 
   /// The context from which the dialog was opened, used for provider access
   /// after the dialog closes.
   final BuildContext parentContext;
-
+  final Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader;
   @override
   State<ImportDialog> createState() => _ImportDialogState();
 }
@@ -102,6 +102,7 @@ class _ImportDialogState extends State<ImportDialog> {
                 key: ValueKey<String>(path),
                 path: path,
                 bookmark: prefs.getBookmark(path),
+                thumbnailLoader: widget.recentFileThumbnailLoader,
                 onTap: () {
                   final String? bookmark = prefs.getBookmark(path);
                   Navigator.pop(context);
@@ -352,6 +353,7 @@ class _RecentFileEntry extends StatefulWidget {
     super.key,
     required this.path,
     required this.bookmark,
+    required this.thumbnailLoader,
     required this.onTap,
     required this.onDiscard,
   });
@@ -359,6 +361,7 @@ class _RecentFileEntry extends StatefulWidget {
   final Future<void> Function() onDiscard;
   final VoidCallback onTap;
   final String path;
+  final Future<ui.Image?> Function(String path, String? bookmark)? thumbnailLoader;
   @override
   State<_RecentFileEntry> createState() => _RecentFileEntryState();
 }
@@ -460,6 +463,27 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
 
   /// Asynchronously decodes the image file and scales it to a thumbnail.
   Future<void> _loadThumbnail() async {
+    if (widget.thumbnailLoader != null) {
+      try {
+        final ui.Image? thumbnail = await widget.thumbnailLoader!(widget.path, widget.bookmark);
+        if (!mounted) {
+          thumbnail?.dispose();
+          return;
+        }
+        setState(() {
+          _thumbnail = thumbnail;
+          _loadFailed = thumbnail == null;
+        });
+      } catch (_) {
+        if (mounted) {
+          setState(() {
+            _loadFailed = true;
+          });
+        }
+      }
+      return;
+    }
+
     try {
       await MacOsBookmarkService.withResolvedBookmark(
         bookmarkBase64: widget.bookmark,
