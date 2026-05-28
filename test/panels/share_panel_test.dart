@@ -32,6 +32,7 @@ void main() {
   Widget buildHarness() {
     return MultiProvider(
       providers: <SingleChildWidget>[
+        ChangeNotifierProvider<AppPreferences>.value(value: preferences),
         ChangeNotifierProvider<LayersProvider>.value(value: appProvider.layers),
         ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
       ],

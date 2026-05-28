@@ -5,6 +5,7 @@ import 'package:fpaint/files/export_download_non_web.dart'
 import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
@@ -38,13 +39,33 @@ const String _displayHeic = 'image.HEIC';
 /// HEIC is conditionally included based on platform support.
 List<_ShareExportEntry> _exportEntries({
   required final bool includeHeic,
+  required final AppPreferences preferences,
 }) => <_ShareExportEntry>[
-  const _ShareExportEntry(_displayPng, onExportAsPng),
-  const _ShareExportEntry(_displayJpg, onExportAsJpeg),
-  const _ShareExportEntry(_displayOra, onExportAsOra),
-  const _ShareExportEntry(_displayWebp, onExportAsWebp),
-  const _ShareExportEntry(_displayTif, onExportAsTiff),
-  if (includeHeic) const _ShareExportEntry(_displayHeic, onExportAsHeic),
+  _ShareExportEntry(
+    _displayPng,
+    (final LayersProvider layers) => onExportAsPng(layers, preferences: preferences),
+  ),
+  _ShareExportEntry(
+    _displayJpg,
+    (final LayersProvider layers) => onExportAsJpeg(layers, preferences: preferences),
+  ),
+  _ShareExportEntry(
+    _displayOra,
+    (final LayersProvider layers) => onExportAsOra(layers, preferences: preferences),
+  ),
+  _ShareExportEntry(
+    _displayWebp,
+    (final LayersProvider layers) => onExportAsWebp(layers, preferences: preferences),
+  ),
+  _ShareExportEntry(
+    _displayTif,
+    (final LayersProvider layers) => onExportAsTiff(layers, preferences: preferences),
+  ),
+  if (includeHeic)
+    _ShareExportEntry(
+      _displayHeic,
+      (final LayersProvider layers) => onExportAsHeic(layers, preferences: preferences),
+    ),
 ];
 
 /// Returns a Text widget with the appropriate action text based on the platform.
@@ -87,6 +108,7 @@ Future<void> sharePanel(
     context: context,
     builder: (final BuildContext context) {
       final AppLocalizations l10n = context.l10n;
+      final AppPreferences preferences = AppPreferences.of(context);
       final String loadedFilePath = ShellProvider.of(context).loadedFileName.trim();
 
       return AppBottomSheetContent(
@@ -118,6 +140,7 @@ Future<void> sharePanel(
             ),
             for (final _ShareExportEntry entry in _exportEntries(
               includeHeic: isHeicExportSupported,
+              preferences: preferences,
             ))
               AppListTile(
                 leading: const AppSvgIcon(icon: AppIcon.iosShare),

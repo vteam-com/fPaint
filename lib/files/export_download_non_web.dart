@@ -6,6 +6,7 @@ import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/export_prepare.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
 const String _fpaintSaveImageTitle = 'fPaint Save Image';
@@ -30,14 +31,16 @@ const String _fpaintSaveImageAsHeicTitle = 'fPaint Save Image as HEIC';
 /// Returns:
 /// - A `Future<void>` that completes when the image has been successfully saved.
 Future<void> onExportAsPng(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = 'image.png',
-]) async {
+  final AppPreferences? preferences,
+}) async {
   await _exportWithFilePicker(
     dialogTitle: _fpaintSaveImageTitle,
     fileName: fileName,
     allowedExtensions: <String>[FileExtensions.png],
     onFileSelected: (final String filePath) => saveAsPng(layers, filePath),
+    preferences: preferences,
   );
 }
 
@@ -67,14 +70,16 @@ Future<void> saveAsPng(
 /// Returns:
 /// - A `Future<void>` that completes when the image has been successfully saved.
 Future<void> onExportAsJpeg(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = 'image.jpg',
-]) async {
+  final AppPreferences? preferences,
+}) async {
   await _exportWithFilePicker(
     dialogTitle: _fpaintSaveImageTitle,
     fileName: fileName,
     allowedExtensions: <String>[FileExtensions.jpg, FileExtensions.jpeg],
     onFileSelected: (final String filePath) => saveAsJpeg(layers, filePath),
+    preferences: preferences,
   );
 }
 
@@ -98,14 +103,16 @@ Future<void> saveAsJpeg(
 ///
 /// Throws an [Exception] if the export process fails.
 Future<void> onExportAsOra(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = 'image.ora',
-]) async {
+  final AppPreferences? preferences,
+}) async {
   await _exportWithFilePicker(
     dialogTitle: _fpaintSaveImageTitle,
     fileName: fileName,
     allowedExtensions: <String>[FileExtensions.ora],
     onFileSelected: (final String filePath) => saveAsOra(layers, filePath),
+    preferences: preferences,
   );
 }
 
@@ -121,27 +128,32 @@ Future<void> saveAsOra(
 
 /// Opens a save dialog and exports the current canvas as a WebP image file.
 Future<void> onExportAsWebp(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = 'image.webp',
-]) async {
+  final AppPreferences? preferences,
+}) async {
   await _exportWithFilePicker(
     dialogTitle: _fpaintSaveImageTitle,
     fileName: fileName,
     allowedExtensions: <String>[FileExtensions.webp],
     onFileSelected: (final String filePath) => saveAsWebp(layers, filePath),
+    preferences: preferences,
   );
 }
 
 /// Opens a save dialog and exports the current canvas as a TIFF file.
 Future<void> onExportAsTiff(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = defaultTiffExportFileName,
-]) async {
+  final AppPreferences? preferences,
+}) async {
   await _exportWithFilePicker(
     dialogTitle: _fpaintSaveImageAsTiffTitle,
     fileName: normalizeTiffExportFileName(fileName),
     allowedExtensions: <String>[FileExtensions.tif],
     onFileSelected: (final String filePath) => saveAsTiff(layers, filePath),
+    preferences: preferences,
+    resolveRecentFilePath: normalizeTiffExportFileName,
   );
 }
 
@@ -151,6 +163,8 @@ Future<void> _exportWithFilePicker({
   required final String fileName,
   required final List<String> allowedExtensions,
   required final Future<void> Function(String) onFileSelected,
+  final AppPreferences? preferences,
+  final String Function(String)? resolveRecentFilePath,
 }) async {
   final String? filePath = await FilePicker.saveFile(
     dialogTitle: dialogTitle,
@@ -162,6 +176,10 @@ Future<void> _exportWithFilePicker({
   );
   if (filePath != null && filePath.isNotEmpty) {
     await onFileSelected(filePath);
+    if (preferences != null) {
+      final String recentFilePath = resolveRecentFilePath == null ? filePath : resolveRecentFilePath(filePath);
+      await preferences.addRecentFile(recentFilePath);
+    }
   }
 }
 
@@ -192,14 +210,16 @@ Future<void> saveAsWebp(
 
 /// Opens a save dialog and exports the current canvas as a HEIC image file.
 Future<void> onExportAsHeic(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = 'image.heic',
-]) async {
+  final AppPreferences? preferences,
+}) async {
   await _exportWithFilePicker(
     dialogTitle: _fpaintSaveImageAsHeicTitle,
     fileName: fileName,
     allowedExtensions: <String>[FileExtensions.heic],
     onFileSelected: (final String filePath) => saveAsHeic(layers, filePath),
+    preferences: preferences,
   );
 }
 
