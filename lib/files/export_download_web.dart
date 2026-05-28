@@ -5,10 +5,17 @@ import 'dart:typed_data';
 import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/export_prepare.dart';
 import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:web/web.dart' as web;
 
 const String _htmlAnchorTag = 'a';
+
+void _ignoreRecentFilePreferences(final AppPreferences? preferences) {
+  if (preferences == null) {
+    return;
+  }
+}
 
 /// Exports the current painter as a PNG image and triggers a download.
 ///
@@ -17,9 +24,11 @@ const String _htmlAnchorTag = 'a';
 ///
 /// [context] The BuildContext to access the current AppProvider.
 Future<void> onExportAsPng(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = 'image.png',
-]) async {
+  final AppPreferences? preferences,
+}) async {
+  _ignoreRecentFilePreferences(preferences);
   await saveAsPng(layers, fileName);
 }
 
@@ -38,9 +47,11 @@ Future<void> saveAsPng(
 ///
 /// [context] The BuildContext to access the current AppProvider.
 Future<void> onExportAsJpeg(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = 'image.jpg',
-]) async {
+  final AppPreferences? preferences,
+}) async {
+  _ignoreRecentFilePreferences(preferences);
   await saveAsJpeg(layers, fileName);
 }
 
@@ -59,9 +70,11 @@ Future<void> saveAsJpeg(
 ///
 /// [context] The BuildContext to access the current AppProvider.
 Future<void> onExportAsOra(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = 'image.ora',
-]) async {
+  final AppPreferences? preferences,
+}) async {
+  _ignoreRecentFilePreferences(preferences);
   await saveAsOra(layers, fileName);
 }
 
@@ -75,17 +88,21 @@ Future<void> saveAsOra(
 
 /// Exports the current painter as a WebP image and triggers a download.
 Future<void> onExportAsWebp(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = 'image.webp',
-]) async {
+  final AppPreferences? preferences,
+}) async {
+  _ignoreRecentFilePreferences(preferences);
   await saveAsWebp(layers, fileName);
 }
 
 /// Exports all layers as a layered TIFF and triggers download.
 Future<void> onExportAsTiff(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = defaultTiffExportFileName,
-]) async {
+  final AppPreferences? preferences,
+}) async {
+  _ignoreRecentFilePreferences(preferences);
   final Uint8List tiffBytes = await convertLayersToTiff(layers);
   downloadBlob(tiffBytes, normalizeTiffExportFileName(fileName));
   layers.clearHasChanged();
@@ -101,9 +118,11 @@ Future<void> saveAsWebp(
 
 /// Exports the current painter as a HEIC image and triggers a download.
 Future<void> onExportAsHeic(
-  final LayersProvider layers, [
+  final LayersProvider layers, {
   final String fileName = 'image.heic',
-]) async {
+  final AppPreferences? preferences,
+}) async {
+  _ignoreRecentFilePreferences(preferences);
   await saveAsHeic(layers, fileName);
 }
 
