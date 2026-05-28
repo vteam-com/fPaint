@@ -87,6 +87,7 @@ void main() {
         'visibility': 'visible',
         'opacity': '1.00000',
         'composite-op': 'svg:multiply',
+        'edit-locked': true,
         'src': 'data/layer-0.png',
         'x': 0,
         'y': 0,
@@ -107,6 +108,7 @@ void main() {
     expect(layer.getAttribute('visibility'), 'visible');
     expect(layer.getAttribute('opacity'), '1.00000');
     expect(layer.getAttribute('composite-op'), 'svg:multiply');
+    expect(layer.getAttribute('edit-locked'), 'true');
     expect(layer.getAttribute('src'), 'data/layer-0.png');
   });
 
@@ -137,6 +139,35 @@ void main() {
 
     expect(importedLayers.length, 1);
     expect(importedLayers.list[0].blendMode, ui.BlendMode.plus);
+  });
+
+  test('createOraArchive round-trips layer edit lock', () async {
+    final LayersProvider exportedLayers = LayersProvider();
+    exportedLayers.size = const ui.Size(100, 100);
+    exportedLayers.list[0].isLocked = true;
+
+    final List<int> archiveData = await createOraArchive(exportedLayers);
+    final Archive archive = ZipDecoder().decodeBytes(archiveData);
+    final ArchiveFile stackFile = archive.files.firstWhere(
+      (final ArchiveFile file) => file.name == 'stack.xml',
+    );
+    final XmlDocument xmlDoc = XmlDocument.parse(
+      String.fromCharCodes(stackFile.content),
+    );
+
+    expect(
+      xmlDoc.findAllElements('layer').single.getAttribute('edit-locked'),
+      'true',
+    );
+
+    final LayersProvider importedLayers = LayersProvider();
+    await readOraFileFromBytes(
+      importedLayers,
+      Uint8List.fromList(archiveData),
+    );
+
+    expect(importedLayers.length, 1);
+    expect(importedLayers.list[0].isLocked, isTrue);
   });
 
   test('buildLayers creates correct XML structure with group', () async {

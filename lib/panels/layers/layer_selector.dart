@@ -19,6 +19,7 @@ const String _menuActionAdd = 'add';
 const String _menuActionDelete = 'delete';
 const String _menuActionMerge = 'merge';
 const String _menuActionBlend = 'blend';
+const String _menuActionLock = 'lock';
 const String _menuActionVisibility = 'visibility';
 const String _menuActionAllHide = 'allHide';
 const String _menuActionAllShow = 'allShow';
@@ -83,6 +84,7 @@ class LayerSelector extends StatelessWidget {
       '[${layer.id}]',
       layer.name,
       if (!layer.isVisible) l10n.layerHidden,
+      if (layer.isLocked) l10n.layerEditsLocked,
       '${l10n.layerOpacity}${layer.opacity.toStringAsFixed(0)}',
       '${l10n.layerBlend}${blendModeToText(layer.blendMode, AppLocalizations.of(context))}',
     ];
@@ -308,6 +310,13 @@ class LayerSelector extends StatelessWidget {
                 ),
               ),
             AppButtonIcon(
+              key: Keys.layerToggleLockButton,
+              tooltip: layer.isLocked ? l10n.layerUnlockEdits : l10n.layerLockEdits,
+              icon: layer.isLocked ? AppIcon.lock : AppIcon.lockOpen,
+              color: layer.isLocked ? AppColors.layerHiddenWarning : AppColors.grey400,
+              onPressed: () => layers.layersToggleLock(layer),
+            ),
+            AppButtonIcon(
               tooltip: l10n.layerToggleVisibility,
               icon: layer.isVisible ? AppIcon.visibility : AppIcon.visibilityOff,
               color: layer.isVisible ? AppColors.primary : AppColors.layerHiddenWarning,
@@ -391,6 +400,19 @@ class LayerSelector extends StatelessWidget {
             ],
           ),
         ),
+      AppPopupMenuItem<String>(
+        value: _menuActionLock,
+        child: Row(
+          children: <Widget>[
+            AppSvgIcon(
+              icon: layer.isLocked ? AppIcon.lock : AppIcon.lockOpen,
+              color: layer.isLocked ? AppColors.layerHiddenWarning : null,
+            ),
+            const SizedBox(width: AppSpacing.small),
+            AppText(layer.isLocked ? l10n.layerUnlockEdits : l10n.layerLockEdits),
+          ],
+        ),
+      ),
       AppPopupMenuItem<String>(
         value: _menuActionVisibility,
         child: Row(
@@ -476,7 +498,18 @@ class LayerSelector extends StatelessWidget {
         alignment: Alignment.topCenter,
         children: <Widget>[
           _buildThumbnailPreview(layers, layer),
-          if (minimal && !layer.isVisible) const AppSvgIcon(icon: AppIcon.visibilityOff, color: AppColors.red),
+          if (minimal && (layer.isLocked || !layer.isVisible))
+            Positioned(
+              top: AppSpacing.thin,
+              right: AppSpacing.thin,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (layer.isLocked) const AppSvgIcon(icon: AppIcon.lock, color: AppColors.layerHiddenWarning),
+                  if (!layer.isVisible) const AppSvgIcon(icon: AppIcon.visibilityOff, color: AppColors.red),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -516,6 +549,9 @@ class LayerSelector extends StatelessWidget {
           context: context,
           selectedBlendMode: layer.blendMode,
         );
+        break;
+      case _menuActionLock:
+        layers.layersToggleLock(layer);
         break;
       case _menuActionVisibility:
         layers.layersToggleVisibility(layer);
@@ -566,6 +602,18 @@ class LayerSelector extends StatelessWidget {
   Future<void> _onModifyLayer(final LayersProvider layers) async {
     final AppProvider appProvider = AppProvider.of(context);
     layers.selectedLayerIndex = layers.getLayerIndex(layer);
+
+    if (appProvider.isSelectedLayerLocked) {
+      _showLockedLayerMessage(appProvider);
+      return;
+    }
+
     await appProvider.modifySelectedLayer();
+  }
+
+  void _showLockedLayerMessage(final AppProvider appProvider) {
+    context.showSnackBarMessage(
+      context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
+    );
   }
 }

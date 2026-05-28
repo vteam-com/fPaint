@@ -1,6 +1,7 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
@@ -26,6 +27,12 @@ Widget shortCutsForMainApp(
   final Widget child, {
   required final Future<void> Function() onSave,
 }) {
+  void showLockedLayerMessage() {
+    context.showSnackBarMessage(
+      context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
+    );
+  }
+
   return Shortcuts(
     shortcuts: <ShortcutActivator, Intent>{
       // Undo
@@ -180,7 +187,15 @@ Widget shortCutsForMainApp(
           onInvoke: (final SaveIntent _) async => await onSave(),
         ),
         CutIntent: CallbackAction<CutIntent>(
-          onInvoke: (final CutIntent _) async => appProvider.regionCut(),
+          onInvoke: (final CutIntent _) async {
+            if (appProvider.isSelectedLayerLocked) {
+              showLockedLayerMessage();
+              return null;
+            }
+
+            await appProvider.regionCut();
+            return null;
+          },
         ),
         CopyIntent: CallbackAction<CopyIntent>(
           onInvoke: (final CopyIntent _) async => await appProvider.regionCopy(),
@@ -198,7 +213,15 @@ Widget shortCutsForMainApp(
           onInvoke: (final PasteIntent _) async => await appProvider.paste(),
         ),
         DuplicateIntent: CallbackAction<DuplicateIntent>(
-          onInvoke: (final DuplicateIntent _) async => await appProvider.regionDuplicateSameLayer(),
+          onInvoke: (final DuplicateIntent _) async {
+            if (appProvider.isSelectedLayerLocked) {
+              showLockedLayerMessage();
+              return null;
+            }
+
+            await appProvider.regionDuplicateSameLayer();
+            return null;
+          },
         ),
         DuplicateNewLayerIntent: CallbackAction<DuplicateNewLayerIntent>(
           onInvoke: (final DuplicateNewLayerIntent _) async => await appProvider.regionDuplicate(),
@@ -247,6 +270,11 @@ Widget shortCutsForMainApp(
         // Delete/Erase
         DeleteIntent: CallbackAction<DeleteIntent>(
           onInvoke: (final DeleteIntent _) async {
+            if (appProvider.isSelectedLayerLocked && appProvider.selectorModel.path1 != null) {
+              showLockedLayerMessage();
+              return null;
+            }
+
             appProvider.regionErase();
             return null;
           },

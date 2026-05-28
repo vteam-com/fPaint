@@ -357,7 +357,7 @@ void main() {
           action: ActionType.region,
           positions: <Offset>[const Offset(10, 10)],
           brush: MyBrush(color: AppColors.black, size: 0),
-          fillColor: AppColors.yellow,
+          fillColor: AppColors.layerHiddenWarning,
           path: regionPath,
         ),
       );

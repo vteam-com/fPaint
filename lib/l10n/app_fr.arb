@@ -170,9 +170,17 @@
   "layerBlendMode": "Mode de fusion",
   "layerChangeBlendMode": "Changer le mode de fusion",
   "layerDelete": "Supprimer ce calque",
+  "layerEditsLocked": "Modification verrouillee",
   "layerHidden": "Masqué",
   "layerHide": "Masquer le calque",
   "layerHideAllOthers": "Masquer tous les autres calques",
+  "layerLockedForEditing": "Le calque {layerName} est verrouille pour la modification.",
+  "@layerLockedForEditing": {
+    "placeholders": {
+      "layerName": {}
+    }
+  },
+  "layerLockEdits": "Verrouiller la modification du calque",
   "layerMergeBelow": "Fusionner avec le calque inférieur",
   "layerModify": "Modifier",
   "layerNameTitle": "Nom du calque",
@@ -181,6 +189,7 @@
   "layerShow": "Afficher le calque",
   "layerShowAll": "Afficher tous les calques",
   "layerToggleVisibility": "Masquer/Afficher ce calque",
+  "layerUnlockEdits": "Deverrouiller la modification du calque",
   "menuTooltip": "Menu principal",
   "mobileApp": "Application mobile.",
   "newCanvasSize": "Nouvelle taille de toile",

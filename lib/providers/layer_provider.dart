@@ -28,10 +28,12 @@ class LayerProvider extends ChangeNotifier {
     this.id = '',
     this.isSelected = false,
     final bool isVisible = true,
+    final bool isLocked = false,
     final double opacity = 1.0,
   }) {
     _size = size;
     _isVisible = isVisible;
+    _isLocked = isLocked;
     _opacity = opacity;
   }
 
@@ -76,6 +78,19 @@ class LayerProvider extends ChangeNotifier {
 
   /// Whether the layer is selected.
   bool isSelected;
+
+  ///---------------------------------------
+  // Edit lock
+  bool _isLocked = false;
+
+  /// Gets whether the layer is locked against direct edits.
+  bool get isLocked => _isLocked;
+
+  /// Sets whether the layer is locked against direct edits.
+  set isLocked(final bool value) {
+    _isLocked = value;
+    notifyListeners();
+  }
 
   /// Whether to preserve the alpha channel when rendering the layer.
   bool preserveAlpha = true;

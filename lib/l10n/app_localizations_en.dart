@@ -383,6 +383,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get layerDelete => 'Delete this layer';
 
   @override
+  String get layerEditsLocked => 'Edits locked';
+
+  @override
   String get layerHidden => 'Hidden';
 
   @override
@@ -390,6 +393,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get layerHideAllOthers => 'Hide all other layers';
+
+  @override
+  String get layerLockEdits => 'Lock layer edits';
+
+  @override
+  String layerLockedForEditing(Object layerName) {
+    return '$layerName is locked for editing.';
+  }
 
   @override
   String get layerMergeBelow => 'Merge to below layer';
@@ -414,6 +425,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get layerToggleVisibility => 'Hide/Show this layer';
+
+  @override
+  String get layerUnlockEdits => 'Unlock layer edits';
 
   @override
   String get menuTooltip => 'Menu';

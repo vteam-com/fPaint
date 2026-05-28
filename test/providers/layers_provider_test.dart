@@ -218,6 +218,13 @@ void main() {
       expect(layer.isVisible, !initialVisibility);
     });
 
+    test('layersToggleLock changes layer lock state', () {
+      final LayerProvider layer = layersProvider.selectedLayer;
+      final bool initialLockState = layer.isLocked;
+      layersProvider.layersToggleLock(layer);
+      expect(layer.isLocked, !initialLockState);
+    });
+
     // Direct opacity, blend mode, name changes are on LayerProvider, not LayersProvider.
     // LayersProvider would trigger updates if these change on selectedLayer.
     test('Modifying selectedLayer name is reflected (test LayerProvider itself)', () {

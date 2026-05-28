@@ -149,11 +149,14 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.layerNameTitle, isNotEmpty);
   expect(l10n.layerAddAbove, isNotEmpty);
   expect(l10n.layerDelete, isNotEmpty);
+  expect(l10n.layerEditsLocked, isNotEmpty);
   expect(l10n.layerMergeBelow, isNotEmpty);
+  expect(l10n.layerLockEdits, isNotEmpty);
   expect(l10n.layerModify, isNotEmpty);
   expect(l10n.layerBlendMode, isNotEmpty);
   expect(l10n.layerBackgroundColor, isNotEmpty);
   expect(l10n.layerToggleVisibility, isNotEmpty);
+  expect(l10n.layerUnlockEdits, isNotEmpty);
   expect(l10n.layerRename, isNotEmpty);
   expect(l10n.layerChangeBlendMode, isNotEmpty);
   expect(l10n.layerHideAllOthers, isNotEmpty);
@@ -173,6 +176,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.failedToLoadImage('err'), isNotEmpty);
   expect(l10n.fileFormatNotSupported('bmp'), isNotEmpty);
   expect(l10n.fileFormatNotSupportedOnPlatform('bmp'), isNotEmpty);
+  expect(l10n.layerLockedForEditing('Layer 1'), isNotEmpty);
   expect(l10n.percentageValue('50'), isNotEmpty);
   expect(l10n.saveAsFile('image.PNG'), isNotEmpty);
   expect(l10n.savedMessage('image.png'), isNotEmpty);

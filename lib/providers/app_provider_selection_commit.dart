@@ -81,6 +81,14 @@ void commitPlacedImage(
   final int currentIndex = appProvider.layers.selectedLayerIndex;
   int newLayerIndex = -1;
 
+  if (commitMode != ImagePlacementCommitMode.newLayer && layerRestoreState != null) {
+    final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
+    if (targetLayer.isLocked) {
+      appProvider.update();
+      return;
+    }
+  }
+
   appProvider.undoProvider.executeAction(
     name: 'Paste',
     forward: () {
