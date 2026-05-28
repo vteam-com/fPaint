@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="2543.0" height="6024.0" viewBox="0 0 2543.0 6024.0" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+<svg width="2546.0" height="6024.0" viewBox="0 0 2546.0 6024.0" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
 <defs>
   <filter id="whiteShadow" x="-20%" y="-20%" width="140%" height="140%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
@@ -1477,8 +1477,8 @@
   <title>files/save.dart ▶ files/export_file_name.dart</title>
 </g>
 <g>
-  <path d="M 630.0 190.0 H 697.0 Q 703.0 190.0 703.0 196.0 V 1485.0 Q 703.0 1491.0 697.0 1491.0 H 626.0" class="edgeVertical"/>
-  <title>main.dart ▶ files/import_files.dart</title>
+  <path d="M 606.0 492.0 H 697.0 Q 703.0 492.0 703.0 498.0 V 1677.0 Q 703.0 1683.0 697.0 1683.0 H 626.0" class="edgeVertical"/>
+  <title>panels/side_panel/recent_files_dialog.dart ▶ files/file_ora.dart</title>
 </g>
 <g>
   <path d="M 630.0 3352.0 H 697.0 Q 703.0 3352.0 703.0 3358.0 V 3943.0 Q 703.0 3949.0 697.0 3949.0 H 626.0" class="edgeVertical"/>
@@ -1501,8 +1501,8 @@
   <title>files/webp_encoder.dart ▶ files/webp_encoder_shared.dart</title>
 </g>
 <g>
-  <path d="M 630.0 190.0 H 700.0 Q 706.0 190.0 706.0 196.0 V 1517.0 Q 706.0 1523.0 700.0 1523.0 H 626.0" class="edgeVertical"/>
-  <title>main.dart ▶ files/save.dart</title>
+  <path d="M 630.0 190.0 H 700.0 Q 706.0 190.0 706.0 196.0 V 1485.0 Q 706.0 1491.0 700.0 1491.0 H 626.0" class="edgeVertical"/>
+  <title>main.dart ▶ files/import_files.dart</title>
 </g>
 <g>
   <path d="M 630.0 3352.0 H 700.0 Q 706.0 3352.0 706.0 3358.0 V 3975.0 Q 706.0 3981.0 700.0 3981.0 H 626.0" class="edgeVertical"/>
@@ -1543,6 +1543,10 @@
 <g>
   <path d="M 630.0 1502.0 H 703.0 Q 709.0 1502.0 709.0 1508.0 V 1933.0 Q 709.0 1939.0 703.0 1939.0 H 626.0" class="edgeVertical"/>
   <title>files/import_files.dart ▶ files/file_heic.dart</title>
+</g>
+<g>
+  <path d="M 630.0 190.0 H 706.0 Q 712.0 190.0 712.0 196.0 V 1517.0 Q 712.0 1523.0 706.0 1523.0 H 626.0" class="edgeVertical"/>
+  <title>main.dart ▶ files/save.dart</title>
 </g>
 <g>
   <path d="M 630.0 3352.0 H 706.0 Q 712.0 3352.0 712.0 3358.0 V 4071.0 Q 712.0 4077.0 706.0 4077.0 H 626.0" class="edgeVertical"/>
@@ -3245,9 +3249,10 @@
 6. providers/layers_provider.dart</title></g><text x="439.0" y="1656.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">file_tiff.dart</text>
 <g class="badge incomingBadge">
   <path d="M 620.0,1683.0 L 632.0,1676.0 Q 635.0,1676.0 635.0,1679.0 L 635.0,1687.0 Q 635.0,1690.0 632.0,1690.0 Z" fill="#3b82f6"/>
-  <text x="630.32" y="1684.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. files/export_prepare.dart
+  <text x="630.32" y="1684.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. files/export_prepare.dart
 2. files/import_files.dart
-3. recovery/draft_recovery_controller.dart</title></g><g class="badge outgoingBadge">
+3. panels/side_panel/recent_files_dialog.dart
+4. recovery/draft_recovery_controller.dart</title></g><g class="badge outgoingBadge">
   <path d="M 636.0,1694.0 L 624.0,1687.0 Q 621.0,1687.0 621.0,1690.0 L 621.0,1698.0 Q 621.0,1701.0 624.0,1701.0 Z" fill="#10b981"/>
   <text x="625.68" y="1695.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. files/file_operation_exception.dart
 2. helpers/constants.dart
@@ -3733,19 +3738,20 @@
   <text x="606.32" y="482.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. panels/side_panel/menu.dart
 2. shell_top_bar.dart</title></g><g class="badge outgoingBadge">
   <path d="M 614.0,492.0 L 598.0,484.4 Q 595.0,484.4 595.0,487.4 L 595.0,496.6 Q 595.0,499.6 598.0,499.6 Z" fill="#10b981"/>
-  <text x="600.72" y="493.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">13</text><title>1. files/import_files.dart
-2. helpers/constants.dart
-3. helpers/image_helper.dart
-4. helpers/macos_bookmark_service.dart
-5. models/app_icon_enum.dart
-6. providers/app_preferences.dart
-7. providers/app_provider.dart
-8. providers/app_provider_canvas.dart
-9. providers/app_provider_selection.dart
-10. providers/shell_provider.dart
-11. widgets/app_icon.dart
-12. widgets/confirm_discard_dialog.dart
-13. widgets/material_free.dart</title></g><text x="459.0" y="486.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">recent_files_dialog.dart</text>
+  <text x="600.72" y="493.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">14</text><title>1. files/file_ora.dart
+2. files/import_files.dart
+3. helpers/constants.dart
+4. helpers/image_helper.dart
+5. helpers/macos_bookmark_service.dart
+6. models/app_icon_enum.dart
+7. providers/app_preferences.dart
+8. providers/app_provider.dart
+9. providers/app_provider_canvas.dart
+10. providers/app_provider_selection.dart
+11. providers/shell_provider.dart
+12. widgets/app_icon.dart
+13. widgets/confirm_discard_dialog.dart
+14. widgets/material_free.dart</title></g><text x="459.0" y="486.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">recent_files_dialog.dart</text>
 <g class="badge incomingBadge">
   <path d="M 596.0,513.0 L 608.0,506.0 Q 611.0,506.0 611.0,509.0 L 611.0,517.0 Q 611.0,520.0 608.0,520.0 Z" fill="#3b82f6"/>
   <text x="606.32" y="514.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. panels/side_panel/menu.dart

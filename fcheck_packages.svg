@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="1200.0" height="3828.0" viewBox="0 0 1200.0 3828.0" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+<svg width="1200.0" height="4902.0" viewBox="0 0 1200.0 4902.0" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
 <defs>
   <filter id="whiteShadow" x="-20%" y="-20%" width="140%" height="140%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
@@ -287,426 +287,593 @@
 <line x1="720.0" y1="76.0" x2="920.0" y2="76.0" stroke="#166534" stroke-width="2.0" opacity="0.9"/>
 <text x="600.0" y="1542.0" text-anchor="middle" fill="#475569" font-size="13.0" font-weight="700">Derived packages (56 items)</text>
 <line x1="40.0" y1="1548.0" x2="1160.0" y2="1548.0" stroke="#64748b" stroke-width="1" opacity="0.35"/>
+<text x="600.0" y="3856.0" text-anchor="middle" fill="#475569" font-size="13.0" font-weight="700">Nested derived packages (25 items)</text>
+<line x1="40.0" y1="3862.0" x2="1160.0" y2="3862.0" stroke="#64748b" stroke-width="1" opacity="0.35"/>
 <g>
-  <path d="M 280.0 131.0 C 190.0 147.0, 370.0 2430.0, 460.0 2414.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>archive -> path v1.9.1</title>
-<g>
-  <path d="M 280.0 131.0 C 190.0 147.0, 370.0 2750.0, 460.0 2734.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>archive -> posix v6.5.0</title>
-<g>
-  <path d="M 280.0 197.0 C 190.0 213.0, 370.0 1830.0, 460.0 1814.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>desktop_drop -> cross_file v0.3.5+2</title>
-<g>
-  <path d="M 280.0 197.0 C 190.0 213.0, 370.0 2030.0, 460.0 2014.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>desktop_drop -> flutter_web_plugins v0.0.0</title>
-<g>
-  <path d="M 280.0 197.0 C 190.0 213.0, 370.0 3270.0, 460.0 3254.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>desktop_drop -> universal_platform v1.1.0</title>
-<g>
-  <path d="M 280.0 263.0 C 190.0 279.0, 370.0 1830.0, 460.0 1814.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>file_picker -> cross_file v0.3.5+2</title>
-<g>
-  <path d="M 280.0 263.0 C 190.0 279.0, 370.0 1870.0, 460.0 1854.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>file_picker -> dbus v0.7.12</title>
-<g>
-  <path d="M 280.0 263.0 C 190.0 279.0, 370.0 1950.0, 460.0 1934.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>file_picker -> ffi v2.2.0</title>
-<g>
-  <path d="M 280.0 263.0 C 190.0 279.0, 370.0 1990.0, 460.0 1974.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>file_picker -> flutter_plugin_android_lifecycle v2.0.34</title>
-<g>
-  <path d="M 280.0 263.0 C 190.0 279.0, 370.0 2030.0, 460.0 2014.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>file_picker -> flutter_web_plugins v0.0.0</title>
-<g>
-  <path d="M 280.0 263.0 C 190.0 279.0, 370.0 2430.0, 460.0 2414.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>file_picker -> path v1.9.1</title>
-<g>
-  <path d="M 280.0 263.0 C 190.0 279.0, 370.0 2710.0, 460.0 2694.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>file_picker -> plugin_platform_interface v2.1.8</title>
-<g>
-  <path d="M 280.0 263.0 C 190.0 279.0, 370.0 3750.0, 460.0 3734.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>file_picker -> win32 v5.15.0</title>
-<g>
-  <path d="M 280.0 329.0 C 190.0 345.0, 370.0 1630.0, 460.0 1614.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter -> characters v1.4.1</title>
-<g>
-  <path d="M 280.0 329.0 C 190.0 345.0, 370.0 1790.0, 460.0 1774.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter -> collection v1.19.1</title>
-<g>
-  <path d="M 280.0 329.0 C 190.0 345.0, 370.0 2270.0, 460.0 2254.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter -> material_color_utilities v0.13.0</title>
-<g>
-  <path d="M 280.0 329.0 C 190.0 345.0, 370.0 2310.0, 460.0 2294.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter -> meta v1.18.0</title>
-<g>
-  <path d="M 280.0 329.0 C 190.0 345.0, 370.0 3070.0, 460.0 3054.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter -> sky_engine v0.0.0</title>
-<g>
-  <path d="M 280.0 395.0 C 190.0 411.0, 370.0 2430.0, 460.0 2414.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_localizations -> path v1.9.1</title>
-<g>
-  <path d="M 280.0 461.0 C 190.0 477.0, 370.0 2070.0, 460.0 2054.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_svg -> http v1.6.0</title>
-<g>
-  <path d="M 280.0 461.0 C 190.0 477.0, 370.0 3630.0, 460.0 3614.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_svg -> vector_graphics v1.2.2</title>
-<g>
-  <path d="M 280.0 461.0 C 190.0 477.0, 370.0 3670.0, 460.0 3654.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_svg -> vector_graphics_codec v1.1.13</title>
-<g>
-  <path d="M 280.0 461.0 C 190.0 477.0, 370.0 3710.0, 460.0 3694.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_svg -> vector_graphics_compiler v1.2.3</title>
-<g>
-  <path d="M 280.0 527.0 C 190.0 543.0, 370.0 2310.0, 460.0 2294.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>image -> meta v1.18.0</title>
-<g>
-  <path d="M 280.0 593.0 C 190.0 609.0, 370.0 1750.0, 460.0 1734.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>intl -> clock v1.1.2</title>
-<g>
-  <path d="M 280.0 593.0 C 190.0 609.0, 370.0 2310.0, 460.0 2294.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>intl -> meta v1.18.0</title>
-<g>
-  <path d="M 280.0 593.0 C 190.0 609.0, 370.0 2430.0, 460.0 2414.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>intl -> path v1.9.1</title>
-<g>
-  <path d="M 280.0 725.0 C 190.0 741.0, 370.0 2310.0, 460.0 2294.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>multi_split_view -> meta v1.18.0</title>
-<g>
-  <path d="M 280.0 791.0 C 190.0 807.0, 370.0 1750.0, 460.0 1734.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>package_info_plus -> clock v1.1.2</title>
-<g>
-  <path d="M 280.0 791.0 C 190.0 807.0, 370.0 1950.0, 460.0 1934.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>package_info_plus -> ffi v2.2.0</title>
-<g>
-  <path d="M 280.0 791.0 C 190.0 807.0, 370.0 2030.0, 460.0 2014.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>package_info_plus -> flutter_web_plugins v0.0.0</title>
-<g>
-  <path d="M 280.0 791.0 C 190.0 807.0, 370.0 2070.0, 460.0 2054.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>package_info_plus -> http v1.6.0</title>
-<g>
-  <path d="M 280.0 791.0 C 190.0 807.0, 370.0 2310.0, 460.0 2294.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>package_info_plus -> meta v1.18.0</title>
-<g>
-  <path d="M 280.0 791.0 C 190.0 807.0, 370.0 2390.0, 460.0 2374.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>package_info_plus -> package_info_plus_platform_interface v3.2.1</title>
-<g>
-  <path d="M 280.0 791.0 C 190.0 807.0, 370.0 2430.0, 460.0 2414.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>package_info_plus -> path v1.9.1</title>
-<g>
-  <path d="M 280.0 791.0 C 190.0 807.0, 370.0 3750.0, 460.0 3734.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>package_info_plus -> win32 v5.15.0</title>
-<g>
-  <path d="M 280.0 857.0 C 190.0 873.0, 370.0 2030.0, 460.0 2014.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>pasteboard -> flutter_web_plugins v0.0.0</title>
-<g>
-  <path d="M 280.0 857.0 C 190.0 873.0, 370.0 2430.0, 460.0 2414.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>pasteboard -> path v1.9.1</title>
-<g>
-  <path d="M 280.0 857.0 C 190.0 873.0, 370.0 3590.0, 460.0 3574.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>pasteboard -> uuid v4.5.3</title>
-<g>
-  <path d="M 280.0 923.0 C 190.0 939.0, 370.0 2470.0, 460.0 2454.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>path_provider -> path_provider_android v2.3.1</title>
-<g>
-  <path d="M 280.0 923.0 C 190.0 939.0, 370.0 2510.0, 460.0 2494.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>path_provider -> path_provider_foundation v2.6.0</title>
-<g>
-  <path d="M 280.0 923.0 C 190.0 939.0, 370.0 2550.0, 460.0 2534.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>path_provider -> path_provider_linux v2.2.1</title>
-<g>
-  <path d="M 280.0 923.0 C 190.0 939.0, 370.0 2590.0, 460.0 2574.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>path_provider -> path_provider_platform_interface v2.1.2</title>
-<g>
-  <path d="M 280.0 923.0 C 190.0 939.0, 370.0 2630.0, 460.0 2614.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>path_provider -> path_provider_windows v2.3.0</title>
-<g>
-  <path d="M 280.0 989.0 C 190.0 1005.0, 370.0 1790.0, 460.0 1774.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>provider -> collection v1.19.1</title>
-<g>
-  <path d="M 280.0 989.0 C 190.0 1005.0, 370.0 2350.0, 460.0 2334.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>provider -> nested v1.0.0</title>
-<g>
-  <path d="M 280.0 1055.0 C 190.0 1071.0, 370.0 2830.0, 460.0 2814.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>shared_preferences -> shared_preferences_android v2.4.23</title>
-<g>
-  <path d="M 280.0 1055.0 C 190.0 1071.0, 370.0 2870.0, 460.0 2854.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>shared_preferences -> shared_preferences_foundation v2.5.6</title>
-<g>
-  <path d="M 280.0 1055.0 C 190.0 1071.0, 370.0 2910.0, 460.0 2894.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>shared_preferences -> shared_preferences_linux v2.4.1</title>
-<g>
-  <path d="M 280.0 1055.0 C 190.0 1071.0, 370.0 2950.0, 460.0 2934.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>shared_preferences -> shared_preferences_platform_interface v2.4.2</title>
-<g>
-  <path d="M 280.0 1055.0 C 190.0 1071.0, 370.0 2990.0, 460.0 2974.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>shared_preferences -> shared_preferences_web v2.4.3</title>
-<g>
-  <path d="M 280.0 1055.0 C 190.0 1071.0, 370.0 3030.0, 460.0 3014.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>shared_preferences -> shared_preferences_windows v2.4.1</title>
-<g>
-  <path d="M 280.0 1121.0 C 190.0 1137.0, 370.0 1790.0, 460.0 1774.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>super_clipboard -> collection v1.19.1</title>
-<g>
-  <path d="M 280.0 1121.0 C 190.0 1137.0, 370.0 2310.0, 460.0 2294.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>super_clipboard -> meta v1.18.0</title>
-<g>
-  <path d="M 280.0 1121.0 C 190.0 1137.0, 370.0 3190.0, 460.0 3174.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>super_clipboard -> super_native_extensions v0.9.1</title>
-<g>
-  <path d="M 280.0 1187.0 C 190.0 1203.0, 370.0 3310.0, 460.0 3294.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>url_launcher -> url_launcher_android v6.3.29</title>
-<g>
-  <path d="M 280.0 1187.0 C 190.0 1203.0, 370.0 3350.0, 460.0 3334.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>url_launcher -> url_launcher_ios v6.4.1</title>
-<g>
-  <path d="M 280.0 1187.0 C 190.0 1203.0, 370.0 3390.0, 460.0 3374.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>url_launcher -> url_launcher_linux v3.2.2</title>
-<g>
-  <path d="M 280.0 1187.0 C 190.0 1203.0, 370.0 3430.0, 460.0 3414.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>url_launcher -> url_launcher_macos v3.2.5</title>
-<g>
-  <path d="M 280.0 1187.0 C 190.0 1203.0, 370.0 3470.0, 460.0 3454.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>url_launcher -> url_launcher_platform_interface v2.3.2</title>
-<g>
-  <path d="M 280.0 1187.0 C 190.0 1203.0, 370.0 3510.0, 460.0 3494.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>url_launcher -> url_launcher_web v2.4.3</title>
-<g>
-  <path d="M 280.0 1187.0 C 190.0 1203.0, 370.0 3550.0, 460.0 3534.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>url_launcher -> url_launcher_windows v3.1.5</title>
-<g>
-  <path d="M 280.0 1385.0 C 190.0 1401.0, 370.0 2430.0, 460.0 2414.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>window_manager -> path v1.9.1</title>
-<g>
-  <path d="M 280.0 1385.0 C 190.0 1401.0, 370.0 2790.0, 460.0 2774.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>window_manager -> screen_retriever v0.2.0</title>
-<g>
-  <path d="M 280.0 1451.0 C 190.0 1467.0, 370.0 1790.0, 460.0 1774.0" class="edgeVertical"/>
+  <path d="M 280.0 1451.0 H 268.0 Q 262.0 1451.0 262.0 1457.0 V 1768.0 Q 262.0 1774.0 268.0 1774.0 H 460.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>xml -> collection v1.19.1</title>
 <g>
-  <path d="M 280.0 1451.0 C 190.0 1467.0, 370.0 2310.0, 460.0 2294.0" class="edgeVertical"/>
+  <path d="M 280.0 1121.0 H 265.0 Q 259.0 1121.0 259.0 1127.0 V 1768.0 Q 259.0 1774.0 265.0 1774.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>super_clipboard -> collection v1.19.1</title>
+<g>
+  <path d="M 280.0 989.0 H 262.0 Q 256.0 989.0 256.0 995.0 V 1768.0 Q 256.0 1774.0 262.0 1774.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>provider -> collection v1.19.1</title>
+<g>
+  <path d="M 280.0 1451.0 H 259.0 Q 253.0 1451.0 253.0 1457.0 V 2288.0 Q 253.0 2294.0 259.0 2294.0 H 460.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>xml -> meta v1.18.0</title>
 <g>
-  <path d="M 280.0 1451.0 C 190.0 1467.0, 370.0 2670.0, 460.0 2654.0" class="edgeVertical"/>
+  <path d="M 280.0 791.0 H 256.0 Q 250.0 791.0 250.0 797.0 V 1728.0 Q 250.0 1734.0 256.0 1734.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>package_info_plus -> clock v1.1.2</title>
+<g>
+  <path d="M 280.0 1385.0 H 253.0 Q 247.0 1385.0 247.0 1391.0 V 2408.0 Q 247.0 2414.0 253.0 2414.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>window_manager -> path v1.9.1</title>
+<g>
+  <path d="M 280.0 593.0 H 250.0 Q 244.0 593.0 244.0 599.0 V 1728.0 Q 244.0 1734.0 250.0 1734.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>intl -> clock v1.1.2</title>
+<g>
+  <path d="M 280.0 791.0 H 247.0 Q 241.0 791.0 241.0 797.0 V 1928.0 Q 241.0 1934.0 247.0 1934.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>package_info_plus -> ffi v2.2.0</title>
+<g>
+  <path d="M 280.0 857.0 H 244.0 Q 238.0 857.0 238.0 863.0 V 2008.0 Q 238.0 2014.0 244.0 2014.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>pasteboard -> flutter_web_plugins v0.0.0</title>
+<g>
+  <path d="M 280.0 1121.0 H 241.0 Q 235.0 1121.0 235.0 1127.0 V 2288.0 Q 235.0 2294.0 241.0 2294.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>super_clipboard -> meta v1.18.0</title>
+<g>
+  <path d="M 280.0 1451.0 H 238.0 Q 232.0 1451.0 232.0 1457.0 V 2648.0 Q 232.0 2654.0 238.0 2654.0 H 460.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>xml -> petitparser v7.0.2</title>
 <g>
-  <path d="M 920.0 131.0 C 1010.0 147.0, 830.0 1590.0, 740.0 1574.0" class="edgeVertical"/>
+  <path d="M 280.0 791.0 H 235.0 Q 229.0 791.0 229.0 797.0 V 2008.0 Q 229.0 2014.0 235.0 2014.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>package_info_plus -> flutter_web_plugins v0.0.0</title>
+<g>
+  <path d="M 280.0 791.0 H 232.0 Q 226.0 791.0 226.0 797.0 V 2048.0 Q 226.0 2054.0 232.0 2054.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>package_info_plus -> http v1.6.0</title>
+<g>
+  <path d="M 280.0 329.0 H 229.0 Q 223.0 329.0 223.0 335.0 V 1608.0 Q 223.0 1614.0 229.0 1614.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter -> characters v1.4.1</title>
+<g>
+  <path d="M 280.0 989.0 H 226.0 Q 220.0 989.0 220.0 995.0 V 2328.0 Q 220.0 2334.0 226.0 2334.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>provider -> nested v1.0.0</title>
+<g>
+  <path d="M 280.0 1385.0 H 223.0 Q 217.0 1385.0 217.0 1391.0 V 2768.0 Q 217.0 2774.0 223.0 2774.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>window_manager -> screen_retriever v0.2.0</title>
+<g>
+  <path d="M 280.0 329.0 H 220.0 Q 214.0 329.0 214.0 335.0 V 1768.0 Q 214.0 1774.0 220.0 1774.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter -> collection v1.19.1</title>
+<g>
+  <path d="M 280.0 791.0 H 217.0 Q 211.0 791.0 211.0 797.0 V 2288.0 Q 211.0 2294.0 217.0 2294.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>package_info_plus -> meta v1.18.0</title>
+<g>
+  <path d="M 280.0 923.0 H 214.0 Q 208.0 923.0 208.0 929.0 V 2448.0 Q 208.0 2454.0 214.0 2454.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>path_provider -> path_provider_android v2.3.1</title>
+<g>
+  <path d="M 280.0 263.0 H 211.0 Q 205.0 263.0 205.0 269.0 V 1808.0 Q 205.0 1814.0 211.0 1814.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>file_picker -> cross_file v0.3.5+2</title>
+<g>
+  <path d="M 280.0 857.0 H 208.0 Q 202.0 857.0 202.0 863.0 V 2408.0 Q 202.0 2414.0 208.0 2414.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>pasteboard -> path v1.9.1</title>
+<g>
+  <path d="M 280.0 725.0 H 205.0 Q 199.0 725.0 199.0 731.0 V 2288.0 Q 199.0 2294.0 205.0 2294.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>multi_split_view -> meta v1.18.0</title>
+<g>
+  <path d="M 280.0 923.0 H 202.0 Q 196.0 923.0 196.0 929.0 V 2488.0 Q 196.0 2494.0 202.0 2494.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>path_provider -> path_provider_foundation v2.6.0</title>
+<g>
+  <path d="M 280.0 791.0 H 199.0 Q 193.0 791.0 193.0 797.0 V 2368.0 Q 193.0 2374.0 199.0 2374.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>package_info_plus -> package_info_plus_platform_interface v3.2.1</title>
+<g>
+  <path d="M 280.0 263.0 H 196.0 Q 190.0 263.0 190.0 269.0 V 1848.0 Q 190.0 1854.0 196.0 1854.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>file_picker -> dbus v0.7.12</title>
+<g>
+  <path d="M 280.0 461.0 H 193.0 Q 187.0 461.0 187.0 467.0 V 2048.0 Q 187.0 2054.0 193.0 2054.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_svg -> http v1.6.0</title>
+<g>
+  <path d="M 280.0 923.0 H 190.0 Q 184.0 923.0 184.0 929.0 V 2528.0 Q 184.0 2534.0 190.0 2534.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>path_provider -> path_provider_linux v2.2.1</title>
+<g>
+  <path d="M 280.0 197.0 H 187.0 Q 181.0 197.0 181.0 203.0 V 1808.0 Q 181.0 1814.0 187.0 1814.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>desktop_drop -> cross_file v0.3.5+2</title>
+<g>
+  <path d="M 280.0 791.0 H 184.0 Q 178.0 791.0 178.0 797.0 V 2408.0 Q 178.0 2414.0 184.0 2414.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>package_info_plus -> path v1.9.1</title>
+<g>
+  <path d="M 280.0 923.0 H 181.0 Q 175.0 923.0 175.0 929.0 V 2568.0 Q 175.0 2574.0 181.0 2574.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>path_provider -> path_provider_platform_interface v2.1.2</title>
+<g>
+  <path d="M 280.0 263.0 H 178.0 Q 172.0 263.0 172.0 269.0 V 1928.0 Q 172.0 1934.0 178.0 1934.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>file_picker -> ffi v2.2.0</title>
+<g>
+  <path d="M 280.0 923.0 H 175.0 Q 169.0 923.0 169.0 929.0 V 2608.0 Q 169.0 2614.0 175.0 2614.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>path_provider -> path_provider_windows v2.3.0</title>
+<g>
+  <path d="M 280.0 593.0 H 172.0 Q 166.0 593.0 166.0 599.0 V 2288.0 Q 166.0 2294.0 172.0 2294.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>intl -> meta v1.18.0</title>
+<g>
+  <path d="M 280.0 263.0 H 169.0 Q 163.0 263.0 163.0 269.0 V 1968.0 Q 163.0 1974.0 169.0 1974.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>file_picker -> flutter_plugin_android_lifecycle v2.0.34</title>
+<g>
+  <path d="M 280.0 263.0 H 166.0 Q 160.0 263.0 160.0 269.0 V 2008.0 Q 160.0 2014.0 166.0 2014.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>file_picker -> flutter_web_plugins v0.0.0</title>
+<g>
+  <path d="M 280.0 1055.0 H 163.0 Q 157.0 1055.0 157.0 1061.0 V 2808.0 Q 157.0 2814.0 163.0 2814.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>shared_preferences -> shared_preferences_android v2.4.23</title>
+<g>
+  <path d="M 280.0 527.0 H 160.0 Q 154.0 527.0 154.0 533.0 V 2288.0 Q 154.0 2294.0 160.0 2294.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>image -> meta v1.18.0</title>
+<g>
+  <path d="M 280.0 1055.0 H 157.0 Q 151.0 1055.0 151.0 1061.0 V 2848.0 Q 151.0 2854.0 157.0 2854.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>shared_preferences -> shared_preferences_foundation v2.5.6</title>
+<g>
+  <path d="M 280.0 197.0 H 154.0 Q 148.0 197.0 148.0 203.0 V 2008.0 Q 148.0 2014.0 154.0 2014.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>desktop_drop -> flutter_web_plugins v0.0.0</title>
+<g>
+  <path d="M 280.0 593.0 H 151.0 Q 145.0 593.0 145.0 599.0 V 2408.0 Q 145.0 2414.0 151.0 2414.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>intl -> path v1.9.1</title>
+<g>
+  <path d="M 280.0 1055.0 H 148.0 Q 142.0 1055.0 142.0 1061.0 V 2888.0 Q 142.0 2894.0 148.0 2894.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>shared_preferences -> shared_preferences_linux v2.4.1</title>
+<g>
+  <path d="M 280.0 1055.0 H 145.0 Q 139.0 1055.0 139.0 1061.0 V 2928.0 Q 139.0 2934.0 145.0 2934.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>shared_preferences -> shared_preferences_platform_interface v2.4.2</title>
+<g>
+  <path d="M 280.0 1055.0 H 142.0 Q 136.0 1055.0 136.0 1061.0 V 2968.0 Q 136.0 2974.0 142.0 2974.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>shared_preferences -> shared_preferences_web v2.4.3</title>
+<g>
+  <path d="M 280.0 329.0 H 139.0 Q 133.0 329.0 133.0 335.0 V 2248.0 Q 133.0 2254.0 139.0 2254.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter -> material_color_utilities v0.13.0</title>
+<g>
+  <path d="M 280.0 1055.0 H 136.0 Q 130.0 1055.0 130.0 1061.0 V 3008.0 Q 130.0 3014.0 136.0 3014.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>shared_preferences -> shared_preferences_windows v2.4.1</title>
+<g>
+  <path d="M 280.0 329.0 H 133.0 Q 127.0 329.0 127.0 335.0 V 2288.0 Q 127.0 2294.0 133.0 2294.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter -> meta v1.18.0</title>
+<g>
+  <path d="M 280.0 395.0 H 130.0 Q 124.0 395.0 124.0 401.0 V 2408.0 Q 124.0 2414.0 130.0 2414.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_localizations -> path v1.9.1</title>
+<g>
+  <path d="M 280.0 1121.0 H 127.0 Q 121.0 1121.0 121.0 1127.0 V 3168.0 Q 121.0 3174.0 127.0 3174.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>super_clipboard -> super_native_extensions v0.9.1</title>
+<g>
+  <path d="M 280.0 1187.0 H 124.0 Q 118.0 1187.0 118.0 1193.0 V 3288.0 Q 118.0 3294.0 124.0 3294.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>url_launcher -> url_launcher_android v6.3.29</title>
+<g>
+  <path d="M 280.0 1187.0 H 121.0 Q 115.0 1187.0 115.0 1193.0 V 3328.0 Q 115.0 3334.0 121.0 3334.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>url_launcher -> url_launcher_ios v6.4.1</title>
+<g>
+  <path d="M 280.0 263.0 H 118.0 Q 112.0 263.0 112.0 269.0 V 2408.0 Q 112.0 2414.0 118.0 2414.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>file_picker -> path v1.9.1</title>
+<g>
+  <path d="M 280.0 1187.0 H 115.0 Q 109.0 1187.0 109.0 1193.0 V 3368.0 Q 109.0 3374.0 115.0 3374.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>url_launcher -> url_launcher_linux v3.2.2</title>
+<g>
+  <path d="M 280.0 1187.0 H 112.0 Q 106.0 1187.0 106.0 1193.0 V 3408.0 Q 106.0 3414.0 112.0 3414.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>url_launcher -> url_launcher_macos v3.2.5</title>
+<g>
+  <path d="M 280.0 1187.0 H 109.0 Q 103.0 1187.0 103.0 1193.0 V 3448.0 Q 103.0 3454.0 109.0 3454.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>url_launcher -> url_launcher_platform_interface v2.3.2</title>
+<g>
+  <path d="M 280.0 131.0 H 106.0 Q 100.0 131.0 100.0 137.0 V 2408.0 Q 100.0 2414.0 106.0 2414.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>archive -> path v1.9.1</title>
+<g>
+  <path d="M 280.0 1187.0 H 103.0 Q 97.0 1187.0 97.0 1193.0 V 3488.0 Q 97.0 3494.0 103.0 3494.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>url_launcher -> url_launcher_web v2.4.3</title>
+<g>
+  <path d="M 280.0 1187.0 H 100.0 Q 94.0 1187.0 94.0 1193.0 V 3528.0 Q 94.0 3534.0 100.0 3534.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>url_launcher -> url_launcher_windows v3.1.5</title>
+<g>
+  <path d="M 280.0 263.0 H 97.0 Q 91.0 263.0 91.0 269.0 V 2688.0 Q 91.0 2694.0 97.0 2694.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>file_picker -> plugin_platform_interface v2.1.8</title>
+<g>
+  <path d="M 280.0 131.0 H 94.0 Q 88.0 131.0 88.0 137.0 V 2728.0 Q 88.0 2734.0 94.0 2734.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>archive -> posix v6.5.0</title>
+<g>
+  <path d="M 280.0 857.0 H 91.0 Q 85.0 857.0 85.0 863.0 V 3568.0 Q 85.0 3574.0 91.0 3574.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>pasteboard -> uuid v4.5.3</title>
+<g>
+  <path d="M 280.0 329.0 H 88.0 Q 82.0 329.0 82.0 335.0 V 3048.0 Q 82.0 3054.0 88.0 3054.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter -> sky_engine v0.0.0</title>
+<g>
+  <path d="M 280.0 791.0 H 85.0 Q 79.0 791.0 79.0 797.0 V 3728.0 Q 79.0 3734.0 85.0 3734.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>package_info_plus -> win32 v5.15.0</title>
+<g>
+  <path d="M 280.0 197.0 H 82.0 Q 76.0 197.0 76.0 203.0 V 3248.0 Q 76.0 3254.0 82.0 3254.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>desktop_drop -> universal_platform v1.1.0</title>
+<g>
+  <path d="M 280.0 461.0 H 79.0 Q 73.0 461.0 73.0 467.0 V 3608.0 Q 73.0 3614.0 79.0 3614.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_svg -> vector_graphics v1.2.2</title>
+<g>
+  <path d="M 280.0 461.0 H 76.0 Q 70.0 461.0 70.0 467.0 V 3648.0 Q 70.0 3654.0 76.0 3654.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_svg -> vector_graphics_codec v1.1.13</title>
+<g>
+  <path d="M 280.0 461.0 H 73.0 Q 67.0 461.0 67.0 467.0 V 3688.0 Q 67.0 3694.0 73.0 3694.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_svg -> vector_graphics_compiler v1.2.3</title>
+<g>
+  <path d="M 280.0 263.0 H 70.0 Q 64.0 263.0 64.0 269.0 V 3728.0 Q 64.0 3734.0 70.0 3734.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>file_picker -> win32 v5.15.0</title>
+<g>
+  <path d="M 920.0 131.0 H 932.0 Q 938.0 131.0 938.0 137.0 V 1568.0 Q 938.0 1574.0 932.0 1574.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_launcher_icons -> args v2.7.0</title>
 <g>
-  <path d="M 920.0 131.0 C 1010.0 147.0, 830.0 1670.0, 740.0 1654.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_launcher_icons -> checked_yaml v2.0.4</title>
-<g>
-  <path d="M 920.0 131.0 C 1010.0 147.0, 830.0 1710.0, 740.0 1694.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_launcher_icons -> cli_util v0.4.2</title>
-<g>
-  <path d="M 920.0 131.0 C 1010.0 147.0, 830.0 2110.0, 740.0 2094.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_launcher_icons -> json_annotation v4.12.0</title>
-<g>
-  <path d="M 920.0 131.0 C 1010.0 147.0, 830.0 2430.0, 740.0 2414.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_launcher_icons -> path v1.9.1</title>
-<g>
-  <path d="M 920.0 131.0 C 1010.0 147.0, 830.0 3790.0, 740.0 3774.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_launcher_icons -> yaml v3.1.3</title>
-<g>
-  <path d="M 920.0 197.0 C 1010.0 213.0, 830.0 2190.0, 740.0 2174.0" class="edgeVertical"/>
-  <title> ▶ </title>
-</g>
-<title>flutter_lints -> lints v6.1.0</title>
-<g>
-  <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 1750.0, 740.0 1734.0" class="edgeVertical"/>
+  <path d="M 920.0 263.0 H 935.0 Q 941.0 263.0 941.0 269.0 V 1728.0 Q 941.0 1734.0 935.0 1734.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_test -> clock v1.1.2</title>
 <g>
-  <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 1790.0, 740.0 1774.0" class="edgeVertical"/>
+  <path d="M 920.0 263.0 H 938.0 Q 944.0 263.0 944.0 269.0 V 1768.0 Q 944.0 1774.0 938.0 1774.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_test -> collection v1.19.1</title>
 <g>
-  <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 1910.0, 740.0 1894.0" class="edgeVertical"/>
+  <path d="M 920.0 131.0 H 941.0 Q 947.0 131.0 947.0 137.0 V 1648.0 Q 947.0 1654.0 941.0 1654.0 H 740.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_launcher_icons -> checked_yaml v2.0.4</title>
+<g>
+  <path d="M 920.0 131.0 H 944.0 Q 950.0 131.0 950.0 137.0 V 1688.0 Q 950.0 1694.0 944.0 1694.0 H 740.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_launcher_icons -> cli_util v0.4.2</title>
+<g>
+  <path d="M 920.0 263.0 H 947.0 Q 953.0 263.0 953.0 269.0 V 1888.0 Q 953.0 1894.0 947.0 1894.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_test -> fake_async v1.3.3</title>
 <g>
-  <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 2150.0, 740.0 2134.0" class="edgeVertical"/>
+  <path d="M 920.0 263.0 H 950.0 Q 956.0 263.0 956.0 269.0 V 2128.0 Q 956.0 2134.0 950.0 2134.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_test -> leak_tracker_flutter_testing v3.0.10</title>
 <g>
-  <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 2230.0, 740.0 2214.0" class="edgeVertical"/>
+  <path d="M 920.0 263.0 H 953.0 Q 959.0 263.0 959.0 269.0 V 2208.0 Q 959.0 2214.0 953.0 2214.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_test -> matcher v0.12.19</title>
 <g>
-  <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 2310.0, 740.0 2294.0" class="edgeVertical"/>
+  <path d="M 920.0 131.0 H 956.0 Q 962.0 131.0 962.0 137.0 V 2088.0 Q 962.0 2094.0 956.0 2094.0 H 740.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_launcher_icons -> json_annotation v4.12.0</title>
+<g>
+  <path d="M 920.0 197.0 H 959.0 Q 965.0 197.0 965.0 203.0 V 2168.0 Q 965.0 2174.0 959.0 2174.0 H 740.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_lints -> lints v6.1.0</title>
+<g>
+  <path d="M 920.0 263.0 H 962.0 Q 968.0 263.0 968.0 269.0 V 2288.0 Q 968.0 2294.0 962.0 2294.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_test -> meta v1.18.0</title>
 <g>
-  <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 2430.0, 740.0 2414.0" class="edgeVertical"/>
+  <path d="M 920.0 263.0 H 965.0 Q 971.0 263.0 971.0 269.0 V 2408.0 Q 971.0 2414.0 965.0 2414.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_test -> path v1.9.1</title>
 <g>
-  <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 3110.0, 740.0 3094.0" class="edgeVertical"/>
+  <path d="M 920.0 131.0 H 968.0 Q 974.0 131.0 974.0 137.0 V 2408.0 Q 974.0 2414.0 968.0 2414.0 H 740.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_launcher_icons -> path v1.9.1</title>
+<g>
+  <path d="M 920.0 263.0 H 971.0 Q 977.0 263.0 977.0 269.0 V 3088.0 Q 977.0 3094.0 971.0 3094.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_test -> stack_trace v1.12.1</title>
 <g>
-  <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 3150.0, 740.0 3134.0" class="edgeVertical"/>
+  <path d="M 920.0 263.0 H 974.0 Q 980.0 263.0 980.0 269.0 V 3128.0 Q 980.0 3134.0 974.0 3134.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_test -> stream_channel v2.1.4</title>
 <g>
-  <path d="M 920.0 263.0 C 1010.0 279.0, 830.0 3230.0, 740.0 3214.0" class="edgeVertical"/>
+  <path d="M 920.0 263.0 H 977.0 Q 983.0 263.0 983.0 269.0 V 3208.0 Q 983.0 3214.0 977.0 3214.0 H 740.0" class="edgeVertical"/>
   <title> ▶ </title>
 </g>
 <title>flutter_test -> test_api v0.7.11</title>
+<g>
+  <path d="M 920.0 131.0 H 980.0 Q 986.0 131.0 986.0 137.0 V 3768.0 Q 986.0 3774.0 980.0 3774.0 H 740.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>flutter_launcher_icons -> yaml v3.1.3</title>
+<g>
+  <path d="M 740.0 3574.0 H 752.0 Q 758.0 3574.0 758.0 3580.0 V 3962.0 Q 758.0 3968.0 752.0 3968.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>uuid -> crypto v3.0.7</title>
+<g>
+  <path d="M 740.0 3574.0 H 755.0 Q 761.0 3574.0 761.0 3580.0 V 4082.0 Q 761.0 4088.0 755.0 4088.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>uuid -> fixnum v1.1.1</title>
+<g>
+  <path d="M 740.0 3214.0 H 758.0 Q 764.0 3214.0 764.0 3220.0 V 3882.0 Q 764.0 3888.0 758.0 3888.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>test_api -> async v2.13.1</title>
+<g>
+  <path d="M 740.0 3214.0 H 761.0 Q 767.0 3214.0 767.0 3220.0 V 3922.0 Q 767.0 3928.0 761.0 3928.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>test_api -> boolean_selector v2.1.2</title>
+<g>
+  <path d="M 740.0 3134.0 H 764.0 Q 770.0 3134.0 770.0 3140.0 V 3882.0 Q 770.0 3888.0 764.0 3888.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>stream_channel -> async v2.13.1</title>
+<g>
+  <path d="M 740.0 3694.0 H 767.0 Q 773.0 3694.0 773.0 3700.0 V 4442.0 Q 773.0 4448.0 767.0 4448.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>vector_graphics_compiler -> path_parsing v1.1.0</title>
+<g>
+  <path d="M 740.0 3174.0 H 770.0 Q 776.0 3174.0 776.0 3180.0 V 4002.0 Q 776.0 4008.0 770.0 4008.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>super_native_extensions -> device_info_plus v11.5.0</title>
+<g>
+  <path d="M 740.0 3774.0 H 773.0 Q 779.0 3774.0 779.0 3780.0 V 4722.0 Q 779.0 4728.0 773.0 4728.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>yaml -> source_span v1.10.2</title>
+<g>
+  <path d="M 740.0 3174.0 H 776.0 Q 782.0 3174.0 782.0 3180.0 V 4162.0 Q 782.0 4168.0 776.0 4168.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>super_native_extensions -> irondash_engine_context v0.5.5</title>
+<g>
+  <path d="M 740.0 3774.0 H 779.0 Q 785.0 3774.0 785.0 3780.0 V 4762.0 Q 785.0 4768.0 779.0 4768.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>yaml -> string_scanner v1.4.1</title>
+<g>
+  <path d="M 740.0 3014.0 H 782.0 Q 788.0 3014.0 788.0 3020.0 V 4042.0 Q 788.0 4048.0 782.0 4048.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>shared_preferences_windows -> file v7.0.1</title>
+<g>
+  <path d="M 740.0 3174.0 H 785.0 Q 791.0 3174.0 791.0 3180.0 V 4202.0 Q 791.0 4208.0 785.0 4208.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>super_native_extensions -> irondash_message_channel v0.7.0</title>
+<g>
+  <path d="M 740.0 2894.0 H 788.0 Q 794.0 2894.0 794.0 2900.0 V 4042.0 Q 794.0 4048.0 788.0 4048.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>shared_preferences_linux -> file v7.0.1</title>
+<g>
+  <path d="M 740.0 3174.0 H 791.0 Q 797.0 3174.0 797.0 3180.0 V 4482.0 Q 797.0 4488.0 791.0 4488.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>super_native_extensions -> pixel_snap v0.1.5</title>
+<g>
+  <path d="M 740.0 3214.0 H 794.0 Q 800.0 3214.0 800.0 3220.0 V 4722.0 Q 800.0 4728.0 794.0 4728.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>test_api -> source_span v1.10.2</title>
+<g>
+  <path d="M 740.0 3214.0 H 797.0 Q 803.0 3214.0 803.0 3220.0 V 4762.0 Q 803.0 4768.0 797.0 4768.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>test_api -> string_scanner v1.4.1</title>
+<g>
+  <path d="M 740.0 3214.0 H 800.0 Q 806.0 3214.0 806.0 3220.0 V 4802.0 Q 806.0 4808.0 800.0 4808.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>test_api -> term_glyph v1.2.2</title>
+<g>
+  <path d="M 740.0 2214.0 H 803.0 Q 809.0 2214.0 809.0 2220.0 V 3882.0 Q 809.0 3888.0 803.0 3888.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>matcher -> async v2.13.1</title>
+<g>
+  <path d="M 740.0 2454.0 H 806.0 Q 812.0 2454.0 812.0 2460.0 V 4242.0 Q 812.0 4248.0 806.0 4248.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>path_provider_android -> jni v1.0.0</title>
+<g>
+  <path d="M 740.0 2774.0 H 809.0 Q 815.0 2774.0 815.0 2780.0 V 4562.0 Q 815.0 4568.0 809.0 4568.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>screen_retriever -> screen_retriever_linux v0.2.0</title>
+<g>
+  <path d="M 740.0 2054.0 H 812.0 Q 818.0 2054.0 818.0 2060.0 V 3882.0 Q 818.0 3888.0 812.0 3888.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>http -> async v2.13.1</title>
+<g>
+  <path d="M 740.0 2454.0 H 815.0 Q 821.0 2454.0 821.0 2460.0 V 4282.0 Q 821.0 4288.0 815.0 4288.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>path_provider_android -> jni_flutter v1.0.1</title>
+<g>
+  <path d="M 740.0 2774.0 H 818.0 Q 824.0 2774.0 824.0 2780.0 V 4602.0 Q 824.0 4608.0 818.0 4608.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>screen_retriever -> screen_retriever_macos v0.2.0</title>
+<g>
+  <path d="M 740.0 2774.0 H 821.0 Q 827.0 2774.0 827.0 2780.0 V 4642.0 Q 827.0 4648.0 821.0 4648.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>screen_retriever -> screen_retriever_platform_interface v0.2.0</title>
+<g>
+  <path d="M 740.0 2494.0 H 824.0 Q 830.0 2494.0 830.0 2500.0 V 4402.0 Q 830.0 4408.0 824.0 4408.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>path_provider_foundation -> objective_c v9.4.0</title>
+<g>
+  <path d="M 740.0 2774.0 H 827.0 Q 833.0 2774.0 833.0 2780.0 V 4682.0 Q 833.0 4688.0 827.0 4688.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>screen_retriever -> screen_retriever_windows v0.2.0</title>
+<g>
+  <path d="M 740.0 2574.0 H 830.0 Q 836.0 2574.0 836.0 2580.0 V 4522.0 Q 836.0 4528.0 830.0 4528.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>path_provider_platform_interface -> platform v3.1.6</title>
+<g>
+  <path d="M 740.0 2054.0 H 833.0 Q 839.0 2054.0 839.0 2060.0 V 4122.0 Q 839.0 4128.0 833.0 4128.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>http -> http_parser v4.1.2</title>
+<g>
+  <path d="M 740.0 2134.0 H 836.0 Q 842.0 2134.0 842.0 2140.0 V 4322.0 Q 842.0 4328.0 836.0 4328.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>leak_tracker_flutter_testing -> leak_tracker v11.0.2</title>
+<g>
+  <path d="M 740.0 2134.0 H 839.0 Q 845.0 2134.0 845.0 2140.0 V 4362.0 Q 845.0 4368.0 839.0 4368.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>leak_tracker_flutter_testing -> leak_tracker_testing v3.0.2</title>
+<g>
+  <path d="M 740.0 2534.0 H 842.0 Q 848.0 2534.0 848.0 2540.0 V 4842.0 Q 848.0 4848.0 842.0 4848.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>path_provider_linux -> xdg_directories v1.1.0</title>
+<g>
+  <path d="M 740.0 2214.0 H 845.0 Q 851.0 2214.0 851.0 2220.0 V 4802.0 Q 851.0 4808.0 845.0 4808.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>matcher -> term_glyph v1.2.2</title>
+<g>
+  <path d="M 740.0 1654.0 H 848.0 Q 854.0 1654.0 854.0 1660.0 V 4722.0 Q 854.0 4728.0 848.0 4728.0 H 460.0" class="edgeVertical"/>
+  <title> ▶ </title>
+</g>
+<title>checked_yaml -> source_span v1.10.2</title>
 <rect x="280.0" y="108.0" width="200.0" height="46.0" rx="8.0" ry="8.0" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1"/>
 <text x="380.0" y="128.0" text-anchor="middle" fill="#0f172a" font-size="13.0">archive</text>
 <text x="380.0" y="141.0" text-anchor="middle" fill="#334155" font-size="10.0">v4.0.9</text>
@@ -1190,4 +1357,79 @@
 <g class="badge incomingBadge">
   <path d="M 734.0,3774.0 L 746.0,3767.0 Q 749.0,3767.0 749.0,3770.0 L 749.0,3778.0 Q 749.0,3781.0 746.0,3781.0 Z" fill="#3b82f6"/>
   <text x="744.32" y="3775.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text></g>
+<rect x="460.0" y="3874.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="3892.0" text-anchor="start" fill="#0f172a" font-size="12.0">async</text>
+<text x="732.0" y="3892.0" text-anchor="end" fill="#334155" font-size="12.0">^2.13.1</text>
+<rect x="460.0" y="3914.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="3932.0" text-anchor="start" fill="#0f172a" font-size="12.0">boolean_selector</text>
+<text x="732.0" y="3932.0" text-anchor="end" fill="#334155" font-size="12.0">^2.1.2</text>
+<rect x="460.0" y="3954.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="3972.0" text-anchor="start" fill="#0f172a" font-size="12.0">crypto</text>
+<text x="732.0" y="3972.0" text-anchor="end" fill="#334155" font-size="12.0">^3.0.7</text>
+<rect x="460.0" y="3994.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4012.0" text-anchor="start" fill="#0f172a" font-size="12.0">device_info_plus</text>
+<text x="732.0" y="4012.0" text-anchor="end" fill="#334155" font-size="12.0">^11.5.0</text>
+<rect x="460.0" y="4034.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4052.0" text-anchor="start" fill="#0f172a" font-size="12.0">file</text>
+<text x="732.0" y="4052.0" text-anchor="end" fill="#334155" font-size="12.0">^7.0.1</text>
+<rect x="460.0" y="4074.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4092.0" text-anchor="start" fill="#0f172a" font-size="12.0">fixnum</text>
+<text x="732.0" y="4092.0" text-anchor="end" fill="#334155" font-size="12.0">^1.1.1</text>
+<rect x="460.0" y="4114.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4132.0" text-anchor="start" fill="#0f172a" font-size="12.0">http_parser</text>
+<text x="732.0" y="4132.0" text-anchor="end" fill="#334155" font-size="12.0">^4.1.2</text>
+<rect x="460.0" y="4154.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4172.0" text-anchor="start" fill="#0f172a" font-size="12.0">irondash_engine_context</text>
+<text x="732.0" y="4172.0" text-anchor="end" fill="#334155" font-size="12.0">^0.5.5</text>
+<rect x="460.0" y="4194.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4212.0" text-anchor="start" fill="#0f172a" font-size="12.0">irondash_message_channel</text>
+<text x="732.0" y="4212.0" text-anchor="end" fill="#334155" font-size="12.0">^0.7.0</text>
+<rect x="460.0" y="4234.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4252.0" text-anchor="start" fill="#0f172a" font-size="12.0">jni</text>
+<text x="732.0" y="4252.0" text-anchor="end" fill="#334155" font-size="12.0">^1.0.0</text>
+<rect x="460.0" y="4274.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4292.0" text-anchor="start" fill="#0f172a" font-size="12.0">jni_flutter</text>
+<text x="732.0" y="4292.0" text-anchor="end" fill="#334155" font-size="12.0">^1.0.1</text>
+<rect x="460.0" y="4314.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4332.0" text-anchor="start" fill="#0f172a" font-size="12.0">leak_tracker</text>
+<text x="732.0" y="4332.0" text-anchor="end" fill="#334155" font-size="12.0">^11.0.2</text>
+<rect x="460.0" y="4354.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4372.0" text-anchor="start" fill="#0f172a" font-size="12.0">leak_tracker_testing</text>
+<text x="732.0" y="4372.0" text-anchor="end" fill="#334155" font-size="12.0">^3.0.2</text>
+<rect x="460.0" y="4394.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4412.0" text-anchor="start" fill="#0f172a" font-size="12.0">objective_c</text>
+<text x="732.0" y="4412.0" text-anchor="end" fill="#334155" font-size="12.0">^9.4.0</text>
+<rect x="460.0" y="4434.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4452.0" text-anchor="start" fill="#0f172a" font-size="12.0">path_parsing</text>
+<text x="732.0" y="4452.0" text-anchor="end" fill="#334155" font-size="12.0">^1.1.0</text>
+<rect x="460.0" y="4474.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4492.0" text-anchor="start" fill="#0f172a" font-size="12.0">pixel_snap</text>
+<text x="732.0" y="4492.0" text-anchor="end" fill="#334155" font-size="12.0">^0.1.5</text>
+<rect x="460.0" y="4514.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4532.0" text-anchor="start" fill="#0f172a" font-size="12.0">platform</text>
+<text x="732.0" y="4532.0" text-anchor="end" fill="#334155" font-size="12.0">^3.1.6</text>
+<rect x="460.0" y="4554.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4572.0" text-anchor="start" fill="#0f172a" font-size="12.0">screen_retriever_linux</text>
+<text x="732.0" y="4572.0" text-anchor="end" fill="#334155" font-size="12.0">^0.2.0</text>
+<rect x="460.0" y="4594.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4612.0" text-anchor="start" fill="#0f172a" font-size="12.0">screen_retriever_macos</text>
+<text x="732.0" y="4612.0" text-anchor="end" fill="#334155" font-size="12.0">^0.2.0</text>
+<rect x="460.0" y="4634.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4652.0" text-anchor="start" fill="#0f172a" font-size="12.0">screen_retriever_platform_interface</text>
+<text x="732.0" y="4652.0" text-anchor="end" fill="#334155" font-size="12.0">^0.2.0</text>
+<rect x="460.0" y="4674.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4692.0" text-anchor="start" fill="#0f172a" font-size="12.0">screen_retriever_windows</text>
+<text x="732.0" y="4692.0" text-anchor="end" fill="#334155" font-size="12.0">^0.2.0</text>
+<rect x="460.0" y="4714.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4732.0" text-anchor="start" fill="#0f172a" font-size="12.0">source_span</text>
+<text x="732.0" y="4732.0" text-anchor="end" fill="#334155" font-size="12.0">^1.10.2</text>
+<rect x="460.0" y="4754.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4772.0" text-anchor="start" fill="#0f172a" font-size="12.0">string_scanner</text>
+<text x="732.0" y="4772.0" text-anchor="end" fill="#334155" font-size="12.0">^1.4.1</text>
+<rect x="460.0" y="4794.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4812.0" text-anchor="start" fill="#0f172a" font-size="12.0">term_glyph</text>
+<text x="732.0" y="4812.0" text-anchor="end" fill="#334155" font-size="12.0">^1.2.2</text>
+<rect x="460.0" y="4834.0" width="280.0" height="28.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="468.0" y="4852.0" text-anchor="start" fill="#0f172a" font-size="12.0">xdg_directories</text>
+<text x="732.0" y="4852.0" text-anchor="end" fill="#334155" font-size="12.0">^1.1.0</text>
 </svg>

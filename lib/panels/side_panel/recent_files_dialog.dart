@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
@@ -17,6 +18,24 @@ import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
+
+const String _oraFileSuffix = '.${FileExtensions.ora}';
+
+/// Returns thumbnail-ready bytes for MRU previews, including ORA archives.
+Future<Uint8List?> resolveRecentFileThumbnailBytes({
+  required final Uint8List fileBytes,
+  required final String path,
+}) async {
+  if (!_isOraPath(path)) {
+    return fileBytes;
+  }
+
+  return extractOraPreviewPngBytes(fileBytes);
+}
+
+bool _isOraPath(final String path) {
+  return path.toLowerCase().endsWith(_oraFileSuffix);
+}
 
 /// The unified import dialog widget.
 class ImportDialog extends StatefulWidget {
@@ -80,6 +99,7 @@ class _ImportDialogState extends State<ImportDialog> {
             const SizedBox(height: AppSpacing.small),
             for (final String path in recentFiles)
               _RecentFileEntry(
+                key: ValueKey<String>(path),
                 path: path,
                 bookmark: prefs.getBookmark(path),
                 onTap: () {
@@ -329,6 +349,7 @@ Future<void> _addRecentAsLayer(
 /// A recent file entry with an async-loaded thumbnail preview.
 class _RecentFileEntry extends StatefulWidget {
   const _RecentFileEntry({
+    super.key,
     required this.path,
     required this.bookmark,
     required this.onTap,
@@ -455,8 +476,20 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
             return;
           }
           final Uint8List bytes = await file.readAsBytes();
+          final Uint8List? thumbnailBytes = await resolveRecentFileThumbnailBytes(
+            fileBytes: bytes,
+            path: resolvedPath,
+          );
+          if (thumbnailBytes == null) {
+            if (mounted) {
+              setState(() {
+                _loadFailed = true;
+              });
+            }
+            return;
+          }
           final ui.Codec codec = await ui.instantiateImageCodec(
-            bytes,
+            thumbnailBytes,
             targetHeight: AppLayout.thumbnailMaxHeight.toInt(),
           );
           final ui.FrameInfo frame = await codec.getNextFrame();

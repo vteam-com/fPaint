@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:xml/xml.dart';
 
@@ -63,10 +64,31 @@ void main() {
       archive.files.any((final ArchiveFile file) => file.name == 'stack.xml'),
       true,
     );
+    expect(
+      archive.files.any((final ArchiveFile file) => file.name == 'mergedimage.png'),
+      true,
+    );
+    expect(
+      archive.files.any((final ArchiveFile file) => file.name == 'Thumbnails/thumbnail.png'),
+      true,
+    );
 
     final ArchiveFile mimetypeFile = archive.files.firstWhere((final ArchiveFile f) => f.name == 'mimetype');
     final String mimetype = String.fromCharCodes(mimetypeFile.content);
     expect(mimetype, 'image/openraster');
+  });
+
+  test('extractOraPreviewPngBytes returns embedded thumbnail', () async {
+    final LayersProvider layers = LayersProvider();
+    layers.size = const ui.Size(100, 50);
+
+    final List<int> archiveData = await createOraArchive(layers);
+    final Uint8List? previewBytes = await extractOraPreviewPngBytes(archiveData);
+
+    expect(previewBytes, isNotNull);
+
+    final ui.Image previewImage = await decodeImage(previewBytes!);
+    expect(previewImage.height, AppLayout.thumbnailMaxHeight.toInt());
   });
 
   test('readOraFileFromBytes throws exception for invalid archive', () async {
