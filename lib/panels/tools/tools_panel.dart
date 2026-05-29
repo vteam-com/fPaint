@@ -223,6 +223,16 @@ class ToolsPanel extends StatelessWidget {
         },
       ),
       _buildActionPicker(
+        key: Keys.toolSmudge,
+        minimal: minimal,
+        name: l10n.toolSmudge,
+        icon: ActionType.smudge.icon,
+        isSelected: selectedTool == ActionType.smudge,
+        onPressed: () {
+          appProvider.selectedAction = ActionType.smudge;
+        },
+      ),
+      _buildActionPicker(
         key: Keys.toolLine,
         minimal: minimal,
         name: l10n.toolLine,

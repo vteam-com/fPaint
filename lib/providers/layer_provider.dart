@@ -503,6 +503,22 @@ class LayerProvider extends ChangeNotifier {
     return newAction;
   }
 
+  /// Replaces all current content with one baked raster image action.
+  void replaceWithRasterImage({
+    required final ui.Image imageToAdd,
+    final ActionType tool = ActionType.image,
+  }) {
+    actionStack.clear();
+    redoStack.clear();
+    backgroundColor = null;
+    blendMode = ui.BlendMode.srcOver;
+    opacity = AppVisual.full;
+    addImage(
+      imageToAdd: imageToAdd,
+      tool: tool,
+    );
+  }
+
   /// Appends a position to the last action.
   void lastActionAppendPosition({required final Offset position}) {
     actionStack.last.positions.add(position);
@@ -665,6 +681,20 @@ class LayerProvider extends ChangeNotifier {
                 userAction.fillColor!,
               ),
             );
+            break;
+
+          case ActionType.smudge:
+            if (userAction.image != null) {
+              applyAction(
+                canvas,
+                userAction.clipPath,
+                (final Canvas theCanvasToUse) => renderImage(
+                  theCanvasToUse,
+                  userAction.positions.first,
+                  userAction.image!,
+                ),
+              );
+            }
             break;
 
           case ActionType.line:

@@ -212,4 +212,17 @@ void main() {
       );
     });
   });
+
+  group('ToolsPanel smudge tool', () {
+    testWidgets('selects smudge and keeps brush-size controls available', (final WidgetTester tester) async {
+      await pumpToolsPanel(tester);
+
+      await tester.tap(find.byKey(Keys.toolSmudge));
+      await tester.pumpAndSettle();
+
+      expect(appProvider.selectedAction, ActionType.smudge);
+      expect(find.byKey(Keys.toolBrushSizeTool), findsOneWidget);
+      expect(find.byKey(Keys.toolBrushSizeButton), findsOneWidget);
+    });
+  });
 }

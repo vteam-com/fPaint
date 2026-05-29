@@ -35,6 +35,24 @@ Future<ui.Image> renderCanvasImage({
   return recorder.endRecording().toImage(width, height);
 }
 
+/// Creates a [ui.Image] from straight RGBA pixel data.
+Future<ui.Image> imageFromPixels(
+  final Uint8List pixels,
+  final int width,
+  final int height,
+) async {
+  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(pixels);
+  final ui.ImageDescriptor descriptor = ui.ImageDescriptor.raw(
+    buffer,
+    width: width,
+    height: height,
+    pixelFormat: ui.PixelFormat.rgba8888,
+  );
+  final ui.Codec codec = await descriptor.instantiateCodec();
+  final ui.FrameInfo frame = await codec.getNextFrame();
+  return frame.image;
+}
+
 /// Extracts the dominant colors from a given [image].
 ///
 /// Returns a list of [ColorUsage] objects, each representing a color and its

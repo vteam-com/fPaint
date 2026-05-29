@@ -63,6 +63,7 @@ class UserActionDrawing {
 enum ActionType {
   pencil(AppIcon.create),
   brush(AppIcon.brush),
+  smudge(AppIcon.effectBlur),
   line(AppIcon.lineAxis),
   circle(AppIcon.circle),
   rectangle(AppIcon.cropSquare),
@@ -114,6 +115,9 @@ final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = <ActionType
     ActionOptions.brushStyle,
     ActionOptions.brushColor,
     ActionOptions.topColors,
+  },
+  ActionType.smudge: <ActionOptions>{
+    ActionOptions.brushSize,
   },
   ActionType.line: <ActionOptions>{
     ActionOptions.brushColor,

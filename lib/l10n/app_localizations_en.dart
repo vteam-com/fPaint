@@ -589,6 +589,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolSelector => 'Selector';
 
   @override
+  String get toolSmudge => 'Smudge';
+
+  @override
   String get toolSolid => 'Solid';
 
   @override

@@ -379,6 +379,12 @@ class AppInteraction {
   static const double radialFillHandleOffset = 50.0;
   static const double magnifierScale = 6.0;
   static const double magnifierImageScale = 8.0;
+  static const double smudgeMinimumRadius = 1.0;
+  static const double smudgeBrushRadiusFactor = 0.5;
+  static const double smudgeInputPointSpacing = 1.0;
+  static const double smudgeStepSpacingFactor = 0.35;
+  static const double smudgeBlendStrength = 0.8;
+  static const int smudgeBoundsPadding = 2;
   static const double selectionHandleSize = 20;
   static const double rotationHandleDistance = 30.0;
   static const double rotationHandleSize = 16.0;
@@ -664,6 +670,7 @@ class Keys {
   static const Key toolFillModeRadial = Key('tool-fill-mode-radial');
   static const Key toolFillHalftoneToggle = Key('tool-fill-halftone-toggle');
   static const Key toolFillHalftoneSlider = Key('tool-fill-halftone-slider');
+  static const Key toolSmudge = Key('tool-smudge');
 
   static const Key toolSelector = Key('tool-selector');
   static const Key toolSelectorModeRectangle = Key('tool-selector-mode-rectangle');

@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layer_provider.dart';
@@ -154,6 +155,67 @@ void main() {
       layer.appendDrawingAction(action2);
       expect(layer.lastUserAction, action2);
       expect(layer.count, 2);
+    });
+  });
+
+  group('replaceWithRasterImage', () {
+    test('collapses repeated raster replacements into one action', () async {
+      final LayerProvider layer = _createLayer();
+      final ui.Image sourceImage = await renderCanvasImage(
+        width: 40,
+        height: 20,
+        draw: (final ui.Canvas canvas) {
+          canvas.drawRect(
+            const Rect.fromLTWH(0, 0, 20, 20),
+            Paint()..color = const Color(0xFFFF0000),
+          );
+          canvas.drawRect(
+            const Rect.fromLTWH(20, 0, 20, 20),
+            Paint()..color = const Color(0xFF0000FF),
+          );
+        },
+      );
+      final ui.Image bakedImage = await renderCanvasImage(
+        width: _defaultSize.width.toInt(),
+        height: _defaultSize.height.toInt(),
+        draw: (final ui.Canvas canvas) {
+          canvas.drawImage(sourceImage, Offset.zero, Paint());
+        },
+      );
+      final ui.Image nextBakedImage = await renderCanvasImage(
+        width: _defaultSize.width.toInt(),
+        height: _defaultSize.height.toInt(),
+        draw: (final ui.Canvas canvas) {
+          canvas.drawImage(sourceImage, const Offset(10, 0), Paint());
+        },
+      );
+
+      layer.backgroundColor = const Color(0xFFFFFFFF);
+      layer.opacity = 0.5;
+      layer.blendMode = ui.BlendMode.multiply;
+      layer.addImage(imageToAdd: sourceImage);
+      layer.addImage(imageToAdd: sourceImage, offset: const Offset(10, 0));
+
+      expect(layer.actionStack, hasLength(2));
+
+      layer.replaceWithRasterImage(
+        imageToAdd: bakedImage,
+        tool: ActionType.smudge,
+      );
+
+      expect(layer.actionStack, hasLength(1));
+      expect(layer.actionStack.single.action, ActionType.smudge);
+      expect(layer.backgroundColor, isNull);
+      expect(layer.blendMode, ui.BlendMode.srcOver);
+      expect(layer.opacity, 1.0);
+
+      layer.replaceWithRasterImage(
+        imageToAdd: nextBakedImage,
+        tool: ActionType.smudge,
+      );
+
+      expect(layer.actionStack, hasLength(1));
+      expect(layer.actionStack.single.image, same(nextBakedImage));
     });
   });
 
