@@ -170,8 +170,10 @@ class FillService {
     required final FillModel fillModel,
     required final Offset Function(Offset) toCanvas,
   }) {
-    final List<Color> gradientColors = fillModel.gradientStopColors;
-    final List<double> gradientStops = fillModel.gradientStopPositions;
+    // Snapshot stop data so previously recorded fills do not change when the
+    // shared fill model is edited for a later action.
+    final List<Color> gradientColors = List<Color>.of(fillModel.gradientStopColors, growable: false);
+    final List<double> gradientStops = List<double>.of(fillModel.gradientStopPositions, growable: false);
 
     if (fillModel.mode == FillMode.radial) {
       final ui.Offset centerPoint = toCanvas(fillModel.gradientPoints.first.offset);
