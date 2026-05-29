@@ -249,6 +249,13 @@ Future<ui.Image> applyNoise(
         final int rowStart = ((y + yOffset) * image.width + x) * AppMath.bytesPerPixel;
         for (int xOffset = 0; xOffset < cellWidth; xOffset++) {
           final int pixelIndex = rowStart + (xOffset * AppMath.bytesPerPixel);
+          final int alpha = pixels[pixelIndex + AppEffects.alphaChannelIndex];
+          if (alpha == 0) {
+            for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
+              pixels[pixelIndex + c] = 0;
+            }
+            continue;
+          }
           for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
             pixels[pixelIndex + c] = (pixels[pixelIndex + c] + channelNoise[c]).clamp(0, AppLimits.rgbChannelMax);
           }
