@@ -9,6 +9,8 @@ import 'package:fpaint/helpers/image_effects.dart';
 
 const int _testImageWidth = 50;
 const int _testImageHeight = 50;
+const int _transparentNoiseTestSize = 8;
+const int _transparentNoiseOpaqueInset = 2;
 const double _halfStrength = 0.5;
 
 /// Creates a solid-color test image.
@@ -40,6 +42,25 @@ Future<ui.Image> _createCheckerImage() async {
   }
 
   return recorder.endRecording().toImage(_testImageWidth, _testImageHeight);
+}
+
+/// Creates an image with a transparent border around an opaque center square.
+Future<ui.Image> _createTransparentBorderImage() async {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+  canvas.drawRect(
+    Rect.fromLTWH(
+      _transparentNoiseOpaqueInset.toDouble(),
+      _transparentNoiseOpaqueInset.toDouble(),
+      (_transparentNoiseTestSize - (_transparentNoiseOpaqueInset * AppMath.pair)).toDouble(),
+      (_transparentNoiseTestSize - (_transparentNoiseOpaqueInset * AppMath.pair)).toDouble(),
+    ),
+    Paint()..color = Colors.red,
+  );
+  return recorder.endRecording().toImage(
+    _transparentNoiseTestSize,
+    _transparentNoiseTestSize,
+  );
 }
 
 Future<Uint8List> _imageBytes(final ui.Image image) async {
@@ -227,6 +248,22 @@ void main() {
       );
 
       expect(await _imageBytes(fineResult), isNot(equals(await _imageBytes(coarseResult))));
+    });
+
+    test('preserves fully transparent pixels', () async {
+      final ui.Image original = await _createTransparentBorderImage();
+      final ui.Image result = await applyNoise(
+        original,
+        strength: AppEffects.maxIntensity,
+        random: Random(7),
+      );
+      final Uint8List resultBytes = await _imageBytes(result);
+      final int topLeftPixelBase = 0;
+
+      expect(resultBytes[topLeftPixelBase], 0);
+      expect(resultBytes[topLeftPixelBase + 1], 0);
+      expect(resultBytes[topLeftPixelBase + 2], 0);
+      expect(resultBytes[topLeftPixelBase + AppEffects.alphaChannelIndex], 0);
     });
   });
 

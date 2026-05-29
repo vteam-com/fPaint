@@ -1,6 +1,8 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/selection_effect.dart';
@@ -23,6 +25,20 @@ void main() {
       Paint()..color = const Color(0xFF000000),
     );
     return recorder.endRecording().toImage(12, 12);
+  }
+
+  Future<Image> createFilledLayerImage({
+    required final int width,
+    required final int height,
+    required final Color color,
+  }) async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+      Paint()..color = color,
+    );
+    return recorder.endRecording().toImage(width, height);
   }
 
   setUp(() async {
@@ -476,6 +492,72 @@ void main() {
       await appProvider.startEffectPreview(SelectionEffect.blur);
 
       expect(appProvider.effectPreviewModel.isVisible, isFalse);
+    });
+
+    test('masks preview and commit to the selection shape', () async {
+      final int canvasWidth = appProvider.layers.width.toInt();
+      final int canvasHeight = appProvider.layers.height.toInt();
+      final Image layerImage = await createFilledLayerImage(
+        width: canvasWidth,
+        height: canvasHeight,
+        color: const Color(0xFF000000),
+      );
+      addTearDown(layerImage.dispose);
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+
+      final Path selectionPath = Path()
+        ..moveTo(0, 0)
+        ..lineTo(canvasWidth.toDouble(), 0)
+        ..lineTo(0, canvasHeight.toDouble())
+        ..close();
+      appProvider.selectorModel.isVisible = true;
+      appProvider.selectorModel.path1 = selectionPath;
+
+      await appProvider.startEffectPreview(SelectionEffect.blur);
+
+      final Image? previewImage = appProvider.effectPreviewModel.previewImage;
+      expect(previewImage, isNotNull);
+
+      final ByteData? previewData = await previewImage!.toByteData(
+        format: ImageByteFormat.rawRgba,
+      );
+      expect(previewData, isNotNull);
+
+      final int previewInsidePixelBase = ((AppMath.one * previewImage.width) + AppMath.one) * AppMath.bytesPerPixel;
+      final int previewOutsidePixelBase =
+          (((previewImage.height - AppMath.one) * previewImage.width) + (previewImage.width - AppMath.one)) *
+          AppMath.bytesPerPixel;
+      expect(
+        previewData!.getUint8(previewInsidePixelBase + AppEffects.alphaChannelIndex),
+        greaterThan(AppMath.zero),
+      );
+      expect(
+        previewData.getUint8(previewOutsidePixelBase + AppEffects.alphaChannelIndex),
+        AppMath.zero,
+      );
+
+      await appProvider.confirmEffectPreview();
+
+      final UserActionDrawing committedAction = appProvider.layers.selectedLayer.actionStack.last;
+      expect(committedAction.action, ActionType.image);
+      final Image committedImage = committedAction.image!;
+      final ByteData? committedData = await committedImage.toByteData(
+        format: ImageByteFormat.rawRgba,
+      );
+      expect(committedData, isNotNull);
+
+      final int committedInsidePixelBase = ((AppMath.one * committedImage.width) + AppMath.one) * AppMath.bytesPerPixel;
+      final int committedOutsidePixelBase =
+          (((committedImage.height - AppMath.one) * committedImage.width) + (committedImage.width - AppMath.one)) *
+          AppMath.bytesPerPixel;
+      expect(
+        committedData!.getUint8(committedInsidePixelBase + AppEffects.alphaChannelIndex),
+        greaterThan(AppMath.zero),
+      );
+      expect(
+        committedData.getUint8(committedOutsidePixelBase + AppEffects.alphaChannelIndex),
+        AppMath.zero,
+      );
     });
   });
 
