@@ -400,6 +400,39 @@ Future<void> prepareCanvasViewport(final WidgetTester tester) async {
 // Gesture helpers
 // ---------------------------------------------------------------------------
 
+/// Captures the post-interaction frame, optionally pumping once first.
+Future<void> _captureRecordedInteraction(
+  final WidgetTester tester, {
+  required final bool settle,
+  final bool pumpBeforeCapture = true,
+}) async {
+  if (pumpBeforeCapture) {
+    await tester.pump();
+  }
+
+  await UnitTestVideoRecorder.captureAfterInteraction(
+    tester,
+    settle: settle,
+  );
+}
+
+/// Records a tap-like interaction, performs it, and captures the result.
+Future<void> _performRecordedTap(
+  final WidgetTester tester, {
+  required final Offset position,
+  required final Future<void> Function() tapAction,
+  required final bool settle,
+  final bool pumpBeforeCapture = true,
+}) async {
+  InteractionTracker.recordTap(position);
+  await tapAction();
+  await _captureRecordedInteraction(
+    tester,
+    settle: settle,
+    pumpBeforeCapture: pumpBeforeCapture,
+  );
+}
+
 /// Simulates a human-like drag from [start] to [end] in incremental steps.
 Future<void> dragLikeHuman(
   final WidgetTester tester,
@@ -431,15 +464,20 @@ Future<void> tapLikeHuman(
   final WidgetTester tester,
   final Offset position,
 ) async {
-  InteractionTracker.recordTap(position);
-
-  final TestGesture gesture = await tester.startGesture(
-    position,
-    kind: PointerDeviceKind.mouse,
-    buttons: kPrimaryButton,
+  await _performRecordedTap(
+    tester,
+    position: position,
+    settle: true,
+    pumpBeforeCapture: false,
+    tapAction: () async {
+      final TestGesture gesture = await tester.startGesture(
+        position,
+        kind: PointerDeviceKind.mouse,
+        buttons: kPrimaryButton,
+      );
+      await gesture.up();
+    },
   );
-  await gesture.up();
-  await UnitTestVideoRecorder.captureAfterInteraction(tester);
 }
 
 /// Simulates a tap at [position] but avoids waiting for all animations or
@@ -451,16 +489,19 @@ Future<void> tapLikeHumanWithoutSettling(
   final WidgetTester tester,
   final Offset position,
 ) async {
-  InteractionTracker.recordTap(position);
-
-  final TestGesture gesture = await tester.startGesture(
-    position,
-    kind: PointerDeviceKind.mouse,
-    buttons: kPrimaryButton,
+  await _performRecordedTap(
+    tester,
+    position: position,
+    settle: false,
+    tapAction: () async {
+      final TestGesture gesture = await tester.startGesture(
+        position,
+        kind: PointerDeviceKind.mouse,
+        buttons: kPrimaryButton,
+      );
+      await gesture.up();
+    },
   );
-  await gesture.up();
-  await tester.pump();
-  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
 }
 
 Future<void> pressListTileWithoutSettling(
@@ -473,13 +514,17 @@ Future<void> pressListTileWithoutSettling(
   final GestureTapCallback? onTap = tile.onTap;
   expect(onTap, isNotNull, reason: 'Expected list tile to be tappable');
 
-  InteractionTracker.recordTap(tester.getCenter(target.first));
-  final dynamic tapResult = (onTap! as dynamic)();
-  if (tapResult is Future<void>) {
-    await tapResult;
-  }
-  await tester.pump();
-  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+  await _performRecordedTap(
+    tester,
+    position: tester.getCenter(target.first),
+    settle: false,
+    tapAction: () async {
+      final dynamic tapResult = (onTap! as dynamic)();
+      if (tapResult is Future<void>) {
+        await tapResult;
+      }
+    },
+  );
 }
 
 Future<void> openPopupMenuButtonWithoutSettling<T>(
@@ -488,11 +533,12 @@ Future<void> openPopupMenuButtonWithoutSettling<T>(
 ) async {
   expect(target, findsOneWidget, reason: 'Should find exactly one visible popup menu button');
 
-  final Offset center = tester.getCenter(target.first);
-  InteractionTracker.recordTap(center);
-  await tester.tap(target.first);
-  await tester.pump();
-  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+  await _performRecordedTap(
+    tester,
+    position: tester.getCenter(target.first),
+    settle: false,
+    tapAction: () => tester.tap(target.first),
+  );
 }
 
 Future<void> tapFinderWithoutSettling(
@@ -507,10 +553,12 @@ Future<void> tapFinderWithoutSettling(
   final Finder tappable = target.hitTestable();
   expect(tappable, findsOneWidget, reason: 'Should find exactly one hit-testable widget');
 
-  InteractionTracker.recordTap(tester.getCenter(tappable.first));
-  await tester.tap(tappable.first);
-  await tester.pump();
-  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
+  await _performRecordedTap(
+    tester,
+    position: tester.getCenter(tappable.first),
+    settle: false,
+    tapAction: () => tester.tap(tappable.first),
+  );
 }
 
 /// Finds the widget matching [key] and taps it.
@@ -527,10 +575,12 @@ Future<void> tapByKey(final WidgetTester tester, final Key key) async {
   final Finder tappable = find.byKey(key).hitTestable();
   expect(tappable, findsOneWidget, reason: 'Should find visible tappable widget with key: $key');
 
-  InteractionTracker.recordTap(tester.getCenter(tappable.first));
-  await tester.tap(tappable.first);
-  await tester.pump();
-  await UnitTestVideoRecorder.captureAfterInteraction(tester);
+  await _performRecordedTap(
+    tester,
+    position: tester.getCenter(tappable.first),
+    settle: true,
+    tapAction: () => tester.tap(tappable.first),
+  );
 }
 
 /// Finds the widget matching [tooltip] and taps it.
