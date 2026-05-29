@@ -1,26 +1,103 @@
 part of 'app_provider_selection.dart';
 
+/// Snapshot of the active effect preview state needed for rendering/commit.
+class _SelectionEffectPreviewState {
+  _SelectionEffectPreviewState({
+    required this.effect,
+    required this.sourceImage,
+    required this.selectionPath,
+    required this.bounds,
+    required this.strength,
+    required this.size,
+  });
+
+  final SelectionEffect effect;
+  final ui.Image sourceImage;
+  final Path selectionPath;
+  final Rect bounds;
+  final double strength;
+  final double size;
+}
+
 /// Effect-preview operations split from the main selection file to keep the
 /// primary selection workflow under the repo's LOC quality gate.
 extension AppProviderSelectionEffects on AppProvider {
+  /// Returns a stable snapshot of the current effect preview state.
+  _SelectionEffectPreviewState? _currentEffectPreviewState() {
+    if (!effectPreviewModel.isVisible ||
+        effectPreviewModel.effect == null ||
+        effectPreviewModel.sourceImage == null ||
+        effectPreviewModel.erasePath == null ||
+        effectPreviewModel.bounds == null) {
+      return null;
+    }
+
+    return _SelectionEffectPreviewState(
+      effect: effectPreviewModel.effect!,
+      sourceImage: effectPreviewModel.sourceImage!,
+      selectionPath: Path.from(effectPreviewModel.erasePath!),
+      bounds: effectPreviewModel.bounds!,
+      strength: effectPreviewModel.strength,
+      size: effectPreviewModel.size,
+    );
+  }
+
+  /// Updates one or both effect preview controls and re-renders the preview.
+  Future<void> _updateEffectPreviewControls({
+    final double? strength,
+    final double? size,
+  }) async {
+    if (!effectPreviewModel.isVisible) {
+      return;
+    }
+
+    if (strength != null) {
+      effectPreviewModel.strength = strength;
+    }
+    if (size != null) {
+      effectPreviewModel.size = size;
+    }
+
+    await _renderEffectPreview();
+  }
+
   /// Re-applies the selection mask so effect output stays inside the region.
   Future<ui.Image> _maskEffectImageToSelection(
     final ui.Image image, {
     required final Path selectionPath,
     required final Rect bounds,
   }) async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
     final Path localSelectionPath = selectionPath.shift(
       Offset(-bounds.left, -bounds.top),
     );
 
-    canvas.save();
-    canvas.clipPath(localSelectionPath, doAntiAlias: true);
-    canvas.drawImage(image, Offset.zero, ui.Paint());
-    canvas.restore();
+    return renderCanvasImage(
+      width: image.width,
+      height: image.height,
+      draw: (final ui.Canvas canvas) {
+        canvas.save();
+        canvas.clipPath(localSelectionPath, doAntiAlias: true);
+        canvas.drawImage(image, Offset.zero, ui.Paint());
+        canvas.restore();
+      },
+    );
+  }
 
-    return recorder.endRecording().toImage(image.width, image.height);
+  /// Applies the active effect and re-masks it to the original selection.
+  Future<ui.Image> _buildMaskedEffectImage(
+    final _SelectionEffectPreviewState state,
+  ) async {
+    final ui.Image processedImage = await state.effect.apply(
+      state.sourceImage,
+      strength: state.strength,
+      size: state.size,
+    );
+
+    return _maskEffectImageToSelection(
+      processedImage,
+      selectionPath: state.selectionPath,
+      bounds: state.bounds,
+    );
   }
 
   /// Starts live preview mode for the selected [effect], [strength], and [size].
@@ -57,59 +134,30 @@ extension AppProviderSelectionEffects on AppProvider {
 
   /// Updates the active preview intensity and re-renders the effect live.
   Future<void> updateEffectPreviewStrength(final double strength) async {
-    if (!effectPreviewModel.isVisible) {
-      return;
-    }
-
-    effectPreviewModel.strength = strength;
-    await _renderEffectPreview();
+    await _updateEffectPreviewControls(strength: strength);
   }
 
   /// Updates the active preview size and re-renders the effect live.
   Future<void> updateEffectPreviewSize(final double size) async {
-    if (!effectPreviewModel.isVisible) {
-      return;
-    }
-
-    effectPreviewModel.size = size;
-    await _renderEffectPreview();
+    await _updateEffectPreviewControls(size: size);
   }
 
   /// Commits the current effect preview as a single undoable action.
   Future<void> confirmEffectPreview() async {
-    if (!effectPreviewModel.isVisible ||
-        effectPreviewModel.effect == null ||
-        effectPreviewModel.sourceImage == null ||
-        effectPreviewModel.erasePath == null ||
-        effectPreviewModel.bounds == null) {
+    final _SelectionEffectPreviewState? state = _currentEffectPreviewState();
+    if (state == null) {
       return;
     }
 
-    final SelectionEffect effect = effectPreviewModel.effect!;
-    final ui.Image sourceImage = effectPreviewModel.sourceImage!;
-    final Path selectionPath = Path.from(effectPreviewModel.erasePath!);
-    final Rect bounds = effectPreviewModel.bounds!;
-    final double strength = effectPreviewModel.strength;
-    final double size = effectPreviewModel.size;
-
-    final ui.Image processedImage = await effect.apply(
-      sourceImage,
-      strength: strength,
-      size: size,
-    );
-    final ui.Image maskedImage = await _maskEffectImageToSelection(
-      processedImage,
-      selectionPath: selectionPath,
-      bounds: bounds,
-    );
+    final ui.Image maskedImage = await _buildMaskedEffectImage(state);
 
     effectPreviewModel.clear();
 
     replaceRegion(
-      name: effect.name,
-      erasePath: selectionPath,
+      name: state.effect.name,
+      erasePath: state.selectionPath,
       replacement: maskedImage,
-      offset: Offset(bounds.left, bounds.top),
+      offset: Offset(state.bounds.left, state.bounds.top),
     );
 
     update();
@@ -128,36 +176,13 @@ extension AppProviderSelectionEffects on AppProvider {
 
   /// Renders the effect preview image and updates overlay listeners.
   Future<void> _renderEffectPreview() async {
-    final SelectionEffect? effect = effectPreviewModel.effect;
-    final ui.Image? sourceImage = effectPreviewModel.sourceImage;
-    final Path? selectionPath = effectPreviewModel.erasePath;
-    final Rect? bounds = effectPreviewModel.bounds;
-    if (!effectPreviewModel.isVisible ||
-        effect == null ||
-        sourceImage == null ||
-        selectionPath == null ||
-        bounds == null) {
+    final _SelectionEffectPreviewState? state = _currentEffectPreviewState();
+    if (state == null) {
       return;
     }
 
     final int requestVersion = ++effectPreviewRenderVersion;
-    final double strength = effectPreviewModel.strength;
-    final double size = effectPreviewModel.size;
-    final ui.Image processedPreviewImage = await effect.apply(
-      sourceImage,
-      strength: strength,
-      size: size,
-    );
-
-    if (!effectPreviewModel.isVisible || requestVersion != effectPreviewRenderVersion) {
-      return;
-    }
-
-    final ui.Image previewImage = await _maskEffectImageToSelection(
-      processedPreviewImage,
-      selectionPath: selectionPath,
-      bounds: bounds,
-    );
+    final ui.Image previewImage = await _buildMaskedEffectImage(state);
 
     if (!effectPreviewModel.isVisible || requestVersion != effectPreviewRenderVersion) {
       return;

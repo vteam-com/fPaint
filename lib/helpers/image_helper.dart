@@ -14,17 +14,36 @@ final Logger _log = Logger(logNameImageHelper);
 
 Uint8List? _sessionClipboardImageBytes;
 
+/// Extracts pixel bytes from [image] using the requested [format].
+Future<Uint8List?> extractImagePixels(
+  final ui.Image image, {
+  final ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba,
+}) async {
+  final ByteData? byteData = await image.toByteData(format: format);
+  return byteData?.buffer.asUint8List();
+}
+
+/// Renders drawing commands into a new [ui.Image] with the given dimensions.
+Future<ui.Image> renderCanvasImage({
+  required final int width,
+  required final int height,
+  required final void Function(ui.Canvas) draw,
+}) {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+  draw(canvas);
+  return recorder.endRecording().toImage(width, height);
+}
+
 /// Extracts the dominant colors from a given [image].
 ///
 /// Returns a list of [ColorUsage] objects, each representing a color and its
 /// usage percentage in the image.
 Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-  if (byteData == null) {
+  final Uint8List? pixels = await extractImagePixels(image);
+  if (pixels == null) {
     return <ColorUsage>[];
   }
-
-  final Uint8List pixels = byteData.buffer.asUint8List();
   final Map<int, int> colorCount = <int, int>{};
   final int length = pixels.length;
   final int totalPixels = length ~/ AppMath.bytesPerPixel;
@@ -76,8 +95,10 @@ Future<ui.Image> fromBytesToImage(final Uint8List list) async {
 
 /// Converts a [ui.Image] to a [Uint8List] of raw RGBA data.
 Future<Uint8List?> convertImageToUint8List(final ui.Image image) async {
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
-  return byteData!.buffer.asUint8List();
+  return extractImagePixels(
+    image,
+    format: ui.ImageByteFormat.rawStraightRgba,
+  );
 }
 
 /// Copies a [ui.Image] to the system clipboard as a PNG.
@@ -143,21 +164,22 @@ Future<bool> clipboardHasImage() async {
 ///
 /// The [image] parameter is the image to resize, and [newSize] is the desired size.
 Future<ui.Image> resizeImage(final ui.Image image, final ui.Size newSize) {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
-  final ui.Paint paint = ui.Paint()
-    ..filterQuality = ui.FilterQuality.high
-    ..isAntiAlias = true;
+  return renderCanvasImage(
+    width: newSize.width.toInt(),
+    height: newSize.height.toInt(),
+    draw: (final ui.Canvas canvas) {
+      final ui.Paint paint = ui.Paint()
+        ..filterQuality = ui.FilterQuality.high
+        ..isAntiAlias = true;
 
-  canvas.drawImageRect(
-    image,
-    ui.Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-    ui.Rect.fromLTWH(0, 0, newSize.width, newSize.height),
-    paint,
+      canvas.drawImageRect(
+        image,
+        ui.Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+        ui.Rect.fromLTWH(0, 0, newSize.width, newSize.height),
+        paint,
+      );
+    },
   );
-
-  final ui.Picture picture = recorder.endRecording();
-  return picture.toImage(newSize.width.toInt(), newSize.height.toInt());
 }
 
 /// Flips an [image] horizontally or vertically.
@@ -170,19 +192,20 @@ Future<ui.Image> flipImage(
 }) async {
   final double w = image.width.toDouble();
   final double h = image.height.toDouble();
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
-
-  if (isHorizontal) {
-    canvas.translate(w, 0);
-    canvas.scale(-1, 1);
-  } else {
-    canvas.translate(0, h);
-    canvas.scale(1, -1);
-  }
-  canvas.drawImage(image, ui.Offset.zero, ui.Paint());
-
-  return recorder.endRecording().toImage(w.toInt(), h.toInt());
+  return renderCanvasImage(
+    width: w.toInt(),
+    height: h.toInt(),
+    draw: (final ui.Canvas canvas) {
+      if (isHorizontal) {
+        canvas.translate(w, 0);
+        canvas.scale(-1, 1);
+      } else {
+        canvas.translate(0, h);
+        canvas.scale(1, -1);
+      }
+      canvas.drawImage(image, ui.Offset.zero, ui.Paint());
+    },
+  );
 }
 
 /// Rotates an [image] 90 degrees clockwise.
@@ -191,16 +214,16 @@ Future<ui.Image> flipImage(
 Future<ui.Image> rotateImage90(final ui.Image image) async {
   final double w = image.width.toDouble();
   final double h = image.height.toDouble();
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
-
-  // Rotate 90° CW: translate to new width (old height), then rotate.
-  canvas.translate(h, 0);
-  canvas.rotate(math.pi / AppMath.pair);
-  canvas.drawImage(image, ui.Offset.zero, ui.Paint());
-
-  // Output dimensions are swapped.
-  return recorder.endRecording().toImage(h.toInt(), w.toInt());
+  return renderCanvasImage(
+    width: h.toInt(),
+    height: w.toInt(),
+    draw: (final ui.Canvas canvas) {
+      // Rotate 90° CW: translate to new width (old height), then rotate.
+      canvas.translate(h, 0);
+      canvas.rotate(math.pi / AppMath.pair);
+      canvas.drawImage(image, ui.Offset.zero, ui.Paint());
+    },
+  );
 }
 
 /// Crops a [ui.Image] to a specified [Rect].
@@ -229,12 +252,10 @@ ui.Image cropImage(final ui.Image image, final ui.Rect rect) {
 ///
 /// Returns `null` when the image is fully transparent.
 Future<ui.Rect?> getNonTransparentBounds(final ui.Image image) async {
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-  if (byteData == null) {
+  final Uint8List? pixels = await extractImagePixels(image);
+  if (pixels == null) {
     return null;
   }
-
-  final Uint8List pixels = byteData.buffer.asUint8List();
   final int width = image.width;
   final int height = image.height;
 

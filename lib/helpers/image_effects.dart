@@ -4,6 +4,45 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
+
+/// Runs [apply] only when [strength] is above the minimum effect intensity.
+Future<ui.Image> _applyWithStrengthGuard(
+  final ui.Image image, {
+  required final double strength,
+  required final Future<ui.Image> Function() apply,
+}) async {
+  if (strength <= AppEffects.minIntensity) {
+    return image;
+  }
+  return apply();
+}
+
+/// Mutates raw RGBA pixels and rebuilds an image from the result.
+Future<ui.Image> _applyPixelTransform(
+  final ui.Image image, {
+  required final double strength,
+  required final void Function(Uint8List) mutate,
+}) {
+  return _applyWithStrengthGuard(
+    image,
+    strength: strength,
+    apply: () async {
+      final Uint8List? pixels = await extractImagePixels(image);
+      if (pixels == null) {
+        return image;
+      }
+
+      mutate(pixels);
+      return _imageFromPixels(pixels, image.width, image.height);
+    },
+  );
+}
+
+/// Converts normalized opacity values to the 0-255 byte range.
+int _opacityToByte(final double opacity) {
+  return (opacity.clamp(AppEffects.minIntensity, AppEffects.maxIntensity) * AppLimits.rgbChannelMax).round();
+}
 
 /// Applies a Gaussian blur with the given [sigma] to [image], scaled by [strength].
 ///
@@ -12,30 +51,36 @@ Future<ui.Image> applyGaussianBlur(
   final ui.Image image,
   final double sigma, {
   final double strength = AppEffects.defaultIntensity,
-}) async {
-  if (strength <= AppEffects.minIntensity) {
-    return image;
-  }
-  final double effectiveSigma = sigma * strength;
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-  canvas.saveLayer(
-    Rect.fromLTWH(
-      0,
-      0,
-      image.width.toDouble(),
-      image.height.toDouble(),
-    ),
-    Paint()
-      ..imageFilter = ui.ImageFilter.blur(
-        sigmaX: effectiveSigma,
-        sigmaY: effectiveSigma,
-        tileMode: TileMode.decal,
-      ),
+}) {
+  return _applyWithStrengthGuard(
+    image,
+    strength: strength,
+    apply: () {
+      final double effectiveSigma = sigma * strength;
+      return renderCanvasImage(
+        width: image.width,
+        height: image.height,
+        draw: (final Canvas canvas) {
+          canvas.saveLayer(
+            Rect.fromLTWH(
+              0,
+              0,
+              image.width.toDouble(),
+              image.height.toDouble(),
+            ),
+            Paint()
+              ..imageFilter = ui.ImageFilter.blur(
+                sigmaX: effectiveSigma,
+                sigmaY: effectiveSigma,
+                tileMode: TileMode.decal,
+              ),
+          );
+          canvas.drawImage(image, Offset.zero, Paint());
+          canvas.restore();
+        },
+      );
+    },
   );
-  canvas.drawImage(image, Offset.zero, Paint());
-  canvas.restore();
-  return recorder.endRecording().toImage(image.width, image.height);
 }
 
 /// Applies pixelation by downscaling then upscaling with no filtering.
@@ -49,43 +94,49 @@ Future<ui.Image> applyPixelate(
   final double strength = AppEffects.defaultIntensity,
   final double size = AppEffects.pixelateDefaultSize,
 }) async {
-  if (strength <= AppEffects.minIntensity) {
-    return image;
-  }
-  final int w = image.width;
-  final int h = image.height;
-  final int blockSize = _resolvePixelateBlockSize(size);
-  final int smallW = max(1, w ~/ blockSize);
-  final int smallH = max(1, h ~/ blockSize);
-
-  // Downscale.
-  final ui.PictureRecorder downRecorder = ui.PictureRecorder();
-  final Canvas downCanvas = Canvas(downRecorder);
-  downCanvas.drawImageRect(
+  return _applyWithStrengthGuard(
     image,
-    Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble()),
-    Rect.fromLTWH(0, 0, smallW.toDouble(), smallH.toDouble()),
-    Paint(),
+    strength: strength,
+    apply: () async {
+      final int w = image.width;
+      final int h = image.height;
+      final int blockSize = _resolvePixelateBlockSize(size);
+      final int smallW = max(1, w ~/ blockSize);
+      final int smallH = max(1, h ~/ blockSize);
+
+      final ui.Image small = await renderCanvasImage(
+        width: smallW,
+        height: smallH,
+        draw: (final Canvas canvas) {
+          canvas.drawImageRect(
+            image,
+            Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble()),
+            Rect.fromLTWH(0, 0, smallW.toDouble(), smallH.toDouble()),
+            Paint(),
+          );
+        },
+      );
+
+      final ui.Image pixelated = await renderCanvasImage(
+        width: w,
+        height: h,
+        draw: (final Canvas canvas) {
+          canvas.drawImageRect(
+            small,
+            Rect.fromLTWH(0, 0, smallW.toDouble(), smallH.toDouble()),
+            Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble()),
+            Paint()..filterQuality = FilterQuality.none,
+          );
+        },
+      );
+
+      if (strength >= AppEffects.maxIntensity) {
+        return pixelated;
+      }
+
+      return _blendOver(image, pixelated, strength);
+    },
   );
-  final ui.Image small = await downRecorder.endRecording().toImage(smallW, smallH);
-
-  // Upscale with no filtering to get blocky pixels.
-  final ui.PictureRecorder upRecorder = ui.PictureRecorder();
-  final Canvas upCanvas = Canvas(upRecorder);
-  upCanvas.drawImageRect(
-    small,
-    Rect.fromLTWH(0, 0, smallW.toDouble(), smallH.toDouble()),
-    Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble()),
-    Paint()..filterQuality = FilterQuality.none,
-  );
-  final ui.Image pixelated = await upRecorder.endRecording().toImage(w, h);
-
-  if (strength >= AppEffects.maxIntensity) {
-    return pixelated;
-  }
-
-  // Blend pixelated over original at the requested strength.
-  return _blendOver(image, pixelated, strength);
 }
 
 /// Converts the image to grayscale using a color matrix filter.
@@ -95,53 +146,57 @@ Future<ui.Image> applyPixelate(
 Future<ui.Image> applyGrayscale(
   final ui.Image image, {
   final double strength = AppEffects.defaultIntensity,
-}) async {
-  if (strength <= AppEffects.minIntensity) {
-    return image;
-  }
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-  // Draw the original beneath so partial strength blends correctly.
-  canvas.drawImage(image, Offset.zero, Paint());
-  final Paint grayPaint = Paint()
-    ..colorFilter = const ColorFilter.matrix(<double>[
-      AppEffects.lumaRed,
-      AppEffects.lumaGreen,
-      AppEffects.lumaBlue,
-      0,
-      0,
-      AppEffects.lumaRed,
-      AppEffects.lumaGreen,
-      AppEffects.lumaBlue,
-      0,
-      0,
-      AppEffects.lumaRed,
-      AppEffects.lumaGreen,
-      AppEffects.lumaBlue,
-      0,
-      0,
-      0,
-      0,
-      0,
-      1,
-      0,
-    ]);
-  // Overlay grayscale at opacity = strength for a linear blend.
-  final int opacityByte = (strength.clamp(AppEffects.minIntensity, AppEffects.maxIntensity) * AppLimits.rgbChannelMax)
-      .round();
-  canvas.saveLayer(
-    null,
-    Paint()
-      ..color = Color.fromARGB(
-        opacityByte,
-        AppLimits.rgbChannelMax,
-        AppLimits.rgbChannelMax,
-        AppLimits.rgbChannelMax,
-      ),
+}) {
+  return _applyWithStrengthGuard(
+    image,
+    strength: strength,
+    apply: () {
+      final Paint grayPaint = Paint()
+        ..colorFilter = const ColorFilter.matrix(<double>[
+          AppEffects.lumaRed,
+          AppEffects.lumaGreen,
+          AppEffects.lumaBlue,
+          0,
+          0,
+          AppEffects.lumaRed,
+          AppEffects.lumaGreen,
+          AppEffects.lumaBlue,
+          0,
+          0,
+          AppEffects.lumaRed,
+          AppEffects.lumaGreen,
+          AppEffects.lumaBlue,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+        ]);
+      final int opacityByte = _opacityToByte(strength);
+
+      return renderCanvasImage(
+        width: image.width,
+        height: image.height,
+        draw: (final Canvas canvas) {
+          canvas.drawImage(image, Offset.zero, Paint());
+          canvas.saveLayer(
+            null,
+            Paint()
+              ..color = Color.fromARGB(
+                opacityByte,
+                AppLimits.rgbChannelMax,
+                AppLimits.rgbChannelMax,
+                AppLimits.rgbChannelMax,
+              ),
+          );
+          canvas.drawImage(image, Offset.zero, grayPaint);
+          canvas.restore();
+        },
+      );
+    },
   );
-  canvas.drawImage(image, Offset.zero, grayPaint);
-  canvas.restore();
-  return recorder.endRecording().toImage(image.width, image.height);
 }
 
 /// Applies an unsharp-mask style sharpening by blending the original over
@@ -153,60 +208,55 @@ Future<ui.Image> applySharpen(
   final ui.Image image, {
   final double strength = AppEffects.defaultIntensity,
 }) async {
-  if (strength <= AppEffects.minIntensity) {
-    return image;
-  }
-  final double effectiveAmount = AppEffects.sharpenAmount * strength;
-  final int w = image.width;
-  final int h = image.height;
-  final Rect rect = Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble());
+  return _applyWithStrengthGuard(
+    image,
+    strength: strength,
+    apply: () async {
+      final double effectiveAmount = AppEffects.sharpenAmount * strength;
+      final int w = image.width;
+      final int h = image.height;
+      final Rect rect = Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble());
 
-  // Create a blurred version.
-  final ui.PictureRecorder blurRecorder = ui.PictureRecorder();
-  final Canvas blurCanvas = Canvas(blurRecorder);
-  blurCanvas.saveLayer(
-    rect,
-    Paint()
-      ..imageFilter = ui.ImageFilter.blur(
-        sigmaX: AppEffects.sharpenBlurSigma,
-        sigmaY: AppEffects.sharpenBlurSigma,
-        tileMode: TileMode.decal,
-      ),
+      final ui.Image blurred = await renderCanvasImage(
+        width: w,
+        height: h,
+        draw: (final Canvas canvas) {
+          canvas.saveLayer(
+            rect,
+            Paint()
+              ..imageFilter = ui.ImageFilter.blur(
+                sigmaX: AppEffects.sharpenBlurSigma,
+                sigmaY: AppEffects.sharpenBlurSigma,
+                tileMode: TileMode.decal,
+              ),
+          );
+          canvas.drawImage(image, Offset.zero, Paint());
+          canvas.restore();
+        },
+      );
+
+      final Uint8List? origPixels = await extractImagePixels(image);
+      final Uint8List? blurPixels = await extractImagePixels(blurred);
+      if (origPixels == null || blurPixels == null) {
+        return image;
+      }
+
+      final Uint8List result = Uint8List(origPixels.length);
+      for (int i = 0; i < origPixels.length; i += AppMath.bytesPerPixel) {
+        for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
+          final int original = origPixels[i + c];
+          final int blurredChannel = blurPixels[i + c];
+          result[i + c] = (original + effectiveAmount * (original - blurredChannel)).round().clamp(
+            0,
+            AppLimits.rgbChannelMax,
+          );
+        }
+        result[i + AppEffects.alphaChannelIndex] = origPixels[i + AppEffects.alphaChannelIndex];
+      }
+
+      return _imageFromPixels(result, w, h);
+    },
   );
-  blurCanvas.drawImage(image, Offset.zero, Paint());
-  blurCanvas.restore();
-  final ui.Image blurred = await blurRecorder.endRecording().toImage(w, h);
-
-  // Pixel-level unsharp mask: result = original + amount * (original - blurred)
-  final ByteData? origData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-  final ByteData? blurData = await blurred.toByteData(format: ui.ImageByteFormat.rawRgba);
-  if (origData == null || blurData == null) {
-    return image;
-  }
-
-  final Uint8List origPixels = origData.buffer.asUint8List();
-  final Uint8List blurPixels = blurData.buffer.asUint8List();
-  final Uint8List result = Uint8List(origPixels.length);
-
-  for (int i = 0; i < origPixels.length; i += AppMath.bytesPerPixel) {
-    for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
-      final int o = origPixels[i + c];
-      final int b = blurPixels[i + c];
-      result[i + c] = (o + effectiveAmount * (o - b)).round().clamp(0, AppLimits.rgbChannelMax);
-    }
-    result[i + AppEffects.alphaChannelIndex] = origPixels[i + AppEffects.alphaChannelIndex]; // preserve alpha
-  }
-
-  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(result);
-  final ui.ImageDescriptor descriptor = ui.ImageDescriptor.raw(
-    buffer,
-    width: w,
-    height: h,
-    pixelFormat: ui.PixelFormat.rgba8888,
-  );
-  final ui.Codec codec = await descriptor.instantiateCodec();
-  final ui.FrameInfo frame = await codec.getNextFrame();
-  return frame.image;
 }
 
 /// Adds random noise to each pixel.
@@ -220,60 +270,46 @@ Future<ui.Image> applyNoise(
   final double strength = AppEffects.defaultIntensity,
   final double size = AppEffects.noiseDefaultSize,
   final Random? random,
-}) async {
-  if (strength <= AppEffects.minIntensity) {
-    return image;
-  }
+}) {
   final int effectiveRange = max(1, (AppEffects.noiseRange * strength).round());
   final int effectiveOffset = effectiveRange ~/ 2;
   final int cellSize = _resolveNoiseCellSize(size);
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-  if (byteData == null) {
-    return image;
-  }
-
-  final Uint8List pixels = byteData.buffer.asUint8List();
   final Random rng = random ?? Random();
 
-  for (int y = 0; y < image.height; y += cellSize) {
-    final int cellHeight = min(cellSize, image.height - y);
-    for (int x = 0; x < image.width; x += cellSize) {
-      final int cellWidth = min(cellSize, image.width - x);
-      final List<int> channelNoise = <int>[
-        rng.nextInt(effectiveRange) - effectiveOffset,
-        rng.nextInt(effectiveRange) - effectiveOffset,
-        rng.nextInt(effectiveRange) - effectiveOffset,
-      ];
+  return _applyPixelTransform(
+    image,
+    strength: strength,
+    mutate: (final Uint8List pixels) {
+      for (int y = 0; y < image.height; y += cellSize) {
+        final int cellHeight = min(cellSize, image.height - y);
+        for (int x = 0; x < image.width; x += cellSize) {
+          final int cellWidth = min(cellSize, image.width - x);
+          final List<int> channelNoise = <int>[
+            rng.nextInt(effectiveRange) - effectiveOffset,
+            rng.nextInt(effectiveRange) - effectiveOffset,
+            rng.nextInt(effectiveRange) - effectiveOffset,
+          ];
 
-      for (int yOffset = 0; yOffset < cellHeight; yOffset++) {
-        final int rowStart = ((y + yOffset) * image.width + x) * AppMath.bytesPerPixel;
-        for (int xOffset = 0; xOffset < cellWidth; xOffset++) {
-          final int pixelIndex = rowStart + (xOffset * AppMath.bytesPerPixel);
-          final int alpha = pixels[pixelIndex + AppEffects.alphaChannelIndex];
-          if (alpha == 0) {
-            for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
-              pixels[pixelIndex + c] = 0;
+          for (int yOffset = 0; yOffset < cellHeight; yOffset++) {
+            final int rowStart = ((y + yOffset) * image.width + x) * AppMath.bytesPerPixel;
+            for (int xOffset = 0; xOffset < cellWidth; xOffset++) {
+              final int pixelIndex = rowStart + (xOffset * AppMath.bytesPerPixel);
+              final int alpha = pixels[pixelIndex + AppEffects.alphaChannelIndex];
+              if (alpha == 0) {
+                for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
+                  pixels[pixelIndex + c] = 0;
+                }
+                continue;
+              }
+              for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
+                pixels[pixelIndex + c] = (pixels[pixelIndex + c] + channelNoise[c]).clamp(0, AppLimits.rgbChannelMax);
+              }
             }
-            continue;
-          }
-          for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
-            pixels[pixelIndex + c] = (pixels[pixelIndex + c] + channelNoise[c]).clamp(0, AppLimits.rgbChannelMax);
           }
         }
       }
-    }
-  }
-
-  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(pixels);
-  final ui.ImageDescriptor descriptor = ui.ImageDescriptor.raw(
-    buffer,
-    width: image.width,
-    height: image.height,
-    pixelFormat: ui.PixelFormat.rgba8888,
+    },
   );
-  final ui.Codec codec = await descriptor.instantiateCodec();
-  final ui.FrameInfo frame = await codec.getNextFrame();
-  return frame.image;
 }
 
 int _resolvePixelateBlockSize(final double size) {
@@ -295,35 +331,37 @@ int _resolveNoiseCellSize(final double size) {
 Future<ui.Image> applyVignette(
   final ui.Image image, {
   final double strength = AppEffects.defaultIntensity,
-}) async {
-  if (strength <= AppEffects.minIntensity) {
-    return image;
-  }
-  final double effectiveStrength = (AppEffects.vignetteStrength * strength).clamp(
-    AppEffects.minIntensity,
-    AppEffects.maxIntensity,
+}) {
+  return _applyWithStrengthGuard(
+    image,
+    strength: strength,
+    apply: () {
+      final double effectiveStrength = (AppEffects.vignetteStrength * strength).clamp(
+        AppEffects.minIntensity,
+        AppEffects.maxIntensity,
+      );
+      final int w = image.width;
+      final int h = image.height;
+      final Rect rect = Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble());
+
+      final Paint vignettePaint = Paint()
+        ..shader = RadialGradient(
+          colors: <Color>[
+            AppColors.transparent,
+            AppColors.black.withValues(alpha: effectiveStrength),
+          ],
+        ).createShader(rect);
+
+      return renderCanvasImage(
+        width: w,
+        height: h,
+        draw: (final Canvas canvas) {
+          canvas.drawImage(image, Offset.zero, Paint());
+          canvas.drawRect(rect, vignettePaint);
+        },
+      );
+    },
   );
-  final int w = image.width;
-  final int h = image.height;
-  final Rect rect = Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble());
-
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-
-  // Draw the original image.
-  canvas.drawImage(image, Offset.zero, Paint());
-
-  // Overlay a radial gradient from transparent center to dark edges.
-  final Paint vignettePaint = Paint()
-    ..shader = RadialGradient(
-      colors: <Color>[
-        AppColors.transparent,
-        AppColors.black.withValues(alpha: effectiveStrength),
-      ],
-    ).createShader(rect);
-  canvas.drawRect(rect, vignettePaint);
-
-  return recorder.endRecording().toImage(w, h);
 }
 
 /// Blends [top] over [bottom] at [opacity] (0.0–1.0) and returns the result.
@@ -331,24 +369,26 @@ Future<ui.Image> _blendOver(
   final ui.Image bottom,
   final ui.Image top,
   final double opacity,
-) async {
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
-  canvas.drawImage(bottom, Offset.zero, Paint());
-  final int opacityByte = (opacity.clamp(AppEffects.minIntensity, AppEffects.maxIntensity) * AppLimits.rgbChannelMax)
-      .round();
-  canvas.drawImage(
-    top,
-    Offset.zero,
-    Paint()
-      ..color = Color.fromARGB(
-        opacityByte,
-        AppLimits.rgbChannelMax,
-        AppLimits.rgbChannelMax,
-        AppLimits.rgbChannelMax,
-      ),
+) {
+  final int opacityByte = _opacityToByte(opacity);
+  return renderCanvasImage(
+    width: bottom.width,
+    height: bottom.height,
+    draw: (final Canvas canvas) {
+      canvas.drawImage(bottom, Offset.zero, Paint());
+      canvas.drawImage(
+        top,
+        Offset.zero,
+        Paint()
+          ..color = Color.fromARGB(
+            opacityByte,
+            AppLimits.rgbChannelMax,
+            AppLimits.rgbChannelMax,
+            AppLimits.rgbChannelMax,
+          ),
+      );
+    },
   );
-  return recorder.endRecording().toImage(bottom.width, bottom.height);
 }
 
 /// Adjusts the brightness of [image] by adding a per-channel offset.
@@ -357,25 +397,19 @@ Future<ui.Image> _blendOver(
 Future<ui.Image> applyBrightness(
   final ui.Image image, {
   final double strength = AppEffects.defaultIntensity,
-}) async {
-  if (strength <= AppEffects.minIntensity) {
-    return image;
-  }
+}) {
   final int offset = (AppEffects.brightnessOffset * strength).round();
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-  if (byteData == null) {
-    return image;
-  }
-
-  final Uint8List pixels = byteData.buffer.asUint8List();
-
-  for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
-    for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
-      pixels[i + c] = (pixels[i + c] + offset).clamp(0, AppLimits.rgbChannelMax);
-    }
-  }
-
-  return _imageFromPixels(pixels, image.width, image.height);
+  return _applyPixelTransform(
+    image,
+    strength: strength,
+    mutate: (final Uint8List pixels) {
+      for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
+        for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
+          pixels[i + c] = (pixels[i + c] + offset).clamp(0, AppLimits.rgbChannelMax);
+        }
+      }
+    },
+  );
 }
 
 /// Adjusts the contrast of [image] by scaling each channel around the midpoint.
@@ -384,29 +418,22 @@ Future<ui.Image> applyBrightness(
 Future<ui.Image> applyContrast(
   final ui.Image image, {
   final double strength = AppEffects.defaultIntensity,
-}) async {
-  if (strength <= AppEffects.minIntensity) {
-    return image;
-  }
+}) {
   final double factor = 1.0 + (AppEffects.contrastMax - 1.0) * strength;
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-  if (byteData == null) {
-    return image;
-  }
-
-  final Uint8List pixels = byteData.buffer.asUint8List();
-
-  for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
-    for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
-      final int v = pixels[i + c];
-      pixels[i + c] = ((factor * (v - AppEffects.shadowMidtone)) + AppEffects.shadowMidtone).round().clamp(
-        0,
-        AppLimits.rgbChannelMax,
-      );
-    }
-  }
-
-  return _imageFromPixels(pixels, image.width, image.height);
+  return _applyPixelTransform(
+    image,
+    strength: strength,
+    mutate: (final Uint8List pixels) {
+      for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
+        for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
+          final int channelValue = pixels[i + c];
+          pixels[i + c] = ((factor * (channelValue - AppEffects.shadowMidtone)) + AppEffects.shadowMidtone)
+              .round()
+              .clamp(0, AppLimits.rgbChannelMax);
+        }
+      }
+    },
+  );
 }
 
 /// Rotates the hue of [image] by up to [AppEffects.hueRotationMax] degrees.
@@ -415,35 +442,29 @@ Future<ui.Image> applyContrast(
 Future<ui.Image> applyHueSaturation(
   final ui.Image image, {
   final double strength = AppEffects.defaultIntensity,
-}) async {
-  if (strength <= AppEffects.minIntensity) {
-    return image;
-  }
+}) {
   final double hueShift = AppEffects.hueRotationMax * strength;
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-  if (byteData == null) {
-    return image;
-  }
-
-  final Uint8List pixels = byteData.buffer.asUint8List();
-
-  for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
-    final int r = pixels[i + AppMath.rgbChannelRed];
-    final int g = pixels[i + AppMath.rgbChannelGreen];
-    final int b = pixels[i + AppMath.rgbChannelBlue];
-    final List<double> hsl = _rgbToHsl(r, g, b);
-    hsl[0] = (hsl[0] + hueShift) % AppEffects.hueFullCircle;
-    final List<int> rgb = _hslToRgb(
-      hsl[AppMath.rgbChannelRed],
-      hsl[AppMath.rgbChannelGreen],
-      hsl[AppMath.rgbChannelBlue],
-    );
-    pixels[i + AppMath.rgbChannelRed] = rgb[AppMath.rgbChannelRed];
-    pixels[i + AppMath.rgbChannelGreen] = rgb[AppMath.rgbChannelGreen];
-    pixels[i + AppMath.rgbChannelBlue] = rgb[AppMath.rgbChannelBlue];
-  }
-
-  return _imageFromPixels(pixels, image.width, image.height);
+  return _applyPixelTransform(
+    image,
+    strength: strength,
+    mutate: (final Uint8List pixels) {
+      for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
+        final int r = pixels[i + AppMath.rgbChannelRed];
+        final int g = pixels[i + AppMath.rgbChannelGreen];
+        final int b = pixels[i + AppMath.rgbChannelBlue];
+        final List<double> hsl = _rgbToHsl(r, g, b);
+        hsl[0] = (hsl[0] + hueShift) % AppEffects.hueFullCircle;
+        final List<int> rgb = _hslToRgb(
+          hsl[AppMath.rgbChannelRed],
+          hsl[AppMath.rgbChannelGreen],
+          hsl[AppMath.rgbChannelBlue],
+        );
+        pixels[i + AppMath.rgbChannelRed] = rgb[AppMath.rgbChannelRed];
+        pixels[i + AppMath.rgbChannelGreen] = rgb[AppMath.rgbChannelGreen];
+        pixels[i + AppMath.rgbChannelBlue] = rgb[AppMath.rgbChannelBlue];
+      }
+    },
+  );
 }
 
 /// Darkens shadow (dark) regions of [image].
@@ -452,32 +473,26 @@ Future<ui.Image> applyHueSaturation(
 Future<ui.Image> applyShadow(
   final ui.Image image, {
   final double strength = AppEffects.defaultIntensity,
-}) async {
-  if (strength <= AppEffects.minIntensity) {
-    return image;
-  }
+}) {
   final double darken = AppEffects.shadowDarkening * strength;
-  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-  if (byteData == null) {
-    return image;
-  }
-
-  final Uint8List pixels = byteData.buffer.asUint8List();
-
-  for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
-    final int r = pixels[i];
-    final int g = pixels[i + 1];
-    final int b = pixels[i + AppMath.rgbChannelBlue];
-    final double luma = AppEffects.lumaRed * r + AppEffects.lumaGreen * g + AppEffects.lumaBlue * b;
-    if (luma < AppEffects.shadowMidtone) {
-      final double shadowFactor = 1.0 - darken * (1.0 - luma / AppEffects.shadowMidtone);
-      pixels[i] = (r * shadowFactor).round().clamp(0, AppLimits.rgbChannelMax);
-      pixels[i + AppMath.rgbChannelGreen] = (g * shadowFactor).round().clamp(0, AppLimits.rgbChannelMax);
-      pixels[i + AppMath.rgbChannelBlue] = (b * shadowFactor).round().clamp(0, AppLimits.rgbChannelMax);
-    }
-  }
-
-  return _imageFromPixels(pixels, image.width, image.height);
+  return _applyPixelTransform(
+    image,
+    strength: strength,
+    mutate: (final Uint8List pixels) {
+      for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
+        final int r = pixels[i];
+        final int g = pixels[i + 1];
+        final int b = pixels[i + AppMath.rgbChannelBlue];
+        final double luma = AppEffects.lumaRed * r + AppEffects.lumaGreen * g + AppEffects.lumaBlue * b;
+        if (luma < AppEffects.shadowMidtone) {
+          final double shadowFactor = 1.0 - darken * (1.0 - luma / AppEffects.shadowMidtone);
+          pixels[i] = (r * shadowFactor).round().clamp(0, AppLimits.rgbChannelMax);
+          pixels[i + AppMath.rgbChannelGreen] = (g * shadowFactor).round().clamp(0, AppLimits.rgbChannelMax);
+          pixels[i + AppMath.rgbChannelBlue] = (b * shadowFactor).round().clamp(0, AppLimits.rgbChannelMax);
+        }
+      }
+    },
+  );
 }
 
 /// Creates a [ui.Image] from raw RGBA pixel data.
