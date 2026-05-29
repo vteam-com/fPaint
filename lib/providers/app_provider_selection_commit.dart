@@ -63,6 +63,8 @@ void _restoreLayerFromSnapshot({
     ..clear()
     ..addAll(restoreState.originalRedoActions);
   targetLayer.backgroundColor = restoreState.originalBackgroundColor;
+  targetLayer.blendMode = restoreState.originalBlendMode;
+  targetLayer.opacity = restoreState.originalOpacity;
   targetLayer.hasChanged = restoreState.originalHasChanged;
   targetLayer.clearCache();
 }

@@ -78,6 +78,11 @@ extension AppProviderSelection on AppProvider {
     await _startDuplicateTransform(commitMode: ImagePlacementCommitMode.newLayer);
   }
 
+  /// Captures the selected layer so destructive tools can restore it on undo.
+  ImagePlacementLayerRestoreState captureSelectedLayerRestoreState() {
+    return _captureSelectedLayerRestoreState();
+  }
+
   /// Duplicates the current selection into the same selected layer.
   Future<void> regionDuplicateSameLayer() async {
     if (isSelectedLayerLocked) {
@@ -172,6 +177,8 @@ extension AppProviderSelection on AppProvider {
       originalRedoActions: List<UserActionDrawing>.from(targetLayer.redoStack),
       originalHasChanged: targetLayer.hasChanged,
       originalBackgroundColor: targetLayer.backgroundColor,
+      originalBlendMode: targetLayer.blendMode,
+      originalOpacity: targetLayer.opacity,
     );
   }
 

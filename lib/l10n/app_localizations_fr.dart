@@ -591,6 +591,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toolSelector => 'Sélecteur';
 
   @override
+  String get toolSmudge => 'Estomper';
+
+  @override
   String get toolSolid => 'Uni';
 
   @override

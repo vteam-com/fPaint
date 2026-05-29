@@ -6,7 +6,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draft_flusher.dart';
+import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/prepared_smudge_stroke_source.dart';
+import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -37,7 +41,13 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   final List<int> _activePointers = <int>[];
   double _baseDistance = 0.0;
   final Map<int, Offset> _pointerPositions = <int, ui.Offset>{};
+  PreparedSmudgeStrokeSource? _preparedSmudgeSource;
   double _scaleFactor = 1.0;
+  ui.Path? _smudgeClipPath;
+  ImagePlacementLayerRestoreState? _smudgeLayerRestoreState;
+  Future<PreparedSmudgeStrokeSource?>? _smudgePreparation;
+  ui.Image? _smudgeSourceImage;
+  final List<Offset> _smudgeStrokePoints = <Offset>[];
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: false);
@@ -159,6 +169,98 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     );
   }
 
+  /// Appends a sampled pointer position to the active smudge stroke.
+  void _appendSmudgePoint(
+    final Offset position,
+    final double brushSize,
+  ) {
+    final double spacing = resolveSmudgeStepSpacing(brushSize);
+    if (_smudgeStrokePoints.isNotEmpty && (_smudgeStrokePoints.last - position).distance < spacing) {
+      return;
+    }
+    _smudgeStrokePoints.add(position);
+  }
+
+  /// Bakes the smudge patch into a full-layer image snapshot.
+  Future<ui.Image> _bakeSmudgeLayerImage({
+    required final ui.Image sourceImage,
+    required final SmudgeStrokeRasterResult strokeResult,
+  }) {
+    return renderCanvasImage(
+      width: sourceImage.width,
+      height: sourceImage.height,
+      draw: (final ui.Canvas canvas) {
+        canvas.drawImage(sourceImage, Offset.zero, ui.Paint());
+        canvas.drawImage(strokeResult.image, strokeResult.bounds.topLeft, ui.Paint());
+      },
+    );
+  }
+
+  /// Clears the in-progress smudge stroke state.
+  void _clearSmudgeStroke() {
+    _smudgeStrokePoints.clear();
+    _smudgeLayerRestoreState = null;
+    _preparedSmudgeSource = null;
+    _smudgePreparation = null;
+    _smudgeSourceImage = null;
+    _smudgeClipPath = null;
+  }
+
+  /// Rasterizes the active smudge stroke and commits it as a rectangular replacement.
+  Future<void> _commitSmudgeStroke(final AppProvider appProvider) async {
+    final ui.Image? sourceImage = _smudgeSourceImage;
+    final ImagePlacementLayerRestoreState? layerRestoreState = _smudgeLayerRestoreState;
+    if (sourceImage == null || layerRestoreState == null || _smudgeStrokePoints.length < AppMath.pair) {
+      return;
+    }
+
+    final PreparedSmudgeStrokeSource? preparedSource =
+        _preparedSmudgeSource ??
+        await _smudgePreparation ??
+        await prepareSmudgeStrokeSource(
+          sourceImage: sourceImage,
+          clipPath: _smudgeClipPath,
+        );
+    if (preparedSource == null) {
+      return;
+    }
+
+    final SmudgeStrokeRasterResult? result = await rasterizeSmudgeStroke(
+      sourceImage: sourceImage,
+      strokePoints: _smudgeStrokePoints,
+      brushSize: appProvider.brushSize,
+      preparedSource: preparedSource,
+    );
+    if (result == null) {
+      return;
+    }
+
+    final ui.Image bakedImage = await _bakeSmudgeLayerImage(
+      sourceImage: sourceImage,
+      strokeResult: result,
+    );
+
+    appProvider.undoProvider.executeAction(
+      name: ActionType.smudge.name,
+      forward: () {
+        final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
+        appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
+        targetLayer.replaceWithRasterImage(
+          imageToAdd: bakedImage,
+          tool: ActionType.smudge,
+        );
+        appProvider.update();
+      },
+      backward: () {
+        _restoreSmudgeLayerState(
+          appProvider: appProvider,
+          restoreState: layerRestoreState,
+        );
+        appProvider.update();
+      },
+    );
+  }
+
   /// Returns the distance between the first two active touch points.
   ///
   /// Returns 0.0 when fewer than two touch pointers are active.
@@ -210,9 +312,16 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     if (_activePointerId == event.pointer) {
       if (isSelectionActive) {
         appProvider.selectorCreationEnd();
+      } else if (_smudgeSourceImage != null) {
+        _appendSmudgePoint(appProvider.toCanvas(event.localPosition), appProvider.brushSize);
+        await _commitSmudgeStroke(appProvider);
       }
       _activePointerId = -1;
+      _clearSmudgeStroke();
       appProvider.layers.selectedLayer.clearCache();
+      if (!mounted) {
+        return;
+      }
       final DraftFlusher controller = Provider.of<DraftFlusher>(context, listen: false);
       unawaited(controller.flushNow());
       appProvider.update();
@@ -257,6 +366,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       }
 
       if (appProvider.selectedAction == ActionType.fill) {
+        return;
+      }
+
+      if (_smudgeSourceImage != null) {
+        _appendSmudgePoint(adjustedPosition, appProvider.brushSize);
         return;
       }
 
@@ -406,6 +520,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
 
       appProvider.layers.selectedLayer.isUserDrawing = true;
 
+      if (appProvider.selectedAction == ActionType.smudge) {
+        _startSmudgeStroke(appProvider, adjustedPosition);
+        return;
+      }
+
       appProvider.recordExecuteDrawingActionToSelectedLayer(
         action: UserActionDrawing(
           action: appProvider.selectedAction,
@@ -470,6 +589,26 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     }
   }
 
+  /// Restores the selected layer state captured before the current smudge stroke.
+  void _restoreSmudgeLayerState({
+    required final AppProvider appProvider,
+    required final ImagePlacementLayerRestoreState restoreState,
+  }) {
+    final LayerProvider targetLayer = appProvider.layers.get(restoreState.layerIndex);
+    appProvider.layers.selectedLayerIndex = restoreState.layerIndex;
+    targetLayer.actionStack
+      ..clear()
+      ..addAll(restoreState.originalActions);
+    targetLayer.redoStack
+      ..clear()
+      ..addAll(restoreState.originalRedoActions);
+    targetLayer.backgroundColor = restoreState.originalBackgroundColor;
+    targetLayer.blendMode = restoreState.originalBlendMode;
+    targetLayer.opacity = restoreState.originalOpacity;
+    targetLayer.hasChanged = restoreState.originalHasChanged;
+    targetLayer.clearCache();
+  }
+
   void _showLockedLayerMessage(final AppProvider appProvider) {
     context.showSnackBarMessage(
       context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
@@ -505,5 +644,33 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         );
       },
     );
+  }
+
+  /// Starts tracking a smudge stroke from [position].
+  void _startSmudgeStroke(
+    final AppProvider appProvider,
+    final Offset position,
+  ) {
+    _smudgeLayerRestoreState = appProvider.captureSelectedLayerRestoreState();
+    _smudgeSourceImage = appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
+    _smudgeClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null
+        ? ui.Path.from(appProvider.selectorModel.path1!)
+        : null;
+    _preparedSmudgeSource = null;
+    final Future<PreparedSmudgeStrokeSource?> preparation = prepareSmudgeStrokeSource(
+      sourceImage: _smudgeSourceImage!,
+      clipPath: _smudgeClipPath,
+    );
+    _smudgePreparation = preparation;
+    unawaited(
+      preparation.then((final PreparedSmudgeStrokeSource? preparedSource) {
+        if (identical(_smudgePreparation, preparation)) {
+          _preparedSmudgeSource = preparedSource;
+        }
+      }),
+    );
+    _smudgeStrokePoints
+      ..clear()
+      ..add(position);
   }
 }

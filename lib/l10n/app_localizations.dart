@@ -1172,6 +1172,12 @@ abstract class AppLocalizations {
   /// **'Selector'**
   String get toolSelector;
 
+  /// No description provided for @toolSmudge.
+  ///
+  /// In en, this message translates to:
+  /// **'Smudge'**
+  String get toolSmudge;
+
   /// No description provided for @toolSolid.
   ///
   /// In en, this message translates to:

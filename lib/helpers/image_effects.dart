@@ -34,7 +34,7 @@ Future<ui.Image> _applyPixelTransform(
       }
 
       mutate(pixels);
-      return _imageFromPixels(pixels, image.width, image.height);
+      return imageFromPixels(pixels, image.width, image.height);
     },
   );
 }
@@ -254,7 +254,7 @@ Future<ui.Image> applySharpen(
         result[i + AppEffects.alphaChannelIndex] = origPixels[i + AppEffects.alphaChannelIndex];
       }
 
-      return _imageFromPixels(result, w, h);
+      return imageFromPixels(result, w, h);
     },
   );
 }
@@ -493,24 +493,6 @@ Future<ui.Image> applyShadow(
       }
     },
   );
-}
-
-/// Creates a [ui.Image] from raw RGBA pixel data.
-Future<ui.Image> _imageFromPixels(
-  final Uint8List pixels,
-  final int width,
-  final int height,
-) async {
-  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(pixels);
-  final ui.ImageDescriptor descriptor = ui.ImageDescriptor.raw(
-    buffer,
-    width: width,
-    height: height,
-    pixelFormat: ui.PixelFormat.rgba8888,
-  );
-  final ui.Codec codec = await descriptor.instantiateCodec();
-  final ui.FrameInfo frame = await codec.getNextFrame();
-  return frame.image;
 }
 
 /// Converts RGB (0–255) to HSL (h: 0–360, s: 0–1, l: 0–1).

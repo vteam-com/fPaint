@@ -257,6 +257,7 @@
   "toolRemove": "Quitar",
   "toolReplace": "Reemplazar",
   "toolSelector": "Seleccionador",
+  "toolSmudge": "Difuminar",
   "toolSolid": "Sólido",
   "toolText": "Texto",
   "topColors": "Top {count} colores",

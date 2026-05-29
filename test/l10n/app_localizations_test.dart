@@ -127,6 +127,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.toolEraser, isNotEmpty);
   expect(l10n.toolText, isNotEmpty);
   expect(l10n.toolSelector, isNotEmpty);
+  expect(l10n.toolSmudge, isNotEmpty);
   expect(l10n.toolFill, isNotEmpty);
   expect(l10n.toolSolid, isNotEmpty);
   expect(l10n.toolLinearGradient, isNotEmpty);

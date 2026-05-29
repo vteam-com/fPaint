@@ -18,6 +18,8 @@ class ImagePlacementLayerRestoreState {
     required this.originalRedoActions,
     required this.originalHasChanged,
     required this.originalBackgroundColor,
+    required this.originalBlendMode,
+    required this.originalOpacity,
   });
 
   /// The layer index that should receive the committed placement.
@@ -34,4 +36,10 @@ class ImagePlacementLayerRestoreState {
 
   /// The original layer background color.
   final ui.Color? originalBackgroundColor;
+
+  /// The original layer blend mode.
+  final ui.BlendMode originalBlendMode;
+
+  /// The original layer opacity.
+  final double originalOpacity;
 }

@@ -65,6 +65,12 @@ void main() {
       expect(ActionType.brush.isSupported(ActionOptions.tolerance), false);
     });
 
+    test('isSupported returns correct values for smudge', () {
+      expect(ActionType.smudge.isSupported(ActionOptions.brushSize), true);
+      expect(ActionType.smudge.isSupported(ActionOptions.brushColor), false);
+      expect(ActionType.smudge.isSupported(ActionOptions.brushStyle), false);
+    });
+
     test('isSupported returns correct values for fill', () {
       expect(ActionType.fill.isSupported(ActionOptions.colorFill), true);
       expect(ActionType.fill.isSupported(ActionOptions.tolerance), true);
@@ -97,6 +103,10 @@ void main() {
       expect(ActionType.brush.icon, AppIcon.brush);
     });
 
+    test('returns correct icon for smudge', () {
+      expect(ActionType.smudge.icon, AppIcon.blender);
+    });
+
     test('returns correct icon for eraser', () {
       expect(ActionType.eraser.icon, AppIcon.eraser);
     });
@@ -116,7 +126,7 @@ void main() {
 
   group('toolsSupportedAttributes', () {
     test('contains all action types', () {
-      expect(toolsSupportedAttributes.length, 10); // Currently only 10 action types have defined attributes
+      expect(toolsSupportedAttributes.length, 11);
     });
 
     test('pencil supports correct attributes', () {
