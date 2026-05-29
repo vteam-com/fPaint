@@ -442,6 +442,43 @@ void main() {
       // Should successfully create a region with the transformed coordinates
       expect(result.action, ActionType.region);
     });
+
+    test('snapshots gradient stops for recorded actions', () async {
+      final ui.Image image = await _createTestImage();
+      final FillModel fillModel = FillModel();
+      fillModel.mode = FillMode.linear;
+      fillModel.gradientStopColors = <Color>[
+        const Color(0xFFFF0000),
+        const Color(0xFF0000FF),
+      ];
+      fillModel.gradientStopPositions = <double>[0.0, 1.0];
+      fillModel.addPoint(
+        GradientPoint(offset: const Offset(2, 2), color: const Color(0xFFFF0000)),
+      );
+      fillModel.addPoint(
+        GradientPoint(offset: const Offset(8, 8), color: const Color(0xFF0000FF)),
+      );
+
+      final UserActionDrawing result = await fillService.createFloodFillGradientAction(
+        sourceImage: image,
+        fillModel: fillModel,
+        tolerance: 50,
+        clipPath: null,
+        toCanvas: (final Offset o) => o,
+      );
+
+      fillModel.gradientStopColors[0] = const Color(0xFFFFA500);
+      fillModel.gradientStopColors[1] = const Color(0xFF800080);
+      fillModel.gradientStopPositions[0] = 0.25;
+      fillModel.gradientStopPositions[1] = 0.75;
+
+      final LinearGradient gradient = result.gradient! as LinearGradient;
+      expect(gradient.colors, <Color>[
+        const Color(0xFFFF0000),
+        const Color(0xFF0000FF),
+      ]);
+      expect(gradient.stops, <double>[0.0, 1.0]);
+    });
   });
 }
 
