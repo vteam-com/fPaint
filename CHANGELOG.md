@@ -4,6 +4,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.2] - 2026-05-29
+
+### Add
+
+- Polygon selection workflow
+- Layer locking controls
+- Additional blend modes
+- ORA thumbnails in recent-file and import flows
+
+### Update
+
+- Saving now shows progress feedback
+- Halftone size picker workflow
+- Selection flood fill performance
+
+### Fix
+
+- Runtime crash in affected editing flows
+- Linear paint fill rendering
+- MRU handling and macOS bookmark-backed save reliability
+- Bottom sheet dialog icon display
+
 ## [1.8.1] - 2026-05-27
 
 ### Add
