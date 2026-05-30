@@ -37,6 +37,7 @@ const Duration _thumbnailPumpStep = Duration(milliseconds: 50);
 Widget _buildHarness({
   required final AppPreferences prefs,
   final Future<ui.Image?> Function()? clipboardImageLoader,
+  final RecentFileMetadataLoader? recentFileMetadataLoader,
   final Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader,
 }) {
   return ChangeNotifierProvider<AppPreferences>.value(
@@ -50,6 +51,7 @@ Widget _buildHarness({
             body: ImportDialog(
               parentContext: context,
               clipboardImageLoader: clipboardImageLoader,
+              recentFileMetadataLoader: recentFileMetadataLoader,
               recentFileThumbnailLoader: recentFileThumbnailLoader,
             ),
           );
@@ -63,12 +65,14 @@ Future<void> _pumpImportDialog(
   final WidgetTester tester, {
   required final AppPreferences prefs,
   final Future<ui.Image?> Function()? clipboardImageLoader,
+  final RecentFileMetadataLoader? recentFileMetadataLoader,
   final Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader,
 }) async {
   await tester.pumpWidget(
     _buildHarness(
       prefs: prefs,
       clipboardImageLoader: clipboardImageLoader,
+      recentFileMetadataLoader: recentFileMetadataLoader,
       recentFileThumbnailLoader: recentFileThumbnailLoader,
     ),
   );
@@ -167,6 +171,7 @@ void main() {
         tester,
         prefs: prefs,
         clipboardImageLoader: () async => null,
+        recentFileThumbnailLoader: (final String path, final String? bookmark) async => null,
       );
 
       final BuildContext context = tester.element(find.byType(ImportDialog));
@@ -187,6 +192,7 @@ void main() {
         tester,
         prefs: prefs,
         clipboardImageLoader: () async => null,
+        recentFileThumbnailLoader: (final String path, final String? bookmark) async => null,
       );
 
       // After async file check fails, thumbnail should switch away from spinner.
@@ -194,6 +200,49 @@ void main() {
       await tester.pump();
 
       expect(find.text('non_existing_image_c.png'), findsOneWidget);
+    });
+
+    testWidgets('renders parent path and modified date for recent files', (final WidgetTester tester) async {
+      final String recentFilePath =
+          '${Directory.systemTemp.path}${Platform.pathSeparator}fpaint_recent_metadata_${DateTime.now().microsecondsSinceEpoch}.png';
+      final File recentFile = File(recentFilePath);
+      final DateTime lastModified = DateTime(2024, 5, 6, 13, 24);
+      final AppPreferences prefs = _FakePreferences(<String>[recentFile.path]);
+
+      await _pumpImportDialog(
+        tester,
+        prefs: prefs,
+        clipboardImageLoader: () async => null,
+        recentFileMetadataLoader: (final String path, final String? bookmark) async => (
+          exists: true,
+          lastModified: lastModified,
+        ),
+        recentFileThumbnailLoader: (final String path, final String? bookmark) async => null,
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump();
+
+      final BuildContext context = tester.element(find.byType(ImportDialog));
+      final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(context);
+      final String modifiedLabel =
+          '${materialLocalizations.formatShortDate(lastModified)} '
+          '${materialLocalizations.formatTimeOfDay(
+            TimeOfDay.fromDateTime(lastModified),
+            alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+          )}';
+      final Finder parentPathAppText = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppText && widget.data == recentFile.parent.path,
+      );
+      final Finder modifiedLabelAppText = find.byWidgetPredicate(
+        (final Widget widget) => widget is AppText && widget.data == modifiedLabel,
+      );
+
+      expect(find.text(recentFile.parent.path), findsOneWidget);
+      expect(find.text(modifiedLabel), findsOneWidget);
+      expect(parentPathAppText, findsOneWidget);
+      expect(modifiedLabelAppText, findsOneWidget);
+      expect(tester.widget<AppText>(parentPathAppText).variant, AppTextVariant.subtitle);
+      expect(tester.widget<AppText>(modifiedLabelAppText).variant, AppTextVariant.subtitle);
     });
 
     testWidgets('keeps thumbnails attached to the correct recent files after deletion', (

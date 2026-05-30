@@ -159,6 +159,8 @@
   "importTooltip": "Importar...",
   "invalidImageSizeDimensionsMustBeNumbers": "Tamano de imagen invalido: las dimensiones deben ser numeros.",
   "invalidSize": "Tamano invalido",
+  "keepSaveBackupsSubtitle": "Antes de sobrescribir un archivo guardado, conserva hasta 3 copias de seguridad con marca de tiempo de la version anterior.",
+  "keepSaveBackupsTitle": "Mantener copias de seguridad al guardar",
   "keyboardShortcuts": "Atajos de teclado",
   "languageEnglish": "Ingles",
   "languageFrench": "Frances",

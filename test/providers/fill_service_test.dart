@@ -234,6 +234,23 @@ void main() {
   });
 
   group('createFloodFillGradientAction', () {
+    test('returns fill action with empty positions when gradient points are missing', () async {
+      final ui.Image image = await _createTestImage();
+      final FillModel fillModel = FillModel();
+      fillModel.mode = FillMode.linear;
+
+      final UserActionDrawing result = await fillService.createFloodFillGradientAction(
+        sourceImage: image,
+        fillModel: fillModel,
+        tolerance: 50,
+        clipPath: null,
+        toCanvas: (final Offset o) => o,
+      );
+
+      expect(result.action, ActionType.fill);
+      expect(result.positions, isEmpty);
+    });
+
     test('returns fill action with empty positions for out-of-bounds start', () async {
       final ui.Image image = await _createTestImage();
       final FillModel fillModel = FillModel();

@@ -63,7 +63,7 @@ class UserActionDrawing {
 enum ActionType {
   pencil(AppIcon.create),
   brush(AppIcon.brush),
-  smudge(AppIcon.effectBlur),
+  smudge(AppIcon.blender),
   line(AppIcon.lineAxis),
   circle(AppIcon.circle),
   rectangle(AppIcon.cropSquare),

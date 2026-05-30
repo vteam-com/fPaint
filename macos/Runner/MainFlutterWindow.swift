@@ -7,6 +7,7 @@ private let getPendingFileMethod = "getPendingFile"
 private let hapticChannelMethod = "hapticAlignment"
 private let hapticChannelName = "com.vteam.fpaint/haptic"
 private let createBookmarkMethod = "createBookmark"
+private let replaceFileWithBackupMethod = "replaceFileWithBackup"
 private let resolveBookmarkMethod = "resolveBookmark"
 private let releaseBookmarkMethod = "releaseBookmark"
 
@@ -70,12 +71,40 @@ class MainFlutterWindow: NSWindow {
             relativeTo: nil,
             bookmarkDataIsStale: &isStale
           )
-          url.startAccessingSecurityScopedResource()
+          _ = url.startAccessingSecurityScopedResource()
           activeScopedURLs[url.path] = url
           result(url.path)
         } catch {
           result(
             FlutterError(code: "RESOLVE_FAILED", message: error.localizedDescription, details: nil))
+        }
+      } else if call.method == replaceFileWithBackupMethod {
+        guard let arguments = call.arguments as? [String: Any],
+          let targetPath = arguments["targetPath"] as? String,
+          let replacementPath = arguments["replacementPath"] as? String,
+          let backupFileName = arguments["backupFileName"] as? String
+        else {
+          result(
+            FlutterError(
+              code: "INVALID_ARGS", message: "Expected target, replacement, and backup paths", details: nil))
+          return
+        }
+
+        let targetURL = activeScopedURLs[targetPath] ?? URL(fileURLWithPath: targetPath)
+        let replacementURL = URL(fileURLWithPath: replacementPath)
+
+        do {
+          _ = try FileManager.default.replaceItemAt(
+            targetURL,
+            withItemAt: replacementURL,
+            backupItemName: backupFileName,
+            options: [.withoutDeletingBackupItem]
+          )
+          result(nil)
+        } catch {
+          result(
+            FlutterError(
+              code: "REPLACE_WITH_BACKUP_FAILED", message: error.localizedDescription, details: nil))
         }
       } else if call.method == releaseBookmarkMethod {
         guard let path = call.arguments as? String else {

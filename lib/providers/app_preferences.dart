@@ -36,6 +36,7 @@ class AppPreferences extends ChangeNotifier {
   static const String keyLastFillColor = 'keyLastFillColor';
   static const String keySidePanelDistance = 'keySidePanelDistance';
   static const String keyUseApplePencil = 'keyUseApplePencil';
+  static const String keyKeepSaveBackups = 'keyKeepSaveBackups';
   static const String keyLanguageCode = 'keyLanguageCode';
   static const String keyRecoveryDraftSourceFilePath = 'keyRecoveryDraftSourceFilePath';
   static const String keyRecentFiles = 'keyRecentFiles';
@@ -50,6 +51,7 @@ class AppPreferences extends ChangeNotifier {
   Color _brushColor = AppColors.black;
   Color _fillColor = AppColors.blue;
   bool _useApplePencil = true;
+  bool _keepSaveBackups = AppDefaults.keepSaveBackups;
   String? _languageCode;
   List<String> _recentFiles = <String>[];
 
@@ -72,6 +74,9 @@ class AppPreferences extends ChangeNotifier {
 
   /// Gets whether to use Apple Pencil only.
   bool get useApplePencil => _useApplePencil;
+
+  /// Gets whether overwriting saves should keep timestamped backups.
+  bool get keepSaveBackups => _keepSaveBackups;
 
   /// Gets the preferred app language code.
   ///
@@ -127,6 +132,15 @@ class AppPreferences extends ChangeNotifier {
   ) async {
     _useApplePencil = value;
     await (await getPref()).setBool(keyUseApplePencil, value);
+    notifyListeners();
+  }
+
+  /// Sets whether overwriting saves should keep timestamped backups.
+  Future<void> setKeepSaveBackups(
+    final bool value,
+  ) async {
+    _keepSaveBackups = value;
+    await (await getPref()).setBool(keyKeepSaveBackups, value);
     notifyListeners();
   }
 
@@ -268,6 +282,8 @@ class AppPreferences extends ChangeNotifier {
     _fillColor = Color(_prefs!.getInt(keyLastFillColor) ?? AppColors.blue.toARGB32());
 
     _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? AppDefaults.useApplePencil;
+
+    _keepSaveBackups = _prefs!.getBool(keyKeepSaveBackups) ?? AppDefaults.keepSaveBackups;
 
     _languageCode = _prefs!.getString(keyLanguageCode);
 

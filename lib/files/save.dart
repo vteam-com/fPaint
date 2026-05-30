@@ -6,6 +6,7 @@ import 'package:fpaint/files/export_download_non_web.dart'
 import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/files/save_backup.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/helpers/macos_bookmark_service.dart';
@@ -163,10 +164,11 @@ Future<void> _saveWithResolvedFileAccess({
   final String? existingBookmark = preferences.getBookmark(fileName);
   final String? bookmark = existingBookmark ?? await MacOsBookmarkService.createBookmark(fileName);
 
-  await MacOsBookmarkService.withResolvedBookmark<void>(
+  await saveWithOptionalBackupAndResolvedFileAccess(
+    filePath: fileName,
     bookmarkBase64: bookmark,
-    fallbackPath: fileName,
-    action: (final String resolvedFileName) => saveAction(resolvedFileName),
+    preferences: preferences,
+    saveAction: saveAction,
   );
 
   if (existingBookmark == null && bookmark != null) {

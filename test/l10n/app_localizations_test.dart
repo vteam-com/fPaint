@@ -84,6 +84,8 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.invalidImageSizeDimensionsMustBeNumbers, isNotEmpty);
   expect(l10n.invalidSize, isNotEmpty);
   expect(l10n.keyboardShortcuts, isNotEmpty);
+  expect(l10n.keepSaveBackupsSubtitle, isNotEmpty);
+  expect(l10n.keepSaveBackupsTitle, isNotEmpty);
   expect(l10n.languageEnglish, isNotEmpty);
   expect(l10n.languageFrench, isNotEmpty);
   expect(l10n.languageLabel, isNotEmpty);

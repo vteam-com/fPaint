@@ -322,6 +322,7 @@ class AppLimits {
   static const int hueGroupingStepDegrees = 15;
   static const int maxRecentFiles = 10;
   static const int recentFilesDisplayCount = 5;
+  static const int maxSaveFileBackups = 3;
 }
 
 /// Shared geometry and math helpers for repeated factors.
@@ -603,6 +604,7 @@ class AppDefaults {
   static const double brushSize = 5.0;
   static const int tolerance = 50;
   static const bool useApplePencil = false;
+  static const bool keepSaveBackups = false;
   static const Duration buttonTapAnimationDuration = Duration(milliseconds: 100);
   static const Duration toolPanelRevealAnimationDuration = Duration(milliseconds: 140);
   static const Duration debounceDuration = Duration(seconds: 1);

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -107,6 +108,26 @@ class _SettingsPageState extends State<SettingsPage> {
                           });
                         },
                       ),
+                      if (!kIsWeb) ...<Widget>[
+                        const AppDivider(),
+                        AppListTile(
+                          title: AppText(l10n.keepSaveBackupsTitle),
+                          subtitle: AppText(l10n.keepSaveBackupsSubtitle, variant: AppTextVariant.subtitle),
+                          trailing: AppToggleSwitch(
+                            value: appPreferences.keepSaveBackups,
+                            onChanged: (final bool value) {
+                              setState(() {
+                                appPreferences.setKeepSaveBackups(value);
+                              });
+                            },
+                          ),
+                          onTap: () {
+                            setState(() {
+                              appPreferences.setKeepSaveBackups(!appPreferences.keepSaveBackups);
+                            });
+                          },
+                        ),
+                      ],
                       const AppDivider(),
                       AppButtonText(
                         onPressed: () {

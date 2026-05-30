@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' show MaterialLocalizations, TimeOfDay;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/import_files.dart';
@@ -20,6 +21,9 @@ import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 const String _oraFileSuffix = '.${FileExtensions.ora}';
+
+typedef RecentFileMetadata = ({bool exists, DateTime? lastModified});
+typedef RecentFileMetadataLoader = Future<RecentFileMetadata> Function(String path, String? bookmark);
 
 /// Returns thumbnail-ready bytes for MRU previews, including ORA archives.
 Future<Uint8List?> resolveRecentFileThumbnailBytes({
@@ -43,6 +47,7 @@ class ImportDialog extends StatefulWidget {
     super.key,
     required this.parentContext,
     this.clipboardImageLoader,
+    this.recentFileMetadataLoader,
     this.recentFileThumbnailLoader,
   });
   final Future<ui.Image?> Function()? clipboardImageLoader;
@@ -50,6 +55,7 @@ class ImportDialog extends StatefulWidget {
   /// The context from which the dialog was opened, used for provider access
   /// after the dialog closes.
   final BuildContext parentContext;
+  final RecentFileMetadataLoader? recentFileMetadataLoader;
   final Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader;
   @override
   State<ImportDialog> createState() => _ImportDialogState();
@@ -102,6 +108,7 @@ class _ImportDialogState extends State<ImportDialog> {
                 key: ValueKey<String>(path),
                 path: path,
                 bookmark: prefs.getBookmark(path),
+                metadataLoader: widget.recentFileMetadataLoader,
                 thumbnailLoader: widget.recentFileThumbnailLoader,
                 onTap: () {
                   final String? bookmark = prefs.getBookmark(path);
@@ -353,11 +360,13 @@ class _RecentFileEntry extends StatefulWidget {
     super.key,
     required this.path,
     required this.bookmark,
+    required this.metadataLoader,
     required this.thumbnailLoader,
     required this.onTap,
     required this.onDiscard,
   });
   final String? bookmark;
+  final RecentFileMetadataLoader? metadataLoader;
   final Future<void> Function() onDiscard;
   final VoidCallback onTap;
   final String path;
@@ -368,17 +377,20 @@ class _RecentFileEntry extends StatefulWidget {
 
 class _RecentFileEntryState extends State<_RecentFileEntry> {
   bool _fileExists = true;
+  DateTime? _lastModified;
   bool _loadFailed = false;
   ui.Image? _thumbnail;
   @override
   void initState() {
     super.initState();
+    _loadFileMetadata();
     _loadThumbnail();
   }
 
   @override
   Widget build(final BuildContext context) {
     final String fileName = widget.path.split(Platform.pathSeparator).last;
+    final String parentPath = File(widget.path).parent.path;
     final AppLocalizations l10n = context.l10n;
 
     return GestureDetector(
@@ -403,7 +415,13 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      AppText(fileName),
+                      AppText(fileName, variant: AppTextVariant.bodyBold),
+                      AppText(parentPath, variant: AppTextVariant.subtitle),
+                      if (_lastModified != null)
+                        AppText(
+                          _formatLastModified(context, _lastModified!),
+                          variant: AppTextVariant.subtitle,
+                        ),
                     ],
                   ),
                 ),
@@ -459,6 +477,65 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
       );
     }
     return const AppProgressIndicator();
+  }
+
+  /// Loads non-thumbnail MRU metadata such as file existence and modified time.
+  Future<void> _loadFileMetadata() async {
+    if (widget.metadataLoader != null) {
+      try {
+        final RecentFileMetadata metadata = await widget.metadataLoader!(widget.path, widget.bookmark);
+        if (!mounted) {
+          return;
+        }
+
+        setState(() {
+          _fileExists = metadata.exists;
+          _lastModified = metadata.lastModified;
+        });
+      } catch (_) {
+        if (mounted) {
+          setState(() {
+            _lastModified = null;
+          });
+        }
+      }
+      return;
+    }
+
+    try {
+      await MacOsBookmarkService.withResolvedBookmark(
+        bookmarkBase64: widget.bookmark,
+        fallbackPath: widget.path,
+        action: (final String resolvedPath) async {
+          final File file = File(resolvedPath);
+          if (!await file.exists()) {
+            if (mounted) {
+              setState(() {
+                _fileExists = false;
+                _lastModified = null;
+              });
+            }
+            return;
+          }
+
+          final DateTime lastModified = await file.lastModified();
+          if (!mounted) {
+            return;
+          }
+
+          setState(() {
+            _fileExists = true;
+            _lastModified = lastModified;
+          });
+        },
+      );
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _lastModified = null;
+        });
+      }
+    }
   }
 
   /// Asynchronously decodes the image file and scales it to a thumbnail.
@@ -532,4 +609,19 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
       }
     }
   }
+}
+
+/// Formats [lastModified] using the active locale's short date and time.
+String _formatLastModified(
+  final BuildContext context,
+  final DateTime lastModified,
+) {
+  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(context);
+  final bool alwaysUse24HourFormat = MediaQuery.maybeOf(context)?.alwaysUse24HourFormat ?? false;
+  final String shortDate = materialLocalizations.formatShortDate(lastModified);
+  final String shortTime = materialLocalizations.formatTimeOfDay(
+    TimeOfDay.fromDateTime(lastModified),
+    alwaysUse24HourFormat: alwaysUse24HourFormat,
+  );
+  return '$shortDate $shortTime';
 }

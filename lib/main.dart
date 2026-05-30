@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/helpers/constants.dart';
@@ -305,10 +304,7 @@ class MyApp extends StatelessWidget {
                           ) => builder(context),
                     );
                   },
-                  localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-                    AppLocalizations.delegate,
-                    GlobalWidgetsLocalizations.delegate,
-                  ],
+                  localizationsDelegates: AppLocalizations.localizationsDelegates,
                   supportedLocales: AppLocalizations.supportedLocales,
                   locale: currentPreferences.preferredLocale,
                   localeResolutionCallback: (final Locale? locale, final Iterable<Locale> supportedLocales) {

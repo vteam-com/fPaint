@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 const String _channelName = 'com.vteam.fpaint/file';
 const String _createBookmark = 'createBookmark';
+const String _replaceFileWithBackup = 'replaceFileWithBackup';
 const String _resolveBookmark = 'resolveBookmark';
 const String _releaseBookmark = 'releaseBookmark';
 
@@ -19,6 +20,9 @@ const MethodChannel _channel = MethodChannel(_channelName);
 class MacOsBookmarkService {
   const MacOsBookmarkService._();
 
+  /// Whether the current platform can use the native replace-with-backup flow.
+  static bool get supportsReplaceFileWithBackup => _isMacOS;
+
   /// Creates a security-scoped bookmark for [path] and returns it as a
   /// base-64 string, or `null` if the platform is not macOS or the call fails.
   static Future<String?> createBookmark(final String path) async {
@@ -30,6 +34,28 @@ class MacOsBookmarkService {
       return result as String?;
     } catch (_) {
       return null;
+    }
+  }
+
+  /// Replaces [targetPath] with [replacementPath] while asking macOS to keep
+  /// the previous file as [backupFileName] beside it.
+  static Future<bool> replaceFileWithBackup({
+    required final String targetPath,
+    required final String replacementPath,
+    required final String backupFileName,
+  }) async {
+    if (!_isMacOS) {
+      return false;
+    }
+    try {
+      await _channel.invokeMethod<void>(_replaceFileWithBackup, <String, String>{
+        'backupFileName': backupFileName,
+        'replacementPath': replacementPath,
+        'targetPath': targetPath,
+      });
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 

@@ -38,6 +38,10 @@ void main() {
       expect(preferences.useApplePencil, AppDefaults.useApplePencil);
     });
 
+    test('keepSaveBackups defaults to AppDefaults value', () {
+      expect(preferences.keepSaveBackups, AppDefaults.keepSaveBackups);
+    });
+
     test('languageCode defaults to null', () {
       expect(preferences.languageCode, isNull);
     });
@@ -109,6 +113,26 @@ void main() {
       await preferences.setUseApplePencil(false);
       final SharedPreferences prefs = await preferences.getPref();
       expect(prefs.getBool(AppPreferences.keyUseApplePencil), isFalse);
+    });
+  });
+
+  group('setKeepSaveBackups', () {
+    test('updates keepSaveBackups', () async {
+      await preferences.setKeepSaveBackups(true);
+      expect(preferences.keepSaveBackups, isTrue);
+    });
+
+    test('notifies listeners', () async {
+      int notifyCount = 0;
+      preferences.addListener(() => notifyCount++);
+      await preferences.setKeepSaveBackups(true);
+      expect(notifyCount, 1);
+    });
+
+    test('persists to SharedPreferences', () async {
+      await preferences.setKeepSaveBackups(true);
+      final SharedPreferences prefs = await preferences.getPref();
+      expect(prefs.getBool(AppPreferences.keyKeepSaveBackups), isTrue);
     });
   });
 
@@ -216,6 +240,15 @@ void main() {
       final AppPreferences prefs2 = AppPreferences();
       await prefs2.getPref();
       expect(prefs2.useApplePencil, isFalse);
+    });
+
+    test('loads saved keepSaveBackups on re-init', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyKeepSaveBackups: true,
+      });
+      final AppPreferences prefs2 = AppPreferences();
+      await prefs2.getPref();
+      expect(prefs2.keepSaveBackups, isTrue);
     });
 
     test('loads saved recentFiles on re-init', () async {

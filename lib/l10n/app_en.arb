@@ -165,6 +165,8 @@
   "importTooltip": "Import...",
   "invalidImageSizeDimensionsMustBeNumbers": "Invalid image size: Dimensions must be numbers.",
   "invalidSize": "Invalid size",
+  "keepSaveBackupsSubtitle": "Before overwriting a saved file, keep up to 3 timestamped backups of the previous version.",
+  "keepSaveBackupsTitle": "Keep Save Backups",
   "keyboardShortcuts": "Keyboard Shortcuts",
   "languageEnglish": "English",
   "languageFrench": "French",

@@ -710,6 +710,18 @@ abstract class AppLocalizations {
   /// **'Keyboard Shortcuts'**
   String get keyboardShortcuts;
 
+  /// No description provided for @keepSaveBackupsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before overwriting a saved file, keep up to 3 timestamped backups of the previous version.'**
+  String get keepSaveBackupsSubtitle;
+
+  /// No description provided for @keepSaveBackupsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Save Backups'**
+  String get keepSaveBackupsTitle;
+
   /// No description provided for @languageEnglish.
   ///
   /// In en, this message translates to:

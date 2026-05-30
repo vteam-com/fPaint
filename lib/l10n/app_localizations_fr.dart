@@ -352,6 +352,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get keyboardShortcuts => 'Raccourcis clavier';
 
   @override
+  String get keepSaveBackupsSubtitle =>
+      'Avant d\'ecraser un fichier enregistre, conservez jusqu\'a 3 sauvegardes horodatees de la version precedente.';
+
+  @override
+  String get keepSaveBackupsTitle => 'Conserver des sauvegardes a l\'enregistrement';
+
+  @override
   String get languageEnglish => 'Anglais';
 
   @override
