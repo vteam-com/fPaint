@@ -7,8 +7,11 @@ private let openDocumentFirstIndex = 1
 
 @main
 class AppDelegate: FlutterAppDelegate {
-    var fileChannel: FlutterMethodChannel?
     static var pendingFilePath: String?  // Temporarily store the file path
+
+    private var liveFileChannel: FlutterMethodChannel? {
+        return (mainFlutterWindow as? MainFlutterWindow)?.fileChannel
+    }
 
     override func application(_ sender: NSApplication, openFile filename: String) -> Bool {
         handleOpenedFile(filename)
@@ -32,14 +35,16 @@ class AppDelegate: FlutterAppDelegate {
         // Set the app title
         mainFlutterWindow?.title = mainWindowTitle
 
-        fileChannel = (mainFlutterWindow as? MainFlutterWindow)?.fileChannel
-        
         // Send pending file path to Flutter if available.
         // Do NOT clear pendingFilePath here — the Dart engine may not be
         // listening yet. Let the Dart side clear it after consuming the file.
         if let pendingFilePath = AppDelegate.pendingFilePath {
-            NSLog("📡 Sending pending file to Flutter (Dart may not be ready yet)")
-            fileChannel?.invokeMethod(fileOpenedMethod, arguments: pendingFilePath)
+            if let channel = liveFileChannel {
+                NSLog("📡 Sending pending file to Flutter (Dart may not be ready yet)")
+                channel.invokeMethod(fileOpenedMethod, arguments: pendingFilePath)
+            } else {
+                NSLog("⚠️ No live Flutter file channel at launch, keeping pending file queued")
+            }
         } else {
             NSLog("⚠️ No pending file found at launch")
         }
@@ -114,11 +119,11 @@ class AppDelegate: FlutterAppDelegate {
 
         AppDelegate.pendingFilePath = path
 
-        if let channel = fileChannel {
+        if let channel = liveFileChannel {
             NSLog("📡 Sending file to Flutter immediately")
             channel.invokeMethod(fileOpenedMethod, arguments: path)
         } else {
-            NSLog("⚠️ fileChannel is nil, storing file for later")
+            NSLog("⚠️ No live Flutter file channel, storing file for later")
         }
     }
 

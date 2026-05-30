@@ -350,6 +350,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keyboardShortcuts => 'Keyboard Shortcuts';
 
   @override
+  String get keepSaveBackupsSubtitle =>
+      'Before overwriting a saved file, keep up to 3 timestamped backups of the previous version.';
+
+  @override
+  String get keepSaveBackupsTitle => 'Keep Save Backups';
+
+  @override
   String get languageEnglish => 'English';
 
   @override

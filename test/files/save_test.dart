@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
-
 import 'package:fpaint/files/save.dart';
+import 'package:fpaint/files/save_backup.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -176,6 +176,200 @@ void main() {
       expect(await File(resolvedPath).exists(), isTrue);
       expect(await File(fallbackPath).exists(), isFalse);
       expect(methodCalls, <String>['resolveBookmark', 'releaseBookmark']);
+    });
+  });
+
+  group('saveFile backups on macOS', () {
+    late Directory tempDirectory;
+    late String filePath;
+    late AppPreferences preferences;
+    late ShellProvider shellProvider;
+    late LayersProvider layers;
+    late TargetPlatform? previousPlatform;
+    late List<String> methodCalls;
+
+    setUp(() async {
+      previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+
+      tempDirectory = await Directory.systemTemp.createTemp('fpaint_save_backups_macos_test');
+      filePath = '${tempDirectory.path}/project.ora';
+      methodCalls = <String>[];
+
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyKeepSaveBackups: true,
+        AppPreferences.keyRecentFiles: <String>[filePath],
+        AppPreferences.keyRecentFileBookmarks: <String>[_bookmarkValue],
+      });
+
+      preferences = AppPreferences();
+      await preferences.getPref();
+      shellProvider = ShellProvider()..loadedFileName = filePath;
+      layers = LayersProvider();
+
+      await File(filePath).writeAsBytes(<int>[7, 8, 9]);
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        _fileChannel,
+        (final MethodCall methodCall) async {
+          methodCalls.add(methodCall.method);
+          switch (methodCall.method) {
+            case 'replaceFileWithBackup':
+              final Map<Object?, Object?> arguments = methodCall.arguments as Map<Object?, Object?>;
+              final File targetFile = File(arguments['targetPath']! as String);
+              final File replacementFile = File(arguments['replacementPath']! as String);
+              final File backupFile = File('${targetFile.parent.path}/${arguments['backupFileName']! as String}');
+              await targetFile.rename(backupFile.path);
+              await replacementFile.rename(targetFile.path);
+              return null;
+            case 'resolveBookmark':
+              return filePath;
+            case 'releaseBookmark':
+              return null;
+            default:
+              return null;
+          }
+        },
+      );
+    });
+
+    tearDown(() async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        _fileChannel,
+        null,
+      );
+      debugDefaultTargetPlatformOverride = previousPlatform;
+      if (await tempDirectory.exists()) {
+        await tempDirectory.delete(recursive: true);
+      }
+    });
+
+    test('creates a visible sibling backup file', () async {
+      await saveFile(shellProvider, layers, preferences);
+
+      final List<File> backupFiles = (await tempDirectory.list().toList())
+          .whereType<File>()
+          .where((final File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
+          .toList();
+
+      expect(await File(filePath).exists(), isTrue);
+      expect(backupFiles, hasLength(1));
+      expect(await backupFiles.single.readAsBytes(), <int>[7, 8, 9]);
+      expect(methodCalls, containsAllInOrder(<String>['resolveBookmark', 'replaceFileWithBackup', 'releaseBookmark']));
+    });
+  });
+
+  group('saveFile backups', () {
+    late Directory tempDirectory;
+    late String filePath;
+    late AppPreferences preferences;
+    late ShellProvider shellProvider;
+    late LayersProvider layers;
+    late TargetPlatform? previousPlatform;
+
+    setUp(() async {
+      previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+
+      tempDirectory = await Directory.systemTemp.createTemp('fpaint_save_backups_test');
+      filePath = '${tempDirectory.path}/project.ora';
+
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyKeepSaveBackups: true,
+      });
+
+      preferences = AppPreferences();
+      await preferences.getPref();
+      shellProvider = ShellProvider()..loadedFileName = filePath;
+      layers = LayersProvider();
+    });
+
+    tearDown(() async {
+      debugDefaultTargetPlatformOverride = previousPlatform;
+      if (await tempDirectory.exists()) {
+        await tempDirectory.delete(recursive: true);
+      }
+    });
+
+    test('renames the previous file into a timestamped backup before saving', () async {
+      final File currentFile = File(filePath);
+      await currentFile.writeAsBytes(<int>[1, 2, 3, 4]);
+
+      await saveFile(shellProvider, layers, preferences);
+
+      final List<File> backupFiles = (await tempDirectory.list().toList())
+          .whereType<File>()
+          .where((final File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
+          .toList();
+
+      expect(await currentFile.exists(), isTrue);
+      expect(backupFiles, hasLength(1));
+      expect(await backupFiles.single.readAsBytes(), <int>[1, 2, 3, 4]);
+    });
+
+    test('keeps only the 3 newest backups', () async {
+      Future<File> createBackup({
+        required final String fileName,
+        required final int secondsOffset,
+      }) async {
+        final File backupFile = File('${tempDirectory.path}/$fileName');
+        await backupFile.writeAsString(fileName);
+        await backupFile.setLastModified(
+          DateTime(2024, 1, 1, 0, 0, secondsOffset),
+        );
+        return backupFile;
+      }
+
+      final File oldestBackup = await createBackup(
+        fileName: 'project_back-20240101-000000-000000.ora',
+        secondsOffset: 0,
+      );
+      await createBackup(
+        fileName: 'project_back-20240101-000001-000000.ora',
+        secondsOffset: 1,
+      );
+      await createBackup(
+        fileName: 'project_back-20240101-000002-000000.ora',
+        secondsOffset: 2,
+      );
+
+      final File currentFile = File(filePath);
+      await currentFile.writeAsBytes(<int>[9, 9, 9]);
+      await currentFile.setLastModified(DateTime(2024, 1, 1, 0, 0, 3));
+
+      await saveFile(shellProvider, layers, preferences);
+
+      final List<File> backupFiles = (await tempDirectory.list().toList())
+          .whereType<File>()
+          .where((final File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
+          .toList();
+
+      expect(backupFiles, hasLength(3));
+      expect(await oldestBackup.exists(), isFalse);
+    });
+
+    test('continues saving when backup creation fails', () async {
+      final File currentFile = File(filePath);
+      await currentFile.writeAsString('old-content');
+
+      await saveWithOptionalBackup(
+        filePath: filePath,
+        preferences: preferences,
+        backupAction: (final File _) async {
+          throw const FileSystemException('backup rename blocked');
+        },
+        saveAction: (final String resolvedPath) async {
+          await File(resolvedPath).writeAsString('new-content');
+        },
+      );
+
+      final List<File> backupFiles = (await tempDirectory.list().toList())
+          .whereType<File>()
+          .where((final File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
+          .toList();
+
+      expect(await currentFile.readAsString(), 'new-content');
+      expect(backupFiles, isEmpty);
     });
   });
 }

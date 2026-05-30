@@ -27,6 +27,7 @@ void main() {
     expect(find.text('Settings...'), findsOneWidget);
     expect(find.text('Language'), findsOneWidget);
     expect(find.text('Use Apple Pencil Only'), findsOneWidget);
+    expect(find.text('Keep Save Backups'), findsOneWidget);
 
     await tester.tap(find.byType(AppDropdown<String>));
     await tester.pumpAndSettle();
@@ -35,10 +36,15 @@ void main() {
 
     expect(preferences.languageCode, 'fr');
 
-    await tester.tap(find.byType(AppToggleSwitch));
+    await tester.tap(find.text('Use Apple Pencil Only'));
     await tester.pumpAndSettle();
 
     expect(preferences.useApplePencil, isTrue);
+
+    await tester.tap(find.text('Keep Save Backups'));
+    await tester.pumpAndSettle();
+
+    expect(preferences.keepSaveBackups, isTrue);
 
     await tester.tap(find.widgetWithText(AppButtonText, 'Keyboard Shortcuts'));
     await tester.pumpAndSettle();

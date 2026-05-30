@@ -158,6 +158,8 @@
   "importTooltip": "Importer...",
   "invalidImageSizeDimensionsMustBeNumbers": "Taille d'image invalide: les dimensions doivent etre des nombres.",
   "invalidSize": "Taille invalide",
+  "keepSaveBackupsSubtitle": "Avant d'ecraser un fichier enregistre, conservez jusqu'a 3 sauvegardes horodatees de la version precedente.",
+  "keepSaveBackupsTitle": "Conserver des sauvegardes a l'enregistrement",
   "keyboardShortcuts": "Raccourcis clavier",
   "languageEnglish": "Anglais",
   "languageFrench": "Francais",

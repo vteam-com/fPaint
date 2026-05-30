@@ -5,7 +5,9 @@ import 'package:file_picker/file_picker.dart';
 import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/export_prepare.dart';
 import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/files/save_backup.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/macos_bookmark_service.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 
@@ -175,10 +177,18 @@ Future<void> _exportWithFilePicker({
     lockParentWindow: true,
   );
   if (filePath != null && filePath.isNotEmpty) {
-    await onFileSelected(filePath);
+    final String selectedFilePath = resolveRecentFilePath == null ? filePath : resolveRecentFilePath(filePath);
+    final String? bookmark =
+        preferences?.getBookmark(selectedFilePath) ?? await MacOsBookmarkService.createBookmark(selectedFilePath);
+
+    await saveWithOptionalBackupAndResolvedFileAccess(
+      filePath: selectedFilePath,
+      bookmarkBase64: bookmark,
+      preferences: preferences,
+      saveAction: onFileSelected,
+    );
     if (preferences != null) {
-      final String recentFilePath = resolveRecentFilePath == null ? filePath : resolveRecentFilePath(filePath);
-      await preferences.addRecentFile(recentFilePath);
+      await preferences.addRecentFile(selectedFilePath);
     }
   }
 }

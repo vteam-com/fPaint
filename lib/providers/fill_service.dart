@@ -45,6 +45,14 @@ class FillImageData {
 
 /// Builds fill actions from image-based flood-fill regions.
 class FillService {
+  /// Returns an empty fill action used when flood fill cannot resolve a region.
+  UserActionDrawing _buildEmptyFloodFillAction() {
+    return UserActionDrawing(
+      action: ActionType.fill,
+      positions: const <ui.Offset>[],
+    );
+  }
+
   /// Performs a flood fill with a solid color.
   Future<UserActionDrawing> createFloodFillSolidAction({
     required final ui.Image sourceImage,
@@ -93,6 +101,10 @@ class FillService {
     required final Offset Function(Offset) toCanvas,
     final Path? regionPathOverride,
   }) async {
+    if (!_hasUsableGradientConfiguration(fillModel)) {
+      return _buildEmptyFloodFillAction();
+    }
+
     // For radial gradients, start flood fill at the first gradient handle position
     // For linear gradients, start at the center between handles
     final ui.Offset floodFillStartPoint = fillModel.mode == FillMode.radial
@@ -110,10 +122,7 @@ class FillService {
 
     // Guard against empty region (e.g. tap outside canvas or on invalid coordinates)
     if (bounds.isEmpty || bounds.width == 0 || bounds.height == 0) {
-      return UserActionDrawing(
-        action: ActionType.fill,
-        positions: const <ui.Offset>[],
-      );
+      return _buildEmptyFloodFillAction();
     }
 
     // Use the authoritative gradient stop colors and positions from the model.
@@ -195,6 +204,14 @@ class FillService {
       begin: _pointToBoundsAlignment(bounds: bounds, point: beginPoint),
       end: _pointToBoundsAlignment(bounds: bounds, point: endPoint),
     );
+  }
+
+  /// Returns whether [fillModel] has enough gradient data for flood fill.
+  bool _hasUsableGradientConfiguration(final FillModel fillModel) {
+    final int pointCount = fillModel.gradientPoints.length;
+    final int colorCount = fillModel.gradientStopColors.length;
+    final int stopCount = fillModel.gradientStopPositions.length;
+    return pointCount >= AppMath.two && colorCount >= FillModel.gradientStopMin && stopCount == colorCount;
   }
 
   /// Converts an absolute [point] inside [bounds] into a gradient alignment.
