@@ -210,7 +210,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     );
 
     final double rotationOverhead = widget.enableMoveAndResize
-        ? AppInteraction.rotationHandleDistance + modeToggleSize
+        ? AppInteraction.selectionToolbarMargin + modeToggleSize
         : 0;
     final double height = bounds.bottom + bounds.height + handleSize + rotationOverhead;
 
@@ -314,8 +314,8 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     );
     final double controlsWidth = showQuickActions ? modeControlsWidth + spacing + quickActionsWidth : modeControlsWidth;
     final double viewportHeight = MediaQuery.sizeOf(context).height;
-    final double idealControlsTop = bounds.top - AppInteraction.rotationHandleDistance - buttonSize / AppMath.pair;
-    final double bottomControlsTop = bounds.bottom + AppInteraction.rotationHandleDistance;
+    final double idealControlsTop = bounds.top - AppInteraction.selectionToolbarMargin - buttonSize / AppMath.pair;
+    final double bottomControlsTop = bounds.bottom + AppInteraction.selectionToolbarMargin;
     final OverlayPlacement placement = computeOverlayPlacement(
       viewportHeight: viewportHeight,
       idealTop: idealControlsTop,
@@ -421,6 +421,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
                   icon: AppIcon.clipboardCopy,
                   contentSemantic: AppButtonContentSemantic.enabled,
                   cursor: SystemMouseCursors.click,
+                  showBorder: false,
                   size: buttonSize,
                   iconSize: iconSize,
                   onTap: () => _handleCopy(l10n),
@@ -431,6 +432,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
                   contentSemantic: AppButtonContentSemantic.enabled,
                   cursor: SystemMouseCursors.click,
                   size: buttonSize,
+                  showBorder: false,
                   iconSize: iconSize,
                   onTap: _handleDuplicate,
                 ),
@@ -445,6 +447,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
                   icon: AppIcon.selectorCancel,
                   contentSemantic: AppButtonContentSemantic.dangerous,
                   cursor: SystemMouseCursors.click,
+                  showBorder: false,
                   size: buttonSize,
                   iconSize: iconSize,
                   onTap: widget.onCancel,
@@ -681,6 +684,7 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
       key: Keys.effectsButton,
       tooltip: widget.l10n.effects,
       icon: AppIcon.autoFixHigh,
+      showBorder: false,
       contentSemantic: AppButtonContentSemantic.enabled,
       cursor: SystemMouseCursors.click,
       size: widget.buttonSize,

@@ -104,7 +104,7 @@ void main() {
     });
 
     test('returns correct icon for smudge', () {
-      expect(ActionType.smudge.icon, AppIcon.blender);
+      expect(ActionType.smudge.icon, AppIcon.effectBlur);
     });
 
     test('returns correct icon for eraser', () {
