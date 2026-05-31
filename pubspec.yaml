@@ -40,7 +40,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_svg: ^2.3.0
-  image: ^4.8.0
+  image: ^4.9.1
   intl: any
   logging: any
   multi_split_view: ^3.6.2

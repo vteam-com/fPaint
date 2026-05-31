@@ -11,7 +11,10 @@ class FakeLayersProvider extends Fake implements LayersProvider {
   ui.Image? cachedImage;
 
   @override
-  Future<Color?> getColorAtOffset(final Offset offset) async {
+  Future<Color?> getColorAtOffset(
+    final Offset offset, {
+    final bool useCachedImage = false,
+  }) async {
     return Colors.red;
   }
 }

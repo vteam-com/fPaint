@@ -297,7 +297,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     }
 
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-    appProvider.update();
+    appProvider.repaintViewport();
   }
 
   /// Finalizes an active pointer interaction and clears temporary drawing state.
@@ -343,12 +343,12 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
 
     if (appProvider.eyeDropPositionForBrush != null) {
       appProvider.eyeDropPositionForBrush = event.localPosition;
-      appProvider.update();
+      appProvider.repaintMainView();
       return;
     }
     if (appProvider.eyeDropPositionForFill != null) {
       appProvider.eyeDropPositionForFill = event.localPosition;
-      appProvider.update();
+      appProvider.repaintMainView();
       return;
     }
 
@@ -380,10 +380,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         appProvider.appendLineFromLastUserAction(adjustedPosition);
       } else if (appProvider.selectedAction == ActionType.brush) {
         appProvider.layers.selectedLayer.lastActionAppendPosition(position: adjustedPosition);
-        appProvider.update();
+        appProvider.layers.repaintCanvas();
       } else {
         appProvider.updateAction(end: adjustedPosition);
-        appProvider.update();
+        appProvider.layers.repaintCanvas();
       }
     }
   }
@@ -546,7 +546,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final Offset offsetDelta,
   ) {
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-    appProvider.canvasPan(offsetDelta: offsetDelta);
+    appProvider.canvasPan(
+      offsetDelta: offsetDelta,
+      notifyListener: false,
+      notifyViewport: true,
+    );
   }
 
   /// Applies user-driven canvas scaling around [anchorPoint].
@@ -565,6 +569,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     appProvider.applyScaleToCanvas(
       scaleDelta: scaleDelta,
       anchorPoint: anchorPoint,
+      notifyListener: false,
+      notifyViewport: true,
     );
   }
 

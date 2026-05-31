@@ -8,12 +8,13 @@ class CanvasPanel extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final LayersProvider layers = LayersProvider.of(context, listen: true);
+    final LayersProvider layers = LayersProvider.of(context);
     return CustomPaint(
       size: Size.infinite,
       painter: CanvasPanelPainter(
         layers.list,
         includeTransparentBackground: true,
+        repaint: Listenable.merge(<Listenable>[layers, layers.canvasRepaintListenable]),
       ),
     );
   }

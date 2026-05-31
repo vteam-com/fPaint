@@ -10,13 +10,11 @@ import 'package:fpaint/models/text_object.dart';
 /// Renders a pencil stroke on the canvas.
 ///
 /// The [canvas] parameter is the canvas to draw on.
-/// The [p1] parameter is the starting point of the stroke.
-/// The [p2] parameter is the ending point of the stroke.
+/// The [positions] parameter is the ordered list of stroke points.
 /// The [brush] parameter is the brush to use for the stroke.
-void renderPencil(
+void renderPencilStroke(
   final Canvas canvas,
-  final Offset p1,
-  final Offset p2,
+  final List<Offset> positions,
   final MyBrush brush,
 ) {
   final Paint paint = Paint();
@@ -25,23 +23,17 @@ void renderPencil(
   paint.style = PaintingStyle.stroke;
   paint.strokeCap = StrokeCap.round;
   paint.blendMode = BlendMode.src;
-  canvas.drawLine(
-    p1,
-    p2,
-    paint,
-  );
+  _renderFreehandStroke(canvas, positions, paint);
 }
 
 /// Renders a pencil eraser stroke on the canvas.
 ///
 /// The [canvas] parameter is the canvas to draw on.
-/// The [p1] parameter is the starting point of the stroke.
-/// The [p2] parameter is the ending point of the stroke.
+/// The [positions] parameter is the ordered list of stroke points.
 /// The [brush] parameter is the brush to use for the stroke.
-void renderPencilEraser(
+void renderPencilEraserStroke(
   final Canvas canvas,
-  final Offset p1,
-  final Offset p2,
+  final List<Offset> positions,
   final MyBrush brush,
 ) {
   final Paint paint = Paint();
@@ -49,11 +41,29 @@ void renderPencilEraser(
   paint.style = PaintingStyle.stroke;
   paint.strokeCap = StrokeCap.round;
   paint.blendMode = BlendMode.clear;
-  canvas.drawLine(
-    p1,
-    p2,
-    paint,
-  );
+  _renderFreehandStroke(canvas, positions, paint);
+}
+
+/// Builds and draws a connected stroke from the sampled pointer positions.
+void _renderFreehandStroke(
+  final Canvas canvas,
+  final List<Offset> positions,
+  final Paint paint,
+) {
+  if (positions.isEmpty) {
+    return;
+  }
+
+  final Path path = Path()..moveTo(positions.first.dx, positions.first.dy);
+  if (positions.length == 1) {
+    path.lineTo(positions.first.dx, positions.first.dy);
+  } else {
+    for (final Offset position in positions.skip(1)) {
+      path.lineTo(position.dx, position.dy);
+    }
+  }
+
+  canvas.drawPath(path, paint);
 }
 
 /// Renders a rectangle on the canvas.

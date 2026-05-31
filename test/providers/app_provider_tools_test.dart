@@ -198,4 +198,76 @@ void main() {
       expect(appProvider.fillModel.isVisible, isFalse);
     });
   });
+
+  group('appendLineFromLastUserAction', () {
+    late AppProvider appProvider;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      appProvider = AppProvider(preferences: preferences);
+      appProvider.undoProvider.clear();
+    });
+
+    test('extends a pencil stroke without creating another undo action', () {
+      appProvider.selectedAction = ActionType.pencil;
+      appProvider.recordExecuteDrawingActionToSelectedLayer(
+        action: UserActionDrawing(
+          action: ActionType.pencil,
+          positions: <ui.Offset>[
+            const ui.Offset(0, 0),
+            const ui.Offset(5, 5),
+          ],
+          brush: MyBrush(color: const ui.Color(0xFF000000), size: 2),
+        ),
+      );
+
+      appProvider.appendLineFromLastUserAction(const ui.Offset(10, 10));
+
+      expect(appProvider.layers.selectedLayer.actionStack, hasLength(1));
+      expect(
+        appProvider.layers.selectedLayer.lastUserAction!.positions,
+        <ui.Offset>[
+          const ui.Offset(0, 0),
+          const ui.Offset(5, 5),
+          const ui.Offset(10, 10),
+        ],
+      );
+
+      appProvider.undoAction();
+
+      expect(appProvider.layers.selectedLayer.actionStack, isEmpty);
+    });
+
+    test('extends an eraser stroke without creating another undo action', () {
+      appProvider.selectedAction = ActionType.eraser;
+      appProvider.recordExecuteDrawingActionToSelectedLayer(
+        action: UserActionDrawing(
+          action: ActionType.eraser,
+          positions: <ui.Offset>[
+            const ui.Offset(0, 0),
+            const ui.Offset(5, 5),
+          ],
+          brush: MyBrush(color: const ui.Color(0xFF000000), size: 4),
+        ),
+      );
+
+      appProvider.appendLineFromLastUserAction(const ui.Offset(10, 10));
+
+      expect(appProvider.layers.selectedLayer.actionStack, hasLength(1));
+      expect(
+        appProvider.layers.selectedLayer.lastUserAction!.positions,
+        <ui.Offset>[
+          const ui.Offset(0, 0),
+          const ui.Offset(5, 5),
+          const ui.Offset(10, 10),
+        ],
+      );
+
+      appProvider.undoAction();
+
+      expect(appProvider.layers.selectedLayer.actionStack, isEmpty);
+    });
+  });
 }

@@ -658,7 +658,7 @@ extension AppProviderSelection on AppProvider {
       // Ignore since straight-line region selection commits only on clicks.
     } else {
       selectorModel.addP2(position);
-      update();
+      repaintMainView();
     }
   }
 
@@ -672,7 +672,7 @@ extension AppProviderSelection on AppProvider {
       position,
       closeDistance: _straightLineRegionCloseDistance,
     );
-    update();
+    repaintMainView();
   }
 
   /// Ends the selector creation.

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
@@ -7,7 +9,11 @@ class CanvasPanelPainter extends CustomPainter {
   CanvasPanelPainter(
     this._layers, {
     this.includeTransparentBackground = false,
+    super.repaint,
   });
+
+  ui.Picture? _cachedTransparentBackgroundPicture;
+  Size? _cachedTransparentBackgroundSize;
 
   /// The layers to paint.
   final List<LayerProvider> _layers;
@@ -22,10 +28,8 @@ class CanvasPanelPainter extends CustomPainter {
     }
 
     if (includeTransparentBackground) {
-      drawTransparentBackgroundOffsetAndSize(
-        canvas: canvas,
-        size: size,
-      );
+      final ui.Picture backgroundPicture = _resolveTransparentBackgroundPicture(size);
+      canvas.drawPicture(backgroundPicture);
     }
 
     for (final LayerProvider layer in _layers.reversed) {
@@ -36,5 +40,26 @@ class CanvasPanelPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(final CanvasPanelPainter oldDelegate) => true;
+  bool shouldRepaint(final CanvasPanelPainter oldDelegate) {
+    return oldDelegate._layers != _layers || oldDelegate.includeTransparentBackground != includeTransparentBackground;
+  }
+
+  /// Returns a cached checkerboard background picture for the current canvas [size].
+  ui.Picture _resolveTransparentBackgroundPicture(final Size size) {
+    if (_cachedTransparentBackgroundPicture != null && _cachedTransparentBackgroundSize == size) {
+      return _cachedTransparentBackgroundPicture!;
+    }
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas pictureCanvas = Canvas(recorder);
+    drawTransparentBackgroundOffsetAndSize(
+      canvas: pictureCanvas,
+      size: size,
+    );
+
+    final ui.Picture picture = recorder.endRecording();
+    _cachedTransparentBackgroundPicture = picture;
+    _cachedTransparentBackgroundSize = size;
+    return picture;
+  }
 }

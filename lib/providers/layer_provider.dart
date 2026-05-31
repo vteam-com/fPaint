@@ -661,10 +661,9 @@ class LayerProvider extends ChangeNotifier {
             applyAction(
               canvas,
               userAction.clipPath,
-              (final Canvas theCanvasToUse) => renderPencil(
+              (final Canvas theCanvasToUse) => renderPencilStroke(
                 theCanvasToUse,
-                userAction.positions.first,
-                userAction.positions.last,
+                userAction.positions,
                 userAction.brush!,
               ),
             );
@@ -763,10 +762,9 @@ class LayerProvider extends ChangeNotifier {
             applyAction(
               canvas,
               userAction.clipPath,
-              (final Canvas theCanvasToUse) => renderPencilEraser(
+              (final Canvas theCanvasToUse) => renderPencilEraserStroke(
                 theCanvasToUse,
-                userAction.positions.first,
-                userAction.positions.last,
+                userAction.positions,
                 userAction.brush!,
               ),
             );

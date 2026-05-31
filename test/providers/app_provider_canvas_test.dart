@@ -142,6 +142,22 @@ void main() {
       appProvider.applyScaleToCanvas(scaleDelta: 2.0, notifyListener: false);
       expect(notifyCount, 0);
     });
+
+    test('notifyViewport repaints viewport without notifying provider listeners', () {
+      int notifyCount = 0;
+      int viewportNotifyCount = 0;
+      appProvider.addListener(() => notifyCount++);
+      appProvider.viewportRepaintListenable.addListener(() => viewportNotifyCount++);
+
+      appProvider.applyScaleToCanvas(
+        scaleDelta: 2.0,
+        notifyListener: false,
+        notifyViewport: true,
+      );
+
+      expect(notifyCount, 0);
+      expect(viewportNotifyCount, 1);
+    });
   });
 
   group('canvasPan', () {
@@ -156,6 +172,22 @@ void main() {
       appProvider.addListener(() => notifyCount++);
       appProvider.canvasPan(offsetDelta: const Offset(5, 10), notifyListener: false);
       expect(notifyCount, 0);
+    });
+
+    test('notifyViewport repaints viewport without notifying provider listeners', () {
+      int notifyCount = 0;
+      int viewportNotifyCount = 0;
+      appProvider.addListener(() => notifyCount++);
+      appProvider.viewportRepaintListenable.addListener(() => viewportNotifyCount++);
+
+      appProvider.canvasPan(
+        offsetDelta: const Offset(5, 10),
+        notifyListener: false,
+        notifyViewport: true,
+      );
+
+      expect(notifyCount, 0);
+      expect(viewportNotifyCount, 1);
     });
 
     test('notifies by default', () {

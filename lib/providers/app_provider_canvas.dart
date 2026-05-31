@@ -35,6 +35,7 @@ extension AppProviderCanvas on AppProvider {
     required final double scaleDelta,
     final ui.Offset? anchorPoint,
     final bool notifyListener = true,
+    final bool notifyViewport = false,
   }) {
     final Offset before = anchorPoint == null ? Offset.zero : toCanvas(anchorPoint);
 
@@ -54,6 +55,8 @@ extension AppProviderCanvas on AppProvider {
     }
     if (notifyListener) {
       update();
+    } else if (notifyViewport) {
+      repaintViewport();
     }
   }
 
@@ -67,6 +70,7 @@ extension AppProviderCanvas on AppProvider {
   void canvasPan({
     required final Offset offsetDelta,
     final bool notifyListener = true,
+    final bool notifyViewport = false,
   }) {
     canvasOffset += offsetDelta;
 
@@ -77,6 +81,8 @@ extension AppProviderCanvas on AppProvider {
     }
     if (notifyListener) {
       update();
+    } else if (notifyViewport) {
+      repaintViewport();
     }
   }
 

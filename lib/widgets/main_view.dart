@@ -36,8 +36,7 @@ class MainView extends StatefulWidget {
 class MainViewState extends State<MainView> {
   @override
   Widget build(final BuildContext context) {
-    final AppProvider appProvider = AppProvider.of(context, listen: true);
-    final bool hasActiveTransformOverlay = appProvider.hasActiveTransformOverlay;
+    final AppProvider appProvider = AppProvider.of(context);
 
     return RepaintBoundary(
       key: Keys.mainViewScreenshotBoundary,
@@ -54,186 +53,206 @@ class MainViewState extends State<MainView> {
             );
           }
 
-          return Stack(
-            children: <Widget>[
-              CanvasGestureHandler(
-                child: _displayCanvas(appProvider),
-              ),
+          return ListenableBuilder(
+            listenable: appProvider,
+            builder: (final BuildContext _, final Widget? _) {
+              return ListenableBuilder(
+                listenable: appProvider.viewportRepaintListenable,
+                builder: (final BuildContext _, final Widget? _) {
+                  return ListenableBuilder(
+                    listenable: appProvider.mainViewRepaintListenable,
+                    builder: (final BuildContext _, final Widget? _) {
+                      final bool hasActiveTransformOverlay = appProvider.hasActiveTransformOverlay;
 
-              if (!hasActiveTransformOverlay &&
-                  appProvider.effectPreviewModel.isVisible &&
-                  appProvider.effectPreviewModel.previewImage != null &&
-                  appProvider.effectPreviewModel.bounds != null)
-                Positioned(
-                  left:
-                      appProvider.canvasOffset.dx +
-                      appProvider.effectPreviewModel.bounds!.left * appProvider.layers.scale,
-                  top:
-                      appProvider.canvasOffset.dy +
-                      appProvider.effectPreviewModel.bounds!.top * appProvider.layers.scale,
-                  child: SizedBox(
-                    width: appProvider.effectPreviewModel.bounds!.width * appProvider.layers.scale,
-                    height: appProvider.effectPreviewModel.bounds!.height * appProvider.layers.scale,
-                    child: RawImage(
-                      image: appProvider.effectPreviewModel.previewImage,
-                      fit: BoxFit.fill,
-                      filterQuality: FilterQuality.high,
-                    ),
-                  ),
-                ),
+                      return Stack(
+                        children: <Widget>[
+                          CanvasGestureHandler(
+                            child: _displayCanvas(appProvider),
+                          ),
 
-              //
-              // Color selection from image
-              //
-              if (!hasActiveTransformOverlay && appProvider.eyeDropPositionForBrush != null)
-                _buildEyeDropper(
-                  appProvider: appProvider,
-                  position: appProvider.eyeDropPositionForBrush!,
-                  onColorPicked: (final Color color) {
-                    appProvider.brushColor = color;
-                  },
-                  onDismiss: () {
-                    appProvider.eyeDropPositionForBrush = null;
-                  },
-                ),
+                          if (!hasActiveTransformOverlay &&
+                              appProvider.effectPreviewModel.isVisible &&
+                              appProvider.effectPreviewModel.previewImage != null &&
+                              appProvider.effectPreviewModel.bounds != null)
+                            Positioned(
+                              left:
+                                  appProvider.canvasOffset.dx +
+                                  appProvider.effectPreviewModel.bounds!.left * appProvider.layers.scale,
+                              top:
+                                  appProvider.canvasOffset.dy +
+                                  appProvider.effectPreviewModel.bounds!.top * appProvider.layers.scale,
+                              child: SizedBox(
+                                width: appProvider.effectPreviewModel.bounds!.width * appProvider.layers.scale,
+                                height: appProvider.effectPreviewModel.bounds!.height * appProvider.layers.scale,
+                                child: RawImage(
+                                  image: appProvider.effectPreviewModel.previewImage,
+                                  fit: BoxFit.fill,
+                                  filterQuality: FilterQuality.high,
+                                ),
+                              ),
+                            ),
 
-              if (!hasActiveTransformOverlay && appProvider.eyeDropPositionForFill != null)
-                _buildEyeDropper(
-                  appProvider: appProvider,
-                  position: appProvider.eyeDropPositionForFill!,
-                  onColorPicked: (final Color color) {
-                    appProvider.fillColor = color;
-                  },
-                  onDismiss: () {
-                    appProvider.eyeDropPositionForFill = null;
-                  },
-                ),
+                          //
+                          // Color selection from image
+                          //
+                          if (!hasActiveTransformOverlay && appProvider.eyeDropPositionForBrush != null)
+                            _buildEyeDropper(
+                              appProvider: appProvider,
+                              position: appProvider.eyeDropPositionForBrush!,
+                              onColorPicked: (final Color color) {
+                                appProvider.brushColor = color;
+                              },
+                              onDismiss: () {
+                                appProvider.eyeDropPositionForBrush = null;
+                              },
+                            ),
 
-              //
-              // Selection Widget
-              //
-              if (appProvider.selectorModel.isVisible && !hasActiveTransformOverlay)
-                SelectionRectWidget(
-                  path1: appProvider.getPathAdjustToCanvasSizeAndPosition(
-                    appProvider.selectorModel.path1,
-                  ),
-                  path2: appProvider.getPathAdjustToCanvasSizeAndPosition(
-                    appProvider.selectorModel.path2,
-                  ),
-                  enableMoveAndResize:
-                      appProvider.selectedAction == ActionType.selector &&
-                      !appProvider.transformModel.isVisible &&
-                      !appProvider.selectorModel.isDrawing,
-                  isDrawing: appProvider.selectorModel.isDrawing,
-                  onDrag: (final Offset offset) {
-                    appProvider.selectorModel.translate(offset / appProvider.layers.scale);
-                    appProvider.update();
-                  },
-                  onDuplicateMove: (final Offset offset, final bool duplicateOnNewLayer) async {
-                    if (!duplicateOnNewLayer && appProvider.isSelectedLayerLocked) {
-                      _showLockedLayerMessage(appProvider);
-                      return;
-                    }
+                          if (!hasActiveTransformOverlay && appProvider.eyeDropPositionForFill != null)
+                            _buildEyeDropper(
+                              appProvider: appProvider,
+                              position: appProvider.eyeDropPositionForFill!,
+                              onColorPicked: (final Color color) {
+                                appProvider.fillColor = color;
+                              },
+                              onDismiss: () {
+                                appProvider.eyeDropPositionForFill = null;
+                              },
+                            ),
 
-                    await appProvider.regionDuplicateMove(
-                      offset / appProvider.layers.scale,
-                      onNewLayer: duplicateOnNewLayer,
-                    );
-                  },
-                  onScale: (final double factor) {
-                    appProvider.selectorModel.scaleUniform(factor);
-                    appProvider.update();
-                  },
-                  onResize: (final NineGridHandle handle, final Offset offset) {
-                    appProvider.selectorModel.nindeGridResize(
-                      handle,
-                      offset / appProvider.layers.scale,
-                    );
-                    appProvider.update();
-                  },
-                  onRotate: (final double angleRadians) {
-                    appProvider.selectorModel.rotate(angleRadians);
-                    appProvider.update();
-                  },
-                  onToggleTransformMode: () async {
-                    if (appProvider.transformModel.isVisible) {
-                      appProvider.cancelTransform();
-                      return;
-                    }
+                          //
+                          // Selection Widget
+                          //
+                          if (appProvider.selectorModel.isVisible && !hasActiveTransformOverlay)
+                            SelectionRectWidget(
+                              path1: appProvider.getPathAdjustToCanvasSizeAndPosition(
+                                appProvider.selectorModel.path1,
+                              ),
+                              path2: appProvider.getPathAdjustToCanvasSizeAndPosition(
+                                appProvider.selectorModel.path2,
+                              ),
+                              enableMoveAndResize:
+                                  appProvider.selectedAction == ActionType.selector &&
+                                  !appProvider.transformModel.isVisible &&
+                                  !appProvider.selectorModel.isDrawing,
+                              isDrawing: appProvider.selectorModel.isDrawing,
+                              onDrag: (final Offset offset) {
+                                appProvider.selectorModel.translate(offset / appProvider.layers.scale);
+                                appProvider.repaintMainView();
+                              },
+                              onDuplicateMove: (final Offset offset, final bool duplicateOnNewLayer) async {
+                                if (!duplicateOnNewLayer && appProvider.isSelectedLayerLocked) {
+                                  _showLockedLayerMessage(appProvider);
+                                  return;
+                                }
 
-                    if (appProvider.isSelectedLayerLocked) {
-                      _showLockedLayerMessage(appProvider);
-                      return;
-                    }
+                                await appProvider.regionDuplicateMove(
+                                  offset / appProvider.layers.scale,
+                                  onNewLayer: duplicateOnNewLayer,
+                                );
+                              },
+                              onScale: (final double factor) {
+                                appProvider.selectorModel.scaleUniform(factor);
+                                appProvider.repaintMainView();
+                              },
+                              onResize: (final NineGridHandle handle, final Offset offset) {
+                                appProvider.selectorModel.nindeGridResize(
+                                  handle,
+                                  offset / appProvider.layers.scale,
+                                );
+                                appProvider.repaintMainView();
+                              },
+                              onRotate: (final double angleRadians) {
+                                appProvider.selectorModel.rotate(angleRadians);
+                                appProvider.repaintMainView();
+                              },
+                              onToggleTransformMode: () async {
+                                if (appProvider.transformModel.isVisible) {
+                                  appProvider.cancelTransform();
+                                  return;
+                                }
 
-                    await appProvider.startTransform();
-                  },
-                  onCopy: () => appProvider.regionCopy(),
-                  onDuplicate: () => appProvider.regionDuplicate(),
-                  onCancel: () {
-                    appProvider.selectorModel.clear();
-                    appProvider.update();
-                  },
-                  onEffectSelected: (final SelectionEffect effect, final BuildContext _) async {
-                    if (appProvider.isSelectedLayerLocked) {
-                      _showLockedLayerMessage(appProvider);
-                      return;
-                    }
+                                if (appProvider.isSelectedLayerLocked) {
+                                  _showLockedLayerMessage(appProvider);
+                                  return;
+                                }
 
-                    await appProvider.startEffectPreview(effect);
-                    if (!mounted) {
-                      return;
-                    }
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      if (!mounted || !appProvider.effectPreviewModel.isVisible) {
-                        return;
-                      }
-                      _showEffectPreviewBottomSheet(context, appProvider: appProvider, l10n: context.l10n);
-                    });
-                  },
-                ),
+                                await appProvider.startTransform();
+                              },
+                              onCopy: () => appProvider.regionCopy(),
+                              onDuplicate: () => appProvider.regionDuplicate(),
+                              onCancel: () {
+                                appProvider.selectorModel.clear();
+                                appProvider.update();
+                              },
+                              onEffectSelected: (final SelectionEffect effect, final BuildContext _) async {
+                                if (appProvider.isSelectedLayerLocked) {
+                                  _showLockedLayerMessage(appProvider);
+                                  return;
+                                }
 
-              //
-              // Fill Widget
-              //
-              if (!hasActiveTransformOverlay && appProvider.fillModel.isVisible)
-                SizedBox(
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: FillWidget(
-                    fillModel: appProvider.fillModel,
-                    onUpdate: (final GradientPoint _) {
-                      appProvider.updateGradientFill();
+                                await appProvider.startEffectPreview(effect);
+                                if (!mounted) {
+                                  return;
+                                }
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (!mounted || !appProvider.effectPreviewModel.isVisible) {
+                                    return;
+                                  }
+                                  _showEffectPreviewBottomSheet(
+                                    context,
+                                    appProvider: appProvider,
+                                    l10n: context.l10n,
+                                  );
+                                });
+                              },
+                            ),
+
+                          //
+                          // Fill Widget
+                          //
+                          if (!hasActiveTransformOverlay && appProvider.fillModel.isVisible)
+                            SizedBox(
+                              width: double.infinity,
+                              height: double.infinity,
+                              child: FillWidget(
+                                fillModel: appProvider.fillModel,
+                                onUpdate: (final GradientPoint _) {
+                                  appProvider.updateGradientFill();
+                                },
+                              ),
+                            ),
+
+                          if (!hasActiveTransformOverlay && appProvider.selectedTextObject != null) const TextEditor(),
+
+                          //
+                          // Transform overlay (perspective/skew)
+                          //
+                          if (appProvider.transformModel.isVisible)
+                            TransformWidget(
+                              model: appProvider.transformModel,
+                              canvasOffset: appProvider.canvasOffset,
+                              canvasScale: appProvider.layers.scale,
+                              onChanged: () => appProvider.repaintMainView(),
+                              onConfirm: () async {
+                                final TransformSessionSource source = appProvider.transformModel.source;
+                                final AppLocalizations l10n = AppLocalizations.of(this.context)!;
+                                await appProvider.confirmTransform();
+                                if (!mounted || source != TransformSessionSource.duplicateSelection) {
+                                  return;
+                                }
+                                final String targetLayerName = appProvider.layers.selectedLayer.name;
+                                final String duplicateMessage = l10n.duplicatedOnLayer(targetLayerName);
+                                showSnackBarIfMounted(this.context, duplicateMessage);
+                              },
+                              onCancel: () => appProvider.cancelTransform(),
+                            ),
+                        ],
+                      );
                     },
-                  ),
-                ),
-
-              if (!hasActiveTransformOverlay && appProvider.selectedTextObject != null) const TextEditor(),
-
-              //
-              // Transform overlay (perspective/skew)
-              //
-              if (appProvider.transformModel.isVisible)
-                TransformWidget(
-                  model: appProvider.transformModel,
-                  canvasOffset: appProvider.canvasOffset,
-                  canvasScale: appProvider.layers.scale,
-                  onChanged: () => appProvider.update(),
-                  onConfirm: () async {
-                    final TransformSessionSource source = appProvider.transformModel.source;
-                    await appProvider.confirmTransform();
-                    if (!mounted || source != TransformSessionSource.duplicateSelection) {
-                      return;
-                    }
-                    final String targetLayerName = appProvider.layers.selectedLayer.name;
-                    final String duplicateMessage = AppLocalizations.of(this.context)!.duplicatedOnLayer(
-                      targetLayerName,
-                    );
-                    showSnackBarIfMounted(this.context, duplicateMessage);
-                  },
-                  onCancel: () => appProvider.cancelTransform(),
-                ),
-            ],
+                  );
+                },
+              );
+            },
           );
         },
       ),
