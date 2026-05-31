@@ -387,9 +387,7 @@ class AppInteraction {
   static const double smudgeBlendStrength = 0.8;
   static const int smudgeBoundsPadding = 2;
   static const double selectionHandleSize = 20;
-  static const double rotationHandleDistance = 30.0;
-  static const double rotationHandleSize = 16.0;
-  static const double rotationHandleLineWidth = 1.5;
+  static const double selectionToolbarMargin = 50.0;
   static const double imagePlacementHandleSize = 14.0;
   static const double imagePlacementButtonSpacing = 8.0;
   static const double imagePlacementButtonSize = 36.0;

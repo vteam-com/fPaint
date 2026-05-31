@@ -202,6 +202,7 @@ Widget buildOverlayModeButton({
     contentSemantic: AppButtonContentSemantic.enabled,
     cursor: cursor,
     size: size,
+    showBorder: false,
     iconSize: iconSize,
     isSelected: isSelected,
     onTap: onTap,

@@ -640,7 +640,7 @@ void main() {
       await tester.pump();
 
       const double buttonSize = AppInteraction.imagePlacementButtonSize;
-      const double rotationHandleDistance = AppInteraction.rotationHandleDistance;
+      const double rotationHandleDistance = AppInteraction.selectionToolbarMargin;
       final Rect bounds = path.getBounds();
       final double idealTop = bounds.top - rotationHandleDistance - buttonSize / AppMath.pair;
 
