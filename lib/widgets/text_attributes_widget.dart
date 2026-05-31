@@ -23,7 +23,7 @@ class TextAttributesWidget extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final AppProvider appProvider = AppProvider.of(context, listen: true);
+    final AppProvider appProvider = AppProvider.of(context);
     final AppLocalizations l10n = context.l10n;
 
     return Column(
@@ -46,8 +46,7 @@ class TextAttributesWidget extends StatelessWidget {
                 min: 1,
                 max: AppLimits.brushSizeMax.toDouble(),
                 onChanged: (final double newValue) {
-                  appProvider.textToolState.size = newValue;
-                  appProvider.update();
+                  appProvider.setTextToolSize(newValue);
                 },
               );
             },
@@ -60,8 +59,7 @@ class TextAttributesWidget extends StatelessWidget {
                   min: 1,
                   max: AppLimits.brushSizeMax.toDouble(),
                   onChanged: (final double value) {
-                    appProvider.textToolState.size = value;
-                    appProvider.update();
+                    appProvider.setTextToolSize(value);
                   },
                 ),
         ),
@@ -100,8 +98,7 @@ class TextAttributesWidget extends StatelessWidget {
                 title: l10n.fontColor,
                 color: appProvider.textToolState.color,
                 onSelectedColor: (final Color color) {
-                  appProvider.textToolState.color = color;
-                  appProvider.update();
+                  appProvider.setTextToolColor(color);
                 },
               );
             },
@@ -111,8 +108,7 @@ class TextAttributesWidget extends StatelessWidget {
               : ColorSelector(
                   color: appProvider.textToolState.color,
                   onColorChanged: (final Color color) {
-                    appProvider.textToolState.color = color;
-                    appProvider.update();
+                    appProvider.setTextToolColor(color);
                   },
                 ),
         ),

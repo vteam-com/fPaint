@@ -62,15 +62,13 @@ void main() {
         findsOneWidget,
       );
 
-      appProvider.fillModel.mode = FillMode.linear;
-      appProvider.update();
+      appProvider.setFillMode(FillMode.linear);
       await tester.pump();
 
       expect(find.byKey(Keys.toolFillHalftoneToggle), findsOneWidget);
       expect(find.byKey(Keys.toolFillHalftoneSlider), findsNothing);
 
-      appProvider.fillModel.mode = FillMode.radial;
-      appProvider.update();
+      appProvider.setFillMode(FillMode.radial);
       await tester.pump();
 
       expect(find.byKey(Keys.toolFillHalftoneToggle), findsOneWidget);
@@ -93,8 +91,7 @@ void main() {
 
       expect(find.byKey(Keys.toolPanelHalftoneDotColor), findsNothing);
 
-      appProvider.fillModel.mode = FillMode.linear;
-      appProvider.update();
+      appProvider.setFillMode(FillMode.linear);
       await tester.pump();
 
       expect(find.byKey(Keys.toolPanelHalftoneDotColor), findsNothing);
@@ -223,6 +220,21 @@ void main() {
       expect(appProvider.selectedAction, ActionType.smudge);
       expect(find.byKey(Keys.toolBrushSizeTool), findsOneWidget);
       expect(find.byKey(Keys.toolBrushSizeButton), findsOneWidget);
+    });
+
+    testWidgets('updates tool button selection when selectedAction changes externally', (
+      final WidgetTester tester,
+    ) async {
+      await pumpToolsPanel(tester);
+
+      expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolFill)).isSelected, isTrue);
+      expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolSmudge)).isSelected, isFalse);
+
+      appProvider.selectedAction = ActionType.smudge;
+      await tester.pump();
+
+      expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolFill)).isSelected, isFalse);
+      expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolSmudge)).isSelected, isTrue);
     });
   });
 }

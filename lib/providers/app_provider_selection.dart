@@ -29,6 +29,7 @@ extension AppProviderSelection on AppProvider {
     if (selectorModel.isVisible) {
       cancelEffectPreview();
       selectorModel.clear();
+      repaintToolOptions();
       update();
       return;
     }
@@ -114,6 +115,8 @@ extension AppProviderSelection on AppProvider {
       return;
     }
 
+    final bool wasLayerModifyMode = isLayerModifyMode;
+
     cancelEffectPreview();
     selectedAction = ActionType.selector;
     selectAll();
@@ -123,6 +126,7 @@ extension AppProviderSelection on AppProvider {
     imagePlacementModel.clear();
     imagePlacementModel.commitMode = ImagePlacementCommitMode.replaceLayer;
     imagePlacementModel.layerRestoreState = restoreState;
+    notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
     await startTransform();
   }
 
@@ -306,9 +310,11 @@ extension AppProviderSelection on AppProvider {
 
   /// Commits the interactively placed image using the active placement mode.
   Future<void> confirmImagePlacement() async {
+    final bool wasLayerModifyMode = isLayerModifyMode;
     final ui.Image? sourceImage = imagePlacementModel.image;
     if (sourceImage == null) {
       imagePlacementModel.clear();
+      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
       update();
       return;
     }
@@ -336,11 +342,13 @@ extension AppProviderSelection on AppProvider {
     );
 
     imagePlacementModel.clear();
+    notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
     update();
   }
 
   /// Cancels an in-progress image placement.
   void cancelImagePlacement() {
+    final bool wasLayerModifyMode = isLayerModifyMode;
     final ImagePlacementLayerRestoreState? layerRestoreState = imagePlacementModel.layerRestoreState;
     if (imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer && layerRestoreState != null) {
       final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
@@ -357,6 +365,7 @@ extension AppProviderSelection on AppProvider {
     }
 
     imagePlacementModel.clear();
+    notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
     update();
   }
 
@@ -393,10 +402,12 @@ extension AppProviderSelection on AppProvider {
   /// Commits the current transform, erasing the original selection region
   /// and placing the warped result as a new image action.
   Future<void> confirmTransform() async {
+    final bool wasLayerModifyMode = isLayerModifyMode;
     cancelEffectPreview();
     final ui.Image? sourceImage = transformModel.sourceImage;
     if (sourceImage == null) {
       transformModel.clear();
+      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
       update();
       return;
     }
@@ -427,6 +438,7 @@ extension AppProviderSelection on AppProvider {
 
       transformModel.clear();
       imagePlacementModel.clear();
+      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
       update();
       return;
     }
@@ -446,16 +458,19 @@ extension AppProviderSelection on AppProvider {
     if (_isLayerModifySession) {
       imagePlacementModel.clear();
     }
+    notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
     update();
   }
 
   /// Cancels an in-progress transform operation.
   void cancelTransform() {
+    final bool wasLayerModifyMode = isLayerModifyMode;
     cancelEffectPreview();
 
     if (_isPreparedImageTransformSource(transformModel.source)) {
       transformModel.clear();
       imagePlacementModel.clear();
+      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
       update();
       return;
     }
@@ -464,6 +479,7 @@ extension AppProviderSelection on AppProvider {
       selectorModel.clear();
       transformModel.clear();
       imagePlacementModel.clear();
+      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
       update();
       return;
     }
@@ -472,9 +488,7 @@ extension AppProviderSelection on AppProvider {
     update();
   }
 
-  bool get _isLayerModifySession =>
-      imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&
-      imagePlacementModel.layerRestoreState != null;
+  bool get _isLayerModifySession => isLayerModifyMode;
 
   bool _isPreparedImageTransformSource(final TransformSessionSource source) {
     return source == TransformSessionSource.duplicateSelection || source == TransformSessionSource.clipboardPaste;
@@ -641,12 +655,14 @@ extension AppProviderSelection on AppProvider {
       if (isClosed) {
         selectorModel.applyMath();
       }
+      repaintToolOptions();
       update();
       return;
     }
 
     selectorModel.isDrawing = true;
     selectorModel.addP1(position);
+    repaintToolOptions();
     update();
   }
 
@@ -679,6 +695,7 @@ extension AppProviderSelection on AppProvider {
   void selectorCreationEnd() {
     if (selectorModel.mode == SelectorMode.wand) {
       selectorModel.isDrawing = false;
+      repaintToolOptions();
       update();
       return;
     }
@@ -689,6 +706,7 @@ extension AppProviderSelection on AppProvider {
 
     selectorModel.isDrawing = false;
     selectorModel.applyMath();
+    repaintToolOptions();
     update();
   }
 
@@ -714,6 +732,7 @@ extension AppProviderSelection on AppProvider {
     selectorModel.path2 = null;
     selectorModel.points.clear();
     selectorModel.math = SelectorMath.replace;
+    repaintToolOptions();
     update();
   }
 
@@ -773,6 +792,7 @@ extension AppProviderSelection on AppProvider {
         }
         selectorModel.isDrawing = false;
         selectorModel.applyMath();
+        repaintToolOptions();
         update();
       }
     } finally {
@@ -944,6 +964,7 @@ extension AppProviderSelection on AppProvider {
         }
 
         selectorModel.clear();
+        repaintToolOptions();
         update();
       },
       backward: () {

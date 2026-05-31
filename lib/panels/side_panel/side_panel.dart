@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/panels/side_panel/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -67,30 +66,36 @@ class _SidePanelState extends State<SidePanel> {
 
   @override
   Widget build(final BuildContext context) {
-    final AppProvider appProvider = AppProvider.of(context, listen: true);
-    if (_isModifyMode(appProvider)) {
-      return _buildModifyModePanel(context, appProvider);
-    }
+    final AppProvider appProvider = AppProvider.of(context);
 
-    return DecoratedBox(
-      decoration: const BoxDecoration(color: AppColors.shellChromeBackground),
-      child: MultiSplitViewTheme(
-        data: MultiSplitViewThemeData(
-          dividerPainter: DividerPainters.grooved1(
-            animationEnabled: true,
-            backgroundColor: AppColors.shellChromeBackground,
-            highlightedBackgroundColor: AppColors.shellChromeDividerHighlight,
-            color: AppColors.shellChromeDivider,
-            thickness: AppStroke.divider,
-            highlightedThickness: AppStroke.dividerHighlighted,
-            strokeCap: StrokeCap.round,
+    return ListenableBuilder(
+      listenable: appProvider.layerModifyModeListenable,
+      builder: (final BuildContext _, final Widget? _) {
+        if (_isModifyMode(appProvider)) {
+          return _buildModifyModePanel(context, appProvider);
+        }
+
+        return DecoratedBox(
+          decoration: const BoxDecoration(color: AppColors.shellChromeBackground),
+          child: MultiSplitViewTheme(
+            data: MultiSplitViewThemeData(
+              dividerPainter: DividerPainters.grooved1(
+                animationEnabled: true,
+                backgroundColor: AppColors.shellChromeBackground,
+                highlightedBackgroundColor: AppColors.shellChromeDividerHighlight,
+                color: AppColors.shellChromeDivider,
+                thickness: AppStroke.divider,
+                highlightedThickness: AppStroke.dividerHighlighted,
+                strokeCap: StrokeCap.round,
+              ),
+            ),
+            child: MultiSplitView(
+              controller: _splitController,
+              axis: Axis.vertical,
+            ),
           ),
-        ),
-        child: MultiSplitView(
-          controller: _splitController,
-          axis: Axis.vertical,
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -154,8 +159,7 @@ class _SidePanelState extends State<SidePanel> {
   }
 
   bool _isModifyMode(final AppProvider appProvider) {
-    return appProvider.imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&
-        appProvider.imagePlacementModel.layerRestoreState != null;
+    return appProvider.isLayerModifyMode;
   }
 
   /// Rebuilds the widget when the split controller changes.

@@ -26,12 +26,13 @@ class LayerProvider extends ChangeNotifier {
     required this.onThumbnailChanged,
     this.parentGroupName = '',
     this.id = '',
-    this.isSelected = false,
+    final bool isSelected = false,
     final bool isVisible = true,
     final bool isLocked = false,
     final double opacity = 1.0,
   }) {
     _size = size;
+    _isSelected = isSelected;
     _isVisible = isVisible;
     _isLocked = isLocked;
     _opacity = opacity;
@@ -76,8 +77,19 @@ class LayerProvider extends ChangeNotifier {
   /// The stack of user actions that have been undone.
   final List<UserActionDrawing> redoStack = <UserActionDrawing>[];
 
-  /// Whether the layer is selected.
-  bool isSelected;
+  bool _isSelected = false;
+
+  /// Gets whether the layer is selected.
+  bool get isSelected => _isSelected;
+
+  /// Sets whether the layer is selected.
+  set isSelected(final bool value) {
+    if (_isSelected == value) {
+      return;
+    }
+    _isSelected = value;
+    notifyListeners();
+  }
 
   ///---------------------------------------
   // Edit lock

@@ -139,6 +139,53 @@ void main() {
       expect(mainViewNotifications, 1);
     });
 
+    test('selectedActionRepaintListenable only notifies when the tool changes', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+      int providerNotifications = 0;
+      int selectedActionNotifications = 0;
+
+      appProvider.addListener(() {
+        providerNotifications++;
+      });
+      appProvider.selectedActionRepaintListenable.addListener(() {
+        selectedActionNotifications++;
+      });
+
+      appProvider.brushColor = Colors.red;
+
+      expect(providerNotifications, 1);
+      expect(selectedActionNotifications, 0);
+
+      providerNotifications = 0;
+      appProvider.selectedAction = ActionType.line;
+
+      expect(providerNotifications, 1);
+      expect(selectedActionNotifications, 1);
+    });
+
+    test('toolOptionsRepaintListenable ignores main-view repaints but tracks tool option changes', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+      int providerNotifications = 0;
+      int toolOptionsNotifications = 0;
+
+      appProvider.addListener(() {
+        providerNotifications++;
+      });
+      appProvider.toolOptionsRepaintListenable.addListener(() {
+        toolOptionsNotifications++;
+      });
+
+      appProvider.repaintMainView();
+
+      expect(providerNotifications, 0);
+      expect(toolOptionsNotifications, 0);
+
+      appProvider.brushColor = Colors.red;
+
+      expect(providerNotifications, 1);
+      expect(toolOptionsNotifications, 1);
+    });
+
     test('selector drag preview only repaints the main view', () {
       final AppProvider appProvider = AppProvider(preferences: AppPreferences());
       int providerNotifications = 0;

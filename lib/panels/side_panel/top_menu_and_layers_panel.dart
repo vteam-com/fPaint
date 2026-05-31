@@ -4,7 +4,6 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:provider/provider.dart';
 
 /// A widget that displays the layers panel in the top split of the side panel.
 class TopMenuAndLayersPanel extends StatelessWidget {
@@ -12,17 +11,17 @@ class TopMenuAndLayersPanel extends StatelessWidget {
 
   @override
   Widget build(final BuildContext context) {
-    final ShellProvider shellProvider = ShellProvider.of(context, listen: true);
+    final ShellProvider shellProvider = ShellProvider.of(context);
+    final LayersProvider layers = LayersProvider.of(context);
 
-    return Column(
-      children: <Widget>[
-        Consumer<LayersProvider>(
-          builder:
-              (
-                final BuildContext context2,
-                final LayersProvider layers,
-                final Widget? _,
-              ) {
+    return ListenableBuilder(
+      listenable: shellProvider.sidePanelExpandedListenable,
+      builder: (final BuildContext _, final Widget? _) {
+        return Column(
+          children: <Widget>[
+            ListenableBuilder(
+              listenable: layers.layerListStructureListenable,
+              builder: (final BuildContext context2, final Widget? _) {
                 return Expanded(
                   child: _ReorderableLayerList(
                     layers: layers,
@@ -31,8 +30,10 @@ class TopMenuAndLayersPanel extends StatelessWidget {
                   ),
                 );
               },
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -59,16 +60,21 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
       itemCount: widget.layers.length,
       itemBuilder: (final BuildContext _, final int index) {
         final LayerProvider layer = widget.layers.get(index);
-        final Widget child = GestureDetector(
-          onTap: () => widget.layers.selectedLayerIndex = index,
-          onDoubleTap: () => widget.layers.layersToggleVisibility(layer),
-          child: LayerSelector(
-            context: widget.parentContext,
-            layer: layer,
-            minimal: !widget.shellProvider.isSidePanelExpanded,
-            isSelected: widget.layers.selectedLayerIndex == index,
-            allowRemoveLayer: index != widget.layers.length - 1,
-          ),
+        final Widget child = ListenableBuilder(
+          listenable: layer,
+          builder: (final BuildContext _, final Widget? _) {
+            return GestureDetector(
+              onTap: () => widget.layers.selectedLayerIndex = index,
+              onDoubleTap: () => widget.layers.layersToggleVisibility(layer),
+              child: LayerSelector(
+                context: widget.parentContext,
+                layer: layer,
+                minimal: !widget.shellProvider.isSidePanelExpanded,
+                isSelected: layer.isSelected,
+                allowRemoveLayer: index != widget.layers.length - 1,
+              ),
+            );
+          },
         );
 
         final Widget dropTarget = DragTarget<int>(

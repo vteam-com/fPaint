@@ -51,7 +51,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: false);
-    final AppPreferences appPreferences = AppPreferences.of(context, listen: true);
+    final AppPreferences appPreferences = AppPreferences.of(context);
     final ShellProvider shellProvider = ShellProvider.of(context);
 
     return Listener(
@@ -449,13 +449,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           // Text selection is handled fully on pointer down; release active pointer
           // in case the subsequent pointer up is consumed by the modal dialog.
           _activePointerId = -1;
-          appProvider.textToolState.size = selectedText.size;
-          appProvider.textToolState.color = selectedText.color;
-          appProvider.textToolState.fontWeight = selectedText.fontWeight;
-          appProvider.textToolState.fontStyle = selectedText.fontStyle;
-          appProvider.textToolState.textAlign = selectedText.textAlign;
+          appProvider.adoptTextToolStateFromObject(selectedText);
           appProvider.selectedTextObject = selectedText;
-          appProvider.update();
           return;
         }
 

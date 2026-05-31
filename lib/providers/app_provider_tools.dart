@@ -194,6 +194,7 @@ extension AppProviderTools on AppProvider {
 
   /// Updates the gradient fill.
   void updateGradientFill() {
+    repaintToolOptions();
     if (fillModel.isVisible) {
       debounceGradientFill.run(
         () {

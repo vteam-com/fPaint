@@ -26,7 +26,7 @@ class MainScreen extends StatelessWidget {
   Widget build(final BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     final AppPreferences appPreferences = AppPreferences.of(context, listen: true);
-    final AppProvider appProvider = AppProvider.of(context, listen: true);
+    final AppProvider appProvider = AppProvider.of(context);
 
     if (appPreferences.isLoaded == false) {
       return const AppScaffold(
@@ -41,10 +41,11 @@ class MainScreen extends StatelessWidget {
       );
     }
 
-    final ShellProvider shellProvider = ShellProvider.of(context, listen: true);
-    final ShellMode shellMode = shellProvider.shellMode;
+    final ShellProvider shellProvider = ShellProvider.of(context);
 
-    shellProvider.deviceSizeSmall = MediaQuery.of(context).size.width < AppLayout.desktopBreakpoint;
+    shellProvider.syncDeviceSizeSmall(
+      MediaQuery.of(context).size.width < AppLayout.desktopBreakpoint,
+    );
 
     return DropTarget(
       onDragDone: (final DropDoneDetails details) {
@@ -54,35 +55,47 @@ class MainScreen extends StatelessWidget {
         backgroundColor: AppColors.shellChromeBackground,
         body: Column(
           children: <Widget>[
-            ShellTopBar(
-              shellProvider: shellProvider,
-              appProvider: appProvider,
+            ListenableBuilder(
+              listenable: shellProvider,
+              builder: (final BuildContext _, final Widget? _) {
+                return ShellTopBar(
+                  shellProvider: shellProvider,
+                  appProvider: appProvider,
+                );
+              },
             ),
             Expanded(
-              child: shellMode == ShellMode.hidden
-                  ? _buildMainContent(
-                      context,
-                      shellProvider,
-                      appPreferences,
-                    )
-                  : MultiSplitViewTheme(
-                      data: MultiSplitViewThemeData(
-                        dividerPainter: DividerPainters.grooved1(
-                          animationEnabled: true,
-                          backgroundColor: AppColors.shellChromeBackground,
-                          highlightedBackgroundColor: AppColors.shellChromeDividerHighlight,
-                          color: AppColors.shellChromeDivider,
-                          thickness: AppStroke.divider,
-                          highlightedThickness: AppStroke.dividerHighlighted,
-                          strokeCap: StrokeCap.round,
-                        ),
-                      ),
-                      child: _buildMainContent(
-                        context,
-                        shellProvider,
-                        appPreferences,
-                      ),
-                    ),
+              child: ListenableBuilder(
+                listenable: shellProvider.mainScreenLayoutListenable,
+                builder: (final BuildContext _, final Widget? _) {
+                  final ShellMode shellMode = shellProvider.shellMode;
+
+                  return shellMode == ShellMode.hidden
+                      ? _buildMainContent(
+                          context,
+                          shellProvider,
+                          appPreferences,
+                        )
+                      : MultiSplitViewTheme(
+                          data: MultiSplitViewThemeData(
+                            dividerPainter: DividerPainters.grooved1(
+                              animationEnabled: true,
+                              backgroundColor: AppColors.shellChromeBackground,
+                              highlightedBackgroundColor: AppColors.shellChromeDividerHighlight,
+                              color: AppColors.shellChromeDivider,
+                              thickness: AppStroke.divider,
+                              highlightedThickness: AppStroke.dividerHighlighted,
+                              strokeCap: StrokeCap.round,
+                            ),
+                          ),
+                          child: _buildMainContent(
+                            context,
+                            shellProvider,
+                            appPreferences,
+                          ),
+                        );
+                },
+              ),
             ),
           ],
         ),
@@ -156,7 +169,6 @@ class MainScreen extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 shellProvider.showMenu = false;
-                shellProvider.update();
               },
               child: Container(
                 color: AppColors.black.withAlpha(AppLayout.overlayAlpha),

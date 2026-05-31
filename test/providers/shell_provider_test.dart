@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 
 void main() {
@@ -68,6 +69,34 @@ void main() {
       provider.shellMode = ShellMode.full;
       expect(provider.shellMode, ShellMode.full);
     });
+
+    test('mainScreenLayoutListenable ignores non-layout shell updates', () {
+      int providerNotifications = 0;
+      int mainScreenLayoutNotifications = 0;
+
+      provider.addListener(() => providerNotifications++);
+      provider.mainScreenLayoutListenable.addListener(() => mainScreenLayoutNotifications++);
+
+      provider.requestCanvasFit();
+
+      expect(providerNotifications, 1);
+      expect(mainScreenLayoutNotifications, 0);
+
+      provider.interactionInputModality = InteractionInputModality.touch;
+
+      expect(providerNotifications, 2);
+      expect(mainScreenLayoutNotifications, 0);
+
+      provider.deviceSizeSmall = true;
+
+      expect(providerNotifications, 3);
+      expect(mainScreenLayoutNotifications, 1);
+
+      provider.shellMode = ShellMode.hidden;
+
+      expect(providerNotifications, 4);
+      expect(mainScreenLayoutNotifications, 2);
+    });
   });
 
   group('isSidePanelExpanded', () {
@@ -86,6 +115,24 @@ void main() {
       provider.isSidePanelExpanded = true;
       expect(provider.isSidePanelExpanded, isTrue);
       expect(notifyCount, 1);
+    });
+
+    test('sidePanelExpandedListenable ignores unrelated shell updates', () {
+      int providerNotifications = 0;
+      int sidePanelExpandedNotifications = 0;
+
+      provider.addListener(() => providerNotifications++);
+      provider.sidePanelExpandedListenable.addListener(() => sidePanelExpandedNotifications++);
+
+      provider.showMenu = true;
+
+      expect(providerNotifications, 1);
+      expect(sidePanelExpandedNotifications, 0);
+
+      provider.isSidePanelExpanded = false;
+
+      expect(providerNotifications, 2);
+      expect(sidePanelExpandedNotifications, 1);
     });
   });
 

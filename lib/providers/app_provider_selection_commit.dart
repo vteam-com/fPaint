@@ -39,6 +39,7 @@ void restoreSelectionState(
     ..clear()
     ..addAll(selectionSnapshot.points);
   appProvider.selectorModel.math = selectionSnapshot.math;
+  appProvider.repaintToolOptions();
 }
 
 /// Replaces the active selection with a rectangle matching [bounds].
@@ -49,6 +50,7 @@ void selectRectOnCanvas(final AppProvider appProvider, final Rect bounds) {
   appProvider.selectorModel.path2 = null;
   appProvider.selectorModel.points.clear();
   appProvider.selectorModel.math = SelectorMath.replace;
+  appProvider.repaintToolOptions();
 }
 
 /// Restores [targetLayer] from [restoreState] after an image-placement undo.

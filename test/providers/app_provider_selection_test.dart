@@ -215,6 +215,36 @@ void main() {
   });
 
   group('modifySelectedLayer', () {
+    test('layerModifyModeListenable only notifies when modify mode enters or exits', () async {
+      int providerNotifications = 0;
+      int layerModifyModeNotifications = 0;
+
+      appProvider.addListener(() => providerNotifications++);
+      appProvider.layerModifyModeListenable.addListener(() => layerModifyModeNotifications++);
+
+      appProvider.brushColor = const Color(0xFF00FF00);
+
+      expect(providerNotifications, 1);
+      expect(layerModifyModeNotifications, 0);
+
+      providerNotifications = 0;
+      await appProvider.modifySelectedLayer();
+
+      expect(appProvider.isLayerModifyMode, isTrue);
+      expect(layerModifyModeNotifications, 1);
+
+      providerNotifications = 0;
+      appProvider.brushColor = const Color(0xFFFF0000);
+
+      expect(providerNotifications, 1);
+      expect(layerModifyModeNotifications, 1);
+
+      appProvider.cancelLayerModifySession();
+
+      expect(appProvider.isLayerModifyMode, isFalse);
+      expect(layerModifyModeNotifications, 2);
+    });
+
     test('does not enter modify mode when the selected layer is locked', () async {
       appProvider.layers.selectedLayer.isLocked = true;
 

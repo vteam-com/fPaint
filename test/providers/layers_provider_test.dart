@@ -210,6 +210,47 @@ void main() {
       layersProvider.selectedLayerIndex = layersProvider.length + 5; // Invalid
       expect(layersProvider.selectedLayerIndex, initialIndex);
     });
+
+    test('layerListStructureListenable only notifies on structure changes', () {
+      layersProvider.addTop(name: 'Layer2');
+      int structureNotifications = 0;
+
+      layersProvider.layerListStructureListenable.addListener(() {
+        structureNotifications++;
+      });
+
+      layersProvider.selectedLayerIndex = 1;
+
+      expect(structureNotifications, 0);
+
+      layersProvider.addTop(name: 'Layer3');
+
+      expect(structureNotifications, 1);
+    });
+
+    test('topColorsListenable only notifies on top-color changes', () async {
+      int topColorNotifications = 0;
+
+      layersProvider.topColorsListenable.addListener(() {
+        topColorNotifications++;
+      });
+
+      layersProvider.selectedLayerIndex = 0;
+
+      expect(topColorNotifications, 0);
+
+      layersProvider.update();
+
+      expect(topColorNotifications, 1);
+
+      layersProvider.get(0).topColorsUsed = <ColorUsage>[
+        ColorUsage(Colors.red, 1),
+      ];
+      layersProvider.evaluateTopColor();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(topColorNotifications, 2);
+    });
   });
 
   group('Layer Properties', () {

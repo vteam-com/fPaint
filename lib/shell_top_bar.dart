@@ -150,7 +150,6 @@ void _cycleDesktopShellState(final ShellProvider shellProvider) {
   }
 
   shellProvider.shellMode = ShellMode.hidden;
-  shellProvider.update();
 }
 
 /// Builds the responsive middle strip for the top toolbar.
@@ -767,12 +766,7 @@ Widget _buildCenterAndDimensionButton(
     key: Keys.floatActionCenter,
     onPressed: () {
       Future<void>.microtask(() {
-        shellProvider.canvasPlacement = CanvasAutoPlacement.fit;
-        appProvider.update();
-        // Its still unclear why but this is needed to update the canvas and the Selectors/Fill widget correctly
-        Future<void>.delayed(const Duration(milliseconds: AppLimits.percentMax), () {
-          appProvider.update();
-        });
+        shellProvider.requestCanvasFit();
       });
     },
     child: Center(
@@ -816,5 +810,4 @@ void _toggleSmallScreenShellState(final ShellProvider shellProvider) {
     default:
       shellProvider.shellMode = ShellMode.hidden;
   }
-  shellProvider.update();
 }

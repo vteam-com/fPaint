@@ -179,22 +179,23 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
           //----------------------------
           // Top colors used in the image
-          TopColors(
-            colorUsages: layers.topColors,
-            onRefresh: () {
-              setState(() {
-                layers.evaluateTopColor();
-              });
+          ListenableBuilder(
+            listenable: layers.topColorsListenable,
+            builder: (final BuildContext _, final Widget? _) {
+              return TopColors(
+                colorUsages: layers.topColors,
+                onRefresh: layers.evaluateTopColor,
+                onColorPicked: (final Color color) {
+                  setState(() {
+                    _currentColor = color;
+                    _hexController.text = colorToHexString(color);
+                  });
+                },
+                showHeader: false,
+                autoRefreshOnIdle: true,
+                refreshRevision: layers.topColorsRefreshRevision,
+              );
             },
-            onColorPicked: (final Color color) {
-              setState(() {
-                _currentColor = color;
-                _hexController.text = colorToHexString(color);
-              });
-            },
-            showHeader: false,
-            autoRefreshOnIdle: true,
-            refreshRevision: layers.topColorsRefreshRevision,
           ),
 
           //----------------------------

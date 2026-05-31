@@ -9,6 +9,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/effect_preview_model.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/image_placement_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
@@ -43,7 +44,10 @@ class AppProvider extends ChangeNotifier {
   final AppPreferences preferences;
 
   final ChangeNotifier _mainViewRepaintNotifier = ChangeNotifier();
+  final ChangeNotifier _layerModifyModeNotifier = ChangeNotifier();
+  final ChangeNotifier _toolOptionsNotifier = ChangeNotifier();
   final ChangeNotifier _viewportRepaintNotifier = ChangeNotifier();
+  final ChangeNotifier _selectedActionNotifier = ChangeNotifier();
 
   void _initCanvas() {
     layers.clear();
@@ -94,14 +98,31 @@ class AppProvider extends ChangeNotifier {
   /// Listenable used to repaint the main canvas and overlay surface only.
   Listenable get mainViewRepaintListenable => _mainViewRepaintNotifier;
 
+  /// Listenable used to rebuild tool-option affordances without waking the full app shell.
+  Listenable get toolOptionsRepaintListenable => _toolOptionsNotifier;
+
+  /// Listenable used to rebuild side-panel mode chrome only when layer-modify mode changes.
+  Listenable get layerModifyModeListenable => _layerModifyModeNotifier;
+
   /// Listenable used to repaint viewport-driven UI such as zoom and pan affordances.
   Listenable get viewportRepaintListenable => _viewportRepaintNotifier;
+
+  /// Listenable used to rebuild tool-selection affordances only when the tool changes.
+  Listenable get selectedActionRepaintListenable => _selectedActionNotifier;
+
+  /// Gets whether layer replacement modify mode is active.
+  bool get isLayerModifyMode =>
+      imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&
+      imagePlacementModel.layerRestoreState != null;
 
   @override
   void dispose() {
     preferences.removeListener(_handlePreferencesChanged);
     _mainViewRepaintNotifier.dispose();
+    _layerModifyModeNotifier.dispose();
+    _toolOptionsNotifier.dispose();
     _viewportRepaintNotifier.dispose();
+    _selectedActionNotifier.dispose();
     super.dispose();
   }
 
@@ -112,6 +133,23 @@ class AppProvider extends ChangeNotifier {
   /// Rebuilds the main canvas and overlay surface without notifying the full app shell.
   void repaintMainView() {
     _mainViewRepaintNotifier.notifyListeners();
+  }
+
+  /// Rebuilds tool-option UI without notifying the full app shell.
+  void repaintToolOptions() {
+    _toolOptionsNotifier.notifyListeners();
+  }
+
+  /// Rebuilds side-panel mode chrome without notifying the full app shell.
+  void repaintLayerModifyMode() {
+    _layerModifyModeNotifier.notifyListeners();
+  }
+
+  /// Rebuilds side-panel mode chrome only when layer-modify mode toggles.
+  void notifyLayerModifyModeChanged({required final bool wasActive}) {
+    if (wasActive != isLayerModifyMode) {
+      repaintLayerModifyMode();
+    }
   }
 
   /// Rebuilds viewport-dependent UI without notifying the full app shell.
@@ -179,8 +217,10 @@ class AppProvider extends ChangeNotifier {
 
   /// Sets the selected action.
   set selectedAction(final ActionType value) {
+    final bool selectedActionChanged = value != _selectedAction;
+
     // Switching tools exits eyedropper mode so pointer interactions follow the new tool.
-    if (value != _selectedAction) {
+    if (selectedActionChanged) {
       eyeDropPositionForBrush = null;
       eyeDropPositionForFill = null;
     }
@@ -204,6 +244,12 @@ class AppProvider extends ChangeNotifier {
       cachedWandSourceWidth = AppMath.zero;
       cachedWandSourceHeight = AppMath.zero;
     }
+
+    if (selectedActionChanged) {
+      _selectedActionNotifier.notifyListeners();
+      repaintToolOptions();
+    }
+
     update();
   }
 
@@ -219,6 +265,7 @@ class AppProvider extends ChangeNotifier {
   /// Sets the brush size.
   set brushSize(final double value) {
     preferences.setBrushSize(value);
+    repaintToolOptions();
     update();
   }
 
@@ -232,6 +279,7 @@ class AppProvider extends ChangeNotifier {
   /// Sets the brush style.
   set brushStyle(final BrushStyle value) {
     _brushStyle = value;
+    repaintToolOptions();
     update();
   }
 
@@ -244,6 +292,7 @@ class AppProvider extends ChangeNotifier {
   /// Sets the brush color.
   set brushColor(final Color value) {
     preferences.setBrushColor(value);
+    repaintToolOptions();
     update();
   }
 
@@ -256,6 +305,7 @@ class AppProvider extends ChangeNotifier {
   /// Sets the fill color.
   set fillColor(final Color value) {
     preferences.setFillColor(value);
+    repaintToolOptions();
     update();
   }
 
@@ -269,6 +319,7 @@ class AppProvider extends ChangeNotifier {
   /// Sets the tolerance.
   set tolerance(final int value) {
     _tolerance = max(1, min(AppLimits.percentMax, value));
+    repaintToolOptions();
     update();
   }
 
@@ -291,6 +342,7 @@ class AppProvider extends ChangeNotifier {
     textToolState.fontWeight = value.fontWeight;
     textToolState.fontStyle = value.fontStyle;
     textToolState.textAlign = value.textAlign;
+    repaintToolOptions();
     update();
   }
 
@@ -300,12 +352,35 @@ class AppProvider extends ChangeNotifier {
   }
 
   //-------------------------
+  Offset? _eyeDropPositionForBrush;
+
   /// The eye drop position for the brush.
-  Offset? eyeDropPositionForBrush;
+  Offset? get eyeDropPositionForBrush => _eyeDropPositionForBrush;
+
+  /// Sets the eye drop position for the brush.
+  set eyeDropPositionForBrush(final Offset? value) {
+    final bool activeChanged = (_eyeDropPositionForBrush == null) != (value == null);
+    _eyeDropPositionForBrush = value;
+    if (activeChanged) {
+      repaintToolOptions();
+    }
+  }
 
   //-------------------------
   /// The eye drop position for the fill.
-  Offset? eyeDropPositionForFill;
+  Offset? _eyeDropPositionForFill;
+
+  /// Gets the eye drop position for the fill.
+  Offset? get eyeDropPositionForFill => _eyeDropPositionForFill;
+
+  /// Sets the eye drop position for the fill.
+  set eyeDropPositionForFill(final Offset? value) {
+    final bool activeChanged = (_eyeDropPositionForFill == null) != (value == null);
+    _eyeDropPositionForFill = value;
+    if (activeChanged) {
+      repaintToolOptions();
+    }
+  }
 
   //-------------------------
   // Selector
@@ -351,6 +426,55 @@ class AppProvider extends ChangeNotifier {
 
   /// The selected text object.
   TextObject? selectedTextObject;
+
+  /// Sets the active fill mode and rebuilds tool options.
+  void setFillMode(final FillMode value) {
+    fillModel.mode = value;
+    repaintToolOptions();
+    update();
+  }
+
+  /// Sets whether flood fill should render as a halftone pattern.
+  void setFillHalftoneEnabled(final bool value) {
+    fillModel.halftoneEnabled = value;
+    repaintToolOptions();
+    update();
+  }
+
+  /// Sets the maximum halftone dot size percentage.
+  void setFillHalftoneMaxDotSizePercent(final int value) {
+    fillModel.halftoneMaxDotSizePercent = value;
+    repaintToolOptions();
+    update();
+  }
+
+  /// Sets the active selector mode and rebuilds tool options.
+  void setSelectorMode(final SelectorMode value) {
+    selectorModel.mode = value;
+    repaintToolOptions();
+    update();
+  }
+
+  /// Sets the active selector math mode and rebuilds tool options.
+  void setSelectorMath(final SelectorMath value) {
+    selectorModel.math = value;
+    repaintToolOptions();
+    update();
+  }
+
+  /// Sets the shared text-tool font size.
+  void setTextToolSize(final double value) {
+    textToolState.size = value;
+    repaintToolOptions();
+    update();
+  }
+
+  /// Sets the shared text-tool color.
+  void setTextToolColor(final Color value) {
+    textToolState.color = value;
+    repaintToolOptions();
+    update();
+  }
 
   //=============================================================================
   /// Notifies all listeners that the model has been updated.
