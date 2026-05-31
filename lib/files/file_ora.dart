@@ -10,6 +10,7 @@ import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
+import 'package:fpaint/providers/layer_provider_storage_export.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:logging/logging.dart';
 import 'package:xml/xml.dart';
@@ -50,6 +51,7 @@ const String _errorOraReadBytes = 'Failed to read ORA bytes.';
 const String _errorOraMissingStackXml = 'stack.xml not found in ORA file.';
 const String _errorOraMissingImageElement = 'image element not found in ORA stack.xml.';
 const String _errorOraMissingDimensions = 'ORA image dimensions are missing.';
+const String _errorOraLayerEncodingFailed = 'Failed to encode ORA layer PNG.';
 
 const List<String> _oraPreviewEntries = <String>[
   _oraThumbnailEntry,
@@ -60,9 +62,40 @@ const List<String> _oraPreviewEntries = <String>[
 /// Creates an [ArchiveFile] with a fixed timestamp so archives are
 /// byte-identical across runs when the payload has not changed.
 ArchiveFile _neutralArchiveFile(final String name, final List<int> data) {
-  final ArchiveFile file = ArchiveFile(name, data.length, data);
+  final ArchiveFile file = ArchiveFile.bytes(name, data);
   file.lastModTime = 0;
   return file;
+}
+
+/// Creates a deterministic [ArchiveFile] stored without ZIP recompression.
+ArchiveFile _storedNeutralArchiveFile(final String name, final List<int> data) {
+  final ArchiveFile file = _neutralArchiveFile(name, data);
+  file.compression = CompressionType.none;
+  return file;
+}
+
+/// Renders [layer], crops away transparent margins, and returns PNG bytes plus
+/// the cropped image's original canvas offset for ORA `x`/`y` metadata.
+Future<({Uint8List bytes, ui.Offset offset})> _prepareOraLayerExport({
+  required final LayerProvider layer,
+}) async {
+  final ui.Rect exportBounds = layer.estimateContentBoundsForStorage();
+  final ui.Image layerImage = layer.toImageForStorageBounds(exportBounds);
+  try {
+    final ByteData? byteData = await layerImage.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+    if (byteData == null) {
+      throw const OraFileException(_errorOraLayerEncodingFailed);
+    }
+
+    return (
+      bytes: byteData.buffer.asUint8List(),
+      offset: exportBounds.topLeft,
+    );
+  } finally {
+    layerImage.dispose();
+  }
 }
 
 // SVG composite operation identifiers used in the ORA format
@@ -501,7 +534,7 @@ Future<List<int>> createOraArchive(final LayersProvider layers) async {
 
   // Add uncompressed mimetype
   archive.addFile(
-    _neutralArchiveFile(
+    _storedNeutralArchiveFile(
       _oraMimetypeEntry,
       utf8.encode('image/openraster'),
     ),
@@ -514,16 +547,14 @@ Future<List<int>> createOraArchive(final LayersProvider layers) async {
   for (int i = 0; i < layers.length; i++) {
     final LayerProvider layer = layers.get(i);
     final String imageName = 'data/layer-$i.png';
-
-    // Save layer image as PNG
-    final ui.Image imageLayer = layer.toImageForStorage(layers.size);
-
-    final ByteData? bytes = await imageLayer.toByteData(format: ui.ImageByteFormat.png);
+    final ({Uint8List bytes, ui.Offset offset}) exportedLayer = await _prepareOraLayerExport(
+      layer: layer,
+    );
 
     archive.addFile(
-      _neutralArchiveFile(
+      _storedNeutralArchiveFile(
         imageName,
-        bytes!.buffer.asUint8List(),
+        exportedLayer.bytes,
       ),
     );
 
@@ -535,8 +566,8 @@ Future<List<int>> createOraArchive(final LayersProvider layers) async {
       _oraAttrCompositeOp: _getOraCompositeOpFromBlendMode(layer.blendMode),
       _oraAttrEditLocked: layer.isLocked,
       _oraAttrSrc: imageName,
-      _oraAttrX: 0,
-      _oraAttrY: 0,
+      _oraAttrX: exportedLayer.offset.dx.toInt(),
+      _oraAttrY: exportedLayer.offset.dy.toInt(),
     });
   }
 
@@ -621,7 +652,7 @@ Future<void> _addOraPreviewFiles({
 
   final Uint8List mergedPngBytes = mergedPngData.buffer.asUint8List();
   archive.addFile(
-    _neutralArchiveFile(
+    _storedNeutralArchiveFile(
       _oraMergedImageEntry,
       mergedPngBytes,
     ),
@@ -631,18 +662,26 @@ Future<void> _addOraPreviewFiles({
     mergedPngBytes,
     targetHeight: AppLayout.thumbnailMaxHeight.toInt(),
   );
-  final ui.FrameInfo thumbnailFrame = await thumbnailCodec.getNextFrame();
-  final ByteData? thumbnailPngData = await thumbnailFrame.image.toByteData(format: ui.ImageByteFormat.png);
-  if (thumbnailPngData == null) {
-    return;
-  }
+  try {
+    final ui.FrameInfo thumbnailFrame = await thumbnailCodec.getNextFrame();
+    try {
+      final ByteData? thumbnailPngData = await thumbnailFrame.image.toByteData(format: ui.ImageByteFormat.png);
+      if (thumbnailPngData == null) {
+        return;
+      }
 
-  archive.addFile(
-    _neutralArchiveFile(
-      _oraThumbnailEntry,
-      thumbnailPngData.buffer.asUint8List(),
-    ),
-  );
+      archive.addFile(
+        _storedNeutralArchiveFile(
+          _oraThumbnailEntry,
+          thumbnailPngData.buffer.asUint8List(),
+        ),
+      );
+    } finally {
+      thumbnailFrame.image.dispose();
+    }
+  } finally {
+    thumbnailCodec.dispose();
+  }
 }
 
 /// Builds the layers for the specified file or canvas.
