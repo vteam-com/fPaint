@@ -14,8 +14,8 @@ Future<Uint8List> preparePngBytes(final LayersProvider layers) async {
 
 /// Captures the current canvas and converts to JPEG-encoded bytes.
 Future<Uint8List> prepareJpegBytes(final LayersProvider layers) async {
-  final Uint8List imageBytes = await layers.capturePainterToImageBytes();
-  return convertToJpg(imageBytes);
+  final ui.Image image = await layers.capturePainterToImage();
+  return convertToJpg(image);
 }
 
 /// Creates an ORA archive from the current layers.

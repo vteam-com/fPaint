@@ -1856,8 +1856,8 @@ Future<void> saveUnitTestJpeg(
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   await tester.runAsync(() async {
-    final Uint8List pngBytes = await layersProvider.capturePainterToImageBytes();
-    final Uint8List jpgBytes = await convertToJpg(pngBytes);
+    final ui.Image image = await layersProvider.capturePainterToImage();
+    final Uint8List jpgBytes = await convertToJpg(image);
     final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
     await outputDir.create(recursive: true);
     final File outputFile = File('${outputDir.path}/$filename');

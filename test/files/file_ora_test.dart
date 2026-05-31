@@ -1,12 +1,13 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+
 import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
-
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:xml/xml.dart';
 
@@ -76,6 +77,17 @@ void main() {
     final ArchiveFile mimetypeFile = archive.files.firstWhere((final ArchiveFile f) => f.name == 'mimetype');
     final String mimetype = String.fromCharCodes(mimetypeFile.content);
     expect(mimetype, 'image/openraster');
+    expect(mimetypeFile.compression, CompressionType.none);
+
+    final ArchiveFile mergedImageFile = archive.files.firstWhere(
+      (final ArchiveFile file) => file.name == 'mergedimage.png',
+    );
+    expect(mergedImageFile.compression, CompressionType.none);
+
+    final ArchiveFile firstLayerFile = archive.files.firstWhere(
+      (final ArchiveFile file) => file.name == 'data/layer-0.png',
+    );
+    expect(firstLayerFile.compression, CompressionType.none);
   });
 
   test('extractOraPreviewPngBytes returns embedded thumbnail', () async {
@@ -190,6 +202,58 @@ void main() {
 
     expect(importedLayers.length, 1);
     expect(importedLayers.list[0].isLocked, isTrue);
+  });
+
+  test('createOraArchive crops sparse layer PNGs and preserves offsets', () async {
+    final LayersProvider exportedLayers = LayersProvider();
+    exportedLayers.clear();
+    exportedLayers.size = const ui.Size(20, 20);
+    final LayerProvider placedLayer = exportedLayers.addTop(name: 'Placed');
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder);
+    final ui.Paint paint = ui.Paint()..color = Colors.white;
+    canvas.drawRect(const Rect.fromLTWH(0, 0, 1, 1), paint);
+    final ui.Picture picture = recorder.endRecording();
+    final ui.Image placedPixel = await picture.toImage(1, 1);
+
+    placedLayer.addImage(
+      imageToAdd: placedPixel,
+      offset: const ui.Offset(10, 6),
+    );
+
+    final List<int> archiveData = await createOraArchive(exportedLayers);
+    final Archive archive = ZipDecoder().decodeBytes(archiveData);
+    final ArchiveFile stackFile = archive.files.firstWhere(
+      (final ArchiveFile file) => file.name == 'stack.xml',
+    );
+    final XmlDocument xmlDoc = XmlDocument.parse(
+      String.fromCharCodes(stackFile.content),
+    );
+    final XmlElement xmlLayer = xmlDoc.findAllElements('layer').single;
+
+    expect(xmlLayer.getAttribute('x'), '10');
+    expect(xmlLayer.getAttribute('y'), '6');
+
+    final ArchiveFile layerFile = archive.files.firstWhere(
+      (final ArchiveFile file) => file.name == 'data/layer-0.png',
+    );
+    final ui.Image exportedLayerImage = await decodeImage(
+      Uint8List.fromList(layerFile.content as List<int>),
+    );
+    expect(exportedLayerImage.width, 1);
+    expect(exportedLayerImage.height, 1);
+
+    final LayersProvider importedLayers = LayersProvider();
+    await readOraFileFromBytes(
+      importedLayers,
+      Uint8List.fromList(archiveData),
+    );
+
+    expect(importedLayers.list[0].name, 'Placed');
+    final ui.Image importedLayerImage = importedLayers.list[0].toImageForStorage(importedLayers.size);
+    final Rect? importedBounds = await getNonTransparentBounds(importedLayerImage);
+    expect(importedBounds, const Rect.fromLTRB(10, 6, 11, 7));
   });
 
   test('buildLayers creates correct XML structure with group', () async {
