@@ -129,6 +129,8 @@ extension AppProviderSelectionEffects on AppProvider {
       initialSize: size ?? effect.defaultSize,
     );
 
+    repaintToolOptions();
+
     await _renderEffectPreview();
   }
 
@@ -152,6 +154,7 @@ extension AppProviderSelectionEffects on AppProvider {
     final ui.Image maskedImage = await _buildMaskedEffectImage(state);
 
     effectPreviewModel.clear();
+    repaintToolOptions();
 
     replaceRegion(
       name: state.effect.name,
@@ -171,6 +174,7 @@ extension AppProviderSelectionEffects on AppProvider {
 
     effectPreviewModel.clear();
     effectPreviewRenderVersion++;
+    repaintToolOptions();
     update();
   }
 

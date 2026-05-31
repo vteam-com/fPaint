@@ -238,7 +238,6 @@ Widget shortCutsForMainApp(
               default:
                 shellProvider.shellMode = ShellMode.hidden;
             }
-            appProvider.update();
             return null;
           },
         ),

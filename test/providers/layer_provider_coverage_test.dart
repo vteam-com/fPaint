@@ -49,6 +49,18 @@ void main() {
       expect(notified, true);
     });
 
+    test('isSelected setter notifies only on change', () {
+      final LayerProvider layer = _createLayer();
+      int notifyCount = 0;
+      layer.addListener(() => notifyCount++);
+
+      layer.isSelected = true;
+      layer.isSelected = true;
+
+      expect(layer.isSelected, true);
+      expect(notifyCount, 1);
+    });
+
     test('isVisible setter clears cache', () {
       final LayerProvider layer = _createLayer();
       layer.isVisible = false;

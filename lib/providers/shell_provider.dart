@@ -28,6 +28,9 @@ enum ShellMode {
 /// side panel is expanded, and whether the menu is visible. It also provides
 /// methods for updating these properties and notifying listeners of any changes.
 class ShellProvider extends ChangeNotifier {
+  final ChangeNotifier _mainScreenLayoutNotifier = ChangeNotifier();
+  final ChangeNotifier _sidePanelExpandedNotifier = ChangeNotifier();
+
   /// Retrieves the [ShellProvider] instance from the given [BuildContext].
   ///
   /// The [listen] parameter determines whether the widget should rebuild when the
@@ -60,8 +63,25 @@ class ShellProvider extends ChangeNotifier {
   /// The name of the loaded file.
   String loadedFileName = '';
 
+  bool _deviceSizeSmall = false;
+
   /// Whether the device size is small.
-  bool deviceSizeSmall = false;
+  bool get deviceSizeSmall => _deviceSizeSmall;
+
+  /// Sets whether the device size is small and rebuilds shell layout when needed.
+  set deviceSizeSmall(final bool value) {
+    if (_deviceSizeSmall == value) {
+      return;
+    }
+    _deviceSizeSmall = value;
+    _mainScreenLayoutNotifier.notifyListeners();
+    update();
+  }
+
+  /// Synchronizes the viewport size class without notifying listeners.
+  void syncDeviceSizeSmall(final bool value) {
+    _deviceSizeSmall = value;
+  }
 
   /// The canvas auto placement setting.
   CanvasAutoPlacement canvasPlacement = CanvasAutoPlacement.fit;
@@ -96,17 +116,40 @@ class ShellProvider extends ChangeNotifier {
 
   //=============================================================================
   // Shell
+  ShellMode _shellMode = ShellMode.full;
+
   /// The current shell mode.
-  ShellMode shellMode = ShellMode.full;
+  ShellMode get shellMode => _shellMode;
+
+  /// Listenable used by MainScreen layout that depends on shell visibility state.
+  Listenable get mainScreenLayoutListenable => _mainScreenLayoutNotifier;
+
+  /// Sets the current shell mode.
+  set shellMode(final ShellMode value) {
+    if (_shellMode == value) {
+      return;
+    }
+    _shellMode = value;
+    _mainScreenLayoutNotifier.notifyListeners();
+    update();
+  }
 
   bool _isSidePanelExpanded = true;
 
   /// Gets whether the side panel is expanded.
   bool get isSidePanelExpanded => _isSidePanelExpanded;
 
+  /// Listenable used by side-panel UI that only depends on expansion state.
+  Listenable get sidePanelExpandedListenable => _sidePanelExpandedNotifier;
+
   /// Sets whether the side panel is expanded.
   set isSidePanelExpanded(final bool value) {
+    if (_isSidePanelExpanded == value) {
+      return;
+    }
     _isSidePanelExpanded = value;
+    _mainScreenLayoutNotifier.notifyListeners();
+    _sidePanelExpandedNotifier.notifyListeners();
     update();
   }
 
@@ -120,6 +163,14 @@ class ShellProvider extends ChangeNotifier {
   /// Sets whether the menu is visible.
   set showMenu(final bool value) {
     _showMenu = value;
+    _mainScreenLayoutNotifier.notifyListeners();
     update();
+  }
+
+  @override
+  void dispose() {
+    _mainScreenLayoutNotifier.dispose();
+    _sidePanelExpandedNotifier.dispose();
+    super.dispose();
   }
 }

@@ -41,45 +41,65 @@ class ToolsPanel extends StatelessWidget {
   final bool minimal;
   @override
   Widget build(final BuildContext context) {
-    final AppProvider appProvider = AppProvider.of(context, listen: true);
-    final ActionType selectedTool = appProvider.selectedAction;
+    final AppProvider appProvider = AppProvider.of(context);
 
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          Wrap(
-            spacing: minimal ? AppSpacing.thin : AppSpacing.small,
-            runSpacing: minimal ? AppSpacing.thin : AppSpacing.small,
-            alignment: WrapAlignment.center,
-            children: getListOfTools(context),
-          ),
-          AnimatedSwitcher(
-            duration: AppDefaults.toolPanelRevealAnimationDuration,
-            reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (final Widget child, final Animation<double> animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SizeTransition(
-                  sizeFactor: animation,
-                  child: child,
+          ListenableBuilder(
+            listenable: appProvider.selectedActionRepaintListenable,
+            builder: (final BuildContext _, final Widget? _) {
+              final ActionType selectedTool = appProvider.selectedAction;
+
+              return Wrap(
+                spacing: minimal ? AppSpacing.thin : AppSpacing.small,
+                runSpacing: minimal ? AppSpacing.thin : AppSpacing.small,
+                alignment: WrapAlignment.center,
+                children: getListOfTools(
+                  context: context,
+                  appProvider: appProvider,
+                  selectedTool: selectedTool,
                 ),
               );
             },
-            child: KeyedSubtree(
-              key: ValueKey<ActionType>(selectedTool),
-              child: Padding(
-                padding: const EdgeInsets.only(left: AppSpacing.medium),
-                child: Wrap(
-                  runSpacing: minimal ? AppSpacing.small : AppSpacing.thin,
-                  alignment: WrapAlignment.center,
-                  children: getWidgetForSelectedTool(context: context),
+          ),
+          ListenableBuilder(
+            listenable: appProvider.toolOptionsRepaintListenable,
+            builder: (final BuildContext _, final Widget? _) {
+              final ActionType selectedTool = appProvider.selectedAction;
+
+              return AnimatedSwitcher(
+                duration: AppDefaults.toolPanelRevealAnimationDuration,
+                reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (final Widget child, final Animation<double> animation) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SizeTransition(
+                      sizeFactor: animation,
+                      child: child,
+                    ),
+                  );
+                },
+                child: KeyedSubtree(
+                  key: ValueKey<ActionType>(selectedTool),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: AppSpacing.medium),
+                    child: Wrap(
+                      runSpacing: minimal ? AppSpacing.small : AppSpacing.thin,
+                      alignment: WrapAlignment.center,
+                      children: getWidgetForSelectedTool(
+                        context: context,
+                        appProvider: appProvider,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),
@@ -166,13 +186,13 @@ class ToolsPanel extends StatelessWidget {
     final AppLocalizations l10n,
   ) {
     widgets.add(
-      ToolAttributeWidget(
-        compact: minimal,
-        name: l10n.topColors(layers.topColors.length),
-        childRight: ListenableBuilder(
-          listenable: layers,
-          builder: (final BuildContext _, final Widget? _) {
-            return TopColors(
+      ListenableBuilder(
+        listenable: layers.topColorsListenable,
+        builder: (final BuildContext _, final Widget? _) {
+          return ToolAttributeWidget(
+            compact: minimal,
+            name: l10n.topColors(layers.topColors.length),
+            childRight: TopColors(
               colorUsages: layers.topColors,
               onRefresh: layers.evaluateTopColor,
               onColorPicked: (final Color color) {
@@ -188,20 +208,20 @@ class ToolsPanel extends StatelessWidget {
               showHeader: false,
               autoRefreshOnIdle: true,
               refreshRevision: layers.topColorsRefreshRevision,
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
   /// Returns a list of widgets representing the available tools.
-  List<Widget> getListOfTools(
-    final BuildContext context,
-  ) {
-    final AppProvider appProvider = AppProvider.of(context);
+  List<Widget> getListOfTools({
+    required final BuildContext context,
+    required final AppProvider appProvider,
+    required final ActionType selectedTool,
+  }) {
     final AppLocalizations l10n = context.l10n;
-    final ActionType selectedTool = appProvider.selectedAction;
 
     final List<Widget> tools = <Widget>[
       _buildActionPicker(
@@ -209,18 +229,14 @@ class ToolsPanel extends StatelessWidget {
         name: l10n.toolPencil,
         icon: ActionType.pencil.icon,
         isSelected: selectedTool == ActionType.pencil,
-        onPressed: () {
-          appProvider.selectedAction = ActionType.pencil;
-        },
+        onPressed: () => appProvider.selectedAction = ActionType.pencil,
       ),
       _buildActionPicker(
         minimal: minimal,
         name: l10n.toolBrush,
         icon: ActionType.brush.icon,
         isSelected: selectedTool == ActionType.brush,
-        onPressed: () {
-          appProvider.selectedAction = ActionType.brush;
-        },
+        onPressed: () => appProvider.selectedAction = ActionType.brush,
       ),
       _buildActionPicker(
         key: Keys.toolSmudge,
@@ -228,9 +244,7 @@ class ToolsPanel extends StatelessWidget {
         name: l10n.toolSmudge,
         icon: ActionType.smudge.icon,
         isSelected: selectedTool == ActionType.smudge,
-        onPressed: () {
-          appProvider.selectedAction = ActionType.smudge;
-        },
+        onPressed: () => appProvider.selectedAction = ActionType.smudge,
       ),
       _buildActionPicker(
         key: Keys.toolLine,
@@ -317,9 +331,9 @@ class ToolsPanel extends StatelessWidget {
   /// Returns a list of widgets representing the attributes for the selected tool.
   List<Widget> getWidgetForSelectedTool({
     required final BuildContext context,
+    required final AppProvider appProvider,
   }) {
     final List<Widget> widgets = <Widget>[];
-    final AppProvider appProvider = AppProvider.of(context, listen: true);
     final AppLocalizations l10n = context.l10n;
     final LayersProvider layers = LayersProvider.of(context);
     final ActionType selectedTool = appProvider.selectedAction;
@@ -343,8 +357,7 @@ class ToolsPanel extends StatelessWidget {
                   icon: AppIcon.fillSolid,
                   isSelected: appProvider.fillModel.mode == FillMode.solid,
                   onPressed: () {
-                    appProvider.fillModel.mode = FillMode.solid;
-                    appProvider.update();
+                    appProvider.setFillMode(FillMode.solid);
                   },
                 ),
                 //
@@ -357,8 +370,7 @@ class ToolsPanel extends StatelessWidget {
                   icon: AppIcon.fillLinear,
                   isSelected: appProvider.fillModel.mode == FillMode.linear,
                   onPressed: () {
-                    appProvider.fillModel.mode = FillMode.linear;
-                    appProvider.update();
+                    appProvider.setFillMode(FillMode.linear);
                     appProvider.updateGradientFill();
                   },
                 ),
@@ -372,8 +384,7 @@ class ToolsPanel extends StatelessWidget {
                   icon: AppIcon.fillRadial,
                   isSelected: appProvider.fillModel.mode == FillMode.radial,
                   onPressed: () {
-                    appProvider.fillModel.mode = FillMode.radial;
-                    appProvider.update();
+                    appProvider.setFillMode(FillMode.radial);
                     appProvider.updateGradientFill();
                   },
                 ),
@@ -420,8 +431,7 @@ class ToolsPanel extends StatelessWidget {
                   icon: AppIcon.selectorSquare,
                   isSelected: appProvider.selectorModel.mode == SelectorMode.rectangle,
                   onPressed: () {
-                    appProvider.selectorModel.mode = SelectorMode.rectangle;
-                    appProvider.update();
+                    appProvider.setSelectorMode(SelectorMode.rectangle);
                   },
                 ),
                 //
@@ -434,8 +444,7 @@ class ToolsPanel extends StatelessWidget {
                   icon: AppIcon.selectorCircle,
                   isSelected: appProvider.selectorModel.mode == SelectorMode.circle,
                   onPressed: () {
-                    appProvider.selectorModel.mode = SelectorMode.circle;
-                    appProvider.update();
+                    appProvider.setSelectorMode(SelectorMode.circle);
                   },
                 ),
                 //
@@ -448,8 +457,7 @@ class ToolsPanel extends StatelessWidget {
                   icon: AppIcon.selectorPolygon,
                   isSelected: appProvider.selectorModel.mode == SelectorMode.line,
                   onPressed: () {
-                    appProvider.selectorModel.mode = SelectorMode.line;
-                    appProvider.update();
+                    appProvider.setSelectorMode(SelectorMode.line);
                   },
                 ),
                 //
@@ -462,8 +470,7 @@ class ToolsPanel extends StatelessWidget {
                   icon: AppIcon.lasso,
                   isSelected: appProvider.selectorModel.mode == SelectorMode.lasso,
                   onPressed: () {
-                    appProvider.selectorModel.mode = SelectorMode.lasso;
-                    appProvider.update();
+                    appProvider.setSelectorMode(SelectorMode.lasso);
                   },
                 ),
                 //
@@ -476,8 +483,7 @@ class ToolsPanel extends StatelessWidget {
                   icon: AppIcon.autoFixHigh,
                   isSelected: appProvider.selectorModel.mode == SelectorMode.wand,
                   onPressed: () {
-                    appProvider.selectorModel.mode = SelectorMode.wand;
-                    appProvider.update();
+                    appProvider.setSelectorMode(SelectorMode.wand);
                   },
                 ),
                 if (appProvider.selectorModel.isVisible)
@@ -504,8 +510,7 @@ class ToolsPanel extends StatelessWidget {
                     icon: AppIcon.selectorReplace,
                     isSelected: appProvider.selectorModel.math == SelectorMath.replace,
                     onPressed: () {
-                      appProvider.selectorModel.math = SelectorMath.replace;
-                      appProvider.update();
+                      appProvider.setSelectorMath(SelectorMath.replace);
                     },
                   ),
 
@@ -516,8 +521,7 @@ class ToolsPanel extends StatelessWidget {
                     icon: AppIcon.selectorAdd,
                     isSelected: appProvider.selectorModel.math == SelectorMath.add,
                     onPressed: () {
-                      appProvider.selectorModel.math = SelectorMath.add;
-                      appProvider.update();
+                      appProvider.setSelectorMath(SelectorMath.add);
                     },
                   ),
 
@@ -528,8 +532,7 @@ class ToolsPanel extends StatelessWidget {
                     icon: AppIcon.selectorRemove,
                     isSelected: appProvider.selectorModel.math == SelectorMath.remove,
                     onPressed: () {
-                      appProvider.selectorModel.math = SelectorMath.remove;
-                      appProvider.update();
+                      appProvider.setSelectorMath(SelectorMath.remove);
                     },
                   ),
 
@@ -735,15 +738,13 @@ class ToolsPanel extends StatelessWidget {
     final int halftonePercent = appProvider.fillModel.halftoneMaxDotSizePercent;
 
     void updateHalftonePercent(final int value) {
-      appProvider.fillModel.halftoneMaxDotSizePercent = value;
+      appProvider.setFillHalftoneMaxDotSizePercent(value);
       appProvider.updateGradientFill();
-      appProvider.update();
     }
 
     void updateHalftoneEnabled(final bool value) {
-      appProvider.fillModel.halftoneEnabled = value;
+      appProvider.setFillHalftoneEnabled(value);
       appProvider.updateGradientFill();
-      appProvider.update();
     }
 
     widgets.add(

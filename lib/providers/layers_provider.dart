@@ -34,9 +34,17 @@ class LayersProvider extends ChangeNotifier {
 
   final UndoProvider _undoProvider;
   final ChangeNotifier _canvasRepaintNotifier = ChangeNotifier();
+  final ChangeNotifier _layerListStructureNotifier = ChangeNotifier();
+  final ChangeNotifier _topColorsNotifier = ChangeNotifier();
 
   /// Lightweight repaint signal used for active canvas interactions.
   Listenable get canvasRepaintListenable => _canvasRepaintNotifier;
+
+  /// Lightweight signal used when the layer-list structure changes.
+  Listenable get layerListStructureListenable => _layerListStructureNotifier;
+
+  /// Lightweight signal used when top-colors data or its refresh token changes.
+  Listenable get topColorsListenable => _topColorsNotifier;
 
   /// Retrieves the [LayersProvider] instance from the given [BuildContext].
   ///
@@ -50,7 +58,23 @@ class LayersProvider extends ChangeNotifier {
   @override
   void dispose() {
     _canvasRepaintNotifier.dispose();
+    _layerListStructureNotifier.dispose();
+    _topColorsNotifier.dispose();
     super.dispose();
+  }
+
+  void _notifyLayerListStructureChanged() {
+    _layerListStructureNotifier.notifyListeners();
+  }
+
+  void _notifyTopColorsChanged() {
+    _topColorsNotifier.notifyListeners();
+  }
+
+  void _syncLayerIds() {
+    for (int i = 0; i < length; i++) {
+      get(i).id = (length - i).toString();
+    }
   }
 
   /// Notifies listeners that the layers have been updated.
@@ -72,6 +96,7 @@ class LayersProvider extends ChangeNotifier {
 
   void _markTopColorsDirty() {
     _topColorsRefreshRevision++;
+    _notifyTopColorsChanged();
   }
 
   Size _size = const Size(AppLayout.canvasDefaultWidth, AppLayout.canvasDefaultHeight);
@@ -205,6 +230,8 @@ class LayersProvider extends ChangeNotifier {
     final LayerProvider firstLayer = newLayer(name ?? _defaultBackgroundName);
     firstLayer.backgroundColor = AppColors.white;
     _list.add(firstLayer);
+    _syncLayerIds();
+    _notifyLayerListStructureChanged();
     return firstLayer;
   }
 
@@ -213,6 +240,7 @@ class LayersProvider extends ChangeNotifier {
   /// Clears all layers from the canvas.
   void clear() {
     _list.clear();
+    _notifyLayerListStructureChanged();
   }
 
   /// Replaces the entire layer stack with freshly-imported content.
@@ -259,9 +287,7 @@ class LayersProvider extends ChangeNotifier {
     final bool notify = true,
   }) {
     for (int i = 0; i < length; i++) {
-      final LayerProvider layer = get(i);
-      layer.id = (length - i).toString();
-      layer.isSelected = i == index;
+      get(i).isSelected = i == index;
     }
     _selectedLayerIndex = index;
     if (notify) {
@@ -326,7 +352,7 @@ class LayersProvider extends ChangeNotifier {
     return LayerProvider(
       name: name,
       size: _size,
-      onThumbnailChanged: () => notifyListeners(),
+      onThumbnailChanged: _notifyTopColorsChanged,
     );
   }
 
@@ -334,6 +360,8 @@ class LayersProvider extends ChangeNotifier {
   void ensureLayerAtIndex(final int index) {
     while (_list.length <= index) {
       _list.add(newLayer('$_defaultLayerPrefix ${_list.length + 1}'));
+      _syncLayerIds();
+      _notifyLayerListStructureChanged();
     }
   }
 
@@ -350,6 +378,8 @@ class LayersProvider extends ChangeNotifier {
     } else {
       _list.add(layerToInsert);
     }
+    _syncLayerIds();
+    _notifyLayerListStructureChanged();
   }
 
   /// Inserts a new layer at the given index.
@@ -365,6 +395,10 @@ class LayersProvider extends ChangeNotifier {
   /// Removes a layer from the canvas.
   bool remove(final LayerProvider layer) {
     final bool wasRemoved = _list.remove(layer);
+    if (wasRemoved) {
+      _syncLayerIds();
+      _notifyLayerListStructureChanged();
+    }
     this.selectedLayerIndex = (this.selectedLayerIndex > 0 ? this.selectedLayerIndex - 1 : 0);
     return wasRemoved;
   }
@@ -373,6 +407,14 @@ class LayersProvider extends ChangeNotifier {
   void removeByIndex(final int index) {
     if (isIndexInRange(index)) {
       _list.removeAt(index);
+      _syncLayerIds();
+      _notifyLayerListStructureChanged();
+      if (isNotEmpty) {
+        selectedLayerIndex = _selectedLayerIndex.clamp(0, length - 1);
+      } else {
+        _selectedLayerIndex = 0;
+        notifyListeners();
+      }
     }
   }
 
@@ -395,6 +437,8 @@ class LayersProvider extends ChangeNotifier {
     final LayerProvider movedLayer = _list.removeAt(fromIndex);
     final int insertIndex = toIndex;
     _list.insert(insertIndex, movedLayer);
+    _syncLayerIds();
+    _notifyLayerListStructureChanged();
     selectedLayerIndex = insertIndex;
   }
 
@@ -509,7 +553,7 @@ class LayersProvider extends ChangeNotifier {
   void evaluateTopColor() {
     this.getTopColorUsed().then((final List<ColorUsage> topColorsFound) {
       topColors = topColorsFound;
-      notifyListeners();
+      _notifyTopColorsChanged();
     });
   }
 
