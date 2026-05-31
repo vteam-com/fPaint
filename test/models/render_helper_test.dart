@@ -100,14 +100,22 @@ void main() {
       recorder.endRecording();
     });
 
-    test('renderPencil draws a line', () {
+    test('renderPencilStroke draws a line', () {
       final MyBrush brush = MyBrush(color: AppColors.black, size: 2.0);
-      renderPencil(canvas, const Offset(0, 0), const Offset(50, 50), brush);
+      renderPencilStroke(
+        canvas,
+        const <Offset>[Offset(0, 0), Offset(50, 50)],
+        brush,
+      );
     });
 
-    test('renderPencilEraser draws with clear blend mode', () {
+    test('renderPencilEraserStroke draws with clear blend mode', () {
       final MyBrush brush = MyBrush(size: 5.0);
-      renderPencilEraser(canvas, const Offset(0, 0), const Offset(50, 50), brush);
+      renderPencilEraserStroke(
+        canvas,
+        const <Offset>[Offset(0, 0), Offset(50, 50)],
+        brush,
+      );
     });
 
     test('renderRectangle with solid brush', () {

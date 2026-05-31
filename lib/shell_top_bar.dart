@@ -161,57 +161,62 @@ Widget _buildResponsiveToolbarActions(
   final InteractionLayoutProfile interactionProfile,
 ) {
   return ListenableBuilder(
-    listenable: appProvider,
+    listenable: appProvider.viewportRepaintListenable,
     builder: (final BuildContext _, final Widget? _) {
       return ListenableBuilder(
-        listenable: appProvider.undoProvider,
+        listenable: appProvider,
         builder: (final BuildContext _, final Widget? _) {
-          return LayoutBuilder(
-            builder: (final BuildContext _, final BoxConstraints constraints) {
-              final List<_ToolbarActionEntry> primaryActions = _buildPrimaryToolbarActionEntries(
-                context,
-                shellProvider,
-                appProvider,
-                interactionProfile,
-              );
-              final List<_ToolbarActionEntry> actions = _filterToolbarActionsForViewport(
-                actions: _buildResponsiveToolbarActionEntries(
-                  context,
-                  shellProvider,
-                  appProvider,
-                  interactionProfile,
-                ),
-                shellProvider: shellProvider,
-              );
-              final double fullToolbarWidth =
-                  _estimateToolbarActionWidth(actions, interactionProfile.buttonSpacing) + AppSpacing.large;
+          return ListenableBuilder(
+            listenable: appProvider.undoProvider,
+            builder: (final BuildContext _, final Widget? _) {
+              return LayoutBuilder(
+                builder: (final BuildContext _, final BoxConstraints constraints) {
+                  final List<_ToolbarActionEntry> primaryActions = _buildPrimaryToolbarActionEntries(
+                    context,
+                    shellProvider,
+                    appProvider,
+                    interactionProfile,
+                  );
+                  final List<_ToolbarActionEntry> actions = _filterToolbarActionsForViewport(
+                    actions: _buildResponsiveToolbarActionEntries(
+                      context,
+                      shellProvider,
+                      appProvider,
+                      interactionProfile,
+                    ),
+                    shellProvider: shellProvider,
+                  );
+                  final double fullToolbarWidth =
+                      _estimateToolbarActionWidth(actions, interactionProfile.buttonSpacing) + AppSpacing.large;
 
-              if (shellProvider.deviceSizeSmall == false && constraints.maxWidth >= fullToolbarWidth) {
-                return _buildWideDesktopToolbarActions(
-                  context: context,
-                  shellProvider: shellProvider,
-                  appProvider: appProvider,
-                  primaryActions: primaryActions,
-                );
-              }
+                  if (shellProvider.deviceSizeSmall == false && constraints.maxWidth >= fullToolbarWidth) {
+                    return _buildWideDesktopToolbarActions(
+                      context: context,
+                      shellProvider: shellProvider,
+                      appProvider: appProvider,
+                      primaryActions: primaryActions,
+                    );
+                  }
 
-              final List<_ToolbarActionEntry> visibleActions = _selectResponsiveToolbarActions(
-                actions: actions,
-                maxWidth: constraints.maxWidth,
-                spacing: interactionProfile.buttonSpacing,
-              );
+                  final List<_ToolbarActionEntry> visibleActions = _selectResponsiveToolbarActions(
+                    actions: actions,
+                    maxWidth: constraints.maxWidth,
+                    spacing: interactionProfile.buttonSpacing,
+                  );
 
-              if (visibleActions.isEmpty) {
-                return const SizedBox.shrink();
-              }
+                  if (visibleActions.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
 
-              return Align(
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: interactionProfile.buttonSpacing,
-                  children: visibleActions.map((final _ToolbarActionEntry entry) => entry.child).toList(),
-                ),
+                  return Align(
+                    alignment: Alignment.center,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: interactionProfile.buttonSpacing,
+                      children: visibleActions.map((final _ToolbarActionEntry entry) => entry.child).toList(),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -489,99 +494,104 @@ Widget buildCanvasToolbarActions(
   final List<Widget>? primaryActionButtons,
 }) {
   return ListenableBuilder(
-    listenable: appProvider,
+    listenable: appProvider.viewportRepaintListenable,
     builder: (final BuildContext _, final Widget? _) {
       return ListenableBuilder(
-        listenable: appProvider.undoProvider,
+        listenable: appProvider,
         builder: (final BuildContext _, final Widget? _) {
-          final AppLocalizations l10n = context.l10n;
-          final InteractionLayoutProfile interactionProfile = shellProvider.interactionLayoutProfile;
-          final bool hasActiveSelection = appProvider.selectorModel.isVisible;
-          final bool canUndo = appProvider.undoProvider.canUndo;
-          final bool canRedo = appProvider.undoProvider.canRedo;
+          return ListenableBuilder(
+            listenable: appProvider.undoProvider,
+            builder: (final BuildContext _, final Widget? _) {
+              final AppLocalizations l10n = context.l10n;
+              final InteractionLayoutProfile interactionProfile = shellProvider.interactionLayoutProfile;
+              final bool hasActiveSelection = appProvider.selectorModel.isVisible;
+              final bool canUndo = appProvider.undoProvider.canUndo;
+              final bool canRedo = appProvider.undoProvider.canRedo;
 
-          final Widget selectorToggleButton = _buildSelectorToggleButton(
-            appProvider: appProvider,
-            l10n: l10n,
-            hasActiveSelection: hasActiveSelection,
-            interactionProfile: interactionProfile,
-          );
-          final Widget undoButton = _buildUndoButton(
-            appProvider,
-            interactionProfile,
-            enabled: canUndo,
-          );
-          final Widget redoButton = _buildRedoButton(
-            appProvider,
-            interactionProfile,
-            enabled: canRedo,
-          );
-          final Widget zoomOutButton = _buildZoomButton(
-            key: Keys.floatActionZoomOut,
-            shellProvider: shellProvider,
-            appProvider: appProvider,
-            interactionProfile: interactionProfile,
-            icon: AppIcon.zoomOut,
-            scaleDelta: AppVisual.shrink,
-          );
-          final Widget centerButton = _buildCenterAndDimensionButton(shellProvider, appProvider);
-          final Widget zoomInButton = _buildZoomButton(
-            key: Keys.floatActionZoomIn,
-            shellProvider: shellProvider,
-            appProvider: appProvider,
-            interactionProfile: interactionProfile,
-            icon: AppIcon.zoomIn,
-            scaleDelta: AppVisual.enlarge,
-          );
-          final Widget? shellToggleButton = shellProvider.deviceSizeSmall
-              ? _buildSmallScreenShellToggleButton(
-                  shellProvider: shellProvider,
-                  tooltip: l10n.menuTooltip,
-                  interactionProfile: interactionProfile,
-                )
-              : null;
+              final Widget selectorToggleButton = _buildSelectorToggleButton(
+                appProvider: appProvider,
+                l10n: l10n,
+                hasActiveSelection: hasActiveSelection,
+                interactionProfile: interactionProfile,
+              );
+              final Widget undoButton = _buildUndoButton(
+                appProvider,
+                interactionProfile,
+                enabled: canUndo,
+              );
+              final Widget redoButton = _buildRedoButton(
+                appProvider,
+                interactionProfile,
+                enabled: canRedo,
+              );
+              final Widget zoomOutButton = _buildZoomButton(
+                key: Keys.floatActionZoomOut,
+                shellProvider: shellProvider,
+                appProvider: appProvider,
+                interactionProfile: interactionProfile,
+                icon: AppIcon.zoomOut,
+                scaleDelta: AppVisual.shrink,
+              );
+              final Widget centerButton = _buildCenterAndDimensionButton(shellProvider, appProvider);
+              final Widget zoomInButton = _buildZoomButton(
+                key: Keys.floatActionZoomIn,
+                shellProvider: shellProvider,
+                appProvider: appProvider,
+                interactionProfile: interactionProfile,
+                icon: AppIcon.zoomIn,
+                scaleDelta: AppVisual.enlarge,
+              );
+              final Widget? shellToggleButton = shellProvider.deviceSizeSmall
+                  ? _buildSmallScreenShellToggleButton(
+                      shellProvider: shellProvider,
+                      tooltip: l10n.menuTooltip,
+                      interactionProfile: interactionProfile,
+                    )
+                  : null;
 
-          if (distributeWideGroups) {
-            final List<Widget> resolvedPrimaryActionButtons = primaryActionButtons ?? const <Widget>[];
-            final List<Widget> leadingPrimaryActions = resolvedPrimaryActionButtons.take(AppMath.triple).toList();
-            final List<Widget> trailingPrimaryActions = resolvedPrimaryActionButtons.skip(AppMath.triple).toList();
+              if (distributeWideGroups) {
+                final List<Widget> resolvedPrimaryActionButtons = primaryActionButtons ?? const <Widget>[];
+                final List<Widget> leadingPrimaryActions = resolvedPrimaryActionButtons.take(AppMath.triple).toList();
+                final List<Widget> trailingPrimaryActions = resolvedPrimaryActionButtons.skip(AppMath.triple).toList();
 
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                _buildToolbarButtonGroup(
-                  children: leadingPrimaryActions,
-                  spacing: AppSpacing.small,
-                ),
-                _buildToolbarButtonGroup(
-                  children: trailingPrimaryActions,
-                  spacing: AppSpacing.small,
-                ),
-                _buildToolbarButtonGroup(
-                  children: <Widget>[undoButton, redoButton],
-                  spacing: interactionProfile.buttonSpacing,
-                ),
-                _buildToolbarButtonGroup(
-                  children: <Widget>[selectorToggleButton],
-                  spacing: interactionProfile.buttonSpacing,
-                ),
-                _buildToolbarButtonGroup(
-                  children: <Widget>[zoomOutButton, centerButton, zoomInButton],
-                  spacing: interactionProfile.buttonSpacing,
-                ),
-              ],
-            );
-          }
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    _buildToolbarButtonGroup(
+                      children: leadingPrimaryActions,
+                      spacing: AppSpacing.small,
+                    ),
+                    _buildToolbarButtonGroup(
+                      children: trailingPrimaryActions,
+                      spacing: AppSpacing.small,
+                    ),
+                    _buildToolbarButtonGroup(
+                      children: <Widget>[undoButton, redoButton],
+                      spacing: interactionProfile.buttonSpacing,
+                    ),
+                    _buildToolbarButtonGroup(
+                      children: <Widget>[selectorToggleButton],
+                      spacing: interactionProfile.buttonSpacing,
+                    ),
+                    _buildToolbarButtonGroup(
+                      children: <Widget>[zoomOutButton, centerButton, zoomInButton],
+                      spacing: interactionProfile.buttonSpacing,
+                    ),
+                  ],
+                );
+              }
 
-          return _buildToolbarDock(
-            undoButton: undoButton,
-            redoButton: redoButton,
-            selectorToggleButton: selectorToggleButton,
-            shellToggleButton: shellToggleButton,
-            interactionProfile: interactionProfile,
-            zoomOutButton: zoomOutButton,
-            centerButton: centerButton,
-            zoomInButton: zoomInButton,
+              return _buildToolbarDock(
+                undoButton: undoButton,
+                redoButton: redoButton,
+                selectorToggleButton: selectorToggleButton,
+                shellToggleButton: shellToggleButton,
+                interactionProfile: interactionProfile,
+                zoomOutButton: zoomOutButton,
+                centerButton: centerButton,
+                zoomInButton: zoomInButton,
+              );
+            },
           );
         },
       );

@@ -42,6 +42,9 @@ class AppProvider extends ChangeNotifier {
   /// The application preferences.
   final AppPreferences preferences;
 
+  final ChangeNotifier _mainViewRepaintNotifier = ChangeNotifier();
+  final ChangeNotifier _viewportRepaintNotifier = ChangeNotifier();
+
   void _initCanvas() {
     layers.clear();
     layers.size = layers.size;
@@ -88,14 +91,32 @@ class AppProvider extends ChangeNotifier {
     final bool listen = false,
   }) => Provider.of<AppProvider>(context, listen: listen);
 
+  /// Listenable used to repaint the main canvas and overlay surface only.
+  Listenable get mainViewRepaintListenable => _mainViewRepaintNotifier;
+
+  /// Listenable used to repaint viewport-driven UI such as zoom and pan affordances.
+  Listenable get viewportRepaintListenable => _viewportRepaintNotifier;
+
   @override
   void dispose() {
     preferences.removeListener(_handlePreferencesChanged);
+    _mainViewRepaintNotifier.dispose();
+    _viewportRepaintNotifier.dispose();
     super.dispose();
   }
 
   void _handlePreferencesChanged() {
     update();
+  }
+
+  /// Rebuilds the main canvas and overlay surface without notifying the full app shell.
+  void repaintMainView() {
+    _mainViewRepaintNotifier.notifyListeners();
+  }
+
+  /// Rebuilds viewport-dependent UI without notifying the full app shell.
+  void repaintViewport() {
+    _viewportRepaintNotifier.notifyListeners();
   }
 
   //=============================================================================

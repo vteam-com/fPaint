@@ -33,6 +33,10 @@ class LayersProvider extends ChangeNotifier {
   }
 
   final UndoProvider _undoProvider;
+  final ChangeNotifier _canvasRepaintNotifier = ChangeNotifier();
+
+  /// Lightweight repaint signal used for active canvas interactions.
+  Listenable get canvasRepaintListenable => _canvasRepaintNotifier;
 
   /// Retrieves the [LayersProvider] instance from the given [BuildContext].
   ///
@@ -43,10 +47,22 @@ class LayersProvider extends ChangeNotifier {
     final bool listen = false,
   }) => Provider.of<LayersProvider>(context, listen: listen);
 
+  @override
+  void dispose() {
+    _canvasRepaintNotifier.dispose();
+    super.dispose();
+  }
+
   /// Notifies listeners that the layers have been updated.
   void update() {
     _markTopColorsDirty();
+    repaintCanvas();
     notifyListeners();
+  }
+
+  /// Repaints the canvas without notifying higher-level UI listeners.
+  void repaintCanvas() {
+    _canvasRepaintNotifier.notifyListeners();
   }
 
   int _topColorsRefreshRevision = 1;
@@ -112,6 +128,8 @@ class LayersProvider extends ChangeNotifier {
 
   /// The cached image of the canvas.
   ui.Image? cachedImage;
+  ByteData? _cachedImageRawRgba;
+  ui.Image? _cachedImageRawRgbaSource;
 
   //-------------------------------------------
   // Canvas Resize position
@@ -549,6 +567,8 @@ class LayersProvider extends ChangeNotifier {
       this.size.width.toInt(),
       this.size.height.toInt(),
     );
+    _cachedImageRawRgba = null;
+    _cachedImageRawRgbaSource = null;
 
     return this.cachedImage!;
   }
@@ -640,16 +660,24 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Gets the color at the given offset.
-  Future<Color?> getColorAtOffset(final Offset offset) async {
+  ///
+  /// When [useCachedImage] is true, the current [cachedImage] snapshot is used
+  /// directly and its RGBA bytes are cached for subsequent samples.
+  Future<Color?> getColorAtOffset(
+    final Offset offset, {
+    final bool useCachedImage = false,
+  }) async {
     try {
-      final ui.Image image = await capturePainterToImage();
+      final ui.Image image = useCachedImage && cachedImage != null ? cachedImage! : await capturePainterToImage();
 
       // Ensure coordinates are within bounds
       final int x = offset.dx.clamp(0, image.width - 1).toInt();
       final int y = offset.dy.clamp(0, image.height - 1).toInt();
 
-      // Convert the image to ByteData in the correct format
-      final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      final ByteData? byteData = await _getRawRgbaBytes(
+        image: image,
+        cacheBytes: useCachedImage && identical(image, cachedImage),
+      );
 
       if (byteData == null) {
         return null;
@@ -668,5 +696,22 @@ class LayersProvider extends ChangeNotifier {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Returns RGBA bytes for [image], reusing the cached snapshot bytes when requested.
+  Future<ByteData?> _getRawRgbaBytes({
+    required final ui.Image image,
+    required final bool cacheBytes,
+  }) async {
+    if (cacheBytes && identical(_cachedImageRawRgbaSource, image) && _cachedImageRawRgba != null) {
+      return _cachedImageRawRgba;
+    }
+
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    if (cacheBytes && byteData != null) {
+      _cachedImageRawRgba = byteData;
+      _cachedImageRawRgbaSource = image;
+    }
+    return byteData;
   }
 }

@@ -106,6 +106,15 @@ extension AppProviderTools on AppProvider {
     if (last == null || last.positions.isEmpty) {
       return;
     }
+
+    final bool canExtendActiveStroke =
+        (last.action == ActionType.pencil || last.action == ActionType.eraser) && last.action == selectedAction;
+    if (canExtendActiveStroke) {
+      layers.selectedLayer.lastActionAppendPosition(position: positionEndOfNewLine);
+      layers.repaintCanvas();
+      return;
+    }
+
     recordExecuteDrawingActionToSelectedLayer(
       action: UserActionDrawing(
         positions: <ui.Offset>[

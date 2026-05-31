@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -117,6 +119,72 @@ void main() {
         appProvider.layers.selectedLayer.lastUserAction!.action,
         ActionType.brush,
       );
+    });
+
+    test('repaintMainView notifies only the main-view listeners', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+      int providerNotifications = 0;
+      int mainViewNotifications = 0;
+
+      appProvider.addListener(() {
+        providerNotifications++;
+      });
+      appProvider.mainViewRepaintListenable.addListener(() {
+        mainViewNotifications++;
+      });
+
+      appProvider.repaintMainView();
+
+      expect(providerNotifications, 0);
+      expect(mainViewNotifications, 1);
+    });
+
+    test('selector drag preview only repaints the main view', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+      int providerNotifications = 0;
+      int mainViewNotifications = 0;
+
+      appProvider.addListener(() {
+        providerNotifications++;
+      });
+      appProvider.mainViewRepaintListenable.addListener(() {
+        mainViewNotifications++;
+      });
+
+      appProvider.selectorModel.mode = SelectorMode.rectangle;
+      appProvider.selectorCreationStart(const Offset(0, 0));
+      providerNotifications = 0;
+      mainViewNotifications = 0;
+
+      appProvider.selectorCreationAdditionalPoint(const Offset(10, 10));
+
+      expect(providerNotifications, 0);
+      expect(mainViewNotifications, 1);
+      expect(appProvider.selectorModel.path1, isNotNull);
+    });
+
+    test('straight-line selector preview only repaints the main view', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+      int providerNotifications = 0;
+      int mainViewNotifications = 0;
+
+      appProvider.addListener(() {
+        providerNotifications++;
+      });
+      appProvider.mainViewRepaintListenable.addListener(() {
+        mainViewNotifications++;
+      });
+
+      appProvider.selectorModel.mode = SelectorMode.line;
+      appProvider.selectorCreationStart(const Offset(0, 0));
+      providerNotifications = 0;
+      mainViewNotifications = 0;
+
+      appProvider.selectorCreationPreview(const Offset(10, 10));
+
+      expect(providerNotifications, 0);
+      expect(mainViewNotifications, 1);
+      expect(appProvider.selectorModel.isDrawing, isTrue);
     });
   });
 }

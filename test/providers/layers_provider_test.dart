@@ -20,10 +20,12 @@ const int _rgbaRedOffset = 0;
 const int _rgbaGreenOffset = 1;
 const int _rgbaBlueOffset = 2;
 const int _rgbaAlphaOffset = 3;
+const int _cachedImageSampleSize = 20;
 const int _firstLayerIndex = 0;
 const int _secondLayerIndex = 1;
 const int _thirdLayerIndex = 2;
 const int _outOfRangeIndex = 999;
+const Offset _cachedImageSampleOffset = Offset(10, 10);
 
 // Mock LayerProvider if its methods are too complex or have external deps for these tests.
 // For now, we'll use real LayerProvider instances, assuming their basic state changes are testable.
@@ -539,6 +541,33 @@ void main() {
       // getColorAtOffset clamps, so it shouldn't return null but still works
       final Color? color = await layersProvider.getColorAtOffset(const Offset(-1, -1));
       expect(color, isNotNull);
+    });
+
+    test('uses cached image snapshot when requested', () async {
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      canvas.drawRect(
+        Rect.fromLTWH(
+          0,
+          0,
+          _cachedImageSampleSize.toDouble(),
+          _cachedImageSampleSize.toDouble(),
+        ),
+        Paint()..color = Colors.red,
+      );
+      final ui.Picture picture = recorder.endRecording();
+      layersProvider.cachedImage = await picture.toImage(
+        _cachedImageSampleSize,
+        _cachedImageSampleSize,
+      );
+
+      final Color? color = await layersProvider.getColorAtOffset(
+        _cachedImageSampleOffset,
+        useCachedImage: true,
+      );
+
+      expect(color, isNotNull);
+      expect(color!.toARGB32(), Colors.red.toARGB32());
     });
   });
 

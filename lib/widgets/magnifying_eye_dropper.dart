@@ -188,7 +188,10 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
 
     final int requestId = ++_colorSampleRequestId;
 
-    final Color? color = await widget.layers.getColorAtOffset(widget.pixelPosition);
+    final Color? color = await widget.layers.getColorAtOffset(
+      widget.pixelPosition,
+      useCachedImage: true,
+    );
 
     if (!mounted || requestId != _colorSampleRequestId || color == _selectedColor) {
       return;
