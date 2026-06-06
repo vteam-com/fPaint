@@ -36,10 +36,14 @@ bool shouldUseSelectionRegionFloodFill({
 /// region into the active selection instead of painting immediately.
 @visibleForTesting
 bool shouldCreateSelectionFromFloodFillTap({
+  required final ActionType selectedAction,
+  required final SelectorMode selectorMode,
   required final bool isSelectionVisible,
   required final ui.Path? selectionPath,
 }) {
-  return !isSelectionVisible || selectionPath == null;
+  return selectedAction == ActionType.selector &&
+      selectorMode == SelectorMode.wand &&
+      (!isSelectionVisible || selectionPath == null);
 }
 
 /// Tool state mutations, drawing actions, and flood-fill operations.
@@ -133,6 +137,8 @@ extension AppProviderTools on AppProvider {
   /// selection behavior.
   Future<bool> prepareFloodFillSelection(final Offset position) async {
     if (!shouldCreateSelectionFromFloodFillTap(
+      selectedAction: selectedAction,
+      selectorMode: selectorModel.mode,
       isSelectionVisible: selectorModel.isVisible,
       selectionPath: selectorModel.path1,
     )) {

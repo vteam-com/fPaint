@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -104,8 +105,10 @@ void main() {
   });
 
   group('shouldCreateSelectionFromFloodFillTap', () {
-    test('returns true when no selection is active', () {
+    test('returns true for selector wand when no selection is active', () {
       final bool result = shouldCreateSelectionFromFloodFillTap(
+        selectedAction: ActionType.selector,
+        selectorMode: SelectorMode.wand,
         isSelectionVisible: false,
         selectionPath: null,
       );
@@ -113,8 +116,10 @@ void main() {
       expect(result, isTrue);
     });
 
-    test('returns true when selection visibility is stale but path is missing', () {
+    test('returns true for selector wand when selection visibility is stale but path is missing', () {
       final bool result = shouldCreateSelectionFromFloodFillTap(
+        selectedAction: ActionType.selector,
+        selectorMode: SelectorMode.wand,
         isSelectionVisible: true,
         selectionPath: null,
       );
@@ -122,12 +127,25 @@ void main() {
       expect(result, isTrue);
     });
 
-    test('returns false when a selection is already active', () {
+    test('returns false when a selector wand selection is already active', () {
       final ui.Path selectionPath = ui.Path()..addRect(_selectionRect);
 
       final bool result = shouldCreateSelectionFromFloodFillTap(
+        selectedAction: ActionType.selector,
+        selectorMode: SelectorMode.wand,
         isSelectionVisible: true,
         selectionPath: selectionPath,
+      );
+
+      expect(result, isFalse);
+    });
+
+    test('returns false for the fill tool when no selection is active', () {
+      final bool result = shouldCreateSelectionFromFloodFillTap(
+        selectedAction: ActionType.fill,
+        selectorMode: SelectorMode.wand,
+        isSelectionVisible: false,
+        selectionPath: null,
       );
 
       expect(result, isFalse);
@@ -145,20 +163,15 @@ void main() {
       appProvider.undoProvider.clear();
     });
 
-    test('creates a selection instead of a paint action when none is active', () async {
+    test('does nothing when the fill tool has no active selection', () async {
+      appProvider.selectedAction = ActionType.fill;
       final int originalActionCount = appProvider.layers.selectedLayer.actionStack.length;
 
       final bool result = await appProvider.prepareFloodFillSelection(const ui.Offset(10, 10));
 
-      expect(result, isTrue);
-      expect(appProvider.selectorModel.isVisible, isTrue);
-      expect(
-        appProvider.selectorModel.path1!.getBounds(),
-        ui.Rect.fromPoints(
-          ui.Offset.zero,
-          ui.Offset(appProvider.layers.width, appProvider.layers.height),
-        ),
-      );
+      expect(result, isFalse);
+      expect(appProvider.selectorModel.isVisible, isFalse);
+      expect(appProvider.selectorModel.path1, isNull);
       expect(appProvider.layers.selectedLayer.actionStack.length, originalActionCount);
     });
 
@@ -172,30 +185,46 @@ void main() {
       expect(appProvider.selectorModel.path1!.getBounds(), originalBounds);
     });
 
-    test('creates a selection while linear fill mode is active', () async {
+    test('creates a selection for the selector wand when none is active', () async {
+      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectorModel.mode = SelectorMode.wand;
+
+      final bool result = await appProvider.prepareFloodFillSelection(const ui.Offset(10, 10));
+
+      expect(result, isTrue);
+      expect(appProvider.selectorModel.isVisible, isTrue);
+      expect(appProvider.selectorModel.path1, isNotNull);
+      expect(
+        appProvider.selectorModel.path1!.getBounds(),
+        ui.Rect.fromPoints(
+          ui.Offset.zero,
+          ui.Offset(appProvider.layers.width, appProvider.layers.height),
+        ),
+      );
+    });
+
+    test('does nothing for the fill tool while linear fill mode is active', () async {
       appProvider.selectedAction = ActionType.fill;
       appProvider.fillModel.mode = FillMode.linear;
 
       final bool result = await appProvider.prepareFloodFillSelection(const ui.Offset(10, 10));
 
-      expect(result, isTrue);
-      expect(appProvider.selectorModel.isVisible, isTrue);
-      expect(appProvider.selectorModel.path1, isNotNull);
+      expect(result, isFalse);
       expect(appProvider.fillModel.gradientPoints, isEmpty);
       expect(appProvider.fillModel.isVisible, isFalse);
+      expect(appProvider.selectorModel.path1, isNull);
     });
 
-    test('creates a selection while radial fill mode is active', () async {
+    test('does nothing for the fill tool while radial fill mode is active', () async {
       appProvider.selectedAction = ActionType.fill;
       appProvider.fillModel.mode = FillMode.radial;
 
       final bool result = await appProvider.prepareFloodFillSelection(const ui.Offset(10, 10));
 
-      expect(result, isTrue);
-      expect(appProvider.selectorModel.isVisible, isTrue);
-      expect(appProvider.selectorModel.path1, isNotNull);
+      expect(result, isFalse);
       expect(appProvider.fillModel.gradientPoints, isEmpty);
       expect(appProvider.fillModel.isVisible, isFalse);
+      expect(appProvider.selectorModel.path1, isNull);
     });
   });
 
