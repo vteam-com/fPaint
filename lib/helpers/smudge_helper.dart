@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -7,19 +8,82 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/prepared_smudge_stroke_source.dart';
 
-/// The rasterized replacement region produced by a smudge stroke.
-class SmudgeStrokeRasterResult {
-  const SmudgeStrokeRasterResult({
-    required this.image,
-    required this.bounds,
-  });
+/// The pixel-manipulation mode applied by the brush.
+enum PixelBrushMode {
+  /// Smudges pixels directionally along the stroke.
+  smudge,
 
-  final ui.Image image;
-  final ui.Rect bounds;
+  /// Blurs pixels in-place under the brush tip.
+  blur,
 }
 
-/// Resolves the spacing between resampled smudge points for [brushSize].
-double resolveSmudgeStepSpacing(final double brushSize) {
+/// The result of rasterizing one incremental segment of a pixel-brush stroke.
+///
+/// [pixels] is the full RGBA image buffer with the new segment's effect
+/// merged in. Feed it back as [livePixels] on the next segment call so effects
+/// accumulate progressively along the stroke.
+///
+/// [width] × [height] match the source image dimensions.
+class PixelBrushSegmentResult {
+  const PixelBrushSegmentResult({
+    required this.pixels,
+    required this.width,
+    required this.height,
+  });
+
+  final Uint8List pixels;
+  final int width;
+  final int height;
+}
+
+// ---------------------------------------------------------------------------
+// Isolate task structs
+// ---------------------------------------------------------------------------
+
+/// Input bundle passed to the pixel-brush isolate worker.
+class _PixelBrushIsolateInput {
+  const _PixelBrushIsolateInput({
+    required this.livePixelData,
+    required this.clipMaskData,
+    required this.imageWidth,
+    required this.imageHeight,
+    required this.segmentPoints,
+    required this.brushSize,
+    required this.mode,
+  });
+
+  final TransferableTypedData livePixelData;
+  final TransferableTypedData? clipMaskData;
+  final int imageWidth;
+  final int imageHeight;
+
+  /// Only the new points not yet processed by a previous segment call.
+  final List<Offset> segmentPoints;
+  final double brushSize;
+  final PixelBrushMode mode;
+}
+
+/// Output bundle returned by the pixel-brush isolate worker.
+class _PixelBrushIsolateOutput {
+  const _PixelBrushIsolateOutput({
+    required this.resultData,
+    required this.imageWidth,
+    required this.imageHeight,
+    required this.hasChanges,
+  });
+
+  final TransferableTypedData resultData;
+  final int imageWidth;
+  final int imageHeight;
+  final bool hasChanges;
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
+/// Resolves the spacing between resampled pixel-brush points for [brushSize].
+double resolvePixelBrushStepSpacing(final double brushSize) {
   final double radius = math.max(
     AppInteraction.smudgeMinimumRadius,
     brushSize * AppInteraction.smudgeBrushRadiusFactor,
@@ -30,8 +94,8 @@ double resolveSmudgeStepSpacing(final double brushSize) {
   );
 }
 
-/// Prepares source pixel data and an optional clip mask for a smudge stroke.
-Future<PreparedSmudgeStrokeSource?> prepareSmudgeStrokeSource({
+/// Prepares source pixel data and an optional clip mask for a pixel-brush stroke.
+Future<PreparedSmudgeStrokeSource?> preparePixelBrushSource({
   required final ui.Image sourceImage,
   final ui.Path? clipPath,
 }) async {
@@ -54,49 +118,130 @@ Future<PreparedSmudgeStrokeSource?> prepareSmudgeStrokeSource({
   );
 }
 
-/// Rasterizes a smudge stroke against [sourceImage] and returns the changed area.
-Future<SmudgeStrokeRasterResult?> rasterizeSmudgeStroke({
-  required final ui.Image sourceImage,
-  required final List<Offset> strokePoints,
+/// Applies [mode] to [livePixels] along [segmentPoints] and returns the
+/// updated full-image pixel buffer.
+///
+/// [livePixels] represents the current visual state of the layer (already
+/// containing any prior segment effects from this stroke). Only
+/// [segmentPoints] – the points not yet processed – are applied; the caller
+/// must advance its "last processed" index after each call.
+///
+/// Returns `null` when the segment cannot produce a visible change (fewer
+/// than two points, no affected pixels, etc.).
+///
+/// The CPU work runs in a separate [Isolate] so the main thread stays free.
+Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
+  required final Uint8List livePixels,
+  required final int imageWidth,
+  required final int imageHeight,
+  required final List<Offset> segmentPoints,
   required final double brushSize,
-  final ui.Path? clipPath,
-  final PreparedSmudgeStrokeSource? preparedSource,
+  required final PixelBrushMode mode,
+  final Uint8List? clipMask,
 }) async {
-  if (strokePoints.length < AppMath.pair) {
+  if (segmentPoints.length < AppMath.pair) {
     return null;
   }
 
-  final PreparedSmudgeStrokeSource? activeSource =
-      preparedSource ??
-      await prepareSmudgeStrokeSource(
-        sourceImage: sourceImage,
-        clipPath: clipPath,
-      );
-  if (activeSource == null) {
+  // Extract values into locals before the isolate closure to avoid
+  // capturing non-sendable objects.
+  final TransferableTypedData livePixelData = TransferableTypedData.fromList(<Uint8List>[livePixels]);
+  final TransferableTypedData? clipMaskData = clipMask == null
+      ? null
+      : TransferableTypedData.fromList(<Uint8List>[clipMask]);
+
+  final _PixelBrushIsolateOutput output = await Isolate.run<_PixelBrushIsolateOutput>(
+    () => _runPixelBrushTask(
+      _PixelBrushIsolateInput(
+        livePixelData: livePixelData,
+        clipMaskData: clipMaskData,
+        imageWidth: imageWidth,
+        imageHeight: imageHeight,
+        segmentPoints: segmentPoints,
+        brushSize: brushSize,
+        mode: mode,
+      ),
+    ),
+  );
+
+  if (!output.hasChanges) {
     return null;
   }
 
-  final ui.Image activeImage = activeSource.image;
-  final Uint8List? clipMask = activeSource.clipMask;
+  return PixelBrushSegmentResult(
+    pixels: output.resultData.materialize().asUint8List(),
+    width: output.imageWidth,
+    height: output.imageHeight,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Isolate entry point
+// ---------------------------------------------------------------------------
+
+/// Runs the pixel-brush effect along [input.segmentPoints] and returns the
+/// updated full-image pixel buffer.
+///
+/// The caller is responsible for passing only the *new* segment points that
+/// have not yet been processed (i.e. the tail of the stroke since the last
+/// call). This keeps each isolate invocation O(segment) instead of
+/// O(full-stroke) and ensures effects accumulate correctly.
+_PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input) {
+  // Start from the caller's current live pixel state.
+  final Uint8List pixels = Uint8List.fromList(input.livePixelData.materialize().asUint8List());
+  final Uint8List? clipMask = input.clipMaskData?.materialize().asUint8List();
+  final int imageWidth = input.imageWidth;
+  final int imageHeight = input.imageHeight;
 
   final double radius = math.max(
     AppInteraction.smudgeMinimumRadius,
-    brushSize * AppInteraction.smudgeBrushRadiusFactor,
+    input.brushSize * AppInteraction.smudgeBrushRadiusFactor,
   );
-  final double stepSpacing = resolveSmudgeStepSpacing(brushSize);
-  final ui.Rect workingBounds = _resolveWorkingBounds(
-    strokePoints: strokePoints,
-    imageWidth: activeImage.width,
-    imageHeight: activeImage.height,
-    radius: radius,
+  final double stepSpacing = math.max(
+    AppInteraction.smudgeInputPointSpacing,
+    radius * AppInteraction.smudgeStepSpacingFactor,
   );
-  final int workingLeft = workingBounds.left.floor();
-  final int workingTop = workingBounds.top.floor();
-  final int workingWidth = workingBounds.width.ceil();
-  final int workingHeight = workingBounds.height.ceil();
+
+  // Compute the bounding box of the segment so we work only on affected rows.
+  final int padding = radius.ceil() + AppInteraction.smudgeBoundsPadding;
+  double minX = input.segmentPoints.first.dx;
+  double minY = input.segmentPoints.first.dy;
+  double maxX = input.segmentPoints.first.dx;
+  double maxY = input.segmentPoints.first.dy;
+  for (final Offset p in input.segmentPoints.skip(AppMath.one)) {
+    if (p.dx < minX) {
+      minX = p.dx;
+    }
+    if (p.dy < minY) {
+      minY = p.dy;
+    }
+    if (p.dx > maxX) {
+      maxX = p.dx;
+    }
+    if (p.dy > maxY) {
+      maxY = p.dy;
+    }
+  }
+  final int workingLeft = math.max(AppMath.zero, minX.floor() - padding);
+  final int workingTop = math.max(AppMath.zero, minY.floor() - padding);
+  final int workingRight = math.min(imageWidth - AppMath.one, maxX.ceil() + padding);
+  final int workingBottom = math.min(imageHeight - AppMath.one, maxY.ceil() + padding);
+  final int workingWidth = workingRight - workingLeft + AppMath.one;
+  final int workingHeight = workingBottom - workingTop + AppMath.one;
+
+  if (workingWidth <= AppMath.zero || workingHeight <= AppMath.zero) {
+    return _PixelBrushIsolateOutput(
+      resultData: TransferableTypedData.fromList(<Uint8List>[pixels]),
+      imageWidth: imageWidth,
+      imageHeight: imageHeight,
+      hasChanges: false,
+    );
+  }
+
+  // Extract a working sub-buffer so inner loops index cheaply.
   final Uint8List workingPixels = _copyPixelRect(
-    pixels: activeSource.pixels,
-    imageWidth: activeImage.width,
+    pixels: pixels,
+    imageWidth: imageWidth,
     left: workingLeft,
     top: workingTop,
     width: workingWidth,
@@ -106,110 +251,94 @@ Future<SmudgeStrokeRasterResult?> rasterizeSmudgeStroke({
       ? null
       : _copyPixelRect(
           pixels: clipMask,
-          imageWidth: activeImage.width,
+          imageWidth: imageWidth,
           left: workingLeft,
           top: workingTop,
           width: workingWidth,
           height: workingHeight,
         );
 
-  int dirtyLeft = workingWidth;
-  int dirtyTop = workingHeight;
-  int dirtyRight = -AppMath.one;
-  int dirtyBottom = -AppMath.one;
+  bool anyChanges = false;
+  final ui.Offset origin = ui.Offset(workingLeft.toDouble(), workingTop.toDouble());
 
-  for (int index = AppMath.one; index < strokePoints.length; index++) {
-    final Offset segmentStart = strokePoints[index - AppMath.one] - workingBounds.topLeft;
-    final Offset segmentEnd = strokePoints[index] - workingBounds.topLeft;
-    final double distance = (segmentEnd - segmentStart).distance;
-    final int stepCount = math.max(AppMath.one, (distance / stepSpacing).ceil());
-    Offset previousCenter = segmentStart;
+  for (int idx = AppMath.one; idx < input.segmentPoints.length; idx++) {
+    final Offset segStart = input.segmentPoints[idx - AppMath.one] - origin;
+    final Offset segEnd = input.segmentPoints[idx] - origin;
+    final double dist = (segEnd - segStart).distance;
+    final int steps = math.max(AppMath.one, (dist / stepSpacing).ceil());
+    Offset prevCenter = segStart;
 
-    for (int step = AppMath.one; step <= stepCount; step++) {
-      final double progress = step / stepCount;
-      final Offset currentCenter = Offset.lerp(segmentStart, segmentEnd, progress) ?? segmentEnd;
-      final ui.Rect? dirtyRect = _applySmudgeStep(
-        pixels: workingPixels,
-        imageWidth: workingWidth,
-        imageHeight: workingHeight,
-        fromCenter: previousCenter,
-        toCenter: currentCenter,
-        radius: radius,
-        clipMask: workingClipMask,
-      );
+    for (int step = AppMath.one; step <= steps; step++) {
+      final double t = step / steps;
+      final Offset curCenter = Offset.lerp(segStart, segEnd, t) ?? segEnd;
 
-      if (dirtyRect != null) {
-        dirtyLeft = math.min(dirtyLeft, dirtyRect.left.floor());
-        dirtyTop = math.min(dirtyTop, dirtyRect.top.floor());
-        dirtyRight = math.max(dirtyRight, dirtyRect.right.ceil() - AppMath.one);
-        dirtyBottom = math.max(dirtyBottom, dirtyRect.bottom.ceil() - AppMath.one);
+      final bool stepChanged;
+      switch (input.mode) {
+        case PixelBrushMode.smudge:
+          stepChanged = _applySmudgeStep(
+            pixels: workingPixels,
+            imageWidth: workingWidth,
+            imageHeight: workingHeight,
+            fromCenter: prevCenter,
+            toCenter: curCenter,
+            radius: radius,
+            clipMask: workingClipMask,
+          );
+        case PixelBrushMode.blur:
+          stepChanged = _applyBlurStep(
+            pixels: workingPixels,
+            imageWidth: workingWidth,
+            imageHeight: workingHeight,
+            center: curCenter,
+            radius: radius,
+            clipMask: workingClipMask,
+          );
       }
 
-      previousCenter = currentCenter;
+      if (stepChanged) {
+        anyChanges = true;
+      }
+      prevCenter = curCenter;
     }
   }
 
-  if (dirtyRight < dirtyLeft || dirtyBottom < dirtyTop) {
-    return null;
+  if (!anyChanges) {
+    return _PixelBrushIsolateOutput(
+      resultData: TransferableTypedData.fromList(<Uint8List>[pixels]),
+      imageWidth: imageWidth,
+      imageHeight: imageHeight,
+      hasChanges: false,
+    );
   }
 
-  final int cropWidth = dirtyRight - dirtyLeft + AppMath.one;
-  final int cropHeight = dirtyBottom - dirtyTop + AppMath.one;
-  final Uint8List croppedPixels = _copyPixelRect(
-    pixels: workingPixels,
-    imageWidth: workingWidth,
-    left: dirtyLeft,
-    top: dirtyTop,
-    width: cropWidth,
-    height: cropHeight,
+  // Write the modified sub-buffer back into the full pixel array.
+  _writePixelRect(
+    source: workingPixels,
+    destination: pixels,
+    imageWidth: imageWidth,
+    left: workingLeft,
+    top: workingTop,
+    width: workingWidth,
+    height: workingHeight,
   );
 
-  return SmudgeStrokeRasterResult(
-    image: await imageFromPixels(croppedPixels, cropWidth, cropHeight),
-    bounds: ui.Rect.fromLTWH(
-      workingBounds.left + dirtyLeft,
-      workingBounds.top + dirtyTop,
-      cropWidth.toDouble(),
-      cropHeight.toDouble(),
-    ),
+  return _PixelBrushIsolateOutput(
+    resultData: TransferableTypedData.fromList(<Uint8List>[pixels]),
+    imageWidth: imageWidth,
+    imageHeight: imageHeight,
+    hasChanges: true,
   );
 }
 
-/// Resolves the stroke-bounded working region that needs pixel processing.
-ui.Rect _resolveWorkingBounds({
-  required final List<Offset> strokePoints,
-  required final int imageWidth,
-  required final int imageHeight,
-  required final double radius,
-}) {
-  final int padding = radius.ceil() + AppInteraction.smudgeBoundsPadding;
-  double minX = strokePoints.first.dx;
-  double minY = strokePoints.first.dy;
-  double maxX = strokePoints.first.dx;
-  double maxY = strokePoints.first.dy;
+// ---------------------------------------------------------------------------
+// Per-step pixel operations
+// ---------------------------------------------------------------------------
 
-  for (final Offset point in strokePoints.skip(AppMath.one)) {
-    minX = math.min(minX, point.dx);
-    minY = math.min(minY, point.dy);
-    maxX = math.max(maxX, point.dx);
-    maxY = math.max(maxY, point.dy);
-  }
-
-  final int left = math.max(AppMath.zero, minX.floor() - padding);
-  final int top = math.max(AppMath.zero, minY.floor() - padding);
-  final int right = math.min(imageWidth - AppMath.one, maxX.ceil() + padding);
-  final int bottom = math.min(imageHeight - AppMath.one, maxY.ceil() + padding);
-
-  return ui.Rect.fromLTRB(
-    left.toDouble(),
-    top.toDouble(),
-    (right + AppMath.one).toDouble(),
-    (bottom + AppMath.one).toDouble(),
-  );
-}
-
-/// Applies one incremental smudge step and returns the modified destination bounds.
-ui.Rect? _applySmudgeStep({
+/// Applies one incremental smudge step: samples pixels at [fromCenter] offset
+/// and blends them into [toCenter] position within [radius].
+///
+/// Returns `true` when at least one pixel was modified.
+bool _applySmudgeStep({
   required final Uint8List pixels,
   required final int imageWidth,
   required final int imageHeight,
@@ -237,24 +366,34 @@ ui.Rect? _applySmudgeStep({
   );
 
   if (right < left || bottom < top) {
-    return null;
+    return false;
   }
 
-  final int rectWidth = right - left + AppMath.one;
-  final int rectHeight = bottom - top + AppMath.one;
+  // Source position for destination (x, y): sourceX = fromCenter.dx + (x − toCenter.dx).
+  // For destinations in [left, right] the sources span [left + d, right + d] where
+  // d = fromCenter − toCenter.  When |d| > 0 that range extends outside [left, right],
+  // so the snapshot must cover the union of both to keep all indices in-bounds.
+  final double displacementX = fromCenter.dx - toCenter.dx;
+  final double displacementY = fromCenter.dy - toCenter.dy;
+  final int snapshotLeft = math.max(AppMath.zero, math.min(left, (left + displacementX).floor()));
+  final int snapshotTop = math.max(AppMath.zero, math.min(top, (top + displacementY).floor()));
+  final int snapshotRight = math.min(imageWidth - AppMath.one, math.max(right, (right + displacementX).ceil()));
+  final int snapshotBottom = math.min(imageHeight - AppMath.one, math.max(bottom, (bottom + displacementY).ceil()));
+  final int snapshotWidth = snapshotRight - snapshotLeft + AppMath.one;
+  final int snapshotHeight = snapshotBottom - snapshotTop + AppMath.one;
+
+  // Snapshot the expanded region *before* modification so every pixel in this
+  // step samples from a consistent pre-step state.
   final Uint8List snapshot = _copyPixelRect(
     pixels: pixels,
     imageWidth: imageWidth,
-    left: left,
-    top: top,
-    width: rectWidth,
-    height: rectHeight,
+    left: snapshotLeft,
+    top: snapshotTop,
+    width: snapshotWidth,
+    height: snapshotHeight,
   );
 
-  int dirtyLeft = imageWidth;
-  int dirtyTop = imageHeight;
-  int dirtyRight = -AppMath.one;
-  int dirtyBottom = -AppMath.one;
+  bool anyChanged = false;
 
   for (int y = top; y <= bottom; y++) {
     for (int x = left; x <= right; x++) {
@@ -278,14 +417,14 @@ ui.Rect? _applySmudgeStep({
       }
 
       final int destinationSnapshotIndex = _pixelIndex(
-        width: rectWidth,
-        x: x - left,
-        y: y - top,
+        width: snapshotWidth,
+        x: x - snapshotLeft,
+        y: y - snapshotTop,
       );
       final int sourceSnapshotIndex = _pixelIndex(
-        width: rectWidth,
-        x: sourceX - left,
-        y: sourceY - top,
+        width: snapshotWidth,
+        x: sourceX - snapshotLeft,
+        y: sourceY - snapshotTop,
       );
       final int destinationIndex = _pixelIndex(
         width: imageWidth,
@@ -293,49 +432,154 @@ ui.Rect? _applySmudgeStep({
         y: y,
       );
 
-      final int sourceAlpha = snapshot[sourceSnapshotIndex + AppMath.rgbChannelAlpha];
-      final int destinationAlpha = snapshot[destinationSnapshotIndex + AppMath.rgbChannelAlpha];
-      if (sourceAlpha == AppMath.zero && destinationAlpha == AppMath.zero) {
+      final int srcAlpha = snapshot[sourceSnapshotIndex + AppMath.rgbChannelAlpha];
+      final int dstAlpha = snapshot[destinationSnapshotIndex + AppMath.rgbChannelAlpha];
+      if (srcAlpha == AppMath.zero && dstAlpha == AppMath.zero) {
         continue;
       }
 
-      final double feather = AppVisual.full - math.sqrt(distanceSquared) / radius;
-      final double blend = AppInteraction.smudgeBlendStrength * feather.clamp(AppMath.zero.toDouble(), AppVisual.full);
+      final double feather = (AppVisual.full - math.sqrt(distanceSquared) / radius).clamp(
+        AppMath.zero.toDouble(),
+        AppVisual.full,
+      );
+      final double radialFalloff = math.pow(feather, AppInteraction.smudgeEdgeFalloffExponent).toDouble();
+      final double blend = AppInteraction.smudgeBlendStrength * radialFalloff;
       if (blend <= AppMath.zero.toDouble()) {
         continue;
       }
 
-      bool changed = false;
       for (int channel = AppMath.zero; channel < AppMath.bytesPerPixel; channel++) {
         final int oldValue = snapshot[destinationSnapshotIndex + channel];
         final int newValue = ((oldValue * (AppVisual.full - blend)) + (snapshot[sourceSnapshotIndex + channel] * blend))
             .round()
             .clamp(AppMath.zero, AppLimits.rgbChannelMax);
         if (newValue != oldValue) {
-          changed = true;
+          anyChanged = true;
           pixels[destinationIndex + channel] = newValue;
         }
-      }
-
-      if (changed) {
-        dirtyLeft = math.min(dirtyLeft, x);
-        dirtyTop = math.min(dirtyTop, y);
-        dirtyRight = math.max(dirtyRight, x);
-        dirtyBottom = math.max(dirtyBottom, y);
       }
     }
   }
 
-  if (dirtyRight < dirtyLeft || dirtyBottom < dirtyTop) {
-    return null;
+  return anyChanged;
+}
+
+/// Applies one blur step: box-blurs the pixels within [radius] around [center].
+///
+/// Uses a small kernel average sampled from the current [pixels] buffer.
+/// Returns `true` when at least one pixel was modified.
+bool _applyBlurStep({
+  required final Uint8List pixels,
+  required final int imageWidth,
+  required final int imageHeight,
+  required final Offset center,
+  required final double radius,
+  required final Uint8List? clipMask,
+}) {
+  final int intRadius = radius.ceil();
+  final int left = math.max(AppMath.zero, center.dx.floor() - intRadius);
+  final int top = math.max(AppMath.zero, center.dy.floor() - intRadius);
+  final int right = math.min(imageWidth - AppMath.one, center.dx.ceil() + intRadius);
+  final int bottom = math.min(imageHeight - AppMath.one, center.dy.ceil() + intRadius);
+
+  if (right < left || bottom < top) {
+    return false;
   }
 
-  return ui.Rect.fromLTRB(
-    dirtyLeft.toDouble(),
-    dirtyTop.toDouble(),
-    (dirtyRight + AppMath.one).toDouble(),
-    (dirtyBottom + AppMath.one).toDouble(),
+  final int rectWidth = right - left + AppMath.one;
+  final int rectHeight = bottom - top + AppMath.one;
+  // Snapshot so every destination pixel reads unmodified source values.
+  final Uint8List snapshot = _copyPixelRect(
+    pixels: pixels,
+    imageWidth: imageWidth,
+    left: left,
+    top: top,
+    width: rectWidth,
+    height: rectHeight,
   );
+
+  // Kernel half-width: 1-pixel neighbour average (3×3).
+  const int kernelHalf = AppInteraction.blurBrushKernelHalf;
+  bool anyChanged = false;
+
+  for (int y = top; y <= bottom; y++) {
+    for (int x = left; x <= right; x++) {
+      if (!_isMaskVisible(clipMask, imageWidth, x, y)) {
+        continue;
+      }
+
+      final double centerOffsetX = x + AppVisual.half - center.dx;
+      final double centerOffsetY = y + AppVisual.half - center.dy;
+      final double distanceSquared = centerOffsetX * centerOffsetX + centerOffsetY * centerOffsetY;
+      if (distanceSquared > radius * radius) {
+        continue;
+      }
+
+      final double feather = (AppVisual.full - math.sqrt(distanceSquared) / radius).clamp(
+        AppMath.zero.toDouble(),
+        AppVisual.full,
+      );
+      final double radialFalloff = math.pow(feather, AppInteraction.blurBrushEdgeFalloffExponent).toDouble();
+      final double blend = AppInteraction.blurBrushStrength * radialFalloff;
+      if (blend <= AppMath.zero.toDouble()) {
+        continue;
+      }
+
+      // Accumulate the neighbourhood average.
+      int sumR = AppMath.zero;
+      int sumG = AppMath.zero;
+      int sumB = AppMath.zero;
+      int sumA = AppMath.zero;
+      int count = AppMath.zero;
+
+      for (int ky = -kernelHalf; ky <= kernelHalf; ky++) {
+        for (int kx = -kernelHalf; kx <= kernelHalf; kx++) {
+          final int sx = _clampPixel(x + kx - left, rectWidth);
+          final int sy = _clampPixel(y + ky - top, rectHeight);
+          final int si = _pixelIndex(width: rectWidth, x: sx, y: sy);
+          sumR += snapshot[si + AppMath.rgbChannelRed];
+          sumG += snapshot[si + AppMath.rgbChannelGreen];
+          sumB += snapshot[si + AppMath.rgbChannelBlue];
+          sumA += snapshot[si + AppMath.rgbChannelAlpha];
+          count++;
+        }
+      }
+
+      final int avgR = sumR ~/ count;
+      final int avgG = sumG ~/ count;
+      final int avgB = sumB ~/ count;
+      final int avgA = sumA ~/ count;
+
+      final int di = _pixelIndex(width: imageWidth, x: x, y: y);
+      final int snapshotI = _pixelIndex(width: rectWidth, x: x - left, y: y - top);
+
+      final int newR = (snapshot[snapshotI + AppMath.rgbChannelRed] * (AppVisual.full - blend) + avgR * blend)
+          .round()
+          .clamp(AppMath.zero, AppLimits.rgbChannelMax);
+      final int newG = (snapshot[snapshotI + AppMath.rgbChannelGreen] * (AppVisual.full - blend) + avgG * blend)
+          .round()
+          .clamp(AppMath.zero, AppLimits.rgbChannelMax);
+      final int newB = (snapshot[snapshotI + AppMath.rgbChannelBlue] * (AppVisual.full - blend) + avgB * blend)
+          .round()
+          .clamp(AppMath.zero, AppLimits.rgbChannelMax);
+      final int newA = (snapshot[snapshotI + AppMath.rgbChannelAlpha] * (AppVisual.full - blend) + avgA * blend)
+          .round()
+          .clamp(AppMath.zero, AppLimits.rgbChannelMax);
+
+      if (newR != snapshot[snapshotI + AppMath.rgbChannelRed] ||
+          newG != snapshot[snapshotI + AppMath.rgbChannelGreen] ||
+          newB != snapshot[snapshotI + AppMath.rgbChannelBlue] ||
+          newA != snapshot[snapshotI + AppMath.rgbChannelAlpha]) {
+        anyChanged = true;
+        pixels[di + AppMath.rgbChannelRed] = newR;
+        pixels[di + AppMath.rgbChannelGreen] = newG;
+        pixels[di + AppMath.rgbChannelBlue] = newB;
+        pixels[di + AppMath.rgbChannelAlpha] = newA;
+      }
+    }
+  }
+
+  return anyChanged;
 }
 
 /// Creates a binary alpha mask for [clipPath] that matches the source image size.
@@ -389,6 +633,33 @@ Uint8List _copyPixelRect({
   }
 
   return result;
+}
+
+/// Writes a rectangular sub-buffer back into [destination] at [left]/[top].
+void _writePixelRect({
+  required final Uint8List source,
+  required final Uint8List destination,
+  required final int imageWidth,
+  required final int left,
+  required final int top,
+  required final int width,
+  required final int height,
+}) {
+  final int rowByteCount = width * AppMath.bytesPerPixel;
+  for (int row = AppMath.zero; row < height; row++) {
+    final int destinationOffset = _pixelIndex(
+      width: imageWidth,
+      x: left,
+      y: top + row,
+    );
+    final int sourceOffset = row * rowByteCount;
+    destination.setRange(
+      destinationOffset,
+      destinationOffset + rowByteCount,
+      source,
+      sourceOffset,
+    );
+  }
 }
 
 /// Returns whether [clipMask] includes the given pixel coordinate.

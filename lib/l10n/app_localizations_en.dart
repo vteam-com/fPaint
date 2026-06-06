@@ -252,18 +252,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get exportedLabel => 'Exported';
-
-  @override
   String errorReadingFile(Object error) {
     return 'Error reading file: $error';
   }
 
   @override
-  String get exportLabel => 'Export...';
+  String get exportedLabel => 'Exported';
 
   @override
   String get exportingLabel => 'Exporting...';
+
+  @override
+  String get exportLabel => 'Export...';
 
   @override
   String get exportTooltip => 'Export...';
@@ -347,14 +347,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidSize => 'Invalid size';
 
   @override
-  String get keyboardShortcuts => 'Keyboard Shortcuts';
-
-  @override
   String get keepSaveBackupsSubtitle =>
       'Before overwriting a saved file, keep up to 3 timestamped backups of the previous version.';
 
   @override
   String get keepSaveBackupsTitle => 'Keep Save Backups';
+
+  @override
+  String get keyboardShortcuts => 'Keyboard Shortcuts';
 
   @override
   String get languageEnglish => 'English';
@@ -408,12 +408,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get layerHideAllOthers => 'Hide all other layers';
 
   @override
-  String get layerLockEdits => 'Lock layer edits';
-
-  @override
   String layerLockedForEditing(Object layerName) {
     return '$layerName is locked for editing.';
   }
+
+  @override
+  String get layerLockEdits => 'Lock layer edits';
 
   @override
   String get layerMergeBelow => 'Merge to below layer';
@@ -495,10 +495,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get savedLabel => 'Saved';
 
   @override
-  String get savingLabel => 'Saving...';
+  String get saveLabel => 'Save';
 
   @override
-  String get saveLabel => 'Save';
+  String get savingLabel => 'Saving...';
 
   @override
   String get scale => 'Scale';
@@ -597,6 +597,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toolSmudge => 'Smudge';
+
+  @override
+  String get toolBlurBrush => 'Blur Brush';
 
   @override
   String get toolSolid => 'Solid';

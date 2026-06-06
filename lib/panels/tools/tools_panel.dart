@@ -247,6 +247,14 @@ class ToolsPanel extends StatelessWidget {
         onPressed: () => appProvider.selectedAction = ActionType.smudge,
       ),
       _buildActionPicker(
+        key: Keys.toolBlurBrush,
+        minimal: minimal,
+        name: l10n.toolBlurBrush,
+        icon: ActionType.blurBrush.icon,
+        isSelected: selectedTool == ActionType.blurBrush,
+        onPressed: () => appProvider.selectedAction = ActionType.blurBrush,
+      ),
+      _buildActionPicker(
         key: Keys.toolLine,
         minimal: minimal,
         name: l10n.toolLine,

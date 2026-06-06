@@ -126,7 +126,7 @@ void main() {
 
   group('toolsSupportedAttributes', () {
     test('contains all action types', () {
-      expect(toolsSupportedAttributes.length, 11);
+      expect(toolsSupportedAttributes.length, 12);
     });
 
     test('pencil supports correct attributes', () {

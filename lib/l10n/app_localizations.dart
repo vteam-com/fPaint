@@ -530,29 +530,29 @@ abstract class AppLocalizations {
   /// **'Error processing file: {error}'**
   String errorProcessingFile(Object error);
 
-  /// No description provided for @exportedLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Exported'**
-  String get exportedLabel;
-
   /// No description provided for @errorReadingFile.
   ///
   /// In en, this message translates to:
   /// **'Error reading file: {error}'**
   String errorReadingFile(Object error);
 
-  /// No description provided for @exportLabel.
+  /// No description provided for @exportedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Export...'**
-  String get exportLabel;
+  /// **'Exported'**
+  String get exportedLabel;
 
   /// No description provided for @exportingLabel.
   ///
   /// In en, this message translates to:
   /// **'Exporting...'**
   String get exportingLabel;
+
+  /// No description provided for @exportLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Export...'**
+  String get exportLabel;
 
   /// No description provided for @exportTooltip.
   ///
@@ -704,12 +704,6 @@ abstract class AppLocalizations {
   /// **'Invalid size'**
   String get invalidSize;
 
-  /// No description provided for @keyboardShortcuts.
-  ///
-  /// In en, this message translates to:
-  /// **'Keyboard Shortcuts'**
-  String get keyboardShortcuts;
-
   /// No description provided for @keepSaveBackupsSubtitle.
   ///
   /// In en, this message translates to:
@@ -721,6 +715,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Keep Save Backups'**
   String get keepSaveBackupsTitle;
+
+  /// No description provided for @keyboardShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard Shortcuts'**
+  String get keyboardShortcuts;
 
   /// No description provided for @languageEnglish.
   ///
@@ -824,17 +824,17 @@ abstract class AppLocalizations {
   /// **'Hide all other layers'**
   String get layerHideAllOthers;
 
-  /// No description provided for @layerLockEdits.
-  ///
-  /// In en, this message translates to:
-  /// **'Lock layer edits'**
-  String get layerLockEdits;
-
   /// No description provided for @layerLockedForEditing.
   ///
   /// In en, this message translates to:
   /// **'{layerName} is locked for editing.'**
   String layerLockedForEditing(Object layerName);
+
+  /// No description provided for @layerLockEdits.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock layer edits'**
+  String get layerLockEdits;
 
   /// No description provided for @layerMergeBelow.
   ///
@@ -986,17 +986,17 @@ abstract class AppLocalizations {
   /// **'Saved'**
   String get savedLabel;
 
-  /// No description provided for @savingLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Saving...'**
-  String get savingLabel;
-
   /// No description provided for @saveLabel.
   ///
   /// In en, this message translates to:
   /// **'Save'**
   String get saveLabel;
+
+  /// No description provided for @savingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving...'**
+  String get savingLabel;
 
   /// No description provided for @scale.
   ///
@@ -1190,6 +1190,12 @@ abstract class AppLocalizations {
   /// **'Smudge'**
   String get toolSmudge;
 
+  /// No description provided for @toolBlurBrush.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur Brush'**
+  String get toolBlurBrush;
+
   /// No description provided for @toolSolid.
   ///
   /// In en, this message translates to:
@@ -1289,13 +1295,4 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
     'that was used.',
   );
-}
-
-/// Convenience accessor so widgets can read localizations via `context.l10n`.
-extension AppLocalizationsBuildContextX on BuildContext {
-  AppLocalizations get l10n {
-    final AppLocalizations? localizations = AppLocalizations.of(this);
-    assert(localizations != null, 'AppLocalizations not found in context.');
-    return localizations!;
-  }
 }

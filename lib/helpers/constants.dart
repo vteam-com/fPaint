@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show Key;
 import 'package:flutter/painting.dart' show TextStyle;
 
 export 'package:fpaint/l10n/app_localizations.dart';
+export 'package:fpaint/l10n/app_localizations_x.dart';
 
 /// The application display name.
 const String appName = 'fPaint';
@@ -385,7 +386,11 @@ class AppInteraction {
   static const double smudgeInputPointSpacing = 1.0;
   static const double smudgeStepSpacingFactor = 0.35;
   static const double smudgeBlendStrength = 0.8;
+  static const double smudgeEdgeFalloffExponent = 2.0;
   static const int smudgeBoundsPadding = 2;
+  static const double blurBrushStrength = 0.6;
+  static const double blurBrushEdgeFalloffExponent = 2.0;
+  static const int blurBrushKernelHalf = 1;
   static const double selectionHandleSize = 20;
   static const double selectionToolbarMargin = 50.0;
   static const double imagePlacementHandleSize = 14.0;
@@ -671,6 +676,7 @@ class Keys {
   static const Key toolFillHalftoneToggle = Key('tool-fill-halftone-toggle');
   static const Key toolFillHalftoneSlider = Key('tool-fill-halftone-slider');
   static const Key toolSmudge = Key('tool-smudge');
+  static const Key toolBlurBrush = Key('tool-blur-brush');
 
   static const Key toolSelector = Key('tool-selector');
   static const Key toolSelectorModeRectangle = Key('tool-selector-mode-rectangle');
