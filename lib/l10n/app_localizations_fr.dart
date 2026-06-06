@@ -253,18 +253,18 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get exportedLabel => 'Exporté';
-
-  @override
   String errorReadingFile(Object error) {
     return 'Erreur de lecture du fichier : $error';
   }
 
   @override
-  String get exportLabel => 'Exporter...';
+  String get exportedLabel => 'Exporté';
 
   @override
   String get exportingLabel => 'Exportation...';
+
+  @override
+  String get exportLabel => 'Exporter...';
 
   @override
   String get exportTooltip => 'Exporter...';
@@ -349,14 +349,14 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invalidSize => 'Taille invalide';
 
   @override
-  String get keyboardShortcuts => 'Raccourcis clavier';
-
-  @override
   String get keepSaveBackupsSubtitle =>
       'Avant d\'ecraser un fichier enregistre, conservez jusqu\'a 3 sauvegardes horodatees de la version precedente.';
 
   @override
   String get keepSaveBackupsTitle => 'Conserver des sauvegardes a l\'enregistrement';
+
+  @override
+  String get keyboardShortcuts => 'Raccourcis clavier';
 
   @override
   String get languageEnglish => 'Anglais';
@@ -410,12 +410,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get layerHideAllOthers => 'Masquer tous les autres calques';
 
   @override
-  String get layerLockEdits => 'Verrouiller la modification du calque';
-
-  @override
   String layerLockedForEditing(Object layerName) {
     return 'Le calque $layerName est verrouille pour la modification.';
   }
+
+  @override
+  String get layerLockEdits => 'Verrouiller la modification du calque';
 
   @override
   String get layerMergeBelow => 'Fusionner avec le calque inférieur';
@@ -497,10 +497,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get savedLabel => 'Enregistre';
 
   @override
-  String get savingLabel => 'Enregistrement...';
+  String get saveLabel => 'Enregistrer';
 
   @override
-  String get saveLabel => 'Enregistrer';
+  String get savingLabel => 'Enregistrement...';
 
   @override
   String get scale => 'Mettre a l\'echelle';
@@ -599,6 +599,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get toolSmudge => 'Estomper';
+
+  @override
+  String get toolBlurBrush => 'Pinceau Flou';
 
   @override
   String get toolSolid => 'Uni';

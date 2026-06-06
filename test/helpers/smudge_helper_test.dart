@@ -27,18 +27,8 @@ Future<ui.Image> _createSplitImage() {
   );
 }
 
-Future<ui.Image> _applyResultToSource(
-  final ui.Image source,
-  final SmudgeStrokeRasterResult result,
-) {
-  return renderCanvasImage(
-    width: source.width,
-    height: source.height,
-    draw: (final ui.Canvas canvas) {
-      canvas.drawImage(source, Offset.zero, Paint());
-      canvas.drawImage(result.image, result.bounds.topLeft, Paint());
-    },
-  );
+Future<ui.Image> _resultToImage(final PixelBrushSegmentResult result) {
+  return imageFromPixels(result.pixels, result.width, result.height);
 }
 
 Future<Color> _readPixel(
@@ -60,62 +50,127 @@ Future<Color> _readPixel(
   );
 }
 
+Future<Uint8List> _imagePixels(final ui.Image source) async {
+  final Uint8List? pixels = await extractImagePixels(
+    source,
+    format: ui.ImageByteFormat.rawStraightRgba,
+  );
+  expect(pixels, isNotNull);
+  return pixels!;
+}
+
 void main() {
-  test('rasterizeSmudgeStroke moves sampled color along the stroke', () async {
+  test('rasterizePixelBrushSegment (smudge) moves sampled color along stroke', () async {
     final ui.Image source = await _createSplitImage();
 
-    final SmudgeStrokeRasterResult? result = await rasterizeSmudgeStroke(
-      sourceImage: source,
-      strokePoints: const <Offset>[
-        Offset(4, 2),
-        Offset(8, 2),
-      ],
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: await _imagePixels(source),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(4, 2), Offset(8, 2)],
       brushSize: 4,
+      mode: PixelBrushMode.smudge,
     );
 
     expect(result, isNotNull);
-
-    final ui.Image output = await _applyResultToSource(source, result!);
+    final ui.Image output = await _resultToImage(result!);
     final Color smeared = await _readPixel(output, 7, 2);
-    final int smearedRed = (smeared.r * AppLimits.rgbChannelMax).round();
-    final int smearedBlue = (smeared.b * AppLimits.rgbChannelMax).round();
-
-    expect(smearedRed, greaterThan(AppMath.zero));
-    expect(smearedBlue, lessThan(AppLimits.rgbChannelMax));
+    expect((smeared.r * AppLimits.rgbChannelMax).round(), greaterThan(AppMath.zero));
+    expect((smeared.b * AppLimits.rgbChannelMax).round(), lessThan(AppLimits.rgbChannelMax));
   });
 
-  test('rasterizeSmudgeStroke respects the clip path', () async {
+  test('rasterizePixelBrushSegment (smudge) respects clip mask', () async {
     final ui.Image source = await _createSplitImage();
+    // Build a clip mask: white only for x < 8, so x=10 should remain unaffected.
     final ui.Path clipPath = ui.Path()..addRect(Rect.fromLTWH(0, 0, 8, _testHeight.toDouble()));
+    final ui.Image maskImage = await renderCanvasImage(
+      width: _testWidth,
+      height: _testHeight,
+      draw: (final ui.Canvas canvas) {
+        canvas.drawPath(clipPath, ui.Paint()..color = const Color(0xFFFFFFFF));
+      },
+    );
+    final Uint8List clipMask = await _imagePixels(maskImage);
 
-    final SmudgeStrokeRasterResult? result = await rasterizeSmudgeStroke(
-      sourceImage: source,
-      strokePoints: const <Offset>[
-        Offset(4, 2),
-        Offset(10, 2),
-      ],
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: await _imagePixels(source),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(4, 2), Offset(10, 2)],
       brushSize: 4,
-      clipPath: clipPath,
+      mode: PixelBrushMode.smudge,
+      clipMask: clipMask,
     );
 
     expect(result, isNotNull);
-    expect(result!.bounds.right, lessThanOrEqualTo(8.0));
-
-    final ui.Image output = await _applyResultToSource(source, result);
+    final ui.Image output = await _resultToImage(result!);
     final Color outsideClip = await _readPixel(output, 10, 2);
-
     expect(outsideClip, const Color(0xFF0000FF));
   });
 
-  test('rasterizeSmudgeStroke returns null for a single point', () async {
+  test('rasterizePixelBrushSegment returns null for a single point', () async {
     final ui.Image source = await _createSplitImage();
 
-    final SmudgeStrokeRasterResult? result = await rasterizeSmudgeStroke(
-      sourceImage: source,
-      strokePoints: const <Offset>[Offset(4, 2)],
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: await _imagePixels(source),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(4, 2)],
       brushSize: 4,
+      mode: PixelBrushMode.smudge,
     );
 
     expect(result, isNull);
+  });
+
+  test('rasterizePixelBrushSegment (blur) reduces contrast at colour boundary', () async {
+    final ui.Image source = await _createSplitImage();
+
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: await _imagePixels(source),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(5, 2), Offset(7, 2)],
+      brushSize: 6,
+      mode: PixelBrushMode.blur,
+    );
+
+    expect(result, isNotNull);
+    final ui.Image output = await _resultToImage(result!);
+    // The pixel at the colour boundary (x=6) should no longer be pure blue
+    // because the blur kernel mixes in neighbouring red pixels.
+    final Color boundary = await _readPixel(output, 6, 2);
+    expect(boundary, isNot(const Color(0xFF0000FF)));
+  });
+
+  test('successive incremental smudge segments accumulate correctly', () async {
+    final ui.Image source = await _createSplitImage();
+    final Uint8List startPixels = await _imagePixels(source);
+
+    // First segment: 4 → 6
+    final PixelBrushSegmentResult? first = await rasterizePixelBrushSegment(
+      livePixels: Uint8List.fromList(startPixels),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(4, 2), Offset(6, 2)],
+      brushSize: 4,
+      mode: PixelBrushMode.smudge,
+    );
+    expect(first, isNotNull);
+
+    // Second segment: 6 → 8 built on the first result (incremental update).
+    final PixelBrushSegmentResult? second = await rasterizePixelBrushSegment(
+      livePixels: first!.pixels,
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(6, 2), Offset(8, 2)],
+      brushSize: 4,
+      mode: PixelBrushMode.smudge,
+    );
+    expect(second, isNotNull);
+
+    final ui.Image output = await _resultToImage(second!);
+    final Color smeared = await _readPixel(output, 7, 2);
+    expect((smeared.r * AppLimits.rgbChannelMax).round(), greaterThan(AppMath.zero));
   });
 }

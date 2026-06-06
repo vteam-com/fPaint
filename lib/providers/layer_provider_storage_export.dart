@@ -89,6 +89,7 @@ extension LayerProviderStorageExport on LayerProvider {
 
       case ActionType.image:
       case ActionType.smudge:
+      case ActionType.blurBrush:
         final ui.Image? image = userAction.image;
         if (image == null || userAction.positions.isEmpty) {
           return null;

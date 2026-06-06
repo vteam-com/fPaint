@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
@@ -40,14 +41,45 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   int _activePointerId = -1;
   final List<int> _activePointers = <int>[];
   double _baseDistance = 0.0;
+
+  /// Index into [_pixelBrushStrokePoints] of the *last point that has already
+  /// been processed* by a previous segment call.  The next kick will send only
+  /// [_pixelBrushStrokePoints.sublist(_lastKickedPointIndex)] to the isolate.
+  int _lastKickedPointIndex = 0;
+
+  /// Current live pixel buffer: starts as a copy of [_preparedPixelBrushSource]
+  /// pixels and is updated in-place after each successful segment rasterization.
+  /// This makes the effect accumulate correctly along the stroke.
+  Uint8List? _livePixelBuffer;
+
+  /// Canvas clip path active when the stroke began (may be null).
+  ui.Path? _pixelBrushClipPath;
+
+  /// Layer state captured before the stroke so it can be restored on undo.
+  ImagePlacementLayerRestoreState? _pixelBrushLayerRestoreState;
+
+  /// Which pixel-manipulation mode is active for the current stroke.
+  PixelBrushMode _pixelBrushMode = PixelBrushMode.smudge;
+
+  /// In-flight preparation future (resolves to [_preparedPixelBrushSource]).
+  Future<PreparedSmudgeStrokeSource?>? _pixelBrushPreparation;
+
+  /// True while the isolate for a preview segment is running.
+  bool _pixelBrushRasterBusy = false;
+
+  /// The original layer image captured at stroke start.
+  ui.Image? _pixelBrushSourceImage;
+
+  /// All accumulated stroke points since the stroke began.
+  final List<Offset> _pixelBrushStrokePoints = <Offset>[];
+
+  /// True when a new preview kick was requested while the isolate was busy.
+  bool _pixelBrushUpdateNeeded = false;
   final Map<int, Offset> _pointerPositions = <int, ui.Offset>{};
-  PreparedSmudgeStrokeSource? _preparedSmudgeSource;
+
+  /// Prepared source data for the active pixel-brush stroke (clip mask + dims).
+  PreparedSmudgeStrokeSource? _preparedPixelBrushSource;
   double _scaleFactor = 1.0;
-  ui.Path? _smudgeClipPath;
-  ImagePlacementLayerRestoreState? _smudgeLayerRestoreState;
-  Future<PreparedSmudgeStrokeSource?>? _smudgePreparation;
-  ui.Image? _smudgeSourceImage;
-  final List<Offset> _smudgeStrokePoints = <Offset>[];
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: false);
@@ -169,90 +201,99 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     );
   }
 
-  /// Appends a sampled pointer position to the active smudge stroke.
-  void _appendSmudgePoint(
+  /// Appends a sampled pointer position to the active pixel-brush stroke.
+  void _appendPixelBrushPoint(
     final Offset position,
     final double brushSize,
   ) {
-    final double spacing = resolveSmudgeStepSpacing(brushSize);
-    if (_smudgeStrokePoints.isNotEmpty && (_smudgeStrokePoints.last - position).distance < spacing) {
+    final double spacing = resolvePixelBrushStepSpacing(brushSize);
+    if (_pixelBrushStrokePoints.isNotEmpty && (_pixelBrushStrokePoints.last - position).distance < spacing) {
       return;
     }
-    _smudgeStrokePoints.add(position);
+    _pixelBrushStrokePoints.add(position);
   }
 
-  /// Bakes the smudge patch into a full-layer image snapshot.
-  Future<ui.Image> _bakeSmudgeLayerImage({
-    required final ui.Image sourceImage,
-    required final SmudgeStrokeRasterResult strokeResult,
-  }) {
-    return renderCanvasImage(
-      width: sourceImage.width,
-      height: sourceImage.height,
-      draw: (final ui.Canvas canvas) {
-        canvas.drawImage(sourceImage, Offset.zero, ui.Paint());
-        canvas.drawImage(strokeResult.image, strokeResult.bounds.topLeft, ui.Paint());
-      },
-    );
+  /// Clears the in-progress pixel-brush stroke state.
+  void _clearPixelBrushStroke() {
+    _pixelBrushStrokePoints.clear();
+    _pixelBrushLayerRestoreState = null;
+    _preparedPixelBrushSource = null;
+    _pixelBrushPreparation = null;
+    _pixelBrushSourceImage = null;
+    _pixelBrushClipPath = null;
+    _livePixelBuffer = null;
+    _lastKickedPointIndex = 0;
+    _pixelBrushRasterBusy = false;
+    _pixelBrushUpdateNeeded = false;
   }
 
-  /// Clears the in-progress smudge stroke state.
-  void _clearSmudgeStroke() {
-    _smudgeStrokePoints.clear();
-    _smudgeLayerRestoreState = null;
-    _preparedSmudgeSource = null;
-    _smudgePreparation = null;
-    _smudgeSourceImage = null;
-    _smudgeClipPath = null;
-  }
-
-  /// Rasterizes the active smudge stroke and commits it as a rectangular replacement.
-  Future<void> _commitSmudgeStroke(final AppProvider appProvider) async {
-    final ui.Image? sourceImage = _smudgeSourceImage;
-    final ImagePlacementLayerRestoreState? layerRestoreState = _smudgeLayerRestoreState;
-    if (sourceImage == null || layerRestoreState == null || _smudgeStrokePoints.length < AppMath.pair) {
+  /// Commits the pixel-brush stroke as an undoable image action.
+  ///
+  /// If a live preview has been running we already have an up-to-date
+  /// [_livePixelBuffer]; we only run a final segment for any points appended
+  /// after the last kick, then convert the buffer to a [ui.Image].
+  Future<void> _commitPixelBrushStroke(final AppProvider appProvider) async {
+    final ui.Image? sourceImage = _pixelBrushSourceImage;
+    final ImagePlacementLayerRestoreState? layerRestoreState = _pixelBrushLayerRestoreState;
+    if (sourceImage == null || layerRestoreState == null || _pixelBrushStrokePoints.length < AppMath.pair) {
+      if (layerRestoreState != null) {
+        _restorePixelBrushLayerState(appProvider: appProvider, restoreState: layerRestoreState);
+      }
       return;
     }
 
-    final PreparedSmudgeStrokeSource? preparedSource =
-        _preparedSmudgeSource ??
-        await _smudgePreparation ??
-        await prepareSmudgeStrokeSource(
+    final PreparedSmudgeStrokeSource? prepared =
+        _preparedPixelBrushSource ??
+        await _pixelBrushPreparation ??
+        await preparePixelBrushSource(
           sourceImage: sourceImage,
-          clipPath: _smudgeClipPath,
+          clipPath: _pixelBrushClipPath,
         );
-    if (preparedSource == null) {
+    if (prepared == null) {
+      _restorePixelBrushLayerState(appProvider: appProvider, restoreState: layerRestoreState);
       return;
     }
 
-    final SmudgeStrokeRasterResult? result = await rasterizeSmudgeStroke(
-      sourceImage: sourceImage,
-      strokePoints: _smudgeStrokePoints,
-      brushSize: appProvider.brushSize,
-      preparedSource: preparedSource,
-    );
-    if (result == null) {
-      return;
+    // Apply any remaining un-kicked segment.
+    Uint8List currentPixels = _livePixelBuffer ?? Uint8List.fromList(prepared.pixels);
+
+    final List<Offset> remaining = _pixelBrushStrokePoints.sublist(_lastKickedPointIndex);
+    if (remaining.length >= AppMath.pair) {
+      final PixelBrushSegmentResult? segResult = await rasterizePixelBrushSegment(
+        livePixels: currentPixels,
+        imageWidth: sourceImage.width,
+        imageHeight: sourceImage.height,
+        segmentPoints: remaining,
+        brushSize: appProvider.brushSize,
+        mode: _pixelBrushMode,
+        clipMask: prepared.clipMask,
+      );
+      if (segResult != null) {
+        currentPixels = segResult.pixels;
+      }
     }
 
-    final ui.Image bakedImage = await _bakeSmudgeLayerImage(
-      sourceImage: sourceImage,
-      strokeResult: result,
+    final ui.Image committedImage = await imageFromPixels(
+      currentPixels,
+      sourceImage.width,
+      sourceImage.height,
     );
 
     appProvider.undoProvider.executeAction(
-      name: ActionType.smudge.name,
+      name: _pixelBrushMode.name,
       forward: () {
         final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
         appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
-        targetLayer.replaceWithRasterImage(
-          imageToAdd: bakedImage,
-          tool: ActionType.smudge,
-        );
+        targetLayer.actionStack.clear();
+        targetLayer.redoStack.clear();
+        targetLayer.backgroundColor = null;
+        targetLayer.blendMode = ui.BlendMode.srcOver;
+        targetLayer.opacity = AppVisual.full;
+        targetLayer.addImage(imageToAdd: committedImage);
         appProvider.update();
       },
       backward: () {
-        _restoreSmudgeLayerState(
+        _restorePixelBrushLayerState(
           appProvider: appProvider,
           restoreState: layerRestoreState,
         );
@@ -312,12 +353,12 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     if (_activePointerId == event.pointer) {
       if (isSelectionActive) {
         appProvider.selectorCreationEnd();
-      } else if (_smudgeSourceImage != null) {
-        _appendSmudgePoint(appProvider.toCanvas(event.localPosition), appProvider.brushSize);
-        await _commitSmudgeStroke(appProvider);
+      } else if (_pixelBrushSourceImage != null) {
+        _appendPixelBrushPoint(appProvider.toCanvas(event.localPosition), appProvider.brushSize);
+        await _commitPixelBrushStroke(appProvider);
       }
       _activePointerId = -1;
-      _clearSmudgeStroke();
+      _clearPixelBrushStroke();
       appProvider.layers.selectedLayer.clearCache();
       if (!mounted) {
         return;
@@ -369,8 +410,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         return;
       }
 
-      if (_smudgeSourceImage != null) {
-        _appendSmudgePoint(adjustedPosition, appProvider.brushSize);
+      if (_pixelBrushSourceImage != null) {
+        _appendPixelBrushPoint(adjustedPosition, appProvider.brushSize);
+        _kickLivePixelBrushPreview(appProvider);
         return;
       }
 
@@ -516,7 +558,12 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       appProvider.layers.selectedLayer.isUserDrawing = true;
 
       if (appProvider.selectedAction == ActionType.smudge) {
-        _startSmudgeStroke(appProvider, adjustedPosition);
+        _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.smudge);
+        return;
+      }
+
+      if (appProvider.selectedAction == ActionType.blurBrush) {
+        _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.blur);
         return;
       }
 
@@ -569,6 +616,97 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     );
   }
 
+  /// Fires an incremental pixel-brush rasterization for live drag preview.
+  ///
+  /// Sends only the *new* segment of points since the last successful kick so
+  /// each isolate call is O(segment) rather than O(full stroke). The resulting
+  /// pixel buffer is stored in [_livePixelBuffer] and fed back as the starting
+  /// state for the next segment, making the effect accumulate correctly.
+  ///
+  /// Skips if a rasterization is already running; marks that a re-run is
+  /// needed so the next completion triggers another pass.
+  void _kickLivePixelBrushPreview(final AppProvider appProvider) {
+    if (_pixelBrushRasterBusy) {
+      _pixelBrushUpdateNeeded = true;
+      return;
+    }
+    // Need at least one overlap point (the last processed point) plus one new
+    // point so the isolate has a valid segment.
+    final int currentLength = _pixelBrushStrokePoints.length;
+    final int segmentStart = _lastKickedPointIndex > AppMath.zero ? _lastKickedPointIndex : AppMath.zero;
+    if (currentLength - segmentStart < AppMath.pair) {
+      return;
+    }
+    final ui.Image? sourceImage = _pixelBrushSourceImage;
+    final ImagePlacementLayerRestoreState? restoreState = _pixelBrushLayerRestoreState;
+    if (sourceImage == null || restoreState == null) {
+      return;
+    }
+    _pixelBrushRasterBusy = true;
+    _pixelBrushUpdateNeeded = false;
+
+    // Snapshot the segment we are about to process.
+    final List<Offset> segmentPoints = List<Offset>.of(_pixelBrushStrokePoints.sublist(segmentStart));
+    // After this kick succeeds the new "last processed" index will be:
+    final int nextLastIndex = currentLength - AppMath.one;
+    final double brushSize = appProvider.brushSize;
+    final PixelBrushMode mode = _pixelBrushMode;
+    final Uint8List? startPixels = _livePixelBuffer;
+
+    unawaited(
+      (() async {
+        final PreparedSmudgeStrokeSource? prepared = _preparedPixelBrushSource ?? await _pixelBrushPreparation;
+        if (!mounted || _pixelBrushSourceImage == null || prepared == null) {
+          _pixelBrushRasterBusy = false;
+          if (mounted && _pixelBrushUpdateNeeded && _pixelBrushSourceImage != null) {
+            _kickLivePixelBrushPreview(appProvider);
+          }
+          return;
+        }
+
+        // Use the current live buffer (or the original source for the first kick).
+        final Uint8List basePixels = startPixels ?? Uint8List.fromList(prepared.pixels);
+
+        final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+          livePixels: basePixels,
+          imageWidth: sourceImage.width,
+          imageHeight: sourceImage.height,
+          segmentPoints: segmentPoints,
+          brushSize: brushSize,
+          mode: mode,
+          clipMask: prepared.clipMask,
+        );
+        _pixelBrushRasterBusy = false;
+        if (!mounted || _pixelBrushSourceImage == null) {
+          return;
+        }
+
+        if (result != null) {
+          // Persist the updated pixel state so the next segment continues from here.
+          _livePixelBuffer = result.pixels;
+          _lastKickedPointIndex = nextLastIndex;
+
+          final ui.Image liveImage = await imageFromPixels(
+            result.pixels,
+            result.width,
+            result.height,
+          );
+          if (!mounted || _pixelBrushSourceImage == null) {
+            return;
+          }
+          final LayerProvider liveLayer = appProvider.layers.get(restoreState.layerIndex);
+          liveLayer.actionStack.clear();
+          liveLayer.addImage(imageToAdd: liveImage);
+          appProvider.layers.repaintCanvas();
+        }
+
+        if (_pixelBrushUpdateNeeded) {
+          _kickLivePixelBrushPreview(appProvider);
+        }
+      })(),
+    );
+  }
+
   /// Updates the shell interaction modality based on the current pointer kind.
   void _registerInputModality(
     final ShellProvider shellProvider,
@@ -590,8 +728,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     }
   }
 
-  /// Restores the selected layer state captured before the current smudge stroke.
-  void _restoreSmudgeLayerState({
+  /// Restores the selected layer state captured before the current pixel-brush stroke.
+  void _restorePixelBrushLayerState({
     required final AppProvider appProvider,
     required final ImagePlacementLayerRestoreState restoreState,
   }) {
@@ -647,31 +785,33 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     );
   }
 
-  /// Starts tracking a smudge stroke from [position].
-  void _startSmudgeStroke(
+  /// Starts tracking a pixel-brush stroke from [position] with the given [mode].
+  void _startPixelBrushStroke(
     final AppProvider appProvider,
     final Offset position,
+    final PixelBrushMode mode,
   ) {
-    _smudgeLayerRestoreState = appProvider.captureSelectedLayerRestoreState();
-    _smudgeSourceImage = appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
-    _smudgeClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null
+    _pixelBrushMode = mode;
+    _pixelBrushLayerRestoreState = appProvider.captureSelectedLayerRestoreState();
+    _pixelBrushSourceImage = appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
+    _pixelBrushClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null
         ? ui.Path.from(appProvider.selectorModel.path1!)
         : null;
-    _preparedSmudgeSource = null;
-    final Future<PreparedSmudgeStrokeSource?> preparation = prepareSmudgeStrokeSource(
-      sourceImage: _smudgeSourceImage!,
-      clipPath: _smudgeClipPath,
+    _preparedPixelBrushSource = null;
+    _livePixelBuffer = null;
+    _lastKickedPointIndex = 0;
+    final Future<PreparedSmudgeStrokeSource?> preparation = preparePixelBrushSource(
+      sourceImage: _pixelBrushSourceImage!,
+      clipPath: _pixelBrushClipPath,
     );
-    _smudgePreparation = preparation;
+    _pixelBrushPreparation = preparation;
     unawaited(
-      preparation.then((final PreparedSmudgeStrokeSource? preparedSource) {
-        if (identical(_smudgePreparation, preparation)) {
-          _preparedSmudgeSource = preparedSource;
+      preparation.then((final PreparedSmudgeStrokeSource? prepared) {
+        if (identical(_pixelBrushPreparation, preparation)) {
+          _preparedPixelBrushSource = prepared;
         }
       }),
     );
-    _smudgeStrokePoints
-      ..clear()
-      ..add(position);
+    _appendPixelBrushPoint(position, appProvider.brushSize);
   }
 }

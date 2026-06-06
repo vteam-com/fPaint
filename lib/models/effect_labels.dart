@@ -1,4 +1,4 @@
-import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/selection_effect.dart';
 
 /// Returns the localized label for a [SelectionEffect].

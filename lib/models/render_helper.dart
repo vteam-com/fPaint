@@ -388,7 +388,7 @@ void renderImage(
   final Offset topLeftPosition,
   final ui.Image image,
 ) {
-  canvas.drawImage(image, topLeftPosition, Paint());
+  canvas.drawImage(image, topLeftPosition, Paint()..filterQuality = FilterQuality.medium);
 }
 
 /// Draws a path with a brush style.

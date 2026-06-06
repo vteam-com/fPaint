@@ -1,7 +1,7 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';

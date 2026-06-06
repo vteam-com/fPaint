@@ -64,6 +64,7 @@ enum ActionType {
   pencil(AppIcon.create),
   brush(AppIcon.brush),
   smudge(AppIcon.effectBlur),
+  blurBrush(AppIcon.waterDrop),
   line(AppIcon.lineAxis),
   circle(AppIcon.circle),
   rectangle(AppIcon.cropSquare),
@@ -117,6 +118,9 @@ final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = <ActionType
     ActionOptions.topColors,
   },
   ActionType.smudge: <ActionOptions>{
+    ActionOptions.brushSize,
+  },
+  ActionType.blurBrush: <ActionOptions>{
     ActionOptions.brushSize,
   },
   ActionType.line: <ActionOptions>{

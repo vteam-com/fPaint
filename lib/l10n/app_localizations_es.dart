@@ -250,18 +250,18 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get exportedLabel => 'Exportado';
-
-  @override
   String errorReadingFile(Object error) {
     return 'Error al leer archivo: $error';
   }
 
   @override
-  String get exportLabel => 'Exportar...';
+  String get exportedLabel => 'Exportado';
 
   @override
   String get exportingLabel => 'Exportando...';
+
+  @override
+  String get exportLabel => 'Exportar...';
 
   @override
   String get exportTooltip => 'Exportar...';
@@ -345,14 +345,14 @@ class AppLocalizationsEs extends AppLocalizations {
   String get invalidSize => 'Tamano invalido';
 
   @override
-  String get keyboardShortcuts => 'Atajos de teclado';
-
-  @override
   String get keepSaveBackupsSubtitle =>
       'Antes de sobrescribir un archivo guardado, conserva hasta 3 copias de seguridad con marca de tiempo de la version anterior.';
 
   @override
   String get keepSaveBackupsTitle => 'Mantener copias de seguridad al guardar';
+
+  @override
+  String get keyboardShortcuts => 'Atajos de teclado';
 
   @override
   String get languageEnglish => 'Ingles';
@@ -406,12 +406,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get layerHideAllOthers => 'Ocultar todas las demás capas';
 
   @override
-  String get layerLockEdits => 'Bloquear edicion de la capa';
-
-  @override
   String layerLockedForEditing(Object layerName) {
     return 'La capa $layerName esta bloqueada para editar.';
   }
+
+  @override
+  String get layerLockEdits => 'Bloquear edicion de la capa';
 
   @override
   String get layerMergeBelow => 'Fusionar con la capa inferior';
@@ -493,10 +493,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get savedLabel => 'Guardado';
 
   @override
-  String get savingLabel => 'Guardando...';
+  String get saveLabel => 'Guardar';
 
   @override
-  String get saveLabel => 'Guardar';
+  String get savingLabel => 'Guardando...';
 
   @override
   String get scale => 'Escalar';
@@ -595,6 +595,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get toolSmudge => 'Difuminar';
+
+  @override
+  String get toolBlurBrush => 'Pincel Desenfoque';
 
   @override
   String get toolSolid => 'Sólido';
