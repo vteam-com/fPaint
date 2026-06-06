@@ -8,6 +8,7 @@ const String _categoryEditing = 'Editing';
 const String _categoryView = 'View';
 const String _categoryTools = 'Tools';
 const String _categoryLayers = 'Layers';
+const String _categorySelection = 'Selection';
 const String _actionSave = 'Save';
 const String _actionOpen = 'Open';
 const String _actionNewCanvas = 'New Canvas';
@@ -28,6 +29,9 @@ const String _actionEraserTool = 'Eraser Tool';
 const String _actionSelectionTool = 'Selection Tool';
 const String _actionFillTool = 'Fill Tool';
 const String _actionTextTool = 'Text Tool';
+const String _actionAddToSelection = 'Add to Selection';
+const String _actionSubtractFromSelection = 'Subtract from Selection';
+const String _actionIntersectWithSelection = 'Intersect with Selection';
 const String _actionNewLayer = 'New Layer';
 const String _actionDeleteLayer = 'Delete Layer';
 const String _labelDelete = 'Delete';
@@ -35,6 +39,7 @@ const String _labelClose = 'Close';
 const String _platformCmd = 'Cmd';
 const String _platformCtrl = 'Ctrl';
 const String _platformOption = 'Option';
+const String _platformAlt = 'Alt';
 const String _keyB = 'B';
 const String _keyC = 'C';
 const String _keyD = 'D';
@@ -108,6 +113,17 @@ class ShortcutsHelpDialog extends StatelessWidget {
               <String, String>{'keys': _keyS, 'description': _actionSelectionTool},
               <String, String>{'keys': _keyF, 'description': _actionFillTool},
               <String, String>{'keys': _keyT, 'description': _actionTextTool},
+            ],
+          ),
+          (
+            title: _categorySelection,
+            shortcuts: <Map<String, String>>[
+              <String, String>{'keys': _modShift, 'description': _actionAddToSelection},
+              <String, String>{'keys': _getSelectionSubtractModifier(), 'description': _actionSubtractFromSelection},
+              <String, String>{
+                'keys': '$_modShift + ${_getSelectionSubtractModifier()}',
+                'description': _actionIntersectWithSelection,
+              },
             ],
           ),
           (
@@ -235,6 +251,11 @@ class ShortcutsHelpDialog extends StatelessWidget {
   String _getMoveDuplicateModifier() {
     final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
     return isMacOS ? _platformOption : _platformCtrl;
+  }
+
+  String _getSelectionSubtractModifier() {
+    final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+    return isMacOS ? _platformOption : _platformAlt;
   }
 
   String _getPlatformModifier(final BuildContext _) {

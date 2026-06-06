@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draft_flusher.dart';
@@ -80,6 +80,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// Prepared source data for the active pixel-brush stroke (clip mask + dims).
   PreparedSmudgeStrokeSource? _preparedPixelBrushSource;
   double _scaleFactor = 1.0;
+
+  /// The selector math mode active before a modifier-key override was applied.
+  /// Non-null only during a modifier-driven selection gesture.
+  SelectorMath? _previousSelectorMath;
+
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: false);
@@ -353,6 +358,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     if (_activePointerId == event.pointer) {
       if (isSelectionActive) {
         appProvider.selectorCreationEnd();
+        _restoreSelectionMath(appProvider);
       } else if (_pixelBrushSourceImage != null) {
         _appendPixelBrushPoint(appProvider.toCanvas(event.localPosition), appProvider.brushSize);
         await _commitPixelBrushStroke(appProvider);
@@ -430,6 +436,47 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     }
   }
 
+  /// Reads the current keyboard modifier state and temporarily overrides
+  /// [selectorModel.math] for the upcoming selection gesture:
+  ///   Shift + Option/Alt → intersect
+  ///   Shift             → add
+  ///   Option/Alt        → remove
+  ///   (none)            → no override; existing math is preserved
+  ///
+  /// The original value is saved in [_previousSelectorMath] and restored by
+  /// [_restoreSelectionMath] once the gesture completes.
+  void _applySelectionModifierMath(final AppProvider appProvider) {
+    final bool isShiftPressed = HardwareKeyboard.instance.isShiftPressed;
+    final bool isAltPressed = HardwareKeyboard.instance.isAltPressed;
+
+    if (!isShiftPressed && !isAltPressed) {
+      return;
+    }
+
+    final SelectorMath overrideMath;
+    if (isShiftPressed && isAltPressed) {
+      overrideMath = SelectorMath.intersect;
+    } else if (isShiftPressed) {
+      overrideMath = SelectorMath.add;
+    } else {
+      overrideMath = SelectorMath.remove;
+    }
+
+    _previousSelectorMath = appProvider.selectorModel.math;
+    appProvider.selectorModel.math = overrideMath;
+    appProvider.repaintToolOptions();
+  }
+
+  /// Restores [selectorModel.math] to the value captured before a
+  /// modifier-key override, then clears the saved value.
+  void _restoreSelectionMath(final AppProvider appProvider) {
+    if (_previousSelectorMath != null) {
+      appProvider.selectorModel.math = _previousSelectorMath!;
+      _previousSelectorMath = null;
+      appProvider.repaintToolOptions();
+    }
+  }
+
   /// Starts pointer interactions including drawing, selection, fill, and text placement.
   void _handlePointerStart(
     final AppProvider appProvider,
@@ -459,6 +506,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       _activePointerId = event.pointer;
 
       if (isSelectionActive) {
+        _applySelectionModifierMath(appProvider);
         appProvider.selectorCreationStart(adjustedPosition);
         return;
       }
