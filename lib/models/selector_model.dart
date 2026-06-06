@@ -237,6 +237,19 @@ class SelectorModel extends VisibleModel {
           path2 = null;
         }
         break;
+      case SelectorMath.intersect:
+        if (path2 != null) {
+          final Path? combinedPath = _combinePathsSafely(
+            PathOperation.intersect,
+            path1!,
+            path2!,
+          );
+          if (combinedPath != null) {
+            path1 = combinedPath;
+          }
+          path2 = null;
+        }
+        break;
     }
     this.points.clear();
   }
@@ -375,4 +388,5 @@ enum SelectorMath {
   replace,
   add,
   remove,
+  intersect,
 }

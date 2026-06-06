@@ -529,13 +529,14 @@ void main() {
 
   group('SelectorMath enum', () {
     test('has all expected values', () {
-      expect(SelectorMath.values.length, 3);
+      expect(SelectorMath.values.length, 4);
       expect(
         SelectorMath.values,
         containsAll(<SelectorMath>[
           SelectorMath.replace,
           SelectorMath.add,
           SelectorMath.remove,
+          SelectorMath.intersect,
         ]),
       );
     });
