@@ -47,6 +47,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// [_pixelBrushStrokePoints.sublist(_lastKickedPointIndex)] to the isolate.
   int _lastKickedPointIndex = 0;
 
+  /// Monotonic token that invalidates stale async preview completions.
+  int _pixelBrushStrokeGeneration = 0;
+
   /// Current live pixel buffer: starts as a copy of [_preparedPixelBrushSource]
   /// pixels and is updated in-place after each successful segment rasterization.
   /// This makes the effect accumulate correctly along the stroke.
@@ -231,6 +234,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     _pixelBrushClipPath = null;
     _livePixelBuffer = null;
     _lastKickedPointIndex = 0;
+    _pixelBrushStrokeGeneration++;
     _pixelBrushRasterBusy = false;
     _pixelBrushUpdateNeeded = false;
   }
@@ -265,7 +269,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     // Apply any remaining un-kicked segment.
     Uint8List currentPixels = _livePixelBuffer ?? Uint8List.fromList(prepared.pixels);
 
-    final List<Offset> remaining = _pixelBrushStrokePoints.sublist(_lastKickedPointIndex);
+    final int remainingStart = normalizePixelBrushRemainingStart(
+      lastKickedPointIndex: _lastKickedPointIndex,
+      strokePointCount: _pixelBrushStrokePoints.length,
+    );
+    final List<Offset> remaining = _pixelBrushStrokePoints.sublist(remainingStart);
     if (remaining.length >= AppMath.pair) {
       final PixelBrushSegmentResult? segResult = await rasterizePixelBrushSegment(
         livePixels: currentPixels,
@@ -282,23 +290,29 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       }
     }
 
-    final ui.Image committedImage = await imageFromPixels(
-      currentPixels,
-      sourceImage.width,
-      sourceImage.height,
+    final PixelBrushLayerPatch? committedPatch = await buildPixelBrushLayerPatch(
+      pixels: currentPixels,
+      imageWidth: sourceImage.width,
+      imageHeight: sourceImage.height,
+      strokePoints: _pixelBrushStrokePoints,
+      brushSize: appProvider.brushSize,
     );
+    if (committedPatch == null) {
+      _restorePixelBrushLayerState(appProvider: appProvider, restoreState: layerRestoreState);
+      return;
+    }
 
     appProvider.undoProvider.executeAction(
       name: _pixelBrushMode.name,
       forward: () {
         final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
         appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
-        targetLayer.actionStack.clear();
-        targetLayer.redoStack.clear();
-        targetLayer.backgroundColor = null;
-        targetLayer.blendMode = ui.BlendMode.srcOver;
-        targetLayer.opacity = AppVisual.full;
-        targetLayer.addImage(imageToAdd: committedImage);
+        applyPixelBrushPatchToLayer(
+          restoreState: layerRestoreState,
+          targetLayer: targetLayer,
+          patch: committedPatch,
+          mode: _pixelBrushMode,
+        );
         appProvider.update();
       },
       backward: () {
@@ -723,10 +737,14 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final double brushSize = appProvider.brushSize;
     final PixelBrushMode mode = _pixelBrushMode;
     final Uint8List? startPixels = _livePixelBuffer;
+    final int strokeGeneration = _pixelBrushStrokeGeneration;
 
     unawaited(
       (() async {
         final PreparedSmudgeStrokeSource? prepared = _preparedPixelBrushSource ?? await _pixelBrushPreparation;
+        if (strokeGeneration != _pixelBrushStrokeGeneration) {
+          return;
+        }
         if (!mounted || _pixelBrushSourceImage == null || prepared == null) {
           _pixelBrushRasterBusy = false;
           if (mounted && _pixelBrushUpdateNeeded && _pixelBrushSourceImage != null) {
@@ -748,6 +766,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           mode: mode,
           clipMask: prepared.clipMask,
         );
+        if (strokeGeneration != _pixelBrushStrokeGeneration) {
+          return;
+        }
         _pixelBrushRasterBusy = false;
         if (!mounted || _pixelBrushSourceImage == null) {
           return;
@@ -758,18 +779,26 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           _livePixelBuffer = result.pixels;
           _lastKickedPointIndex = nextLastIndex;
 
-          final ui.Image liveImage = await imageFromPixels(
-            result.pixels,
-            result.width,
-            result.height,
+          final PixelBrushLayerPatch? livePatch = await buildPixelBrushLayerPatch(
+            pixels: result.pixels,
+            imageWidth: result.width,
+            imageHeight: result.height,
+            strokePoints: _pixelBrushStrokePoints,
+            brushSize: brushSize,
           );
           if (!mounted || _pixelBrushSourceImage == null) {
             return;
           }
-          final LayerProvider liveLayer = appProvider.layers.get(restoreState.layerIndex);
-          liveLayer.actionStack.clear();
-          liveLayer.addImage(imageToAdd: liveImage);
-          appProvider.layers.repaintCanvas();
+          if (livePatch != null) {
+            final LayerProvider liveLayer = appProvider.layers.get(restoreState.layerIndex);
+            applyPixelBrushPatchToLayer(
+              restoreState: restoreState,
+              targetLayer: liveLayer,
+              patch: livePatch,
+              mode: _pixelBrushMode,
+            );
+            appProvider.layers.repaintCanvas();
+          }
         }
 
         if (_pixelBrushUpdateNeeded) {
@@ -863,10 +892,13 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final Offset position,
     final PixelBrushMode mode,
   ) {
+    _pixelBrushStrokeGeneration++;
     _pixelBrushMode = mode;
     _pixelBrushIntensity = appProvider.brushIntensity;
     _pixelBrushLayerRestoreState = appProvider.captureSelectedLayerRestoreState();
-    _pixelBrushSourceImage = appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
+    _pixelBrushSourceImage = pixelBrushUsesCompositeBackdrop(mode)
+        ? appProvider.layers.capturePainterToImageThroughLayerSync(appProvider.layers.selectedLayerIndex)
+        : appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
     _pixelBrushClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null
         ? ui.Path.from(appProvider.selectorModel.path1!)
         : null;
@@ -887,4 +919,171 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     );
     _appendPixelBrushPoint(position, appProvider.brushSize);
   }
+}
+
+class PixelBrushLayerPatch {
+  const PixelBrushLayerPatch({
+    required this.bounds,
+    required this.image,
+  });
+
+  final ui.Rect bounds;
+  final ui.Image image;
+}
+
+ActionType pixelBrushActionType(final PixelBrushMode mode) {
+  return mode == PixelBrushMode.smudge ? ActionType.smudge : ActionType.blurBrush;
+}
+
+bool pixelBrushUsesCompositeBackdrop(final PixelBrushMode mode) {
+  return mode == PixelBrushMode.smudge || mode == PixelBrushMode.blur;
+}
+
+int normalizePixelBrushRemainingStart({
+  required final int lastKickedPointIndex,
+  required final int strokePointCount,
+}) {
+  return lastKickedPointIndex.clamp(AppMath.zero, strokePointCount);
+}
+
+void applyPixelBrushPatchToLayer({
+  required final ImagePlacementLayerRestoreState restoreState,
+  required final LayerProvider targetLayer,
+  required final PixelBrushLayerPatch patch,
+  required final PixelBrushMode mode,
+}) {
+  targetLayer.actionStack
+    ..clear()
+    ..addAll(restoreState.originalActions);
+  targetLayer.redoStack.clear();
+  targetLayer.backgroundColor = restoreState.originalBackgroundColor;
+  targetLayer.blendMode = restoreState.originalBlendMode;
+  targetLayer.opacity = restoreState.originalOpacity;
+  targetLayer.hasChanged = restoreState.originalHasChanged;
+  targetLayer.appendDrawingAction(
+    UserActionDrawing(
+      action: ActionType.cut,
+      positions: <Offset>[patch.bounds.topLeft, patch.bounds.bottomRight],
+      fillColor: AppColors.transparent,
+      path: ui.Path()..addRect(patch.bounds),
+    ),
+  );
+  targetLayer.appendDrawingAction(
+    UserActionDrawing(
+      action: pixelBrushActionType(mode),
+      positions: <Offset>[patch.bounds.topLeft, patch.bounds.bottomRight],
+      brush: MyBrush(
+        color: AppColors.transparent,
+        size: AppMath.zero.toDouble(),
+      ),
+      fillColor: AppColors.transparent,
+      image: patch.image,
+    ),
+  );
+}
+
+Future<PixelBrushLayerPatch?> buildPixelBrushLayerPatch({
+  required final Uint8List pixels,
+  required final int imageWidth,
+  required final int imageHeight,
+  required final List<Offset> strokePoints,
+  required final double brushSize,
+}) async {
+  final ui.Rect? patchBounds = resolvePixelBrushPatchBounds(
+    strokePoints: strokePoints,
+    imageWidth: imageWidth,
+    imageHeight: imageHeight,
+    brushSize: brushSize,
+  );
+  if (patchBounds == null) {
+    return null;
+  }
+
+  final Uint8List patchPixels = copyPixelBrushRect(
+    pixels: pixels,
+    imageWidth: imageWidth,
+    left: patchBounds.left.toInt(),
+    top: patchBounds.top.toInt(),
+    width: patchBounds.width.toInt(),
+    height: patchBounds.height.toInt(),
+  );
+  final ui.Image patchImage = await imageFromPixels(
+    patchPixels,
+    patchBounds.width.toInt(),
+    patchBounds.height.toInt(),
+  );
+  return PixelBrushLayerPatch(bounds: patchBounds, image: patchImage);
+}
+
+ui.Rect? resolvePixelBrushPatchBounds({
+  required final List<Offset> strokePoints,
+  required final int imageWidth,
+  required final int imageHeight,
+  required final double brushSize,
+}) {
+  if (strokePoints.isEmpty) {
+    return null;
+  }
+
+  final double radius = max(
+    AppInteraction.smudgeMinimumRadius,
+    brushSize * AppInteraction.smudgeBrushRadiusFactor,
+  );
+  final int padding = radius.ceil() + AppInteraction.smudgeBoundsPadding;
+  double minX = strokePoints.first.dx;
+  double minY = strokePoints.first.dy;
+  double maxX = strokePoints.first.dx;
+  double maxY = strokePoints.first.dy;
+
+  for (final Offset point in strokePoints.skip(AppMath.one)) {
+    if (point.dx < minX) {
+      minX = point.dx;
+    }
+    if (point.dy < minY) {
+      minY = point.dy;
+    }
+    if (point.dx > maxX) {
+      maxX = point.dx;
+    }
+    if (point.dy > maxY) {
+      maxY = point.dy;
+    }
+  }
+
+  final int left = max(AppMath.zero, minX.floor() - padding);
+  final int top = max(AppMath.zero, minY.floor() - padding);
+  final int right = min(imageWidth - AppMath.one, maxX.ceil() + padding);
+  final int bottom = min(imageHeight - AppMath.one, maxY.ceil() + padding);
+  if (right < left || bottom < top) {
+    return null;
+  }
+  return ui.Rect.fromLTRB(
+    left.toDouble(),
+    top.toDouble(),
+    (right + AppMath.one).toDouble(),
+    (bottom + AppMath.one).toDouble(),
+  );
+}
+
+Uint8List copyPixelBrushRect({
+  required final Uint8List pixels,
+  required final int imageWidth,
+  required final int left,
+  required final int top,
+  required final int width,
+  required final int height,
+}) {
+  final Uint8List result = Uint8List(width * height * AppMath.bytesPerPixel);
+  final int rowByteCount = width * AppMath.bytesPerPixel;
+  for (int row = AppMath.zero; row < height; row++) {
+    final int sourceOffset = (((top + row) * imageWidth) + left) * AppMath.bytesPerPixel;
+    final int destinationOffset = row * rowByteCount;
+    result.setRange(
+      destinationOffset,
+      destinationOffset + rowByteCount,
+      pixels,
+      sourceOffset,
+    );
+  }
+  return result;
 }

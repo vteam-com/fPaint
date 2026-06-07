@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/prepared_smudge_stroke_source.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
 
 const int _testWidth = 12;
@@ -60,6 +61,10 @@ Future<Uint8List> _imagePixels(final ui.Image source) async {
 }
 
 void main() {
+  test('resolvePixelBrushStepSpacing caps large brushes for gesture fidelity', () {
+    expect(resolvePixelBrushStepSpacing(100), AppInteraction.smudgeMaximumPointSpacing);
+  });
+
   test('rasterizePixelBrushSegment (smudge) moves sampled color along stroke', () async {
     final ui.Image source = await _createSplitImage();
 
@@ -108,6 +113,31 @@ void main() {
     expect(outsideClip, const Color(0xFF0000FF));
   });
 
+  test('preparePixelBrushSource clip mask does not leak through antialiased curved edges', () async {
+    final ui.Image source = await _createSplitImage();
+    final PreparedSmudgeStrokeSource? prepared = await preparePixelBrushSource(
+      sourceImage: source,
+      clipPath: ui.Path()..addOval(Rect.fromCircle(center: const Offset(6, 2), radius: 3)),
+    );
+
+    expect(prepared, isNotNull);
+
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: Uint8List.fromList(prepared!.pixels),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(4, 2), Offset(8, 2)],
+      brushSize: 4,
+      mode: PixelBrushMode.smudge,
+      clipMask: prepared.clipMask,
+    );
+
+    expect(result, isNotNull);
+    final ui.Image output = await _resultToImage(result!);
+    final Color outsideClip = await _readPixel(output, 9, 2);
+    expect(outsideClip, const Color(0xFF0000FF));
+  });
+
   test('rasterizePixelBrushSegment returns null for a single point', () async {
     final ui.Image source = await _createSplitImage();
 
@@ -138,7 +168,7 @@ void main() {
     expect(result, isNotNull);
     final ui.Image output = await _resultToImage(result!);
     // The pixel at the colour boundary (x=6) should no longer be pure blue
-    // because the blur kernel mixes in neighbouring red pixels.
+    // because the blur kernel mixes in neighboring red pixels.
     final Color boundary = await _readPixel(output, 6, 2);
     expect(boundary, isNot(const Color(0xFF0000FF)));
   });
