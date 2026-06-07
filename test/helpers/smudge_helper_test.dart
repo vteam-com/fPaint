@@ -143,6 +143,40 @@ void main() {
     expect(boundary, isNot(const Color(0xFF0000FF)));
   });
 
+  test('rasterizePixelBrushSegment intensity changes blur strength', () async {
+    final ui.Image source = await _createSplitImage();
+    final Uint8List sourcePixels = await _imagePixels(source);
+
+    final PixelBrushSegmentResult? lowIntensityResult = await rasterizePixelBrushSegment(
+      livePixels: Uint8List.fromList(sourcePixels),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(5, 2), Offset(7, 2)],
+      brushSize: 6,
+      intensity: 0.2,
+      mode: PixelBrushMode.blur,
+    );
+
+    final PixelBrushSegmentResult? highIntensityResult = await rasterizePixelBrushSegment(
+      livePixels: Uint8List.fromList(sourcePixels),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(5, 2), Offset(7, 2)],
+      brushSize: 6,
+      intensity: 1.0,
+      mode: PixelBrushMode.blur,
+    );
+
+    expect(lowIntensityResult, isNotNull);
+    expect(highIntensityResult, isNotNull);
+
+    final Color lowBoundary = await _readPixel(await _resultToImage(lowIntensityResult!), 6, 2);
+    final Color highBoundary = await _readPixel(await _resultToImage(highIntensityResult!), 6, 2);
+
+    expect(highBoundary.r, greaterThan(lowBoundary.r));
+    expect(highBoundary.b, lessThan(lowBoundary.b));
+  });
+
   test('successive incremental smudge segments accumulate correctly', () async {
     final ui.Image source = await _createSplitImage();
     final Uint8List startPixels = await _imagePixels(source);

@@ -211,7 +211,7 @@ void main() {
   });
 
   group('ToolsPanel smudge tool', () {
-    testWidgets('selects smudge and keeps brush-size controls available', (final WidgetTester tester) async {
+    testWidgets('selects smudge and keeps size and intensity controls available', (final WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
       await tester.tap(find.byKey(Keys.toolSmudge));
@@ -220,6 +220,21 @@ void main() {
       expect(appProvider.selectedAction, ActionType.smudge);
       expect(find.byKey(Keys.toolBrushSizeTool), findsOneWidget);
       expect(find.byKey(Keys.toolBrushSizeButton), findsOneWidget);
+      expect(find.byKey(Keys.toolBrushIntensityTool), findsOneWidget);
+      expect(find.byKey(Keys.toolBrushIntensitySlider), findsOneWidget);
+    });
+
+    testWidgets('updates smudge intensity from the inline slider', (final WidgetTester tester) async {
+      await pumpToolsPanel(tester);
+
+      appProvider.selectedAction = ActionType.smudge;
+      await tester.pump();
+
+      final AppSlider slider = tester.widget<AppSlider>(find.byKey(Keys.toolBrushIntensitySlider));
+      slider.onChanged!(AppEffects.maxIntensity);
+      await tester.pump();
+
+      expect(appProvider.brushIntensity, greaterThan(AppInteraction.pixelBrushDefaultIntensity));
     });
 
     testWidgets('updates tool button selection when selectedAction changes externally', (

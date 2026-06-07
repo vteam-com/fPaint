@@ -388,10 +388,13 @@ class AppInteraction {
   static const double smudgeStepSpacingFactor = 0.35;
   static const double smudgeBlendStrength = 0.8;
   static const double smudgeEdgeFalloffExponent = 2.0;
+  static const double pixelBrushDefaultIntensity = 0.5;
+  static const double pixelBrushIntensityAppliedScale = 2.0;
   static const int smudgeBoundsPadding = 2;
   static const double blurBrushStrength = 0.6;
   static const double blurBrushEdgeFalloffExponent = 2.0;
   static const int blurBrushKernelHalf = 1;
+  static const int blurBrushKernelHalfRange = 2;
   static const double selectionHandleSize = 20;
   static const double selectionToolbarMargin = 50.0;
   static const double imagePlacementHandleSize = 14.0;
@@ -606,6 +609,8 @@ class AppEffects {
 /// Shared persisted/default app values.
 class AppDefaults {
   static const double brushSize = 5.0;
+  static const double smudgeIntensity = AppInteraction.pixelBrushDefaultIntensity;
+  static const double blurBrushIntensity = AppInteraction.pixelBrushDefaultIntensity;
   static const int tolerance = 50;
   static const bool useApplePencil = false;
   static const bool keepSaveBackups = false;
@@ -708,4 +713,7 @@ class Keys {
   static const Key toolBrushSizeTool = Key('tool-brush-size-tool');
   static const Key toolBrushSizeButton = Key('tool-brush-size-button');
   static const Key toolBrushSizeSlider = Key('tool-brush-size-slider');
+  static const Key toolBrushIntensityTool = Key('tool-brush-intensity-tool');
+  static const Key toolBrushIntensityButton = Key('tool-brush-intensity-button');
+  static const Key toolBrushIntensitySlider = Key('tool-brush-intensity-slider');
 }

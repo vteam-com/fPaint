@@ -61,6 +61,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// Which pixel-manipulation mode is active for the current stroke.
   PixelBrushMode _pixelBrushMode = PixelBrushMode.smudge;
 
+  /// Intensity captured when the current pixel-brush stroke started.
+  double _pixelBrushIntensity = AppInteraction.pixelBrushDefaultIntensity;
+
   /// In-flight preparation future (resolves to [_preparedPixelBrushSource]).
   Future<PreparedSmudgeStrokeSource?>? _pixelBrushPreparation;
 
@@ -270,6 +273,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         imageHeight: sourceImage.height,
         segmentPoints: remaining,
         brushSize: appProvider.brushSize,
+        intensity: _pixelBrushIntensity,
         mode: _pixelBrushMode,
         clipMask: prepared.clipMask,
       );
@@ -740,6 +744,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           imageHeight: sourceImage.height,
           segmentPoints: segmentPoints,
           brushSize: brushSize,
+          intensity: _pixelBrushIntensity,
           mode: mode,
           clipMask: prepared.clipMask,
         );
@@ -859,6 +864,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final PixelBrushMode mode,
   ) {
     _pixelBrushMode = mode;
+    _pixelBrushIntensity = appProvider.brushIntensity;
     _pixelBrushLayerRestoreState = appProvider.captureSelectedLayerRestoreState();
     _pixelBrushSourceImage = appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
     _pixelBrushClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null

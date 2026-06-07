@@ -221,6 +221,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get effectHueSaturation => 'Décalage de teinte';
 
   @override
+  String get effectIntensity => 'Intensité';
+
+  @override
   String get effectNoise => 'Bruit';
 
   @override

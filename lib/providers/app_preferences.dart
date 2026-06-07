@@ -32,6 +32,8 @@ class AppPreferences extends ChangeNotifier {
 
   // Keys for preferences
   static const String keyBrushSize = 'keyBrushSize';
+  static const String keySmudgeIntensity = 'keySmudgeIntensity';
+  static const String keyBlurBrushIntensity = 'keyBlurBrushIntensity';
   static const String keyLastBrushColor = 'keyLastBrushColor';
   static const String keyLastFillColor = 'keyLastFillColor';
   static const String keySidePanelDistance = 'keySidePanelDistance';
@@ -48,6 +50,8 @@ class AppPreferences extends ChangeNotifier {
   // Default values
   double _sidePanelDistance = AppLayout.sidePanelTopDefault;
   double _brushSize = AppDefaults.brushSize;
+  double _smudgeIntensity = AppDefaults.smudgeIntensity;
+  double _blurBrushIntensity = AppDefaults.blurBrushIntensity;
   Color _brushColor = AppColors.black;
   Color _fillColor = AppColors.blue;
   bool _useApplePencil = true;
@@ -68,6 +72,12 @@ class AppPreferences extends ChangeNotifier {
 
   /// Gets the brush color.
   Color get brushColor => _brushColor;
+
+  /// Gets the persisted smudge intensity.
+  double get smudgeIntensity => _smudgeIntensity;
+
+  /// Gets the persisted blur-brush intensity.
+  double get blurBrushIntensity => _blurBrushIntensity;
 
   /// Gets the fill color.
   Color get fillColor => _fillColor;
@@ -112,6 +122,18 @@ class AppPreferences extends ChangeNotifier {
   Future<void> setBrushSize(final double size) async {
     _brushSize = size;
     await (await getPref()).setDouble(keyBrushSize, size);
+  }
+
+  /// Sets the smudge intensity.
+  Future<void> setSmudgeIntensity(final double value) async {
+    _smudgeIntensity = value.clamp(AppEffects.minIntensity, AppEffects.maxIntensity);
+    await (await getPref()).setDouble(keySmudgeIntensity, _smudgeIntensity);
+  }
+
+  /// Sets the blur-brush intensity.
+  Future<void> setBlurBrushIntensity(final double value) async {
+    _blurBrushIntensity = value.clamp(AppEffects.minIntensity, AppEffects.maxIntensity);
+    await (await getPref()).setDouble(keyBlurBrushIntensity, _blurBrushIntensity);
   }
 
   /// Sets the brush color.
@@ -275,6 +297,10 @@ class AppPreferences extends ChangeNotifier {
 
     // Load brush size
     _brushSize = _prefs!.getDouble(keyBrushSize) ?? AppDefaults.brushSize;
+
+    _smudgeIntensity = _prefs!.getDouble(keySmudgeIntensity) ?? AppDefaults.smudgeIntensity;
+
+    _blurBrushIntensity = _prefs!.getDouble(keyBlurBrushIntensity) ?? AppDefaults.blurBrushIntensity;
 
     // Load last used color
     _brushColor = Color(_prefs!.getInt(keyLastBrushColor) ?? AppColors.black.toARGB32());

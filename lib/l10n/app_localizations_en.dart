@@ -220,6 +220,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get effectHueSaturation => 'Hue Shift';
 
   @override
+  String get effectIntensity => 'Intensity';
+
+  @override
   String get effectNoise => 'Noise';
 
   @override
