@@ -248,6 +248,12 @@ abstract class AppLocalizations {
   /// **'Brush Style'**
   String get brushStyle;
 
+  /// No description provided for @effectIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Intensity'**
+  String get effectIntensity;
+
   /// No description provided for @brushStyleDash.
   ///
   /// In en, this message translates to:

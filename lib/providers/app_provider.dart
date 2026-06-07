@@ -270,6 +270,34 @@ class AppProvider extends ChangeNotifier {
     update();
   }
 
+  /// Gets the active pixel-brush intensity for the selected tool.
+  double get brushIntensity {
+    switch (_selectedAction) {
+      case ActionType.smudge:
+        return preferences.smudgeIntensity;
+      case ActionType.blurBrush:
+        return preferences.blurBrushIntensity;
+      default:
+        return AppInteraction.pixelBrushDefaultIntensity;
+    }
+  }
+
+  /// Sets the active pixel-brush intensity for the selected tool.
+  set brushIntensity(final double value) {
+    switch (_selectedAction) {
+      case ActionType.smudge:
+        preferences.setSmudgeIntensity(value);
+        break;
+      case ActionType.blurBrush:
+        preferences.setBlurBrushIntensity(value);
+        break;
+      default:
+        return;
+    }
+    repaintToolOptions();
+    update();
+  }
+
   //-------------------------
   // Brush Style
   BrushStyle _brushStyle = BrushStyle.solid;

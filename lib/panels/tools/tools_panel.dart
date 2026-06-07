@@ -12,6 +12,7 @@ import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/brush_intensity_picker.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -634,6 +635,46 @@ class ToolsPanel extends StatelessWidget {
                       max: max,
                       onChanged: (final double value) {
                         appProvider.brushSize = value;
+                      },
+                    ),
+            ),
+          );
+        }
+
+        if (selectedTool.isSupported(ActionOptions.brushIntensity)) {
+          widgets.add(
+            ToolAttributeWidget(
+              key: Keys.toolBrushIntensityTool,
+              compact: minimal,
+              name: l10n.effectIntensity,
+              childLeft: AppButtonIcon(
+                key: Keys.toolBrushIntensityButton,
+                icon: selectedTool.icon,
+                constraints: minimal ? const BoxConstraints() : null,
+                padding: minimal ? EdgeInsets.zero : const EdgeInsets.all(AppSpacing.small),
+                onPressed: () {
+                  showBrushIntensityPicker(
+                    context: context,
+                    title: l10n.effectIntensity,
+                    titleIcon: AppSvgIcon(icon: selectedTool.icon),
+                    value: appProvider.brushIntensity,
+                    onChanged: (final double newValue) {
+                      appProvider.brushIntensity = newValue;
+                    },
+                  );
+                },
+              ),
+              childRight: minimal
+                  ? null
+                  : AppSlider(
+                      key: Keys.toolBrushIntensitySlider,
+                      value: appProvider.brushIntensity,
+                      min: AppEffects.minIntensity,
+                      max: AppEffects.maxIntensity,
+                      divisions: AppLimits.sliderDivisions,
+                      valueLabel: '${(appProvider.brushIntensity * AppMath.percentScale).round()}%',
+                      onChanged: (final double value) {
+                        appProvider.brushIntensity = value;
                       },
                     ),
             ),

@@ -140,6 +140,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.toolReplace, isNotEmpty);
   expect(l10n.toolAdd, isNotEmpty);
   expect(l10n.toolRemove, isNotEmpty);
+  expect(l10n.effectIntensity, isNotEmpty);
   expect(l10n.toolInvert, isNotEmpty);
   expect(l10n.toolCrop, isNotEmpty);
   expect(l10n.brushColor, isNotEmpty);

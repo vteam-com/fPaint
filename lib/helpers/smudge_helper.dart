@@ -49,6 +49,7 @@ class _PixelBrushIsolateInput {
     required this.imageHeight,
     required this.segmentPoints,
     required this.brushSize,
+    required this.intensity,
     required this.mode,
   });
 
@@ -60,6 +61,7 @@ class _PixelBrushIsolateInput {
   /// Only the new points not yet processed by a previous segment call.
   final List<Offset> segmentPoints;
   final double brushSize;
+  final double intensity;
   final PixelBrushMode mode;
 }
 
@@ -136,6 +138,7 @@ Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
   required final int imageHeight,
   required final List<Offset> segmentPoints,
   required final double brushSize,
+  final double intensity = AppInteraction.pixelBrushDefaultIntensity,
   required final PixelBrushMode mode,
   final Uint8List? clipMask,
 }) async {
@@ -159,6 +162,7 @@ Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
         imageHeight: imageHeight,
         segmentPoints: segmentPoints,
         brushSize: brushSize,
+        intensity: intensity,
         mode: mode,
       ),
     ),
@@ -192,6 +196,8 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
   final Uint8List? clipMask = input.clipMaskData?.materialize().asUint8List();
   final int imageWidth = input.imageWidth;
   final int imageHeight = input.imageHeight;
+  final double clampedIntensity = input.intensity.clamp(AppEffects.minIntensity, AppEffects.maxIntensity);
+  final double appliedIntensity = clampedIntensity * AppInteraction.pixelBrushIntensityAppliedScale;
 
   final double radius = math.max(
     AppInteraction.smudgeMinimumRadius,
@@ -282,6 +288,7 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
             fromCenter: prevCenter,
             toCenter: curCenter,
             radius: radius,
+            intensity: appliedIntensity,
             clipMask: workingClipMask,
           );
         case PixelBrushMode.blur:
@@ -291,6 +298,7 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
             imageHeight: workingHeight,
             center: curCenter,
             radius: radius,
+            intensity: appliedIntensity,
             clipMask: workingClipMask,
           );
       }
@@ -345,6 +353,7 @@ bool _applySmudgeStep({
   required final Offset fromCenter,
   required final Offset toCenter,
   required final double radius,
+  required final double intensity,
   required final Uint8List? clipMask,
 }) {
   final int integerRadius = radius.ceil() + AppInteraction.smudgeBoundsPadding;
@@ -443,7 +452,10 @@ bool _applySmudgeStep({
         AppVisual.full,
       );
       final double radialFalloff = math.pow(feather, AppInteraction.smudgeEdgeFalloffExponent).toDouble();
-      final double blend = AppInteraction.smudgeBlendStrength * radialFalloff;
+      final double blend = (AppInteraction.smudgeBlendStrength * intensity * radialFalloff).clamp(
+        AppMath.zero.toDouble(),
+        AppVisual.full,
+      );
       if (blend <= AppMath.zero.toDouble()) {
         continue;
       }
@@ -474,6 +486,7 @@ bool _applyBlurStep({
   required final int imageHeight,
   required final Offset center,
   required final double radius,
+  required final double intensity,
   required final Uint8List? clipMask,
 }) {
   final int intRadius = radius.ceil();
@@ -498,8 +511,8 @@ bool _applyBlurStep({
     height: rectHeight,
   );
 
-  // Kernel half-width: 1-pixel neighbour average (3×3).
-  const int kernelHalf = AppInteraction.blurBrushKernelHalf;
+  final int kernelHalf =
+      AppInteraction.blurBrushKernelHalf + (intensity * AppInteraction.blurBrushKernelHalfRange).round();
   bool anyChanged = false;
 
   for (int y = top; y <= bottom; y++) {
@@ -520,7 +533,10 @@ bool _applyBlurStep({
         AppVisual.full,
       );
       final double radialFalloff = math.pow(feather, AppInteraction.blurBrushEdgeFalloffExponent).toDouble();
-      final double blend = AppInteraction.blurBrushStrength * radialFalloff;
+      final double blend = (AppInteraction.blurBrushStrength * intensity * radialFalloff).clamp(
+        AppMath.zero.toDouble(),
+        AppVisual.full,
+      );
       if (blend <= AppMath.zero.toDouble()) {
         continue;
       }

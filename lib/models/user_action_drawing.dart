@@ -96,6 +96,7 @@ enum ActionType {
 /// Enum representing the different options for drawing actions.
 enum ActionOptions {
   brushSize,
+  brushIntensity,
   brushStyle,
   brushColor,
   colorFill,
@@ -119,9 +120,11 @@ final Map<ActionType, Set<ActionOptions>> toolsSupportedAttributes = <ActionType
   },
   ActionType.smudge: <ActionOptions>{
     ActionOptions.brushSize,
+    ActionOptions.brushIntensity,
   },
   ActionType.blurBrush: <ActionOptions>{
     ActionOptions.brushSize,
+    ActionOptions.brushIntensity,
   },
   ActionType.line: <ActionOptions>{
     ActionOptions.brushColor,

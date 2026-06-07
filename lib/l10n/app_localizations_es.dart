@@ -218,6 +218,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get effectHueSaturation => 'Cambio de tono';
 
   @override
+  String get effectIntensity => 'Intensidad';
+
+  @override
   String get effectNoise => 'Ruido';
 
   @override
