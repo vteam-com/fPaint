@@ -4,6 +4,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.4] - 2026-06-07
+
+### Update
+
+- Smudge and Blur stroke workflow improvements
+- Selection and flood fill workflow polish
+
+## [1.8.3] - 2026-05-29
+
+### Fix
+
+- Flood fill gradient handling
+- Selection effect reliability
+
 ## [1.8.2] - 2026-05-29
 
 ### Add
