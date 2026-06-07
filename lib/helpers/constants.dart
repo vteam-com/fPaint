@@ -170,6 +170,7 @@ class AppLayout {
   static const double integrationTestTabletLandscapeWidth = 1600.0;
   static const double integrationTestTabletLandscapeHeight = 800.0;
   static const double thumbnailMaxHeight = 64.0;
+  static const double shellTopBarHeight = toolbarButtonSize;
   static const double shortcutGroupWidth = 250.0;
   static const double shortcutDialogMaxWidth = 760.0;
   static const double shortcutHelpTwoColumnBreakpoint = 640.0;

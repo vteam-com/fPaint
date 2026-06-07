@@ -314,12 +314,12 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
     );
     final double controlsWidth = showQuickActions ? modeControlsWidth + spacing + quickActionsWidth : modeControlsWidth;
     final double viewportHeight = MediaQuery.sizeOf(context).height;
-    final double idealControlsTop = bounds.top - AppInteraction.selectionToolbarMargin - buttonSize / AppMath.pair;
-    final double bottomControlsTop = bounds.bottom + AppInteraction.selectionToolbarMargin;
+    final double snappedControlsTop =
+        MediaQuery.paddingOf(context).top + AppLayout.shellTopBarHeight + AppSpacing.small;
     final OverlayPlacement placement = computeOverlayPlacement(
       viewportHeight: viewportHeight,
-      idealTop: idealControlsTop,
-      bottomTop: bottomControlsTop,
+      idealTop: snappedControlsTop,
+      bottomTop: snappedControlsTop,
       isFeedbackVisible: _isFeedbackVisible,
     );
     final double controlsLeft = bounds.center.dx - controlsWidth / AppMath.pair;
