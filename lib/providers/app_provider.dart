@@ -48,6 +48,8 @@ class AppProvider extends ChangeNotifier {
   final ChangeNotifier _toolOptionsNotifier = ChangeNotifier();
   final ChangeNotifier _viewportRepaintNotifier = ChangeNotifier();
   final ChangeNotifier _selectedActionNotifier = ChangeNotifier();
+  Timer? _brushSizePreviewTimer;
+  double? _brushSizePreviewSize;
 
   void _initCanvas() {
     layers.clear();
@@ -118,6 +120,7 @@ class AppProvider extends ChangeNotifier {
   @override
   void dispose() {
     preferences.removeListener(_handlePreferencesChanged);
+    _brushSizePreviewTimer?.cancel();
     _mainViewRepaintNotifier.dispose();
     _layerModifyModeNotifier.dispose();
     _toolOptionsNotifier.dispose();
@@ -263,11 +266,36 @@ class AppProvider extends ChangeNotifier {
   /// Gets the brush size.
   double get brushSize => preferences.brushSize;
 
+  /// Gets whether the live brush-size preview overlay is visible.
+  bool get isBrushSizePreviewVisible => _brushSizePreviewSize != null;
+
+  /// Gets the current live brush-size preview diameter in canvas units.
+  double? get brushSizePreviewSize => _brushSizePreviewSize;
+
+  /// Gets an inverse of the active brush color for preview visibility.
+  Color get brushSizePreviewColor => brushColor;
+
   /// Sets the brush size.
   set brushSize(final double value) {
     preferences.setBrushSize(value);
+    _showBrushSizePreview(value);
     repaintToolOptions();
     update();
+  }
+
+  void _showBrushSizePreview(final double value) {
+    _brushSizePreviewTimer?.cancel();
+    _brushSizePreviewSize = value;
+    repaintMainView();
+    _brushSizePreviewTimer = Timer(AppDefaults.brushSizePreviewDuration, _hideBrushSizePreview);
+  }
+
+  void _hideBrushSizePreview() {
+    if (_brushSizePreviewSize == null) {
+      return;
+    }
+    _brushSizePreviewSize = null;
+    repaintMainView();
   }
 
   /// Gets the active pixel-brush intensity for the selected tool.

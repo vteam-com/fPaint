@@ -191,6 +191,8 @@ class AppLayout {
   static const double switchThumbInset = 2.0;
   static const double popupMenuMinWidth = 200.0;
   static const double popupMenuItemHeight = 48.0;
+  static const double brushSizePreviewBorderWidth = 2.0;
+  static const double brushSizePreviewDashLength = 6.0;
 }
 
 /// Shared font size tokens for consistent typography across the app.
@@ -351,6 +353,7 @@ class AppMath {
   static const int two = 2;
   static const int four = 4;
   static const int six = 6;
+  static const int eight = 8;
   static const int pair = 2;
   static const int triple = 3;
   static const int bytesPerPixel = 4;
@@ -615,6 +618,7 @@ class AppDefaults {
   static const int tolerance = 50;
   static const bool useApplePencil = false;
   static const bool keepSaveBackups = false;
+  static const Duration brushSizePreviewDuration = Duration(milliseconds: 700);
   static const Duration buttonTapAnimationDuration = Duration(milliseconds: 100);
   static const Duration toolPanelRevealAnimationDuration = Duration(milliseconds: 140);
   static const Duration debounceDuration = Duration(seconds: 1);
@@ -655,6 +659,7 @@ class Keys {
   static const Key sidePanelExportButton = Key('side-panel-export-button');
   static const Key appScreenshotBoundary = Key('app-screenshot-boundary');
   static const Key mainViewScreenshotBoundary = Key('main-view-screenshot-boundary');
+  static const Key brushSizePreviewOverlay = Key('brush-size-preview-overlay');
   static const String gradientHandleKeyPrefixText = 'gradient_handle_';
   static const Key layerAddAboveButton = Key('layer-add-above-button');
   static const Key layerModifyButton = Key('layer-modify-button');
