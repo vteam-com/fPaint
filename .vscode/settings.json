@@ -92,6 +92,7 @@
         "syms",
         "tracefile",
         "undoable",
+        "unloadable",
         "unsharp",
         "vteam",
         "webp",
