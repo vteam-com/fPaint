@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
@@ -80,6 +81,21 @@ class _PixelBrushIsolateOutput {
   final bool hasChanges;
 }
 
+/// Plain result used by both the native isolate worker and the web fallback.
+class _PixelBrushComputationResult {
+  const _PixelBrushComputationResult({
+    required this.pixels,
+    required this.imageWidth,
+    required this.imageHeight,
+    required this.hasChanges,
+  });
+
+  final Uint8List pixels;
+  final int imageWidth;
+  final int imageHeight;
+  final bool hasChanges;
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -134,7 +150,9 @@ Future<PreparedSmudgeStrokeSource?> preparePixelBrushSource({
 /// Returns `null` when the segment cannot produce a visible change (fewer
 /// than two points, no affected pixels, etc.).
 ///
-/// The CPU work runs in a separate [Isolate] so the main thread stays free.
+/// The CPU work runs in a separate [Isolate] on native platforms and falls
+/// back to synchronous execution on web where `dart:isolate` transfer APIs are
+/// unavailable.
 Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
   required final Uint8List livePixels,
   required final int imageWidth,
@@ -147,6 +165,29 @@ Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
 }) async {
   if (segmentPoints.length < AppMath.pair) {
     return null;
+  }
+
+  if (kIsWeb) {
+    final _PixelBrushComputationResult webResult = _runPixelBrushComputation(
+      livePixels: livePixels,
+      clipMask: clipMask,
+      imageWidth: imageWidth,
+      imageHeight: imageHeight,
+      segmentPoints: segmentPoints,
+      brushSize: brushSize,
+      intensity: intensity,
+      mode: mode,
+    );
+
+    if (!webResult.hasChanges) {
+      return null;
+    }
+
+    return PixelBrushSegmentResult(
+      pixels: webResult.pixels,
+      width: webResult.imageWidth,
+      height: webResult.imageHeight,
+    );
   }
 
   // Extract values into locals before the isolate closure to avoid
@@ -194,27 +235,53 @@ Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
 /// call). This keeps each isolate invocation O(segment) instead of
 /// O(full-stroke) and ensures effects accumulate correctly.
 _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input) {
+  final _PixelBrushComputationResult result = _runPixelBrushComputation(
+    livePixels: input.livePixelData.materialize().asUint8List(),
+    clipMask: input.clipMaskData?.materialize().asUint8List(),
+    imageWidth: input.imageWidth,
+    imageHeight: input.imageHeight,
+    segmentPoints: input.segmentPoints,
+    brushSize: input.brushSize,
+    intensity: input.intensity,
+    mode: input.mode,
+  );
+
+  return _PixelBrushIsolateOutput(
+    resultData: TransferableTypedData.fromList(<Uint8List>[result.pixels]),
+    imageWidth: result.imageWidth,
+    imageHeight: result.imageHeight,
+    hasChanges: result.hasChanges,
+  );
+}
+
+_PixelBrushComputationResult _runPixelBrushComputation({
+  required final Uint8List livePixels,
+  required final Uint8List? clipMask,
+  required final int imageWidth,
+  required final int imageHeight,
+  required final List<Offset> segmentPoints,
+  required final double brushSize,
+  required final double intensity,
+  required final PixelBrushMode mode,
+}) {
   // Start from the caller's current live pixel state.
-  final Uint8List pixels = Uint8List.fromList(input.livePixelData.materialize().asUint8List());
-  final Uint8List? clipMask = input.clipMaskData?.materialize().asUint8List();
-  final int imageWidth = input.imageWidth;
-  final int imageHeight = input.imageHeight;
-  final double clampedIntensity = input.intensity.clamp(AppEffects.minIntensity, AppEffects.maxIntensity);
+  final Uint8List pixels = Uint8List.fromList(livePixels);
+  final double clampedIntensity = intensity.clamp(AppEffects.minIntensity, AppEffects.maxIntensity);
   final double appliedIntensity = clampedIntensity * AppInteraction.pixelBrushIntensityAppliedScale;
 
   final double radius = math.max(
     AppInteraction.smudgeMinimumRadius,
-    input.brushSize * AppInteraction.smudgeBrushRadiusFactor,
+    brushSize * AppInteraction.smudgeBrushRadiusFactor,
   );
-  final double stepSpacing = resolvePixelBrushStepSpacing(input.brushSize);
+  final double stepSpacing = resolvePixelBrushStepSpacing(brushSize);
 
   // Compute the bounding box of the segment so we work only on affected rows.
   final int padding = radius.ceil() + AppInteraction.smudgeBoundsPadding;
-  double minX = input.segmentPoints.first.dx;
-  double minY = input.segmentPoints.first.dy;
-  double maxX = input.segmentPoints.first.dx;
-  double maxY = input.segmentPoints.first.dy;
-  for (final Offset p in input.segmentPoints.skip(AppMath.one)) {
+  double minX = segmentPoints.first.dx;
+  double minY = segmentPoints.first.dy;
+  double maxX = segmentPoints.first.dx;
+  double maxY = segmentPoints.first.dy;
+  for (final Offset p in segmentPoints.skip(AppMath.one)) {
     if (p.dx < minX) {
       minX = p.dx;
     }
@@ -236,8 +303,8 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
   final int workingHeight = workingBottom - workingTop + AppMath.one;
 
   if (workingWidth <= AppMath.zero || workingHeight <= AppMath.zero) {
-    return _PixelBrushIsolateOutput(
-      resultData: TransferableTypedData.fromList(<Uint8List>[pixels]),
+    return _PixelBrushComputationResult(
+      pixels: pixels,
       imageWidth: imageWidth,
       imageHeight: imageHeight,
       hasChanges: false,
@@ -267,9 +334,9 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
   bool anyChanges = false;
   final ui.Offset origin = ui.Offset(workingLeft.toDouble(), workingTop.toDouble());
 
-  for (int idx = AppMath.one; idx < input.segmentPoints.length; idx++) {
-    final Offset segStart = input.segmentPoints[idx - AppMath.one] - origin;
-    final Offset segEnd = input.segmentPoints[idx] - origin;
+  for (int idx = AppMath.one; idx < segmentPoints.length; idx++) {
+    final Offset segStart = segmentPoints[idx - AppMath.one] - origin;
+    final Offset segEnd = segmentPoints[idx] - origin;
     final double dist = (segEnd - segStart).distance;
     final int steps = math.max(AppMath.one, (dist / stepSpacing).ceil());
     Offset prevCenter = segStart;
@@ -279,7 +346,7 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
       final Offset curCenter = Offset.lerp(segStart, segEnd, t) ?? segEnd;
 
       final bool stepChanged;
-      switch (input.mode) {
+      switch (mode) {
         case PixelBrushMode.smudge:
           stepChanged = _applySmudgeStep(
             pixels: workingPixels,
@@ -311,8 +378,8 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
   }
 
   if (!anyChanges) {
-    return _PixelBrushIsolateOutput(
-      resultData: TransferableTypedData.fromList(<Uint8List>[pixels]),
+    return _PixelBrushComputationResult(
+      pixels: pixels,
       imageWidth: imageWidth,
       imageHeight: imageHeight,
       hasChanges: false,
@@ -330,8 +397,8 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
     height: workingHeight,
   );
 
-  return _PixelBrushIsolateOutput(
-    resultData: TransferableTypedData.fromList(<Uint8List>[pixels]),
+  return _PixelBrushComputationResult(
+    pixels: pixels,
     imageWidth: imageWidth,
     imageHeight: imageHeight,
     hasChanges: true,
