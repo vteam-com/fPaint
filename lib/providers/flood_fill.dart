@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:isolate';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 
@@ -824,18 +825,23 @@ Future<Region> extractRegionByColorEdgeAndOffsetFromPixels({
     return region;
   }
 
-  final _FloodFillTaskOutput output = await Isolate.run<_FloodFillTaskOutput>(
-    () => _runFloodFillTask(
-      _FloodFillTaskInput(
-        x: x,
-        y: y,
-        width: width,
-        height: height,
-        tolerance: tolerance,
-        pixelData: TransferableTypedData.fromList(<Uint8List>[pixels]),
-      ),
-    ),
+  final _FloodFillTaskInput taskInput = _FloodFillTaskInput(
+    x: x,
+    y: y,
+    width: width,
+    height: height,
+    tolerance: tolerance,
+    pixelData: TransferableTypedData.fromList(<Uint8List>[pixels]),
   );
+
+  final _FloodFillTaskOutput output;
+  if (kIsWeb) {
+    output = _runFloodFillTask(taskInput);
+  } else {
+    output = await Isolate.run<_FloodFillTaskOutput>(
+      () => _runFloodFillTask(taskInput),
+    );
+  }
 
   if (!output.hasRegion || output.runs.isEmpty) {
     return region;

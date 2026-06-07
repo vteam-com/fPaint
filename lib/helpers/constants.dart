@@ -381,6 +381,8 @@ class AppInteraction {
   static const double minCanvasScale = 0.1;
   static const double maxCanvasScale = 10.0;
   static const double multiTouchScaleThreshold = 50.0;
+  static const Duration selectionDoubleTapTimeout = Duration(milliseconds: 300);
+  static const double selectionDoubleTapSlop = 24.0;
   static const double linearFillHandleOffset = 40.0;
   static const double radialFillHandleOffset = 50.0;
   static const double magnifierScale = 6.0;

@@ -186,6 +186,33 @@ void main() {
       expect(appProvider.selectorModel.path1, isNotNull);
       expect(appProvider.selectorModel.boundingRect, const Rect.fromLTWH(10, 10, 70, 70));
     });
+
+    test('line mode closes when explicitly requested after three points', () {
+      appProvider.selectorModel.mode = SelectorMode.line;
+      appProvider.selectorCreationStart(const Offset(10, 10));
+      appProvider.selectorCreationStart(const Offset(80, 10));
+      appProvider.selectorCreationStart(const Offset(80, 80));
+
+      final bool didClose = appProvider.selectorCreationClosePolygon();
+
+      expect(didClose, isTrue);
+      expect(appProvider.selectorModel.isDrawing, isFalse);
+      expect(appProvider.selectorModel.points, isEmpty);
+      expect(appProvider.selectorModel.path1, isNotNull);
+      expect(appProvider.selectorModel.boundingRect, const Rect.fromLTWH(10, 10, 70, 70));
+    });
+
+    test('line mode does not close explicitly before three points', () {
+      appProvider.selectorModel.mode = SelectorMode.line;
+      appProvider.selectorCreationStart(const Offset(10, 10));
+      appProvider.selectorCreationStart(const Offset(80, 10));
+
+      final bool didClose = appProvider.selectorCreationClosePolygon();
+
+      expect(didClose, isFalse);
+      expect(appProvider.selectorModel.isDrawing, isTrue);
+      expect(appProvider.selectorModel.points, <Offset>[const Offset(10, 10), const Offset(80, 10)]);
+    });
   });
 
   group('cancelImagePlacement', () {

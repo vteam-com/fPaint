@@ -41,6 +41,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   int _activePointerId = -1;
   final List<int> _activePointers = <int>[];
   double _baseDistance = 0.0;
+  Duration? _lastSelectionTapTimestamp;
+  Offset? _lastSelectionTapCanvasPosition;
 
   /// Index into [_pixelBrushStrokePoints] of the *last point that has already
   /// been processed* by a previous segment call.  The next kick will send only
@@ -377,9 +379,15 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       if (isSelectionActive) {
         appProvider.selectorCreationEnd();
         _restoreSelectionMath(appProvider);
+        if (appProvider.selectorModel.mode != SelectorMode.line || !appProvider.selectorModel.isDrawing) {
+          _clearSelectionTapTracking();
+        }
       } else if (_pixelBrushSourceImage != null) {
         _appendPixelBrushPoint(appProvider.toCanvas(event.localPosition), appProvider.brushSize);
         await _commitPixelBrushStroke(appProvider);
+        _clearSelectionTapTracking();
+      } else {
+        _clearSelectionTapTracking();
       }
       _activePointerId = -1;
       _clearPixelBrushStroke();
@@ -495,10 +503,50 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     }
   }
 
+  void _clearSelectionTapTracking() {
+    _lastSelectionTapTimestamp = null;
+    _lastSelectionTapCanvasPosition = null;
+  }
+
   /// Returns whether the current keyboard state requests sampling from all visible layers.
   bool _isSampleAllLayersModifierPressed() {
     final HardwareKeyboard keyboard = HardwareKeyboard.instance;
     return keyboard.isControlPressed || keyboard.isMetaPressed;
+  }
+
+  bool _tryCloseStraightLineSelectionOnDoubleTap(
+    final AppProvider appProvider,
+    final PointerDownEvent event,
+    final Offset canvasPosition,
+  ) {
+    if (appProvider.selectorModel.mode != SelectorMode.line || !appProvider.selectorModel.isDrawing) {
+      return false;
+    }
+
+    final Duration eventTimestamp = event.timeStamp;
+    final Duration? previousTimestamp = _lastSelectionTapTimestamp;
+    final Offset? previousPosition = _lastSelectionTapCanvasPosition;
+    final bool isDoubleTap =
+        previousTimestamp != null &&
+        previousPosition != null &&
+        eventTimestamp - previousTimestamp <= AppInteraction.selectionDoubleTapTimeout &&
+        (canvasPosition - previousPosition).distance <=
+            AppInteraction.selectionDoubleTapSlop / appProvider.layers.scale;
+
+    _lastSelectionTapTimestamp = eventTimestamp;
+    _lastSelectionTapCanvasPosition = canvasPosition;
+
+    if (!isDoubleTap) {
+      return false;
+    }
+
+    final bool didClose = appProvider.selectorCreationClosePolygon();
+    if (didClose) {
+      _activePointerId = -1;
+      _restoreSelectionMath(appProvider);
+      _clearSelectionTapTracking();
+    }
+    return didClose;
   }
 
   /// Starts pointer interactions including drawing, selection, fill, and text placement.
@@ -531,6 +579,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
 
       if (isSelectionActive) {
         _applySelectionModifierMath(appProvider);
+        if (_tryCloseStraightLineSelectionOnDoubleTap(appProvider, event, adjustedPosition)) {
+          return;
+        }
         appProvider.selectorCreationStart(
           adjustedPosition,
           sampleAllLayers: appProvider.selectorModel.mode == SelectorMode.wand && _isSampleAllLayersModifierPressed(),

@@ -227,6 +227,84 @@ void main() {
     controller.dispose();
   });
 
+  testWidgets('straight-line selector closes on double tap without returning to the first point', (
+    final WidgetTester tester,
+  ) async {
+    final AppPreferences preferences = await createRecoveryTestPreferences();
+    final AppProvider appProvider = AppProvider(preferences: preferences);
+    final ShellProvider shellProvider = ShellProvider();
+    final MemoryDraftRecoveryStorage storage = MemoryDraftRecoveryStorage();
+    final DraftRecoveryController controller = DraftRecoveryController(
+      preferences: preferences,
+      layers: appProvider.layers,
+      shellProvider: shellProvider,
+      storage: storage,
+      encoder: (final LayersProvider _) async => <int>[1, 2, 3],
+      saveDebounce: const Duration(seconds: 10),
+    );
+
+    resetAppProviderLayersForRecovery(appProvider);
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: <SingleChildWidget>[
+          Provider<DraftRecoveryController>.value(value: controller),
+          Provider<DraftFlusher>.value(value: controller),
+          ChangeNotifierProvider<AppPreferences>.value(value: preferences),
+          ChangeNotifierProvider<AppProvider>.value(value: appProvider),
+          ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
+        ],
+        child: const MaterialApp(
+          home: Scaffold(
+            body: SizedBox.expand(
+              child: CanvasGestureHandler(
+                child: ColoredBox(color: Colors.white),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    appProvider.selectedAction = ActionType.selector;
+    appProvider.selectorModel.mode = SelectorMode.line;
+    await tester.pump();
+
+    final Offset canvasTopLeft = tester.getTopLeft(find.byType(CanvasGestureHandler));
+
+    Future<void> tapCanvas(final Offset canvasPosition) async {
+      await tester.tapAt(canvasTopLeft + canvasPosition);
+      await tester.pump();
+    }
+
+    await tapCanvas(const Offset(50, 50));
+    await tapCanvas(const Offset(120, 50));
+    await tapCanvas(const Offset(120, 120));
+
+    expect(appProvider.selectorModel.isDrawing, isTrue);
+    expect(
+      appProvider.selectorModel.points,
+      <Offset>[const Offset(50, 50), const Offset(120, 50), const Offset(120, 120)],
+    );
+
+    await tester.tapAt(canvasTopLeft + const Offset(170, 140));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tapAt(canvasTopLeft + const Offset(170, 140));
+    await tester.pump();
+
+    expect(appProvider.selectorModel.isDrawing, isFalse);
+    expect(appProvider.selectorModel.points, isEmpty);
+    expect(appProvider.selectorModel.path1, isNotNull);
+    expect(appProvider.selectorModel.path1!.getBounds(), const Rect.fromLTWH(50, 50, 120, 90));
+
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump();
+
+    controller.dispose();
+  });
+
   test('smudge patch application keeps prior vector actions and appends a bounded replacement', () async {
     final LayerProvider layer = LayerProvider(
       name: 'Test',
