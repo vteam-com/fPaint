@@ -863,7 +863,7 @@
   <path d="M 515.0,5531.0 L 527.0,5524.0 Q 530.0,5524.0 530.0,5527.0 L 530.0,5535.0 Q 530.0,5538.0 527.0,5538.0 Z" fill="#3b82f6"/>
   <text x="525.32" y="5532.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. widgets/text_formatting_controls.dart</title></g><text x="334.0" y="5536.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">text_style_toggle_buttons.dart</text>
 <g class="folderTitleLayer">
-<text x="322.0" y="105.0" class="layerTitle">fpaint v1.8.4+1</text>
+<text x="322.0" y="105.0" class="layerTitle">fpaint v1.8.5+1</text>
 <text x="342.0" y="157.0" class="layerTitle">  ...</text>
 <text x="342.0" y="375.0" class="layerTitle">  l10n</text>
 <text x="342.0" y="497.0" class="layerTitle">  recovery</text>

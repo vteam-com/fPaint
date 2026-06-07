@@ -350,6 +350,17 @@ class SelectorModel extends VisibleModel {
     return points.length >= AppMath.triple && (position - points.first).distance <= closeDistance;
   }
 
+  /// Closes the in-progress straight-line region without requiring a tap near
+  /// the first vertex.
+  bool closeStraightLineRegion() {
+    if (points.length < AppMath.triple) {
+      return false;
+    }
+
+    _setWorkingPath(_buildStraightLineRegionPath(closePath: true));
+    return true;
+  }
+
   /// Builds the current straight-line region path from committed vertices plus
   /// an optional preview edge, closing the polygon only when requested.
   Path _buildStraightLineRegionPath({

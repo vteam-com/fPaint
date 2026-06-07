@@ -714,6 +714,24 @@ extension AppProviderSelection on AppProvider {
     update();
   }
 
+  /// Closes an active straight-line region selection and commits it.
+  bool selectorCreationClosePolygon() {
+    if (selectorModel.mode != SelectorMode.line || !selectorModel.isDrawing) {
+      return false;
+    }
+
+    final bool isClosed = selectorModel.closeStraightLineRegion();
+    if (!isClosed) {
+      return false;
+    }
+
+    selectorModel.isDrawing = false;
+    selectorModel.applyMath();
+    repaintToolOptions();
+    update();
+    return true;
+  }
+
   /// Ensures a selection exists. If no selection path is set, selects the
   /// entire canvas so that operations can treat the full layer as the target.
   void _ensureSelection() {
