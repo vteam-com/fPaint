@@ -239,6 +239,7 @@ class AppProvider extends ChangeNotifier {
     if (value != ActionType.selector) {
       wandSelectionRequestVersion += AppMath.one;
       pendingWandSelectionPosition = null;
+      pendingWandSelectionSampleAllLayers = false;
       cachedWandSourceSignature = -AppMath.one;
       cachedWandSourcePixels = null;
       cachedWandSourceWidth = AppMath.zero;
@@ -411,6 +412,9 @@ class AppProvider extends ChangeNotifier {
 
   /// Latest pointer position requested for magic-wand selection.
   Offset? pendingWandSelectionPosition;
+
+  /// Whether the queued magic-wand request should sample all visible layers.
+  bool pendingWandSelectionSampleAllLayers = false;
 
   /// Fingerprint of the cached raster bytes used by magic-wand/fill extraction.
   int cachedWandSourceSignature = -AppMath.one;

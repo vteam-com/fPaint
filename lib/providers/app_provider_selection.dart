@@ -636,12 +636,16 @@ extension AppProviderSelection on AppProvider {
   }
 
   /// Starts a selector creation.
-  void selectorCreationStart(final Offset position) {
+  void selectorCreationStart(
+    final Offset position, {
+    final bool sampleAllLayers = false,
+  }) {
     cancelEffectPreview();
     if (selectorModel.mode == SelectorMode.wand) {
       selectorModel.isDrawing = true;
       wandSelectionRequestVersion += AppMath.one;
       pendingWandSelectionPosition = position;
+      pendingWandSelectionSampleAllLayers = sampleAllLayers;
       unawaited(_processPendingWandSelectionRequests());
       return;
     }
@@ -748,8 +752,13 @@ extension AppProviderSelection on AppProvider {
   }
 
   /// Gets the region path from a layer image.
-  Future<FillRegion> getRegionPathFromLayerImage(final ui.Offset position) async {
-    final FillImageData? imageData = await _getSelectedLayerFillImageData();
+  Future<FillRegion> getRegionPathFromLayerImage(
+    final ui.Offset position, {
+    required final bool sampleAllLayers,
+  }) async {
+    final FillImageData? imageData = await _getSelectedLayerFillImageData(
+      sampleAllLayers: sampleAllLayers,
+    );
     if (imageData == null) {
       return FillRegion(path: Path(), offset: Offset.zero);
     }
@@ -771,10 +780,15 @@ extension AppProviderSelection on AppProvider {
     try {
       while (pendingWandSelectionPosition != null) {
         final Offset requestPosition = pendingWandSelectionPosition!;
+        final bool requestSampleAllLayers = pendingWandSelectionSampleAllLayers;
         final int requestVersion = wandSelectionRequestVersion;
         pendingWandSelectionPosition = null;
+        pendingWandSelectionSampleAllLayers = false;
 
-        final FillRegion region = await getRegionPathFromLayerImage(requestPosition);
+        final FillRegion region = await getRegionPathFromLayerImage(
+          requestPosition,
+          sampleAllLayers: requestSampleAllLayers,
+        );
 
         if (requestVersion != wandSelectionRequestVersion) {
           continue;
@@ -800,9 +814,14 @@ extension AppProviderSelection on AppProvider {
     }
   }
 
-  /// Returns cached selected-layer RGBA bytes, refreshing cache when signature changes.
-  Future<FillImageData?> _getSelectedLayerFillImageData() async {
-    final int signature = _createSelectedLayerFloodSourceSignature();
+  /// Returns cached wand source RGBA bytes, refreshing cache when signature changes.
+  /// Samples either the selected layer only or all visible layers for the current request.
+  Future<FillImageData?> _getSelectedLayerFillImageData({
+    required final bool sampleAllLayers,
+  }) async {
+    final int signature = _createSelectedLayerFloodSourceSignature(
+      sampleAllLayers: sampleAllLayers,
+    );
     if (signature == cachedWandSourceSignature &&
         cachedWandSourcePixels != null &&
         cachedWandSourceWidth > AppMath.zero &&
@@ -814,7 +833,11 @@ extension AppProviderSelection on AppProvider {
       );
     }
 
-    final ui.Image image = layers.selectedLayer.toImageForStorage(layers.size);
+    final bool ownsImage = !sampleAllLayers;
+    final ui.Image image = sampleAllLayers
+        ? layers.cachedImage ?? await layers.capturePainterToImage()
+        : layers.selectedLayer.toImageForStorage(layers.size);
+
     try {
       final Uint8List? pixels = await convertImageToUint8List(image);
       if (pixels == null) {
@@ -832,12 +855,37 @@ extension AppProviderSelection on AppProvider {
         height: image.height,
       );
     } finally {
-      image.dispose();
+      if (ownsImage) {
+        image.dispose();
+      }
     }
   }
 
-  /// Creates a stable fingerprint for selected-layer raster cache invalidation.
-  int _createSelectedLayerFloodSourceSignature() {
+  /// Creates a stable fingerprint for wand source cache invalidation.
+  /// Includes the sampling mode in the signature.
+  int _createSelectedLayerFloodSourceSignature({
+    required final bool sampleAllLayers,
+  }) {
+    if (sampleAllLayers) {
+      return Object.hash(
+        layers,
+        layers.width.toInt(),
+        layers.height.toInt(),
+        sampleAllLayers,
+        layers.list
+            .map(
+              (final LayerProvider l) => Object.hash(
+                l,
+                l.actionStack.length,
+                l.redoStack.length,
+                l.lastUserAction,
+                l.isVisible,
+              ),
+            )
+            .toList(),
+      );
+    }
+
     final LayerProvider layer = layers.selectedLayer;
     return Object.hash(
       layer,
@@ -847,6 +895,7 @@ extension AppProviderSelection on AppProvider {
       layer.actionStack.length,
       layer.redoStack.length,
       layer.lastUserAction,
+      sampleAllLayers,
     );
   }
 

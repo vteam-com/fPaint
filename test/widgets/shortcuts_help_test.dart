@@ -139,12 +139,16 @@ void main() {
       expect(find.text('Add to Selection'), findsOneWidget);
       expect(find.text('Subtract from Selection'), findsOneWidget);
       expect(find.text('Intersect with Selection'), findsOneWidget);
+      expect(find.text('Magic Wand: Sample All Layers'), findsOneWidget);
+      expect(find.text('Flood Fill: Sample All Layers'), findsOneWidget);
       // Shift key cap must appear for Add to Selection
       expect(find.text('Shift'), findsAtLeastNWidgets(1));
       // Platform subtract modifier: Option on macOS/iOS, Alt on other platforms
       final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
       final String subtractModifier = isApple ? 'Option' : 'Alt';
       expect(find.textContaining(subtractModifier), findsAtLeastNWidgets(1));
+      final String wandModifier = isApple ? 'Cmd' : 'Ctrl';
+      expect(find.textContaining(wandModifier), findsAtLeastNWidgets(1));
     });
 
     testWidgets('shows Save shortcut', (final WidgetTester tester) async {
