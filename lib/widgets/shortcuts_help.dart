@@ -32,6 +32,8 @@ const String _actionTextTool = 'Text Tool';
 const String _actionAddToSelection = 'Add to Selection';
 const String _actionSubtractFromSelection = 'Subtract from Selection';
 const String _actionIntersectWithSelection = 'Intersect with Selection';
+const String _actionWandSampleAllLayers = 'Magic Wand: Sample All Layers';
+const String _actionFloodFillSampleAllLayers = 'Flood Fill: Sample All Layers';
 const String _actionNewLayer = 'New Layer';
 const String _actionDeleteLayer = 'Delete Layer';
 const String _labelDelete = 'Delete';
@@ -124,6 +126,8 @@ class ShortcutsHelpDialog extends StatelessWidget {
                 'keys': '$_modShift + ${_getSelectionSubtractModifier()}',
                 'description': _actionIntersectWithSelection,
               },
+              <String, String>{'keys': _getPlatformModifier(context), 'description': _actionWandSampleAllLayers},
+              <String, String>{'keys': _getPlatformModifier(context), 'description': _actionFloodFillSampleAllLayers},
             ],
           ),
           (

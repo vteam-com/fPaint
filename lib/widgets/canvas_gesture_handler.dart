@@ -477,6 +477,12 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     }
   }
 
+  /// Returns whether the current keyboard state requests sampling from all visible layers.
+  bool _isSampleAllLayersModifierPressed() {
+    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+    return keyboard.isControlPressed || keyboard.isMetaPressed;
+  }
+
   /// Starts pointer interactions including drawing, selection, fill, and text placement.
   void _handlePointerStart(
     final AppProvider appProvider,
@@ -507,7 +513,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
 
       if (isSelectionActive) {
         _applySelectionModifierMath(appProvider);
-        appProvider.selectorCreationStart(adjustedPosition);
+        appProvider.selectorCreationStart(
+          adjustedPosition,
+          sampleAllLayers: appProvider.selectorModel.mode == SelectorMode.wand && _isSampleAllLayersModifierPressed(),
+        );
         return;
       }
 
@@ -552,15 +561,25 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       }
 
       if (appProvider.selectedAction == ActionType.fill) {
-        if (await appProvider.prepareFloodFillSelection(adjustedPosition)) {
+        final bool sampleAllLayers = _isSampleAllLayersModifierPressed();
+
+        if (await appProvider.prepareFloodFillSelection(
+          adjustedPosition,
+          sampleAllLayers: sampleAllLayers,
+        )) {
           return;
         }
 
         if (appProvider.fillModel.mode == FillMode.solid) {
           appProvider.fillModel.gradientPoints.clear();
-          appProvider.floodFillSolidAction(adjustedPosition);
+          appProvider.fillModel.sampleAllLayers = sampleAllLayers;
+          appProvider.floodFillSolidAction(
+            adjustedPosition,
+            sampleAllLayers: sampleAllLayers,
+          );
         } else {
           if (appProvider.fillModel.gradientPoints.isEmpty) {
+            appProvider.fillModel.sampleAllLayers = sampleAllLayers;
             if (appProvider.fillModel.mode == FillMode.linear) {
               appProvider.fillModel.addPoint(
                 GradientPoint(

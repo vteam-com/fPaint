@@ -32,6 +32,9 @@ class FillModel extends VisibleModel {
   /// Whether flood fill should render as a halftone pattern.
   bool halftoneEnabled = false;
 
+  /// Whether the active flood fill session samples all visible layers.
+  bool sampleAllLayers = false;
+
   int _halftoneMaxDotSizePercent = AppHalftone.defaultDotSizePercent;
 
   /// Relative maximum dot size for halftone flood fill in percent.
@@ -84,6 +87,7 @@ class FillModel extends VisibleModel {
   @override
   void clear() {
     this.gradientPoints.clear();
+    sampleAllLayers = false;
     this.isVisible = false;
   }
 

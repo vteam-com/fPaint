@@ -233,5 +233,41 @@ void main() {
       expect(mainViewNotifications, 1);
       expect(appProvider.selectorModel.isDrawing, isTrue);
     });
+
+    test('wand selector request captures sample-all-layers modifier per click', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+
+      appProvider.selectorModel.mode = SelectorMode.wand;
+      appProvider.isWandSelectionInProgress = true;
+      appProvider.selectorCreationStart(
+        const Offset(4, 6),
+        sampleAllLayers: true,
+      );
+
+      expect(appProvider.pendingWandSelectionPosition, const Offset(4, 6));
+      expect(appProvider.pendingWandSelectionSampleAllLayers, isTrue);
+    });
+
+    test('wand all-layers sampling can reuse cached composite image', () async {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+
+      await appProvider.layers.capturePainterToImage();
+
+      await appProvider.getRegionPathFromLayerImage(
+        const Offset(0, 0),
+        sampleAllLayers: true,
+      );
+
+      await appProvider.getRegionPathFromLayerImage(
+        const Offset(0, 0),
+        sampleAllLayers: true,
+      );
+
+      expect(appProvider.layers.cachedImage, isNotNull);
+      expect(
+        appProvider.layers.cachedImage!.width,
+        greaterThan(0),
+      );
+    });
   });
 }

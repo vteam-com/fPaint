@@ -47,11 +47,13 @@ void main() {
     test('clears gradient points and hides', () {
       model.mode = FillMode.linear;
       model.isVisible = true;
+      model.sampleAllLayers = true;
       model.addPoint(GradientPoint(offset: const Offset(10, 10), color: const Color(0xFFFF0000)));
       model.addPoint(GradientPoint(offset: const Offset(50, 50), color: const Color(0xFF0000FF)));
       model.clear();
       expect(model.gradientPoints, isEmpty);
       expect(model.isVisible, isFalse);
+      expect(model.sampleAllLayers, isFalse);
     });
   });
 

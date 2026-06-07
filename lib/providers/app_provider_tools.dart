@@ -72,6 +72,16 @@ extension AppProviderTools on AppProvider {
     return ui.Path.from(selectionPath);
   }
 
+  Future<ui.Image> _getFloodFillSourceImage({
+    required final bool sampleAllLayers,
+  }) async {
+    if (sampleAllLayers) {
+      return layers.cachedImage ?? await layers.capturePainterToImage();
+    }
+
+    return layers.selectedLayer.toImageForStorage(layers.size);
+  }
+
   /// Updates an action.
   void updateAction({
     final Offset? start,
@@ -135,7 +145,10 @@ extension AppProviderTools on AppProvider {
   /// Creates a selection from the tapped flood-fill region when no active
   /// selection exists yet. Returns `true` when the tap was consumed by the new
   /// selection behavior.
-  Future<bool> prepareFloodFillSelection(final Offset position) async {
+  Future<bool> prepareFloodFillSelection(
+    final Offset position, {
+    final bool sampleAllLayers = false,
+  }) async {
     if (!shouldCreateSelectionFromFloodFillTap(
       selectedAction: selectedAction,
       selectorMode: selectorModel.mode,
@@ -145,7 +158,10 @@ extension AppProviderTools on AppProvider {
       return false;
     }
 
-    final FillRegion region = await getRegionPathFromLayerImage(position);
+    final FillRegion region = await getRegionPathFromLayerImage(
+      position,
+      sampleAllLayers: sampleAllLayers,
+    );
     if (region.path.getBounds().isEmpty) {
       return false;
     }
@@ -161,41 +177,67 @@ extension AppProviderTools on AppProvider {
   }
 
   /// Performs a flood fill with a solid color.
-  void floodFillSolidAction(final Offset position) async {
-    if (await prepareFloodFillSelection(position)) {
+  void floodFillSolidAction(
+    final Offset position, {
+    final bool sampleAllLayers = false,
+  }) async {
+    if (await prepareFloodFillSelection(
+      position,
+      sampleAllLayers: sampleAllLayers,
+    )) {
       return;
     }
 
-    final ui.Image sourceImage = layers.selectedLayer.toImageForStorage(layers.size);
-    final ui.Path? clipPath = selectorModel.isVisible ? selectorModel.path1 : null;
-    final UserActionDrawing action = await fillService.createFloodFillSolidAction(
-      sourceImage: sourceImage,
-      position: position,
-      fillColor: fillColor,
-      halftoneDotColor: fillModel.halftoneEnabled ? fillColor : null,
-      halftoneMaxDotSizeFactor: fillModel.halftoneMaxDotSizeFactor,
-      tolerance: tolerance,
-      clipPath: clipPath,
-      regionPathOverride: _selectionRegionFloodFillOverridePath,
+    final bool ownsSourceImage = !sampleAllLayers;
+    final ui.Image sourceImage = await _getFloodFillSourceImage(
+      sampleAllLayers: sampleAllLayers,
     );
 
-    recordExecuteDrawingActionToSelectedLayer(action: action);
+    try {
+      final ui.Path? clipPath = selectorModel.isVisible ? selectorModel.path1 : null;
+      final UserActionDrawing action = await fillService.createFloodFillSolidAction(
+        sourceImage: sourceImage,
+        position: position,
+        fillColor: fillColor,
+        halftoneDotColor: fillModel.halftoneEnabled ? fillColor : null,
+        halftoneMaxDotSizeFactor: fillModel.halftoneMaxDotSizeFactor,
+        tolerance: tolerance,
+        clipPath: clipPath,
+        regionPathOverride: _selectionRegionFloodFillOverridePath,
+      );
+
+      recordExecuteDrawingActionToSelectedLayer(action: action);
+    } finally {
+      if (ownsSourceImage) {
+        sourceImage.dispose();
+      }
+    }
   }
 
   /// Performs a flood fill with a gradient.
   void floodFillGradientAction(final FillModel fillModel) async {
-    final ui.Image sourceImage = layers.selectedLayer.toImageForStorage(layers.size);
-    final ui.Path? clipPath = selectorModel.isVisible ? selectorModel.path1 : null;
-    final UserActionDrawing action = await fillService.createFloodFillGradientAction(
-      sourceImage: sourceImage,
-      fillModel: fillModel,
-      tolerance: tolerance,
-      clipPath: clipPath,
-      toCanvas: toCanvas,
-      regionPathOverride: _selectionRegionFloodFillOverridePath,
+    final bool ownsSourceImage = !fillModel.sampleAllLayers;
+    final ui.Image sourceImage = await _getFloodFillSourceImage(
+      sampleAllLayers: fillModel.sampleAllLayers,
     );
 
-    recordExecuteDrawingActionToSelectedLayer(action: action);
+    try {
+      final ui.Path? clipPath = selectorModel.isVisible ? selectorModel.path1 : null;
+      final UserActionDrawing action = await fillService.createFloodFillGradientAction(
+        sourceImage: sourceImage,
+        fillModel: fillModel,
+        tolerance: tolerance,
+        clipPath: clipPath,
+        toCanvas: toCanvas,
+        regionPathOverride: _selectionRegionFloodFillOverridePath,
+      );
+
+      recordExecuteDrawingActionToSelectedLayer(action: action);
+    } finally {
+      if (ownsSourceImage) {
+        sourceImage.dispose();
+      }
+    }
   }
 
   /// Updates the gradient fill.
