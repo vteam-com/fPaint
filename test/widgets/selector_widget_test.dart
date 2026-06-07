@@ -10,6 +10,8 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_tooltip.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
+import '../helpers/widget_test_harness.dart';
+
 const Duration _snackBarDismissDuration = Duration(seconds: 4);
 
 Widget _buildHarness({
@@ -28,30 +30,26 @@ Widget _buildHarness({
   required final void Function(double) onRotate,
   required final Future<void> Function(SelectionEffect effect, BuildContext context) onEffectSelected,
 }) {
-  return MaterialApp(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: Scaffold(
-      body: MediaQuery(
-        data: const MediaQueryData(size: Size(1200, 900)),
-        child: SelectionRectWidget(
-          path1: path1,
-          path2: path2,
-          enableMoveAndResize: enableMoveAndResize,
-          isDrawing: isDrawing,
-          onCancel: onCancel,
-          onCopy: onCopy,
-          onDuplicate: onDuplicate,
-          onDuplicateMove: onDuplicateMove,
-          onToggleTransformMode: onToggleTransformMode,
-          onDrag: onDrag,
-          onResize: onResize,
-          onScale: onScale,
-          onRotate: onRotate,
-          onEffectSelected: onEffectSelected,
-        ),
-      ),
-    ),
+  return buildLocalizedScaffoldTestApp(
+    mediaQueryData: const MediaQueryData(size: Size(1200, 900)),
+    bodyBuilder: (final BuildContext context) {
+      return SelectionRectWidget(
+        path1: path1,
+        path2: path2,
+        enableMoveAndResize: enableMoveAndResize,
+        isDrawing: isDrawing,
+        onCancel: onCancel,
+        onCopy: onCopy,
+        onDuplicate: onDuplicate,
+        onDuplicateMove: onDuplicateMove,
+        onToggleTransformMode: onToggleTransformMode,
+        onDrag: onDrag,
+        onResize: onResize,
+        onScale: onScale,
+        onRotate: onRotate,
+        onEffectSelected: onEffectSelected,
+      );
+    },
   );
 }
 

@@ -8,6 +8,8 @@ import 'package:fpaint/widgets/main_view.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helpers/widget_test_harness.dart';
+
 Widget _buildHarness({
   required final AppPreferences preferences,
   required final AppProvider appProvider,
@@ -20,10 +22,8 @@ Widget _buildHarness({
       ChangeNotifierProvider<LayersProvider>.value(value: appProvider.layers),
       ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
     ],
-    child: const MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(body: SizedBox.expand(child: MainView())),
+    child: buildLocalizedTestApp(
+      home: const Scaffold(body: SizedBox.expand(child: MainView())),
     ),
   );
 }

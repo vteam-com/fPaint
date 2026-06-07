@@ -8,6 +8,8 @@ import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
+import '../helpers/widget_test_harness.dart';
+
 class _FakePreferences extends AppPreferences {
   _FakePreferences(this._recent);
 
@@ -42,21 +44,15 @@ Widget _buildHarness({
 }) {
   return ChangeNotifierProvider<AppPreferences>.value(
     value: prefs,
-    child: MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Builder(
-        builder: (final BuildContext context) {
-          return Scaffold(
-            body: ImportDialog(
-              parentContext: context,
-              clipboardImageLoader: clipboardImageLoader,
-              recentFileMetadataLoader: recentFileMetadataLoader,
-              recentFileThumbnailLoader: recentFileThumbnailLoader,
-            ),
-          );
-        },
-      ),
+    child: buildLocalizedScaffoldTestApp(
+      bodyBuilder: (final BuildContext context) {
+        return ImportDialog(
+          parentContext: context,
+          clipboardImageLoader: clipboardImageLoader,
+          recentFileMetadataLoader: recentFileMetadataLoader,
+          recentFileThumbnailLoader: recentFileThumbnailLoader,
+        );
+      },
     ),
   );
 }

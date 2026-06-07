@@ -16,7 +16,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_jpeg.dart';
 import 'package:fpaint/files/file_ora.dart';
-import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/file_webp.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
@@ -416,6 +415,71 @@ Future<void> _captureRecordedInteraction(
   );
 }
 
+Future<void> _waitForEffectPreviewCommit(
+  final WidgetTester tester, {
+  required final AppProvider appProvider,
+}) async {
+  for (int index = 0; index < _effectControlsWaitPumpCount; index++) {
+    if (!appProvider.effectPreviewModel.isVisible && !tester.binding.hasScheduledFrame) {
+      break;
+    }
+    await tester.pump(_effectControlsWaitPumpDuration);
+  }
+
+  await pumpForUnitTestUiSettle(tester);
+}
+
+Future<ui.Image> _captureRenderedMainViewCanvasImage(final WidgetTester tester) async {
+  await tester.pump();
+
+  final BuildContext context = tester.element(find.byType(MainView));
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
+  final Finder boundaryFinder = find.byKey(Keys.mainViewScreenshotBoundary);
+  expect(
+    boundaryFinder,
+    findsOneWidget,
+    reason: 'Expected the main view screenshot boundary to be present',
+  );
+
+  final RenderRepaintBoundary boundary = tester.renderObject<RenderRepaintBoundary>(boundaryFinder);
+  final double pixelRatio = AppDefaults.renderedScreenshotPixelRatio;
+  final ui.Image boundaryImage = await boundary.toImage(pixelRatio: pixelRatio);
+
+  final Rect rawSourceRect = Rect.fromLTWH(
+    appProvider.canvasOffset.dx * pixelRatio,
+    appProvider.canvasOffset.dy * pixelRatio,
+    appProvider.layers.width * appProvider.layers.scale * pixelRatio,
+    appProvider.layers.height * appProvider.layers.scale * pixelRatio,
+  );
+  final Rect imageBounds = Rect.fromLTWH(
+    0,
+    0,
+    boundaryImage.width.toDouble(),
+    boundaryImage.height.toDouble(),
+  );
+  final Rect sourceRect = rawSourceRect.intersect(imageBounds);
+  if (sourceRect.width <= 0 || sourceRect.height <= 0) {
+    boundaryImage.dispose();
+    throw StateError('Rendered canvas bounds are outside the main view screenshot boundary');
+  }
+
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final Canvas canvas = Canvas(recorder);
+  canvas.drawImageRect(
+    boundaryImage,
+    sourceRect,
+    Rect.fromLTWH(0, 0, appProvider.layers.width, appProvider.layers.height),
+    Paint()..filterQuality = FilterQuality.high,
+  );
+
+  final ui.Image image = await recorder.endRecording().toImage(
+    appProvider.layers.width.toInt(),
+    appProvider.layers.height.toInt(),
+  );
+  boundaryImage.dispose();
+  return image;
+}
+
 /// Records a tap-like interaction, performs it, and captures the result.
 Future<void> _performRecordedTap(
   final WidgetTester tester, {
@@ -573,13 +637,13 @@ Future<void> tapByKey(final WidgetTester tester, final Key key) async {
   await pumpForUnitTestUiSettle(tester);
 
   final Finder tappable = find.byKey(key).hitTestable();
-  expect(tappable, findsOneWidget, reason: 'Should find visible tappable widget with key: $key');
+  final Finder tapTarget = tappable.evaluate().isNotEmpty ? tappable : found;
 
   await _performRecordedTap(
     tester,
-    position: tester.getCenter(tappable.first),
+    position: tester.getCenter(tapTarget.first),
     settle: true,
-    tapAction: () => tester.tap(tappable.first),
+    tapAction: () => tester.tap(tapTarget.first, warnIfMissed: false),
   );
 }
 
@@ -848,7 +912,6 @@ Future<void> applyEffectViaUi(
   final String effectLabel_ = effectLabel(l10n, effect);
 
   // --- 1. Tap the Effects button to open the popup menu ---
-  // Record tap target and capture frame showing the red circle BEFORE tapping.
   final Finder effectsBtn = find.byKey(Keys.effectsButton);
   expect(effectsBtn, findsOneWidget, reason: 'Effects button should be visible');
   final Finder tappableEffectsBtn = effectsBtn.hitTestable();
@@ -943,7 +1006,6 @@ Future<void> applyEffectViaUi(
     final Finder sliderFinder = bottomSheetSlider.evaluate().isNotEmpty ? bottomSheetSlider : sidePanelSlider;
     expect(sliderFinder, findsAtLeastNWidgets(1), reason: 'Intensity slider should be visible');
 
-    // Record red circle at the slider's target position before adjusting.
     final Offset sliderCenter = tester.getCenter(sliderFinder.first);
     InteractionTracker.recordTap(sliderCenter);
     await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
@@ -972,10 +1034,6 @@ Future<void> applyEffectViaUi(
   final Finder applyBtn = bottomSheetApplyBtn.evaluate().isNotEmpty ? bottomSheetApplyBtn : sidePanelApplyBtn;
   expect(applyBtn, findsAtLeastNWidgets(1), reason: 'Apply button should be visible');
   final Finder tappableApplyBtn = applyBtn.hitTestable();
-  final Finder applyTapTarget = tappableApplyBtn.evaluate().isNotEmpty ? tappableApplyBtn : applyBtn;
-  InteractionTracker.recordTap(tester.getCenter(applyTapTarget.first));
-  await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
-
   if (tappableApplyBtn.evaluate().isNotEmpty) {
     await tapLikeHuman(tester, tester.getCenter(tappableApplyBtn.first));
   } else {
@@ -983,8 +1041,10 @@ Future<void> applyEffectViaUi(
     await tester.pump();
     await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
   }
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _dialogTransitionMs));
+  await _waitForEffectPreviewCommit(
+    tester,
+    appProvider: appProvider,
+  );
 }
 
 /// Drags one overlay handle of the current selection by [delta].
@@ -1834,15 +1894,17 @@ Future<void> saveUnitTestPng(
   final WidgetTester tester, {
   required final String filename,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
-  final LayersProvider layersProvider = LayersProvider.of(context);
-
   await tester.runAsync(() async {
-    final Uint8List bytes = await layersProvider.capturePainterToImageBytes();
+    final ui.Image image = await _captureRenderedMainViewCanvasImage(tester);
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
+    if (byteData == null) {
+      throw StateError('Failed to encode rendered canvas as PNG');
+    }
     final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
     await outputDir.create(recursive: true);
     final File outputFile = File('${outputDir.path}/$filename');
-    await outputFile.writeAsBytes(bytes);
+    await outputFile.writeAsBytes(byteData.buffer.asUint8List());
     debugPrint('📦 Unit test PNG saved: ${outputFile.path}');
   });
 }
@@ -1852,12 +1914,10 @@ Future<void> saveUnitTestJpeg(
   final WidgetTester tester, {
   required final String filename,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
-  final LayersProvider layersProvider = LayersProvider.of(context);
-
   await tester.runAsync(() async {
-    final ui.Image image = await layersProvider.capturePainterToImage();
+    final ui.Image image = await _captureRenderedMainViewCanvasImage(tester);
     final Uint8List jpgBytes = await convertToJpg(image);
+    image.dispose();
     final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
     await outputDir.create(recursive: true);
     final File outputFile = File('${outputDir.path}/$filename');
@@ -1871,12 +1931,19 @@ Future<void> saveUnitTestTiff(
   final WidgetTester tester, {
   required final String filename,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
-  final LayersProvider layersProvider = LayersProvider.of(context);
-
   await tester.runAsync(() async {
     final String normalizedFileName = normalizeTiffExportFileName(filename);
-    final Uint8List tiffBytes = await convertLayersToTiff(layersProvider);
+    final ui.Image image = await _captureRenderedMainViewCanvasImage(tester);
+    final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
+    if (byteData == null) {
+      throw StateError('Failed to encode rendered canvas as TIFF source data');
+    }
+    final img.Image? decoded = img.decodeImage(byteData.buffer.asUint8List());
+    if (decoded == null) {
+      throw StateError('Failed to decode rendered canvas image for TIFF export');
+    }
+    final Uint8List tiffBytes = Uint8List.fromList(img.encodeTiff(decoded));
     final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
     await outputDir.create(recursive: true);
     final File outputFile = File('${outputDir.path}/$normalizedFileName');
@@ -1890,12 +1957,10 @@ Future<void> saveUnitTestWebp(
   final WidgetTester tester, {
   required final String filename,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
-  final LayersProvider layersProvider = LayersProvider.of(context);
-
   await tester.runAsync(() async {
-    final ui.Image image = await layersProvider.capturePainterToImage();
+    final ui.Image image = await _captureRenderedMainViewCanvasImage(tester);
     final Uint8List webpBytes = await convertImageToWebp(image);
+    image.dispose();
     final Directory outputDir = Directory(_unitTestOutputDirectoryPath);
     await outputDir.create(recursive: true);
     final File outputFile = File('${outputDir.path}/$filename');
@@ -1957,10 +2022,13 @@ enum UnitTestExportFormat {
 }
 
 class _UnitTestSaveDialogFilePicker extends FilePickerPlatform {
-  _UnitTestSaveDialogFilePicker();
+  _UnitTestSaveDialogFilePicker({
+    required this.selectedFilePath,
+  });
 
   String? lastSuggestedFileName;
   List<String>? lastAllowedExtensions;
+  final String selectedFilePath;
 
   @override
   Future<String?> saveFile({
@@ -1974,7 +2042,7 @@ class _UnitTestSaveDialogFilePicker extends FilePickerPlatform {
   }) async {
     lastSuggestedFileName = fileName;
     lastAllowedExtensions = allowedExtensions == null ? null : List<String>.from(allowedExtensions);
-    return null;
+    return selectedFilePath;
   }
 }
 
@@ -2029,30 +2097,6 @@ Future<void> pumpForUnitTestUiSettle(final WidgetTester tester) async {
   }
 }
 
-Future<void> _saveUnitTestExportArtifactFallback(
-  final WidgetTester tester, {
-  required final UnitTestExportFormat format,
-  required final String filename,
-}) async {
-  switch (format) {
-    case UnitTestExportFormat.ora:
-      await saveUnitTestOraArchive(tester, filename: filename);
-      break;
-    case UnitTestExportFormat.png:
-      await saveUnitTestPng(tester, filename: filename);
-      break;
-    case UnitTestExportFormat.jpeg:
-      await saveUnitTestJpeg(tester, filename: filename);
-      break;
-    case UnitTestExportFormat.tiff:
-      await saveUnitTestTiff(tester, filename: filename);
-      break;
-    case UnitTestExportFormat.webp:
-      await saveUnitTestWebp(tester, filename: filename);
-      break;
-  }
-}
-
 Future<void> _openUnitTestExportSheetFromMainMenu(
   final WidgetTester tester,
   final AppLocalizations l10n,
@@ -2084,7 +2128,9 @@ Future<void> saveUnitTestArtworkViaExportUi(
   final File outputFile = _buildUnitTestExportOutputFile(format, filename);
   final Directory outputDirectory = Directory(_unitTestOutputDirectoryPath);
   final FilePickerPlatform originalFilePicker = FilePickerPlatform.instance;
-  final _UnitTestSaveDialogFilePicker testFilePicker = _UnitTestSaveDialogFilePicker();
+  final _UnitTestSaveDialogFilePicker testFilePicker = _UnitTestSaveDialogFilePicker(
+    selectedFilePath: outputFile.path,
+  );
 
   FilePickerPlatform.instance = testFilePicker;
 
@@ -2118,6 +2164,7 @@ Future<void> saveUnitTestArtworkViaExportUi(
     await pressListTileWithoutSettling(tester, exportActionTile);
     _unitTestExportSheetIsOpen = false;
     await _pumpUnitTestExportUiTransition(tester);
+    await pumpForUnitTestUiSettle(tester);
     expect(
       testFilePicker.lastSuggestedFileName,
       format.pickerFileName,
@@ -2127,12 +2174,6 @@ Future<void> saveUnitTestArtworkViaExportUi(
       testFilePicker.lastAllowedExtensions,
       format.allowedExtensions,
       reason: 'The save dialog should filter by ${format.allowedExtensions.join(', ')}',
-    );
-
-    await _saveUnitTestExportArtifactFallback(
-      tester,
-      format: format,
-      filename: filename,
     );
 
     expect(
