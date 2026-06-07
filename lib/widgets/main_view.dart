@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
@@ -69,6 +71,16 @@ class MainViewState extends State<MainView> {
                           CanvasGestureHandler(
                             child: _displayCanvas(appProvider),
                           ),
+
+                          if (appProvider.isBrushSizePreviewVisible)
+                            IgnorePointer(
+                              child: Center(
+                                child: _BrushSizePreviewOverlay(
+                                  diameter: appProvider.brushSizePreviewSize! * appProvider.layers.scale,
+                                  color: appProvider.brushSizePreviewColor,
+                                ),
+                              ),
+                            ),
 
                           if (!hasActiveTransformOverlay &&
                               appProvider.effectPreviewModel.isVisible &&
@@ -356,5 +368,79 @@ class MainViewState extends State<MainView> {
       context,
       context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
     );
+  }
+}
+
+class _BrushSizePreviewOverlay extends StatelessWidget {
+  const _BrushSizePreviewOverlay({
+    required this.diameter,
+    required this.color,
+  });
+
+  final double diameter;
+  final Color color;
+
+  @override
+  Widget build(final BuildContext context) {
+    return CustomPaint(
+      key: Keys.brushSizePreviewOverlay,
+      painter: _BrushSizePreviewOverlayPainter(color: color),
+      child: SizedBox(
+        width: diameter,
+        height: diameter,
+      ),
+    );
+  }
+}
+
+class _BrushSizePreviewOverlayPainter extends CustomPainter {
+  const _BrushSizePreviewOverlayPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(final Canvas canvas, final Size size) {
+    final Offset center = size.center(Offset.zero);
+    final double radius = math.max(
+      AppMath.zero.toDouble(),
+      (math.min(size.width, size.height) - AppLayout.brushSizePreviewBorderWidth) / AppMath.pair,
+    );
+
+    final Paint fillPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, radius, fillPaint);
+
+    final Rect borderRect = Rect.fromCircle(center: center, radius: radius);
+    final double circumference = AppMath.pair * AppMath.pi * radius;
+    final int segmentCount = math.max(
+      AppMath.eight,
+      (circumference / AppLayout.brushSizePreviewDashLength).round(),
+    );
+    final double sweepAngle = (AppMath.pair * AppMath.pi) / segmentCount;
+
+    final Paint blackPaint = Paint()
+      ..color = AppColors.black
+      ..strokeWidth = AppLayout.brushSizePreviewBorderWidth
+      ..style = PaintingStyle.stroke;
+    final Paint whitePaint = Paint()
+      ..color = AppColors.white
+      ..strokeWidth = AppLayout.brushSizePreviewBorderWidth
+      ..style = PaintingStyle.stroke;
+
+    for (int index = AppMath.zero; index < segmentCount; index += AppMath.one) {
+      canvas.drawArc(
+        borderRect,
+        index * sweepAngle,
+        sweepAngle,
+        false,
+        index.isEven ? blackPaint : whitePaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant final _BrushSizePreviewOverlayPainter oldDelegate) {
+    return oldDelegate.color != color;
   }
 }
