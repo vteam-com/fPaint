@@ -8,6 +8,8 @@ import 'package:fpaint/widgets/app_tooltip.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/transform_widget.dart';
 
+import '../helpers/widget_test_harness.dart';
+
 Future<ui.Image> _createTestImage({
   final int width = 120,
   final int height = 80,
@@ -24,29 +26,25 @@ Widget _buildHarness({
   required final TransformModel model,
   required final VoidCallback onChanged,
 }) {
-  return MaterialApp(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    home: Scaffold(
-      body: MediaQuery(
-        data: const MediaQueryData(size: Size(1200, 900)),
-        child: StatefulBuilder(
-          builder: (final BuildContext context, final void Function(void Function()) setState) {
-            return TransformWidget(
-              model: model,
-              canvasOffset: Offset.zero,
-              canvasScale: 1,
-              onChanged: () {
-                setState(() {});
-                onChanged();
-              },
-              onConfirm: () {},
-              onCancel: () {},
-            );
-          },
-        ),
-      ),
-    ),
+  return buildLocalizedScaffoldTestApp(
+    mediaQueryData: const MediaQueryData(size: Size(1200, 900)),
+    bodyBuilder: (final BuildContext context) {
+      return StatefulBuilder(
+        builder: (final BuildContext context, final void Function(void Function()) setState) {
+          return TransformWidget(
+            model: model,
+            canvasOffset: Offset.zero,
+            canvasScale: 1,
+            onChanged: () {
+              setState(() {});
+              onChanged();
+            },
+            onConfirm: () {},
+            onCancel: () {},
+          );
+        },
+      );
+    },
   );
 }
 
