@@ -92,7 +92,10 @@ double resolvePixelBrushStepSpacing(final double brushSize) {
   );
   return math.max(
     AppInteraction.smudgeInputPointSpacing,
-    radius * AppInteraction.smudgeStepSpacingFactor,
+    math.min(
+      AppInteraction.smudgeMaximumPointSpacing,
+      radius * AppInteraction.smudgeStepSpacingFactor,
+    ),
   );
 }
 
@@ -203,10 +206,7 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
     AppInteraction.smudgeMinimumRadius,
     input.brushSize * AppInteraction.smudgeBrushRadiusFactor,
   );
-  final double stepSpacing = math.max(
-    AppInteraction.smudgeInputPointSpacing,
-    radius * AppInteraction.smudgeStepSpacingFactor,
-  );
+  final double stepSpacing = resolvePixelBrushStepSpacing(input.brushSize);
 
   // Compute the bounding box of the segment so we work only on affected rows.
   final int padding = radius.ceil() + AppInteraction.smudgeBoundsPadding;
@@ -541,7 +541,7 @@ bool _applyBlurStep({
         continue;
       }
 
-      // Accumulate the neighbourhood average.
+      // Accumulate the neighborhood average.
       int sumR = AppMath.zero;
       int sumG = AppMath.zero;
       int sumB = AppMath.zero;

@@ -1,9 +1,13 @@
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/draft_flusher.dart';
+import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -221,5 +225,81 @@ void main() {
     await tester.pump();
 
     controller.dispose();
+  });
+
+  test('smudge patch application keeps prior vector actions and appends a bounded replacement', () async {
+    final LayerProvider layer = LayerProvider(
+      name: 'Test',
+      size: const Size(200, 200),
+      onThumbnailChanged: () {},
+    );
+    layer.appendDrawingAction(
+      UserActionDrawing(
+        action: ActionType.region,
+        positions: <Offset>[const Offset(80, 80), const Offset(120, 160)],
+        fillColor: const Color(0xFFFF6699),
+        path: ui.Path()..addRect(const Rect.fromLTWH(80, 80, 40, 80)),
+      ),
+    );
+    layer.appendDrawingAction(
+      UserActionDrawing(
+        action: ActionType.region,
+        positions: <Offset>[const Offset(120, 80), const Offset(160, 160)],
+        fillColor: const Color(0xFF6699FF),
+        path: ui.Path()..addRect(const Rect.fromLTWH(120, 80, 40, 80)),
+      ),
+    );
+
+    final ImagePlacementLayerRestoreState restoreState = ImagePlacementLayerRestoreState(
+      layerIndex: 0,
+      originalActions: List<UserActionDrawing>.from(layer.actionStack),
+      originalRedoActions: <UserActionDrawing>[],
+      originalHasChanged: layer.hasChanged,
+      originalBackgroundColor: layer.backgroundColor,
+      originalBlendMode: layer.blendMode,
+      originalOpacity: layer.opacity,
+    );
+    final ui.Image patchImage = await renderCanvasImage(
+      width: 8,
+      height: 8,
+      draw: (final ui.Canvas canvas) {
+        canvas.drawRect(
+          const Rect.fromLTWH(0, 0, 8, 8),
+          Paint()..color = const Color(0xFFFFFFFF),
+        );
+      },
+    );
+
+    applyPixelBrushPatchToLayer(
+      restoreState: restoreState,
+      targetLayer: layer,
+      patch: PixelBrushLayerPatch(
+        bounds: const Rect.fromLTWH(116, 116, 8, 8),
+        image: patchImage,
+      ),
+      mode: PixelBrushMode.smudge,
+    );
+
+    final List<ActionType> actions = layer.actionStack.map((final UserActionDrawing action) => action.action).toList();
+    expect(actions, contains(ActionType.region));
+    expect(actions, contains(ActionType.cut));
+    expect(actions, contains(ActionType.smudge));
+    expect(actions.length, 4);
+  });
+
+  test('pixel brush backdrop sampling includes blur and smudge', () {
+    expect(pixelBrushUsesCompositeBackdrop(PixelBrushMode.smudge), isTrue);
+    expect(pixelBrushUsesCompositeBackdrop(PixelBrushMode.blur), isTrue);
+  });
+
+  test('normalizePixelBrushRemainingStart clamps stale preview indexes', () {
+    expect(
+      normalizePixelBrushRemainingStart(lastKickedPointIndex: 66, strokePointCount: 28),
+      28,
+    );
+    expect(
+      normalizePixelBrushRemainingStart(lastKickedPointIndex: -1, strokePointCount: 28),
+      0,
+    );
   });
 }

@@ -617,6 +617,29 @@ class LayersProvider extends ChangeNotifier {
     return this.cachedImage!;
   }
 
+  /// Renders visible layers from the canvas bottom up through [topLayerIndex].
+  ///
+  /// This includes the layer at [topLayerIndex] and every visible layer below
+  /// it, but excludes any layers above it.
+  ui.Image capturePainterToImageThroughLayerSync(final int topLayerIndex) {
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final int clampedTopLayerIndex = topLayerIndex.clamp(0, length - 1);
+
+    for (int index = length - 1; index >= clampedTopLayerIndex; index--) {
+      final LayerProvider layer = get(index);
+      if (layer.isVisible) {
+        layer.renderLayer(canvas);
+      }
+    }
+
+    final ui.Picture picture = recorder.endRecording();
+    return picture.toImageSync(
+      size.width.toInt(),
+      size.height.toInt(),
+    );
+  }
+
   /// Rotates the entire canvas and all its layers 90 degrees clockwise.
   Future<void> rotateCanvas90Clockwise() async {
     final Size oldSize = Size(width, height);

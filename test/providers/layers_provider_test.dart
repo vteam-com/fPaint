@@ -562,6 +562,37 @@ void main() {
       final ui.Image image = await layersProvider.capturePainterToImage();
       expect(image.width, layersProvider.size.width.toInt());
     });
+
+    test('capturePainterToImageThroughLayerSync includes selected layer and layers below only', () async {
+      final LayerProvider smudgeLayer = layersProvider.addTop(name: 'Smudge');
+      smudgeLayer.actionStack.add(
+        UserActionDrawing(
+          action: ActionType.region,
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(10, 0, 10, 10)),
+          fillColor: Colors.blue,
+        ),
+      );
+
+      final LayerProvider overlay = layersProvider.addTop(name: 'Overlay');
+      overlay.actionStack.add(
+        UserActionDrawing(
+          action: ActionType.region,
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
+          fillColor: Colors.red,
+        ),
+      );
+
+      layersProvider.selectedLayerIndex = 1;
+
+      final ui.Image image = layersProvider.capturePainterToImageThroughLayerSync(layersProvider.selectedLayerIndex);
+      final Color belowSelected = await _pixelColorAt(image, 5, 5);
+      final Color onSelected = await _pixelColorAt(image, 15, 5);
+
+      expect(belowSelected.toARGB32(), Colors.white.toARGB32());
+      expect(onSelected.toARGB32(), Colors.blue.toARGB32());
+    });
   });
 
   group('capturePainterToImageBytes', () {
