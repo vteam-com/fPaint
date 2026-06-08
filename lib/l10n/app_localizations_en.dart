@@ -127,6 +127,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get colorLabel => 'Color';
 
   @override
+  String get colorPickerModeSliders => 'Sliders';
+
+  @override
+  String get colorPickerModeWheel => 'Wheel';
+
+  @override
   String get colorTolerance => 'Color Tolerance';
 
   @override
@@ -545,6 +551,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolAdd => 'Add';
 
   @override
+  String get toolBlurBrush => 'Blur Brush';
+
+  @override
   String get toolBrush => 'Brush';
 
   @override
@@ -600,9 +609,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toolSmudge => 'Smudge';
-
-  @override
-  String get toolBlurBrush => 'Blur Brush';
 
   @override
   String get toolSolid => 'Solid';

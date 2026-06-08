@@ -7,9 +7,15 @@ import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/color_wheel_selector.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/top_colors.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
+
+enum _ColorPickerMode {
+  sliders,
+  wheel,
+}
 
 /// A bottom sheet that allows the user to pick a color.
 class ColorPickerDialog extends StatefulWidget {
@@ -41,6 +47,7 @@ class ColorPickerDialog extends StatefulWidget {
 class _ColorPickerDialogState extends State<ColorPickerDialog> {
   late Color _currentColor;
   late TextEditingController _hexController;
+  _ColorPickerMode _pickerMode = _ColorPickerMode.sliders;
   static const String _plainTextMimeType = 'text/plain';
   @override
   void initState() {
@@ -102,6 +109,23 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     ];
   }
 
+  void _setColor(final Color color) {
+    setState(() {
+      _currentColor = color;
+      _hexController.text = colorToHexString(color);
+    });
+  }
+
+  void _setPickerMode(final _ColorPickerMode mode) {
+    if (_pickerMode == mode) {
+      return;
+    }
+
+    setState(() {
+      _pickerMode = mode;
+    });
+  }
+
   /// Builds the content of the dialog.
   Widget _buildContent(final LayersProvider layers) {
     final AppLocalizations l10n = context.l10n;
@@ -113,6 +137,8 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
         mainAxisSize: MainAxisSize.min,
         spacing: AppSpacing.largest,
         children: <Widget>[
+          _buildPickerModeToggle(l10n),
+
           //----------------------------
           // Color preview and selection sliders
           Row(
@@ -134,15 +160,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 ),
               ),
               Expanded(
-                child: ColorSelector(
-                  color: _currentColor,
-                  onColorChanged: (final Color color) {
-                    setState(() {
-                      _currentColor = color;
-                      _hexController.text = colorToHexString(color);
-                    });
-                  },
-                ),
+                child: _buildActivePicker(),
               ),
             ],
           ),
@@ -167,12 +185,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                   color: color,
                   border: false,
                   minimal: true,
-                  onPressed: () {
-                    setState(() {
-                      _currentColor = color;
-                      _hexController.text = colorToHexString(color);
-                    });
-                  },
+                  onPressed: () => _setColor(color),
                 ),
             ],
           ),
@@ -186,10 +199,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 colorUsages: layers.topColors,
                 onRefresh: layers.evaluateTopColor,
                 onColorPicked: (final Color color) {
-                  setState(() {
-                    _currentColor = color;
-                    _hexController.text = colorToHexString(color);
-                  });
+                  _setColor(color);
                 },
                 showHeader: false,
                 autoRefreshOnIdle: true,
@@ -214,10 +224,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
                   try {
                     final Color color = getColorFromString(data.text as String);
-                    setState(() {
-                      _currentColor = color;
-                      _hexController.text = colorToHexString(color);
-                    });
+                    _setColor(color);
                   } catch (_) {
                     // Invalid hex color format - silently ignore
                   }
@@ -257,6 +264,75 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildActivePicker() {
+    switch (_pickerMode) {
+      case _ColorPickerMode.sliders:
+        return ColorSelector(
+          color: _currentColor,
+          onColorChanged: _setColor,
+        );
+      case _ColorPickerMode.wheel:
+        return ColorWheelSelector(
+          color: _currentColor,
+          onColorChanged: _setColor,
+        );
+    }
+  }
+
+  Widget _buildPickerModeLabel({
+    required final Key key,
+    required final String label,
+    required final bool selected,
+    required final VoidCallback onPressed,
+  }) {
+    return AppButton(
+      key: key,
+      onPressed: onPressed,
+      child: SizedBox(
+        width: AppLayout.colorPickerModeLabelMinWidth,
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: AppTextStyle.bodyBold.copyWith(
+            color: selected ? AppColors.primary : AppColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPickerModeToggle(final AppLocalizations l10n) {
+    final bool wheelSelected = _pickerMode == _ColorPickerMode.wheel;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      spacing: AppSpacing.medium,
+      children: <Widget>[
+        _buildPickerModeLabel(
+          key: Keys.colorPickerModeSlidersButton,
+          label: l10n.colorPickerModeSliders,
+          selected: !wheelSelected,
+          onPressed: () => _setPickerMode(_ColorPickerMode.sliders),
+        ),
+        AppSwitch(
+          key: Keys.colorPickerModeToggle,
+          value: wheelSelected,
+          onChanged: (final bool useWheel) {
+            _setPickerMode(
+              useWheel ? _ColorPickerMode.wheel : _ColorPickerMode.sliders,
+            );
+          },
+        ),
+        _buildPickerModeLabel(
+          key: Keys.colorPickerModeWheelButton,
+          label: l10n.colorPickerModeWheel,
+          selected: wheelSelected,
+          onPressed: () => _setPickerMode(_ColorPickerMode.wheel),
+        ),
+      ],
     );
   }
 }

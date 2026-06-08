@@ -128,6 +128,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get colorLabel => 'Couleur';
 
   @override
+  String get colorPickerModeSliders => 'Curseurs';
+
+  @override
+  String get colorPickerModeWheel => 'Roue';
+
+  @override
   String get colorTolerance => 'Tolérance de couleur';
 
   @override
@@ -547,6 +553,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toolAdd => 'Ajouter';
 
   @override
+  String get toolBlurBrush => 'Pinceau Flou';
+
+  @override
   String get toolBrush => 'Pinceau';
 
   @override
@@ -602,9 +611,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get toolSmudge => 'Estomper';
-
-  @override
-  String get toolBlurBrush => 'Pinceau Flou';
 
   @override
   String get toolSolid => 'Uni';

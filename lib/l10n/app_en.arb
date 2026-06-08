@@ -42,6 +42,8 @@
   "@colorLabel": {
     "description": "REVIEWED"
   },
+  "colorPickerModeSliders": "Sliders",
+  "colorPickerModeWheel": "Wheel",
   "colorTolerance": "Color Tolerance",
   "colorUsage": "Usage {percentage}",
   "@colorUsage": {
