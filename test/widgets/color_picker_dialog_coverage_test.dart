@@ -6,6 +6,8 @@ import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
+import 'package:fpaint/widgets/color_selector.dart';
+import 'package:fpaint/widgets/color_wheel_selector.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:provider/provider.dart';
 
@@ -143,6 +145,109 @@ void main() {
 
       // Should still render content.
       expect(find.byType(ColorPickerDialog), findsOneWidget);
+    });
+
+    testWidgets('toggle switches between slider and wheel pickers', (final WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildTestWidget(
+          initialColor: Colors.red,
+          onColorChanged: (final Color _) {},
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(ColorSelector), findsOneWidget);
+      expect(find.byType(ColorWheelSelector), findsNothing);
+
+      await tester.tap(find.byKey(Keys.colorPickerModeToggle));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ColorSelector), findsNothing);
+      expect(find.byType(ColorWheelSelector), findsOneWidget);
+
+      await tester.tap(find.byKey(Keys.colorPickerModeSlidersButton));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ColorSelector), findsOneWidget);
+      expect(find.byType(ColorWheelSelector), findsNothing);
+    });
+
+    testWidgets('wheel picker updates the selected color', (final WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildTestWidget(
+          initialColor: Colors.red,
+          onColorChanged: (final Color _) {},
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byKey(Keys.colorPickerModeWheelButton));
+      await tester.pumpAndSettle();
+
+      final Finder wheelFinder = find.byKey(Keys.colorPickerWheelSelector);
+      expect(wheelFinder, findsOneWidget);
+
+      final GestureDetector wheel = tester.widget<GestureDetector>(wheelFinder);
+      final double wheelRadius = AppLayout.colorWheelDiameter / AppMath.pair;
+      wheel.onTapDown!(
+        TapDownDetails(
+          localPosition: Offset(0, wheelRadius),
+          globalPosition: Offset.zero,
+        ),
+      );
+      await tester.pump();
+
+      final ColorPreview preview = tester.widget<ColorPreview>(
+        find
+            .byWidgetPredicate(
+              (final Widget widget) => widget is ColorPreview && widget.minimal == false,
+            )
+            .first,
+      );
+      final HSLColor previewHsl = HSLColor.fromColor(preview.color);
+
+      expect(preview.color.toARGB32(), isNot(Colors.red.toARGB32()));
+      expect(previewHsl.hue, closeTo(AppMath.degrees180, AppLimits.hueGroupingStepDegrees.toDouble()));
+      expect(previewHsl.saturation, greaterThan(AppVisual.half));
+    });
+
+    testWidgets('wheel triangle updates value and saturation', (final WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildTestWidget(
+          initialColor: Colors.red,
+          onColorChanged: (final Color _) {},
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byKey(Keys.colorPickerModeWheelButton));
+      await tester.pumpAndSettle();
+
+      final Finder wheelFinder = find.byKey(Keys.colorPickerWheelSelector);
+      final GestureDetector wheel = tester.widget<GestureDetector>(wheelFinder);
+      final double radius = AppLayout.colorWheelDiameter / AppMath.pair;
+      final Offset center = Offset(radius, radius);
+
+      wheel.onTapDown!(
+        TapDownDetails(
+          localPosition: center,
+          globalPosition: Offset.zero,
+        ),
+      );
+      await tester.pump();
+
+      final ColorPreview preview = tester.widget<ColorPreview>(
+        find
+            .byWidgetPredicate(
+              (final Widget widget) => widget is ColorPreview && widget.minimal == false,
+            )
+            .first,
+      );
+      final HSVColor previewHsv = HSVColor.fromColor(preview.color);
+
+      expect(previewHsv.saturation, lessThan(0.7));
+      expect(previewHsv.value, lessThan(0.8));
+      expect(previewHsv.value, greaterThan(0.5));
     });
 
     testWidgets('cancel pops dialog', (final WidgetTester tester) async {

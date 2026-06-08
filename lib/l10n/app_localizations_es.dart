@@ -125,6 +125,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get colorLabel => 'Color';
 
   @override
+  String get colorPickerModeSliders => 'Deslizadores';
+
+  @override
+  String get colorPickerModeWheel => 'Rueda';
+
+  @override
   String get colorTolerance => 'Tolerancia de color';
 
   @override
@@ -543,6 +549,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get toolAdd => 'Agregar';
 
   @override
+  String get toolBlurBrush => 'Pincel Desenfoque';
+
+  @override
   String get toolBrush => 'Pincel';
 
   @override
@@ -598,9 +607,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get toolSmudge => 'Difuminar';
-
-  @override
-  String get toolBlurBrush => 'Pincel Desenfoque';
 
   @override
   String get toolSolid => 'Sólido';

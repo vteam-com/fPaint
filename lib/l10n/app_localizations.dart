@@ -248,12 +248,6 @@ abstract class AppLocalizations {
   /// **'Brush Style'**
   String get brushStyle;
 
-  /// No description provided for @effectIntensity.
-  ///
-  /// In en, this message translates to:
-  /// **'Intensity'**
-  String get effectIntensity;
-
   /// No description provided for @brushStyleDash.
   ///
   /// In en, this message translates to:
@@ -313,6 +307,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Color'**
   String get colorLabel;
+
+  /// No description provided for @colorPickerModeSliders.
+  ///
+  /// In en, this message translates to:
+  /// **'Sliders'**
+  String get colorPickerModeSliders;
+
+  /// No description provided for @colorPickerModeWheel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheel'**
+  String get colorPickerModeWheel;
 
   /// No description provided for @colorTolerance.
   ///
@@ -475,6 +481,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hue Shift'**
   String get effectHueSaturation;
+
+  /// No description provided for @effectIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Intensity'**
+  String get effectIntensity;
 
   /// No description provided for @effectNoise.
   ///
@@ -1082,6 +1094,12 @@ abstract class AppLocalizations {
   /// **'Add'**
   String get toolAdd;
 
+  /// No description provided for @toolBlurBrush.
+  ///
+  /// In en, this message translates to:
+  /// **'Blur Brush'**
+  String get toolBlurBrush;
+
   /// No description provided for @toolBrush.
   ///
   /// In en, this message translates to:
@@ -1195,12 +1213,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Smudge'**
   String get toolSmudge;
-
-  /// No description provided for @toolBlurBrush.
-  ///
-  /// In en, this message translates to:
-  /// **'Blur Brush'**
-  String get toolBlurBrush;
 
   /// No description provided for @toolSolid.
   ///

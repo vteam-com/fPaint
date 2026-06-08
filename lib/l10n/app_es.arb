@@ -36,6 +36,8 @@
   "canvasDimensionsMustBePositive": "Las dimensiones del lienzo deben ser positivas.",
   "canvasSizeTitle": "Tamano del lienzo",
   "colorLabel": "Color",
+  "colorPickerModeSliders": "Deslizadores",
+  "colorPickerModeWheel": "Rueda",
   "colorTolerance": "Tolerancia de color",
   "colorUsage": "Uso {percentage}",
   "@colorUsage": {

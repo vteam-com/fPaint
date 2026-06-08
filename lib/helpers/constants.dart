@@ -180,6 +180,11 @@ class AppLayout {
   static const double separatorHeight = 15.0;
   static const double inputFieldWidth = 150.0;
   static const double gradientStopPositionFieldWidth = 52.0;
+  static const double colorWheelDiameter = 200.0;
+  static const double colorWheelThumbDiameter = 16.0;
+  static const double colorWheelRingThickness = 22.0;
+  static const double colorWheelTriangleInset = 8.0;
+  static const double colorPickerModeLabelMinWidth = 72.0;
   static const int textLengthThreshold = 50;
   static const double textMaxWidthCompact = 800.0;
   static const double textMaxWidthNormal = 1000.0;
@@ -677,6 +682,10 @@ class Keys {
   static const Key textEditorAlignmentDropdown = Key('text-editor-alignment-dropdown');
   static const Key magnifyingEyeDropperCloseButton = Key('magnifying-eye-dropper-close-button');
   static const Key magnifyingEyeDropperConfirmButton = Key('magnifying-eye-dropper-confirm-button');
+  static const Key colorPickerModeToggle = Key('color-picker-mode-toggle');
+  static const Key colorPickerModeSlidersButton = Key('color-picker-mode-sliders-button');
+  static const Key colorPickerModeWheelButton = Key('color-picker-mode-wheel-button');
+  static const Key colorPickerWheelSelector = Key('color-picker-wheel-selector');
 
   static const Key toolLine = Key('tool-line');
   static const Key toolRectangle = Key('tool-rectangle');

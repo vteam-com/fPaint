@@ -36,6 +36,8 @@
   "canvasDimensionsMustBePositive": "Les dimensions de la toile doivent etre positives.",
   "canvasSizeTitle": "Taille de la toile",
   "colorLabel": "Couleur",
+  "colorPickerModeSliders": "Curseurs",
+  "colorPickerModeWheel": "Roue",
   "colorTolerance": "Tolérance de couleur",
   "colorUsage": "Utilisation {percentage}",
   "@colorUsage": {
