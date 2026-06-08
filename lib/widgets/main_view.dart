@@ -72,9 +72,25 @@ class MainViewState extends State<MainView> {
                             child: _displayCanvas(appProvider),
                           ),
 
-                          if (appProvider.isBrushSizePreviewVisible)
+                          if (appProvider.isBrushSizePreviewVisible && appProvider.brushSizePreviewPosition == null)
                             IgnorePointer(
                               child: Center(
+                                child: _BrushSizePreviewOverlay(
+                                  diameter: appProvider.brushSizePreviewSize! * appProvider.layers.scale,
+                                  color: appProvider.brushSizePreviewColor,
+                                ),
+                              ),
+                            ),
+
+                          if (appProvider.isBrushSizePreviewVisible && appProvider.brushSizePreviewPosition != null)
+                            Positioned(
+                              left:
+                                  appProvider.brushSizePreviewPosition!.dx -
+                                  (appProvider.brushSizePreviewSize! * appProvider.layers.scale) / AppMath.pair,
+                              top:
+                                  appProvider.brushSizePreviewPosition!.dy -
+                                  (appProvider.brushSizePreviewSize! * appProvider.layers.scale) / AppMath.pair,
+                              child: IgnorePointer(
                                 child: _BrushSizePreviewOverlay(
                                   diameter: appProvider.brushSizePreviewSize! * appProvider.layers.scale,
                                   color: appProvider.brushSizePreviewColor,
@@ -407,7 +423,7 @@ class _BrushSizePreviewOverlayPainter extends CustomPainter {
     );
 
     final Paint fillPaint = Paint()
-      ..color = color
+      ..color = color.withAlpha(AppMath.zero)
       ..style = PaintingStyle.fill;
     canvas.drawCircle(center, radius, fillPaint);
 

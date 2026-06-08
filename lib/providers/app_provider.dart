@@ -50,6 +50,7 @@ class AppProvider extends ChangeNotifier {
   final ChangeNotifier _selectedActionNotifier = ChangeNotifier();
   Timer? _brushSizePreviewTimer;
   double? _brushSizePreviewSize;
+  Offset? _brushSizePreviewPosition;
 
   void _initCanvas() {
     layers.clear();
@@ -272,6 +273,9 @@ class AppProvider extends ChangeNotifier {
   /// Gets the current live brush-size preview diameter in canvas units.
   double? get brushSizePreviewSize => _brushSizePreviewSize;
 
+  /// Gets the current live brush-size preview position in main-view space.
+  Offset? get brushSizePreviewPosition => _brushSizePreviewPosition;
+
   /// Gets an inverse of the active brush color for preview visibility.
   Color get brushSizePreviewColor => brushColor;
 
@@ -286,16 +290,35 @@ class AppProvider extends ChangeNotifier {
   void _showBrushSizePreview(final double value) {
     _brushSizePreviewTimer?.cancel();
     _brushSizePreviewSize = value;
+    _brushSizePreviewPosition = null;
     repaintMainView();
     _brushSizePreviewTimer = Timer(AppDefaults.brushSizePreviewDuration, _hideBrushSizePreview);
+  }
+
+  /// Shows the brush-size preview at the current pointer position while the user draws.
+  void showDrawingToolPreviewAt({
+    required final double size,
+    required final Offset position,
+  }) {
+    _brushSizePreviewTimer?.cancel();
+    _brushSizePreviewSize = size;
+    _brushSizePreviewPosition = position;
+    repaintMainView();
   }
 
   void _hideBrushSizePreview() {
     if (_brushSizePreviewSize == null) {
       return;
     }
+    _brushSizePreviewTimer?.cancel();
     _brushSizePreviewSize = null;
+    _brushSizePreviewPosition = null;
     repaintMainView();
+  }
+
+  /// Hides any active drawing-time brush-size preview immediately.
+  void hideDrawingToolPreview() {
+    _hideBrushSizePreview();
   }
 
   /// Gets the active pixel-brush intensity for the selected tool.

@@ -93,23 +93,95 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// Non-null only during a modifier-driven selection gesture.
   SelectorMath? _previousSelectorMath;
 
+  /// Returns whether the current tool should show a live size marker while drawing.
+  bool _shouldShowDrawingToolPreview(final AppProvider appProvider) {
+    return appProvider.selectedAction.isSupported(ActionOptions.brushSize) &&
+        appProvider.selectedAction != ActionType.text;
+  }
+
+  /// Returns whether [kind] can report hover location before pointer down.
+  bool _supportsHoverPreview(final PointerDeviceKind kind) {
+    return kind == PointerDeviceKind.mouse ||
+        kind == PointerDeviceKind.stylus ||
+        kind == PointerDeviceKind.invertedStylus;
+  }
+
+  /// Updates the live drawing marker to the current pointer location.
+  void _updateDrawingToolPreview(
+    final AppProvider appProvider,
+    final Offset localPosition,
+  ) {
+    if (!_shouldShowDrawingToolPreview(appProvider)) {
+      return;
+    }
+
+    appProvider.showDrawingToolPreviewAt(
+      size: appProvider.brushSize,
+      position: localPosition,
+    );
+  }
+
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: false);
     final AppPreferences appPreferences = AppPreferences.of(context);
     final ShellProvider shellProvider = ShellProvider.of(context);
 
-    return Listener(
-      onPointerSignal: (final PointerSignalEvent event) {
-        _registerInputModality(shellProvider, event.kind);
-        if (event is PointerScrollEvent) {
-          _handleUserPanningTheCanvas(
-            shellProvider,
-            appProvider,
-            Offset(-event.scrollDelta.dx, -event.scrollDelta.dy),
-          );
-        } else {
-          if (event is PointerScaleEvent) {
+    return MouseRegion(
+      onExit: (final PointerExitEvent _) {
+        if (_activePointerId == -1 && appProvider.brushSizePreviewPosition != null) {
+          appProvider.hideDrawingToolPreview();
+        }
+      },
+      child: Listener(
+        onPointerSignal: (final PointerSignalEvent event) {
+          _registerInputModality(shellProvider, event.kind);
+          if (event is PointerScrollEvent) {
+            _handleUserPanningTheCanvas(
+              shellProvider,
+              appProvider,
+              Offset(-event.scrollDelta.dx, -event.scrollDelta.dy),
+            );
+          } else {
+            if (event is PointerScaleEvent) {
+              _handleUserScalingTheCanvas(
+                shellProvider,
+                appProvider,
+                event.localPosition,
+                event.scale,
+              );
+            }
+          }
+        },
+        onPointerHover: (final PointerHoverEvent event) {
+          _registerInputModality(shellProvider, event.kind);
+          if (_activePointerId != -1 || !_supportsHoverPreview(event.kind)) {
+            return;
+          }
+
+          if (_shouldShowDrawingToolPreview(appProvider) && !appProvider.hasActiveTransformOverlay) {
+            _updateDrawingToolPreview(appProvider, event.localPosition);
+            return;
+          }
+
+          if (appProvider.brushSizePreviewPosition != null) {
+            appProvider.hideDrawingToolPreview();
+          }
+        },
+        onPointerPanZoomStart: (final PointerPanZoomStartEvent _) {
+          shellProvider.interactionInputModality = InteractionInputModality.mouse;
+        },
+        onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
+          _registerInputModality(shellProvider, event.kind);
+          if (event.scale == 1) {
+            // Panning
+            _handleUserPanningTheCanvas(
+              shellProvider,
+              appProvider,
+              event.panDelta,
+            );
+          } else {
+            // Scaling
             _handleUserScalingTheCanvas(
               shellProvider,
               appProvider,
@@ -117,100 +189,78 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
               event.scale,
             );
           }
-        }
-      },
-      onPointerPanZoomStart: (final PointerPanZoomStartEvent _) {
-        shellProvider.interactionInputModality = InteractionInputModality.mouse;
-      },
-      onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
-        _registerInputModality(shellProvider, event.kind);
-        if (event.scale == 1) {
-          // Panning
-          _handleUserPanningTheCanvas(
-            shellProvider,
-            appProvider,
-            event.panDelta,
-          );
-        } else {
-          // Scaling
-          _handleUserScalingTheCanvas(
-            shellProvider,
-            appProvider,
-            event.localPosition,
-            event.scale,
-          );
-        }
-      },
-      onPointerPanZoomEnd: (final PointerPanZoomEndEvent _) {
-        // No-op
-      },
-      onPointerDown: (final PointerDownEvent event) {
-        _registerInputModality(shellProvider, event.kind);
-        if (event.kind == PointerDeviceKind.touch) {
-          _pointerPositions[event.pointer] = event.localPosition;
-          _getDistanceBetweenTouchPoints();
+        },
+        onPointerPanZoomEnd: (final PointerPanZoomEndEvent _) {
+          // No-op
+        },
+        onPointerDown: (final PointerDownEvent event) {
+          _registerInputModality(shellProvider, event.kind);
+          if (event.kind == PointerDeviceKind.touch) {
+            _pointerPositions[event.pointer] = event.localPosition;
+            _getDistanceBetweenTouchPoints();
 
-          _activePointers.add(event.pointer);
+            _activePointers.add(event.pointer);
 
-          if (_activePointers.length == AppMath.pair) {
-            // Set the initial focal point between two fingers
-            _baseDistance = _getDistanceBetweenTouchPoints();
-          } else {
-            if (event.buttons == 1 && !appPreferences.useApplePencil) {
-              _handlePointerStart(appProvider, event);
+            if (_activePointers.length == AppMath.pair) {
+              // Set the initial focal point between two fingers
+              _baseDistance = _getDistanceBetweenTouchPoints();
+            } else {
+              if (event.buttons == 1 && !appPreferences.useApplePencil) {
+                _handlePointerStart(appProvider, event);
+              }
             }
-          }
-        } else {
-          _handlePointerStart(appProvider, event);
-        }
-      },
-      onPointerMove: (final PointerMoveEvent event) {
-        _registerInputModality(shellProvider, event.kind);
-        if (event.kind == PointerDeviceKind.touch) {
-          _pointerPositions[event.pointer] = event.localPosition;
-          _getDistanceBetweenTouchPoints();
-
-          if (_activePointers.length == AppMath.pair) {
-            _handleMultiTouchUpdate(
-              event,
-              appProvider,
-              shellProvider,
-            );
           } else {
-            if (event.buttons == 1 && !appPreferences.useApplePencil) {
-              _handlePointerMove(appProvider, event);
+            _handlePointerStart(appProvider, event);
+          }
+        },
+        onPointerMove: (final PointerMoveEvent event) {
+          _registerInputModality(shellProvider, event.kind);
+          if (event.kind == PointerDeviceKind.touch) {
+            _pointerPositions[event.pointer] = event.localPosition;
+            _getDistanceBetweenTouchPoints();
+
+            if (_activePointers.length == AppMath.pair) {
+              _handleMultiTouchUpdate(
+                event,
+                appProvider,
+                shellProvider,
+              );
+            } else {
+              if (event.buttons == 1 && !appPreferences.useApplePencil) {
+                _handlePointerMove(appProvider, event);
+              }
             }
+          } else {
+            _handlePointerMove(appProvider, event);
           }
-        } else {
-          _handlePointerMove(appProvider, event);
-        }
-      },
-      onPointerUp: (final PointerUpEvent event) {
-        if (event.kind == PointerDeviceKind.touch) {
-          _pointerPositions.remove(event.pointer);
-          _getDistanceBetweenTouchPoints(); // Recalculate distance
-          _activePointers.remove(event.pointer);
-          if (_activePointers.length < AppMath.pair) {
-            _baseDistance = 0.0; // Reset base distance
+        },
+        onPointerUp: (final PointerUpEvent event) {
+          if (event.kind == PointerDeviceKind.touch) {
+            _pointerPositions.remove(event.pointer);
+            _getDistanceBetweenTouchPoints(); // Recalculate distance
+            _activePointers.remove(event.pointer);
+            if (_activePointers.length < AppMath.pair) {
+              _baseDistance = 0.0; // Reset base distance
+            }
+            _handlePointerEnd(appProvider, event);
+          } else {
+            _handlePointerEnd(appProvider, event);
           }
-          _handlePointerEnd(appProvider, event);
-        } else {
-          _handlePointerEnd(appProvider, event);
-        }
-      },
-      onPointerCancel: (final PointerCancelEvent event) {
-        if (event.kind == PointerDeviceKind.touch) {
-          _pointerPositions.remove(event.pointer);
-          _getDistanceBetweenTouchPoints(); // Recalculate distance
-          _activePointers.remove(event.pointer);
-          if (_activePointers.length < AppMath.pair) {
-            _baseDistance = 0.0; // Reset base distance
+        },
+        onPointerCancel: (final PointerCancelEvent event) {
+          if (event.kind == PointerDeviceKind.touch) {
+            _pointerPositions.remove(event.pointer);
+            _getDistanceBetweenTouchPoints(); // Recalculate distance
+            _activePointers.remove(event.pointer);
+            if (_activePointers.length < AppMath.pair) {
+              _baseDistance = 0.0; // Reset base distance
+            }
+          } else {
+            _handlePointerEnd(appProvider, event);
           }
-        } else {
-          _handlePointerEnd(appProvider, event);
-        }
-      },
-      child: widget.child,
+        },
+        child: widget.child,
+      ),
     );
   }
 
@@ -389,6 +439,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       } else {
         _clearSelectionTapTracking();
       }
+      appProvider.hideDrawingToolPreview();
       _activePointerId = -1;
       _clearPixelBrushStroke();
       appProvider.layers.selectedLayer.clearCache();
@@ -437,6 +488,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         appProvider.selectorCreationAdditionalPoint(adjustedPosition);
         return;
       }
+
+      _updateDrawingToolPreview(appProvider, event.localPosition);
 
       if (appProvider.selectedAction == ActionType.fill) {
         return;
@@ -588,6 +641,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         );
         return;
       }
+
+      _updateDrawingToolPreview(appProvider, event.localPosition);
 
       if (appProvider.layers.selectedLayer.isVisible == false) {
         final AppLocalizations l10n = context.l10n;
