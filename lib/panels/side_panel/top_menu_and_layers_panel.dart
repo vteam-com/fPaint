@@ -6,7 +6,7 @@ import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/side_panel_header.dart';
 
 /// A widget that displays the layers panel in the top split of the side panel.
 class TopMenuAndLayersPanel extends StatelessWidget {
@@ -23,19 +23,7 @@ class TopMenuAndLayersPanel extends StatelessWidget {
       builder: (final BuildContext _, final Widget? _) {
         return Column(
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.medium,
-                AppSpacing.small,
-                AppSpacing.medium,
-                AppSpacing.small,
-              ),
-              child: Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: AppText(l10n.sidePanelLayersSection, variant: AppTextVariant.title),
-              ),
-            ),
-            const AppDivider(),
+            SidePanelHeader(title: l10n.sidePanelLayersSection),
             ListenableBuilder(
               listenable: layers.layerListStructureListenable,
               builder: (final BuildContext context2, final Widget? _) {

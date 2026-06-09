@@ -15,7 +15,10 @@ extension _ToolsPanelSelectionSection on ToolsPanel {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          AppText(title, variant: AppTextVariant.title),
+          SidePanelHeader(
+            title: title,
+            padding: EdgeInsets.zero,
+          ),
           const SizedBox(height: AppSpacing.small),
           child,
         ],
