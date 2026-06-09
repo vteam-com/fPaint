@@ -5,7 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 const int _topLeftCornerIndex = 0;
 const int _topRightCornerIndex = 1;
@@ -150,7 +150,7 @@ Future<ui.Image> renderTransformedImage(
   );
 }
 
-/// Bilinearly interpolates a point inside the quad defined by [corners].
+/// Bilinear interpolates a point inside the quad defined by [corners].
 Offset _interpolateBilinear({
   required final List<Offset> corners,
   required final double u,

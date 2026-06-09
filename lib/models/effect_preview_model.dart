@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/visible_model.dart';
 

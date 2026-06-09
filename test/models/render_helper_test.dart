@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/render_helper.dart';

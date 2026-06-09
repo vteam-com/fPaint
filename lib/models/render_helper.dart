@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/text_object.dart';
@@ -89,7 +89,7 @@ void renderRectangle(
   final Rect rect = Rect.fromPoints(p1, p2);
   canvas.drawRect(rect, paint);
 
-  // Draw the path arround the rectangle
+  // Draw the path around the rectangle
   paint.style = PaintingStyle.stroke;
   paint.color = brush.color;
   final Path path = Path()..addRect(rect);

@@ -2,7 +2,7 @@
 import 'dart:core';
 
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:provider/provider.dart';
 

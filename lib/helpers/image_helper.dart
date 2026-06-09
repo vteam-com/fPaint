@@ -3,8 +3,8 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
-import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:logging/logging.dart';
 import 'package:pasteboard/pasteboard.dart';

@@ -5,7 +5,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/effect_preview_model.dart';
 import 'package:fpaint/models/fill_model.dart';
@@ -101,16 +101,16 @@ class AppProvider extends ChangeNotifier {
   /// Listenable used to repaint the main canvas and overlay surface only.
   Listenable get mainViewRepaintListenable => _mainViewRepaintNotifier;
 
-  /// Listenable used to rebuild tool-option affordances without waking the full app shell.
+  /// Listenable used to rebuild tool-option affordance without waking the full app shell.
   Listenable get toolOptionsRepaintListenable => _toolOptionsNotifier;
 
   /// Listenable used to rebuild side-panel mode chrome only when layer-modify mode changes.
   Listenable get layerModifyModeListenable => _layerModifyModeNotifier;
 
-  /// Listenable used to repaint viewport-driven UI such as zoom and pan affordances.
+  /// Listenable used to repaint viewport-driven UI such as zoom and pan affordance.
   Listenable get viewportRepaintListenable => _viewportRepaintNotifier;
 
-  /// Listenable used to rebuild tool-selection affordances only when the tool changes.
+  /// Listenable used to rebuild tool-selection affordance only when the tool changes.
   Listenable get selectedActionRepaintListenable => _selectedActionNotifier;
 
   /// Gets whether layer replacement modify mode is active.

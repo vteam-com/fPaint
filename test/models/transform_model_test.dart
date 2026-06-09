@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/transform_model.dart';
 
 /// Creates a test image.
@@ -38,7 +38,7 @@ void main() {
       expect(model.corners, isEmpty);
     });
 
-    test('start() initialises corners from bounds', () async {
+    test('start() initializes corners from bounds', () async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
       const Rect bounds = Rect.fromLTWH(10, 20, 100, 50);

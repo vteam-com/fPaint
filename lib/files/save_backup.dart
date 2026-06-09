@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/helpers/macos_bookmark_service.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/providers/macos_bookmark_service.dart';
 
 const String _backupFileNameMarker = '_back-';
 const String _temporarySaveFileNamePrefix = 'fpaint-save-';

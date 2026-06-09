@@ -1,6 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_effects.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 

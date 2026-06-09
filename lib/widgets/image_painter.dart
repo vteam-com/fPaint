@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 /// A custom painter that displays an image, scaling and centering it to fit within the available space.
 class ImagePainter extends CustomPainter {

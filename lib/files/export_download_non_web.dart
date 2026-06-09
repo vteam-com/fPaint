@@ -2,14 +2,14 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/export_prepare.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/save_backup.dart';
-import 'package:fpaint/helpers/constants.dart';
-import 'package:fpaint/helpers/macos_bookmark_service.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/providers/macos_bookmark_service.dart';
 
 const String _fpaintSaveImageTitle = 'fPaint Save Image';
 const String _fpaintSaveImageAsTiffTitle = 'fPaint Save Image as TIFF';

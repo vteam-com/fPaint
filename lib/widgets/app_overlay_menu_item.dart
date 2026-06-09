@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 /// Shared tappable menu item styling for dropdowns and popup menus.
 class AppOverlayMenuItem extends StatelessWidget {

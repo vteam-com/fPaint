@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 /// A horizontal divider line replacing Material [Divider].
 class AppDivider extends StatelessWidget {
