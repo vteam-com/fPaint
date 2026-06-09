@@ -30,6 +30,7 @@ enum ShellMode {
 class ShellProvider extends ChangeNotifier {
   final ChangeNotifier _mainScreenLayoutNotifier = ChangeNotifier();
   final ChangeNotifier _sidePanelExpandedNotifier = ChangeNotifier();
+  final ChangeNotifier _canvasFitRequestNotifier = ChangeNotifier();
 
   /// Retrieves the [ShellProvider] instance from the given [BuildContext].
   ///
@@ -86,6 +87,10 @@ class ShellProvider extends ChangeNotifier {
   /// The canvas auto placement setting.
   CanvasAutoPlacement canvasPlacement = CanvasAutoPlacement.fit;
 
+  /// Listenable used by [MainView] to re-run its layout builder when a canvas
+  /// fit is requested, without rebuilding the rest of the shell.
+  Listenable get canvasFitRequestListenable => _canvasFitRequestNotifier;
+
   /// Requests the canvas to auto-fit within the viewport on the next frame.
   ///
   /// Centralizes the pattern of setting [canvasPlacement] to
@@ -93,6 +98,7 @@ class ShellProvider extends ChangeNotifier {
   /// [MainView] layout builder re-centres / re-scales the canvas.
   void requestCanvasFit() {
     canvasPlacement = CanvasAutoPlacement.fit;
+    _canvasFitRequestNotifier.notifyListeners();
     update();
   }
 
@@ -171,6 +177,7 @@ class ShellProvider extends ChangeNotifier {
   void dispose() {
     _mainScreenLayoutNotifier.dispose();
     _sidePanelExpandedNotifier.dispose();
+    _canvasFitRequestNotifier.dispose();
     super.dispose();
   }
 }

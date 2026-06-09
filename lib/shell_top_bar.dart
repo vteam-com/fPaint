@@ -796,6 +796,9 @@ Widget _buildCenterAndDimensionButton(
     onPressed: () {
       Future<void>.microtask(() {
         shellProvider.requestCanvasFit();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          appProvider.repaintViewport();
+        });
       });
     },
     child: Center(
