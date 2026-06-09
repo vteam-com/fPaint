@@ -32,148 +32,10 @@ Widget shortCutsForMainApp(
     );
   }
 
+  final Map<ShortcutActivator, Intent> shortcuts = _buildShortcuts();
+
   return Shortcuts(
-    shortcuts: <ShortcutActivator, Intent>{
-      // Undo
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.keyZ,
-      ): const UndoIntent(),
-
-      LogicalKeySet(
-        LogicalKeyboardKey.meta,
-        LogicalKeyboardKey.keyZ,
-      ): const UndoIntent(),
-
-      // Redo
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.keyZ,
-        LogicalKeyboardKey.shift,
-      ): const RedoIntent(),
-
-      LogicalKeySet(
-        LogicalKeyboardKey.meta,
-        LogicalKeyboardKey.keyZ,
-        LogicalKeyboardKey.shift,
-      ): const RedoIntent(),
-
-      //-------------------------------------------------
-      // Save
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.keyS,
-      ): const SaveIntent(),
-
-      LogicalKeySet(
-        LogicalKeyboardKey.meta,
-        LogicalKeyboardKey.keyS,
-      ): const SaveIntent(),
-
-      //-------------------------------------------------
-      // Cut
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.keyX,
-      ): const CutIntent(),
-
-      LogicalKeySet(
-        LogicalKeyboardKey.meta,
-        LogicalKeyboardKey.keyX,
-      ): const CutIntent(),
-
-      //-------------------------------------------------
-      // Copy
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.keyC,
-      ): const CopyIntent(),
-
-      LogicalKeySet(
-        LogicalKeyboardKey.meta,
-        LogicalKeyboardKey.keyC,
-      ): const CopyIntent(),
-
-      //-------------------------------------------------
-      // Paste
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.keyV,
-      ): const PasteIntent(),
-
-      LogicalKeySet(
-        LogicalKeyboardKey.meta,
-        LogicalKeyboardKey.keyV,
-      ): const PasteIntent(),
-
-      //-------------------------------------------------
-      // Duplicate (selection copy + paste)
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.keyD,
-      ): const DuplicateIntent(),
-
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.keyD,
-        LogicalKeyboardKey.shift,
-      ): const DuplicateNewLayerIntent(),
-
-      LogicalKeySet(
-        LogicalKeyboardKey.meta,
-        LogicalKeyboardKey.keyD,
-      ): const DuplicateIntent(),
-
-      LogicalKeySet(
-        LogicalKeyboardKey.meta,
-        LogicalKeyboardKey.keyD,
-        LogicalKeyboardKey.shift,
-      ): const DuplicateNewLayerIntent(),
-
-      //-------------------------------------------------
-      // Tab key
-      LogicalKeySet(
-        LogicalKeyboardKey.tab,
-      ): const ToggleShellModeIntent(),
-
-      //-------------------------------------------------
-      // Select All
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.keyA,
-      ): const SelectAllIntent(),
-      LogicalKeySet(
-        LogicalKeyboardKey.meta,
-        LogicalKeyboardKey.keyA,
-      ): const SelectAllIntent(),
-
-      //-------------------------------------------------
-      // New document from Clipboard
-      LogicalKeySet(
-        LogicalKeyboardKey.meta,
-        LogicalKeyboardKey.keyN,
-      ): const NewDocumentFromClipboardImage(),
-
-      //-------------------------------------------------
-      // Escape
-      LogicalKeySet(
-        LogicalKeyboardKey.escape,
-      ): const EscapeIntent(),
-
-      //-------------------------------------------------
-      // Delete/Backspace
-      LogicalKeySet(
-        LogicalKeyboardKey.delete,
-      ): const DeleteIntent(),
-
-      LogicalKeySet(
-        LogicalKeyboardKey.backspace,
-      ): const DeleteIntent(),
-
-      // Add a help shortcut
-      LogicalKeySet(LogicalKeyboardKey.f1): const HelpIntent(),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.slash): const HelpIntent(),
-    },
+    shortcuts: shortcuts,
     child: Actions(
       actions: <Type, Action<Intent>>{
         UndoIntent: CallbackAction<UndoIntent>(
@@ -385,4 +247,79 @@ void showShortcutsHelp(final BuildContext context) {
     context: context,
     builder: (final BuildContext _) => const ShortcutsHelpDialog(),
   );
+}
+
+/// Builds the keyboard shortcuts map, combining platform-specific shortcuts.
+Map<ShortcutActivator, Intent> _buildShortcuts() {
+  final Map<ShortcutActivator, Intent> shortcuts = <ShortcutActivator, Intent>{};
+
+  // Helper function to add cross-platform shortcuts
+  void addCrossPlatformShortcut(
+    LogicalKeyboardKey primaryKey,
+    Intent intent, {
+    LogicalKeyboardKey? secondaryKey,
+  }) {
+    // Add Control/Cmd + primary
+    shortcuts[LogicalKeySet(LogicalKeyboardKey.control, primaryKey)] = intent;
+    shortcuts[LogicalKeySet(LogicalKeyboardKey.meta, primaryKey)] = intent;
+
+    // Add Control/Cmd + secondary + primary if secondary is provided
+    if (secondaryKey != null) {
+      shortcuts[LogicalKeySet(LogicalKeyboardKey.control, primaryKey, secondaryKey)] = intent;
+      shortcuts[LogicalKeySet(LogicalKeyboardKey.meta, primaryKey, secondaryKey)] = intent;
+    }
+  }
+
+  // Undo
+  addCrossPlatformShortcut(LogicalKeyboardKey.keyZ, const UndoIntent());
+
+  // Redo
+  addCrossPlatformShortcut(
+    LogicalKeyboardKey.keyZ,
+    const RedoIntent(),
+    secondaryKey: LogicalKeyboardKey.shift,
+  );
+
+  // Save
+  addCrossPlatformShortcut(LogicalKeyboardKey.keyS, const SaveIntent());
+
+  // Cut
+  addCrossPlatformShortcut(LogicalKeyboardKey.keyX, const CutIntent());
+
+  // Copy
+  addCrossPlatformShortcut(LogicalKeyboardKey.keyC, const CopyIntent());
+
+  // Paste
+  addCrossPlatformShortcut(LogicalKeyboardKey.keyV, const PasteIntent());
+
+  // Duplicate in the selected layer (exactly Cmd/Ctrl + D).
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyD, control: true)] = const DuplicateIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyD, meta: true)] = const DuplicateIntent();
+
+  // Duplicate to a new layer (exactly Shift + Cmd/Ctrl + D).
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyD, control: true, shift: true)] =
+      const DuplicateNewLayerIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyD, meta: true, shift: true)] = const DuplicateNewLayerIntent();
+
+  // Select All
+  addCrossPlatformShortcut(LogicalKeyboardKey.keyA, const SelectAllIntent());
+
+  // Tab key (no duplicates needed)
+  shortcuts[LogicalKeySet(LogicalKeyboardKey.tab)] = const ToggleShellModeIntent();
+
+  // New document from Clipboard (only Meta)
+  shortcuts[LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.keyN)] = const NewDocumentFromClipboardImage();
+
+  // Escape
+  shortcuts[LogicalKeySet(LogicalKeyboardKey.escape)] = const EscapeIntent();
+
+  // Delete/Backspace (no duplicates needed)
+  shortcuts[LogicalKeySet(LogicalKeyboardKey.delete)] = const DeleteIntent();
+  shortcuts[LogicalKeySet(LogicalKeyboardKey.backspace)] = const DeleteIntent();
+
+  // Help
+  shortcuts[LogicalKeySet(LogicalKeyboardKey.f1)] = const HelpIntent();
+  shortcuts[LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.slash)] = const HelpIntent();
+
+  return shortcuts;
 }

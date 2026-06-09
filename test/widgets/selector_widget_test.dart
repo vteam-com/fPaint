@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,9 +7,10 @@ import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/app_icon.dart';
-import 'package:fpaint/widgets/app_tooltip.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
+import '../helpers/platform_helpers.dart';
+import '../helpers/selector_widget_test_helpers.dart';
 import '../helpers/widget_test_harness.dart';
 
 const Duration _snackBarDismissDuration = Duration(seconds: 4);
@@ -20,16 +20,7 @@ Widget _buildHarness({
   Path? path2,
   bool enableMoveAndResize = true,
   bool isDrawing = false,
-  required final VoidCallback onCancel,
-  required final Future<void> Function() onCopy,
-  required final Future<void> Function() onDuplicate,
-  Future<void> Function(Offset offset, bool duplicateOnNewLayer)? onDuplicateMove,
-  required final VoidCallback onToggleTransformMode,
-  required final void Function(Offset) onDrag,
-  required final void Function(NineGridHandle, Offset) onResize,
-  required final void Function(double) onScale,
-  required final void Function(double) onRotate,
-  required final Future<void> Function(SelectionEffect effect, BuildContext context) onEffectSelected,
+  required final SelectionRectCallbacks callbacks,
 }) {
   return buildLocalizedScaffoldTestApp(
     mediaQueryData: const MediaQueryData(size: Size(1200, 900)),
@@ -39,25 +30,19 @@ Widget _buildHarness({
         path2: path2,
         enableMoveAndResize: enableMoveAndResize,
         isDrawing: isDrawing,
-        onCancel: onCancel,
-        onCopy: onCopy,
-        onDuplicate: onDuplicate,
-        onDuplicateMove: onDuplicateMove,
-        onToggleTransformMode: onToggleTransformMode,
-        onDrag: onDrag,
-        onResize: onResize,
-        onScale: onScale,
-        onRotate: onRotate,
-        onEffectSelected: onEffectSelected,
+        onCancel: callbacks.onCancel,
+        onCopy: callbacks.onCopy,
+        onDuplicate: callbacks.onDuplicate,
+        onDuplicateMove: callbacks.onDuplicateMove,
+        onToggleTransformMode: callbacks.onToggleTransformMode,
+        onDrag: callbacks.onDrag,
+        onResize: callbacks.onResize,
+        onScale: callbacks.onScale,
+        onRotate: callbacks.onRotate,
+        onEffectSelected: callbacks.onEffectSelected,
       );
     },
   );
-}
-
-LogicalKeyboardKey _duplicateMoveModifierKey() {
-  final bool isApplePlatform =
-      defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
-  return isApplePlatform ? LogicalKeyboardKey.altLeft : LogicalKeyboardKey.controlLeft;
 }
 
 void main() {
@@ -66,15 +51,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: null,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {},
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(),
         ),
       );
 
@@ -88,15 +65,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {},
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(),
         ),
       );
       await tester.pump();
@@ -111,15 +80,7 @@ void main() {
         _buildHarness(
           path1: path,
           isDrawing: true,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {},
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(),
         ),
       );
       await tester.pump();
@@ -134,17 +95,11 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {},
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect effect, final BuildContext _) async {
-            selected = effect;
-          },
+          callbacks: createDefaultSelectionRectCallbacks(
+            onEffectSelected: (final SelectionEffect effect, final BuildContext _) async {
+              selected = effect;
+            },
+          ),
         ),
       );
       await tester.pump();
@@ -173,19 +128,14 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {
-            dragCalls++;
-          },
-          onResize: (final NineGridHandle _, final Offset _) {
-            resizeCalls++;
-          },
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(
+            onDrag: (final Offset _) {
+              dragCalls++;
+            },
+            onResize: (final NineGridHandle _, final Offset _) {
+              resizeCalls++;
+            },
+          ),
         ),
       );
       await tester.pump();
@@ -213,23 +163,20 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {
-            cancelCalls++;
-          },
-          onCopy: () async {
-            copyCalls++;
-          },
-          onDuplicate: () async {
-            duplicateCalls++;
-          },
-          onToggleTransformMode: () {
-            transformCalls++;
-          },
-          onDrag: (final Offset _) {},
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(
+            onCancel: () {
+              cancelCalls++;
+            },
+            onCopy: () async {
+              copyCalls++;
+            },
+            onDuplicate: () async {
+              duplicateCalls++;
+            },
+            onToggleTransformMode: () {
+              transformCalls++;
+            },
+          ),
         ),
       );
       await tester.pump();
@@ -237,18 +184,10 @@ void main() {
       final BuildContext context = tester.element(find.byType(SelectionRectWidget));
       final AppLocalizations l10n = AppLocalizations.of(context)!;
 
-      final Finder copyTooltip = find.byWidgetPredicate(
-        (final Widget w) => w is AppTooltip && w.message == l10n.copyToClipboard,
-      );
-      final Finder duplicateTooltip = find.byWidgetPredicate(
-        (final Widget w) => w is AppTooltip && w.message == l10n.duplicate,
-      );
-      final Finder cancelTooltip = find.byWidgetPredicate(
-        (final Widget w) => w is AppTooltip && w.message == l10n.cancel,
-      );
-      final Finder transformTooltip = find.byWidgetPredicate(
-        (final Widget w) => w is AppTooltip && w.message == l10n.transform,
-      );
+      final Finder copyTooltip = findTooltipByMessage(l10n.copyToClipboard);
+      final Finder duplicateTooltip = findTooltipByMessage(l10n.duplicate);
+      final Finder cancelTooltip = findTooltipByMessage(l10n.cancel);
+      final Finder transformTooltip = findTooltipByMessage(l10n.transform);
 
       await tester.tap(copyTooltip);
       await tester.pump();
@@ -278,30 +217,16 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {},
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(),
         ),
       );
       await tester.pump();
 
       final BuildContext context = tester.element(find.byType(SelectionRectWidget));
       final AppLocalizations l10n = AppLocalizations.of(context)!;
-      final Finder copyTooltip = find.byWidgetPredicate(
-        (final Widget widget) => widget is AppTooltip && widget.message == l10n.copyToClipboard,
-      );
-      final Finder duplicateTooltip = find.byWidgetPredicate(
-        (final Widget widget) => widget is AppTooltip && widget.message == l10n.duplicate,
-      );
-      final Finder cancelTooltip = find.byWidgetPredicate(
-        (final Widget widget) => widget is AppTooltip && widget.message == l10n.cancel,
-      );
+      final Finder copyTooltip = findTooltipByMessage(l10n.copyToClipboard);
+      final Finder duplicateTooltip = findTooltipByMessage(l10n.duplicate);
+      final Finder cancelTooltip = findTooltipByMessage(l10n.cancel);
       final Finder effectsButton = find.byKey(Keys.effectsButton);
 
       final Finder copyScale = find.descendant(of: copyTooltip, matching: find.byType(AnimatedScale));
@@ -366,15 +291,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {},
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(),
         ),
       );
       await tester.pump();
@@ -385,12 +302,8 @@ void main() {
         of: find.byType(SelectionRectWidget),
         matching: find.byType(Stack),
       );
-      final Finder copyTooltip = find.byWidgetPredicate(
-        (final Widget w) => w is AppTooltip && w.message == l10n.copyToClipboard,
-      );
-      final Finder cancelTooltip = find.byWidgetPredicate(
-        (final Widget w) => w is AppTooltip && w.message == l10n.cancel,
-      );
+      final Finder copyTooltip = findTooltipByMessage(l10n.copyToClipboard);
+      final Finder cancelTooltip = findTooltipByMessage(l10n.cancel);
 
       expect(selectionStack, findsOneWidget);
       expect(tester.getRect(copyTooltip).left, greaterThanOrEqualTo(tester.getRect(selectionStack).left));
@@ -406,36 +319,26 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {
-            translateCalls++;
-          },
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {
-            scaleCalls++;
-          },
-          onRotate: (final double _) {
-            rotateCalls++;
-          },
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(
+            onDrag: (final Offset _) {
+              translateCalls++;
+            },
+            onScale: (final double _) {
+              scaleCalls++;
+            },
+            onRotate: (final double _) {
+              rotateCalls++;
+            },
+          ),
         ),
       );
       await tester.pump();
 
       final BuildContext context = tester.element(find.byType(SelectionRectWidget));
       final AppLocalizations l10n = AppLocalizations.of(context)!;
-      final Finder translateTooltip = find.byWidgetPredicate(
-        (final Widget widget) => widget is AppTooltip && widget.message == l10n.translate,
-      );
-      final Finder scaleTooltip = find.byWidgetPredicate(
-        (final Widget widget) => widget is AppTooltip && widget.message == l10n.scale,
-      );
-      final Finder rotateTooltip = find.byWidgetPredicate(
-        (final Widget widget) => widget is AppTooltip && widget.message == l10n.resizeRotate,
-      );
+      final Finder translateTooltip = findTooltipByMessage(l10n.translate);
+      final Finder scaleTooltip = findTooltipByMessage(l10n.scale);
+      final Finder rotateTooltip = findTooltipByMessage(l10n.resizeRotate);
 
       await tester.dragFrom(tester.getCenter(translateTooltip), const Offset(15, 10));
       await tester.pump();
@@ -461,27 +364,21 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onDuplicateMove: (final Offset offset, final bool duplicateOnNewLayerValue) async {
-            duplicateMoveCalls++;
-            duplicateMoveOffset += offset;
-            duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
-          },
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {
-            dragCalls++;
-          },
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(
+            onDuplicateMove: (final Offset offset, final bool duplicateOnNewLayerValue) async {
+              duplicateMoveCalls++;
+              duplicateMoveOffset += offset;
+              duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
+            },
+            onDrag: (final Offset _) {
+              dragCalls++;
+            },
+          ),
         ),
       );
       await tester.pump();
 
-      final LogicalKeyboardKey modifierKey = _duplicateMoveModifierKey();
+      final LogicalKeyboardKey modifierKey = getPlatformModifierKey();
       await tester.sendKeyDownEvent(modifierKey);
       await tester.dragFrom(const Offset(240, 240), const Offset(20, 10));
       await tester.pump();
@@ -503,25 +400,19 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onDuplicateMove: (final Offset _, final bool duplicateOnNewLayerValue) async {
-            duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
-          },
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {
-            dragCalls++;
-          },
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(
+            onDuplicateMove: (final Offset _, final bool duplicateOnNewLayerValue) async {
+              duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
+            },
+            onDrag: (final Offset _) {
+              dragCalls++;
+            },
+          ),
         ),
       );
       await tester.pump();
 
-      final LogicalKeyboardKey modifierKey = _duplicateMoveModifierKey();
+      final LogicalKeyboardKey modifierKey = getPlatformModifierKey();
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       await tester.sendKeyDownEvent(modifierKey);
       await tester.dragFrom(const Offset(240, 240), const Offset(20, 10));
@@ -544,32 +435,24 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: path,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onDuplicateMove: (final Offset _, final bool duplicateOnNewLayerValue) async {
-            duplicateMoveCalls++;
-            duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
-          },
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {
-            translateCalls++;
-          },
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(
+            onDuplicateMove: (final Offset _, final bool duplicateOnNewLayerValue) async {
+              duplicateMoveCalls++;
+              duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
+            },
+            onDrag: (final Offset _) {
+              translateCalls++;
+            },
+          ),
         ),
       );
       await tester.pump();
 
       final BuildContext context = tester.element(find.byType(SelectionRectWidget));
       final AppLocalizations l10n = AppLocalizations.of(context)!;
-      final Finder translateTooltip = find.byWidgetPredicate(
-        (final Widget widget) => widget is AppTooltip && widget.message == l10n.translate,
-      );
+      final Finder translateTooltip = findTooltipByMessage(l10n.translate);
 
-      final LogicalKeyboardKey modifierKey = _duplicateMoveModifierKey();
+      final LogicalKeyboardKey modifierKey = getPlatformModifierKey();
       await tester.sendKeyDownEvent(modifierKey);
       await tester.dragFrom(tester.getCenter(translateTooltip), const Offset(15, 10));
       await tester.pump();
@@ -591,19 +474,14 @@ void main() {
           path1: path1,
           path2: path2,
           enableMoveAndResize: false,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {
-            dragCalls++;
-          },
-          onResize: (final NineGridHandle _, final Offset _) {
-            resizeCalls++;
-          },
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(
+            onDrag: (final Offset _) {
+              dragCalls++;
+            },
+            onResize: (final NineGridHandle _, final Offset _) {
+              resizeCalls++;
+            },
+          ),
         ),
       );
       await tester.pump();
@@ -626,15 +504,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: nearTopPath,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {},
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(),
         ),
       );
       await tester.pump();
@@ -644,15 +514,7 @@ void main() {
       await tester.pumpWidget(
         _buildHarness(
           path1: lowerPath,
-          onCancel: () {},
-          onCopy: () async {},
-          onDuplicate: () async {},
-          onToggleTransformMode: () {},
-          onDrag: (final Offset _) {},
-          onResize: (final NineGridHandle _, final Offset _) {},
-          onScale: (final double _) {},
-          onRotate: (final double _) {},
-          onEffectSelected: (final SelectionEffect _, final BuildContext _) async {},
+          callbacks: createDefaultSelectionRectCallbacks(),
         ),
       );
       await tester.pump();
