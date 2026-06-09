@@ -194,6 +194,17 @@ void main() {
       expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
     });
 
+    testWidgets('renders paste button with correct key on the top toolbar', (final WidgetTester tester) async {
+      await pumpShellTopBar(
+        tester,
+        width: _wideToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      expect(find.byKey(Keys.floatActionPaste), findsOneWidget);
+    });
+
     testWidgets('renders zoom in button with correct key', (final WidgetTester tester) async {
       shellProvider.deviceSizeSmall = false;
 
@@ -725,6 +736,7 @@ void main() {
       expect(find.byKey(Keys.floatActionToggle), findsNothing);
       expect(find.byKey(Keys.mainMenuButton), findsOneWidget);
       expect(find.byKey(Keys.floatActionUndo), findsOneWidget);
+      expect(find.byKey(Keys.floatActionPaste), findsNothing);
       expect(find.byKey(Keys.floatActionSelector), findsOneWidget);
       expect(find.byKey(Keys.sidePanelExportButton), findsNothing);
     });
@@ -740,6 +752,7 @@ void main() {
       expect(find.byKey(Keys.floatActionToggle), findsOneWidget);
       expect(find.byKey(Keys.mainMenuButton), findsOneWidget);
       expect(find.byKey(Keys.floatActionRedo), findsOneWidget);
+      expect(find.byKey(Keys.floatActionPaste), findsOneWidget);
       expect(find.byKey(Keys.sidePanelExportButton), findsOneWidget);
       expect(find.byKey(Keys.floatActionZoomOut), findsOneWidget);
 
@@ -755,11 +768,14 @@ void main() {
       final double flipVerticalX = tester.getCenter(flipVerticalIconFinder).dx;
       final double undoX = tester.getCenter(find.byKey(Keys.floatActionUndo)).dx;
       final double exportX = tester.getCenter(exportIconFinder).dx;
+      final double pasteX = tester.getCenter(find.byKey(Keys.floatActionPaste)).dx;
       final double rotateX = tester.getCenter(rotateIconFinder).dx;
 
       expect(flipVerticalIconFinder, findsOneWidget);
       expect(rotateIconFinder, findsOneWidget);
       expect(undoX - flipVerticalX, greaterThan(_wideToolbarDistributedGapLowerBound));
+      expect(pasteX, greaterThan(exportX));
+      expect(rotateX, greaterThan(pasteX));
       expect(rotateX - exportX, greaterThan(_wideToolbarPrimaryGroupGapLowerBound));
       expect(selectorX - redoX, greaterThan(_wideToolbarHistorySelectorGroupGapLowerBound));
     });

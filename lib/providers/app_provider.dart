@@ -218,6 +218,18 @@ class AppProvider extends ChangeNotifier {
   //-------------------------
   // Selected Tool
   ActionType _selectedAction = ActionType.brush;
+  ActionType _lastNonSelectorAction = ActionType.brush;
+
+  /// Activates the selector action while remembering the previous non-selector tool.
+  void activateSelectionAction() {
+    selectedAction = ActionType.selector;
+  }
+
+  /// Clears the current selection UI state and returns to the previous tool.
+  void clearSelectionAndRestorePreviousTool() {
+    selectorModel.clear();
+    selectedAction = _lastNonSelectorAction;
+  }
 
   /// Sets the selected action.
   set selectedAction(final ActionType value) {
@@ -227,6 +239,10 @@ class AppProvider extends ChangeNotifier {
     if (selectedActionChanged) {
       eyeDropPositionForBrush = null;
       eyeDropPositionForFill = null;
+    }
+
+    if (value != ActionType.selector) {
+      _lastNonSelectorAction = value;
     }
 
     _selectedAction = value;

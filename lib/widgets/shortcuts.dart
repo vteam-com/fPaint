@@ -2,7 +2,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
@@ -247,7 +246,7 @@ Widget shortCutsForMainApp(
         SelectAllIntent: CallbackAction<SelectAllIntent>(
           onInvoke: (final SelectAllIntent _) async {
             appProvider.selectAll();
-            appProvider.selectedAction = ActionType.selector;
+            appProvider.activateSelectionAction();
             return null;
           },
         ),
@@ -256,7 +255,7 @@ Widget shortCutsForMainApp(
         // Escape current action
         EscapeIntent: CallbackAction<EscapeIntent>(
           onInvoke: (final EscapeIntent _) async {
-            appProvider.selectorModel.clear();
+            appProvider.clearSelectionAndRestorePreviousTool();
             appProvider.fillModel.clear();
             appProvider.eyeDropPositionForBrush = null;
             appProvider.eyeDropPositionForFill = null;

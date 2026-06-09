@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -250,6 +251,73 @@ void main() {
 
       expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolFill)).isSelected, isFalse);
       expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolSmudge)).isSelected, isTrue);
+    });
+  });
+
+  group('ToolsPanel sections', () {
+    testWidgets('shows separate Selection and Brushes headings', (final WidgetTester tester) async {
+      await pumpToolsPanel(tester);
+
+      expect(find.text('Selection'), findsOneWidget);
+      expect(find.text('Brushes'), findsOneWidget);
+    });
+
+    testWidgets('selection clipboard actions are shown only for an active selection', (
+      final WidgetTester tester,
+    ) async {
+      await pumpToolsPanel(tester);
+
+      expect(find.byKey(Keys.toolSelectorCopy), findsNothing);
+      expect(find.byKey(Keys.toolSelectorCut), findsNothing);
+
+      appProvider.activateSelectionAction();
+      appProvider.selectorModel.isVisible = true;
+      appProvider.selectorModel.path1 = Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10));
+      appProvider.update();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(Keys.toolSelectorCopy), findsOneWidget);
+      expect(find.byKey(Keys.toolSelectorCut), findsOneWidget);
+    });
+
+    testWidgets('selection mode buttons activate the selector tool', (final WidgetTester tester) async {
+      await pumpToolsPanel(tester);
+
+      await tester.tap(find.byKey(Keys.toolSelectorModeCircle));
+      await tester.pumpAndSettle();
+
+      expect(appProvider.selectedAction, ActionType.selector);
+      expect(appProvider.selectorModel.mode, SelectorMode.circle);
+    });
+
+    testWidgets('selection dismiss restores the previous non-selection tool', (final WidgetTester tester) async {
+      appProvider.selectedAction = ActionType.smudge;
+      appProvider.activateSelectionAction();
+      appProvider.setSelectorMode(SelectorMode.circle);
+      appProvider.selectorModel.isVisible = true;
+      appProvider.selectorModel.path1 = Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10));
+
+      await pumpToolsPanel(tester);
+
+      await tester.tap(find.byKey(Keys.toolSelectorCancel));
+      await tester.pumpAndSettle();
+
+      expect(appProvider.selectedAction, ActionType.smudge);
+      expect(appProvider.selectorModel.isVisible, isFalse);
+    });
+
+    testWidgets('selection dismiss button stays to the right of the top row', (final WidgetTester tester) async {
+      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectorModel.isVisible = true;
+      appProvider.selectorModel.path1 = Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10));
+
+      await pumpToolsPanel(tester);
+
+      final Rect selectorRect = tester.getRect(find.byKey(Keys.toolSelector));
+      final Rect cancelRect = tester.getRect(find.byKey(Keys.toolSelectorCancel));
+
+      expect(cancelRect.center.dx, greaterThan(selectorRect.center.dx));
+      expect((cancelRect.center.dy - selectorRect.center.dy).abs(), lessThan(AppLayout.toolbarButtonWidth));
     });
   });
 }

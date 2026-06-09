@@ -55,6 +55,7 @@
   "copied": "Copied",
   "copyToClipboard": "Copy to clipboard",
   "create": "Create",
+  "cut": "Cut",
   "degreesValue": "{value}°",
   "@degreesValue": {
     "placeholders": {
@@ -244,6 +245,9 @@
     }
   },
   "settings": "Settings...",
+  "sidePanelBrushesSection": "Brushes",
+  "sidePanelLayersSection": "Layers",
+  "sidePanelSelectionSection": "Selection",
   "startOver": "Start new...",
   "startOverTooltip": "Start new...",
   "textAlignCenter": "Center",

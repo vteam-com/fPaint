@@ -661,6 +661,7 @@ class Keys {
   static const Key floatActionZoomOut = Key('floating_action_zoom_out');
   static const Key floatActionCenter = Key('floating_action_center');
   static const Key floatActionToggle = Key('floating_action_toggle');
+  static const Key floatActionPaste = Key('floating_action_paste');
   static const Key mainMenuButton = Key('main-menu-button');
   static const Key mainMenuCanvasSize = Key('main-menu-canvas-size');
   static const Key sidePanelExportButton = Key('side-panel-export-button');
@@ -708,6 +709,8 @@ class Keys {
   static const Key toolSelectorModeLasso = Key('tool-selector-mode-lasso');
   static const Key toolSelectorModeWand = Key('tool-selector-mode-wand');
   static const Key toolSelectorCancel = Key('tool-selector-cancel');
+  static const Key toolSelectorCopy = Key('tool-selector-copy');
+  static const Key toolSelectorCut = Key('tool-selector-cut');
 
   static const Key toolPanelFillColor = Key('toolPanelFillColor');
   static const Key toolPanelHalftoneDotColor = Key('toolPanelHalftoneDotColor');

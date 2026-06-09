@@ -356,6 +356,12 @@ abstract class AppLocalizations {
   /// **'Create'**
   String get create;
 
+  /// No description provided for @cut.
+  ///
+  /// In en, this message translates to:
+  /// **'Cut'**
+  String get cut;
+
   /// No description provided for @degreesValue.
   ///
   /// In en, this message translates to:
@@ -1039,6 +1045,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings...'**
   String get settings;
+
+  /// No description provided for @sidePanelBrushesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Brushes'**
+  String get sidePanelBrushesSection;
+
+  /// No description provided for @sidePanelLayersSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Layers'**
+  String get sidePanelLayersSection;
+
+  /// No description provided for @sidePanelSelectionSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Selection'**
+  String get sidePanelSelectionSection;
 
   /// No description provided for @startOver.
   ///

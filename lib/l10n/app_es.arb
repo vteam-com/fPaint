@@ -49,6 +49,7 @@
   "copied": "Copiado",
   "copyToClipboard": "Copiar al portapapeles",
   "create": "Crear",
+  "cut": "Cortar",
   "degreesValue": "Giro: {value}°",
   "@degreesValue": {
     "placeholders": {
@@ -235,6 +236,9 @@
     }
   },
   "settings": "Configuracion...",
+  "sidePanelBrushesSection": "Pinceles",
+  "sidePanelLayersSection": "Capas",
+  "sidePanelSelectionSection": "Seleccion",
   "startOver": "Nuevo...",
   "startOverTooltip": "Nuevo...",
   "textAlignCenter": "Centro",

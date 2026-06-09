@@ -27,13 +27,10 @@ extension AppProviderSelection on AppProvider {
   /// Toggles selection overlay behavior from the FAB without coupling to tool state.
   void toggleSelectionOverlayFromFab() {
     if (selectorModel.isVisible) {
-      cancelEffectPreview();
-      selectorModel.clear();
-      repaintToolOptions();
-      update();
+      clearSelectionAndRestorePreviousTool();
       return;
     }
-    selectedAction = ActionType.selector;
+    activateSelectionAction();
   }
 
   /// Erases a region on the canvas.
@@ -118,7 +115,7 @@ extension AppProviderSelection on AppProvider {
     final bool wasLayerModifyMode = isLayerModifyMode;
 
     cancelEffectPreview();
-    selectedAction = ActionType.selector;
+    activateSelectionAction();
     selectAll();
 
     final ImagePlacementLayerRestoreState restoreState = _captureSelectedLayerRestoreState();

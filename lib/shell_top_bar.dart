@@ -273,6 +273,19 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
     ),
     _ToolbarActionEntry(
       child: _buildToolbarIconButton(
+        key: Keys.floatActionPaste,
+        tooltip: l10n.paste,
+        icon: AppIcon.clipboardPaste,
+        interactionProfile: interactionProfile,
+        onPressed: () {
+          Future<void>.microtask(() => appProvider.paste());
+        },
+      ),
+      estimatedWidth: _toolbarIconActionEstimatedWidth,
+      importance: _ToolbarActionImportance.low,
+    ),
+    _ToolbarActionEntry(
+      child: _buildToolbarIconButton(
         tooltip: l10n.rotateCanvasTooltip,
         icon: AppIcon.rotate90DegreesCw,
         interactionProfile: interactionProfile,
