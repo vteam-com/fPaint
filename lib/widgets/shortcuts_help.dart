@@ -257,14 +257,14 @@ class ShortcutsHelpDialog extends StatelessWidget {
     return isMacOS ? _platformOption : _platformCtrl;
   }
 
-  String _getSelectionSubtractModifier() {
-    final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
-    return isMacOS ? _platformOption : _platformAlt;
-  }
-
   String _getPlatformModifier(final BuildContext _) {
     final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
     return isMacOS ? _platformCmd : _platformCtrl;
+  }
+
+  String _getSelectionSubtractModifier() {
+    final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
+    return isMacOS ? _platformOption : _platformAlt;
   }
 
   double _shortcutGroupWidth(final double availableWidth) {

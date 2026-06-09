@@ -391,10 +391,8 @@ class _BrushSizePreviewOverlay extends StatelessWidget {
     required this.diameter,
     required this.color,
   });
-
-  final double diameter;
   final Color color;
-
+  final double diameter;
   @override
   Widget build(final BuildContext context) {
     return CustomPaint(

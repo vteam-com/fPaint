@@ -109,21 +109,20 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     ];
   }
 
-  void _setColor(final Color color) {
-    setState(() {
-      _currentColor = color;
-      _hexController.text = colorToHexString(color);
-    });
-  }
-
-  void _setPickerMode(final _ColorPickerMode mode) {
-    if (_pickerMode == mode) {
-      return;
+  /// Builds the currently selected picker implementation.
+  Widget _buildActivePicker() {
+    switch (_pickerMode) {
+      case _ColorPickerMode.sliders:
+        return ColorSelector(
+          color: _currentColor,
+          onColorChanged: _setColor,
+        );
+      case _ColorPickerMode.wheel:
+        return ColorWheelSelector(
+          color: _currentColor,
+          onColorChanged: _setColor,
+        );
     }
-
-    setState(() {
-      _pickerMode = mode;
-    });
   }
 
   /// Builds the content of the dialog.
@@ -267,21 +266,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     );
   }
 
-  Widget _buildActivePicker() {
-    switch (_pickerMode) {
-      case _ColorPickerMode.sliders:
-        return ColorSelector(
-          color: _currentColor,
-          onColorChanged: _setColor,
-        );
-      case _ColorPickerMode.wheel:
-        return ColorWheelSelector(
-          color: _currentColor,
-          onColorChanged: _setColor,
-        );
-    }
-  }
-
+  /// Builds one mode label button in the sliders/wheel toggle row.
   Widget _buildPickerModeLabel({
     required final Key key,
     required final String label,
@@ -304,6 +289,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     );
   }
 
+  /// Builds the control that switches between slider and wheel pickers.
   Widget _buildPickerModeToggle(final AppLocalizations l10n) {
     final bool wheelSelected = _pickerMode == _ColorPickerMode.wheel;
 
@@ -334,6 +320,23 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
         ),
       ],
     );
+  }
+
+  void _setColor(final Color color) {
+    setState(() {
+      _currentColor = color;
+      _hexController.text = colorToHexString(color);
+    });
+  }
+
+  void _setPickerMode(final _ColorPickerMode mode) {
+    if (_pickerMode == mode) {
+      return;
+    }
+
+    setState(() {
+      _pickerMode = mode;
+    });
   }
 }
 
