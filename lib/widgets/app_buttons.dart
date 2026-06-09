@@ -1,4 +1,5 @@
 // ignore: fcheck_one_class_per_file
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -7,6 +8,19 @@ import 'package:fpaint/widgets/app_tooltip.dart';
 
 const int _subtleButtonBackgroundAlpha = 25;
 const String _appButtonContentAssertionMessage = 'AppButton requires exactly one of child or builder.';
+const String _previewLabelText = 'Button';
+const String _previewLabelDanger = 'Danger';
+const String _previewLabelPrimary = 'Primary';
+const String _previewLabelTooltip = 'Button tooltip';
+const String _previewLabelChild = 'Child';
+const String _previewLabelBuilder = 'Builder';
+const String previewNameAppButtonText = 'AppButtonText';
+const String previewNameAppButtonDanger = 'AppButtonDanger';
+const String previewNameAppButtonPrimary = 'AppButtonPrimary';
+const String previewNameAppButtonIcon = 'AppButtonIcon';
+const String previewNameAppButtonChild = 'AppButtonChild';
+const String previewNameAppButtonBuilder = 'AppButtonBuilder';
+const double _previewContainerWidth = 220;
 
 /// Shared semantic intents for button labels and icons.
 ///
@@ -472,4 +486,89 @@ class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMi
       _isPressed = isPressed;
     });
   }
+}
+
+/// Wraps previews with baseline layout context so button samples render safely.
+Widget _buildButtonPreviewContainer(final Widget child) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(
+      child: SizedBox(
+        width: _previewContainerWidth,
+        child: child,
+      ),
+    ),
+  );
+}
+
+void _noopPreviewAction() {}
+
+/// Widget preview entry for [AppButtonText].
+@Preview(name: previewNameAppButtonText)
+Widget appButtonTextPreview() {
+  return _buildButtonPreviewContainer(
+    const AppButtonText(
+      onPressed: _noopPreviewAction,
+      text: _previewLabelText,
+    ),
+  );
+}
+
+/// Widget preview entry for [AppButtonDanger].
+@Preview(name: previewNameAppButtonDanger)
+Widget appButtonDangerPreview() {
+  return _buildButtonPreviewContainer(
+    const AppButtonDanger(
+      onPressed: _noopPreviewAction,
+      text: _previewLabelDanger,
+    ),
+  );
+}
+
+/// Widget preview entry for [AppButtonPrimary].
+@Preview(name: previewNameAppButtonPrimary)
+Widget appButtonPrimaryPreview() {
+  return _buildButtonPreviewContainer(
+    const AppButtonPrimary(
+      onPressed: _noopPreviewAction,
+      text: _previewLabelPrimary,
+    ),
+  );
+}
+
+/// Widget preview entry for [AppButtonIcon].
+@Preview(name: previewNameAppButtonIcon)
+Widget appButtonIconPreview() {
+  return _buildButtonPreviewContainer(
+    const AppButtonIcon(
+      icon: AppIcon.menu,
+      onPressed: _noopPreviewAction,
+      tooltip: _previewLabelTooltip,
+    ),
+  );
+}
+
+/// Widget preview entry for [AppButton] using static child content.
+@Preview(name: previewNameAppButtonChild)
+Widget appButtonChildPreview() {
+  return _buildButtonPreviewContainer(
+    const AppButton(
+      onPressed: _noopPreviewAction,
+      child: Text(_previewLabelChild),
+    ),
+  );
+}
+
+/// Widget preview entry for [AppButton] using builder content.
+@Preview(name: previewNameAppButtonBuilder)
+Widget appButtonBuilderPreview() {
+  return _buildButtonPreviewContainer(
+    AppButton(
+      onPressed: _noopPreviewAction,
+      builder: (final BuildContext _, final AppButtonVisualState state) {
+        final String label = state.isPressed ? _previewLabelPrimary : _previewLabelBuilder;
+        return Text(label);
+      },
+    ),
+  );
 }

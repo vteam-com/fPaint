@@ -1,3 +1,4 @@
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/import_files.dart';
@@ -12,6 +13,9 @@ import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/overlay_control_widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:provider/single_child_widget.dart';
 
 const String _canvasZoomAndSizeFormat = '{zoom}%\n{width}\n{height}';
 const String _placeholderZoom = '{zoom}';
@@ -19,6 +23,7 @@ const String _placeholderWidth = '{width}';
 const String _placeholderHeight = '{height}';
 const double _toolbarIconActionEstimatedWidth = AppLayout.iconSize + AppSpacing.medium + AppSpacing.medium;
 const double _toolbarCenterActionEstimatedWidth = AppLayout.toolbarButtonWidth;
+const double _shellTopBarPreviewWidth = AppLayout.sidePanelExpandedMin;
 
 enum _ToolbarActionImportance {
   critical,
@@ -565,8 +570,8 @@ Widget buildCanvasToolbarActions(
 
               if (distributeWideGroups) {
                 final List<Widget> resolvedPrimaryActionButtons = primaryActionButtons ?? const <Widget>[];
-                final List<Widget> leadingPrimaryActions = resolvedPrimaryActionButtons.take(AppMath.triple).toList();
-                final List<Widget> trailingPrimaryActions = resolvedPrimaryActionButtons.skip(AppMath.triple).toList();
+                final List<Widget> leadingPrimaryActions = resolvedPrimaryActionButtons.take(AppMath.four).toList();
+                final List<Widget> trailingPrimaryActions = resolvedPrimaryActionButtons.skip(AppMath.four).toList();
 
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -622,14 +627,12 @@ Widget _buildToolbarButtonGroup({
     return const SizedBox.shrink();
   }
 
-  if (children.length == AppMath.one) {
-    return children.first;
-  }
-
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    spacing: spacing,
-    children: children,
+  return buildOverlayControlSurface(
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: spacing,
+      children: children,
+    ),
   );
 }
 
@@ -733,17 +736,27 @@ Widget _buildToolbarDock({
   required final Widget centerButton,
   required final Widget zoomInButton,
 }) {
+  final List<Widget> selectionDomainButtons = <Widget>[
+    selectorToggleButton,
+    ?shellToggleButton,
+  ];
+
   return Row(
     mainAxisSize: MainAxisSize.min,
     spacing: interactionProfile.buttonSpacing,
     children: <Widget>[
-      undoButton,
-      redoButton,
-      selectorToggleButton,
-      ?shellToggleButton,
-      zoomOutButton,
-      centerButton,
-      zoomInButton,
+      _buildToolbarButtonGroup(
+        children: <Widget>[undoButton, redoButton],
+        spacing: interactionProfile.buttonSpacing,
+      ),
+      _buildToolbarButtonGroup(
+        children: selectionDomainButtons,
+        spacing: interactionProfile.buttonSpacing,
+      ),
+      _buildToolbarButtonGroup(
+        children: <Widget>[zoomOutButton, centerButton, zoomInButton],
+        spacing: interactionProfile.buttonSpacing,
+      ),
     ],
   );
 }
@@ -828,4 +841,34 @@ void _toggleSmallScreenShellState(final ShellProvider shellProvider) {
     default:
       shellProvider.shellMode = ShellMode.hidden;
   }
+}
+
+/// Widget preview entry for [ShellTopBar].
+@Preview(name: 'ShellTopBar')
+Widget shellTopBarPreview() {
+  final AppProvider appProvider = AppProvider();
+  final ShellProvider shellProvider = ShellProvider();
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: MediaQuery(
+      data: const MediaQueryData(size: Size(_shellTopBarPreviewWidth, AppLayout.shellTopBarHeight)),
+      child: Localizations(
+        locale: const Locale('en'),
+        delegates: AppLocalizations.localizationsDelegates,
+        child: MultiProvider(
+          providers: <SingleChildWidget>[
+            ChangeNotifierProvider<AppProvider>.value(value: appProvider),
+            ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
+          ],
+          child: SizedBox(
+            height: AppLayout.shellTopBarHeight,
+            child: ShellTopBar(
+              appProvider: appProvider,
+              shellProvider: shellProvider,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }

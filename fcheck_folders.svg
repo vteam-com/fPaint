@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="2867.0" height="7138.0" viewBox="0 0 2867.0 7138.0" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+<svg width="2870.0" height="7138.0" viewBox="0 0 2870.0 7138.0" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
 <defs>
   <filter id="whiteShadow" x="-20%" y="-20%" width="140%" height="140%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
@@ -2425,6 +2425,10 @@
   <title>widgets/app_switch.dart ▶ constants/constants.dart</title>
 </g>
 <g>
+  <path d="M 666.0 254.0 H 943.0 Q 949.0 254.0 949.0 260.0 V 2919.0 Q 949.0 2925.0 943.0 2925.0 H 662.0" class="edgeVertical"/>
+  <title>shell_top_bar.dart ▶ widgets/overlay_control_widgets.dart</title>
+</g>
+<g>
   <path d="M 666.0 3352.0 H 943.0 Q 949.0 3352.0 949.0 3358.0 V 5467.0 Q 949.0 5473.0 943.0 5473.0 H 662.0" class="edgeVertical"/>
   <title>widgets/text_style_toggle_buttons.dart ▶ models/text_tool_state.dart</title>
 </g>
@@ -3620,7 +3624,7 @@
   <path d="M 656.0,243.0 L 668.0,236.0 Q 671.0,236.0 671.0,239.0 L 671.0,247.0 Q 671.0,250.0 668.0,250.0 Z" fill="#3b82f6"/>
   <text x="666.32" y="244.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. main_screen.dart</title></g><g class="badge outgoingBadge">
   <path d="M 674.0,254.0 L 658.0,246.4 Q 655.0,246.4 655.0,249.4 L 655.0,258.6 Q 655.0,261.6 658.0,261.6 Z" fill="#10b981"/>
-  <text x="660.72" y="255.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">12</text><title>1. constants/constants.dart
+  <text x="660.72" y="255.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">13</text><title>1. constants/constants.dart
 2. files/import_files.dart
 3. l10n/app_localizations.dart
 4. models/app_icon_enum.dart
@@ -3631,7 +3635,8 @@
 9. providers/app_provider_canvas.dart
 10. providers/app_provider_selection.dart
 11. providers/shell_provider.dart
-12. widgets/material_free.dart</title></g><text x="472.0" y="248.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">shell_top_bar.dart</text>
+12. widgets/material_free.dart
+13. widgets/overlay_control_widgets.dart</title></g><text x="472.0" y="248.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">shell_top_bar.dart</text>
 <g class="badge incomingBadge">
   <path d="M 656.0,275.0 L 668.0,268.0 Q 671.0,268.0 671.0,271.0 L 671.0,279.0 Q 671.0,282.0 668.0,282.0 Z" fill="#3b82f6"/>
   <text x="666.32" y="276.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. main.dart</title></g><g class="badge outgoingBadge">
@@ -4929,9 +4934,10 @@
 6. widgets/transparent_background.dart</title></g><text x="472.0" y="2898.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">color_preview.dart</text>
 <g class="badge incomingBadge">
   <path d="M 656.0,2925.0 L 668.0,2918.0 Q 671.0,2918.0 671.0,2921.0 L 671.0,2929.0 Q 671.0,2932.0 668.0,2932.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="2926.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. widgets/magnifying_eye_dropper.dart
-2. widgets/selector_widget.dart
-3. widgets/transform_widget.dart</title></g><g class="badge outgoingBadge">
+  <text x="666.32" y="2926.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. shell_top_bar.dart
+2. widgets/magnifying_eye_dropper.dart
+3. widgets/selector_widget.dart
+4. widgets/transform_widget.dart</title></g><g class="badge outgoingBadge">
   <path d="M 672.0,2936.0 L 660.0,2929.0 Q 657.0,2929.0 657.0,2932.0 L 657.0,2940.0 Q 657.0,2943.0 660.0,2943.0 Z" fill="#10b981"/>
   <text x="661.68" y="2937.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">5</text><title>1. constants/constants.dart
 2. l10n/app_localizations.dart
