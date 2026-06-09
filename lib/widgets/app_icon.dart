@@ -11,6 +11,7 @@ class AppSvgIcon extends StatelessWidget {
     this.color,
     this.size,
     this.isSelected,
+    this.useSourceColors = false,
   });
   final Color? color;
   final AppIcon icon;
@@ -18,16 +19,21 @@ class AppSvgIcon extends StatelessWidget {
   /// When non-null, overrides [color] with blue (selected) or white (unselected).
   final bool? isSelected;
   final double? size;
+
+  /// When true, keeps original colors from the SVG file and skips tinting.
+  final bool useSourceColors;
+
   @override
   Widget build(final BuildContext context) {
     final double resolvedSize = size ?? AppLayout.iconSize;
+    final ColorFilter? resolvedColorFilter = useSourceColors ? null : ColorFilter.mode(defaultColor, BlendMode.srcIn);
 
     return SvgPicture.asset(
       icon.assetPath,
       key: key,
       width: resolvedSize,
       height: resolvedSize,
-      colorFilter: ColorFilter.mode(defaultColor, BlendMode.srcIn),
+      colorFilter: resolvedColorFilter,
     );
   }
 

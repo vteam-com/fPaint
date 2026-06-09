@@ -212,6 +212,7 @@ class AppButtonIcon extends StatelessWidget {
     this.constraints,
     this.padding,
     this.enabled = true,
+    this.useSourceColors = false,
   });
   final Color? color;
   final BoxConstraints? constraints;
@@ -222,6 +223,8 @@ class AppButtonIcon extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final double? size;
   final String? tooltip;
+  final bool useSourceColors;
+
   @override
   Widget build(final BuildContext context) {
     return AppButton(
@@ -237,6 +240,7 @@ class AppButtonIcon extends StatelessWidget {
           isSelected: isSelected,
           color: color,
           size: size,
+          useSourceColors: useSourceColors,
         ),
       ),
     );

@@ -446,9 +446,9 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
                 buildOverlayCircleButton(
                   tooltip: l10n.cancel,
                   icon: AppIcon.selectorCancel,
-                  contentSemantic: AppButtonContentSemantic.dangerous,
                   cursor: SystemMouseCursors.click,
                   showBorder: false,
+                  useSourceColors: true,
                   size: buttonSize,
                   iconSize: iconSize,
                   onTap: widget.onCancel,

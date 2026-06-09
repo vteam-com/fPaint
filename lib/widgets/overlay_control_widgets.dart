@@ -34,6 +34,7 @@ Widget buildOverlayButton({
   final AppIcon? icon,
   final Widget? child,
   final AppButtonContentSemantic contentSemantic = AppButtonContentSemantic.enabled,
+  final bool useSourceColors = false,
   final bool isSelected = false,
   final bool showBorder = true,
   final double width = AppInteraction.imagePlacementButtonSize,
@@ -88,6 +89,7 @@ Widget buildOverlayButton({
             child: child,
             contentColor: contentColor,
             iconSize: iconSize,
+            useSourceColors: useSourceColors,
           ),
         ),
       );
@@ -102,6 +104,7 @@ Widget buildOverlayCircleButton({
   final AppIcon? icon,
   final Widget? child,
   final AppButtonContentSemantic contentSemantic = AppButtonContentSemantic.enabled,
+  final bool useSourceColors = false,
   final bool isSelected = false,
   final bool showBorder = true,
   final double size = AppInteraction.imagePlacementButtonSize,
@@ -120,6 +123,7 @@ Widget buildOverlayCircleButton({
     icon: icon,
     child: child,
     contentSemantic: contentSemantic,
+    useSourceColors: useSourceColors,
     isSelected: isSelected,
     showBorder: showBorder,
     width: size,
@@ -141,12 +145,14 @@ Widget _buildOverlayButtonContent({
   required final Widget? child,
   required final Color contentColor,
   required final double iconSize,
+  required final bool useSourceColors,
 }) {
   if (icon != null) {
     return AppSvgIcon(
       icon: icon,
-      color: contentColor,
+      color: useSourceColors ? null : contentColor,
       size: iconSize,
+      useSourceColors: useSourceColors,
     );
   }
 
@@ -155,9 +161,10 @@ Widget _buildOverlayButtonContent({
     return AppSvgIcon(
       key: resolvedChild.key,
       icon: resolvedChild.icon,
-      color: contentColor,
+      color: useSourceColors ? null : contentColor,
       size: resolvedChild.size ?? iconSize,
       isSelected: resolvedChild.isSelected,
+      useSourceColors: useSourceColors,
     );
   }
   if (resolvedChild is AppText) {

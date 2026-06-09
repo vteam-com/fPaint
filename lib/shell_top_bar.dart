@@ -662,6 +662,7 @@ Widget _buildSelectorToggleButton({
     tooltip: hasActiveSelection ? l10n.cancel : l10n.toolSelector,
     icon: hasActiveSelection ? AppIcon.selectorCancel : AppIcon.selector,
     interactionProfile: interactionProfile,
+    useSourceColors: hasActiveSelection,
     onPressed: () {
       Future<void>.microtask(() => appProvider.toggleSelectionOverlayFromFab());
     },
@@ -804,6 +805,7 @@ Widget _buildToolbarIconButton({
   required final AppIcon icon,
   required final InteractionLayoutProfile interactionProfile,
   final bool enabled = true,
+  final bool useSourceColors = false,
   required final VoidCallback onPressed,
 }) {
   return AppButtonIcon(
@@ -812,6 +814,7 @@ Widget _buildToolbarIconButton({
     icon: icon,
     size: interactionProfile.iconSize,
     enabled: enabled,
+    useSourceColors: useSourceColors,
     onPressed: onPressed,
   );
 }
