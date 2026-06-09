@@ -342,7 +342,8 @@ void main() {
         (tester.widget<Container>(effectsBackground).decoration! as BoxDecoration).color,
         AppColors.buttonBackground,
       );
-      expect(tester.widget<AppSvgIcon>(cancelIcon).color, AppColors.buttonDanger);
+      expect(tester.widget<AppSvgIcon>(cancelIcon).useSourceColors, isTrue);
+      expect(tester.widget<AppSvgIcon>(cancelIcon).color, isNull);
 
       await tester.tap(copyTooltip);
       await tester.pump();
