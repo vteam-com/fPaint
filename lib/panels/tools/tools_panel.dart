@@ -819,6 +819,7 @@ Widget _buildActionPicker({
   required final AppIcon icon,
   final bool isSelected = false,
   final Color? color,
+  final bool useSourceColors = false,
   required final VoidCallback onPressed,
 }) {
   return AppButtonIcon(
@@ -826,6 +827,7 @@ Widget _buildActionPicker({
     icon: icon,
     isSelected: isSelected,
     color: color,
+    useSourceColors: useSourceColors,
     onPressed: onPressed,
     tooltip: name,
     constraints: minimal ? const BoxConstraints() : null,

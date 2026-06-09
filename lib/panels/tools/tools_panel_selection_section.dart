@@ -75,7 +75,7 @@ extension _ToolsPanelSelectionSection on ToolsPanel {
         key: Keys.toolSelectorModeLasso,
         minimal: minimal,
         name: l10n.toolLasso,
-        icon: AppIcon.lasso,
+        icon: AppIcon.selectorLasso,
         isSelected: selectorIsActive && appProvider.selectorModel.mode == SelectorMode.lasso,
         onPressed: () {
           appProvider.activateSelectionAction();
@@ -86,7 +86,7 @@ extension _ToolsPanelSelectionSection on ToolsPanel {
         key: Keys.toolSelectorModeWand,
         minimal: minimal,
         name: l10n.toolMagic,
-        icon: AppIcon.autoFixHigh,
+        icon: AppIcon.selectorWand,
         isSelected: selectorIsActive && appProvider.selectorModel.mode == SelectorMode.wand,
         onPressed: () {
           appProvider.activateSelectionAction();
@@ -113,7 +113,7 @@ extension _ToolsPanelSelectionSection on ToolsPanel {
               minimal: minimal,
               name: l10n.cancel,
               icon: AppIcon.selectorCancel,
-              color: AppColors.layerHiddenWarning,
+              useSourceColors: true,
               onPressed: () {
                 appProvider.clearSelectionAndRestorePreviousTool();
               },
@@ -162,7 +162,7 @@ extension _ToolsPanelSelectionSection on ToolsPanel {
             _buildActionPicker(
               minimal: minimal,
               name: l10n.toolReplace,
-              icon: AppIcon.selectorReplace,
+              icon: AppIcon.selectorMathReplace,
               isSelected: appProvider.selectorModel.math == SelectorMath.replace,
               onPressed: () {
                 appProvider.setSelectorMath(SelectorMath.replace);
@@ -171,7 +171,7 @@ extension _ToolsPanelSelectionSection on ToolsPanel {
             _buildActionPicker(
               minimal: minimal,
               name: l10n.toolAdd,
-              icon: AppIcon.selectorAdd,
+              icon: AppIcon.selectorMathAdd,
               isSelected: appProvider.selectorModel.math == SelectorMath.add,
               onPressed: () {
                 appProvider.setSelectorMath(SelectorMath.add);
@@ -180,7 +180,7 @@ extension _ToolsPanelSelectionSection on ToolsPanel {
             _buildActionPicker(
               minimal: minimal,
               name: l10n.toolRemove,
-              icon: AppIcon.selectorRemove,
+              icon: AppIcon.selectorMathRemove,
               isSelected: appProvider.selectorModel.math == SelectorMath.remove,
               onPressed: () {
                 appProvider.setSelectorMath(SelectorMath.remove);
@@ -197,7 +197,7 @@ extension _ToolsPanelSelectionSection on ToolsPanel {
             _buildActionPicker(
               minimal: minimal,
               name: l10n.toolInvert,
-              icon: AppIcon.selectorInvert,
+              icon: AppIcon.selectorMathInvert,
               onPressed: () {
                 appProvider.selectorModel.invert(
                   Rect.fromLTWH(
