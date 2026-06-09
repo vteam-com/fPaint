@@ -8,6 +8,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/side_panel_header.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 
 /// The `SidePanel` widget is a stateful widget that represents the side panel of the application.
@@ -130,7 +131,10 @@ class _SidePanelState extends State<SidePanel> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                AppText(l10n.layerModify, variant: AppTextVariant.title),
+                SidePanelHeader(
+                  title: l10n.layerModify,
+                  padding: EdgeInsets.zero,
+                ),
                 const Spacer(),
                 AppButtonRow(
                   actions: <Widget>[

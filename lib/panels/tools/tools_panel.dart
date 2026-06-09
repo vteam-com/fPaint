@@ -24,6 +24,7 @@ import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/gradient_color_list_editor.dart';
 import 'package:fpaint/widgets/halftone_size_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/side_panel_header.dart';
 import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
