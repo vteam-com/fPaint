@@ -209,8 +209,7 @@ class MainViewState extends State<MainView> {
                               onCopy: () => appProvider.regionCopy(),
                               onDuplicate: () => appProvider.regionDuplicate(),
                               onCancel: () {
-                                appProvider.selectorModel.clear();
-                                appProvider.update();
+                                appProvider.clearSelectionAndRestorePreviousTool();
                               },
                               onEffectSelected: (final SelectionEffect effect, final BuildContext _) async {
                                 if (appProvider.isSelectedLayerLocked) {

@@ -49,6 +49,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.duplicate, isNotEmpty);
   expect(l10n.duplicatedOnLayer('Layer 1'), isNotEmpty);
   expect(l10n.create, isNotEmpty);
+  expect(l10n.cut, isNotEmpty);
   expect(l10n.delete, isNotEmpty);
   expect(l10n.desktopSoftware, isNotEmpty);
   expect(l10n.discard, isNotEmpty);
@@ -188,6 +189,9 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.savedLabel, isNotEmpty);
   expect(l10n.savingLabel, isNotEmpty);
   expect(l10n.selectValue('all'), isNotEmpty);
+  expect(l10n.sidePanelBrushesSection, isNotEmpty);
+  expect(l10n.sidePanelLayersSection, isNotEmpty);
+  expect(l10n.sidePanelSelectionSection, isNotEmpty);
   expect(l10n.topColors('5'), isNotEmpty);
 }
 

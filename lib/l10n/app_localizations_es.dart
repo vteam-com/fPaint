@@ -151,6 +151,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get create => 'Crear';
 
   @override
+  String get cut => 'Cortar';
+
+  @override
   String degreesValue(Object value) {
     return 'Giro: $value°';
   }
@@ -520,6 +523,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings => 'Configuracion...';
+
+  @override
+  String get sidePanelBrushesSection => 'Pinceles';
+
+  @override
+  String get sidePanelLayersSection => 'Capas';
+
+  @override
+  String get sidePanelSelectionSection => 'Seleccion';
 
   @override
   String get startOver => 'Nuevo...';

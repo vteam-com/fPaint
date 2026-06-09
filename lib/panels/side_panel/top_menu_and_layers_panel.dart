@@ -4,6 +4,7 @@ import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/material_free.dart';
 
 /// A widget that displays the layers panel in the top split of the side panel.
 class TopMenuAndLayersPanel extends StatelessWidget {
@@ -13,12 +14,26 @@ class TopMenuAndLayersPanel extends StatelessWidget {
   Widget build(final BuildContext context) {
     final ShellProvider shellProvider = ShellProvider.of(context);
     final LayersProvider layers = LayersProvider.of(context);
+    final AppLocalizations l10n = context.l10n;
 
     return ListenableBuilder(
       listenable: shellProvider.sidePanelExpandedListenable,
       builder: (final BuildContext _, final Widget? _) {
         return Column(
           children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.medium,
+                AppSpacing.small,
+                AppSpacing.medium,
+                AppSpacing.small,
+              ),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: AppText(l10n.sidePanelLayersSection, variant: AppTextVariant.title),
+              ),
+            ),
+            const AppDivider(),
             ListenableBuilder(
               listenable: layers.layerListStructureListenable,
               builder: (final BuildContext context2, final Widget? _) {
