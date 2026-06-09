@@ -1,8 +1,24 @@
 // ignore: fcheck_one_class_per_file
+import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
+
+const String _previewTextDelete = 'Delete';
+const String _previewTextCancel = 'Cancel';
+const String _previewTextApply = 'Apply';
+const String _previewTextReplace = 'Replace';
+const String _previewTextRotate = 'Rotate';
+const String _previewTextFlip = 'Flip';
+const String previewNameAppRowDangerButton = 'AppRowDangerButton';
+const String previewNameAppRowIconButton = 'AppRowIconButton';
+const String previewNameAppRowSecondaryButton = 'AppRowSecondaryButton';
+const String previewNameAppRowPrimaryButton = 'AppRowPrimaryButton';
+const String previewNameAppButtonRowDefault = 'AppButtonRowDefault';
+const String previewNameAppButtonRowWithIcon = 'AppButtonRowWithIcon';
+const String previewNameAppButtonRowCompact = 'AppButtonRowCompact';
+const double _previewWideContainerWidth = AppLayout.sidePanelExpandedMin;
 
 /// Semantic placement slots supported by [AppButtonRow].
 enum AppButtonRowSlot {
@@ -326,4 +342,136 @@ class _AppButtonRowActionDescription {
 
   final double estimatedWidth;
   final AppButtonRowSlot slot;
+}
+
+/// Wraps button-row previews with directionality and a constrained width.
+Widget _buildButtonRowPreviewContainer({
+  required final double width,
+  required final Widget child,
+}) {
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: Center(
+      child: SizedBox(
+        width: width,
+        child: child,
+      ),
+    ),
+  );
+}
+
+void _noopButtonRowPreviewAction() {}
+
+/// Widget preview entry for [AppRowDangerButton].
+@Preview(name: previewNameAppRowDangerButton)
+Widget appRowDangerButtonPreview() {
+  return _buildButtonRowPreviewContainer(
+    width: _previewWideContainerWidth,
+    child: const AppRowDangerButton(
+      onPressed: _noopButtonRowPreviewAction,
+      text: _previewTextDelete,
+    ),
+  );
+}
+
+/// Widget preview entry for [AppRowIconButton].
+@Preview(name: previewNameAppRowIconButton)
+Widget appRowIconButtonPreview() {
+  return _buildButtonRowPreviewContainer(
+    width: _previewWideContainerWidth,
+    child: const AppRowIconButton(
+      icon: AppIcon.refresh,
+      onPressed: _noopButtonRowPreviewAction,
+      tooltip: _previewTextReplace,
+    ),
+  );
+}
+
+/// Widget preview entry for [AppRowSecondaryButton].
+@Preview(name: previewNameAppRowSecondaryButton)
+Widget appRowSecondaryButtonPreview() {
+  return _buildButtonRowPreviewContainer(
+    width: _previewWideContainerWidth,
+    child: const AppRowSecondaryButton(
+      onPressed: _noopButtonRowPreviewAction,
+      text: _previewTextCancel,
+    ),
+  );
+}
+
+/// Widget preview entry for [AppRowPrimaryButton].
+@Preview(name: previewNameAppRowPrimaryButton)
+Widget appRowPrimaryButtonPreview() {
+  return _buildButtonRowPreviewContainer(
+    width: _previewWideContainerWidth,
+    child: const AppRowPrimaryButton(
+      onPressed: _noopButtonRowPreviewAction,
+      text: _previewTextApply,
+    ),
+  );
+}
+
+/// Widget preview entry for [AppButtonRow] with danger and trailing actions.
+@Preview(name: previewNameAppButtonRowDefault, size: Size(600, 60))
+Widget appButtonRowDefaultPreview() {
+  return const AppButtonRow(
+    actions: <Widget>[
+      AppRowDangerButton(
+        onPressed: _noopButtonRowPreviewAction,
+        text: _previewTextDelete,
+      ),
+      AppRowSecondaryButton(
+        onPressed: _noopButtonRowPreviewAction,
+        text: _previewTextCancel,
+      ),
+      AppRowPrimaryButton(
+        onPressed: _noopButtonRowPreviewAction,
+        text: _previewTextApply,
+      ),
+    ],
+  );
+}
+
+/// Widget preview entry for [AppButtonRow] including centered icon controls.
+@Preview(name: previewNameAppButtonRowWithIcon, size: Size(600, 60))
+Widget appButtonRowWithIconPreview() {
+  return const AppButtonRow(
+    actions: <Widget>[
+      AppRowIconButton(
+        icon: AppIcon.rotateRight,
+        onPressed: _noopButtonRowPreviewAction,
+        tooltip: _previewTextRotate,
+      ),
+      AppRowIconButton(
+        icon: AppIcon.flipHorizontal,
+        onPressed: _noopButtonRowPreviewAction,
+        tooltip: _previewTextFlip,
+      ),
+      AppRowSecondaryButton(
+        onPressed: _noopButtonRowPreviewAction,
+        text: _previewTextCancel,
+      ),
+      AppRowPrimaryButton(
+        onPressed: _noopButtonRowPreviewAction,
+        text: _previewTextApply,
+      ),
+    ],
+  );
+}
+
+/// Widget preview entry for [AppButtonRow] in narrow containers.
+@Preview(name: previewNameAppButtonRowCompact, size: Size(100, 100))
+Widget appButtonRowCompactPreview() {
+  return const AppButtonRow(
+    actions: <Widget>[
+      AppRowSecondaryButton(
+        onPressed: _noopButtonRowPreviewAction,
+        text: _previewTextCancel,
+      ),
+      AppRowPrimaryButton(
+        onPressed: _noopButtonRowPreviewAction,
+        text: _previewTextApply,
+      ),
+    ],
+  );
 }
