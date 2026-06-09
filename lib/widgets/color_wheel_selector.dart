@@ -32,12 +32,11 @@ class ColorWheelSelector extends StatefulWidget {
 
 class _ColorWheelSelectorState extends State<ColorWheelSelector> {
   late double _alpha;
+  _ColorWheelDragTarget? _dragTarget;
   late double _hue;
   late double _saturation;
   Offset? _triangleSelectionPoint;
   late double _value;
-  _ColorWheelDragTarget? _dragTarget;
-
   @override
   void initState() {
     super.initState();
@@ -131,12 +130,61 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
     );
   }
 
+  ({
+    Offset blackVertex,
+    Offset center,
+    Offset colorVertex,
+    double outerRadius,
+    double ringInnerRadius,
+    Offset whiteVertex,
+  })
+  get _currentWheelGeometry {
+    return _buildWheelGeometry(
+      const Size.square(AppLayout.colorWheelDiameter),
+      _hue,
+    );
+  }
+
   void _notifyColorChanged() {
     widget.onColorChanged(
       HSVColor.fromAHSV(_alpha, _hue, _saturation, _value).toColor(),
     );
   }
 
+  /// Resolves whether [localPosition] targets the hue ring or SV triangle.
+  _ColorWheelDragTarget? _resolveDragTarget(final Offset localPosition) {
+    final Size size = const Size.square(AppLayout.colorWheelDiameter);
+    final ({
+      Offset blackVertex,
+      Offset center,
+      Offset colorVertex,
+      double outerRadius,
+      double ringInnerRadius,
+      Offset whiteVertex,
+    })
+    geometry = _buildWheelGeometry(size, _hue);
+    final double distanceToCenter = (localPosition - geometry.center).distance;
+
+    if (distanceToCenter <= geometry.outerRadius && distanceToCenter >= geometry.ringInnerRadius) {
+      return _ColorWheelDragTarget.ring;
+    }
+
+    final ({double black, double color, double white})? weights = _triangleWeightsForPoint(
+      point: localPosition,
+      whiteVertex: geometry.whiteVertex,
+      blackVertex: geometry.blackVertex,
+      colorVertex: geometry.colorVertex,
+    );
+
+    if (weights == null) {
+      return null;
+    }
+
+    return _ColorWheelDragTarget.triangle;
+  }
+
+  /// Synchronizes internal HSV values and triangle thumb position from the
+  /// externally provided widget color.
   void _syncFromColor() {
     final HSVColor hsvColor = HSVColor.fromColor(widget.color);
     _alpha = widget.color.a;
@@ -152,6 +200,8 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
     );
   }
 
+  /// Updates hue/saturation/value based on pointer movement inside the active
+  /// ring or triangle target.
   void _updateFromLocalPosition(final Offset localPosition) {
     final Size size = const Size.square(AppLayout.colorWheelDiameter);
     final ({
@@ -218,52 +268,6 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
     });
 
     _notifyColorChanged();
-  }
-
-  _ColorWheelDragTarget? _resolveDragTarget(final Offset localPosition) {
-    final Size size = const Size.square(AppLayout.colorWheelDiameter);
-    final ({
-      Offset blackVertex,
-      Offset center,
-      Offset colorVertex,
-      double outerRadius,
-      double ringInnerRadius,
-      Offset whiteVertex,
-    })
-    geometry = _buildWheelGeometry(size, _hue);
-    final double distanceToCenter = (localPosition - geometry.center).distance;
-
-    if (distanceToCenter <= geometry.outerRadius && distanceToCenter >= geometry.ringInnerRadius) {
-      return _ColorWheelDragTarget.ring;
-    }
-
-    final ({double black, double color, double white})? weights = _triangleWeightsForPoint(
-      point: localPosition,
-      whiteVertex: geometry.whiteVertex,
-      blackVertex: geometry.blackVertex,
-      colorVertex: geometry.colorVertex,
-    );
-
-    if (weights == null) {
-      return null;
-    }
-
-    return _ColorWheelDragTarget.triangle;
-  }
-
-  ({
-    Offset blackVertex,
-    Offset center,
-    Offset colorVertex,
-    double outerRadius,
-    double ringInnerRadius,
-    Offset whiteVertex,
-  })
-  get _currentWheelGeometry {
-    return _buildWheelGeometry(
-      const Size.square(AppLayout.colorWheelDiameter),
-      _hue,
-    );
   }
 }
 
@@ -439,6 +443,7 @@ class _WheelAlphaGradientPainter extends CustomPainter {
   }
 }
 
+/// Computes wheel and triangle geometry for [size] at the given [hue].
 ({
   Offset blackVertex,
   Offset center,
@@ -516,6 +521,8 @@ Offset _trianglePointForWeights({
   );
 }
 
+/// Finds the best in-triangle point that approximates [targetColor] for the
+/// current hue triangle.
 Offset _triangleBestPointForColor({
   required final Offset blackVertex,
   required final Offset colorVertex,
@@ -597,6 +604,8 @@ int _weightedTriangleChannel({
   return weightedValue.round().clamp(AppMath.zero, AppLimits.rgbChannelMax);
 }
 
+/// Returns barycentric triangle weights for [point], or null when the point is
+/// outside the SV triangle or the triangle is degenerate.
 ({double black, double color, double white})? _triangleWeightsForPoint({
   required final Offset point,
   required final Offset whiteVertex,

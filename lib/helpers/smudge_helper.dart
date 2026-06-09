@@ -254,6 +254,8 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
   );
 }
 
+/// Applies one pixel-brush segment on a working buffer and returns the updated
+/// full image pixels plus a change flag.
 _PixelBrushComputationResult _runPixelBrushComputation({
   required final Uint8List livePixels,
   required final Uint8List? clipMask,
