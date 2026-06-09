@@ -1,7 +1,7 @@
 import 'dart:ui' show Color, TextAlign;
 
 import 'package:flutter/widgets.dart' show StatelessWidget, BuildContext, Text, TextStyle, Widget;
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 /// Semantic text-style variant for [AppText].
 ///

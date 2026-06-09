@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
 
 void main() {

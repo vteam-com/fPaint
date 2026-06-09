@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/prepared_smudge_stroke_source.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';

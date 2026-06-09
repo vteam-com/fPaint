@@ -5,11 +5,10 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
-
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/tiff_constants.dart';
-import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:image/image.dart' as img;
 

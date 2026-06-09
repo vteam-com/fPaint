@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/menu_model.dart';
 import 'package:fpaint/panels/side_panel/about.dart';

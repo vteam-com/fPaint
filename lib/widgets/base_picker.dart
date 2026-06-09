@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 /// A generic base picker widget that can handle different value types.

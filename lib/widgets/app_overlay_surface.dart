@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 /// Shared overlay surface styling for dialogs, sheets, and menus.
 class AppOverlaySurface extends StatelessWidget {

@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/transform_model.dart';

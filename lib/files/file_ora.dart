@@ -6,8 +6,8 @@ import 'dart:ui' as ui;
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
-import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/layer_provider_storage_export.dart';

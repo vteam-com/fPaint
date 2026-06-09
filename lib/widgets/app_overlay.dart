@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 export 'app_overlay_menu_item.dart';
 export 'app_overlay_surface.dart';

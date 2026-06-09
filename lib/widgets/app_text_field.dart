@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 /// Keyboard cause used for text selection shortcut intents.
 const SelectionChangedCause _kKeyboardSelectionCause = SelectionChangedCause.keyboard;

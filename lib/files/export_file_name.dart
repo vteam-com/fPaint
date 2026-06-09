@@ -1,4 +1,4 @@
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 const String _unixPathSeparator = '/';
 const String _windowsPathSeparator = r'\';

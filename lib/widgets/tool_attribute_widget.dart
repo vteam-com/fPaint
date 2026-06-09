@@ -1,6 +1,6 @@
 import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 /// A widget that displays a tool attribute with a label and a child widget.

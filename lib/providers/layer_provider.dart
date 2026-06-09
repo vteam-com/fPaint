@@ -4,8 +4,8 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
-import 'package:fpaint/helpers/constants.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/render_helper.dart';

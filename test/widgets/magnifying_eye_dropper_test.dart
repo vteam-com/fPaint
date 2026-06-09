@@ -1,7 +1,8 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 

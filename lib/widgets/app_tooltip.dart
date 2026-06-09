@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 /// A tooltip widget replacing Material [Tooltip].
 class AppTooltip extends StatefulWidget {

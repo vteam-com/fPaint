@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 
 /// A widget that draws a rectangle with dashed borders and a specified fill color.
 class DashedRectangle extends StatelessWidget {

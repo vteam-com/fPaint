@@ -1,0 +1,67 @@
+/// Shared layout and sizing tokens.
+class AppLayout {
+  static const double minPanelExtent = 100.0;
+  static const double sidePanelCollapsed = 100.0;
+  static const double sidePanelExpanded = 400.0;
+  static const double sidePanelExpandedMin = 350.0;
+  static const double sidePanelExpandedMax = 600.0;
+  static const double sidePanelTopDefault = 200.0;
+  static const double modalSheetMaxHeightFactor = 0.9;
+  static const double modalSheetMaxWidth = 800.0;
+  static const double mobileMenuWidthFactor = 0.85;
+  static const double toolAttributeWidgetHeight = 100;
+  static const int overlayAlpha = 128;
+  static const double desktopBreakpoint = 600.0;
+  static const double appIconSize = 100.0;
+  static const double dialogWidth = 400.0;
+  static const double modalSheetContentMaxWidth = 600.0;
+  static const double platformPageWidth = 400.0;
+  static const double loaderRadius = 40.0;
+  static const double loaderStrokeWidth = 4.0;
+  static const double layerPreviewSize = 60.0;
+  static const double layerPreviewCompactSize = 50.0;
+  static const double toolbarButtonSize = 50.0;
+  static const double toolbarButtonWidth = 60.0;
+  static const double iconSize = 24.0;
+  static const double recentFileMissingIconSize = 32.0;
+  static const double sliderHeight = 30.0;
+  static const double gridSelectorSize = 120.0;
+  static const double previewRegionSize = 100.0;
+  static const double magnifierWidgetWidth = 50.0;
+  static const double magnifierTargetSize = 30.0;
+  static const double canvasDefaultWidth = 1024.0;
+  static const double canvasDefaultHeight = 768.0;
+  static const double desktopWindowWidth = 1200.0;
+  static const double desktopWindowHeight = 900.0;
+  static const double integrationTestTabletLandscapeWidth = 1600.0;
+  static const double integrationTestTabletLandscapeHeight = 800.0;
+  static const double thumbnailMaxHeight = 64.0;
+  static const double shellTopBarHeight = toolbarButtonSize;
+  static const double shortcutGroupWidth = 250.0;
+  static const double shortcutDialogMaxWidth = 760.0;
+  static const double shortcutHelpTwoColumnBreakpoint = 640.0;
+  static const double shortcutHelpRowStackBreakpoint = 360.0;
+  static const int shortcutHelpInlineKeyMaxCharacters = 18;
+  static const double shortcutHelpReadableTextMinWidth = 120.0;
+  static const double separatorHeight = 15.0;
+  static const double inputFieldWidth = 150.0;
+  static const double gradientStopPositionFieldWidth = 52.0;
+  static const double colorWheelDiameter = 200.0;
+  static const double colorWheelThumbDiameter = 16.0;
+  static const double colorWheelRingThickness = 22.0;
+  static const double colorWheelTriangleInset = 8.0;
+  static const double colorPickerModeLabelMinWidth = 72.0;
+  static const int textLengthThreshold = 50;
+  static const double textMaxWidthCompact = 800.0;
+  static const double textMaxWidthNormal = 1000.0;
+
+  // Control sizing
+  static const double switchTrackWidth = 48.0;
+  static const double switchTrackHeight = 24.0;
+  static const double switchThumbSize = 20.0;
+  static const double switchThumbInset = 2.0;
+  static const double popupMenuMinWidth = 200.0;
+  static const double popupMenuItemHeight = 48.0;
+  static const double brushSizePreviewBorderWidth = 2.0;
+  static const double brushSizePreviewDashLength = 6.0;
+}

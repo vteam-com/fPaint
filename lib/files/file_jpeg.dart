@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
-import 'package:fpaint/helpers/constants.dart';
 import 'package:image/image.dart' as img;
 
 const String _errorFailedToGetJpegRgbaBytes = 'Failed to get raw RGBA bytes for JPEG conversion.';

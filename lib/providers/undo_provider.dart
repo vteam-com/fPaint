@@ -1,7 +1,7 @@
 // ignore: fcheck_one_class_per_file
 
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';

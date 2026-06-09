@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 /// A custom slider widget that allows users to adjust a value by dragging horizontally within a container.

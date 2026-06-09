@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:fpaint/helpers/constants.dart';
+import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/panels/side_panel/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';

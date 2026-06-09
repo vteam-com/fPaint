@@ -2,8 +2,8 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_jpeg.dart';
-import 'package:fpaint/helpers/constants.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
