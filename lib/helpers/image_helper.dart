@@ -53,6 +53,31 @@ Future<ui.Image> imageFromPixels(
   return frame.image;
 }
 
+/// Creates a [ui.Image] from straight RGBA pixel data.
+///
+/// Faster single-await path: collapses codec instantiation into two awaits
+/// and explicitly disposes intermediate objects to reduce GPU memory pressure.
+/// Safe on both Skia and Impeller renderers.
+Future<ui.Image> imageFromPixelsFast(
+  final Uint8List pixels,
+  final int width,
+  final int height,
+) async {
+  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(pixels);
+  final ui.ImageDescriptor descriptor = ui.ImageDescriptor.raw(
+    buffer,
+    width: width,
+    height: height,
+    pixelFormat: ui.PixelFormat.rgba8888,
+  );
+  final ui.Codec codec = await descriptor.instantiateCodec();
+  final ui.FrameInfo frame = await codec.getNextFrame();
+  buffer.dispose();
+  descriptor.dispose();
+  codec.dispose();
+  return frame.image;
+}
+
 /// Extracts the dominant colors from a given [image].
 ///
 /// Returns a list of [ColorUsage] objects, each representing a color and its

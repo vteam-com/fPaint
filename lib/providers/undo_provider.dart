@@ -97,6 +97,40 @@ class UndoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Trims undo history for actions that match [predicate], keeping only
+  /// the latest [maxKeep] matches.
+  ///
+  /// Useful for tools with expensive replay cost (for example pixel-brush
+  /// smudge/blur) where long histories can degrade runtime performance.
+  void trimUndoHistoryWhere({
+    required final bool Function(RecordAction) predicate,
+    required final int maxKeep,
+  }) {
+    if (maxKeep < AppMath.zero) {
+      return;
+    }
+
+    int kept = AppMath.zero;
+    bool didTrim = false;
+    for (int index = _undoStack.length - AppMath.one; index >= AppMath.zero; index--) {
+      final RecordAction action = _undoStack[index];
+      if (!predicate(action)) {
+        continue;
+      }
+      if (kept < maxKeep) {
+        kept++;
+        continue;
+      }
+      _undoStack.removeAt(index);
+      didTrim = true;
+    }
+
+    if (didTrim) {
+      _redoStack.clear();
+      notifyListeners();
+    }
+  }
+
   /// Gets the history of actions that can be undone as a string.
   String getHistoryStringForUndo() {
     return getHistoryString(_undoStack);

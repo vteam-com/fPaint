@@ -23,6 +23,7 @@ import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
@@ -82,8 +83,17 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// Monotonic token that invalidates stale async preview completions.
   int _pixelBrushStrokeGeneration = 0;
 
+  /// Incrementally maintained stroke patch bounds for fast live preview updates.
+  ui.Rect? _pixelBrushStrokePatchBounds;
+
   /// All accumulated stroke points since the stroke began.
   final List<Offset> _pixelBrushStrokePoints = <Offset>[];
+
+  /// The layer being modified by the active pixel-brush stroke.
+  ///
+  /// Kept in state so [_clearPixelBrushStroke] can clear the live-preview
+  /// overlay without needing an [AppProvider] reference.
+  LayerProvider? _pixelBrushTargetLayer;
 
   /// True when a new preview kick was requested while the isolate was busy.
   bool _pixelBrushUpdateNeeded = false;
@@ -257,6 +267,11 @@ ActionType pixelBrushActionType(final PixelBrushMode mode) {
   return mode == PixelBrushMode.smudge ? ActionType.smudge : ActionType.blurBrush;
 }
 
+/// Returns whether [actionType] is a persisted pixel-brush action.
+bool isPixelBrushPersistedActionType(final ActionType actionType) {
+  return actionType == ActionType.smudge || actionType == ActionType.blurBrush;
+}
+
 /// Returns whether [mode] needs a composited backdrop instead of only the
 /// selected layer as input.
 bool pixelBrushUsesCompositeBackdrop(final PixelBrushMode mode) {
@@ -309,6 +324,43 @@ void applyPixelBrushPatchToLayer({
   );
 }
 
+/// Compacts historical pixel-brush actions by flattening the layer when the
+/// number of persisted smudge/blur gestures exceeds [maxGestureCount].
+///
+/// This keeps redraw cost bounded over long drawing sessions.
+void compactPixelBrushLayerHistory({
+  required final LayerProvider targetLayer,
+  required final int maxGestureCount,
+}) {
+  int persistedPixelBrushCount = AppMath.zero;
+  for (final UserActionDrawing action in targetLayer.actionStack) {
+    if (isPixelBrushPersistedActionType(action.action)) {
+      persistedPixelBrushCount++;
+    }
+  }
+
+  if (persistedPixelBrushCount <= maxGestureCount) {
+    return;
+  }
+
+  final ui.Image flattenedLayerImage = targetLayer.toImageForStorage(targetLayer.size);
+  targetLayer.actionStack
+    ..clear()
+    ..add(
+      UserActionDrawing(
+        action: ActionType.image,
+        positions: <Offset>[
+          Offset.zero,
+          Offset(targetLayer.size.width, targetLayer.size.height),
+        ],
+        image: flattenedLayerImage,
+      ),
+    );
+  targetLayer.redoStack.clear();
+  targetLayer.hasChanged = true;
+  targetLayer.clearCache();
+}
+
 /// Builds a minimal layer patch image covering the modified stroke area.
 Future<PixelBrushLayerPatch?> buildPixelBrushLayerPatch({
   required final Uint8List pixels,
@@ -316,31 +368,93 @@ Future<PixelBrushLayerPatch?> buildPixelBrushLayerPatch({
   required final int imageHeight,
   required final List<Offset> strokePoints,
   required final double brushSize,
+  final ui.Rect? preferredBounds,
 }) async {
-  final ui.Rect? patchBounds = resolvePixelBrushPatchBounds(
-    strokePoints: strokePoints,
-    imageWidth: imageWidth,
-    imageHeight: imageHeight,
-    brushSize: brushSize,
-  );
-  if (patchBounds == null) {
+  final ui.Rect? rawBounds =
+      preferredBounds ??
+      resolvePixelBrushPatchBounds(
+        strokePoints: strokePoints,
+        imageWidth: imageWidth,
+        imageHeight: imageHeight,
+        brushSize: brushSize,
+      );
+  if (rawBounds == null) {
+    return null;
+  }
+
+  final int left = max(AppMath.zero, rawBounds.left.floor());
+  final int top = max(AppMath.zero, rawBounds.top.floor());
+  final int right = min(imageWidth, rawBounds.right.ceil());
+  final int bottom = min(imageHeight, rawBounds.bottom.ceil());
+  final int patchWidth = right - left;
+  final int patchHeight = bottom - top;
+  if (patchWidth <= AppMath.zero || patchHeight <= AppMath.zero) {
     return null;
   }
 
   final Uint8List patchPixels = copyPixelBrushRect(
     pixels: pixels,
     imageWidth: imageWidth,
-    left: patchBounds.left.toInt(),
-    top: patchBounds.top.toInt(),
-    width: patchBounds.width.toInt(),
-    height: patchBounds.height.toInt(),
+    left: left,
+    top: top,
+    width: patchWidth,
+    height: patchHeight,
   );
   final ui.Image patchImage = await imageFromPixels(
     patchPixels,
-    patchBounds.width.toInt(),
-    patchBounds.height.toInt(),
+    patchWidth,
+    patchHeight,
   );
-  return PixelBrushLayerPatch(bounds: patchBounds, image: patchImage);
+  return PixelBrushLayerPatch(
+    bounds: ui.Rect.fromLTRB(
+      left.toDouble(),
+      top.toDouble(),
+      right.toDouble(),
+      bottom.toDouble(),
+    ),
+    image: patchImage,
+  );
+}
+
+/// Builds a live-preview layer patch covering [patchBounds] from [pixels].
+///
+/// Uses [imageFromPixelsFast] for a faster image-upload path compared to the
+/// full [buildPixelBrushLayerPatch] API, while remaining safe on both Skia
+/// and Impeller renderers.
+Future<PixelBrushLayerPatch?> buildPixelBrushLayerPatchFast({
+  required final Uint8List pixels,
+  required final int imageWidth,
+  required final int imageHeight,
+  required final ui.Rect patchBounds,
+}) async {
+  final int left = max(AppMath.zero, patchBounds.left.floor());
+  final int top = max(AppMath.zero, patchBounds.top.floor());
+  final int right = min(imageWidth, patchBounds.right.ceil());
+  final int bottom = min(imageHeight, patchBounds.bottom.ceil());
+  final int patchWidth = right - left;
+  final int patchHeight = bottom - top;
+  if (patchWidth <= AppMath.zero || patchHeight <= AppMath.zero) {
+    return null;
+  }
+
+  final Uint8List patchPixels = copyPixelBrushRect(
+    pixels: pixels,
+    imageWidth: imageWidth,
+    left: left,
+    top: top,
+    width: patchWidth,
+    height: patchHeight,
+  );
+  final ui.Image patchImage = await imageFromPixelsFast(patchPixels, patchWidth, patchHeight);
+  return PixelBrushLayerPatch(
+    bounds: ui.Rect.fromLTRB(
+      left.toDouble(),
+      top.toDouble(),
+      right.toDouble(),
+      bottom.toDouble(),
+    ),
+    image: patchImage,
+  );
 }
 
 /// Resolves the axis-aligned patch bounds that fully contain the stroke with

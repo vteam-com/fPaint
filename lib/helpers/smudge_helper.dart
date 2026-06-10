@@ -162,12 +162,13 @@ Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
   final double intensity = AppInteraction.pixelBrushDefaultIntensity,
   required final PixelBrushMode mode,
   final Uint8List? clipMask,
+  final bool preferSynchronous = false,
 }) async {
   if (segmentPoints.length < AppMath.pair) {
     return null;
   }
 
-  if (kIsWeb) {
+  if (kIsWeb || preferSynchronous) {
     final _PixelBrushComputationResult webResult = _runPixelBrushComputation(
       livePixels: livePixels,
       clipMask: clipMask,
@@ -267,7 +268,7 @@ _PixelBrushComputationResult _runPixelBrushComputation({
   required final PixelBrushMode mode,
 }) {
   // Start from the caller's current live pixel state.
-  final Uint8List pixels = Uint8List.fromList(livePixels);
+  final Uint8List pixels = livePixels;
   final double clampedIntensity = intensity.clamp(AppEffects.minIntensity, AppEffects.maxIntensity);
   final double appliedIntensity = clampedIntensity * AppInteraction.pixelBrushIntensityAppliedScale;
 
@@ -425,6 +426,7 @@ bool _applySmudgeStep({
   required final double intensity,
   required final Uint8List? clipMask,
 }) {
+  final double radiusSquared = radius * radius;
   final int integerRadius = radius.ceil() + AppInteraction.smudgeBoundsPadding;
   final int left = math.max(
     AppMath.zero,
@@ -482,7 +484,7 @@ bool _applySmudgeStep({
       final double centerOffsetX = x + AppVisual.half - toCenter.dx;
       final double centerOffsetY = y + AppVisual.half - toCenter.dy;
       final double distanceSquared = centerOffsetX * centerOffsetX + centerOffsetY * centerOffsetY;
-      if (distanceSquared > radius * radius) {
+      if (distanceSquared > radiusSquared) {
         continue;
       }
 
@@ -558,6 +560,7 @@ bool _applyBlurStep({
   required final double intensity,
   required final Uint8List? clipMask,
 }) {
+  final double radiusSquared = radius * radius;
   final int intRadius = radius.ceil();
   final int left = math.max(AppMath.zero, center.dx.floor() - intRadius);
   final int top = math.max(AppMath.zero, center.dy.floor() - intRadius);
@@ -593,7 +596,7 @@ bool _applyBlurStep({
       final double centerOffsetX = x + AppVisual.half - center.dx;
       final double centerOffsetY = y + AppVisual.half - center.dy;
       final double distanceSquared = centerOffsetX * centerOffsetX + centerOffsetY * centerOffsetY;
-      if (distanceSquared > radius * radius) {
+      if (distanceSquared > radiusSquared) {
         continue;
       }
 

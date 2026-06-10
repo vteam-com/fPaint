@@ -23,6 +23,7 @@ class AppInteraction {
   static const double blurBrushEdgeFalloffExponent = 2.0;
   static const int blurBrushKernelHalf = 1;
   static const int blurBrushKernelHalfRange = 2;
+  static const int pixelBrushMaxUndoGestures = 3;
   static const double selectionHandleSize = 20;
   static const double selectionToolbarMargin = 50.0;
   static const double imagePlacementHandleSize = 14.0;
