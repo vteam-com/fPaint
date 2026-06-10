@@ -11,6 +11,21 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
     _pixelBrushStrokePoints.add(position);
+
+    final double radius = max(
+      AppInteraction.smudgeMinimumRadius,
+      brushSize * AppInteraction.smudgeBrushRadiusFactor,
+    );
+    final double padding = (radius.ceil() + AppInteraction.smudgeBoundsPadding).toDouble();
+    final ui.Rect pointBounds = ui.Rect.fromLTRB(
+      position.dx - padding,
+      position.dy - padding,
+      position.dx + padding + AppMath.one.toDouble(),
+      position.dy + padding + AppMath.one.toDouble(),
+    );
+    _pixelBrushStrokePatchBounds = _pixelBrushStrokePatchBounds == null
+        ? pointBounds
+        : _pixelBrushStrokePatchBounds!.expandToInclude(pointBounds);
   }
 
   /// Reads the current keyboard modifier state and temporarily overrides
@@ -54,6 +69,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     _pixelBrushClipPath = null;
     _livePixelBuffer = null;
     _lastKickedPointIndex = 0;
+    _pixelBrushStrokePatchBounds = null;
+    _pixelBrushTargetLayer?.clearLivePixelBrushPreview();
+    _pixelBrushTargetLayer = null;
     _pixelBrushStrokeGeneration++;
     _pixelBrushRasterBusy = false;
     _pixelBrushUpdateNeeded = false;
@@ -109,6 +127,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         intensity: _pixelBrushIntensity,
         mode: _pixelBrushMode,
         clipMask: prepared.clipMask,
+        preferSynchronous: true,
       );
       if (segResult != null) {
         currentPixels = segResult.pixels;
@@ -121,6 +140,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       imageHeight: sourceImage.height,
       strokePoints: _pixelBrushStrokePoints,
       brushSize: appProvider.brushSize,
+      preferredBounds: _pixelBrushStrokePatchBounds,
     );
     if (committedPatch == null) {
       _restorePixelBrushLayerState(appProvider: appProvider, restoreState: layerRestoreState);
@@ -132,11 +152,16 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       forward: () {
         final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
         appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
+        targetLayer.clearLivePixelBrushPreview();
         applyPixelBrushPatchToLayer(
           restoreState: layerRestoreState,
           targetLayer: targetLayer,
           patch: committedPatch,
           mode: _pixelBrushMode,
+        );
+        compactPixelBrushLayerHistory(
+          targetLayer: targetLayer,
+          maxGestureCount: AppInteraction.pixelBrushMaxUndoGestures,
         );
         appProvider.update();
       },
@@ -147,6 +172,13 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         );
         appProvider.update();
       },
+    );
+
+    appProvider.undoProvider.trimUndoHistoryWhere(
+      predicate: (final RecordAction action) {
+        return action.name == PixelBrushMode.smudge.name || action.name == PixelBrushMode.blur.name;
+      },
+      maxKeep: AppInteraction.pixelBrushMaxUndoGestures,
     );
   }
 
@@ -536,6 +568,14 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     final PixelBrushMode mode = _pixelBrushMode;
     final Uint8List? startPixels = _livePixelBuffer;
     final int strokeGeneration = _pixelBrushStrokeGeneration;
+    // Compute the dirty rect for this segment only — avoids growing the patch
+    // image to full-stroke size on every update.
+    final ui.Rect? segmentBounds = resolvePixelBrushPatchBounds(
+      strokePoints: segmentPoints,
+      imageWidth: sourceImage.width,
+      imageHeight: sourceImage.height,
+      brushSize: brushSize,
+    );
 
     unawaited(
       (() async {
@@ -552,7 +592,10 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         }
 
         // Use the current live buffer (or the original source for the first kick).
-        final Uint8List basePixels = startPixels ?? Uint8List.fromList(prepared.pixels);
+        // prepared.pixels is already a Uint8List — reference it directly; the
+        // isolate will receive it via TransferableTypedData so no up-front copy
+        // is needed here.
+        final Uint8List basePixels = startPixels ?? prepared.pixels;
 
         final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
           livePixels: basePixels,
@@ -567,8 +610,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         if (strokeGeneration != _pixelBrushStrokeGeneration) {
           return;
         }
-        _pixelBrushRasterBusy = false;
         if (!mounted || _pixelBrushSourceImage == null) {
+          _pixelBrushRasterBusy = false;
           return;
         }
         if (result != null) {
@@ -576,28 +619,30 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
           _livePixelBuffer = result.pixels;
           _lastKickedPointIndex = nextLastIndex;
 
-          final PixelBrushLayerPatch? livePatch = await buildPixelBrushLayerPatch(
-            pixels: result.pixels,
-            imageWidth: result.width,
-            imageHeight: result.height,
-            strokePoints: _pixelBrushStrokePoints,
-            brushSize: brushSize,
-          );
-          if (!mounted || _pixelBrushSourceImage == null) {
-            return;
-          }
-          if (livePatch != null) {
-            final LayerProvider liveLayer = appProvider.layers.get(restoreState.layerIndex);
-            applyPixelBrushPatchToLayer(
-              restoreState: restoreState,
-              targetLayer: liveLayer,
-              patch: livePatch,
-              mode: _pixelBrushMode,
+          // Build the patch covering only this segment's dirty rect for
+          // minimal pixel-copy overhead.
+          if (segmentBounds != null) {
+            final PixelBrushLayerPatch? livePatch = await buildPixelBrushLayerPatchFast(
+              pixels: result.pixels,
+              imageWidth: result.width,
+              imageHeight: result.height,
+              patchBounds: segmentBounds,
             );
-            appProvider.layers.repaintCanvas();
+            if (!mounted || _pixelBrushSourceImage == null) {
+              _pixelBrushRasterBusy = false;
+              return;
+            }
+            if (livePatch != null) {
+              _pixelBrushTargetLayer?.setLivePixelBrushPatch(
+                livePatch.image,
+                livePatch.bounds,
+              );
+              appProvider.layers.repaintCanvas();
+            }
           }
         }
 
+        _pixelBrushRasterBusy = false;
         if (_pixelBrushUpdateNeeded) {
           _kickLivePixelBrushPreview(appProvider);
         }
@@ -718,6 +763,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     _preparedPixelBrushSource = null;
     _livePixelBuffer = null;
     _lastKickedPointIndex = 0;
+    _pixelBrushStrokePatchBounds = null;
+    _pixelBrushTargetLayer = appProvider.layers.get(appProvider.layers.selectedLayerIndex);
+    _pixelBrushTargetLayer!.beginLivePixelBrushPreview();
     final Future<PreparedSmudgeStrokeSource?> preparation = preparePixelBrushSource(
       sourceImage: _pixelBrushSourceImage!,
       clipPath: _pixelBrushClipPath,

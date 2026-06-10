@@ -539,6 +539,42 @@ class LayerProvider extends ChangeNotifier {
   }
 
   //------------------------------------------------------
+  // Live pixel-brush preview
+  //
+  // During a smudge/blur stroke the layer bypasses the action stack and renders
+  // from a pre-captured baseline + an incrementally updated patch instead.
+  // This avoids clearCache(), action-stack manipulation, and full action replay
+  // on every pointer-move event.
+  //
+  ui.Image? _livePreviewBaseline;
+  ui.Image? _livePreviewPatchImage;
+  ui.Rect? _livePreviewPatchBounds;
+
+  /// Captures the current layer rendering as the baseline for a pixel-brush stroke.
+  ///
+  /// Must be called once at the start of a stroke, before any points are
+  /// appended. The captured image is composited with subsequent patch updates
+  /// by [renderLayer] without touching the action stack or the cache.
+  void beginLivePixelBrushPreview() {
+    _livePreviewBaseline = renderImageWH(size.width.toInt(), size.height.toInt());
+    _livePreviewPatchImage = null;
+    _livePreviewPatchBounds = null;
+  }
+
+  /// Updates the live patch image composited over the baseline during a stroke.
+  void setLivePixelBrushPatch(final ui.Image? image, final ui.Rect? bounds) {
+    _livePreviewPatchImage = image;
+    _livePreviewPatchBounds = bounds;
+  }
+
+  /// Clears all live preview state, returning [renderLayer] to its normal path.
+  void clearLivePixelBrushPreview() {
+    _livePreviewBaseline = null;
+    _livePreviewPatchImage = null;
+    _livePreviewPatchBounds = null;
+  }
+
+  //------------------------------------------------------
   // Thumbnail image
   //
   ui.Image? _cachedImage;
@@ -634,6 +670,20 @@ class LayerProvider extends ChangeNotifier {
     layerPaint.blendMode = blendMode;
 
     canvas.saveLayer(null, layerPaint);
+
+    // Fast live-preview path: composite baseline + current patch without
+    // replaying the action stack or touching the cache.
+    if (_livePreviewBaseline != null) {
+      canvas.drawImage(_livePreviewBaseline!, Offset.zero, Paint());
+      final ui.Image? patch = _livePreviewPatchImage;
+      final ui.Rect? patchBounds = _livePreviewPatchBounds;
+      if (patch != null && patchBounds != null) {
+        renderRegionErase(canvas, Path()..addRect(patchBounds));
+        canvas.drawImage(patch, patchBounds.topLeft, Paint());
+      }
+      canvas.restore();
+      return;
+    }
 
     if (_cachedImage != null && isUserDrawing == false) {
       //print('RenderLayer "$name" USE CACHE ');

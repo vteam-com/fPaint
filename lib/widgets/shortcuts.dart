@@ -272,6 +272,8 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
 
   // Undo
   addCrossPlatformShortcut(LogicalKeyboardKey.keyZ, const UndoIntent());
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyZ, meta: true)] = const UndoIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyZ, control: true)] = const UndoIntent();
 
   // Redo
   addCrossPlatformShortcut(
@@ -279,6 +281,10 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
     const RedoIntent(),
     secondaryKey: LogicalKeyboardKey.shift,
   );
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyZ, meta: true, shift: true)] = const RedoIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true)] = const RedoIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyY, meta: true)] = const RedoIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyY, control: true)] = const RedoIntent();
 
   // Save
   addCrossPlatformShortcut(LogicalKeyboardKey.keyS, const SaveIntent());
