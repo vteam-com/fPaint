@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
@@ -346,6 +347,42 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(saveCount, 1);
+    });
+
+    testWidgets('single-key tool shortcuts switch the selected tool', (final WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+      final ShellProvider shellProvider = ShellProvider();
+
+      await tester.pumpWidget(
+        buildShortcutHandlerTestWidget(
+          appProvider: appProvider,
+          shellProvider: shellProvider,
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyE);
+      await tester.pump();
+      expect(appProvider.selectedAction, ActionType.eraser);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyT);
+      await tester.pump();
+      expect(appProvider.selectedAction, ActionType.text);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyS);
+      await tester.pump();
+      expect(appProvider.selectedAction, ActionType.selector);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+      await tester.pump();
+      expect(appProvider.selectedAction, ActionType.fill);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+      await tester.pump();
+      expect(appProvider.selectedAction, ActionType.brush);
     });
   });
 }

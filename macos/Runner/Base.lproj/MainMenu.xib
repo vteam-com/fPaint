@@ -71,13 +71,15 @@
                     <menu key="submenu" title="Edit" id="W48-6f-4Dl">
                         <items>
                             <menuItem title="Undo" keyEquivalent="z" id="dRJ-4n-Yzg">
+                                <modifierMask key="keyEquivalentModifierMask" command="YES"/>
                                 <connections>
-                                    <action selector="undo:" target="-1" id="M6e-cu-g7V"/>
+                                    <action selector="appUndo:" target="Voe-Tx-rLC" id="M6e-cu-g7V"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Redo" keyEquivalent="Z" id="6dh-zS-Vam">
+                            <menuItem title="Redo" keyEquivalent="z" id="6dh-zS-Vam">
+                                <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                 <connections>
-                                    <action selector="redo:" target="-1" id="oIA-Rs-6OD"/>
+                                    <action selector="appRedo:" target="Voe-Tx-rLC" id="oIA-Rs-6OD"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="WRV-NI-Exz"/>
