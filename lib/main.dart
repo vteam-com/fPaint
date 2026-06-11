@@ -8,7 +8,6 @@ import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/main_screen.dart';
-import 'package:fpaint/my_window_manager.dart';
 import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -48,7 +47,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   initLogging();
 
-  await MyWindowManager.setupMainWindow();
   mainApp = MyApp();
   await mainApp.draftRecoveryController.initialize();
 

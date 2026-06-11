@@ -8,7 +8,6 @@ import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:logging/logging.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:super_clipboard/super_clipboard.dart';
 
 final Logger _log = Logger(logNameImageHelper);
 
@@ -153,16 +152,16 @@ Future<void> copyImageToClipboard(final ui.Image image) async {
 
   final Uint8List pngBytes = data.buffer.asUint8List();
   _sessionClipboardImageBytes = pngBytes;
+  await copyImageBytesToClipboard(pngBytes);
+}
 
-  final SystemClipboard? clipboard = SystemClipboard.instance;
-  if (clipboard != null) {
-    final DataWriterItem item = DataWriterItem(suggestedName: 'fpaint.png');
-    item.add(Formats.png(pngBytes));
-    try {
-      await clipboard.write(<DataWriterItem>[item]).timeout(AppDefaults.clipboardAccessTimeout);
-    } catch (e) {
-      _log.warning('Failed to copy image to clipboard: $e');
-    }
+/// Copies PNG [imageBytes] to the system clipboard.
+Future<void> copyImageBytesToClipboard(final Uint8List imageBytes) async {
+  _sessionClipboardImageBytes = imageBytes;
+  try {
+    await Pasteboard.writeImage(imageBytes).timeout(AppDefaults.clipboardAccessTimeout);
+  } catch (e) {
+    _log.warning('Failed to copy image to clipboard: $e');
   }
 }
 

@@ -35,7 +35,6 @@ void main() {
       expect(logNameFileTiff.isNotEmpty, isTrue);
       expect(logNameImageHelper.isNotEmpty, isTrue);
       expect(logNameImportFiles.isNotEmpty, isTrue);
-      expect(logNameMyWindowManager.isNotEmpty, isTrue);
       expect(logNameDraftRecovery.isNotEmpty, isTrue);
       expect(logNameDraftRecoveryStorage.isNotEmpty, isTrue);
       expect(logNameSave.isNotEmpty, isTrue);

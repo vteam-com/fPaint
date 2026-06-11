@@ -4,6 +4,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -12,7 +13,6 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
-import 'package:super_clipboard/super_clipboard.dart';
 
 /// Callback signature for export-format handlers.
 typedef _ExportHandler = Future<void> Function(LayersProvider layers);
@@ -198,21 +198,13 @@ Future<void> sharePanel(
 /// Exports the current canvas content to the clipboard as a PNG image.
 ///
 /// This function captures the current canvas content as a PNG image and copies it
-/// to the clipboard. It uses the `super_clipboard` package to interact with the
-/// system clipboard.
+/// to the system clipboard.
 ///
 /// The [context] parameter is the [BuildContext] used to access the LayersProvider
 /// and display any error messages.
 Future<void> _onExportToClipboard(final BuildContext context) async {
-  final SystemClipboard? clipboard = SystemClipboard.instance;
-  if (clipboard != null) {
-    final Uint8List image = await capturePainterToImageBytes(LayersProvider.of(context));
-    final DataWriterItem item = DataWriterItem(suggestedName: 'fPaint.png');
-    item.add(Formats.png(image));
-    await clipboard.write(<DataWriterItem>[item]);
-  } else {
-    //
-  }
+  final Uint8List image = await capturePainterToImageBytes(LayersProvider.of(context));
+  await copyImageBytesToClipboard(image);
 }
 
 /// Captures the current canvas content as an image and returns the image bytes.

@@ -4,7 +4,10 @@ import FlutterMacOS
 private let editRedoMethod = "redo"
 private let editUndoMethod = "undo"
 private let fileOpenedMethod = "fileOpened"
+private let fallbackWindowHeight: CGFloat = 900
+private let fallbackWindowWidth: CGFloat = 1280
 private let mainWindowTitle = "fPaint"
+private let minimumVisibleWindowDimension: CGFloat = 100
 private let openDocumentFirstIndex = 1
 
 @main
@@ -44,28 +47,44 @@ class AppDelegate: FlutterAppDelegate {
 
     override func applicationDidFinishLaunching(_ notification: Notification) {
         super.applicationDidFinishLaunching(notification)
-        NSLog("🚀 fPaint B - applicationDidFinishLaunching")
 
-        // Set the app title
-        mainFlutterWindow?.title = mainWindowTitle
+        // Aggressive window setup: the XIB window may have 0x0 frame, so initialize it immediately
+        let window = resolveMainWindow()
+        window.title = mainWindowTitle
+        
+        // Force minimum visible size and center
+        if window.frame.width < fallbackWindowWidth || window.frame.height < fallbackWindowHeight {
+            window.setFrame(
+                NSRect(x: 0, y: 0, width: fallbackWindowWidth, height: fallbackWindowHeight),
+                display: true
+            )
+        }
+        window.center()
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
 
         // Send pending file path to Flutter if available.
         // Do NOT clear pendingFilePath here — the Dart engine may not be
         // listening yet. Let the Dart side clear it after consuming the file.
         if let pendingFilePath = AppDelegate.pendingFilePath {
             if let channel = liveFileChannel {
-                NSLog("📡 Sending pending file to Flutter (Dart may not be ready yet)")
                 channel.invokeMethod(fileOpenedMethod, arguments: pendingFilePath)
-            } else {
-                NSLog("⚠️ No live Flutter file channel at launch, keeping pending file queued")
             }
-        } else {
-            NSLog("⚠️ No pending file found at launch")
         }
     }
 
-    override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+    override func applicationDidBecomeActive(_ notification: Notification) {
+        super.applicationDidBecomeActive(notification)
+        ensureMainWindowVisible(forceCenterIfOffScreen: false)
+    }
+
+    override func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        ensureMainWindowVisible(forceCenterIfOffScreen: false)
         return true
+    }
+
+    override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return false
     }
 
     override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
@@ -158,5 +177,63 @@ class AppDelegate: FlutterAppDelegate {
         }
 
         return url.path
+    }
+
+    private func ensureMainWindowVisible(forceCenterIfOffScreen: Bool) {
+        let window = resolveMainWindow()
+
+        if window.frame.width < minimumVisibleWindowDimension ||
+            window.frame.height < minimumVisibleWindowDimension {
+            window.setContentSize(NSSize(width: fallbackWindowWidth, height: fallbackWindowHeight))
+        }
+
+        if window.isMiniaturized {
+            window.deminiaturize(nil)
+        }
+
+        if forceCenterIfOffScreen, isWindowOffScreen(window) {
+            window.center()
+        }
+
+        window.orderFrontRegardless()
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private func resolveMainWindow() -> MainFlutterWindow {
+        if let existingWindow = mainFlutterWindow as? MainFlutterWindow {
+            return existingWindow
+        }
+
+        if let existingWindow = NSApp.windows.first as? MainFlutterWindow {
+            mainFlutterWindow = existingWindow
+            existingWindow.configureFlutterContentIfNeeded()
+            return existingWindow
+        }
+
+        let styleMask: NSWindow.StyleMask = [.titled, .closable, .miniaturizable, .resizable]
+        let fallbackWindow = MainFlutterWindow(
+            contentRect: NSRect(x: 0, y: 0, width: fallbackWindowWidth, height: fallbackWindowHeight),
+            styleMask: styleMask,
+            backing: .buffered,
+            defer: false
+        )
+        fallbackWindow.title = mainWindowTitle
+        fallbackWindow.center()
+        fallbackWindow.configureFlutterContentIfNeeded()
+        mainFlutterWindow = fallbackWindow
+        return fallbackWindow
+    }
+
+    private func isWindowOffScreen(_ window: NSWindow) -> Bool {
+        let frame = window.frame
+
+        for screen in NSScreen.screens {
+            if screen.visibleFrame.intersects(frame) {
+                return false
+            }
+        }
+
+        return true
     }
 }
