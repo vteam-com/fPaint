@@ -2,6 +2,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
@@ -34,127 +35,213 @@ Widget shortCutsForMainApp(
 
   final Map<ShortcutActivator, Intent> shortcuts = _buildShortcuts();
 
-  return Shortcuts(
+  return _MainAppShortcutScope(
     shortcuts: shortcuts,
-    child: Actions(
-      actions: <Type, Action<Intent>>{
-        UndoIntent: CallbackAction<UndoIntent>(
-          onInvoke: (final UndoIntent _) => appProvider.undoAction(),
-        ),
-        RedoIntent: CallbackAction<RedoIntent>(
-          onInvoke: (final RedoIntent _) => appProvider.redoAction(),
-        ),
-        SaveIntent: CallbackAction<SaveIntent>(
-          onInvoke: (final SaveIntent _) async => await onSave(),
-        ),
-        CutIntent: CallbackAction<CutIntent>(
-          onInvoke: (final CutIntent _) async {
-            if (appProvider.isSelectedLayerLocked) {
-              showLockedLayerMessage();
-              return null;
-            }
-
-            await appProvider.regionCut();
-            return null;
-          },
-        ),
-        CopyIntent: CallbackAction<CopyIntent>(
-          onInvoke: (final CopyIntent _) async => await appProvider.regionCopy(),
-        ),
-        NewDocumentFromClipboardImage: CallbackAction<NewDocumentFromClipboardImage>(
-          onInvoke: (final NewDocumentFromClipboardImage _) async {
-            if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
-              return;
-            }
-            appProvider.newDocumentFromClipboardImage();
-            return null;
-          },
-        ),
-        PasteIntent: CallbackAction<PasteIntent>(
-          onInvoke: (final PasteIntent _) async => await appProvider.paste(),
-        ),
-        DuplicateIntent: CallbackAction<DuplicateIntent>(
-          onInvoke: (final DuplicateIntent _) async {
-            if (appProvider.isSelectedLayerLocked) {
-              showLockedLayerMessage();
-              return null;
-            }
-
-            await appProvider.regionDuplicateSameLayer();
-            return null;
-          },
-        ),
-        DuplicateNewLayerIntent: CallbackAction<DuplicateNewLayerIntent>(
-          onInvoke: (final DuplicateNewLayerIntent _) async => await appProvider.regionDuplicate(),
-        ),
-
-        //-------------------------------------------------------------
-        // toggle shell mode aka the tools
-        ToggleShellModeIntent: CallbackAction<ToggleShellModeIntent>(
-          onInvoke: (final ToggleShellModeIntent _) async {
-            switch (shellProvider.shellMode) {
-              case ShellMode.hidden:
-                shellProvider.shellMode = ShellMode.full;
-                break;
-              default:
-                shellProvider.shellMode = ShellMode.hidden;
-            }
-            return null;
-          },
-        ),
-
-        //-------------------------------------------------------------
-        // Select all
-        SelectAllIntent: CallbackAction<SelectAllIntent>(
-          onInvoke: (final SelectAllIntent _) async {
-            appProvider.selectAll();
-            appProvider.activateSelectionAction();
-            return null;
-          },
-        ),
-
-        //-------------------------------------------------------------
-        // Escape current action
-        EscapeIntent: CallbackAction<EscapeIntent>(
-          onInvoke: (final EscapeIntent _) async {
-            appProvider.clearSelectionAndRestorePreviousTool();
-            appProvider.fillModel.clear();
-            appProvider.eyeDropPositionForBrush = null;
-            appProvider.eyeDropPositionForFill = null;
-            appProvider.update();
-            return null;
-          },
-        ),
-
-        //-------------------------------------------------------------
-        // Delete/Erase
-        DeleteIntent: CallbackAction<DeleteIntent>(
-          onInvoke: (final DeleteIntent _) async {
-            if (appProvider.isSelectedLayerLocked && appProvider.selectorModel.path1 != null) {
-              showLockedLayerMessage();
-              return null;
-            }
-
-            appProvider.regionErase();
-            return null;
-          },
-        ),
-
-        // Add a help action
-        HelpIntent: CallbackAction<HelpIntent>(
-          onInvoke: (final HelpIntent _) {
-            showShortcutsHelp(context);
-            return null;
-          },
-        ),
-      },
-      child: Focus(
-        // Ensure the widget can receive keyboard focus
-        autofocus: true, // Automatically request focus
-        child: child,
+    actions: <Type, Action<Intent>>{
+      UndoIntent: CallbackAction<UndoIntent>(
+        onInvoke: (final UndoIntent _) => appProvider.undoAction(),
       ),
-    ),
+      RedoIntent: CallbackAction<RedoIntent>(
+        onInvoke: (final RedoIntent _) => appProvider.redoAction(),
+      ),
+      SaveIntent: CallbackAction<SaveIntent>(
+        onInvoke: (final SaveIntent _) async => await onSave(),
+      ),
+      CutIntent: CallbackAction<CutIntent>(
+        onInvoke: (final CutIntent _) async {
+          if (appProvider.isSelectedLayerLocked) {
+            showLockedLayerMessage();
+            return null;
+          }
+
+          await appProvider.regionCut();
+          return null;
+        },
+      ),
+      CopyIntent: CallbackAction<CopyIntent>(
+        onInvoke: (final CopyIntent _) async => await appProvider.regionCopy(),
+      ),
+      NewDocumentFromClipboardImage: CallbackAction<NewDocumentFromClipboardImage>(
+        onInvoke: (final NewDocumentFromClipboardImage _) async {
+          if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
+            return;
+          }
+          appProvider.newDocumentFromClipboardImage();
+          return null;
+        },
+      ),
+      PasteIntent: CallbackAction<PasteIntent>(
+        onInvoke: (final PasteIntent _) async => await appProvider.paste(),
+      ),
+      DuplicateIntent: CallbackAction<DuplicateIntent>(
+        onInvoke: (final DuplicateIntent _) async {
+          if (appProvider.isSelectedLayerLocked) {
+            showLockedLayerMessage();
+            return null;
+          }
+
+          await appProvider.regionDuplicateSameLayer();
+          return null;
+        },
+      ),
+      DuplicateNewLayerIntent: CallbackAction<DuplicateNewLayerIntent>(
+        onInvoke: (final DuplicateNewLayerIntent _) async => await appProvider.regionDuplicate(),
+      ),
+
+      //-------------------------------------------------------------
+      // toggle shell mode aka the tools
+      ToggleShellModeIntent: CallbackAction<ToggleShellModeIntent>(
+        onInvoke: (final ToggleShellModeIntent _) async {
+          switch (shellProvider.shellMode) {
+            case ShellMode.hidden:
+              shellProvider.shellMode = ShellMode.full;
+              break;
+            default:
+              shellProvider.shellMode = ShellMode.hidden;
+          }
+          return null;
+        },
+      ),
+
+      //-------------------------------------------------------------
+      // Select all
+      SelectAllIntent: CallbackAction<SelectAllIntent>(
+        onInvoke: (final SelectAllIntent _) async {
+          appProvider.selectAll();
+          appProvider.activateSelectionAction();
+          return null;
+        },
+      ),
+
+      ToolBrushIntent: CallbackAction<ToolBrushIntent>(
+        onInvoke: (final ToolBrushIntent _) {
+          appProvider.selectedAction = ActionType.brush;
+          return null;
+        },
+      ),
+      ToolEraserIntent: CallbackAction<ToolEraserIntent>(
+        onInvoke: (final ToolEraserIntent _) {
+          appProvider.selectedAction = ActionType.eraser;
+          return null;
+        },
+      ),
+      ToolSelectionIntent: CallbackAction<ToolSelectionIntent>(
+        onInvoke: (final ToolSelectionIntent _) {
+          appProvider.selectedAction = ActionType.selector;
+          return null;
+        },
+      ),
+      ToolFillIntent: CallbackAction<ToolFillIntent>(
+        onInvoke: (final ToolFillIntent _) {
+          appProvider.selectedAction = ActionType.fill;
+          return null;
+        },
+      ),
+      ToolTextIntent: CallbackAction<ToolTextIntent>(
+        onInvoke: (final ToolTextIntent _) {
+          appProvider.selectedAction = ActionType.text;
+          return null;
+        },
+      ),
+
+      //-------------------------------------------------------------
+      // Escape current action
+      EscapeIntent: CallbackAction<EscapeIntent>(
+        onInvoke: (final EscapeIntent _) async {
+          appProvider.clearSelectionAndRestorePreviousTool();
+          appProvider.fillModel.clear();
+          appProvider.eyeDropPositionForBrush = null;
+          appProvider.eyeDropPositionForFill = null;
+          appProvider.update();
+          return null;
+        },
+      ),
+
+      //-------------------------------------------------------------
+      // Delete/Erase
+      DeleteIntent: CallbackAction<DeleteIntent>(
+        onInvoke: (final DeleteIntent _) async {
+          if (appProvider.isSelectedLayerLocked && appProvider.selectorModel.path1 != null) {
+            showLockedLayerMessage();
+            return null;
+          }
+
+          appProvider.regionErase();
+          return null;
+        },
+      ),
+
+      // Add a help action
+      HelpIntent: CallbackAction<HelpIntent>(
+        onInvoke: (final HelpIntent _) {
+          showShortcutsHelp(context);
+          return null;
+        },
+      ),
+    },
+    child: child,
   );
+}
+
+class _MainAppShortcutScope extends StatefulWidget {
+  const _MainAppShortcutScope({
+    required this.shortcuts,
+    required this.actions,
+    required this.child,
+  });
+  final Map<Type, Action<Intent>> actions;
+  final Widget child;
+  final Map<ShortcutActivator, Intent> shortcuts;
+  @override
+  State<_MainAppShortcutScope> createState() => _MainAppShortcutScopeState();
+}
+
+class _MainAppShortcutScopeState extends State<_MainAppShortcutScope> {
+  late final FocusNode _focusNode;
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    WidgetsBinding.instance.addPostFrameCallback((final _) {
+      if (mounted) {
+        _focusNode.requestFocus();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(final BuildContext context) {
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (final PointerDownEvent _) {
+        _restoreShortcutFocus();
+      },
+      child: Shortcuts(
+        shortcuts: widget.shortcuts,
+        child: Actions(
+          actions: widget.actions,
+          child: Focus(
+            focusNode: _focusNode,
+            autofocus: true,
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _restoreShortcutFocus() {
+    if (_focusNode.hasFocus) {
+      return;
+    }
+    _focusNode.requestFocus();
+  }
 }
 
 /// An [Intent] that triggers the undo action.
@@ -179,6 +266,36 @@ class SaveIntent extends Intent {
 class SelectAllIntent extends Intent {
   /// Creates a [SelectAllIntent].
   const SelectAllIntent();
+}
+
+/// An [Intent] that switches to the brush tool.
+class ToolBrushIntent extends Intent {
+  /// Creates a [ToolBrushIntent].
+  const ToolBrushIntent();
+}
+
+/// An [Intent] that switches to the eraser tool.
+class ToolEraserIntent extends Intent {
+  /// Creates a [ToolEraserIntent].
+  const ToolEraserIntent();
+}
+
+/// An [Intent] that switches to the selection tool.
+class ToolSelectionIntent extends Intent {
+  /// Creates a [ToolSelectionIntent].
+  const ToolSelectionIntent();
+}
+
+/// An [Intent] that switches to the fill tool.
+class ToolFillIntent extends Intent {
+  /// Creates a [ToolFillIntent].
+  const ToolFillIntent();
+}
+
+/// An [Intent] that switches to the text tool.
+class ToolTextIntent extends Intent {
+  /// Creates a [ToolTextIntent].
+  const ToolTextIntent();
 }
 
 /// An [Intent] that triggers the new document from clipboard image action.
@@ -309,6 +426,13 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
 
   // Select All
   addCrossPlatformShortcut(LogicalKeyboardKey.keyA, const SelectAllIntent());
+
+  // Tools
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyB)] = const ToolBrushIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyE)] = const ToolEraserIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyS)] = const ToolSelectionIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyF)] = const ToolFillIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.keyT)] = const ToolTextIntent();
 
   // Tab key (no duplicates needed)
   shortcuts[LogicalKeySet(LogicalKeyboardKey.tab)] = const ToggleShellModeIntent();

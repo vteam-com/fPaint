@@ -2,6 +2,14 @@ import Cocoa
 import FlutterMacOS
 
 private let clearPendingFileMethod = "clearPendingFile"
+private let editChannelName = "com.vteam.fpaint/edit"
+private let editRedoAlternateKeyEquivalent = "y"
+private let editRedoMethod = "redo"
+private let editShortcutModifierMask: NSEvent.ModifierFlags = [.command, .shift, .control, .option]
+private let editShortcutRedoModifierMask: NSEvent.ModifierFlags = [.command, .shift]
+private let editShortcutUndoModifierMask: NSEvent.ModifierFlags = [.command]
+private let editUndoMethod = "undo"
+private let editUndoRedoKeyEquivalent = "z"
 private let fileChannelName = "com.vteam.fpaint/file"
 private let getPendingFileMethod = "getPendingFile"
 private let hapticChannelMethod = "hapticAlignment"
@@ -15,8 +23,21 @@ private let releaseBookmarkMethod = "releaseBookmark"
 private var activeScopedURLs: [String: URL] = [:]
 
 class MainFlutterWindow: NSWindow {
+  var editChannel: FlutterMethodChannel?
   var fileChannel: FlutterMethodChannel?
   private var hapticChannel: FlutterMethodChannel?
+
+  override func performKeyEquivalent(with event: NSEvent) -> Bool {
+    if isTextEditingResponderActive == false,
+      let editMethod = MainFlutterWindow.editMethod(forKeyEquivalentEvent: event),
+      let editChannel
+    {
+      editChannel.invokeMethod(editMethod, arguments: nil)
+      return true
+    }
+
+    return super.performKeyEquivalent(with: event)
+  }
 
   override func awakeFromNib() {
     let flutterViewController = FlutterViewController()
@@ -25,6 +46,11 @@ class MainFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+
+    editChannel = FlutterMethodChannel(
+      name: editChannelName,
+      binaryMessenger: flutterViewController.engine.binaryMessenger
+    )
 
     fileChannel = FlutterMethodChannel(
       name: fileChannelName,
@@ -137,5 +163,39 @@ class MainFlutterWindow: NSWindow {
     }
 
     super.awakeFromNib()
+  }
+
+  static func editMethod(forKeyEquivalentEvent event: NSEvent) -> String? {
+    guard event.type == .keyDown,
+      let charactersIgnoringModifiers = event.charactersIgnoringModifiers?.lowercased()
+    else {
+      return nil
+    }
+
+    let modifierFlags = event.modifierFlags.intersection(editShortcutModifierMask)
+
+    if charactersIgnoringModifiers == editUndoRedoKeyEquivalent {
+      if modifierFlags == editShortcutUndoModifierMask {
+        return editUndoMethod
+      }
+
+      if modifierFlags == editShortcutRedoModifierMask {
+        return editRedoMethod
+      }
+
+      return nil
+    }
+
+    if charactersIgnoringModifiers == editRedoAlternateKeyEquivalent,
+      modifierFlags == editShortcutUndoModifierMask
+    {
+      return editRedoMethod
+    }
+
+    return nil
+  }
+
+  private var isTextEditingResponderActive: Bool {
+    firstResponder is NSTextView
   }
 }

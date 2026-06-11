@@ -1,6 +1,8 @@
 import Cocoa
 import FlutterMacOS
 
+private let editRedoMethod = "redo"
+private let editUndoMethod = "undo"
 private let fileOpenedMethod = "fileOpened"
 private let mainWindowTitle = "fPaint"
 private let openDocumentFirstIndex = 1
@@ -9,8 +11,20 @@ private let openDocumentFirstIndex = 1
 class AppDelegate: FlutterAppDelegate {
     static var pendingFilePath: String?  // Temporarily store the file path
 
+    private var liveEditChannel: FlutterMethodChannel? {
+        return (mainFlutterWindow as? MainFlutterWindow)?.editChannel
+    }
+
     private var liveFileChannel: FlutterMethodChannel? {
         return (mainFlutterWindow as? MainFlutterWindow)?.fileChannel
+    }
+
+    @IBAction func appUndo(_ sender: Any?) {
+        liveEditChannel?.invokeMethod(editUndoMethod, arguments: nil)
+    }
+
+    @IBAction func appRedo(_ sender: Any?) {
+        liveEditChannel?.invokeMethod(editRedoMethod, arguments: nil)
     }
 
     override func application(_ sender: NSApplication, openFile filename: String) -> Bool {

@@ -21,10 +21,14 @@ import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:provider/single_child_widget.dart';
 
 const String _clearPendingFileMethod = 'clearPendingFile';
+const String _editChannelName = 'com.vteam.fpaint/edit';
+const String _editRedoMethod = 'redo';
+const String _editUndoMethod = 'undo';
 const String _fileChannelName = 'com.vteam.fpaint/file';
 const String _fileOpenedMethod = 'fileOpened';
 const String _fileUrlPrefix = 'file://';
 const String _getPendingFileMethod = 'getPendingFile';
+const MethodChannel _editChannel = MethodChannel(_editChannelName);
 const MethodChannel _fileChannel = MethodChannel(_fileChannelName);
 
 /// The global instance of the [MyApp] widget.
@@ -55,6 +59,7 @@ Future<void> main() async {
       await _queueOrHandlePlatformFile(filePath);
     }
   });
+  _editChannel.setMethodCallHandler(handlePlatformEditMethodCall);
 
   runApp(mainApp);
 
@@ -158,6 +163,21 @@ Future<void> _clearPendingPlatformFile() async {
     return;
   } on PlatformException {
     return;
+  }
+}
+
+/// Handles native platform edit commands that need to trigger Flutter actions.
+@visibleForTesting
+Future<void> handlePlatformEditMethodCall(final MethodCall call) async {
+  switch (call.method) {
+    case _editUndoMethod:
+      mainApp.appProvider.undoAction();
+      return;
+    case _editRedoMethod:
+      mainApp.appProvider.redoAction();
+      return;
+    default:
+      throw MissingPluginException('Unhandled edit command: ${call.method}');
   }
 }
 
