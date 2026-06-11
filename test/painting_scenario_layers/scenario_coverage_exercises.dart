@@ -29,8 +29,7 @@ Future<void> _undoTimes(
     }
     await tester.pump();
     await tester.pump();
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
   }
 }
 
@@ -40,7 +39,7 @@ Future<void> exerciseCoverageScenarios(
 ) async {
   // Clear stale undo/redo entries from scene painting so they don't
   // interfere with coverage exercises that use undo.
-  final BuildContext initContext = session.tester.element(find.byType(MainView));
+  final BuildContext initContext = mainViewContext(session.tester);
   AppProvider.of(initContext, listen: false).undoProvider.clear();
 
   await _exerciseLayerOperations(session);
@@ -79,10 +78,9 @@ Future<void> exerciseCoverageScenarios(
   await _exerciseSettingsPage(session);
 
   // Dismiss any open menus/dialogs and ensure the main view is visible.
-  while (Navigator.of(session.tester.element(find.byType(MainView))).canPop()) {
-    Navigator.of(session.tester.element(find.byType(MainView))).pop();
-    await session.tester.pump();
-    await session.tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  while (Navigator.of(mainViewContext(session.tester)).canPop()) {
+    Navigator.of(mainViewContext(session.tester)).pop();
+    await pumpForDialogTransition(session.tester, transitionMs: _coverageDialogTransitionMs);
   }
   // Switch to selector tool for a clean final state.
   await tapByKey(session.tester, Keys.toolSelector);
@@ -99,7 +97,7 @@ Future<void> _exerciseLayerDragFeedbackRegression(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
   final TargetPlatform? previousPlatform = debugDefaultTargetPlatformOverride;
   debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
@@ -205,7 +203,7 @@ Future<void> _exerciseLayerOperations(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   // Add a temporary layer.
@@ -309,7 +307,7 @@ Future<void> _exerciseKeyboardShortcuts(
   await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
 
   // Clean up any lingering state from Cmd+D duplicate transform.
-  final BuildContext kbContext = tester.element(find.byType(MainView));
+  final BuildContext kbContext = mainViewContext(tester);
   final AppProvider kbAppProvider = AppProvider.of(kbContext, listen: false);
   kbAppProvider.cancelTransform();
   kbAppProvider.selectorModel.clear();
@@ -329,7 +327,7 @@ Future<void> _exerciseToolSwitching(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
@@ -391,7 +389,7 @@ Future<void> _exerciseTextEditor(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
@@ -419,8 +417,7 @@ Future<void> _exerciseTextEditor(
   appProvider.selectedTextObject = textObj;
   appProvider.update();
   await tester.pump();
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   // Toggle bold button if available (text_editor_dialog.dart has key, text_editor.dart does not).
   final Finder boldBtn = find.byKey(Keys.textEditorBoldButton);
@@ -484,23 +481,20 @@ Future<void> _exerciseTextEditor(
   final Finder cancelBtn = find.text(l10n.cancel);
   if (cancelBtn.evaluate().isNotEmpty) {
     await tester.tap(cancelBtn.last);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
   }
 
   // Re-open the text editor dialog for the delete test.
   appProvider.selectedTextObject = textObj;
   appProvider.update();
   await tester.pump();
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   // Tap delete button.
   final Finder deleteBtn = find.text(l10n.delete);
   if (deleteBtn.evaluate().isNotEmpty) {
     await tester.tap(deleteBtn.last);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
   }
 
   // Re-create text object and re-open editor for apply test.
@@ -514,15 +508,13 @@ Future<void> _exerciseTextEditor(
   appProvider.selectedTextObject = textObj;
   appProvider.update();
   await tester.pump();
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   // Apply.
   final Finder applyBtn = find.text(l10n.apply);
   if (applyBtn.evaluate().isNotEmpty) {
     await tester.tap(applyBtn.last);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
   }
 
   // Re-create text object and re-open editor for "apply with empty text" test.
@@ -542,8 +534,7 @@ Future<void> _exerciseTextEditor(
   appProvider.selectedTextObject = textObj2;
   appProvider.update();
   await tester.pump();
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   // Clear the text field and apply — triggers _deleteText().
   final Finder textFields = find.byType(AppTextField);
@@ -554,8 +545,7 @@ Future<void> _exerciseTextEditor(
   final Finder applyBtn2 = find.text(l10n.apply);
   if (applyBtn2.evaluate().isNotEmpty) {
     await tester.tap(applyBtn2.last);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
   }
 
   // Ensure clean state.
@@ -581,7 +571,7 @@ Future<void> _exerciseSelectionToolPanel(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Ensure selector tool is active.
@@ -650,7 +640,7 @@ Future<void> _exerciseSelectionFlipRotate(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
   // Ensure selector tool is active.
   await tapByKey(tester, Keys.toolSelector);
@@ -712,7 +702,7 @@ Future<void> _exerciseSelectionCropAndDuplicate(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Create a small selection for duplicate.
@@ -752,14 +742,11 @@ Future<void> _exerciseMenuDialogs(
 ) async {
   final WidgetTester tester = session.tester;
 
-  await tapByKey(tester, Keys.mainMenuButton);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await openMainMenu(tester);
 
   // Dismiss.
   await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   await session.videoRecorder.captureFrame();
 }
@@ -773,7 +760,7 @@ Future<void> _exerciseCanvasTransforms(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
   final LayersProvider layersProvider = LayersProvider.of(context);
   // Ensure no selection is active.
@@ -887,7 +874,7 @@ Future<void> _exerciseSelectionOperations(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Ensure selector tool is active.
@@ -932,7 +919,7 @@ Future<void> _exerciseLayerBlendMode(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   for (int i = 0; i < layersProvider.length; i++) {
@@ -961,7 +948,7 @@ Future<void> _exerciseSidePanelButtons(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
@@ -1007,17 +994,14 @@ Future<void> _exerciseCanvasSettingsDialog(
   final WidgetTester tester = session.tester;
 
   // Open main menu.
-  await tapByKey(tester, Keys.mainMenuButton);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await openMainMenu(tester);
 
   // Tap "Canvas Size" menu item by its text.
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
   final Finder canvasMenuItem = find.text(l10n.canvas);
   await tester.tap(canvasMenuItem);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   // Toggle aspect ratio lock button.
   await tapByKey(tester, Keys.canvasSettingsAspectRatioToggleButton);
@@ -1029,8 +1013,7 @@ Future<void> _exerciseCanvasSettingsDialog(
 
   // Tap apply with current (unchanged) values.
   await tapByKey(tester, Keys.canvasSettingsApplyButton);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   await session.videoRecorder.captureFrame();
 }
@@ -1045,7 +1028,7 @@ Future<void> _exerciseMoreToolSwitching(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Line tool.
@@ -1155,7 +1138,7 @@ Future<void> _exerciseShapeDrawing(
   // Perform a tap on the canvas to trigger flood fill.
   // floodFillSolidAction is async (fire-and-forget), so use runAsync to let
   // the real async computation finish before undoing.
-  final BuildContext sdContext = tester.element(find.byType(MainView));
+  final BuildContext sdContext = mainViewContext(tester);
   final AppProvider sdAppProvider = AppProvider.of(sdContext, listen: false);
   final int stackBefore = sdAppProvider.layers.selectedLayer.actionStack.length;
   await tester.tapAt(session.canvasCenter);
@@ -1182,7 +1165,7 @@ Future<void> _exerciseSidePanelToggle(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final ShellProvider shellProvider = ShellProvider.of(context);
 
   // Collapse side panel.
@@ -1206,7 +1189,7 @@ Future<void> _exerciseLayerRenameDialog(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   // Find a LayerThumbnail widget and long press to trigger popup menu.
@@ -1214,16 +1197,14 @@ Future<void> _exerciseLayerRenameDialog(
   expect(thumbnails, findsWidgets);
 
   await tester.longPress(thumbnails.first);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   // The popup menu should be visible. Find the "Rename" option and tap it.
   final AppLocalizations l10n = context.l10n;
   final Finder renameItem = find.text(l10n.layerRename);
   if (renameItem.evaluate().isNotEmpty) {
     await tester.tap(renameItem);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
     // Type a new name in the rename text field.
     final Finder renameField = find.byKey(Keys.layerRenameTextField);
@@ -1234,8 +1215,7 @@ Future<void> _exerciseLayerRenameDialog(
 
       // Tap apply.
       await tapByKey(tester, Keys.layerRenameApplyButton);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+      await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
       expect(layersProvider.selectedLayer.name, _coverageRenamedLayerName);
 
@@ -1262,18 +1242,15 @@ Future<void> _exerciseMenuNavigations(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
 
   // Open menu and tap Settings.
-  await tapByKey(tester, Keys.mainMenuButton);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await openMainMenu(tester);
   final Finder settingsItem = find.text(l10n.settings);
   if (settingsItem.evaluate().isNotEmpty) {
     await tester.tap(settingsItem.last);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
     // Go back by finding the back button (AppIcon.arrowLeft).
     final Finder backBtn = find.byWidgetPredicate(
       (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.arrowLeft,
@@ -1285,21 +1262,17 @@ Future<void> _exerciseMenuNavigations(
       );
       if (parentBtn.evaluate().isNotEmpty) {
         await tester.tap(parentBtn.first);
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+        await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
       }
     }
   }
 
   // Open menu and tap Platforms.
-  await tapByKey(tester, Keys.mainMenuButton);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await openMainMenu(tester);
   final Finder platformsItem = find.text(l10n.platforms);
   if (platformsItem.evaluate().isNotEmpty) {
     await tester.tap(platformsItem.last);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
     // Go back.
     final Finder backBtn2 = find.byWidgetPredicate(
       (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.arrowLeft,
@@ -1311,8 +1284,7 @@ Future<void> _exerciseMenuNavigations(
       );
       if (parentBtn2.evaluate().isNotEmpty) {
         await tester.tap(parentBtn2.first);
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+        await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
       }
     }
   }
@@ -1329,7 +1301,7 @@ Future<void> _exerciseShellModeToggle(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final ShellProvider shellProvider = ShellProvider.of(context);
 
   // Switch to hidden mode.
@@ -1391,26 +1363,22 @@ Future<void> _exerciseToolColorPickers(
   final Finder brushColorPreview = find.byKey(Keys.toolPanelBrushColor1);
   if (brushColorPreview.evaluate().isNotEmpty) {
     await tester.tap(brushColorPreview);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
     // Dismiss color picker dialog.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
   }
 
   // Tap the fill color preview to open color picker.
   final Finder fillColorPreview = find.byKey(Keys.toolPanelFillColor);
   if (fillColorPreview.evaluate().isNotEmpty) {
     await tester.tap(fillColorPreview);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
     // Dismiss color picker dialog.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
   }
 
   // Switch back to selector.
@@ -1429,7 +1397,7 @@ Future<void> _exerciseLayerAddDelete(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
   final AppLocalizations l10n = context.l10n;
   final int originalCount = layersProvider.length;
@@ -1438,15 +1406,13 @@ Future<void> _exerciseLayerAddDelete(
   final Finder thumbnails = find.byType(LayerThumbnail);
   expect(thumbnails, findsWidgets);
   await tester.longPress(thumbnails.first);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   // Tap "Add layer" option.
   final Finder addItem = find.text(l10n.layerAddAbove);
   if (addItem.evaluate().isNotEmpty) {
     await tester.tap(addItem);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
     expect(layersProvider.length, originalCount + 1);
 
     // Undo the add to restore the original state (the add pushed to
@@ -1476,7 +1442,7 @@ Future<void> _exerciseFloatingButtons(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
   final ShellProvider shellProvider = ShellProvider.of(context);
 
@@ -1499,14 +1465,12 @@ Future<void> _exerciseFloatingButtons(
   // Tap undo floating button.
   await tapByKey(tester, Keys.floatActionUndo);
   await tester.pump();
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   // Tap redo floating button.
   await tapByKey(tester, Keys.floatActionRedo);
   await tester.pump();
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   appProvider.undoProvider.clear();
 
@@ -1535,7 +1499,7 @@ Future<void> _exerciseSelectionViaGesture(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
@@ -1613,7 +1577,7 @@ Future<void> _exerciseLayerTapInteractions(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
   final int originalIndex = layersProvider.selectedLayerIndex;
 
@@ -1653,7 +1617,7 @@ Future<void> _exerciseToolPanelButtons(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
 
   // Switch to pencil tool to get brush size button.
@@ -1740,7 +1704,7 @@ Future<void> _exerciseLayerPopupMenuActions(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
   final AppLocalizations l10n = context.l10n;
 
@@ -1844,7 +1808,7 @@ Future<void> _exerciseSelectionToolPanelButtons(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
   final AppLocalizations l10n = context.l10n;
 
@@ -1893,7 +1857,7 @@ Future<void> _exerciseSelectionAdvanced(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Exercise cancelImagePlacement (no-op if no prepared placement exists).
@@ -1992,7 +1956,7 @@ Future<void> _exerciseCanvasResizeLockAspectRatio(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Toggle lock aspect ratio.
@@ -2018,16 +1982,13 @@ Future<void> _exerciseCanvasSettingsValidation(
   final WidgetTester tester = session.tester;
 
   // Open main menu.
-  await tapByKey(tester, Keys.mainMenuButton);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await openMainMenu(tester);
 
   // Tap "Canvas Size" menu item.
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
   await tester.tap(find.text(l10n.canvas));
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   // Enter non-numeric width and tap apply → triggers "must be numbers" error.
   final Finder widthField = find.byKey(Keys.canvasSettingsWidthField);
@@ -2072,8 +2033,7 @@ Future<void> _exerciseCanvasSettingsValidation(
 
   // Dismiss the dialog.
   await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
   await session.videoRecorder.captureFrame();
 }
@@ -2123,7 +2083,7 @@ Future<void> _exerciseToleranceAndTopColors(
   }
 
   // Switch back to pencil.
-  final BuildContext fillContext = tester.element(find.byType(MainView));
+  final BuildContext fillContext = mainViewContext(tester);
   final AppLocalizations fillL10n = fillContext.l10n;
   await tapByTooltip(tester, fillL10n.toolPencil);
   await tester.pump();
@@ -2140,7 +2100,7 @@ Future<void> _exerciseBrushStylePicker(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext brushContext = tester.element(find.byType(MainView));
+  final BuildContext brushContext = mainViewContext(tester);
   final AppLocalizations brushL10n = brushContext.l10n;
 
   // Switch to brush tool.
@@ -2151,20 +2111,17 @@ Future<void> _exerciseBrushStylePicker(
   final Finder dropdown = find.byType(AppDropdown<int>);
   if (dropdown.evaluate().isNotEmpty) {
     await tester.tap(dropdown.first);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
     // Tap a different style by its localized text.
     final Finder dashItem = find.text(brushL10n.brushStyleDash);
     if (dashItem.evaluate().isNotEmpty) {
       await tester.tap(dashItem.last);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+      await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
     } else {
       // Dismiss.
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+      await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
     }
   }
 
@@ -2184,20 +2141,17 @@ Future<void> _exerciseSettingsPage(
   final PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
 
   // Open main menu.
-  await tapByKey(tester, Keys.mainMenuButton);
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+  await openMainMenu(tester);
 
   // Tap Settings.
   final Finder settingsItem = find.text(l10n.settings);
   if (settingsItem.evaluate().isNotEmpty) {
     await tester.tap(settingsItem.last);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+    await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
     // Toggle Apple Pencil setting if available.
     final Finder applePencilToggle = find.text(l10n.useApplePencilOnlyTitle);
@@ -2220,8 +2174,7 @@ Future<void> _exerciseSettingsPage(
       );
       if (parentBtn.evaluate().isNotEmpty) {
         await tester.tap(parentBtn.first);
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: _coverageDialogTransitionMs));
+        await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
       }
     }
   }
