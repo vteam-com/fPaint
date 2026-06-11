@@ -49,11 +49,9 @@ dependencies:
   path_provider: any
   provider: any
   shared_preferences: ^2.5.5
-  super_clipboard: ^0.9.1
   url_launcher: ^6.3.2
   vector_math: any
   web: any
-  window_manager: ^0.5.1
   xml: any
 
 dev_dependencies:

@@ -40,13 +40,38 @@ class MainFlutterWindow: NSWindow {
   }
 
   override func awakeFromNib() {
+    // CRITICAL: The XIB window has no frame defined, so it loads with 0 width.
+    // Set a proper default frame immediately, before Flutter initialization.
+    if frame.width < 100 || frame.height < 100 {
+      setFrame(NSRect(x: 100, y: 100, width: 1280, height: 900), display: false)
+      center()
+    }
+    
+    configureFlutterContentIfNeeded()
+    super.awakeFromNib()
+    
+    // Make window visible immediately
+    orderFront(nil)
+    makeKey()
+    makeKeyAndOrderFront(nil)
+    NSApp.activate(ignoringOtherApps: true)
+  }
+
+  func configureFlutterContentIfNeeded() {
+    if contentViewController is FlutterViewController {
+      return
+    }
+
     let flutterViewController = FlutterViewController()
-    let windowFrame = self.frame
-    self.contentViewController = flutterViewController
-    self.setFrame(windowFrame, display: true)
+    let windowFrame = frame
+    contentViewController = flutterViewController
+    setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    configureChannels(with: flutterViewController)
+  }
 
+  private func configureChannels(with flutterViewController: FlutterViewController) {
     editChannel = FlutterMethodChannel(
       name: editChannelName,
       binaryMessenger: flutterViewController.engine.binaryMessenger
@@ -161,8 +186,6 @@ class MainFlutterWindow: NSWindow {
         result(FlutterMethodNotImplemented)
       }
     }
-
-    super.awakeFromNib()
   }
 
   static func editMethod(forKeyEquivalentEvent event: NSEvent) -> String? {
