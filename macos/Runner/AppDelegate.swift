@@ -83,8 +83,12 @@ class AppDelegate: FlutterAppDelegate {
         return true
     }
 
+    override func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        return .terminateNow
+    }
+
     override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return false
+        return true
     }
 
     override func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
