@@ -15,12 +15,12 @@ const String _errorFailedToGetJpegRgbaBytes = 'Failed to get raw RGBA bytes for 
 /// [image] The source image.
 /// Returns the image bytes in JPEG format.
 Future<Uint8List> convertToJpg(final ui.Image image) async {
-  final ByteData? byteData = await image.toByteData(
+  final ByteData byteData = await requireImageByteData<JpegConversionException>(
+    image: image,
     format: ui.ImageByteFormat.rawStraightRgba,
+    errorMessage: _errorFailedToGetJpegRgbaBytes,
+    exceptionBuilder: JpegConversionException.new,
   );
-  if (byteData == null) {
-    throw const JpegConversionException(_errorFailedToGetJpegRgbaBytes);
-  }
 
   final img.Image packageImage = img.Image.fromBytes(
     width: image.width,

@@ -145,10 +145,11 @@ Future<void> readImageFromFilePathOra(
   } on OraFileException {
     rethrow;
   } catch (error, stackTrace) {
-    _throwOraException(
-      '$_errorOraReadFilePrefix "$filePath"',
-      error,
-      stackTrace,
+    throwFileOperationException<OraFileException>(
+      message: '$_errorOraReadFilePrefix "$filePath"',
+      error: error,
+      stackTrace: stackTrace,
+      exceptionBuilder: OraFileException.new,
     );
   }
 }
@@ -182,7 +183,12 @@ Future<void> readOraFileFromBytes(
   } on OraFileException {
     rethrow;
   } catch (error, stackTrace) {
-    _throwOraException(_errorOraReadBytes, error, stackTrace);
+    throwFileOperationException<OraFileException>(
+      message: _errorOraReadBytes,
+      error: error,
+      stackTrace: stackTrace,
+      exceptionBuilder: OraFileException.new,
+    );
   }
 }
 
@@ -226,17 +232,6 @@ Future<void> importFromOraXml(
 
   final XmlElement? xmlElementTopStack = xmlElementImage.getElement(_oraElementStack);
   await importStack(archive, layers, xmlElementTopStack);
-}
-
-Never _throwOraException(
-  final String message,
-  final Object error,
-  final StackTrace stackTrace,
-) {
-  Error.throwWithStackTrace(
-    OraFileException(message, cause: error),
-    stackTrace,
-  );
 }
 
 /// Recursively imports a stack node and its child stacks and layers.

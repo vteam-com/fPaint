@@ -431,10 +431,43 @@ Future<void> _waitForEffectPreviewCommit(
   await pumpForUnitTestUiSettle(tester);
 }
 
+/// Returns the [BuildContext] from the rendered [MainView].
+BuildContext mainViewContext(final WidgetTester tester) {
+  return tester.element(find.byType(MainView));
+}
+
+/// Returns the non-listening [AppProvider] from the rendered [MainView].
+AppProvider appProviderFromTester(
+  final WidgetTester tester, {
+  final bool listen = false,
+}) {
+  return AppProvider.of(mainViewContext(tester), listen: listen);
+}
+
+/// Returns the [LayersProvider] from the rendered [MainView].
+LayersProvider layersProviderFromTester(final WidgetTester tester) {
+  return LayersProvider.of(mainViewContext(tester));
+}
+
+/// Pumps one frame plus a dialog transition duration.
+Future<void> pumpForDialogTransition(
+  final WidgetTester tester, {
+  final int transitionMs = _dialogTransitionMs,
+}) async {
+  await tester.pump();
+  await tester.pump(Duration(milliseconds: transitionMs));
+}
+
+/// Opens the main menu and waits for its transition to finish.
+Future<void> openMainMenu(final WidgetTester tester) async {
+  await tapByKey(tester, Keys.mainMenuButton);
+  await pumpForDialogTransition(tester);
+}
+
 Future<ui.Image> _captureRenderedMainViewCanvasImage(final WidgetTester tester) async {
   await tester.pump();
 
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
   final Finder boundaryFinder = find.byKey(Keys.mainViewScreenshotBoundary);
   expect(
@@ -828,7 +861,7 @@ Future<void> selectWandArea(
   await tester.pump();
 
   if (tolerance != null) {
-    final BuildContext context = tester.element(find.byType(MainView));
+    final BuildContext context = mainViewContext(tester);
     final AppProvider appProvider = AppProvider.of(context, listen: false);
     appProvider.tolerance = tolerance;
     await tester.pump();
@@ -885,7 +918,7 @@ Future<void> applyEffectViaUi(
   final bool requireApply = false,
   final bool forceFullSelection = false,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Ensure the selector tool is active so the effect buttons are visible.
@@ -1055,7 +1088,7 @@ Future<void> dragSelectionHandle(
   required final TransformOverlayHandle handle,
   required final Offset delta,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
   await _ensureAllTransformHandlesVisible(tester, l10n: l10n);
 
@@ -1077,7 +1110,7 @@ Future<void> scaleSelectionWithOverlayControl(
   final WidgetTester tester, {
   required final Offset delta,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
   await dragByTooltip(tester, tooltip: l10n.scale, delta: delta);
   await tester.pump();
@@ -1088,7 +1121,7 @@ Future<void> rotateSelectionWithOverlayControl(
   final WidgetTester tester, {
   required final Offset delta,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
   await dragByTooltip(tester, tooltip: l10n.resizeRotate, delta: delta);
   await tester.pump();
@@ -1099,7 +1132,7 @@ Future<void> deformSelectionWithTransformOverlay(
   final WidgetTester tester, {
   required final Map<TransformOverlayHandle, Offset> handleDeltas,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
 
   await tapByTooltip(tester, l10n.transform);
@@ -1155,7 +1188,7 @@ Future<void> setBrushSizeViaProvider(
   final WidgetTester tester,
   final double brushSize,
 ) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
   appProvider.brushSize = brushSize;
   await tester.pump();
@@ -1171,7 +1204,7 @@ Future<void> _applyBrushAndFillColors(
     return;
   }
 
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context);
 
   if (brushColor != null) {
@@ -1187,7 +1220,7 @@ Future<void> _selectDrawingAction(
   final WidgetTester tester,
   final ActionType action,
 ) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context);
 
   appProvider.selectedAction = action;
@@ -1333,7 +1366,7 @@ Future<void> performFloodFillSolid(
   await tapByKey(tester, Keys.toolFill);
   await tapByKey(tester, Keys.toolFillModeSolid);
 
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
   appProvider.fillColor = color;
   if (tolerance != null) {
@@ -1386,7 +1419,7 @@ Future<void> performFloodFillSolidAtCanvasPosition(
   await tapByKey(tester, Keys.toolFill);
   await tapByKey(tester, Keys.toolFillModeSolid);
 
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
   appProvider.fillColor = color;
   if (tolerance != null) {
@@ -1450,7 +1483,7 @@ Future<void> performFloodFillGradient(
   final Key modeKey = gradientMode == FillMode.linear ? Keys.toolFillModeLinear : Keys.toolFillModeRadial;
   await tapByKey(tester, modeKey);
 
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   final int stopCount = gradientPoints.length;
@@ -1544,7 +1577,7 @@ class PaintingLayerHelpers {
     final WidgetTester tester,
     final String name,
   ) async {
-    final BuildContext context = tester.element(find.byType(MainView));
+    final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
     final int initialLayerCount = layersProvider.length;
 
@@ -1574,7 +1607,7 @@ class PaintingLayerHelpers {
     final WidgetTester tester,
     final int layerIndex,
   ) async {
-    final BuildContext context = tester.element(find.byType(MainView));
+    final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
     layersProvider.selectedLayerIndex = layerIndex;
     await tester.pump();
@@ -1585,7 +1618,7 @@ class PaintingLayerHelpers {
     final WidgetTester tester,
     final String layerName,
   ) async {
-    final BuildContext context = tester.element(find.byType(MainView));
+    final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
 
     for (int i = 0; i < layersProvider.length; i++) {
@@ -1604,7 +1637,7 @@ class PaintingLayerHelpers {
     final int fromIndex,
     final int toIndex,
   ) async {
-    final BuildContext context = tester.element(find.byType(MainView));
+    final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
     await switchToLayer(tester, fromIndex);
     layersProvider.mergeLayers(fromIndex, toIndex);
@@ -1616,7 +1649,7 @@ class PaintingLayerHelpers {
     final WidgetTester tester,
     final int layerIndex,
   ) async {
-    final BuildContext context = tester.element(find.byType(MainView));
+    final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
     final LayerProvider layer = layersProvider.get(layerIndex);
     layersProvider.remove(layer);
@@ -1629,7 +1662,7 @@ class PaintingLayerHelpers {
     final WidgetTester tester,
     final String newName,
   ) async {
-    final BuildContext context = tester.element(find.byType(MainView));
+    final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
     layersProvider.selectedLayer.name = newName;
     layersProvider.update();
@@ -1639,7 +1672,7 @@ class PaintingLayerHelpers {
   /// Prints the current layer structure for debugging.
   static Future<void> printLayerStructure(final WidgetTester tester) async {
     await tester.pump();
-    final BuildContext context = tester.element(find.byType(MainView));
+    final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
     debugPrint('📚 Layer Structure:');
     for (int i = 0; i < layersProvider.length; i++) {
@@ -1671,7 +1704,7 @@ Future<void> placeTextViaUI(
   final FontWeight fontWeight = FontWeight.normal,
   final String? fontFamily,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   // Pre-configure the text tool settings so the dialog opens with the
@@ -1849,7 +1882,7 @@ Future<void> saveUnitTestArtworkScreenshot(
   final WidgetTester tester, {
   required final String filename,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   await tester.runAsync(() async {
@@ -1878,7 +1911,7 @@ Future<void> saveUnitTestOraArchive(
   final WidgetTester tester, {
   required final String filename,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
 
   await tester.runAsync(() async {
@@ -2125,7 +2158,7 @@ Future<void> saveUnitTestArtworkViaExportUi(
   required final UnitTestExportFormat format,
   required final String filename,
 }) async {
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = AppLocalizations.of(context)!;
   final File outputFile = _buildUnitTestExportOutputFile(format, filename);
   final Directory outputDirectory = Directory(_unitTestOutputDirectoryPath);
@@ -2195,7 +2228,7 @@ Future<void> dismissOpenUnitTestExportSheet(final WidgetTester tester) async {
     return;
   }
 
-  final BuildContext context = tester.element(find.byType(MainView));
+  final BuildContext context = mainViewContext(tester);
   Navigator.of(context).pop();
   await _pumpUnitTestExportUiTransition(tester);
   _unitTestExportSheetIsOpen = false;

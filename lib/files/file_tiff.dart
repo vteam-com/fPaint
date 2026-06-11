@@ -585,23 +585,13 @@ Future<void> readTiffFromFilePath(
   } on TiffFileException {
     rethrow;
   } catch (error, stackTrace) {
-    _throwTiffException(
-      '$_errorTiffReadFilePrefix "$path"',
-      error,
-      stackTrace,
+    throwFileOperationException<TiffFileException>(
+      message: '$_errorTiffReadFilePrefix "$path"',
+      error: error,
+      stackTrace: stackTrace,
+      exceptionBuilder: TiffFileException.new,
     );
   }
-}
-
-Never _throwTiffException(
-  final String message,
-  final Object error,
-  final StackTrace stackTrace,
-) {
-  Error.throwWithStackTrace(
-    TiffFileException(message, cause: error),
-    stackTrace,
-  );
 }
 
 // Private helper to convert Uint8List to ui.Image
