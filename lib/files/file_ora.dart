@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -52,6 +53,12 @@ const String _errorOraMissingStackXml = 'stack.xml not found in ORA file.';
 const String _errorOraMissingImageElement = 'image element not found in ORA stack.xml.';
 const String _errorOraMissingDimensions = 'ORA image dimensions are missing.';
 const String _errorOraLayerEncodingFailed = 'Failed to encode ORA layer PNG.';
+const String _oraLayerImageEntryPrefix = 'data/layer-';
+const String _oraLayerImageEntrySuffix = '.png';
+const String _oraLayerMetaParentGroupName = 'parentGroupName';
+const int _oraPerfLogThresholdMs = 500;
+const int _oraPerfSlowLayerThresholdMs = 150;
+const int _oraParallelLayerExportCap = AppMath.four;
 
 const List<String> _oraPreviewEntries = <String>[
   _oraThumbnailEntry,
@@ -520,10 +527,17 @@ ArchiveFile? _findOraPreviewFile(final Archive archive) {
 /// - Parameters:
 ///   - layers: A [LayersProvider] instance containing the layers to be
 ///     included in the ORA archive.
+///   - includePreviews: When true, embeds merged and thumbnail preview PNGs.
+///     Disable for internal snapshots when save latency is prioritized.
 ///
 /// - Returns: A `Future` that resolves to a `List<int>` representing the
 ///   binary data of the created ORA archive.
-Future<List<int>> createOraArchive(final LayersProvider layers) async {
+Future<List<int>> createOraArchive(
+  final LayersProvider layers, {
+  final bool includePreviews = true,
+}) async {
+  final Stopwatch totalStopwatch = Stopwatch()..start();
+  final Stopwatch layerExportStopwatch = Stopwatch()..start();
   final Archive archive = Archive();
   final XmlBuilder builder = XmlBuilder();
 
@@ -537,38 +551,71 @@ Future<List<int>> createOraArchive(final LayersProvider layers) async {
 
   // Placeholder for layer image names
   final List<Map<String, dynamic>> layersData = <Map<String, dynamic>>[];
+  int skippedEmptyLayerImageCount = 0;
 
-  // Generate PNG files and add them to the archive
+  // Build XML metadata first so expensive layer rendering can run in batches.
+  final List<_OraLayerExportRequest> exportRequests = <_OraLayerExportRequest>[];
   for (int i = 0; i < layers.length; i++) {
     final LayerProvider layer = layers.get(i);
-    final String imageName = 'data/layer-$i.png';
-    final ({Uint8List bytes, ui.Offset offset}) exportedLayer = await _prepareOraLayerExport(
-      layer: layer,
-    );
-
-    archive.addFile(
-      _storedNeutralArchiveFile(
-        imageName,
-        exportedLayer.bytes,
-      ),
-    );
-
-    layersData.add(<String, dynamic>{
-      'parentGroupName': layer.parentGroupName,
+    final Map<String, dynamic> layerData = <String, dynamic>{
+      _oraLayerMetaParentGroupName: layer.parentGroupName,
       _oraAttrName: layer.name,
       _oraAttrVisibility: layer.isVisible ? _oraVisibilityVisible : _oraVisibilityHidden,
       _oraAttrOpacity: layer.opacity.toStringAsFixed(AppLimits.opacityPrecision),
       _oraAttrCompositeOp: _getOraCompositeOpFromBlendMode(layer.blendMode),
       _oraAttrEditLocked: layer.isLocked,
-      _oraAttrSrc: imageName,
-      _oraAttrX: exportedLayer.offset.dx.toInt(),
-      _oraAttrY: exportedLayer.offset.dy.toInt(),
-    });
+    };
+
+    if (_isOraLayerImageEmpty(layer)) {
+      skippedEmptyLayerImageCount++;
+      layersData.add(layerData);
+      continue;
+    }
+
+    layersData.add(layerData);
+    exportRequests.add(
+      _OraLayerExportRequest(
+        layerIndex: i,
+        layer: layer,
+      ),
+    );
   }
 
-  await _addOraPreviewFiles(archive: archive, layers: layers);
+  final List<_OraLayerExportResult> exportResults = await _exportOraLayersInBatches(
+    requests: exportRequests,
+  );
+
+  for (final _OraLayerExportResult result in exportResults) {
+    if (result.elapsedMilliseconds >= _oraPerfSlowLayerThresholdMs) {
+      _log.info(
+        'ORA export slow layer[${result.layerIndex}] name="${result.layerName}" '
+        'size=${result.bytes.lengthInBytes}B '
+        'elapsed=${result.elapsedMilliseconds}ms',
+      );
+    }
+
+    archive.addFile(
+      _storedNeutralArchiveFile(
+        result.imageName,
+        result.bytes,
+      ),
+    );
+
+    final Map<String, dynamic> layerData = layersData[result.layerIndex];
+    layerData[_oraAttrSrc] = result.imageName;
+    layerData[_oraAttrX] = result.offset.dx.toInt();
+    layerData[_oraAttrY] = result.offset.dy.toInt();
+  }
+  layerExportStopwatch.stop();
+
+  final Stopwatch previewStopwatch = Stopwatch()..start();
+  if (includePreviews) {
+    await _addOraPreviewFiles(archive: archive, layers: layers);
+  }
+  previewStopwatch.stop();
 
   // Create stack.xml synchronously
+  final Stopwatch stackXmlStopwatch = Stopwatch()..start();
   builder.processing(_oraXmlProcessingTarget, _oraXmlEncoding);
   builder.element(
     _oraElementImage,
@@ -590,7 +637,7 @@ Future<List<int>> createOraArchive(final LayersProvider layers) async {
           final List<Map<String, dynamic>> ungroupedLayers = <Map<String, dynamic>>[];
 
           for (final Map<String, dynamic> layerData in layersData) {
-            final String parentGroupNameOfLayer = layerData['parentGroupName'] as String? ?? '';
+            final String parentGroupNameOfLayer = layerData[_oraLayerMetaParentGroupName] as String? ?? '';
 
             if (parentGroupNameOfLayer.isNotEmpty) {
               groupedLayers
@@ -628,10 +675,110 @@ Future<List<int>> createOraArchive(final LayersProvider layers) async {
       utf8.encode(stackXml),
     ),
   );
+  stackXmlStopwatch.stop();
 
   // Write archive to file
+  final Stopwatch zipEncodeStopwatch = Stopwatch()..start();
   final List<int> encodedData = ZipEncoder().encode(archive);
+  zipEncodeStopwatch.stop();
+
+  totalStopwatch.stop();
+  if (totalStopwatch.elapsedMilliseconds >= _oraPerfLogThresholdMs) {
+    _log.info(
+      'ORA export timings total=${totalStopwatch.elapsedMilliseconds}ms '
+      'layers=${layerExportStopwatch.elapsedMilliseconds}ms '
+      'preview=${previewStopwatch.elapsedMilliseconds}ms '
+      'stackXml=${stackXmlStopwatch.elapsedMilliseconds}ms '
+      'zip=${zipEncodeStopwatch.elapsedMilliseconds}ms '
+      'size=${encodedData.length}B '
+      'skippedEmptyLayers=$skippedEmptyLayerImageCount '
+      'layerCount=${layers.length}',
+    );
+  }
+
   return encodedData;
+}
+
+class _OraLayerExportRequest {
+  _OraLayerExportRequest({
+    required this.layerIndex,
+    required this.layer,
+  });
+
+  final int layerIndex;
+  final LayerProvider layer;
+}
+
+class _OraLayerExportResult {
+  _OraLayerExportResult({
+    required this.layerIndex,
+    required this.layerName,
+    required this.imageName,
+    required this.offset,
+    required this.bytes,
+    required this.elapsedMilliseconds,
+  });
+
+  final int layerIndex;
+  final String layerName;
+  final String imageName;
+  final ui.Offset offset;
+  final Uint8List bytes;
+  final int elapsedMilliseconds;
+}
+
+/// Exports non-empty ORA layer PNGs in bounded parallel batches.
+///
+/// Batch processing keeps memory pressure predictable while still overlapping
+/// async PNG encoding across several layers to reduce total save latency.
+Future<List<_OraLayerExportResult>> _exportOraLayersInBatches({
+  required final List<_OraLayerExportRequest> requests,
+}) async {
+  if (requests.isEmpty) {
+    return <_OraLayerExportResult>[];
+  }
+
+  final List<_OraLayerExportResult> results = <_OraLayerExportResult>[];
+  final int batchSize = _computeOraLayerExportBatchSize(requestCount: requests.length);
+
+  for (int start = AppMath.zero; start < requests.length; start += batchSize) {
+    final int end = math.min(start + batchSize, requests.length);
+    final List<_OraLayerExportResult> batchResults = await Future.wait(
+      requests.sublist(start, end).map((final _OraLayerExportRequest request) => _exportOraLayer(request)),
+    );
+    results.addAll(batchResults);
+  }
+
+  return results;
+}
+
+int _computeOraLayerExportBatchSize({required final int requestCount}) {
+  final int processorCount = math.max(Platform.numberOfProcessors, AppMath.one);
+  final int boundedByCpu = math.min(processorCount, _oraParallelLayerExportCap);
+  return math.max(AppMath.one, math.min(requestCount, boundedByCpu));
+}
+
+/// Exports one ORA layer image and captures timing metadata for diagnostics.
+Future<_OraLayerExportResult> _exportOraLayer(final _OraLayerExportRequest request) async {
+  final Stopwatch perLayerStopwatch = Stopwatch()..start();
+  final ({Uint8List bytes, ui.Offset offset}) exportedLayer = await _prepareOraLayerExport(
+    layer: request.layer,
+  );
+  perLayerStopwatch.stop();
+
+  return _OraLayerExportResult(
+    layerIndex: request.layerIndex,
+    layerName: request.layer.name,
+    imageName: '$_oraLayerImageEntryPrefix${request.layerIndex}$_oraLayerImageEntrySuffix',
+    offset: exportedLayer.offset,
+    bytes: exportedLayer.bytes,
+    elapsedMilliseconds: perLayerStopwatch.elapsedMilliseconds,
+  );
+}
+
+/// Empty layers can be represented in ORA XML without an image payload.
+bool _isOraLayerImageEmpty(final LayerProvider layer) {
+  return layer.backgroundColor == null && layer.actionStack.isEmpty;
 }
 
 /// Writes standard merged and thumbnail preview PNGs into the ORA [archive].
@@ -639,44 +786,97 @@ Future<void> _addOraPreviewFiles({
   required final Archive archive,
   required final LayersProvider layers,
 }) async {
-  final ui.Image mergedImage = await layers.capturePainterToImage();
-  final ByteData? mergedPngData = await mergedImage.toByteData(format: ui.ImageByteFormat.png);
-  if (mergedPngData == null) {
-    return;
-  }
-
-  final Uint8List mergedPngBytes = mergedPngData.buffer.asUint8List();
-  archive.addFile(
-    _storedNeutralArchiveFile(
-      _oraMergedImageEntry,
-      mergedPngBytes,
-    ),
-  );
-
-  final ui.Codec thumbnailCodec = await ui.instantiateImageCodec(
-    mergedPngBytes,
-    targetHeight: AppLayout.thumbnailMaxHeight.toInt(),
-  );
+  final ({bool disposeImage, ui.Image image}) mergedImageCapture = await _captureOraMergedImage(layers);
+  final ui.Image mergedImage = mergedImageCapture.image;
   try {
-    final ui.FrameInfo thumbnailFrame = await thumbnailCodec.getNextFrame();
+    final Uint8List? mergedPngBytes = await _safeImageToPngBytes(mergedImage, _oraMergedImageEntry);
+    if (mergedPngBytes == null) {
+      return;
+    }
+
+    archive.addFile(
+      _storedNeutralArchiveFile(
+        _oraMergedImageEntry,
+        mergedPngBytes,
+      ),
+    );
+
+    final ui.Image thumbnailImage = _createOraThumbnailImage(mergedImage);
     try {
-      final ByteData? thumbnailPngData = await thumbnailFrame.image.toByteData(format: ui.ImageByteFormat.png);
-      if (thumbnailPngData == null) {
+      final Uint8List? thumbnailPngBytes = await _safeImageToPngBytes(thumbnailImage, _oraThumbnailEntry);
+      if (thumbnailPngBytes == null) {
         return;
       }
 
       archive.addFile(
         _storedNeutralArchiveFile(
           _oraThumbnailEntry,
-          thumbnailPngData.buffer.asUint8List(),
+          thumbnailPngBytes,
         ),
       );
     } finally {
-      thumbnailFrame.image.dispose();
+      thumbnailImage.dispose();
     }
   } finally {
-    thumbnailCodec.dispose();
+    if (mergedImageCapture.disposeImage) {
+      mergedImage.dispose();
+    }
   }
+}
+
+/// Converts [image] to PNG bytes while tolerating transient engine failures.
+///
+/// Some test runs can hit an engine assertion inside [ui.Image.toByteData]
+/// under heavy image churn. In that case previews are skipped, while the ORA
+/// layer payload remains valid.
+Future<Uint8List?> _safeImageToPngBytes(final ui.Image image, final String entryName) async {
+  try {
+    final ByteData? pngData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return pngData?.buffer.asUint8List();
+  } on Object catch (error, stackTrace) {
+    _log.warning('Skipping ORA preview entry "$entryName" due to PNG encode failure.', error, stackTrace);
+    return null;
+  }
+}
+
+/// Reuses the current merged snapshot when it is known to be up to date.
+Future<({bool disposeImage, ui.Image image})> _captureOraMergedImage(final LayersProvider layers) async {
+  final ui.Image? cachedImage = layers.cachedImage;
+  if (!layers.hasChanged && cachedImage != null) {
+    return (disposeImage: false, image: cachedImage);
+  }
+
+  return (disposeImage: true, image: await layers.capturePainterToImage());
+}
+
+/// Builds the ORA thumbnail directly from the merged image without a PNG round-trip.
+ui.Image _createOraThumbnailImage(final ui.Image mergedImage) {
+  final int targetHeight = math.max(AppLayout.thumbnailMaxHeight.toInt(), AppMath.one);
+  final double scale = targetHeight / mergedImage.height;
+  final int targetWidth = math.max((mergedImage.width * scale).round(), AppMath.one);
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+  final ui.Paint paint = ui.Paint();
+
+  canvas.drawImageRect(
+    mergedImage,
+    ui.Rect.fromLTWH(
+      AppMath.zero.toDouble(),
+      AppMath.zero.toDouble(),
+      mergedImage.width.toDouble(),
+      mergedImage.height.toDouble(),
+    ),
+    ui.Rect.fromLTWH(
+      AppMath.zero.toDouble(),
+      AppMath.zero.toDouble(),
+      targetWidth.toDouble(),
+      targetHeight.toDouble(),
+    ),
+    paint,
+  );
+
+  final ui.Picture picture = recorder.endRecording();
+  return picture.toImageSync(targetWidth, targetHeight);
 }
 
 /// Builds the layers for the specified file or canvas.

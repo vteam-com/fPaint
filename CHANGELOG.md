@@ -4,6 +4,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.5] - 2026-06-13
+
+### Add
+
+- Large hover preview for layer thumbnails using the full layer image cache
+
+### Update
+
+- Faster save and export workflow across ORA, PNG, JPEG, WebP, HEIC, and TIFF
+- Faster draft recovery snapshots by skipping ORA preview generation when not needed
+
+### Fix
+
+- ORA save preview generation reliability under heavy image-processing test load
+- Layer preview popup positioning now avoids clipping at the top and bottom of the viewport
+
 ## [1.8.4] - 2026-06-07
 
 ### Update

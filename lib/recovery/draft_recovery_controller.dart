@@ -220,7 +220,10 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
 }
 
 Future<List<int>> _defaultDraftRecoveryEncoder(final LayersProvider layers) {
-  return createOraArchive(layers);
+  return createOraArchive(
+    layers,
+    includePreviews: false,
+  );
 }
 
 Future<void> _defaultDraftRecoveryRestorer(
