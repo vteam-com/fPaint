@@ -582,6 +582,9 @@ class LayerProvider extends ChangeNotifier {
   /// The cached thumbnail image of the layer.
   ui.Image? _cachedThumbnailImage;
 
+  /// Gets the cached full-resolution image of the layer.
+  ui.Image? get cachedImage => _cachedImage;
+
   /// Gets the thumbnail image of the layer.
   ui.Image? get thumbnailImage => _cachedThumbnailImage;
 
@@ -608,6 +611,24 @@ class LayerProvider extends ChangeNotifier {
 
     // the latest thumbnail is ready
     this.onThumbnailChanged();
+  }
+
+  /// Ensures the per-layer render cache is populated so compositing is fast.
+  ///
+  /// When [_cachedImage] is already set this is a no-op. Otherwise the layer is
+  /// rendered once and the result cached, so subsequent [renderLayer] calls take
+  /// the fast [Canvas.drawImage] path rather than replaying the full action stack.
+  Future<void> ensureCachePrimed() async {
+    if (_cachedImage != null) {
+      return;
+    }
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = Canvas(recorder);
+    renderLayer(canvas);
+    _cachedImage = await recorder.endRecording().toImage(
+      size.width.toInt(),
+      size.height.toInt(),
+    );
   }
 
   /// Clears the cached image and thumbnail, and updates the thumbnail.

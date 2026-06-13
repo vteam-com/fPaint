@@ -594,6 +594,16 @@ class LayersProvider extends ChangeNotifier {
 
   /// Captures the canvas panel to an image.
   Future<ui.Image> capturePainterToImage() async {
+    // Prime per-layer caches in parallel before compositing. This ensures that
+    // renderLayer() takes the fast drawImage path (one blit per layer) instead
+    // of replaying the full action stack for any layer whose cache was cleared
+    // by a recent stroke but whose debounced thumbnail update has not yet fired.
+    await Future.wait(
+      _list
+          .where((final LayerProvider layer) => layer.isVisible)
+          .map((final LayerProvider layer) => layer.ensureCachePrimed()),
+    );
+
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
 

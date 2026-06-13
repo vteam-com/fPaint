@@ -1,0 +1,6 @@
+# Generated test outputs are intentionally committed so results can be
+# compared in GitHub, but they are binary artifacts and should not produce
+# expensive or low-value textual diffs.
+#
+# Keep persistence in Git; suppress text diff and merge handling.
+test/output/** binary -diff -merge

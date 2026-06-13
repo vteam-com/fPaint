@@ -103,6 +103,27 @@ void main() {
     expect(previewImage.height, AppLayout.thumbnailMaxHeight.toInt());
   });
 
+  test('createOraArchive can skip preview assets', () async {
+    final LayersProvider layers = LayersProvider();
+    layers.size = const ui.Size(100, 50);
+
+    final List<int> archiveData = await createOraArchive(
+      layers,
+      includePreviews: false,
+    );
+    final Archive archive = ZipDecoder().decodeBytes(archiveData);
+
+    expect(
+      archive.files.any((final ArchiveFile file) => file.name == 'mergedimage.png'),
+      isFalse,
+    );
+    expect(
+      archive.files.any((final ArchiveFile file) => file.name == 'Thumbnails/thumbnail.png'),
+      isFalse,
+    );
+    expect(await extractOraPreviewPngBytes(archiveData), isNull);
+  });
+
   test('readOraFileFromBytes throws exception for invalid archive', () async {
     final LayersProvider layers = LayersProvider();
     final Uint8List invalidBytes = Uint8List.fromList(<int>[1, 2, 3, 4, 5]);
