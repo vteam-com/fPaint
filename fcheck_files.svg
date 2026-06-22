@@ -270,6 +270,7 @@
 <rect x="50.0" y="230.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/providers/app_provider_selection_effects.dart</title></rect>
 <rect x="50.0" y="300.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/widgets/canvas_gesture_handler_state_methods.dart</title></rect>
 <rect x="50.0" y="370.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/files/file_tiff_encoder.dart</title></rect>
+<rect x="50.0" y="440.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/shell_top_bar_responsive_groups.dart</title></rect>
 <rect x="370.0" y="90.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/recovery/draft_recovery_controller.dart</title></rect>
 <rect x="370.0" y="160.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/main_screen.dart</title></rect>
 <rect x="370.0" y="230.0" width="220" height="50" class="fileNode"><title>File: /Users/jp/src/github/vteam/fPaint/lib/pages/settings_page.dart</title></rect>
@@ -3361,6 +3362,7 @@
 <text x="160.0" y="255.0" class="textSmall">app_provider_selection_effects.dart</text>
 <text x="160.0" y="325.0" class="textSmall">canvas_gesture_handler_state_methods.dart</text>
 <text x="160.0" y="395.0" class="textNormal">file_tiff_encoder.dart</text>
+<text x="160.0" y="465.0" class="textSmall">shell_top_bar_responsive_groups.dart</text>
 <g class="badge incomingBadge">
   <path d="M 382.0,115.0 L 370.0,108.0 Q 367.0,108.0 367.0,111.0 L 367.0,119.0 Q 367.0,122.0 370.0,122.0 Z" fill="#3b82f6"/>
   <text x="371.68" y="116.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">1</text><title>1. main.dart</title></g><g class="badge outgoingBadge">

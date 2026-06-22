@@ -66,3 +66,13 @@ Use the entire surface for drawing, selection, and visual review.
 Side panel visibility is explicit shell state. Only the top-left shell button, the desktop splitter bar, or the `Tab` keyboard shortcut may change it.
 
 Canvas gestures, editing overlays, placement/transform gestures, and scrim taps must preserve the current side panel state. See [SCENARIO_SIDE_PANEL_VISIBILITY](scenarios/SCENARIO_SIDE_PANEL_VISIBILITY.md).
+
+## Top Toolbar Grouping Rules
+
+Top shell toolbar controls are organized into stable domains rather than a flat list of independent buttons.
+
+- Domains: document actions, history, selection, and viewport zoom.
+- Each domain must stay inside one shared grouped surface whenever it is visible.
+- Responsive compaction may remove lower-priority buttons from inside a domain, but it must not split a domain into separate standalone buttons or redistribute that domain across multiple surfaces.
+- If a preserved domain still exceeds its responsive allocation, that domain may scroll horizontally inside its own grouped surface instead of forcing the overall top toolbar to overflow or ungroup adjacent domains.
+- Entering selection mode may change only the selection domain contents. It must not ungroup the history, document, or zoom domains.

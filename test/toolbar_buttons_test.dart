@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 const int _testImageDimension = 12;
 const double _narrowToolbarWidth = 170.0;
 const double _wideToolbarWidth = 720.0;
+const double _selectionOverflowToolbarWidth = 627.0;
 const double _wideToolbarDistributedGapLowerBound = AppLayout.toolbarButtonSize + AppSpacing.large;
 const double _wideToolbarPrimaryGroupGapLowerBound = AppSpacing.large;
 const double _wideToolbarHistorySelectorGroupGapLowerBound = AppSpacing.large;
@@ -57,6 +58,29 @@ void main() {
         ),
       ),
     );
+  }
+
+  Element? findOverlaySurfaceAncestor(final WidgetTester tester, final Finder finder) {
+    if (finder.evaluate().isEmpty) {
+      return null;
+    }
+
+    final Element element = tester.element(finder);
+    Element? matchingAncestor;
+
+    element.visitAncestorElements((final Element ancestor) {
+      final Widget widget = ancestor.widget;
+      if (widget is DecoratedBox) {
+        final Decoration decoration = widget.decoration;
+        if (decoration is BoxDecoration && decoration.borderRadius != null && decoration.boxShadow != null) {
+          matchingAncestor = ancestor;
+          return false;
+        }
+      }
+      return true;
+    });
+
+    return matchingAncestor;
   }
 
   Widget fabUnderTest() {
@@ -808,6 +832,73 @@ void main() {
       expect(rotateX, greaterThan(pasteX));
       expect(rotateX - exportX, greaterThan(_wideToolbarPrimaryGroupGapLowerBound));
       expect(selectorX - redoX, greaterThan(_wideToolbarHistorySelectorGroupGapLowerBound));
+    });
+
+    testWidgets('keeps zoom controls grouped when selection mode activates the responsive toolbar', (
+      final WidgetTester tester,
+    ) async {
+      await pumpShellTopBar(
+        tester,
+        width: _wideToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      await tester.tap(find.byKey(Keys.floatActionSelector));
+      await tester.pump();
+
+      final Element? selectionSurface = findOverlaySurfaceAncestor(
+        tester,
+        find.byKey(Keys.toolSelectorModeRectangle),
+      );
+      final Element? zoomOutSurface = findOverlaySurfaceAncestor(
+        tester,
+        find.byKey(Keys.floatActionZoomOut),
+      );
+      final Element? centerSurface = findOverlaySurfaceAncestor(
+        tester,
+        find.byKey(Keys.floatActionCenter),
+      );
+      final Element? zoomInSurface = findOverlaySurfaceAncestor(
+        tester,
+        find.byKey(Keys.floatActionZoomIn),
+      );
+
+      expect(selectionSurface, isNotNull);
+      expect(zoomOutSurface, isNotNull);
+      expect(centerSurface, same(zoomOutSurface));
+      expect(zoomInSurface, same(zoomOutSurface));
+      expect(selectionSurface, isNot(same(zoomOutSurface)));
+    });
+
+    testWidgets('keeps the visible selection domain horizontally scrollable without overflowing', (
+      final WidgetTester tester,
+    ) async {
+      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectorModel.isVisible = true;
+
+      await pumpShellTopBar(
+        tester,
+        width: _selectionOverflowToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      final Finder selectionScrollView = find.ancestor(
+        of: find.byKey(Keys.toolSelectorModeRectangle),
+        matching: find.byType(SingleChildScrollView),
+      );
+
+      expect(selectionScrollView, findsOneWidget);
+      expect(
+        find.ancestor(
+          of: selectionScrollView,
+          matching: find.byType(SingleChildScrollView),
+        ),
+        findsNothing,
+      );
+      expect(find.byKey(Keys.floatActionCenter), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   });
 
