@@ -20,6 +20,8 @@ import 'package:fpaint/widgets/toolbar_icon_button.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
+part 'shell_top_bar_responsive_groups.dart';
+
 const String _canvasZoomAndSizeFormat = '{zoom}%\n{width}\n{height}';
 const String _placeholderZoom = '{zoom}';
 const String _placeholderWidth = '{width}';
@@ -186,6 +188,10 @@ Widget _buildResponsiveToolbarActions(
                     appProvider,
                     interactionProfile,
                   );
+                  final List<_ToolbarActionEntry> filteredPrimaryActions = _filterToolbarActionsForViewport(
+                    actions: primaryActions,
+                    shellProvider: shellProvider,
+                  );
                   final List<_ToolbarActionEntry> actions = _filterToolbarActionsForViewport(
                     actions: _buildResponsiveToolbarActionEntries(
                       context,
@@ -207,22 +213,33 @@ Widget _buildResponsiveToolbarActions(
                     );
                   }
 
-                  final List<_ToolbarActionEntry> visibleActions = _selectResponsiveToolbarActions(
-                    actions: actions,
+                  final List<_ResolvedToolbarActionGroup> visibleGroups = _selectResponsiveToolbarActionGroups(
+                    groups: _buildResponsiveToolbarActionGroups(
+                      context: context,
+                      shellProvider: shellProvider,
+                      appProvider: appProvider,
+                      interactionProfile: interactionProfile,
+                      primaryActions: filteredPrimaryActions,
+                    ),
                     maxWidth: constraints.maxWidth,
-                    spacing: interactionProfile.buttonSpacing,
+                    groupSpacing: interactionProfile.buttonSpacing,
                   );
 
-                  if (visibleActions.isEmpty) {
+                  if (visibleGroups.isEmpty) {
                     return const SizedBox.shrink();
                   }
 
                   return Align(
                     alignment: Alignment.center,
                     child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       spacing: interactionProfile.buttonSpacing,
-                      children: visibleActions.map((final _ToolbarActionEntry entry) => entry.child).toList(),
+                      children: visibleGroups
+                          .map<Widget>(
+                            (final _ResolvedToolbarActionGroup group) => _buildResponsiveToolbarGroupWidget(group),
+                          )
+                          .toList(),
                     ),
                   );
                 },
@@ -233,6 +250,23 @@ Widget _buildResponsiveToolbarActions(
       );
     },
   );
+}
+
+/// Builds one responsive toolbar domain, allowing configured domains to scroll
+/// horizontally instead of overflowing the overall toolbar row.
+Widget _buildResponsiveToolbarGroupWidget(final _ResolvedToolbarActionGroup group) {
+  final Widget groupWidget = group.usesCustomSurface
+      ? group.actions.single.child
+      : _buildToolbarButtonGroup(
+          children: group.actions.map((final _ToolbarActionEntry entry) => entry.child).toList(),
+          spacing: group.spacing,
+        );
+
+  if (group.isHorizontallyScrollable == false) {
+    return groupWidget;
+  }
+
+  return Flexible(child: groupWidget);
 }
 
 /// Builds the primary document actions shown on wide desktop toolbars.
@@ -435,6 +469,7 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
         ),
         estimatedWidth: estimateSelectionSubToolbarWidth(
           _toolbarIconActionEstimatedWidth,
+          hasVisibleSelection: appProvider.selectorModel.isVisible,
           includeToggleButton: true,
         ),
         importance: _ToolbarActionImportance.critical,
@@ -469,31 +504,6 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
       importance: _ToolbarActionImportance.medium,
     ),
   ];
-}
-
-/// Selects the highest-value actions that fit within [maxWidth].
-List<_ToolbarActionEntry> _selectResponsiveToolbarActions({
-  required final List<_ToolbarActionEntry> actions,
-  required final double maxWidth,
-  required final double spacing,
-}) {
-  if (maxWidth <= AppMath.zero) {
-    return const <_ToolbarActionEntry>[];
-  }
-
-  final List<_ToolbarActionEntry> visibleActions = List<_ToolbarActionEntry>.from(actions);
-  double requiredWidth = _estimateToolbarActionWidth(visibleActions, spacing);
-
-  while (visibleActions.isNotEmpty && requiredWidth > maxWidth) {
-    final int removalIndex = _indexOfLeastImportantAction(visibleActions);
-    if (removalIndex < AppMath.zero) {
-      break;
-    }
-    visibleActions.removeAt(removalIndex);
-    requiredWidth = _estimateToolbarActionWidth(visibleActions, spacing);
-  }
-
-  return visibleActions;
 }
 
 /// Estimates the width of [actions] including inter-button spacing.

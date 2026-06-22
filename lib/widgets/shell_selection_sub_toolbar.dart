@@ -17,9 +17,10 @@ import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/toolbar_icon_button.dart';
 
 const int _selectionModeButtonCount = AppMath.four + AppMath.one;
-const int _selectionVisibleActionsCount = AppMath.six;
+const int _selectionClipboardButtonCount = AppMath.pair;
 const int _selectionMathButtonCount = AppMath.triple;
-const int _selectionCanvasActionButtonCount = AppMath.pair;
+const int _selectionInvertButtonCount = AppMath.one;
+const int _selectionCanvasActionButtonCount = AppMath.one;
 const int _selectionEffectsButtonCount = AppMath.one;
 const int _selectionToggleButtonCount = AppMath.one;
 
@@ -31,15 +32,23 @@ bool shouldShowSelectionSubToolbar(final AppProvider appProvider) {
 /// Estimates the width needed by the selection sub-toolbar.
 double estimateSelectionSubToolbarWidth(
   final double toolbarIconActionEstimatedWidth, {
+  required final bool hasVisibleSelection,
   final bool includeToggleButton = false,
 }) {
-  final int totalButtons =
-      _selectionModeButtonCount +
-      _selectionVisibleActionsCount +
-      _selectionMathButtonCount +
-      _selectionCanvasActionButtonCount +
-      _selectionEffectsButtonCount +
-      (includeToggleButton ? _selectionToggleButtonCount : AppMath.zero);
+  int totalButtons = _selectionModeButtonCount;
+
+  if (hasVisibleSelection) {
+    totalButtons +=
+        _selectionClipboardButtonCount +
+        _selectionMathButtonCount +
+        _selectionInvertButtonCount +
+        _selectionCanvasActionButtonCount +
+        _selectionEffectsButtonCount;
+  }
+
+  if (includeToggleButton) {
+    totalButtons += _selectionToggleButtonCount;
+  }
 
   return (totalButtons * toolbarIconActionEstimatedWidth) + ((totalButtons - AppMath.one) * AppSpacing.small);
 }
@@ -50,6 +59,7 @@ Widget buildSelectionSubToolbar({
   required final ShellProvider shellProvider,
   required final AppProvider appProvider,
   required final InteractionLayoutProfile interactionProfile,
+  final bool horizontallyScrollable = false,
   final Widget? trailingToggleButton,
 }) {
   final AppLocalizations l10n = context.l10n;
@@ -216,12 +226,21 @@ Widget buildSelectionSubToolbar({
     buttons.add(trailingToggleButton);
   }
 
+  final Widget buttonRow = Row(
+    mainAxisSize: MainAxisSize.min,
+    spacing: AppSpacing.small,
+    children: buttons,
+  );
+
   return buildOverlayControlSurface(
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: AppSpacing.small,
-      children: buttons,
-    ),
+    child: horizontallyScrollable
+        ? SingleChildScrollView(
+            primary: false,
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.hardEdge,
+            child: buttonRow,
+          )
+        : buttonRow,
   );
 }
 
