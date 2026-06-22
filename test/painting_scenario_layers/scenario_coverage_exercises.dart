@@ -622,7 +622,7 @@ Future<void> _exerciseSelectionToolPanel(
   await setSelectorMathReplace(tester);
 
   // Cancel selection.
-  final Finder cancelBtn = find.byKey(Keys.toolSelectorCancel);
+  final Finder cancelBtn = find.byKey(Keys.floatActionSelector);
   if (cancelBtn.evaluate().isNotEmpty) {
     await tester.tap(cancelBtn);
     await tester.pump();
@@ -1832,7 +1832,7 @@ Future<void> _exerciseSelectionToolPanelButtons(
     }
 
     // Tap "Cancel" button to clear selection.
-    final Finder cancelButton = find.byKey(Keys.toolSelectorCancel);
+    final Finder cancelButton = find.byKey(Keys.floatActionSelector);
     if (cancelButton.evaluate().isNotEmpty) {
       await tester.tap(cancelButton);
       await tester.pump();

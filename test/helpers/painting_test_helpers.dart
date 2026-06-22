@@ -29,11 +29,13 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/fill_service.dart';
+import 'package:fpaint/shell_top_bar.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
+import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 import 'package:image/image.dart' as img;
 
@@ -666,6 +668,10 @@ Future<void> tapFinderWithoutSettling(
 /// overlay is automatically captured after the tap.
 Future<void> tapByKey(final WidgetTester tester, final Key key) async {
   final Finder found = find.byKey(key);
+  if (key == Keys.toolSelector && found.evaluate().isEmpty) {
+    await activateSelectorTool(tester);
+    return;
+  }
   expect(found, findsOneWidget, reason: 'Should find button with key: $key');
 
   await tester.ensureVisible(found.first);
@@ -680,6 +686,53 @@ Future<void> tapByKey(final WidgetTester tester, final Key key) async {
     settle: true,
     tapAction: () => tester.tap(tapTarget.first, warnIfMissed: false),
   );
+}
+
+bool _hasSelectorModeButtons() {
+  return find.byKey(Keys.toolSelectorModeRectangle).evaluate().isNotEmpty ||
+      find.byKey(Keys.toolSelectorModeWand).evaluate().isNotEmpty;
+}
+
+Future<void> _waitForSelectorModeButtons(final WidgetTester tester) async {
+  for (int i = 0; i < 30; i++) {
+    if (_hasSelectorModeButtons()) {
+      return;
+    }
+    await tester.pump(const Duration(milliseconds: 16));
+  }
+}
+
+/// Activates selector mode using whichever selector entry is currently visible.
+Future<void> activateSelectorTool(final WidgetTester tester) async {
+  if (_hasSelectorModeButtons()) {
+    return;
+  }
+
+  final BuildContext context = mainViewContext(tester);
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
+
+  if (appProvider.selectedAction == ActionType.selector || appProvider.selectorModel.isVisible) {
+    await _waitForSelectorModeButtons(tester);
+    if (_hasSelectorModeButtons()) {
+      return;
+    }
+  }
+
+  final Finder shellSelector = find.byKey(Keys.floatActionSelector).hitTestable();
+  if (shellSelector.evaluate().isNotEmpty) {
+    await tapByKey(tester, Keys.floatActionSelector);
+    await _waitForSelectorModeButtons(tester);
+    return;
+  }
+
+  final Finder panelSelector = find.byKey(Keys.toolSelector).hitTestable();
+  if (panelSelector.evaluate().isNotEmpty) {
+    await tapByKey(tester, Keys.toolSelector);
+    await _waitForSelectorModeButtons(tester);
+    return;
+  }
+
+  fail('Selector toolbar controls were not shown from the top shell toolbar.');
 }
 
 /// Finds the widget matching [tooltip] and taps it.
@@ -726,7 +779,7 @@ Future<void> selectRectangleArea(
   required final Offset startPosition,
   required final Offset endPosition,
 }) async {
-  await tapByKey(tester, Keys.toolSelector);
+  await activateSelectorTool(tester);
   await tester.pump();
 
   await tapByKey(tester, Keys.toolSelectorModeRectangle);
@@ -742,7 +795,7 @@ Future<void> selectCircleArea(
   required final Offset center,
   required final double radius,
 }) async {
-  await tapByKey(tester, Keys.toolSelector);
+  await activateSelectorTool(tester);
   await tester.pump();
 
   await tapByKey(tester, Keys.toolSelectorModeCircle);
@@ -766,7 +819,7 @@ Future<void> selectLineRegion(
     reason: 'Straight-line region selection requires at least three vertices',
   );
 
-  await tapByKey(tester, Keys.toolSelector);
+  await activateSelectorTool(tester);
   await tester.pump();
 
   await tapByKey(tester, Keys.toolSelectorModeLine);
@@ -790,7 +843,7 @@ Future<void> selectLassoArea(
     reason: 'Lasso selection requires at least three points',
   );
 
-  await tapByKey(tester, Keys.toolSelector);
+  await activateSelectorTool(tester);
   await tester.pump();
 
   await tapByKey(tester, Keys.toolSelectorModeLasso);
@@ -854,8 +907,9 @@ Future<void> selectWandArea(
   required final Offset position,
   int? tolerance,
 }) async {
-  await tapByKey(tester, Keys.toolSelector);
-  await tester.pump();
+  await activateSelectorTool(tester);
+  // Ensure the selection sub-toolbar has time to appear
+  await tester.pumpAndSettle(const Duration(milliseconds: 500));
 
   await tapByKey(tester, Keys.toolSelectorModeWand);
   await tester.pump();
@@ -873,7 +927,7 @@ Future<void> selectWandArea(
 
 /// Sets selector math mode to replace.
 Future<void> setSelectorMathReplace(final WidgetTester tester) async {
-  await tapByKey(tester, Keys.toolSelector);
+  await activateSelectorTool(tester);
   await tester.pump();
   await tapByTooltip(tester, _selectorMathReplaceTooltip);
   await tester.pump();
@@ -881,7 +935,7 @@ Future<void> setSelectorMathReplace(final WidgetTester tester) async {
 
 /// Sets selector math mode to add.
 Future<void> setSelectorMathAdd(final WidgetTester tester) async {
-  await tapByKey(tester, Keys.toolSelector);
+  await activateSelectorTool(tester);
   await tester.pump();
   await tapByTooltip(tester, _selectorMathAddTooltip);
   await tester.pump();
@@ -889,7 +943,7 @@ Future<void> setSelectorMathAdd(final WidgetTester tester) async {
 
 /// Sets selector math mode to remove.
 Future<void> setSelectorMathRemove(final WidgetTester tester) async {
-  await tapByKey(tester, Keys.toolSelector);
+  await activateSelectorTool(tester);
   await tester.pump();
   await tapByTooltip(tester, _selectorMathRemoveTooltip);
   await tester.pump();
@@ -897,7 +951,7 @@ Future<void> setSelectorMathRemove(final WidgetTester tester) async {
 
 /// Inverts the current selector path.
 Future<void> invertCurrentSelection(final WidgetTester tester) async {
-  await tapByKey(tester, Keys.toolSelector);
+  await activateSelectorTool(tester);
   await tester.pump();
   await tapByTooltip(tester, _selectorInvertTooltip);
   await tester.pump();
@@ -947,8 +1001,24 @@ Future<void> applyEffectViaUi(
   final String effectLabel_ = effectLabel(l10n, effect);
 
   // --- 1. Tap the Effects button to open the popup menu ---
-  final Finder effectsBtn = find.byKey(Keys.effectsButton);
-  expect(effectsBtn, findsOneWidget, reason: 'Effects button should be visible');
+  // Selection actions now live in the top shell toolbar. Prefer that button,
+  // but keep the legacy selection-overlay button as a fallback.
+  final Finder shellEffectsBtn = find.descendant(
+    of: find.byType(ShellTopBar),
+    matching: find.byKey(Keys.effectsButton),
+  );
+  final Finder overlayEffectsBtn = find.descendant(
+    of: find.byType(SelectionRectWidget),
+    matching: find.byKey(Keys.effectsButton),
+  );
+  final Finder fallbackEffectsBtn = find.byKey(Keys.effectsButton);
+  final Finder effectsBtn = shellEffectsBtn.hitTestable().evaluate().isNotEmpty
+      ? shellEffectsBtn
+      : overlayEffectsBtn.hitTestable().evaluate().isNotEmpty
+      ? overlayEffectsBtn
+      : fallbackEffectsBtn;
+
+  expect(effectsBtn, findsAtLeastNWidgets(1), reason: 'Effects button should be visible');
   final Finder tappableEffectsBtn = effectsBtn.hitTestable();
   expect(tappableEffectsBtn, findsAtLeastNWidgets(1), reason: 'Effects button should be tappable');
   InteractionTracker.recordTap(tester.getCenter(tappableEffectsBtn.first));
@@ -2538,6 +2608,21 @@ class UnitTestVideoRecorder {
     _frameErrors = 0;
     _active = this;
     debugPrint('🎬 Video recorder started — frames: ${_framesDirectory.path}');
+  }
+
+  /// Temporarily disables automatic post-interaction frame capture.
+  ///
+  /// This keeps manual [captureFrame] available while skipping the very
+  /// expensive per-tap auto-capture path.
+  void pauseAutoCapture() {
+    if (_active == this) {
+      _active = null;
+    }
+  }
+
+  /// Re-enables automatic post-interaction frame capture for this recorder.
+  void resumeAutoCapture() {
+    _active = this;
   }
 
   /// Captures the current app screenshot boundary as a numbered PNG frame.

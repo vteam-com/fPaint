@@ -165,7 +165,7 @@ const List<_HandleDescriptor> _resizeHandles = <_HandleDescriptor>[
 ];
 
 const int _selectionModeButtonCount = AppMath.four;
-const int _selectionQuickActionButtonCount = AppMath.four;
+const int _selectionQuickActionButtonCount = AppMath.triple;
 const double _selectionToolbarSurfacePadding = AppSpacing.small;
 
 Offset _topLeft(final Rect b) => b.topLeft;
@@ -442,16 +442,6 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
                   buttonSize: buttonSize,
                   iconSize: iconSize,
                   onEffectSelected: widget.onEffectSelected,
-                ),
-                buildOverlayCircleButton(
-                  tooltip: l10n.cancel,
-                  icon: AppIcon.selectorCancel,
-                  cursor: SystemMouseCursors.click,
-                  showBorder: false,
-                  useSourceColors: true,
-                  size: buttonSize,
-                  iconSize: iconSize,
-                  onTap: widget.onCancel,
                 ),
               ],
             ),

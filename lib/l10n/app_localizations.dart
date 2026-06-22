@@ -1058,12 +1058,6 @@ abstract class AppLocalizations {
   /// **'Layers'**
   String get sidePanelLayersSection;
 
-  /// No description provided for @sidePanelSelectionSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Selection'**
-  String get sidePanelSelectionSection;
-
   /// No description provided for @startOver.
   ///
   /// In en, this message translates to:

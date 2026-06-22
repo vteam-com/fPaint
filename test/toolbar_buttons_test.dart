@@ -315,6 +315,35 @@ void main() {
       expect(appProvider.selectedAction, ActionType.selector);
     });
 
+    testWidgets('selector cancel tap restores previous tool when selector is active without marquee', (
+      final WidgetTester tester,
+    ) async {
+      shellProvider.deviceSizeSmall = false;
+      appProvider.selectedAction = ActionType.pencil;
+
+      await tester.pumpWidget(
+        buildTestWidget(
+          child: Builder(
+            builder: (final BuildContext context) {
+              return buildCanvasToolbarActions(context, shellProvider, appProvider);
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.byKey(Keys.floatActionSelector));
+      await tester.pump();
+      expect(appProvider.selectedAction, ActionType.selector);
+      expect(appProvider.selectorModel.isVisible, isFalse);
+
+      await tester.tap(find.byKey(Keys.floatActionSelector));
+      await tester.pump();
+
+      expect(appProvider.selectedAction, ActionType.pencil);
+      expect(appProvider.selectorModel.isVisible, isFalse);
+    });
+
     testWidgets('selector button clears active selection without changing active tool', (
       final WidgetTester tester,
     ) async {

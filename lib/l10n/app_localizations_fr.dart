@@ -535,9 +535,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get sidePanelLayersSection => 'Calques';
 
   @override
-  String get sidePanelSelectionSection => 'Outils de selection';
-
-  @override
   String get startOver => 'Nouveau...';
 
   @override

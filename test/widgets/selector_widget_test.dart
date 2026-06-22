@@ -6,7 +6,6 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
-import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 
 import '../helpers/platform_helpers.dart';
@@ -151,11 +150,10 @@ void main() {
       expect(dragCalls + resizeCalls, greaterThan(0));
     });
 
-    testWidgets('copy, duplicate, cancel and transform controls invoke callbacks', (
+    testWidgets('copy, duplicate and transform controls invoke callbacks', (
       final WidgetTester tester,
     ) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
-      int cancelCalls = 0;
       int copyCalls = 0;
       int duplicateCalls = 0;
       int transformCalls = 0;
@@ -164,9 +162,6 @@ void main() {
         _buildHarness(
           path1: path,
           callbacks: createDefaultSelectionRectCallbacks(
-            onCancel: () {
-              cancelCalls++;
-            },
             onCopy: () async {
               copyCalls++;
             },
@@ -186,19 +181,15 @@ void main() {
 
       final Finder copyTooltip = findTooltipByMessage(l10n.copyToClipboard);
       final Finder duplicateTooltip = findTooltipByMessage(l10n.duplicate);
-      final Finder cancelTooltip = findTooltipByMessage(l10n.cancel);
       final Finder transformTooltip = findTooltipByMessage(l10n.transform);
 
       await tester.tap(copyTooltip);
       await tester.pump();
       await tester.tap(duplicateTooltip);
       await tester.pump();
-      await tester.tap(cancelTooltip);
-      await tester.pump();
       await tester.tap(transformTooltip);
       await tester.pump();
 
-      expect(cancelCalls, 1);
       expect(copyCalls, 1);
       expect(duplicateCalls, 1);
       expect(transformCalls, 1);
@@ -226,7 +217,6 @@ void main() {
       final AppLocalizations l10n = AppLocalizations.of(context)!;
       final Finder copyTooltip = findTooltipByMessage(l10n.copyToClipboard);
       final Finder duplicateTooltip = findTooltipByMessage(l10n.duplicate);
-      final Finder cancelTooltip = findTooltipByMessage(l10n.cancel);
       final Finder effectsButton = find.byKey(Keys.effectsButton);
 
       final Finder copyScale = find.descendant(of: copyTooltip, matching: find.byType(AnimatedScale));
@@ -257,7 +247,6 @@ void main() {
               (widget.decoration! as BoxDecoration).shape == BoxShape.circle,
         ),
       );
-      final Finder cancelIcon = find.descendant(of: cancelTooltip, matching: find.byType(AppSvgIcon));
 
       expect(
         (tester.widget<Container>(copyBackground).decoration! as BoxDecoration).color,
@@ -267,8 +256,6 @@ void main() {
         (tester.widget<Container>(effectsBackground).decoration! as BoxDecoration).color,
         AppColors.buttonBackground,
       );
-      expect(tester.widget<AppSvgIcon>(cancelIcon).useSourceColors, isTrue);
-      expect(tester.widget<AppSvgIcon>(cancelIcon).color, isNull);
 
       await tester.tap(copyTooltip);
       await tester.pump();
@@ -303,11 +290,11 @@ void main() {
         matching: find.byType(Stack),
       );
       final Finder copyTooltip = findTooltipByMessage(l10n.copyToClipboard);
-      final Finder cancelTooltip = findTooltipByMessage(l10n.cancel);
+      final Finder effectsTooltip = findTooltipByMessage(l10n.effects);
 
       expect(selectionStack, findsOneWidget);
       expect(tester.getRect(copyTooltip).left, greaterThanOrEqualTo(tester.getRect(selectionStack).left));
-      expect(tester.getRect(cancelTooltip).right, lessThanOrEqualTo(tester.getRect(selectionStack).right));
+      expect(tester.getRect(effectsTooltip).right, lessThanOrEqualTo(tester.getRect(selectionStack).right));
     });
 
     testWidgets('translate, scale and rotate handle drags invoke callbacks', (final WidgetTester tester) async {
