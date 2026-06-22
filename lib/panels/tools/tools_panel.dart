@@ -6,13 +6,11 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
-import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
-import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/brush_intensity_picker.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
@@ -29,8 +27,6 @@ import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
 import 'package:fpaint/widgets/top_colors.dart';
-
-part 'tools_panel_selection_section.dart';
 
 /// Represents a panel that displays tools for the application.
 /// The ToolsPanel is a stateless widget that displays a set of tools
@@ -55,22 +51,6 @@ class ToolsPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _buildPanelSection(
-            title: l10n.sidePanelSelectionSection,
-            child: ListenableBuilder(
-              listenable: Listenable.merge(<Listenable>[
-                appProvider.selectedActionRepaintListenable,
-                appProvider.toolOptionsRepaintListenable,
-              ]),
-              builder: (final BuildContext _, final Widget? _) {
-                return _buildSelectionSection(
-                  context: context,
-                  appProvider: appProvider,
-                );
-              },
-            ),
-          ),
-          const AppDivider(),
           _buildPanelSection(
             title: l10n.sidePanelBrushesSection,
             child: Column(
@@ -345,18 +325,7 @@ class ToolsPanel extends StatelessWidget {
           appProvider.selectedAction = ActionType.text;
         },
       ),
-      _buildActionPicker(
-        key: Keys.toolSelector,
-        minimal: minimal,
-        name: l10n.toolSelector,
-        icon: ActionType.selector.icon,
-        isSelected: selectedTool == ActionType.selector,
-        onPressed: () {
-          appProvider.selectedAction = ActionType.selector;
-        },
-      ),
     ];
-    tools.removeWhere((final Widget widget) => widget.key == Keys.toolSelector);
     return tools;
   }
 
@@ -732,6 +701,31 @@ class ToolsPanel extends StatelessWidget {
                 color: color,
                 onColorChanged: onColorChanged,
               ),
+      ),
+    );
+  }
+
+  /// Builds a titled panel block used by the side tools panel.
+  Widget _buildPanelSection({
+    required final String title,
+    required final Widget child,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.medium,
+        vertical: AppSpacing.small,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          SidePanelHeader(
+            title: title,
+            padding: EdgeInsets.zero,
+          ),
+          const SizedBox(height: AppSpacing.small),
+          child,
+        ],
       ),
     );
   }

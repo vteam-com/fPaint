@@ -533,9 +533,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sidePanelLayersSection => 'Layers';
 
   @override
-  String get sidePanelSelectionSection => 'Selection';
-
-  @override
   String get startOver => 'Start new...';
 
   @override

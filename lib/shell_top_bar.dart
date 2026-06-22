@@ -5,6 +5,7 @@ import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/side_panel/menu.dart';
 import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
@@ -14,6 +15,8 @@ import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
+import 'package:fpaint/widgets/shell_selection_sub_toolbar.dart';
+import 'package:fpaint/widgets/toolbar_icon_button.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -63,7 +66,7 @@ class ShellTopBar extends StatelessWidget {
     final InteractionLayoutProfile interactionProfile = shellProvider.interactionLayoutProfile;
     final AppLocalizations l10n = context.l10n;
     final Widget leadingToolbarButton = shellProvider.deviceSizeSmall
-        ? _buildToolbarIconButton(
+        ? buildToolbarIconButton(
             key: Keys.floatActionMenuToggle,
             tooltip: shellProvider.showMenu ? l10n.cancel : l10n.menuTooltip,
             icon: shellProvider.showMenu ? AppIcon.close : AppIcon.menu,
@@ -122,7 +125,7 @@ Widget _buildDesktopShellCycleButton({
   required final String tooltip,
   required final InteractionLayoutProfile interactionProfile,
 }) {
-  return _buildToolbarIconButton(
+  return buildToolbarIconButton(
     key: Keys.floatActionToggle,
     tooltip: tooltip,
     icon: _desktopShellCycleIcon(shellProvider),
@@ -243,7 +246,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
 
   return <_ToolbarActionEntry>[
     _ToolbarActionEntry(
-      child: _buildToolbarIconButton(
+      child: buildToolbarIconButton(
         tooltip: l10n.startOverTooltip,
         icon: AppIcon.powerSettingsNew,
         interactionProfile: interactionProfile,
@@ -253,7 +256,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
       importance: _ToolbarActionImportance.lowest,
     ),
     _ToolbarActionEntry(
-      child: _buildToolbarIconButton(
+      child: buildToolbarIconButton(
         tooltip: l10n.importTooltip,
         icon: AppIcon.fileDownload,
         interactionProfile: interactionProfile,
@@ -268,7 +271,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
       importance: _ToolbarActionImportance.low,
     ),
     _ToolbarActionEntry(
-      child: _buildToolbarIconButton(
+      child: buildToolbarIconButton(
         key: Keys.sidePanelExportButton,
         tooltip: l10n.exportTooltip,
         icon: AppIcon.iosShare,
@@ -279,7 +282,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
       importance: _ToolbarActionImportance.low,
     ),
     _ToolbarActionEntry(
-      child: _buildToolbarIconButton(
+      child: buildToolbarIconButton(
         key: Keys.floatActionPaste,
         tooltip: l10n.paste,
         icon: AppIcon.clipboardPaste,
@@ -292,7 +295,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
       importance: _ToolbarActionImportance.low,
     ),
     _ToolbarActionEntry(
-      child: _buildToolbarIconButton(
+      child: buildToolbarIconButton(
         tooltip: l10n.rotateCanvasTooltip,
         icon: AppIcon.rotate90DegreesCw,
         interactionProfile: interactionProfile,
@@ -305,7 +308,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
       importance: _ToolbarActionImportance.lowest,
     ),
     _ToolbarActionEntry(
-      child: _buildToolbarIconButton(
+      child: buildToolbarIconButton(
         tooltip: l10n.flipHorizontalTooltip,
         icon: AppIcon.flipHorizontal,
         interactionProfile: interactionProfile,
@@ -318,7 +321,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
       importance: _ToolbarActionImportance.lowest,
     ),
     _ToolbarActionEntry(
-      child: _buildToolbarIconButton(
+      child: buildToolbarIconButton(
         tooltip: l10n.flipVerticalTooltip,
         icon: AppIcon.flipVertical,
         interactionProfile: interactionProfile,
@@ -379,9 +382,11 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
     interactionProfile,
   );
   final AppLocalizations l10n = context.l10n;
-  final bool hasActiveSelection = appProvider.selectorModel.isVisible;
+  final bool hasActiveSelection =
+      appProvider.selectedAction == ActionType.selector || appProvider.selectorModel.isVisible;
   final bool canUndo = appProvider.undoProvider.canUndo;
   final bool canRedo = appProvider.undoProvider.canRedo;
+  final bool showSelectionSubToolbar = shouldShowSelectionSubToolbar(appProvider);
 
   return <_ToolbarActionEntry>[
     ...primaryActions,
@@ -403,16 +408,37 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
       estimatedWidth: _toolbarIconActionEstimatedWidth,
       importance: _ToolbarActionImportance.medium,
     ),
-    _ToolbarActionEntry(
-      child: _buildSelectorToggleButton(
-        appProvider: appProvider,
-        l10n: l10n,
-        hasActiveSelection: hasActiveSelection,
-        interactionProfile: interactionProfile,
+    if (!showSelectionSubToolbar)
+      _ToolbarActionEntry(
+        child: _buildSelectorToggleButton(
+          appProvider: appProvider,
+          l10n: l10n,
+          hasActiveSelection: hasActiveSelection,
+          interactionProfile: interactionProfile,
+        ),
+        estimatedWidth: _toolbarIconActionEstimatedWidth,
+        importance: _ToolbarActionImportance.critical,
       ),
-      estimatedWidth: _toolbarIconActionEstimatedWidth,
-      importance: _ToolbarActionImportance.critical,
-    ),
+    if (showSelectionSubToolbar)
+      _ToolbarActionEntry(
+        child: buildSelectionSubToolbar(
+          context: context,
+          shellProvider: shellProvider,
+          appProvider: appProvider,
+          interactionProfile: interactionProfile,
+          trailingToggleButton: _buildSelectorToggleButton(
+            appProvider: appProvider,
+            l10n: l10n,
+            hasActiveSelection: hasActiveSelection,
+            interactionProfile: interactionProfile,
+          ),
+        ),
+        estimatedWidth: estimateSelectionSubToolbarWidth(
+          _toolbarIconActionEstimatedWidth,
+          includeToggleButton: true,
+        ),
+        importance: _ToolbarActionImportance.critical,
+      ),
     _ToolbarActionEntry(
       child: _buildZoomButton(
         key: Keys.floatActionZoomOut,
@@ -523,7 +549,8 @@ Widget buildCanvasToolbarActions(
             builder: (final BuildContext _, final Widget? _) {
               final AppLocalizations l10n = context.l10n;
               final InteractionLayoutProfile interactionProfile = shellProvider.interactionLayoutProfile;
-              final bool hasActiveSelection = appProvider.selectorModel.isVisible;
+              final bool hasActiveSelection =
+                  appProvider.selectedAction == ActionType.selector || appProvider.selectorModel.isVisible;
               final bool canUndo = appProvider.undoProvider.canUndo;
               final bool canRedo = appProvider.undoProvider.canRedo;
 
@@ -572,6 +599,7 @@ Widget buildCanvasToolbarActions(
                 final List<Widget> resolvedPrimaryActionButtons = primaryActionButtons ?? const <Widget>[];
                 final List<Widget> leadingPrimaryActions = resolvedPrimaryActionButtons.take(AppMath.four).toList();
                 final List<Widget> trailingPrimaryActions = resolvedPrimaryActionButtons.skip(AppMath.four).toList();
+                final bool showSubToolbar = shouldShowSelectionSubToolbar(appProvider);
 
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -588,10 +616,18 @@ Widget buildCanvasToolbarActions(
                       children: <Widget>[undoButton, redoButton],
                       spacing: interactionProfile.buttonSpacing,
                     ),
-                    _buildToolbarButtonGroup(
-                      children: <Widget>[selectorToggleButton],
-                      spacing: interactionProfile.buttonSpacing,
-                    ),
+                    showSubToolbar
+                        ? buildSelectionSubToolbar(
+                            context: context,
+                            shellProvider: shellProvider,
+                            appProvider: appProvider,
+                            interactionProfile: interactionProfile,
+                            trailingToggleButton: selectorToggleButton,
+                          )
+                        : _buildToolbarButtonGroup(
+                            children: <Widget>[selectorToggleButton],
+                            spacing: interactionProfile.buttonSpacing,
+                          ),
                     _buildToolbarButtonGroup(
                       children: <Widget>[zoomOutButton, centerButton, zoomInButton],
                       spacing: interactionProfile.buttonSpacing,
@@ -600,15 +636,23 @@ Widget buildCanvasToolbarActions(
                 );
               }
 
-              return _buildToolbarDock(
-                undoButton: undoButton,
-                redoButton: redoButton,
-                selectorToggleButton: selectorToggleButton,
-                shellToggleButton: shellToggleButton,
-                interactionProfile: interactionProfile,
-                zoomOutButton: zoomOutButton,
-                centerButton: centerButton,
-                zoomInButton: zoomInButton,
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: interactionProfile.buttonSpacing,
+                children: <Widget>[
+                  _buildToolbarButtonGroup(
+                    children: <Widget>[undoButton, redoButton],
+                    spacing: interactionProfile.buttonSpacing,
+                  ),
+                  _buildToolbarButtonGroup(
+                    children: <Widget>[selectorToggleButton, ?shellToggleButton],
+                    spacing: interactionProfile.buttonSpacing,
+                  ),
+                  _buildToolbarButtonGroup(
+                    children: <Widget>[zoomOutButton, centerButton, zoomInButton],
+                    spacing: interactionProfile.buttonSpacing,
+                  ),
+                ],
               );
             },
           );
@@ -642,7 +686,7 @@ Widget _buildSmallScreenShellToggleButton({
   required final String tooltip,
   required final InteractionLayoutProfile interactionProfile,
 }) {
-  return _buildToolbarIconButton(
+  return buildToolbarIconButton(
     key: Keys.floatActionToggle,
     tooltip: tooltip,
     icon: shellProvider.shellMode == ShellMode.hidden ? AppIcon.menu : AppIcon.close,
@@ -660,7 +704,7 @@ Widget _buildSelectorToggleButton({
   required final bool hasActiveSelection,
   required final InteractionLayoutProfile interactionProfile,
 }) {
-  return _buildToolbarIconButton(
+  return buildToolbarIconButton(
     key: Keys.floatActionSelector,
     tooltip: hasActiveSelection ? l10n.cancel : l10n.toolSelector,
     icon: hasActiveSelection ? AppIcon.selectorCancel : AppIcon.selector,
@@ -713,7 +757,7 @@ Widget _buildHistoryButton({
   required final InteractionLayoutProfile interactionProfile,
   required final bool enabled,
 }) {
-  return _buildToolbarIconButton(
+  return buildToolbarIconButton(
     key: key,
     tooltip: enabled ? tooltip : null,
     icon: icon,
@@ -722,42 +766,6 @@ Widget _buildHistoryButton({
     onPressed: () {
       Future<void>.microtask(action);
     },
-  );
-}
-
-/// Builds the toolbar row of history, selection, zoom, and shell controls.
-Widget _buildToolbarDock({
-  required final Widget undoButton,
-  required final Widget redoButton,
-  required final Widget selectorToggleButton,
-  required final Widget? shellToggleButton,
-  required final InteractionLayoutProfile interactionProfile,
-  required final Widget zoomOutButton,
-  required final Widget centerButton,
-  required final Widget zoomInButton,
-}) {
-  final List<Widget> selectionDomainButtons = <Widget>[
-    selectorToggleButton,
-    ?shellToggleButton,
-  ];
-
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    spacing: interactionProfile.buttonSpacing,
-    children: <Widget>[
-      _buildToolbarButtonGroup(
-        children: <Widget>[undoButton, redoButton],
-        spacing: interactionProfile.buttonSpacing,
-      ),
-      _buildToolbarButtonGroup(
-        children: selectionDomainButtons,
-        spacing: interactionProfile.buttonSpacing,
-      ),
-      _buildToolbarButtonGroup(
-        children: <Widget>[zoomOutButton, centerButton, zoomInButton],
-        spacing: interactionProfile.buttonSpacing,
-      ),
-    ],
   );
 }
 
@@ -770,7 +778,7 @@ Widget _buildZoomButton({
   required final AppIcon icon,
   required final double scaleDelta,
 }) {
-  return _buildToolbarIconButton(
+  return buildToolbarIconButton(
     key: key,
     icon: icon,
     interactionProfile: interactionProfile,
@@ -811,27 +819,6 @@ Widget _buildCenterAndDimensionButton(
         variant: AppTextVariant.label,
       ),
     ),
-  );
-}
-
-/// Builds a standard icon action for the top toolbar.
-Widget _buildToolbarIconButton({
-  final Key? key,
-  final String? tooltip,
-  required final AppIcon icon,
-  required final InteractionLayoutProfile interactionProfile,
-  final bool enabled = true,
-  final bool useSourceColors = false,
-  required final VoidCallback onPressed,
-}) {
-  return AppButtonIcon(
-    key: key,
-    tooltip: tooltip,
-    icon: icon,
-    size: interactionProfile.iconSize,
-    enabled: enabled,
-    useSourceColors: useSourceColors,
-    onPressed: onPressed,
   );
 }
 

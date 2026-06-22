@@ -18,6 +18,9 @@ Future<void> paintLayerLand(final PaintingScenarioSession session) async {
     endPosition: session.canvasCenter + _landBottomRight,
   );
 
+  final BuildContext landContext = session.tester.element(find.byType(MainView));
+  final AppProvider landAppProvider = AppProvider.of(landContext, listen: false);
+
   await applyEffectViaUi(
     session.tester,
     SelectionEffect.noise,
@@ -25,8 +28,8 @@ Future<void> paintLayerLand(final PaintingScenarioSession session) async {
     requireApply: true,
   );
 
-  final BuildContext landContext = session.tester.element(find.byType(MainView));
-  final AppProvider landAppProvider = AppProvider.of(landContext, listen: false);
+  await pumpForUnitTestUiSettle(session.tester);
+
   landAppProvider.selectorModel.clear();
   landAppProvider.selectedAction = ActionType.brush;
   landAppProvider.update();

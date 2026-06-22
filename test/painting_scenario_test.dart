@@ -68,6 +68,7 @@ const Map<String, Object> _testPreferences = <String, Object>{
 
 const double _scenarioViewportHeightScale = 1.5;
 const int _coverageDialogTransitionMs = 300;
+const Duration _paintingScenarioTestTimeout = Duration(minutes: 20);
 
 // Sky layer
 const String _skyLayerName = 'Sky';
@@ -460,22 +461,38 @@ void main() {
         videoRecorder: videoRecorder,
       );
 
+      debugPrint('⏱️ Scenario phase: sky');
       await paintLayerSky(session);
+      debugPrint('⏱️ Scenario phase: mountains');
       await paintLayerMountains(session);
+      debugPrint('⏱️ Scenario phase: clouds');
       await paintLayerClouds(session);
+      debugPrint('⏱️ Scenario phase: sun');
       await paintLayerSun(session);
+      debugPrint('⏱️ Scenario phase: land');
       await paintLayerLand(session);
+      debugPrint('⏱️ Scenario phase: lake');
       await paintLayerLake(session);
+      debugPrint('⏱️ Scenario phase: house');
       await paintLayerHouse(session);
+      debugPrint('⏱️ Scenario phase: house shadow');
       await paintLayerHouseShadow(session);
+      debugPrint('⏱️ Scenario phase: fence');
       await paintLayerFence(session);
+      debugPrint('⏱️ Scenario phase: fence shadow');
       await paintLayerFenceShadow(session);
+      debugPrint('⏱️ Scenario phase: birds');
       await paintLayerBirds(session);
 
+      debugPrint('⏱️ Scenario phase: crop');
       final LayersProvider layersProvider = await cropScenarioCanvas(session);
+      debugPrint('⏱️ Scenario phase: vignette');
       await applyPostCropVignette(session);
+      debugPrint('⏱️ Scenario phase: signature');
       await paintLayerSignature(session, layersProvider: layersProvider);
+      debugPrint('⏱️ Scenario phase: validate');
       await validateScenarioScene(session, layersProvider: layersProvider);
+      debugPrint('⏱️ Scenario phase: export');
       await exportScenarioOutputs(session);
 
       // Capture the scene state before coverage exercises.
@@ -489,7 +506,10 @@ void main() {
         for (int i = 0; i < layersProvider.length; i++) layersProvider.get(i).actionStack.length,
       ];
 
+      videoRecorder.pauseAutoCapture();
+      debugPrint('⏱️ Scenario phase: coverage exercises');
       await exerciseCoverageScenarios(session);
+      videoRecorder.resumeAutoCapture();
 
       // Each exercise cleans up after itself. Verify the scene is unchanged.
       expect(layersProvider.length, layerCountBefore);
@@ -528,6 +548,6 @@ void main() {
       debugPrint(
         '✅ Full painting scenario completed in unit test — no simulator needed',
       );
-    });
+    }, timeout: const Timeout(_paintingScenarioTestTimeout));
   });
 }

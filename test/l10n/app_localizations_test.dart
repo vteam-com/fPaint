@@ -191,7 +191,6 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.selectValue('all'), isNotEmpty);
   expect(l10n.sidePanelBrushesSection, isNotEmpty);
   expect(l10n.sidePanelLayersSection, isNotEmpty);
-  expect(l10n.sidePanelSelectionSection, isNotEmpty);
   expect(l10n.topColors('5'), isNotEmpty);
 }
 

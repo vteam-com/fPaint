@@ -256,14 +256,7 @@ void main() {
   });
 
   group('ToolsPanel sections', () {
-    testWidgets('shows separate Selection and Brushes headings', (final WidgetTester tester) async {
-      await pumpToolsPanel(tester);
-
-      expect(find.text('Selection'), findsOneWidget);
-      expect(find.text('Brushes'), findsOneWidget);
-    });
-
-    testWidgets('selection clipboard actions are shown only for an active selection', (
+    testWidgets('selection clipboard actions are not shown in side panel', (
       final WidgetTester tester,
     ) async {
       await pumpToolsPanel(tester);
@@ -277,21 +270,21 @@ void main() {
       appProvider.update();
       await tester.pumpAndSettle();
 
-      expect(find.byKey(Keys.toolSelectorCopy), findsOneWidget);
-      expect(find.byKey(Keys.toolSelectorCut), findsOneWidget);
+      expect(find.byKey(Keys.toolSelectorCopy), findsNothing);
+      expect(find.byKey(Keys.toolSelectorCut), findsNothing);
     });
 
-    testWidgets('selection mode buttons activate the selector tool', (final WidgetTester tester) async {
+    testWidgets('selection mode buttons are not shown in side panel', (final WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
-      await tester.tap(find.byKey(Keys.toolSelectorModeCircle));
-      await tester.pumpAndSettle();
-
-      expect(appProvider.selectedAction, ActionType.selector);
-      expect(appProvider.selectorModel.mode, SelectorMode.circle);
+      expect(find.byKey(Keys.toolSelectorModeCircle), findsNothing);
+      expect(find.byKey(Keys.toolSelectorModeRectangle), findsNothing);
+      expect(find.byKey(Keys.toolSelectorModeLine), findsNothing);
+      expect(find.byKey(Keys.toolSelectorModeLasso), findsNothing);
+      expect(find.byKey(Keys.toolSelectorModeWand), findsNothing);
     });
 
-    testWidgets('selection dismiss restores the previous non-selection tool', (final WidgetTester tester) async {
+    testWidgets('selection dismiss button is not shown in side panel', (final WidgetTester tester) async {
       appProvider.selectedAction = ActionType.smudge;
       appProvider.activateSelectionAction();
       appProvider.setSelectorMode(SelectorMode.circle);
@@ -300,25 +293,18 @@ void main() {
 
       await pumpToolsPanel(tester);
 
-      await tester.tap(find.byKey(Keys.toolSelectorCancel));
-      await tester.pumpAndSettle();
-
-      expect(appProvider.selectedAction, ActionType.smudge);
-      expect(appProvider.selectorModel.isVisible, isFalse);
+      expect(find.byKey(Keys.toolSelectorCancel), findsNothing);
     });
 
-    testWidgets('selection dismiss button stays to the right of the top row', (final WidgetTester tester) async {
+    testWidgets('selection section no longer renders side-panel selector row', (final WidgetTester tester) async {
       appProvider.selectedAction = ActionType.selector;
       appProvider.selectorModel.isVisible = true;
       appProvider.selectorModel.path1 = Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10));
 
       await pumpToolsPanel(tester);
 
-      final Rect selectorRect = tester.getRect(find.byKey(Keys.toolSelector));
-      final Rect cancelRect = tester.getRect(find.byKey(Keys.toolSelectorCancel));
-
-      expect(cancelRect.center.dx, greaterThan(selectorRect.center.dx));
-      expect((cancelRect.center.dy - selectorRect.center.dy).abs(), lessThan(AppLayout.toolbarButtonWidth));
+      expect(find.byKey(Keys.toolSelector), findsNothing);
+      expect(find.byKey(Keys.toolSelectorCancel), findsNothing);
     });
   });
 }

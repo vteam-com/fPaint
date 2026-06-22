@@ -21,13 +21,17 @@ part 'app_provider_selection_crop.dart';
 
 /// Selection, region, transform, effect, and crop operations.
 extension AppProviderSelection on AppProvider {
+  bool get _isSelectionToggleInCancelState {
+    return selectedAction == ActionType.selector || selectorModel.isVisible;
+  }
+
   double get _straightLineRegionCloseDistance {
     return AppInteraction.selectionHandleSize / layers.scale;
   }
 
   /// Toggles selection overlay behavior from the FAB without coupling to tool state.
   void toggleSelectionOverlayFromFab() {
-    if (selectorModel.isVisible) {
+    if (_isSelectionToggleInCancelState) {
       clearSelectionAndRestorePreviousTool();
       return;
     }
