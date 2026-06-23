@@ -1362,7 +1362,13 @@ Future<void> _exerciseToolColorPickers(
   // Tap the brush color preview to open color picker.
   final Finder brushColorPreview = find.byKey(Keys.toolPanelBrushColor1);
   if (brushColorPreview.evaluate().isNotEmpty) {
-    await tester.tap(brushColorPreview);
+    await tester.ensureVisible(brushColorPreview.first);
+    await pumpForUnitTestUiSettle(tester);
+    final Finder brushColorTapTarget = find.byKey(Keys.toolPanelBrushColor1).hitTestable();
+    final Finder resolvedBrushColorTapTarget = brushColorTapTarget.evaluate().isNotEmpty
+        ? brushColorTapTarget
+        : brushColorPreview;
+    await tester.tap(resolvedBrushColorTapTarget.first, warnIfMissed: false);
     await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
     // Dismiss color picker dialog.
@@ -1373,7 +1379,13 @@ Future<void> _exerciseToolColorPickers(
   // Tap the fill color preview to open color picker.
   final Finder fillColorPreview = find.byKey(Keys.toolPanelFillColor);
   if (fillColorPreview.evaluate().isNotEmpty) {
-    await tester.tap(fillColorPreview);
+    await tester.ensureVisible(fillColorPreview.first);
+    await pumpForUnitTestUiSettle(tester);
+    final Finder fillColorTapTarget = find.byKey(Keys.toolPanelFillColor).hitTestable();
+    final Finder resolvedFillColorTapTarget = fillColorTapTarget.evaluate().isNotEmpty
+        ? fillColorTapTarget
+        : fillColorPreview;
+    await tester.tap(resolvedFillColorTapTarget.first, warnIfMissed: false);
     await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
     // Dismiss color picker dialog.
@@ -1627,7 +1639,13 @@ Future<void> _exerciseToolPanelButtons(
   // Tap brush size button to open picker dialog.
   final Finder brushSizeButton = find.byKey(Keys.toolBrushSizeButton);
   if (brushSizeButton.evaluate().isNotEmpty) {
-    await tester.tap(brushSizeButton);
+    await tester.ensureVisible(brushSizeButton.first);
+    await pumpForUnitTestUiSettle(tester);
+    final Finder brushSizeTapTarget = find.byKey(Keys.toolBrushSizeButton).hitTestable();
+    final Finder resolvedBrushSizeTapTarget = brushSizeTapTarget.evaluate().isNotEmpty
+        ? brushSizeTapTarget
+        : brushSizeButton;
+    await tester.tap(resolvedBrushSizeTapTarget.first, warnIfMissed: false);
     await tester.pumpAndSettle();
     // Dismiss dialog.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
@@ -1646,7 +1664,20 @@ Future<void> _exerciseToolPanelButtons(
     matching: find.byType(AppButtonIcon),
   );
   if (lineStyleButton.evaluate().isNotEmpty) {
-    await tester.tap(lineStyleButton.first);
+    await tester.ensureVisible(lineStyleButton.first);
+    await pumpForUnitTestUiSettle(tester);
+    final Finder lineStyleTapTarget = find
+        .ancestor(
+          of: find.byWidgetPredicate(
+            (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.lineStyle,
+          ),
+          matching: find.byType(AppButtonIcon),
+        )
+        .hitTestable();
+    final Finder resolvedLineStyleTapTarget = lineStyleTapTarget.evaluate().isNotEmpty
+        ? lineStyleTapTarget
+        : lineStyleButton;
+    await tester.tap(resolvedLineStyleTapTarget.first, warnIfMissed: false);
     await tester.pumpAndSettle();
     // Dismiss popup.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
@@ -1666,8 +1697,19 @@ Future<void> _exerciseToolPanelButtons(
   );
   if (toleranceButton.evaluate().isNotEmpty) {
     await tester.ensureVisible(toleranceButton.first);
-    await tester.pump();
-    await tester.tap(toleranceButton.first);
+    await pumpForUnitTestUiSettle(tester);
+    final Finder toleranceTapTarget = find
+        .ancestor(
+          of: find.byWidgetPredicate(
+            (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.support,
+          ),
+          matching: find.byType(AppButtonIcon),
+        )
+        .hitTestable();
+    final Finder resolvedToleranceTapTarget = toleranceTapTarget.evaluate().isNotEmpty
+        ? toleranceTapTarget
+        : toleranceButton;
+    await tester.tap(resolvedToleranceTapTarget.first, warnIfMissed: false);
     await tester.pumpAndSettle();
     // Dismiss dialog.
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
@@ -1683,8 +1725,17 @@ Future<void> _exerciseToolPanelButtons(
   );
   if (refreshButton.evaluate().isNotEmpty) {
     await tester.ensureVisible(refreshButton.first);
-    await tester.pump();
-    await tester.tap(refreshButton.first);
+    await pumpForUnitTestUiSettle(tester);
+    final Finder refreshTapTarget = find
+        .ancestor(
+          of: find.byWidgetPredicate(
+            (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.refresh,
+          ),
+          matching: find.byType(AppButtonIcon),
+        )
+        .hitTestable();
+    final Finder resolvedRefreshTapTarget = refreshTapTarget.evaluate().isNotEmpty ? refreshTapTarget : refreshButton;
+    await tester.tap(resolvedRefreshTapTarget.first, warnIfMissed: false);
     await tester.pump();
   }
 
@@ -2060,10 +2111,22 @@ Future<void> _exerciseToleranceAndTopColors(
       matching: find.byType(AppSlider),
     );
     if (sliderInTolerance.evaluate().isNotEmpty) {
+      await tester.ensureVisible(sliderInTolerance.first);
+      await pumpForUnitTestUiSettle(tester);
+      final Finder sliderDragTarget = find
+          .descendant(
+            of: tolerancePicker.first,
+            matching: find.byType(AppSlider),
+          )
+          .hitTestable();
+      final Finder resolvedSliderDragTarget = sliderDragTarget.evaluate().isNotEmpty
+          ? sliderDragTarget
+          : sliderInTolerance;
       await tester.timedDrag(
-        sliderInTolerance.first,
+        resolvedSliderDragTarget.first,
         const Offset(20, 0),
         const Duration(milliseconds: 200),
+        warnIfMissed: false,
       );
       await tester.pump();
     }
@@ -2077,7 +2140,18 @@ Future<void> _exerciseToleranceAndTopColors(
       matching: find.byType(ColorPreview),
     );
     if (colorPreviews.evaluate().isNotEmpty) {
-      await tester.tap(colorPreviews.first);
+      await tester.ensureVisible(colorPreviews.first);
+      await pumpForUnitTestUiSettle(tester);
+      final Finder colorPreviewTapTarget = find
+          .descendant(
+            of: topColorsWidget.first,
+            matching: find.byType(ColorPreview),
+          )
+          .hitTestable();
+      final Finder resolvedColorPreviewTapTarget = colorPreviewTapTarget.evaluate().isNotEmpty
+          ? colorPreviewTapTarget
+          : colorPreviews;
+      await tester.tap(resolvedColorPreviewTapTarget.first, warnIfMissed: false);
       await tester.pump();
     }
   }
@@ -2110,7 +2184,11 @@ Future<void> _exerciseBrushStylePicker(
   // Find brush style picker (AppDropdown).
   final Finder dropdown = find.byType(AppDropdown<int>);
   if (dropdown.evaluate().isNotEmpty) {
-    await tester.tap(dropdown.first);
+    await tester.ensureVisible(dropdown.first);
+    await pumpForUnitTestUiSettle(tester);
+    final Finder dropdownTapTarget = find.byType(AppDropdown<int>).hitTestable();
+    final Finder resolvedDropdownTapTarget = dropdownTapTarget.evaluate().isNotEmpty ? dropdownTapTarget : dropdown;
+    await tester.tap(resolvedDropdownTapTarget.first, warnIfMissed: false);
     await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
     // Tap a different style by its localized text.
