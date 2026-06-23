@@ -46,7 +46,7 @@ dependencies:
   multi_split_view: ^3.6.2
   package_info_plus: ^9.0.1
   pasteboard: ^0.5.0
-  path_provider: any
+  path_provider: 2.1.6
   provider: any
   shared_preferences: ^2.5.5
   url_launcher: ^6.3.2
