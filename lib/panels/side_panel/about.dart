@@ -2,8 +2,9 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/version.dart';
+import 'package:fpaint/panels/side_panel/attribution_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Displays an about dialog with information about the application.
@@ -13,21 +14,16 @@ import 'package:url_launcher/url_launcher.dart';
 /// screen resolution and a link to the application's GitHub repository.
 ///
 /// The [context] parameter is the [BuildContext] used to show the dialog.
-Future<void> showAboutBox(final BuildContext context) async {
+void showAboutBox(final BuildContext context) {
   final AppLocalizations l10n = context.l10n;
   final MediaQueryData mediaQuery = MediaQuery.of(context);
   final String screenResolution = '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';
-  final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
-  if (!context.mounted) {
-    return;
-  }
 
   showAppDialog<void>(
     context: context,
     builder: (final BuildContext dialogContext) {
       return AppDialog(
-        title: '$appName ${packageInfo.version}',
+        title: '$appName $packageVersion',
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,23 +37,23 @@ Future<void> showAboutBox(final BuildContext context) async {
             const AppText(AppConfig.applicationCopyright),
             const SizedBox(height: AppSpacing.large),
             AppText(l10n.deviceScreenResolution(screenResolution)),
-            const SizedBox(height: AppSpacing.large),
-            GestureDetector(
-              onTap: () => launchUrl(Uri.parse(AppConfig.repositoryUrl)),
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: AppText(
-                  l10n.githubRepo,
-                  variant: AppTextVariant.button,
-                ),
-              ),
-            ),
           ],
         ),
         actions: <Widget>[
           AppRowSecondaryButton(
+            onPressed: () => launchUrl(Uri.parse(AppConfig.repositoryUrl)),
+            text: l10n.githubRepo,
+          ),
+          AppRowSecondaryButton(
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              await showAttributionDialog(context);
+            },
+            text: l10n.flutterAttribution,
+          ),
+          AppRowPrimaryButton(
             onPressed: () => Navigator.pop(dialogContext),
-            text: l10n.cancel,
+            text: l10n.close,
           ),
         ],
       );

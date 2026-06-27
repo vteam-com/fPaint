@@ -134,6 +134,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get colorPickerModeWheel => 'Roue';
 
   @override
+  String get close => 'Fermer';
+
+  @override
   String get colorTolerance => 'Tolérance de couleur';
 
   @override
@@ -307,6 +310,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get flipVerticalTooltip => 'Retourner verticalement';
+
+  @override
+  String get flutterAttribution => 'Attribution';
 
   @override
   String get fontColor => 'Couleur de police';
