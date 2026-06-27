@@ -2,64 +2,44 @@ part of '../painting_scenario_test.dart';
 
 Future<void> paintLayerMountains(final PaintingScenarioSession session) async {
   await _setLayerVisibilityByName(session.tester, layerName: _skyLayerName, isVisible: false);
-  await PaintingLayerHelpers.addNewLayer(session.tester, _mountainsLayerName);
 
-  await selectLassoArea(
-    session.tester,
-    points: _mountain1SelectionPoints.map((final Offset point) => session.canvasCenter + point).toList(),
+  // Back mountain: largest and most blurred.
+  await PaintingLayerHelpers.addNewLayer(session.tester, _mountainsLayerName);
+  await _paintMountainOnSelectedLayer(
+    session,
+    selectionPoints: _mountainBackSelectionPoints,
+    peak: _mountainBackPeak,
+    gradientQuickDropPoint: _mountainBackGradientQuickDropPoint,
+    fillPoint: _mountainBackFillPoint,
   );
-  await performFloodFillGradient(
-    session.tester,
-    gradientMode: FillMode.linear,
-    gradientPoints: <GradientPoint>[
-      GradientPoint(color: _mountainGradientTopColor, offset: session.canvasCenter + _mountain1Peak),
-      GradientPoint(color: _mountainGradientBlueColor, offset: session.canvasCenter + _mountain1GradientQuickDropPoint),
-      GradientPoint(
-        color: const ui.Color.fromARGB(255, 0, 112, 30),
-        offset: session.canvasCenter + _mountain1FillPoint,
-      ),
-    ],
+  await applyEffectViaUi(session.tester, SelectionEffect.blur, strength: _mountainBackBlurIntensity);
+
+  // Middle mountain: less blurred than the back mountain.
+  await PaintingLayerHelpers.addNewLayer(session.tester, _mountainsMiddleLayerName);
+  await _paintMountainOnSelectedLayer(
+    session,
+    selectionPoints: _mountainMiddleSelectionPoints,
+    peak: _mountainMiddlePeak,
+    gradientQuickDropPoint: _mountainMiddleGradientQuickDropPoint,
+    fillPoint: _mountainMiddleFillPoint,
   );
+  await applyEffectViaUi(session.tester, SelectionEffect.blur, strength: _mountainMiddleBlurIntensity);
+
+  // Front mountain: smaller and sharp.
+  await PaintingLayerHelpers.addNewLayer(session.tester, _mountainsFrontLayerName);
+  await _paintMountainOnSelectedLayer(
+    session,
+    selectionPoints: _mountainFrontSelectionPoints,
+    peak: _mountainFrontPeak,
+    gradientQuickDropPoint: _mountainFrontGradientQuickDropPoint,
+    fillPoint: _mountainFrontFillPoint,
+  );
+
+  await _mergeMountainLayerIntoBase(session, _mountainsFrontLayerName);
+  await _mergeMountainLayerIntoBase(session, _mountainsMiddleLayerName);
 
   final BuildContext mountainContext = session.tester.element(find.byType(MainView));
   final AppProvider mountainAppProvider = AppProvider.of(mountainContext, listen: false);
-  final LayersProvider mountainLayersProvider = LayersProvider.of(mountainContext);
-
-  await _duplicateSelectedMountain(
-    session,
-    mountainAppProvider: mountainAppProvider,
-    moveDelta: _mountainDuplicateLargeMoveDelta,
-    scaleFactor: _mountainDuplicateLargeScaleFactor,
-  );
-  final LayerProvider firstDuplicateLayer = mountainLayersProvider.selectedLayer;
-
-  await _duplicateSelectedMountain(
-    session,
-    mountainAppProvider: mountainAppProvider,
-    moveDelta: _mountainDuplicateSmallMoveDelta,
-    scaleFactor: _mountainDuplicateSmallScaleFactor,
-  );
-  final LayerProvider secondDuplicateLayer = mountainLayersProvider.selectedLayer;
-
-  int mountainsLayerIndex = mountainLayersProvider.list.indexWhere(
-    (final LayerProvider layer) => layer.name == _mountainsLayerName,
-  );
-  final int secondDuplicateLayerIndex = mountainLayersProvider.list.indexOf(secondDuplicateLayer);
-  expect(secondDuplicateLayerIndex, isNonNegative, reason: 'Second duplicated mountain layer should exist');
-  expect(mountainsLayerIndex, isNonNegative, reason: 'Mountains layer should exist for merge');
-  await PaintingLayerHelpers.mergeLayer(session.tester, secondDuplicateLayerIndex, mountainsLayerIndex);
-
-  mountainsLayerIndex = mountainLayersProvider.list.indexWhere(
-    (final LayerProvider layer) => layer.name == _mountainsLayerName,
-  );
-  final int firstDuplicateLayerIndex = mountainLayersProvider.list.indexOf(firstDuplicateLayer);
-  expect(firstDuplicateLayerIndex, isNonNegative, reason: 'First duplicated mountain layer should exist');
-  expect(mountainsLayerIndex, isNonNegative, reason: 'Mountains layer should exist for merge');
-  await PaintingLayerHelpers.mergeLayer(session.tester, firstDuplicateLayerIndex, mountainsLayerIndex);
-
-  // Apply blur effect at reduced intensity to soften the merged mountains.
-  await applyEffectViaUi(session.tester, SelectionEffect.blur, strength: _mountainBlurIntensity);
-
   mountainAppProvider.selectorModel.clear();
   mountainAppProvider.update();
   await session.tester.pump();
@@ -68,41 +48,90 @@ Future<void> paintLayerMountains(final PaintingScenarioSession session) async {
   await session.videoRecorder.captureFrame();
 }
 
-Future<void> _duplicateSelectedMountain(
+Future<void> _paintMountainOnSelectedLayer(
   final PaintingScenarioSession session, {
-  required final AppProvider mountainAppProvider,
-  required final Offset moveDelta,
-  required final double scaleFactor,
+  required final List<Offset> selectionPoints,
+  required final Offset peak,
+  required final Offset gradientQuickDropPoint,
+  required final Offset fillPoint,
 }) async {
-  mountainAppProvider.selectAll();
-  mountainAppProvider.selectedAction = ActionType.selector;
-  mountainAppProvider.update();
-  await session.tester.pump();
+  final Offset snowTransitionPoint = Offset.lerp(peak, gradientQuickDropPoint, _mountainSnowTransitionFactor)!;
+  final Offset foothillTransitionPoint = Offset.lerp(
+    gradientQuickDropPoint,
+    fillPoint,
+    _mountainFoothillTransitionFactor,
+  )!;
 
-  await mountainAppProvider.regionDuplicate();
-  mountainAppProvider.transformModel.moveAll(moveDelta);
-  _scaleActiveDuplicateTransform(mountainAppProvider, scaleFactor);
-  mountainAppProvider.update();
-  await session.tester.pump();
+  await selectLassoArea(
+    session.tester,
+    points: selectionPoints.map((final Offset point) => session.canvasCenter + point).toList(),
+  );
+  await performFloodFillGradient(
+    session.tester,
+    gradientMode: FillMode.linear,
+    gradientPoints: <GradientPoint>[
+      GradientPoint(color: _mountainGradientTopColor, offset: session.canvasCenter + peak),
+      GradientPoint(color: _mountainGradientUpperSlopeColor, offset: session.canvasCenter + snowTransitionPoint),
+      GradientPoint(color: _mountainGradientLowerSlopeColor, offset: session.canvasCenter + foothillTransitionPoint),
+      GradientPoint(color: _mountainGradientBaseColor, offset: session.canvasCenter + fillPoint),
+    ],
+  );
 
-  await mountainAppProvider.confirmTransform();
-  await session.tester.pump();
+  await _paintMountainSnowCap(
+    session,
+    selectionPoints: selectionPoints,
+    peak: peak,
+    gradientQuickDropPoint: gradientQuickDropPoint,
+  );
 }
 
-void _scaleActiveDuplicateTransform(
-  final AppProvider mountainAppProvider,
-  final double scaleFactor,
-) {
-  final Offset transformCenter = mountainAppProvider.transformModel.center;
+Future<void> _paintMountainSnowCap(
+  final PaintingScenarioSession session, {
+  required final List<Offset> selectionPoints,
+  required final Offset peak,
+  required final Offset gradientQuickDropPoint,
+}) async {
+  final Offset baseLeft = selectionPoints.first;
+  final Offset baseRight = selectionPoints[4];
+  final Offset capLeft = Offset.lerp(peak, baseLeft, _mountainSnowCapEdgeFactor)!;
+  final Offset capRight = Offset.lerp(peak, baseRight, _mountainSnowCapEdgeFactor)!;
+  final Offset capBottomMid = Offset.lerp(
+    peak,
+    Offset((baseLeft.dx + baseRight.dx) / AppMath.pair, gradientQuickDropPoint.dy),
+    _mountainSnowCapBottomFactor,
+  )!;
 
-  mountainAppProvider.transformModel.corners = mountainAppProvider.transformModel.corners.map((final Offset corner) {
-    final Offset vector = corner - transformCenter;
-    return transformCenter + (vector * scaleFactor);
-  }).toList();
-  mountainAppProvider.transformModel.edgeMidpoints = mountainAppProvider.transformModel.edgeMidpoints.map((
-    final Offset midpoint,
-  ) {
-    final Offset vector = midpoint - transformCenter;
-    return transformCenter + (vector * scaleFactor);
-  }).toList();
+  await selectLassoArea(
+    session.tester,
+    points: <Offset>[
+      session.canvasCenter + capLeft,
+      session.canvasCenter + peak,
+      session.canvasCenter + capRight,
+      session.canvasCenter + capBottomMid,
+      session.canvasCenter + capLeft,
+    ],
+  );
+  await performFloodFillSolid(
+    session.tester,
+    position: session.canvasCenter + capBottomMid,
+    color: _mountainSnowCapColor,
+  );
+}
+
+Future<void> _mergeMountainLayerIntoBase(
+  final PaintingScenarioSession session,
+  final String sourceLayerName,
+) async {
+  final BuildContext mountainContext = session.tester.element(find.byType(MainView));
+  final LayersProvider mountainLayersProvider = LayersProvider.of(mountainContext);
+
+  final int sourceLayerIndex = mountainLayersProvider.list.indexWhere(
+    (final LayerProvider layer) => layer.name == sourceLayerName,
+  );
+  final int mountainsLayerIndex = mountainLayersProvider.list.indexWhere(
+    (final LayerProvider layer) => layer.name == _mountainsLayerName,
+  );
+  expect(sourceLayerIndex, isNonNegative, reason: 'Source mountain layer should exist for merge');
+  expect(mountainsLayerIndex, isNonNegative, reason: 'Mountains layer should exist for merge');
+  await PaintingLayerHelpers.mergeLayer(session.tester, sourceLayerIndex, mountainsLayerIndex);
 }
