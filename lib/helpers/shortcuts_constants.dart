@@ -46,6 +46,12 @@ abstract class ShortcutLabels {
   static const String close = 'Close';
 }
 
+/// Internal map keys used by shortcut-row metadata.
+abstract class ShortcutMapKeys {
+  static const String keys = 'keys';
+  static const String description = 'description';
+}
+
 /// Display strings for keyboard modifier keys.
 abstract class ShortcutModifiers {
   static const String cmd = 'Cmd';
