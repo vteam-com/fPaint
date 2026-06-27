@@ -21,84 +21,66 @@ class ShortcutsHelpDialog extends StatelessWidget {
           (
             title: ShortcutCategories.fileOperations,
             shortcuts: <Map<String, String>>[
-              <String, String>{'keys': '$mod ${ShortcutKeys.s}', 'description': ShortcutActions.save},
-              <String, String>{'keys': '$mod ${ShortcutKeys.o}', 'description': ShortcutActions.open},
-              <String, String>{'keys': '$mod ${ShortcutKeys.n}', 'description': ShortcutActions.newCanvas},
+              _shortcutEntry('$mod ${ShortcutKeys.s}', ShortcutActions.save),
+              _shortcutEntry('$mod ${ShortcutKeys.o}', ShortcutActions.open),
+              _shortcutEntry('$mod ${ShortcutKeys.n}', ShortcutActions.newCanvas),
             ],
           ),
           (
             title: ShortcutCategories.editing,
             shortcuts: <Map<String, String>>[
-              <String, String>{'keys': '$mod ${ShortcutKeys.z}', 'description': ShortcutActions.undo},
-              <String, String>{'keys': '$mod ${ShortcutKeys.y}', 'description': ShortcutActions.redo},
-              <String, String>{'keys': '$mod ${ShortcutKeys.x}', 'description': ShortcutActions.cut},
-              <String, String>{'keys': '$mod ${ShortcutKeys.c}', 'description': ShortcutActions.copy},
-              <String, String>{'keys': '$mod ${ShortcutKeys.v}', 'description': ShortcutActions.paste},
-              <String, String>{'keys': '$mod ${ShortcutKeys.d}', 'description': ShortcutActions.duplicateSameLayer},
-              <String, String>{
-                'keys': '$mod ${ShortcutModifiers.shift} ${ShortcutKeys.d}',
-                'description': ShortcutActions.duplicateNewLayer,
-              },
-              <String, String>{
-                'keys': '$moveDuplicateModifier + ${ShortcutActions.dragSelection}',
-                'description': ShortcutActions.duplicateSameLayer,
-              },
-              <String, String>{
-                'keys': duplicateMoveNewLayerShortcut,
-                'description': ShortcutActions.duplicateNewLayer,
-              },
+              _shortcutEntry('$mod ${ShortcutKeys.z}', ShortcutActions.undo),
+              _shortcutEntry('$mod ${ShortcutKeys.y}', ShortcutActions.redo),
+              _shortcutEntry('$mod ${ShortcutKeys.x}', ShortcutActions.cut),
+              _shortcutEntry('$mod ${ShortcutKeys.c}', ShortcutActions.copy),
+              _shortcutEntry('$mod ${ShortcutKeys.v}', ShortcutActions.paste),
+              _shortcutEntry('$mod ${ShortcutKeys.d}', ShortcutActions.duplicateSameLayer),
+              _shortcutEntry('$mod ${ShortcutModifiers.shift} ${ShortcutKeys.d}', ShortcutActions.duplicateNewLayer),
+              _shortcutEntry(
+                '$moveDuplicateModifier + ${ShortcutActions.dragSelection}',
+                ShortcutActions.duplicateSameLayer,
+              ),
+              _shortcutEntry(duplicateMoveNewLayerShortcut, ShortcutActions.duplicateNewLayer),
             ],
           ),
           (
             title: ShortcutCategories.view,
             shortcuts: <Map<String, String>>[
-              <String, String>{'keys': '$mod +', 'description': ShortcutActions.zoomIn},
-              <String, String>{'keys': '$mod -', 'description': ShortcutActions.zoomOut},
-              <String, String>{'keys': '$mod 0', 'description': ShortcutActions.resetZoom},
-              <String, String>{'keys': ShortcutKeys.tab, 'description': l10n.toggleShell},
-              <String, String>{'keys': ShortcutActions.showKeyboardShortcuts, 'description': l10n.keyboardShortcuts},
+              _shortcutEntry('$mod +', ShortcutActions.zoomIn),
+              _shortcutEntry('$mod -', ShortcutActions.zoomOut),
+              _shortcutEntry('$mod 0', ShortcutActions.resetZoom),
+              _shortcutEntry(ShortcutKeys.tab, l10n.toggleShell),
+              _shortcutEntry(ShortcutActions.showKeyboardShortcuts, l10n.keyboardShortcuts),
             ],
           ),
           (
             title: ShortcutCategories.tools,
             shortcuts: <Map<String, String>>[
-              <String, String>{'keys': ShortcutKeys.b, 'description': ShortcutActions.brushTool},
-              <String, String>{'keys': ShortcutKeys.e, 'description': ShortcutActions.eraserTool},
-              <String, String>{'keys': ShortcutKeys.s, 'description': ShortcutActions.selectionTool},
-              <String, String>{'keys': ShortcutKeys.f, 'description': ShortcutActions.fillTool},
-              <String, String>{'keys': ShortcutKeys.t, 'description': ShortcutActions.textTool},
+              _shortcutEntry(ShortcutKeys.b, ShortcutActions.brushTool),
+              _shortcutEntry(ShortcutKeys.e, ShortcutActions.eraserTool),
+              _shortcutEntry(ShortcutKeys.s, ShortcutActions.selectionTool),
+              _shortcutEntry(ShortcutKeys.f, ShortcutActions.fillTool),
+              _shortcutEntry(ShortcutKeys.t, ShortcutActions.textTool),
             ],
           ),
           (
             title: ShortcutCategories.selection,
             shortcuts: <Map<String, String>>[
-              <String, String>{'keys': ShortcutModifiers.shift, 'description': ShortcutActions.addToSelection},
-              <String, String>{
-                'keys': _getSelectionSubtractModifier(),
-                'description': ShortcutActions.subtractFromSelection,
-              },
-              <String, String>{
-                'keys': '${ShortcutModifiers.shift} + ${_getSelectionSubtractModifier()}',
-                'description': ShortcutActions.intersectWithSelection,
-              },
-              <String, String>{
-                'keys': _getPlatformModifier(context),
-                'description': ShortcutActions.wandSampleAllLayers,
-              },
-              <String, String>{
-                'keys': _getPlatformModifier(context),
-                'description': ShortcutActions.floodFillSampleAllLayers,
-              },
+              _shortcutEntry(ShortcutModifiers.shift, ShortcutActions.addToSelection),
+              _shortcutEntry(_getSelectionSubtractModifier(), ShortcutActions.subtractFromSelection),
+              _shortcutEntry(
+                '${ShortcutModifiers.shift} + ${_getSelectionSubtractModifier()}',
+                ShortcutActions.intersectWithSelection,
+              ),
+              _shortcutEntry(_getPlatformModifier(context), ShortcutActions.wandSampleAllLayers),
+              _shortcutEntry(_getPlatformModifier(context), ShortcutActions.floodFillSampleAllLayers),
             ],
           ),
           (
             title: ShortcutCategories.layers,
             shortcuts: <Map<String, String>>[
-              <String, String>{
-                'keys': '$mod ${ShortcutModifiers.shift} ${ShortcutKeys.n}',
-                'description': ShortcutActions.newLayer,
-              },
-              <String, String>{'keys': ShortcutLabels.delete, 'description': ShortcutActions.deleteLayer},
+              _shortcutEntry('$mod ${ShortcutModifiers.shift} ${ShortcutKeys.n}', ShortcutActions.newLayer),
+              _shortcutEntry(ShortcutLabels.delete, ShortcutActions.deleteLayer),
             ],
           ),
         ];
@@ -191,8 +173,8 @@ class ShortcutsHelpDialog extends StatelessWidget {
         _buildShortcutCategory(title),
         ...shortcuts.map(
           (final Map<String, String> shortcut) => _buildShortcut(
-            shortcut['keys']!,
-            shortcut['description']!,
+            shortcut[ShortcutMapKeys.keys]!,
+            shortcut[ShortcutMapKeys.description]!,
             groupWidth: groupWidth,
           ),
         ),
@@ -229,6 +211,13 @@ class ShortcutsHelpDialog extends StatelessWidget {
   String _getSelectionSubtractModifier() {
     final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
     return isMacOS ? ShortcutModifiers.option : ShortcutModifiers.alt;
+  }
+
+  Map<String, String> _shortcutEntry(final String keys, final String description) {
+    return <String, String>{
+      ShortcutMapKeys.keys: keys,
+      ShortcutMapKeys.description: description,
+    };
   }
 
   double _shortcutGroupWidth(final double availableWidth) {
