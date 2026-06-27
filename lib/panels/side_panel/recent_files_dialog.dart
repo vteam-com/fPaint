@@ -462,16 +462,21 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               const AppSvgIcon(
                 icon: AppIcon.image,
                 size: AppLayout.recentFileMissingIconSize,
               ),
               const SizedBox(height: AppSpacing.small),
-              AppText(
-                label,
-                variant: AppTextVariant.subtitle,
-                textAlign: TextAlign.center,
+              Flexible(
+                child: AppText(
+                  label,
+                  variant: AppTextVariant.subtitle,
+                  textAlign: TextAlign.center,
+                  maxLines: AppMath.pair,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),

@@ -1,6 +1,6 @@
 import 'dart:ui' show Color, TextAlign;
 
-import 'package:flutter/widgets.dart' show StatelessWidget, BuildContext, Text, TextStyle, Widget;
+import 'package:flutter/widgets.dart' show StatelessWidget, BuildContext, Text, TextOverflow, TextStyle, Widget;
 import 'package:fpaint/constants/constants.dart';
 
 /// Semantic text-style variant for [AppText].
@@ -39,6 +39,8 @@ class AppText extends StatelessWidget {
     this.variant = AppTextVariant.body,
     this.color,
     this.textAlign,
+    this.maxLines,
+    this.overflow,
   });
 
   /// Optional color override applied on top of the variant's base style.
@@ -46,6 +48,12 @@ class AppText extends StatelessWidget {
 
   /// The text to display.
   final String data;
+
+  /// Optional maximum number of lines before the text is truncated.
+  final int? maxLines;
+
+  /// How visual overflow should be handled when the text exceeds its bounds.
+  final TextOverflow? overflow;
 
   /// Horizontal alignment of the text within its parent.
   final TextAlign? textAlign;
@@ -68,6 +76,6 @@ class AppText extends StatelessWidget {
       style = style.copyWith(color: color);
     }
 
-    return Text(data, style: style, textAlign: textAlign);
+    return Text(data, style: style, textAlign: textAlign, maxLines: maxLines, overflow: overflow);
   }
 }

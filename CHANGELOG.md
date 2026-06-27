@@ -4,6 +4,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.6] - 2026-06-27
+
+### Update
+
+- Responsive toolbar actions and selection sub-toolbar behavior
+- Selection tool and effect preview refinements
+- Improved tooltips and keyboard shortcut hints
+- Adjusted UI font sizes for better readability
+
+### Fix
+
+- Removed duplicate UI strings
+
 ## [1.8.5] - 2026-06-13
 
 ### Add
