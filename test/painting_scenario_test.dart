@@ -85,27 +85,66 @@ const double _skyLowerMidStopPosition = 0.60;
 
 // Mountains layer
 const String _mountainsLayerName = 'Mountains';
-const Color _mountainGradientTopColor = ui.Color.fromARGB(255, 187, 220, 220);
-const Color _mountainGradientBlueColor = ui.Color.fromARGB(255, 8, 126, 185);
-const Offset _mountain1BaseLeft = Offset(-380, 80);
-const Offset _mountain1Peak = Offset(-190, -110);
-const Offset _mountain1PeakLeftCurve = Offset(-200, -96);
-const Offset _mountain1PeakRightCurve = Offset(-168, -96);
-const Offset _mountain1BaseRight = Offset(40, 80);
-const Offset _mountain1GradientQuickDropPoint = Offset(-190, -92);
-const Offset _mountain1FillPoint = Offset(-190, -24);
-const double _mountainDuplicateLargeScaleFactor = 1.35;
-const Offset _mountainDuplicateLargeMoveDelta = Offset(-170, -24);
-const double _mountainDuplicateSmallScaleFactor = 0.7;
-const Offset _mountainDuplicateSmallMoveDelta = Offset(210, 14);
-const double _mountainBlurIntensity = 0.2;
-const List<Offset> _mountain1SelectionPoints = <Offset>[
-  _mountain1BaseLeft,
-  _mountain1PeakLeftCurve,
-  _mountain1Peak,
-  _mountain1PeakRightCurve,
-  _mountain1BaseRight,
-  _mountain1BaseLeft,
+const String _mountainsMiddleLayerName = 'Mountains Middle Draft';
+const String _mountainsFrontLayerName = 'Mountains Front Draft';
+const Color _mountainGradientTopColor = ui.Color.fromARGB(255, 232, 247, 242);
+const Color _mountainGradientUpperSlopeColor = ui.Color.fromARGB(255, 154, 208, 197);
+const Color _mountainGradientLowerSlopeColor = ui.Color.fromARGB(255, 67, 168, 156);
+const Color _mountainGradientBaseColor = ui.Color.fromARGB(255, 34, 114, 58);
+const Color _mountainSnowCapColor = ui.Color.fromARGB(255, 247, 250, 252);
+const double _mountainSnowTransitionFactor = 0.40;
+const double _mountainFoothillTransitionFactor = 0.62;
+const double _mountainSnowCapEdgeFactor = 0.22;
+const double _mountainSnowCapBottomFactor = 0.30;
+
+const Offset _mountainBackBaseLeft = Offset(-40, 98);
+const Offset _mountainBackPeak = Offset(88, -166);
+const Offset _mountainBackPeakLeftCurve = Offset(64, -146);
+const Offset _mountainBackPeakRightCurve = Offset(116, -146);
+const Offset _mountainBackBaseRight = Offset(252, 98);
+const Offset _mountainBackGradientQuickDropPoint = Offset(88, -138);
+const Offset _mountainBackFillPoint = Offset(98, -52);
+const double _mountainBackBlurIntensity = 0.38;
+
+const Offset _mountainMiddleBaseLeft = Offset(-220, 98);
+const Offset _mountainMiddlePeak = Offset(-90, -138);
+const Offset _mountainMiddlePeakLeftCurve = Offset(-112, -118);
+const Offset _mountainMiddlePeakRightCurve = Offset(-66, -118);
+const Offset _mountainMiddleBaseRight = Offset(80, 98);
+const Offset _mountainMiddleGradientQuickDropPoint = Offset(-90, -114);
+const Offset _mountainMiddleFillPoint = Offset(-80, -20);
+const double _mountainMiddleBlurIntensity = 0.20;
+
+const Offset _mountainFrontBaseLeft = Offset(-300, 98);
+const Offset _mountainFrontPeak = Offset(-236, -114);
+const Offset _mountainFrontPeakLeftCurve = Offset(-252, -98);
+const Offset _mountainFrontPeakRightCurve = Offset(-220, -98);
+const Offset _mountainFrontBaseRight = Offset(-170, 98);
+const Offset _mountainFrontGradientQuickDropPoint = Offset(-236, -84);
+const Offset _mountainFrontFillPoint = Offset(-228, 34);
+const List<Offset> _mountainBackSelectionPoints = <Offset>[
+  _mountainBackBaseLeft,
+  _mountainBackPeakLeftCurve,
+  _mountainBackPeak,
+  _mountainBackPeakRightCurve,
+  _mountainBackBaseRight,
+  _mountainBackBaseLeft,
+];
+const List<Offset> _mountainMiddleSelectionPoints = <Offset>[
+  _mountainMiddleBaseLeft,
+  _mountainMiddlePeakLeftCurve,
+  _mountainMiddlePeak,
+  _mountainMiddlePeakRightCurve,
+  _mountainMiddleBaseRight,
+  _mountainMiddleBaseLeft,
+];
+const List<Offset> _mountainFrontSelectionPoints = <Offset>[
+  _mountainFrontBaseLeft,
+  _mountainFrontPeakLeftCurve,
+  _mountainFrontPeak,
+  _mountainFrontPeakRightCurve,
+  _mountainFrontBaseRight,
+  _mountainFrontBaseLeft,
 ];
 
 // Clouds layer (drawn with 5 circles and bottom trimmed by selection erase)
