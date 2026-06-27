@@ -2,7 +2,10 @@
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CHECK_FAILURE_EXIT_CODE="1"
-FCHECK_VERSION="1.4.0"
+FCHECK_VERSION="1.4.1"
+TEST_OUTPUT_DIR="$ROOT_DIR/test/output"
+COVERAGE_LCOV_FILE="$ROOT_DIR/coverage/lcov.info"
+COVERAGE_SUMMARY_FILE="$TEST_OUTPUT_DIR/cc.txt"
 ANSI_RED="$(printf '\033[31m')"
 ANSI_BOLD="$(printf '\033[1m')"
 ANSI_BLINK="$(printf '\033[5m')"
@@ -45,11 +48,6 @@ case "$fcheck_exit_code" in
 		;;
 esac
 
-# fcheck --fix can touch dependency declarations; refresh package resolution
-# before formatter/analyzer reads analysis_options includes.
-echo --- Pub Get post-fcheck
-flutter pub get > /dev/null || { echo "Pub get failed"; exit 1; }
-
 echo --- Format sources
 dart format lib test tool
 dart fix --apply
@@ -59,13 +57,52 @@ if [ "$fcheck_exit_code" -ne 0 ]; then
 fi
 
 echo --- Analyze
-flutter analyze lib test --no-pub | sed 's/^/    /'
+flutter analyze lib test --no-pub
 
 echo --- Test
-test_output="$(flutter test --reporter=compact --coverage --no-pub 2>&1)" || {
+test_started_at="$(date +%s)"
+test_output="$(flutter test --reporter=compact --coverage --no-pub 2>&1)"
+test_exit_code="$?"
+test_finished_at="$(date +%s)"
+test_elapsed_seconds="$((test_finished_at - test_started_at))"
+test_elapsed_minutes="$((test_elapsed_seconds / 60))"
+test_elapsed_remaining_seconds="$((test_elapsed_seconds % 60))"
+printf '%s %sm %ss\n' '--- Test Duration:' "$test_elapsed_minutes" "$test_elapsed_remaining_seconds"
+
+if [ "$test_exit_code" -ne 0 ]; then
 	echo "$test_output"
+	exit "$CHECK_FAILURE_EXIT_CODE"
+fi
+
+echo --- Coverage Summary
+if [ ! -f "$COVERAGE_LCOV_FILE" ]; then
+	echo "Coverage file not found: $COVERAGE_LCOV_FILE"
+	exit "$CHECK_FAILURE_EXIT_CODE"
+fi
+
+if [ ! -s "$COVERAGE_LCOV_FILE" ]; then
+	echo "Coverage file is empty: $COVERAGE_LCOV_FILE"
+	exit "$CHECK_FAILURE_EXIT_CODE"
+fi
+
+if ! grep -q "^LF:" "$COVERAGE_LCOV_FILE"; then
+	echo "Coverage file does not contain line totals: $COVERAGE_LCOV_FILE"
+	exit "$CHECK_FAILURE_EXIT_CODE"
+fi
+
+COVERAGE_PERCENTAGE="$(awk -F: '
+	/^LF:/ { line_found += $2; next }
+	/^LH:/ { line_hit += $2; next }
+	END {
+		if (line_found <= 0) {
+			exit 1
+		}
+		printf "%.1f%%", (line_hit / line_found) * 100
+	}
+' "$COVERAGE_LCOV_FILE")" || {
+	echo "Coverage file does not contain valid line totals: $COVERAGE_LCOV_FILE"
 	exit "$CHECK_FAILURE_EXIT_CODE"
 }
 
-echo --- Coverage Summary
-"$ROOT_DIR/tool/update_coverage_summary.sh" || exit "$CHECK_FAILURE_EXIT_CODE"
+mkdir -p "$TEST_OUTPUT_DIR"
+printf '%s\n' "$COVERAGE_PERCENTAGE" | tee "$COVERAGE_SUMMARY_FILE"
