@@ -122,6 +122,9 @@ const int _unitTestUiSettlePumpCount = 12;
 /// Duration of each bounded settle pump before test interactions continue.
 const Duration _unitTestUiSettlePumpDuration = Duration(milliseconds: 16);
 
+/// Maximum number of pumps while waiting for async wand selection work.
+const int _wandSelectionWaitPumpCount = 120;
+
 /// Share-sheet label for PNG export actions.
 const String _unitTestPngShareActionFileName = 'image.PNG';
 
@@ -457,7 +460,14 @@ Future<void> pumpForDialogTransition(
   final int transitionMs = _dialogTransitionMs,
 }) async {
   await tester.pump();
-  await tester.pump(Duration(milliseconds: transitionMs));
+
+  final int maxPumpCount = math.max(1, (transitionMs / _unitTestUiSettlePumpDuration.inMilliseconds).ceil());
+  for (int index = 0; index < maxPumpCount; index++) {
+    if (!tester.binding.hasScheduledFrame) {
+      break;
+    }
+    await tester.pump(_unitTestUiSettlePumpDuration);
+  }
 }
 
 /// Opens the main menu and waits for its transition to finish.
@@ -702,6 +712,19 @@ Future<void> _waitForSelectorModeButtons(final WidgetTester tester) async {
   }
 }
 
+Future<void> _waitForWandSelectionIdle(
+  final WidgetTester tester, {
+  required final AppProvider appProvider,
+}) async {
+  for (int index = 0; index < _wandSelectionWaitPumpCount; index++) {
+    final bool hasPendingRequest = appProvider.pendingWandSelectionPosition != null;
+    if (!appProvider.isWandSelectionInProgress && !hasPendingRequest) {
+      break;
+    }
+    await tester.pump(_unitTestUiSettlePumpDuration);
+  }
+}
+
 /// Activates selector mode using whichever selector entry is currently visible.
 Future<void> activateSelectorTool(final WidgetTester tester) async {
   if (_hasSelectorModeButtons()) {
@@ -908,21 +931,21 @@ Future<void> selectWandArea(
   int? tolerance,
 }) async {
   await activateSelectorTool(tester);
-  // Ensure the selection sub-toolbar has time to appear
-  await tester.pumpAndSettle(const Duration(milliseconds: 500));
+  await _waitForSelectorModeButtons(tester);
+
+  final BuildContext context = mainViewContext(tester);
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   await tapByKey(tester, Keys.toolSelectorModeWand);
   await tester.pump();
 
   if (tolerance != null) {
-    final BuildContext context = mainViewContext(tester);
-    final AppProvider appProvider = AppProvider.of(context, listen: false);
     appProvider.tolerance = tolerance;
     await tester.pump();
   }
 
   await tapLikeHuman(tester, position);
-  await pumpForUnitTestUiSettle(tester);
+  await _waitForWandSelectionIdle(tester, appProvider: appProvider);
 }
 
 /// Sets selector math mode to replace.
@@ -2622,6 +2645,9 @@ class UnitTestVideoRecorder {
 
   /// Re-enables automatic post-interaction frame capture for this recorder.
   void resumeAutoCapture() {
+    // Drop interaction markers recorded while auto-capture was paused so
+    // they are not drawn as a backlog on the next captured frame.
+    InteractionTracker.clear();
     _active = this;
   }
 
@@ -2687,7 +2713,13 @@ class UnitTestVideoRecorder {
   /// Stops recording, assembles the frames into an MP4 using ffmpeg,
   /// and cleans up the frames directory on success.
   Future<void> stop() async {
+    // Capture pending UI state first (may include a final interaction marker).
     await captureFrame();
+
+    // Append one extra clean frame so the video ends on a stable final view.
+    InteractionTracker.clear();
+    await captureFrame();
+
     _active = null;
 
     debugPrint(
