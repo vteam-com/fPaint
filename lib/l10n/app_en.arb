@@ -38,6 +38,7 @@
   "canvas": "Canvas...",
   "canvasDimensionsMustBePositive": "Canvas dimensions must be positive.",
   "canvasSizeTitle": "Canvas Size",
+  "close": "Close",
   "colorLabel": "Color",
   "@colorLabel": {
     "description": "REVIEWED"
@@ -152,6 +153,7 @@
   "fillColor": "Fill Color",
   "flipHorizontalTooltip": "Flip Horizontal",
   "flipVerticalTooltip": "Flip Vertical",
+  "flutterAttribution": "Attribution",
   "fontColor": "Font Color",
   "fontSizeLabel": "Font Size",
   "fpaintLoadImage": "fPaint Load Image",

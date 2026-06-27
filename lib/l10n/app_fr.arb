@@ -35,6 +35,7 @@
   "canvas": "Toile...",
   "canvasDimensionsMustBePositive": "Les dimensions de la toile doivent etre positives.",
   "canvasSizeTitle": "Taille de la toile",
+  "close": "Fermer",
   "colorLabel": "Couleur",
   "colorPickerModeSliders": "Curseurs",
   "colorPickerModeWheel": "Roue",
@@ -145,6 +146,10 @@
   "fillColor": "Couleur de remplissage",
   "flipHorizontalTooltip": "Retourner horizontalement",
   "flipVerticalTooltip": "Retourner verticalement",
+  "flutterAttribution": "Attribution",
+  "@flutterAttribution": {
+    "description": "reviewed"
+  },
   "fontColor": "Couleur de police",
   "fontSizeLabel": "Taille de police",
   "fpaintLoadImage": "fPaint Charger une image",

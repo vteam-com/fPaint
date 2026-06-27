@@ -320,6 +320,12 @@ abstract class AppLocalizations {
   /// **'Wheel'**
   String get colorPickerModeWheel;
 
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
   /// No description provided for @colorTolerance.
   ///
   /// In en, this message translates to:
@@ -625,6 +631,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Flip Vertical'**
   String get flipVerticalTooltip;
+
+  /// No description provided for @flutterAttribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Attribution'**
+  String get flutterAttribution;
 
   /// No description provided for @fontColor.
   ///
