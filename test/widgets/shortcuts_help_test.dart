@@ -8,6 +8,7 @@ import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_dialog.dart';
@@ -383,6 +384,80 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
       await tester.pump();
       expect(appProvider.selectedAction, ActionType.brush);
+    });
+
+    testWidgets('Cmd/Ctrl + and - zoom the canvas', (final WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+      final ShellProvider shellProvider = ShellProvider();
+
+      await tester.pumpWidget(
+        buildShortcutHandlerTestWidget(
+          appProvider: appProvider,
+          shellProvider: shellProvider,
+        ),
+      );
+      await tester.pump();
+
+      final double initialScale = appProvider.layers.scale;
+      final LogicalKeyboardKey modifierKey = duplicateShortcutModifierKey();
+
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.sendKeyEvent(LogicalKeyboardKey.equal);
+      await tester.sendKeyUpEvent(modifierKey);
+      await tester.pump();
+
+      final double zoomedInScale = appProvider.layers.scale;
+      expect(zoomedInScale, greaterThan(initialScale));
+      expect(shellProvider.canvasPlacement, CanvasAutoPlacement.manual);
+
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.sendKeyEvent(LogicalKeyboardKey.minus);
+      await tester.sendKeyUpEvent(modifierKey);
+      await tester.pump();
+
+      expect(appProvider.layers.scale, lessThan(zoomedInScale));
+      expect(shellProvider.canvasPlacement, CanvasAutoPlacement.manual);
+    });
+
+    testWidgets('Cmd/Ctrl+0 resets zoom to 100%', (final WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+      final ShellProvider shellProvider = ShellProvider();
+
+      await tester.pumpWidget(
+        buildShortcutHandlerTestWidget(
+          appProvider: appProvider,
+          shellProvider: shellProvider,
+        ),
+      );
+      await tester.pump();
+
+      appProvider.applyScaleToCanvas(
+        scaleDelta: AppVisual.enlarge,
+        anchorPoint: appProvider.canvasCenter,
+      );
+      await tester.pump();
+      expect(
+        (appProvider.layers.scale * AppLimits.percentMax).round(),
+        isNot(AppLimits.percentMax),
+      );
+
+      final LogicalKeyboardKey modifierKey = duplicateShortcutModifierKey();
+      await tester.sendKeyDownEvent(modifierKey);
+      await tester.sendKeyEvent(LogicalKeyboardKey.digit0);
+      await tester.sendKeyUpEvent(modifierKey);
+      await tester.pump();
+
+      expect(
+        (appProvider.layers.scale * AppLimits.percentMax).round(),
+        AppLimits.percentMax,
+      );
+      expect(shellProvider.canvasPlacement, CanvasAutoPlacement.manual);
     });
   });
 }

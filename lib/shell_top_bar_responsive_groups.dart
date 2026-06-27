@@ -80,19 +80,27 @@ List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
     _ToolbarActionGroup(
       actions: <_ToolbarActionEntry>[
         _ToolbarActionEntry(
-          child: _buildUndoButton(
-            appProvider,
-            interactionProfile,
+          child: _buildUndoRedoButton(
+            interactionProfile: interactionProfile,
             enabled: canUndo,
+            key: Keys.floatActionUndo,
+            icon: AppIcon.undo,
+            historyLabel: appProvider.undoProvider.getHistoryStringForUndo(),
+            shortcutKey: ShortcutKeys.z,
+            action: appProvider.undoAction,
           ),
           estimatedWidth: _toolbarIconActionEstimatedWidth,
           importance: _ToolbarActionImportance.critical,
         ),
         _ToolbarActionEntry(
-          child: _buildRedoButton(
-            appProvider,
-            interactionProfile,
+          child: _buildUndoRedoButton(
+            interactionProfile: interactionProfile,
             enabled: canRedo,
+            key: Keys.floatActionRedo,
+            icon: AppIcon.redo,
+            historyLabel: appProvider.undoProvider.getHistoryStringForRedo(),
+            shortcutKey: ShortcutKeys.y,
+            action: appProvider.redoAction,
           ),
           estimatedWidth: _toolbarIconActionEstimatedWidth,
           importance: _ToolbarActionImportance.medium,
@@ -137,6 +145,10 @@ List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
             shellProvider: shellProvider,
             appProvider: appProvider,
             interactionProfile: interactionProfile,
+            tooltip: tooltipWithShortcut(
+              ShortcutActions.zoomOut,
+              primaryModifiedShortcut(ShortcutKeys.minus),
+            )!,
             icon: AppIcon.zoomOut,
             scaleDelta: AppVisual.shrink,
           ),
@@ -154,6 +166,10 @@ List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
             shellProvider: shellProvider,
             appProvider: appProvider,
             interactionProfile: interactionProfile,
+            tooltip: tooltipWithShortcut(
+              ShortcutActions.zoomIn,
+              primaryModifiedShortcut(ShortcutKeys.plus),
+            )!,
             icon: AppIcon.zoomIn,
             scaleDelta: AppVisual.enlarge,
           ),

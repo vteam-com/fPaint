@@ -2,6 +2,8 @@ import 'package:flutter/widget_previews.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/import_files.dart';
+import 'package:fpaint/helpers/shortcut_tooltip.dart';
+import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -23,6 +25,7 @@ import 'package:provider/single_child_widget.dart';
 part 'shell_top_bar_responsive_groups.dart';
 
 const String _canvasZoomAndSizeFormat = '{zoom}%\n{width}\n{height}';
+const String _canvasZoomFormat = '{zoom}%';
 const String _placeholderZoom = '{zoom}';
 const String _placeholderWidth = '{width}';
 const String _placeholderHeight = '{height}';
@@ -70,7 +73,12 @@ class ShellTopBar extends StatelessWidget {
     final Widget leadingToolbarButton = shellProvider.deviceSizeSmall
         ? buildToolbarIconButton(
             key: Keys.floatActionMenuToggle,
-            tooltip: shellProvider.showMenu ? l10n.cancel : l10n.menuTooltip,
+            tooltip: shellProvider.showMenu
+                ? l10n.cancel
+                : tooltipWithShortcut(
+                    l10n.menuTooltip,
+                    singleKeyShortcut(ShortcutKeys.tab),
+                  ),
             icon: shellProvider.showMenu ? AppIcon.close : AppIcon.menu,
             interactionProfile: interactionProfile,
             onPressed: () {
@@ -86,7 +94,10 @@ class ShellTopBar extends StatelessWidget {
           )
         : _buildDesktopShellCycleButton(
             shellProvider: shellProvider,
-            tooltip: l10n.menuTooltip,
+            tooltip: tooltipWithShortcut(
+              l10n.menuTooltip,
+              singleKeyShortcut(ShortcutKeys.tab),
+            )!,
             interactionProfile: interactionProfile,
           );
 
@@ -318,7 +329,10 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
     _ToolbarActionEntry(
       child: buildToolbarIconButton(
         key: Keys.floatActionPaste,
-        tooltip: l10n.paste,
+        tooltip: tooltipWithShortcut(
+          l10n.paste,
+          primaryModifiedShortcut(ShortcutKeys.v),
+        ),
         icon: AppIcon.clipboardPaste,
         interactionProfile: interactionProfile,
         onPressed: () {
@@ -425,19 +439,27 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
   return <_ToolbarActionEntry>[
     ...primaryActions,
     _ToolbarActionEntry(
-      child: _buildUndoButton(
-        appProvider,
-        interactionProfile,
+      child: _buildUndoRedoButton(
+        interactionProfile: interactionProfile,
         enabled: canUndo,
+        key: Keys.floatActionUndo,
+        icon: AppIcon.undo,
+        historyLabel: appProvider.undoProvider.getHistoryStringForUndo(),
+        shortcutKey: ShortcutKeys.z,
+        action: appProvider.undoAction,
       ),
       estimatedWidth: _toolbarIconActionEstimatedWidth,
       importance: _ToolbarActionImportance.critical,
     ),
     _ToolbarActionEntry(
-      child: _buildRedoButton(
-        appProvider,
-        interactionProfile,
+      child: _buildUndoRedoButton(
+        interactionProfile: interactionProfile,
         enabled: canRedo,
+        key: Keys.floatActionRedo,
+        icon: AppIcon.redo,
+        historyLabel: appProvider.undoProvider.getHistoryStringForRedo(),
+        shortcutKey: ShortcutKeys.y,
+        action: appProvider.redoAction,
       ),
       estimatedWidth: _toolbarIconActionEstimatedWidth,
       importance: _ToolbarActionImportance.medium,
@@ -480,6 +502,10 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
         shellProvider: shellProvider,
         appProvider: appProvider,
         interactionProfile: interactionProfile,
+        tooltip: tooltipWithShortcut(
+          ShortcutActions.zoomOut,
+          primaryModifiedShortcut(ShortcutKeys.minus),
+        )!,
         icon: AppIcon.zoomOut,
         scaleDelta: AppVisual.shrink,
       ),
@@ -497,6 +523,10 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
         shellProvider: shellProvider,
         appProvider: appProvider,
         interactionProfile: interactionProfile,
+        tooltip: tooltipWithShortcut(
+          ShortcutActions.zoomIn,
+          primaryModifiedShortcut(ShortcutKeys.plus),
+        )!,
         icon: AppIcon.zoomIn,
         scaleDelta: AppVisual.enlarge,
       ),
@@ -570,21 +600,33 @@ Widget buildCanvasToolbarActions(
                 hasActiveSelection: hasActiveSelection,
                 interactionProfile: interactionProfile,
               );
-              final Widget undoButton = _buildUndoButton(
-                appProvider,
-                interactionProfile,
+              final Widget undoButton = _buildUndoRedoButton(
+                interactionProfile: interactionProfile,
                 enabled: canUndo,
+                key: Keys.floatActionUndo,
+                icon: AppIcon.undo,
+                historyLabel: appProvider.undoProvider.getHistoryStringForUndo(),
+                shortcutKey: ShortcutKeys.z,
+                action: appProvider.undoAction,
               );
-              final Widget redoButton = _buildRedoButton(
-                appProvider,
-                interactionProfile,
+              final Widget redoButton = _buildUndoRedoButton(
+                interactionProfile: interactionProfile,
                 enabled: canRedo,
+                key: Keys.floatActionRedo,
+                icon: AppIcon.redo,
+                historyLabel: appProvider.undoProvider.getHistoryStringForRedo(),
+                shortcutKey: ShortcutKeys.y,
+                action: appProvider.redoAction,
               );
               final Widget zoomOutButton = _buildZoomButton(
                 key: Keys.floatActionZoomOut,
                 shellProvider: shellProvider,
                 appProvider: appProvider,
                 interactionProfile: interactionProfile,
+                tooltip: tooltipWithShortcut(
+                  ShortcutActions.zoomOut,
+                  primaryModifiedShortcut(ShortcutKeys.minus),
+                )!,
                 icon: AppIcon.zoomOut,
                 scaleDelta: AppVisual.shrink,
               );
@@ -594,6 +636,10 @@ Widget buildCanvasToolbarActions(
                 shellProvider: shellProvider,
                 appProvider: appProvider,
                 interactionProfile: interactionProfile,
+                tooltip: tooltipWithShortcut(
+                  ShortcutActions.zoomIn,
+                  primaryModifiedShortcut(ShortcutKeys.plus),
+                )!,
                 icon: AppIcon.zoomIn,
                 scaleDelta: AppVisual.enlarge,
               );
@@ -716,7 +762,12 @@ Widget _buildSelectorToggleButton({
 }) {
   return buildToolbarIconButton(
     key: Keys.floatActionSelector,
-    tooltip: hasActiveSelection ? l10n.cancel : l10n.toolSelector,
+    tooltip: hasActiveSelection
+        ? l10n.cancel
+        : tooltipWithShortcut(
+            l10n.toolSelector,
+            singleKeyShortcut(ShortcutKeys.s),
+          ),
     icon: hasActiveSelection ? AppIcon.selectorCancel : AppIcon.selector,
     interactionProfile: interactionProfile,
     useSourceColors: hasActiveSelection,
@@ -726,33 +777,27 @@ Widget _buildSelectorToggleButton({
   );
 }
 
-/// Builds the undo FAB using current undo history tooltip content.
-Widget _buildUndoButton(
-  final AppProvider appProvider,
-  final InteractionLayoutProfile interactionProfile, {
+/// Builds either the undo or redo FAB with history-aware tooltip content.
+///
+/// This keeps undo/redo construction in one place so both actions stay in sync
+/// for enabled-state handling, shortcut labeling, and dispatch behavior.
+Widget _buildUndoRedoButton({
+  required final InteractionLayoutProfile interactionProfile,
   required final bool enabled,
+  required final Key key,
+  required final AppIcon icon,
+  required final String historyLabel,
+  required final String shortcutKey,
+  required final void Function() action,
 }) {
   return _buildHistoryButton(
-    key: Keys.floatActionUndo,
-    icon: AppIcon.undo,
-    tooltip: appProvider.undoProvider.getHistoryStringForUndo(),
-    action: appProvider.undoAction,
-    interactionProfile: interactionProfile,
-    enabled: enabled,
-  );
-}
-
-/// Builds the redo FAB using current redo history tooltip content.
-Widget _buildRedoButton(
-  final AppProvider appProvider,
-  final InteractionLayoutProfile interactionProfile, {
-  required final bool enabled,
-}) {
-  return _buildHistoryButton(
-    key: Keys.floatActionRedo,
-    icon: AppIcon.redo,
-    tooltip: appProvider.undoProvider.getHistoryStringForRedo(),
-    action: appProvider.redoAction,
+    key: key,
+    icon: icon,
+    tooltip: tooltipWithShortcut(
+      historyLabel,
+      primaryModifiedShortcut(shortcutKey),
+    )!,
+    action: action,
     interactionProfile: interactionProfile,
     enabled: enabled,
   );
@@ -785,11 +830,13 @@ Widget _buildZoomButton({
   required final ShellProvider shellProvider,
   required final AppProvider appProvider,
   required final InteractionLayoutProfile interactionProfile,
+  required final String tooltip,
   required final AppIcon icon,
   required final double scaleDelta,
 }) {
   return buildToolbarIconButton(
     key: key,
+    tooltip: tooltip,
     icon: icon,
     interactionProfile: interactionProfile,
     onPressed: () {
@@ -809,8 +856,18 @@ Widget _buildCenterAndDimensionButton(
   final ShellProvider shellProvider,
   final AppProvider appProvider,
 ) {
+  final String zoomPercentage = (appProvider.layers.scale * AppLimits.percentMax).toInt().toString();
+  final String canvasWidth = appProvider.layers.size.width.toInt().toString();
+  final String canvasHeight = appProvider.layers.size.height.toInt().toString();
+  final String zoomAndSizeDetails = _canvasZoomAndSizeFormat
+      .replaceFirst(_placeholderZoom, zoomPercentage)
+      .replaceFirst(_placeholderWidth, canvasWidth)
+      .replaceFirst(_placeholderHeight, canvasHeight);
+
   return AppButton(
     key: Keys.floatActionCenter,
+    tooltip:
+        '${tooltipWithShortcut(ShortcutActions.resetZoom, primaryModifiedShortcut(ShortcutKeys.zero))!}\n$zoomAndSizeDetails',
     onPressed: () {
       Future<void>.microtask(() {
         shellProvider.requestCanvasFit();
@@ -821,12 +878,9 @@ Widget _buildCenterAndDimensionButton(
     },
     child: Center(
       child: AppText(
-        _canvasZoomAndSizeFormat
-            .replaceFirst(_placeholderZoom, (appProvider.layers.scale * AppLimits.percentMax).toInt().toString())
-            .replaceFirst(_placeholderWidth, appProvider.layers.size.width.toInt().toString())
-            .replaceFirst(_placeholderHeight, appProvider.layers.size.height.toInt().toString()),
+        _canvasZoomFormat.replaceFirst(_placeholderZoom, zoomPercentage),
         textAlign: TextAlign.center,
-        variant: AppTextVariant.label,
+        variant: AppTextVariant.body,
       ),
     ),
   );

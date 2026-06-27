@@ -63,6 +63,9 @@ abstract class ShortcutModifiers {
 
 /// Display strings for individual keyboard keys.
 abstract class ShortcutKeys {
+  static const String zero = '0';
+  static const String plus = '+';
+  static const String minus = '-';
   static const String tab = 'Tab';
   static const String b = 'B';
   static const String c = 'C';

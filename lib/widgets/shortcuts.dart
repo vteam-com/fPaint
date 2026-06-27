@@ -1,6 +1,7 @@
 // ignore: fcheck_one_class_per_file
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -43,6 +44,36 @@ Widget shortCutsForMainApp(
       ),
       RedoIntent: CallbackAction<RedoIntent>(
         onInvoke: (final RedoIntent _) => appProvider.redoAction(),
+      ),
+      ZoomInIntent: CallbackAction<ZoomInIntent>(
+        onInvoke: (final ZoomInIntent _) {
+          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+          appProvider.applyScaleToCanvas(
+            scaleDelta: AppVisual.enlarge,
+            anchorPoint: appProvider.canvasCenter,
+          );
+          return null;
+        },
+      ),
+      ZoomOutIntent: CallbackAction<ZoomOutIntent>(
+        onInvoke: (final ZoomOutIntent _) {
+          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+          appProvider.applyScaleToCanvas(
+            scaleDelta: AppVisual.shrink,
+            anchorPoint: appProvider.canvasCenter,
+          );
+          return null;
+        },
+      ),
+      ResetZoomIntent: CallbackAction<ResetZoomIntent>(
+        onInvoke: (final ResetZoomIntent _) {
+          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+          appProvider.applyScaleToCanvas(
+            scaleDelta: AppVisual.full / appProvider.layers.scale,
+            anchorPoint: appProvider.canvasCenter,
+          );
+          return null;
+        },
       ),
       SaveIntent: CallbackAction<SaveIntent>(
         onInvoke: (final SaveIntent _) async => await onSave(),
@@ -256,6 +287,24 @@ class RedoIntent extends Intent {
   const RedoIntent();
 }
 
+/// An [Intent] that triggers zoom in.
+class ZoomInIntent extends Intent {
+  /// Creates a [ZoomInIntent].
+  const ZoomInIntent();
+}
+
+/// An [Intent] that triggers zoom out.
+class ZoomOutIntent extends Intent {
+  /// Creates a [ZoomOutIntent].
+  const ZoomOutIntent();
+}
+
+/// An [Intent] that resets zoom to 100%.
+class ResetZoomIntent extends Intent {
+  /// Creates a [ResetZoomIntent].
+  const ResetZoomIntent();
+}
+
 /// An [Intent] that triggers the save action.
 class SaveIntent extends Intent {
   /// Creates a [SaveIntent].
@@ -402,6 +451,26 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
   shortcuts[const SingleActivator(LogicalKeyboardKey.keyZ, control: true, shift: true)] = const RedoIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.keyY, meta: true)] = const RedoIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.keyY, control: true)] = const RedoIntent();
+
+  // Zoom in (Cmd/Ctrl + '=' and Cmd/Ctrl + Shift + '=' for '+').
+  shortcuts[const SingleActivator(LogicalKeyboardKey.equal, meta: true)] = const ZoomInIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.equal, control: true)] = const ZoomInIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.equal, meta: true, shift: true)] = const ZoomInIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.equal, control: true, shift: true)] = const ZoomInIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.numpadAdd, meta: true)] = const ZoomInIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.numpadAdd, control: true)] = const ZoomInIntent();
+
+  // Zoom out (Cmd/Ctrl + '-').
+  shortcuts[const SingleActivator(LogicalKeyboardKey.minus, meta: true)] = const ZoomOutIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.minus, control: true)] = const ZoomOutIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.numpadSubtract, meta: true)] = const ZoomOutIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.numpadSubtract, control: true)] = const ZoomOutIntent();
+
+  // Reset zoom (Cmd/Ctrl + '0').
+  shortcuts[const SingleActivator(LogicalKeyboardKey.digit0, meta: true)] = const ResetZoomIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.digit0, control: true)] = const ResetZoomIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.numpad0, meta: true)] = const ResetZoomIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.numpad0, control: true)] = const ResetZoomIntent();
 
   // Save
   addCrossPlatformShortcut(LogicalKeyboardKey.keyS, const SaveIntent());
