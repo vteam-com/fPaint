@@ -13,6 +13,7 @@ import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/shell_top_bar.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/app_tooltip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const int _testImageDimension = 12;
@@ -230,6 +231,68 @@ void main() {
       expect(find.byKey(Keys.floatActionPaste), findsOneWidget);
     });
 
+    testWidgets('shows paste shortcut inside the paste tooltip', (final WidgetTester tester) async {
+      await pumpShellTopBar(
+        tester,
+        width: _wideToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      final Finder pasteTooltip = find.descendant(
+        of: find.byKey(Keys.floatActionPaste),
+        matching: find.byType(AppTooltip),
+      );
+
+      expect(pasteTooltip, findsOneWidget);
+      expect(tester.widget<AppTooltip>(pasteTooltip).message, 'Paste (Ctrl V)');
+    });
+
+    testWidgets('shows shortcut inside undo tooltip when undo is available', (final WidgetTester tester) async {
+      appProvider.undoProvider.executeAction(
+        name: 'undo-shortcut-check',
+        forward: () {},
+        backward: () {},
+      );
+
+      await pumpShellTopBar(
+        tester,
+        width: _wideToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      final Finder undoTooltip = find.descendant(
+        of: find.byKey(Keys.floatActionUndo),
+        matching: find.byType(AppTooltip),
+      );
+
+      expect(undoTooltip, findsOneWidget);
+      expect(tester.widget<AppTooltip>(undoTooltip).message, contains('(Ctrl Z)'));
+    });
+
+    testWidgets('shows selector key inside selector tooltip when selector is inactive', (
+      final WidgetTester tester,
+    ) async {
+      appProvider.selectedAction = ActionType.brush;
+      appProvider.selectorModel.isVisible = false;
+
+      await pumpShellTopBar(
+        tester,
+        width: _wideToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      final Finder selectorTooltip = find.descendant(
+        of: find.byKey(Keys.floatActionSelector),
+        matching: find.byType(AppTooltip),
+      );
+
+      expect(selectorTooltip, findsOneWidget);
+      expect(tester.widget<AppTooltip>(selectorTooltip).message, contains('(S)'));
+    });
+
     testWidgets('renders zoom in button with correct key', (final WidgetTester tester) async {
       shellProvider.deviceSizeSmall = false;
 
@@ -262,6 +325,38 @@ void main() {
       await tester.pump();
 
       expect(find.byKey(Keys.floatActionZoomOut), findsOneWidget);
+    });
+
+    testWidgets('shows zoom-group tooltips', (final WidgetTester tester) async {
+      await pumpShellTopBar(
+        tester,
+        width: _wideToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      final Finder zoomInTooltip = find.descendant(
+        of: find.byKey(Keys.floatActionZoomIn),
+        matching: find.byType(AppTooltip),
+      );
+      final Finder zoomOutTooltip = find.descendant(
+        of: find.byKey(Keys.floatActionZoomOut),
+        matching: find.byType(AppTooltip),
+      );
+      final Finder resetZoomTooltip = find.descendant(
+        of: find.byKey(Keys.floatActionCenter),
+        matching: find.byType(AppTooltip),
+      );
+
+      expect(zoomInTooltip, findsOneWidget);
+      expect(zoomOutTooltip, findsOneWidget);
+      expect(resetZoomTooltip, findsOneWidget);
+      expect(tester.widget<AppTooltip>(zoomInTooltip).message, 'Zoom In (Ctrl +)');
+      expect(tester.widget<AppTooltip>(zoomOutTooltip).message, 'Zoom Out (Ctrl -)');
+      expect(
+        tester.widget<AppTooltip>(resetZoomTooltip).message,
+        'Reset Zoom (Ctrl 0)\n100%\n1024\n768',
+      );
     });
 
     testWidgets('renders center button with correct key', (final WidgetTester tester) async {
@@ -300,7 +395,7 @@ void main() {
       expect(find.byKey(Keys.floatActionToggle), findsNothing);
     });
 
-    testWidgets('center button displays zoom and canvas size', (final WidgetTester tester) async {
+    testWidgets('center button displays only zoom percentage', (final WidgetTester tester) async {
       shellProvider.deviceSizeSmall = false;
 
       await tester.pumpWidget(
@@ -314,8 +409,15 @@ void main() {
       );
       await tester.pump();
 
-      // Scale is 1.0 (100%), default canvas size 1024x768
-      expect(find.textContaining('100'), findsOneWidget);
+      // Scale is 1.0 (100%), and the center button now only shows percentage.
+      final Finder centerButtonText = find.descendant(
+        of: find.byKey(Keys.floatActionCenter),
+        matching: find.byType(Text),
+      );
+      expect(centerButtonText, findsOneWidget);
+      expect(tester.widget<Text>(centerButtonText).data, '100%');
+      expect(find.text('1024'), findsNothing);
+      expect(find.text('768'), findsNothing);
     });
 
     testWidgets('selector button enables selector mode on tap', (final WidgetTester tester) async {
@@ -568,10 +670,7 @@ void main() {
       );
       await tester.pump();
 
-      final String expectedZoomAndSize =
-          '${(appProvider.layers.scale * AppLimits.percentMax).toInt()}%\n'
-          '${appProvider.layers.size.width.toInt()}\n'
-          '${appProvider.layers.size.height.toInt()}';
+      final String expectedZoomPercentage = '${(appProvider.layers.scale * AppLimits.percentMax).toInt()}%';
       final Finder centerButtonText = find.descendant(
         of: find.byKey(Keys.floatActionCenter),
         matching: find.byType(Text),
@@ -579,7 +678,7 @@ void main() {
 
       expect(notifyCount, 0);
       expect(centerButtonText, findsOneWidget);
-      expect(tester.widget<Text>(centerButtonText).data, expectedZoomAndSize);
+      expect(tester.widget<Text>(centerButtonText).data, expectedZoomPercentage);
     });
   });
 
@@ -832,6 +931,23 @@ void main() {
       expect(rotateX, greaterThan(pasteX));
       expect(rotateX - exportX, greaterThan(_wideToolbarPrimaryGroupGapLowerBound));
       expect(selectorX - redoX, greaterThan(_wideToolbarHistorySelectorGroupGapLowerBound));
+    });
+
+    testWidgets('shows Tab shortcut inside desktop top-left chevron tooltip', (final WidgetTester tester) async {
+      await pumpShellTopBar(
+        tester,
+        width: _wideToolbarWidth,
+        isSmall: false,
+        showMenu: false,
+      );
+
+      final Finder shellToggleTooltip = find.descendant(
+        of: find.byKey(Keys.floatActionToggle),
+        matching: find.byType(AppTooltip),
+      );
+
+      expect(shellToggleTooltip, findsOneWidget);
+      expect(tester.widget<AppTooltip>(shellToggleTooltip).message, 'Menu (Tab)');
     });
 
     testWidgets('keeps zoom controls grouped when selection mode activates the responsive toolbar', (

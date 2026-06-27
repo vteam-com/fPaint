@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/shortcut_tooltip.dart';
+import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -138,7 +140,10 @@ Widget buildSelectionSubToolbar({
     buttons.addAll(<Widget>[
       buildToolbarIconButton(
         key: Keys.toolSelectorCopy,
-        tooltip: l10n.copyToClipboard,
+        tooltip: tooltipWithShortcut(
+          l10n.copyToClipboard,
+          primaryModifiedShortcut(ShortcutKeys.c),
+        ),
         icon: AppIcon.clipboardCopy,
         interactionProfile: interactionProfile,
         color: AppColors.textPrimary,
@@ -148,7 +153,10 @@ Widget buildSelectionSubToolbar({
       ),
       buildToolbarIconButton(
         key: Keys.toolSelectorCut,
-        tooltip: l10n.cut,
+        tooltip: tooltipWithShortcut(
+          l10n.cut,
+          primaryModifiedShortcut(ShortcutKeys.x),
+        ),
         icon: ActionType.cut.icon,
         interactionProfile: interactionProfile,
         color: AppColors.textPrimary,
