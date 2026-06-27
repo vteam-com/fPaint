@@ -6,6 +6,7 @@ FCHECK_VERSION="1.4.1"
 TEST_OUTPUT_DIR="$ROOT_DIR/test/output"
 COVERAGE_LCOV_FILE="$ROOT_DIR/coverage/lcov.info"
 COVERAGE_SUMMARY_FILE="$TEST_OUTPUT_DIR/cc.txt"
+MINIMUM_COVERAGE_PERCENTAGE="85.1"
 ANSI_RED="$(printf '\033[31m')"
 ANSI_BOLD="$(printf '\033[1m')"
 ANSI_BLINK="$(printf '\033[5m')"
@@ -106,3 +107,10 @@ COVERAGE_PERCENTAGE="$(awk -F: '
 
 mkdir -p "$TEST_OUTPUT_DIR"
 printf '%s\n' "$COVERAGE_PERCENTAGE" | tee "$COVERAGE_SUMMARY_FILE"
+
+echo --- Coverage Threshold
+COVERAGE_PERCENTAGE_VALUE="$(printf '%s' "$COVERAGE_PERCENTAGE" | tr -d '%')"
+if ! awk -v current="$COVERAGE_PERCENTAGE_VALUE" -v minimum="$MINIMUM_COVERAGE_PERCENTAGE" 'BEGIN { exit(current + 0 >= minimum + 0 ? 0 : 1) }'; then
+	echo "Coverage regression: $COVERAGE_PERCENTAGE is below required minimum ${MINIMUM_COVERAGE_PERCENTAGE}%"
+	exit "$CHECK_FAILURE_EXIT_CODE"
+fi

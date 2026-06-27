@@ -229,8 +229,6 @@ Future<void> _exerciseLayerOperations(
     tester,
     layersProvider.selectedLayerIndex,
   );
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -314,8 +312,6 @@ Future<void> _exerciseKeyboardShortcuts(
   kbAppProvider.undoProvider.clear();
   kbAppProvider.update();
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -376,8 +372,6 @@ Future<void> _exerciseToolSwitching(
   // Switch back to selector.
   await tapByKey(tester, Keys.toolSelector);
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -558,8 +552,6 @@ Future<void> _exerciseTextEditor(
     appProvider.layers.selectedLayer.actionStack.removeLast();
   }
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -627,8 +619,6 @@ Future<void> _exerciseSelectionToolPanel(
     await tester.tap(cancelBtn);
     await tester.pump();
   }
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -689,8 +679,6 @@ Future<void> _exerciseSelectionFlipRotate(
   appProvider.selectorModel.clear();
   appProvider.update();
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -728,8 +716,6 @@ Future<void> _exerciseSelectionCropAndDuplicate(
   appProvider.selectorModel.clear();
   appProvider.update();
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -747,8 +733,6 @@ Future<void> _exerciseMenuDialogs(
   // Dismiss.
   await tester.sendKeyEvent(LogicalKeyboardKey.escape);
   await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -861,8 +845,6 @@ Future<void> _exerciseCanvasTransforms(
   // Reset view one more time.
   appProvider.resetView();
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -906,8 +888,6 @@ Future<void> _exerciseSelectionOperations(
   appProvider.selectorModel.clear();
   appProvider.update();
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -935,8 +915,6 @@ Future<void> _exerciseLayerBlendMode(
       break;
     }
   }
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -979,8 +957,6 @@ Future<void> _exerciseSidePanelButtons(
   // Clear undo entries from the self-canceling transforms.
   appProvider.undoProvider.clear();
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1014,8 +990,6 @@ Future<void> _exerciseCanvasSettingsDialog(
   // Tap apply with current (unchanged) values.
   await tapByKey(tester, Keys.canvasSettingsApplyButton);
   await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1067,8 +1041,6 @@ Future<void> _exerciseMoreToolSwitching(
   // Switch back to selector.
   await tapByKey(tester, Keys.toolSelector);
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1156,8 +1128,6 @@ Future<void> _exerciseShapeDrawing(
   // Switch back to selector.
   await tapByKey(tester, Keys.toolSelector);
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 /// Collapses and re-expands the side panel to cover the toggle button callback.
@@ -1175,8 +1145,6 @@ Future<void> _exerciseSidePanelToggle(
   // Expand it back.
   shellProvider.isSidePanelExpanded = true;
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1229,8 +1197,6 @@ Future<void> _exerciseLayerRenameDialog(
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
   }
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1288,8 +1254,6 @@ Future<void> _exerciseMenuNavigations(
       }
     }
   }
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1341,8 +1305,6 @@ Future<void> _exerciseShellModeToggle(
   shellProvider.update();
   await tester.pump();
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1396,8 +1358,6 @@ Future<void> _exerciseToolColorPickers(
   // Switch back to selector.
   await tapByKey(tester, Keys.toolSelector);
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1441,8 +1401,6 @@ Future<void> _exerciseLayerAddDelete(
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pump();
   }
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1497,8 +1455,6 @@ Future<void> _exerciseFloatingButtons(
   // Tap center.
   await tapByKey(tester, Keys.floatActionCenter);
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1575,8 +1531,6 @@ Future<void> _exerciseSelectionViaGesture(
   appProvider.transformModel.clear();
   appProvider.update();
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1616,8 +1570,6 @@ Future<void> _exerciseLayerTapInteractions(
   // Restore.
   layersProvider.selectedLayerIndex = originalIndex;
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1742,8 +1694,6 @@ Future<void> _exerciseToolPanelButtons(
   // Switch back to pencil.
   await tapByTooltip(tester, l10n.toolPencil);
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1845,8 +1795,6 @@ Future<void> _exerciseLayerPopupMenuActions(
       await tester.pump();
     }
   }
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1894,8 +1842,6 @@ Future<void> _exerciseSelectionToolPanelButtons(
   appProvider.selectorModel.clear();
   appProvider.update();
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -1994,8 +1940,6 @@ Future<void> _exerciseSelectionAdvanced(
   appProvider.selectorModel.clear();
   appProvider.update();
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -2018,8 +1962,6 @@ Future<void> _exerciseCanvasResizeLockAspectRatio(
 
   appProvider.canvasResizeLockAspectRatio = original;
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -2048,8 +1990,9 @@ Future<void> _exerciseCanvasSettingsValidation(
   await tester.pump();
   await tapByKey(tester, Keys.canvasSettingsApplyButton);
   await tester.pump();
-  // Wait for snackbar timer (4 seconds) to expire.
-  await tester.pump(const Duration(seconds: 5));
+  // Dismiss immediately instead of waiting for the snackbar timeout.
+  dismissGlobalSnackBarMessage();
+  await pumpForUnitTestUiSettle(tester);
 
   // Enter zero width → triggers "must be positive" error.
   await tester.tap(widthField);
@@ -2060,8 +2003,9 @@ Future<void> _exerciseCanvasSettingsValidation(
   await tester.pump();
   await tapByKey(tester, Keys.canvasSettingsApplyButton);
   await tester.pump();
-  // Wait for snackbar timer (4 seconds) to expire.
-  await tester.pump(const Duration(seconds: 5));
+  // Dismiss immediately instead of waiting for the snackbar timeout.
+  dismissGlobalSnackBarMessage();
+  await pumpForUnitTestUiSettle(tester);
 
   // Exercise aspect-ratio-linked width/height fields.
   // First enable lock aspect ratio.
@@ -2085,8 +2029,6 @@ Future<void> _exerciseCanvasSettingsValidation(
   // Dismiss the dialog.
   await tester.sendKeyEvent(LogicalKeyboardKey.escape);
   await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -2161,8 +2103,6 @@ Future<void> _exerciseToleranceAndTopColors(
   final AppLocalizations fillL10n = fillContext.l10n;
   await tapByTooltip(tester, fillL10n.toolPencil);
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -2206,8 +2146,6 @@ Future<void> _exerciseBrushStylePicker(
   // Switch back to pencil.
   await tapByTooltip(tester, brushL10n.toolPencil);
   await tester.pump();
-
-  await session.videoRecorder.captureFrame();
 }
 
 // ---------------------------------------------------------------------------
@@ -2256,6 +2194,4 @@ Future<void> _exerciseSettingsPage(
       }
     }
   }
-
-  await session.videoRecorder.captureFrame();
 }

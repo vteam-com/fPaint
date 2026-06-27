@@ -69,6 +69,8 @@ const Map<String, Object> _testPreferences = <String, Object>{
 const double _scenarioViewportHeightScale = 1.5;
 const int _coverageDialogTransitionMs = 300;
 const Duration _paintingScenarioTestTimeout = Duration(minutes: 20);
+const int _scenarioTimingSecondsPerMinute = 60;
+const int _scenarioTimingMillisecondsPerSecond = 1000;
 
 // Sky layer
 const String _skyLayerName = 'Sky';
@@ -429,6 +431,82 @@ Future<void> _setLayerVisibilityByName(
   }
 }
 
+class _ScenarioPhaseTiming {
+  const _ScenarioPhaseTiming({
+    required this.label,
+    required this.duration,
+  });
+
+  final String label;
+  final Duration duration;
+}
+
+String _formatScenarioDuration(final Duration duration) {
+  final int minutes = duration.inMinutes;
+  final int seconds = duration.inSeconds.remainder(_scenarioTimingSecondsPerMinute);
+  final int milliseconds = duration.inMilliseconds.remainder(_scenarioTimingMillisecondsPerSecond);
+  return '${minutes}m ${seconds}s ${milliseconds}ms';
+}
+
+Future<void> _runTimedScenarioPhase(
+  final List<_ScenarioPhaseTiming> phaseTimings, {
+  required final String label,
+  required final Future<void> Function() phase,
+}) async {
+  final Stopwatch stopwatch = Stopwatch()..start();
+  await phase();
+  stopwatch.stop();
+  phaseTimings.add(
+    _ScenarioPhaseTiming(
+      label: label,
+      duration: stopwatch.elapsed,
+    ),
+  );
+  debugPrint(
+    '⏱️ Scenario phase complete: $label (${_formatScenarioDuration(stopwatch.elapsed)})',
+  );
+}
+
+Future<T> _runTimedScenarioPhaseWithValue<T>(
+  final List<_ScenarioPhaseTiming> phaseTimings, {
+  required final String label,
+  required final Future<T> Function() phase,
+}) async {
+  final Stopwatch stopwatch = Stopwatch()..start();
+  final T value = await phase();
+  stopwatch.stop();
+  phaseTimings.add(
+    _ScenarioPhaseTiming(
+      label: label,
+      duration: stopwatch.elapsed,
+    ),
+  );
+  debugPrint(
+    '⏱️ Scenario phase complete: $label (${_formatScenarioDuration(stopwatch.elapsed)})',
+  );
+  return value;
+}
+
+void _printScenarioTimingSummary(
+  final List<_ScenarioPhaseTiming> phaseTimings, {
+  required final Duration totalDuration,
+}) {
+  final List<_ScenarioPhaseTiming> sortedTimings = List<_ScenarioPhaseTiming>.from(phaseTimings)
+    ..sort(
+      (final _ScenarioPhaseTiming left, final _ScenarioPhaseTiming right) => right.duration.compareTo(left.duration),
+    );
+
+  debugPrint(
+    '⏱️ Scenario timing summary (total ${_formatScenarioDuration(totalDuration)}):',
+  );
+  for (int index = 0; index < sortedTimings.length; index++) {
+    final _ScenarioPhaseTiming timing = sortedTimings[index];
+    debugPrint(
+      '   ${index + 1}. ${timing.label}: ${_formatScenarioDuration(timing.duration)}',
+    );
+  }
+}
+
 void main() {
   SharedPreferences.setMockInitialValues(_testPreferences);
 
@@ -461,39 +539,90 @@ void main() {
         videoRecorder: videoRecorder,
       );
 
-      debugPrint('⏱️ Scenario phase: sky');
-      await paintLayerSky(session);
-      debugPrint('⏱️ Scenario phase: mountains');
-      await paintLayerMountains(session);
-      debugPrint('⏱️ Scenario phase: clouds');
-      await paintLayerClouds(session);
-      debugPrint('⏱️ Scenario phase: sun');
-      await paintLayerSun(session);
-      debugPrint('⏱️ Scenario phase: land');
-      await paintLayerLand(session);
-      debugPrint('⏱️ Scenario phase: lake');
-      await paintLayerLake(session);
-      debugPrint('⏱️ Scenario phase: house');
-      await paintLayerHouse(session);
-      debugPrint('⏱️ Scenario phase: house shadow');
-      await paintLayerHouseShadow(session);
-      debugPrint('⏱️ Scenario phase: fence');
-      await paintLayerFence(session);
-      debugPrint('⏱️ Scenario phase: fence shadow');
-      await paintLayerFenceShadow(session);
-      debugPrint('⏱️ Scenario phase: birds');
-      await paintLayerBirds(session);
+      final Stopwatch scenarioStopwatch = Stopwatch()..start();
+      final List<_ScenarioPhaseTiming> phaseTimings = <_ScenarioPhaseTiming>[];
 
-      debugPrint('⏱️ Scenario phase: crop');
-      final LayersProvider layersProvider = await cropScenarioCanvas(session);
-      debugPrint('⏱️ Scenario phase: vignette');
-      await applyPostCropVignette(session);
-      debugPrint('⏱️ Scenario phase: signature');
-      await paintLayerSignature(session, layersProvider: layersProvider);
-      debugPrint('⏱️ Scenario phase: validate');
-      await validateScenarioScene(session, layersProvider: layersProvider);
-      debugPrint('⏱️ Scenario phase: export');
-      await exportScenarioOutputs(session);
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'sky',
+        phase: () => paintLayerSky(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'mountains',
+        phase: () => paintLayerMountains(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'clouds',
+        phase: () => paintLayerClouds(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'sun',
+        phase: () => paintLayerSun(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'land',
+        phase: () => paintLayerLand(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'lake',
+        phase: () => paintLayerLake(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'house',
+        phase: () => paintLayerHouse(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'house shadow',
+        phase: () => paintLayerHouseShadow(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'fence',
+        phase: () => paintLayerFence(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'fence shadow',
+        phase: () => paintLayerFenceShadow(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'birds',
+        phase: () => paintLayerBirds(session),
+      );
+
+      final LayersProvider layersProvider = await _runTimedScenarioPhaseWithValue<LayersProvider>(
+        phaseTimings,
+        label: 'crop',
+        phase: () => cropScenarioCanvas(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'vignette',
+        phase: () => applyPostCropVignette(session),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'signature',
+        phase: () => paintLayerSignature(session, layersProvider: layersProvider),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'validate',
+        phase: () => validateScenarioScene(session, layersProvider: layersProvider),
+      );
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'export',
+        phase: () => exportScenarioOutputs(session),
+      );
 
       // Capture the scene state before coverage exercises.
       final int layerCountBefore = layersProvider.length;
@@ -507,8 +636,11 @@ void main() {
       ];
 
       videoRecorder.pauseAutoCapture();
-      debugPrint('⏱️ Scenario phase: coverage exercises');
-      await exerciseCoverageScenarios(session);
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'coverage exercises',
+        phase: () => exerciseCoverageScenarios(session),
+      );
       videoRecorder.resumeAutoCapture();
 
       // Each exercise cleans up after itself. Verify the scene is unchanged.
@@ -540,13 +672,23 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      await videoRecorder.stop();
+      await _runTimedScenarioPhase(
+        phaseTimings,
+        label: 'video assembly',
+        phase: () => videoRecorder.stop(),
+      );
 
       // Drain any pending debounce timers to avoid a "Pending timers" warning.
       await tester.pump(AppDefaults.debounceDuration);
 
+      scenarioStopwatch.stop();
+      _printScenarioTimingSummary(
+        phaseTimings,
+        totalDuration: scenarioStopwatch.elapsed,
+      );
+
       debugPrint(
-        '✅ Full painting scenario completed in unit test — no simulator needed',
+        '✅ Full painting scenario completed',
       );
     }, timeout: const Timeout(_paintingScenarioTestTimeout));
   });
