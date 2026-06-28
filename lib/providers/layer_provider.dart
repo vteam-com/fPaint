@@ -294,21 +294,21 @@ class LayerProvider extends ChangeNotifier {
       ui.Image? newImage = oldAction.image;
       if (oldAction.image != null) {
         final ui.Image originalImage = oldAction.image!;
-        final ui.PictureRecorder recorder = ui.PictureRecorder();
-        final Canvas canvas = Canvas(recorder);
         final double newImageWidth = originalImage.height.toDouble();
         final double newImageHeight = originalImage.width.toDouble();
 
-        canvas.translate(newImageWidth / AppMath.pair, newImageHeight / AppMath.pair);
-        canvas.rotate(-pi / AppMath.pair); // 90 degrees clockwise (Flutter canvas +angle is CCW)
-        canvas.drawImage(
-          originalImage,
-          Offset(-originalImage.width / AppMath.pair, -originalImage.height / AppMath.pair),
-          Paint(),
-        );
-        newImage = await recorder.endRecording().toImage(
-          newImageWidth.toInt(),
-          newImageHeight.toInt(),
+        newImage = await renderCanvasImage(
+          width: newImageWidth.toInt(),
+          height: newImageHeight.toInt(),
+          draw: (final ui.Canvas canvas) {
+            canvas.translate(newImageWidth / AppMath.pair, newImageHeight / AppMath.pair);
+            canvas.rotate(-pi / AppMath.pair); // 90 degrees clockwise (Flutter canvas +angle is CCW)
+            canvas.drawImage(
+              originalImage,
+              Offset(-originalImage.width / AppMath.pair, -originalImage.height / AppMath.pair),
+              Paint(),
+            );
+          },
         );
       }
 
@@ -590,15 +590,11 @@ class LayerProvider extends ChangeNotifier {
 
   /// Updates the thumbnail image of the layer.
   Future<void> updateThumbnail() async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = Canvas(recorder);
-    renderLayer(canvas);
-    final ui.Picture picture = recorder.endRecording();
-
     // Cache the full size image of this layer
-    _cachedImage = await picture.toImage(
-      size.width.toInt(),
-      size.height.toInt(),
+    _cachedImage = await renderCanvasImage(
+      width: size.width.toInt(),
+      height: size.height.toInt(),
+      draw: renderLayer,
     );
 
     // Cache the thumbnail version
@@ -622,12 +618,10 @@ class LayerProvider extends ChangeNotifier {
     if (_cachedImage != null) {
       return;
     }
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = Canvas(recorder);
-    renderLayer(canvas);
-    _cachedImage = await recorder.endRecording().toImage(
-      size.width.toInt(),
-      size.height.toInt(),
+    _cachedImage = await renderCanvasImage(
+      width: size.width.toInt(),
+      height: size.height.toInt(),
+      draw: renderLayer,
     );
   }
 
@@ -651,14 +645,14 @@ class LayerProvider extends ChangeNotifier {
 
   /// Renders the layer to an image with the given width and height.
   ui.Image renderImageWH(final int width, final int height) {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = Canvas(recorder);
-
-    canvas.saveLayer(null, Paint());
-    renderLayer(canvas);
-
-    final ui.Picture picture = recorder.endRecording();
-    return picture.toImageSync(width, height);
+    return renderCanvasImageSync(
+      width: width,
+      height: height,
+      draw: (final ui.Canvas canvas) {
+        canvas.saveLayer(null, Paint());
+        renderLayer(canvas);
+      },
+    );
   }
 
   /// Applies an action to the canvas, clipping it if necessary.

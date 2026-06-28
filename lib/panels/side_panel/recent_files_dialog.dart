@@ -9,6 +9,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -21,6 +22,9 @@ import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:logging/logging.dart';
+
+final Logger _log = Logger(logNameRecentFiles);
 
 const String _oraFileSuffix = '.${FileExtensions.ora}';
 
@@ -499,7 +503,8 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
           _fileExists = metadata.exists;
           _lastModified = metadata.lastModified;
         });
-      } catch (_) {
+      } catch (e, stackTrace) {
+        _log.warning('Failed to read recent file metadata', e, stackTrace);
         if (mounted) {
           setState(() {
             _lastModified = null;
@@ -536,7 +541,8 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
           });
         },
       );
-    } catch (_) {
+    } catch (e, stackTrace) {
+      _log.warning('Failed to resolve recent file metadata', e, stackTrace);
       if (mounted) {
         setState(() {
           _lastModified = null;
@@ -558,7 +564,8 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
           _thumbnail = thumbnail;
           _loadFailed = thumbnail == null;
         });
-      } catch (_) {
+      } catch (e, stackTrace) {
+        _log.warning('Failed to load recent file thumbnail', e, stackTrace);
         if (mounted) {
           setState(() {
             _loadFailed = true;
@@ -608,7 +615,8 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
           }
         },
       );
-    } catch (_) {
+    } catch (e, stackTrace) {
+      _log.warning('Failed to decode recent file thumbnail', e, stackTrace);
       if (mounted) {
         setState(() {
           _loadFailed = true;

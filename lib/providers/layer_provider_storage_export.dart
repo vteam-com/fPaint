@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 
@@ -43,15 +44,13 @@ extension LayerProviderStorageExport on LayerProvider {
   /// Renders the layer directly into [bounds] for cropped export snapshots.
   ui.Image toImageForStorageBounds(final ui.Rect bounds) {
     final ui.Rect normalizedBounds = _normalizeStorageBounds(bounds);
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder)..translate(-normalizedBounds.left, -normalizedBounds.top);
-
-    renderLayer(canvas);
-
-    final ui.Picture picture = recorder.endRecording();
-    return picture.toImageSync(
-      max(normalizedBounds.width.ceil(), AppMath.one),
-      max(normalizedBounds.height.ceil(), AppMath.one),
+    return renderCanvasImageSync(
+      width: max(normalizedBounds.width.ceil(), AppMath.one),
+      height: max(normalizedBounds.height.ceil(), AppMath.one),
+      draw: (final ui.Canvas canvas) {
+        canvas.translate(-normalizedBounds.left, -normalizedBounds.top);
+        renderLayer(canvas);
+      },
     );
   }
 

@@ -34,6 +34,21 @@ Future<ui.Image> renderCanvasImage({
   return recorder.endRecording().toImage(width, height);
 }
 
+/// Renders drawing commands into a new [ui.Image] synchronously.
+///
+/// Mirrors [renderCanvasImage] for callers on synchronous paint/export paths
+/// that need the image without awaiting.
+ui.Image renderCanvasImageSync({
+  required final int width,
+  required final int height,
+  required final void Function(ui.Canvas) draw,
+}) {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas canvas = ui.Canvas(recorder);
+  draw(canvas);
+  return recorder.endRecording().toImageSync(width, height);
+}
+
 /// Creates a [ui.Image] from straight RGBA pixel data.
 Future<ui.Image> imageFromPixels(
   final Uint8List pixels,

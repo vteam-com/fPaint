@@ -307,7 +307,8 @@ img.TiffImage? _readTiffImageAtOffset(
         offset: subIfdOffset,
       ),
     );
-  } catch (_) {
+  } catch (e, stackTrace) {
+    _log.warning('Failed to decode TIFF sub-IFD image', e, stackTrace);
     return null;
   }
 }

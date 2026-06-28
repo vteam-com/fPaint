@@ -162,16 +162,15 @@ extension AppProviderSelection on AppProvider {
     }
 
     final ui.Image image = layers.selectedLayer.toImageForStorage(layers.size);
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
 
-    canvas.translate(-bounds.left, -bounds.top);
-    canvas.clipPath(selectorModel.path1!);
-    canvas.drawImage(image, Offset.zero, Paint());
-
-    return recorder.endRecording().toImage(
-      bounds.width.toInt(),
-      bounds.height.toInt(),
+    return renderCanvasImage(
+      width: bounds.width.toInt(),
+      height: bounds.height.toInt(),
+      draw: (final ui.Canvas canvas) {
+        canvas.translate(-bounds.left, -bounds.top);
+        canvas.clipPath(selectorModel.path1!);
+        canvas.drawImage(image, Offset.zero, Paint());
+      },
     );
   }
 
@@ -504,26 +503,27 @@ extension AppProviderSelection on AppProvider {
     required final double outWidth,
     required final double outHeight,
     required final double rotation,
-  }) async {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-
-    canvas.translate(outWidth / AppMath.pair, outHeight / AppMath.pair);
-    canvas.rotate(rotation);
-    canvas.translate(-outWidth / AppMath.pair, -outHeight / AppMath.pair);
-    canvas.drawImageRect(
-      sourceImage,
-      Rect.fromLTWH(
-        0,
-        0,
-        sourceImage.width.toDouble(),
-        sourceImage.height.toDouble(),
-      ),
-      Rect.fromLTWH(0, 0, outWidth, outHeight),
-      Paint()..filterQuality = FilterQuality.high,
+  }) {
+    return renderCanvasImage(
+      width: outWidth.ceil(),
+      height: outHeight.ceil(),
+      draw: (final ui.Canvas canvas) {
+        canvas.translate(outWidth / AppMath.pair, outHeight / AppMath.pair);
+        canvas.rotate(rotation);
+        canvas.translate(-outWidth / AppMath.pair, -outHeight / AppMath.pair);
+        canvas.drawImageRect(
+          sourceImage,
+          Rect.fromLTWH(
+            0,
+            0,
+            sourceImage.width.toDouble(),
+            sourceImage.height.toDouble(),
+          ),
+          Rect.fromLTWH(0, 0, outWidth, outHeight),
+          Paint()..filterQuality = FilterQuality.high,
+        );
+      },
     );
-
-    return recorder.endRecording().toImage(outWidth.ceil(), outHeight.ceil());
   }
 
   /// Flips the selected region horizontally (left ↔ right).
@@ -670,6 +670,30 @@ extension AppProviderSelection on AppProvider {
     selectorModel.addP1(position);
     repaintToolOptions();
     update();
+  }
+
+  /// Translates the active selection by [screenDelta], a screen-space offset.
+  void selectionTranslateByScreenDelta(final Offset screenDelta) {
+    selectorModel.translate(screenDelta / layers.scale);
+    repaintMainView();
+  }
+
+  /// Scales the active selection uniformly by [factor].
+  void selectionScaleUniform(final double factor) {
+    selectorModel.scaleUniform(factor);
+    repaintMainView();
+  }
+
+  /// Resizes the active selection by dragging [handle] by [screenDelta].
+  void selectionResize(final NineGridHandle handle, final Offset screenDelta) {
+    selectorModel.nindeGridResize(handle, screenDelta / layers.scale);
+    repaintMainView();
+  }
+
+  /// Rotates the active selection by [angleRadians].
+  void selectionRotate(final double angleRadians) {
+    selectorModel.rotate(angleRadians);
+    repaintMainView();
   }
 
   /// Adds an additional point to the selector creation.

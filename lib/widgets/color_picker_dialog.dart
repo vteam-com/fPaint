@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -13,6 +14,9 @@ import 'package:fpaint/widgets/color_wheel_selector.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/top_colors.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
+import 'package:logging/logging.dart';
+
+final Logger _log = Logger(logNameColorPicker);
 
 enum _ColorPickerMode {
   sliders,
@@ -226,8 +230,9 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                   try {
                     final Color color = getColorFromString(data.text as String);
                     _setColor(color);
-                  } catch (_) {
-                    // Invalid hex color format - silently ignore
+                  } on FormatException catch (e) {
+                    // Invalid hex color in clipboard; ignore the paste.
+                    _log.fine('Ignored invalid pasted hex color', e);
                   }
                 },
               ),
@@ -242,8 +247,9 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                       setState(() {
                         _currentColor = color;
                       });
-                    } catch (_) {
-                      // Invalid hex color format - silently ignore as user is still typing
+                    } on FormatException catch (e) {
+                      // Invalid hex color while the user is still typing; ignore.
+                      _log.fine('Ignored incomplete hex color input', e);
                     }
                   },
                 ),

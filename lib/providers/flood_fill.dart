@@ -181,9 +181,9 @@ class _RunBuffer {
 
     final int base = _size * AppFloodFill.runStride;
     _runs[base] = y;
-    _runs[base + AppMath.rgbChannelGreen] = startX;
-    _runs[base + AppMath.rgbChannelBlue] = endX;
-    _size += AppMath.rgbChannelGreen;
+    _runs[base + AppFloodFill.runFieldStartX] = startX;
+    _runs[base + AppFloodFill.runFieldEndX] = endX;
+    _size += AppMath.one;
   }
 
   /// Returns a tightly-sized run list containing only populated entries.
@@ -274,7 +274,7 @@ _FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
     // Expand left
     int left = px;
     while (left > AppMath.zero) {
-      final int candidate = left - AppMath.rgbChannelGreen;
+      final int candidate = left - AppFloodFill.columnPixelWidth;
       final int candidateKey = rowBase + candidate;
       if (visited[candidateKey] == AppFloodFill.visitedMarker) {
         break;
@@ -295,8 +295,8 @@ _FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
 
     // Expand right
     int right = px;
-    while (right < width - AppMath.rgbChannelGreen) {
-      final int candidate = right + AppMath.rgbChannelGreen;
+    while (right < width - AppFloodFill.columnPixelWidth) {
+      final int candidate = right + AppFloodFill.columnPixelWidth;
       final int candidateKey = rowBase + candidate;
       if (visited[candidateKey] == AppFloodFill.visitedMarker) {
         break;
@@ -316,7 +316,7 @@ _FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
     }
 
     // Mark entire run as visited
-    for (int xIndex = left; xIndex <= right; xIndex += AppMath.rgbChannelGreen) {
+    for (int xIndex = left; xIndex <= right; xIndex += AppFloodFill.columnPixelWidth) {
       visited[rowBase + xIndex] = AppFloodFill.visitedMarker;
     }
 
@@ -330,7 +330,7 @@ _FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
     runBuffer.add(py, left, right);
 
     // Push spans from row above
-    final int rowAbove = py - AppMath.rgbChannelGreen;
+    final int rowAbove = py - AppFloodFill.rowPixelHeight;
     if (rowAbove >= AppMath.zero) {
       int scanX = left;
       while (scanX <= right) {
@@ -346,7 +346,7 @@ _FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
               (cb - targetB).abs() <= tolerance255 &&
               (ca - targetA).abs() <= tolerance255) {
             spanStack.push(scanX, rowAbove);
-            scanX += AppMath.rgbChannelGreen;
+            scanX += AppFloodFill.columnPixelWidth;
             while (scanX <= right) {
               final int contiguousKey = rowAbove * width + scanX;
               if (visited[contiguousKey] == AppFloodFill.visitedMarker) {
@@ -363,16 +363,16 @@ _FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
                   (cca - targetA).abs() > tolerance255) {
                 break;
               }
-              scanX += AppMath.rgbChannelGreen;
+              scanX += AppFloodFill.columnPixelWidth;
             }
           }
         }
-        scanX += AppMath.rgbChannelGreen;
+        scanX += AppFloodFill.columnPixelWidth;
       }
     }
 
     // Push spans from row below
-    final int rowBelow = py + AppMath.rgbChannelGreen;
+    final int rowBelow = py + AppFloodFill.rowPixelHeight;
     if (rowBelow < height) {
       int scanX = left;
       while (scanX <= right) {
@@ -388,7 +388,7 @@ _FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
               (cb - targetB).abs() <= tolerance255 &&
               (ca - targetA).abs() <= tolerance255) {
             spanStack.push(scanX, rowBelow);
-            scanX += AppMath.rgbChannelGreen;
+            scanX += AppFloodFill.columnPixelWidth;
             while (scanX <= right) {
               final int contiguousKey = rowBelow * width + scanX;
               if (visited[contiguousKey] == AppFloodFill.visitedMarker) {
@@ -405,11 +405,11 @@ _FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
                   (cca - targetA).abs() > tolerance255) {
                 break;
               }
-              scanX += AppMath.rgbChannelGreen;
+              scanX += AppFloodFill.columnPixelWidth;
             }
           }
         }
-        scanX += AppMath.rgbChannelGreen;
+        scanX += AppFloodFill.columnPixelWidth;
       }
     }
   }
@@ -453,8 +453,8 @@ SplayTreeMap<int, List<_RunSegment>> _groupRunsByRow(final Int32List runs) {
   int i = AppMath.zero;
   while (i < runs.length) {
     final int y = runs[i];
-    final int startX = runs[i + AppMath.rgbChannelGreen];
-    final int endXExclusive = runs[i + AppMath.rgbChannelBlue] + AppMath.one;
+    final int startX = runs[i + AppFloodFill.runFieldStartX];
+    final int endXExclusive = runs[i + AppFloodFill.runFieldEndX] + AppMath.one;
     groupedRuns
         .putIfAbsent(y, () => <_RunSegment>[])
         .add(

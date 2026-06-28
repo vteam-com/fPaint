@@ -35,12 +35,13 @@ const String _loadedImageDefaultName = 'Loaded Image';
 
 final Logger _log = Logger(logNameImportFiles);
 
+/// Shows import feedback via the global overlay so it survives async gaps and
+/// does not depend on a possibly-unmounted [BuildContext].
 void _showImportFeedback(
-  final BuildContext context,
   final String message, {
   final Duration duration = AppDefaults.fileImportFeedbackDuration,
 }) {
-  showSnackBarIfMounted(context, message, duration: duration);
+  showGlobalSnackBarMessage(message, duration: duration);
 }
 
 /// Handles the creation of a new file within the application.
@@ -140,6 +141,9 @@ Future<void> onFileOpen(final BuildContext context) async {
   final ShellProvider shellProvider = ShellProvider.of(context);
   final LayersProvider layers = LayersProvider.of(context);
   final AppLocalizations l10n = context.l10n;
+  // Resolve the preferences provider before any await so recent-file tracking
+  // never reaches back into a possibly-defunct BuildContext.
+  final AppPreferences preferences = AppPreferences.of(context);
 
   if (layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
     return;
@@ -169,20 +173,15 @@ Future<void> onFileOpen(final BuildContext context) async {
           // Assuming readTiffFileFromBytes handles its own clearing and sizing or needs similar refactor
           await readTiffFileFromBytes(layers, bytes);
         } else if (extension == _fileExtensionHeic || extension == _fileExtensionAvif) {
-          if (!context.mounted) {
-            return;
-          }
           await _readHeifFromBytes(
             layers,
             bytes,
-            context,
+            l10n,
             extension: extension,
             imageName: fileName,
           );
         } else if (isFileExtensionSupported(extension)) {
-          // Pass context and filename
-          // ignore: use_build_context_synchronously
-          await readImageFileFromBytes(layers, bytes, context, imageName: fileName);
+          await readImageFileFromBytes(layers, bytes, l10n, imageName: fileName);
         }
       } else {
         final String path = result.files.single.path!;
@@ -195,8 +194,7 @@ Future<void> onFileOpen(final BuildContext context) async {
           );
         }
         shellProvider.loadedFileName = path;
-        // ignore: use_build_context_synchronously
-        await AppPreferences.of(context).addRecentFile(path);
+        await preferences.addRecentFile(path);
       }
       layers.clearHasChanged();
       shellProvider.requestCanvasFit();
@@ -229,6 +227,9 @@ Future<bool> openFileFromPath({
     return false;
   }
 
+  // Capture localization up front so the rest of the flow never touches the
+  // BuildContext across the await points below.
+  final AppLocalizations l10n = context.l10n;
   final String extension = path.split('.').last.toLowerCase();
 
   if (isFileExtensionSupported(extension)) {
@@ -244,27 +245,24 @@ Future<bool> openFileFromPath({
         return await _readHeifFromFilePath(
           layers,
           path,
-          context,
+          l10n,
           extension: extension,
           imageName: fileName,
         );
       } else {
         final String fileName = path.split(Platform.pathSeparator).last;
-        return await readImageFromFilePath(layers, path, context, imageName: fileName);
+        return await readImageFromFilePath(layers, path, l10n, imageName: fileName);
       }
     } catch (e) {
       // General error catch, readImageFromFilePath might have already shown a SnackBar for decode errors
-      // ignore: use_build_context_synchronously
-      _showImportFeedback(context, context.l10n.errorProcessingFile(e.toString()));
+      _showImportFeedback(l10n.errorProcessingFile(e.toString()));
       return false;
     }
   } else {
     // Show unsupported format message
-    // ignore: use_build_context_synchronously
-    _showImportFeedback(context, context.l10n.fileFormatNotSupported(extension));
-    return false; // Return false regardless of context.mounted if format is not supported
+    _showImportFeedback(l10n.fileFormatNotSupported(extension));
+    return false;
   }
-  // Removed duplicated else block
 }
 
 final List<String> supportedImageFileExtensions = <String>[
@@ -301,7 +299,7 @@ bool isFileExtensionSupported(final String extension) {
 Future<bool> _decodeAndApplyImage(
   final LayersProvider layers,
   final Uint8List imageBytes,
-  final BuildContext context, {
+  final AppLocalizations l10n, {
   final String imageName = _loadedImageDefaultName,
 }) async {
   try {
@@ -317,8 +315,7 @@ Future<bool> _decodeAndApplyImage(
 
     return true; // Success
   } catch (e) {
-    // ignore: use_build_context_synchronously
-    _showImportFeedback(context, context.l10n.failedToLoadImage(e.toString()));
+    _showImportFeedback(l10n.failedToLoadImage(e.toString()));
     return false; // Failure
   }
 }
@@ -327,16 +324,14 @@ Future<bool> _decodeAndApplyImage(
 Future<bool> readImageFromFilePath(
   final LayersProvider layers,
   final String path,
-  final BuildContext context, {
+  final AppLocalizations l10n, {
   final String imageName = _loadedImageDefaultName,
 }) async {
   try {
     final Uint8List fileBytes = await File(path).readAsBytes();
-    // ignore: use_build_context_synchronously
-    return await _decodeAndApplyImage(layers, fileBytes, context, imageName: imageName);
+    return await _decodeAndApplyImage(layers, fileBytes, l10n, imageName: imageName);
   } catch (e) {
-    // ignore: use_build_context_synchronously
-    _showImportFeedback(context, context.l10n.errorReadingFile(e.toString()));
+    _showImportFeedback(l10n.errorReadingFile(e.toString()));
     return false;
   }
 }
@@ -345,10 +340,10 @@ Future<bool> readImageFromFilePath(
 Future<bool> readImageFileFromBytes(
   final LayersProvider layers,
   final Uint8List bytes,
-  final BuildContext context, {
+  final AppLocalizations l10n, {
   final String imageName = _loadedImageDefaultName,
 }) async {
-  return await _decodeAndApplyImage(layers, bytes, context, imageName: imageName);
+  return await _decodeAndApplyImage(layers, bytes, l10n, imageName: imageName);
 }
 
 /// Reads a HEIF-family file from disk, decodes it via the platform-specific
@@ -356,22 +351,19 @@ Future<bool> readImageFileFromBytes(
 Future<bool> _readHeifFromFilePath(
   final LayersProvider layers,
   final String path,
-  final BuildContext context, {
+  final AppLocalizations l10n, {
   required final String extension,
   final String imageName = _loadedImageDefaultName,
 }) async {
   try {
     final Uint8List fileBytes = await File(path).readAsBytes();
     final Uint8List decodableBytes = await decodeHeicBytes(fileBytes);
-    // ignore: use_build_context_synchronously
-    return await _decodeAndApplyImage(layers, decodableBytes, context, imageName: imageName);
+    return await _decodeAndApplyImage(layers, decodableBytes, l10n, imageName: imageName);
   } on HeicConversionException {
-    // ignore: use_build_context_synchronously
-    _showImportFeedback(context, context.l10n.fileFormatNotSupportedOnPlatform(extension));
+    _showImportFeedback(l10n.fileFormatNotSupportedOnPlatform(extension));
     return false;
   } catch (e) {
-    // ignore: use_build_context_synchronously
-    _showImportFeedback(context, context.l10n.errorReadingFile(e.toString()));
+    _showImportFeedback(l10n.errorReadingFile(e.toString()));
     return false;
   }
 }
@@ -381,17 +373,15 @@ Future<bool> _readHeifFromFilePath(
 Future<bool> _readHeifFromBytes(
   final LayersProvider layers,
   final Uint8List bytes,
-  final BuildContext context, {
+  final AppLocalizations l10n, {
   required final String extension,
   final String imageName = _loadedImageDefaultName,
 }) async {
   try {
     final Uint8List decodableBytes = await decodeHeicBytes(bytes);
-    // ignore: use_build_context_synchronously
-    return await _decodeAndApplyImage(layers, decodableBytes, context, imageName: imageName);
+    return await _decodeAndApplyImage(layers, decodableBytes, l10n, imageName: imageName);
   } on HeicConversionException {
-    // ignore: use_build_context_synchronously
-    _showImportFeedback(context, context.l10n.fileFormatNotSupportedOnPlatform(extension));
+    _showImportFeedback(l10n.fileFormatNotSupportedOnPlatform(extension));
     return false;
   }
 }
@@ -417,10 +407,11 @@ Future<void> onFileDropped({
 }) async {
   final LayersProvider layers = LayersProvider.of(context);
   final ShellProvider shellProvider = ShellProvider.of(context);
+  final AppPreferences preferences = AppPreferences.of(context);
 
   final String extension = path.split('.').last.toLowerCase();
   if (!isFileExtensionSupported(extension)) {
-    _showImportFeedback(context, context.l10n.fileFormatNotSupported(extension));
+    _showImportFeedback(context.l10n.fileFormatNotSupported(extension));
     return;
   }
 
@@ -470,8 +461,7 @@ Future<void> onFileDropped({
     shellProvider.loadedFileName = path;
     layers.clearHasChanged();
     shellProvider.requestCanvasFit();
-    // ignore: use_build_context_synchronously
-    await AppPreferences.of(context).addRecentFile(path);
+    await preferences.addRecentFile(path);
   }
 }
 
@@ -493,9 +483,6 @@ Future<void> addFileAsLayer({
     layers.selectedLayer.addImage(imageToAdd: image);
     layers.update();
   } catch (e) {
-    if (!context.mounted) {
-      return;
-    }
-    _showImportFeedback(context, l10n.failedToLoadImage(e.toString()));
+    _showImportFeedback(l10n.failedToLoadImage(e.toString()));
   }
 }

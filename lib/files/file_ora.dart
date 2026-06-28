@@ -9,6 +9,7 @@ import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/list_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/layer_provider_storage_export.dart';
@@ -495,7 +496,8 @@ Future<Uint8List?> extractOraPreviewPngBytes(final List<int> archiveBytes) async
     if (content is List<int>) {
       return Uint8List.fromList(content);
     }
-  } catch (_) {
+  } catch (e, stackTrace) {
+    _log.warning('Failed to read ORA preview content', e, stackTrace);
     return null;
   }
 
@@ -854,29 +856,29 @@ ui.Image _createOraThumbnailImage(final ui.Image mergedImage) {
   final int targetHeight = math.max(AppLayout.thumbnailMaxHeight.toInt(), AppMath.one);
   final double scale = targetHeight / mergedImage.height;
   final int targetWidth = math.max((mergedImage.width * scale).round(), AppMath.one);
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final ui.Canvas canvas = ui.Canvas(recorder);
-  final ui.Paint paint = ui.Paint();
 
-  canvas.drawImageRect(
-    mergedImage,
-    ui.Rect.fromLTWH(
-      AppMath.zero.toDouble(),
-      AppMath.zero.toDouble(),
-      mergedImage.width.toDouble(),
-      mergedImage.height.toDouble(),
-    ),
-    ui.Rect.fromLTWH(
-      AppMath.zero.toDouble(),
-      AppMath.zero.toDouble(),
-      targetWidth.toDouble(),
-      targetHeight.toDouble(),
-    ),
-    paint,
+  return renderCanvasImageSync(
+    width: targetWidth,
+    height: targetHeight,
+    draw: (final ui.Canvas canvas) {
+      canvas.drawImageRect(
+        mergedImage,
+        ui.Rect.fromLTWH(
+          AppMath.zero.toDouble(),
+          AppMath.zero.toDouble(),
+          mergedImage.width.toDouble(),
+          mergedImage.height.toDouble(),
+        ),
+        ui.Rect.fromLTWH(
+          AppMath.zero.toDouble(),
+          AppMath.zero.toDouble(),
+          targetWidth.toDouble(),
+          targetHeight.toDouble(),
+        ),
+        ui.Paint(),
+      );
+    },
   );
-
-  final ui.Picture picture = recorder.endRecording();
-  return picture.toImageSync(targetWidth, targetHeight);
 }
 
 /// Builds the layers for the specified file or canvas.
