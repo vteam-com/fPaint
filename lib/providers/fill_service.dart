@@ -25,7 +25,7 @@ class FillRegion {
 ///
 /// **Immutability Contract:** Callers must treat [pixels] as read-only after construction.
 /// Mutations to the byte buffer will corrupt the cache. The cache layer validates correctness
-/// via [cachedWandSourceSignature], but this relies on pixels remaining unchanged.
+/// via `WandSelectionManager`'s cached signature, but this relies on pixels remaining unchanged.
 class FillImageData {
   const FillImageData({
     required this.pixels,

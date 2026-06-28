@@ -6,6 +6,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
+import 'package:fpaint/providers/wand_selection_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -238,14 +239,15 @@ void main() {
       final AppProvider appProvider = AppProvider(preferences: AppPreferences());
 
       appProvider.selectorModel.mode = SelectorMode.wand;
-      appProvider.isWandSelectionInProgress = true;
+      appProvider.wandSelection.isInProgress = true;
       appProvider.selectorCreationStart(
         const Offset(4, 6),
         sampleAllLayers: true,
       );
 
-      expect(appProvider.pendingWandSelectionPosition, const Offset(4, 6));
-      expect(appProvider.pendingWandSelectionSampleAllLayers, isTrue);
+      final WandSelectionRequest? request = appProvider.wandSelection.takePendingRequest();
+      expect(request!.position, const Offset(4, 6));
+      expect(request.sampleAllLayers, isTrue);
     });
 
     test('wand all-layers sampling can reuse cached composite image', () async {

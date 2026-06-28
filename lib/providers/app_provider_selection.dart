@@ -14,6 +14,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection_commit.dart';
 import 'package:fpaint/providers/fill_service.dart';
+import 'package:fpaint/providers/wand_selection_manager.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 part 'app_provider_selection_effects.dart';
@@ -645,9 +646,7 @@ extension AppProviderSelection on AppProvider {
     cancelEffectPreview();
     if (selectorModel.mode == SelectorMode.wand) {
       selectorModel.isDrawing = true;
-      wandSelectionRequestVersion += AppMath.one;
-      pendingWandSelectionPosition = position;
-      pendingWandSelectionSampleAllLayers = sampleAllLayers;
+      wandSelection.queueRequest(position: position, sampleAllLayers: sampleAllLayers);
       unawaited(_processPendingWandSelectionRequests());
       return;
     }
@@ -745,8 +744,7 @@ extension AppProviderSelection on AppProvider {
   /// Selects all.
   void selectAll() {
     cancelEffectPreview();
-    wandSelectionRequestVersion += AppMath.one;
-    pendingWandSelectionPosition = null;
+    wandSelection.cancelPendingRequest();
     selectorModel.isVisible = true;
     selectorModel.isDrawing = false;
     selectorModel.path1 = Path()
@@ -792,25 +790,21 @@ extension AppProviderSelection on AppProvider {
 
   /// Processes queued wand requests in order while applying only the latest valid result.
   Future<void> _processPendingWandSelectionRequests() async {
-    if (isWandSelectionInProgress) {
+    if (wandSelection.isInProgress) {
       return;
     }
 
-    isWandSelectionInProgress = true;
+    wandSelection.isInProgress = true;
     try {
-      while (pendingWandSelectionPosition != null) {
-        final Offset requestPosition = pendingWandSelectionPosition!;
-        final bool requestSampleAllLayers = pendingWandSelectionSampleAllLayers;
-        final int requestVersion = wandSelectionRequestVersion;
-        pendingWandSelectionPosition = null;
-        pendingWandSelectionSampleAllLayers = false;
+      while (wandSelection.hasPendingRequest) {
+        final WandSelectionRequest request = wandSelection.takePendingRequest()!;
 
         final FillRegion region = await getRegionPathFromLayerImage(
-          requestPosition,
-          sampleAllLayers: requestSampleAllLayers,
+          request.position,
+          sampleAllLayers: request.sampleAllLayers,
         );
 
-        if (requestVersion != wandSelectionRequestVersion) {
+        if (request.version != wandSelection.requestVersion) {
           continue;
         }
 
@@ -830,7 +824,7 @@ extension AppProviderSelection on AppProvider {
         update();
       }
     } finally {
-      isWandSelectionInProgress = false;
+      wandSelection.isInProgress = false;
     }
   }
 
@@ -842,15 +836,9 @@ extension AppProviderSelection on AppProvider {
     final int signature = _createSelectedLayerFloodSourceSignature(
       sampleAllLayers: sampleAllLayers,
     );
-    if (signature == cachedWandSourceSignature &&
-        cachedWandSourcePixels != null &&
-        cachedWandSourceWidth > AppMath.zero &&
-        cachedWandSourceHeight > AppMath.zero) {
-      return FillImageData(
-        pixels: cachedWandSourcePixels!,
-        width: cachedWandSourceWidth,
-        height: cachedWandSourceHeight,
-      );
+    final FillImageData? cached = wandSelection.cachedImageData(signature);
+    if (cached != null) {
+      return cached;
     }
 
     final bool ownsImage = !sampleAllLayers;
@@ -864,10 +852,12 @@ extension AppProviderSelection on AppProvider {
         return null;
       }
 
-      cachedWandSourceSignature = signature;
-      cachedWandSourcePixels = pixels;
-      cachedWandSourceWidth = image.width;
-      cachedWandSourceHeight = image.height;
+      wandSelection.storeCache(
+        signature: signature,
+        pixels: pixels,
+        width: image.width,
+        height: image.height,
+      );
 
       return FillImageData(
         pixels: pixels,
