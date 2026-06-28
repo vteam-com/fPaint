@@ -717,8 +717,8 @@ Future<void> _waitForWandSelectionIdle(
   required final AppProvider appProvider,
 }) async {
   for (int index = 0; index < _wandSelectionWaitPumpCount; index++) {
-    final bool hasPendingRequest = appProvider.pendingWandSelectionPosition != null;
-    if (!appProvider.isWandSelectionInProgress && !hasPendingRequest) {
+    final bool hasPendingRequest = appProvider.wandSelection.hasPendingRequest;
+    if (!appProvider.wandSelection.isInProgress && !hasPendingRequest) {
       break;
     }
     await tester.pump(_unitTestUiSettlePumpDuration);

@@ -2,7 +2,6 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
@@ -20,6 +19,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:fpaint/providers/wand_selection_manager.dart';
 
 // Exports
 export 'package:fpaint/providers/layers_provider.dart';
@@ -257,13 +257,7 @@ class AppProvider extends ChangeNotifier {
     }
 
     if (value != ActionType.selector) {
-      wandSelectionRequestVersion += AppMath.one;
-      pendingWandSelectionPosition = null;
-      pendingWandSelectionSampleAllLayers = false;
-      cachedWandSourceSignature = -AppMath.one;
-      cachedWandSourcePixels = null;
-      cachedWandSourceWidth = AppMath.zero;
-      cachedWandSourceHeight = AppMath.zero;
+      wandSelection.reset();
     }
 
     if (selectedActionChanged) {
@@ -499,29 +493,8 @@ class AppProvider extends ChangeNotifier {
   /// Monotonic token that invalidates stale async effect preview renders.
   int effectPreviewRenderVersion = 0;
 
-  /// Monotonic token that invalidates stale async magic-wand computations.
-  int wandSelectionRequestVersion = 0;
-
-  /// Whether a magic-wand computation is currently running.
-  bool isWandSelectionInProgress = false;
-
-  /// Latest pointer position requested for magic-wand selection.
-  Offset? pendingWandSelectionPosition;
-
-  /// Whether the queued magic-wand request should sample all visible layers.
-  bool pendingWandSelectionSampleAllLayers = false;
-
-  /// Fingerprint of the cached raster bytes used by magic-wand/fill extraction.
-  int cachedWandSourceSignature = -AppMath.one;
-
-  /// Cached rasterized bytes for the active selected layer.
-  Uint8List? cachedWandSourcePixels;
-
-  /// Width of [cachedWandSourcePixels].
-  int cachedWandSourceWidth = AppMath.zero;
-
-  /// Height of [cachedWandSourcePixels].
-  int cachedWandSourceHeight = AppMath.zero;
+  /// Owns the magic-wand selection request queue and rasterized source cache.
+  final WandSelectionManager wandSelection = WandSelectionManager();
 
   /// The selected text object.
   TextObject? selectedTextObject;
