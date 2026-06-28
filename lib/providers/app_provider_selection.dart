@@ -14,6 +14,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection_commit.dart';
 import 'package:fpaint/providers/fill_service.dart';
+import 'package:fpaint/providers/layer_crop_state.dart';
 import 'package:fpaint/providers/wand_selection_manager.dart';
 import 'package:vector_math/vector_math_64.dart';
 
