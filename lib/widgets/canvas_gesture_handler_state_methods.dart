@@ -59,6 +59,26 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.repaintToolOptions();
   }
 
+  /// Returns whether drawing may start on the selected layer, surfacing a
+  /// message and aborting when the layer is hidden or locked.
+  bool _canStartDrawingOnSelectedLayer(final AppProvider appProvider) {
+    if (appProvider.layers.selectedLayer.isVisible == false) {
+      final AppLocalizations l10n = context.l10n;
+      context.showSnackBarMessage(
+        l10n.selectionIsHidden,
+      );
+      return false;
+    }
+
+    if (appProvider.isSelectedLayerLocked) {
+      _activePointerId = -1;
+      _showLockedLayerMessage(appProvider);
+      return false;
+    }
+
+    return true;
+  }
+
   /// Clears the in-progress pixel-brush stroke state.
   void _clearPixelBrushStroke() {
     _pixelBrushStrokePoints.clear();
@@ -196,6 +216,57 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
   }
 
+  /// Captures an eyedropper sample at [adjustedPosition] when an eyedropper is
+  /// armed. Returns whether the pointer-down was consumed.
+  bool _handleEyeDropperPointerStart(
+    final AppProvider appProvider,
+    final ui.Offset adjustedPosition,
+  ) {
+    if (appProvider.eyeDropPositionForBrush != null) {
+      appProvider.layers.capturePainterToImage();
+      appProvider.eyeDropPositionForBrush = adjustedPosition;
+      return true;
+    }
+
+    if (appProvider.eyeDropPositionForFill != null) {
+      appProvider.layers.capturePainterToImage();
+      appProvider.eyeDropPositionForFill = adjustedPosition;
+      return true;
+    }
+
+    return false;
+  }
+
+  /// Starts a flood fill at [adjustedPosition], honouring an active selection,
+  /// solid fill, or gradient fill initialization.
+  Future<void> _handleFillPointerStart(
+    final AppProvider appProvider,
+    final ui.Offset adjustedPosition,
+  ) async {
+    final bool sampleAllLayers = _isSampleAllLayersModifierPressed();
+
+    if (await appProvider.prepareFloodFillSelection(
+      adjustedPosition,
+      sampleAllLayers: sampleAllLayers,
+    )) {
+      return;
+    }
+
+    if (appProvider.fillModel.mode == FillMode.solid) {
+      appProvider.fillModel.gradientPoints.clear();
+      appProvider.fillModel.sampleAllLayers = sampleAllLayers;
+      appProvider.floodFillSolidAction(
+        adjustedPosition,
+        sampleAllLayers: sampleAllLayers,
+      );
+      return;
+    }
+
+    if (appProvider.fillModel.gradientPoints.isEmpty) {
+      _initializeGradientFill(appProvider, adjustedPosition, sampleAllLayers: sampleAllLayers);
+    }
+  }
+
   /// Handles two-finger pan and pinch updates for manual canvas navigation.
   void _handleMultiTouchUpdate(
     final PointerMoveEvent event,
@@ -321,6 +392,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   }
 
   /// Starts pointer interactions including drawing, selection, fill, and text placement.
+  ///
+  /// Acts as a dispatcher: each tool's behaviour lives in a focused handler so this
+  /// method only decides which one applies for the current pointer-down.
   void _handlePointerStart(
     final AppProvider appProvider,
     final PointerDownEvent event,
@@ -329,166 +403,86 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
 
+    if (event.buttons != 1 || _activePointerId != -1) {
+      return;
+    }
+
     final ui.Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
+
+    if (_handleEyeDropperPointerStart(appProvider, adjustedPosition)) {
+      return;
+    }
+
+    _activePointerId = event.pointer;
+
     final bool isSelectionActive =
         appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
-
-    if (event.buttons == 1 && _activePointerId == -1) {
-      if (appProvider.eyeDropPositionForBrush != null) {
-        appProvider.layers.capturePainterToImage();
-        appProvider.eyeDropPositionForBrush = adjustedPosition;
-        return;
-      }
-
-      if (appProvider.eyeDropPositionForFill != null) {
-        appProvider.layers.capturePainterToImage();
-        appProvider.eyeDropPositionForFill = adjustedPosition;
-        return;
-      }
-
-      _activePointerId = event.pointer;
-
-      if (isSelectionActive) {
-        _applySelectionModifierMath(appProvider);
-        if (_tryCloseStraightLineSelectionOnDoubleTap(appProvider, event, adjustedPosition)) {
-          return;
-        }
-        appProvider.selectorCreationStart(
-          adjustedPosition,
-          sampleAllLayers: appProvider.selectorModel.mode == SelectorMode.wand && _isSampleAllLayersModifierPressed(),
-        );
-        return;
-      }
-
-      _updateDrawingToolPreview(appProvider, event.localPosition);
-
-      if (appProvider.layers.selectedLayer.isVisible == false) {
-        final AppLocalizations l10n = context.l10n;
-        context.showSnackBarMessage(
-          l10n.selectionIsHidden,
-        );
-        return;
-      }
-
-      if (appProvider.isSelectedLayerLocked) {
-        _activePointerId = -1;
-        _showLockedLayerMessage(appProvider);
-        return;
-      }
-
-      if (appProvider.selectedAction == ActionType.text) {
-        TextObject? selectedText;
-
-        for (final UserActionDrawing action in appProvider.layers.selectedLayer.actionStack.reversed) {
-          if (action.textObject != null && action.textObject!.containsPoint(adjustedPosition)) {
-            selectedText = action.textObject;
-            break;
-          }
-        }
-
-        if (selectedText != null) {
-          // Text selection is handled fully on pointer down; release active pointer
-          // in case the subsequent pointer up is consumed by the modal dialog.
-          _activePointerId = -1;
-          appProvider.adoptTextToolStateFromObject(selectedText);
-          appProvider.selectedTextObject = selectedText;
-          return;
-        }
-
-        // Text creation opens a dialog on pointer down, so pointer up may not
-        // reach this listener. Clear active pointer to avoid locking tools.
-        _activePointerId = -1;
-        _showTextDialog(appProvider, adjustedPosition);
-        return;
-      }
-
-      if (appProvider.selectedAction == ActionType.fill) {
-        final bool sampleAllLayers = _isSampleAllLayersModifierPressed();
-
-        if (await appProvider.prepareFloodFillSelection(
-          adjustedPosition,
-          sampleAllLayers: sampleAllLayers,
-        )) {
-          return;
-        }
-
-        if (appProvider.fillModel.mode == FillMode.solid) {
-          appProvider.fillModel.gradientPoints.clear();
-          appProvider.fillModel.sampleAllLayers = sampleAllLayers;
-          appProvider.floodFillSolidAction(
-            adjustedPosition,
-            sampleAllLayers: sampleAllLayers,
-          );
-        } else {
-          if (appProvider.fillModel.gradientPoints.isEmpty) {
-            appProvider.fillModel.sampleAllLayers = sampleAllLayers;
-            if (appProvider.fillModel.mode == FillMode.linear) {
-              appProvider.fillModel.addPoint(
-                GradientPoint(
-                  offset: appProvider.fromCanvas(
-                    adjustedPosition + const Offset(-AppInteraction.linearFillHandleOffset, 0),
-                  ),
-                  color: appProvider.fillModel.gradientStopColors.first,
-                ),
-              );
-              appProvider.fillModel.addPoint(
-                GradientPoint(
-                  offset: appProvider.fromCanvas(
-                    adjustedPosition + const Offset(AppInteraction.linearFillHandleOffset, 0),
-                  ),
-                  color: appProvider.fillModel.gradientStopColors.last,
-                ),
-              );
-            } else if (appProvider.fillModel.mode == FillMode.radial) {
-              appProvider.fillModel.addPoint(
-                GradientPoint(
-                  offset: appProvider.fromCanvas(adjustedPosition),
-                  color: appProvider.fillModel.gradientStopColors.first,
-                ),
-              );
-              appProvider.fillModel.addPoint(
-                GradientPoint(
-                  offset: appProvider.fromCanvas(
-                    adjustedPosition +
-                        const Offset(AppInteraction.radialFillHandleOffset, AppInteraction.radialFillHandleOffset),
-                  ),
-                  color: appProvider.fillModel.gradientStopColors.last,
-                ),
-              );
-            }
-            appProvider.fillModel.isVisible = true;
-            appProvider.floodFillGradientAction(appProvider.fillModel);
-            appProvider.update();
-          }
-        }
-        return;
-      }
-
-      appProvider.layers.selectedLayer.isUserDrawing = true;
-
-      if (appProvider.selectedAction == ActionType.smudge) {
-        _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.smudge);
-        return;
-      }
-
-      if (appProvider.selectedAction == ActionType.blurBrush) {
-        _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.blur);
-        return;
-      }
-
-      appProvider.recordExecuteDrawingActionToSelectedLayer(
-        action: UserActionDrawing(
-          action: appProvider.selectedAction,
-          positions: <ui.Offset>[adjustedPosition, adjustedPosition],
-          brush: MyBrush(
-            color: appProvider.brushColor,
-            size: appProvider.brushSize,
-            style: appProvider.brushStyle,
-          ),
-          fillColor: appProvider.fillColor,
-        ),
-      );
+    if (isSelectionActive) {
+      _handleSelectionPointerStart(appProvider, event, adjustedPosition);
+      return;
     }
+
+    _updateDrawingToolPreview(appProvider, event.localPosition);
+
+    if (!_canStartDrawingOnSelectedLayer(appProvider)) {
+      return;
+    }
+
+    if (appProvider.selectedAction == ActionType.text) {
+      _handleTextPointerStart(appProvider, adjustedPosition);
+      return;
+    }
+
+    if (appProvider.selectedAction == ActionType.fill) {
+      await _handleFillPointerStart(appProvider, adjustedPosition);
+      return;
+    }
+
+    _startDrawingPointer(appProvider, adjustedPosition);
+  }
+
+  /// Begins a selection at [adjustedPosition], applying modifier math and
+  /// closing an in-progress straight-line selection on a double tap.
+  void _handleSelectionPointerStart(
+    final AppProvider appProvider,
+    final PointerDownEvent event,
+    final ui.Offset adjustedPosition,
+  ) {
+    _applySelectionModifierMath(appProvider);
+    if (_tryCloseStraightLineSelectionOnDoubleTap(appProvider, event, adjustedPosition)) {
+      return;
+    }
+    appProvider.selectorCreationStart(
+      adjustedPosition,
+      sampleAllLayers: appProvider.selectorModel.mode == SelectorMode.wand && _isSampleAllLayersModifierPressed(),
+    );
+  }
+
+  /// Selects an existing text object under [adjustedPosition] or opens the text
+  /// dialog to create a new one. Releases the active pointer because a modal may
+  /// consume the matching pointer-up.
+  void _handleTextPointerStart(
+    final AppProvider appProvider,
+    final ui.Offset adjustedPosition,
+  ) {
+    TextObject? selectedText;
+
+    for (final UserActionDrawing action in appProvider.layers.selectedLayer.actionStack.reversed) {
+      if (action.textObject != null && action.textObject!.containsPoint(adjustedPosition)) {
+        selectedText = action.textObject;
+        break;
+      }
+    }
+
+    if (selectedText != null) {
+      _activePointerId = -1;
+      appProvider.adoptTextToolStateFromObject(selectedText);
+      appProvider.selectedTextObject = selectedText;
+      return;
+    }
+
+    _activePointerId = -1;
+    _showTextDialog(appProvider, adjustedPosition);
   }
 
   void _handleUserPanningTheCanvas(
@@ -523,6 +517,53 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       notifyListener: false,
       notifyViewport: true,
     );
+  }
+
+  /// Seeds the gradient fill handles around [adjustedPosition] for the active
+  /// linear or radial fill mode and commits the initial gradient action.
+  void _initializeGradientFill(
+    final AppProvider appProvider,
+    final ui.Offset adjustedPosition, {
+    required final bool sampleAllLayers,
+  }) {
+    appProvider.fillModel.sampleAllLayers = sampleAllLayers;
+    if (appProvider.fillModel.mode == FillMode.linear) {
+      appProvider.fillModel.addPoint(
+        GradientPoint(
+          offset: appProvider.fromCanvas(
+            adjustedPosition + const Offset(-AppInteraction.linearFillHandleOffset, 0),
+          ),
+          color: appProvider.fillModel.gradientStopColors.first,
+        ),
+      );
+      appProvider.fillModel.addPoint(
+        GradientPoint(
+          offset: appProvider.fromCanvas(
+            adjustedPosition + const Offset(AppInteraction.linearFillHandleOffset, 0),
+          ),
+          color: appProvider.fillModel.gradientStopColors.last,
+        ),
+      );
+    } else if (appProvider.fillModel.mode == FillMode.radial) {
+      appProvider.fillModel.addPoint(
+        GradientPoint(
+          offset: appProvider.fromCanvas(adjustedPosition),
+          color: appProvider.fillModel.gradientStopColors.first,
+        ),
+      );
+      appProvider.fillModel.addPoint(
+        GradientPoint(
+          offset: appProvider.fromCanvas(
+            adjustedPosition +
+                const Offset(AppInteraction.radialFillHandleOffset, AppInteraction.radialFillHandleOffset),
+          ),
+          color: appProvider.fillModel.gradientStopColors.last,
+        ),
+      );
+    }
+    appProvider.fillModel.isVisible = true;
+    appProvider.floodFillGradientAction(appProvider.fillModel);
+    appProvider.update();
   }
 
   /// Returns whether the current keyboard state requests sampling from all visible layers.
@@ -741,6 +782,38 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
           },
         );
       },
+    );
+  }
+
+  /// Starts a brush/pencil/eraser or pixel-brush stroke at [adjustedPosition]
+  /// for the active drawing tool.
+  void _startDrawingPointer(
+    final AppProvider appProvider,
+    final ui.Offset adjustedPosition,
+  ) {
+    appProvider.layers.selectedLayer.isUserDrawing = true;
+
+    if (appProvider.selectedAction == ActionType.smudge) {
+      _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.smudge);
+      return;
+    }
+
+    if (appProvider.selectedAction == ActionType.blurBrush) {
+      _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.blur);
+      return;
+    }
+
+    appProvider.recordExecuteDrawingActionToSelectedLayer(
+      action: UserActionDrawing(
+        action: appProvider.selectedAction,
+        positions: <ui.Offset>[adjustedPosition, adjustedPosition],
+        brush: MyBrush(
+          color: appProvider.brushColor,
+          size: appProvider.brushSize,
+          style: appProvider.brushStyle,
+        ),
+        fillColor: appProvider.fillColor,
+      ),
     );
   }
 

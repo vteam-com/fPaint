@@ -13,24 +13,7 @@ extension AppProviderSelectionCrop on AppProvider {
     final int originalHeight = layers.height.toInt();
     final ui.Path cropPath = Path.from(selectionPath);
 
-    final ui.PictureRecorder maskRecorder = ui.PictureRecorder();
-    final ui.Canvas maskCanvas = ui.Canvas(maskRecorder);
-    maskCanvas.drawPath(
-      cropPath,
-      ui.Paint()
-        ..color = const ui.Color.fromARGB(
-          AppLimits.rgbChannelMax,
-          AppLimits.rgbChannelMax,
-          AppLimits.rgbChannelMax,
-          AppLimits.rgbChannelMax,
-        )
-        ..style = ui.PaintingStyle.fill,
-    );
-    final ui.Image selectionMask = await maskRecorder.endRecording().toImage(
-      originalWidth,
-      originalHeight,
-    );
-
+    final ui.Image selectionMask = await _renderSelectionMask(cropPath, originalWidth, originalHeight);
     final Rect? maskBounds = await getNonTransparentBounds(selectionMask);
     if (maskBounds == null || maskBounds.width <= 0 || maskBounds.height <= 0) {
       return;
@@ -44,40 +27,29 @@ extension AppProviderSelectionCrop on AppProvider {
 
     final Size originalSize = layers.size;
 
-    final Map<LayerProvider, List<UserActionDrawing>> originalActions = <LayerProvider, List<UserActionDrawing>>{};
-    final Map<LayerProvider, List<UserActionDrawing>> originalRedoActions = <LayerProvider, List<UserActionDrawing>>{};
-    final Map<LayerProvider, bool> originalHasChanged = <LayerProvider, bool>{};
-    final Map<LayerProvider, Color?> originalBackgroundColors = <LayerProvider, Color?>{};
-    final Map<LayerProvider, ui.Image> croppedImages = <LayerProvider, ui.Image>{};
-
+    final Map<LayerProvider, LayerCropState> cropStates = <LayerProvider, LayerCropState>{};
     Rect? finalContentBounds;
 
     for (final LayerProvider layer in layers.list) {
-      originalActions[layer] = List<UserActionDrawing>.from(layer.actionStack);
-      originalRedoActions[layer] = List<UserActionDrawing>.from(layer.redoStack);
-      originalHasChanged[layer] = layer.hasChanged;
-      originalBackgroundColors[layer] = layer.backgroundColor;
+      // Capture the undo snapshot before rendering so the layer state is untouched.
+      final LayerCropState state = LayerCropState(
+        originalActions: List<UserActionDrawing>.from(layer.actionStack),
+        originalRedoActions: List<UserActionDrawing>.from(layer.redoStack),
+        originalHasChanged: layer.hasChanged,
+        originalBackgroundColor: layer.backgroundColor,
+        croppedImage: await _cropLayerToSelection(
+          layer,
+          cropPath: cropPath,
+          bounds: bounds,
+          width: originalWidth,
+          height: originalHeight,
+        ),
+      );
+      cropStates[layer] = state;
 
-      final ui.Image layerImage = layer.renderImageWH(originalWidth, originalHeight);
-
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder);
-      canvas.save();
-      canvas.clipPath(cropPath);
-      canvas.drawImage(layerImage, Offset.zero, ui.Paint());
-      canvas.restore();
-
-      final ui.Image maskedImage = await recorder.endRecording().toImage(originalWidth, originalHeight);
-      final ui.Image layerCrop = cropImage(maskedImage, bounds);
-      croppedImages[layer] = layerCrop;
-
-      final Rect? layerBounds = await getNonTransparentBounds(layerCrop);
+      final Rect? layerBounds = await getNonTransparentBounds(state.croppedImage);
       if (layerBounds != null && layerBounds.width > 0 && layerBounds.height > 0) {
-        if (finalContentBounds == null) {
-          finalContentBounds = layerBounds;
-        } else {
-          finalContentBounds = finalContentBounds.expandToInclude(layerBounds);
-        }
+        finalContentBounds = finalContentBounds == null ? layerBounds : finalContentBounds.expandToInclude(layerBounds);
       }
     }
 
@@ -94,9 +66,8 @@ extension AppProviderSelectionCrop on AppProvider {
       return;
     }
 
-    final Map<LayerProvider, ui.Image> finalImages = <LayerProvider, ui.Image>{};
     for (final LayerProvider layer in layers.list) {
-      finalImages[layer] = cropImage(croppedImages[layer]!, effectiveBounds);
+      cropStates[layer]!.finalImage = cropImage(cropStates[layer]!.croppedImage, effectiveBounds);
     }
 
     undoProvider.executeAction(
@@ -109,7 +80,7 @@ extension AppProviderSelectionCrop on AppProvider {
           layer.redoStack.clear();
           layer.backgroundColor = null;
           layer.addImage(
-            imageToAdd: finalImages[layer]!,
+            imageToAdd: cropStates[layer]!.finalImage,
             offset: Offset.zero,
           );
         }
@@ -122,19 +93,63 @@ extension AppProviderSelectionCrop on AppProvider {
         layers.size = originalSize;
 
         for (final LayerProvider layer in layers.list) {
+          final LayerCropState state = cropStates[layer]!;
           layer.actionStack
             ..clear()
-            ..addAll(originalActions[layer]!);
+            ..addAll(state.originalActions);
           layer.redoStack
             ..clear()
-            ..addAll(originalRedoActions[layer]!);
-          layer.hasChanged = originalHasChanged[layer]!;
-          layer.backgroundColor = originalBackgroundColors[layer];
+            ..addAll(state.originalRedoActions);
+          layer.hasChanged = state.originalHasChanged;
+          layer.backgroundColor = state.originalBackgroundColor;
           layer.clearCache();
         }
 
         update();
       },
     );
+  }
+
+  /// Renders the selection [cropPath] as an opaque white mask sized to the canvas.
+  Future<ui.Image> _renderSelectionMask(
+    final ui.Path cropPath,
+    final int width,
+    final int height,
+  ) async {
+    final ui.PictureRecorder maskRecorder = ui.PictureRecorder();
+    final ui.Canvas maskCanvas = ui.Canvas(maskRecorder);
+    maskCanvas.drawPath(
+      cropPath,
+      ui.Paint()
+        ..color = const ui.Color.fromARGB(
+          AppLimits.rgbChannelMax,
+          AppLimits.rgbChannelMax,
+          AppLimits.rgbChannelMax,
+          AppLimits.rgbChannelMax,
+        )
+        ..style = ui.PaintingStyle.fill,
+    );
+    return maskRecorder.endRecording().toImage(width, height);
+  }
+
+  /// Clips [layer] to [cropPath] and returns the result cropped to [bounds].
+  Future<ui.Image> _cropLayerToSelection(
+    final LayerProvider layer, {
+    required final ui.Path cropPath,
+    required final Rect bounds,
+    required final int width,
+    required final int height,
+  }) async {
+    final ui.Image layerImage = layer.renderImageWH(width, height);
+
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final ui.Canvas canvas = ui.Canvas(recorder);
+    canvas.save();
+    canvas.clipPath(cropPath);
+    canvas.drawImage(layerImage, Offset.zero, ui.Paint());
+    canvas.restore();
+
+    final ui.Image maskedImage = await recorder.endRecording().toImage(width, height);
+    return cropImage(maskedImage, bounds);
   }
 }
