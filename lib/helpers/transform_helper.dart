@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
 
 const int _topLeftCornerIndex = 0;
 const int _topRightCornerIndex = 1;
@@ -130,23 +131,21 @@ Future<ui.Image> renderTransformedImage(
   final double width = maxX - minX;
   final double height = maxY - minY;
 
-  final ui.PictureRecorder recorder = ui.PictureRecorder();
-  final Canvas canvas = Canvas(recorder);
+  return renderCanvasImage(
+    width: max(1, width.ceil()),
+    height: max(1, height.ceil()),
+    draw: (final ui.Canvas canvas) {
+      // Translate so the quad's top-left is at (0,0)
+      canvas.translate(-minX, -minY);
 
-  // Translate so the quad's top-left is at (0,0)
-  canvas.translate(-minX, -minY);
-
-  drawPerspectiveImage(
-    canvas,
-    sourceImage,
-    corners,
-    subdivisions,
-    edgeMidpoints: edgeMidpoints,
-  );
-
-  return recorder.endRecording().toImage(
-    max(1, width.ceil()),
-    max(1, height.ceil()),
+      drawPerspectiveImage(
+        canvas,
+        sourceImage,
+        corners,
+        subdivisions,
+        edgeMidpoints: edgeMidpoints,
+      );
+    },
   );
 }
 

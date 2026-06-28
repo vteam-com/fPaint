@@ -183,79 +183,69 @@ Widget _buildResponsiveToolbarActions(
   final InteractionLayoutProfile interactionProfile,
 ) {
   return ListenableBuilder(
-    listenable: appProvider.viewportRepaintListenable,
+    listenable: appProvider.toolbarActionsListenable,
     builder: (final BuildContext _, final Widget? _) {
-      return ListenableBuilder(
-        listenable: appProvider,
-        builder: (final BuildContext _, final Widget? _) {
-          return ListenableBuilder(
-            listenable: appProvider.undoProvider,
-            builder: (final BuildContext _, final Widget? _) {
-              return LayoutBuilder(
-                builder: (final BuildContext _, final BoxConstraints constraints) {
-                  final List<_ToolbarActionEntry> primaryActions = _buildPrimaryToolbarActionEntries(
-                    context,
-                    shellProvider,
-                    appProvider,
-                    interactionProfile,
-                  );
-                  final List<_ToolbarActionEntry> filteredPrimaryActions = _filterToolbarActionsForViewport(
-                    actions: primaryActions,
-                    shellProvider: shellProvider,
-                  );
-                  final List<_ToolbarActionEntry> actions = _filterToolbarActionsForViewport(
-                    actions: _buildResponsiveToolbarActionEntries(
-                      context,
-                      shellProvider,
-                      appProvider,
-                      interactionProfile,
-                    ),
-                    shellProvider: shellProvider,
-                  );
-                  final double fullToolbarWidth =
-                      _estimateToolbarActionWidth(actions, interactionProfile.buttonSpacing) + AppSpacing.large;
+      return LayoutBuilder(
+        builder: (final BuildContext _, final BoxConstraints constraints) {
+          final List<_ToolbarActionEntry> primaryActions = _buildPrimaryToolbarActionEntries(
+            context,
+            shellProvider,
+            appProvider,
+            interactionProfile,
+          );
+          final List<_ToolbarActionEntry> filteredPrimaryActions = _filterToolbarActionsForViewport(
+            actions: primaryActions,
+            shellProvider: shellProvider,
+          );
+          final List<_ToolbarActionEntry> actions = _filterToolbarActionsForViewport(
+            actions: _buildResponsiveToolbarActionEntries(
+              context,
+              shellProvider,
+              appProvider,
+              interactionProfile,
+            ),
+            shellProvider: shellProvider,
+          );
+          final double fullToolbarWidth =
+              _estimateToolbarActionWidth(actions, interactionProfile.buttonSpacing) + AppSpacing.large;
 
-                  if (shellProvider.deviceSizeSmall == false && constraints.maxWidth >= fullToolbarWidth) {
-                    return _buildWideDesktopToolbarActions(
-                      context: context,
-                      shellProvider: shellProvider,
-                      appProvider: appProvider,
-                      primaryActions: primaryActions,
-                    );
-                  }
+          if (shellProvider.deviceSizeSmall == false && constraints.maxWidth >= fullToolbarWidth) {
+            return _buildWideDesktopToolbarActions(
+              context: context,
+              shellProvider: shellProvider,
+              appProvider: appProvider,
+              primaryActions: primaryActions,
+            );
+          }
 
-                  final List<_ResolvedToolbarActionGroup> visibleGroups = _selectResponsiveToolbarActionGroups(
-                    groups: _buildResponsiveToolbarActionGroups(
-                      context: context,
-                      shellProvider: shellProvider,
-                      appProvider: appProvider,
-                      interactionProfile: interactionProfile,
-                      primaryActions: filteredPrimaryActions,
-                    ),
-                    maxWidth: constraints.maxWidth,
-                    groupSpacing: interactionProfile.buttonSpacing,
-                  );
+          final List<_ResolvedToolbarActionGroup> visibleGroups = _selectResponsiveToolbarActionGroups(
+            groups: _buildResponsiveToolbarActionGroups(
+              context: context,
+              shellProvider: shellProvider,
+              appProvider: appProvider,
+              interactionProfile: interactionProfile,
+              primaryActions: filteredPrimaryActions,
+            ),
+            maxWidth: constraints.maxWidth,
+            groupSpacing: interactionProfile.buttonSpacing,
+          );
 
-                  if (visibleGroups.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
+          if (visibleGroups.isEmpty) {
+            return const SizedBox.shrink();
+          }
 
-                  return Align(
-                    alignment: Alignment.center,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: interactionProfile.buttonSpacing,
-                      children: visibleGroups
-                          .map<Widget>(
-                            (final _ResolvedToolbarActionGroup group) => _buildResponsiveToolbarGroupWidget(group),
-                          )
-                          .toList(),
-                    ),
-                  );
-                },
-              );
-            },
+          return Align(
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: interactionProfile.buttonSpacing,
+              children: visibleGroups
+                  .map<Widget>(
+                    (final _ResolvedToolbarActionGroup group) => _buildResponsiveToolbarGroupWidget(group),
+                  )
+                  .toList(),
+            ),
           );
         },
       );

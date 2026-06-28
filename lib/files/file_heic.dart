@@ -2,7 +2,11 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:fpaint/files/file_operation_exception.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:image/image.dart' as img;
+import 'package:logging/logging.dart';
+
+final Logger _log = Logger(logNameFileHeic);
 
 const String _errorConvertPrefix = 'Failed to decode HEIC image';
 const String _errorEncodePrefix = 'Failed to encode HEIC image';
@@ -78,8 +82,9 @@ Future<Uint8List> encodeToHeic(final Uint8List pngBytes) async {
   } finally {
     try {
       await tempDir.delete(recursive: true);
-    } catch (_) {
+    } catch (e, stackTrace) {
       // Best-effort cleanup of temporary files.
+      _log.warning('Failed to delete temporary HEIC directory', e, stackTrace);
     }
   }
 }

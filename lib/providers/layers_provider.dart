@@ -5,14 +5,19 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
+import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 // Exports
 export 'package:fpaint/providers/layer_provider.dart';
+
+final Logger _log = Logger(logNameLayersProvider);
 
 const String _defaultBackgroundName = 'Background';
 const String _defaultLayerPrefix = 'Layer';
@@ -604,22 +609,16 @@ class LayersProvider extends ChangeNotifier {
           .map((final LayerProvider layer) => layer.ensureCachePrimed()),
     );
 
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
-
-    for (final LayerProvider layer in _list.reversed) {
-      if (layer.isVisible) {
-        layer.renderLayer(canvas);
-      }
-    }
-
-    // End the recording and get the picture
-    final ui.Picture picture = recorder.endRecording();
-
-    // Convert the picture to an image
-    this.cachedImage = await picture.toImage(
-      this.size.width.toInt(),
-      this.size.height.toInt(),
+    this.cachedImage = await renderCanvasImage(
+      width: this.size.width.toInt(),
+      height: this.size.height.toInt(),
+      draw: (final ui.Canvas canvas) {
+        for (final LayerProvider layer in _list.reversed) {
+          if (layer.isVisible) {
+            layer.renderLayer(canvas);
+          }
+        }
+      },
     );
     _cachedImageRawRgba = null;
     _cachedImageRawRgbaSource = null;
@@ -632,21 +631,19 @@ class LayersProvider extends ChangeNotifier {
   /// This includes the layer at [topLayerIndex] and every visible layer below
   /// it, but excludes any layers above it.
   ui.Image capturePainterToImageThroughLayerSync(final int topLayerIndex) {
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final Canvas canvas = Canvas(recorder);
     final int clampedTopLayerIndex = topLayerIndex.clamp(0, length - 1);
 
-    for (int index = length - 1; index >= clampedTopLayerIndex; index--) {
-      final LayerProvider layer = get(index);
-      if (layer.isVisible) {
-        layer.renderLayer(canvas);
-      }
-    }
-
-    final ui.Picture picture = recorder.endRecording();
-    return picture.toImageSync(
-      size.width.toInt(),
-      size.height.toInt(),
+    return renderCanvasImageSync(
+      width: size.width.toInt(),
+      height: size.height.toInt(),
+      draw: (final ui.Canvas canvas) {
+        for (int index = length - 1; index >= clampedTopLayerIndex; index--) {
+          final LayerProvider layer = get(index);
+          if (layer.isVisible) {
+            layer.renderLayer(canvas);
+          }
+        }
+      },
     );
   }
 
@@ -770,7 +767,8 @@ class LayersProvider extends ChangeNotifier {
       final int a = byteData.getUint8(pixelIndex + AppMath.triple);
 
       return Color.fromARGB(a, r, g, b);
-    } catch (_) {
+    } catch (e, stackTrace) {
+      _log.warning('Failed to read pixel color', e, stackTrace);
       return null;
     }
   }

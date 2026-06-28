@@ -2,8 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/widgets/app_progress.dart';
+import 'package:logging/logging.dart';
+
+final Logger _log = Logger(logNameAppSnackbar);
 
 final GlobalKey<NavigatorState> appSnackBarNavigatorKey = GlobalKey<NavigatorState>();
 final RegExp _pathSeparatorPattern = RegExp(r'[\\/]');
@@ -234,7 +238,8 @@ Future<T> runWithGlobalProgressSnackBar<T>({
       dismissGlobalSnackBarMessage();
     }
     return result;
-  } catch (_) {
+  } catch (e, stackTrace) {
+    _log.warning('Task failed while showing snackbar progress', e, stackTrace);
     dismissGlobalSnackBarMessage();
     rethrow;
   }

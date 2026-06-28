@@ -115,21 +115,24 @@ extension AppProviderSelectionCrop on AppProvider {
     final ui.Path cropPath,
     final int width,
     final int height,
-  ) async {
-    final ui.PictureRecorder maskRecorder = ui.PictureRecorder();
-    final ui.Canvas maskCanvas = ui.Canvas(maskRecorder);
-    maskCanvas.drawPath(
-      cropPath,
-      ui.Paint()
-        ..color = const ui.Color.fromARGB(
-          AppLimits.rgbChannelMax,
-          AppLimits.rgbChannelMax,
-          AppLimits.rgbChannelMax,
-          AppLimits.rgbChannelMax,
-        )
-        ..style = ui.PaintingStyle.fill,
+  ) {
+    return renderCanvasImage(
+      width: width,
+      height: height,
+      draw: (final ui.Canvas maskCanvas) {
+        maskCanvas.drawPath(
+          cropPath,
+          ui.Paint()
+            ..color = const ui.Color.fromARGB(
+              AppLimits.rgbChannelMax,
+              AppLimits.rgbChannelMax,
+              AppLimits.rgbChannelMax,
+              AppLimits.rgbChannelMax,
+            )
+            ..style = ui.PaintingStyle.fill,
+        );
+      },
     );
-    return maskRecorder.endRecording().toImage(width, height);
   }
 
   /// Clips [layer] to [cropPath] and returns the result cropped to [bounds].
@@ -142,14 +145,16 @@ extension AppProviderSelectionCrop on AppProvider {
   }) async {
     final ui.Image layerImage = layer.renderImageWH(width, height);
 
-    final ui.PictureRecorder recorder = ui.PictureRecorder();
-    final ui.Canvas canvas = ui.Canvas(recorder);
-    canvas.save();
-    canvas.clipPath(cropPath);
-    canvas.drawImage(layerImage, Offset.zero, ui.Paint());
-    canvas.restore();
-
-    final ui.Image maskedImage = await recorder.endRecording().toImage(width, height);
+    final ui.Image maskedImage = await renderCanvasImage(
+      width: width,
+      height: height,
+      draw: (final ui.Canvas canvas) {
+        canvas.save();
+        canvas.clipPath(cropPath);
+        canvas.drawImage(layerImage, Offset.zero, ui.Paint());
+        canvas.restore();
+      },
+    );
     return cropImage(maskedImage, bounds);
   }
 }

@@ -1,5 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:fpaint/helpers/log_helper.dart';
+import 'package:logging/logging.dart';
+
+final Logger _log = Logger(logNameMacosBookmark);
 
 const String _channelName = 'com.vteam.fpaint/file';
 const String _createBookmark = 'createBookmark';
@@ -32,7 +36,8 @@ class MacOsBookmarkService {
     try {
       final Object? result = await _channel.invokeMethod<String>(_createBookmark, path);
       return result as String?;
-    } catch (_) {
+    } catch (e, stackTrace) {
+      _log.warning('Failed to create security-scoped bookmark', e, stackTrace);
       return null;
     }
   }
@@ -54,7 +59,8 @@ class MacOsBookmarkService {
         'targetPath': targetPath,
       });
       return true;
-    } catch (_) {
+    } catch (e, stackTrace) {
+      _log.warning('Failed to replace file with backup', e, stackTrace);
       return false;
     }
   }
@@ -75,8 +81,9 @@ class MacOsBookmarkService {
     String? resolvedPath;
     try {
       resolvedPath = await _channel.invokeMethod<String>(_resolveBookmark, bookmarkBase64);
-    } catch (_) {
+    } catch (e, stackTrace) {
       // Fall back to direct path access if bookmark resolution fails.
+      _log.warning('Failed to resolve security-scoped bookmark; using direct path', e, stackTrace);
     }
     final String pathToUse = resolvedPath ?? fallbackPath;
     try {
@@ -85,8 +92,9 @@ class MacOsBookmarkService {
       if (resolvedPath != null) {
         try {
           await _channel.invokeMethod<void>(_releaseBookmark, resolvedPath);
-        } catch (_) {
+        } catch (e, stackTrace) {
           // Best-effort release.
+          _log.warning('Failed to release security-scoped bookmark', e, stackTrace);
         }
       }
     }

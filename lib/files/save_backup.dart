@@ -1,8 +1,12 @@
 import 'dart:io';
 
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/macos_bookmark_service.dart';
+import 'package:logging/logging.dart';
+
+final Logger _log = Logger(logNameSaveBackup);
 
 const String _backupFileNameMarker = '_back-';
 const String _temporarySaveFileNamePrefix = 'fpaint-save-';
@@ -58,7 +62,8 @@ Future<void> saveWithOptionalBackup({
 
   try {
     await saveAction(filePath);
-  } catch (_) {
+  } catch (e, stackTrace) {
+    _log.warning('Save failed; restoring backup if available', e, stackTrace);
     if (backupFile != null) {
       await _restoreBackupFile(
         targetFile: targetFile,

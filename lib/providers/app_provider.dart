@@ -113,6 +113,27 @@ class AppProvider extends ChangeNotifier {
   /// Listenable used to rebuild tool-selection affordance only when the tool changes.
   Listenable get selectedActionRepaintListenable => _selectedActionNotifier;
 
+  late final Listenable _mainViewCompositeListenable = Listenable.merge(<Listenable>[
+    this,
+    viewportRepaintListenable,
+    mainViewRepaintListenable,
+  ]);
+
+  /// Stable merged listenable for the main view (app state + viewport + main-view repaints).
+  ///
+  /// Built once so widgets do not allocate a fresh `Listenable.merge` and
+  /// re-subscribe on every rebuild, which would add per-frame churn while drawing.
+  Listenable get mainViewCompositeListenable => _mainViewCompositeListenable;
+
+  late final Listenable _toolbarActionsListenable = Listenable.merge(<Listenable>[
+    _viewportRepaintNotifier,
+    this,
+    _undoProvider,
+  ]);
+
+  /// Stable merged listenable for the top toolbar actions (viewport + app state + undo).
+  Listenable get toolbarActionsListenable => _toolbarActionsListenable;
+
   /// Gets whether layer replacement modify mode is active.
   bool get isLayerModifyMode =>
       imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&

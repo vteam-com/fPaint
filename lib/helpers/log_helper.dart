@@ -6,6 +6,8 @@ import 'package:logging/logging.dart';
 // Logger name constants for each module.
 const String logNameAppPreferences = 'AppPreferences';
 const String logNameAppProvider = 'AppProvider';
+const String logNameAppSnackbar = 'AppSnackbar';
+const String logNameColorPicker = 'ColorPicker';
 const String logNameFileHeic = 'FileHeic';
 const String logNameFileOra = 'FileOra';
 const String logNameFileTiff = 'FileTiff';
@@ -13,7 +15,11 @@ const String logNameImageHelper = 'ImageHelper';
 const String logNameImportFiles = 'ImportFiles';
 const String logNameDraftRecovery = 'DraftRecovery';
 const String logNameDraftRecoveryStorage = 'DraftRecoveryStorage';
+const String logNameLayersProvider = 'LayersProvider';
+const String logNameMacosBookmark = 'MacosBookmark';
+const String logNameRecentFiles = 'RecentFiles';
 const String logNameSave = 'Save';
+const String logNameSaveBackup = 'SaveBackup';
 const String logNameUndoProvider = 'UndoProvider';
 
 /// Initializes the application-wide logging system.

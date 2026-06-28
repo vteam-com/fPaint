@@ -5,7 +5,11 @@ import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:fpaint/files/file_operation_exception.dart';
+import 'package:fpaint/helpers/log_helper.dart';
+import 'package:logging/logging.dart';
 import 'package:web/web.dart' as web;
+
+final Logger _log = Logger(logNameFileHeic);
 
 const String _errorConvertPrefix = 'Failed to decode HEIC image';
 const String _errorEncodePrefix = 'Failed to encode HEIC image';
@@ -132,7 +136,8 @@ Future<void> _ensureLibheifLoaded() async {
   _libheifLoadFuture ??= _loadLibheifScript();
   try {
     await _libheifLoadFuture;
-  } catch (_) {
+  } catch (e, stackTrace) {
+    _log.warning('Failed to load libheif-js runtime', e, stackTrace);
     _libheifLoadFuture = null;
     rethrow;
   }
