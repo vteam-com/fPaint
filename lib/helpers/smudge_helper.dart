@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:math' as math;
 import 'dart:typed_data';
@@ -106,12 +107,15 @@ double resolvePixelBrushStepSpacing(final double brushSize) {
     AppInteraction.smudgeMinimumRadius,
     brushSize * AppInteraction.smudgeBrushRadiusFactor,
   );
+  // Dab spacing must scale with the radius: a fixed ~2px cap forced a large
+  // brush to apply hundreds of full-disc dabs per stroke (O(strokeLength/2)),
+  // each blending tens of thousands of pixels — the source of multi-second
+  // lag. radius * 0.35 keeps ~80% disc overlap (smooth) while cutting dab count
+  // by an order of magnitude for big brushes. The lower bound keeps small
+  // brushes crisp.
   return math.max(
     AppInteraction.smudgeInputPointSpacing,
-    math.min(
-      AppInteraction.smudgeMaximumPointSpacing,
-      radius * AppInteraction.smudgeStepSpacingFactor,
-    ),
+    radius * AppInteraction.smudgeStepSpacingFactor,
   );
 }
 
@@ -522,7 +526,9 @@ bool _applySmudgeStep({
         AppMath.zero.toDouble(),
         AppVisual.full,
       );
-      final double radialFalloff = math.pow(feather, AppInteraction.smudgeEdgeFalloffExponent).toDouble();
+      // smudgeEdgeFalloffExponent is 2.0 — a multiply is far cheaper than
+      // math.pow() called once per pixel across the brush disc.
+      final double radialFalloff = feather * feather;
       final double blend = (AppInteraction.smudgeBlendStrength * intensity * radialFalloff).clamp(
         AppMath.zero.toDouble(),
         AppVisual.full,
@@ -604,7 +610,9 @@ bool _applyBlurStep({
         AppMath.zero.toDouble(),
         AppVisual.full,
       );
-      final double radialFalloff = math.pow(feather, AppInteraction.blurBrushEdgeFalloffExponent).toDouble();
+      // blurBrushEdgeFalloffExponent is 2.0 — a multiply is far cheaper than
+      // math.pow() called once per pixel across the brush disc.
+      final double radialFalloff = feather * feather;
       final double blend = (AppInteraction.blurBrushStrength * intensity * radialFalloff).clamp(
         AppMath.zero.toDouble(),
         AppVisual.full,
@@ -775,4 +783,412 @@ int _pixelIndex({
   required final int y,
 }) {
   return ((y * width) + x) * AppMath.bytesPerPixel;
+}
+
+// ---------------------------------------------------------------------------
+// Profiling instrumentation (temporary experiment)
+// ---------------------------------------------------------------------------
+
+class _ProfStat {
+  int count = 0;
+  int totalMicros = 0;
+  int maxMicros = 0;
+  void add(final int micros) {
+    count++;
+    totalMicros += micros;
+    if (micros > maxMicros) {
+      maxMicros = micros;
+    }
+  }
+
+  String format() {
+    final double avgMs = count == 0 ? 0 : (totalMicros / count / 1000);
+    return 'n=$count avg=${avgMs.toStringAsFixed(2)}ms max=${(maxMicros / 1000).toStringAsFixed(2)}ms '
+        'total=${(totalMicros / 1000).toStringAsFixed(0)}ms';
+  }
+}
+
+/// Lightweight aggregating profiler for the pixel-brush pipeline. Flip
+/// [enabled] to false to remove all overhead. Prints a summary per stroke.
+class PixelBrushProfiler {
+  PixelBrushProfiler._();
+
+  static bool enabled = true;
+
+  static final Map<String, _ProfStat> _stats = <String, _ProfStat>{};
+  static final Stopwatch _wall = Stopwatch();
+  static final Stopwatch _sinceLastKick = Stopwatch();
+  static int _kicks = 0;
+  static int _totalPoints = 0;
+  static int _maxPoints = 0;
+  static int _maxPatchPixels = 0;
+  static int _moves = 0;
+  static int _kickAttempts = 0;
+  static int _skipBusy = 0;
+  static int _skipFewPoints = 0;
+  static int _exceptions = 0;
+
+  static void beginStroke() {
+    if (!enabled) {
+      return;
+    }
+    _stats.clear();
+    _kicks = 0;
+    _totalPoints = 0;
+    _maxPoints = 0;
+    _maxPatchPixels = 0;
+    _moves = 0;
+    _kickAttempts = 0;
+    _skipBusy = 0;
+    _skipFewPoints = 0;
+    _exceptions = 0;
+    _wall
+      ..reset()
+      ..start();
+    _sinceLastKick
+      ..reset()
+      ..start();
+  }
+
+  static void recordMove() {
+    if (enabled) {
+      _moves++;
+    }
+  }
+
+  static void recordKickAttempt() {
+    if (enabled) {
+      _kickAttempts++;
+    }
+  }
+
+  static void recordSkipBusy() {
+    if (enabled) {
+      _skipBusy++;
+    }
+  }
+
+  static void recordSkipFewPoints() {
+    if (enabled) {
+      _skipFewPoints++;
+    }
+  }
+
+  static void recordException() {
+    if (enabled) {
+      _exceptions++;
+    }
+  }
+
+  /// Records the gap since the previous kick actually started work.
+  static void markKickStart() {
+    if (!enabled) {
+      return;
+    }
+    record('kickGap', _sinceLastKick.elapsedMicroseconds);
+    _sinceLastKick
+      ..reset()
+      ..start();
+  }
+
+  static void record(final String name, final int micros) {
+    if (!enabled) {
+      return;
+    }
+    (_stats[name] ??= _ProfStat()).add(micros);
+  }
+
+  static void recordSegment(final int pointCount, final int patchPixels) {
+    if (!enabled) {
+      return;
+    }
+    _kicks++;
+    _totalPoints += pointCount;
+    if (pointCount > _maxPoints) {
+      _maxPoints = pointCount;
+    }
+    if (patchPixels > _maxPatchPixels) {
+      _maxPatchPixels = patchPixels;
+    }
+  }
+
+  static void endStroke() {
+    if (!enabled || !_wall.isRunning) {
+      return;
+    }
+    _wall.stop();
+    debugPrint(
+      '[PixelBrushProfile] stroke wall=${_wall.elapsedMilliseconds}ms moves=$_moves '
+      'kickAttempts=$_kickAttempts kicks=$_kicks skip(busy=$_skipBusy fewPts=$_skipFewPoints) '
+      'exceptions=$_exceptions points(total=$_totalPoints maxPerSeg=$_maxPoints) maxPatchPx=$_maxPatchPixels',
+    );
+    _stats.forEach((final String name, final _ProfStat stat) {
+      debugPrint('[PixelBrushProfile]   $name: ${stat.format()}');
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Persistent per-stroke worker isolate
+// ---------------------------------------------------------------------------
+
+/// A small dirty-rect patch produced by [PixelBrushStrokeWorker] for one
+/// segment. [pixels] are the RGBA bytes for the rect at [left]/[top] sized
+/// [width] x [height] in image coordinates.
+class PixelBrushPatchUpdate {
+  const PixelBrushPatchUpdate({
+    required this.pixels,
+    required this.left,
+    required this.top,
+    required this.width,
+    required this.height,
+  });
+
+  final Uint8List pixels;
+  final int left;
+  final int top;
+  final int width;
+  final int height;
+}
+
+/// A long-lived isolate that owns the full pixel buffer for the duration of a
+/// single pixel-brush stroke.
+///
+/// Spawned once per stroke (not per pointer-move), it keeps the accumulating
+/// image buffer in the background isolate so each update only sends the new
+/// segment points across the port and receives back the small dirty-rect patch
+/// — never the full image. The heavy per-pixel blending therefore never blocks
+/// the UI isolate, and there is no per-move isolate spawn or full-buffer copy.
+///
+/// The caller must serialize calls (one in-flight [applySegment]/[finalize] at
+/// a time); the gesture handler already enforces this with its busy flag.
+class PixelBrushStrokeWorker {
+  PixelBrushStrokeWorker._(this._isolate, this._receivePort) {
+    _subscription = _receivePort.listen(_handleMessage);
+  }
+
+  final Isolate _isolate;
+  final ReceivePort _receivePort;
+  late final StreamSubscription<dynamic> _subscription;
+  final Completer<void> _ready = Completer<void>();
+  late final SendPort _commandPort;
+  final Map<int, Completer<Map<String, Object?>>> _pending = <int, Completer<Map<String, Object?>>>{};
+  int _nextId = 0;
+  bool _disposed = false;
+
+  /// Spawns and initializes a worker holding [basePixels]. Returns `null` on
+  /// web (isolates unavailable) or if spawning fails, so callers fall back to
+  /// the synchronous path.
+  static Future<PixelBrushStrokeWorker?> start({
+    required final Uint8List basePixels,
+    required final int imageWidth,
+    required final int imageHeight,
+    final Uint8List? clipMask,
+  }) async {
+    if (kIsWeb) {
+      return null;
+    }
+    try {
+      final Stopwatch startupWatch = Stopwatch()..start();
+      final ReceivePort receivePort = ReceivePort();
+      final Isolate isolate = await Isolate.spawn(_pixelBrushWorkerEntry, receivePort.sendPort);
+      final PixelBrushStrokeWorker worker = PixelBrushStrokeWorker._(isolate, receivePort);
+      await worker._ready.future;
+      worker._commandPort.send(<String, Object?>{
+        'type': 'init',
+        'pixels': TransferableTypedData.fromList(<Uint8List>[basePixels]),
+        'clipMask': clipMask == null ? null : TransferableTypedData.fromList(<Uint8List>[clipMask]),
+        'width': imageWidth,
+        'height': imageHeight,
+      });
+      startupWatch.stop();
+      PixelBrushProfiler.record('workerStartup', startupWatch.elapsedMicroseconds);
+      return worker;
+    } on Object {
+      return null;
+    }
+  }
+
+  void _handleMessage(final dynamic message) {
+    if (message is SendPort) {
+      _commandPort = message;
+      _ready.complete();
+      return;
+    }
+    final Map<String, Object?> reply = message as Map<String, Object?>;
+    final int id = reply['id']! as int;
+    _pending.remove(id)?.complete(reply);
+  }
+
+  Future<Map<String, Object?>> _send(final Map<String, Object?> message) {
+    final int id = _nextId++;
+    final Completer<Map<String, Object?>> completer = Completer<Map<String, Object?>>();
+    _pending[id] = completer;
+    message['id'] = id;
+    _commandPort.send(message);
+    return completer.future;
+  }
+
+  /// Applies [segmentPoints] to the retained buffer and returns the dirty-rect
+  /// patch bounded by [patchBounds], or `null` when nothing changed.
+  Future<PixelBrushPatchUpdate?> applySegment({
+    required final List<Offset> segmentPoints,
+    required final double brushSize,
+    required final double intensity,
+    required final PixelBrushMode mode,
+    required final ui.Rect patchBounds,
+  }) async {
+    if (_disposed) {
+      return null;
+    }
+    final Float64List encoded = Float64List(segmentPoints.length * AppMath.pair);
+    for (int i = AppMath.zero; i < segmentPoints.length; i++) {
+      encoded[i * AppMath.pair] = segmentPoints[i].dx;
+      encoded[i * AppMath.pair + AppMath.one] = segmentPoints[i].dy;
+    }
+    final Stopwatch roundtripWatch = Stopwatch()..start();
+    final Map<String, Object?> reply = await _send(<String, Object?>{
+      'type': 'segment',
+      'points': encoded,
+      'brushSize': brushSize,
+      'intensity': intensity,
+      'mode': mode.index,
+      'pl': patchBounds.left,
+      'pt': patchBounds.top,
+      'pr': patchBounds.right,
+      'pb': patchBounds.bottom,
+    });
+    roundtripWatch.stop();
+    PixelBrushProfiler.record('roundtrip', roundtripWatch.elapsedMicroseconds);
+    final Object? computeMicros = reply['computeMicros'];
+    if (computeMicros is int) {
+      PixelBrushProfiler.record('isolateCompute', computeMicros);
+      // Round-trip minus compute ≈ messaging/transfer/scheduling overhead.
+      PixelBrushProfiler.record('roundtripOverhead', roundtripWatch.elapsedMicroseconds - computeMicros);
+    }
+    if (reply['hasChanges'] != true) {
+      PixelBrushProfiler.recordSegment(segmentPoints.length, AppMath.zero);
+      return null;
+    }
+    final int width = reply['width']! as int;
+    final int height = reply['height']! as int;
+    PixelBrushProfiler.recordSegment(segmentPoints.length, width * height);
+    return PixelBrushPatchUpdate(
+      pixels: (reply['patch']! as TransferableTypedData).materialize().asUint8List(),
+      left: reply['left']! as int,
+      top: reply['top']! as int,
+      width: width,
+      height: height,
+    );
+  }
+
+  /// Returns the full accumulated pixel buffer for committing the stroke.
+  Future<Uint8List?> finalizePixels() async {
+    if (_disposed) {
+      return null;
+    }
+    final Map<String, Object?> reply = await _send(<String, Object?>{'type': 'finalize'});
+    return (reply['pixels']! as TransferableTypedData).materialize().asUint8List();
+  }
+
+  /// Tears down the worker isolate. Safe to call multiple times.
+  void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    _subscription.cancel();
+    _receivePort.close();
+    _isolate.kill(priority: Isolate.immediate);
+    for (final Completer<Map<String, Object?>> completer in _pending.values) {
+      if (!completer.isCompleted) {
+        completer.complete(<String, Object?>{'hasChanges': false});
+      }
+    }
+    _pending.clear();
+  }
+}
+
+/// Entry point for [PixelBrushStrokeWorker]. Owns the stroke's pixel buffer and
+/// services segment / finalize requests until disposed.
+void _pixelBrushWorkerEntry(final SendPort mainSendPort) {
+  final ReceivePort commandPort = ReceivePort();
+  mainSendPort.send(commandPort.sendPort);
+
+  Uint8List? pixels;
+  Uint8List? clipMask;
+  int width = AppMath.zero;
+  int height = AppMath.zero;
+
+  commandPort.listen((final dynamic message) {
+    final Map<String, Object?> map = message as Map<String, Object?>;
+    switch (map['type']) {
+      case 'init':
+        pixels = (map['pixels']! as TransferableTypedData).materialize().asUint8List();
+        final TransferableTypedData? mask = map['clipMask'] as TransferableTypedData?;
+        clipMask = mask?.materialize().asUint8List();
+        width = map['width']! as int;
+        height = map['height']! as int;
+      case 'segment':
+        final int id = map['id']! as int;
+        final Float64List encoded = map['points']! as Float64List;
+        final List<Offset> segmentPoints = <Offset>[
+          for (int i = AppMath.zero; i < encoded.length; i += AppMath.pair)
+            Offset(encoded[i], encoded[i + AppMath.one]),
+        ];
+        final Stopwatch computeWatch = Stopwatch()..start();
+        final _PixelBrushComputationResult result = _runPixelBrushComputation(
+          livePixels: pixels!,
+          clipMask: clipMask,
+          imageWidth: width,
+          imageHeight: height,
+          segmentPoints: segmentPoints,
+          brushSize: map['brushSize']! as double,
+          intensity: map['intensity']! as double,
+          mode: PixelBrushMode.values[map['mode']! as int],
+        );
+        computeWatch.stop();
+        final int computeMicros = computeWatch.elapsedMicroseconds;
+        if (!result.hasChanges) {
+          mainSendPort.send(<String, Object?>{'id': id, 'hasChanges': false, 'computeMicros': computeMicros});
+          break;
+        }
+        final int left = math.max(AppMath.zero, (map['pl']! as double).floor());
+        final int top = math.max(AppMath.zero, (map['pt']! as double).floor());
+        final int right = math.min(width, (map['pr']! as double).ceil());
+        final int bottom = math.min(height, (map['pb']! as double).ceil());
+        final int patchWidth = right - left;
+        final int patchHeight = bottom - top;
+        if (patchWidth <= AppMath.zero || patchHeight <= AppMath.zero) {
+          mainSendPort.send(<String, Object?>{'id': id, 'hasChanges': false});
+          break;
+        }
+        final Uint8List patch = _copyPixelRect(
+          pixels: pixels!,
+          imageWidth: width,
+          left: left,
+          top: top,
+          width: patchWidth,
+          height: patchHeight,
+        );
+        mainSendPort.send(<String, Object?>{
+          'id': id,
+          'hasChanges': true,
+          'patch': TransferableTypedData.fromList(<Uint8List>[patch]),
+          'left': left,
+          'top': top,
+          'width': patchWidth,
+          'height': patchHeight,
+          'computeMicros': computeMicros,
+        });
+      case 'finalize':
+        final int id = map['id']! as int;
+        mainSendPort.send(<String, Object?>{
+          'id': id,
+          'pixels': TransferableTypedData.fromList(<Uint8List>[pixels!]),
+        });
+      case 'dispose':
+        commandPort.close();
+    }
+  });
 }

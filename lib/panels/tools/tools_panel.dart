@@ -420,7 +420,9 @@ class ToolsPanel extends StatelessWidget {
       default:
         final String title = appProvider.selectedAction == ActionType.pencil ? l10n.pencilSize : l10n.brushSize;
         final double min = appProvider.selectedAction == ActionType.pencil ? 1 : AppInteraction.minCanvasScale;
-        final double max = AppLimits.percentMax.toDouble();
+        final bool isPixelBrush =
+            appProvider.selectedAction == ActionType.smudge || appProvider.selectedAction == ActionType.blurBrush;
+        final double max = isPixelBrush ? AppLimits.pixelBrushSizeMax.toDouble() : AppLimits.percentMax.toDouble();
 
         // Brush Size
         if (selectedTool.isSupported(ActionOptions.brushSize)) {

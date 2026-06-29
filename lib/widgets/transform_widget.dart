@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
@@ -801,5 +802,13 @@ class _TransformPreviewPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(final _TransformPreviewPainter oldDelegate) => true;
+  bool shouldRepaint(final _TransformPreviewPainter oldDelegate) {
+    // Regenerating the perspective mesh is expensive; only repaint when the
+    // transform geometry, highlighted edge, or source image actually changes.
+    return oldDelegate.activeEdgeIndex != activeEdgeIndex ||
+        !identical(oldDelegate.image, image) ||
+        !listEquals(oldDelegate.screenCorners, screenCorners) ||
+        !listEquals(oldDelegate.screenEdgeMidpoints, screenEdgeMidpoints) ||
+        !listEquals(oldDelegate.screenBoundaryPoints, screenBoundaryPoints);
+  }
 }

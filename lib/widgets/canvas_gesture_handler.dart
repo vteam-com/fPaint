@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/draft_flusher.dart';
+import 'package:fpaint/helpers/gpu_pixel_brush.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/prepared_smudge_stroke_source.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
@@ -46,6 +47,14 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   int _activePointerId = -1;
   final List<int> _activePointers = <int>[];
   double _baseDistance = 0.0;
+
+  /// Active GPU smudge/blur stroke. When non-null the effect runs entirely on
+  /// the GPU (no CPU readback) and the worker/CPU path below is unused.
+  GpuPixelBrushStroke? _gpuPixelBrushStroke;
+
+  /// Centre of the previous GPU dab, so each move drags from there to the
+  /// current pointer position.
+  ui.Offset? _lastDabCenter;
 
   /// Index into [_pixelBrushStrokePoints] of the *last point that has already
   /// been processed* by a previous segment call.  The next kick will send only
@@ -97,6 +106,15 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
 
   /// True when a new preview kick was requested while the isolate was busy.
   bool _pixelBrushUpdateNeeded = false;
+
+  /// Long-lived background worker that owns the pixel buffer for the active
+  /// stroke. Null on web or when spawning failed, in which case the live
+  /// preview falls back to the synchronous compute path.
+  PixelBrushStrokeWorker? _pixelBrushWorker;
+
+  /// In-flight worker startup; awaited by the first preview kick so we don't
+  /// race the spawn.
+  Future<PixelBrushStrokeWorker?>? _pixelBrushWorkerStartup;
   final Map<int, Offset> _pointerPositions = <int, ui.Offset>{};
 
   /// Prepared source data for the active pixel-brush stroke (clip mask + dims).
@@ -106,6 +124,25 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// Non-null only during a modifier-driven selection gesture.
   SelectorMath? _previousSelectorMath;
   double _scaleFactor = 1.0;
+  @override
+  void initState() {
+    super.initState();
+    // Warm the GPU pixel-brush shader so it is ready before the first stroke.
+    unawaited(GpuPixelBrushStroke.loadProgram());
+  }
+
+  @override
+  void dispose() {
+    // Tear down any in-progress stroke worker so its background isolate does
+    // not outlive the widget.
+    _pixelBrushWorker?.dispose();
+    _pixelBrushWorker = null;
+    _pixelBrushWorkerStartup = null;
+    _gpuPixelBrushStroke?.dispose();
+    _gpuPixelBrushStroke = null;
+    super.dispose();
+  }
+
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: false);
@@ -411,6 +448,32 @@ Future<PixelBrushLayerPatch?> buildPixelBrushLayerPatch({
       top.toDouble(),
       right.toDouble(),
       bottom.toDouble(),
+    ),
+    image: patchImage,
+  );
+}
+
+/// Builds a live-preview layer patch directly from already-cropped patch
+/// [pixels] (as produced by [PixelBrushStrokeWorker]). Avoids re-copying the
+/// rect out of a full-image buffer — the bytes already cover exactly the rect
+/// at [left]/[top] sized [width] x [height] in image coordinates.
+Future<PixelBrushLayerPatch?> buildPixelBrushLayerPatchFromBytes({
+  required final Uint8List pixels,
+  required final int left,
+  required final int top,
+  required final int width,
+  required final int height,
+}) async {
+  if (width <= AppMath.zero || height <= AppMath.zero) {
+    return null;
+  }
+  final ui.Image patchImage = await imageFromPixelsFast(pixels, width, height);
+  return PixelBrushLayerPatch(
+    bounds: ui.Rect.fromLTRB(
+      left.toDouble(),
+      top.toDouble(),
+      (left + width).toDouble(),
+      (top + height).toDouble(),
     ),
     image: patchImage,
   );

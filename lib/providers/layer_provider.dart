@@ -561,10 +561,22 @@ class LayerProvider extends ChangeNotifier {
     _livePreviewPatchBounds = null;
   }
 
+  /// The full-layer baseline image captured at the start of a pixel-brush
+  /// stroke. Used to seed the GPU stroke without a readback.
+  ui.Image? get livePreviewBaseline => _livePreviewBaseline;
+
   /// Updates the live patch image composited over the baseline during a stroke.
   void setLivePixelBrushPatch(final ui.Image? image, final ui.Rect? bounds) {
     _livePreviewPatchImage = image;
     _livePreviewPatchBounds = bounds;
+  }
+
+  /// Replaces the full live-preview image (used by the GPU stroke, which keeps
+  /// the whole accumulated result on the GPU). Clears any partial patch.
+  void setLivePixelBrushImage(final ui.Image image) {
+    _livePreviewBaseline = image;
+    _livePreviewPatchImage = null;
+    _livePreviewPatchBounds = null;
   }
 
   /// Clears all live preview state, returning [renderLayer] to its normal path.
@@ -655,6 +667,23 @@ class LayerProvider extends ChangeNotifier {
     );
   }
 
+  /// Async counterpart to [toImageForStorage]/[renderImageWH].
+  ///
+  /// Uses `Picture.toImage()` rather than `toImageSync()`. This matters when the
+  /// result is read back with `toByteData()`: reading back a `toImageSync()`
+  /// image stalls the GPU for seconds on Impeller, whereas an async `toImage()`
+  /// readback is milliseconds.
+  Future<ui.Image> toImageForStorageAsync(final Size size) {
+    return renderCanvasImage(
+      width: size.width.toInt(),
+      height: size.height.toInt(),
+      draw: (final ui.Canvas canvas) {
+        canvas.saveLayer(null, Paint());
+        renderLayer(canvas);
+      },
+    );
+  }
+
   /// Applies an action to the canvas, clipping it if necessary.
   void applyAction(
     final Canvas canvas,
@@ -683,15 +712,30 @@ class LayerProvider extends ChangeNotifier {
   /// cached raster, or a full replay of the action stack. The per-action drawing
   /// lives in [_renderAction] so this method stays a thin dispatcher.
   void renderLayer(final Canvas canvas) {
-    // Save a layer with opacity and blend mode applied
-    final Paint layerPaint = Paint();
-    layerPaint.color = AppColors.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt());
-    layerPaint.blendMode = blendMode;
+    final Paint layerPaint = Paint()
+      ..color = AppColors.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt())
+      ..blendMode = blendMode;
 
+    // Fast path: when the layer is just its cached raster (not mid-stroke, no
+    // live preview), draw it directly with opacity/blend baked into the paint.
+    // This avoids an offscreen `saveLayer` per layer every frame — the dominant
+    // composite cost with many layers (e.g. an 8-layer document during a
+    // smudge/blur stroke repaints all layers each frame).
+    if (_livePreviewBaseline == null && _cachedImage != null && !isUserDrawing) {
+      canvas.drawImage(_cachedImage!, Offset.zero, layerPaint);
+      return;
+    }
+
+    // Past the cached fast path we either replay the action stack or run the
+    // live-preview composite directly onto the *shared* canvas. Both can contain
+    // destination-clearing blends (a committed `cut`/eraser action, or the
+    // live-preview region erase), which would punch straight through the layers
+    // already drawn beneath this one. A group `saveLayer` is therefore always
+    // required here to contain those blends to this layer (it also applies the
+    // opacity/blend mode to the composited result).
     canvas.saveLayer(null, layerPaint);
 
     if (_tryRenderLivePreview(canvas)) {
-      // Restore the canvas to apply the opacity and blend mode
       canvas.restore();
       return;
     }
@@ -702,7 +746,6 @@ class LayerProvider extends ChangeNotifier {
       _renderActionStack(canvas);
     }
 
-    // Restore the canvas to apply the opacity and blend mode
     canvas.restore();
   }
 
