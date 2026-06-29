@@ -45,6 +45,14 @@ class LayersProvider extends ChangeNotifier {
   /// Lightweight repaint signal used for active canvas interactions.
   Listenable get canvasRepaintListenable => _canvasRepaintNotifier;
 
+  /// Stable repaint signal for the canvas painter (layer state + active-interaction
+  /// repaints), merged once so the painter does not allocate a fresh
+  /// `Listenable.merge` and re-subscribe on every widget rebuild.
+  late final Listenable canvasPainterRepaint = Listenable.merge(<Listenable>[
+    this,
+    _canvasRepaintNotifier,
+  ]);
+
   /// Lightweight signal used when the layer-list structure changes.
   Listenable get layerListStructureListenable => _layerListStructureNotifier;
 
@@ -634,6 +642,27 @@ class LayersProvider extends ChangeNotifier {
     final int clampedTopLayerIndex = topLayerIndex.clamp(0, length - 1);
 
     return renderCanvasImageSync(
+      width: size.width.toInt(),
+      height: size.height.toInt(),
+      draw: (final ui.Canvas canvas) {
+        for (int index = length - 1; index >= clampedTopLayerIndex; index--) {
+          final LayerProvider layer = get(index);
+          if (layer.isVisible) {
+            layer.renderLayer(canvas);
+          }
+        }
+      },
+    );
+  }
+
+  /// Async counterpart to [capturePainterToImageThroughLayerSync].
+  ///
+  /// Uses `Picture.toImage()` so the result can be read back with `toByteData()`
+  /// cheaply — a `toImageSync()` readback stalls the GPU for seconds on Impeller.
+  Future<ui.Image> capturePainterToImageThroughLayer(final int topLayerIndex) {
+    final int clampedTopLayerIndex = topLayerIndex.clamp(0, length - 1);
+
+    return renderCanvasImage(
       width: size.width.toInt(),
       height: size.height.toInt(),
       draw: (final ui.Canvas canvas) {

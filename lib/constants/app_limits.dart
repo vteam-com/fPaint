@@ -4,6 +4,10 @@ class AppLimits {
   static const int percentMax = 100;
   static const int topColorCount = 20;
   static const int brushSizeMax = 200;
+
+  /// Maximum brush size for the smudge/blur pixel brushes, which benefit from
+  /// much larger radii than paint tools.
+  static const int pixelBrushSizeMax = 500;
   static const int transparentPatternSize = 10;
   static const int hexRgbLength = 6;
   static const int hexArgbLength = 8;

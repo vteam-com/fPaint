@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/widgets/transparent_background.dart';
 
@@ -27,6 +28,8 @@ class CanvasPanelPainter extends CustomPainter {
       return;
     }
 
+    final Stopwatch? paintWatch = PixelBrushProfiler.enabled ? (Stopwatch()..start()) : null;
+
     if (includeTransparentBackground) {
       final ui.Picture backgroundPicture = _resolveTransparentBackgroundPicture(size);
       canvas.drawPicture(backgroundPicture);
@@ -36,6 +39,11 @@ class CanvasPanelPainter extends CustomPainter {
       if (layer.isVisible) {
         layer.renderLayer(canvas);
       }
+    }
+
+    if (paintWatch != null) {
+      paintWatch.stop();
+      PixelBrushProfiler.record('canvasPaint', paintWatch.elapsedMicroseconds);
     }
   }
 

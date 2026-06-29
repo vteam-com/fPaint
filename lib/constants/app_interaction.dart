@@ -14,6 +14,17 @@ class AppInteraction {
   static const double smudgeInputPointSpacing = 1.0;
   static const double smudgeMaximumPointSpacing = 2.0;
   static const double smudgeStepSpacingFactor = 0.35;
+
+  /// Dab spacing as a fraction of radius for the GPU pixel brush. Much finer
+  /// than [smudgeStepSpacingFactor] (used by the CPU path, where each dab costs
+  /// a radius² per-pixel loop): a GPU dab is a cheap texture blit, so dense
+  /// dabs are affordable and are what make the smudge trail seamless instead of
+  /// a chain of discs.
+  static const double smudgeGpuStepSpacingFactor = 0.1;
+
+  /// Upper bound on dabs emitted for a single pointer-move on the GPU path, so a
+  /// fast flick cannot stall a frame with hundreds of full-canvas blits.
+  static const int smudgeGpuMaxDabsPerMove = 96;
   static const double smudgeBlendStrength = 0.8;
   static const double smudgeEdgeFalloffExponent = 2.0;
   static const double pixelBrushDefaultIntensity = 0.5;

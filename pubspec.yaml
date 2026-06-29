@@ -64,6 +64,8 @@ flutter:
     enable-swift-package-manager: true
 
   generate: true
+  shaders:
+    - shaders/pixel_brush.frag
   assets:
     - assets/app_icon.png
     - assets/icons/
