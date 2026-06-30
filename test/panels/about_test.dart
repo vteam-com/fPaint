@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' show MaterialApp, Scaffold;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/version.dart';
 import 'package:fpaint/panels/side_panel/about.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
@@ -31,7 +32,7 @@ void main() {
 
       // About dialog should be visible.
       expect(find.text('(c) 2025 VTeam'), findsOneWidget);
-      expect(find.textContaining('fPaint 1.8.5'), findsOneWidget);
+      expect(find.textContaining('fPaint $packageVersion'), findsOneWidget);
       expect(find.text('Attribution'), findsOneWidget);
       expect(find.textContaining('fPaint'), findsWidgets);
 

@@ -61,8 +61,73 @@ Future<Uint8List> _imagePixels(final ui.Image source) async {
 }
 
 void main() {
-  test('resolvePixelBrushStepSpacing caps large brushes for gesture fidelity', () {
-    expect(resolvePixelBrushStepSpacing(100), AppInteraction.smudgeMaximumPointSpacing);
+  test('resolvePixelBrushStepSpacing scales dab spacing with brush radius', () {
+    // Small brushes are lower-bounded so fine strokes stay crisp.
+    expect(resolvePixelBrushStepSpacing(0), AppInteraction.smudgeInputPointSpacing);
+
+    // Large brushes scale spacing with the brush radius (radius * factor) rather
+    // than a fixed cap: the old ~2px cap forced hundreds of full-disc dabs per
+    // stroke and caused multi-second lag, so it was removed for performance.
+    const double largeBrush = 100;
+    final double expectedRadius = largeBrush * AppInteraction.smudgeBrushRadiusFactor;
+    expect(
+      resolvePixelBrushStepSpacing(largeBrush),
+      expectedRadius * AppInteraction.smudgeStepSpacingFactor,
+    );
+  });
+
+  group('PixelBrushProfiler', () {
+    // The profiler ships disabled (zero hot-path cost). Tests exercise the
+    // enabled branches explicitly, then restore the shipping default.
+    setUp(() => PixelBrushProfiler.enabled = true);
+    tearDown(() => PixelBrushProfiler.enabled = false);
+
+    test('startWatch returns a running watch only when enabled', () {
+      final Stopwatch? running = PixelBrushProfiler.startWatch();
+      expect(running, isNotNull);
+      expect(running!.isRunning, isTrue);
+
+      PixelBrushProfiler.enabled = false;
+      expect(PixelBrushProfiler.startWatch(), isNull);
+    });
+
+    test('recordElapsed ignores a null watch and stops a real one', () {
+      // Null watch: no-op, must not throw.
+      PixelBrushProfiler.recordElapsed('noop', null);
+
+      final Stopwatch? watch = PixelBrushProfiler.startWatch();
+      PixelBrushProfiler.recordElapsed('span', watch);
+      expect(watch!.isRunning, isFalse);
+    });
+
+    test('aggregates a full stroke without throwing', () {
+      PixelBrushProfiler.beginStroke();
+      PixelBrushProfiler.recordMove();
+      PixelBrushProfiler.recordKickAttempt();
+      PixelBrushProfiler.recordSkipBusy();
+      PixelBrushProfiler.recordSkipFewPoints();
+      PixelBrushProfiler.recordException();
+      PixelBrushProfiler.markKickStart();
+      // Two samples in the same bucket exercise the max/total accumulation.
+      PixelBrushProfiler.record('dab', 10);
+      PixelBrushProfiler.record('dab', 25);
+      PixelBrushProfiler.recordSegment(8, 4096);
+      // endStroke prints the aggregated summary and must tolerate being called.
+      PixelBrushProfiler.endStroke();
+      // A second endStroke is a no-op because the wall clock is stopped.
+      PixelBrushProfiler.endStroke();
+    });
+
+    test('disabled profiler skips all bookkeeping', () {
+      PixelBrushProfiler.enabled = false;
+      // None of these should throw or record while disabled.
+      PixelBrushProfiler.beginStroke();
+      PixelBrushProfiler.recordMove();
+      PixelBrushProfiler.markKickStart();
+      PixelBrushProfiler.record('dab', 1);
+      PixelBrushProfiler.recordSegment(1, 1);
+      PixelBrushProfiler.endStroke();
+    });
   });
 
   test('rasterizePixelBrushSegment (smudge) moves sampled color along stroke', () async {

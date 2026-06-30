@@ -191,8 +191,22 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     required final ImagePlacementLayerRestoreState layerRestoreState,
     required final PixelBrushLayerPatch committedPatch,
   }) {
+    // Textures this record can resurrect: the committed patch plus every image
+    // its restore-state snapshots reintroduce on undo/redo. Listing them lets
+    // the LayersProvider coordinator free them only once the record is dropped
+    // (trim/compaction) and nothing else references them — fixing the per-stroke
+    // full-canvas texture leak without risking a use-after-free.
+    final List<ui.Image> retainedImages = <ui.Image>[
+      committedPatch.image,
+      for (final UserActionDrawing action in layerRestoreState.originalActions)
+        if (action.image != null) action.image!,
+      for (final UserActionDrawing action in layerRestoreState.originalRedoActions)
+        if (action.image != null) action.image!,
+    ];
+
     appProvider.undoProvider.executeAction(
       name: _pixelBrushMode.name,
+      retainedImages: retainedImages,
       forward: () {
         final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
         appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
@@ -283,10 +297,9 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
             // back the small dirty-rect patch — no full-image transfer and no
             // main-thread blocking. Awaiting the startup future also waits for the
             // source preparation it depends on.
-            final Stopwatch startupAwaitWatch = Stopwatch()..start();
+            final Stopwatch? startupAwaitWatch = PixelBrushProfiler.startWatch();
             final PixelBrushStrokeWorker? worker = _pixelBrushWorker ?? await _pixelBrushWorkerStartup;
-            startupAwaitWatch.stop();
-            PixelBrushProfiler.record('awaitStartup', startupAwaitWatch.elapsedMicroseconds);
+            PixelBrushProfiler.recordElapsed('awaitStartup', startupAwaitWatch);
             if (strokeGeneration != _pixelBrushStrokeGeneration) {
               return;
             }
@@ -315,7 +328,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
                   return;
                 }
                 if (update != null) {
-                  final Stopwatch patchWatch = Stopwatch()..start();
+                  final Stopwatch? patchWatch = PixelBrushProfiler.startWatch();
                   final PixelBrushLayerPatch? livePatch = await buildPixelBrushLayerPatchFromBytes(
                     pixels: update.pixels,
                     left: update.left,
@@ -323,8 +336,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
                     width: update.width,
                     height: update.height,
                   );
-                  patchWatch.stop();
-                  PixelBrushProfiler.record('patchImageBuild', patchWatch.elapsedMicroseconds);
+                  PixelBrushProfiler.recordElapsed('patchImageBuild', patchWatch);
                   if (!mounted || _pixelBrushSourceImage == null) {
                     _pixelBrushRasterBusy = false;
                     return;
@@ -451,12 +463,11 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     _pixelBrushMode = mode;
     _pixelBrushIntensity = appProvider.brushIntensity;
     _pixelBrushLayerRestoreState = appProvider.captureSelectedLayerRestoreState();
-    final Stopwatch captureWatch = Stopwatch()..start();
+    final Stopwatch? captureWatch = PixelBrushProfiler.startWatch();
     _pixelBrushSourceImage = pixelBrushUsesCompositeBackdrop(mode)
         ? appProvider.layers.capturePainterToImageThroughLayerSync(appProvider.layers.selectedLayerIndex)
         : appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
-    captureWatch.stop();
-    PixelBrushProfiler.record('sourceCapture', captureWatch.elapsedMicroseconds);
+    PixelBrushProfiler.recordElapsed('sourceCapture', captureWatch);
     _pixelBrushClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null
         ? ui.Path.from(appProvider.selectorModel.path1!)
         : null;
@@ -485,29 +496,26 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     final int selectedLayerIndex = appProvider.layers.selectedLayerIndex;
     final Size strokeSize = appProvider.layers.size;
     final bool usesCompositeBackdrop = pixelBrushUsesCompositeBackdrop(mode);
-    final Stopwatch prepWatch = Stopwatch()..start();
+    final Stopwatch? prepWatch = PixelBrushProfiler.startWatch();
     // Render the source pixels via async `toImage()` (not `toImageSync()`):
     // `toByteData()` on a `toImageSync()` image stalls the GPU for *seconds* on
     // Impeller, which was freezing the entire live preview until stroke end.
     final Future<PreparedSmudgeStrokeSource?> preparation =
         (() async {
-          final Stopwatch renderWatch = Stopwatch()..start();
+          final Stopwatch? renderWatch = PixelBrushProfiler.startWatch();
           final ui.Image readbackImage = usesCompositeBackdrop
               ? await appProvider.layers.capturePainterToImageThroughLayer(selectedLayerIndex)
               : await appProvider.layers.get(selectedLayerIndex).toImageForStorageAsync(strokeSize);
-          renderWatch.stop();
-          PixelBrushProfiler.record('srcRender', renderWatch.elapsedMicroseconds);
-          final Stopwatch extractWatch = Stopwatch()..start();
+          PixelBrushProfiler.recordElapsed('srcRender', renderWatch);
+          final Stopwatch? extractWatch = PixelBrushProfiler.startWatch();
           final PreparedSmudgeStrokeSource? prepared = await preparePixelBrushSource(
             sourceImage: readbackImage,
             clipPath: _pixelBrushClipPath,
           );
-          extractWatch.stop();
-          PixelBrushProfiler.record('srcExtractAndMask', extractWatch.elapsedMicroseconds);
+          PixelBrushProfiler.recordElapsed('srcExtractAndMask', extractWatch);
           return prepared;
         })().then((final PreparedSmudgeStrokeSource? prepared) {
-          prepWatch.stop();
-          PixelBrushProfiler.record('prepareSource', prepWatch.elapsedMicroseconds);
+          PixelBrushProfiler.recordElapsed('prepareSource', prepWatch);
           return prepared;
         });
     _pixelBrushPreparation = preparation;

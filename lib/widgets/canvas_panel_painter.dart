@@ -34,7 +34,7 @@ class CanvasPanelPainter extends CustomPainter {
       return;
     }
 
-    final Stopwatch? paintWatch = PixelBrushProfiler.enabled ? (Stopwatch()..start()) : null;
+    final Stopwatch? paintWatch = PixelBrushProfiler.startWatch();
 
     if (includeTransparentBackground) {
       canvas.drawRect(
@@ -49,10 +49,7 @@ class CanvasPanelPainter extends CustomPainter {
       }
     }
 
-    if (paintWatch != null) {
-      paintWatch.stop();
-      PixelBrushProfiler.record('canvasPaint', paintWatch.elapsedMicroseconds);
-    }
+    PixelBrushProfiler.recordElapsed('canvasPaint', paintWatch);
   }
 
   @override

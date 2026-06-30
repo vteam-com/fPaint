@@ -5,6 +5,13 @@ class AppLimits {
   static const int topColorCount = 20;
   static const int brushSizeMax = 200;
 
+  /// Maximum number of undoable actions kept in global history. Older records
+  /// are evicted (their content stays on the canvas, it just can no longer be
+  /// undone), which bounds record memory and lets the disposal coordinator free
+  /// any GPU textures an evicted record was the last to retain. Tune for the
+  /// depth-vs-memory trade-off.
+  static const int maxUndoHistory = 50;
+
   /// Maximum brush size for the smudge/blur pixel brushes, which benefit from
   /// much larger radii than paint tools.
   static const int pixelBrushSizeMax = 500;

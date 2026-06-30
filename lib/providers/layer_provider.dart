@@ -14,6 +14,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:provider/provider.dart';
 
 part 'layer_provider_live_preview.dart';
+part 'layer_provider_transform.dart';
 
 /// Represents a layer in the painting application.
 ///
@@ -228,257 +229,6 @@ class LayerProvider extends ChangeNotifier {
     clearCache();
   }
 
-  /// Rotates all actions and content in the layer by 90 degrees clockwise.
-  ///
-  /// [oldCanvasSize] is the size of the canvas *before* rotation (width, height will be swapped after this).
-  Future<void> rotate90Clockwise(final Size oldCanvasSize) async {
-    final double oldCanvasHeight = oldCanvasSize.height;
-
-    final List<UserActionDrawing> newActionStack = <UserActionDrawing>[];
-
-    for (final UserActionDrawing oldAction in actionStack) {
-      final List<Offset> newPositions = List<Offset>.from(oldAction.positions);
-      for (int i = 0; i < newPositions.length; i++) {
-        final Offset oldPos = newPositions[i];
-        // Clockwise: (x,y) -> (H_old - y, x)
-        newPositions[i] = Offset(oldCanvasHeight - oldPos.dy, oldPos.dx);
-      }
-
-      // For image actions the draw origin must be the top-left of the
-      // rotated bounding box, not the raw point-transform of the old origin.
-      if (oldAction.action == ActionType.image && oldAction.image != null) {
-        final double imageWidth = oldAction.image!.width.toDouble();
-        final double imageHeight = oldAction.image!.height.toDouble();
-        final Offset oldOrigin = oldAction.positions.first;
-        // After 90° CW the image dimensions swap: newW = oldH, newH = oldW.
-        final Offset newOrigin = Offset(
-          oldCanvasHeight - oldOrigin.dy - imageHeight,
-          oldOrigin.dx,
-        );
-        newPositions[0] = newOrigin;
-        if (newPositions.length > 1) {
-          newPositions[1] = Offset(
-            newOrigin.dx + imageHeight,
-            newOrigin.dy + imageWidth,
-          );
-        }
-      }
-
-      ui.Path? newPath = oldAction.path;
-      if (oldAction.path != null) {
-        // Matrix for: x' = H - y; y' = x
-        // [ 0 -1 H ]
-        // [ 1  0 0 ]
-        // [ 0  0 1 ]
-        final Matrix4 matrix = Matrix4.identity();
-        matrix.setEntry(0, 0, 0.0);
-        matrix.setEntry(0, 1, -1.0);
-        matrix.setEntry(0, AppMath.triple, oldCanvasHeight); // Translation for x' = H-y
-        matrix.setEntry(1, 0, 1.0);
-        matrix.setEntry(1, 1, 0.0);
-        matrix.setEntry(1, AppMath.triple, 0.0); // No translation for y'
-        newPath = oldAction.path!.transform(matrix.storage);
-      }
-
-      ui.Path? newClipPath = oldAction.clipPath;
-      if (oldAction.clipPath != null) {
-        // Apply the same transformation
-        final Matrix4 matrix = Matrix4.identity();
-        matrix.setEntry(0, 0, 0.0);
-        matrix.setEntry(0, 1, -1.0);
-        matrix.setEntry(0, AppMath.triple, oldCanvasHeight);
-        matrix.setEntry(1, 0, 1.0);
-        matrix.setEntry(1, 1, 0.0);
-        matrix.setEntry(1, AppMath.triple, 0.0);
-        newClipPath = oldAction.clipPath!.transform(matrix.storage);
-      }
-
-      ui.Image? newImage = oldAction.image;
-      if (oldAction.image != null) {
-        final ui.Image originalImage = oldAction.image!;
-        final double newImageWidth = originalImage.height.toDouble();
-        final double newImageHeight = originalImage.width.toDouble();
-
-        newImage = await renderCanvasImage(
-          width: newImageWidth.toInt(),
-          height: newImageHeight.toInt(),
-          draw: (final ui.Canvas canvas) {
-            canvas.translate(newImageWidth / AppMath.pair, newImageHeight / AppMath.pair);
-            canvas.rotate(-pi / AppMath.pair); // 90 degrees clockwise (Flutter canvas +angle is CCW)
-            canvas.drawImage(
-              originalImage,
-              Offset(-originalImage.width / AppMath.pair, -originalImage.height / AppMath.pair),
-              Paint(),
-            );
-          },
-        );
-      }
-
-      // Rotate the text object position: (x,y) -> (H_old - y - textHeight, x)
-      TextObject? newTextObject;
-      if (oldAction.textObject != null) {
-        final TextObject t = oldAction.textObject!;
-        final Rect bounds = t.getBounds();
-        newTextObject = TextObject(
-          text: t.text,
-          position: Offset(oldCanvasHeight - t.position.dy - bounds.height, t.position.dx),
-          color: t.color,
-          size: t.size,
-          fontFamily: t.fontFamily,
-          fontWeight: t.fontWeight,
-          fontStyle: t.fontStyle,
-          textAlign: t.textAlign,
-        );
-      }
-
-      newActionStack.add(
-        UserActionDrawing(
-          action: oldAction.action,
-          positions: newPositions,
-          brush: oldAction.brush,
-          fillColor: oldAction.fillColor,
-          gradient: oldAction.gradient,
-          halftoneFill: oldAction.halftoneFill,
-          path: newPath,
-          image: newImage,
-          clipPath: newClipPath,
-          textObject: newTextObject,
-        ),
-      );
-    }
-
-    actionStack.clear();
-    actionStack.addAll(newActionStack);
-
-    // The layer's own size will be updated by LayersProvider after all layers are processed.
-    clearCache();
-  }
-
-  /// Flips all actions and content in the layer horizontally (left ↔ right).
-  ///
-  /// [canvasSize] is the current canvas size used to compute mirrored positions.
-  Future<void> flipHorizontal(final Size canvasSize) => _flip(canvasSize, isHorizontal: true);
-
-  /// Flips all actions and content in the layer vertically (top ↔ bottom).
-  ///
-  /// [canvasSize] is the current canvas size used to compute mirrored positions.
-  Future<void> flipVertical(final Size canvasSize) => _flip(canvasSize, isHorizontal: false);
-
-  /// Shared implementation for flipping layer content on one axis.
-  Future<void> _flip(final Size canvasSize, {required final bool isHorizontal}) async {
-    final double extent = isHorizontal ? canvasSize.width : canvasSize.height;
-    final List<UserActionDrawing> newActionStack = <UserActionDrawing>[];
-
-    for (final UserActionDrawing oldAction in actionStack) {
-      final List<Offset> newPositions = List<Offset>.from(oldAction.positions);
-      for (int i = 0; i < newPositions.length; i++) {
-        final Offset oldPos = newPositions[i];
-        newPositions[i] = isHorizontal ? Offset(extent - oldPos.dx, oldPos.dy) : Offset(oldPos.dx, extent - oldPos.dy);
-      }
-
-      // For image actions the draw origin must be the top-left of the
-      // mirrored bounding box, not the raw point-mirror of the old origin.
-      if (oldAction.action == ActionType.image && oldAction.image != null) {
-        final double imageWidth = oldAction.image!.width.toDouble();
-        final double imageHeight = oldAction.image!.height.toDouble();
-        final Offset oldOrigin = oldAction.positions.first;
-        final Offset newOrigin = isHorizontal
-            ? Offset(extent - oldOrigin.dx - imageWidth, oldOrigin.dy)
-            : Offset(oldOrigin.dx, extent - oldOrigin.dy - imageHeight);
-        newPositions[0] = newOrigin;
-        if (newPositions.length > 1) {
-          newPositions[1] = Offset(
-            newOrigin.dx + imageWidth,
-            newOrigin.dy + imageHeight,
-          );
-        }
-      }
-
-      final ui.Path? newPath = _transformPath(oldAction.path, extent, isHorizontal: isHorizontal);
-      final ui.Path? newClipPath = _transformPath(oldAction.clipPath, extent, isHorizontal: isHorizontal);
-      final ui.Image? newImage = await _flipImage(oldAction.image, isHorizontal: isHorizontal);
-      final TextObject? newTextObject = _flipTextObject(oldAction.textObject, extent, isHorizontal: isHorizontal);
-
-      newActionStack.add(
-        UserActionDrawing(
-          action: oldAction.action,
-          positions: newPositions,
-          brush: oldAction.brush,
-          fillColor: oldAction.fillColor,
-          gradient: oldAction.gradient,
-          halftoneFill: oldAction.halftoneFill,
-          path: newPath,
-          image: newImage,
-          clipPath: newClipPath,
-          textObject: newTextObject,
-        ),
-      );
-    }
-
-    actionStack.clear();
-    actionStack.addAll(newActionStack);
-    clearCache();
-  }
-
-  /// Transforms a path for a flip operation.
-  ui.Path? _transformPath(
-    final ui.Path? path,
-    final double extent, {
-    required final bool isHorizontal,
-  }) {
-    if (path == null) {
-      return null;
-    }
-    final Matrix4 matrix = Matrix4.identity();
-    if (isHorizontal) {
-      matrix.setEntry(0, 0, -1.0);
-      matrix.setEntry(0, AppMath.triple, extent);
-    } else {
-      matrix.setEntry(1, 1, -1.0);
-      matrix.setEntry(1, AppMath.triple, extent);
-    }
-    return path.transform(matrix.storage);
-  }
-
-  /// Flips an image horizontally or vertically.
-  ///
-  /// Delegates to the shared [flipImage] helper.
-  Future<ui.Image?> _flipImage(
-    final ui.Image? image, {
-    required final bool isHorizontal,
-  }) async {
-    if (image == null) {
-      return null;
-    }
-    return flipImage(image, isHorizontal: isHorizontal);
-  }
-
-  /// Flips a text object's position for a flip operation.
-  TextObject? _flipTextObject(
-    final TextObject? textObject,
-    final double extent, {
-    required final bool isHorizontal,
-  }) {
-    if (textObject == null) {
-      return null;
-    }
-    final Rect bounds = textObject.getBounds();
-    final Offset oldPos = textObject.position;
-    final Offset newPos = isHorizontal
-        ? Offset(extent - oldPos.dx - bounds.width, oldPos.dy)
-        : Offset(oldPos.dx, extent - oldPos.dy - bounds.height);
-    return TextObject(
-      text: textObject.text,
-      position: newPos,
-      color: textObject.color,
-      size: textObject.size,
-      fontFamily: textObject.fontFamily,
-      fontWeight: textObject.fontWeight,
-      fontStyle: textObject.fontStyle,
-      textAlign: textObject.textAlign,
-    );
-  }
-
   /// Gets the last user action performed on the layer.
   UserActionDrawing? get lastUserAction => actionStack.isEmpty ? null : actionStack.last;
 
@@ -556,6 +306,16 @@ class LayerProvider extends ChangeNotifier {
   ui.Rect? _livePreviewPatchBounds;
 
   //------------------------------------------------------
+  // Freehand-stroke preview (brush / pencil / eraser)
+  //
+  // During a freehand stroke the layer composites a baseline captured once at
+  // stroke start (all committed actions) plus only the in-progress action(s),
+  // instead of replaying the whole action stack on every pointer-move frame.
+  // This bounds per-frame cost to O(active stroke) rather than O(history).
+  ui.Image? _strokeBaseline;
+  int _strokeBaselineActionCount = 0;
+
+  //------------------------------------------------------
   // Thumbnail image
   //
   ui.Image? _cachedImage;
@@ -616,6 +376,47 @@ class LayerProvider extends ChangeNotifier {
       await updateThumbnail();
       notifyListeners();
     });
+  }
+
+  /// Captures the current committed composite as the baseline for a freehand
+  /// stroke (brush/pencil/eraser).
+  ///
+  /// Call once at stroke start, *before* the active action is appended. During
+  /// the stroke [renderLayer] then draws this baseline plus only the in-progress
+  /// action(s), avoiding a full action-stack replay on every pointer-move frame.
+  /// The baseline is full-opacity content (it mirrors [_renderActionStack], not
+  /// [renderLayer]) because the layer opacity/blend is applied by the group
+  /// `saveLayer` when the baseline is composited.
+  void beginStrokePreview() {
+    _strokeBaseline?.dispose();
+    _strokeBaseline = null;
+    final int width = size.width.toInt();
+    final int height = size.height.toInt();
+    if (width <= 0 || height <= 0) {
+      return;
+    }
+    _strokeBaselineActionCount = actionStack.length;
+    _strokeBaseline = renderCanvasImageSync(
+      width: width,
+      height: height,
+      draw: (final ui.Canvas canvas) {
+        canvas.saveLayer(null, Paint());
+        _renderActionStack(canvas);
+        canvas.restore();
+      },
+    );
+  }
+
+  /// Clears the freehand-stroke baseline, returning [renderLayer] to its normal
+  /// path. Call at stroke end (when `isUserDrawing` becomes false).
+  ///
+  /// Note: [clearCache] deliberately does *not* touch the baseline, because it
+  /// fires at stroke start (via [appendDrawingAction]) right after the baseline
+  /// is captured.
+  void clearStrokePreview() {
+    _strokeBaseline?.dispose();
+    _strokeBaseline = null;
+    _strokeBaselineActionCount = 0;
   }
 
   /// Converts the layer to an image for storage.
@@ -707,6 +508,20 @@ class LayerProvider extends ChangeNotifier {
     canvas.saveLayer(null, layerPaint);
 
     if (_tryRenderLivePreview(canvas)) {
+      canvas.restore();
+      return;
+    }
+
+    // Fast freehand-stroke path: composite the baseline captured at stroke start
+    // (all committed actions) plus only the in-progress action(s). This bounds
+    // per-frame cost to O(active stroke) instead of O(history). Clear blends in
+    // the active action (e.g. eraser) clear into the baseline within this group
+    // `saveLayer`, exactly as a full replay would.
+    if (_strokeBaseline != null && isUserDrawing) {
+      canvas.drawImage(_strokeBaseline!, Offset.zero, Paint());
+      for (int i = _strokeBaselineActionCount; i < actionStack.length; i++) {
+        _renderAction(canvas, actionStack[i]);
+      }
       canvas.restore();
       return;
     }

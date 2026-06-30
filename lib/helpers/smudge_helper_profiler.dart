@@ -38,11 +38,16 @@ class _ProfStat {
 }
 
 /// Lightweight aggregating profiler for the pixel-brush pipeline. Flip
-/// [enabled] to false to remove all overhead. Prints a summary per stroke.
+/// [enabled] to true while diagnosing stroke performance; it must stay false
+/// in shipping builds so no `Stopwatch` allocation, `record` bookkeeping, or
+/// per-stroke `debugPrint` runs on the interaction hot path.
 class PixelBrushProfiler {
   PixelBrushProfiler._();
 
-  static bool enabled = true;
+  /// Whether profiling instrumentation is active. Off by default; callers must
+  /// gate every hot-path `Stopwatch` construction on this flag so a disabled
+  /// profiler has zero cost (see usages in the canvas gesture handlers).
+  static bool enabled = false;
 
   static final Map<String, _ProfStat> _stats = <String, _ProfStat>{};
   static final Stopwatch _wall = Stopwatch();
@@ -132,6 +137,21 @@ class PixelBrushProfiler {
       return;
     }
     (_stats[name] ??= _ProfStat()).add(micros);
+  }
+
+  /// Returns a started [Stopwatch] when profiling is [enabled], otherwise null.
+  ///
+  /// Hot-path callers use this (paired with [recordElapsed]) so a disabled
+  /// profiler performs no allocation or timing syscalls on the interaction path.
+  static Stopwatch? startWatch() => enabled ? (Stopwatch()..start()) : null;
+
+  /// Stops [watch] and records its elapsed time under [name] when non-null.
+  static void recordElapsed(final String name, final Stopwatch? watch) {
+    if (watch == null) {
+      return;
+    }
+    watch.stop();
+    record(name, watch.elapsedMicroseconds);
   }
 
   /// Records one processed segment of [pointCount] points that touched

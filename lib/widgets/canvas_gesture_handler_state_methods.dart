@@ -153,6 +153,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     final PointerEvent event,
   ) async {
     appProvider.layers.selectedLayer.isUserDrawing = false;
+    // Pair with beginStrokePreview: release the frozen baseline (no-op for tools
+    // that never captured one, e.g. smudge/blur, which use the live preview).
+    appProvider.layers.selectedLayer.clearStrokePreview();
     final bool isSelectionActive =
         appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
 
@@ -257,7 +260,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
               : baseSpacing;
           steps = min(steps, AppInteraction.smudgeGpuMaxDabsPerMove);
           final ui.Offset stepDelta = (adjustedPosition - start) / dist * spacing;
-          final Stopwatch dabWatch = Stopwatch()..start();
+          final Stopwatch? dabWatch = PixelBrushProfiler.startWatch();
           ui.Offset prev = start;
           for (int step = AppMath.one; step <= steps; step++) {
             final ui.Offset cur = start + stepDelta * step.toDouble();
@@ -270,8 +273,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
             );
             prev = cur;
           }
-          dabWatch.stop();
-          PixelBrushProfiler.record('gpuDab', dabWatch.elapsedMicroseconds);
+          PixelBrushProfiler.recordElapsed('gpuDab', dabWatch);
           // Advance by whole steps only; the sub-spacing remainder is picked up
           // once the cursor travels another full spacing, keeping displacement
           // constant at `spacing` per dab.
@@ -577,6 +579,10 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
 
+    // Freeze the committed composite so the stroke composites baseline + active
+    // action each frame instead of replaying the whole stack. Captured before
+    // the active action is appended below.
+    appProvider.layers.selectedLayer.beginStrokePreview();
     appProvider.recordExecuteDrawingActionToSelectedLayer(
       action: UserActionDrawing(
         action: appProvider.selectedAction,

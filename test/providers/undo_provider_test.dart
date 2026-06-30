@@ -375,4 +375,34 @@ void main() {
       expect(identical(a, b), isFalse);
     });
   });
+
+  group('maxUndoHistory cap', () {
+    test('evicts the oldest records beyond the cap', () {
+      provider.maxUndoHistory = 3;
+      for (final String name in <String>['A', 'B', 'C', 'D', 'E']) {
+        provider.executeAction(name: name, forward: () {}, backward: () {});
+      }
+      final String history = provider.getHistoryStringForUndo();
+      expect(history, contains('C'));
+      expect(history, contains('D'));
+      expect(history, contains('E'));
+      expect(history, isNot(contains('A')), reason: 'oldest evicted past the cap');
+      expect(history, isNot(contains('B')), reason: 'oldest evicted past the cap');
+    });
+
+    test('caps how far undo can travel; evicted actions stay applied', () {
+      provider.maxUndoHistory = 2;
+      int value = 0;
+      for (int i = 0; i < 5; i++) {
+        provider.executeAction(name: 'inc', forward: () => value++, backward: () => value--);
+      }
+      expect(value, 5);
+
+      // Only the latest two actions remain undoable.
+      provider.undo();
+      provider.undo();
+      expect(provider.canUndo, isFalse, reason: 'older records were evicted');
+      expect(value, 3, reason: 'the three evicted increments are permanent');
+    });
+  });
 }
