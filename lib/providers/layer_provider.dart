@@ -13,6 +13,8 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:provider/provider.dart';
 
+part 'layer_provider_live_preview.dart';
+
 /// Represents a layer in the painting application.
 ///
 /// A layer contains a stack of user actions, such as drawing, erasing, or adding images.
@@ -546,45 +548,12 @@ class LayerProvider extends ChangeNotifier {
   // This avoids clearCache(), action-stack manipulation, and full action replay
   // on every pointer-move event.
   //
+  // The live-preview API ([beginLivePixelBrushPreview], [setLivePixelBrushPatch],
+  // [setLivePixelBrushImage], [clearLivePixelBrushPreview], [livePreviewBaseline])
+  // lives in the `LayerLivePreview` extension (layer_provider_live_preview.dart).
   ui.Image? _livePreviewBaseline;
   ui.Image? _livePreviewPatchImage;
   ui.Rect? _livePreviewPatchBounds;
-
-  /// Captures the current layer rendering as the baseline for a pixel-brush stroke.
-  ///
-  /// Must be called once at the start of a stroke, before any points are
-  /// appended. The captured image is composited with subsequent patch updates
-  /// by [renderLayer] without touching the action stack or the cache.
-  void beginLivePixelBrushPreview() {
-    _livePreviewBaseline = renderImageWH(size.width.toInt(), size.height.toInt());
-    _livePreviewPatchImage = null;
-    _livePreviewPatchBounds = null;
-  }
-
-  /// The full-layer baseline image captured at the start of a pixel-brush
-  /// stroke. Used to seed the GPU stroke without a readback.
-  ui.Image? get livePreviewBaseline => _livePreviewBaseline;
-
-  /// Updates the live patch image composited over the baseline during a stroke.
-  void setLivePixelBrushPatch(final ui.Image? image, final ui.Rect? bounds) {
-    _livePreviewPatchImage = image;
-    _livePreviewPatchBounds = bounds;
-  }
-
-  /// Replaces the full live-preview image (used by the GPU stroke, which keeps
-  /// the whole accumulated result on the GPU). Clears any partial patch.
-  void setLivePixelBrushImage(final ui.Image image) {
-    _livePreviewBaseline = image;
-    _livePreviewPatchImage = null;
-    _livePreviewPatchBounds = null;
-  }
-
-  /// Clears all live preview state, returning [renderLayer] to its normal path.
-  void clearLivePixelBrushPreview() {
-    _livePreviewBaseline = null;
-    _livePreviewPatchImage = null;
-    _livePreviewPatchBounds = null;
-  }
 
   //------------------------------------------------------
   // Thumbnail image
@@ -602,22 +571,21 @@ class LayerProvider extends ChangeNotifier {
 
   /// Updates the thumbnail image of the layer.
   Future<void> updateThumbnail() async {
-    // Cache the full size image of this layer
-    _cachedImage = await renderCanvasImage(
+    final ui.Image fullImage = await renderCanvasImage(
       width: size.width.toInt(),
       height: size.height.toInt(),
       draw: renderLayer,
     );
-
-    // Cache the thumbnail version
-    _cachedThumbnailImage = await resizeImage(
-      _cachedImage!,
+    final ui.Image thumbnail = await resizeImage(
+      fullImage,
       scaleSizeTo(size, maxHeight: AppLayout.thumbnailMaxHeight),
     );
-
+    // Dispose old textures before replacing; ui.Images are not GC-freed.
+    _cachedImage?.dispose();
+    _cachedThumbnailImage?.dispose();
+    _cachedImage = fullImage;
+    _cachedThumbnailImage = thumbnail;
     _cacheTopColorsUsed();
-
-    // the latest thumbnail is ready
     this.onThumbnailChanged();
   }
 
@@ -639,6 +607,9 @@ class LayerProvider extends ChangeNotifier {
 
   /// Clears the cached image and thumbnail, and updates the thumbnail.
   void clearCache() {
+    // Free GPU textures before dropping refs — else every edit leaks a full image.
+    _cachedImage?.dispose();
+    _cachedThumbnailImage?.dispose();
     _cachedImage = null;
     _cachedThumbnailImage = null;
     _debounceTimer.run(() async {

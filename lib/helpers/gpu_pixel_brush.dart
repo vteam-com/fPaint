@@ -28,8 +28,13 @@ class GpuPixelBrushStroke {
 
   static ui.FragmentProgram? _cachedProgram;
 
+  /// The current accumulated image (layer plus the effect applied so far).
   ui.Image get image => _working;
+
+  /// Width in pixels of the working image.
   int get width => _working.width;
+
+  /// Height in pixels of the working image.
   int get height => _working.height;
 
   /// Loads and caches the pixel-brush shader. Returns null if it cannot be
@@ -82,7 +87,7 @@ class GpuPixelBrushStroke {
 
     // Brush bounding rect: only this region changes, so the rest of the canvas
     // is a cheap blit of the previous image.
-    final double pad = radius + 2.0;
+    final double pad = radius + AppInteraction.smudgeGpuDabPadding;
     final double left = math.max(0, math.min(from.dx, to.dx) - pad);
     final double top = math.max(0, math.min(from.dy, to.dy) - pad);
     final double right = math.min(width.toDouble(), math.max(from.dx, to.dx) + pad);
@@ -98,17 +103,18 @@ class GpuPixelBrushStroke {
       if (mode == PixelBrushMode.smudge) {
         final double strength = AppInteraction.smudgeBlendStrength * appliedIntensity;
         shader = _program.fragmentShader();
-        shader.setFloat(0, width.toDouble());
-        shader.setFloat(1, height.toDouble());
-        shader.setFloat(2, from.dx);
-        shader.setFloat(3, from.dy);
-        shader.setFloat(4, to.dx);
-        shader.setFloat(5, to.dy);
-        shader.setFloat(6, radius);
-        shader.setFloat(7, strength);
-        shader.setFloat(8, 0.0);
-        shader.setFloat(9, 1.0);
-        shader.setImageSampler(0, _working);
+        shader.setFloat(AppInteraction.pixelBrushShaderSlotWidth, width.toDouble());
+        shader.setFloat(AppInteraction.pixelBrushShaderSlotHeight, height.toDouble());
+        shader.setFloat(AppInteraction.pixelBrushShaderSlotFromX, from.dx);
+        shader.setFloat(AppInteraction.pixelBrushShaderSlotFromY, from.dy);
+        shader.setFloat(AppInteraction.pixelBrushShaderSlotToX, to.dx);
+        shader.setFloat(AppInteraction.pixelBrushShaderSlotToY, to.dy);
+        shader.setFloat(AppInteraction.pixelBrushShaderSlotRadius, radius);
+        shader.setFloat(AppInteraction.pixelBrushShaderSlotStrength, strength);
+        // uMode 0 = smudge; blur spacing is unused in smudge mode.
+        shader.setFloat(AppInteraction.pixelBrushShaderSlotMode, 0.0);
+        shader.setFloat(AppInteraction.pixelBrushShaderSlotBlurSpacing, 1.0);
+        shader.setImageSampler(AppInteraction.pixelBrushShaderSamplerTexture, _working);
         canvas.drawRect(
           dabRect,
           ui.Paint()
@@ -138,8 +144,13 @@ class GpuPixelBrushStroke {
                 to,
                 radius,
                 <ui.Color>[
-                  ui.Color.fromARGB((centerAlpha * 255).round(), 255, 255, 255),
-                  const ui.Color(0x00FFFFFF),
+                  ui.Color.fromARGB(
+                    (centerAlpha * AppLimits.rgbChannelMax).round(),
+                    AppLimits.rgbChannelMax,
+                    AppLimits.rgbChannelMax,
+                    AppLimits.rgbChannelMax,
+                  ),
+                  AppColors.transparentWhite,
                 ],
               ),
           )
