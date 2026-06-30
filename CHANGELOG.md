@@ -4,6 +4,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.7] - 2026-06-30
+
+### Update
+
+- GPU-accelerated Smudge and Blur brushes with a smooth real-time live preview
+
+### Fix
+
+- Runaway memory growth during Smudge/Blur strokes (layer image textures were not released)
+
 ## [1.8.6] - 2026-06-27
 
 ### Update
