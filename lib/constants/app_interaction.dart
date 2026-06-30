@@ -12,7 +12,6 @@ class AppInteraction {
   static const double smudgeMinimumRadius = 1.0;
   static const double smudgeBrushRadiusFactor = 0.5;
   static const double smudgeInputPointSpacing = 1.0;
-  static const double smudgeMaximumPointSpacing = 2.0;
   static const double smudgeStepSpacingFactor = 0.35;
 
   /// Dab spacing as a fraction of radius for the GPU pixel brush. Much finer

@@ -34,6 +34,15 @@ extension LayerLivePreview on LayerProvider {
 
   /// Replaces the full live-preview image (used by the GPU stroke, which keeps
   /// the whole accumulated result on the GPU). Clears any partial patch.
+  ///
+  /// IMPORTANT: this must NOT dispose the previous baseline. The GPU stroke owns
+  /// the working-image chain: [GpuPixelBrushStroke.create] adopts the baseline as
+  /// its first working image and every `dab()` disposes the prior working image
+  /// before producing the next. So by the time this setter runs, the previous
+  /// `_livePreviewBaseline` has already been freed by `dab()` — disposing it here
+  /// would be a double-free. Ownership of [image] likewise stays with the stroke
+  /// until commit (`detachImage`), so [clearLivePixelBrushPreview] also leaves the
+  /// baseline alone.
   void setLivePixelBrushImage(final ui.Image image) {
     _livePreviewBaseline = image;
     _livePreviewPatchImage = null;

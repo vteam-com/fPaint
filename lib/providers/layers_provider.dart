@@ -32,6 +32,10 @@ const String _defaultLayerPrefix = 'Layer';
 /// the layers, as well as a method to get the top color usage across all layers.
 class LayersProvider extends ChangeNotifier {
   LayersProvider({UndoProvider? undoProvider}) : _undoProvider = undoProvider ?? UndoProvider() {
+    // Own the disposal of committed GPU textures that undo records would
+    // otherwise strand once they leave history (pixel-brush patches, merge
+    // flattens). The reachability check keeps any still-restorable image alive.
+    _undoProvider.onRecordsDropped = _disposeDroppedRecordImages;
     addWhiteBackgroundLayer();
     _setSelectedLayerIndex(index: 0, notify: false);
     clearHasChanged();
@@ -67,10 +71,64 @@ class LayersProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    if (identical(_undoProvider.onRecordsDropped, _disposeDroppedRecordImages)) {
+      _undoProvider.onRecordsDropped = null;
+    }
     _canvasRepaintNotifier.dispose();
     _layerListStructureNotifier.dispose();
     _topColorsNotifier.dispose();
     super.dispose();
+  }
+
+  /// Disposes the GPU textures retained by [dropped] undo records that no longer
+  /// appear anywhere in the live document. Invoked by [UndoProvider] when records
+  /// are trimmed, redo-cleared, or fully cleared.
+  void _disposeDroppedRecordImages(final List<RecordAction> dropped) {
+    disposeCommittedImagesIfUnreferenced(
+      dropped.expand((final RecordAction record) => record.retainedImages),
+    );
+  }
+
+  /// Disposes each candidate GPU texture that is not referenced by any layer's
+  /// action/redo stack and is not resurrectable by any surviving undo/redo record.
+  ///
+  /// This is the single authority for freeing committed pixel-brush/merge/transform
+  /// textures: the reachability check guarantees a still-restorable image is never
+  /// disposed (no use-after-free), while orphaned textures are reclaimed promptly.
+  void disposeCommittedImagesIfUnreferenced(final Iterable<ui.Image> candidates) {
+    final Set<ui.Image> unique = candidates.toSet();
+    if (unique.isEmpty) {
+      return;
+    }
+    final Set<ui.Image> live = _collectLiveCommittedImages();
+    for (final ui.Image image in unique) {
+      if (!live.contains(image)) {
+        image.dispose();
+      }
+    }
+  }
+
+  /// Builds the set of committed GPU textures still reachable from the document:
+  /// every layer's action and redo stacks plus every undo/redo record's retained
+  /// images. Identity-based (`ui.Image` does not override `==`).
+  Set<ui.Image> _collectLiveCommittedImages() {
+    final Set<ui.Image> live = <ui.Image>{};
+    for (final LayerProvider layer in _list) {
+      for (final UserActionDrawing action in layer.actionStack) {
+        final ui.Image? image = action.image;
+        if (image != null) {
+          live.add(image);
+        }
+      }
+      for (final UserActionDrawing action in layer.redoStack) {
+        final ui.Image? image = action.image;
+        if (image != null) {
+          live.add(image);
+        }
+      }
+    }
+    live.addAll(_undoProvider.liveRetainedImages);
+    return live;
   }
 
   void _notifyLayerListStructureChanged() {
@@ -518,8 +576,16 @@ class LayersProvider extends ChangeNotifier {
 
     final int numberOfActionAdded = actionsToAppend.length;
 
+    // Textures the merge record can resurrect on redo (notably the rasterized
+    // flatten image). Listed so disposal waits until the record leaves history.
+    final List<ui.Image> retainedImages = <ui.Image>[
+      for (final UserActionDrawing action in actionsToAppend)
+        if (action.image != null) action.image!,
+    ];
+
     _undoProvider.executeAction(
       name: 'Merge Layer',
+      retainedImages: retainedImages,
       forward: () {
         // Step 1 - Merge 2 layers
         layerTo.actionStack.addAll(actionsToAppend);
@@ -701,11 +767,13 @@ class LayersProvider extends ChangeNotifier {
     _undoProvider.executeAction(
       name: 'Rotate Canvas 90° clock wise',
       forward: () async {
+        final List<ui.Image> replaced = <ui.Image>[];
         for (final LayerProvider layer in _list) {
-          await layer.rotate90Clockwise(oldSize);
+          replaced.addAll(await layer.rotate90Clockwise(oldSize));
           layer.size = newSize; // Update individual layer's understanding of canvas size
         }
         this.size = newSize; // Update LayersProvider's canvas size
+        disposeCommittedImagesIfUnreferenced(replaced);
         this.update();
       },
       backward: () async {
@@ -714,11 +782,12 @@ class LayersProvider extends ChangeNotifier {
         Size currentOldSize = newSize; // Size before the first CCW rotation
         Size nextSize = oldSize; // Size after the first CCW rotation
 
+        final List<ui.Image> replaced = <ui.Image>[];
         for (int i = 0; i < AppMath.triple; i++) {
           for (final LayerProvider layer in _list) {
             // Effectively rotating counter-clockwise by passing the "new" size as old,
             // because rotate90Clockwise expects the size *before* its CW rotation.
-            await layer.rotate90Clockwise(currentOldSize);
+            replaced.addAll(await layer.rotate90Clockwise(currentOldSize));
             layer.size = nextSize;
           }
           this.size = nextSize;
@@ -727,6 +796,7 @@ class LayersProvider extends ChangeNotifier {
           currentOldSize = this.size;
           nextSize = Size(currentOldSize.height, currentOldSize.width);
         }
+        disposeCommittedImagesIfUnreferenced(replaced);
         this.update();
       },
     );
@@ -746,13 +816,15 @@ class LayersProvider extends ChangeNotifier {
     final Size canvasSize = Size(width, height);
 
     Future<void> applyFlip() async {
+      final List<ui.Image> replaced = <ui.Image>[];
       for (final LayerProvider layer in _list) {
         if (isHorizontal) {
-          await layer.flipHorizontal(canvasSize);
+          replaced.addAll(await layer.flipHorizontal(canvasSize));
         } else {
-          await layer.flipVertical(canvasSize);
+          replaced.addAll(await layer.flipVertical(canvasSize));
         }
       }
+      disposeCommittedImagesIfUnreferenced(replaced);
       this.update();
     }
 

@@ -53,7 +53,7 @@ class PixelBrushStrokeWorker {
       return null;
     }
     try {
-      final Stopwatch startupWatch = Stopwatch()..start();
+      final Stopwatch? startupWatch = PixelBrushProfiler.startWatch();
       final ReceivePort receivePort = ReceivePort();
       final Isolate isolate = await Isolate.spawn(_pixelBrushWorkerEntry, receivePort.sendPort);
       final PixelBrushStrokeWorker worker = PixelBrushStrokeWorker._(isolate, receivePort);
@@ -65,8 +65,7 @@ class PixelBrushStrokeWorker {
         'width': imageWidth,
         'height': imageHeight,
       });
-      startupWatch.stop();
-      PixelBrushProfiler.record('workerStartup', startupWatch.elapsedMicroseconds);
+      PixelBrushProfiler.recordElapsed('workerStartup', startupWatch);
       return worker;
     } on Object {
       return null;
@@ -113,7 +112,7 @@ class PixelBrushStrokeWorker {
       encoded[i * AppMath.pair] = segmentPoints[i].dx;
       encoded[i * AppMath.pair + AppMath.one] = segmentPoints[i].dy;
     }
-    final Stopwatch roundtripWatch = Stopwatch()..start();
+    final Stopwatch? roundtripWatch = PixelBrushProfiler.startWatch();
     final Map<String, Object?> reply = await _send(<String, Object?>{
       'type': _workerMsgSegment,
       'points': encoded,
@@ -125,13 +124,14 @@ class PixelBrushStrokeWorker {
       'pr': patchBounds.right,
       'pb': patchBounds.bottom,
     });
-    roundtripWatch.stop();
-    PixelBrushProfiler.record(_profLabelRoundtrip, roundtripWatch.elapsedMicroseconds);
+    roundtripWatch?.stop();
+    final int roundtripMicros = roundtripWatch?.elapsedMicroseconds ?? AppMath.zero;
+    PixelBrushProfiler.record(_profLabelRoundtrip, roundtripMicros);
     final Object? computeMicros = reply['computeMicros'];
     if (computeMicros is int) {
       PixelBrushProfiler.record('isolateCompute', computeMicros);
       // Round-trip minus compute ≈ messaging/transfer/scheduling overhead.
-      PixelBrushProfiler.record('roundtripOverhead', roundtripWatch.elapsedMicroseconds - computeMicros);
+      PixelBrushProfiler.record('roundtripOverhead', roundtripMicros - computeMicros);
     }
     if (reply['hasChanges'] != true) {
       PixelBrushProfiler.recordSegment(segmentPoints.length, AppMath.zero);
