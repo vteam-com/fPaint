@@ -28,6 +28,7 @@ import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
+part 'canvas_gesture_handler_pixel_brush.dart';
 part 'canvas_gesture_handler_state_methods.dart';
 
 /// Handles pointer, pan, and zoom gestures over the canvas widget tree.

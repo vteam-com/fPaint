@@ -42,9 +42,6 @@ class LayersProvider extends ChangeNotifier {
   final ChangeNotifier _layerListStructureNotifier = ChangeNotifier();
   final ChangeNotifier _topColorsNotifier = ChangeNotifier();
 
-  /// Lightweight repaint signal used for active canvas interactions.
-  Listenable get canvasRepaintListenable => _canvasRepaintNotifier;
-
   /// Stable repaint signal for the canvas painter (layer state + active-interaction
   /// repaints), merged once so the painter does not allocate a fresh
   /// `Listenable.merge` and re-subscribe on every widget rebuild.
@@ -365,8 +362,21 @@ class LayersProvider extends ChangeNotifier {
     return LayerProvider(
       name: name,
       size: _size,
-      onThumbnailChanged: _notifyTopColorsChanged,
+      onThumbnailChanged: _onLayerThumbnailChanged,
     );
+  }
+
+  /// Invoked when a layer finishes (re)building its cached raster/thumbnail.
+  ///
+  /// The cache rebuild is debounced and completes asynchronously, after which
+  /// the layer's on-canvas appearance can differ from the last painted frame
+  /// (e.g. a freshly committed text or stroke). The canvas is wrapped in a
+  /// `RepaintBoundary` that only re-rasterizes when [canvasPainterRepaint]
+  /// fires, so the canvas must be explicitly repainted here — otherwise it
+  /// keeps a stale raster showing the layer mid-build.
+  void _onLayerThumbnailChanged() {
+    _notifyTopColorsChanged();
+    repaintCanvas();
   }
 
   /// Ensures that a layer exists at the given index.
@@ -617,7 +627,7 @@ class LayersProvider extends ChangeNotifier {
           .map((final LayerProvider layer) => layer.ensureCachePrimed()),
     );
 
-    this.cachedImage = await renderCanvasImage(
+    final ui.Image compositeImage = await renderCanvasImage(
       width: this.size.width.toInt(),
       height: this.size.height.toInt(),
       draw: (final ui.Canvas canvas) {
@@ -628,6 +638,11 @@ class LayersProvider extends ChangeNotifier {
         }
       },
     );
+    // Free the previous composite texture before replacing it; otherwise every
+    // capture (color sampling, export, top-colors refresh) leaks a full-canvas
+    // image.
+    this.cachedImage?.dispose();
+    this.cachedImage = compositeImage;
     _cachedImageRawRgba = null;
     _cachedImageRawRgbaSource = null;
 
@@ -639,19 +654,10 @@ class LayersProvider extends ChangeNotifier {
   /// This includes the layer at [topLayerIndex] and every visible layer below
   /// it, but excludes any layers above it.
   ui.Image capturePainterToImageThroughLayerSync(final int topLayerIndex) {
-    final int clampedTopLayerIndex = topLayerIndex.clamp(0, length - 1);
-
     return renderCanvasImageSync(
       width: size.width.toInt(),
       height: size.height.toInt(),
-      draw: (final ui.Canvas canvas) {
-        for (int index = length - 1; index >= clampedTopLayerIndex; index--) {
-          final LayerProvider layer = get(index);
-          if (layer.isVisible) {
-            layer.renderLayer(canvas);
-          }
-        }
-      },
+      draw: _drawLayersThrough(topLayerIndex),
     );
   }
 
@@ -660,20 +666,26 @@ class LayersProvider extends ChangeNotifier {
   /// Uses `Picture.toImage()` so the result can be read back with `toByteData()`
   /// cheaply — a `toImageSync()` readback stalls the GPU for seconds on Impeller.
   Future<ui.Image> capturePainterToImageThroughLayer(final int topLayerIndex) {
-    final int clampedTopLayerIndex = topLayerIndex.clamp(0, length - 1);
-
     return renderCanvasImage(
       width: size.width.toInt(),
       height: size.height.toInt(),
-      draw: (final ui.Canvas canvas) {
-        for (int index = length - 1; index >= clampedTopLayerIndex; index--) {
-          final LayerProvider layer = get(index);
-          if (layer.isVisible) {
-            layer.renderLayer(canvas);
-          }
-        }
-      },
+      draw: _drawLayersThrough(topLayerIndex),
     );
+  }
+
+  /// Builds a canvas draw callback that paints every visible layer from the
+  /// bottom up through [topLayerIndex] (inclusive), excluding layers above it.
+  void Function(ui.Canvas) _drawLayersThrough(final int topLayerIndex) {
+    final int clampedTopLayerIndex = topLayerIndex.clamp(0, length - 1);
+
+    return (final ui.Canvas canvas) {
+      for (int index = length - 1; index >= clampedTopLayerIndex; index--) {
+        final LayerProvider layer = get(index);
+        if (layer.isVisible) {
+          layer.renderLayer(canvas);
+        }
+      }
+    };
   }
 
   /// Rotates the entire canvas and all its layers 90 degrees clockwise.

@@ -488,6 +488,13 @@ Future<ui.Image> _captureRenderedMainViewCanvasImage(final WidgetTester tester) 
     reason: 'Expected the main view screenshot boundary to be present',
   );
 
+  // Layer caches settle asynchronously (debounced), and the canvas is isolated
+  // behind a RepaintBoundary that only re-rasterizes on an explicit repaint
+  // signal. Force one so the snapshot reflects the latest layer state rather
+  // than a stale raster.
+  appProvider.layers.repaintCanvas();
+  await tester.pump();
+
   final RenderRepaintBoundary boundary = tester.renderObject<RenderRepaintBoundary>(boundaryFinder);
   final double pixelRatio = AppDefaults.renderedScreenshotPixelRatio;
   final ui.Image boundaryImage = await boundary.toImage(pixelRatio: pixelRatio);
