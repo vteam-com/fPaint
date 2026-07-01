@@ -867,9 +867,13 @@ extension AppProviderSelection on AppProvider {
     }
 
     final bool ownsImage = !sampleAllLayers;
+    // Async `toImage()` render, not `toImageForStorage`'s `toImageSync()`: the
+    // image is read back with `convertImageToUint8List` (`toByteData()`) below,
+    // and reading back a `toImageSync()` image stalls the GPU for seconds on
+    // Impeller (large canvases) — the same fix already applied to the brush path.
     final ui.Image image = sampleAllLayers
         ? layers.cachedImage ?? await layers.capturePainterToImage()
-        : layers.selectedLayer.toImageForStorage(layers.size);
+        : await layers.selectedLayer.toImageForStorageAsync(layers.size);
 
     try {
       final Uint8List? pixels = await convertImageToUint8List(image);

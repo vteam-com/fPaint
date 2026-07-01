@@ -36,8 +36,9 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     // Bump the generation first so any in-flight worker startup disposes the
     // isolate it spawns instead of leaking it.
     _pixelBrushStrokeGeneration++;
-    // Dispose the GPU stroke if it wasn't committed (commit calls detachImage(),
-    // which leaves _gpuPixelBrushStroke null so this is a no-op then).
+    // Dispose the GPU stroke if it wasn't committed (commit calls
+    // compositeAndDetach(), which leaves _gpuPixelBrushStroke null so this is a
+    // no-op then). Disposing frees the baseline + current patch textures.
     _gpuPixelBrushStroke?.dispose();
     _gpuPixelBrushStroke = null;
     _lastDabCenter = null;
@@ -85,10 +86,10 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
       return;
     }
 
-    // GPU path: the final working image is already on the GPU. Commit it as a
-    // full-canvas image patch — no readback, no CPU compute.
+    // GPU path: flatten baseline + patch into a concrete full-canvas image on the
+    // GPU — no readback, no CPU compute.
     if (_gpuPixelBrushStroke != null) {
-      final ui.Image finalImage = _gpuPixelBrushStroke!.detachImage();
+      final ui.Image finalImage = await _gpuPixelBrushStroke!.compositeAndDetach();
       _gpuPixelBrushStroke = null;
       _applyCommittedPixelBrushPatch(
         appProvider: appProvider,
@@ -458,6 +459,18 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     final Offset position,
     final PixelBrushMode mode,
   ) {
+    // A prior stroke whose pointer-up was cancelled or arrived with a mismatched
+    // pointer id never ran _clearPixelBrushStroke (its cleanup is gated on the
+    // active pointer in _handlePointerEnd), so its full-canvas GPU textures are
+    // still held in these fields. Reclaim them before the assignments below
+    // overwrite the references: an undisposed ui.Image's GPU texture is never
+    // reclaimed by GC, so each orphaned smudge baseline/source leaks permanently
+    // (hundreds of MB each on a large canvas). _clearPixelBrushStroke disposes
+    // the GPU stroke that owns the working image the live-preview baseline
+    // aliases, so this cannot double-free.
+    if (_gpuPixelBrushStroke != null || _pixelBrushSourceImage != null || _preparedPixelBrushSource != null) {
+      _clearPixelBrushStroke();
+    }
     _pixelBrushStrokeGeneration++;
     PixelBrushProfiler.beginStroke();
     _pixelBrushMode = mode;
@@ -480,13 +493,18 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
 
     // GPU path (primary): if the shader is loaded, run the whole effect on the
     // GPU seeded from the just-captured baseline image. No readback, no worker,
-    // no async — each pointer-move applies one synchronous dab.
+    // no async — each pointer-move applies one synchronous dab. Works at any
+    // canvas size: dabs rasterize only the stroke's dirty-rect patch, so cost and
+    // memory scale with the brush footprint, not the canvas.
     _gpuPixelBrushStroke = null;
     _lastDabCenter = null;
     final ui.FragmentProgram? gpuProgram = GpuPixelBrushStroke.loadedProgram;
     final ui.Image? gpuBaseline = _pixelBrushTargetLayer!.livePreviewBaseline;
     if (gpuProgram != null && gpuBaseline != null) {
       _gpuPixelBrushStroke = GpuPixelBrushStroke.create(program: gpuProgram, baseline: gpuBaseline);
+      // The stroke captured the baseline and disposes it at commit; keep the
+      // layer from disposing it in clearLivePixelBrushPreview.
+      _pixelBrushTargetLayer!.markLivePreviewBaselineExternallyOwned();
       _lastDabCenter = position;
       _appendPixelBrushPoint(position, appProvider.brushSize);
       return;

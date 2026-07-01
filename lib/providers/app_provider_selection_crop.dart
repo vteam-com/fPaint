@@ -15,6 +15,8 @@ extension AppProviderSelectionCrop on AppProvider {
 
     final ui.Image selectionMask = await _renderSelectionMask(cropPath, originalWidth, originalHeight);
     final Rect? maskBounds = await getNonTransparentBounds(selectionMask);
+    // getNonTransparentBounds has read the mask back; it is not needed again.
+    selectionMask.dispose();
     if (maskBounds == null || maskBounds.width <= 0 || maskBounds.height <= 0) {
       return;
     }
@@ -67,11 +69,32 @@ extension AppProviderSelectionCrop on AppProvider {
     }
 
     for (final LayerProvider layer in layers.list) {
-      cropStates[layer]!.finalImage = cropImage(cropStates[layer]!.croppedImage, effectiveBounds);
+      final LayerCropState state = cropStates[layer]!;
+      state.finalImage = cropImage(state.croppedImage, effectiveBounds);
+      // finalImage is the trimmed crop; the selection-bounds intermediate that
+      // produced it is superseded and otherwise leaks (one per layer per crop).
+      state.croppedImage.dispose();
     }
+
+    // Textures the Crop record can resurrect: each layer's committed crop result
+    // (re-added by forward on redo) plus the original action/redo images that
+    // backward restores on undo. Listing them defers disposal until the record
+    // leaves history (the reachability check prevents any use-after-free) instead
+    // of stranding these full-canvas textures — the same protocol merge and the
+    // pixel brush already use.
+    final List<ui.Image> retainedImages = <ui.Image>[
+      for (final LayerProvider layer in layers.list) ...<ui.Image>[
+        cropStates[layer]!.finalImage,
+        for (final UserActionDrawing action in cropStates[layer]!.originalActions)
+          if (action.image != null) action.image!,
+        for (final UserActionDrawing action in cropStates[layer]!.originalRedoActions)
+          if (action.image != null) action.image!,
+      ],
+    ];
 
     undoProvider.executeAction(
       name: 'Crop',
+      retainedImages: retainedImages,
       forward: () {
         layers.size = Size(effectiveBounds.width, effectiveBounds.height);
 
@@ -155,6 +178,15 @@ extension AppProviderSelectionCrop on AppProvider {
         canvas.restore();
       },
     );
-    return cropImage(maskedImage, bounds);
+    // maskedImage is fully rasterized (awaited), so the full-canvas source raster
+    // is no longer needed — release it instead of stranding a texture per layer.
+    layerImage.dispose();
+
+    final ui.Image cropped = cropImage(maskedImage, bounds);
+    // cropImage's picture samples maskedImage; the engine ref-counts the texture
+    // for the pending raster, so releasing this full-canvas intermediate now is
+    // safe (same invariant the GPU brush relies on).
+    maskedImage.dispose();
+    return cropped;
   }
 }

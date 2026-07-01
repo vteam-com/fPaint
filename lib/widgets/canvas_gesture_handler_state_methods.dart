@@ -278,7 +278,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
           // once the cursor travels another full spacing, keeping displacement
           // constant at `spacing` per dab.
           _lastDabCenter = prev;
-          _pixelBrushTargetLayer?.setLivePixelBrushImage(stroke.image);
+          // Display baseline + the stroke's dirty-rect patch. ownsImage: false —
+          // the GPU stroke retains and disposes its own patch.
+          _pixelBrushTargetLayer?.setLivePixelBrushPatch(stroke.patch, stroke.patchBounds, ownsImage: false);
           appProvider.layers.repaintCanvas();
           return;
         }

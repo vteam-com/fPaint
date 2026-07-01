@@ -44,7 +44,15 @@ void renderPencilEraserStroke(
   _renderFreehandStroke(canvas, positions, paint);
 }
 
-/// Builds and draws a connected stroke from the sampled pointer positions.
+/// Draws a freehand stroke as a sequence of independent round-capped segments.
+///
+/// Each consecutive pair of [positions] is stroked as its own line; the round
+/// caps overlap at shared vertices to form continuous round joins, so the result
+/// is visually equivalent to one connected path. Crucially, the segments
+/// partition the polyline and never overlap-redraw, so drawing them in batches —
+/// as the live-preview accumulator does, folding each new segment into a cached
+/// image — is byte-identical to drawing the whole stroke at once. That identity
+/// is what keeps the in-progress preview matching the committed render.
 void _renderFreehandStroke(
   final Canvas canvas,
   final List<Offset> positions,
@@ -54,16 +62,20 @@ void _renderFreehandStroke(
     return;
   }
 
-  final Path path = Path()..moveTo(positions.first.dx, positions.first.dy);
-  if (positions.length == 1) {
-    path.lineTo(positions.first.dx, positions.first.dy);
-  } else {
-    for (final Offset position in positions.skip(1)) {
-      path.lineTo(position.dx, position.dy);
-    }
+  if (positions.length == AppMath.one) {
+    // A single tap is a dot: a degenerate round-capped segment.
+    canvas.drawPath(
+      Path()
+        ..moveTo(positions.first.dx, positions.first.dy)
+        ..lineTo(positions.first.dx, positions.first.dy),
+      paint,
+    );
+    return;
   }
 
-  canvas.drawPath(path, paint);
+  for (int i = AppMath.one; i < positions.length; i++) {
+    canvas.drawLine(positions[i - AppMath.one], positions[i], paint);
+  }
 }
 
 /// Renders a rectangle on the canvas.

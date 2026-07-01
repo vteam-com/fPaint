@@ -79,7 +79,10 @@ extension AppProviderTools on AppProvider {
       return layers.cachedImage ?? await layers.capturePainterToImage();
     }
 
-    return layers.selectedLayer.toImageForStorage(layers.size);
+    // Async `toImage()` render, not `toImageForStorage`'s `toImageSync()`: the
+    // result is read back with `toByteData()` (see fill_service), which stalls
+    // the GPU for seconds on Impeller when the source came from `toImageSync()`.
+    return layers.selectedLayer.toImageForStorageAsync(layers.size);
   }
 
   /// Updates an action.
