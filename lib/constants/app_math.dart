@@ -28,6 +28,12 @@ class AppMath {
   static const int pair = 2;
   static const int triple = 3;
   static const int bytesPerPixel = 4;
+
+  /// Byte offsets of each channel within a packed straight-RGBA pixel.
+  static const int rgbaRedOffset = 0;
+  static const int rgbaGreenOffset = 1;
+  static const int rgbaBlueOffset = 2;
+  static const int rgbaAlphaOffset = 3;
   static const int baseTen = 10;
   static const int hexRadix = 16;
   static const int hexPad = 2;

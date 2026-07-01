@@ -292,4 +292,38 @@ void main() {
       expect(appProvider.transformModel, isNotNull);
     });
   });
+
+  group('pixel-brush gesture + processing state', () {
+    test('gesture is hidden and not committing by default', () {
+      expect(appProvider.isPixelBrushGestureVisible, isFalse);
+      expect(appProvider.isPixelBrushCommitting, isFalse);
+    });
+
+    test('showPixelBrushGesture publishes points and size', () {
+      appProvider.showPixelBrushGesture(
+        points: const <Offset>[Offset(1, 2), Offset(3, 4)],
+        size: 12,
+      );
+      expect(appProvider.isPixelBrushGestureVisible, isTrue);
+      expect(appProvider.pixelBrushGesturePoints, <Offset>[const Offset(1, 2), const Offset(3, 4)]);
+      expect(appProvider.pixelBrushGestureSize, 12);
+    });
+
+    test('setPixelBrushCommitting toggles the processing flag', () {
+      appProvider.setPixelBrushCommitting(committing: true);
+      expect(appProvider.isPixelBrushCommitting, isTrue);
+      appProvider.setPixelBrushCommitting(committing: false);
+      expect(appProvider.isPixelBrushCommitting, isFalse);
+    });
+
+    test('clearPixelBrushGesture clears both the marquee and the committing flag', () {
+      appProvider.showPixelBrushGesture(points: const <Offset>[Offset(1, 1)], size: 8);
+      appProvider.setPixelBrushCommitting(committing: true);
+
+      appProvider.clearPixelBrushGesture();
+
+      expect(appProvider.isPixelBrushGestureVisible, isFalse);
+      expect(appProvider.isPixelBrushCommitting, isFalse);
+    });
+  });
 }

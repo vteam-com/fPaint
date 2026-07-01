@@ -67,29 +67,25 @@ Future<ui.Image> imageFromPixels(
   return frame.image;
 }
 
-/// Creates a [ui.Image] from straight RGBA pixel data.
+/// Creates a [ui.Image] from straight RGBA pixel data via [ui.decodeImageFromPixels].
 ///
-/// Faster single-await path: collapses codec instantiation into two awaits
-/// and explicitly disposes intermediate objects to reduce GPU memory pressure.
-/// Safe on both Skia and Impeller renderers.
-Future<ui.Image> imageFromPixelsFast(
+/// The [ui.ImageDescriptor.raw] + `instantiateCodec` path is pathologically slow
+/// for large raster buffers on Impeller (multi-second for ~1 MP). This direct
+/// decode path avoids the codec abstraction and uploads the texture directly.
+Future<ui.Image> imageFromPixelsDecode(
   final Uint8List pixels,
   final int width,
   final int height,
-) async {
-  final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(pixels);
-  final ui.ImageDescriptor descriptor = ui.ImageDescriptor.raw(
-    buffer,
-    width: width,
-    height: height,
-    pixelFormat: ui.PixelFormat.rgba8888,
+) {
+  final Completer<ui.Image> completer = Completer<ui.Image>();
+  ui.decodeImageFromPixels(
+    pixels,
+    width,
+    height,
+    ui.PixelFormat.rgba8888,
+    completer.complete,
   );
-  final ui.Codec codec = await descriptor.instantiateCodec();
-  final ui.FrameInfo frame = await codec.getNextFrame();
-  buffer.dispose();
-  descriptor.dispose();
-  codec.dispose();
-  return frame.image;
+  return completer.future;
 }
 
 /// Extracts the dominant colors from a given [image].
@@ -217,26 +213,50 @@ Future<bool> clipboardHasImage() async {
   }
 }
 
-/// Resizes a [ui.Image] to a new [Size].
+/// Box-average downscale of a straight-RGBA buffer from [srcWidth]x[srcHeight]
+/// to [dstWidth]x[dstHeight].
 ///
-/// The [image] parameter is the image to resize, and [newSize] is the desired size.
-Future<ui.Image> resizeImage(final ui.Image image, final ui.Size newSize) {
-  return renderCanvasImage(
-    width: newSize.width.toInt(),
-    height: newSize.height.toInt(),
-    draw: (final ui.Canvas canvas) {
-      final ui.Paint paint = ui.Paint()
-        ..filterQuality = ui.FilterQuality.high
-        ..isAntiAlias = true;
-
-      canvas.drawImageRect(
-        image,
-        ui.Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-        ui.Rect.fromLTWH(0, 0, newSize.width, newSize.height),
-        paint,
-      );
-    },
-  );
+/// A cheap CPU pass that shrinks a pixel buffer before a (slow) GPU upload; the
+/// result is GPU-upscaled back for display. Each destination pixel averages the
+/// source pixels that map into it, so soft content (smudge/blur) loses no
+/// perceptible detail.
+Uint8List downsampleRgbaBox(
+  final Uint8List src,
+  final int srcWidth,
+  final int srcHeight,
+  final int dstWidth,
+  final int dstHeight,
+) {
+  final Uint8List out = Uint8List(dstWidth * dstHeight * AppMath.bytesPerPixel);
+  for (int dy = AppMath.zero; dy < dstHeight; dy++) {
+    final int sy0 = (dy * srcHeight) ~/ dstHeight;
+    final int sy1 = math.max(sy0 + AppMath.one, ((dy + AppMath.one) * srcHeight) ~/ dstHeight);
+    for (int dx = AppMath.zero; dx < dstWidth; dx++) {
+      final int sx0 = (dx * srcWidth) ~/ dstWidth;
+      final int sx1 = math.max(sx0 + AppMath.one, ((dx + AppMath.one) * srcWidth) ~/ dstWidth);
+      int r = AppMath.zero, g = AppMath.zero, b = AppMath.zero, a = AppMath.zero, count = AppMath.zero;
+      for (int sy = sy0; sy < sy1 && sy < srcHeight; sy++) {
+        int si = ((sy * srcWidth) + sx0) * AppMath.bytesPerPixel;
+        for (int sx = sx0; sx < sx1 && sx < srcWidth; sx++) {
+          r += src[si + AppMath.rgbaRedOffset];
+          g += src[si + AppMath.rgbaGreenOffset];
+          b += src[si + AppMath.rgbaBlueOffset];
+          a += src[si + AppMath.rgbaAlphaOffset];
+          count++;
+          si += AppMath.bytesPerPixel;
+        }
+      }
+      if (count == AppMath.zero) {
+        count = AppMath.one;
+      }
+      final int oi = ((dy * dstWidth) + dx) * AppMath.bytesPerPixel;
+      out[oi + AppMath.rgbaRedOffset] = r ~/ count;
+      out[oi + AppMath.rgbaGreenOffset] = g ~/ count;
+      out[oi + AppMath.rgbaBlueOffset] = b ~/ count;
+      out[oi + AppMath.rgbaAlphaOffset] = a ~/ count;
+    }
+  }
+  return out;
 }
 
 /// Flips an [image] horizontally or vertically.

@@ -174,6 +174,10 @@ void renderPath(
   paint.color = fillColor;
   paint.style = PaintingStyle.stroke;
   paint.strokeCap = StrokeCap.round;
+  // Round the joins between segments. The default StrokeJoin.miter extends the
+  // outer edge to a point at every vertex, so a curved gesture (a polyline of
+  // many short segments) sprouts sharp triangles wherever the direction turns.
+  paint.strokeJoin = StrokeJoin.round;
   paint.strokeWidth = brush.size;
 
   final Path path = Path()

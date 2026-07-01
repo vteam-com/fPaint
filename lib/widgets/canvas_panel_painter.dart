@@ -2,7 +2,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 
 /// A custom painter that paints the canvas panel.
@@ -10,6 +9,8 @@ class CanvasPanelPainter extends CustomPainter {
   CanvasPanelPainter(
     this._layers, {
     this.includeTransparentBackground = false,
+    this.displayScale = 1.0,
+    this.onNeedsDisplayCache,
     super.repaint,
   });
 
@@ -28,13 +29,20 @@ class CanvasPanelPainter extends CustomPainter {
   /// Whether to include the transparent background.
   final bool includeTransparentBackground;
 
+  /// On-screen canvas-pixels per canvas-pixel (zoom × devicePixelRatio). Layers
+  /// draw from a display-resolution cache sized for this; when it's stale/absent
+  /// (or zoomed in past it) they fall back to full-res and request a rebuild.
+  final double displayScale;
+
+  /// Called (during paint) when a layer needs its display cache (re)built for
+  /// the current [displayScale]. The owner schedules the async build and repaints.
+  final void Function(LayerProvider layer, double requiredScale)? onNeedsDisplayCache;
+
   @override
   void paint(final Canvas canvas, final Size size) {
     if (size.width <= 0 || size.height <= 0) {
       return;
     }
-
-    final Stopwatch? paintWatch = PixelBrushProfiler.startWatch();
 
     if (includeTransparentBackground) {
       canvas.drawRect(
@@ -43,18 +51,23 @@ class CanvasPanelPainter extends CustomPainter {
       );
     }
 
+    final void Function(LayerProvider, double)? requestRebuild = onNeedsDisplayCache;
     for (final LayerProvider layer in _layers.reversed) {
       if (layer.isVisible) {
-        layer.renderLayer(canvas);
+        if (requestRebuild == null) {
+          layer.renderLayer(canvas);
+        } else {
+          layer.renderLayerForDisplay(canvas, displayScale, () => requestRebuild(layer, displayScale));
+        }
       }
     }
-
-    PixelBrushProfiler.recordElapsed('canvasPaint', paintWatch);
   }
 
   @override
   bool shouldRepaint(final CanvasPanelPainter oldDelegate) {
-    return oldDelegate._layers != _layers || oldDelegate.includeTransparentBackground != includeTransparentBackground;
+    return oldDelegate._layers != _layers ||
+        oldDelegate.includeTransparentBackground != includeTransparentBackground ||
+        oldDelegate.displayScale != displayScale;
   }
 
   /// Returns a repeating checkerboard shader. The tile is rasterized once and

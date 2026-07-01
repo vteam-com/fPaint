@@ -12,18 +12,43 @@ class AppInteraction {
   static const double smudgeMinimumRadius = 1.0;
   static const double smudgeBrushRadiusFactor = 0.5;
   static const double smudgeInputPointSpacing = 1.0;
-  static const double smudgeStepSpacingFactor = 0.35;
 
-  /// Dab spacing as a fraction of radius for the GPU pixel brush. Much finer
-  /// than [smudgeStepSpacingFactor] (used by the CPU path, where each dab costs
-  /// a radius² per-pixel loop): a GPU dab is a cheap texture blit, so dense
-  /// dabs are affordable and are what make the smudge trail seamless instead of
-  /// a chain of discs.
-  static const double smudgeGpuStepSpacingFactor = 0.1;
+  /// Dab spacing as a fraction of the brush radius. The smudge/blur effect is
+  /// rendered once on pointer-up (the drag only shows a marquee), so we can
+  /// afford dense dabs for a smooth trail without per-move lag — 0.15 (~13× disc
+  /// overlap) removes the washboard ridges the coarser 0.35 left behind.
+  static const double smudgeStepSpacingFactor = 0.15;
 
-  /// Upper bound on dabs emitted for a single pointer-move on the GPU path, so a
-  /// fast flick cannot stall a frame with hundreds of full-canvas blits.
-  static const int smudgeGpuMaxDabsPerMove = 96;
+  /// Downsampling for the one-shot commit render. The GPU→CPU readback of the
+  /// source region is the commit bottleneck (Impeller stalls at ~10 µs/px), so
+  /// for a large brush we read back / process / upload at reduced resolution and
+  /// GPU-upscale the result — smudge/blur are soft enough that the loss is
+  /// invisible. One downsample level per this many pixels of brush radius.
+  static const double smudgeCommitDownsampleRadiusPerLevel = 40.0;
+
+  /// Maximum commit downsample factor (a big brush caps here).
+  static const int smudgeCommitMaxDownsample = 4;
+
+  /// Level-of-detail for the CPU smudge/blur *computation* (isolate). The per-dab
+  /// cost is O(radius²), so a large brush is computed on a downsampled copy of the
+  /// region and upsampled back — the effect is low-frequency, so the detail loss
+  /// is invisible while cost drops by the factor squared (Krita "Instant Preview"
+  /// applied to the CPU path). LOD only kicks in above this brush radius (px).
+  static const double smudgeComputeLodMinRadius = 64.0;
+
+  /// Target effective radius (px) at LOD resolution — the downsample factor is
+  /// chosen so the brush works at roughly this radius on the low-res buffer.
+  static const double smudgeComputeLodTargetRadius = 48.0;
+
+  /// Cap on the LOD downsample factor for the compute pass.
+  static const int smudgeComputeLodMaxFactor = 8;
+
+  /// Padding (px) added around a smudge stroke's region when caching the source
+  /// backdrop, so nearby subsequent strokes stay cache hits without re-reading.
+  /// Only this region is read back (not the whole canvas), bounding both the
+  /// readback cost and the resident memory on large canvases.
+  static const double smudgeSourceCacheMargin = 384.0;
+
   static const double smudgeBlendStrength = 0.8;
   static const double smudgeEdgeFalloffExponent = 2.0;
   static const double pixelBrushDefaultIntensity = 0.5;
@@ -35,30 +60,12 @@ class AppInteraction {
   static const int blurBrushKernelHalfRange = 2;
   static const int pixelBrushMaxUndoGestures = 3;
 
-  /// Padding (px) added around a GPU dab's bounding rect so the feathered brush
-  /// edge is fully covered.
-  static const double smudgeGpuDabPadding = 2.0;
-
   /// Max un-baked freehand segments replayed per frame before the in-progress
   /// stroke is folded into the cached baseline. Bounds per-frame preview cost to
   /// O(threshold) instead of O(stroke length); below it the tail is cheap to
   /// replay, so short strokes never pay for a full-canvas re-bake.
   static const int strokePreviewFoldThreshold = 64;
 
-  // Fragment-shader uniform float-slot indices for `shaders/pixel_brush.frag`.
-  // Slots 0/1 are the resolution vec2, 2/3 the previous dab centre, 4/5 the
-  // current dab centre, then radius and blend strength.
-  static const int pixelBrushShaderSlotWidth = 0;
-  static const int pixelBrushShaderSlotHeight = 1;
-  static const int pixelBrushShaderSlotFromX = 2;
-  static const int pixelBrushShaderSlotFromY = 3;
-  static const int pixelBrushShaderSlotToX = 4;
-  static const int pixelBrushShaderSlotToY = 5;
-  static const int pixelBrushShaderSlotRadius = 6;
-  static const int pixelBrushShaderSlotStrength = 7;
-
-  /// Sampler slot for the working image texture in `pixel_brush.frag`.
-  static const int pixelBrushShaderSamplerTexture = 0;
   static const double selectionHandleSize = 20;
   static const double selectionToolbarMargin = 50.0;
   static const double imagePlacementHandleSize = 14.0;

@@ -166,9 +166,14 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         if (appProvider.selectorModel.mode != SelectorMode.line || !appProvider.selectorModel.isDrawing) {
           _clearSelectionTapTracking();
         }
-      } else if (_pixelBrushSourceImage != null) {
+      } else if (_pixelBrushLayerRestoreState != null) {
         _appendPixelBrushPoint(appProvider.toCanvas(event.localPosition), appProvider.brushSize);
+        // Marquee stays visible across the (async) one-shot render, switching to
+        // a processing shimmer while the commit generates the image, then is
+        // cleared once the committed smudge/blur is on the layer.
+        appProvider.setPixelBrushCommitting(committing: true);
         await _commitPixelBrushStroke(appProvider);
+        appProvider.clearPixelBrushGesture();
         _clearSelectionTapTracking();
       } else {
         _clearSelectionTapTracking();
@@ -223,68 +228,16 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         return;
       }
 
-      if (_pixelBrushSourceImage != null) {
-        PixelBrushProfiler.recordMove();
-        // Keep the brush-size marquee tracking the cursor for the whole drag.
-        // (Safe now that the GPU stroke has no readback to starve, and the
-        // canvas RepaintBoundary stops repaintMainView from re-rasterizing it.)
-        _updateDrawingToolPreview(appProvider, event.localPosition);
+      if (_pixelBrushLayerRestoreState != null) {
+        // No live rasterization: just extend the gesture and redraw the swept-
+        // band marquee. The smudge/blur is rendered once on pointer-up, so the
+        // drag stays responsive at any canvas size and the marquee is the sole
+        // feedback (its round-capped band already shows the affected footprint).
         _appendPixelBrushPoint(adjustedPosition, appProvider.brushSize);
-        // GPU path: synchronous shader dabs displayed immediately. A pointer
-        // moves more than one spacing between frames, so — exactly like the CPU
-        // stepping in rasterizePixelBrushSegment — interpolate the move into
-        // spacing-sized sub-dabs. Dabbing only at the raw pointer position would
-        // leave gaps (visible dots) and a large per-dab displacement that pulls
-        // the smudge source far off the cursor centre. Each dab is a full-canvas
-        // `toImageSync`, so the spacing also bounds the dab count per stroke.
-        if (_gpuPixelBrushStroke != null) {
-          final double radius = max(
-            AppInteraction.smudgeMinimumRadius,
-            appProvider.brushSize * AppInteraction.smudgeBrushRadiusFactor,
-          );
-          final double baseSpacing = max(
-            AppInteraction.smudgeInputPointSpacing,
-            radius * AppInteraction.smudgeGpuStepSpacingFactor,
-          );
-          final ui.Offset start = _lastDabCenter ?? adjustedPosition;
-          final double dist = (adjustedPosition - start).distance;
-          if (dist < baseSpacing) {
-            return;
-          }
-          final GpuPixelBrushStroke stroke = _gpuPixelBrushStroke!;
-          // Fine spacing for a seamless trail, but clamp the count for one move
-          // so a fast flick widens spacing slightly rather than stalling.
-          int steps = (dist / baseSpacing).floor();
-          final double spacing = steps > AppInteraction.smudgeGpuMaxDabsPerMove
-              ? dist / AppInteraction.smudgeGpuMaxDabsPerMove
-              : baseSpacing;
-          steps = min(steps, AppInteraction.smudgeGpuMaxDabsPerMove);
-          final ui.Offset stepDelta = (adjustedPosition - start) / dist * spacing;
-          final Stopwatch? dabWatch = PixelBrushProfiler.startWatch();
-          ui.Offset prev = start;
-          for (int step = AppMath.one; step <= steps; step++) {
-            final ui.Offset cur = start + stepDelta * step.toDouble();
-            stroke.dab(
-              from: prev,
-              to: cur,
-              brushSize: appProvider.brushSize,
-              intensity: _pixelBrushIntensity,
-              mode: _pixelBrushMode,
-            );
-            prev = cur;
-          }
-          PixelBrushProfiler.recordElapsed('gpuDab', dabWatch);
-          // Advance by whole steps only; the sub-spacing remainder is picked up
-          // once the cursor travels another full spacing, keeping displacement
-          // constant at `spacing` per dab.
-          _lastDabCenter = prev;
-          // Display baseline + the stroke's dirty-rect patch. ownsImage: false —
-          // the GPU stroke retains and disposes its own patch.
-          _pixelBrushTargetLayer?.setLivePixelBrushPatch(stroke.patch, stroke.patchBounds, ownsImage: false);
-          appProvider.layers.repaintCanvas();
-          return;
-        }
-        _kickLivePixelBrushPreview(appProvider);
+        appProvider.showPixelBrushGesture(
+          points: _pixelBrushStrokePoints,
+          size: appProvider.brushSize,
+        );
         return;
       }
 

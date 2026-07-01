@@ -310,36 +310,4 @@ void main() {
       expect(_alphaAt(bytes, 4, 4), AppLimits.rgbChannelMax);
     });
   });
-
-  group('live pixel-brush preview baseline ownership', () {
-    test('clear disposes the baseline on the CPU worker/sync path (layer-owned)', () async {
-      final LayerProvider layer = _layer();
-      layer.actionStack.add(_imageAction(await _solid(const Color(0xFFFF0000)), Offset.zero));
-
-      layer.beginLivePixelBrushPreview();
-      final ui.Image? baseline = layer.livePreviewBaseline;
-      expect(baseline, isNotNull);
-
-      // No GPU stroke adopted it, so the layer owns the full-canvas baseline and
-      // must free it — otherwise it leaks one canvas-sized texture per stroke.
-      layer.clearLivePixelBrushPreview();
-      expect(baseline!.debugDisposed, isTrue, reason: 'worker/sync-path baseline is layer-owned and must be freed');
-    });
-
-    test('clear leaves the baseline alone once a GPU stroke owns it', () async {
-      final LayerProvider layer = _layer();
-      layer.actionStack.add(_imageAction(await _solid(const Color(0xFFFF0000)), Offset.zero));
-
-      layer.beginLivePixelBrushPreview();
-      final ui.Image? baseline = layer.livePreviewBaseline;
-      expect(baseline, isNotNull);
-
-      // Once the GPU stroke adopts it (or it becomes the committed action image),
-      // clearing must NOT dispose it — that would double-free / corrupt the commit.
-      layer.markLivePreviewBaselineExternallyOwned();
-      layer.clearLivePixelBrushPreview();
-      expect(baseline!.debugDisposed, isFalse, reason: 'GPU stroke / committed action owns it; clear must not free it');
-      baseline.dispose();
-    });
-  });
 }

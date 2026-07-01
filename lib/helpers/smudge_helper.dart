@@ -8,11 +8,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
-import 'package:fpaint/helpers/prepared_smudge_stroke_source.dart';
-
-part 'smudge_helper_patch.dart';
-part 'smudge_helper_profiler.dart';
-part 'smudge_helper_worker.dart';
 
 /// The pixel-manipulation mode applied by the brush.
 enum PixelBrushMode {
@@ -111,39 +106,14 @@ double resolvePixelBrushStepSpacing(final double brushSize) {
     AppInteraction.smudgeMinimumRadius,
     brushSize * AppInteraction.smudgeBrushRadiusFactor,
   );
-  // Dab spacing must scale with the radius: a fixed ~2px cap forced a large
-  // brush to apply hundreds of full-disc dabs per stroke (O(strokeLength/2)),
-  // each blending tens of thousands of pixels — the source of multi-second
-  // lag. radius * 0.35 keeps ~80% disc overlap (smooth) while cutting dab count
-  // by an order of magnitude for big brushes. The lower bound keeps small
-  // brushes crisp.
+  // Dab spacing scales with the radius so large brushes don't emit an absurd
+  // dab count. The whole stroke is rasterized once on pointer-up (the drag only
+  // draws a marquee), so the spacing is tuned for a smooth trail rather than
+  // per-move speed; see [AppInteraction.smudgeStepSpacingFactor]. The lower
+  // bound keeps small brushes crisp.
   return math.max(
     AppInteraction.smudgeInputPointSpacing,
     radius * AppInteraction.smudgeStepSpacingFactor,
-  );
-}
-
-/// Prepares source pixel data and an optional clip mask for a pixel-brush stroke.
-Future<PreparedSmudgeStrokeSource?> preparePixelBrushSource({
-  required final ui.Image sourceImage,
-  final ui.Path? clipPath,
-}) async {
-  final Uint8List? sourcePixels = await extractImagePixels(
-    sourceImage,
-    format: ui.ImageByteFormat.rawStraightRgba,
-  );
-  if (sourcePixels == null) {
-    return null;
-  }
-
-  return PreparedSmudgeStrokeSource(
-    image: sourceImage,
-    pixels: sourcePixels,
-    clipMask: await _createClipMask(
-      width: sourceImage.width,
-      height: sourceImage.height,
-      clipPath: clipPath,
-    ),
   );
 }
 
@@ -177,7 +147,7 @@ Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
   }
 
   if (kIsWeb || preferSynchronous) {
-    final _PixelBrushComputationResult webResult = _runPixelBrushComputation(
+    final _PixelBrushComputationResult webResult = _runPixelBrushComputationLod(
       livePixels: livePixels,
       clipMask: clipMask,
       imageWidth: imageWidth,
@@ -244,7 +214,7 @@ Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
 /// call). This keeps each isolate invocation O(segment) instead of
 /// O(full-stroke) and ensures effects accumulate correctly.
 _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input) {
-  final _PixelBrushComputationResult result = _runPixelBrushComputation(
+  final _PixelBrushComputationResult result = _runPixelBrushComputationLod(
     livePixels: input.livePixelData.materialize().asUint8List(),
     clipMask: input.clipMaskData?.materialize().asUint8List(),
     imageWidth: input.imageWidth,
@@ -261,6 +231,130 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
     imageHeight: result.imageHeight,
     hasChanges: result.hasChanges,
   );
+}
+
+/// Level-of-detail wrapper around [_runPixelBrushComputation].
+///
+/// The per-dab cost is O(radius²), so a large brush is prohibitively slow at
+/// full resolution (a 500 px brush measured ~5–6 s). Smudge and blur are
+/// low-frequency effects, so for radii above [AppInteraction.smudgeComputeLodMinRadius]
+/// we downscale the region by an integer factor, run the effect on the small
+/// buffer (cost drops by factor²), and bilinearly upsample the result. Small
+/// brushes run full-resolution unchanged. This is the CPU analog of Krita's
+/// "Instant Preview" — the softening is invisible at large brush sizes.
+_PixelBrushComputationResult _runPixelBrushComputationLod({
+  required final Uint8List livePixels,
+  required final Uint8List? clipMask,
+  required final int imageWidth,
+  required final int imageHeight,
+  required final List<Offset> segmentPoints,
+  required final double brushSize,
+  required final double intensity,
+  required final PixelBrushMode mode,
+}) {
+  final double radius = math.max(
+    AppInteraction.smudgeMinimumRadius,
+    brushSize * AppInteraction.smudgeBrushRadiusFactor,
+  );
+  final int factor = radius <= AppInteraction.smudgeComputeLodMinRadius
+      ? AppMath.one
+      : (radius / AppInteraction.smudgeComputeLodTargetRadius).round().clamp(
+          AppMath.pair,
+          AppInteraction.smudgeComputeLodMaxFactor,
+        );
+  final int lowWidth = imageWidth ~/ factor;
+  final int lowHeight = imageHeight ~/ factor;
+  if (factor <= AppMath.one || lowWidth < AppMath.pair || lowHeight < AppMath.pair) {
+    return _runPixelBrushComputation(
+      livePixels: livePixels,
+      clipMask: clipMask,
+      imageWidth: imageWidth,
+      imageHeight: imageHeight,
+      segmentPoints: segmentPoints,
+      brushSize: brushSize,
+      intensity: intensity,
+      mode: mode,
+    );
+  }
+
+  final double scaleX = lowWidth / imageWidth;
+  final double scaleY = lowHeight / imageHeight;
+  final Uint8List lowPixels = downsampleRgbaBox(livePixels, imageWidth, imageHeight, lowWidth, lowHeight);
+  final Uint8List? lowMask = clipMask == null
+      ? null
+      : downsampleRgbaBox(clipMask, imageWidth, imageHeight, lowWidth, lowHeight);
+  final List<Offset> lowPoints = <Offset>[
+    for (final Offset point in segmentPoints) Offset(point.dx * scaleX, point.dy * scaleY),
+  ];
+
+  final _PixelBrushComputationResult low = _runPixelBrushComputation(
+    livePixels: lowPixels,
+    clipMask: lowMask,
+    imageWidth: lowWidth,
+    imageHeight: lowHeight,
+    segmentPoints: lowPoints,
+    brushSize: brushSize * scaleX,
+    intensity: intensity,
+    mode: mode,
+  );
+
+  if (!low.hasChanges) {
+    return _PixelBrushComputationResult(
+      pixels: livePixels,
+      imageWidth: imageWidth,
+      imageHeight: imageHeight,
+      hasChanges: false,
+    );
+  }
+
+  return _PixelBrushComputationResult(
+    pixels: _upsampleRgbaBilinear(low.pixels, lowWidth, lowHeight, imageWidth, imageHeight),
+    imageWidth: imageWidth,
+    imageHeight: imageHeight,
+    hasChanges: true,
+  );
+}
+
+/// Bilinear upscale of a straight-RGBA buffer.
+Uint8List _upsampleRgbaBilinear(
+  final Uint8List src,
+  final int srcWidth,
+  final int srcHeight,
+  final int dstWidth,
+  final int dstHeight,
+) {
+  final Uint8List out = Uint8List(dstWidth * dstHeight * AppMath.bytesPerPixel);
+  final double fx = srcWidth / dstWidth;
+  final double fy = srcHeight / dstHeight;
+  for (int dy = AppMath.zero; dy < dstHeight; dy++) {
+    double syf = (dy + AppVisual.half) * fy - AppVisual.half;
+    if (syf < AppMath.zero) {
+      syf = AppMath.zero.toDouble();
+    }
+    final int sy0 = math.min(syf.floor(), srcHeight - AppMath.one);
+    final int sy1 = math.min(sy0 + AppMath.one, srcHeight - AppMath.one);
+    final double wy = syf - sy0;
+    for (int dx = AppMath.zero; dx < dstWidth; dx++) {
+      double sxf = (dx + AppVisual.half) * fx - AppVisual.half;
+      if (sxf < AppMath.zero) {
+        sxf = AppMath.zero.toDouble();
+      }
+      final int sx0 = math.min(sxf.floor(), srcWidth - AppMath.one);
+      final int sx1 = math.min(sx0 + AppMath.one, srcWidth - AppMath.one);
+      final double wx = sxf - sx0;
+      final int i00 = ((sy0 * srcWidth) + sx0) * AppMath.bytesPerPixel;
+      final int i01 = ((sy0 * srcWidth) + sx1) * AppMath.bytesPerPixel;
+      final int i10 = ((sy1 * srcWidth) + sx0) * AppMath.bytesPerPixel;
+      final int i11 = ((sy1 * srcWidth) + sx1) * AppMath.bytesPerPixel;
+      final int oi = ((dy * dstWidth) + dx) * AppMath.bytesPerPixel;
+      for (int c = AppMath.zero; c < AppMath.bytesPerPixel; c++) {
+        final double top = src[i00 + c] * (AppMath.one - wx) + src[i01 + c] * wx;
+        final double bottom = src[i10 + c] * (AppMath.one - wx) + src[i11 + c] * wx;
+        out[oi + c] = (top * (AppMath.one - wy) + bottom * wy).round().clamp(AppMath.zero, AppLimits.rgbChannelMax);
+      }
+    }
+  }
+  return out;
 }
 
 /// Applies one pixel-brush segment on a working buffer and returns the updated
@@ -530,9 +624,12 @@ bool _applySmudgeStep({
         AppMath.zero.toDouble(),
         AppVisual.full,
       );
-      // smudgeEdgeFalloffExponent is 2.0 — a multiply is far cheaper than
-      // math.pow() called once per pixel across the brush disc.
-      final double radialFalloff = feather * feather;
+      // Smoothstep (feather²·(3−2·feather)) rather than a bare feather². A bare
+      // feather² peaks with a corner at the tip centre, so at the CPU path's dab
+      // spacing each dab's peak shows through as periodic washboard ridges along
+      // the stroke. Smoothstep is flat-sloped at both the centre and the edge, so
+      // overlapping dabs sum smoothly. Still only multiplies — no per-pixel pow.
+      final double radialFalloff = feather * feather * (3.0 - (2.0 * feather));
       final double blend = (AppInteraction.smudgeBlendStrength * intensity * radialFalloff).clamp(
         AppMath.zero.toDouble(),
         AppVisual.full,
@@ -541,15 +638,28 @@ bool _applySmudgeStep({
         continue;
       }
 
-      for (int channel = AppMath.zero; channel < AppMath.bytesPerPixel; channel++) {
-        final int oldValue = snapshot[destinationSnapshotIndex + channel];
-        final int newValue = ((oldValue * (AppVisual.full - blend)) + (snapshot[sourceSnapshotIndex + channel] * blend))
-            .round()
-            .clamp(AppMath.zero, AppLimits.rgbChannelMax);
-        if (newValue != oldValue) {
+      // Blend in *premultiplied* space so a transparent pixel's (meaningless)
+      // RGB — e.g. the white of an opaque backdrop showing through an alpha-0
+      // hole — cannot bleed into the smear as the alpha grows. Straight-RGBA
+      // blending here produced a white smear front over a white background.
+      final double inverseBlend = AppVisual.full - blend;
+      final double newAlpha = (dstAlpha * inverseBlend) + (srcAlpha * blend);
+      for (int channel = AppMath.zero; channel < AppMath.rgbChannelAlpha; channel++) {
+        final double dstPremul = snapshot[destinationSnapshotIndex + channel] * dstAlpha.toDouble();
+        final double srcPremul = snapshot[sourceSnapshotIndex + channel] * srcAlpha.toDouble();
+        final double newPremul = (dstPremul * inverseBlend) + (srcPremul * blend);
+        final int newValue = newAlpha > AppMath.zero
+            ? (newPremul / newAlpha).round().clamp(AppMath.zero, AppLimits.rgbChannelMax)
+            : AppMath.zero;
+        if (newValue != pixels[destinationIndex + channel]) {
           anyChanged = true;
           pixels[destinationIndex + channel] = newValue;
         }
+      }
+      final int newAlphaByte = newAlpha.round().clamp(AppMath.zero, AppLimits.rgbChannelMax);
+      if (newAlphaByte != pixels[destinationIndex + AppMath.rgbChannelAlpha]) {
+        anyChanged = true;
+        pixels[destinationIndex + AppMath.rgbChannelAlpha] = newAlphaByte;
       }
     }
   }
@@ -663,18 +773,36 @@ bool _applyBlurStep({
       final int di = _pixelIndex(width: imageWidth, x: x, y: y);
       final int snapshotI = _pixelIndex(width: rectWidth, x: x - left, y: y - top);
 
-      final int newR = (snapshot[snapshotI + AppMath.rgbChannelRed] * (AppVisual.full - blend) + avgR * blend)
-          .round()
-          .clamp(AppMath.zero, AppLimits.rgbChannelMax);
-      final int newG = (snapshot[snapshotI + AppMath.rgbChannelGreen] * (AppVisual.full - blend) + avgG * blend)
-          .round()
-          .clamp(AppMath.zero, AppLimits.rgbChannelMax);
-      final int newB = (snapshot[snapshotI + AppMath.rgbChannelBlue] * (AppVisual.full - blend) + avgB * blend)
-          .round()
-          .clamp(AppMath.zero, AppLimits.rgbChannelMax);
-      final int newA = (snapshot[snapshotI + AppMath.rgbChannelAlpha] * (AppVisual.full - blend) + avgA * blend)
-          .round()
-          .clamp(AppMath.zero, AppLimits.rgbChannelMax);
+      // Blend the original pixel toward the neighbourhood average in
+      // premultiplied space, so a transparent original's undefined RGB (e.g. the
+      // white backdrop behind an alpha-0 hole) can't bleed in as alpha rises.
+      // `avgR/G/B` are alpha-corrected straight colours and `avgA` their mean
+      // alpha, so `avg*·avgA` is the premultiplied average sample.
+      final double inverseBlend = AppVisual.full - blend;
+      final int origR = snapshot[snapshotI + AppMath.rgbChannelRed];
+      final int origG = snapshot[snapshotI + AppMath.rgbChannelGreen];
+      final int origB = snapshot[snapshotI + AppMath.rgbChannelBlue];
+      final int origA = snapshot[snapshotI + AppMath.rgbChannelAlpha];
+      final double newAlphaD = (origA * inverseBlend) + (avgA * blend);
+      final int newA = newAlphaD.round().clamp(AppMath.zero, AppLimits.rgbChannelMax);
+      final int newR = newAlphaD > AppMath.zero
+          ? (((origR * origA) * inverseBlend + (avgR * avgA) * blend) / newAlphaD).round().clamp(
+              AppMath.zero,
+              AppLimits.rgbChannelMax,
+            )
+          : AppMath.zero;
+      final int newG = newAlphaD > AppMath.zero
+          ? (((origG * origA) * inverseBlend + (avgG * avgA) * blend) / newAlphaD).round().clamp(
+              AppMath.zero,
+              AppLimits.rgbChannelMax,
+            )
+          : AppMath.zero;
+      final int newB = newAlphaD > AppMath.zero
+          ? (((origB * origA) * inverseBlend + (avgB * avgA) * blend) / newAlphaD).round().clamp(
+              AppMath.zero,
+              AppLimits.rgbChannelMax,
+            )
+          : AppMath.zero;
 
       if (newR != snapshot[snapshotI + AppMath.rgbChannelRed] ||
           newG != snapshot[snapshotI + AppMath.rgbChannelGreen] ||
@@ -693,7 +821,7 @@ bool _applyBlurStep({
 }
 
 /// Creates a binary alpha mask for [clipPath] that matches the source image size.
-Future<Uint8List?> _createClipMask({
+Future<Uint8List?> createPixelBrushClipMask({
   required final int width,
   required final int height,
   required final ui.Path? clipPath,
