@@ -4,6 +4,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.8] - 2026-07-01
+
+### Update
+
+- Real-time Smudge and Blur at any canvas size — brush cost now scales with the stroke, not the canvas dimensions
+- Faster brush, pencil, and eraser strokes, including long continuous strokes
+- Faster paint-bucket fill and magic-wand selection on large canvases
+
+### Fix
+
+- Runaway memory use during Smudge and Blur on large documents
+- Memory leak when cropping multi-layer documents
+- Multi-second freeze on the first fill or wand selection after editing a large canvas
+- Blur darkening (halos) along transparent edges
+
 ## [1.8.7] - 2026-06-30
 
 ### Update
