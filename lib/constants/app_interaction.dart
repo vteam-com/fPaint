@@ -39,9 +39,15 @@ class AppInteraction {
   /// edge is fully covered.
   static const double smudgeGpuDabPadding = 2.0;
 
+  /// Max un-baked freehand segments replayed per frame before the in-progress
+  /// stroke is folded into the cached baseline. Bounds per-frame preview cost to
+  /// O(threshold) instead of O(stroke length); below it the tail is cheap to
+  /// replay, so short strokes never pay for a full-canvas re-bake.
+  static const int strokePreviewFoldThreshold = 64;
+
   // Fragment-shader uniform float-slot indices for `shaders/pixel_brush.frag`.
   // Slots 0/1 are the resolution vec2, 2/3 the previous dab centre, 4/5 the
-  // current dab centre, then radius, blend strength, mode and blur spacing.
+  // current dab centre, then radius and blend strength.
   static const int pixelBrushShaderSlotWidth = 0;
   static const int pixelBrushShaderSlotHeight = 1;
   static const int pixelBrushShaderSlotFromX = 2;
@@ -50,8 +56,6 @@ class AppInteraction {
   static const int pixelBrushShaderSlotToY = 5;
   static const int pixelBrushShaderSlotRadius = 6;
   static const int pixelBrushShaderSlotStrength = 7;
-  static const int pixelBrushShaderSlotMode = 8;
-  static const int pixelBrushShaderSlotBlurSpacing = 9;
 
   /// Sampler slot for the working image texture in `pixel_brush.frag`.
   static const int pixelBrushShaderSamplerTexture = 0;

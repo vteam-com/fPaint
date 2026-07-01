@@ -105,6 +105,184 @@ void main() {
       expect(_alphaAt(strokeBytes, 0, 0), _alphaAt(referenceBytes, 0, 0));
       expect(_alphaAt(strokeBytes, 0, 0), AppLimits.rgbChannelMax);
     });
+
+    test('incrementally folded pencil stroke matches a full replay', () async {
+      final MyBrush brush = MyBrush(color: const Color(0xFF000000), size: 2);
+      // Duplicate first point mirrors how a stroke starts (positions: [p, p]).
+      const List<Offset> points = <Offset>[
+        Offset(1, 1),
+        Offset(1, 1),
+        Offset(3, 2),
+        Offset(5, 5),
+        Offset(6, 2),
+        Offset(2, 6),
+      ];
+
+      // Reference: white background then the whole pencil action, full replay.
+      final LayerProvider reference = _layer();
+      reference.actionStack
+        ..add(_imageAction(await _solid(const Color(0xFFFFFFFF)), Offset.zero))
+        ..add(UserActionDrawing(action: ActionType.pencil, positions: List<Offset>.of(points), brush: brush));
+      final Uint8List referenceBytes = await _renderBytes(reference);
+
+      // Stroke: freeze the baseline, then grow the pencil action point-by-point,
+      // rendering each frame so the accumulator folds one new segment at a time.
+      final LayerProvider stroke = _layer();
+      stroke.actionStack.add(_imageAction(await _solid(const Color(0xFFFFFFFF)), Offset.zero));
+      stroke.beginStrokePreview();
+      stroke.isUserDrawing = true;
+      stroke.actionStack.add(
+        UserActionDrawing(action: ActionType.pencil, positions: <Offset>[points[0], points[1]], brush: brush),
+      );
+      await _renderBytes(stroke);
+      for (int i = 2; i < points.length; i++) {
+        stroke.lastActionAppendPosition(position: points[i]);
+        await _renderBytes(stroke);
+      }
+      final Uint8List strokeBytes = await _renderBytes(stroke);
+
+      expect(strokeBytes, equals(referenceBytes));
+    });
+
+    test('incrementally folded eraser stroke matches a full replay', () async {
+      final MyBrush brush = MyBrush(color: AppColors.transparent, size: 3);
+      const List<Offset> points = <Offset>[
+        Offset(1, 4),
+        Offset(1, 4),
+        Offset(3, 4),
+        Offset(5, 4),
+        Offset(7, 4),
+      ];
+
+      final LayerProvider reference = _layer();
+      reference.actionStack
+        ..add(_imageAction(await _solid(const Color(0xFFFF0000)), Offset.zero))
+        ..add(UserActionDrawing(action: ActionType.eraser, positions: List<Offset>.of(points), brush: brush));
+      final Uint8List referenceBytes = await _renderBytes(reference);
+
+      final LayerProvider stroke = _layer();
+      stroke.actionStack.add(_imageAction(await _solid(const Color(0xFFFF0000)), Offset.zero));
+      stroke.beginStrokePreview();
+      stroke.isUserDrawing = true;
+      stroke.actionStack.add(
+        UserActionDrawing(action: ActionType.eraser, positions: <Offset>[points[0], points[1]], brush: brush),
+      );
+      await _renderBytes(stroke);
+      for (int i = 2; i < points.length; i++) {
+        stroke.lastActionAppendPosition(position: points[i]);
+        await _renderBytes(stroke);
+      }
+      final Uint8List strokeBytes = await _renderBytes(stroke);
+
+      expect(strokeBytes, equals(referenceBytes));
+    });
+
+    test('incrementally folded brush stroke (per-move actions) matches a full replay', () async {
+      final MyBrush brush = MyBrush(color: const Color(0xFF000000), size: 2);
+      const Color fill = Color(0xFF000000);
+      // Brush appends a fresh 2-point action per move rather than growing one.
+      const List<List<Offset>> segments = <List<Offset>>[
+        <Offset>[Offset(1, 1), Offset(3, 3)],
+        <Offset>[Offset(3, 3), Offset(5, 2)],
+        <Offset>[Offset(5, 2), Offset(6, 6)],
+      ];
+      UserActionDrawing brushAction(final List<Offset> pts) => UserActionDrawing(
+        action: ActionType.brush,
+        positions: List<Offset>.of(pts),
+        brush: brush,
+        fillColor: fill,
+      );
+
+      final LayerProvider reference = _layer();
+      reference.actionStack.add(_imageAction(await _solid(const Color(0xFFFFFFFF)), Offset.zero));
+      for (final List<Offset> segment in segments) {
+        reference.actionStack.add(brushAction(segment));
+      }
+      final Uint8List referenceBytes = await _renderBytes(reference);
+
+      final LayerProvider stroke = _layer();
+      stroke.actionStack.add(_imageAction(await _solid(const Color(0xFFFFFFFF)), Offset.zero));
+      stroke.beginStrokePreview();
+      stroke.isUserDrawing = true;
+      for (final List<Offset> segment in segments) {
+        stroke.actionStack.add(brushAction(segment));
+        await _renderBytes(stroke);
+      }
+      final Uint8List strokeBytes = await _renderBytes(stroke);
+
+      expect(strokeBytes, equals(referenceBytes));
+    });
+
+    test('long pencil stroke crossing the fold threshold matches a full replay', () async {
+      final MyBrush brush = MyBrush(color: const Color(0xFF000000), size: 2);
+      // Enough points that the un-baked tail crosses the fold threshold several
+      // times, exercising repeated mid-stroke folds (and the connecting-segment
+      // logic) rather than the cheap replay-only path short strokes take.
+      final int total = (AppInteraction.strokePreviewFoldThreshold * 3) + 5;
+      final List<Offset> points = <Offset>[
+        for (int i = 0; i < total; i++) Offset((i % 7).toDouble(), ((i * 3) % 7).toDouble()),
+      ];
+
+      final LayerProvider reference = _layer();
+      reference.actionStack
+        ..add(_imageAction(await _solid(const Color(0xFFFFFFFF)), Offset.zero))
+        ..add(UserActionDrawing(action: ActionType.pencil, positions: List<Offset>.of(points), brush: brush));
+      final Uint8List referenceBytes = await _renderBytes(reference);
+
+      final LayerProvider stroke = _layer();
+      stroke.actionStack.add(_imageAction(await _solid(const Color(0xFFFFFFFF)), Offset.zero));
+      stroke.beginStrokePreview();
+      stroke.isUserDrawing = true;
+      stroke.actionStack.add(
+        UserActionDrawing(action: ActionType.pencil, positions: <Offset>[points[0]], brush: brush),
+      );
+      for (int i = 1; i < points.length; i++) {
+        stroke.lastActionAppendPosition(position: points[i]);
+        // Render after the tail has grown past the threshold so a fold fires.
+        if (i % (AppInteraction.strokePreviewFoldThreshold + 5) == 0) {
+          await _renderBytes(stroke);
+        }
+      }
+      final Uint8List strokeBytes = await _renderBytes(stroke);
+
+      expect(strokeBytes, equals(referenceBytes));
+    });
+
+    test('many brush actions crossing the fold threshold match a full replay', () async {
+      final MyBrush brush = MyBrush(color: const Color(0xFF000000), size: 2);
+      const Color fill = Color(0xFF000000);
+      final int total = (AppInteraction.strokePreviewFoldThreshold * 2) + 3;
+      UserActionDrawing brushSegment(final int i) => UserActionDrawing(
+        action: ActionType.brush,
+        positions: <Offset>[
+          Offset((i % 7).toDouble(), (i % 5).toDouble()),
+          Offset(((i + 1) % 7).toDouble(), ((i + 2) % 5).toDouble()),
+        ],
+        brush: brush,
+        fillColor: fill,
+      );
+
+      final LayerProvider reference = _layer();
+      reference.actionStack.add(_imageAction(await _solid(const Color(0xFFFFFFFF)), Offset.zero));
+      for (int i = 0; i < total; i++) {
+        reference.actionStack.add(brushSegment(i));
+      }
+      final Uint8List referenceBytes = await _renderBytes(reference);
+
+      final LayerProvider stroke = _layer();
+      stroke.actionStack.add(_imageAction(await _solid(const Color(0xFFFFFFFF)), Offset.zero));
+      stroke.beginStrokePreview();
+      stroke.isUserDrawing = true;
+      for (int i = 0; i < total; i++) {
+        stroke.actionStack.add(brushSegment(i));
+        if (i % (AppInteraction.strokePreviewFoldThreshold + 1) == 0) {
+          await _renderBytes(stroke);
+        }
+      }
+      final Uint8List strokeBytes = await _renderBytes(stroke);
+
+      expect(strokeBytes, equals(referenceBytes));
+    });
   });
 
   group('stroke-preview lifecycle', () {
@@ -130,6 +308,38 @@ void main() {
       layer.isUserDrawing = true;
       final Uint8List bytes = await _renderBytes(layer);
       expect(_alphaAt(bytes, 4, 4), AppLimits.rgbChannelMax);
+    });
+  });
+
+  group('live pixel-brush preview baseline ownership', () {
+    test('clear disposes the baseline on the CPU worker/sync path (layer-owned)', () async {
+      final LayerProvider layer = _layer();
+      layer.actionStack.add(_imageAction(await _solid(const Color(0xFFFF0000)), Offset.zero));
+
+      layer.beginLivePixelBrushPreview();
+      final ui.Image? baseline = layer.livePreviewBaseline;
+      expect(baseline, isNotNull);
+
+      // No GPU stroke adopted it, so the layer owns the full-canvas baseline and
+      // must free it — otherwise it leaks one canvas-sized texture per stroke.
+      layer.clearLivePixelBrushPreview();
+      expect(baseline!.debugDisposed, isTrue, reason: 'worker/sync-path baseline is layer-owned and must be freed');
+    });
+
+    test('clear leaves the baseline alone once a GPU stroke owns it', () async {
+      final LayerProvider layer = _layer();
+      layer.actionStack.add(_imageAction(await _solid(const Color(0xFFFF0000)), Offset.zero));
+
+      layer.beginLivePixelBrushPreview();
+      final ui.Image? baseline = layer.livePreviewBaseline;
+      expect(baseline, isNotNull);
+
+      // Once the GPU stroke adopts it (or it becomes the committed action image),
+      // clearing must NOT dispose it — that would double-free / corrupt the commit.
+      layer.markLivePreviewBaselineExternallyOwned();
+      layer.clearLivePixelBrushPreview();
+      expect(baseline!.debugDisposed, isFalse, reason: 'GPU stroke / committed action owns it; clear must not free it');
+      baseline.dispose();
     });
   });
 }

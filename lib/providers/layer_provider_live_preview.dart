@@ -13,9 +13,26 @@ extension LayerLivePreview on LayerProvider {
   /// appended. The captured image is composited with subsequent patch updates
   /// by [renderLayer] without touching the action stack or the cache.
   void beginLivePixelBrushPreview() {
+    // Reclaim any baseline/patch left by a stroke whose cleanup was skipped
+    // (cancelled/pointer-id-mismatched gesture); after a normal end both are
+    // already released, so this only frees genuine orphans.
+    if (!_livePreviewBaselineExternallyOwned) {
+      _livePreviewBaseline?.dispose();
+    }
+    _livePreviewPatchImage?.dispose();
     _livePreviewBaseline = renderImageWH(size.width.toInt(), size.height.toInt());
+    // Freshly rendered here: this layer owns it until a GPU stroke adopts it.
+    _livePreviewBaselineExternallyOwned = false;
     _livePreviewPatchImage = null;
     _livePreviewPatchBounds = null;
+  }
+
+  /// Marks the current baseline as owned by the GPU stroke (which adopts it as
+  /// its working image and later hands it to the committed action). After this,
+  /// [clearLivePixelBrushPreview] leaves the baseline alone to avoid a double
+  /// free / freeing a committed texture.
+  void markLivePreviewBaselineExternallyOwned() {
+    _livePreviewBaselineExternallyOwned = true;
   }
 
   /// The full-layer baseline image captured at the start of a pixel-brush
@@ -23,39 +40,38 @@ extension LayerLivePreview on LayerProvider {
   ui.Image? get livePreviewBaseline => _livePreviewBaseline;
 
   /// Updates the live patch image composited over the baseline during a stroke.
-  void setLivePixelBrushPatch(final ui.Image? image, final ui.Rect? bounds) {
-    // Free the previous preview-owned patch before replacing (avoids a per-segment leak).
-    if (!identical(_livePreviewPatchImage, image)) {
+  ///
+  /// [ownsImage] controls disposal: the CPU worker/sync path passes owned patches
+  /// (default true) that this layer frees on replace/clear; the GPU stroke passes
+  /// `false` because it retains and disposes its own patch, so the layer only
+  /// references it.
+  void setLivePixelBrushPatch(final ui.Image? image, final ui.Rect? bounds, {final bool ownsImage = true}) {
+    // Free the previous layer-owned patch before replacing (avoids a per-segment
+    // leak); never dispose an externally-owned (GPU-stroke) patch.
+    if (!_livePreviewPatchExternallyOwned && !identical(_livePreviewPatchImage, image)) {
       _livePreviewPatchImage?.dispose();
     }
     _livePreviewPatchImage = image;
     _livePreviewPatchBounds = bounds;
-  }
-
-  /// Replaces the full live-preview image (used by the GPU stroke, which keeps
-  /// the whole accumulated result on the GPU). Clears any partial patch.
-  ///
-  /// IMPORTANT: this must NOT dispose the previous baseline. The GPU stroke owns
-  /// the working-image chain: [GpuPixelBrushStroke.create] adopts the baseline as
-  /// its first working image and every `dab()` disposes the prior working image
-  /// before producing the next. So by the time this setter runs, the previous
-  /// `_livePreviewBaseline` has already been freed by `dab()` — disposing it here
-  /// would be a double-free. Ownership of [image] likewise stays with the stroke
-  /// until commit (`detachImage`), so [clearLivePixelBrushPreview] also leaves the
-  /// baseline alone.
-  void setLivePixelBrushImage(final ui.Image image) {
-    _livePreviewBaseline = image;
-    _livePreviewPatchImage = null;
-    _livePreviewPatchBounds = null;
+    _livePreviewPatchExternallyOwned = !ownsImage;
   }
 
   /// Clears all live preview state, returning [renderLayer] to its normal path.
   void clearLivePixelBrushPreview() {
-    // Free the preview-owned patch. The baseline is NOT disposed: the GPU path
-    // hands it to the committed action's image, so the action stack owns it.
-    _livePreviewPatchImage?.dispose();
+    // Dispose the patch/baseline only when this layer owns them (CPU worker/sync
+    // path). On the GPU path the stroke owns them (freed by the stroke), or the
+    // baseline became the committed action image — disposing here would
+    // double-free or corrupt the commit.
+    if (!_livePreviewPatchExternallyOwned) {
+      _livePreviewPatchImage?.dispose();
+    }
+    if (!_livePreviewBaselineExternallyOwned) {
+      _livePreviewBaseline?.dispose();
+    }
     _livePreviewBaseline = null;
+    _livePreviewBaselineExternallyOwned = false;
     _livePreviewPatchImage = null;
     _livePreviewPatchBounds = null;
+    _livePreviewPatchExternallyOwned = false;
   }
 }

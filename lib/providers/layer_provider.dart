@@ -305,6 +305,19 @@ class LayerProvider extends ChangeNotifier {
   ui.Image? _livePreviewPatchImage;
   ui.Rect? _livePreviewPatchBounds;
 
+  // Whether [_livePreviewBaseline] is owned elsewhere (the GPU stroke, which
+  // captured it and disposes it at commit) rather than by this layer. When true,
+  // [clearLivePixelBrushPreview] must NOT dispose it (the GPU stroke / committed
+  // action owns it). When false (the CPU worker/sync path, which never hands the
+  // baseline to a commit), clearing MUST dispose it or it leaks a full-canvas
+  // texture per stroke.
+  bool _livePreviewBaselineExternallyOwned = false;
+
+  // Same ownership question for [_livePreviewPatchImage]: the GPU stroke retains
+  // and disposes its own patch (external), whereas the CPU worker/sync path hands
+  // the layer patches it must free on replace/clear.
+  bool _livePreviewPatchExternallyOwned = false;
+
   //------------------------------------------------------
   // Freehand-stroke preview (brush / pencil / eraser)
   //
@@ -314,6 +327,16 @@ class LayerProvider extends ChangeNotifier {
   // This bounds per-frame cost to O(active stroke) rather than O(history).
   ui.Image? _strokeBaseline;
   int _strokeBaselineActionCount = 0;
+
+  // Fold cursor for the in-progress stroke: tracks how much of the live stroke
+  // has already been baked into [_strokeBaseline]. Each frame only the new
+  // segments past this cursor are composited in, so per-frame cost stays
+  // O(new points) instead of replaying the whole growing stroke (O(stroke) per
+  // frame -> O(stroke^2) over a long drag). [_strokeFoldedActionIndex] is the
+  // action currently being folded; [_strokeFoldedPointCount] is how many of its
+  // points are already baked.
+  int _strokeFoldedActionIndex = 0;
+  int _strokeFoldedPointCount = 0;
 
   //------------------------------------------------------
   // Thumbnail image
@@ -396,6 +419,8 @@ class LayerProvider extends ChangeNotifier {
       return;
     }
     _strokeBaselineActionCount = actionStack.length;
+    _strokeFoldedActionIndex = _strokeBaselineActionCount;
+    _strokeFoldedPointCount = 0;
     _strokeBaseline = renderCanvasImageSync(
       width: width,
       height: height,
@@ -417,6 +442,115 @@ class LayerProvider extends ChangeNotifier {
     _strokeBaseline?.dispose();
     _strokeBaseline = null;
     _strokeBaselineActionCount = 0;
+    _strokeFoldedActionIndex = 0;
+    _strokeFoldedPointCount = 0;
+  }
+
+  /// Folds the in-progress stroke into [_strokeBaseline] only when the un-baked
+  /// tail has grown past [AppInteraction.strokePreviewFoldThreshold] — a pencil/
+  /// eraser action gaining that many points, or that many brush actions queued.
+  /// Below the threshold the tail is cheap to replay each frame, so a full-canvas
+  /// re-bake would be pure overhead (notably on short strokes / large canvases).
+  void _foldInProgressStrokeIfTailLarge() {
+    final int count = actionStack.length;
+    if (_strokeFoldedActionIndex >= count) {
+      return;
+    }
+    final int unbakedActions = count - _strokeFoldedActionIndex;
+    final int unbakedCursorPoints = actionStack[_strokeFoldedActionIndex].positions.length - _strokeFoldedPointCount;
+    if (unbakedActions <= AppInteraction.strokePreviewFoldThreshold &&
+        unbakedCursorPoints <= AppInteraction.strokePreviewFoldThreshold) {
+      return;
+    }
+    _foldInProgressStrokeIntoBaseline();
+  }
+
+  /// Bakes the stroke segments appended since the last frame into
+  /// [_strokeBaseline] so the active-stroke composite never re-draws the whole
+  /// growing stroke. Because freehand segments partition the polyline (each
+  /// drawn exactly once) and committed actions are drawn whole, the accumulated
+  /// baseline stays byte-identical to a full action-stack replay — and to the
+  /// committed cache built once the stroke ends.
+  void _foldInProgressStrokeIntoBaseline() {
+    final ui.Image? baseline = _strokeBaseline;
+    if (baseline == null) {
+      return;
+    }
+    final int count = actionStack.length;
+    if (_strokeFoldedActionIndex >= count) {
+      return;
+    }
+    // Anything new since the last fold? Either the cursor action grew (a pencil/
+    // eraser stroke gaining points) or newer actions were appended (brush adds a
+    // fresh action per move).
+    final bool cursorGrew = _strokeFoldedPointCount < actionStack[_strokeFoldedActionIndex].positions.length;
+    final bool hasNewerActions = _strokeFoldedActionIndex < count - AppMath.one;
+    if (!cursorGrew && !hasNewerActions) {
+      return;
+    }
+    final int width = size.width.toInt();
+    final int height = size.height.toInt();
+    if (width <= AppMath.zero || height <= AppMath.zero) {
+      return;
+    }
+
+    _strokeBaseline = renderCanvasImageSync(
+      width: width,
+      height: height,
+      draw: (final ui.Canvas canvas) {
+        canvas.drawImage(baseline, Offset.zero, Paint());
+        _renderInProgressTail(canvas);
+      },
+    );
+    // Safe per the engine's texture ref-counting: the new baseline's pending
+    // raster keeps the old texture alive until it resolves (the GPU brush relies
+    // on the same invariant). This is the freehand-stroke baseline, never the
+    // smudge/blur live-preview baseline.
+    baseline.dispose();
+
+    final UserActionDrawing last = actionStack[count - AppMath.one];
+    _strokeFoldedActionIndex = count - AppMath.one;
+    _strokeFoldedPointCount = last.positions.length;
+  }
+
+  /// Draws the in-progress actions/segments not yet folded into the baseline,
+  /// starting at ([_strokeFoldedActionIndex], [_strokeFoldedPointCount]).
+  void _renderInProgressTail(final ui.Canvas canvas) {
+    final int count = actionStack.length;
+    int index = _strokeFoldedActionIndex;
+    int fromPoint = _strokeFoldedPointCount;
+    while (index < count) {
+      final UserActionDrawing action = actionStack[index];
+      if (fromPoint < action.positions.length) {
+        if (fromPoint <= AppMath.zero) {
+          _renderAction(canvas, action);
+        } else {
+          _renderFreehandActionTail(canvas, action, fromPoint);
+        }
+      }
+      if (index < count - AppMath.one) {
+        index++;
+        fromPoint = AppMath.zero;
+      } else {
+        break;
+      }
+    }
+  }
+
+  /// Renders only the undrawn tail of a growing pencil/eraser [action], starting
+  /// one point back from [fromPoint] so the new segments connect to the already
+  /// folded ones without re-drawing them. Only pencil/eraser grow point-by-point;
+  /// other action types are always folded whole (via [_renderAction]).
+  void _renderFreehandActionTail(final ui.Canvas canvas, final UserActionDrawing action, final int fromPoint) {
+    final List<Offset> tail = action.positions.sublist(fromPoint - AppMath.one);
+    switch (action.action) {
+      case ActionType.pencil:
+        applyAction(canvas, action.clipPath, (final Canvas c) => renderPencilStroke(c, tail, action.brush!));
+      case ActionType.eraser:
+        applyAction(canvas, action.clipPath, (final Canvas c) => renderPencilEraserStroke(c, tail, action.brush!));
+      default:
+        _renderAction(canvas, action);
+    }
   }
 
   /// Converts the layer to an image for storage.
@@ -512,16 +646,21 @@ class LayerProvider extends ChangeNotifier {
       return;
     }
 
-    // Fast freehand-stroke path: composite the baseline captured at stroke start
-    // (all committed actions) plus only the in-progress action(s). This bounds
-    // per-frame cost to O(active stroke) instead of O(history). Clear blends in
-    // the active action (e.g. eraser) clear into the baseline within this group
-    // `saveLayer`, exactly as a full replay would.
+    // Fast freehand-stroke path: the baseline accumulates the committed actions
+    // (captured at stroke start) plus every stroke segment already drawn. Each
+    // frame folds in only the segments appended since the last frame, so cost is
+    // O(new points) instead of O(active stroke) — turning an O(stroke^2) drag
+    // into O(stroke). Clear blends in the active action (eraser) clear into the
+    // accumulated baseline, exactly as a full replay would.
     if (_strokeBaseline != null && isUserDrawing) {
+      // Fold the in-progress stroke into the baseline only once enough segments
+      // have accumulated to be worth a full-canvas re-bake; otherwise replay the
+      // small un-baked tail directly. Short strokes never re-bake (matching the
+      // previous cost), long strokes stay O(threshold) per frame instead of
+      // O(stroke). Either way baseline + tail == a full replay == the commit.
+      _foldInProgressStrokeIfTailLarge();
       canvas.drawImage(_strokeBaseline!, Offset.zero, Paint());
-      for (int i = _strokeBaselineActionCount; i < actionStack.length; i++) {
-        _renderAction(canvas, actionStack[i]);
-      }
+      _renderInProgressTail(canvas);
       canvas.restore();
       return;
     }

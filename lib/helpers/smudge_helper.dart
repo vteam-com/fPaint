@@ -625,10 +625,17 @@ bool _applyBlurStep({
         continue;
       }
 
-      // Accumulate the neighborhood average.
-      int sumR = AppMath.zero;
-      int sumG = AppMath.zero;
-      int sumB = AppMath.zero;
+      // Accumulate an alpha-weighted neighborhood average. The source pixels are
+      // straight (un-premultiplied) RGBA, so a plain channel average would pull
+      // the undefined RGB of fully/partly transparent neighbours into the
+      // result and darken the layer's edges into a halo. Weighting each colour
+      // sample by its alpha — and dividing the colour sums by the summed alpha
+      // rather than the sample count — recovers the correct straight colour,
+      // matching the premultiplied handling the GPU path gets from
+      // ui.ImageFilter.blur. Alpha itself is still a plain count average.
+      int weightedR = AppMath.zero;
+      int weightedG = AppMath.zero;
+      int weightedB = AppMath.zero;
       int sumA = AppMath.zero;
       int count = AppMath.zero;
 
@@ -637,18 +644,21 @@ bool _applyBlurStep({
           final int sx = _clampPixel(x + kx - left, rectWidth);
           final int sy = _clampPixel(y + ky - top, rectHeight);
           final int si = _pixelIndex(width: rectWidth, x: sx, y: sy);
-          sumR += snapshot[si + AppMath.rgbChannelRed];
-          sumG += snapshot[si + AppMath.rgbChannelGreen];
-          sumB += snapshot[si + AppMath.rgbChannelBlue];
-          sumA += snapshot[si + AppMath.rgbChannelAlpha];
+          final int sampleAlpha = snapshot[si + AppMath.rgbChannelAlpha];
+          weightedR += snapshot[si + AppMath.rgbChannelRed] * sampleAlpha;
+          weightedG += snapshot[si + AppMath.rgbChannelGreen] * sampleAlpha;
+          weightedB += snapshot[si + AppMath.rgbChannelBlue] * sampleAlpha;
+          sumA += sampleAlpha;
           count++;
         }
       }
 
-      final int avgR = sumR ~/ count;
-      final int avgG = sumG ~/ count;
-      final int avgB = sumB ~/ count;
       final int avgA = sumA ~/ count;
+      // When every neighbour is fully transparent the colour is undefined; fall
+      // back to zero so nothing bleeds in.
+      final int avgR = sumA > AppMath.zero ? weightedR ~/ sumA : AppMath.zero;
+      final int avgG = sumA > AppMath.zero ? weightedG ~/ sumA : AppMath.zero;
+      final int avgB = sumA > AppMath.zero ? weightedB ~/ sumA : AppMath.zero;
 
       final int di = _pixelIndex(width: imageWidth, x: x, y: y);
       final int snapshotI = _pixelIndex(width: rectWidth, x: x - left, y: y - top);

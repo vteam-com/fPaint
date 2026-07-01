@@ -28,6 +28,24 @@ Future<ui.Image> _createSplitImage() {
   );
 }
 
+/// Builds a straight-RGBA buffer: left half (x < 6) opaque red, right half
+/// fully transparent (0,0,0,0). Constructed pixel-exact (no canvas, no
+/// anti-aliasing) so the red→transparent boundary is hard — anti-aliased edge
+/// pixels keep full-strength colour with partial alpha and would mask the
+/// regression this guards.
+Uint8List _redLeftTransparentRightPixels() {
+  final Uint8List pixels = Uint8List(_testWidth * _testHeight * AppMath.bytesPerPixel);
+  const int boundaryX = 6;
+  for (int y = 0; y < _testHeight; y++) {
+    for (int x = 0; x < boundaryX; x++) {
+      final int i = ((y * _testWidth) + x) * AppMath.bytesPerPixel;
+      pixels[i + AppMath.rgbChannelRed] = AppLimits.rgbChannelMax;
+      pixels[i + AppMath.rgbChannelAlpha] = AppLimits.rgbChannelMax;
+    }
+  }
+  return pixels;
+}
+
 Future<ui.Image> _resultToImage(final PixelBrushSegmentResult result) {
   return imageFromPixels(result.pixels, result.width, result.height);
 }
@@ -301,5 +319,47 @@ void main() {
     final ui.Image output = await _resultToImage(second!);
     final Color smeared = await _readPixel(output, 7, 2);
     expect((smeared.r * AppLimits.rgbChannelMax).round(), greaterThan(AppMath.zero));
+  });
+
+  test('rasterizePixelBrushSegment (blur) preserves hue across a transparent edge', () async {
+    // Regression guard for premultiplied-alpha handling. Blurring a hard
+    // red→transparent edge must not drag the red channel down toward the
+    // (partial) alpha: a straight, non-premultiplied channel average mixes in
+    // the undefined RGB of transparent neighbours and darkens the edge into a
+    // halo. The alpha-weighted average keeps the un-premultiplied colour pure,
+    // so the formerly-transparent boundary pixel stays saturated red while only
+    // partially covered. (Fully-opaque blurs are unaffected: with every alpha
+    // at max the alpha-weighted average reduces to the plain average.)
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: _redLeftTransparentRightPixels(),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(6, 1), Offset(6, 3)],
+      brushSize: 6,
+      intensity: 1.0,
+      mode: PixelBrushMode.blur,
+    );
+
+    expect(result, isNotNull);
+    // Read the computed pixel straight from the result buffer (no ui.Image
+    // round-trip) so the channel values stay exact. Pixel (6, 2) starts fully
+    // transparent and sits at the blur centre, gaining colour only from its red
+    // neighbours.
+    final Uint8List out = result!.pixels;
+    final int index = ((2 * result.width) + 6) * AppMath.bytesPerPixel;
+    final int red = out[index + AppMath.rgbChannelRed];
+    final int green = out[index + AppMath.rgbChannelGreen];
+    final int blue = out[index + AppMath.rgbChannelBlue];
+    final int alpha = out[index + AppMath.rgbChannelAlpha];
+
+    // Partial coverage: the formerly-transparent pixel picks up some alpha but
+    // is not fully opaque.
+    expect(alpha, greaterThan(AppMath.zero));
+    expect(alpha, lessThan(AppLimits.rgbChannelMax));
+    // Hue stays red and saturated: un-premultiplied red is well above the
+    // partial alpha. The straight (buggy) average yields red == alpha here.
+    expect(red, greaterThan(alpha));
+    expect(green, AppMath.zero);
+    expect(blue, AppMath.zero);
   });
 }

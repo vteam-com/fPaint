@@ -664,6 +664,40 @@ void main() {
     });
   });
 
+  group('crop', () {
+    test('registers committed crop textures for reclamation and frees them once orphaned', () async {
+      appProvider.selectAll();
+
+      await appProvider.crop();
+
+      // The crop commits a finalImage per layer and must register them (plus any
+      // resurrectable originals) with the undo coordinator. Before the fix this
+      // list was empty, so the committed crop textures leaked permanently. They
+      // are simultaneously live in the layer stacks, so none is disposed yet.
+      final List<Image> retained = appProvider.undoProvider.liveRetainedImages.toSet().toList();
+      expect(retained, isNotEmpty, reason: 'Crop must register its committed textures');
+      for (final Image image in retained) {
+        expect(image.debugDisposed, isFalse, reason: 'a live committed crop texture must not be disposed');
+      }
+
+      // Orphan every committed texture: drop the layer content that holds the
+      // crop results and the undo record that can resurrect them, then run the
+      // reachability sweep. Nothing references the crop textures now, so they
+      // must be reclaimed rather than leaked. (Driving the sweep directly keeps
+      // this independent of the layers<->undo callback wiring, which the default
+      // test constructor leaves unlinked; production shares one provider.)
+      for (final LayerProvider layer in appProvider.layers.list) {
+        layer.actionStack.clear();
+        layer.redoStack.clear();
+      }
+      appProvider.undoProvider.clear();
+      appProvider.layers.disposeCommittedImagesIfUnreferenced(retained);
+      for (final Image image in retained) {
+        expect(image.debugDisposed, isTrue, reason: 'orphaned crop texture must be reclaimed');
+      }
+    });
+  });
+
   group('dispose', () {
     test('can be disposed without error', () {
       appProvider.dispose();

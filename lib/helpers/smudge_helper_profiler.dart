@@ -47,6 +47,10 @@ class PixelBrushProfiler {
   /// Whether profiling instrumentation is active. Off by default; callers must
   /// gate every hot-path `Stopwatch` construction on this flag so a disabled
   /// profiler has zero cost (see usages in the canvas gesture handlers).
+  // Off by default so no Stopwatch/record/debugPrint runs on the interaction hot
+  // path in shipping builds. Flip to true (or `kProfileMode`) locally to profile
+  // a stroke; run `flutter run --profile` and read the `[PixelBrushProfile]`
+  // console summary printed at stroke end.
   static bool enabled = false;
 
   static final Map<String, _ProfStat> _stats = <String, _ProfStat>{};
