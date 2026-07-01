@@ -13,6 +13,7 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:provider/provider.dart';
 
+part 'layer_provider_display_cache.dart';
 part 'layer_provider_live_preview.dart';
 part 'layer_provider_transform.dart';
 
@@ -184,6 +185,13 @@ class LayerProvider extends ChangeNotifier {
 
   /// Sets the opacity of the layer.
   set opacity(final double value) {
+    // Guard against no-op writes: the pixel-brush commit re-assigns the layer's
+    // original (unchanged) opacity every stroke, and an unconditional clearCache
+    // here would null the incrementally-composited cache and schedule a
+    // full-canvas thumbnail rebuild on every commit.
+    if (_opacity == value) {
+      return;
+    }
     _opacity = value;
     clearCache();
   }
@@ -237,6 +245,17 @@ class LayerProvider extends ChangeNotifier {
     actionStack.add(userAction);
     hasChanged = true;
     clearCache();
+  }
+
+  /// Appends [userAction] without invalidating the render cache.
+  ///
+  /// For callers that keep the cache valid themselves — the pixel-brush commit
+  /// composites its patch straight into [_cachedImage] (see
+  /// [composePixelBrushLayerCache]/[installPixelBrushLayerCache]) rather than
+  /// paying [clearCache]'s full-stack replay + thumbnail rebuild.
+  void appendDrawingActionRetainingCache(final UserActionDrawing userAction) {
+    actionStack.add(userAction);
+    hasChanged = true;
   }
 
   /// Adds an image to the layer.
@@ -298,25 +317,12 @@ class LayerProvider extends ChangeNotifier {
   // This avoids clearCache(), action-stack manipulation, and full action replay
   // on every pointer-move event.
   //
-  // The live-preview API ([beginLivePixelBrushPreview], [setLivePixelBrushPatch],
-  // [setLivePixelBrushImage], [clearLivePixelBrushPreview], [livePreviewBaseline])
-  // lives in the `LayerLivePreview` extension (layer_provider_live_preview.dart).
+  // [clearLivePixelBrushPreview] (in the `LayerLivePreview` extension,
+  // layer_provider_live_preview.dart) releases the baseline and patch images and
+  // returns [renderLayer] to its normal path.
   ui.Image? _livePreviewBaseline;
   ui.Image? _livePreviewPatchImage;
   ui.Rect? _livePreviewPatchBounds;
-
-  // Whether [_livePreviewBaseline] is owned elsewhere (the GPU stroke, which
-  // captured it and disposes it at commit) rather than by this layer. When true,
-  // [clearLivePixelBrushPreview] must NOT dispose it (the GPU stroke / committed
-  // action owns it). When false (the CPU worker/sync path, which never hands the
-  // baseline to a commit), clearing MUST dispose it or it leaks a full-canvas
-  // texture per stroke.
-  bool _livePreviewBaselineExternallyOwned = false;
-
-  // Same ownership question for [_livePreviewPatchImage]: the GPU stroke retains
-  // and disposes its own patch (external), whereas the CPU worker/sync path hands
-  // the layer patches it must free on replace/clear.
-  bool _livePreviewPatchExternallyOwned = false;
 
   //------------------------------------------------------
   // Freehand-stroke preview (brush / pencil / eraser)
@@ -352,6 +358,28 @@ class LayerProvider extends ChangeNotifier {
   /// Gets the thumbnail image of the layer.
   ui.Image? get thumbnailImage => _cachedThumbnailImage;
 
+  //------------------------------------------------------
+  // Display-resolution projection cache
+  //
+  // The on-screen canvas is shown far smaller than its native size (a 62 MP
+  // canvas fits a viewport at ~15%). Sampling the full-res [_cachedImage] every
+  // frame — and rebuilding it per edit — is the dominant cost on large canvases.
+  // [_displayCache] is a downscaled copy of this layer's committed content at
+  // roughly the on-screen resolution; the live painter draws it (a small blit)
+  // instead of the full-res cache. Full resolution is materialized only on
+  // demand (export/transform/sampling) via [renderLayer]/[renderImageWH], which
+  // never touch this cache. This is the Flutter analog of Krita's "Instant
+  // Preview" / Level-of-Detail projection.
+  ui.Image? _displayCache;
+
+  /// The scale [_displayCache] was rendered at (displayCache size / canvas size).
+  double _displayCacheScale = 0.0;
+
+  /// Guards against overlapping async rebuilds of [_displayCache]. The display
+  /// cache's read/write API lives in the `LayerDisplayCache` extension
+  /// (layer_provider_display_cache.dart).
+  bool _displayCacheBuilding = false;
+
   /// Updates the thumbnail image of the layer.
   Future<void> updateThumbnail() async {
     final ui.Image fullImage = await renderCanvasImage(
@@ -359,10 +387,7 @@ class LayerProvider extends ChangeNotifier {
       height: size.height.toInt(),
       draw: renderLayer,
     );
-    final ui.Image thumbnail = await resizeImage(
-      fullImage,
-      scaleSizeTo(size, maxHeight: AppLayout.thumbnailMaxHeight),
-    );
+    final ui.Image thumbnail = await _renderThumbnailFromImage(fullImage);
     // Dispose old textures before replacing; ui.Images are not GC-freed.
     _cachedImage?.dispose();
     _cachedThumbnailImage?.dispose();
@@ -372,29 +397,24 @@ class LayerProvider extends ChangeNotifier {
     this.onThumbnailChanged();
   }
 
-  /// Ensures the per-layer render cache is populated so compositing is fast.
-  ///
-  /// When [_cachedImage] is already set this is a no-op. Otherwise the layer is
-  /// rendered once and the result cached, so subsequent [renderLayer] calls take
-  /// the fast [Canvas.drawImage] path rather than replaying the full action stack.
-  Future<void> ensureCachePrimed() async {
-    if (_cachedImage != null) {
-      return;
-    }
-    _cachedImage = await renderCanvasImage(
-      width: size.width.toInt(),
-      height: size.height.toInt(),
-      draw: renderLayer,
-    );
-  }
-
-  /// Clears the cached image and thumbnail, and updates the thumbnail.
+  /// Clears the cached image and refreshes the thumbnail.
   void clearCache() {
-    // Free GPU textures before dropping refs — else every edit leaks a full image.
+    // Free the full-res render cache now — it is only read inside renderLayer,
+    // which null-checks it every paint, so dropping it here can't be drawn stale.
     _cachedImage?.dispose();
-    _cachedThumbnailImage?.dispose();
     _cachedImage = null;
-    _cachedThumbnailImage = null;
+    // The live-display projection is derived from the same content, so a general
+    // edit invalidates it too; the painter rebuilds it on the next frame. (The
+    // pixel-brush commit does NOT go through clearCache — it updates the display
+    // cache incrementally instead.)
+    invalidateDisplayCache();
+    // Do NOT dispose _cachedThumbnailImage here. The layers panel holds it in a
+    // live ImagePainter, and clearCache only *schedules* the rebuild (debounced),
+    // so freeing it now leaves that painter drawing a released image for the
+    // frames until then — the "Canvas.drawImageRect called with non-genuine
+    // Image" flood. updateThumbnail disposes the old thumbnail and swaps in the
+    // new one in one synchronous step, then notifies, so the panel rebuilds
+    // before the old texture is freed.
     _debounceTimer.run(() async {
       await updateThumbnail();
       notifyListeners();
@@ -745,10 +765,20 @@ class LayerProvider extends ChangeNotifier {
           applyAction(
             canvas,
             userAction.clipPath,
-            (final Canvas theCanvasToUse) => renderImage(
-              theCanvasToUse,
-              userAction.positions.first,
+            // Draw the committed patch with BlendMode.src (replace), not srcOver.
+            // The patch already holds the final content for its region, so it must
+            // REPLACE (including alpha, for smudge that thins transparency) rather
+            // than composite. src also keeps edges opaque at any scale: replaying
+            // this action under the display cache's fractional canvas.scale, a
+            // clear-then-srcOver pair leaves alpha c+(1-c)² < 1 at anti-aliased
+            // edges — the transparent ring that showed as a white rectangle around
+            // the stroke. src gives c·1+(1-c)·1 = 1, so no seam and no separate cut.
+            (final Canvas theCanvasToUse) => theCanvasToUse.drawImage(
               userAction.image!,
+              userAction.positions.first,
+              Paint()
+                ..filterQuality = FilterQuality.medium
+                ..blendMode = ui.BlendMode.src,
             ),
           );
         }

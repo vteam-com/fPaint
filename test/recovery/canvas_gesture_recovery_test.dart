@@ -20,6 +20,68 @@ import 'package:provider/single_child_widget.dart';
 
 import '../helpers/recovery_test_helpers.dart';
 
+/// Commits an opaque blur patch covering [patchBounds] onto a fully opaque
+/// 64×64 layer, rebuilds the display cache at [scale] (which replays the patch
+/// under a fractional canvas.scale), and returns the minimum alpha of the
+/// re-rendered display. An opaque layer must stay fully opaque; any value below
+/// 255 is the transparent seam the canvas backdrop shows through as the white
+/// rectangle around the stroke.
+Future<int> _committedPatchMinDisplayAlpha(final Rect patchBounds, final double scale) async {
+  final LayerProvider layer = LayerProvider(
+    name: 'Seam',
+    size: const Size(64, 64),
+    onThumbnailChanged: () {},
+  );
+  layer.appendDrawingAction(
+    UserActionDrawing(
+      action: ActionType.region,
+      positions: <Offset>[Offset.zero, const Offset(64, 64)],
+      fillColor: const Color(0xFF3388AA),
+      path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 64, 64)),
+    ),
+  );
+  final ImagePlacementLayerRestoreState restoreState = ImagePlacementLayerRestoreState(
+    layerIndex: 0,
+    originalActions: List<UserActionDrawing>.from(layer.actionStack),
+    originalRedoActions: <UserActionDrawing>[],
+    originalHasChanged: layer.hasChanged,
+    originalBackgroundColor: layer.backgroundColor,
+    originalBlendMode: layer.blendMode,
+    originalOpacity: layer.opacity,
+  );
+  final ui.Image patch = await renderCanvasImage(
+    width: patchBounds.width.toInt(),
+    height: patchBounds.height.toInt(),
+    draw: (final ui.Canvas canvas) => canvas.drawRect(
+      Rect.fromLTWH(0, 0, patchBounds.width, patchBounds.height),
+      Paint()..color = const Color(0xFF992222),
+    ),
+  );
+
+  applyPixelBrushPatchToLayer(
+    restoreState: restoreState,
+    targetLayer: layer,
+    patch: PixelBrushLayerPatch(bounds: patchBounds, image: patch),
+    mode: PixelBrushMode.blur,
+  );
+
+  await layer.buildDisplayCache(scale);
+  final ui.Image displayed = await renderCanvasImage(
+    width: 64,
+    height: 64,
+    draw: (final ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, scale, () {}),
+  );
+  final ByteData? bytes = await displayed.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+  displayed.dispose();
+  int minAlpha = 255;
+  for (int i = 3; i < bytes!.lengthInBytes; i += 4) {
+    if (bytes.getUint8(i) < minAlpha) {
+      minAlpha = bytes.getUint8(i);
+    }
+  }
+  return minAlpha;
+}
+
 void main() {
   testWidgets('pointer up flushes a recovery draft immediately', (final WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
@@ -360,24 +422,40 @@ void main() {
 
     final List<ActionType> actions = layer.actionStack.map((final UserActionDrawing action) => action.action).toList();
     expect(actions, contains(ActionType.region));
-    expect(actions, contains(ActionType.cut));
     expect(actions, contains(ActionType.smudge));
-    expect(actions.length, 4);
+    // No separate `cut`: the patch action replaces its region with BlendMode.src.
+    // A clear-then-srcOver pair left a sub-1-alpha ring at anti-aliased edges when
+    // replayed under the display cache's fractional scale — the white rectangle
+    // around the stroke.
+    expect(actions, isNot(contains(ActionType.cut)));
+    expect(actions.length, 3);
   });
 
-  test('pixel brush backdrop sampling includes blur and smudge', () {
-    expect(pixelBrushUsesCompositeBackdrop(PixelBrushMode.smudge), isTrue);
-    expect(pixelBrushUsesCompositeBackdrop(PixelBrushMode.blur), isTrue);
-  });
+  test('a committed smudge/blur patch never leaves a display-cache seam', () async {
+    // End-to-end guard for the "white rectangle around the blur/smudge stroke":
+    // commit a patch through the real path, then rebuild the display cache (which
+    // replays the patch under a fractional canvas.scale). The seam depended on
+    // the sub-pixel fraction of the scaled patch bounds, so sweep several scales
+    // and offsets — a fully opaque layer must stay fully opaque (no alpha < 255)
+    // in every case. Fails if the commit re-introduces the `cut` clear or the
+    // patch renders srcOver instead of BlendMode.src.
+    const List<Rect> boundsCases = <Rect>[
+      Rect.fromLTWH(11, 11, 22, 16),
+      Rect.fromLTWH(7, 5, 19, 21),
+      Rect.fromLTWH(9, 13, 25, 17),
+      Rect.fromLTWH(3, 7, 30, 27),
+      Rect.fromLTWH(5, 9, 21, 23),
+    ];
+    const List<double> scaleCases = <double>[0.5, 0.375, 0.6, 0.7];
 
-  test('normalizePixelBrushRemainingStart clamps stale preview indexes', () {
-    expect(
-      normalizePixelBrushRemainingStart(lastKickedPointIndex: 66, strokePointCount: 28),
-      28,
-    );
-    expect(
-      normalizePixelBrushRemainingStart(lastKickedPointIndex: -1, strokePointCount: 28),
-      0,
-    );
+    for (final double scale in scaleCases) {
+      for (final Rect bounds in boundsCases) {
+        expect(
+          await _committedPatchMinDisplayAlpha(bounds, scale),
+          255,
+          reason: 'transparent seam for bounds=$bounds scale=$scale',
+        );
+      }
+    }
   });
 }

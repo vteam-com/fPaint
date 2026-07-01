@@ -32,161 +32,328 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
 
   /// Clears the in-progress pixel-brush stroke state.
   void _clearPixelBrushStroke() {
-    PixelBrushProfiler.endStroke();
-    // Bump the generation first so any in-flight worker startup disposes the
-    // isolate it spawns instead of leaking it.
+    // Bump the generation so any in-flight one-shot commit render is dropped
+    // instead of applying to a layer that has moved on.
     _pixelBrushStrokeGeneration++;
-    // Dispose the GPU stroke if it wasn't committed (commit calls
-    // compositeAndDetach(), which leaves _gpuPixelBrushStroke null so this is a
-    // no-op then). Disposing frees the baseline + current patch textures.
-    _gpuPixelBrushStroke?.dispose();
-    _gpuPixelBrushStroke = null;
-    _lastDabCenter = null;
-    _pixelBrushWorker?.dispose();
-    _pixelBrushWorker = null;
-    _pixelBrushWorkerStartup = null;
     _pixelBrushStrokePoints.clear();
     _pixelBrushLayerRestoreState = null;
-    // Free the full-canvas source/baseline images captured for this stroke;
-    // they are stroke-internal and not handed to the committed action, so
-    // overwriting them on the next stroke without disposing leaks a full-canvas
-    // texture per stroke. The prepared source's image may alias
-    // [_pixelBrushSourceImage], so guard against a double dispose.
-    final ui.Image? strokeSourceImage = _pixelBrushSourceImage;
-    final ui.Image? preparedSourceImage = _preparedPixelBrushSource?.image;
-    strokeSourceImage?.dispose();
-    if (preparedSourceImage != null && !identical(preparedSourceImage, strokeSourceImage)) {
-      preparedSourceImage.dispose();
-    }
-    _preparedPixelBrushSource = null;
-    _pixelBrushPreparation = null;
-    _pixelBrushSourceImage = null;
     _pixelBrushClipPath = null;
-    _livePixelBuffer = null;
-    _lastKickedPointIndex = 0;
     _pixelBrushStrokePatchBounds = null;
-    _pixelBrushTargetLayer?.clearLivePixelBrushPreview();
-    _pixelBrushTargetLayer = null;
-    _pixelBrushRasterBusy = false;
-    _pixelBrushUpdateNeeded = false;
   }
 
-  /// Commits the pixel-brush stroke as an undoable image action.
+  /// Renders the whole smudge/blur stroke in one pass and commits it as an
+  /// undoable image action.
   ///
-  /// If a live preview has been running we already have an up-to-date
-  /// [_livePixelBuffer]; we only run a final segment for any points appended
-  /// after the last kick, then convert the buffer to a [ui.Image].
+  /// The GPU→CPU readback of the composite backdrop is a fixed multi-second
+  /// stall on this renderer, so it is done **once per session, not per stroke**:
+  /// [_smudgeSourceBytes] caches the composite pixels, each stroke crops its
+  /// region from that cache (a CPU copy, no readback), and after committing we
+  /// blit the result region back into the cache so it stays current. The cache is
+  /// re-read only when [_currentSmudgeSignature] shows the composite changed
+  /// (another edit, layer switch, undo).
+  ///
+  /// The in-progress generation is re-checked across each await so a stroke
+  /// started mid-render is dropped rather than corrupting layer state.
   Future<void> _commitPixelBrushStroke(final AppProvider appProvider) async {
-    final ui.Image? sourceImage = _pixelBrushSourceImage;
     final ImagePlacementLayerRestoreState? layerRestoreState = _pixelBrushLayerRestoreState;
-    if (sourceImage == null || layerRestoreState == null || _pixelBrushStrokePoints.length < AppMath.pair) {
-      if (layerRestoreState != null) {
-        _restorePixelBrushLayerState(appProvider: appProvider, restoreState: layerRestoreState);
-      }
+    final ui.Rect? patchBounds = _pixelBrushStrokePatchBounds;
+    if (layerRestoreState == null || patchBounds == null || _pixelBrushStrokePoints.length < AppMath.pair) {
       return;
     }
 
-    // GPU path: flatten baseline + patch into a concrete full-canvas image on the
-    // GPU — no readback, no CPU compute.
-    if (_gpuPixelBrushStroke != null) {
-      final ui.Image finalImage = await _gpuPixelBrushStroke!.compositeAndDetach();
-      _gpuPixelBrushStroke = null;
-      _applyCommittedPixelBrushPatch(
-        appProvider: appProvider,
-        layerRestoreState: layerRestoreState,
-        committedPatch: PixelBrushLayerPatch(
-          bounds: ui.Rect.fromLTWH(0, 0, sourceImage.width.toDouble(), sourceImage.height.toDouble()),
-          image: finalImage,
-        ),
-      );
-      return;
-    }
+    final int generation = _pixelBrushStrokeGeneration;
+    final PixelBrushMode mode = _pixelBrushMode;
+    final double intensity = _pixelBrushIntensity;
+    final double brushSize = appProvider.brushSize;
+    final ui.Path? clipPath = _pixelBrushClipPath;
+    final List<Offset> strokePoints = List<Offset>.of(_pixelBrushStrokePoints);
+    final int selectedLayerIndex = appProvider.layers.selectedLayerIndex;
+    final int canvasWidth = appProvider.layers.size.width.toInt();
+    final int canvasHeight = appProvider.layers.size.height.toInt();
 
-    final PreparedSmudgeStrokeSource? prepared =
-        _preparedPixelBrushSource ??
-        await _pixelBrushPreparation ??
-        await preparePixelBrushSource(
-          sourceImage: sourceImage,
-          clipPath: _pixelBrushClipPath,
-        );
-    if (prepared == null) {
-      _restorePixelBrushLayerState(appProvider: appProvider, restoreState: layerRestoreState);
-      return;
-    }
-
-    // Apply any remaining un-kicked segment, then read back the accumulated
-    // buffer. When the background worker handled the stroke it owns the
-    // authoritative buffer; otherwise fall back to the synchronous path.
-    final PixelBrushStrokeWorker? worker = _pixelBrushWorker ?? await _pixelBrushWorkerStartup;
-    final int remainingStart = normalizePixelBrushRemainingStart(
-      lastKickedPointIndex: _lastKickedPointIndex,
-      strokePointCount: _pixelBrushStrokePoints.length,
+    final double radius = max(
+      AppInteraction.smudgeMinimumRadius,
+      brushSize * AppInteraction.smudgeBrushRadiusFactor,
     );
-    final List<Offset> remaining = _pixelBrushStrokePoints.sublist(remainingStart);
 
-    Uint8List currentPixels = _livePixelBuffer ?? Uint8List.fromList(prepared.pixels);
+    // Region to process: the footprint inflated by one radius (so every source
+    // pixel a dab samples is inside it), integer-aligned and clamped.
+    final int cropLeft = max(AppMath.zero, (patchBounds.left - radius).floor());
+    final int cropTop = max(AppMath.zero, (patchBounds.top - radius).floor());
+    final int cropRight = min(canvasWidth, (patchBounds.right + radius).ceil());
+    final int cropBottom = min(canvasHeight, (patchBounds.bottom + radius).ceil());
+    final int cropWidth = cropRight - cropLeft;
+    final int cropHeight = cropBottom - cropTop;
+    if (cropWidth <= AppMath.zero || cropHeight <= AppMath.zero) {
+      return;
+    }
 
-    if (worker != null) {
-      if (remaining.length >= AppMath.pair) {
-        final ui.Rect? remainingBounds = resolvePixelBrushPatchBounds(
-          strokePoints: remaining,
-          imageWidth: sourceImage.width,
-          imageHeight: sourceImage.height,
-          brushSize: appProvider.brushSize,
-        );
-        if (remainingBounds != null) {
-          await worker.applySegment(
-            segmentPoints: remaining,
-            brushSize: appProvider.brushSize,
-            intensity: _pixelBrushIntensity,
-            mode: _pixelBrushMode,
-            patchBounds: remainingBounds,
+    // Ensure the source cache covers this stroke's crop. The cache holds only a
+    // region of the composite (not the whole 62 MP canvas), so a cold/invalidated
+    // cache — or a stroke reaching outside the cached region — reads back just the
+    // padded stroke region, not the full canvas.
+    final List<int> signature = _currentSmudgeSignature(appProvider);
+    final bool cacheValid =
+        _smudgeSourceBytes != null &&
+        _intListEquals(_smudgeSourceSignature, signature) &&
+        cropLeft >= _smudgeSourceRegionLeft &&
+        cropTop >= _smudgeSourceRegionTop &&
+        cropRight <= _smudgeSourceRegionLeft + _smudgeSourceWidth &&
+        cropBottom <= _smudgeSourceRegionTop + _smudgeSourceHeight;
+    if (!cacheValid) {
+      final int margin = AppInteraction.smudgeSourceCacheMargin.round();
+      final int regionLeft = max(AppMath.zero, cropLeft - margin);
+      final int regionTop = max(AppMath.zero, cropTop - margin);
+      final int regionRight = min(canvasWidth, cropRight + margin);
+      final int regionBottom = min(canvasHeight, cropBottom + margin);
+      final int regionWidth = regionRight - regionLeft;
+      final int regionHeight = regionBottom - regionTop;
+      final ui.Rect regionRect = ui.Rect.fromLTWH(
+        regionLeft.toDouble(),
+        regionTop.toDouble(),
+        regionWidth.toDouble(),
+        regionHeight.toDouble(),
+      );
+
+      // Sample only the SELECTED layer (colour + alpha), not the composite
+      // through it. Smudge/blur then affect just this layer — preserving its
+      // transparency and not pulling an opaque backdrop's colour into the smear
+      // (which baked white over a white background and darkened a region when a
+      // sparse layer sat over an opaque one). Standard "sample active layer".
+      final ui.Image layerSource = await appProvider.layers.captureLayerRegion(selectedLayerIndex, regionRect);
+      if (!mounted || generation != _pixelBrushStrokeGeneration) {
+        layerSource.dispose();
+        return;
+      }
+      final Uint8List? layerBytes = await extractImagePixels(layerSource, format: ui.ImageByteFormat.rawStraightRgba);
+      layerSource.dispose();
+      if (layerBytes == null || !mounted || generation != _pixelBrushStrokeGeneration) {
+        return;
+      }
+      _smudgeSourceBytes = layerBytes;
+      _smudgeSourceRegionLeft = regionLeft;
+      _smudgeSourceRegionTop = regionTop;
+      _smudgeSourceWidth = regionWidth;
+      _smudgeSourceHeight = regionHeight;
+    }
+    final Uint8List sourceBytes = _smudgeSourceBytes!;
+    final int regionLeft = _smudgeSourceRegionLeft;
+    final int regionTop = _smudgeSourceRegionTop;
+    final int regionStride = _smudgeSourceWidth;
+
+    // Crop the stroke's region out of the cached region bytes (region-local
+    // coordinates) and build the region-local clip mask if a selection is active.
+    final Uint8List regionBytes = copyPixelBrushRect(
+      pixels: sourceBytes,
+      imageWidth: regionStride,
+      left: cropLeft - regionLeft,
+      top: cropTop - regionTop,
+      width: cropWidth,
+      height: cropHeight,
+    );
+    final Uint8List? clipMask = clipPath == null
+        ? null
+        : await createPixelBrushClipMask(
+            width: cropWidth,
+            height: cropHeight,
+            clipPath: clipPath.shift(Offset(-cropLeft.toDouble(), -cropTop.toDouble())),
           );
-        }
-      }
-      final Uint8List? finalized = await worker.finalizePixels();
-      if (finalized != null) {
-        currentPixels = finalized;
-      }
-    } else if (remaining.length >= AppMath.pair) {
-      final PixelBrushSegmentResult? segResult = await rasterizePixelBrushSegment(
-        livePixels: currentPixels,
-        imageWidth: sourceImage.width,
-        imageHeight: sourceImage.height,
-        segmentPoints: remaining,
-        brushSize: appProvider.brushSize,
-        intensity: _pixelBrushIntensity,
-        mode: _pixelBrushMode,
-        clipMask: prepared.clipMask,
-        preferSynchronous: true,
-      );
-      if (segResult != null) {
-        currentPixels = segResult.pixels;
-      }
+    if (!mounted || generation != _pixelBrushStrokeGeneration) {
+      return;
     }
 
-    final PixelBrushLayerPatch? committedPatch = await buildPixelBrushLayerPatch(
-      pixels: currentPixels,
-      imageWidth: sourceImage.width,
-      imageHeight: sourceImage.height,
-      strokePoints: _pixelBrushStrokePoints,
-      brushSize: appProvider.brushSize,
-      preferredBounds: _pixelBrushStrokePatchBounds,
+    // Rasterize the whole stroke at full resolution, region-local (isolate).
+    final List<Offset> localPoints = <Offset>[
+      for (final Offset point in strokePoints) Offset(point.dx - cropLeft, point.dy - cropTop),
+    ];
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: regionBytes,
+      imageWidth: cropWidth,
+      imageHeight: cropHeight,
+      segmentPoints: localPoints,
+      brushSize: brushSize,
+      intensity: intensity,
+      mode: mode,
+      clipMask: clipMask,
+      preferSynchronous: false,
     );
-    if (committedPatch == null) {
-      _restorePixelBrushLayerState(appProvider: appProvider, restoreState: layerRestoreState);
+    if (result == null || !mounted || generation != _pixelBrushStrokeGeneration) {
+      return;
+    }
+
+    // Build the committed patch image at full resolution (stored in the undoable
+    // action for export). A large footprint is downsampled before the CPU→GPU
+    // upload and GPU-upscaled back — smudge/blur are soft enough that the loss is
+    // invisible. The live display is served by the layer's display cache, updated
+    // below; this full-res patch is only materialized for on-demand full-res use.
+    final int fpLeft = max(AppMath.zero, patchBounds.left.floor());
+    final int fpTop = max(AppMath.zero, patchBounds.top.floor());
+    final int fpRight = min(canvasWidth, patchBounds.right.ceil());
+    final int fpBottom = min(canvasHeight, patchBounds.bottom.ceil());
+    final int fpWidth = fpRight - fpLeft;
+    final int fpHeight = fpBottom - fpTop;
+    if (fpWidth <= AppMath.zero || fpHeight <= AppMath.zero) {
+      return;
+    }
+    final Uint8List footprintBytes = copyPixelBrushRect(
+      pixels: result.pixels,
+      imageWidth: cropWidth,
+      left: fpLeft - cropLeft,
+      top: fpTop - cropTop,
+      width: fpWidth,
+      height: fpHeight,
+    );
+    final int patchDownsample = (radius / AppInteraction.smudgeCommitDownsampleRadiusPerLevel).ceil().clamp(
+      AppMath.one,
+      AppInteraction.smudgeCommitMaxDownsample,
+    );
+    final ui.Image patchImage;
+    if (patchDownsample <= AppMath.one) {
+      patchImage = await imageFromPixelsDecode(footprintBytes, fpWidth, fpHeight);
+    } else {
+      final int lowWidth = max(AppMath.one, fpWidth ~/ patchDownsample);
+      final int lowHeight = max(AppMath.one, fpHeight ~/ patchDownsample);
+      final Uint8List lowBytes = downsampleRgbaBox(footprintBytes, fpWidth, fpHeight, lowWidth, lowHeight);
+      final ui.Image lowImage = await imageFromPixelsDecode(lowBytes, lowWidth, lowHeight);
+      patchImage = await renderCanvasImage(
+        width: fpWidth,
+        height: fpHeight,
+        draw: (final ui.Canvas canvas) {
+          canvas.drawImageRect(
+            lowImage,
+            ui.Rect.fromLTWH(0, 0, lowWidth.toDouble(), lowHeight.toDouble()),
+            ui.Rect.fromLTWH(0, 0, fpWidth.toDouble(), fpHeight.toDouble()),
+            ui.Paint()..filterQuality = ui.FilterQuality.medium,
+          );
+        },
+      );
+      lowImage.dispose();
+    }
+    if (!mounted || generation != _pixelBrushStrokeGeneration) {
+      patchImage.dispose();
+      return;
+    }
+
+    final ui.Rect committedBounds = ui.Rect.fromLTRB(
+      fpLeft.toDouble(),
+      fpTop.toDouble(),
+      fpRight.toDouble(),
+      fpBottom.toDouble(),
+    );
+
+    // Fold the patch into the layer's display-resolution projection (a small,
+    // display-res blit) so the commit shows immediately with NO full-canvas GPU
+    // work — the fix for the multi-second commit stall. Full resolution is
+    // rebuilt lazily on demand (export/sampling) by replaying the appended
+    // action; the live canvas never needs it.
+    final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
+    await targetLayer.updateDisplayCacheWithPatch(
+      patchImage: patchImage,
+      patchBounds: committedBounds,
+    );
+    if (!mounted || generation != _pixelBrushStrokeGeneration) {
+      patchImage.dispose();
       return;
     }
 
     _applyCommittedPixelBrushPatch(
       appProvider: appProvider,
       layerRestoreState: layerRestoreState,
-      committedPatch: committedPatch,
+      committedPatch: PixelBrushLayerPatch(
+        bounds: committedBounds,
+        image: patchImage,
+      ),
     );
+
+    // Keep the region cache current: the composite-through-selected now equals
+    // the smudged region, so blit it back in (region-local coords, CPU, no
+    // readback) and record the post-commit signature so the next nearby stroke
+    // is a cache hit.
+    _blitRegionIntoSmudgeCache(
+      region: result.pixels,
+      regionWidth: cropWidth,
+      regionHeight: cropHeight,
+      destLeft: cropLeft - regionLeft,
+      destTop: cropTop - regionTop,
+    );
+    _smudgeSourceSignature = _currentSmudgeSignature(appProvider);
+  }
+
+  /// A cheap fingerprint of the composite-through-selected-layer state. Changes
+  /// when anything that affects the smudge source changes (action counts, layer
+  /// visibility/opacity/blend, selection, canvas size) — but NOT on `clearCache`,
+  /// so it stays stable across a run of smudge strokes.
+  List<int> _currentSmudgeSignature(final AppProvider appProvider) {
+    final LayersProvider layers = appProvider.layers;
+    final int selected = layers.selectedLayerIndex.clamp(AppMath.zero, layers.length - AppMath.one);
+    final List<int> signature = <int>[
+      selected,
+      layers.length,
+      layers.size.width.toInt(),
+      layers.size.height.toInt(),
+    ];
+    for (int index = layers.length - AppMath.one; index >= selected; index--) {
+      final LayerProvider layer = layers.get(index);
+      signature
+        ..add(layer.isVisible ? AppMath.one : AppMath.zero)
+        ..add((layer.opacity * AppLimits.rgbChannelMax).round())
+        ..add(layer.blendMode.index)
+        ..add(layer.actionStack.length)
+        ..add(layer.redoStack.length);
+    }
+    return signature;
+  }
+
+  /// Blits a patch's pixels back into the cached source region [_smudgeSourceBytes]
+  /// (destination in region-local coordinates, stride [_smudgeSourceWidth]).
+  void _blitRegionIntoSmudgeCache({
+    required final Uint8List region,
+    required final int regionWidth,
+    required final int regionHeight,
+    required final int destLeft,
+    required final int destTop,
+  }) {
+    final Uint8List? dest = _smudgeSourceBytes;
+    if (dest == null) {
+      return;
+    }
+    final int rowBytes = regionWidth * AppMath.bytesPerPixel;
+    for (int row = AppMath.zero; row < regionHeight; row++) {
+      final int destOffset = (((destTop + row) * _smudgeSourceWidth) + destLeft) * AppMath.bytesPerPixel;
+      dest.setRange(destOffset, destOffset + rowBytes, region, row * rowBytes);
+    }
+  }
+
+  /// Frees the smudge source region cache (on tool change / teardown).
+  void _clearSmudgeSourceCache() {
+    _smudgeSourceBytes = null;
+    _smudgeSourceRegionLeft = 0;
+    _smudgeSourceRegionTop = 0;
+    _smudgeSourceWidth = 0;
+    _smudgeSourceHeight = 0;
+    _smudgeSourceSignature = null;
+  }
+
+  /// Element-wise equality for two nullable int lists (cache signatures).
+  bool _intListEquals(final List<int>? a, final List<int>? b) {
+    if (a == null || b == null || a.length != b.length) {
+      return false;
+    }
+    for (int i = AppMath.zero; i < a.length; i++) {
+      if (a[i] != b[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// Commits [committedPatch] to the layer as an undoable pixel-brush action and
   /// trims the undo history. Shared by the GPU and CPU commit paths.
+  ///
+  /// The committed patch has already been folded into the layer's
+  /// display-resolution projection by the caller, so `forward` only appends the
+  /// undoable action, drops the (now-stale) full-res cache — rebuilt lazily on
+  /// demand — and refreshes the thumbnail cheaply. No full-canvas GPU work.
   void _applyCommittedPixelBrushPatch({
     required final AppProvider appProvider,
     required final ImagePlacementLayerRestoreState layerRestoreState,
@@ -212,12 +379,19 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
         final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
         appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
         targetLayer.clearLivePixelBrushPreview();
+        // Append without clearing caches (that would schedule a full-canvas
+        // thumbnail rebuild); the display projection already reflects this patch.
         applyPixelBrushPatchToLayer(
           restoreState: layerRestoreState,
           targetLayer: targetLayer,
           patch: committedPatch,
           mode: _pixelBrushMode,
+          retainCache: true,
         );
+        // Full-res is now stale but the live display isn't served from it; drop
+        // it so any on-demand full-res consumer replays the appended action.
+        targetLayer.invalidateFullResCache();
+        targetLayer.refreshThumbnailFromDisplayCache();
         compactPixelBrushLayerHistory(
           targetLayer: targetLayer,
           maxGestureCount: AppInteraction.pixelBrushMaxUndoGestures,
@@ -238,198 +412,6 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
         return action.name == PixelBrushMode.smudge.name || action.name == PixelBrushMode.blur.name;
       },
       maxKeep: AppInteraction.pixelBrushMaxUndoGestures,
-    );
-  }
-
-  /// Fires an incremental pixel-brush rasterization for live drag preview.
-  ///
-  /// Sends only the *new* segment of points since the last successful kick so
-  /// each isolate call is O(segment) rather than O(full stroke). The resulting
-  /// pixel buffer is stored in [_livePixelBuffer] and fed back as the starting
-  /// state for the next segment, making the effect accumulate correctly.
-  ///
-  /// Skips if a rasterization is already running; marks that a re-run is
-  /// needed so the next completion triggers another pass.
-  void _kickLivePixelBrushPreview(final AppProvider appProvider) {
-    PixelBrushProfiler.recordKickAttempt();
-    if (_pixelBrushRasterBusy) {
-      _pixelBrushUpdateNeeded = true;
-      PixelBrushProfiler.recordSkipBusy();
-      return;
-    }
-    // Need at least one overlap point (the last processed point) plus one new
-    // point so the isolate has a valid segment.
-    final int currentLength = _pixelBrushStrokePoints.length;
-    final int segmentStart = _lastKickedPointIndex > AppMath.zero ? _lastKickedPointIndex : AppMath.zero;
-    if (currentLength - segmentStart < AppMath.pair) {
-      PixelBrushProfiler.recordSkipFewPoints();
-      return;
-    }
-    final ui.Image? sourceImage = _pixelBrushSourceImage;
-    final ImagePlacementLayerRestoreState? restoreState = _pixelBrushLayerRestoreState;
-    if (sourceImage == null || restoreState == null) {
-      return;
-    }
-    _pixelBrushRasterBusy = true;
-    _pixelBrushUpdateNeeded = false;
-    PixelBrushProfiler.markKickStart();
-
-    // Snapshot the segment we are about to process.
-    final List<Offset> segmentPoints = List<Offset>.of(_pixelBrushStrokePoints.sublist(segmentStart));
-    // After this kick succeeds the new "last processed" index will be:
-    final int nextLastIndex = currentLength - AppMath.one;
-    final double brushSize = appProvider.brushSize;
-    final PixelBrushMode mode = _pixelBrushMode;
-    final Uint8List? startPixels = _livePixelBuffer;
-    final int strokeGeneration = _pixelBrushStrokeGeneration;
-    // Compute the dirty rect for this segment only — avoids growing the patch
-    // image to full-stroke size on every update.
-    final ui.Rect? segmentBounds = resolvePixelBrushPatchBounds(
-      strokePoints: segmentPoints,
-      imageWidth: sourceImage.width,
-      imageHeight: sourceImage.height,
-      brushSize: brushSize,
-    );
-
-    unawaited(
-      (() async {
-            // Prefer the long-lived stroke worker (background isolate): it owns the
-            // accumulating buffer, so we send only the new segment points and get
-            // back the small dirty-rect patch — no full-image transfer and no
-            // main-thread blocking. Awaiting the startup future also waits for the
-            // source preparation it depends on.
-            final Stopwatch? startupAwaitWatch = PixelBrushProfiler.startWatch();
-            final PixelBrushStrokeWorker? worker = _pixelBrushWorker ?? await _pixelBrushWorkerStartup;
-            PixelBrushProfiler.recordElapsed('awaitStartup', startupAwaitWatch);
-            if (strokeGeneration != _pixelBrushStrokeGeneration) {
-              return;
-            }
-            if (!mounted || _pixelBrushSourceImage == null) {
-              _pixelBrushRasterBusy = false;
-              return;
-            }
-
-            if (worker != null) {
-              // The worker mutated its retained buffer, so these points are now
-              // consumed regardless of whether they produced a visible change.
-              _lastKickedPointIndex = nextLastIndex;
-              if (segmentBounds != null) {
-                final PixelBrushPatchUpdate? update = await worker.applySegment(
-                  segmentPoints: segmentPoints,
-                  brushSize: brushSize,
-                  intensity: _pixelBrushIntensity,
-                  mode: mode,
-                  patchBounds: segmentBounds,
-                );
-                if (strokeGeneration != _pixelBrushStrokeGeneration) {
-                  return;
-                }
-                if (!mounted || _pixelBrushSourceImage == null) {
-                  _pixelBrushRasterBusy = false;
-                  return;
-                }
-                if (update != null) {
-                  final Stopwatch? patchWatch = PixelBrushProfiler.startWatch();
-                  final PixelBrushLayerPatch? livePatch = await buildPixelBrushLayerPatchFromBytes(
-                    pixels: update.pixels,
-                    left: update.left,
-                    top: update.top,
-                    width: update.width,
-                    height: update.height,
-                  );
-                  PixelBrushProfiler.recordElapsed('patchImageBuild', patchWatch);
-                  if (!mounted || _pixelBrushSourceImage == null) {
-                    _pixelBrushRasterBusy = false;
-                    return;
-                  }
-                  if (livePatch != null && strokeGeneration == _pixelBrushStrokeGeneration) {
-                    _pixelBrushTargetLayer?.setLivePixelBrushPatch(
-                      livePatch.image,
-                      livePatch.bounds,
-                    );
-                    appProvider.layers.repaintCanvas();
-                  }
-                }
-              }
-            } else {
-              // Synchronous fallback (web, or worker spawn failed). Mutates
-              // basePixels in place, so copy the pristine source on the first
-              // segment to keep it intact for commit/undo.
-              final PreparedSmudgeStrokeSource? prepared = _preparedPixelBrushSource ?? await _pixelBrushPreparation;
-              if (strokeGeneration != _pixelBrushStrokeGeneration) {
-                return;
-              }
-              if (!mounted || _pixelBrushSourceImage == null || prepared == null) {
-                _pixelBrushRasterBusy = false;
-                return;
-              }
-              final Uint8List basePixels = startPixels ?? Uint8List.fromList(prepared.pixels);
-              final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
-                livePixels: basePixels,
-                imageWidth: sourceImage.width,
-                imageHeight: sourceImage.height,
-                segmentPoints: segmentPoints,
-                brushSize: brushSize,
-                intensity: _pixelBrushIntensity,
-                mode: mode,
-                clipMask: prepared.clipMask,
-                preferSynchronous: true,
-              );
-              if (strokeGeneration != _pixelBrushStrokeGeneration) {
-                return;
-              }
-              if (!mounted || _pixelBrushSourceImage == null) {
-                _pixelBrushRasterBusy = false;
-                return;
-              }
-              if (result != null) {
-                _livePixelBuffer = result.pixels;
-                _lastKickedPointIndex = nextLastIndex;
-                if (segmentBounds != null) {
-                  final PixelBrushLayerPatch? livePatch = await buildPixelBrushLayerPatchFast(
-                    pixels: result.pixels,
-                    imageWidth: result.width,
-                    imageHeight: result.height,
-                    patchBounds: segmentBounds,
-                  );
-                  if (!mounted || _pixelBrushSourceImage == null) {
-                    _pixelBrushRasterBusy = false;
-                    return;
-                  }
-                  if (livePatch != null) {
-                    _pixelBrushTargetLayer?.setLivePixelBrushPatch(
-                      livePatch.image,
-                      livePatch.bounds,
-                    );
-                    appProvider.layers.repaintCanvas();
-                  }
-                }
-              }
-            }
-
-            _pixelBrushRasterBusy = false;
-            if (_pixelBrushUpdateNeeded) {
-              _kickLivePixelBrushPreview(appProvider);
-            }
-          })()
-          .then<void>(
-            (final void _) {},
-            onError: (final Object error, final StackTrace stack) {
-              PixelBrushProfiler.recordException();
-              debugPrint('[PixelBrushProfile] kick exception: $error\n$stack');
-            },
-          )
-          .whenComplete(() {
-            // Safety net: an exception must never strand the busy flag — if it did,
-            // every later move would early-return on `busy` and the live preview
-            // would freeze for the rest of the stroke.
-            if (_pixelBrushRasterBusy) {
-              _pixelBrushRasterBusy = false;
-              if (_pixelBrushUpdateNeeded && mounted && _pixelBrushSourceImage != null) {
-                _kickLivePixelBrushPreview(appProvider);
-              }
-            }
-          }),
     );
   }
 
@@ -454,113 +436,34 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
   }
 
   /// Starts tracking a pixel-brush stroke from [position] with the given [mode].
+  ///
+  /// Lightweight: it captures only the undo restore-state, the clip path, and the
+  /// first point, then publishes the gesture marquee. No source readback, worker,
+  /// or live rasterization happens during the drag — the whole effect is rendered
+  /// once in [_commitPixelBrushStroke] on pointer-up. This keeps the drag O(1) at
+  /// any canvas size.
   void _startPixelBrushStroke(
     final AppProvider appProvider,
     final Offset position,
     final PixelBrushMode mode,
   ) {
     // A prior stroke whose pointer-up was cancelled or arrived with a mismatched
-    // pointer id never ran _clearPixelBrushStroke (its cleanup is gated on the
-    // active pointer in _handlePointerEnd), so its full-canvas GPU textures are
-    // still held in these fields. Reclaim them before the assignments below
-    // overwrite the references: an undisposed ui.Image's GPU texture is never
-    // reclaimed by GC, so each orphaned smudge baseline/source leaks permanently
-    // (hundreds of MB each on a large canvas). _clearPixelBrushStroke disposes
-    // the GPU stroke that owns the working image the live-preview baseline
-    // aliases, so this cannot double-free.
-    if (_gpuPixelBrushStroke != null || _pixelBrushSourceImage != null || _preparedPixelBrushSource != null) {
+    // pointer id never ran _clearPixelBrushStroke; reclaim its state first.
+    if (_pixelBrushLayerRestoreState != null) {
       _clearPixelBrushStroke();
     }
     _pixelBrushStrokeGeneration++;
-    PixelBrushProfiler.beginStroke();
     _pixelBrushMode = mode;
     _pixelBrushIntensity = appProvider.brushIntensity;
     _pixelBrushLayerRestoreState = appProvider.captureSelectedLayerRestoreState();
-    final Stopwatch? captureWatch = PixelBrushProfiler.startWatch();
-    _pixelBrushSourceImage = pixelBrushUsesCompositeBackdrop(mode)
-        ? appProvider.layers.capturePainterToImageThroughLayerSync(appProvider.layers.selectedLayerIndex)
-        : appProvider.layers.selectedLayer.toImageForStorage(appProvider.layers.size);
-    PixelBrushProfiler.recordElapsed('sourceCapture', captureWatch);
     _pixelBrushClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null
         ? ui.Path.from(appProvider.selectorModel.path1!)
         : null;
-    _preparedPixelBrushSource = null;
-    _livePixelBuffer = null;
-    _lastKickedPointIndex = 0;
     _pixelBrushStrokePatchBounds = null;
-    _pixelBrushTargetLayer = appProvider.layers.get(appProvider.layers.selectedLayerIndex);
-    _pixelBrushTargetLayer!.beginLivePixelBrushPreview();
-
-    // GPU path (primary): if the shader is loaded, run the whole effect on the
-    // GPU seeded from the just-captured baseline image. No readback, no worker,
-    // no async — each pointer-move applies one synchronous dab. Works at any
-    // canvas size: dabs rasterize only the stroke's dirty-rect patch, so cost and
-    // memory scale with the brush footprint, not the canvas.
-    _gpuPixelBrushStroke = null;
-    _lastDabCenter = null;
-    final ui.FragmentProgram? gpuProgram = GpuPixelBrushStroke.loadedProgram;
-    final ui.Image? gpuBaseline = _pixelBrushTargetLayer!.livePreviewBaseline;
-    if (gpuProgram != null && gpuBaseline != null) {
-      _gpuPixelBrushStroke = GpuPixelBrushStroke.create(program: gpuProgram, baseline: gpuBaseline);
-      // The stroke captured the baseline and disposes it at commit; keep the
-      // layer from disposing it in clearLivePixelBrushPreview.
-      _pixelBrushTargetLayer!.markLivePreviewBaselineExternallyOwned();
-      _lastDabCenter = position;
-      _appendPixelBrushPoint(position, appProvider.brushSize);
-      return;
-    }
-
-    final int startGeneration = _pixelBrushStrokeGeneration;
-    final int selectedLayerIndex = appProvider.layers.selectedLayerIndex;
-    final Size strokeSize = appProvider.layers.size;
-    final bool usesCompositeBackdrop = pixelBrushUsesCompositeBackdrop(mode);
-    final Stopwatch? prepWatch = PixelBrushProfiler.startWatch();
-    // Render the source pixels via async `toImage()` (not `toImageSync()`):
-    // `toByteData()` on a `toImageSync()` image stalls the GPU for *seconds* on
-    // Impeller, which was freezing the entire live preview until stroke end.
-    final Future<PreparedSmudgeStrokeSource?> preparation =
-        (() async {
-          final Stopwatch? renderWatch = PixelBrushProfiler.startWatch();
-          final ui.Image readbackImage = usesCompositeBackdrop
-              ? await appProvider.layers.capturePainterToImageThroughLayer(selectedLayerIndex)
-              : await appProvider.layers.get(selectedLayerIndex).toImageForStorageAsync(strokeSize);
-          PixelBrushProfiler.recordElapsed('srcRender', renderWatch);
-          final Stopwatch? extractWatch = PixelBrushProfiler.startWatch();
-          final PreparedSmudgeStrokeSource? prepared = await preparePixelBrushSource(
-            sourceImage: readbackImage,
-            clipPath: _pixelBrushClipPath,
-          );
-          PixelBrushProfiler.recordElapsed('srcExtractAndMask', extractWatch);
-          return prepared;
-        })().then((final PreparedSmudgeStrokeSource? prepared) {
-          PixelBrushProfiler.recordElapsed('prepareSource', prepWatch);
-          return prepared;
-        });
-    _pixelBrushPreparation = preparation;
-    // Start the long-lived stroke worker as soon as the source pixels are
-    // prepared. It owns the accumulating buffer in a background isolate so the
-    // per-pixel blending never blocks the UI isolate.
-    _pixelBrushWorker = null;
-    _pixelBrushWorkerStartup = preparation.then((final PreparedSmudgeStrokeSource? prepared) async {
-      if (prepared == null || startGeneration != _pixelBrushStrokeGeneration) {
-        return null;
-      }
-      _preparedPixelBrushSource = prepared;
-      final PixelBrushStrokeWorker? worker = await PixelBrushStrokeWorker.start(
-        basePixels: prepared.pixels,
-        imageWidth: prepared.image.width,
-        imageHeight: prepared.image.height,
-        clipMask: prepared.clipMask,
-      );
-      // A newer stroke may have started (or this one ended) while spawning.
-      if (startGeneration != _pixelBrushStrokeGeneration) {
-        worker?.dispose();
-        return null;
-      }
-      _pixelBrushWorker = worker;
-      return worker;
-    });
-    unawaited(_pixelBrushWorkerStartup);
     _appendPixelBrushPoint(position, appProvider.brushSize);
+    appProvider.showPixelBrushGesture(
+      points: _pixelBrushStrokePoints,
+      size: appProvider.brushSize,
+    );
   }
 }

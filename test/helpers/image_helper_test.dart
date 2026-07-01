@@ -54,6 +54,54 @@ void main() {
     });
   });
 
+  group('downsampleRgbaBox', () {
+    // Builds a [width]x[height] straight-RGBA buffer from per-pixel [pixel]
+    // callbacks returning an (r, g, b, a) 4-list.
+    Uint8List buildRgba(final int width, final int height, final List<int> Function(int x, int y) pixel) {
+      final Uint8List out = Uint8List(width * height * 4);
+      for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+          final List<int> channels = pixel(x, y);
+          final int index = ((y * width) + x) * 4;
+          out[index] = channels[0];
+          out[index + 1] = channels[1];
+          out[index + 2] = channels[2];
+          out[index + 3] = channels[3];
+        }
+      }
+      return out;
+    }
+
+    test('preserves a uniform buffer without cross-channel bleed', () {
+      // Every source pixel is (10, 20, 30, 40); a 2x2 -> 1x1 box average must
+      // return exactly that, proving each channel offset is handled separately.
+      final Uint8List src = buildRgba(2, 2, (final int x, final int y) => <int>[10, 20, 30, 40]);
+      final Uint8List dst = downsampleRgbaBox(src, 2, 2, 1, 1);
+      expect(dst.length, 1 * 1 * 4);
+      expect(dst, <int>[10, 20, 30, 40]);
+    });
+
+    test('averages the source pixels mapping into each destination pixel', () {
+      // 2x2 with red channel {0, 90, 180, 250}: average = 520 ~/ 4 = 130.
+      const List<List<int>> reds = <List<int>>[
+        <int>[0, 0, 0, 255],
+        <int>[90, 0, 0, 255],
+        <int>[180, 0, 0, 255],
+        <int>[250, 0, 0, 255],
+      ];
+      final Uint8List src = buildRgba(2, 2, (final int x, final int y) => reds[(y * 2) + x]);
+      final Uint8List dst = downsampleRgbaBox(src, 2, 2, 1, 1);
+      expect(dst[0], (0 + 90 + 180 + 250) ~/ 4);
+      expect(dst[3], 255);
+    });
+
+    test('produces the requested destination dimensions', () {
+      final Uint8List src = buildRgba(4, 4, (final int x, final int y) => <int>[x * 10, y * 10, 0, 255]);
+      final Uint8List dst = downsampleRgbaBox(src, 4, 4, 2, 2);
+      expect(dst.length, 2 * 2 * 4);
+    });
+  });
+
   group('convertImageToUint8List', () {
     test('returns raw RGBA bytes', () async {
       final ui.Image image = _createTestImage();
@@ -61,17 +109,6 @@ void main() {
       expect(bytes, isNotNull);
       // 4 bytes per pixel * width * height
       expect(bytes!.length, _testWidth * _testHeight * 4);
-    });
-  });
-
-  group('resizeImage', () {
-    test('resizes image to new dimensions', () async {
-      final ui.Image image = _createTestImage();
-      const int newWidth = 80;
-      const int newHeight = 60;
-      final ui.Image resized = await resizeImage(image, const ui.Size(80, 60));
-      expect(resized.width, newWidth);
-      expect(resized.height, newHeight);
     });
   });
 

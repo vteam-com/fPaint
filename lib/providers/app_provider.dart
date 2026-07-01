@@ -52,6 +52,18 @@ class AppProvider extends ChangeNotifier {
   double? _brushSizePreviewSize;
   Offset? _brushSizePreviewPosition;
 
+  // Live smudge/blur gesture marquee: the in-progress stroke's sampled points
+  // (canvas space) and brush size. The effect itself is rendered once on
+  // pointer-up; during the drag we only show this swept-band outline so the
+  // gesture stays responsive without any per-move rasterization.
+  List<Offset>? _pixelBrushGesturePoints;
+  double _pixelBrushGestureSize = 0.0;
+
+  /// Whether the pointer-up smudge/blur commit is running. Drives the processing
+  /// shimmer over the affected region while the (async) commit generates the
+  /// image, then clears with the gesture.
+  bool _isPixelBrushCommitting = false;
+
   void _initCanvas() {
     layers.clear();
     layers.size = layers.size;
@@ -309,6 +321,53 @@ class AppProvider extends ChangeNotifier {
 
   /// Gets an inverse of the active brush color for preview visibility.
   Color get brushSizePreviewColor => brushColor;
+
+  /// Whether an in-progress smudge/blur gesture marquee should be drawn.
+  bool get isPixelBrushGestureVisible => _pixelBrushGesturePoints != null;
+
+  /// The in-progress smudge/blur gesture points, in canvas space.
+  List<Offset>? get pixelBrushGesturePoints => _pixelBrushGesturePoints;
+
+  /// The brush size (canvas units) of the in-progress smudge/blur gesture.
+  double get pixelBrushGestureSize => _pixelBrushGestureSize;
+
+  /// Whether the pointer-up smudge/blur commit is currently generating the
+  /// image, so the main view should show the processing shimmer.
+  bool get isPixelBrushCommitting => _isPixelBrushCommitting;
+
+  /// Marks the smudge/blur commit as running ([committing] true) or finished,
+  /// refreshing the overlay so the processing shimmer appears/clears. No-op when
+  /// the state is unchanged.
+  void setPixelBrushCommitting({required final bool committing}) {
+    if (_isPixelBrushCommitting == committing) {
+      return;
+    }
+    _isPixelBrushCommitting = committing;
+    repaintMainView();
+  }
+
+  /// Publishes the in-progress smudge/blur gesture so the main view can draw its
+  /// swept-band marquee. Snapshots [points] so later mutation of the stroke list
+  /// can't tear a frame mid-paint.
+  void showPixelBrushGesture({
+    required final List<Offset> points,
+    required final double size,
+  }) {
+    _pixelBrushGesturePoints = List<Offset>.of(points);
+    _pixelBrushGestureSize = size;
+    repaintMainView();
+  }
+
+  /// Clears the smudge/blur gesture marquee and processing state (on commit or
+  /// abandon).
+  void clearPixelBrushGesture() {
+    if (_pixelBrushGesturePoints == null && !_isPixelBrushCommitting) {
+      return;
+    }
+    _pixelBrushGesturePoints = null;
+    _isPixelBrushCommitting = false;
+    repaintMainView();
+  }
 
   /// Sets the brush size.
   set brushSize(final double value) {

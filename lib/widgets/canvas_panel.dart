@@ -9,6 +9,10 @@ class CanvasPanel extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final LayersProvider layers = LayersProvider.of(context);
+    // On-screen resolution per canvas pixel (zoom × devicePixelRatio): the live
+    // painter serves layers from a display-resolution cache sized for this rather
+    // than sampling the full 62 MP layer textures every frame.
+    final double displayScale = layers.scale * MediaQuery.devicePixelRatioOf(context);
     // RepaintBoundary isolates the expensive multi-layer canvas composite into
     // its own raster layer. Without it, any repaint elsewhere in the main-view
     // Stack (brush-size hover preview, marching-ants animation, transform mesh,
@@ -21,6 +25,8 @@ class CanvasPanel extends StatelessWidget {
         painter: CanvasPanelPainter(
           layers.list,
           includeTransparentBackground: true,
+          displayScale: displayScale,
+          onNeedsDisplayCache: layers.scheduleDisplayCacheRebuild,
           repaint: layers.canvasPainterRepaint,
         ),
       ),
