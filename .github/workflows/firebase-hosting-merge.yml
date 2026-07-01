@@ -248,8 +248,16 @@ jobs:
         run: sleep 15
 
       - name: Deploy to Firebase Hosting
-        run: npx -y firebase-tools@latest deploy --only hosting --project vteam-paint
-          --non-interactive
+        run: |
+          set +e
+          out=$(npx -y firebase-tools@latest deploy --only hosting --project vteam-paint --non-interactive 2>&1)
+          code=$?
+          printf '%s\n' "$out"
+          if [ "$code" -ne 0 ] && printf '%s' "$out" | grep -q 'is the current active version'; then
+            echo "::notice::Live site already serves this exact content — nothing new to release. Treating as success."
+            exit 0
+          fi
+          exit "$code"
 
   cleanup-artifacts:
     name: Clean up build artifacts
