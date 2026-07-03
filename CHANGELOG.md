@@ -4,6 +4,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.9] - 2026-07-03
+
+### Update
+
+- Smudge and Blur stroke preview now shows a dashed marquee border
+- Added a processing shimmer over the region while a Smudge or Blur is being applied
+
+### Fix
+
+- Smudge or Blur no longer leaves a faint white rectangle around the stroke
+- Layers containing text no longer occasionally render as a solid block on the live canvas
+- Improved Smudge and Blur stability on large documents
+
 ## [1.8.8] - 2026-07-01
 
 ### Update
