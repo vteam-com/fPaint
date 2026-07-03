@@ -583,12 +583,10 @@ class _PixelBrushProcessingShimmer extends StatefulWidget {
     required this.canvasOffset,
     required this.scale,
   });
-
-  final List<Offset> points;
   final double brushSize;
   final Offset canvasOffset;
+  final List<Offset> points;
   final double scale;
-
   @override
   State<_PixelBrushProcessingShimmer> createState() => _PixelBrushProcessingShimmerState();
 }
