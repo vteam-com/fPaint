@@ -9,10 +9,10 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get about => 'Acerca de...';
+  String get paint => 'Pintar';
 
   @override
-  String get clippedToSelection => 'Recortado a la selección';
+  String get about => 'Acerca de...';
 
   @override
   String get addAsNewLayer => 'Agregar como nueva capa';
@@ -123,6 +123,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get canvasSizeTitle => 'Tamano del lienzo';
+
+  @override
+  String get clippedToSelection => 'Recortado a la selección';
 
   @override
   String get close => 'Cerrar';

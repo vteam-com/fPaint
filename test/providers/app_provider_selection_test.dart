@@ -648,6 +648,86 @@ void main() {
     });
   });
 
+  group('effect brush paint mode', () {
+    test('setEffectPaintMode toggles mode and arming exposes the armed effect', () {
+      appProvider.setEffectPaintMode(enabled: true);
+      expect(appProvider.effectBrushModel.paintMode, isTrue);
+
+      appProvider.armEffectBrush(SelectionEffect.blur);
+      expect(appProvider.effectBrushModel.isArmed, isTrue);
+      expect(appProvider.effectBrushModel.effect, SelectionEffect.blur);
+
+      appProvider.setEffectBrushStrength(AppEffects.maxIntensity);
+      expect(appProvider.effectBrushModel.strength, AppEffects.maxIntensity);
+
+      appProvider.disarmEffectBrush();
+      expect(appProvider.effectBrushModel.isArmed, isFalse);
+
+      appProvider.setEffectPaintMode(enabled: false);
+      expect(appProvider.effectBrushModel.paintMode, isFalse);
+    });
+
+    test('commitEffectBrushStroke overlays a masked effect patch as one undoable action', () async {
+      final int canvasWidth = appProvider.layers.width.toInt();
+      final int canvasHeight = appProvider.layers.height.toInt();
+      final Image layerImage = await createFilledLayerImage(
+        width: canvasWidth,
+        height: canvasHeight,
+        color: const Color(0xFF3366AA),
+      );
+      addTearDown(layerImage.dispose);
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+
+      final int actionsBefore = appProvider.layers.selectedLayer.actionStack.length;
+
+      await appProvider.commitEffectBrushStroke(
+        effect: SelectionEffect.blur,
+        strength: AppEffects.defaultIntensity,
+        size: AppEffects.minSize,
+        strokePoints: <Offset>[const Offset(20, 20), const Offset(80, 60)],
+        strokeBounds: const Rect.fromLTRB(20, 20, 80, 60),
+        brushSize: 30,
+        clipPath: null,
+      );
+
+      expect(appProvider.layers.selectedLayer.actionStack.length, actionsBefore + 1);
+      final UserActionDrawing committed = appProvider.layers.selectedLayer.actionStack.last;
+      expect(committed.action, ActionType.image);
+      expect(committed.image, isNotNull);
+      expect(appProvider.undoProvider.canUndo, isTrue);
+
+      // The patch must be masked to the brushed band: opaque along the stroke,
+      // transparent in the region corner away from it (guards against the
+      // whole-region-rectangle masking bug).
+      final Image patch = committed.image!;
+      final ByteData patchData = (await patch.toByteData(format: ImageByteFormat.rawRgba))!;
+      int alphaAt(final int x, final int y) => patchData.getUint8(
+        (((y * patch.width) + x) * AppMath.bytesPerPixel) + AppEffects.alphaChannelIndex,
+      );
+      expect(alphaAt(45, 35), greaterThan(AppMath.zero));
+      expect(alphaAt(2, 2), AppMath.zero);
+
+      appProvider.undoProvider.undo();
+      expect(appProvider.layers.selectedLayer.actionStack.length, actionsBefore);
+    });
+
+    test('commitEffectBrushStroke ignores strokes with fewer than two points', () async {
+      final int actionsBefore = appProvider.layers.selectedLayer.actionStack.length;
+
+      await appProvider.commitEffectBrushStroke(
+        effect: SelectionEffect.blur,
+        strength: AppEffects.defaultIntensity,
+        size: AppEffects.minSize,
+        strokePoints: <Offset>[const Offset(10, 10)],
+        strokeBounds: const Rect.fromLTRB(10, 10, 11, 11),
+        brushSize: 10,
+        clipPath: null,
+      );
+
+      expect(appProvider.layers.selectedLayer.actionStack.length, actionsBefore);
+    });
+  });
+
   group('getPathAdjustToCanvasSizeAndPosition', () {
     test('returns null for null path', () {
       expect(appProvider.getPathAdjustToCanvasSizeAndPosition(null), isNull);

@@ -92,17 +92,17 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('es'), Locale('fr')];
 
+  /// No description provided for @paint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paint'**
+  String get paint;
+
   /// No description provided for @about.
   ///
   /// In en, this message translates to:
   /// **'About...'**
   String get about;
-
-  /// No description provided for @clippedToSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Clipped to selection'**
-  String get clippedToSelection;
 
   /// No description provided for @addAsNewLayer.
   ///
@@ -307,6 +307,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Canvas Size'**
   String get canvasSizeTitle;
+
+  /// No description provided for @clippedToSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clipped to selection'**
+  String get clippedToSelection;
 
   /// No description provided for @close.
   ///

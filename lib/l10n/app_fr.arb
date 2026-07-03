@@ -209,6 +209,7 @@
   "newCanvasSize": "Nouvelle taille de toile",
   "newFromClipboard": "Importé du Presse-papiers",
   "no": "Non",
+  "paint": "Peindre",
   "paste": "Coller",
   "pencilSize": "Taille du crayon",
   "percentageValue": "Echelle : {value} %",

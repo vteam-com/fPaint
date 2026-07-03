@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/models/effect_brush_model.dart';
 import 'package:fpaint/models/effect_preview_model.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
@@ -569,6 +570,9 @@ class AppProvider extends ChangeNotifier {
 
   /// The effect preview model for live selection-effect intensity updates.
   final EffectPreviewModel effectPreviewModel = EffectPreviewModel();
+
+  /// The paint-mode state for brushing an Adjust effect onto the canvas.
+  final EffectBrushModel effectBrushModel = EffectBrushModel();
 
   /// Monotonic token that invalidates stale async effect preview renders.
   int effectPreviewRenderVersion = 0;

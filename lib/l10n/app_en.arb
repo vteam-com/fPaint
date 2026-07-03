@@ -216,6 +216,7 @@
   "@no": {
     "description": "REVIEWED"
   },
+  "paint": "Paint",
   "paste": "Paste",
   "pencilSize": "Pencil Size",
   "percentageValue": "{value}%",

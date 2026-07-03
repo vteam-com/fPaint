@@ -207,6 +207,7 @@
   "newCanvasSize": "Tamano del nuevo lienzo",
   "newFromClipboard": "Nuevo desde el portapapeles",
   "no": "No",
+  "paint": "Pintar",
   "paste": "Pegar",
   "pencilSize": "Tamaño del lápiz",
   "percentageValue": "Escala: {value}%",

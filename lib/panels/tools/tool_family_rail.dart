@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
 import 'package:fpaint/models/tool_family.dart';
@@ -10,6 +12,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_divider.dart';
+import 'package:fpaint/widgets/app_slider.dart';
 import 'package:fpaint/widgets/app_snackbar.dart';
 import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/side_panel_header.dart';
@@ -156,7 +159,10 @@ class _AdjustFamily extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final AppLocalizations l10n = context.l10n;
-    final SelectionEffect? selectedEffect = appProvider.effectPreviewModel.effect;
+    final bool paintMode = appProvider.effectBrushModel.paintMode;
+    final SelectionEffect? selectedEffect = paintMode
+        ? appProvider.effectBrushModel.effect
+        : appProvider.effectPreviewModel.effect;
     final bool hasPreview = appProvider.effectPreviewModel.isVisible;
 
     return Padding(
@@ -168,9 +174,24 @@ class _AdjustFamily extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          SidePanelHeader(
-            title: toolFamilyLabel(l10n, ToolFamily.adjust),
-            padding: EdgeInsets.zero,
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: SidePanelHeader(
+                  title: toolFamilyLabel(l10n, ToolFamily.adjust),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+              AppButtonIcon(
+                key: Keys.effectPaintModeToggle,
+                icon: AppIcon.brush,
+                isSelected: paintMode,
+                tooltip: l10n.paint,
+                constraints: minimal ? const BoxConstraints() : null,
+                padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
+                onPressed: () => appProvider.setEffectPaintMode(enabled: !paintMode),
+              ),
+            ],
           ),
           const SizedBox(height: AppSpacing.small),
           Wrap(
@@ -191,13 +212,14 @@ class _AdjustFamily extends StatelessWidget {
                     l10n,
                     descriptor.effect!,
                     selectedEffect,
-                    hasPreview,
+                    hasPreview: hasPreview,
+                    paintMode: paintMode,
                   ),
                 ),
             ],
           ),
-          if (hasPreview) const AppDivider(),
-          if (hasPreview)
+          if (!paintMode && hasPreview) const AppDivider(),
+          if (!paintMode && hasPreview)
             EffectIntensityControls(
               key: ValueKey<SelectionEffect?>(selectedEffect),
               appProvider: appProvider,
@@ -206,20 +228,43 @@ class _AdjustFamily extends StatelessWidget {
               applyButtonKey: Keys.effectIntensityPanelApplyButton,
               cancelButtonKey: Keys.effectIntensityCancelButton,
             ),
+          if (paintMode && selectedEffect != null)
+            Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.small),
+              child: AppSlider(
+                key: Keys.effectPaintStrengthSlider,
+                label: effectLabel(l10n, selectedEffect),
+                value: appProvider.effectBrushModel.strength,
+                valueLabel: '${(appProvider.effectBrushModel.strength * AppMath.percentScale).round()}%',
+                min: AppEffects.minIntensity,
+                max: AppEffects.maxIntensity,
+                onChanged: (final double value) => appProvider.setEffectBrushStrength(value),
+              ),
+            ),
         ],
       ),
     );
   }
 
-  /// Toggles [effect]'s live preview: cancels it when already active,
-  /// otherwise starts it (unless the selected layer is locked).
+  /// Handles an effect button tap. In Paint mode it arms/disarms the effect for
+  /// brushing; otherwise it toggles the whole-region Apply preview.
   Future<void> _onEffectPressed(
     final BuildContext context,
     final AppLocalizations l10n,
     final SelectionEffect effect,
-    final SelectionEffect? selectedEffect,
-    final bool hasPreview,
-  ) async {
+    final SelectionEffect? selectedEffect, {
+    required final bool hasPreview,
+    required final bool paintMode,
+  }) async {
+    if (paintMode) {
+      if (selectedEffect == effect) {
+        appProvider.disarmEffectBrush();
+      } else {
+        appProvider.armEffectBrush(effect);
+      }
+      return;
+    }
+
     if (hasPreview && selectedEffect == effect) {
       appProvider.cancelEffectPreview();
       return;

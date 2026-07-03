@@ -282,6 +282,25 @@ void main() {
 
       expect(appProvider.effectPreviewModel.isVisible, isFalse);
     });
+
+    testWidgets('paint mode arms an effect and reveals the strength slider', (final WidgetTester tester) async {
+      await pumpToolsPanel(tester);
+
+      final Finder paintToggle = find.byKey(Keys.effectPaintModeToggle);
+      await tester.ensureVisible(paintToggle);
+      await tester.tap(paintToggle);
+      await tester.pumpAndSettle();
+      expect(appProvider.effectBrushModel.paintMode, isTrue);
+
+      final Finder blurEffect = find.byKey(const ValueKey<SelectionEffect>(SelectionEffect.blur));
+      await tester.ensureVisible(blurEffect);
+      await tester.tap(blurEffect);
+      await tester.pumpAndSettle();
+
+      expect(appProvider.effectBrushModel.isArmed, isTrue);
+      expect(appProvider.effectBrushModel.effect, SelectionEffect.blur);
+      expect(find.byKey(Keys.effectPaintStrengthSlider), findsOneWidget);
+    });
   });
 
   group('ToolsPanel sections', () {

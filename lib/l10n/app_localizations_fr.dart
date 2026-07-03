@@ -9,10 +9,10 @@ class AppLocalizationsFr extends AppLocalizations {
   AppLocalizationsFr([String locale = 'fr']) : super(locale);
 
   @override
-  String get about => 'A propos...';
+  String get paint => 'Peindre';
 
   @override
-  String get clippedToSelection => 'Rogné sur la sélection';
+  String get about => 'A propos...';
 
   @override
   String get addAsNewLayer => 'Ajouter comme nouveau calque';
@@ -126,6 +126,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get canvasSizeTitle => 'Taille de la toile';
+
+  @override
+  String get clippedToSelection => 'Rogné sur la sélection';
 
   @override
   String get close => 'Fermer';

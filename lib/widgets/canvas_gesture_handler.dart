@@ -13,6 +13,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
+import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -46,6 +47,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   int _activePointerId = -1;
   final List<int> _activePointers = <int>[];
   double _baseDistance = 0.0;
+
+  /// Whether the active gesture is a paint-mode effect stroke: it reuses the
+  /// pixel-brush gesture capture but commits the armed Adjust effect on
+  /// pointer-up instead of a smudge/blur dab.
+  bool _effectBrushStroke = false;
   Offset? _lastSelectionTapCanvasPosition;
   Duration? _lastSelectionTapTimestamp;
 

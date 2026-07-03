@@ -166,13 +166,17 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         if (appProvider.selectorModel.mode != SelectorMode.line || !appProvider.selectorModel.isDrawing) {
           _clearSelectionTapTracking();
         }
-      } else if (_pixelBrushLayerRestoreState != null) {
+      } else if (_pixelBrushLayerRestoreState != null || _effectBrushStroke) {
         _appendPixelBrushPoint(appProvider.toCanvas(event.localPosition), appProvider.brushSize);
         // Marquee stays visible across the (async) one-shot render, switching to
         // a processing shimmer while the commit generates the image, then is
-        // cleared once the committed smudge/blur is on the layer.
+        // cleared once the committed stroke is on the layer.
         appProvider.setPixelBrushCommitting(committing: true);
-        await _commitPixelBrushStroke(appProvider);
+        if (_effectBrushStroke) {
+          await _commitEffectBrushStroke(appProvider);
+        } else {
+          await _commitPixelBrushStroke(appProvider);
+        }
         appProvider.clearPixelBrushGesture();
         _clearSelectionTapTracking();
       } else {
@@ -189,6 +193,43 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       unawaited(controller.flushNow());
       appProvider.update();
     }
+  }
+
+  /// Starts a paint-mode effect stroke. Reuses the pixel-brush gesture capture
+  /// (points, bounds, marquee); the armed Adjust effect is committed on
+  /// pointer-up by [_commitEffectBrushStroke].
+  void _startEffectBrushStroke(
+    final AppProvider appProvider,
+    final ui.Offset adjustedPosition,
+  ) {
+    _clearPixelBrushStroke();
+    _effectBrushStroke = true;
+    _pixelBrushClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null
+        ? ui.Path.from(appProvider.selectorModel.path1!)
+        : null;
+    _appendPixelBrushPoint(adjustedPosition, appProvider.brushSize);
+    appProvider.showPixelBrushGesture(
+      points: _pixelBrushStrokePoints,
+      size: appProvider.brushSize,
+    );
+  }
+
+  /// Commits the active paint-mode effect stroke through the provider.
+  Future<void> _commitEffectBrushStroke(final AppProvider appProvider) async {
+    final ui.Rect? patchBounds = _pixelBrushStrokePatchBounds;
+    final SelectionEffect? effect = appProvider.effectBrushModel.effect;
+    if (patchBounds == null || effect == null || _pixelBrushStrokePoints.length < AppMath.pair) {
+      return;
+    }
+    await appProvider.commitEffectBrushStroke(
+      effect: effect,
+      strength: appProvider.effectBrushModel.strength,
+      size: appProvider.effectBrushModel.size,
+      strokePoints: List<ui.Offset>.of(_pixelBrushStrokePoints),
+      strokeBounds: patchBounds,
+      brushSize: appProvider.brushSize,
+      clipPath: _pixelBrushClipPath,
+    );
   }
 
   /// Handles pointer move events for drawing, selection, and eyedropper interactions.
@@ -228,7 +269,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         return;
       }
 
-      if (_pixelBrushLayerRestoreState != null) {
+      if (_pixelBrushLayerRestoreState != null || _effectBrushStroke) {
         // No live rasterization: just extend the gesture and redraw the swept-
         // band marquee. The smudge/blur is rendered once on pointer-up, so the
         // drag stays responsive at any canvas size and the marquee is the sole
@@ -523,6 +564,11 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     final ui.Offset adjustedPosition,
   ) {
     appProvider.layers.selectedLayer.isUserDrawing = true;
+
+    if (appProvider.effectBrushModel.isArmed) {
+      _startEffectBrushStroke(appProvider, adjustedPosition);
+      return;
+    }
 
     if (appProvider.selectedAction == ActionType.smudge) {
       _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.smudge);
