@@ -551,6 +551,36 @@ void main() {
       expect(appProvider.effectPreviewModel.isVisible, isFalse);
     });
 
+    test('targets the whole layer when no selection is visible', () async {
+      final int canvasWidth = appProvider.layers.width.toInt();
+      final int canvasHeight = appProvider.layers.height.toInt();
+      final Image layerImage = await createFilledLayerImage(
+        width: canvasWidth,
+        height: canvasHeight,
+        color: const Color(0xFF112233),
+      );
+      addTearDown(layerImage.dispose);
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+
+      expect(appProvider.selectorModel.isVisible, isFalse);
+
+      await appProvider.startEffectPreview(SelectionEffect.blur);
+
+      expect(appProvider.effectPreviewModel.isVisible, isTrue);
+      // A layer-wide effect must not leave a lingering select-all region.
+      expect(appProvider.selectorModel.isVisible, isFalse);
+
+      final Rect bounds = appProvider.effectPreviewModel.bounds!;
+      expect(bounds.width, appProvider.layers.width);
+      expect(bounds.height, appProvider.layers.height);
+
+      await appProvider.confirmEffectPreview();
+
+      final UserActionDrawing committedAction = appProvider.layers.selectedLayer.actionStack.last;
+      expect(committedAction.action, ActionType.image);
+      expect(appProvider.effectPreviewModel.isVisible, isFalse);
+    });
+
     test('masks preview and commit to the selection shape', () async {
       final int canvasWidth = appProvider.layers.width.toInt();
       final int canvasHeight = appProvider.layers.height.toInt();
@@ -661,6 +691,31 @@ void main() {
         ),
       );
       expect(appProvider.undoProvider.canUndo, isTrue);
+    });
+
+    test('persists across a tool switch and clips the new tool to the selection', () {
+      // Make a selection while in selector mode.
+      appProvider.activateSelectionAction();
+      appProvider.selectAll();
+      expect(appProvider.selectorModel.isVisible, isTrue);
+
+      // Switching to a gesture tool must NOT clear the selection.
+      appProvider.selectedAction = ActionType.brush;
+      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.selectorModel.isVisible, isTrue);
+
+      // A stroke on the gesture tool is clipped to the persistent selection.
+      appProvider.recordExecuteDrawingActionToSelectedLayer(
+        action: UserActionDrawing(
+          positions: <Offset>[const Offset(0, 0), const Offset(10, 10)],
+          action: ActionType.brush,
+          brush: MyBrush(color: const Color(0xFF000000), size: 5),
+        ),
+      );
+
+      final UserActionDrawing recorded = appProvider.layers.selectedLayer.actionStack.last;
+      expect(recorded.clipPath, isNotNull);
+      expect(recorded.clipPath!.getBounds().width, appProvider.layers.width);
     });
   });
 

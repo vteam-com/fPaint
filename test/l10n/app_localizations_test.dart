@@ -189,8 +189,10 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.savedLabel, isNotEmpty);
   expect(l10n.savingLabel, isNotEmpty);
   expect(l10n.selectValue('all'), isNotEmpty);
-  expect(l10n.sidePanelBrushesSection, isNotEmpty);
   expect(l10n.sidePanelLayersSection, isNotEmpty);
+  expect(l10n.toolFamilyAdjust, isNotEmpty);
+  expect(l10n.toolFamilyDraw, isNotEmpty);
+  expect(l10n.toolFamilyRetouch, isNotEmpty);
   expect(l10n.topColors('5'), isNotEmpty);
 }
 

@@ -4,6 +4,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
@@ -252,6 +253,34 @@ void main() {
 
       expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolFill)).isSelected, isFalse);
       expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolSmudge)).isSelected, isTrue);
+    });
+  });
+
+  group('ToolsPanel adjust family', () {
+    testWidgets('starts and toggles an effect preview from the rail without a selection', (
+      final WidgetTester tester,
+    ) async {
+      await pumpToolsPanel(tester);
+
+      expect(appProvider.effectPreviewModel.isVisible, isFalse);
+      expect(appProvider.selectorModel.isVisible, isFalse);
+
+      final Finder blurEffect = find.byKey(const ValueKey<SelectionEffect>(SelectionEffect.blur));
+      await tester.ensureVisible(blurEffect);
+      await tester.tap(blurEffect);
+      await tester.pumpAndSettle();
+
+      // Effect applies to the whole layer — no selection required.
+      expect(appProvider.effectPreviewModel.isVisible, isTrue);
+      expect(appProvider.effectPreviewModel.effect, SelectionEffect.blur);
+      expect(find.byKey(Keys.effectIntensityCancelButton), findsOneWidget);
+
+      // Tapping the active effect again toggles the preview off.
+      await tester.ensureVisible(blurEffect);
+      await tester.tap(blurEffect);
+      await tester.pumpAndSettle();
+
+      expect(appProvider.effectPreviewModel.isVisible, isFalse);
     });
   });
 

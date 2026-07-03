@@ -12,6 +12,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get about => 'A propos...';
 
   @override
+  String get clippedToSelection => 'Rogné sur la sélection';
+
+  @override
   String get addAsNewLayer => 'Ajouter comme nouveau calque';
 
   @override
@@ -125,6 +128,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get canvasSizeTitle => 'Taille de la toile';
 
   @override
+  String get close => 'Fermer';
+
+  @override
   String get colorLabel => 'Couleur';
 
   @override
@@ -132,9 +138,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get colorPickerModeWheel => 'Roue';
-
-  @override
-  String get close => 'Fermer';
 
   @override
   String get colorTolerance => 'Tolérance de couleur';
@@ -535,9 +538,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settings => 'Parametres...';
 
   @override
-  String get sidePanelBrushesSection => 'Pinceaux';
-
-  @override
   String get sidePanelLayersSection => 'Calques';
 
   @override
@@ -581,6 +581,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get toolEraser => 'Gomme';
+
+  @override
+  String get toolFamilyAdjust => 'Ajuster';
+
+  @override
+  String get toolFamilyDraw => 'Dessiner';
+
+  @override
+  String get toolFamilyRetouch => 'Retouche';
 
   @override
   String get toolFill => 'Remplissage';

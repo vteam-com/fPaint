@@ -38,6 +38,7 @@
   "canvas": "Canvas...",
   "canvasDimensionsMustBePositive": "Canvas dimensions must be positive.",
   "canvasSizeTitle": "Canvas Size",
+  "clippedToSelection": "Clipped to selection",
   "close": "Close",
   "colorLabel": "Color",
   "@colorLabel": {
@@ -247,7 +248,6 @@
     }
   },
   "settings": "Settings...",
-  "sidePanelBrushesSection": "Brushes",
   "sidePanelLayersSection": "Layers",
   "startOver": "Start new...",
   "startOverTooltip": "Start new...",
@@ -263,6 +263,9 @@
   "toolCircle": "Circle",
   "toolCrop": "Crop",
   "toolEraser": "Eraser",
+  "toolFamilyAdjust": "Adjust",
+  "toolFamilyDraw": "Draw",
+  "toolFamilyRetouch": "Retouch",
   "toolFill": "Fill",
   "toolHalftone": "Halftone",
   "toolInvert": "Invert",

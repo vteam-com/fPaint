@@ -101,6 +101,10 @@ extension AppProviderSelectionEffects on AppProvider {
   }
 
   /// Starts live preview mode for the selected [effect], [strength], and [size].
+  ///
+  /// Targets the active selection when one is visible; otherwise the effect
+  /// applies to the whole active layer without creating a lingering
+  /// select-all region.
   Future<void> startEffectPreview(
     final SelectionEffect effect, {
     final double strength = AppEffects.defaultIntensity,
@@ -110,19 +114,29 @@ extension AppProviderSelectionEffects on AppProvider {
       return;
     }
 
-    _ensureSelection();
+    final bool hasSelection = selectorModel.isVisible && selectorModel.path1 != null;
 
-    final ui.Image? clippedImage = await createSelectionImage();
-    if (clippedImage == null) {
-      return;
+    final Path selectionPath;
+    final Rect bounds;
+    final ui.Image sourceImage;
+
+    if (hasSelection) {
+      final ui.Image? clippedImage = await createSelectionImage();
+      if (clippedImage == null) {
+        return;
+      }
+      sourceImage = clippedImage;
+      selectionPath = Path.from(selectorModel.path1!);
+      bounds = selectorModel.path1!.getBounds();
+    } else {
+      bounds = Offset.zero & layers.size;
+      selectionPath = Path()..addRect(bounds);
+      sourceImage = layers.selectedLayer.toImageForStorage(layers.size);
     }
-
-    final Path selectionPath = Path.from(selectorModel.path1!);
-    final Rect bounds = selectorModel.path1!.getBounds();
 
     effectPreviewModel.start(
       selectedEffect: effect,
-      selectionImage: clippedImage,
+      selectionImage: sourceImage,
       selectionPath: selectionPath,
       selectionBounds: bounds,
       initialStrength: strength,

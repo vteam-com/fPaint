@@ -12,6 +12,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get about => 'Acerca de...';
 
   @override
+  String get clippedToSelection => 'Recortado a la selección';
+
+  @override
   String get addAsNewLayer => 'Agregar como nueva capa';
 
   @override
@@ -122,6 +125,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get canvasSizeTitle => 'Tamano del lienzo';
 
   @override
+  String get close => 'Cerrar';
+
+  @override
   String get colorLabel => 'Color';
 
   @override
@@ -129,9 +135,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get colorPickerModeWheel => 'Rueda';
-
-  @override
-  String get close => 'Cerrar';
 
   @override
   String get colorTolerance => 'Tolerancia de color';
@@ -531,9 +534,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings => 'Configuracion...';
 
   @override
-  String get sidePanelBrushesSection => 'Pinceles';
-
-  @override
   String get sidePanelLayersSection => 'Capas';
 
   @override
@@ -577,6 +577,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get toolEraser => 'Borrador';
+
+  @override
+  String get toolFamilyAdjust => 'Ajustar';
+
+  @override
+  String get toolFamilyDraw => 'Dibujar';
+
+  @override
+  String get toolFamilyRetouch => 'Retoque';
 
   @override
   String get toolFill => 'Relleno';

@@ -98,6 +98,12 @@ abstract class AppLocalizations {
   /// **'About...'**
   String get about;
 
+  /// No description provided for @clippedToSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Clipped to selection'**
+  String get clippedToSelection;
+
   /// No description provided for @addAsNewLayer.
   ///
   /// In en, this message translates to:
@@ -302,6 +308,12 @@ abstract class AppLocalizations {
   /// **'Canvas Size'**
   String get canvasSizeTitle;
 
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
   /// REVIEWED
   ///
   /// In en, this message translates to:
@@ -319,12 +331,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wheel'**
   String get colorPickerModeWheel;
-
-  /// No description provided for @close.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get close;
 
   /// No description provided for @colorTolerance.
   ///
@@ -1058,12 +1064,6 @@ abstract class AppLocalizations {
   /// **'Settings...'**
   String get settings;
 
-  /// No description provided for @sidePanelBrushesSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Brushes'**
-  String get sidePanelBrushesSection;
-
   /// No description provided for @sidePanelLayersSection.
   ///
   /// In en, this message translates to:
@@ -1153,6 +1153,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Eraser'**
   String get toolEraser;
+
+  /// No description provided for @toolFamilyAdjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust'**
+  String get toolFamilyAdjust;
+
+  /// No description provided for @toolFamilyDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw'**
+  String get toolFamilyDraw;
+
+  /// No description provided for @toolFamilyRetouch.
+  ///
+  /// In en, this message translates to:
+  /// **'Retouch'**
+  String get toolFamilyRetouch;
 
   /// No description provided for @toolFill.
   ///

@@ -12,6 +12,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get about => 'About...';
 
   @override
+  String get clippedToSelection => 'Clipped to selection';
+
+  @override
   String get addAsNewLayer => 'Add as new layer';
 
   @override
@@ -124,6 +127,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get canvasSizeTitle => 'Canvas Size';
 
   @override
+  String get close => 'Close';
+
+  @override
   String get colorLabel => 'Color';
 
   @override
@@ -131,9 +137,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get colorPickerModeWheel => 'Wheel';
-
-  @override
-  String get close => 'Close';
 
   @override
   String get colorTolerance => 'Color Tolerance';
@@ -533,9 +536,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings...';
 
   @override
-  String get sidePanelBrushesSection => 'Brushes';
-
-  @override
   String get sidePanelLayersSection => 'Layers';
 
   @override
@@ -579,6 +579,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toolEraser => 'Eraser';
+
+  @override
+  String get toolFamilyAdjust => 'Adjust';
+
+  @override
+  String get toolFamilyDraw => 'Draw';
+
+  @override
+  String get toolFamilyRetouch => 'Retouch';
 
   @override
   String get toolFill => 'Fill';
