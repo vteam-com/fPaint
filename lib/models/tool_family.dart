@@ -3,33 +3,16 @@ import 'package:fpaint/models/user_action_drawing.dart';
 
 /// High-level grouping of tools by how they change pixels.
 ///
-/// The tool rail presents families in this order so related tools sit
-/// together and the user never has to switch between a "brush mode" and an
-/// "effect mode": everything applied by gesture is a brush, region filters
-/// live under [adjust], and selection is an orthogonal modifier.
+/// The rail presents the two families so the user never switches between a
+/// "brush mode" and an "effect mode": everything applied by gesture (including
+/// smudge) is a brush under [draw], region filters live under [adjust], and
+/// selection is an orthogonal modifier.
 enum ToolFamily {
-  /// Deposit colour by gesture — pencil, brush, shapes, fill, eraser, text.
+  /// Applied by gesture — pencil, brush, smudge, shapes, fill, eraser, text.
   draw,
-
-  /// Modify existing pixels by gesture — smudge, blur.
-  retouch,
 
   /// Region filter applied to the layer or selection — the effects.
   adjust,
-}
-
-/// Gesture tools that modify existing pixels rather than deposit colour.
-const Set<ActionType> kRetouchActions = <ActionType>{
-  ActionType.smudge,
-  ActionType.blurBrush,
-};
-
-/// The [ToolFamily] a gesture [action] belongs to.
-///
-/// Adjustments are backed by effects, not [ActionType]s, so this only
-/// distinguishes the two gesture families.
-ToolFamily familyOfAction(final ActionType action) {
-  return kRetouchActions.contains(action) ? ToolFamily.retouch : ToolFamily.draw;
 }
 
 /// Localized section header for a tool [family].
@@ -37,8 +20,6 @@ String toolFamilyLabel(final AppLocalizations l10n, final ToolFamily family) {
   switch (family) {
     case ToolFamily.draw:
       return l10n.toolFamilyDraw;
-    case ToolFamily.retouch:
-      return l10n.toolFamilyRetouch;
     case ToolFamily.adjust:
       return l10n.toolFamilyAdjust;
   }

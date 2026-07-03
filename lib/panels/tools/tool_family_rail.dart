@@ -46,13 +46,7 @@ class ToolFamilyRail extends StatelessWidget {
         ListenableBuilder(
           listenable: appProvider.selectedActionRepaintListenable,
           builder: (final BuildContext context, final Widget? _) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                _gestureFamily(context, appProvider, ToolFamily.draw),
-                _gestureFamily(context, appProvider, ToolFamily.retouch),
-              ],
-            );
+            return _gestureFamily(context, appProvider, ToolFamily.draw);
           },
         ),
         ?gestureParams,
@@ -231,14 +225,28 @@ class _AdjustFamily extends StatelessWidget {
           if (paintMode && selectedEffect != null)
             Padding(
               padding: const EdgeInsets.only(top: AppSpacing.small),
-              child: AppSlider(
-                key: Keys.effectPaintStrengthSlider,
-                label: effectLabel(l10n, selectedEffect),
-                value: appProvider.effectBrushModel.strength,
-                valueLabel: '${(appProvider.effectBrushModel.strength * AppMath.percentScale).round()}%',
-                min: AppEffects.minIntensity,
-                max: AppEffects.maxIntensity,
-                onChanged: (final double value) => appProvider.setEffectBrushStrength(value),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  AppSlider(
+                    key: Keys.effectPaintSizeSlider,
+                    label: l10n.brushSize,
+                    value: appProvider.brushSize,
+                    valueLabel: appProvider.brushSize.toStringAsFixed(AppMath.zero),
+                    min: AppInteraction.minCanvasScale,
+                    max: AppLimits.pixelBrushSizeMax.toDouble(),
+                    onChanged: (final double value) => appProvider.brushSize = value,
+                  ),
+                  AppSlider(
+                    key: Keys.effectPaintStrengthSlider,
+                    label: effectLabel(l10n, selectedEffect),
+                    value: appProvider.effectBrushModel.strength,
+                    valueLabel: '${(appProvider.effectBrushModel.strength * AppMath.percentScale).round()}%',
+                    min: AppEffects.minIntensity,
+                    max: AppEffects.maxIntensity,
+                    onChanged: (final double value) => appProvider.setEffectBrushStrength(value),
+                  ),
+                ],
               ),
             ),
         ],

@@ -9,9 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get paint => 'Paint';
-
-  @override
   String get about => 'About...';
 
   @override
@@ -482,6 +479,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no => 'No';
 
   @override
+  String get paint => 'Paint';
+
+  @override
   String get paste => 'Paste';
 
   @override
@@ -588,9 +588,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toolFamilyDraw => 'Draw';
-
-  @override
-  String get toolFamilyRetouch => 'Retouch';
 
   @override
   String get toolFill => 'Fill';

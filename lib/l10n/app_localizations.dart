@@ -92,12 +92,6 @@ abstract class AppLocalizations {
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[Locale('en'), Locale('es'), Locale('fr')];
 
-  /// No description provided for @paint.
-  ///
-  /// In en, this message translates to:
-  /// **'Paint'**
-  String get paint;
-
   /// No description provided for @about.
   ///
   /// In en, this message translates to:
@@ -968,6 +962,12 @@ abstract class AppLocalizations {
   /// **'No'**
   String get no;
 
+  /// No description provided for @paint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paint'**
+  String get paint;
+
   /// No description provided for @paste.
   ///
   /// In en, this message translates to:
@@ -1171,12 +1171,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Draw'**
   String get toolFamilyDraw;
-
-  /// No description provided for @toolFamilyRetouch.
-  ///
-  /// In en, this message translates to:
-  /// **'Retouch'**
-  String get toolFamilyRetouch;
 
   /// No description provided for @toolFill.
   ///

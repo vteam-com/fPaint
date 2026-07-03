@@ -82,6 +82,7 @@ class Keys {
   static const Key effectSizeDialogSlider = Key('effect-size-dialog-slider');
   static const Key effectPaintModeToggle = Key('effect-paint-mode-toggle');
   static const Key effectPaintStrengthSlider = Key('effect-paint-strength-slider');
+  static const Key effectPaintSizeSlider = Key('effect-paint-size-slider');
 
   static const Key toolBrushSizeTool = Key('tool-brush-size-tool');
   static const Key toolBrushSizeButton = Key('tool-brush-size-button');

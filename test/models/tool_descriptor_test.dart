@@ -14,33 +14,27 @@ void main() {
     l10n = await AppLocalizations.delegate.load(const Locale('en'));
   });
 
-  group('familyOfAction', () {
-    test('gesture paint tools belong to the draw family', () {
-      for (final ActionType action in <ActionType>[
-        ActionType.pencil,
-        ActionType.brush,
-        ActionType.line,
-        ActionType.rectangle,
-        ActionType.circle,
-        ActionType.fill,
-        ActionType.eraser,
-        ActionType.text,
-      ]) {
-        expect(familyOfAction(action), ToolFamily.draw);
-      }
+  group('tool families', () {
+    test('every rail gesture tool, including smudge, is in the Draw family', () {
+      final List<ActionType?> drawActions = toolsInFamily(
+        ToolFamily.draw,
+      ).map((final ToolDescriptor d) => d.action).toList();
+      expect(drawActions, contains(ActionType.smudge));
+      expect(
+        toolsInFamily(ToolFamily.draw).every((final ToolDescriptor d) => d.action != null),
+        isTrue,
+      );
     });
 
-    test('smudge and blur belong to the retouch family', () {
-      expect(familyOfAction(ActionType.smudge), ToolFamily.retouch);
-      expect(familyOfAction(ActionType.blurBrush), ToolFamily.retouch);
-      expect(kRetouchActions, <ActionType>{ActionType.smudge, ActionType.blurBrush});
+    test('blur is not a rail gesture tool (it lives under Adjust)', () {
+      expect(kGestureToolOrder, contains(ActionType.smudge));
+      expect(kGestureToolOrder, isNot(contains(ActionType.blurBrush)));
     });
   });
 
   group('toolFamilyLabel', () {
     test('maps each family to its localized header', () {
       expect(toolFamilyLabel(l10n, ToolFamily.draw), l10n.toolFamilyDraw);
-      expect(toolFamilyLabel(l10n, ToolFamily.retouch), l10n.toolFamilyRetouch);
       expect(toolFamilyLabel(l10n, ToolFamily.adjust), l10n.toolFamilyAdjust);
     });
   });
@@ -50,7 +44,6 @@ void main() {
       expect(toolLabel(l10n, ActionType.pencil), l10n.toolPencil);
       expect(toolLabel(l10n, ActionType.brush), l10n.toolBrush);
       expect(toolLabel(l10n, ActionType.smudge), l10n.toolSmudge);
-      expect(toolLabel(l10n, ActionType.blurBrush), l10n.toolBlurBrush);
       expect(toolLabel(l10n, ActionType.line), l10n.toolLine);
       expect(toolLabel(l10n, ActionType.rectangle), l10n.toolRectangle);
       expect(toolLabel(l10n, ActionType.circle), l10n.toolCircle);
@@ -72,17 +65,10 @@ void main() {
       expect(toolRail().length, kGestureToolOrder.length + SelectionEffect.values.length);
     });
 
-    test('draw family lists the eight paint tools as gesture descriptors', () {
+    test('draw family lists all gesture tools as gesture descriptors', () {
       final List<ToolDescriptor> draw = toolsInFamily(ToolFamily.draw);
-      expect(draw.length, 8);
+      expect(draw.length, kGestureToolOrder.length);
       expect(draw.every((final ToolDescriptor d) => d.action != null), isTrue);
-    });
-
-    test('retouch family lists smudge then blur', () {
-      final List<ActionType> retouch = toolsInFamily(
-        ToolFamily.retouch,
-      ).map((final ToolDescriptor d) => d.action!).toList();
-      expect(retouch, <ActionType>[ActionType.smudge, ActionType.blurBrush]);
     });
 
     test('adjust family lists every effect as adjust descriptors', () {
@@ -95,7 +81,7 @@ void main() {
   group('descriptors expose family, icon, and label', () {
     test('gesture descriptor mirrors its action', () {
       const ToolDescriptor descriptor = ToolDescriptor.gesture(ActionType.smudge);
-      expect(descriptor.family, ToolFamily.retouch);
+      expect(descriptor.family, ToolFamily.draw);
       expect(descriptor.icon, ActionType.smudge.icon);
       expect(descriptor.label(l10n), l10n.toolSmudge);
     });

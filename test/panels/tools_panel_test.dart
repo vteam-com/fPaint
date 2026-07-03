@@ -300,6 +300,7 @@ void main() {
       expect(appProvider.effectBrushModel.isArmed, isTrue);
       expect(appProvider.effectBrushModel.effect, SelectionEffect.blur);
       expect(find.byKey(Keys.effectPaintStrengthSlider), findsOneWidget);
+      expect(find.byKey(Keys.effectPaintSizeSlider), findsOneWidget);
     });
   });
 
