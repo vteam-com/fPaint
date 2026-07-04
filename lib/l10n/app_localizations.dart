@@ -302,12 +302,6 @@ abstract class AppLocalizations {
   /// **'Canvas Size'**
   String get canvasSizeTitle;
 
-  /// No description provided for @clippedToSelection.
-  ///
-  /// In en, this message translates to:
-  /// **'Clipped to selection'**
-  String get clippedToSelection;
-
   /// No description provided for @close.
   ///
   /// In en, this message translates to:
@@ -530,23 +524,17 @@ abstract class AppLocalizations {
   /// **'Shadow'**
   String get effectShadow;
 
-  /// No description provided for @effectSharpen.
+  /// No description provided for @effectSharpness.
   ///
   /// In en, this message translates to:
-  /// **'Sharpen'**
-  String get effectSharpen;
+  /// **'Sharpness'**
+  String get effectSharpness;
 
   /// No description provided for @effectSize.
   ///
   /// In en, this message translates to:
   /// **'Size'**
   String get effectSize;
-
-  /// No description provided for @effectSoften.
-  ///
-  /// In en, this message translates to:
-  /// **'Edge Soften'**
-  String get effectSoften;
 
   /// No description provided for @effectVignette.
   ///
@@ -962,12 +950,6 @@ abstract class AppLocalizations {
   /// **'No'**
   String get no;
 
-  /// No description provided for @paint.
-  ///
-  /// In en, this message translates to:
-  /// **'Paint'**
-  String get paint;
-
   /// No description provided for @paste.
   ///
   /// In en, this message translates to:
@@ -1160,18 +1142,6 @@ abstract class AppLocalizations {
   /// **'Eraser'**
   String get toolEraser;
 
-  /// No description provided for @toolFamilyAdjust.
-  ///
-  /// In en, this message translates to:
-  /// **'Adjust'**
-  String get toolFamilyAdjust;
-
-  /// No description provided for @toolFamilyDraw.
-  ///
-  /// In en, this message translates to:
-  /// **'Draw'**
-  String get toolFamilyDraw;
-
   /// No description provided for @toolFill.
   ///
   /// In en, this message translates to:
@@ -1249,6 +1219,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Replace'**
   String get toolReplace;
+
+  /// No description provided for @toolSectionBrush.
+  ///
+  /// In en, this message translates to:
+  /// **'Brush'**
+  String get toolSectionBrush;
 
   /// No description provided for @toolSelector.
   ///

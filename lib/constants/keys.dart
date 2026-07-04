@@ -60,8 +60,6 @@ class Keys {
   static const Key toolSelectorCancel = Key('tool-selector-cancel');
   static const Key toolSelectorCopy = Key('tool-selector-copy');
   static const Key toolSelectorCut = Key('tool-selector-cut');
-  static const Key selectionClipBadge = Key('selection-clip-badge');
-  static const Key selectionClipBadgeClear = Key('selection-clip-badge-clear');
 
   static const Key toolPanelFillColor = Key('toolPanelFillColor');
   static const Key toolPanelHalftoneDotColor = Key('toolPanelHalftoneDotColor');
@@ -80,7 +78,6 @@ class Keys {
   static const Key effectIntensityDialogSlider = Key('effect-intensity-dialog-slider');
   static const Key effectSizeSlider = Key('effect-size-slider');
   static const Key effectSizeDialogSlider = Key('effect-size-dialog-slider');
-  static const Key effectPaintModeToggle = Key('effect-paint-mode-toggle');
   static const Key effectPaintStrengthSlider = Key('effect-paint-strength-slider');
   static const Key effectPaintSizeSlider = Key('effect-paint-size-slider');
 

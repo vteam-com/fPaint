@@ -64,8 +64,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.effectGrayscale, isNotEmpty);
   expect(l10n.effectNoise, isNotEmpty);
   expect(l10n.effectPixelate, isNotEmpty);
-  expect(l10n.effectSharpen, isNotEmpty);
-  expect(l10n.effectSoften, isNotEmpty);
+  expect(l10n.effectSharpness, isNotEmpty);
   expect(l10n.effectVignette, isNotEmpty);
   expect(l10n.effects, isNotEmpty);
   expect(l10n.enterYourTextHere, isNotEmpty);
@@ -190,8 +189,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.savingLabel, isNotEmpty);
   expect(l10n.selectValue('all'), isNotEmpty);
   expect(l10n.sidePanelLayersSection, isNotEmpty);
-  expect(l10n.toolFamilyAdjust, isNotEmpty);
-  expect(l10n.toolFamilyDraw, isNotEmpty);
+  expect(l10n.toolSectionBrush, isNotEmpty);
   expect(l10n.topColors('5'), isNotEmpty);
 }
 

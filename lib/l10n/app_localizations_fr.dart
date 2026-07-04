@@ -125,9 +125,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get canvasSizeTitle => 'Taille de la toile';
 
   @override
-  String get clippedToSelection => 'Rogné sur la sélection';
-
-  @override
   String get close => 'Fermer';
 
   @override
@@ -251,13 +248,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get effectShadow => 'Ombre';
 
   @override
-  String get effectSharpen => 'Netteté';
+  String get effectSharpness => 'Netteté';
 
   @override
   String get effectSize => 'Taille';
-
-  @override
-  String get effectSoften => 'Adoucir les bords';
 
   @override
   String get effectVignette => 'Vignetage';
@@ -481,9 +475,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get no => 'Non';
 
   @override
-  String get paint => 'Peindre';
-
-  @override
   String get paste => 'Coller';
 
   @override
@@ -586,12 +577,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toolEraser => 'Gomme';
 
   @override
-  String get toolFamilyAdjust => 'Ajuster';
-
-  @override
-  String get toolFamilyDraw => 'Dessiner';
-
-  @override
   String get toolFill => 'Remplissage';
 
   @override
@@ -629,6 +614,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get toolReplace => 'Remplacer';
+
+  @override
+  String get toolSectionBrush => 'Pinceau';
 
   @override
   String get toolSelector => 'Sélecteur';

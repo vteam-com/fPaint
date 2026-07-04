@@ -2,28 +2,24 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
-import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
-import 'package:fpaint/models/tool_family.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
-import 'package:fpaint/widgets/app_divider.dart';
 import 'package:fpaint/widgets/app_slider.dart';
-import 'package:fpaint/widgets/app_snackbar.dart';
-import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/side_panel_header.dart';
 
-/// The unified tool rail: gesture tools and region adjustments grouped into
-/// the Draw, Retouch, and Adjust families.
+/// The unified tool rail: every pixel-changing tool in one Brush section.
 ///
-/// Draw and Retouch select an [ActionType] to apply by gesture; Adjust starts
-/// a live effect preview. [gestureParams] holds the parameter controls for the
-/// currently selected gesture tool and is placed between the gesture families
-/// and Adjust so a tool's options sit directly beneath it.
+/// Gesture tools (pencil, brush, smudge, shapes, fill, eraser, text) and
+/// effects (blur, sharpness, brightness, …) share a single flat grid, because
+/// an effect is just a brush too — tapping one arms it as a brush and you paint
+/// it on. Exactly one tool is active at a time: arming an effect deselects the
+/// gesture tool and swaps [gestureParams] for the effect's brush controls (size
+/// and strength), and picking a gesture tool disarms the effect.
 class ToolFamilyRail extends StatelessWidget {
   const ToolFamilyRail({
     super.key,
@@ -40,51 +36,83 @@ class ToolFamilyRail extends StatelessWidget {
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        ListenableBuilder(
-          listenable: appProvider.selectedActionRepaintListenable,
-          builder: (final BuildContext context, final Widget? _) {
-            return _gestureFamily(context, appProvider, ToolFamily.draw);
-          },
-        ),
-        ?gestureParams,
-        ListenableBuilder(
-          listenable: appProvider.toolOptionsRepaintListenable,
-          builder: (final BuildContext _, final Widget? _) {
-            return _AdjustFamily(minimal: minimal, appProvider: appProvider);
-          },
-        ),
-      ],
+    return ListenableBuilder(
+      // Rebuild on tool change AND on effect arm/disarm + strength changes, so
+      // the selection highlight and the options panel always reflect the single
+      // active tool.
+      listenable: Listenable.merge(<Listenable>[
+        appProvider.selectedActionRepaintListenable,
+        appProvider.toolOptionsRepaintListenable,
+      ]),
+      builder: (final BuildContext context, final Widget? _) {
+        return _brushSection(context, appProvider);
+      },
     );
   }
 
-  /// Builds a titled group of gesture-tool buttons for [family].
-  Widget _gestureFamily(
-    final BuildContext context,
-    final AppProvider appProvider,
-    final ToolFamily family,
-  ) {
+  /// Builds the single Brush section: the flat tool grid plus the controls for
+  /// whichever tool is active (gesture params, or the armed effect's controls).
+  Widget _brushSection(final BuildContext context, final AppProvider appProvider) {
     final AppLocalizations l10n = context.l10n;
+    final SelectionEffect? armedEffect = appProvider.effectBrushModel.effect;
 
-    return _railSection(
-      title: toolFamilyLabel(l10n, family),
-      child: Wrap(
-        spacing: minimal ? AppSpacing.thin : AppSpacing.small,
-        runSpacing: minimal ? AppSpacing.thin : AppSpacing.small,
-        alignment: WrapAlignment.center,
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.medium,
+        vertical: AppSpacing.small,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          for (final ToolDescriptor descriptor in toolsInFamily(family))
-            AppButtonIcon(
-              key: _gestureToolKey(descriptor.action!),
-              icon: descriptor.icon,
-              isSelected: appProvider.selectedAction == descriptor.action,
-              tooltip: descriptor.label(l10n),
-              constraints: minimal ? const BoxConstraints() : null,
-              padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
-              onPressed: () => appProvider.selectedAction = descriptor.action!,
-            ),
+          SidePanelHeader(title: l10n.toolSectionBrush, padding: EdgeInsets.zero),
+          const SizedBox(height: AppSpacing.small),
+          Wrap(
+            spacing: minimal ? AppSpacing.thin : AppSpacing.small,
+            runSpacing: minimal ? AppSpacing.thin : AppSpacing.small,
+            alignment: WrapAlignment.center,
+            children: <Widget>[
+              for (final ToolDescriptor descriptor in toolRail())
+                _toolButton(l10n, appProvider, descriptor, armedEffect),
+            ],
+          ),
+          if (armedEffect == null && gestureParams != null) gestureParams!,
+          if (armedEffect != null) _effectControls(l10n, appProvider, armedEffect),
+        ],
+      ),
+    );
+  }
+
+  /// Brush controls for the [armedEffect]: brush size and strength. The effect
+  /// is applied by painting it onto the canvas.
+  Widget _effectControls(
+    final AppLocalizations l10n,
+    final AppProvider appProvider,
+    final SelectionEffect armedEffect,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.small),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          AppSlider(
+            key: Keys.effectPaintSizeSlider,
+            label: l10n.brushSize,
+            value: appProvider.brushSize,
+            valueLabel: appProvider.brushSize.toStringAsFixed(AppMath.zero),
+            min: AppInteraction.minCanvasScale,
+            max: AppLimits.pixelBrushSizeMax.toDouble(),
+            onChanged: (final double value) => appProvider.brushSize = value,
+          ),
+          AppSlider(
+            key: Keys.effectPaintStrengthSlider,
+            label: effectLabel(l10n, armedEffect),
+            value: appProvider.effectBrushModel.strength,
+            valueLabel: '${(appProvider.effectBrushModel.strength * AppMath.percentScale).round()}%',
+            min: armedEffect.bipolar ? -AppEffects.maxIntensity : AppEffects.minIntensity,
+            max: AppEffects.maxIntensity,
+            onChanged: (final double value) => appProvider.setEffectBrushStrength(value),
+          ),
         ],
       ),
     );
@@ -119,172 +147,40 @@ class ToolFamilyRail extends StatelessWidget {
     }
   }
 
-  /// Wraps [child] in a padded section headed by [title].
-  Widget _railSection({
-    required final String title,
-    required final Widget child,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.medium,
-        vertical: AppSpacing.small,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          SidePanelHeader(title: title, padding: EdgeInsets.zero),
-          const SizedBox(height: AppSpacing.small),
-          child,
-        ],
-      ),
-    );
-  }
-}
-
-/// The Adjust family: region-effect buttons plus the live preview controls.
-class _AdjustFamily extends StatelessWidget {
-  const _AdjustFamily({
-    required this.minimal,
-    required this.appProvider,
-  });
-  final AppProvider appProvider;
-  final bool minimal;
-  @override
-  Widget build(final BuildContext context) {
-    final AppLocalizations l10n = context.l10n;
-    final bool paintMode = appProvider.effectBrushModel.paintMode;
-    final SelectionEffect? selectedEffect = paintMode
-        ? appProvider.effectBrushModel.effect
-        : appProvider.effectPreviewModel.effect;
-    final bool hasPreview = appProvider.effectPreviewModel.isVisible;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.medium,
-        vertical: AppSpacing.small,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: SidePanelHeader(
-                  title: toolFamilyLabel(l10n, ToolFamily.adjust),
-                  padding: EdgeInsets.zero,
-                ),
-              ),
-              AppButtonIcon(
-                key: Keys.effectPaintModeToggle,
-                icon: AppIcon.brush,
-                isSelected: paintMode,
-                tooltip: l10n.paint,
-                constraints: minimal ? const BoxConstraints() : null,
-                padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
-                onPressed: () => appProvider.setEffectPaintMode(enabled: !paintMode),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.small),
-          Wrap(
-            spacing: minimal ? AppSpacing.thin : AppSpacing.small,
-            runSpacing: minimal ? AppSpacing.thin : AppSpacing.small,
-            alignment: WrapAlignment.center,
-            children: <Widget>[
-              for (final ToolDescriptor descriptor in toolsInFamily(ToolFamily.adjust))
-                AppButtonIcon(
-                  key: ValueKey<SelectionEffect>(descriptor.effect!),
-                  icon: descriptor.icon,
-                  isSelected: selectedEffect == descriptor.effect,
-                  tooltip: descriptor.label(l10n),
-                  constraints: minimal ? const BoxConstraints() : null,
-                  padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
-                  onPressed: () => _onEffectPressed(
-                    context,
-                    l10n,
-                    descriptor.effect!,
-                    selectedEffect,
-                    hasPreview: hasPreview,
-                    paintMode: paintMode,
-                  ),
-                ),
-            ],
-          ),
-          if (!paintMode && hasPreview) const AppDivider(),
-          if (!paintMode && hasPreview)
-            EffectIntensityControls(
-              key: ValueKey<SelectionEffect?>(selectedEffect),
-              appProvider: appProvider,
-              l10n: l10n,
-              sliderKey: Keys.effectIntensitySlider,
-              applyButtonKey: Keys.effectIntensityPanelApplyButton,
-              cancelButtonKey: Keys.effectIntensityCancelButton,
-            ),
-          if (paintMode && selectedEffect != null)
-            Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.small),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  AppSlider(
-                    key: Keys.effectPaintSizeSlider,
-                    label: l10n.brushSize,
-                    value: appProvider.brushSize,
-                    valueLabel: appProvider.brushSize.toStringAsFixed(AppMath.zero),
-                    min: AppInteraction.minCanvasScale,
-                    max: AppLimits.pixelBrushSizeMax.toDouble(),
-                    onChanged: (final double value) => appProvider.brushSize = value,
-                  ),
-                  AppSlider(
-                    key: Keys.effectPaintStrengthSlider,
-                    label: effectLabel(l10n, selectedEffect),
-                    value: appProvider.effectBrushModel.strength,
-                    valueLabel: '${(appProvider.effectBrushModel.strength * AppMath.percentScale).round()}%',
-                    min: AppEffects.minIntensity,
-                    max: AppEffects.maxIntensity,
-                    onChanged: (final double value) => appProvider.setEffectBrushStrength(value),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  /// Handles an effect button tap. In Paint mode it arms/disarms the effect for
-  /// brushing; otherwise it toggles the whole-region Apply preview.
-  Future<void> _onEffectPressed(
-    final BuildContext context,
+  /// A single rail button: a gesture tool that sets the active action, or an
+  /// effect that arms/disarms itself as a brush.
+  Widget _toolButton(
     final AppLocalizations l10n,
-    final SelectionEffect effect,
-    final SelectionEffect? selectedEffect, {
-    required final bool hasPreview,
-    required final bool paintMode,
-  }) async {
-    if (paintMode) {
-      if (selectedEffect == effect) {
-        appProvider.disarmEffectBrush();
-      } else {
-        appProvider.armEffectBrush(effect);
-      }
-      return;
-    }
+    final AppProvider appProvider,
+    final ToolDescriptor descriptor,
+    final SelectionEffect? armedEffect,
+  ) {
+    final EdgeInsets padding = EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small);
+    final BoxConstraints? constraints = minimal ? const BoxConstraints() : null;
 
-    if (hasPreview && selectedEffect == effect) {
-      appProvider.cancelEffectPreview();
-      return;
-    }
-
-    if (appProvider.isSelectedLayerLocked) {
-      context.showSnackBarMessage(
-        l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
+    if (descriptor.effect != null) {
+      final SelectionEffect effect = descriptor.effect!;
+      return AppButtonIcon(
+        key: ValueKey<SelectionEffect>(effect),
+        icon: descriptor.icon,
+        isSelected: armedEffect == effect,
+        tooltip: descriptor.label(l10n),
+        constraints: constraints,
+        padding: padding,
+        onPressed: () => armedEffect == effect ? appProvider.disarmEffectBrush() : appProvider.armEffectBrush(effect),
       );
-      return;
     }
 
-    await appProvider.startEffectPreview(effect);
+    final ActionType action = descriptor.action!;
+    return AppButtonIcon(
+      key: _gestureToolKey(action),
+      icon: descriptor.icon,
+      // Suppressed while an effect brush is armed — only one tool is active.
+      isSelected: appProvider.selectedAction == action && armedEffect == null,
+      tooltip: descriptor.label(l10n),
+      constraints: constraints,
+      padding: padding,
+      onPressed: () => appProvider.selectedAction = action,
+    );
   }
 }

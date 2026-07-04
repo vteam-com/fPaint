@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
-import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/transform_model.dart';
@@ -247,24 +246,6 @@ class MainViewState extends State<MainView> {
                       ),
 
                     //
-                    // Clipped-to-selection modifier badge
-                    //
-                    if (appProvider.selectorModel.isVisible &&
-                        appProvider.selectedAction != ActionType.selector &&
-                        !hasActiveTransformOverlay)
-                      Positioned(
-                        top: AppSpacing.large,
-                        left: 0,
-                        right: 0,
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: _SelectionClipBadge(
-                            onClear: appProvider.clearSelectionAndRestorePreviousTool,
-                          ),
-                        ),
-                      ),
-
-                    //
                     // Fill Widget
                     //
                     if (!hasActiveTransformOverlay && appProvider.fillModel.isVisible)
@@ -378,52 +359,6 @@ class MainViewState extends State<MainView> {
     showSnackBarIfMounted(
       context,
       context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
-    );
-  }
-}
-
-/// A pill shown over the canvas when an active selection is clipping a gesture
-/// tool. It names the modifier state and offers a one-tap clear so the user is
-/// never stuck wondering why strokes are being masked.
-class _SelectionClipBadge extends StatelessWidget {
-  const _SelectionClipBadge({required this.onClear});
-
-  /// Called when the user clears the active selection.
-  final VoidCallback onClear;
-
-  @override
-  Widget build(final BuildContext context) {
-    final AppLocalizations l10n = context.l10n;
-
-    return Container(
-      key: Keys.selectionClipBadge,
-      padding: const EdgeInsets.only(
-        left: AppSpacing.medium,
-        right: AppSpacing.thin,
-        top: AppSpacing.thin,
-        bottom: AppSpacing.thin,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.overlayDark,
-        borderRadius: BorderRadius.circular(AppSpacing.large),
-        border: Border.all(color: AppColors.overlayBorder),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          AppText(
-            l10n.clippedToSelection,
-            variant: AppTextVariant.label,
-            color: AppColors.textPrimary,
-          ),
-          const SizedBox(width: AppSpacing.small),
-          AppButtonIcon(
-            key: Keys.selectionClipBadgeClear,
-            icon: AppIcon.close,
-            onPressed: onClear,
-          ),
-        ],
-      ),
     );
   }
 }

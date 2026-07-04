@@ -124,9 +124,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get canvasSizeTitle => 'Canvas Size';
 
   @override
-  String get clippedToSelection => 'Clipped to selection';
-
-  @override
   String get close => 'Close';
 
   @override
@@ -250,13 +247,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get effectShadow => 'Shadow';
 
   @override
-  String get effectSharpen => 'Sharpen';
+  String get effectSharpness => 'Sharpness';
 
   @override
   String get effectSize => 'Size';
-
-  @override
-  String get effectSoften => 'Edge Soften';
 
   @override
   String get effectVignette => 'Vignette';
@@ -479,9 +473,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get no => 'No';
 
   @override
-  String get paint => 'Paint';
-
-  @override
   String get paste => 'Paste';
 
   @override
@@ -584,12 +575,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolEraser => 'Eraser';
 
   @override
-  String get toolFamilyAdjust => 'Adjust';
-
-  @override
-  String get toolFamilyDraw => 'Draw';
-
-  @override
   String get toolFill => 'Fill';
 
   @override
@@ -627,6 +612,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toolReplace => 'Replace';
+
+  @override
+  String get toolSectionBrush => 'Brush';
 
   @override
   String get toolSelector => 'Selector';

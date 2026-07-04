@@ -14,28 +14,18 @@ void main() {
     l10n = await AppLocalizations.delegate.load(const Locale('en'));
   });
 
-  group('tool families', () {
-    test('every rail gesture tool, including smudge, is in the Draw family', () {
-      final List<ActionType?> drawActions = toolsInFamily(
-        ToolFamily.draw,
-      ).map((final ToolDescriptor d) => d.action).toList();
-      expect(drawActions, contains(ActionType.smudge));
-      expect(
-        toolsInFamily(ToolFamily.draw).every((final ToolDescriptor d) => d.action != null),
-        isTrue,
-      );
+  group('gesture tools', () {
+    test('every rail gesture tool, including smudge, carries an action', () {
+      final List<ActionType?> gestureActions = toolRail()
+          .where((final ToolDescriptor d) => d.action != null)
+          .map((final ToolDescriptor d) => d.action)
+          .toList();
+      expect(gestureActions, contains(ActionType.smudge));
     });
 
-    test('blur is not a rail gesture tool (it lives under Adjust)', () {
+    test('blur is not a rail gesture tool (it appears as an effect)', () {
       expect(kGestureToolOrder, contains(ActionType.smudge));
       expect(kGestureToolOrder, isNot(contains(ActionType.blurBrush)));
-    });
-  });
-
-  group('toolFamilyLabel', () {
-    test('maps each family to its localized header', () {
-      expect(toolFamilyLabel(l10n, ToolFamily.draw), l10n.toolFamilyDraw);
-      expect(toolFamilyLabel(l10n, ToolFamily.adjust), l10n.toolFamilyAdjust);
     });
   });
 
@@ -65,30 +55,32 @@ void main() {
       expect(toolRail().length, kGestureToolOrder.length + SelectionEffect.values.length);
     });
 
-    test('draw family lists all gesture tools as gesture descriptors', () {
-      final List<ToolDescriptor> draw = toolsInFamily(ToolFamily.draw);
-      expect(draw.length, kGestureToolOrder.length);
-      expect(draw.every((final ToolDescriptor d) => d.action != null), isTrue);
+    test('gesture entries come first and cover every gesture tool', () {
+      final List<ToolDescriptor> gestures = toolRail().where((final ToolDescriptor d) => d.action != null).toList();
+      expect(gestures.length, kGestureToolOrder.length);
+      // Gesture tools lead the rail, effects follow.
+      expect(toolRail().take(kGestureToolOrder.length).every((final ToolDescriptor d) => d.action != null), isTrue);
     });
 
-    test('adjust family lists every effect as adjust descriptors', () {
-      final List<ToolDescriptor> adjust = toolsInFamily(ToolFamily.adjust);
-      expect(adjust.length, SelectionEffect.values.length);
-      expect(adjust.every((final ToolDescriptor d) => d.effect != null), isTrue);
+    test('effect entries cover every effect', () {
+      final List<ToolDescriptor> effects = toolRail().where((final ToolDescriptor d) => d.effect != null).toList();
+      expect(effects.length, SelectionEffect.values.length);
     });
   });
 
-  group('descriptors expose family, icon, and label', () {
+  group('descriptors expose icon and label', () {
     test('gesture descriptor mirrors its action', () {
       const ToolDescriptor descriptor = ToolDescriptor.gesture(ActionType.smudge);
-      expect(descriptor.family, ToolFamily.draw);
+      expect(descriptor.action, ActionType.smudge);
+      expect(descriptor.effect, isNull);
       expect(descriptor.icon, ActionType.smudge.icon);
       expect(descriptor.label(l10n), l10n.toolSmudge);
     });
 
-    test('adjust descriptor mirrors its effect', () {
+    test('effect descriptor mirrors its effect', () {
       const ToolDescriptor descriptor = ToolDescriptor.adjust(SelectionEffect.blur);
-      expect(descriptor.family, ToolFamily.adjust);
+      expect(descriptor.effect, SelectionEffect.blur);
+      expect(descriptor.action, isNull);
       expect(descriptor.icon, SelectionEffect.blur.icon);
       expect(descriptor.label(l10n), l10n.effectBlur);
     });

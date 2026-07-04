@@ -648,11 +648,8 @@ void main() {
     });
   });
 
-  group('effect brush paint mode', () {
-    test('setEffectPaintMode toggles mode and arming exposes the armed effect', () {
-      appProvider.setEffectPaintMode(enabled: true);
-      expect(appProvider.effectBrushModel.paintMode, isTrue);
-
+  group('effect brush', () {
+    test('arming an effect exposes it and disarming clears it', () {
       appProvider.armEffectBrush(SelectionEffect.blur);
       expect(appProvider.effectBrushModel.isArmed, isTrue);
       expect(appProvider.effectBrushModel.effect, SelectionEffect.blur);
@@ -662,9 +659,17 @@ void main() {
 
       appProvider.disarmEffectBrush();
       expect(appProvider.effectBrushModel.isArmed, isFalse);
+    });
 
-      appProvider.setEffectPaintMode(enabled: false);
-      expect(appProvider.effectBrushModel.paintMode, isFalse);
+    test('selecting a gesture tool disarms the effect brush (one active tool)', () {
+      appProvider.armEffectBrush(SelectionEffect.sharpness);
+      expect(appProvider.effectBrushModel.isArmed, isTrue);
+
+      // Picking any tool cancels the armed effect brush so a stroke is never
+      // ambiguous (gesture tool vs. effect brush).
+      appProvider.selectedAction = ActionType.brush;
+      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.effectBrushModel.isArmed, isFalse);
     });
 
     test('commitEffectBrushStroke overlays a masked effect patch as one undoable action', () async {
@@ -721,6 +726,35 @@ void main() {
         strokePoints: <Offset>[const Offset(10, 10)],
         strokeBounds: const Rect.fromLTRB(10, 10, 11, 11),
         brushSize: 10,
+        clipPath: null,
+      );
+
+      expect(appProvider.layers.selectedLayer.actionStack.length, actionsBefore);
+    });
+
+    test('commitEffectBrushStroke is a safe no-op at centre strength (0)', () async {
+      final int canvasWidth = appProvider.layers.width.toInt();
+      final int canvasHeight = appProvider.layers.height.toInt();
+      final Image layerImage = await createFilledLayerImage(
+        width: canvasWidth,
+        height: canvasHeight,
+        color: const Color(0xFF808080),
+      );
+      addTearDown(layerImage.dispose);
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+
+      final int actionsBefore = appProvider.layers.selectedLayer.actionStack.length;
+
+      // A bipolar effect at centre (0) is a no-op: apply() returns the source
+      // image untouched. Must not crash (was "non-genuine Image") and must not
+      // commit anything.
+      await appProvider.commitEffectBrushStroke(
+        effect: SelectionEffect.brightness,
+        strength: AppEffects.minIntensity,
+        size: AppEffects.minSize,
+        strokePoints: <Offset>[const Offset(20, 20), const Offset(80, 60)],
+        strokeBounds: const Rect.fromLTRB(20, 20, 80, 60),
+        brushSize: 30,
         clipPath: null,
       );
 

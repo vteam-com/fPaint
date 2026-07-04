@@ -269,6 +269,13 @@ class AppProvider extends ChangeNotifier {
   set selectedAction(final ActionType value) {
     final bool selectedActionChanged = value != _selectedAction;
 
+    // Picking any tool cancels an armed paint-mode effect brush, so only one
+    // gesture tool is ever active — a stroke is never ambiguous.
+    final bool wasEffectBrushArmed = effectBrushModel.effect != null;
+    if (wasEffectBrushArmed) {
+      effectBrushModel.disarm();
+    }
+
     // Switching tools exits eyedropper mode so pointer interactions follow the new tool.
     if (selectedActionChanged) {
       eyeDropPositionForBrush = null;
@@ -294,7 +301,7 @@ class AppProvider extends ChangeNotifier {
       wandSelection.reset();
     }
 
-    if (selectedActionChanged) {
+    if (selectedActionChanged || wasEffectBrushArmed) {
       _selectedActionNotifier.notifyListeners();
       repaintToolOptions();
     }

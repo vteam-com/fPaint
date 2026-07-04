@@ -31,7 +31,7 @@ Future<void> paintLayerSun(final PaintingScenarioSession session) async {
   sunAppProvider.update();
   await session.tester.pump();
 
-  await applyEffectViaUi(session.tester, SelectionEffect.soften, strength: _sunSoftenIntensity);
+  await applyEffectViaUi(session.tester, SelectionEffect.sharpness, strength: -_sunSoftenIntensity);
 
   sunAppProvider.selectorModel.clear();
   sunAppProvider.update();

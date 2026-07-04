@@ -38,7 +38,6 @@
   "canvas": "Canvas...",
   "canvasDimensionsMustBePositive": "Canvas dimensions must be positive.",
   "canvasSizeTitle": "Canvas Size",
-  "clippedToSelection": "Clipped to selection",
   "close": "Close",
   "colorLabel": "Color",
   "@colorLabel": {
@@ -111,9 +110,8 @@
   "effectPixelate": "Pixelate",
   "effects": "Effects",
   "effectShadow": "Shadow",
-  "effectSharpen": "Sharpen",
+  "effectSharpness": "Sharpness",
   "effectSize": "Size",
-  "effectSoften": "Edge Soften",
   "effectVignette": "Vignette",
   "enterYourTextHere": "Enter your text here...",
   "errorProcessingFile": "Error processing file: {error}",
@@ -216,7 +214,6 @@
   "@no": {
     "description": "REVIEWED"
   },
-  "paint": "Paint",
   "paste": "Paste",
   "pencilSize": "Pencil Size",
   "percentageValue": "{value}%",
@@ -264,8 +261,6 @@
   "toolCircle": "Circle",
   "toolCrop": "Crop",
   "toolEraser": "Eraser",
-  "toolFamilyAdjust": "Adjust",
-  "toolFamilyDraw": "Draw",
   "toolFill": "Fill",
   "toolHalftone": "Halftone",
   "toolInvert": "Invert",
@@ -279,6 +274,7 @@
   "toolRectangle": "Rectangle",
   "toolRemove": "Remove",
   "toolReplace": "Replace",
+  "toolSectionBrush": "Brush",
   "toolSelector": "Selector",
   "toolSmudge": "Smudge",
   "toolSolid": "Solid",

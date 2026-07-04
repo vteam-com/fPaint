@@ -92,11 +92,12 @@ Future<void> paintLayerLake(final PaintingScenarioSession session) async {
     strength: _pondReflectionBlurIntensity,
   );
 
-  // Soften edges while the lake selection is active for a natural blend.
+  // Soften edges (negative Sharpness) while the lake selection is active for a
+  // natural blend.
   await applyEffectViaUi(
     session.tester,
-    SelectionEffect.soften,
-    strength: _pondRippleSoftenIntensity,
+    SelectionEffect.sharpness,
+    strength: -_pondRippleSoftenIntensity,
   );
 
   expect(

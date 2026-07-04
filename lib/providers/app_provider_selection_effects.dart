@@ -100,11 +100,41 @@ extension AppProviderSelectionEffects on AppProvider {
     );
   }
 
+  /// Captures the effect source image, mask path, and bounds for the current
+  /// target: the active selection when one is visible, otherwise the whole
+  /// active layer (without leaving a lingering select-all region).
+  ///
+  /// Returns null when the source image could not be produced. Callers own the
+  /// returned image and must dispose it.
+  Future<({ui.Image image, Path path, Rect bounds})?> _captureEffectTarget() async {
+    final bool hasSelection = selectorModel.isVisible && selectorModel.path1 != null;
+
+    if (hasSelection) {
+      final ui.Image? clippedImage = await createSelectionImage();
+      if (clippedImage == null) {
+        return null;
+      }
+      return (
+        image: clippedImage,
+        path: Path.from(selectorModel.path1!),
+        bounds: selectorModel.path1!.getBounds(),
+      );
+    }
+
+    final Rect bounds = Offset.zero & layers.size;
+    return (
+      image: layers.selectedLayer.toImageForStorage(layers.size),
+      path: Path()..addRect(bounds),
+      bounds: bounds,
+    );
+  }
+
   /// Starts live preview mode for the selected [effect], [strength], and [size].
   ///
   /// Targets the active selection when one is visible; otherwise the effect
-  /// applies to the whole active layer without creating a lingering
-  /// select-all region.
+  /// applies to the whole active layer. Used by the on-canvas overlay / bottom
+  /// sheet flow (the Brush section applies effects by painting them, so it does
+  /// not use this preview path).
   Future<void> startEffectPreview(
     final SelectionEffect effect, {
     final double strength = AppEffects.defaultIntensity,
@@ -114,31 +144,16 @@ extension AppProviderSelectionEffects on AppProvider {
       return;
     }
 
-    final bool hasSelection = selectorModel.isVisible && selectorModel.path1 != null;
-
-    final Path selectionPath;
-    final Rect bounds;
-    final ui.Image sourceImage;
-
-    if (hasSelection) {
-      final ui.Image? clippedImage = await createSelectionImage();
-      if (clippedImage == null) {
-        return;
-      }
-      sourceImage = clippedImage;
-      selectionPath = Path.from(selectorModel.path1!);
-      bounds = selectorModel.path1!.getBounds();
-    } else {
-      bounds = Offset.zero & layers.size;
-      selectionPath = Path()..addRect(bounds);
-      sourceImage = layers.selectedLayer.toImageForStorage(layers.size);
+    final ({ui.Image image, Path path, Rect bounds})? target = await _captureEffectTarget();
+    if (target == null) {
+      return;
     }
 
     effectPreviewModel.start(
       selectedEffect: effect,
-      selectionImage: sourceImage,
-      selectionPath: selectionPath,
-      selectionBounds: bounds,
+      selectionImage: target.image,
+      selectionPath: target.path,
+      selectionBounds: target.bounds,
       initialStrength: strength,
       initialSize: size ?? effect.defaultSize,
     );
@@ -210,22 +225,6 @@ extension AppProviderSelectionEffects on AppProvider {
     update();
   }
 
-  /// Toggles the Adjust family between Apply and Paint modes. Entering Paint
-  /// cancels an active Apply preview; leaving it disarms any armed effect.
-  void setEffectPaintMode({required final bool enabled}) {
-    effectBrushModel.paintMode = enabled;
-    if (enabled) {
-      if (effectPreviewModel.isVisible) {
-        effectPreviewModel.clear();
-        effectPreviewRenderVersion++;
-      }
-    } else {
-      effectBrushModel.disarm();
-    }
-    repaintToolOptions();
-    update();
-  }
-
   /// Arms [effect] for painting onto the canvas, cancelling any Apply preview.
   void armEffectBrush(final SelectionEffect effect) {
     if (effectPreviewModel.isVisible) {
@@ -289,6 +288,14 @@ extension AppProviderSelectionEffects on AppProvider {
     final Rect regionRect = Rect.fromLTWH(left.toDouble(), top.toDouble(), width.toDouble(), height.toDouble());
     final ui.Image layerImage = await layers.captureLayerRegion(layers.selectedLayerIndex, regionRect);
     final ui.Image processed = await effect.apply(layerImage, strength: strength, size: size);
+    if (identical(processed, layerImage)) {
+      // The effect is a no-op at this strength (e.g. a bipolar effect at its
+      // centre): apply() returned the source image untouched, so there is
+      // nothing to paint. Dispose the single image and bail — disposing it and
+      // then drawing it would crash with "non-genuine Image".
+      layerImage.dispose();
+      return;
+    }
     layerImage.dispose();
 
     final Offset regionOrigin = Offset(left.toDouble(), top.toDouble());

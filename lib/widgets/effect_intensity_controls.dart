@@ -78,7 +78,7 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
             label: effectLabel(widget.l10n, effect),
             value: _strength,
             valueLabel: '${(_strength * AppMath.percentScale).round()}%',
-            min: AppEffects.minIntensity,
+            min: effect.bipolar ? -AppEffects.maxIntensity : AppEffects.minIntensity,
             max: AppEffects.maxIntensity,
             onChanged: (final double value) async {
               setState(() => _strength = value);

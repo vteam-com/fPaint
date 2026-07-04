@@ -122,9 +122,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get canvasSizeTitle => 'Tamano del lienzo';
 
   @override
-  String get clippedToSelection => 'Recortado a la selección';
-
-  @override
   String get close => 'Cerrar';
 
   @override
@@ -248,13 +245,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get effectShadow => 'Sombra';
 
   @override
-  String get effectSharpen => 'Nitidez';
+  String get effectSharpness => 'Nitidez';
 
   @override
   String get effectSize => 'Tamano';
-
-  @override
-  String get effectSoften => 'Suavizar bordes';
 
   @override
   String get effectVignette => 'Viñeta';
@@ -477,9 +471,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get no => 'No';
 
   @override
-  String get paint => 'Pintar';
-
-  @override
   String get paste => 'Pegar';
 
   @override
@@ -582,12 +573,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get toolEraser => 'Borrador';
 
   @override
-  String get toolFamilyAdjust => 'Ajustar';
-
-  @override
-  String get toolFamilyDraw => 'Dibujar';
-
-  @override
   String get toolFill => 'Relleno';
 
   @override
@@ -625,6 +610,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get toolReplace => 'Reemplazar';
+
+  @override
+  String get toolSectionBrush => 'Pincel';
 
   @override
   String get toolSelector => 'Seleccionador';

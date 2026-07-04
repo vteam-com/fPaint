@@ -256,13 +256,13 @@ void main() {
     });
   });
 
-  group('ToolsPanel adjust family', () {
-    testWidgets('starts and toggles an effect preview from the rail without a selection', (
+  group('ToolsPanel Brush section', () {
+    testWidgets('tapping an effect arms it as a brush and reveals its controls', (
       final WidgetTester tester,
     ) async {
       await pumpToolsPanel(tester);
 
-      expect(appProvider.effectPreviewModel.isVisible, isFalse);
+      expect(appProvider.effectBrushModel.isArmed, isFalse);
       expect(appProvider.selectorModel.isVisible, isFalse);
 
       final Finder blurEffect = find.byKey(const ValueKey<SelectionEffect>(SelectionEffect.blur));
@@ -270,37 +270,42 @@ void main() {
       await tester.tap(blurEffect);
       await tester.pumpAndSettle();
 
-      // Effect applies to the whole layer — no selection required.
-      expect(appProvider.effectPreviewModel.isVisible, isTrue);
-      expect(appProvider.effectPreviewModel.effect, SelectionEffect.blur);
-      expect(find.byKey(Keys.effectIntensityCancelButton), findsOneWidget);
+      // The effect arms as a brush — no whole-region preview, no selection.
+      expect(appProvider.effectBrushModel.isArmed, isTrue);
+      expect(appProvider.effectBrushModel.effect, SelectionEffect.blur);
+      expect(appProvider.effectPreviewModel.isVisible, isFalse);
+      expect(find.byKey(Keys.effectPaintStrengthSlider), findsOneWidget);
+      expect(find.byKey(Keys.effectPaintSizeSlider), findsOneWidget);
 
-      // Tapping the active effect again toggles the preview off.
+      // Tapping the armed effect again disarms it.
       await tester.ensureVisible(blurEffect);
       await tester.tap(blurEffect);
       await tester.pumpAndSettle();
-
-      expect(appProvider.effectPreviewModel.isVisible, isFalse);
+      expect(appProvider.effectBrushModel.isArmed, isFalse);
     });
 
-    testWidgets('paint mode arms an effect and reveals the strength slider', (final WidgetTester tester) async {
+    testWidgets('arming an effect deselects the gesture tool; picking one disarms it', (
+      final WidgetTester tester,
+    ) async {
       await pumpToolsPanel(tester);
 
-      final Finder paintToggle = find.byKey(Keys.effectPaintModeToggle);
-      await tester.ensureVisible(paintToggle);
-      await tester.tap(paintToggle);
-      await tester.pumpAndSettle();
-      expect(appProvider.effectBrushModel.paintMode, isTrue);
+      // A gesture tool (fill, from setUp) is selected and no effect is armed.
+      expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolFill)).isSelected, isTrue);
 
       final Finder blurEffect = find.byKey(const ValueKey<SelectionEffect>(SelectionEffect.blur));
       await tester.ensureVisible(blurEffect);
       await tester.tap(blurEffect);
       await tester.pumpAndSettle();
 
+      // Effect armed → the gesture tool no longer shows as selected.
       expect(appProvider.effectBrushModel.isArmed, isTrue);
-      expect(appProvider.effectBrushModel.effect, SelectionEffect.blur);
-      expect(find.byKey(Keys.effectPaintStrengthSlider), findsOneWidget);
-      expect(find.byKey(Keys.effectPaintSizeSlider), findsOneWidget);
+      expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolFill)).isSelected, isFalse);
+
+      // Picking a gesture tool disarms the effect and reselects the tool.
+      await tester.tap(find.byKey(Keys.toolFill));
+      await tester.pumpAndSettle();
+      expect(appProvider.effectBrushModel.isArmed, isFalse);
+      expect(tester.widget<AppButtonIcon>(find.byKey(Keys.toolFill)).isSelected, isTrue);
     });
   });
 

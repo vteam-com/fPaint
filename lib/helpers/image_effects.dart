@@ -12,7 +12,9 @@ Future<ui.Image> _applyWithStrengthGuard(
   required final double strength,
   required final Future<ui.Image> Function() apply,
 }) async {
-  if (strength <= AppEffects.minIntensity) {
+  // Skip only at exactly zero (no change). Negative strength is meaningful for
+  // bipolar effects (darken, reduce contrast, reverse hue), so it applies.
+  if (strength == AppEffects.minIntensity) {
     return image;
   }
   return apply();

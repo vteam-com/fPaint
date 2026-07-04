@@ -147,6 +147,17 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.repaintViewport();
   }
 
+  /// Whether a canvas gesture should create or extend a selection.
+  ///
+  /// The selector tool must be active with no transform overlay up, AND no
+  /// effect brush armed: an armed effect paints (clipped to the current
+  /// selection) just like any other brush, so it takes precedence over the
+  /// selector tool instead of starting a new marquee.
+  bool _isSelectionGesture(final AppProvider appProvider) =>
+      appProvider.selectedAction == ActionType.selector &&
+      !appProvider.transformModel.isVisible &&
+      !appProvider.effectBrushModel.isArmed;
+
   /// Finalizes an active pointer interaction and clears temporary drawing state.
   void _handlePointerEnd(
     final AppProvider appProvider,
@@ -156,8 +167,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // Pair with beginStrokePreview: release the frozen baseline (no-op for tools
     // that never captured one, e.g. smudge/blur, which use the live preview).
     appProvider.layers.selectedLayer.clearStrokePreview();
-    final bool isSelectionActive =
-        appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
+    final bool isSelectionActive = _isSelectionGesture(appProvider);
 
     if (_activePointerId == event.pointer) {
       if (isSelectionActive) {
@@ -242,8 +252,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
 
     final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
-    final bool isSelectionActive =
-        appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
+    final bool isSelectionActive = _isSelectionGesture(appProvider);
 
     if (appProvider.eyeDropPositionForBrush != null) {
       appProvider.eyeDropPositionForBrush = event.localPosition;
@@ -326,8 +335,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
     _activePointerId = event.pointer;
 
-    final bool isSelectionActive =
-        appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
+    final bool isSelectionActive = _isSelectionGesture(appProvider);
     if (isSelectionActive) {
       _handleSelectionPointerStart(appProvider, event, adjustedPosition);
       return;
