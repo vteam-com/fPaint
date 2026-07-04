@@ -61,6 +61,7 @@ class Keys {
   static const Key toolSelectorCopy = Key('tool-selector-copy');
   static const Key toolSelectorCut = Key('tool-selector-cut');
 
+  static const Key toolPanelTopColorsToggle = Key('tool-panel-top-colors-toggle');
   static const Key toolPanelFillColor = Key('toolPanelFillColor');
   static const Key toolPanelHalftoneDotColor = Key('toolPanelHalftoneDotColor');
   static const Key toolPanelBrushColor1 = Key('toolPanelBrushColor1');

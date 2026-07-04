@@ -173,10 +173,10 @@ class ToolsPanel extends StatelessWidget {
       ListenableBuilder(
         listenable: layers.topColorsListenable,
         builder: (final BuildContext _, final Widget? _) {
-          return ToolAttributeWidget(
+          return _CollapsibleTopColors(
             compact: minimal,
             name: l10n.topColors(layers.topColors.length),
-            childRight: TopColors(
+            child: TopColors(
               colorUsages: layers.topColors,
               onRefresh: layers.evaluateTopColor,
               onColorPicked: (final Color color) {
@@ -574,6 +574,43 @@ class ToolsPanel extends StatelessWidget {
                 onColorChanged: onColorChanged,
               ),
       ),
+    );
+  }
+}
+
+/// Wraps the top colors grid in a collapsible tool attribute, collapsed by default.
+class _CollapsibleTopColors extends StatefulWidget {
+  const _CollapsibleTopColors({
+    required this.name,
+    required this.compact,
+    required this.child,
+  });
+
+  /// The top colors grid revealed when expanded.
+  final Widget child;
+
+  /// Whether the tool panel is in minimal mode.
+  final bool compact;
+
+  /// The label shown on the expand/collapse toggle.
+  final String name;
+
+  @override
+  State<_CollapsibleTopColors> createState() => _CollapsibleTopColorsState();
+}
+
+class _CollapsibleTopColorsState extends State<_CollapsibleTopColors> {
+  bool _expanded = false;
+
+  @override
+  Widget build(final BuildContext context) {
+    return ToolAttributeWidget(
+      compact: widget.compact,
+      name: widget.name,
+      enabled: _expanded,
+      enabledToggleKey: Keys.toolPanelTopColorsToggle,
+      onEnabledChanged: (final bool value) => setState(() => _expanded = value),
+      childRight: widget.child,
     );
   }
 }

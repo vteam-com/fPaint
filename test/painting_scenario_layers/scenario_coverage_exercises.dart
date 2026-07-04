@@ -2074,6 +2074,14 @@ Future<void> _exerciseToleranceAndTopColors(
     }
   }
 
+  // Expand the collapsible top-colors section (collapsed by default).
+  final Finder topColorsToggle = find.byKey(Keys.toolPanelTopColorsToggle);
+  if (topColorsToggle.evaluate().isNotEmpty) {
+    await tester.ensureVisible(topColorsToggle.first);
+    await tapByKey(tester, Keys.toolPanelTopColorsToggle);
+    await pumpForUnitTestUiSettle(tester);
+  }
+
   // Tap a top-colors color swatch if visible.
   final Finder topColorsWidget = find.byType(TopColors);
   if (topColorsWidget.evaluate().isNotEmpty) {
