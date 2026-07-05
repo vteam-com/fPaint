@@ -37,13 +37,17 @@ Future<Uint8List> convertLayersToTiff(final LayersProvider layers) async {
 }
 
 /// Serializes layer properties into a JSON string for ImageDescription.
-String _encodeLayerMetadata(final LayerProvider layer) {
+String _encodeLayerMetadata(
+  final LayerProvider layer, {
+  required final bool selected,
+}) {
   return jsonEncode(<String, dynamic>{
     TiffConstants.metaKeyName: layer.name,
     TiffConstants.metaKeyOpacity: layer.opacity,
     TiffConstants.metaKeyBlendMode: layer.blendMode.name,
     TiffConstants.metaKeyVisible: layer.isVisible,
     TiffConstants.metaKeyLocked: layer.isLocked,
+    TiffConstants.metaKeySelected: selected,
   });
 }
 
@@ -86,7 +90,7 @@ Future<List<_LayerFrame>> _buildLayerFrames(final LayersProvider layers) async {
     frames.add(
       _LayerFrame(
         image: decoded,
-        description: _encodeLayerMetadata(layer),
+        description: _encodeLayerMetadata(layer, selected: i == layers.selectedLayerIndex),
         layerName: layer.name,
         offset: exportBounds.topLeft,
       ),
@@ -153,14 +157,31 @@ Future<void> readTiffFileFromBytes(
 ) async {
   final _DecodedTiffDocument decodedDocument = _decodeTiffDocument(bytes);
 
+  LayerProvider? selectedLayer;
   await layers.replaceAll(
     canvasSize: decodedDocument.size,
     addLayers: () async {
       for (final _DecodedTiffLayer layer in decodedDocument.layers) {
-        await _appendDecodedTiffLayer(layers, meta: layer.meta, image: layer.image, offset: layer.offset);
+        final LayerProvider appended = await _appendDecodedTiffLayer(
+          layers,
+          meta: layer.meta,
+          image: layer.image,
+          offset: layer.offset,
+        );
+        if (layer.meta.selected) {
+          selectedLayer = appended;
+        }
       }
     },
   );
+
+  // replaceAll resets the selection to the first layer, so restore afterwards.
+  if (selectedLayer != null) {
+    final int index = layers.getLayerIndex(selectedLayer!);
+    if (index >= 0) {
+      layers.selectedLayerIndex = index;
+    }
+  }
 }
 
 /// Decodes [bytes] into a validated TIFF document model ready to apply.
@@ -459,7 +480,9 @@ int _unMultiplyChannel(
 }
 
 /// Appends one decoded TIFF layer to the canvas, preserving placement.
-Future<void> _appendDecodedTiffLayer(
+///
+/// Returns the created [LayerProvider] so callers can restore the selection.
+Future<LayerProvider> _appendDecodedTiffLayer(
   final LayersProvider layers, {
   required final _LayerMeta meta,
   required final img.Image image,
@@ -478,6 +501,7 @@ Future<void> _appendDecodedTiffLayer(
     imageToAdd: uiFrameImage,
     offset: offset,
   );
+  return newLayer;
 }
 
 /// Parsed layer metadata extracted from a TIFF frame's ImageDescription tag.
@@ -488,6 +512,7 @@ class _LayerMeta {
     required this.blendMode,
     required this.visible,
     required this.locked,
+    this.selected = false,
   });
 
   final String name;
@@ -495,6 +520,9 @@ class _LayerMeta {
   final ui.BlendMode blendMode;
   final bool visible;
   final bool locked;
+
+  /// Whether this layer was the selected layer when the TIFF was written.
+  final bool selected;
 }
 
 /// Reads the ImageDescription tag from the [frameIndex]-th frame of
@@ -548,6 +576,7 @@ _LayerMeta? _tryParseJsonMeta(final String description, final int frameIndex) {
     final double opacity = (map[TiffConstants.metaKeyOpacity] as num?)?.toDouble() ?? 1.0;
     final bool visible = (map[TiffConstants.metaKeyVisible] as bool?) ?? true;
     final bool locked = (map[TiffConstants.metaKeyLocked] as bool?) ?? false;
+    final bool selected = (map[TiffConstants.metaKeySelected] as bool?) ?? false;
     final String blendName = (map[TiffConstants.metaKeyBlendMode] as String?) ?? 'srcOver';
 
     ui.BlendMode blendMode = ui.BlendMode.srcOver;
@@ -564,6 +593,7 @@ _LayerMeta? _tryParseJsonMeta(final String description, final int frameIndex) {
       blendMode: blendMode,
       visible: visible,
       locked: locked,
+      selected: selected,
     );
   } on FormatException {
     return null;

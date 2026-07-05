@@ -267,6 +267,9 @@ class TiffConstants {
   /// JSON key for layer edit lock in the ImageDescription payload.
   static const String metaKeyLocked = 'locked';
 
+  /// JSON key marking the last-selected layer in the ImageDescription payload.
+  static const String metaKeySelected = 'selected';
+
   /// Public `package:image` type string for ASCII TIFF values.
   static const String ifdValueTypeAscii = 'ascii';
 }
