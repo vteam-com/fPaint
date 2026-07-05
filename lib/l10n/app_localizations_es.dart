@@ -609,9 +609,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get toolRemove => 'Quitar';
 
   @override
-  String get toolReplace => 'Reemplazar';
-
-  @override
   String get toolSectionBrush => 'Pincel';
 
   @override

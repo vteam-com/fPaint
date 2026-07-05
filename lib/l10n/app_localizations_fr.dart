@@ -613,9 +613,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toolRemove => 'Retirer';
 
   @override
-  String get toolReplace => 'Remplacer';
-
-  @override
   String get toolSectionBrush => 'Pinceau';
 
   @override

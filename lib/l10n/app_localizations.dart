@@ -1181,7 +1181,7 @@ abstract class AppLocalizations {
   /// No description provided for @toolMagic.
   ///
   /// In en, this message translates to:
-  /// **'Magic'**
+  /// **'Edge Detection'**
   String get toolMagic;
 
   /// No description provided for @toolPaintBucket.
@@ -1213,12 +1213,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove'**
   String get toolRemove;
-
-  /// No description provided for @toolReplace.
-  ///
-  /// In en, this message translates to:
-  /// **'Replace'**
-  String get toolReplace;
 
   /// No description provided for @toolSectionBrush.
   ///

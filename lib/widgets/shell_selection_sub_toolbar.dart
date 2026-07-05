@@ -167,22 +167,19 @@ Widget buildSelectionSubToolbar({
           Future<void>.microtask(() => appProvider.regionCut());
         },
       ),
-      buildToolbarIconButton(
-        tooltip: l10n.toolReplace,
-        icon: AppIcon.selectorMathReplace,
-        interactionProfile: interactionProfile,
-        isSelected: appProvider.selectorModel.math == SelectorMath.replace,
-        onPressed: () {
-          Future<void>.microtask(() => appProvider.setSelectorMath(SelectorMath.replace));
-        },
-      ),
+      // Add and Subtract are mutually-exclusive toggles. With both off the
+      // selection replaces the previous one ("New"); enabling one turns the
+      // other off, and tapping the active toggle returns to replace.
       buildToolbarIconButton(
         tooltip: l10n.toolAdd,
         icon: AppIcon.selectorMathAdd,
         interactionProfile: interactionProfile,
         isSelected: appProvider.selectorModel.math == SelectorMath.add,
         onPressed: () {
-          Future<void>.microtask(() => appProvider.setSelectorMath(SelectorMath.add));
+          final SelectorMath next = appProvider.selectorModel.math == SelectorMath.add
+              ? SelectorMath.replace
+              : SelectorMath.add;
+          Future<void>.microtask(() => appProvider.setSelectorMath(next));
         },
       ),
       buildToolbarIconButton(
@@ -191,7 +188,10 @@ Widget buildSelectionSubToolbar({
         interactionProfile: interactionProfile,
         isSelected: appProvider.selectorModel.math == SelectorMath.remove,
         onPressed: () {
-          Future<void>.microtask(() => appProvider.setSelectorMath(SelectorMath.remove));
+          final SelectorMath next = appProvider.selectorModel.math == SelectorMath.remove
+              ? SelectorMath.replace
+              : SelectorMath.remove;
+          Future<void>.microtask(() => appProvider.setSelectorMath(next));
         },
       ),
       buildToolbarIconButton(

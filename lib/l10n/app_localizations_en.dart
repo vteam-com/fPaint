@@ -611,9 +611,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolRemove => 'Remove';
 
   @override
-  String get toolReplace => 'Replace';
-
-  @override
   String get toolSectionBrush => 'Brush';
 
   @override
