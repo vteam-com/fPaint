@@ -53,6 +53,11 @@ class AppProvider extends ChangeNotifier {
   double? _brushSizePreviewSize;
   Offset? _brushSizePreviewPosition;
 
+  // Live Edge Detection tolerance HUD: the value (raw 1–100) and main-view
+  // anchor shown while dragging the wand tolerance. Null when not dragging.
+  int? _wandToleranceHudTolerance;
+  Offset? _wandToleranceHudPosition;
+
   // Live smudge/blur gesture marquee: the in-progress stroke's sampled points
   // (canvas space) and brush size. The effect itself is rendered once on
   // pointer-up; during the drag we only show this swept-band outline so the
@@ -419,6 +424,32 @@ class AppProvider extends ChangeNotifier {
     _hideBrushSizePreview();
   }
 
+  /// Whether the live Edge Detection tolerance HUD should be shown.
+  bool get isWandToleranceHudVisible => _wandToleranceHudTolerance != null;
+
+  /// The tolerance shown in the live wand HUD (raw 1–100, read as a percentage).
+  int? get wandToleranceHudTolerance => _wandToleranceHudTolerance;
+
+  /// The main-view-space position the wand HUD is anchored to.
+  Offset? get wandToleranceHudPosition => _wandToleranceHudPosition;
+
+  /// Shows or updates the live Edge Detection tolerance HUD at [position].
+  void showWandToleranceHud({required final int tolerance, required final Offset position}) {
+    _wandToleranceHudTolerance = tolerance;
+    _wandToleranceHudPosition = position;
+    repaintMainView();
+  }
+
+  /// Hides the live Edge Detection tolerance HUD.
+  void hideWandToleranceHud() {
+    if (_wandToleranceHudTolerance == null) {
+      return;
+    }
+    _wandToleranceHudTolerance = null;
+    _wandToleranceHudPosition = null;
+    repaintMainView();
+  }
+
   /// Gets the active pixel-brush intensity for the selected tool.
   double get brushIntensity {
     switch (_selectedAction) {
@@ -617,6 +648,12 @@ class AppProvider extends ChangeNotifier {
     repaintToolOptions();
     update();
   }
+
+  /// Whether the Edge Detection (magic wand) selector is the active tool.
+  ///
+  /// Gates wand-only affordances such as the canvas tolerance control and the
+  /// crosshair cursor.
+  bool get isWandSelectionActive => selectedAction == ActionType.selector && selectorModel.mode == SelectorMode.wand;
 
   /// Sets the active selector math mode and rebuilds tool options.
   void setSelectorMath(final SelectorMath value) {

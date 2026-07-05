@@ -591,7 +591,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get toolLinearGradient => 'Degradado lineal';
 
   @override
-  String get toolMagic => 'Mágico';
+  String get toolMagic => 'Detección de bordes';
 
   @override
   String get toolPaintBucket => 'Bote de pintura';

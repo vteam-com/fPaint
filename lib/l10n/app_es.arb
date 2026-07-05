@@ -258,7 +258,7 @@
   "toolLasso": "Lazo",
   "toolLine": "Línea",
   "toolLinearGradient": "Degradado lineal",
-  "toolMagic": "Mágico",
+  "toolMagic": "Detección de bordes",
   "toolPaintBucket": "Bote de pintura",
   "toolPencil": "Lápiz",
   "toolRadialGradient": "Degradado radial",

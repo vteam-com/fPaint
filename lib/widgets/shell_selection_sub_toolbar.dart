@@ -131,6 +131,9 @@ Widget buildSelectionSubToolbar({
         Future<void>.microtask(() {
           appProvider.activateSelectionAction();
           appProvider.setSelectorMode(SelectorMode.wand);
+          // Warm the source cache now so the first tap-and-drag is live, not
+          // stalled on the first sample's layer render + readback.
+          appProvider.prewarmWandSourceCache();
         });
       },
     ),

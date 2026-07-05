@@ -9,6 +9,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
+import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/fill_model.dart';
@@ -89,6 +90,22 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   int _smudgeSourceRegionTop = 0;
   List<int>? _smudgeSourceSignature;
   int _smudgeSourceWidth = 0;
+
+  /// Canvas-space sample anchor resampled on every wand drag step.
+  Offset? _wandDragAnchorCanvas;
+
+  /// Screen-space anchor of the wand sample tap; horizontal drag distance from
+  /// here drives the live tolerance. Non-null only during a wand gesture.
+  Offset? _wandDragAnchorScreen;
+
+  /// Last tolerance applied during the wand drag, to skip redundant resamples.
+  int? _wandDragLastAppliedTolerance;
+
+  /// Whether the active wand gesture samples all visible layers.
+  bool _wandDragSampleAllLayers = false;
+
+  /// Tolerance captured when the wand gesture began.
+  int _wandDragStartTolerance = AppDefaults.tolerance;
   @override
   void dispose() {
     // Free the per-session smudge source cache (a full-canvas CPU buffer).
@@ -102,11 +119,20 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
     final AppPreferences appPreferences = AppPreferences.of(context);
     final ShellProvider shellProvider = ShellProvider.of(context);
 
-    return MouseRegion(
-      onExit: (final PointerExitEvent _) {
-        if (_activePointerId == -1 && appProvider.brushSizePreviewPosition != null) {
-          appProvider.hideDrawingToolPreview();
-        }
+    return ListenableBuilder(
+      // Rebuild only the cursor wrapper when the tool / selector mode changes,
+      // keeping the (expensive) Listener gesture subtree built once.
+      listenable: appProvider.toolOptionsRepaintListenable,
+      builder: (final BuildContext _, final Widget? listenerChild) {
+        return MouseRegion(
+          cursor: _canvasCursor(appProvider),
+          onExit: (final PointerExitEvent _) {
+            if (_activePointerId == -1 && appProvider.brushSizePreviewPosition != null) {
+              appProvider.hideDrawingToolPreview();
+            }
+          },
+          child: listenerChild,
+        );
       },
       child: Listener(
         onPointerSignal: (final PointerSignalEvent event) {
@@ -237,6 +263,15 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         child: widget.child,
       ),
     );
+  }
+
+  /// The cursor shown over the canvas for the active tool.
+  ///
+  /// The Edge Detection (magic wand) selector uses a crosshair to signal
+  /// "click a point to sample a color region"; every other tool defers to the
+  /// default cursor (and to any overlay handles layered above the canvas).
+  MouseCursor _canvasCursor(final AppProvider appProvider) {
+    return appProvider.isWandSelectionActive ? SystemMouseCursors.precise : MouseCursor.defer;
   }
 }
 

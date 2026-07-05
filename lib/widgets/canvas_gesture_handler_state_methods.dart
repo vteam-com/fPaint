@@ -193,6 +193,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         _clearSelectionTapTracking();
       }
       appProvider.hideDrawingToolPreview();
+      appProvider.hideWandToleranceHud();
+      _clearWandDragAnchor();
       _activePointerId = -1;
       _clearPixelBrushStroke();
       appProvider.layers.selectedLayer.clearCache();
@@ -274,7 +276,11 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
     if (event.buttons == 1 && _activePointerId == event.pointer) {
       if (isSelectionActive) {
-        appProvider.selectorCreationAdditionalPoint(adjustedPosition);
+        if (appProvider.selectorModel.mode == SelectorMode.wand) {
+          _updateWandToleranceFromDrag(appProvider, event.localPosition);
+        } else {
+          appProvider.selectorCreationAdditionalPoint(adjustedPosition);
+        }
         return;
       }
 
@@ -371,10 +377,58 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     if (_tryCloseStraightLineSelectionOnDoubleTap(appProvider, event, adjustedPosition)) {
       return;
     }
+    final bool sampleAllLayers =
+        appProvider.selectorModel.mode == SelectorMode.wand && _isSampleAllLayersModifierPressed();
+    if (appProvider.selectorModel.mode == SelectorMode.wand) {
+      // Anchor the sample tap so a subsequent drag can grow/shrink the selection
+      // live (Edge Detection = tap to sample, drag on canvas to adjust).
+      _wandDragAnchorScreen = event.localPosition;
+      _wandDragAnchorCanvas = adjustedPosition;
+      _wandDragStartTolerance = appProvider.tolerance;
+      _wandDragSampleAllLayers = sampleAllLayers;
+      _wandDragLastAppliedTolerance = appProvider.tolerance;
+      appProvider.showWandToleranceHud(tolerance: appProvider.tolerance, position: event.localPosition);
+    }
     appProvider.selectorCreationStart(
       adjustedPosition,
-      sampleAllLayers: appProvider.selectorModel.mode == SelectorMode.wand && _isSampleAllLayersModifierPressed(),
+      sampleAllLayers: sampleAllLayers,
     );
+  }
+
+  /// Adjusts the live wand tolerance from the horizontal drag since the sample
+  /// tap and resamples the fixed anchor, skipping resamples that don't change it.
+  void _updateWandToleranceFromDrag(
+    final AppProvider appProvider,
+    final Offset screenPosition,
+  ) {
+    final Offset? anchorScreen = _wandDragAnchorScreen;
+    final Offset? anchorCanvas = _wandDragAnchorCanvas;
+    if (anchorScreen == null || anchorCanvas == null) {
+      return;
+    }
+    final int tolerance = appProvider.wandToleranceForDrag(
+      _wandDragStartTolerance,
+      screenPosition.dx - anchorScreen.dx,
+    );
+    // Keep the HUD glued to the finger even when the tolerance value is unchanged.
+    appProvider.showWandToleranceHud(tolerance: tolerance, position: screenPosition);
+    if (tolerance == _wandDragLastAppliedTolerance) {
+      return;
+    }
+    triggerWandToleranceHaptic(_wandDragLastAppliedTolerance ?? tolerance, tolerance);
+    _wandDragLastAppliedTolerance = tolerance;
+    appProvider.wandSelectionResampleAt(
+      anchorCanvas,
+      tolerance: tolerance,
+      sampleAllLayers: _wandDragSampleAllLayers,
+    );
+  }
+
+  /// Clears the wand drag anchor once the gesture ends or is cancelled.
+  void _clearWandDragAnchor() {
+    _wandDragAnchorScreen = null;
+    _wandDragAnchorCanvas = null;
+    _wandDragLastAppliedTolerance = null;
   }
 
   /// Selects an existing text object under [adjustedPosition] or opens the text

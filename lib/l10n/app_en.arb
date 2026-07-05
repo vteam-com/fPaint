@@ -267,7 +267,7 @@
   "toolLasso": "Lasso",
   "toolLine": "Line",
   "toolLinearGradient": "Linear Gradient",
-  "toolMagic": "Magic",
+  "toolMagic": "Edge Detection",
   "toolPaintBucket": "Paint Bucket",
   "toolPencil": "Pencil",
   "toolRadialGradient": "Radial Gradient",

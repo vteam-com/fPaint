@@ -595,7 +595,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toolLinearGradient => 'Dégradé linéaire';
 
   @override
-  String get toolMagic => 'Magique';
+  String get toolMagic => 'Détection de contours';
 
   @override
   String get toolPaintBucket => 'Pot de peinture';

@@ -593,7 +593,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolLinearGradient => 'Linear Gradient';
 
   @override
-  String get toolMagic => 'Magic';
+  String get toolMagic => 'Edge Detection';
 
   @override
   String get toolPaintBucket => 'Paint Bucket';

@@ -285,6 +285,8 @@ class ToolsPanel extends StatelessWidget {
         );
         break;
       case ActionType.selector:
+        // Selection tooling lives on the canvas (sub-toolbar + bottom sheets),
+        // not in the side panel — see shell_selection_sub_toolbar.dart.
         break;
 
       default:
