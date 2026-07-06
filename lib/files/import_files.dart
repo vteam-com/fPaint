@@ -276,9 +276,9 @@ Future<bool> openFileFromPath({
 /// Restores the remembered selection for a flat (non-layered) file.
 ///
 /// Flat formats cannot embed the selected layer, so it is looked up from
-/// [preferences] by path. The index is clamped to the current layer range,
-/// which in practice resolves to the base layer since flat files reload as a
-/// single layer. No-op when the load failed or no preference is available.
+/// [preferences] by path. The index is applied only when it is still within the
+/// current layer range (flat files typically reload as a single base layer).
+/// No-op when the load failed or no preference is available.
 void _restoreFlatLayerSelection(
   final AppPreferences? preferences,
   final LayersProvider layers,

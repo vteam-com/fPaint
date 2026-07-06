@@ -65,10 +65,12 @@ class MainViewState extends State<MainView> {
               listenable: appProvider.mainViewCompositeListenable,
               builder: (final BuildContext _, final Widget? _) {
                 final bool hasActiveTransformOverlay = appProvider.hasActiveTransformOverlay;
-                // The brush-size ring is a paint-tool affordance; the selector
-                // (incl. Edge Detection wand) never paints, so never show it there.
-                final bool showBrushSizePreview =
-                    appProvider.isBrushSizePreviewVisible && appProvider.selectedAction != ActionType.selector;
+                // The brush-size ring is a paint-tool affordance. The selector
+                // (incl. Edge Detection wand) never paints, so it is hidden there
+                // — except when an effect brush is armed, which paints (clipped to
+                // the selection) even while the selector tool is active.
+                final bool showBrushSizePreview = appProvider.isBrushSizePreviewVisible &&
+                    (appProvider.selectedAction != ActionType.selector || appProvider.effectBrushModel.isArmed);
 
                 return Stack(
                   children: <Widget>[
