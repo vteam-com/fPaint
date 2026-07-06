@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 
@@ -139,10 +140,15 @@ extension LayerProviderStorageExport on LayerProvider {
     switch (brush.style) {
       case BrushStyle.slash:
         return brush.size * AppStroke.dashWidthFactor * AppVisual.half;
+      case BrushStyle.soft:
+        // The Gaussian feather paints beyond the nominal half-width.
+        return softStrokeOutset(brush.size);
       case BrushStyle.solid:
       case BrushStyle.dash:
       case BrushStyle.dotted:
       case BrushStyle.dashDot:
+      case BrushStyle.grain:
+        // Grain masks a solid stroke, so it stays within the nominal half-width.
         return brush.size * AppVisual.half;
     }
   }

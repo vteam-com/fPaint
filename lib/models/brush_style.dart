@@ -17,6 +17,16 @@ enum BrushStyle {
 
   /// A slash brush style that draws forward slashes along the path.
   slash,
+
+  /// A soft-edged "airbrush" style: the stroke is drawn with a Gaussian
+  /// [MaskFilter.blur] so its edges feather out instead of being hard. Kept last
+  /// so existing persisted [BrushStyle] indices stay stable.
+  soft,
+
+  /// A grainy "pencil" style: the stroke is modulated by a repeating paper-grain
+  /// texture (see `BrushGrain`) so it reads as graphite rather than a flat fill.
+  /// Appended last to keep persisted [BrushStyle] indices stable.
+  grain,
 }
 
 /// Represents a brush with a specific style, color, and size.

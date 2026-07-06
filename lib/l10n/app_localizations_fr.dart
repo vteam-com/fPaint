@@ -107,7 +107,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get brushStyleDotted => 'Pointille';
 
   @override
+  String get brushStyleGrain => 'Granuleux';
+
+  @override
   String get brushStyleSlash => 'Barre oblique';
+
+  @override
+  String get brushStyleSoft => 'Doux';
 
   @override
   String get brushStyleSolid => 'Continu';

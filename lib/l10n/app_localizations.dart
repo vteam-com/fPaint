@@ -266,11 +266,23 @@ abstract class AppLocalizations {
   /// **'Dotted'**
   String get brushStyleDotted;
 
+  /// No description provided for @brushStyleGrain.
+  ///
+  /// In en, this message translates to:
+  /// **'Grain'**
+  String get brushStyleGrain;
+
   /// No description provided for @brushStyleSlash.
   ///
   /// In en, this message translates to:
   /// **'Slash'**
   String get brushStyleSlash;
+
+  /// No description provided for @brushStyleSoft.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft'**
+  String get brushStyleSoft;
 
   /// No description provided for @brushStyleSolid.
   ///
