@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -370,6 +371,57 @@ void main() {
 
       expect(await currentFile.readAsString(), 'new-content');
       expect(backupFiles, isEmpty);
+    });
+  });
+
+  group('saveFile remembers flat-format selection', () {
+    late Directory tempDirectory;
+    late AppPreferences preferences;
+    late ShellProvider shellProvider;
+    late LayersProvider layers;
+    late TargetPlatform? previousPlatform;
+
+    setUp(() async {
+      previousPlatform = debugDefaultTargetPlatformOverride;
+      debugDefaultTargetPlatformOverride = TargetPlatform.linux;
+
+      tempDirectory = await Directory.systemTemp.createTemp('fpaint_save_selection_test');
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+
+      preferences = AppPreferences();
+      await preferences.getPref();
+      shellProvider = ShellProvider();
+      layers = LayersProvider()..size = const ui.Size(8, 8);
+      // A fresh provider has one background layer; add a second so index 1 is valid.
+      layers.addTop(name: 'Top');
+      layers.selectedLayerIndex = 1;
+    });
+
+    tearDown(() async {
+      debugDefaultTargetPlatformOverride = previousPlatform;
+      if (await tempDirectory.exists()) {
+        await tempDirectory.delete(recursive: true);
+      }
+    });
+
+    test('records the selected layer index for a PNG save', () async {
+      final String filePath = '${tempDirectory.path}/art.png';
+      shellProvider.loadedFileName = filePath;
+
+      await saveFile(shellProvider, layers, preferences);
+
+      expect(await File(filePath).exists(), isTrue);
+      expect(preferences.lastSelectedLayerFor(filePath), 1);
+    });
+
+    test('does not record selection for a layered ORA save', () async {
+      final String filePath = '${tempDirectory.path}/art.ora';
+      shellProvider.loadedFileName = filePath;
+
+      await saveFile(shellProvider, layers, preferences);
+
+      expect(await File(filePath).exists(), isTrue);
+      expect(preferences.lastSelectedLayerFor(filePath), isNull);
     });
   });
 }

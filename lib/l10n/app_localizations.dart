@@ -302,6 +302,12 @@ abstract class AppLocalizations {
   /// **'Canvas Size'**
   String get canvasSizeTitle;
 
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
   /// REVIEWED
   ///
   /// In en, this message translates to:
@@ -319,12 +325,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Wheel'**
   String get colorPickerModeWheel;
-
-  /// No description provided for @close.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get close;
 
   /// No description provided for @colorTolerance.
   ///
@@ -524,23 +524,17 @@ abstract class AppLocalizations {
   /// **'Shadow'**
   String get effectShadow;
 
-  /// No description provided for @effectSharpen.
+  /// No description provided for @effectSharpness.
   ///
   /// In en, this message translates to:
-  /// **'Sharpen'**
-  String get effectSharpen;
+  /// **'Sharpness'**
+  String get effectSharpness;
 
   /// No description provided for @effectSize.
   ///
   /// In en, this message translates to:
   /// **'Size'**
   String get effectSize;
-
-  /// No description provided for @effectSoften.
-  ///
-  /// In en, this message translates to:
-  /// **'Edge Soften'**
-  String get effectSoften;
 
   /// No description provided for @effectVignette.
   ///
@@ -1058,12 +1052,6 @@ abstract class AppLocalizations {
   /// **'Settings...'**
   String get settings;
 
-  /// No description provided for @sidePanelBrushesSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Brushes'**
-  String get sidePanelBrushesSection;
-
   /// No description provided for @sidePanelLayersSection.
   ///
   /// In en, this message translates to:
@@ -1193,7 +1181,7 @@ abstract class AppLocalizations {
   /// No description provided for @toolMagic.
   ///
   /// In en, this message translates to:
-  /// **'Magic'**
+  /// **'Edge Detection'**
   String get toolMagic;
 
   /// No description provided for @toolPaintBucket.
@@ -1226,11 +1214,11 @@ abstract class AppLocalizations {
   /// **'Remove'**
   String get toolRemove;
 
-  /// No description provided for @toolReplace.
+  /// No description provided for @toolSectionBrush.
   ///
   /// In en, this message translates to:
-  /// **'Replace'**
-  String get toolReplace;
+  /// **'Brush'**
+  String get toolSectionBrush;
 
   /// No description provided for @toolSelector.
   ///

@@ -35,6 +35,7 @@ const String _oraAttrY = 'y';
 const String _oraAttrCompositeOp = 'composite-op';
 const String _oraAttrAlphaPreserve = 'alpha-preserve';
 const String _oraAttrEditLocked = 'edit-locked';
+const String _oraAttrSelected = 'selected';
 const String _oraVisibilityVisible = 'visible';
 const String _oraVisibilityHidden = 'hidden';
 const String _oraVisibilityInherit = 'inherit';
@@ -184,10 +185,14 @@ Future<void> readOraFileFromBytes(
 
     final ui.Size canvasSize = _extractOraCanvasSize(xmlDoc);
 
+    LayerProvider? selectedLayer;
     await layers.replaceAll(
       canvasSize: canvasSize,
-      addLayers: () => importFromOraXml(archive, layers, xmlDoc),
+      addLayers: () async {
+        selectedLayer = await importFromOraXml(archive, layers, xmlDoc);
+      },
     );
+    _restoreSelectedLayer(layers, selectedLayer);
   } on OraFileException {
     rethrow;
   } catch (error, stackTrace) {
@@ -217,7 +222,10 @@ ui.Size _extractOraCanvasSize(final XmlDocument xmlDoc) {
 }
 
 /// Imports image metadata and root stack information from an ORA XML document.
-Future<void> importFromOraXml(
+///
+/// Returns the layer flagged as `selected` in the document, or null when no
+/// layer carries the marker.
+Future<LayerProvider?> importFromOraXml(
   final Archive archive,
   final LayersProvider layers,
   final XmlDocument xmlDoc,
@@ -239,31 +247,60 @@ Future<void> importFromOraXml(
   );
 
   final XmlElement? xmlElementTopStack = xmlElementImage.getElement(_oraElementStack);
-  await importStack(archive, layers, xmlElementTopStack);
+  return importStack(archive, layers, xmlElementTopStack);
 }
 
 /// Recursively imports a stack node and its child stacks and layers.
-Future<void> importStack(
+///
+/// Returns the layer marked `selected` within this subtree, or null.
+Future<LayerProvider?> importStack(
   final Archive archive,
   final LayersProvider layers,
   final XmlElement? xmlElementTopStack,
 ) async {
+  LayerProvider? selectedLayer;
   if (xmlElementTopStack != null) {
     final String stackName = xmlElementTopStack.getAttribute(_oraAttrName) ?? '';
     for (final XmlElement xmlElementChild in xmlElementTopStack.childElements) {
       if (xmlElementChild.localName == _oraElementStack) {
-        await importStack(archive, layers, xmlElementChild);
+        final LayerProvider? nested = await importStack(archive, layers, xmlElementChild);
+        if (nested != null) {
+          selectedLayer = nested;
+        }
       } else {
         if (xmlElementChild.localName == _oraElementLayer) {
-          await addLayer(archive, layers, stackName, xmlElementChild);
+          final LayerProvider addedLayer = await addLayer(archive, layers, stackName, xmlElementChild);
+          if (xmlElementChild.getAttribute(_oraAttrSelected) == _booleanTextTrue) {
+            selectedLayer = addedLayer;
+          }
         }
       }
     }
   }
+  return selectedLayer;
+}
+
+/// Selects [selectedLayer] once the full stack has been rebuilt.
+///
+/// [LayersProvider.replaceAll] resets the selection to the first layer, so the
+/// restore must run after it completes. No-op when the layer is absent.
+void _restoreSelectedLayer(
+  final LayersProvider layers,
+  final LayerProvider? selectedLayer,
+) {
+  if (selectedLayer == null) {
+    return;
+  }
+  final int index = layers.getLayerIndex(selectedLayer);
+  if (index >= 0) {
+    layers.selectedLayerIndex = index;
+  }
 }
 
 /// Creates and configures a layer from an ORA layer XML node.
-Future<void> addLayer(
+///
+/// Returns the created [LayerProvider] so callers can track the selection.
+Future<LayerProvider> addLayer(
   final Archive archive,
   final LayersProvider layers,
   final String stackName,
@@ -304,7 +341,7 @@ Future<void> addLayer(
       offset: offset,
     );
   }
-  return;
+  return newLayer;
 }
 
 /// Converts ORA visibility text into a layer-visible flag.
@@ -566,6 +603,7 @@ Future<List<int>> createOraArchive(
       _oraAttrOpacity: layer.opacity.toStringAsFixed(AppLimits.opacityPrecision),
       _oraAttrCompositeOp: _getOraCompositeOpFromBlendMode(layer.blendMode),
       _oraAttrEditLocked: layer.isLocked,
+      _oraAttrSelected: i == layers.selectedLayerIndex,
     };
 
     if (_isOraLayerImageEmpty(layer)) {
@@ -897,6 +935,7 @@ void buildLayers(
   for (final Map<String, dynamic> layerData in layersData) {
     final String? compositeOp = layerData[_oraAttrCompositeOp] as String?;
     final bool isLocked = layerData[_oraAttrEditLocked] as bool? ?? false;
+    final bool isSelected = layerData[_oraAttrSelected] as bool? ?? false;
 
     builder.element(
       _oraElementLayer,
@@ -909,6 +948,9 @@ void buildLayers(
         }
         if (isLocked) {
           builder.attribute(_oraAttrEditLocked, _booleanTextTrue);
+        }
+        if (isSelected) {
+          builder.attribute(_oraAttrSelected, _booleanTextTrue);
         }
         builder.attribute(_oraAttrSrc, layerData[_oraAttrSrc]);
         builder.attribute(_oraAttrX, layerData[_oraAttrX]);

@@ -24,6 +24,7 @@ import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
+import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -53,9 +54,6 @@ const Duration _effectControlsWaitPumpDuration = Duration(milliseconds: 16);
 
 /// Minimum number of vertices required to form a lasso selection polygon.
 const int _lassoSelectionMinimumPointCount = 3;
-
-/// Tooltip label for selector math: replace current selection.
-const String _selectorMathReplaceTooltip = 'Replace';
 
 /// Tooltip label for selector math: add to current selection.
 const String _selectorMathAddTooltip = 'Add';
@@ -955,11 +953,26 @@ Future<void> selectWandArea(
   await _waitForWandSelectionIdle(tester, appProvider: appProvider);
 }
 
-/// Sets selector math mode to replace.
+/// Returns selector math to replace by toggling off whichever mode is active.
+///
+/// There is no longer a dedicated "replace" button: replace is the state where
+/// both Add and Subtract toggles are off, so tapping the active toggle restores
+/// it.
 Future<void> setSelectorMathReplace(final WidgetTester tester) async {
   await activateSelectorTool(tester);
   await tester.pump();
-  await tapByTooltip(tester, _selectorMathReplaceTooltip);
+  final AppProvider appProvider = appProviderFromTester(tester);
+  switch (appProvider.selectorModel.math) {
+    case SelectorMath.add:
+      await tapByTooltip(tester, _selectorMathAddTooltip);
+      break;
+    case SelectorMath.remove:
+      await tapByTooltip(tester, _selectorMathRemoveTooltip);
+      break;
+    case SelectorMath.replace:
+    case SelectorMath.intersect:
+      break;
+  }
   await tester.pump();
 }
 

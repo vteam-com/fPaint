@@ -551,6 +551,36 @@ void main() {
       expect(appProvider.effectPreviewModel.isVisible, isFalse);
     });
 
+    test('targets the whole layer when no selection is visible', () async {
+      final int canvasWidth = appProvider.layers.width.toInt();
+      final int canvasHeight = appProvider.layers.height.toInt();
+      final Image layerImage = await createFilledLayerImage(
+        width: canvasWidth,
+        height: canvasHeight,
+        color: const Color(0xFF112233),
+      );
+      addTearDown(layerImage.dispose);
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+
+      expect(appProvider.selectorModel.isVisible, isFalse);
+
+      await appProvider.startEffectPreview(SelectionEffect.blur);
+
+      expect(appProvider.effectPreviewModel.isVisible, isTrue);
+      // A layer-wide effect must not leave a lingering select-all region.
+      expect(appProvider.selectorModel.isVisible, isFalse);
+
+      final Rect bounds = appProvider.effectPreviewModel.bounds!;
+      expect(bounds.width, appProvider.layers.width);
+      expect(bounds.height, appProvider.layers.height);
+
+      await appProvider.confirmEffectPreview();
+
+      final UserActionDrawing committedAction = appProvider.layers.selectedLayer.actionStack.last;
+      expect(committedAction.action, ActionType.image);
+      expect(appProvider.effectPreviewModel.isVisible, isFalse);
+    });
+
     test('masks preview and commit to the selection shape', () async {
       final int canvasWidth = appProvider.layers.width.toInt();
       final int canvasHeight = appProvider.layers.height.toInt();
@@ -618,6 +648,120 @@ void main() {
     });
   });
 
+  group('effect brush', () {
+    test('arming an effect exposes it and disarming clears it', () {
+      appProvider.armEffectBrush(SelectionEffect.blur);
+      expect(appProvider.effectBrushModel.isArmed, isTrue);
+      expect(appProvider.effectBrushModel.effect, SelectionEffect.blur);
+
+      appProvider.setEffectBrushStrength(AppEffects.maxIntensity);
+      expect(appProvider.effectBrushModel.strength, AppEffects.maxIntensity);
+
+      appProvider.disarmEffectBrush();
+      expect(appProvider.effectBrushModel.isArmed, isFalse);
+    });
+
+    test('selecting a gesture tool disarms the effect brush (one active tool)', () {
+      appProvider.armEffectBrush(SelectionEffect.sharpness);
+      expect(appProvider.effectBrushModel.isArmed, isTrue);
+
+      // Picking any tool cancels the armed effect brush so a stroke is never
+      // ambiguous (gesture tool vs. effect brush).
+      appProvider.selectedAction = ActionType.brush;
+      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.effectBrushModel.isArmed, isFalse);
+    });
+
+    test('commitEffectBrushStroke overlays a masked effect patch as one undoable action', () async {
+      final int canvasWidth = appProvider.layers.width.toInt();
+      final int canvasHeight = appProvider.layers.height.toInt();
+      final Image layerImage = await createFilledLayerImage(
+        width: canvasWidth,
+        height: canvasHeight,
+        color: const Color(0xFF3366AA),
+      );
+      addTearDown(layerImage.dispose);
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+
+      final int actionsBefore = appProvider.layers.selectedLayer.actionStack.length;
+
+      await appProvider.commitEffectBrushStroke(
+        effect: SelectionEffect.blur,
+        strength: AppEffects.defaultIntensity,
+        size: AppEffects.minSize,
+        strokePoints: <Offset>[const Offset(20, 20), const Offset(80, 60)],
+        strokeBounds: const Rect.fromLTRB(20, 20, 80, 60),
+        brushSize: 30,
+        clipPath: null,
+      );
+
+      expect(appProvider.layers.selectedLayer.actionStack.length, actionsBefore + 1);
+      final UserActionDrawing committed = appProvider.layers.selectedLayer.actionStack.last;
+      expect(committed.action, ActionType.image);
+      expect(committed.image, isNotNull);
+      expect(appProvider.undoProvider.canUndo, isTrue);
+
+      // The patch must be masked to the brushed band: opaque along the stroke,
+      // transparent in the region corner away from it (guards against the
+      // whole-region-rectangle masking bug).
+      final Image patch = committed.image!;
+      final ByteData patchData = (await patch.toByteData(format: ImageByteFormat.rawRgba))!;
+      int alphaAt(final int x, final int y) => patchData.getUint8(
+        (((y * patch.width) + x) * AppMath.bytesPerPixel) + AppEffects.alphaChannelIndex,
+      );
+      expect(alphaAt(45, 35), greaterThan(AppMath.zero));
+      expect(alphaAt(2, 2), AppMath.zero);
+
+      appProvider.undoProvider.undo();
+      expect(appProvider.layers.selectedLayer.actionStack.length, actionsBefore);
+    });
+
+    test('commitEffectBrushStroke ignores strokes with fewer than two points', () async {
+      final int actionsBefore = appProvider.layers.selectedLayer.actionStack.length;
+
+      await appProvider.commitEffectBrushStroke(
+        effect: SelectionEffect.blur,
+        strength: AppEffects.defaultIntensity,
+        size: AppEffects.minSize,
+        strokePoints: <Offset>[const Offset(10, 10)],
+        strokeBounds: const Rect.fromLTRB(10, 10, 11, 11),
+        brushSize: 10,
+        clipPath: null,
+      );
+
+      expect(appProvider.layers.selectedLayer.actionStack.length, actionsBefore);
+    });
+
+    test('commitEffectBrushStroke is a safe no-op at centre strength (0)', () async {
+      final int canvasWidth = appProvider.layers.width.toInt();
+      final int canvasHeight = appProvider.layers.height.toInt();
+      final Image layerImage = await createFilledLayerImage(
+        width: canvasWidth,
+        height: canvasHeight,
+        color: const Color(0xFF808080),
+      );
+      addTearDown(layerImage.dispose);
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+
+      final int actionsBefore = appProvider.layers.selectedLayer.actionStack.length;
+
+      // A bipolar effect at centre (0) is a no-op: apply() returns the source
+      // image untouched. Must not crash (was "non-genuine Image") and must not
+      // commit anything.
+      await appProvider.commitEffectBrushStroke(
+        effect: SelectionEffect.brightness,
+        strength: AppEffects.minIntensity,
+        size: AppEffects.minSize,
+        strokePoints: <Offset>[const Offset(20, 20), const Offset(80, 60)],
+        strokeBounds: const Rect.fromLTRB(20, 20, 80, 60),
+        brushSize: 30,
+        clipPath: null,
+      );
+
+      expect(appProvider.layers.selectedLayer.actionStack.length, actionsBefore);
+    });
+  });
+
   group('getPathAdjustToCanvasSizeAndPosition', () {
     test('returns null for null path', () {
       expect(appProvider.getPathAdjustToCanvasSizeAndPosition(null), isNull);
@@ -661,6 +805,31 @@ void main() {
         ),
       );
       expect(appProvider.undoProvider.canUndo, isTrue);
+    });
+
+    test('persists across a tool switch and clips the new tool to the selection', () {
+      // Make a selection while in selector mode.
+      appProvider.activateSelectionAction();
+      appProvider.selectAll();
+      expect(appProvider.selectorModel.isVisible, isTrue);
+
+      // Switching to a gesture tool must NOT clear the selection.
+      appProvider.selectedAction = ActionType.brush;
+      expect(appProvider.selectedAction, ActionType.brush);
+      expect(appProvider.selectorModel.isVisible, isTrue);
+
+      // A stroke on the gesture tool is clipped to the persistent selection.
+      appProvider.recordExecuteDrawingActionToSelectedLayer(
+        action: UserActionDrawing(
+          positions: <Offset>[const Offset(0, 0), const Offset(10, 10)],
+          action: ActionType.brush,
+          brush: MyBrush(color: const Color(0xFF000000), size: 5),
+        ),
+      );
+
+      final UserActionDrawing recorded = appProvider.layers.selectedLayer.actionStack.last;
+      expect(recorded.clipPath, isNotNull);
+      expect(recorded.clipPath!.getBounds().width, appProvider.layers.width);
     });
   });
 

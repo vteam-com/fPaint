@@ -91,6 +91,7 @@ enum AppIcon {
   selectorMathRemove('assets/icons/selector_math_remove.svg'),
   selectorMathReplace('assets/icons/selector_math_replace.svg'),
 
+  smudge('assets/icons/smudge.svg'),
   square('assets/icons/square.svg'),
   support('assets/icons/support.svg'),
   transform('assets/icons/transform.svg'),

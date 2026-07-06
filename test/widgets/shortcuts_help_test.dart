@@ -142,7 +142,7 @@ void main() {
       expect(find.text('Add to Selection'), findsOneWidget);
       expect(find.text('Subtract from Selection'), findsOneWidget);
       expect(find.text('Intersect with Selection'), findsOneWidget);
-      expect(find.text('Magic Wand: Sample All Layers'), findsOneWidget);
+      expect(find.text('Edge Detection: Sample All Layers'), findsOneWidget);
       expect(find.text('Flood Fill: Sample All Layers'), findsOneWidget);
       // Shift key cap must appear for Add to Selection
       expect(find.text('Shift'), findsAtLeastNWidgets(1));

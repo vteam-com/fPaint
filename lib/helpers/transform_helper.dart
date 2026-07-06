@@ -292,6 +292,19 @@ void triggerSquareSnapHaptic(
   }
 }
 
+/// Fires a haptic tick when the Edge Detection wand tolerance crosses a multiple
+/// of [AppMath.wandToleranceSnapInterval] while dragging, so the drag feels
+/// notched without buzzing on every single unit.
+void triggerWandToleranceHaptic(
+  final int previousTolerance,
+  final int currentTolerance,
+) {
+  const int interval = AppMath.wandToleranceSnapInterval;
+  if ((previousTolerance ~/ interval) != (currentTolerance ~/ interval)) {
+    _performHaptic();
+  }
+}
+
 /// Triggers a platform-appropriate haptic tick.
 void _performHaptic() {
   if (Platform.isMacOS) {

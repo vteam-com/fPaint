@@ -21,6 +21,24 @@
 - Every user-facing string must be localized through Flutter l10n (`AppLocalizations`) unless there is a technical reason not to localize.
 - Non-user-facing tokens (e.g., protocol values, file format identifiers, action IDs, binding/runtime markers) must be declared as named `const String` values, not inline literals.
 
+## Tool Design: Brushes & Effects
+
+- Every pixel-changing tool lives in one **Brush** section and is used the same
+  way — pick it, then paint. **Effects are brushes too**: tapping one arms it as
+  a brush (size + strength) and you paint it on. In the panel an effect is a
+  brush only; whole-layer/selection apply lives on the on-canvas selection
+  overlay, not the panel. Selection is an orthogonal modifier that clips any
+  tool and gates none.
+- Do not add a separate section, an "effect mode" toggle, or a whole-region
+  "Apply" button to the panel, and do not make one capability selectable in two
+  places.
+- **Read [BRUSHES_AND_EFFECTS.md](BRUSHES_AND_EFFECTS.md) before adding, moving,
+  or renaming any tool or effect.** It is the canonical spec and holds the full
+  invariants (one active tool at a time, region-bounded painting, and the
+  bipolar-effect no-op commit guard — a strength-0 effect returns the same image
+  instance, so any commit that disposes its source must check
+  `identical(processed, source)` before drawing).
+
 ## Current Lint Context
 
 - Magic number currently reported: `lib/main.dart` line 108 value `0.35`.

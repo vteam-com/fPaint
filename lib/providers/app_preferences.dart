@@ -44,6 +44,13 @@ class AppPreferences extends ChangeNotifier {
   static const String keyRecentFiles = 'keyRecentFiles';
   static const String keyRecentFileBookmarks = 'keyRecentFileBookmarks';
 
+  /// Paths, most-recent-first, of files whose last-selected layer is remembered
+  /// for formats that cannot embed the selection (PNG, JPEG, WebP, HEIC).
+  static const String keyLastLayerFiles = 'keyLastLayerFiles';
+
+  /// Selected layer indices, positionally paired with [keyLastLayerFiles].
+  static const String keyLastLayerIndices = 'keyLastLayerIndices';
+
   /// Legacy separator used by the previous path+bookmark serialized format.
   static const String _legacyBookmarkSeparator = '\x00';
 
@@ -61,6 +68,11 @@ class AppPreferences extends ChangeNotifier {
 
   /// macOS security-scoped bookmarks keyed by file path.
   Map<String, String> _recentFileBookmarks = <String, String>{};
+
+  /// Last-selected layer index keyed by file path, for formats that cannot
+  /// embed the selection. Insertion order is most-recent-first and the map is
+  /// capped at [AppLimits.maxRecentFiles] entries.
+  final Map<String, int> _lastLayerIndexByPath = <String, int>{};
 
   // Getters
 
@@ -103,6 +115,11 @@ class AppPreferences extends ChangeNotifier {
 
   /// Returns the macOS security-scoped bookmark string for [path], or null.
   String? getBookmark(final String path) => _recentFileBookmarks[path];
+
+  /// Returns the remembered selected layer index for [path], or null when the
+  /// file has no stored selection. Only used for formats that cannot embed the
+  /// selection; layered formats (ORA, TIFF) carry it inside the file instead.
+  int? lastSelectedLayerFor(final String path) => _lastLayerIndexByPath[path];
 
   /// Gets the SharedPreferences instance.
   Future<SharedPreferences> getPref() async {
@@ -235,6 +252,50 @@ class AppPreferences extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Remembers the [index] of the last-selected layer for [path].
+  ///
+  /// Intended for formats that cannot embed the selection inside the file
+  /// (PNG, JPEG, WebP, HEIC). The entry is moved to the front and the list is
+  /// capped at [AppLimits.maxRecentFiles] so only the most recently worked-on
+  /// files are retained.
+  Future<void> recordLastSelectedLayer(
+    final String path,
+    final int index,
+  ) async {
+    final Map<String, int> reordered = <String, int>{path: index};
+    for (final MapEntry<String, int> entry in _lastLayerIndexByPath.entries) {
+      if (entry.key == path || reordered.length >= AppLimits.maxRecentFiles) {
+        continue;
+      }
+      reordered[entry.key] = entry.value;
+    }
+    _lastLayerIndexByPath
+      ..clear()
+      ..addAll(reordered);
+
+    final SharedPreferences prefs = await getPref();
+    await prefs.setStringList(keyLastLayerFiles, _lastLayerIndexByPath.keys.toList());
+    await prefs.setStringList(
+      keyLastLayerIndices,
+      _lastLayerIndexByPath.values.map((final int value) => value.toString()).toList(),
+    );
+  }
+
+  /// Rebuilds [_lastLayerIndexByPath] from the two persisted parallel lists.
+  void _loadLastLayerSelections({
+    required final List<String> files,
+    required final List<String> indices,
+  }) {
+    _lastLayerIndexByPath.clear();
+    final int sharedCount = files.length < indices.length ? files.length : indices.length;
+    for (int i = 0; i < sharedCount && i < AppLimits.maxRecentFiles; i++) {
+      final int? index = int.tryParse(indices[i]);
+      if (index != null) {
+        _lastLayerIndexByPath[files[i]] = index;
+      }
+    }
+  }
+
   /// Removes bookmarks for files that are no longer present in the MRU list.
   void _pruneRecentFileBookmarks() {
     _recentFileBookmarks.removeWhere(
@@ -323,6 +384,11 @@ class AppPreferences extends ChangeNotifier {
     if (loadedRecentFileBookmarks.needsResave) {
       await _persistRecentFileBookmarks(_prefs!);
     }
+
+    _loadLastLayerSelections(
+      files: _prefs!.getStringList(keyLastLayerFiles) ?? <String>[],
+      indices: _prefs!.getStringList(keyLastLayerIndices) ?? <String>[],
+    );
   }
 
   /// Loads bookmark entries and repairs legacy macOS-pref storage formats.

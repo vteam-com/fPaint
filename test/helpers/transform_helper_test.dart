@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 
@@ -18,6 +19,29 @@ Future<ui.Image> _createTestImage({
 }
 
 void main() {
+  group('triggerWandToleranceHaptic', () {
+    const MethodChannel hapticChannel = MethodChannel('com.vteam.fpaint/haptic');
+
+    setUp(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        hapticChannel,
+        (final MethodCall _) async => null,
+      );
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(hapticChannel, null);
+    });
+
+    test('runs without error whether or not it crosses a snap interval', () {
+      // Same snap bucket -> no tick fired.
+      triggerWandToleranceHaptic(6, 7);
+      // Crosses a multiple of the snap interval -> fires the platform tick.
+      triggerWandToleranceHaptic(4, 9);
+    });
+  });
+
   group('drawPerspectiveImage', () {
     test('draws without error for identity quad', () async {
       final ui.Image image = await _createTestImage();

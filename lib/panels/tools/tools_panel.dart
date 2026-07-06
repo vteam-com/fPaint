@@ -3,13 +3,11 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
-import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/panels/tools/tool_family_rail.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/brush_intensity_picker.dart';
@@ -18,11 +16,9 @@ import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
-import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/gradient_color_list_editor.dart';
 import 'package:fpaint/widgets/halftone_size_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
-import 'package:fpaint/widgets/side_panel_header.dart';
 import 'package:fpaint/widgets/text_attributes_widget.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
@@ -44,73 +40,49 @@ class ToolsPanel extends StatelessWidget {
   @override
   Widget build(final BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context);
-    final AppLocalizations l10n = context.l10n;
 
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _buildPanelSection(
-            title: l10n.sidePanelBrushesSection,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                ListenableBuilder(
-                  listenable: appProvider.selectedActionRepaintListenable,
-                  builder: (final BuildContext _, final Widget? _) {
-                    final ActionType selectedTool = appProvider.selectedAction;
+          ToolFamilyRail(
+            minimal: minimal,
+            gestureParams: ListenableBuilder(
+              listenable: appProvider.toolOptionsRepaintListenable,
+              builder: (final BuildContext _, final Widget? _) {
+                final ActionType selectedTool = appProvider.selectedAction;
 
-                    return Wrap(
-                      spacing: minimal ? AppSpacing.thin : AppSpacing.small,
-                      runSpacing: minimal ? AppSpacing.thin : AppSpacing.small,
-                      alignment: WrapAlignment.center,
-                      children: getListOfTools(
-                        context: context,
-                        appProvider: appProvider,
-                        selectedTool: selectedTool,
+                return AnimatedSwitcher(
+                  duration: AppDefaults.toolPanelRevealAnimationDuration,
+                  reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (final Widget child, final Animation<double> animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SizeTransition(
+                        sizeFactor: animation,
+                        child: child,
                       ),
                     );
                   },
-                ),
-                ListenableBuilder(
-                  listenable: appProvider.toolOptionsRepaintListenable,
-                  builder: (final BuildContext _, final Widget? _) {
-                    final ActionType selectedTool = appProvider.selectedAction;
-
-                    return AnimatedSwitcher(
-                      duration: AppDefaults.toolPanelRevealAnimationDuration,
-                      reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
-                      switchInCurve: Curves.easeOutCubic,
-                      switchOutCurve: Curves.easeInCubic,
-                      transitionBuilder: (final Widget child, final Animation<double> animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SizeTransition(
-                            sizeFactor: animation,
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: KeyedSubtree(
-                        key: ValueKey<ActionType>(selectedTool),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: AppSpacing.medium),
-                          child: Wrap(
-                            runSpacing: minimal ? AppSpacing.small : AppSpacing.thin,
-                            alignment: WrapAlignment.center,
-                            children: getWidgetForSelectedTool(
-                              context: context,
-                              appProvider: appProvider,
-                            ),
-                          ),
+                  child: KeyedSubtree(
+                    key: ValueKey<ActionType>(selectedTool),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: AppSpacing.medium),
+                      child: Wrap(
+                        runSpacing: minimal ? AppSpacing.small : AppSpacing.thin,
+                        alignment: WrapAlignment.center,
+                        children: getWidgetForSelectedTool(
+                          context: context,
+                          appProvider: appProvider,
                         ),
                       ),
-                    );
-                  },
-                ),
-              ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -201,10 +173,10 @@ class ToolsPanel extends StatelessWidget {
       ListenableBuilder(
         listenable: layers.topColorsListenable,
         builder: (final BuildContext _, final Widget? _) {
-          return ToolAttributeWidget(
+          return _CollapsibleTopColors(
             compact: minimal,
             name: l10n.topColors(layers.topColors.length),
-            childRight: TopColors(
+            child: TopColors(
               colorUsages: layers.topColors,
               onRefresh: layers.evaluateTopColor,
               onColorPicked: (final Color color) {
@@ -225,108 +197,6 @@ class ToolsPanel extends StatelessWidget {
         },
       ),
     );
-  }
-
-  /// Returns a list of widgets representing the available tools.
-  List<Widget> getListOfTools({
-    required final BuildContext context,
-    required final AppProvider appProvider,
-    required final ActionType selectedTool,
-  }) {
-    final AppLocalizations l10n = context.l10n;
-
-    final List<Widget> tools = <Widget>[
-      _buildActionPicker(
-        minimal: minimal,
-        name: l10n.toolPencil,
-        icon: ActionType.pencil.icon,
-        isSelected: selectedTool == ActionType.pencil,
-        onPressed: () => appProvider.selectedAction = ActionType.pencil,
-      ),
-      _buildActionPicker(
-        minimal: minimal,
-        name: l10n.toolBrush,
-        icon: ActionType.brush.icon,
-        isSelected: selectedTool == ActionType.brush,
-        onPressed: () => appProvider.selectedAction = ActionType.brush,
-      ),
-      _buildActionPicker(
-        key: Keys.toolSmudge,
-        minimal: minimal,
-        name: l10n.toolSmudge,
-        icon: ActionType.smudge.icon,
-        isSelected: selectedTool == ActionType.smudge,
-        onPressed: () => appProvider.selectedAction = ActionType.smudge,
-      ),
-      _buildActionPicker(
-        key: Keys.toolBlurBrush,
-        minimal: minimal,
-        name: l10n.toolBlurBrush,
-        icon: ActionType.blurBrush.icon,
-        isSelected: selectedTool == ActionType.blurBrush,
-        onPressed: () => appProvider.selectedAction = ActionType.blurBrush,
-      ),
-      _buildActionPicker(
-        key: Keys.toolLine,
-        minimal: minimal,
-        name: l10n.toolLine,
-        icon: ActionType.line.icon,
-        isSelected: selectedTool == ActionType.line,
-        onPressed: () {
-          appProvider.selectedAction = ActionType.line;
-        },
-      ),
-      _buildActionPicker(
-        key: Keys.toolRectangle,
-        minimal: minimal,
-        name: l10n.toolRectangle,
-        icon: ActionType.rectangle.icon,
-        isSelected: selectedTool == ActionType.rectangle,
-        onPressed: () {
-          appProvider.selectedAction = ActionType.rectangle;
-        },
-      ),
-      _buildActionPicker(
-        key: Keys.toolCircle,
-        minimal: minimal,
-        name: l10n.toolCircle,
-        icon: ActionType.circle.icon,
-        isSelected: selectedTool == ActionType.circle,
-        onPressed: () {
-          appProvider.selectedAction = ActionType.circle;
-        },
-      ),
-      _buildActionPicker(
-        key: Keys.toolFill,
-        minimal: minimal,
-        name: l10n.toolPaintBucket,
-        icon: ActionType.fill.icon,
-        isSelected: selectedTool == ActionType.fill,
-        onPressed: () {
-          appProvider.selectedAction = ActionType.fill;
-        },
-      ),
-      _buildActionPicker(
-        minimal: minimal,
-        name: l10n.toolEraser,
-        icon: ActionType.eraser.icon,
-        isSelected: selectedTool == ActionType.eraser,
-        onPressed: () {
-          appProvider.selectedAction = ActionType.eraser;
-        },
-      ),
-      _buildActionPicker(
-        key: Keys.toolText,
-        minimal: minimal,
-        name: l10n.toolText,
-        icon: ActionType.text.icon,
-        isSelected: selectedTool == ActionType.text,
-        onPressed: () {
-          appProvider.selectedAction = ActionType.text;
-        },
-      ),
-    ];
-    return tools;
   }
 
   /// Returns a list of widgets representing the attributes for the selected tool.
@@ -415,6 +285,8 @@ class ToolsPanel extends StatelessWidget {
         );
         break;
       case ActionType.selector:
+        // Selection tooling lives on the canvas (sub-toolbar + bottom sheets),
+        // not in the side panel — see shell_selection_sub_toolbar.dart.
         break;
 
       default:
@@ -706,103 +578,41 @@ class ToolsPanel extends StatelessWidget {
       ),
     );
   }
-
-  /// Builds a titled panel block used by the side tools panel.
-  Widget _buildPanelSection({
-    required final String title,
-    required final Widget child,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.medium,
-        vertical: AppSpacing.small,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          SidePanelHeader(
-            title: title,
-            padding: EdgeInsets.zero,
-          ),
-          const SizedBox(height: AppSpacing.small),
-          child,
-        ],
-      ),
-    );
-  }
 }
 
-/// Side-panel section listing all [SelectionEffect] buttons with effect sliders
-/// so the user can tune preview parameters before applying an effect.
-class _EffectsSection extends StatefulWidget {
-  const _EffectsSection({
-    required this.minimal,
-    required this.l10n,
-    required this.appProvider,
+/// Wraps the top colors grid in a collapsible tool attribute, collapsed by default.
+class _CollapsibleTopColors extends StatefulWidget {
+  const _CollapsibleTopColors({
+    required this.name,
+    required this.compact,
+    required this.child,
   });
 
-  final AppProvider appProvider;
-  final AppLocalizations l10n;
-  final bool minimal;
+  /// The top colors grid revealed when expanded.
+  final Widget child;
+
+  /// Whether the tool panel is in minimal mode.
+  final bool compact;
+
+  /// The label shown on the expand/collapse toggle.
+  final String name;
 
   @override
-  State<_EffectsSection> createState() => _EffectsSectionState();
+  State<_CollapsibleTopColors> createState() => _CollapsibleTopColorsState();
 }
 
-class _EffectsSectionState extends State<_EffectsSection> {
+class _CollapsibleTopColorsState extends State<_CollapsibleTopColors> {
+  bool _expanded = false;
+
   @override
   Widget build(final BuildContext context) {
-    final SelectionEffect? selectedEffect = widget.appProvider.effectPreviewModel.effect;
-    final bool hasEffectPreview = widget.appProvider.effectPreviewModel.isVisible;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Wrap(
-          spacing: widget.minimal ? AppSpacing.thin : AppSpacing.small,
-          runSpacing: widget.minimal ? AppSpacing.thin : AppSpacing.small,
-          alignment: WrapAlignment.center,
-          children: <Widget>[
-            for (final SelectionEffect effect in SelectionEffect.values)
-              _buildActionPicker(
-                minimal: widget.minimal,
-                name: effectLabel(widget.l10n, effect),
-                icon: effect.icon,
-                isSelected: selectedEffect == effect,
-                onPressed: () async {
-                  if (hasEffectPreview && selectedEffect == effect) {
-                    widget.appProvider.cancelEffectPreview();
-                    return;
-                  }
-
-                  if (widget.appProvider.isSelectedLayerLocked) {
-                    _showLockedLayerMessage();
-                    return;
-                  }
-
-                  await widget.appProvider.startEffectPreview(effect);
-                },
-              ),
-          ],
-        ),
-        if (hasEffectPreview) const AppDivider(),
-        if (hasEffectPreview)
-          EffectIntensityControls(
-            key: ValueKey<SelectionEffect?>(selectedEffect),
-            appProvider: widget.appProvider,
-            l10n: widget.l10n,
-            sliderKey: Keys.effectIntensitySlider,
-            applyButtonKey: Keys.effectIntensityPanelApplyButton,
-            cancelButtonKey: Keys.effectIntensityCancelButton,
-          ),
-      ],
-    );
-  }
-
-  void _showLockedLayerMessage() {
-    context.showSnackBarMessage(
-      widget.l10n.layerLockedForEditing(widget.appProvider.layers.selectedLayer.name),
+    return ToolAttributeWidget(
+      compact: widget.compact,
+      name: widget.name,
+      enabled: _expanded,
+      enabledToggleKey: Keys.toolPanelTopColorsToggle,
+      onEnabledChanged: (final bool value) => setState(() => _expanded = value),
+      childRight: widget.child,
     );
   }
 }

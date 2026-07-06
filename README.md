@@ -13,6 +13,7 @@ To create a **free alternative to expensive commercial graphics software** throu
 ## ✨ Features
 
 - **Professional Drawing Tools** - Advanced brushes, pressure sensitivity, and precision controls
+- **Brushes & Effects** - A unified tool model: *everything is a brush, selection is a mask* — even effects arm as brushes. See [BRUSHES_AND_EFFECTS.md](BRUSHES_AND_EFFECTS.md)
 - **Layer Management** - Full layer system with blending modes, opacity, and organization
 - **Selection Tools** - Magic Wand, lasso, rectangle, and advanced selection capabilities
 - **Color Management** - Professional color picker with palettes, gradients, and color harmony

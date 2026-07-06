@@ -34,7 +34,7 @@ abstract class ShortcutActions {
   static const String addToSelection = 'Add to Selection';
   static const String subtractFromSelection = 'Subtract from Selection';
   static const String intersectWithSelection = 'Intersect with Selection';
-  static const String wandSampleAllLayers = 'Magic Wand: Sample All Layers';
+  static const String wandSampleAllLayers = 'Edge Detection: Sample All Layers';
   static const String floodFillSampleAllLayers = 'Flood Fill: Sample All Layers';
   static const String newLayer = 'New Layer';
   static const String deleteLayer = 'Delete Layer';

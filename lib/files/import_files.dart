@@ -191,6 +191,7 @@ Future<void> onFileOpen(final BuildContext context) async {
             context: context,
             layers: layers,
             path: path,
+            preferences: preferences,
           );
         }
         shellProvider.loadedFileName = path;
@@ -222,6 +223,7 @@ Future<bool> openFileFromPath({
   required final BuildContext context,
   required final LayersProvider layers,
   required final String path,
+  final AppPreferences? preferences,
 }) async {
   if (!context.mounted) {
     return false;
@@ -235,23 +237,29 @@ Future<bool> openFileFromPath({
   if (isFileExtensionSupported(extension)) {
     try {
       if (extension == _fileExtensionOra) {
+        // ORA embeds the selected layer, restored inside the reader.
         await readImageFromFilePathOra(layers, path);
         return true;
       } else if (extension == _fileExtensionTif || extension == _fileExtensionTiff) {
+        // TIFF embeds the selected layer, restored inside the reader.
         await readTiffFromFilePath(layers, path);
         return true;
       } else if (extension == _fileExtensionHeic || extension == _fileExtensionAvif) {
         final String fileName = path.split(Platform.pathSeparator).last;
-        return await _readHeifFromFilePath(
+        final bool loaded = await _readHeifFromFilePath(
           layers,
           path,
           l10n,
           extension: extension,
           imageName: fileName,
         );
+        _restoreFlatLayerSelection(preferences, layers, path, loaded: loaded);
+        return loaded;
       } else {
         final String fileName = path.split(Platform.pathSeparator).last;
-        return await readImageFromFilePath(layers, path, l10n, imageName: fileName);
+        final bool loaded = await readImageFromFilePath(layers, path, l10n, imageName: fileName);
+        _restoreFlatLayerSelection(preferences, layers, path, loaded: loaded);
+        return loaded;
       }
     } catch (e) {
       // General error catch, readImageFromFilePath might have already shown a SnackBar for decode errors
@@ -262,6 +270,27 @@ Future<bool> openFileFromPath({
     // Show unsupported format message
     _showImportFeedback(l10n.fileFormatNotSupported(extension));
     return false;
+  }
+}
+
+/// Restores the remembered selection for a flat (non-layered) file.
+///
+/// Flat formats cannot embed the selected layer, so it is looked up from
+/// [preferences] by path. The index is clamped to the current layer range,
+/// which in practice resolves to the base layer since flat files reload as a
+/// single layer. No-op when the load failed or no preference is available.
+void _restoreFlatLayerSelection(
+  final AppPreferences? preferences,
+  final LayersProvider layers,
+  final String path, {
+  required final bool loaded,
+}) {
+  if (!loaded || preferences == null) {
+    return;
+  }
+  final int? index = preferences.lastSelectedLayerFor(path);
+  if (index != null && layers.isIndexInRange(index)) {
+    layers.selectedLayerIndex = index;
   }
 }
 
@@ -457,7 +486,7 @@ Future<void> onFileDropped({
 
   // Open the file, replacing the current content.
   if (context.mounted) {
-    await openFileFromPath(context: context, layers: layers, path: path);
+    await openFileFromPath(context: context, layers: layers, path: path, preferences: preferences);
     shellProvider.loadedFileName = path;
     layers.clearHasChanged();
     shellProvider.requestCanvasFit();

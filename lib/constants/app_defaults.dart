@@ -5,7 +5,9 @@ class AppDefaults {
   static const double brushSize = 5.0;
   static const double smudgeIntensity = AppInteraction.pixelBrushDefaultIntensity;
   static const double blurBrushIntensity = AppInteraction.pixelBrushDefaultIntensity;
-  static const int tolerance = 50;
+  // Starting raw tolerance for the Edge Detection wand's sample tap; the user
+  // then drags on the canvas to grow/shrink the selection from there.
+  static const int tolerance = 6;
   static const bool useApplePencil = false;
   static const bool keepSaveBackups = false;
   static const Duration brushSizePreviewDuration = Duration(milliseconds: 700);

@@ -20,6 +20,7 @@ import 'package:fpaint/widgets/effect_preview_bottom_sheet.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/text_editor.dart';
 import 'package:fpaint/widgets/transform_widget.dart';
@@ -64,6 +65,10 @@ class MainViewState extends State<MainView> {
               listenable: appProvider.mainViewCompositeListenable,
               builder: (final BuildContext _, final Widget? _) {
                 final bool hasActiveTransformOverlay = appProvider.hasActiveTransformOverlay;
+                // The brush-size ring is a paint-tool affordance; the selector
+                // (incl. Edge Detection wand) never paints, so never show it there.
+                final bool showBrushSizePreview =
+                    appProvider.isBrushSizePreviewVisible && appProvider.selectedAction != ActionType.selector;
 
                 return Stack(
                   children: <Widget>[
@@ -98,7 +103,7 @@ class MainViewState extends State<MainView> {
                         ),
                       ),
 
-                    if (appProvider.isBrushSizePreviewVisible && appProvider.brushSizePreviewPosition == null)
+                    if (showBrushSizePreview && appProvider.brushSizePreviewPosition == null)
                       IgnorePointer(
                         child: Center(
                           child: _BrushSizePreviewOverlay(
@@ -108,7 +113,7 @@ class MainViewState extends State<MainView> {
                         ),
                       ),
 
-                    if (appProvider.isBrushSizePreviewVisible && appProvider.brushSizePreviewPosition != null)
+                    if (showBrushSizePreview && appProvider.brushSizePreviewPosition != null)
                       Positioned(
                         left:
                             appProvider.brushSizePreviewPosition!.dx -
@@ -120,6 +125,19 @@ class MainViewState extends State<MainView> {
                           child: _BrushSizePreviewOverlay(
                             diameter: appProvider.brushSizePreviewSize! * appProvider.layers.scale,
                             color: appProvider.brushSizePreviewColor,
+                          ),
+                        ),
+                      ),
+
+                    // Live Edge Detection tolerance readout, tagged near the
+                    // finger while dragging to grow/shrink the wand selection.
+                    if (appProvider.isWandToleranceHudVisible && appProvider.wandToleranceHudPosition != null)
+                      Positioned(
+                        left: appProvider.wandToleranceHudPosition!.dx + AppSpacing.large,
+                        top: appProvider.wandToleranceHudPosition!.dy - AppSpacing.largest * AppMath.pair,
+                        child: IgnorePointer(
+                          child: buildOverlayFeedbackBubble(
+                            label: '${appProvider.wandToleranceHudTolerance}%',
                           ),
                         ),
                       ),

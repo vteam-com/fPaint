@@ -39,6 +39,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     _pixelBrushLayerRestoreState = null;
     _pixelBrushClipPath = null;
     _pixelBrushStrokePatchBounds = null;
+    _effectBrushStroke = false;
   }
 
   /// Renders the whole smudge/blur stroke in one pass and commits it as an

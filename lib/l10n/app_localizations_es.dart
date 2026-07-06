@@ -122,6 +122,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get canvasSizeTitle => 'Tamano del lienzo';
 
   @override
+  String get close => 'Cerrar';
+
+  @override
   String get colorLabel => 'Color';
 
   @override
@@ -129,9 +132,6 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get colorPickerModeWheel => 'Rueda';
-
-  @override
-  String get close => 'Cerrar';
 
   @override
   String get colorTolerance => 'Tolerancia de color';
@@ -245,13 +245,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get effectShadow => 'Sombra';
 
   @override
-  String get effectSharpen => 'Nitidez';
+  String get effectSharpness => 'Nitidez';
 
   @override
   String get effectSize => 'Tamano';
-
-  @override
-  String get effectSoften => 'Suavizar bordes';
 
   @override
   String get effectVignette => 'Viñeta';
@@ -531,9 +528,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings => 'Configuracion...';
 
   @override
-  String get sidePanelBrushesSection => 'Pinceles';
-
-  @override
   String get sidePanelLayersSection => 'Capas';
 
   @override
@@ -597,7 +591,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get toolLinearGradient => 'Degradado lineal';
 
   @override
-  String get toolMagic => 'Mágico';
+  String get toolMagic => 'Detección de bordes';
 
   @override
   String get toolPaintBucket => 'Bote de pintura';
@@ -615,7 +609,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get toolRemove => 'Quitar';
 
   @override
-  String get toolReplace => 'Reemplazar';
+  String get toolSectionBrush => 'Pincel';
 
   @override
   String get toolSelector => 'Seleccionador';

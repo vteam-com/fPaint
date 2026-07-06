@@ -28,6 +28,11 @@ enum SaveFileFormat {
   webp,
   heic;
 
+  /// Whether the format embeds individual layers (and can therefore store the
+  /// selected layer inside the file). Flat formats rely on a preference keyed
+  /// by file path instead.
+  bool get supportsLayers => this == SaveFileFormat.ora || this == SaveFileFormat.tiff;
+
   /// Resolves a save format from a file name.
   static SaveFileFormat? fromFileName(final String fileName) {
     final String extension = fileName.split('.').last.toLowerCase();
@@ -141,6 +146,11 @@ Future<void> saveFile(
           saveAction: (final String resolvedFileName) => saveAsHeic(layers, resolvedFileName),
         );
         break;
+    }
+
+    // Layered formats embed the selection; flat formats remember it per path.
+    if (!format.supportsLayers) {
+      await preferences.recordLastSelectedLayer(fileName, layers.selectedLayerIndex);
     }
 
     layers.clearHasChanged();

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/selection_effect.dart';
+import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:provider/single_child_widget.dart';
@@ -81,6 +84,37 @@ void main() {
 
     expect(appProvider.isPixelBrushGestureVisible, isFalse);
     expect(find.byWidgetPredicate(_isMarqueePaint), findsNothing);
+  });
+
+  testWidgets('an armed effect brush paints over a live selection instead of starting a new one', (
+    final WidgetTester tester,
+  ) async {
+    // Selector tool active with a completed selection (the modifier), then an
+    // effect is armed as a brush.
+    appProvider.selectorModel
+      ..isVisible = true
+      ..path1 = (Path()..addRect(const Rect.fromLTWH(50, 50, 300, 300)));
+    appProvider.selectedAction = ActionType.selector;
+    appProvider.armEffectBrush(SelectionEffect.blur);
+    expect(appProvider.effectBrushModel.isArmed, isTrue);
+
+    await pumpMainView(tester);
+
+    // Pressing on the canvas must begin an effect-brush stroke (a pixel-brush
+    // gesture), not restart the selection.
+    final TestGesture gesture = await tester.startGesture(const Offset(600, 400));
+    await tester.pump();
+    await gesture.moveTo(const Offset(640, 430));
+    await tester.pump();
+
+    expect(appProvider.isPixelBrushGestureVisible, isTrue);
+    expect(appProvider.selectorModel.isDrawing, isFalse);
+    // The selection (the clip modifier) is preserved.
+    expect(appProvider.selectorModel.isVisible, isTrue);
+
+    // Release via touch-cancel so no async one-shot commit runs in the test.
+    await gesture.cancel();
+    await tester.pump();
   });
 
   testWidgets('committing shows the processing shimmer instead of the static marquee', (

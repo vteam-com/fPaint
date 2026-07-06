@@ -19,12 +19,14 @@ class _SelectionEffectConfig {
     required this.icon,
     required this.apply,
     this.supportsSizeControl = false,
+    this.bipolar = false,
     this.defaultSize = AppEffects.minSize,
     this.sizeValueResolver = _defaultSelectionEffectSizeValue,
   });
 
   final AppIcon icon;
   final bool supportsSizeControl;
+  final bool bipolar;
   final double defaultSize;
   final _SelectionEffectSizeValueResolver sizeValueResolver;
   final _SelectionEffectApply apply;
@@ -38,16 +40,25 @@ enum SelectionEffect {
       apply: _applyBlurEffect,
     ),
   ),
+  sharpness(
+    _SelectionEffectConfig(
+      icon: AppIcon.effectSharpen,
+      apply: _applySharpnessEffect,
+      bipolar: true,
+    ),
+  ),
   brightness(
     _SelectionEffectConfig(
       icon: AppIcon.effectBrightness,
       apply: _applyBrightnessEffect,
+      bipolar: true,
     ),
   ),
   contrast(
     _SelectionEffectConfig(
       icon: AppIcon.effectContrast,
       apply: _applyContrastEffect,
+      bipolar: true,
     ),
   ),
   grayscale(
@@ -60,6 +71,7 @@ enum SelectionEffect {
     _SelectionEffectConfig(
       icon: AppIcon.effectHueSaturation,
       apply: _applyHueSaturationEffect,
+      bipolar: true,
     ),
   ),
   noise(
@@ -86,18 +98,6 @@ enum SelectionEffect {
       apply: _applyShadowEffect,
     ),
   ),
-  sharpen(
-    _SelectionEffectConfig(
-      icon: AppIcon.effectSharpen,
-      apply: _applySharpenEffect,
-    ),
-  ),
-  soften(
-    _SelectionEffectConfig(
-      icon: AppIcon.effectSoften,
-      apply: _applySoftenEffect,
-    ),
-  ),
   vignette(
     _SelectionEffectConfig(
       icon: AppIcon.effectVignette,
@@ -116,6 +116,11 @@ enum SelectionEffect {
   /// Whether this effect exposes a size control in the UI.
   bool get supportsSizeControl => _config.supportsSizeControl;
 
+  /// Whether this effect is bidirectional: its slider is centred (0 = no
+  /// change) and negative vs. positive strength push opposite ways (e.g.
+  /// darken vs. brighten, less vs. more contrast, hue ±).
+  bool get bipolar => _config.bipolar;
+
   /// Default UI size value for this effect.
   double get defaultSize => _config.defaultSize;
 
@@ -126,8 +131,9 @@ enum SelectionEffect {
 
   /// Applies this effect to the given [image] and returns the processed result.
   ///
-  /// [strength] controls how strongly the effect is applied (0.0 = none,
-  /// 1.0 = full authored strength).
+  /// For unipolar effects [strength] runs 0.0 (none) to 1.0 (full authored
+  /// strength). For [bipolar] effects it is signed: 0.0 = no change, and the
+  /// sign selects the direction (e.g. + brightens, - darkens).
   ///
   /// [size] controls effect-specific block or grain sizing where supported.
   Future<ui.Image> apply(
@@ -135,7 +141,9 @@ enum SelectionEffect {
     final double strength = AppEffects.defaultIntensity,
     final double? size,
   }) {
-    final double appliedStrength = strength * AppEffects.intensityAppliedScale;
+    // Bipolar effects map strength directly (symmetric ±1 range); unipolar
+    // effects scale up so the slider max reaches double the authored strength.
+    final double appliedStrength = _config.bipolar ? strength : strength * AppEffects.intensityAppliedScale;
     final double appliedSize = size ?? defaultSize;
     return _config.apply(image, appliedStrength, appliedSize);
   }
@@ -221,20 +229,22 @@ Future<ui.Image> _applyShadowEffect(
   return applyShadow(image, strength: strength);
 }
 
-Future<ui.Image> _applySharpenEffect(
+/// Bipolar sharpness: negative strength softens (a gentle Gaussian blur using
+/// [AppEffects.softenSigma]); positive strength sharpens. Centre (0) is a
+/// no-op returning the source image unchanged. Heavy blurring is left to the
+/// dedicated Blur effect (which uses the stronger blur sigma and scale).
+Future<ui.Image> _applySharpnessEffect(
   final ui.Image image,
   final double strength,
   final double _,
 ) {
+  if (strength == AppEffects.minIntensity) {
+    return Future<ui.Image>.value(image);
+  }
+  if (strength < AppEffects.minIntensity) {
+    return applyGaussianBlur(image, AppEffects.softenSigma, strength: -strength);
+  }
   return applySharpen(image, strength: strength);
-}
-
-Future<ui.Image> _applySoftenEffect(
-  final ui.Image image,
-  final double strength,
-  final double _,
-) {
-  return applyGaussianBlur(image, AppEffects.softenSigma, strength: strength);
 }
 
 Future<ui.Image> _applyVignetteEffect(

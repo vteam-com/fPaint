@@ -27,12 +27,33 @@ This document lists the features currently available in fPaint.
 - Localized UI support (via Flutter localization)
 - Automatic recovery/restore flow for unsaved artwork on startup
 
+## Tools: Brushes & Effects
+
+Every pixel-changing tool lives in one **Brush** section and is used the same
+way — pick it, then paint. **Effects are brushes too.**
+
+- **Gesture tools** — Pencil/Freehand, Brush, Smudge, Line, Rectangle, Circle,
+  Fill, Eraser, Text.
+- **Effects** — Blur, Sharpness, Brightness, Contrast, Grayscale,
+  Hue/Saturation, Noise, Pixelate, Shadow, Vignette. Tapping one **arms it as a
+  brush** (with size + strength); paint it on. (To filter a whole layer or
+  selection at once, pick the effect from the on-canvas selection overlay.)
+
+The **selection** is a modifier that clips any tool and gates none. Bipolar
+effects (Sharpness, Brightness, Contrast, Hue/Saturation) use a centered
+slider where the sign chooses the direction (e.g. darken ↔ brighten).
+
+📖 Full design rules and rationale:
+**[BRUSHES_AND_EFFECTS.md](BRUSHES_AND_EFFECTS.md).**
+
 ## Drawing and Painting Tools
 
 - Freehand painting workflow with adjustable brush settings
+- Smudge tool (paint-driven)
 - Line tool
 - Rectangle tool
 - Circle tool
+- Eraser tool
 - Text tool
 - Fill tool
 
@@ -100,7 +121,7 @@ This document lists the features currently available in fPaint.
 - Haptic feedback on scale and rotate gestures
 - Display dimensions while drawing selection rectangles
 - Updated icon set using SVG assets
-- Effects (Blur, Sharpen, Pixelate, Grayscale, Noise, Soften, Vignette) accessible from the selector tool panel without requiring an active selection
+- Effects (Blur, Sharpness, Brightness, Contrast, Grayscale, Hue/Saturation, Noise, Pixelate, Shadow, Vignette) live in the Brush section, armed as a brush and painted on; whole-layer/selection apply is available from the on-canvas selection overlay — see [BRUSHES_AND_EFFECTS.md](BRUSHES_AND_EFFECTS.md)
 
 ## Quality and Testing Support (Project Capability)
 

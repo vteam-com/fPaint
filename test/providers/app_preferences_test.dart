@@ -363,4 +363,66 @@ void main() {
       );
     });
   });
+
+  group('lastSelectedLayer', () {
+    test('returns null for an unknown path', () {
+      expect(preferences.lastSelectedLayerFor('/tmp/unknown.png'), isNull);
+    });
+
+    test('recordLastSelectedLayer stores the index for a path', () async {
+      await preferences.recordLastSelectedLayer('/tmp/a.png', 3);
+      expect(preferences.lastSelectedLayerFor('/tmp/a.png'), 3);
+    });
+
+    test('recordLastSelectedLayer overwrites an existing index', () async {
+      await preferences.recordLastSelectedLayer('/tmp/a.png', 3);
+      await preferences.recordLastSelectedLayer('/tmp/a.png', 1);
+      expect(preferences.lastSelectedLayerFor('/tmp/a.png'), 1);
+    });
+
+    test('recordLastSelectedLayer persists both parallel lists', () async {
+      await preferences.recordLastSelectedLayer('/tmp/a.png', 2);
+      final SharedPreferences prefs = await preferences.getPref();
+      expect(prefs.getStringList(AppPreferences.keyLastLayerFiles), <String>['/tmp/a.png']);
+      expect(prefs.getStringList(AppPreferences.keyLastLayerIndices), <String>['2']);
+    });
+
+    test('recordLastSelectedLayer caps at maxRecentFiles, evicting the oldest', () async {
+      for (int i = 0; i < AppLimits.maxRecentFiles + 5; i++) {
+        await preferences.recordLastSelectedLayer('/tmp/file_$i.png', i);
+      }
+      // The oldest entry is evicted; the very first path is gone.
+      expect(preferences.lastSelectedLayerFor('/tmp/file_0.png'), isNull);
+      // The most recent entry is retained.
+      final int newest = AppLimits.maxRecentFiles + 4;
+      expect(preferences.lastSelectedLayerFor('/tmp/file_$newest.png'), newest);
+      final SharedPreferences prefs = await preferences.getPref();
+      expect(
+        prefs.getStringList(AppPreferences.keyLastLayerFiles)!.length,
+        AppLimits.maxRecentFiles,
+      );
+    });
+
+    test('loads persisted selections on re-init', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyLastLayerFiles: <String>['/tmp/a.png', '/tmp/b.jpg'],
+        AppPreferences.keyLastLayerIndices: <String>['4', '0'],
+      });
+      final AppPreferences prefs2 = AppPreferences();
+      await prefs2.getPref();
+      expect(prefs2.lastSelectedLayerFor('/tmp/a.png'), 4);
+      expect(prefs2.lastSelectedLayerFor('/tmp/b.jpg'), 0);
+    });
+
+    test('ignores entries with an unparsable index on load', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        AppPreferences.keyLastLayerFiles: <String>['/tmp/a.png', '/tmp/b.jpg'],
+        AppPreferences.keyLastLayerIndices: <String>['not-a-number', '2'],
+      });
+      final AppPreferences prefs2 = AppPreferences();
+      await prefs2.getPref();
+      expect(prefs2.lastSelectedLayerFor('/tmp/a.png'), isNull);
+      expect(prefs2.lastSelectedLayerFor('/tmp/b.jpg'), 2);
+    });
+  });
 }

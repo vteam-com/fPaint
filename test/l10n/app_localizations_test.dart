@@ -64,8 +64,7 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.effectGrayscale, isNotEmpty);
   expect(l10n.effectNoise, isNotEmpty);
   expect(l10n.effectPixelate, isNotEmpty);
-  expect(l10n.effectSharpen, isNotEmpty);
-  expect(l10n.effectSoften, isNotEmpty);
+  expect(l10n.effectSharpness, isNotEmpty);
   expect(l10n.effectVignette, isNotEmpty);
   expect(l10n.effects, isNotEmpty);
   expect(l10n.enterYourTextHere, isNotEmpty);
@@ -138,7 +137,6 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.toolHalftone, isNotEmpty);
   expect(l10n.toolLasso, isNotEmpty);
   expect(l10n.toolMagic, isNotEmpty);
-  expect(l10n.toolReplace, isNotEmpty);
   expect(l10n.toolAdd, isNotEmpty);
   expect(l10n.toolRemove, isNotEmpty);
   expect(l10n.effectIntensity, isNotEmpty);
@@ -189,8 +187,8 @@ void _exerciseAllStrings(final AppLocalizations l10n) {
   expect(l10n.savedLabel, isNotEmpty);
   expect(l10n.savingLabel, isNotEmpty);
   expect(l10n.selectValue('all'), isNotEmpty);
-  expect(l10n.sidePanelBrushesSection, isNotEmpty);
   expect(l10n.sidePanelLayersSection, isNotEmpty);
+  expect(l10n.toolSectionBrush, isNotEmpty);
   expect(l10n.topColors('5'), isNotEmpty);
 }
 
