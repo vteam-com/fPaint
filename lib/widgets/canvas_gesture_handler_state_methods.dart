@@ -535,7 +535,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       );
     }
     appProvider.fillModel.isVisible = true;
-    appProvider.floodFillGradientAction(appProvider.fillModel);
+    // Start the live preview session (non-committed, no undo entry) rather than
+    // committing the fill; Apply/Cancel on the fill overlay finalizes it.
+    appProvider.updateGradientPreview();
     appProvider.update();
   }
 

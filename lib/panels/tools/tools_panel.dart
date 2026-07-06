@@ -242,7 +242,7 @@ class ToolsPanel extends StatelessWidget {
                   isSelected: appProvider.fillModel.mode == FillMode.linear,
                   onPressed: () {
                     appProvider.setFillMode(FillMode.linear);
-                    appProvider.updateGradientFill();
+                    appProvider.updateGradientPreview();
                   },
                 ),
                 //
@@ -256,7 +256,7 @@ class ToolsPanel extends StatelessWidget {
                   isSelected: appProvider.fillModel.mode == FillMode.radial,
                   onPressed: () {
                     appProvider.setFillMode(FillMode.radial);
-                    appProvider.updateGradientFill();
+                    appProvider.updateGradientPreview();
                   },
                 ),
               ],
@@ -457,7 +457,7 @@ class ToolsPanel extends StatelessWidget {
                       if (appProvider.fillModel.gradientPoints.isNotEmpty) {
                         appProvider.fillModel.gradientPoints.first.color = picked;
                       }
-                      appProvider.updateGradientFill();
+                      appProvider.updateGradientPreview();
                     },
                   );
                 },
@@ -467,7 +467,7 @@ class ToolsPanel extends StatelessWidget {
             ? null
             : GradientColorListEditor(
                 fillModel: appProvider.fillModel,
-                onChanged: appProvider.updateGradientFill,
+                onChanged: appProvider.updateGradientPreview,
               ),
       ),
     );
@@ -485,12 +485,12 @@ class ToolsPanel extends StatelessWidget {
 
     void updateHalftonePercent(final int value) {
       appProvider.setFillHalftoneMaxDotSizePercent(value);
-      appProvider.updateGradientFill();
+      appProvider.updateGradientPreview();
     }
 
     void updateHalftoneEnabled(final bool value) {
       appProvider.setFillHalftoneEnabled(value);
-      appProvider.updateGradientFill();
+      appProvider.updateGradientPreview();
     }
 
     widgets.add(

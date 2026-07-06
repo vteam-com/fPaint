@@ -8,6 +8,8 @@ import 'package:fpaint/widgets/fill_widget.dart';
 Widget _buildTestApp({
   required final FillModel fillModel,
   required final void Function(GradientPoint) onUpdate,
+  final VoidCallback? onApply,
+  final VoidCallback? onCancel,
 }) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -16,6 +18,8 @@ Widget _buildTestApp({
       child: FillWidget(
         fillModel: fillModel,
         onUpdate: onUpdate,
+        onApply: onApply ?? () {},
+        onCancel: onCancel ?? () {},
       ),
     ),
   );
@@ -187,6 +191,35 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(model.gradientStopPositions[2], greaterThanOrEqualTo(model.gradientStopPositions[3]));
       expect(model.gradientStopPositions[2], lessThanOrEqualTo(model.gradientStopPositions[1]));
+    });
+
+    testWidgets('Apply and Cancel controls invoke their callbacks', (final WidgetTester tester) async {
+      final FillModel model = _createLinearFillModel();
+      int applyCount = 0;
+      int cancelCount = 0;
+
+      await tester.pumpWidget(
+        _buildTestApp(
+          fillModel: model,
+          onUpdate: (final GradientPoint _) {},
+          onApply: () => applyCount++,
+          onCancel: () => cancelCount++,
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(Keys.fillApply), findsOneWidget);
+      expect(find.byKey(Keys.fillCancel), findsOneWidget);
+
+      await tester.tap(find.byKey(Keys.fillApply));
+      await tester.pump();
+      expect(applyCount, 1);
+      expect(cancelCount, 0);
+
+      await tester.tap(find.byKey(Keys.fillCancel));
+      await tester.pump();
+      expect(applyCount, 1);
+      expect(cancelCount, 1);
     });
 
     testWidgets('radial mode builds marching-ants path and handles', (final WidgetTester tester) async {

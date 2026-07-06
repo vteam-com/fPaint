@@ -69,7 +69,8 @@ class MainViewState extends State<MainView> {
                 // (incl. Edge Detection wand) never paints, so it is hidden there
                 // — except when an effect brush is armed, which paints (clipped to
                 // the selection) even while the selector tool is active.
-                final bool showBrushSizePreview = appProvider.isBrushSizePreviewVisible &&
+                final bool showBrushSizePreview =
+                    appProvider.isBrushSizePreviewVisible &&
                     (appProvider.selectedAction != ActionType.selector || appProvider.effectBrushModel.isArmed);
 
                 return Stack(
@@ -275,8 +276,10 @@ class MainViewState extends State<MainView> {
                         child: FillWidget(
                           fillModel: appProvider.fillModel,
                           onUpdate: (final GradientPoint _) {
-                            appProvider.updateGradientFill();
+                            appProvider.updateGradientPreview();
                           },
+                          onApply: appProvider.applyGradientPreview,
+                          onCancel: appProvider.cancelGradientPreview,
                         ),
                       ),
 

@@ -274,6 +274,7 @@
   "toolRectangle": "Rectangle",
   "toolRemove": "Remove",
   "toolSectionBrush": "Brush",
+  "toolSectionElements": "Elements",
   "toolSelector": "Selector",
   "toolSmudge": "Smudge",
   "toolSolid": "Solid",

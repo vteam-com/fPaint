@@ -614,6 +614,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolSectionBrush => 'Brush';
 
   @override
+  String get toolSectionElements => 'Elements';
+
+  @override
   String get toolSelector => 'Selector';
 
   @override
