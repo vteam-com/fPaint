@@ -239,6 +239,11 @@ class AppProvider extends ChangeNotifier {
 
   /// Undoes an action.
   void undoAction() {
+    // Finalize any live gradient-fill session first so the transient preview
+    // (which is not on the undo stack) never participates in history.
+    if (isGradientPreviewActive) {
+      applyGradientPreview();
+    }
     _undoProvider.undo();
     layers.update();
     update();
@@ -246,6 +251,9 @@ class AppProvider extends ChangeNotifier {
 
   /// Redoes an action.
   void redoAction() {
+    if (isGradientPreviewActive) {
+      applyGradientPreview();
+    }
     _undoProvider.redo();
     layers.update();
     update();
@@ -299,7 +307,14 @@ class AppProvider extends ChangeNotifier {
     }
 
     if (value != ActionType.fill) {
-      fillModel.clear();
+      // Leaving the fill tool finalizes any live gradient-fill session (implicit
+      // Apply — commit exactly one undo entry and clear), otherwise just drop
+      // any lingering fill config.
+      if (isGradientPreviewActive) {
+        applyGradientPreview();
+      } else {
+        fillModel.clear();
+      }
     }
 
     if (value != ActionType.selector) {
@@ -537,6 +552,80 @@ class AppProvider extends ChangeNotifier {
 
   /// The fill model.
   FillModel fillModel = FillModel();
+
+  /// The transient gradient-fill preview action currently laid on the selected
+  /// layer's action stack. Present only during a live gradient-fill session; it
+  /// is never recorded on the undo stack. Applying the session commits a real
+  /// (undoable) fill and clears this; cancelling discards it. See
+  /// `updateGradientPreview` / `applyGradientPreview` / `cancelGradientPreview`.
+  UserActionDrawing? gradientPreviewAction;
+
+  /// Monotonic token that invalidates stale async gradient-fill preview renders.
+  int fillPreviewRenderVersion = 0;
+
+  /// Whether a live gradient-fill preview session is active. Session-scoped (not
+  /// merely "a transient is on the stack"), so it stays true across the brief
+  /// window where a re-render has removed the old preview and not yet appended
+  /// the new one. Only [FillModel.isVisible] gradient sessions set this; solid
+  /// fills commit immediately and never enter a session.
+  bool get isGradientPreviewActive => fillModel.isVisible;
+
+  /// Applies the live gradient-fill preview, committing the currently previewed
+  /// transient as exactly one undoable action, then ends the session. What is
+  /// committed is exactly what is on screen (WYSIWYG); if no transient has been
+  /// rendered yet nothing is committed. Safe to call with no active session.
+  ///
+  /// The preview *build* lives in the tools extension (`updateGradientPreview`),
+  /// but this lifecycle stays on the base class so the tool-switch setter and
+  /// undo/redo can finalize a session without the base depending on the
+  /// extension.
+  void applyGradientPreview() {
+    if (!fillModel.isVisible) {
+      return;
+    }
+    _debounceGradientFill.cancel();
+    fillPreviewRenderVersion++; // invalidate any in-flight render
+    final UserActionDrawing? rendered = gradientPreviewAction;
+    removeGradientPreviewTransient();
+    if (rendered != null) {
+      // Reuse the exact previewed action so committed pixels match the preview.
+      recordExecuteDrawingActionToSelectedLayer(action: rendered);
+    }
+    fillModel.clear();
+    update();
+  }
+
+  /// Discards the live gradient-fill preview and ends the session without
+  /// recording any undo entry. Safe to call with no active session.
+  void cancelGradientPreview() {
+    if (!fillModel.isVisible && gradientPreviewAction == null) {
+      return;
+    }
+    _debounceGradientFill.cancel();
+    fillPreviewRenderVersion++; // invalidate any in-flight render
+    removeGradientPreviewTransient();
+    fillModel.clear();
+    update();
+  }
+
+  /// Removes the transient gradient preview action from the selected layer, if
+  /// present, and invalidates the layer cache. Uses an identity check so it only
+  /// ever removes its own action. Public so the tools extension's
+  /// `updateGradientPreview` can strip the prior transient before re-rendering.
+  void removeGradientPreviewTransient() {
+    final UserActionDrawing? preview = gradientPreviewAction;
+    gradientPreviewAction = null;
+    if (preview == null) {
+      return;
+    }
+    final List<UserActionDrawing> stack = layers.selectedLayer.actionStack;
+    if (stack.isNotEmpty && identical(stack.last, preview)) {
+      stack.removeLast();
+    } else {
+      stack.remove(preview);
+    }
+    layers.selectedLayer.clearCache();
+  }
 
   /// The shared style state for the text tool.
   late final TextToolState textToolState = TextToolState(

@@ -16,10 +16,10 @@ void main() {
 
   group('gesture tools', () {
     test('every rail gesture tool, including smudge, carries an action', () {
-      final List<ActionType?> gestureActions = toolRail()
-          .where((final ToolDescriptor d) => d.action != null)
-          .map((final ToolDescriptor d) => d.action)
-          .toList();
+      final List<ActionType?> gestureActions = <ToolDescriptor>[
+        ...brushSectionTools(),
+        ...elementSectionTools(),
+      ].where((final ToolDescriptor d) => d.action != null).map((final ToolDescriptor d) => d.action).toList();
       expect(gestureActions, contains(ActionType.smudge));
     });
 
@@ -50,21 +50,57 @@ void main() {
     });
   });
 
-  group('toolRail and toolsInFamily', () {
-    test('rail contains every gesture tool and every effect', () {
-      expect(toolRail().length, kGestureToolOrder.length + SelectionEffect.values.length);
+  group('rail composition across sections', () {
+    List<ToolDescriptor> fullRail() => <ToolDescriptor>[...brushSectionTools(), ...elementSectionTools()];
+
+    test('the two sections together contain every gesture tool and every effect', () {
+      expect(fullRail().length, kGestureToolOrder.length + SelectionEffect.values.length);
     });
 
-    test('gesture entries come first and cover every gesture tool', () {
-      final List<ToolDescriptor> gestures = toolRail().where((final ToolDescriptor d) => d.action != null).toList();
+    test('every gesture tool is covered exactly once across the sections', () {
+      final List<ToolDescriptor> gestures = fullRail().where((final ToolDescriptor d) => d.action != null).toList();
       expect(gestures.length, kGestureToolOrder.length);
-      // Gesture tools lead the rail, effects follow.
-      expect(toolRail().take(kGestureToolOrder.length).every((final ToolDescriptor d) => d.action != null), isTrue);
     });
 
-    test('effect entries cover every effect', () {
-      final List<ToolDescriptor> effects = toolRail().where((final ToolDescriptor d) => d.effect != null).toList();
+    test('effects live only in the Brush section and cover every effect', () {
+      final List<ToolDescriptor> effects = fullRail().where((final ToolDescriptor d) => d.effect != null).toList();
       expect(effects.length, SelectionEffect.values.length);
+      expect(elementSectionTools().where((final ToolDescriptor d) => d.effect != null), isEmpty);
+    });
+  });
+
+  group('brush and element sections', () {
+    List<ActionType> gestureActionsOf(final List<ToolDescriptor> tools) =>
+        tools.where((final ToolDescriptor d) => d.action != null).map((final ToolDescriptor d) => d.action!).toList();
+
+    test('Brush section holds the freehand painters plus every effect', () {
+      final List<ToolDescriptor> tools = brushSectionTools();
+      expect(gestureActionsOf(tools), kBrushToolOrder);
+      expect(
+        gestureActionsOf(tools),
+        containsAll(<ActionType>[ActionType.pencil, ActionType.brush, ActionType.smudge, ActionType.eraser]),
+      );
+      // Effects live in the Brush section.
+      final List<ToolDescriptor> effects = tools.where((final ToolDescriptor d) => d.effect != null).toList();
+      expect(effects.length, SelectionEffect.values.length);
+    });
+
+    test('Elements section is exactly the placement / shape tools', () {
+      expect(gestureActionsOf(elementSectionTools()), kElementToolOrder);
+      expect(
+        kElementToolOrder,
+        <ActionType>[ActionType.line, ActionType.rectangle, ActionType.circle, ActionType.fill, ActionType.text],
+      );
+      // The Elements section carries no effects.
+      expect(elementSectionTools().where((final ToolDescriptor d) => d.effect != null), isEmpty);
+    });
+
+    test('the two sections are disjoint and together cover every gesture tool', () {
+      final Set<ActionType> brush = kBrushToolOrder.toSet();
+      final Set<ActionType> element = kElementToolOrder.toSet();
+      expect(brush.intersection(element), isEmpty);
+      expect(<ActionType>{...brush, ...element}, kGestureToolOrder.toSet());
+      expect(kGestureToolOrder, <ActionType>[...kBrushToolOrder, ...kElementToolOrder]);
     });
   });
 

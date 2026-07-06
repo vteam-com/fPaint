@@ -11,6 +11,12 @@ class AppInteraction {
   static const double wandToleranceDragPixelsPerUnit = 8.0;
   static const double linearFillHandleOffset = 40.0;
   static const double radialFillHandleOffset = 50.0;
+
+  /// Placement of the on-canvas Apply/Cancel controls for a live gradient fill,
+  /// relative to the gradient center: half the control row's width (to center
+  /// it horizontally) and its downward offset (to clear the color-stop handles).
+  static const double fillControlsHalfWidth = 40.0;
+  static const double fillControlsVerticalOffset = 44.0;
   static const double magnifierScale = 6.0;
   static const double magnifierImageScale = 8.0;
   static const double smudgeMinimumRadius = 1.0;

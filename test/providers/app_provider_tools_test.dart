@@ -318,6 +318,116 @@ void main() {
     });
   });
 
+  group('gradient fill preview session', () {
+    late AppProvider appProvider;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      appProvider = AppProvider(preferences: preferences);
+      appProvider.undoProvider.clear();
+    });
+
+    // Seeds a linear gradient session as the first canvas tap would.
+    void startLinearSession() {
+      appProvider.selectedAction = ActionType.fill;
+      appProvider.fillModel.mode = FillMode.linear;
+      appProvider.fillModel.addPoint(
+        GradientPoint(offset: const ui.Offset(10, 10), color: const ui.Color(0xFFFF0000)),
+      );
+      appProvider.fillModel.addPoint(
+        GradientPoint(offset: const ui.Offset(40, 40), color: const ui.Color(0xFF0000FF)),
+      );
+      appProvider.fillModel.isVisible = true;
+    }
+
+    // Waits for the debounced async preview render to append its transient.
+    Future<void> settlePreview() async {
+      int guard = 0;
+      while (appProvider.gradientPreviewAction == null && guard < 1000) {
+        await Future<void>.delayed(const Duration(milliseconds: 2));
+        guard++;
+      }
+    }
+
+    test('live preview never records an undo entry until applied', () async {
+      startLinearSession();
+
+      appProvider.updateGradientPreview();
+      await settlePreview();
+      // A second edit rebuilds the transient (remove-before-build), still no undo.
+      appProvider.updateGradientPreview();
+      await settlePreview();
+
+      expect(appProvider.gradientPreviewAction, isNotNull);
+      expect(appProvider.isGradientPreviewActive, isTrue);
+      expect(appProvider.undoProvider.canUndo, isFalse);
+    });
+
+    test('applying commits exactly one undo entry and ends the session', () async {
+      startLinearSession();
+      appProvider.updateGradientPreview();
+      await settlePreview();
+      expect(appProvider.gradientPreviewAction, isNotNull);
+
+      appProvider.applyGradientPreview();
+
+      expect(appProvider.fillModel.isVisible, isFalse);
+      expect(appProvider.gradientPreviewAction, isNull);
+      expect(appProvider.undoProvider.canUndo, isTrue);
+
+      // Exactly one entry: a single undo empties the stack.
+      appProvider.undoAction();
+      expect(appProvider.undoProvider.canUndo, isFalse);
+    });
+
+    test('leaving the fill tool implicitly applies the session once', () async {
+      startLinearSession();
+      appProvider.updateGradientPreview();
+      await settlePreview();
+
+      // Switching tools routes through applyGradientPreview (implicit Apply).
+      appProvider.selectedAction = ActionType.brush;
+
+      expect(appProvider.fillModel.isVisible, isFalse);
+      expect(appProvider.gradientPreviewAction, isNull);
+      expect(appProvider.undoProvider.canUndo, isTrue);
+      appProvider.undoAction();
+      expect(appProvider.undoProvider.canUndo, isFalse);
+    });
+
+    test('cancelling discards the preview with no undo entry', () async {
+      startLinearSession();
+      appProvider.updateGradientPreview();
+      await settlePreview();
+      expect(appProvider.gradientPreviewAction, isNotNull);
+      final int stackWithPreview = appProvider.layers.selectedLayer.actionStack.length;
+
+      appProvider.cancelGradientPreview();
+
+      expect(appProvider.fillModel.isVisible, isFalse);
+      expect(appProvider.gradientPreviewAction, isNull);
+      expect(appProvider.undoProvider.canUndo, isFalse);
+      // The transient was stripped from the layer.
+      expect(appProvider.layers.selectedLayer.actionStack.length, stackWithPreview - 1);
+    });
+
+    test('a render whose session ends before it completes does not append', () async {
+      startLinearSession();
+      appProvider.updateGradientPreview(); // schedules the debounced render
+
+      // Session ends out from under the pending render.
+      appProvider.fillModel.isVisible = false;
+
+      // Give the debounce time to fire; the guarded callback must drop.
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+
+      expect(appProvider.gradientPreviewAction, isNull);
+      expect(appProvider.undoProvider.canUndo, isFalse);
+    });
+  });
+
   group('appendLineFromLastUserAction', () {
     late AppProvider appProvider;
 

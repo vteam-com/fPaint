@@ -69,14 +69,24 @@ class AppSlider extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            Row(
-              spacing: AppSpacing.medium,
-              children: <Widget>[
-                ?icon,
-                if (label != null) AppText(label!),
-              ],
+            // Flexible so a long label ellipsizes instead of overflowing the row
+            // when the slider is laid out in a narrow column.
+            Flexible(
+              child: Row(
+                spacing: AppSpacing.medium,
+                children: <Widget>[
+                  ?icon,
+                  if (label != null)
+                    Flexible(
+                      child: AppText(label!, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                ],
+              ),
             ),
-            if (valueLabel != null) AppText(valueLabel!),
+            if (valueLabel != null) ...<Widget>[
+              const SizedBox(width: AppSpacing.small),
+              AppText(valueLabel!),
+            ],
           ],
         ),
         slider,

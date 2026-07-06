@@ -616,6 +616,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toolSectionBrush => 'Pinceau';
 
   @override
+  String get toolSectionElements => 'Éléments';
+
+  @override
   String get toolSelector => 'Sélecteur';
 
   @override

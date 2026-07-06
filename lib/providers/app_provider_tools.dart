@@ -217,8 +217,10 @@ extension AppProviderTools on AppProvider {
     }
   }
 
-  /// Performs a flood fill with a gradient.
-  void floodFillGradientAction(final FillModel fillModel) async {
+  /// Builds a gradient flood-fill action from [fillModel] without committing or
+  /// recording it. Returns null when the gradient configuration or resolved
+  /// region is unusable (an empty, path-less action).
+  Future<UserActionDrawing?> _buildGradientFillAction(final FillModel fillModel) async {
     final bool ownsSourceImage = !fillModel.sampleAllLayers;
     final ui.Image sourceImage = await _getFloodFillSourceImage(
       sampleAllLayers: fillModel.sampleAllLayers,
@@ -234,8 +236,8 @@ extension AppProviderTools on AppProvider {
         toCanvas: toCanvas,
         regionPathOverride: _selectionRegionFloodFillOverridePath,
       );
-
-      recordExecuteDrawingActionToSelectedLayer(action: action);
+      // An unusable config yields an empty, path-less action — treat as nothing.
+      return action.path == null ? null : action;
     } finally {
       if (ownsSourceImage) {
         sourceImage.dispose();
@@ -243,17 +245,33 @@ extension AppProviderTools on AppProvider {
     }
   }
 
-  /// Updates the gradient fill.
-  void updateGradientFill() {
+  /// Rebuilds the live, non-committed gradient-fill preview on the selected
+  /// layer. Debounced so rapid handle / color / size edits coalesce.
+  ///
+  /// The prior transient preview is stripped before the region is re-resolved so
+  /// the flood fill always samples the clean layer (otherwise the region would
+  /// shrink as it re-samples already-filled gradient pixels — the old
+  /// undo-then-refill dance existed for the same reason). The preview action is
+  /// appended without an undo entry; the session lifecycle
+  /// ([AppProvider.applyGradientPreview] / [AppProvider.cancelGradientPreview])
+  /// commits or discards it. A monotonic version token drops stale async renders.
+  void updateGradientPreview() {
     repaintToolOptions();
-    if (fillModel.isVisible) {
-      debounceGradientFill.run(
-        () {
-          undoProvider.undo();
-          floodFillGradientAction(fillModel);
-          update();
-        },
-      );
+    if (!fillModel.isVisible || isSelectedLayerLocked) {
+      return;
     }
+    debounceGradientFill.run(() async {
+      final int requestVersion = ++fillPreviewRenderVersion;
+      // Sample the clean layer: strip any previous transient first.
+      removeGradientPreviewTransient();
+      final UserActionDrawing? action = await _buildGradientFillAction(fillModel);
+      if (action == null || !fillModel.isVisible || requestVersion != fillPreviewRenderVersion) {
+        update();
+        return;
+      }
+      gradientPreviewAction = action;
+      layers.selectedLayer.appendDrawingAction(action);
+      update();
+    });
   }
 }

@@ -10,47 +10,52 @@ If you are adding, moving, or renaming a tool, read the
 
 ## The core idea
 
-**Everything is a brush. Selection is a mask.**
+**A brush is something you paint. Selection is a mask.**
 
-Every pixel-changing tool lives in one **Brush** section in the side panel and
-is used the same way: pick it, then paint. This includes the effects — a blur
-or a brightness adjustment is just a brush you paint onto the canvas.
+Pixel-changing tools split by **interaction shape** into two side-panel
+sections:
 
-The interaction shape, not the algorithm, is what unifies them:
+- **Brush** — freehand painters that deposit or move pixels along a stroke
+  (pencil, brush, smudge, eraser), *plus the effects* (blur, sharpness,
+  brightness, …). An effect is just a brush: pick one and it **arms as a
+  brush**; paint to apply it along your stroke. In this section an effect *is*
+  a brush — no separate "effect mode", no mode toggle, no per-effect "Apply"
+  button. (Applying an effect to a whole region at once lives on the on-canvas
+  selection overlay; see [Whole-region apply](#whole-region-apply).)
+- **Elements** — placement / shape tools that commit a discrete shape, region,
+  or text object from a click or two-point drag rather than a freehand stroke:
+  line, rectangle, circle, fill (paint bucket), text. These are *not* brushes;
+  grouping them under "Brush" was misleading, so they get their own section.
 
-- **Gesture tools** deposit or move pixels along your stroke (pencil, brush,
-  smudge, shapes, fill, eraser, text).
-- **Effects** transform pixels (blur, sharpness, brightness, …). Pick one and
-  it **arms as a brush**; paint to apply it along your stroke.
-
-In the left panel an effect *is* a brush — nothing more. There is no separate
-"effect mode", no mode toggle, and no per-effect "Apply" button — one flat
-palette, one interaction. (Applying an effect to a whole region at once lives
-on the on-canvas selection overlay; see [Whole-region apply](#whole-region-apply).)
+The gradient paint bucket is a small live editor: the first tap opens a
+non-committed **preview session** with draggable handles; **Apply/Cancel** on
+the on-canvas overlay finalizes it (see [Gradient fill sessions](#gradient-fill-sessions)).
 
 ---
 
-## The one Brush section
+## The two sections
 
-The rail is a single flat grid, in this order:
+The rail is two flat grids, in this order:
 
-**Gesture tools** — Pencil · Brush · Smudge · Line · Rectangle · Circle · Fill ·
-Eraser · Text.
-
-**Effects** — Blur · Sharpness · Brightness · Contrast · Grayscale ·
+**Brush section** —
+Gesture painters: Pencil · Brush · Smudge · Eraser.
+Effects: Blur · Sharpness · Brightness · Contrast · Grayscale ·
 Hue/Saturation · Noise · Pixelate · Shadow · Vignette.
+
+**Elements section** — Line · Rectangle · Circle · Fill · Text.
 
 | | Gesture tool | Effect |
 |---|---|---|
 | Backed by | `ActionType` | `SelectionEffect` |
 | Tapping it | selects it as the active tool | arms it as a brush (tap again to disarm) |
 | Options shown | that tool's params | brush **size** and **strength** |
-| How it applies | paint the stroke | paint the stroke |
+| How it applies | paint / place | paint the stroke |
 
-Exactly **one tool is active at a time**: arming an effect deselects the
-gesture tool (and swaps in the effect's controls); picking a gesture tool
-disarms the effect. The highlight, the options panel, and the actual stroke
-behavior always agree on one active tool.
+Exactly **one tool is active at a time across both sections**: arming an effect
+deselects the gesture tool (and swaps in the effect's controls); picking any
+gesture tool disarms the effect. The active tool's controls render beneath
+whichever section owns it. The highlight, the options panel, and the actual
+stroke behavior always agree on one active tool.
 
 ---
 
@@ -107,14 +112,40 @@ axis. Heavy blur stays the dedicated **Blur** effect.
 
 ---
 
+## Gradient fill sessions
+
+Solid fill commits immediately on tap. **Gradient** fill (linear/radial) opens a
+live, bounded **preview session**:
+
+- The first canvas tap seeds the gradient handles and lays a **non-committed
+  preview** on the active layer — appended to the layer's action stack but
+  **never** written to the undo stack.
+- Dragging handles, editing stops/colors, or changing size re-renders the
+  preview (debounced). Each re-render strips the previous transient first so the
+  flood fill always samples the **clean** layer (otherwise the region shrinks).
+- **Apply** (green check on the on-canvas overlay) commits the previewed fill as
+  **exactly one** undoable action. **Cancel** (red X) discards it with **zero**
+  undo entries.
+- The session also finalizes implicitly: switching tools or undo/redo **applies**
+  it; **Escape** cancels it. A monotonic version token drops stale async renders.
+
+This replaced an older model that juggled `undoProvider.undo()` on every edit —
+that blind undo corrupted the shared undo stack whenever anything else touched
+it, which is why the bucket felt flaky.
+
+---
+
 ## Design rules for contributors
 
 These are the invariants. Breaking one is a design regression, not just a code
 change.
 
-1. **One Brush section, one interaction.** Every pixel-changing tool goes in the
-   single flat grid and is used by picking-then-painting. Do not add a separate
-   section, mode, or "effect mode" toggle.
+1. **Two sections by interaction shape.** *Brush* holds the freehand painters
+   (pencil, brush, smudge, eraser) and every effect, all used by
+   picking-then-painting. *Elements* holds the placement/shape tools (line,
+   rectangle, circle, fill, text). Do not move a placement tool into Brush or a
+   freehand/effect tool into Elements, and do not add a third section or an
+   "effect mode" toggle. Within Brush, an effect is still just a brush.
 
 2. **In the panel, an effect is a brush — full stop.** A new effect must arm as
    a brush (size + strength controls) and be applied by painting. Do not add a
@@ -153,11 +184,13 @@ change.
 
 | Concern | File |
 |---|---|
-| The unified rail (one Brush section: grid + active-tool controls) | [lib/panels/tools/tool_family_rail.dart](lib/panels/tools/tool_family_rail.dart) |
-| Rail entries + gesture order (`toolRail`, `kGestureToolOrder`) | [lib/models/tool_descriptor.dart](lib/models/tool_descriptor.dart) |
+| The rail (Brush + Elements sections: grids + active-tool controls) | [lib/panels/tools/tool_family_rail.dart](lib/panels/tools/tool_family_rail.dart) |
+| Section orders + builders (`kBrushToolOrder`, `kElementToolOrder`, `brushSectionTools`, `elementSectionTools`) | [lib/models/tool_descriptor.dart](lib/models/tool_descriptor.dart) |
 | Gesture tool labels | [lib/models/tool_family.dart](lib/models/tool_family.dart) |
 | Effect definitions, polarity, `apply()` | [lib/models/selection_effect.dart](lib/models/selection_effect.dart) |
 | Effect display labels | [lib/models/effect_labels.dart](lib/models/effect_labels.dart) |
 | Armed effect-brush state | [lib/models/effect_brush_model.dart](lib/models/effect_brush_model.dart) |
 | Gesture actions | [lib/models/user_action_drawing.dart](lib/models/user_action_drawing.dart) |
 | Paint commit, overlay preview flow, selection clipping | [lib/providers/app_provider_selection_effects.dart](lib/providers/app_provider_selection_effects.dart) |
+| Gradient fill preview session (update/apply/cancel) | [lib/providers/app_provider_tools.dart](lib/providers/app_provider_tools.dart) |
+| Gradient fill on-canvas handles + Apply/Cancel overlay | [lib/widgets/fill_widget.dart](lib/widgets/fill_widget.dart) |

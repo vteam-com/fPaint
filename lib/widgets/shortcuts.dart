@@ -179,8 +179,10 @@ Widget shortCutsForMainApp(
       // Escape current action
       EscapeIntent: CallbackAction<EscapeIntent>(
         onInvoke: (final EscapeIntent _) async {
+          // Discard any live gradient-fill session before restoring the tool, so
+          // Escape backs out of the fill (no undo entry) rather than applying it.
+          appProvider.cancelGradientPreview();
           appProvider.clearSelectionAndRestorePreviousTool();
-          appProvider.fillModel.clear();
           appProvider.eyeDropPositionForBrush = null;
           appProvider.eyeDropPositionForFill = null;
           appProvider.update();

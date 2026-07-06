@@ -2,9 +2,12 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/marching_ants_path.dart';
+import 'package:fpaint/widgets/overlay_control_widgets.dart';
 
 /// A widget that displays the fill controls for a gradient or solid color fill.
 class FillWidget extends StatefulWidget {
@@ -16,14 +19,21 @@ class FillWidget extends StatefulWidget {
     super.key,
     required this.fillModel,
     required this.onUpdate,
+    required this.onApply,
+    required this.onCancel,
   });
 
   /// The fill model to use.
   final FillModel fillModel;
 
+  /// Called to commit the live gradient-fill session (Apply).
+  final VoidCallback onApply;
+
+  /// Called to discard the live gradient-fill session (Cancel).
+  final VoidCallback onCancel;
+
   /// A callback that is called when a gradient point is updated.
   final void Function(GradientPoint) onUpdate;
-
   @override
   State<FillWidget> createState() => _FillWidgetState();
 }
@@ -32,7 +42,6 @@ const double defaultHandleSize = AppInteraction.selectionHandleSize;
 
 class _FillWidgetState extends State<FillWidget> {
   bool showDetails = false;
-
   @override
   Widget build(final BuildContext context) {
     final List<Widget> stackChildren = <Widget>[];
@@ -104,6 +113,10 @@ class _FillWidgetState extends State<FillWidget> {
       );
     }
     // For radial gradients, the center is already clearly indicated by the first handle
+
+    // Apply / Cancel controls for the live gradient session, anchored below the
+    // gradient center so they stay clear of the color-stop handles.
+    stackChildren.add(_buildSessionControls(context));
 
     return Stack(
       children: stackChildren,
@@ -210,6 +223,38 @@ class _FillWidgetState extends State<FillWidget> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// Builds the on-canvas Apply (commit) / Cancel (discard) controls for the
+  /// live gradient-fill session.
+  Widget _buildSessionControls(final BuildContext context) {
+    final AppLocalizations l10n = context.l10n;
+    final Offset anchor = widget.fillModel.centerPoint;
+    return Positioned(
+      left: anchor.dx - AppInteraction.fillControlsHalfWidth,
+      top: anchor.dy + AppInteraction.fillControlsVerticalOffset,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: AppInteraction.imagePlacementButtonSpacing,
+        children: <Widget>[
+          buildOverlayCircleButton(
+            key: Keys.fillApply,
+            tooltip: l10n.apply,
+            icon: AppIcon.check,
+            cursor: SystemMouseCursors.click,
+            onTap: widget.onApply,
+          ),
+          buildOverlayCircleButton(
+            key: Keys.fillCancel,
+            tooltip: l10n.cancel,
+            icon: AppIcon.close,
+            contentSemantic: AppButtonContentSemantic.dangerous,
+            cursor: SystemMouseCursors.click,
+            onTap: widget.onCancel,
+          ),
+        ],
       ),
     );
   }

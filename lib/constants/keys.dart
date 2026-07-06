@@ -48,6 +48,8 @@ class Keys {
   static const Key toolFillModeRadial = Key('tool-fill-mode-radial');
   static const Key toolFillHalftoneToggle = Key('tool-fill-halftone-toggle');
   static const Key toolFillHalftoneSlider = Key('tool-fill-halftone-slider');
+  static const Key fillApply = Key('fill-apply');
+  static const Key fillCancel = Key('fill-cancel');
   static const Key toolSmudge = Key('tool-smudge');
   static const Key toolBlurBrush = Key('tool-blur-brush');
 

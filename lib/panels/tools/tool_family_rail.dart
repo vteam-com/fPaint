@@ -9,17 +9,20 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
+import 'package:fpaint/widgets/app_divider.dart';
 import 'package:fpaint/widgets/app_slider.dart';
 import 'package:fpaint/widgets/side_panel_header.dart';
 
-/// The unified tool rail: every pixel-changing tool in one Brush section.
+/// The tool rail: two sections split by interaction shape.
 ///
-/// Gesture tools (pencil, brush, smudge, shapes, fill, eraser, text) and
-/// effects (blur, sharpness, brightness, …) share a single flat grid, because
-/// an effect is just a brush too — tapping one arms it as a brush and you paint
-/// it on. Exactly one tool is active at a time: arming an effect deselects the
-/// gesture tool and swaps [gestureParams] for the effect's brush controls (size
-/// and strength), and picking a gesture tool disarms the effect.
+/// **Brush** holds the freehand painters (pencil, brush, smudge, eraser) plus
+/// the effects (blur, sharpness, brightness, …) — an effect is just a brush,
+/// tapping one arms it and you paint it on. **Elements** holds the placement /
+/// shape tools (line, rectangle, circle, fill, text). Exactly one tool is active
+/// across both sections at a time: arming an effect deselects the gesture tool
+/// and swaps [gestureParams] for the effect's brush controls (size and
+/// strength), and picking any gesture tool disarms the effect. The active tool's
+/// controls render beneath whichever section owns it.
 class ToolFamilyRail extends StatelessWidget {
   const ToolFamilyRail({
     super.key,
@@ -45,41 +48,8 @@ class ToolFamilyRail extends StatelessWidget {
         appProvider.toolOptionsRepaintListenable,
       ]),
       builder: (final BuildContext context, final Widget? _) {
-        return _brushSection(context, appProvider);
+        return _toolSections(context, appProvider);
       },
-    );
-  }
-
-  /// Builds the single Brush section: the flat tool grid plus the controls for
-  /// whichever tool is active (gesture params, or the armed effect's controls).
-  Widget _brushSection(final BuildContext context, final AppProvider appProvider) {
-    final AppLocalizations l10n = context.l10n;
-    final SelectionEffect? armedEffect = appProvider.effectBrushModel.effect;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.medium,
-        vertical: AppSpacing.small,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          SidePanelHeader(title: l10n.toolSectionBrush, padding: EdgeInsets.zero),
-          const SizedBox(height: AppSpacing.small),
-          Wrap(
-            spacing: minimal ? AppSpacing.thin : AppSpacing.small,
-            runSpacing: minimal ? AppSpacing.thin : AppSpacing.small,
-            alignment: WrapAlignment.center,
-            children: <Widget>[
-              for (final ToolDescriptor descriptor in toolRail())
-                _toolButton(l10n, appProvider, descriptor, armedEffect),
-            ],
-          ),
-          if (armedEffect == null && gestureParams != null) gestureParams!,
-          if (armedEffect != null) _effectControls(l10n, appProvider, armedEffect),
-        ],
-      ),
     );
   }
 
@@ -181,6 +151,67 @@ class ToolFamilyRail extends StatelessWidget {
       constraints: constraints,
       padding: padding,
       onPressed: () => appProvider.selectedAction = action,
+    );
+  }
+
+  /// A wrapped grid of tool buttons for one section.
+  Widget _toolGrid(
+    final AppLocalizations l10n,
+    final AppProvider appProvider,
+    final List<ToolDescriptor> descriptors,
+    final SelectionEffect? armedEffect,
+  ) {
+    return Wrap(
+      spacing: minimal ? AppSpacing.thin : AppSpacing.small,
+      runSpacing: minimal ? AppSpacing.thin : AppSpacing.small,
+      alignment: WrapAlignment.center,
+      children: <Widget>[
+        for (final ToolDescriptor descriptor in descriptors) _toolButton(l10n, appProvider, descriptor, armedEffect),
+      ],
+    );
+  }
+
+  /// Builds the two tool sections: **Brush** (freehand painters + effects) and
+  /// **Elements** (line, rectangle, circle, fill, text). Exactly one tool is
+  /// active across both, so its controls (gesture params, or the armed effect's
+  /// controls) render beneath whichever section owns it.
+  Widget _toolSections(final BuildContext context, final AppProvider appProvider) {
+    final AppLocalizations l10n = context.l10n;
+    final SelectionEffect? armedEffect = appProvider.effectBrushModel.effect;
+    final ActionType selectedAction = appProvider.selectedAction;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.medium,
+        vertical: AppSpacing.small,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          // Brush section: freehand painters, then effects. When an effect is
+          // armed its controls show here; otherwise a selected brush tool's
+          // params show here.
+          SidePanelHeader(title: l10n.toolSectionBrush, padding: EdgeInsets.zero),
+          const SizedBox(height: AppSpacing.small),
+          _toolGrid(l10n, appProvider, brushSectionTools(), armedEffect),
+          if (armedEffect != null)
+            _effectControls(l10n, appProvider, armedEffect)
+          else if (kBrushToolOrder.contains(selectedAction) && gestureParams != null)
+            gestureParams!,
+          // Divider separating the Brush and Elements sections.
+          const SizedBox(height: AppSpacing.medium),
+          const AppDivider(),
+          const SizedBox(height: AppSpacing.medium),
+          // Elements section: placement / shape tools. An armed effect never
+          // owns these, so params only show for a selected element tool.
+          SidePanelHeader(title: l10n.toolSectionElements, padding: EdgeInsets.zero),
+          const SizedBox(height: AppSpacing.small),
+          _toolGrid(l10n, appProvider, elementSectionTools(), armedEffect),
+          if (armedEffect == null && kElementToolOrder.contains(selectedAction) && gestureParams != null)
+            gestureParams!,
+        ],
+      ),
     );
   }
 }
