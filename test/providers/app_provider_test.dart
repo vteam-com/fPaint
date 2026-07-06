@@ -275,9 +275,18 @@ void main() {
     });
   });
 
-  group('debounceGradientFill', () {
-    test('is accessible', () {
-      expect(appProvider.debounceGradientFill, isNotNull);
+  group('tolerance pointer lock', () {
+    test('begin pins the anchor and locks; end releases', () {
+      expect(appProvider.isTolerancePointerLocked, isFalse);
+      expect(appProvider.tolerancePointerAnchor, isNull);
+
+      appProvider.beginTolerancePointerLock(const Offset(120, 90));
+      expect(appProvider.isTolerancePointerLocked, isTrue);
+      expect(appProvider.tolerancePointerAnchor, const Offset(120, 90));
+
+      appProvider.endTolerancePointerLock();
+      expect(appProvider.isTolerancePointerLocked, isFalse);
+      expect(appProvider.tolerancePointerAnchor, isNull);
     });
   });
 

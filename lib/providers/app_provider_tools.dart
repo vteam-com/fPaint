@@ -72,19 +72,6 @@ extension AppProviderTools on AppProvider {
     return ui.Path.from(selectionPath);
   }
 
-  Future<ui.Image> _getFloodFillSourceImage({
-    required final bool sampleAllLayers,
-  }) async {
-    if (sampleAllLayers) {
-      return layers.cachedImage ?? await layers.capturePainterToImage();
-    }
-
-    // Async `toImage()` render, not `toImageForStorage`'s `toImageSync()`: the
-    // result is read back with `toByteData()` (see fill_service), which stalls
-    // the GPU for seconds on Impeller when the source came from `toImageSync()`.
-    return layers.selectedLayer.toImageForStorageAsync(layers.size);
-  }
-
   /// Updates an action.
   void updateAction({
     final Offset? start,
@@ -179,7 +166,7 @@ extension AppProviderTools on AppProvider {
     return true;
   }
 
-  /// Performs a flood fill with a solid color.
+  /// Performs a flood fill with a solid color, committed as one undoable action.
   void floodFillSolidAction(
     final Offset position, {
     final bool sampleAllLayers = false,
@@ -191,87 +178,94 @@ extension AppProviderTools on AppProvider {
       return;
     }
 
-    final bool ownsSourceImage = !sampleAllLayers;
-    final ui.Image sourceImage = await _getFloodFillSourceImage(
-      sampleAllLayers: sampleAllLayers,
-    );
-
-    try {
-      final ui.Path? clipPath = selectorModel.isVisible ? selectorModel.path1 : null;
-      final UserActionDrawing action = await fillService.createFloodFillSolidAction(
-        sourceImage: sourceImage,
-        position: position,
-        fillColor: fillColor,
-        halftoneDotColor: fillModel.halftoneEnabled ? fillColor : null,
-        halftoneMaxDotSizeFactor: fillModel.halftoneMaxDotSizeFactor,
-        tolerance: tolerance,
-        clipPath: clipPath,
-        regionPathOverride: _selectionRegionFloodFillOverridePath,
-      );
-
-      recordExecuteDrawingActionToSelectedLayer(action: action);
-    } finally {
-      if (ownsSourceImage) {
-        sourceImage.dispose();
-      }
+    final UserActionDrawing? action = await _buildSolidFillAction(position, sampleAllLayers: sampleAllLayers);
+    if (action == null) {
+      return;
     }
+    recordExecuteDrawingActionToSelectedLayer(action: action);
   }
 
-  /// Builds a gradient flood-fill action from [fillModel] without committing or
-  /// recording it. Returns null when the gradient configuration or resolved
-  /// region is unusable (an empty, path-less action).
+  /// Builds a solid flood-fill action at [position], resolving the region from
+  /// the **cached** layer pixels (+ isolate) so repeated builds during a drag
+  /// skip the full-canvas readback. Honours fill color, halftone, and any
+  /// selection clip. Returns null when the resolved region is empty.
+  Future<UserActionDrawing?> _buildSolidFillAction(
+    final Offset position, {
+    required final bool sampleAllLayers,
+  }) async {
+    final FillImageData? imageData = await getSelectedLayerFillImageData(sampleAllLayers: sampleAllLayers);
+    if (imageData == null) {
+      return null;
+    }
+    final UserActionDrawing action = await fillService.createFloodFillSolidAction(
+      imageData: imageData,
+      position: position,
+      fillColor: fillColor,
+      halftoneDotColor: fillModel.halftoneEnabled ? fillColor : null,
+      halftoneMaxDotSizeFactor: fillModel.halftoneMaxDotSizeFactor,
+      tolerance: tolerance,
+      clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
+      regionPathOverride: _selectionRegionFloodFillOverridePath,
+    );
+    return (action.path?.getBounds().isEmpty ?? true) ? null : action;
+  }
+
+  /// Builds a gradient flood-fill action from [fillModel], resolving the region
+  /// from the **cached** layer pixels (+ isolate). Returns null when the gradient
+  /// config or resolved region is unusable (an empty, path-less action).
   Future<UserActionDrawing?> _buildGradientFillAction(final FillModel fillModel) async {
-    final bool ownsSourceImage = !fillModel.sampleAllLayers;
-    final ui.Image sourceImage = await _getFloodFillSourceImage(
-      sampleAllLayers: fillModel.sampleAllLayers,
-    );
-
-    try {
-      final ui.Path? clipPath = selectorModel.isVisible ? selectorModel.path1 : null;
-      final UserActionDrawing action = await fillService.createFloodFillGradientAction(
-        sourceImage: sourceImage,
-        fillModel: fillModel,
-        tolerance: tolerance,
-        clipPath: clipPath,
-        toCanvas: toCanvas,
-        regionPathOverride: _selectionRegionFloodFillOverridePath,
-      );
-      // An unusable config yields an empty, path-less action — treat as nothing.
-      return action.path == null ? null : action;
-    } finally {
-      if (ownsSourceImage) {
-        sourceImage.dispose();
-      }
+    final FillImageData? imageData = await getSelectedLayerFillImageData(sampleAllLayers: fillModel.sampleAllLayers);
+    if (imageData == null) {
+      return null;
     }
+    final UserActionDrawing action = await fillService.createFloodFillGradientAction(
+      imageData: imageData,
+      fillModel: fillModel,
+      tolerance: tolerance,
+      clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
+      toCanvas: toCanvas,
+      regionPathOverride: _selectionRegionFloodFillOverridePath,
+    );
+    return action.path == null ? null : action;
   }
 
-  /// Rebuilds the live, non-committed gradient-fill preview on the selected
-  /// layer. Debounced so rapid handle / color / size edits coalesce.
-  ///
-  /// The prior transient preview is stripped before the region is re-resolved so
-  /// the flood fill always samples the clean layer (otherwise the region would
-  /// shrink as it re-samples already-filled gradient pixels — the old
-  /// undo-then-refill dance existed for the same reason). The preview action is
-  /// appended without an undo entry; the session lifecycle
-  /// ([AppProvider.applyGradientPreview] / [AppProvider.cancelGradientPreview])
-  /// commits or discards it. A monotonic version token drops stale async renders.
-  void updateGradientPreview() {
+  /// Rebuilds the live solid-fill preview at [position] as a **held** action the
+  /// canvas overlay paints — never appended to the layer, so re-previewing while
+  /// dragging the tolerance costs O(region path), not a full-canvas re-composite.
+  /// The region resolve is cached + isolate-run; a version token drops stale
+  /// async results. Committed on pointer-up via [AppProvider.commitFillPreview].
+  Future<void> updateSolidFillPreview(
+    final Offset position, {
+    required final bool sampleAllLayers,
+  }) async {
+    if (isSelectedLayerLocked) {
+      return;
+    }
+    final int requestVersion = ++fillPreviewRenderVersion;
+    final UserActionDrawing? action = await _buildSolidFillAction(position, sampleAllLayers: sampleAllLayers);
+    if (requestVersion != fillPreviewRenderVersion) {
+      return;
+    }
+    fillPreviewAction = action;
+    repaintMainView();
+  }
+
+  /// Rebuilds the live gradient-fill preview as a **held** action the canvas
+  /// overlay paints — never appended to the layer. Re-resolves the region from
+  /// the current handles (cached + isolate) and repaints the overlay; a version
+  /// token drops stale async results. Finalized via
+  /// [AppProvider.applyGradientPreview] / [AppProvider.cancelGradientPreview].
+  Future<void> updateGradientPreview() async {
     repaintToolOptions();
     if (!fillModel.isVisible || isSelectedLayerLocked) {
       return;
     }
-    debounceGradientFill.run(() async {
-      final int requestVersion = ++fillPreviewRenderVersion;
-      // Sample the clean layer: strip any previous transient first.
-      removeGradientPreviewTransient();
-      final UserActionDrawing? action = await _buildGradientFillAction(fillModel);
-      if (action == null || !fillModel.isVisible || requestVersion != fillPreviewRenderVersion) {
-        update();
-        return;
-      }
-      gradientPreviewAction = action;
-      layers.selectedLayer.appendDrawingAction(action);
-      update();
-    });
+    final int requestVersion = ++fillPreviewRenderVersion;
+    final UserActionDrawing? action = await _buildGradientFillAction(fillModel);
+    if (requestVersion != fillPreviewRenderVersion || !fillModel.isVisible) {
+      return;
+    }
+    fillPreviewAction = action;
+    repaintMainView();
   }
 }

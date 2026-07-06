@@ -5,7 +5,6 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/effect_brush_model.dart';
 import 'package:fpaint/models/effect_preview_model.dart';
 import 'package:fpaint/models/fill_model.dart';
@@ -95,11 +94,6 @@ class AppProvider extends ChangeNotifier {
 
   /// Gets the undo provider.
   UndoProvider get undoProvider => _undoProvider;
-
-  final Debouncer _debounceGradientFill = Debouncer();
-
-  /// Gets the gradient fill debouncer.
-  Debouncer get debounceGradientFill => _debounceGradientFill;
 
   final FillService _fillService = FillService();
 
@@ -553,78 +547,118 @@ class AppProvider extends ChangeNotifier {
   /// The fill model.
   FillModel fillModel = FillModel();
 
-  /// The transient gradient-fill preview action currently laid on the selected
-  /// layer's action stack. Present only during a live gradient-fill session; it
-  /// is never recorded on the undo stack. Applying the session commits a real
-  /// (undoable) fill and clears this; cancelling discards it. See
-  /// `updateGradientPreview` / `applyGradientPreview` / `cancelGradientPreview`.
-  UserActionDrawing? gradientPreviewAction;
+  /// The **held** fill preview action — the region to fill plus its solid
+  /// colour / gradient / halftone. It is drawn by a lightweight canvas overlay
+  /// (`renderRegion`) and is **never** appended to the layer or the undo stack,
+  /// so re-previewing while dragging costs O(region path), not a full-canvas
+  /// re-composite. Committing records it as exactly one undoable action;
+  /// cancelling drops it. See `updateSolidFillPreview` / `updateGradientPreview`
+  /// / `commitFillPreview`.
+  UserActionDrawing? fillPreviewAction;
 
-  /// Monotonic token that invalidates stale async gradient-fill preview renders.
+  /// Monotonic token that invalidates stale async fill-region resolves.
   int fillPreviewRenderVersion = 0;
 
-  /// Whether a live gradient-fill preview session is active. Session-scoped (not
-  /// merely "a transient is on the stack"), so it stays true across the brief
-  /// window where a re-render has removed the old preview and not yet appended
-  /// the new one. Only [FillModel.isVisible] gradient sessions set this; solid
-  /// fills commit immediately and never enter a session.
+  /// Whether a live gradient-fill preview session is active. Only
+  /// [FillModel.isVisible] gradient sessions set this; solid fills preview only
+  /// during the pointer press and commit on release.
   bool get isGradientPreviewActive => fillModel.isVisible;
 
-  /// Applies the live gradient-fill preview, committing the currently previewed
-  /// transient as exactly one undoable action, then ends the session. What is
-  /// committed is exactly what is on screen (WYSIWYG); if no transient has been
-  /// rendered yet nothing is committed. Safe to call with no active session.
-  ///
-  /// The preview *build* lives in the tools extension (`updateGradientPreview`),
-  /// but this lifecycle stays on the base class so the tool-switch setter and
-  /// undo/redo can finalize a session without the base depending on the
-  /// extension.
+  int? _fillTolerancePreview;
+
+  /// The tolerance shown in the top "Fill Tolerance" bar while a paint-bucket
+  /// tolerance drag is active, or null when the bar is hidden.
+  int? get fillTolerancePreview => _fillTolerancePreview;
+
+  /// Shows/updates the top "Fill Tolerance" bar with [value].
+  void showFillTolerancePreview(final int value) {
+    if (_fillTolerancePreview == value) {
+      return;
+    }
+    _fillTolerancePreview = value;
+    repaintMainView();
+  }
+
+  /// Hides the top "Fill Tolerance" bar.
+  void hideFillTolerancePreview() {
+    if (_fillTolerancePreview == null) {
+      return;
+    }
+    _fillTolerancePreview = null;
+    repaintMainView();
+  }
+
+  Offset? _tolerancePointerAnchor;
+
+  /// Screen-space start point of an active horizontal tolerance drag (wand or
+  /// paint bucket), or null when no such drag is active. While set, the OS
+  /// cursor is hidden and a fixed marker is pinned here, so the tolerance scrub
+  /// reads as adjusting a value in place rather than dragging across the canvas.
+  Offset? get tolerancePointerAnchor => _tolerancePointerAnchor;
+
+  /// Whether a horizontal tolerance drag is holding the pointer at its start.
+  bool get isTolerancePointerLocked => _tolerancePointerAnchor != null;
+
+  /// Pins the tolerance drag to [screenAnchor]: hides the cursor and shows the
+  /// fixed anchor marker.
+  void beginTolerancePointerLock(final Offset screenAnchor) {
+    _tolerancePointerAnchor = screenAnchor;
+    repaintToolOptions(); // rebuild the cursor MouseRegion to hide the cursor
+    repaintMainView(); // draw the fixed anchor marker
+  }
+
+  /// Releases the tolerance pointer lock, restoring the cursor.
+  void endTolerancePointerLock() {
+    if (_tolerancePointerAnchor == null) {
+      return;
+    }
+    _tolerancePointerAnchor = null;
+    repaintToolOptions();
+    repaintMainView();
+  }
+
+  /// Commits the held fill preview action (if any) as exactly one undoable
+  /// action, then clears it. What is committed is exactly what the overlay shows
+  /// (WYSIWYG); if nothing has been previewed yet, nothing is committed. Stays on
+  /// the base class so the tool-switch setter, undo/redo, and the gesture handler
+  /// can finalize without depending on the tools extension.
+  void commitFillPreview() {
+    fillPreviewRenderVersion++; // drop any in-flight region resolve
+    final UserActionDrawing? rendered = fillPreviewAction;
+    fillPreviewAction = null;
+    if (rendered != null) {
+      recordExecuteDrawingActionToSelectedLayer(action: rendered);
+    }
+    repaintMainView();
+  }
+
+  /// Drops the held fill preview without recording anything.
+  void clearFillPreview() {
+    fillPreviewRenderVersion++; // drop any in-flight region resolve
+    fillPreviewAction = null;
+    repaintMainView();
+  }
+
+  /// Applies the live gradient-fill preview session, committing its held action
+  /// and ending the session. Safe to call with no active session.
   void applyGradientPreview() {
     if (!fillModel.isVisible) {
       return;
     }
-    _debounceGradientFill.cancel();
-    fillPreviewRenderVersion++; // invalidate any in-flight render
-    final UserActionDrawing? rendered = gradientPreviewAction;
-    removeGradientPreviewTransient();
-    if (rendered != null) {
-      // Reuse the exact previewed action so committed pixels match the preview.
-      recordExecuteDrawingActionToSelectedLayer(action: rendered);
-    }
+    commitFillPreview();
     fillModel.clear();
     update();
   }
 
-  /// Discards the live gradient-fill preview and ends the session without
-  /// recording any undo entry. Safe to call with no active session.
+  /// Discards the live gradient-fill preview session without recording any undo
+  /// entry. Safe to call with no active session.
   void cancelGradientPreview() {
-    if (!fillModel.isVisible && gradientPreviewAction == null) {
+    if (!fillModel.isVisible && fillPreviewAction == null) {
       return;
     }
-    _debounceGradientFill.cancel();
-    fillPreviewRenderVersion++; // invalidate any in-flight render
-    removeGradientPreviewTransient();
+    clearFillPreview();
     fillModel.clear();
     update();
-  }
-
-  /// Removes the transient gradient preview action from the selected layer, if
-  /// present, and invalidates the layer cache. Uses an identity check so it only
-  /// ever removes its own action. Public so the tools extension's
-  /// `updateGradientPreview` can strip the prior transient before re-rendering.
-  void removeGradientPreviewTransient() {
-    final UserActionDrawing? preview = gradientPreviewAction;
-    gradientPreviewAction = null;
-    if (preview == null) {
-      return;
-    }
-    final List<UserActionDrawing> stack = layers.selectedLayer.actionStack;
-    if (stack.isNotEmpty && identical(stack.last, preview)) {
-      stack.removeLast();
-    } else {
-      stack.remove(preview);
-    }
-    layers.selectedLayer.clearCache();
   }
 
   /// The shared style state for the text tool.

@@ -53,11 +53,13 @@ class FillService {
     );
   }
 
-  /// Performs a flood fill with a solid color.
+  /// Performs a flood fill with a solid color. Pass [imageData] (cached RGBA
+  /// bytes) to skip the readback during live previews, or [sourceImage] otherwise.
   Future<UserActionDrawing> createFloodFillSolidAction({
-    required final ui.Image sourceImage,
     required final Offset position,
     required final Color fillColor,
+    final ui.Image? sourceImage,
+    final FillImageData? imageData,
     final Color? halftoneDotColor,
     final double? halftoneMaxDotSizeFactor,
     required final int tolerance,
@@ -66,11 +68,30 @@ class FillService {
   }) async {
     final ui.Path path = await _resolveFloodFillPath(
       sourceImage: sourceImage,
+      imageData: imageData,
       position: position,
       tolerance: tolerance,
       regionPathOverride: regionPathOverride,
     );
 
+    return buildSolidFillActionForPath(
+      path: path,
+      fillColor: fillColor,
+      halftoneDotColor: halftoneDotColor,
+      halftoneMaxDotSizeFactor: halftoneMaxDotSizeFactor,
+      clipPath: clipPath,
+    );
+  }
+
+  /// Builds a solid fill action for an already-resolved region [path], skipping
+  /// the flood-fill readback — cheap enough to call live while dragging.
+  UserActionDrawing buildSolidFillActionForPath({
+    required final ui.Path path,
+    required final Color fillColor,
+    final Color? halftoneDotColor,
+    final double? halftoneMaxDotSizeFactor,
+    required final Path? clipPath,
+  }) {
     final ui.Rect bounds = path.getBounds();
 
     return UserActionDrawing(
@@ -92,31 +113,61 @@ class FillService {
     );
   }
 
-  /// Performs a flood fill with a gradient.
+  /// The canvas-space point at which a gradient flood fill is seeded, derived
+  /// from the current handles: the first handle for radial, the midpoint between
+  /// handles for linear.
+  Offset gradientFloodFillStartPoint(
+    final FillModel fillModel,
+    final Offset Function(Offset) toCanvas,
+  ) {
+    return fillModel.mode == FillMode.radial
+        ? toCanvas(fillModel.gradientPoints.first.offset)
+        : toCanvas(fillModel.centerPoint);
+  }
+
+  /// Performs a flood fill with a gradient. Pass [imageData] (cached RGBA bytes)
+  /// to skip the readback during live previews, or [sourceImage] otherwise.
   Future<UserActionDrawing> createFloodFillGradientAction({
-    required final ui.Image sourceImage,
     required final FillModel fillModel,
     required final int tolerance,
     required final Path? clipPath,
     required final Offset Function(Offset) toCanvas,
+    final ui.Image? sourceImage,
+    final FillImageData? imageData,
     final Path? regionPathOverride,
   }) async {
     if (!_hasUsableGradientConfiguration(fillModel)) {
       return _buildEmptyFloodFillAction();
     }
 
-    // For radial gradients, start flood fill at the first gradient handle position
-    // For linear gradients, start at the center between handles
-    final ui.Offset floodFillStartPoint = fillModel.mode == FillMode.radial
-        ? toCanvas(fillModel.gradientPoints.first.offset)
-        : toCanvas(fillModel.centerPoint);
-
     final ui.Path path = await _resolveFloodFillPath(
       sourceImage: sourceImage,
-      position: floodFillStartPoint,
+      imageData: imageData,
+      position: gradientFloodFillStartPoint(fillModel, toCanvas),
       tolerance: tolerance,
       regionPathOverride: regionPathOverride,
     );
+
+    return buildGradientFillActionForPath(
+      path: path,
+      fillModel: fillModel,
+      toCanvas: toCanvas,
+      clipPath: clipPath,
+    );
+  }
+
+  /// Builds a gradient fill action for an already-resolved region [path],
+  /// skipping the flood-fill readback — cheap enough to call live while dragging.
+  /// Returns an empty (path-less) action when the region or config is unusable.
+  UserActionDrawing buildGradientFillActionForPath({
+    required final ui.Path path,
+    required final FillModel fillModel,
+    required final Offset Function(Offset) toCanvas,
+    required final Path? clipPath,
+  }) {
+    if (!_hasUsableGradientConfiguration(fillModel)) {
+      return _buildEmptyFloodFillAction();
+    }
 
     final ui.Rect bounds = path.getBounds();
 
@@ -153,9 +204,11 @@ class FillService {
   }
 
   /// Resolves the geometry to fill, either from an explicit override path or
-  /// from the raster flood-fill region sampled at [position].
+  /// from the raster flood-fill region sampled at [position]. Prefers
+  /// [imageData] (cached RGBA bytes — no readback) over [sourceImage].
   Future<ui.Path> _resolveFloodFillPath({
-    required final ui.Image sourceImage,
+    final ui.Image? sourceImage,
+    final FillImageData? imageData,
     required final Offset position,
     required final int tolerance,
     required final Path? regionPathOverride,
@@ -166,6 +219,7 @@ class FillService {
 
     final FillRegion region = await getRegionPathFromImage(
       image: sourceImage,
+      imageData: imageData,
       position: position,
       tolerance: tolerance,
     );

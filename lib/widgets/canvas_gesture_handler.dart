@@ -91,21 +91,21 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   List<int>? _smudgeSourceSignature;
   int _smudgeSourceWidth = 0;
 
-  /// Canvas-space sample anchor resampled on every wand drag step.
-  Offset? _wandDragAnchorCanvas;
+  /// Canvas-space sample anchor re-sampled / re-previewed on every drag step.
+  Offset? _toleranceDragAnchorCanvas;
 
-  /// Screen-space anchor of the wand sample tap; horizontal drag distance from
-  /// here drives the live tolerance. Non-null only during a wand gesture.
-  Offset? _wandDragAnchorScreen;
+  /// Screen-space anchor of the sample tap; horizontal drag distance from here
+  /// drives the live tolerance. Non-null only during a tolerance-drag gesture.
+  Offset? _toleranceDragAnchorScreen;
 
-  /// Last tolerance applied during the wand drag, to skip redundant resamples.
-  int? _wandDragLastAppliedTolerance;
+  /// Last tolerance applied during the drag, to skip redundant re-runs.
+  int? _toleranceDragLastApplied;
 
-  /// Whether the active wand gesture samples all visible layers.
-  bool _wandDragSampleAllLayers = false;
+  /// Whether the active tolerance-drag gesture samples all visible layers.
+  bool _toleranceDragSampleAllLayers = false;
 
-  /// Tolerance captured when the wand gesture began.
-  int _wandDragStartTolerance = AppDefaults.tolerance;
+  /// Tolerance captured when the tolerance-drag gesture began.
+  int _toleranceDragStartTolerance = AppDefaults.tolerance;
   @override
   void dispose() {
     // Free the per-session smudge source cache (a full-canvas CPU buffer).
@@ -256,6 +256,9 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             if (_activePointers.length < AppMath.pair) {
               _baseDistance = 0.0; // Reset base distance
             }
+            // Release a tolerance pointer lock so a cancelled touch cannot leave
+            // the cursor hidden for a later mouse user.
+            appProvider.endTolerancePointerLock();
           } else {
             _handlePointerEnd(appProvider, event);
           }
@@ -271,6 +274,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// "click a point to sample a color region"; every other tool defers to the
   /// default cursor (and to any overlay handles layered above the canvas).
   MouseCursor _canvasCursor(final AppProvider appProvider) {
+    // A horizontal tolerance drag pins the pointer at its start: hide the OS
+    // cursor so it does not appear to wander across the canvas while scrubbing.
+    if (appProvider.isTolerancePointerLocked) {
+      return SystemMouseCursors.none;
+    }
     return appProvider.isWandSelectionActive ? SystemMouseCursors.precise : MouseCursor.defer;
   }
 }

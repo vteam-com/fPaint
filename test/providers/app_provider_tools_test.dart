@@ -345,7 +345,7 @@ void main() {
     // Waits for the debounced async preview render to append its transient.
     Future<void> settlePreview() async {
       int guard = 0;
-      while (appProvider.gradientPreviewAction == null && guard < 1000) {
+      while (appProvider.fillPreviewAction == null && guard < 1000) {
         await Future<void>.delayed(const Duration(milliseconds: 2));
         guard++;
       }
@@ -360,7 +360,7 @@ void main() {
       appProvider.updateGradientPreview();
       await settlePreview();
 
-      expect(appProvider.gradientPreviewAction, isNotNull);
+      expect(appProvider.fillPreviewAction, isNotNull);
       expect(appProvider.isGradientPreviewActive, isTrue);
       expect(appProvider.undoProvider.canUndo, isFalse);
     });
@@ -369,12 +369,12 @@ void main() {
       startLinearSession();
       appProvider.updateGradientPreview();
       await settlePreview();
-      expect(appProvider.gradientPreviewAction, isNotNull);
+      expect(appProvider.fillPreviewAction, isNotNull);
 
       appProvider.applyGradientPreview();
 
       expect(appProvider.fillModel.isVisible, isFalse);
-      expect(appProvider.gradientPreviewAction, isNull);
+      expect(appProvider.fillPreviewAction, isNull);
       expect(appProvider.undoProvider.canUndo, isTrue);
 
       // Exactly one entry: a single undo empties the stack.
@@ -391,39 +391,92 @@ void main() {
       appProvider.selectedAction = ActionType.brush;
 
       expect(appProvider.fillModel.isVisible, isFalse);
-      expect(appProvider.gradientPreviewAction, isNull);
+      expect(appProvider.fillPreviewAction, isNull);
       expect(appProvider.undoProvider.canUndo, isTrue);
       appProvider.undoAction();
       expect(appProvider.undoProvider.canUndo, isFalse);
     });
 
-    test('cancelling discards the preview with no undo entry', () async {
+    test('the preview is held, never appended to the layer', () async {
+      final int baseline = appProvider.layers.selectedLayer.actionStack.length;
       startLinearSession();
       appProvider.updateGradientPreview();
       await settlePreview();
-      expect(appProvider.gradientPreviewAction, isNotNull);
-      final int stackWithPreview = appProvider.layers.selectedLayer.actionStack.length;
+
+      expect(appProvider.fillPreviewAction, isNotNull);
+      // The live preview is drawn by the overlay, not baked onto the layer.
+      expect(appProvider.layers.selectedLayer.actionStack.length, baseline);
+    });
+
+    test('cancelling discards the preview with no undo entry', () async {
+      final int baseline = appProvider.layers.selectedLayer.actionStack.length;
+      startLinearSession();
+      appProvider.updateGradientPreview();
+      await settlePreview();
+      expect(appProvider.fillPreviewAction, isNotNull);
 
       appProvider.cancelGradientPreview();
 
       expect(appProvider.fillModel.isVisible, isFalse);
-      expect(appProvider.gradientPreviewAction, isNull);
+      expect(appProvider.fillPreviewAction, isNull);
       expect(appProvider.undoProvider.canUndo, isFalse);
-      // The transient was stripped from the layer.
-      expect(appProvider.layers.selectedLayer.actionStack.length, stackWithPreview - 1);
+      // Nothing was ever added to the layer (held preview, overlay only).
+      expect(appProvider.layers.selectedLayer.actionStack.length, baseline);
     });
 
-    test('a render whose session ends before it completes does not append', () async {
+    test('a render whose session ends before it completes does not apply', () async {
       startLinearSession();
-      appProvider.updateGradientPreview(); // schedules the debounced render
+      appProvider.updateGradientPreview(); // async region resolve in flight
 
-      // Session ends out from under the pending render.
+      // Session ends out from under the in-flight resolve.
       appProvider.fillModel.isVisible = false;
 
-      // Give the debounce time to fire; the guarded callback must drop.
+      // Let the async resolve settle; the version/visibility guard must drop it.
       await Future<void>.delayed(const Duration(milliseconds: 400));
 
-      expect(appProvider.gradientPreviewAction, isNull);
+      expect(appProvider.fillPreviewAction, isNull);
+      expect(appProvider.undoProvider.canUndo, isFalse);
+    });
+  });
+
+  group('solid fill preview (tolerance drag)', () {
+    late AppProvider appProvider;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      appProvider = AppProvider(preferences: preferences);
+      appProvider.undoProvider.clear();
+      appProvider.selectedAction = ActionType.fill; // solid is the default mode
+    });
+
+    Future<void> settlePreview() async {
+      int guard = 0;
+      while (appProvider.fillPreviewAction == null && guard < 1000) {
+        await Future<void>.delayed(const Duration(milliseconds: 2));
+        guard++;
+      }
+    }
+
+    test('preview is not on the undo stack; committing records exactly one entry', () async {
+      appProvider.updateSolidFillPreview(const ui.Offset(10, 10), sampleAllLayers: false);
+      await settlePreview();
+
+      expect(appProvider.fillPreviewAction, isNotNull);
+      expect(appProvider.undoProvider.canUndo, isFalse);
+
+      appProvider.commitFillPreview();
+
+      expect(appProvider.fillPreviewAction, isNull);
+      expect(appProvider.undoProvider.canUndo, isTrue);
+      appProvider.undoAction();
+      expect(appProvider.undoProvider.canUndo, isFalse);
+    });
+
+    test('committing with no rendered preview records nothing', () {
+      expect(appProvider.fillPreviewAction, isNull);
+      appProvider.commitFillPreview();
       expect(appProvider.undoProvider.canUndo, isFalse);
     });
   });
