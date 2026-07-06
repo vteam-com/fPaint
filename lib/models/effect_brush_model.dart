@@ -12,7 +12,8 @@ class EffectBrushModel {
   /// The effect armed as a brush, or null when nothing is armed.
   SelectionEffect? effect;
 
-  /// Strength applied by each painted stroke (0..1).
+  /// Strength applied by each painted stroke (0..1 for unipolar effects;
+  /// -1..1 for bipolar effects, e.g. sharpness/brightness).
   double strength = AppEffects.defaultIntensity;
 
   /// Size parameter for effects that expose one (e.g. pixelate, noise).
