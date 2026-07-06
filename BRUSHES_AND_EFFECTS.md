@@ -29,7 +29,7 @@ sections:
 
 The gradient paint bucket is a small live editor: the first tap opens a
 non-committed **preview session** with draggable handles; **Apply/Cancel** on
-the on-canvas overlay finalizes it (see [Gradient fill sessions](#gradient-fill-sessions)).
+the on-canvas overlay finalizes it (see [Fill sessions](#fill-sessions)).
 
 ---
 
@@ -112,26 +112,44 @@ axis. Heavy blur stays the dedicated **Blur** effect.
 
 ---
 
-## Gradient fill sessions
+## Fill sessions
 
-Solid fill commits immediately on tap. **Gradient** fill (linear/radial) opens a
-live, bounded **preview session**:
+**Both** fill modes use the same tap-to-sample / drag-to-adjust-tolerance gesture
+as the Edge Detection wand: tap to fill, then drag horizontally to grow/shrink
+the filled region's colour tolerance live (with the tolerance HUD + haptics),
+re-previewing the region as it changes. The tolerance-drag anchor state is shared
+with the wand in the gesture handler.
 
-- The first canvas tap seeds the gradient handles and lays a **non-committed
-  preview** on the active layer — appended to the layer's action stack but
-  **never** written to the undo stack.
-- Dragging handles, editing stops/colors, or changing size re-renders the
-  preview (debounced). Each re-render strips the previous transient first so the
-  flood fill always samples the **clean** layer (otherwise the region shrinks).
-- **Apply** (green check on the on-canvas overlay) commits the previewed fill as
+**How the live preview renders (both modes).** The preview is a **held action**
+painted by a lightweight canvas overlay ([lib/widgets/fill_preview_overlay.dart](lib/widgets/fill_preview_overlay.dart)) —
+it is **never** baked into the layer or the undo stack until committed. The region
+is resolved by the **cached-pixels + isolate** flood fill (`getRegionPathFromLayerImage`,
+the same fast path the Edge Detection wand uses), and drawn with the *same*
+`renderRegion` the commit uses (so the preview is pixel-identical). Re-previewing
+while dragging is therefore O(region path), not a full-canvas re-composite — the
+key perf fix. A monotonic version token drops stale async resolves.
+
+**Solid** fill commits the held preview as exactly one undoable action on release
+(a plain tap with no drag just fills).
+
+**Gradient** fill (linear/radial) opens a live, bounded **preview session**:
+
+- The first canvas tap seeds the gradient handles and the held preview. Dragging
+  from that tap (or pressing empty canvas again and dragging) adjusts the region's
+  tolerance live; dragging handles / editing stops re-resolves and repaints the
+  overlay.
+- **Apply** (green check on the on-canvas overlay) commits the preview as
   **exactly one** undoable action. **Cancel** (red X) discards it with **zero**
-  undo entries.
+  undo entries. Releasing the tolerance drag does **not** commit — the session
+  stays open for handle editing.
 - The session also finalizes implicitly: switching tools or undo/redo **applies**
-  it; **Escape** cancels it. A monotonic version token drops stale async renders.
+  it; **Escape** cancels it.
 
-This replaced an older model that juggled `undoProvider.undo()` on every edit —
-that blind undo corrupted the shared undo stack whenever anything else touched
-it, which is why the bucket felt flaky.
+This replaced two earlier models: `undoProvider.undo()`-per-edit (corrupted the
+shared undo stack — the original flakiness), then baking the preview into the
+layer per step (a full-canvas readback + re-composite each step — far too slow at
+62 MP). Because the preview is now overlay-only, a flatten/export does **not**
+capture an un-applied preview — commit or Apply first.
 
 ---
 
@@ -192,5 +210,7 @@ change.
 | Armed effect-brush state | [lib/models/effect_brush_model.dart](lib/models/effect_brush_model.dart) |
 | Gesture actions | [lib/models/user_action_drawing.dart](lib/models/user_action_drawing.dart) |
 | Paint commit, overlay preview flow, selection clipping | [lib/providers/app_provider_selection_effects.dart](lib/providers/app_provider_selection_effects.dart) |
-| Gradient fill preview session (update/apply/cancel) | [lib/providers/app_provider_tools.dart](lib/providers/app_provider_tools.dart) |
+| Fill preview builders (solid tolerance-drag + gradient) | [lib/providers/app_provider_tools.dart](lib/providers/app_provider_tools.dart) |
+| Fill preview lifecycle (`commitFillPreview` / apply / cancel) | [lib/providers/app_provider.dart](lib/providers/app_provider.dart) |
+| Tap-to-fill + drag-to-adjust-tolerance gesture (shared with wand) | [lib/widgets/canvas_gesture_handler_state_methods.dart](lib/widgets/canvas_gesture_handler_state_methods.dart) |
 | Gradient fill on-canvas handles + Apply/Cancel overlay | [lib/widgets/fill_widget.dart](lib/widgets/fill_widget.dart) |

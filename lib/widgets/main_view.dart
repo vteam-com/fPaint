@@ -17,6 +17,7 @@ import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/canvas_panel.dart';
 import 'package:fpaint/widgets/effect_preview_bottom_sheet.dart';
+import 'package:fpaint/widgets/fill_preview_overlay.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -267,7 +268,19 @@ class MainViewState extends State<MainView> {
                       ),
 
                     //
-                    // Fill Widget
+                    // Live fill preview (solid or gradient region) — a
+                    // lightweight overlay, not baked into the layer.
+                    //
+                    if (!hasActiveTransformOverlay && appProvider.fillPreviewAction != null)
+                      FillPreviewOverlay(
+                        action: appProvider.fillPreviewAction!,
+                        canvasOffset: appProvider.canvasOffset,
+                        scale: appProvider.layers.scale,
+                      ),
+
+                    //
+                    // Fill Widget (gradient handles + Apply/Cancel), on top of
+                    // the preview overlay.
                     //
                     if (!hasActiveTransformOverlay && appProvider.fillModel.isVisible)
                       SizedBox(
@@ -280,6 +293,36 @@ class MainViewState extends State<MainView> {
                           },
                           onApply: appProvider.applyGradientPreview,
                           onCancel: appProvider.cancelGradientPreview,
+                        ),
+                      ),
+
+                    // Fixed marker pinned at the start of a tolerance drag (wand
+                    // or paint bucket) — the cursor is hidden, so this shows the
+                    // maintained gesture start point.
+                    if (appProvider.tolerancePointerAnchor != null)
+                      Positioned(
+                        left:
+                            appProvider.tolerancePointerAnchor!.dx -
+                            AppInteraction.toleranceAnchorMarkerSize / AppMath.pair,
+                        top:
+                            appProvider.tolerancePointerAnchor!.dy -
+                            AppInteraction.toleranceAnchorMarkerSize / AppMath.pair,
+                        child: const IgnorePointer(child: _ToleranceAnchorMarker()),
+                      ),
+
+                    // Procreate-style "Fill Tolerance NN%" bar, top-center, while
+                    // dragging the paint-bucket tolerance.
+                    if (appProvider.fillTolerancePreview != null)
+                      Positioned(
+                        top: AppSpacing.large,
+                        left: AppMath.zero.toDouble(),
+                        right: AppMath.zero.toDouble(),
+                        child: IgnorePointer(
+                          child: Center(
+                            child: buildOverlayFeedbackBubble(
+                              label: '${context.l10n.colorTolerance}   ${appProvider.fillTolerancePreview}%',
+                            ),
+                          ),
                         ),
                       ),
 
@@ -382,6 +425,41 @@ class MainViewState extends State<MainView> {
     showSnackBarIfMounted(
       context,
       context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
+    );
+  }
+}
+
+/// A fixed ring-and-dot marker pinned at the start of a horizontal tolerance
+/// drag, shown while the OS cursor is hidden so the gesture reads as adjusting a
+/// value in place.
+class _ToleranceAnchorMarker extends StatelessWidget {
+  const _ToleranceAnchorMarker();
+
+  @override
+  Widget build(final BuildContext context) {
+    return Container(
+      width: AppInteraction.toleranceAnchorMarkerSize,
+      height: AppInteraction.toleranceAnchorMarkerSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.white, width: AppStroke.regular),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: AppColors.black.withValues(alpha: AppVisual.half),
+            blurRadius: AppSpacing.thin,
+          ),
+        ],
+      ),
+      child: Center(
+        child: Container(
+          width: AppSpacing.small,
+          height: AppSpacing.small,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.black,
+          ),
+        ),
+      ),
     );
   }
 }

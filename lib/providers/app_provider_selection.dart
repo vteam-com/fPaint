@@ -49,7 +49,7 @@ extension AppProviderSelection on AppProvider {
     if (!isWandSelectionActive) {
       return;
     }
-    unawaited(_getSelectedLayerFillImageData(sampleAllLayers: false));
+    unawaited(getSelectedLayerFillImageData(sampleAllLayers: false));
   }
 
   /// Erases a region on the canvas.
@@ -836,7 +836,7 @@ extension AppProviderSelection on AppProvider {
     final ui.Offset position, {
     required final bool sampleAllLayers,
   }) async {
-    final FillImageData? imageData = await _getSelectedLayerFillImageData(
+    final FillImageData? imageData = await getSelectedLayerFillImageData(
       sampleAllLayers: sampleAllLayers,
     );
     if (imageData == null) {
@@ -892,7 +892,7 @@ extension AppProviderSelection on AppProvider {
 
   /// Returns cached wand source RGBA bytes, refreshing cache when signature changes.
   /// Samples either the selected layer only or all visible layers for the current request.
-  Future<FillImageData?> _getSelectedLayerFillImageData({
+  Future<FillImageData?> getSelectedLayerFillImageData({
     required final bool sampleAllLayers,
   }) async {
     final int signature = _createSelectedLayerFloodSourceSignature(

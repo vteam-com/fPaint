@@ -93,9 +93,16 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   }
 
   /// Starts a flood fill at [adjustedPosition], honouring an active selection,
-  /// solid fill, or gradient fill initialization.
+  /// solid fill, or gradient fill initialization. [screenPosition] is the raw
+  /// pointer position used to anchor the tolerance drag and HUD.
+  ///
+  /// Both modes use the same tap-to-fill / drag-horizontally-to-adjust-tolerance
+  /// gesture as the Edge Detection wand: the region is previewed live as the
+  /// tolerance changes. Solid fill commits on pointer-up; gradient fill leaves
+  /// its handle session open on release (finalized via Apply/Cancel).
   Future<void> _handleFillPointerStart(
     final AppProvider appProvider,
+    final ui.Offset screenPosition,
     final ui.Offset adjustedPosition,
   ) async {
     final bool sampleAllLayers = _isSampleAllLayersModifierPressed();
@@ -110,16 +117,36 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     if (appProvider.fillModel.mode == FillMode.solid) {
       appProvider.fillModel.gradientPoints.clear();
       appProvider.fillModel.sampleAllLayers = sampleAllLayers;
-      appProvider.floodFillSolidAction(
-        adjustedPosition,
-        sampleAllLayers: sampleAllLayers,
-      );
+      _startFillToleranceDrag(appProvider, screenPosition, adjustedPosition, sampleAllLayers: sampleAllLayers);
+      appProvider.updateSolidFillPreview(adjustedPosition, sampleAllLayers: sampleAllLayers);
       return;
     }
 
+    // Gradient: seed the handle session on the first tap (it re-previews itself),
+    // then anchor the tolerance drag so dragging adjusts the region's tolerance.
     if (appProvider.fillModel.gradientPoints.isEmpty) {
       _initializeGradientFill(appProvider, adjustedPosition, sampleAllLayers: sampleAllLayers);
     }
+    _startFillToleranceDrag(appProvider, screenPosition, adjustedPosition, sampleAllLayers: sampleAllLayers);
+  }
+
+  /// Anchors a tap-to-fill / drag-to-adjust-tolerance gesture (shared by solid
+  /// and gradient fill) at [screenPosition] and shows the top Fill Tolerance bar.
+  void _startFillToleranceDrag(
+    final AppProvider appProvider,
+    final ui.Offset screenPosition,
+    final ui.Offset adjustedPosition, {
+    required final bool sampleAllLayers,
+  }) {
+    _toleranceDragAnchorScreen = screenPosition;
+    _toleranceDragAnchorCanvas = adjustedPosition;
+    _toleranceDragStartTolerance = appProvider.tolerance;
+    _toleranceDragSampleAllLayers = sampleAllLayers;
+    _toleranceDragLastApplied = appProvider.tolerance;
+    appProvider.showFillTolerancePreview(appProvider.tolerance);
+    // Pin the pointer at the tap: the horizontal scrub adjusts tolerance in
+    // place instead of dragging the cursor across the canvas.
+    appProvider.beginTolerancePointerLock(screenPosition);
   }
 
   /// Handles two-finger pan and pinch updates for manual canvas navigation.
@@ -189,12 +216,21 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         }
         appProvider.clearPixelBrushGesture();
         _clearSelectionTapTracking();
+      } else if (appProvider.selectedAction == ActionType.fill &&
+          _toleranceDragAnchorScreen != null &&
+          appProvider.fillModel.mode == FillMode.solid) {
+        // Solid fill commits on release; gradient fill leaves its handle session
+        // open (finalized later via Apply/Cancel) and just falls through.
+        _commitSolidFillDrag(appProvider);
+        _clearSelectionTapTracking();
       } else {
         _clearSelectionTapTracking();
       }
       appProvider.hideDrawingToolPreview();
       appProvider.hideWandToleranceHud();
-      _clearWandDragAnchor();
+      appProvider.hideFillTolerancePreview();
+      appProvider.endTolerancePointerLock();
+      _clearToleranceDragAnchor();
       _activePointerId = -1;
       _clearPixelBrushStroke();
       appProvider.layers.selectedLayer.clearCache();
@@ -300,6 +336,11 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       _updateDrawingToolPreview(appProvider, event.localPosition);
 
       if (appProvider.selectedAction == ActionType.fill) {
+        // Solid fill: drag horizontally to adjust the tolerance and re-preview
+        // the filled region live (gradient fill has no tolerance drag anchor).
+        if (_toleranceDragAnchorScreen != null) {
+          _updateFillToleranceFromDrag(appProvider, event.localPosition);
+        }
         return;
       }
 
@@ -359,7 +400,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
 
     if (appProvider.selectedAction == ActionType.fill) {
-      await _handleFillPointerStart(appProvider, adjustedPosition);
+      await _handleFillPointerStart(appProvider, event.localPosition, adjustedPosition);
       return;
     }
 
@@ -382,12 +423,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     if (appProvider.selectorModel.mode == SelectorMode.wand) {
       // Anchor the sample tap so a subsequent drag can grow/shrink the selection
       // live (Edge Detection = tap to sample, drag on canvas to adjust).
-      _wandDragAnchorScreen = event.localPosition;
-      _wandDragAnchorCanvas = adjustedPosition;
-      _wandDragStartTolerance = appProvider.tolerance;
-      _wandDragSampleAllLayers = sampleAllLayers;
-      _wandDragLastAppliedTolerance = appProvider.tolerance;
+      _toleranceDragAnchorScreen = event.localPosition;
+      _toleranceDragAnchorCanvas = adjustedPosition;
+      _toleranceDragStartTolerance = appProvider.tolerance;
+      _toleranceDragSampleAllLayers = sampleAllLayers;
+      _toleranceDragLastApplied = appProvider.tolerance;
       appProvider.showWandToleranceHud(tolerance: appProvider.tolerance, position: event.localPosition);
+      // Pin the pointer at the sample tap: the horizontal scrub adjusts tolerance
+      // in place instead of dragging the cursor across the canvas.
+      appProvider.beginTolerancePointerLock(event.localPosition);
     }
     appProvider.selectorCreationStart(
       adjustedPosition,
@@ -395,40 +439,95 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     );
   }
 
-  /// Adjusts the live wand tolerance from the horizontal drag since the sample
-  /// tap and resamples the fixed anchor, skipping resamples that don't change it.
+  /// Computes the live tolerance for the current horizontal drag since the
+  /// sample tap and fires haptics on change. Returns the new tolerance to apply,
+  /// or null when there is no active drag anchor or the tolerance is unchanged.
+  /// Feedback (wand finger-HUD vs. fill top-bar) is left to the callers. Shared
+  /// by the Edge Detection wand and the paint-bucket tolerance drags.
+  int? _toleranceForDragStep(
+    final AppProvider appProvider,
+    final Offset screenPosition,
+  ) {
+    final Offset? anchorScreen = _toleranceDragAnchorScreen;
+    if (anchorScreen == null || _toleranceDragAnchorCanvas == null) {
+      return null;
+    }
+    final int tolerance = appProvider.wandToleranceForDrag(
+      _toleranceDragStartTolerance,
+      screenPosition.dx - anchorScreen.dx,
+    );
+    if (tolerance == _toleranceDragLastApplied) {
+      return null;
+    }
+    triggerWandToleranceHaptic(_toleranceDragLastApplied ?? tolerance, tolerance);
+    _toleranceDragLastApplied = tolerance;
+    return tolerance;
+  }
+
+  /// Resamples the wand selection at the fixed anchor for the dragged tolerance.
   void _updateWandToleranceFromDrag(
     final AppProvider appProvider,
     final Offset screenPosition,
   ) {
-    final Offset? anchorScreen = _wandDragAnchorScreen;
-    final Offset? anchorCanvas = _wandDragAnchorCanvas;
-    if (anchorScreen == null || anchorCanvas == null) {
-      return;
-    }
-    final int tolerance = appProvider.wandToleranceForDrag(
-      _wandDragStartTolerance,
-      screenPosition.dx - anchorScreen.dx,
+    final int? tolerance = _toleranceForDragStep(appProvider, screenPosition);
+    // Keep the HUD pinned at the sample tap (the pointer is locked there), not
+    // at the moving finger.
+    appProvider.showWandToleranceHud(
+      tolerance: _toleranceDragLastApplied ?? appProvider.tolerance,
+      position: _toleranceDragAnchorScreen ?? screenPosition,
     );
-    // Keep the HUD glued to the finger even when the tolerance value is unchanged.
-    appProvider.showWandToleranceHud(tolerance: tolerance, position: screenPosition);
-    if (tolerance == _wandDragLastAppliedTolerance) {
+    if (tolerance == null) {
       return;
     }
-    triggerWandToleranceHaptic(_wandDragLastAppliedTolerance ?? tolerance, tolerance);
-    _wandDragLastAppliedTolerance = tolerance;
     appProvider.wandSelectionResampleAt(
-      anchorCanvas,
+      _toleranceDragAnchorCanvas!,
       tolerance: tolerance,
-      sampleAllLayers: _wandDragSampleAllLayers,
+      sampleAllLayers: _toleranceDragSampleAllLayers,
     );
   }
 
-  /// Clears the wand drag anchor once the gesture ends or is cancelled.
-  void _clearWandDragAnchor() {
-    _wandDragAnchorScreen = null;
-    _wandDragAnchorCanvas = null;
-    _wandDragLastAppliedTolerance = null;
+  /// Re-previews the fill at the fixed anchor for the dragged tolerance. Solid
+  /// fill re-resolves the region from the anchor; gradient fill re-resolves from
+  /// its handles.
+  void _updateFillToleranceFromDrag(
+    final AppProvider appProvider,
+    final Offset screenPosition,
+  ) {
+    final int? tolerance = _toleranceForDragStep(appProvider, screenPosition);
+    if (tolerance == null) {
+      return;
+    }
+    // Apply the tolerance so the preview (and, for solid, the pointer-up commit)
+    // use it, and update the top Fill Tolerance bar.
+    appProvider.tolerance = tolerance;
+    appProvider.showFillTolerancePreview(tolerance);
+    if (appProvider.fillModel.mode == FillMode.solid) {
+      appProvider.updateSolidFillPreview(_toleranceDragAnchorCanvas!, sampleAllLayers: _toleranceDragSampleAllLayers);
+    } else {
+      appProvider.updateGradientPreview();
+    }
+  }
+
+  /// Commits the solid-fill tolerance drag on pointer-up: the previewed transient
+  /// is committed as one undoable action, or — when a quick tap released before
+  /// the debounced preview rendered — a fresh fill is committed at the anchor.
+  void _commitSolidFillDrag(final AppProvider appProvider) {
+    final Offset? anchorCanvas = _toleranceDragAnchorCanvas;
+    final bool hadPreview = appProvider.fillPreviewAction != null;
+    // Cancels the pending render, invalidates in-flight ones, and commits the
+    // transient (if any) as a single undo entry.
+    appProvider.commitFillPreview();
+    if (!hadPreview && anchorCanvas != null) {
+      appProvider.floodFillSolidAction(anchorCanvas, sampleAllLayers: _toleranceDragSampleAllLayers);
+    }
+  }
+
+  /// Clears the tolerance-drag anchor once the gesture ends or is cancelled
+  /// (shared by the Edge Detection wand and the solid-fill tolerance drag).
+  void _clearToleranceDragAnchor() {
+    _toleranceDragAnchorScreen = null;
+    _toleranceDragAnchorCanvas = null;
+    _toleranceDragLastApplied = null;
   }
 
   /// Selects an existing text object under [adjustedPosition] or opens the text

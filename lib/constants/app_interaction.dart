@@ -17,6 +17,10 @@ class AppInteraction {
   /// it horizontally) and its downward offset (to clear the color-stop handles).
   static const double fillControlsHalfWidth = 40.0;
   static const double fillControlsVerticalOffset = 44.0;
+
+  /// Diameter of the fixed marker pinned at the start of a horizontal tolerance
+  /// drag (while the cursor is hidden), for the wand and the paint bucket.
+  static const double toleranceAnchorMarkerSize = 18.0;
   static const double magnifierScale = 6.0;
   static const double magnifierImageScale = 8.0;
   static const double smudgeMinimumRadius = 1.0;
