@@ -23,10 +23,8 @@ String effectLabel(
       return l10n.effectPixelate;
     case SelectionEffect.shadow:
       return l10n.effectShadow;
-    case SelectionEffect.sharpen:
-      return l10n.effectSharpen;
-    case SelectionEffect.soften:
-      return l10n.effectSoften;
+    case SelectionEffect.sharpness:
+      return l10n.effectSharpness;
     case SelectionEffect.vignette:
       return l10n.effectVignette;
   }

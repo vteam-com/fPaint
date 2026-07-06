@@ -51,4 +51,8 @@ class AppMath {
 
   /// Scale percentage increment for scale snap haptic feedback.
   static const double scaleSnapInterval = 25.0;
+
+  /// Raw-tolerance increment between haptic ticks while dragging the Edge
+  /// Detection wand tolerance.
+  static const int wandToleranceSnapInterval = 5;
 }

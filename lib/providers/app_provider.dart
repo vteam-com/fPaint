@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/models/effect_brush_model.dart';
 import 'package:fpaint/models/effect_preview_model.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
@@ -51,6 +52,11 @@ class AppProvider extends ChangeNotifier {
   Timer? _brushSizePreviewTimer;
   double? _brushSizePreviewSize;
   Offset? _brushSizePreviewPosition;
+
+  // Live Edge Detection tolerance HUD: the value (raw 1–100) and main-view
+  // anchor shown while dragging the wand tolerance. Null when not dragging.
+  int? _wandToleranceHudTolerance;
+  Offset? _wandToleranceHudPosition;
 
   // Live smudge/blur gesture marquee: the in-progress stroke's sampled points
   // (canvas space) and brush size. The effect itself is rendered once on
@@ -268,6 +274,13 @@ class AppProvider extends ChangeNotifier {
   set selectedAction(final ActionType value) {
     final bool selectedActionChanged = value != _selectedAction;
 
+    // Picking any tool cancels an armed paint-mode effect brush, so only one
+    // gesture tool is ever active — a stroke is never ambiguous.
+    final bool wasEffectBrushArmed = effectBrushModel.effect != null;
+    if (wasEffectBrushArmed) {
+      effectBrushModel.disarm();
+    }
+
     // Switching tools exits eyedropper mode so pointer interactions follow the new tool.
     if (selectedActionChanged) {
       eyeDropPositionForBrush = null;
@@ -293,7 +306,7 @@ class AppProvider extends ChangeNotifier {
       wandSelection.reset();
     }
 
-    if (selectedActionChanged) {
+    if (selectedActionChanged || wasEffectBrushArmed) {
       _selectedActionNotifier.notifyListeners();
       repaintToolOptions();
     }
@@ -409,6 +422,32 @@ class AppProvider extends ChangeNotifier {
   /// Hides any active drawing-time brush-size preview immediately.
   void hideDrawingToolPreview() {
     _hideBrushSizePreview();
+  }
+
+  /// Whether the live Edge Detection tolerance HUD should be shown.
+  bool get isWandToleranceHudVisible => _wandToleranceHudTolerance != null;
+
+  /// The tolerance shown in the live wand HUD (raw 1–100, read as a percentage).
+  int? get wandToleranceHudTolerance => _wandToleranceHudTolerance;
+
+  /// The main-view-space position the wand HUD is anchored to.
+  Offset? get wandToleranceHudPosition => _wandToleranceHudPosition;
+
+  /// Shows or updates the live Edge Detection tolerance HUD at [position].
+  void showWandToleranceHud({required final int tolerance, required final Offset position}) {
+    _wandToleranceHudTolerance = tolerance;
+    _wandToleranceHudPosition = position;
+    repaintMainView();
+  }
+
+  /// Hides the live Edge Detection tolerance HUD.
+  void hideWandToleranceHud() {
+    if (_wandToleranceHudTolerance == null) {
+      return;
+    }
+    _wandToleranceHudTolerance = null;
+    _wandToleranceHudPosition = null;
+    repaintMainView();
   }
 
   /// Gets the active pixel-brush intensity for the selected tool.
@@ -570,6 +609,9 @@ class AppProvider extends ChangeNotifier {
   /// The effect preview model for live selection-effect intensity updates.
   final EffectPreviewModel effectPreviewModel = EffectPreviewModel();
 
+  /// The paint-mode state for brushing an Adjust effect onto the canvas.
+  final EffectBrushModel effectBrushModel = EffectBrushModel();
+
   /// Monotonic token that invalidates stale async effect preview renders.
   int effectPreviewRenderVersion = 0;
 
@@ -606,6 +648,12 @@ class AppProvider extends ChangeNotifier {
     repaintToolOptions();
     update();
   }
+
+  /// Whether the Edge Detection (magic wand) selector is the active tool.
+  ///
+  /// Gates wand-only affordances such as the canvas tolerance control and the
+  /// crosshair cursor.
+  bool get isWandSelectionActive => selectedAction == ActionType.selector && selectorModel.mode == SelectorMode.wand;
 
   /// Sets the active selector math mode and rebuilds tool options.
   void setSelectorMath(final SelectorMath value) {

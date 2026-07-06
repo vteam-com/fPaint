@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -9,8 +10,8 @@ import 'package:fpaint/models/selection_effect.dart';
 
 void main() {
   group('SelectionEffect enum', () {
-    test('has 11 values', () {
-      expect(SelectionEffect.values.length, 11);
+    test('has 10 values', () {
+      expect(SelectionEffect.values.length, 10);
     });
 
     test('each has an icon', () {
@@ -23,8 +24,8 @@ void main() {
       expect(SelectionEffect.blur.icon, AppIcon.effectBlur);
     });
 
-    test('sharpen has the sharpen icon', () {
-      expect(SelectionEffect.sharpen.icon, AppIcon.effectSharpen);
+    test('sharpness has the sharpen icon', () {
+      expect(SelectionEffect.sharpness.icon, AppIcon.effectSharpen);
     });
 
     test('pixelate has the pixelate icon', () {
@@ -37,10 +38,6 @@ void main() {
 
     test('noise has the noise icon', () {
       expect(SelectionEffect.noise.icon, AppIcon.effectNoise);
-    });
-
-    test('soften has the soften icon', () {
-      expect(SelectionEffect.soften.icon, AppIcon.effectSoften);
     });
 
     test('vignette has the vignette icon', () {
@@ -87,8 +84,8 @@ void main() {
       expect(effectLabel(l10n, SelectionEffect.blur), l10n.effectBlur);
     });
 
-    test('sharpen returns localized sharpen label', () {
-      expect(effectLabel(l10n, SelectionEffect.sharpen), l10n.effectSharpen);
+    test('sharpness returns localized sharpness label', () {
+      expect(effectLabel(l10n, SelectionEffect.sharpness), l10n.effectSharpness);
     });
 
     test('pixelate returns localized pixelate label', () {
@@ -103,12 +100,74 @@ void main() {
       expect(effectLabel(l10n, SelectionEffect.noise), l10n.effectNoise);
     });
 
-    test('soften returns localized soften label', () {
-      expect(effectLabel(l10n, SelectionEffect.soften), l10n.effectSoften);
-    });
-
     test('vignette returns localized vignette label', () {
       expect(effectLabel(l10n, SelectionEffect.vignette), l10n.effectVignette);
+    });
+  });
+
+  group('bipolar effects', () {
+    test('brightness, contrast and hue are bipolar; others are not', () {
+      expect(SelectionEffect.brightness.bipolar, isTrue);
+      expect(SelectionEffect.contrast.bipolar, isTrue);
+      expect(SelectionEffect.hueSaturation.bipolar, isTrue);
+      expect(SelectionEffect.sharpness.bipolar, isTrue);
+      expect(SelectionEffect.blur.bipolar, isFalse);
+      expect(SelectionEffect.grayscale.bipolar, isFalse);
+      expect(SelectionEffect.vignette.bipolar, isFalse);
+    });
+
+    test('brightness darkens on negative strength, brightens on positive, no-ops at centre', () async {
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      canvas.drawRect(const Rect.fromLTWH(0, 0, 4, 4), Paint()..color = const Color(0xFF808080));
+      final Image gray = await recorder.endRecording().toImage(4, 4);
+      addTearDown(gray.dispose);
+
+      Future<int> redAt(final Image image) async {
+        final ByteData data = (await image.toByteData(format: ImageByteFormat.rawRgba))!;
+        return data.getUint8(AppMath.rgbChannelRed);
+      }
+
+      final Image brighter = await SelectionEffect.brightness.apply(gray, strength: AppEffects.maxIntensity);
+      final Image darker = await SelectionEffect.brightness.apply(gray, strength: -AppEffects.maxIntensity);
+      final Image centre = await SelectionEffect.brightness.apply(gray, strength: AppEffects.minIntensity);
+      addTearDown(brighter.dispose);
+      addTearDown(darker.dispose);
+
+      const int mid = 0x80;
+      expect(await redAt(brighter), greaterThan(mid));
+      expect(await redAt(darker), lessThan(mid));
+      // Centre skips the transform and returns the original image untouched.
+      expect(await redAt(centre), mid);
+    });
+
+    test('sharpness blurs on negative, runs sharpen on positive, no-ops at centre', () async {
+      // Vertical hard edge: left half black, right half white (8x8).
+      final PictureRecorder recorder = PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      canvas.drawRect(const Rect.fromLTWH(0, 0, 4, 8), Paint()..color = const Color(0xFF000000));
+      canvas.drawRect(const Rect.fromLTWH(4, 0, 4, 8), Paint()..color = const Color(0xFFFFFFFF));
+      final Image edge = await recorder.endRecording().toImage(8, 8);
+      addTearDown(edge.dispose);
+
+      final Image centre = await SelectionEffect.sharpness.apply(edge, strength: AppEffects.minIntensity);
+      // Centre is a no-op that returns the source image untouched.
+      expect(identical(centre, edge), isTrue);
+
+      final Image blurred = await SelectionEffect.sharpness.apply(edge, strength: -AppEffects.maxIntensity);
+      final Image sharpened = await SelectionEffect.sharpness.apply(edge, strength: AppEffects.maxIntensity);
+      addTearDown(blurred.dispose);
+      addTearDown(sharpened.dispose);
+
+      // Negative Sharpness blurs: white bleeds across the edge, so a black-side
+      // pixel next to the edge is no longer pure black.
+      final ByteData blurredData = (await blurred.toByteData(format: ImageByteFormat.rawRgba))!;
+      const int width = 8;
+      const int nearEdgeRed = (((4 * width) + 3) * 4) + 0; // pixel (x:3, y:4), red channel
+      expect(blurredData.getUint8(nearEdgeRed), greaterThan(0));
+
+      // Positive Sharpness runs the sharpen path (a distinct, non-identity result).
+      expect(identical(sharpened, edge), isFalse);
     });
   });
 

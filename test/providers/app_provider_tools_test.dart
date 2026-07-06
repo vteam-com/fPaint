@@ -2,6 +2,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/app_interaction.dart';
+import 'package:fpaint/constants/app_limits.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -225,6 +227,94 @@ void main() {
       expect(appProvider.fillModel.gradientPoints, isEmpty);
       expect(appProvider.fillModel.isVisible, isFalse);
       expect(appProvider.selectorModel.path1, isNull);
+    });
+  });
+
+  group('Edge Detection wand drag-to-adjust', () {
+    late AppProvider appProvider;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      appProvider = AppProvider(preferences: preferences);
+      appProvider.undoProvider.clear();
+      appProvider.selectedAction = ActionType.selector;
+      appProvider.selectorModel.mode = SelectorMode.wand;
+    });
+
+    test('wandToleranceForDrag loosens dragging right and tightens dragging left', () {
+      const int start = 6;
+      const double perUnit = AppInteraction.wandToleranceDragPixelsPerUnit;
+
+      // No movement keeps the starting tolerance.
+      expect(appProvider.wandToleranceForDrag(start, 0), start);
+      // Dragging right by 4 units raises tolerance by 4.
+      expect(appProvider.wandToleranceForDrag(start, perUnit * 4), start + 4);
+      // Dragging far left clamps to the minimum.
+      expect(appProvider.wandToleranceForDrag(start, -perUnit * 100), 1);
+      // Dragging far right clamps to the maximum.
+      expect(appProvider.wandToleranceForDrag(start, perUnit * 1000), AppLimits.percentMax);
+    });
+
+    test('wandSelectionResampleAt applies the tolerance and re-runs the selection', () async {
+      appProvider.wandSelectionResampleAt(const ui.Offset(10, 10), tolerance: 25, sampleAllLayers: false);
+
+      expect(appProvider.tolerance, 25);
+      expect(appProvider.selectorModel.isDrawing, isTrue);
+
+      // Let the queued async wand request settle; a selection should result.
+      int guard = 0;
+      while ((appProvider.wandSelection.isInProgress || appProvider.wandSelection.hasPendingRequest) && guard < 500) {
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        guard++;
+      }
+      expect(appProvider.selectorModel.path1, isNotNull);
+    });
+
+    test('wandSelectionResampleAt is a no-op outside wand mode', () {
+      appProvider.selectorModel.mode = SelectorMode.rectangle;
+      final int before = appProvider.tolerance;
+
+      appProvider.wandSelectionResampleAt(const ui.Offset(10, 10), tolerance: 99, sampleAllLayers: false);
+
+      expect(appProvider.tolerance, before);
+    });
+
+    test('wand tolerance HUD show/hide toggles visibility, value and position', () {
+      expect(appProvider.isWandToleranceHudVisible, isFalse);
+
+      appProvider.showWandToleranceHud(tolerance: 20, position: const ui.Offset(30, 40));
+      expect(appProvider.isWandToleranceHudVisible, isTrue);
+      expect(appProvider.wandToleranceHudTolerance, 20);
+      expect(appProvider.wandToleranceHudPosition, const ui.Offset(30, 40));
+
+      appProvider.hideWandToleranceHud();
+      expect(appProvider.isWandToleranceHudVisible, isFalse);
+      expect(appProvider.wandToleranceHudTolerance, isNull);
+      expect(appProvider.wandToleranceHudPosition, isNull);
+    });
+
+    test('prewarmWandSourceCache is a no-op outside wand mode', () {
+      appProvider.selectorModel.mode = SelectorMode.rectangle;
+
+      appProvider.prewarmWandSourceCache();
+
+      expect(appProvider.wandSelection.isInProgress, isFalse);
+    });
+
+    test('prewarmWandSourceCache warms the source so a later sample still selects', () async {
+      appProvider.prewarmWandSourceCache();
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      appProvider.wandSelectionResampleAt(const ui.Offset(10, 10), tolerance: 20, sampleAllLayers: false);
+      int guard = 0;
+      while ((appProvider.wandSelection.isInProgress || appProvider.wandSelection.hasPendingRequest) && guard < 500) {
+        await Future<void>.delayed(const Duration(milliseconds: 1));
+        guard++;
+      }
+
+      expect(appProvider.selectorModel.path1, isNotNull);
     });
   });
 

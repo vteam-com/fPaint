@@ -38,6 +38,18 @@ extension AppProviderSelection on AppProvider {
       return;
     }
     activateSelectionAction();
+    prewarmWandSourceCache();
+  }
+
+  /// Warms the wand source-pixel cache (layer render + readback) as soon as Edge
+  /// Detection becomes active, so the first tap-and-drag is responsive instead of
+  /// stalling ~half a second while the first sample builds the cache. No-ops when
+  /// the wand isn't active or the cache is already warm; safe to call repeatedly.
+  void prewarmWandSourceCache() {
+    if (!isWandSelectionActive) {
+      return;
+    }
+    unawaited(_getSelectedLayerFillImageData(sampleAllLayers: false));
   }
 
   /// Erases a region on the canvas.
@@ -670,6 +682,31 @@ extension AppProviderSelection on AppProvider {
     selectorModel.addP1(position);
     repaintToolOptions();
     update();
+  }
+
+  /// Maps a horizontal screen drag [screenDx] from the wand sample anchor onto a
+  /// tolerance, starting from [startTolerance]. Dragging right loosens (grows)
+  /// the selection; dragging left tightens it.
+  int wandToleranceForDrag(final int startTolerance, final double screenDx) {
+    final int delta = (screenDx / AppInteraction.wandToleranceDragPixelsPerUnit).round();
+    return (startTolerance + delta).clamp(AppMath.one, AppLimits.percentMax);
+  }
+
+  /// Re-runs the Edge Detection wand selection at the fixed sample [position]
+  /// using [tolerance]. Drives the live "tap to sample, drag to grow/shrink"
+  /// gesture — each drag step resamples the same anchor at the new tolerance.
+  void wandSelectionResampleAt(
+    final Offset position, {
+    required final int tolerance,
+    required final bool sampleAllLayers,
+  }) {
+    if (selectorModel.mode != SelectorMode.wand) {
+      return;
+    }
+    this.tolerance = tolerance;
+    selectorModel.isDrawing = true;
+    wandSelection.queueRequest(position: position, sampleAllLayers: sampleAllLayers);
+    unawaited(_processPendingWandSelectionRequests());
   }
 
   /// Translates the active selection by [screenDelta], a screen-space offset.

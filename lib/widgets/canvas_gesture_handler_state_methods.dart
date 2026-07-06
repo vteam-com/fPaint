@@ -147,6 +147,17 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.repaintViewport();
   }
 
+  /// Whether a canvas gesture should create or extend a selection.
+  ///
+  /// The selector tool must be active with no transform overlay up, AND no
+  /// effect brush armed: an armed effect paints (clipped to the current
+  /// selection) just like any other brush, so it takes precedence over the
+  /// selector tool instead of starting a new marquee.
+  bool _isSelectionGesture(final AppProvider appProvider) =>
+      appProvider.selectedAction == ActionType.selector &&
+      !appProvider.transformModel.isVisible &&
+      !appProvider.effectBrushModel.isArmed;
+
   /// Finalizes an active pointer interaction and clears temporary drawing state.
   void _handlePointerEnd(
     final AppProvider appProvider,
@@ -156,8 +167,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // Pair with beginStrokePreview: release the frozen baseline (no-op for tools
     // that never captured one, e.g. smudge/blur, which use the live preview).
     appProvider.layers.selectedLayer.clearStrokePreview();
-    final bool isSelectionActive =
-        appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
+    final bool isSelectionActive = _isSelectionGesture(appProvider);
 
     if (_activePointerId == event.pointer) {
       if (isSelectionActive) {
@@ -166,19 +176,25 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         if (appProvider.selectorModel.mode != SelectorMode.line || !appProvider.selectorModel.isDrawing) {
           _clearSelectionTapTracking();
         }
-      } else if (_pixelBrushLayerRestoreState != null) {
+      } else if (_pixelBrushLayerRestoreState != null || _effectBrushStroke) {
         _appendPixelBrushPoint(appProvider.toCanvas(event.localPosition), appProvider.brushSize);
         // Marquee stays visible across the (async) one-shot render, switching to
         // a processing shimmer while the commit generates the image, then is
-        // cleared once the committed smudge/blur is on the layer.
+        // cleared once the committed stroke is on the layer.
         appProvider.setPixelBrushCommitting(committing: true);
-        await _commitPixelBrushStroke(appProvider);
+        if (_effectBrushStroke) {
+          await _commitEffectBrushStroke(appProvider);
+        } else {
+          await _commitPixelBrushStroke(appProvider);
+        }
         appProvider.clearPixelBrushGesture();
         _clearSelectionTapTracking();
       } else {
         _clearSelectionTapTracking();
       }
       appProvider.hideDrawingToolPreview();
+      appProvider.hideWandToleranceHud();
+      _clearWandDragAnchor();
       _activePointerId = -1;
       _clearPixelBrushStroke();
       appProvider.layers.selectedLayer.clearCache();
@@ -191,6 +207,43 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
   }
 
+  /// Starts a paint-mode effect stroke. Reuses the pixel-brush gesture capture
+  /// (points, bounds, marquee); the armed Adjust effect is committed on
+  /// pointer-up by [_commitEffectBrushStroke].
+  void _startEffectBrushStroke(
+    final AppProvider appProvider,
+    final ui.Offset adjustedPosition,
+  ) {
+    _clearPixelBrushStroke();
+    _effectBrushStroke = true;
+    _pixelBrushClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null
+        ? ui.Path.from(appProvider.selectorModel.path1!)
+        : null;
+    _appendPixelBrushPoint(adjustedPosition, appProvider.brushSize);
+    appProvider.showPixelBrushGesture(
+      points: _pixelBrushStrokePoints,
+      size: appProvider.brushSize,
+    );
+  }
+
+  /// Commits the active paint-mode effect stroke through the provider.
+  Future<void> _commitEffectBrushStroke(final AppProvider appProvider) async {
+    final ui.Rect? patchBounds = _pixelBrushStrokePatchBounds;
+    final SelectionEffect? effect = appProvider.effectBrushModel.effect;
+    if (patchBounds == null || effect == null || _pixelBrushStrokePoints.length < AppMath.pair) {
+      return;
+    }
+    await appProvider.commitEffectBrushStroke(
+      effect: effect,
+      strength: appProvider.effectBrushModel.strength,
+      size: appProvider.effectBrushModel.size,
+      strokePoints: List<ui.Offset>.of(_pixelBrushStrokePoints),
+      strokeBounds: patchBounds,
+      brushSize: appProvider.brushSize,
+      clipPath: _pixelBrushClipPath,
+    );
+  }
+
   /// Handles pointer move events for drawing, selection, and eyedropper interactions.
   void _handlePointerMove(
     final AppProvider appProvider,
@@ -201,8 +254,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
 
     final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
-    final bool isSelectionActive =
-        appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
+    final bool isSelectionActive = _isSelectionGesture(appProvider);
 
     if (appProvider.eyeDropPositionForBrush != null) {
       appProvider.eyeDropPositionForBrush = event.localPosition;
@@ -224,11 +276,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
     if (event.buttons == 1 && _activePointerId == event.pointer) {
       if (isSelectionActive) {
-        appProvider.selectorCreationAdditionalPoint(adjustedPosition);
+        if (appProvider.selectorModel.mode == SelectorMode.wand) {
+          _updateWandToleranceFromDrag(appProvider, event.localPosition);
+        } else {
+          appProvider.selectorCreationAdditionalPoint(adjustedPosition);
+        }
         return;
       }
 
-      if (_pixelBrushLayerRestoreState != null) {
+      if (_pixelBrushLayerRestoreState != null || _effectBrushStroke) {
         // No live rasterization: just extend the gesture and redraw the swept-
         // band marquee. The smudge/blur is rendered once on pointer-up, so the
         // drag stays responsive at any canvas size and the marquee is the sole
@@ -285,8 +341,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
     _activePointerId = event.pointer;
 
-    final bool isSelectionActive =
-        appProvider.selectedAction == ActionType.selector && !appProvider.transformModel.isVisible;
+    final bool isSelectionActive = _isSelectionGesture(appProvider);
     if (isSelectionActive) {
       _handleSelectionPointerStart(appProvider, event, adjustedPosition);
       return;
@@ -322,10 +377,58 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     if (_tryCloseStraightLineSelectionOnDoubleTap(appProvider, event, adjustedPosition)) {
       return;
     }
+    final bool sampleAllLayers =
+        appProvider.selectorModel.mode == SelectorMode.wand && _isSampleAllLayersModifierPressed();
+    if (appProvider.selectorModel.mode == SelectorMode.wand) {
+      // Anchor the sample tap so a subsequent drag can grow/shrink the selection
+      // live (Edge Detection = tap to sample, drag on canvas to adjust).
+      _wandDragAnchorScreen = event.localPosition;
+      _wandDragAnchorCanvas = adjustedPosition;
+      _wandDragStartTolerance = appProvider.tolerance;
+      _wandDragSampleAllLayers = sampleAllLayers;
+      _wandDragLastAppliedTolerance = appProvider.tolerance;
+      appProvider.showWandToleranceHud(tolerance: appProvider.tolerance, position: event.localPosition);
+    }
     appProvider.selectorCreationStart(
       adjustedPosition,
-      sampleAllLayers: appProvider.selectorModel.mode == SelectorMode.wand && _isSampleAllLayersModifierPressed(),
+      sampleAllLayers: sampleAllLayers,
     );
+  }
+
+  /// Adjusts the live wand tolerance from the horizontal drag since the sample
+  /// tap and resamples the fixed anchor, skipping resamples that don't change it.
+  void _updateWandToleranceFromDrag(
+    final AppProvider appProvider,
+    final Offset screenPosition,
+  ) {
+    final Offset? anchorScreen = _wandDragAnchorScreen;
+    final Offset? anchorCanvas = _wandDragAnchorCanvas;
+    if (anchorScreen == null || anchorCanvas == null) {
+      return;
+    }
+    final int tolerance = appProvider.wandToleranceForDrag(
+      _wandDragStartTolerance,
+      screenPosition.dx - anchorScreen.dx,
+    );
+    // Keep the HUD glued to the finger even when the tolerance value is unchanged.
+    appProvider.showWandToleranceHud(tolerance: tolerance, position: screenPosition);
+    if (tolerance == _wandDragLastAppliedTolerance) {
+      return;
+    }
+    triggerWandToleranceHaptic(_wandDragLastAppliedTolerance ?? tolerance, tolerance);
+    _wandDragLastAppliedTolerance = tolerance;
+    appProvider.wandSelectionResampleAt(
+      anchorCanvas,
+      tolerance: tolerance,
+      sampleAllLayers: _wandDragSampleAllLayers,
+    );
+  }
+
+  /// Clears the wand drag anchor once the gesture ends or is cancelled.
+  void _clearWandDragAnchor() {
+    _wandDragAnchorScreen = null;
+    _wandDragAnchorCanvas = null;
+    _wandDragLastAppliedTolerance = null;
   }
 
   /// Selects an existing text object under [adjustedPosition] or opens the text
@@ -523,6 +626,11 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     final ui.Offset adjustedPosition,
   ) {
     appProvider.layers.selectedLayer.isUserDrawing = true;
+
+    if (appProvider.effectBrushModel.isArmed) {
+      _startEffectBrushStroke(appProvider, adjustedPosition);
+      return;
+    }
 
     if (appProvider.selectedAction == ActionType.smudge) {
       _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.smudge);

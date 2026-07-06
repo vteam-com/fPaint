@@ -4,6 +4,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] - 2026-07-05
+
+### Update
+
+- Unified brushes and effects into one experience: every pixel tool now lives in a single Brush section and works the same way — pick it, then paint. Effects such as Blur, Brightness, and Sharpness now arm as brushes with their own size and strength and are painted directly onto the canvas.
+- Effects are no longer gated by a selection — with nothing selected, an effect targets the whole active layer instead of waiting for a region.
+- Selection is now a persistent modifier that clips any tool: a "Clipped to selection" badge with one-tap clear appears while a selection is active, and switching tools no longer clears it.
+- Streamlined the tool groups into Draw and Adjust, with Smudge now sitting beside the paint tools.
+- Signed sliders for Sharpness, Brightness, Contrast, and Hue/Saturation — the center is no change and the sign picks the direction. Sharpness now folds the former Sharpen and Edge Soften into a single axis.
+- Adjust paint mode now has its own brush-size slider instead of borrowing the ambient brush size.
+- Reworked the magic-wand ("Edge Detection") selection with a clearer on-canvas workflow and simpler Add/Subtract selection math.
+
+### Add
+
+- Toggle to show the top 20 colors used in the current image
+- Documents now remember the last selected layer when reopened
+
 ## [1.8.9] - 2026-07-03
 
 ### Update

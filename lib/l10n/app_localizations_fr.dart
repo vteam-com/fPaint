@@ -125,6 +125,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get canvasSizeTitle => 'Taille de la toile';
 
   @override
+  String get close => 'Fermer';
+
+  @override
   String get colorLabel => 'Couleur';
 
   @override
@@ -132,9 +135,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get colorPickerModeWheel => 'Roue';
-
-  @override
-  String get close => 'Fermer';
 
   @override
   String get colorTolerance => 'Tolérance de couleur';
@@ -248,13 +248,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get effectShadow => 'Ombre';
 
   @override
-  String get effectSharpen => 'Netteté';
+  String get effectSharpness => 'Netteté';
 
   @override
   String get effectSize => 'Taille';
-
-  @override
-  String get effectSoften => 'Adoucir les bords';
 
   @override
   String get effectVignette => 'Vignetage';
@@ -535,9 +532,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get settings => 'Parametres...';
 
   @override
-  String get sidePanelBrushesSection => 'Pinceaux';
-
-  @override
   String get sidePanelLayersSection => 'Calques';
 
   @override
@@ -601,7 +595,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toolLinearGradient => 'Dégradé linéaire';
 
   @override
-  String get toolMagic => 'Magique';
+  String get toolMagic => 'Détection de contours';
 
   @override
   String get toolPaintBucket => 'Pot de peinture';
@@ -619,7 +613,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toolRemove => 'Retirer';
 
   @override
-  String get toolReplace => 'Remplacer';
+  String get toolSectionBrush => 'Pinceau';
 
   @override
   String get toolSelector => 'Sélecteur';

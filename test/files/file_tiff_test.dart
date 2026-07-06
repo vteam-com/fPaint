@@ -146,6 +146,38 @@ void main() {
       expect(layers.get(1).isLocked, isFalse);
     });
 
+    test('round-trips the selected layer', () async {
+      final LayersProvider layers = LayersProvider();
+      layers.clear();
+      layers.size = _layeredExportCanvasSize;
+      layers.addWhiteBackgroundLayer('Background');
+      final LayerProvider foregroundLayer = layers.addTop(name: 'Foreground')..backgroundColor = Colors.red;
+      layers.addTop(name: 'Top').backgroundColor = Colors.green;
+      // Stack (top-first): Top(0), Foreground(1), Background(2). Select the middle.
+      layers.selectedLayerIndex = layers.getLayerIndex(foregroundLayer);
+
+      final Uint8List bytes = await convertLayersToTiff(layers);
+
+      final LayersProvider restored = LayersProvider();
+      restored.clear();
+      await readTiffFileFromBytes(restored, bytes);
+
+      expect(restored.selectedLayer.name, 'Foreground');
+      expect(restored.getLayerIndex(restored.selectedLayer), 1);
+    });
+
+    test('defaults selection to first layer for TIFFs without a selected marker', () async {
+      // test.tif is a third-party SketchBook file with no "selected" metadata,
+      // exercising the backward-compatible default path.
+      final LayersProvider layers = LayersProvider();
+      layers.clear();
+
+      final Uint8List bytes = await File(_sampleSketchBookTiffPath).readAsBytes();
+      await readTiffFileFromBytes(layers, bytes);
+
+      expect(layers.selectedLayerIndex, 0);
+    });
+
     test('exports cropped layer rasters with preserved offsets', () async {
       final LayersProvider layers = LayersProvider();
       layers.clear();

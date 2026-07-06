@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -223,6 +224,62 @@ void main() {
 
     expect(importedLayers.length, 1);
     expect(importedLayers.list[0].isLocked, isTrue);
+  });
+
+  test('createOraArchive round-trips the selected layer', () async {
+    final LayersProvider exportedLayers = LayersProvider();
+    exportedLayers.size = const ui.Size(50, 50);
+    final LayerProvider layerA = exportedLayers.addTop(name: 'A')..backgroundColor = const Color(0xFF112233);
+    exportedLayers.addTop(name: 'B').backgroundColor = const Color(0xFF445566);
+    // Stack (top-first): B(0), A(1), background(2). Select the middle layer.
+    exportedLayers.selectedLayerIndex = exportedLayers.getLayerIndex(layerA);
+
+    final List<int> archiveData = await createOraArchive(exportedLayers);
+    final Archive archive = ZipDecoder().decodeBytes(archiveData);
+    final ArchiveFile stackFile = archive.files.firstWhere(
+      (final ArchiveFile file) => file.name == 'stack.xml',
+    );
+    final XmlDocument xmlDoc = XmlDocument.parse(String.fromCharCodes(stackFile.content));
+
+    // Exactly one layer element carries selected="true", and it is layer A.
+    final Iterable<XmlElement> selectedElements = xmlDoc
+        .findAllElements('layer')
+        .where((final XmlElement e) => e.getAttribute('selected') == 'true');
+    expect(selectedElements.length, 1);
+    expect(selectedElements.single.getAttribute('name'), 'A');
+
+    final LayersProvider importedLayers = LayersProvider();
+    await readOraFileFromBytes(importedLayers, Uint8List.fromList(archiveData));
+
+    expect(importedLayers.selectedLayer.name, 'A');
+    expect(importedLayers.getLayerIndex(importedLayers.selectedLayer), 1);
+  });
+
+  test('readOraFileFromBytes defaults selection to first layer without a marker', () async {
+    final LayersProvider exportedLayers = LayersProvider();
+    exportedLayers.size = const ui.Size(50, 50);
+    exportedLayers.addTop(name: 'Extra').backgroundColor = const Color(0xFF778899);
+
+    final List<int> archiveData = await createOraArchive(exportedLayers);
+    // Strip any selected markers to emulate an ORA written by another app.
+    final Archive archive = ZipDecoder().decodeBytes(archiveData);
+    final ArchiveFile stackFile = archive.files.firstWhere(
+      (final ArchiveFile file) => file.name == 'stack.xml',
+    );
+    final String strippedStackXml = String.fromCharCodes(stackFile.content).replaceAll(' selected="true"', '');
+    final Archive rebuilt = Archive();
+    for (final ArchiveFile file in archive.files) {
+      if (file.name == 'stack.xml') {
+        rebuilt.addFile(ArchiveFile.bytes('stack.xml', utf8.encode(strippedStackXml)));
+      } else {
+        rebuilt.addFile(file);
+      }
+    }
+
+    final LayersProvider importedLayers = LayersProvider();
+    await readOraFileFromBytes(importedLayers, Uint8List.fromList(ZipEncoder().encode(rebuilt)));
+
+    expect(importedLayers.selectedLayerIndex, 0);
   });
 
   test('createOraArchive crops sparse layer PNGs and preserves offsets', () async {

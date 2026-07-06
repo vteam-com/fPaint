@@ -124,6 +124,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get canvasSizeTitle => 'Canvas Size';
 
   @override
+  String get close => 'Close';
+
+  @override
   String get colorLabel => 'Color';
 
   @override
@@ -131,9 +134,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get colorPickerModeWheel => 'Wheel';
-
-  @override
-  String get close => 'Close';
 
   @override
   String get colorTolerance => 'Color Tolerance';
@@ -247,13 +247,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get effectShadow => 'Shadow';
 
   @override
-  String get effectSharpen => 'Sharpen';
+  String get effectSharpness => 'Sharpness';
 
   @override
   String get effectSize => 'Size';
-
-  @override
-  String get effectSoften => 'Edge Soften';
 
   @override
   String get effectVignette => 'Vignette';
@@ -533,9 +530,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings...';
 
   @override
-  String get sidePanelBrushesSection => 'Brushes';
-
-  @override
   String get sidePanelLayersSection => 'Layers';
 
   @override
@@ -599,7 +593,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolLinearGradient => 'Linear Gradient';
 
   @override
-  String get toolMagic => 'Magic';
+  String get toolMagic => 'Edge Detection';
 
   @override
   String get toolPaintBucket => 'Paint Bucket';
@@ -617,7 +611,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolRemove => 'Remove';
 
   @override
-  String get toolReplace => 'Replace';
+  String get toolSectionBrush => 'Brush';
 
   @override
   String get toolSelector => 'Selector';
