@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/models/brush_grain.dart';
 import 'package:fpaint/models/effect_brush_model.dart';
 import 'package:fpaint/models/effect_preview_model.dart';
 import 'package:fpaint/models/fill_model.dart';
@@ -38,6 +39,11 @@ class AppProvider extends ChangeNotifier {
        _undoProvider = undoProvider ?? UndoProvider() {
     this.preferences.addListener(_handlePreferencesChanged);
     _initCanvas();
+    // Build the grain ("pencil") brush texture ahead of first use. Fire-and-forget
+    // with no completion callback: it populates a shared singleton tile, and must
+    // not touch this provider afterwards (the future can outlive it — e.g. across
+    // tests — and notifying a disposed ChangeNotifier throws).
+    unawaited(BrushGrain.instance.prewarm());
   }
 
   /// The application preferences.

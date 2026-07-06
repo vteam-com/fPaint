@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/models/brush_grain.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/render_helper.dart';
@@ -68,6 +69,143 @@ void main() {
 
     test('slash draws without error', () {
       drawPathWithBrushStyle(canvas, paint, path, BrushStyle.slash, 4.0);
+    });
+
+    test('soft draws without error and applies a blur mask filter', () {
+      drawPathWithBrushStyle(canvas, paint, path, BrushStyle.soft, 4.0);
+      // The soft style feathers the stroke by installing a blur mask filter.
+      expect(paint.maskFilter, isNotNull);
+    });
+  });
+
+  group('soft stroke geometry', () {
+    test('sigma scales with brush size', () {
+      expect(softStrokeBlurSigma(10), 10 * AppStroke.softBlurSigmaFactor);
+      expect(softStrokeBlurSigma(0), 0);
+    });
+
+    test('outset covers the half-width plus the Gaussian feather', () {
+      const double size = 12;
+      final double expected = size * AppVisual.half + softStrokeBlurSigma(size) * AppStroke.softBlurExtentSigmas;
+      expect(softStrokeOutset(size), expected);
+      // A soft stroke paints beyond the nominal half-width because of the feather.
+      expect(softStrokeOutset(size), greaterThan(size * AppVisual.half));
+    });
+  });
+
+  group('soft brush feathering', () {
+    test('a soft stroke has a translucent feathered edge unlike a solid one', () async {
+      Future<ui.Image> renderStroke(final BrushStyle style) async {
+        final ui.PictureRecorder recorder = ui.PictureRecorder();
+        final Canvas canvas = Canvas(recorder);
+        final Paint paint = Paint()
+          ..color = AppColors.black
+          ..strokeWidth = 8.0
+          ..strokeCap = StrokeCap.round
+          ..style = PaintingStyle.stroke;
+        final Path path = Path()
+          ..moveTo(10, 32)
+          ..lineTo(54, 32);
+        drawPathWithBrushStyle(canvas, paint, path, style, 8.0);
+        return recorder.endRecording().toImage(64, 64);
+      }
+
+      int alphaAt(final ByteData data, final int x, final int y) => data.getUint8((y * 64 + x) * 4 + 3);
+
+      final ui.Image solid = await renderStroke(BrushStyle.solid);
+      final ui.Image soft = await renderStroke(BrushStyle.soft);
+      final ByteData solidBytes = (await solid.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+      final ByteData softBytes = (await soft.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+
+      // On the stroke centerline both are painted.
+      expect(alphaAt(solidBytes, 32, 32), greaterThan(0));
+      expect(alphaAt(softBytes, 32, 32), greaterThan(0));
+
+      // A few pixels above the centerline (past the solid half-width) the solid
+      // stroke is empty but the soft stroke's feather is faintly painted.
+      expect(alphaAt(solidBytes, 32, 26), 0);
+      expect(alphaAt(softBytes, 32, 26), greaterThan(0));
+      expect(alphaAt(softBytes, 32, 26), lessThan(255));
+
+      solid.dispose();
+      soft.dispose();
+    });
+  });
+
+  group('grain brush', () {
+    test('BrushGrain.prewarm generates a square noise tile', () async {
+      await BrushGrain.instance.prewarm();
+      final ui.Image? tile = BrushGrain.instance.tile;
+      expect(tile, isNotNull);
+      expect(tile!.width, AppBrushGrain.tileSize);
+      expect(tile.height, AppBrushGrain.tileSize);
+    });
+
+    test('grain style falls back to a solid stroke without throwing', () {
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      final Paint paint = Paint()
+        ..color = AppColors.black
+        ..strokeWidth = 6.0
+        ..style = PaintingStyle.stroke;
+      final Path path = Path()
+        ..moveTo(0, 0)
+        ..lineTo(100, 0);
+      drawPathWithBrushStyle(canvas, paint, path, BrushStyle.grain, 6.0);
+      recorder.endRecording();
+    });
+
+    test('grain installs a shader + colour filter once the tile is ready', () async {
+      await BrushGrain.instance.prewarm();
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      final Paint paint = Paint()
+        ..color = AppColors.black
+        ..strokeWidth = 6.0
+        ..style = PaintingStyle.stroke;
+      final Path path = Path()
+        ..moveTo(0, 0)
+        ..lineTo(100, 0);
+      drawPathWithBrushStyle(canvas, paint, path, BrushStyle.grain, 6.0);
+      expect(paint.shader, isNotNull);
+      expect(paint.colorFilter, isNotNull);
+      recorder.endRecording();
+    });
+
+    test('a grain stroke has non-uniform (textured) alpha unlike a solid one', () async {
+      await BrushGrain.instance.prewarm();
+
+      Future<ByteData> renderCenterline(final BrushStyle style) async {
+        final ui.PictureRecorder recorder = ui.PictureRecorder();
+        final Canvas canvas = Canvas(recorder);
+        final Paint paint = Paint()
+          ..color = AppColors.black
+          ..strokeWidth = 20.0
+          ..strokeCap = StrokeCap.round
+          ..style = PaintingStyle.stroke;
+        final Path path = Path()
+          ..moveTo(10, 32)
+          ..lineTo(118, 32);
+        drawPathWithBrushStyle(canvas, paint, path, style, 20.0);
+        final ui.Image image = await recorder.endRecording().toImage(128, 64);
+        final ByteData bytes = (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+        image.dispose();
+        return bytes;
+      }
+
+      int alphaAt(final ByteData data, final int x) => data.getUint8((32 * 128 + x) * 4 + 3);
+
+      final ByteData solid = await renderCenterline(BrushStyle.solid);
+      final ByteData grain = await renderCenterline(BrushStyle.grain);
+
+      final List<int> solidAlphas = <int>[for (int x = 20; x < 108; x += 8) alphaAt(solid, x)];
+      final List<int> grainAlphas = <int>[for (int x = 20; x < 108; x += 8) alphaAt(grain, x)];
+
+      // Solid is uniformly opaque along the centerline.
+      expect(solidAlphas.every((final int a) => a > 250), isTrue);
+      // Grain paints, but the paper texture makes its alpha vary (not all opaque).
+      expect(grainAlphas.any((final int a) => a > 0), isTrue);
+      expect(grainAlphas.any((final int a) => a < 250), isTrue);
     });
   });
 

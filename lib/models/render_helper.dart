@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/models/brush_grain.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/text_object.dart';
@@ -407,6 +408,15 @@ void renderImage(
   canvas.drawImage(image, topLeftPosition, Paint()..filterQuality = FilterQuality.medium);
 }
 
+/// The Gaussian blur sigma applied to a soft ("airbrush") stroke of [brushSize].
+double softStrokeBlurSigma(final double brushSize) => brushSize * AppStroke.softBlurSigmaFactor;
+
+/// How far a soft ("airbrush") stroke of [brushSize] paints beyond its nominal
+/// half-width, once the Gaussian feather is included. Used to size export/cache
+/// bounds so the soft edge is not clipped.
+double softStrokeOutset(final double brushSize) =>
+    brushSize * AppVisual.half + softStrokeBlurSigma(brushSize) * AppStroke.softBlurExtentSigmas;
+
 /// Draws a path with a brush style.
 ///
 /// The [canvas] parameter is the canvas to draw on.
@@ -423,6 +433,29 @@ void drawPathWithBrushStyle(
 ) {
   switch (brushStyle) {
     case BrushStyle.solid:
+      canvas.drawPath(path, paint);
+    case BrushStyle.soft:
+      // Feather the stroke edges into a soft "airbrush" falloff. The paint is
+      // built fresh per render call, so setting the mask filter on it is safe.
+      paint.maskFilter = MaskFilter.blur(BlurStyle.normal, softStrokeBlurSigma(brushSize));
+      canvas.drawPath(path, paint);
+    case BrushStyle.grain:
+      // Modulate the stroke by a repeating paper-grain texture so it reads as a
+      // pencil. The tile is sampled in canvas space (identity matrix) so the
+      // grain stays paper-locked; srcIn tints white noise-alpha to the brush
+      // colour (result alpha = brushColor.alpha * grainAlpha). Falls back to a
+      // solid stroke until the async tile is ready.
+      final ui.Image? grainTile = BrushGrain.instance.tile;
+      if (grainTile != null) {
+        final Color grainColor = paint.color;
+        paint.shader = ui.ImageShader(
+          grainTile,
+          TileMode.repeated,
+          TileMode.repeated,
+          Matrix4.identity().storage,
+        );
+        paint.colorFilter = ColorFilter.mode(grainColor, BlendMode.srcIn);
+      }
       canvas.drawPath(path, paint);
     case BrushStyle.dash:
       drawPathDash(

@@ -104,7 +104,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get brushStyleDotted => 'Punteado';
 
   @override
+  String get brushStyleGrain => 'Grano';
+
+  @override
   String get brushStyleSlash => 'Barra oblicua';
+
+  @override
+  String get brushStyleSoft => 'Suave';
 
   @override
   String get brushStyleSolid => 'Solido';
