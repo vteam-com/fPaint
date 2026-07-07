@@ -264,7 +264,7 @@ extension AppProviderSelectionEffects on AppProvider {
     required final double brushSize,
     required final Path? clipPath,
   }) async {
-    if (isSelectedLayerLocked || strokePoints.length < AppMath.pair) {
+    if (isSelectedLayerLocked || strokePoints.isEmpty) {
       return;
     }
 
@@ -336,6 +336,15 @@ extension AppProviderSelectionEffects on AppProvider {
   /// region-local coordinates: a disc of [radius] at every point plus a
   /// [radius]-wide quad between consecutive points. Used to clip a painted
   /// effect to the stroke footprint (a stroked polyline is not a fill region).
+  ///
+  /// Winding matters: the path is filled with the default non-zero rule, so
+  /// every sub-shape must wind the SAME direction or overlaps cancel to a hole.
+  /// [Path.addOval] always winds clockwise; the bridging quads must be emitted
+  /// in the matching order or the lens where each quad overlaps its end discs
+  /// cancels out — carving a gap ring at every joint and breaking a fast /
+  /// small-brush stroke (whose sampled points are spaced apart) into a string
+  /// of separated beads. So the quad below winds `a-n → b-n → b+n → a+n` to
+  /// match the ovals, NOT the geometrically-natural `a+n → b+n → b-n → a-n`.
   Path _effectBrushBandPath(
     final List<Offset> strokePoints,
     final Offset regionOrigin,
@@ -354,7 +363,7 @@ extension AppProviderSelectionEffects on AppProvider {
         continue;
       }
       final Offset normal = Offset(-delta.dy, delta.dx) / length * radius;
-      band.addPolygon(<Offset>[a + normal, b + normal, b - normal, a - normal], true);
+      band.addPolygon(<Offset>[a - normal, b - normal, b + normal, a + normal], true);
     }
     return band;
   }

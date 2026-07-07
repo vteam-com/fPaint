@@ -716,14 +716,105 @@ void main() {
       expect(appProvider.layers.selectedLayer.actionStack.length, actionsBefore);
     });
 
-    test('commitEffectBrushStroke ignores strokes with fewer than two points', () async {
+    test('commitEffectBrushStroke keeps the band continuous across joints (no beading)', () async {
+      // Regression: on a fast / small-brush stroke the sampled points are spaced
+      // apart (the sampler never interpolates), so the band relies on the quads
+      // that bridge consecutive discs. If those quads wind opposite to the discs,
+      // the non-zero fill cancels their overlap into a hole ring at every joint
+      // and the stroke renders as separated circles. The whole stroke centreline
+      // must stay opaque.
+      final int canvasWidth = appProvider.layers.width.toInt();
+      final int canvasHeight = appProvider.layers.height.toInt();
+      final Image layerImage = await createFilledLayerImage(
+        width: canvasWidth,
+        height: canvasHeight,
+        color: const Color(0xFFCC5533),
+      );
+      addTearDown(layerImage.dispose);
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+
+      // brushSize 20 → radius 10.
+      // Points 30 px apart (> disc diameter): discs alone leave gaps, so the
+      // bridging quads are the only thing keeping the centreline continuous.
+      await appProvider.commitEffectBrushStroke(
+        effect: SelectionEffect.grayscale,
+        strength: AppEffects.maxIntensity,
+        size: AppEffects.minSize,
+        strokePoints: <Offset>[const Offset(20, 20), const Offset(50, 20), const Offset(80, 20)],
+        strokeBounds: const Rect.fromLTRB(20, 20, 80, 20),
+        brushSize: 20,
+        clipPath: null,
+      );
+
+      final UserActionDrawing committed = appProvider.layers.selectedLayer.actionStack.last;
+      final Image patch = committed.image!;
+      final ByteData patchData = (await patch.toByteData(format: ImageByteFormat.rawRgba))!;
+      // Patch region origin is the stroke bounds inflated by one radius, floored.
+      const int originX = 20 - 10; // stroke left - radius
+      const int originY = 20 - 10; // stroke top - radius
+      int alphaAt(final int canvasX, final int canvasY) => patchData.getUint8(
+        ((((canvasY - originY) * patch.width) + (canvasX - originX)) * AppMath.bytesPerPixel) +
+            AppEffects.alphaChannelIndex,
+      );
+
+      // Every point along the stroke centreline must be opaque — including the
+      // disc/quad joints near x=30 and x=60 that the winding bug carved out.
+      for (int x = 22; x <= 78; x++) {
+        expect(alphaAt(x, 20), greaterThan(AppMath.zero), reason: 'gap in band at x=$x');
+      }
+    });
+
+    test('commitEffectBrushStroke commits a single-point tap as one dab', () async {
+      // A single tap deposits one effect dab (a disc) rather than doing nothing,
+      // matching the freehand brushes' single-click behaviour.
+      final int canvasWidth = appProvider.layers.width.toInt();
+      final int canvasHeight = appProvider.layers.height.toInt();
+      final Image layerImage = await createFilledLayerImage(
+        width: canvasWidth,
+        height: canvasHeight,
+        color: const Color(0xFFCC5533),
+      );
+      addTearDown(layerImage.dispose);
+      appProvider.layers.selectedLayer.addImage(imageToAdd: layerImage);
+
+      final int actionsBefore = appProvider.layers.selectedLayer.actionStack.length;
+
+      // brushSize 20 → radius 10; a single point paints one radius-10 disc.
+      await appProvider.commitEffectBrushStroke(
+        effect: SelectionEffect.grayscale,
+        strength: AppEffects.maxIntensity,
+        size: AppEffects.minSize,
+        strokePoints: <Offset>[const Offset(20, 20)],
+        strokeBounds: const Rect.fromLTRB(20, 20, 21, 21),
+        brushSize: 20,
+        clipPath: null,
+      );
+
+      expect(appProvider.layers.selectedLayer.actionStack.length, actionsBefore + 1);
+      final UserActionDrawing committed = appProvider.layers.selectedLayer.actionStack.last;
+      final Image patch = committed.image!;
+      final ByteData patchData = (await patch.toByteData(format: ImageByteFormat.rawRgba))!;
+      // Patch region origin is the stroke bounds inflated by one radius, floored.
+      const int originX = 20 - 10; // stroke left - radius
+      const int originY = 20 - 10; // stroke top - radius
+      int alphaAt(final int canvasX, final int canvasY) => patchData.getUint8(
+        ((((canvasY - originY) * patch.width) + (canvasX - originX)) * AppMath.bytesPerPixel) +
+            AppEffects.alphaChannelIndex,
+      );
+      // Opaque at the dab centre, transparent at the patch corner (~14 px from
+      // the centre, outside the radius-10 disc).
+      expect(alphaAt(20, 20), greaterThan(AppMath.zero));
+      expect(alphaAt(10, 10), AppMath.zero);
+    });
+
+    test('commitEffectBrushStroke ignores an empty stroke', () async {
       final int actionsBefore = appProvider.layers.selectedLayer.actionStack.length;
 
       await appProvider.commitEffectBrushStroke(
         effect: SelectionEffect.blur,
         strength: AppEffects.defaultIntensity,
         size: AppEffects.minSize,
-        strokePoints: <Offset>[const Offset(10, 10)],
+        strokePoints: <Offset>[],
         strokeBounds: const Rect.fromLTRB(10, 10, 11, 11),
         brushSize: 10,
         clipPath: null,

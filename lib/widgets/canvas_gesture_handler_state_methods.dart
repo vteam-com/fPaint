@@ -266,7 +266,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   Future<void> _commitEffectBrushStroke(final AppProvider appProvider) async {
     final ui.Rect? patchBounds = _pixelBrushStrokePatchBounds;
     final SelectionEffect? effect = appProvider.effectBrushModel.effect;
-    if (patchBounds == null || effect == null || _pixelBrushStrokePoints.length < AppMath.pair) {
+    if (patchBounds == null || effect == null || _pixelBrushStrokePoints.length < AppMath.one) {
       return;
     }
     await appProvider.commitEffectBrushStroke(

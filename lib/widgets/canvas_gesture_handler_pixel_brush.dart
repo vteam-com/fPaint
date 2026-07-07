@@ -58,7 +58,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
   Future<void> _commitPixelBrushStroke(final AppProvider appProvider) async {
     final ImagePlacementLayerRestoreState? layerRestoreState = _pixelBrushLayerRestoreState;
     final ui.Rect? patchBounds = _pixelBrushStrokePatchBounds;
-    if (layerRestoreState == null || patchBounds == null || _pixelBrushStrokePoints.length < AppMath.pair) {
+    if (layerRestoreState == null || patchBounds == null || _pixelBrushStrokePoints.length < AppMath.one) {
       return;
     }
 
