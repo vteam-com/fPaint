@@ -74,6 +74,15 @@ class AppInteraction {
   static const int blurBrushKernelHalfRange = 2;
   static const int pixelBrushMaxUndoGestures = 3;
 
+  /// Radial "press" dab (a smudge single tap): ink is pushed outward from the
+  /// centre, like pressing a stamp into wet paint. [smudgePressPushFraction] is
+  /// how far — as a fraction of the brush radius, per unit intensity — a pixel's
+  /// ink is displaced outward at the dab's peak; [smudgePressMaxPush] caps it so
+  /// the warp stays fold-free (the sampled radius rises monotonically with
+  /// distance) and the centre never collapses to a single hard disc.
+  static const double smudgePressPushFraction = 0.7;
+  static const double smudgePressMaxPush = 0.9;
+
   /// Max un-baked freehand segments replayed per frame before the in-progress
   /// stroke is folded into the cached baseline. Bounds per-frame preview cost to
   /// O(threshold) instead of O(stroke length); below it the tail is cheap to

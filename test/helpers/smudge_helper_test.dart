@@ -45,6 +45,25 @@ Uint8List _redLeftTransparentRightPixels() {
   return pixels;
 }
 
+/// Builds a [size]×[size] opaque buffer of red/blue vertical stripes two columns
+/// wide. A box-downsample-by-2 keeps the stripes' contrast (so a dab still finds
+/// something to push), but the bilinear-upsample back smears every column toward
+/// its neighbour — so a pixel that comes back bit-exact proves it bypassed the
+/// LOD round-trip entirely.
+Uint8List _verticalStripes(final int size) {
+  final Uint8List pixels = Uint8List(size * size * AppMath.bytesPerPixel);
+  for (int y = 0; y < size; y++) {
+    for (int x = 0; x < size; x++) {
+      final int i = ((y * size) + x) * AppMath.bytesPerPixel;
+      final bool red = (x ~/ 2).isEven;
+      pixels[i + AppMath.rgbChannelRed] = red ? AppLimits.rgbChannelMax : AppMath.zero;
+      pixels[i + AppMath.rgbChannelBlue] = red ? AppMath.zero : AppLimits.rgbChannelMax;
+      pixels[i + AppMath.rgbChannelAlpha] = AppLimits.rgbChannelMax;
+    }
+  }
+  return pixels;
+}
+
 Future<ui.Image> _resultToImage(final PixelBrushSegmentResult result) {
   return imageFromPixels(result.pixels, result.width, result.height);
 }
@@ -141,14 +160,87 @@ void main() {
     expect(outsideClip, const Color(0xFF0000FF));
   });
 
-  test('rasterizePixelBrushSegment returns null for a single point', () async {
+  test('rasterizePixelBrushSegment (smudge) presses ink outward for a single point (tap)', () async {
+    // A single tap has no drag direction, so smudge presses the ink radially
+    // outward from the tap point (like pressing a stamp into wet paint). Tapping
+    // the red/blue boundary pushes the centre's blue onto the neighbouring red,
+    // so the red pixel just inside the disc is no longer pure red.
     final ui.Image source = await _createSplitImage();
 
     final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
       livePixels: await _imagePixels(source),
       imageWidth: _testWidth,
       imageHeight: _testHeight,
-      segmentPoints: const <Offset>[Offset(4, 2)],
+      segmentPoints: const <Offset>[Offset(6, 2)],
+      brushSize: 6,
+      mode: PixelBrushMode.smudge,
+      preferSynchronous: true,
+    );
+
+    expect(result, isNotNull);
+    final ui.Image output = await _resultToImage(result!);
+    final Color pushed = await _readPixel(output, 5, 2);
+    expect(pushed, isNot(const Color(0xFFFF0000)));
+  });
+
+  test('rasterizePixelBrushSegment (blur) softens a single point (tap)', () async {
+    // A single blur tap softens the spot in place; at the tapped red/blue
+    // boundary the kernel mixes the two colours.
+    final ui.Image source = await _createSplitImage();
+
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: await _imagePixels(source),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[Offset(6, 2)],
+      brushSize: 6,
+      mode: PixelBrushMode.blur,
+      preferSynchronous: true,
+    );
+
+    expect(result, isNotNull);
+    final ui.Image output = await _resultToImage(result!);
+    final Color boundary = await _readPixel(output, 6, 2);
+    expect(boundary, isNot(const Color(0xFF0000FF)));
+  });
+
+  test('rasterizePixelBrushSegment (smudge) leaves pixels outside a large-brush dab untouched (no square)', () async {
+    // Regression: a single-tap dab commits its whole rectangular footprint via
+    // BlendMode.src, so pixels the dab did not touch must stay bit-exact — else
+    // the untouched margin stamps a visible square. A large brush used to route
+    // the tap through the LOD down/up-sample, which blurred that whole margin.
+    const int size = 160;
+    final Uint8List input = _verticalStripes(size);
+
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: Uint8List.fromList(input),
+      imageWidth: size,
+      imageHeight: size,
+      // radius 80 > smudgeComputeLodMinRadius (64): would trigger LOD for a drag.
+      segmentPoints: const <Offset>[Offset(80, 80)],
+      brushSize: 160,
+      mode: PixelBrushMode.smudge,
+      preferSynchronous: true,
+    );
+
+    expect(result, isNotNull);
+    // A corner ~110 px from the centre — well outside the radius-80 disc.
+    const int corner = ((2 * size) + 2) * AppMath.bytesPerPixel;
+    expect(
+      result!.pixels.sublist(corner, corner + AppMath.bytesPerPixel),
+      input.sublist(corner, corner + AppMath.bytesPerPixel),
+      reason: 'the dab must not alter pixels outside its disc',
+    );
+  });
+
+  test('rasterizePixelBrushSegment returns null for an empty stroke', () async {
+    final ui.Image source = await _createSplitImage();
+
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: await _imagePixels(source),
+      imageWidth: _testWidth,
+      imageHeight: _testHeight,
+      segmentPoints: const <Offset>[],
       brushSize: 4,
       mode: PixelBrushMode.smudge,
     );
