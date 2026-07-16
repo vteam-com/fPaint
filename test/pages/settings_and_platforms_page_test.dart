@@ -4,6 +4,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 import '../helpers/recovery_test_helpers.dart';
@@ -13,8 +14,8 @@ void main() {
     final AppPreferences preferences = await createRecoveryTestPreferences();
 
     await tester.pumpWidget(
-      ChangeNotifierProvider<AppPreferences>.value(
-        value: preferences,
+      InheritedControllerScope<AppPreferences>(
+        controller: preferences,
         child: const MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,

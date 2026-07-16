@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
@@ -10,7 +11,6 @@ import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/color_wheel_selector.dart';
 import 'package:fpaint/widgets/material_free.dart';
-import 'package:provider/provider.dart';
 
 const List<Color> _presetColors = <Color>[
   AppColors.black,
@@ -30,19 +30,20 @@ Widget _buildTestWidget({
   final bool small = false,
 }) {
   final ShellProvider shellProvider = ShellProvider()..deviceSizeSmall = small;
-  return MultiProvider(
-    providers: <ChangeNotifierProvider<ChangeNotifier>>[
-      ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
-      ChangeNotifierProvider<LayersProvider>.value(value: LayersProvider()),
-    ],
-    child: MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: Scaffold(
-        body: ColorPickerDialog(
-          title: 'Pick Color',
-          color: initialColor,
-          onColorChanged: onColorChanged,
+  final LayersProvider layersProvider = LayersProvider();
+  return InheritedControllerScope<ShellProvider>(
+    controller: shellProvider,
+    child: InheritedControllerScope<LayersProvider>(
+      controller: layersProvider,
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: Scaffold(
+          body: ColorPickerDialog(
+            title: 'Pick Color',
+            color: initialColor,
+            onColorChanged: onColorChanged,
+          ),
         ),
       ),
     ),

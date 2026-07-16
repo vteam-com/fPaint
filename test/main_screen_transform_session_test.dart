@@ -11,12 +11,12 @@ import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/transform_widget.dart';
-import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const int _testImageDimension = 12;
@@ -54,17 +54,21 @@ Widget _buildHarness({
   required final ShellProvider shellProvider,
   final Widget? home,
 }) {
-  return MultiProvider(
-    providers: <SingleChildWidget>[
-      ChangeNotifierProvider<AppPreferences>.value(value: preferences),
-      ChangeNotifierProvider<AppProvider>.value(value: appProvider),
-      ChangeNotifierProvider<LayersProvider>.value(value: appProvider.layers),
-      ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
-    ],
-    child: MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: home ?? const MainScreen(),
+  return InheritedControllerScope<ShellProvider>(
+    controller: shellProvider,
+    child: InheritedControllerScope<AppPreferences>(
+      controller: preferences,
+      child: InheritedControllerScope<AppProvider>(
+        controller: appProvider,
+        child: InheritedControllerScope<LayersProvider>(
+          controller: appProvider.layers,
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: home ?? const MainScreen(),
+          ),
+        ),
+      ),
     ),
   );
 }

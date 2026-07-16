@@ -19,8 +19,6 @@ import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/shell_selection_sub_toolbar.dart';
 import 'package:fpaint/widgets/toolbar_icon_button.dart';
-import 'package:provider/provider.dart';
-import 'package:provider/single_child_widget.dart';
 
 part 'shell_top_bar_responsive_groups.dart';
 
@@ -899,17 +897,11 @@ Widget shellTopBarPreview() {
       child: Localizations(
         locale: const Locale('en'),
         delegates: AppLocalizations.localizationsDelegates,
-        child: MultiProvider(
-          providers: <SingleChildWidget>[
-            ChangeNotifierProvider<AppProvider>.value(value: appProvider),
-            ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
-          ],
-          child: SizedBox(
-            height: AppLayout.shellTopBarHeight,
-            child: ShellTopBar(
-              appProvider: appProvider,
-              shellProvider: shellProvider,
-            ),
+        child: SizedBox(
+          height: AppLayout.shellTopBarHeight,
+          child: ShellTopBar(
+            appProvider: appProvider,
+            shellProvider: shellProvider,
           ),
         ),
       ),

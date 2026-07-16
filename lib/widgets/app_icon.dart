@@ -34,6 +34,7 @@ class AppSvgIcon extends StatelessWidget {
       width: resolvedSize,
       height: resolvedSize,
       colorFilter: resolvedColorFilter,
+      package: 'fpaint_assets',
     );
   }
 

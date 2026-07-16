@@ -145,6 +145,7 @@ Future<void> showAttributionDialog(final BuildContext context) async {
                       'assets/app_icon.png',
                       width: _attributionIconSize,
                       height: _attributionIconSize,
+                      package: 'fpaint_assets',
                     ),
                     const SizedBox(height: AppSpacing.large),
                     for (final _AttributionSection attribution in attributions) ...<Widget>[

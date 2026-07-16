@@ -140,7 +140,7 @@ class PlatformsPage extends StatelessWidget {
                       height: AppLayout.iconSize * AppVisual.previewTextScale,
                       child: DecoratedBox(
                         decoration: const BoxDecoration(color: AppColors.white),
-                        child: Image.asset(image),
+                        child: Image.asset(image, package: 'fpaint_assets'),
                       ),
                     ),
                   ),

@@ -6,7 +6,7 @@ import 'package:fpaint/files/file_heic.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 
 /// Path to the HEIC test asset relative to the project root.
-const String _testHeicPath = 'assets/test/test.heic';
+const String _testHeicPath = 'packages/fpaint_assets/assets/test/test.heic';
 
 /// Path to the PNG test asset used for encode tests.
 const String _testPngPath = 'test/output/final.png';

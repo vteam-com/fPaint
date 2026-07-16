@@ -7,6 +7,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 import '../helpers/widget_test_harness.dart';
@@ -43,8 +44,8 @@ Widget _buildHarness({
   final RecentFileMetadataLoader? recentFileMetadataLoader,
   final Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader,
 }) {
-  return ChangeNotifierProvider<AppPreferences>.value(
-    value: prefs,
+  return InheritedControllerScope<AppPreferences>(
+    controller: prefs,
     child: buildLocalizedScaffoldTestApp(
       bodyBuilder: (final BuildContext context) {
         return ImportDialog(

@@ -18,6 +18,7 @@ import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/fill_service.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/providers/wand_selection_manager.dart';
@@ -114,7 +115,7 @@ class AppProvider extends ChangeNotifier {
   static AppProvider of(
     final BuildContext context, {
     final bool listen = false,
-  }) => Provider.of<AppProvider>(context, listen: listen);
+  }) => InheritedControllerScope.of<AppProvider>(context, listen: listen);
 
   /// Listenable used to repaint the main canvas and overlay surface only.
   Listenable get mainViewRepaintListenable => _mainViewRepaintNotifier;

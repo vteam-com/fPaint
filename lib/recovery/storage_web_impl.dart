@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:fpaint/recovery/draft_recovery_storage.dart';
 
 /// Creates the no-op recovery storage used on web builds.
-DraftRecoveryStorage createDraftRecoveryStorage() {
+DraftRecoveryStorage create() {
   return const _WebDraftRecoveryStorage();
 }
 

@@ -2,38 +2,35 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
-import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/widget_test_harness.dart';
-
-class _NoopDraftFlusher implements DraftFlusher {
-  @override
-  Future<void> flushNow() async {}
-}
 
 Widget _buildHarness({
   required final AppPreferences preferences,
   required final AppProvider appProvider,
   required final ShellProvider shellProvider,
 }) {
-  return MultiProvider(
-    providers: <SingleChildWidget>[
-      Provider<DraftFlusher>.value(value: _NoopDraftFlusher()),
-      ChangeNotifierProvider<AppPreferences>.value(value: preferences),
-      ChangeNotifierProvider<AppProvider>.value(value: appProvider),
-      ChangeNotifierProvider<LayersProvider>.value(value: appProvider.layers),
-      ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
-    ],
-    child: buildLocalizedTestApp(
-      home: const Scaffold(body: SizedBox.expand(child: MainView())),
+  return InheritedControllerScope<AppPreferences>(
+    controller: preferences,
+    child: InheritedControllerScope<AppProvider>(
+      controller: appProvider,
+      child: InheritedControllerScope<LayersProvider>(
+        controller: appProvider.layers,
+        child: InheritedControllerScope<ShellProvider>(
+          controller: shellProvider,
+          child: buildLocalizedTestApp(
+            home: const Scaffold(body: SizedBox.expand(child: MainView())),
+          ),
+        ),
+      ),
     ),
   );
 }

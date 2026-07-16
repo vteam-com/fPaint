@@ -237,8 +237,10 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       if (!mounted) {
         return;
       }
-      final DraftFlusher controller = Provider.of<DraftFlusher>(context, listen: false);
-      unawaited(controller.flushNow());
+      final DraftRecoveryController? controller = InheritedScope.maybeOf<DraftRecoveryController>(context);
+      if (controller != null) {
+        unawaited(controller.flushNow());
+      }
       appProvider.update();
     }
   }
