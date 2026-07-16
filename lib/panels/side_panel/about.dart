@@ -32,6 +32,7 @@ void showAboutBox(final BuildContext context) {
               'assets/app_icon.png',
               width: AppLayout.appIconSize,
               height: AppLayout.appIconSize,
+              package: 'fpaint_assets',
             ),
             const SizedBox(height: AppSpacing.medium),
             const AppText(AppConfig.applicationCopyright),

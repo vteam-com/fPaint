@@ -7,10 +7,10 @@ import 'package:fpaint/files/file_heic.dart';
 import 'package:fpaint/files/import_files.dart';
 
 /// Path to the HEIC test asset relative to the project root.
-const String _testHeicPath = 'assets/test/test.heic';
+const String _testHeicPath = 'packages/fpaint_assets/assets/test/test.heic';
 
 /// Path to the AVIF test asset relative to the project root.
-const String _testAvifPath = 'assets/test/test.avif';
+const String _testAvifPath = 'packages/fpaint_assets/assets/test/test.avif';
 
 /// ISO base media file format box type identifier (ASCII "ftyp").
 const int _ftypByte0 = 0x66; // 'f'

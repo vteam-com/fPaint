@@ -11,7 +11,7 @@ const String _kDefaultFontFamily = 'Inter';
 const String _kInterFontFilename = 'Inter-Regular.otf';
 
 /// Path within the workspace to the bundled font assets.
-const String _kAppFontsRelativePath = 'assets/fonts';
+const String _kAppFontsRelativePath = 'packages/fpaint_assets/assets/fonts';
 
 /// Loads the Inter font so text renders legibly in
 /// golden-file screenshots and widget tests instead of showing as white boxes.

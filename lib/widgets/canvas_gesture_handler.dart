@@ -6,7 +6,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
@@ -23,8 +22,10 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/app_provider_tools.dart';
+import 'package:fpaint/providers/inherited_scope.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 

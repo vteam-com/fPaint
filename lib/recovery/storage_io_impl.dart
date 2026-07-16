@@ -12,7 +12,7 @@ const String _draftRecoveryFileName = 'recovery.ora';
 final Logger _log = Logger(logNameDraftRecoveryStorage);
 
 /// Creates the file-backed recovery storage used on non-web platforms.
-DraftRecoveryStorage createDraftRecoveryStorage() {
+DraftRecoveryStorage create() {
   return _IoDraftRecoveryStorage();
 }
 

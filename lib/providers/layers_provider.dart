@@ -10,10 +10,10 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 
 // Exports
 export 'package:fpaint/providers/layer_provider.dart';
@@ -68,7 +68,7 @@ class LayersProvider extends ChangeNotifier {
   static LayersProvider of(
     final BuildContext context, {
     final bool listen = false,
-  }) => Provider.of<LayersProvider>(context, listen: listen);
+  }) => InheritedControllerScope.of<LayersProvider>(context, listen: listen);
 
   @override
   void dispose() {

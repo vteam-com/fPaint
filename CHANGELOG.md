@@ -4,6 +4,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.1] - 2026-07-16
+
+### Update
+
+- fPaint can now be embedded inside another Flutter application. The editor no longer assumes it owns the whole app: state is exposed through stock Flutter inherited widgets and it renders without requiring the host to provide a `MaterialApp`.
+- Removed the third-party `provider` package (and its `nested` dependency) in favor of stock Flutter state management, so hosting apps are no longer forced onto a particular state-management library.
+- Moved the app's assets and fonts into a dedicated `fpaint_assets` package that a host application can depend on and bundle cleanly.
+- Reworked the internal module layout to remove cyclic folder dependencies and enforce a clean one-way dependency direction.
+
 ## [1.9.0] - 2026-07-05
 
 ### Update

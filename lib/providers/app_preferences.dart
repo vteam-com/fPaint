@@ -3,12 +3,10 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/macos_bookmark_service.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-export 'package:provider/provider.dart';
 
 /// Manages the application's persistent settings using SharedPreferences.
 class AppPreferences extends ChangeNotifier {
@@ -25,7 +23,7 @@ class AppPreferences extends ChangeNotifier {
   static AppPreferences of(
     final BuildContext context, {
     final bool listen = false,
-  }) => Provider.of<AppPreferences>(context, listen: listen);
+  }) => InheritedControllerScope.of<AppPreferences>(context, listen: listen);
 
   /// Indicates whether the preferences have been loaded.
   bool get isLoaded => _prefs != null;

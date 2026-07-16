@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/files/draft_recovery_encoder.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
-import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
@@ -12,12 +12,13 @@ import 'package:fpaint/pages/platforms_page.dart';
 import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/inherited_provider.dart' show InheritedControllerScope;
+import 'package:fpaint/providers/inherited_scope.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
-import 'package:provider/single_child_widget.dart';
 
 const String _clearPendingFileMethod = 'clearPendingFile';
 const String _editChannelName = 'com.vteam.fpaint/edit';
@@ -267,6 +268,8 @@ class MyApp extends StatelessWidget {
     preferences: appPreferences,
     layers: layersProvider,
     shellProvider: shellProvider,
+    encoder: createRecoveryDraft,
+    restorer: restoreRecoveryDraft,
   );
 
   /// Provides functionalities and states for managing layers.
@@ -282,96 +285,92 @@ class MyApp extends StatelessWidget {
   final UndoProvider undoProvider = UndoProvider();
   @override
   Widget build(final BuildContext context) {
-    return MultiProvider(
-      providers: <SingleChildWidget>[
-        Provider<DraftRecoveryController>.value(value: draftRecoveryController),
-        Provider<DraftFlusher>.value(value: draftRecoveryController),
-        // ignore: always_specify_types
-        ChangeNotifierProvider(create: (final BuildContext _) => shellProvider),
-        // ignore: always_specify_types
-        ChangeNotifierProvider(create: (final BuildContext _) => appPreferences),
-        // ignore: always_specify_types
-        ChangeNotifierProvider(create: (final BuildContext _) => appProvider),
-        // Provide the existing shared instance without transferring
-        // disposal ownership to Provider.
-        ChangeNotifierProvider<LayersProvider>.value(value: layersProvider),
-        // ignore: always_specify_types
-        ChangeNotifierProvider(create: (final BuildContext _) => undoProvider),
-      ],
-      child: Consumer2<AppProvider, AppPreferences>(
-        builder:
-            (
-              final BuildContext _,
-              final AppProvider currentAppProvider,
-              final AppPreferences currentPreferences,
-              final Widget? _,
-            ) {
-              return RepaintBoundary(
-                key: Keys.appScreenshotBoundary,
-                child: WidgetsApp(
-                  debugShowCheckedModeBanner: false,
-                  navigatorKey: navigatorKey,
-                  title: appName,
-                  color: AppColors.primary,
-                  pageRouteBuilder: <T>(final RouteSettings settings, final WidgetBuilder builder) {
-                    return PageRouteBuilder<T>(
-                      settings: settings,
-                      pageBuilder:
-                          (
-                            final BuildContext context,
-                            final Animation<double> _,
-                            final Animation<double> _,
-                          ) => builder(context),
-                    );
-                  },
-                  localizationsDelegates: AppLocalizations.localizationsDelegates,
-                  supportedLocales: AppLocalizations.supportedLocales,
-                  locale: currentPreferences.preferredLocale,
-                  localeResolutionCallback: (final Locale? locale, final Iterable<Locale> supportedLocales) {
-                    if (locale == null) {
-                      return const Locale('en');
-                    }
+    return InheritedScope<DraftRecoveryController>(
+      controller: draftRecoveryController,
+      child: InheritedControllerScope<ShellProvider>(
+        controller: shellProvider,
+        child: InheritedControllerScope<AppPreferences>(
+          controller: appPreferences,
+          child: InheritedControllerScope<AppProvider>(
+            controller: appProvider,
+            child: InheritedControllerScope<LayersProvider>(
+              controller: layersProvider,
+              child: InheritedControllerScope<UndoProvider>(
+                controller: undoProvider,
+                child: ListenableBuilder(
+                  listenable: Listenable.merge(<Listenable>[appProvider, appPreferences]),
+                  builder: (final BuildContext _, final Widget? _) {
+                    return RepaintBoundary(
+                      key: Keys.appScreenshotBoundary,
+                      child: WidgetsApp(
+                        debugShowCheckedModeBanner: false,
+                        navigatorKey: navigatorKey,
+                        title: appName,
+                        color: AppColors.primary,
+                        pageRouteBuilder: <T>(final RouteSettings settings, final WidgetBuilder builder) {
+                          return PageRouteBuilder<T>(
+                            settings: settings,
+                            pageBuilder:
+                                (
+                                  final BuildContext context,
+                                  final Animation<double> _,
+                                  final Animation<double> _,
+                                ) => builder(context),
+                          );
+                        },
+                        localizationsDelegates: AppLocalizations.localizationsDelegates,
+                        supportedLocales: AppLocalizations.supportedLocales,
+                        locale: appPreferences.preferredLocale,
+                        localeResolutionCallback: (final Locale? locale, final Iterable<Locale> supportedLocales) {
+                          if (locale == null) {
+                            return const Locale('en');
+                          }
 
-                    for (final Locale supportedLocale in supportedLocales) {
-                      if (supportedLocale.languageCode == locale.languageCode) {
-                        return supportedLocale;
-                      }
-                    }
+                          for (final Locale supportedLocale in supportedLocales) {
+                            if (supportedLocale.languageCode == locale.languageCode) {
+                              return supportedLocale;
+                            }
+                          }
 
-                    return const Locale('en');
-                  },
-                  routes: <String, WidgetBuilder>{
-                    '/': (final BuildContext context) => shortCutsForMainApp(
-                      context,
-                      shellProvider,
-                      currentAppProvider,
-                      const MainScreen(),
-                      onSave: () async {
-                        await runWithGlobalFileSaveSnackBar<void>(
-                          initialFilePath: shellProvider.loadedFileName,
-                          completedFilePathBuilder: () => shellProvider.loadedFileName,
-                          task: () {
-                            return saveFile(
-                              shellProvider,
-                              currentAppProvider.layers,
-                              currentPreferences,
-                            );
-                          },
-                        );
-                      },
-                    ),
-                    '/settings': (final _) => const SettingsPage(),
-                    '/platforms': (final _) => const PlatformsPage(),
-                  },
-                  builder: (final BuildContext _, final Widget? child) {
-                    return DefaultTextStyle(
-                      style: const TextStyle(fontFamily: appFontFamily),
-                      child: child ?? const SizedBox.shrink(),
+                          return const Locale('en');
+                        },
+                        routes: <String, WidgetBuilder>{
+                          '/': (final BuildContext context) => shortCutsForMainApp(
+                            context,
+                            shellProvider,
+                            appProvider,
+                            const MainScreen(),
+                            onSave: () async {
+                              await runWithGlobalFileSaveSnackBar<void>(
+                                initialFilePath: shellProvider.loadedFileName,
+                                completedFilePathBuilder: () => shellProvider.loadedFileName,
+                                task: () {
+                                  return saveFile(
+                                    shellProvider,
+                                    appProvider.layers,
+                                    appPreferences,
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                          '/settings': (final _) => const SettingsPage(),
+                          '/platforms': (final _) => const PlatformsPage(),
+                        },
+                        builder: (final BuildContext _, final Widget? child) {
+                          return DefaultTextStyle(
+                            style: const TextStyle(fontFamily: appFontFamily),
+                            child: child ?? const SizedBox.shrink(),
+                          );
+                        },
+                      ),
                     );
                   },
                 ),
-              );
-            },
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

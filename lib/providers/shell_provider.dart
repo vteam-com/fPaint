@@ -4,7 +4,7 @@ import 'dart:core';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/canvas_resize.dart';
-import 'package:provider/provider.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 
 // Exports
 export 'package:fpaint/models/canvas_resize.dart';
@@ -39,19 +39,13 @@ class ShellProvider extends ChangeNotifier {
   static ShellProvider of(
     final BuildContext context, {
     final bool listen = false,
-  }) => Provider.of<ShellProvider>(context, listen: listen);
+  }) => InheritedControllerScope.of<ShellProvider>(context, listen: listen);
 
   /// Returns [ShellProvider] when found in the tree, otherwise null.
   static ShellProvider? maybeOf(
     final BuildContext context, {
     final bool listen = false,
-  }) {
-    try {
-      return Provider.of<ShellProvider>(context, listen: listen);
-    } on ProviderNotFoundException {
-      return null;
-    }
-  }
+  }) => InheritedControllerScope.maybeOf<ShellProvider>(context, listen: listen);
 
   //=============================================================================
   /// Notifies all listeners that the model has been updated.

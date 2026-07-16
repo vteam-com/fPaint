@@ -9,6 +9,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/shell_top_bar.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
@@ -93,10 +94,10 @@ void main() {
   }
 
   Widget shellTopBarUnderTest({required final double width}) {
-    return ChangeNotifierProvider<ShellProvider>.value(
-      value: shellProvider,
-      child: ChangeNotifierProvider<AppProvider>.value(
-        value: appProvider,
+    return InheritedControllerScope<ShellProvider>(
+      controller: shellProvider,
+      child: InheritedControllerScope<AppProvider>(
+        controller: appProvider,
         child: SizedBox(
           width: width,
           child: ShellTopBar(

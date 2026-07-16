@@ -5,14 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/color_helper.dart' hide hsvToColor;
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/material_free.dart';
-import 'package:provider/provider.dart';
-import 'package:provider/single_child_widget.dart';
 
 void main() {
   group('ColorSelector Widget Tests', () {
@@ -251,37 +250,37 @@ void main() {
         });
 
         await tester.pumpWidget(
-          MultiProvider(
-            providers: <SingleChildWidget>[
-              ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
-              ChangeNotifierProvider<LayersProvider>.value(value: layersProvider),
-            ],
-            child: MaterialApp(
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              // Added ThemeData
-              theme: ThemeData(),
-              home: Scaffold(
-                body: Builder(
-                  builder: (final BuildContext context) {
-                    return AppButtonPrimary(
-                      onPressed: () {
-                        showColorPicker(
-                          context: context,
-                          title: 'Test Picker',
-                          titleIcon: const AppSvgIcon(
-                            key: titleIconKey,
-                            icon: AppIcon.colorLens,
-                          ),
-                          color: Colors.red, // Initial color for the dialog's ColorSelector
-                          onSelectedColor: (final Color color) {
-                            selectedColorOut = color;
-                          },
-                        );
-                      },
-                      text: 'Show Picker',
-                    );
-                  },
+          InheritedControllerScope<ShellProvider>(
+            controller: shellProvider,
+            child: InheritedControllerScope<LayersProvider>(
+              controller: layersProvider,
+              child: MaterialApp(
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                // Added ThemeData
+                theme: ThemeData(),
+                home: Scaffold(
+                  body: Builder(
+                    builder: (final BuildContext context) {
+                      return AppButtonPrimary(
+                        onPressed: () {
+                          showColorPicker(
+                            context: context,
+                            title: 'Test Picker',
+                            titleIcon: const AppSvgIcon(
+                              key: titleIconKey,
+                              icon: AppIcon.colorLens,
+                            ),
+                            color: Colors.red, // Initial color for the dialog's ColorSelector
+                            onSelectedColor: (final Color color) {
+                              selectedColorOut = color;
+                            },
+                          );
+                        },
+                        text: 'Show Picker',
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

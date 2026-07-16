@@ -11,7 +11,6 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
-import 'package:provider/provider.dart';
 
 part 'layer_provider_display_cache.dart';
 part 'layer_provider_live_preview.dart';
@@ -41,15 +40,6 @@ class LayerProvider extends ChangeNotifier {
     _isLocked = isLocked;
     _opacity = opacity;
   }
-
-  /// Retrieves the [LayerProvider] instance from the given [BuildContext].
-  ///
-  /// The [listen] parameter determines whether the widget should rebuild when the
-  /// [LayerProvider]'s state changes.
-  static LayerProvider of(
-    final BuildContext context, {
-    final bool listen = false,
-  }) => Provider.of<LayerProvider>(context, listen: listen);
 
   /// Notifies listeners that the layer has been updated.
   void update() {

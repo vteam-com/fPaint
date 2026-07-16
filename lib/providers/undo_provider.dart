@@ -5,8 +5,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 
 /// Callback invoked with [RecordAction]s that are permanently dropped from
 /// history (redo cleared, trimmed, or a full clear). Owners use it to dispose
@@ -37,7 +37,7 @@ class UndoProvider extends ChangeNotifier {
   static UndoProvider of(
     final BuildContext context, {
     final bool listen = false,
-  }) => Provider.of<UndoProvider>(context, listen: listen);
+  }) => InheritedControllerScope.of<UndoProvider>(context, listen: listen);
 
   final List<RecordAction> _undoStack = <RecordAction>[];
   final List<RecordAction> _redoStack = <RecordAction>[];

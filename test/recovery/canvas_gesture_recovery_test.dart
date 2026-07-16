@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -12,11 +11,12 @@ import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
+import 'package:fpaint/providers/inherited_scope.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
-import 'package:provider/single_child_widget.dart';
 
 import '../helpers/recovery_test_helpers.dart';
 
@@ -101,19 +101,22 @@ void main() {
     await controller.initialize();
 
     await tester.pumpWidget(
-      MultiProvider(
-        providers: <SingleChildWidget>[
-          Provider<DraftRecoveryController>.value(value: controller),
-          Provider<DraftFlusher>.value(value: controller),
-          ChangeNotifierProvider<AppPreferences>.value(value: preferences),
-          ChangeNotifierProvider<AppProvider>.value(value: appProvider),
-          ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
-        ],
-        child: const MaterialApp(
-          home: Scaffold(
-            body: SizedBox.expand(
-              child: CanvasGestureHandler(
-                child: ColoredBox(color: Colors.white),
+      InheritedControllerScope<AppPreferences>(
+        controller: preferences,
+        child: InheritedControllerScope<AppProvider>(
+          controller: appProvider,
+          child: InheritedControllerScope<ShellProvider>(
+            controller: shellProvider,
+            child: InheritedScope<DraftRecoveryController>(
+              controller: controller,
+              child: const MaterialApp(
+                home: Scaffold(
+                  body: SizedBox.expand(
+                    child: CanvasGestureHandler(
+                      child: ColoredBox(color: Colors.white),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -158,21 +161,21 @@ void main() {
     await controller.initialize();
 
     await tester.pumpWidget(
-      MultiProvider(
-        providers: <SingleChildWidget>[
-          Provider<DraftRecoveryController>.value(value: controller),
-          Provider<DraftFlusher>.value(value: controller),
-          ChangeNotifierProvider<AppPreferences>.value(value: preferences),
-          ChangeNotifierProvider<AppProvider>.value(value: appProvider),
-          ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
-        ],
-        child: const MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: SizedBox.expand(
-              child: CanvasGestureHandler(
-                child: ColoredBox(color: Colors.white),
+      InheritedControllerScope<AppPreferences>(
+        controller: preferences,
+        child: InheritedControllerScope<AppProvider>(
+          controller: appProvider,
+          child: InheritedControllerScope<ShellProvider>(
+            controller: shellProvider,
+            child: const MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: SizedBox.expand(
+                  child: CanvasGestureHandler(
+                    child: ColoredBox(color: Colors.white),
+                  ),
+                ),
               ),
             ),
           ),
@@ -230,19 +233,22 @@ void main() {
     await controller.initialize();
 
     await tester.pumpWidget(
-      MultiProvider(
-        providers: <SingleChildWidget>[
-          Provider<DraftRecoveryController>.value(value: controller),
-          Provider<DraftFlusher>.value(value: controller),
-          ChangeNotifierProvider<AppPreferences>.value(value: preferences),
-          ChangeNotifierProvider<AppProvider>.value(value: appProvider),
-          ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
-        ],
-        child: const MaterialApp(
-          home: Scaffold(
-            body: SizedBox.expand(
-              child: CanvasGestureHandler(
-                child: ColoredBox(color: Colors.white),
+      InheritedControllerScope<AppPreferences>(
+        controller: preferences,
+        child: InheritedControllerScope<AppProvider>(
+          controller: appProvider,
+          child: InheritedControllerScope<ShellProvider>(
+            controller: shellProvider,
+            child: InheritedScope<DraftRecoveryController>(
+              controller: controller,
+              child: const MaterialApp(
+                home: Scaffold(
+                  body: SizedBox.expand(
+                    child: CanvasGestureHandler(
+                      child: ColoredBox(color: Colors.white),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -309,19 +315,22 @@ void main() {
     await controller.initialize();
 
     await tester.pumpWidget(
-      MultiProvider(
-        providers: <SingleChildWidget>[
-          Provider<DraftRecoveryController>.value(value: controller),
-          Provider<DraftFlusher>.value(value: controller),
-          ChangeNotifierProvider<AppPreferences>.value(value: preferences),
-          ChangeNotifierProvider<AppProvider>.value(value: appProvider),
-          ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
-        ],
-        child: const MaterialApp(
-          home: Scaffold(
-            body: SizedBox.expand(
-              child: CanvasGestureHandler(
-                child: ColoredBox(color: Colors.white),
+      InheritedControllerScope<AppPreferences>(
+        controller: preferences,
+        child: InheritedControllerScope<AppProvider>(
+          controller: appProvider,
+          child: InheritedControllerScope<ShellProvider>(
+            controller: shellProvider,
+            child: InheritedScope<DraftRecoveryController>(
+              controller: controller,
+              child: const MaterialApp(
+                home: Scaffold(
+                  body: SizedBox.expand(
+                    child: CanvasGestureHandler(
+                      child: ColoredBox(color: Colors.white),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

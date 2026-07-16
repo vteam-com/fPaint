@@ -3,19 +3,16 @@ import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/helpers/log_helper.dart';
-import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_storage.dart';
-import 'package:fpaint/recovery/draft_recovery_storage_io.dart'
-    if (dart.library.html) 'package:fpaint/recovery/draft_recovery_storage_web.dart'
-    as draft_storage;
-import 'package:fpaint/widgets/app_snackbar.dart';
+import 'package:fpaint/recovery/storage_io_impl.dart'
+    if (dart.library.html) 'package:fpaint/recovery/storage_web_impl.dart'
+    as storage;
 import 'package:logging/logging.dart';
 
 typedef DraftRecoveryEncoder = Future<List<int>> Function(LayersProvider layers);
@@ -34,9 +31,9 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
     DraftRecoveryEncoder? encoder,
     DraftRecoveryRestorer? restorer,
     Duration? saveDebounce,
-  }) : _storage = storage ?? draft_storage.createDraftRecoveryStorage(),
-       _encoder = encoder ?? _defaultDraftRecoveryEncoder,
-       _restorer = restorer ?? _defaultDraftRecoveryRestorer,
+  }) : _storage = storage ?? _createStorage(),
+       _encoder = encoder ?? _encoderNotConfigured,
+       _restorer = restorer ?? _restorerNotConfigured,
        _saveDebounce = saveDebounce ?? AppDefaults.recoverySaveDebounce;
 
   final AppPreferences preferences;
@@ -126,13 +123,9 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
   }
 
   /// Applies draft bytes to the in-memory document and resets view state.
-  ///
-  /// If [context] is provided, restoration failures are surfaced to users via
-  /// a localized snackbar message before discarding the unreadable draft.
   Future<void> _restoreDraft({
     required final AppProvider appProvider,
     required final Uint8List bytes,
-    final BuildContext? context,
   }) async {
     try {
       final String? sourceFilePath = await preferences.getRecoveryDraftSourceFilePath();
@@ -145,11 +138,6 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
       appProvider.update();
     } catch (error, stackTrace) {
       _log.severe('Failed to restore recovery draft.', error, stackTrace);
-      if (context != null && context.mounted) {
-        context.showSnackBarMessage(
-          context.l10n.errorProcessingFile(error.toString()),
-        );
-      }
       await discardDraft();
     }
   }
@@ -217,18 +205,23 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
 
     return sourceFilePath;
   }
-}
 
-Future<List<int>> _defaultDraftRecoveryEncoder(final LayersProvider layers) {
-  return createOraArchive(
-    layers,
-    includePreviews: false,
-  );
-}
+  static DraftRecoveryStorage _createStorage() {
+    return storage.create();
+  }
 
-Future<void> _defaultDraftRecoveryRestorer(
-  final LayersProvider layers,
-  final Uint8List bytes,
-) {
-  return readOraFileFromBytes(layers, bytes);
+  static Future<List<int>> _encoderNotConfigured(final LayersProvider _) {
+    throw StateError(
+      'DraftRecoveryController requires an encoder to write recovery drafts.',
+    );
+  }
+
+  static Future<void> _restorerNotConfigured(
+    final LayersProvider _,
+    final Uint8List _,
+  ) {
+    throw StateError(
+      'DraftRecoveryController requires a restorer to read recovery drafts.',
+    );
+  }
 }

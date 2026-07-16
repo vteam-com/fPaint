@@ -10,6 +10,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/widgets/app_bottom_sheet.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_icon.dart';
@@ -33,10 +34,10 @@ void main() {
     final bool minimal = false,
   }) async {
     await tester.pumpWidget(
-      ChangeNotifierProvider<LayersProvider>.value(
-        value: appProvider.layers,
-        child: ChangeNotifierProvider<AppProvider>.value(
-          value: appProvider,
+      InheritedControllerScope<LayersProvider>(
+        controller: appProvider.layers,
+        child: InheritedControllerScope<AppProvider>(
+          controller: appProvider,
           child: MaterialApp(
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,

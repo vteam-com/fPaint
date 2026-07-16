@@ -7,10 +7,10 @@ import 'package:fpaint/panels/side_panel/menu.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
-import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const int _exportPanelTransitionPumpCount = 4;
@@ -31,19 +31,21 @@ void main() {
   });
 
   Widget buildHarness() {
-    return MultiProvider(
-      providers: <SingleChildWidget>[
-        ChangeNotifierProvider<AppPreferences>.value(value: preferences),
-        ChangeNotifierProvider<LayersProvider>.value(value: appProvider.layers),
-        ChangeNotifierProvider<ShellProvider>.value(value: shellProvider),
-      ],
-      child: const MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: Align(
-            alignment: Alignment.topLeft,
-            child: MainMenu(),
+    return InheritedControllerScope<AppPreferences>(
+      controller: preferences,
+      child: InheritedControllerScope<LayersProvider>(
+        controller: appProvider.layers,
+        child: InheritedControllerScope<ShellProvider>(
+          controller: shellProvider,
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Align(
+                alignment: Alignment.topLeft,
+                child: MainMenu(),
+              ),
+            ),
           ),
         ),
       ),
