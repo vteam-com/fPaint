@@ -65,7 +65,6 @@ flutter:
     enable-swift-package-manager: true
 
   generate: true
-  # Assets and fonts moved to fpaint_assets package
 
 # dart run flutter_launcher_icons
 flutter_launcher_icons:
