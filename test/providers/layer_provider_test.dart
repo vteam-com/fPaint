@@ -827,4 +827,11 @@ void main() {
       );
     });
   });
+
+  group('cancelPendingThumbnailRebuild', () {
+    test('can be called without error', () {
+      final LayerProvider layer = _createLayer();
+      expect(() => layer.cancelPendingThumbnailRebuild(), returnsNormally);
+    });
+  });
 }

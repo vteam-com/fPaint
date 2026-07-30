@@ -141,10 +141,14 @@ class LayerProvider extends ChangeNotifier {
   void _cacheTopColorsUsed() async {
     topColorsUsed = <ColorUsage>[];
     if (_cachedThumbnailImage != null) {
-      final List<ColorUsage> imageColors = await getImageColors(_cachedThumbnailImage!);
+      final List<ColorUsage> imageColors = await getImageColors(
+        _cachedThumbnailImage!,
+      );
 
       for (final ColorUsage colorUsage in imageColors) {
-        if (!topColorsUsed.any((final ColorUsage c) => c.color == colorUsage.color)) {
+        if (!topColorsUsed.any(
+          (final ColorUsage c) => c.color == colorUsage.color,
+        )) {
           topColorsUsed.add(colorUsage);
         }
       }
@@ -196,7 +200,10 @@ class LayerProvider extends ChangeNotifier {
   void offset(final Offset offset) {
     for (final UserActionDrawing action in actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
-        action.positions[i] = action.positions[i].translate(offset.dx, offset.dy);
+        action.positions[i] = action.positions[i].translate(
+          offset.dx,
+          offset.dy,
+        );
       }
 
       if (action.path != null) {
@@ -208,7 +215,10 @@ class LayerProvider extends ChangeNotifier {
       }
 
       if (action.textObject != null) {
-        action.textObject!.position = action.textObject!.position.translate(offset.dx, offset.dy);
+        action.textObject!.position = action.textObject!.position.translate(
+          offset.dx,
+          offset.dy,
+        );
       }
     }
     clearCache();
@@ -263,10 +273,7 @@ class LayerProvider extends ChangeNotifier {
           offset.dy + imageToAdd.height.toDouble(),
         ),
       ],
-      brush: MyBrush(
-        color: AppColors.transparent,
-        size: 0,
-      ),
+      brush: MyBrush(color: AppColors.transparent, size: 0),
       fillColor: AppColors.transparent,
       image: imageToAdd,
     );
@@ -411,11 +418,14 @@ class LayerProvider extends ChangeNotifier {
     });
   }
 
+  /// Cancels any pending thumbnail rebuilds.
+  void cancelPendingThumbnailRebuild() => _debounceTimer.cancel();
+
   @override
   void dispose() {
     // Cancel the pending thumbnail-rebuild debounce so no timer outlives this
     // layer (e.g. a headless render that never mounts a UI to consume it).
-    _debounceTimer.cancel();
+    cancelPendingThumbnailRebuild();
     _cachedImage?.dispose();
     _cachedImage = null;
     _cachedThumbnailImage?.dispose();
@@ -565,13 +575,25 @@ class LayerProvider extends ChangeNotifier {
   /// one point back from [fromPoint] so the new segments connect to the already
   /// folded ones without re-drawing them. Only pencil/eraser grow point-by-point;
   /// other action types are always folded whole (via [_renderAction]).
-  void _renderFreehandActionTail(final ui.Canvas canvas, final UserActionDrawing action, final int fromPoint) {
+  void _renderFreehandActionTail(
+    final ui.Canvas canvas,
+    final UserActionDrawing action,
+    final int fromPoint,
+  ) {
     final List<Offset> tail = action.positions.sublist(fromPoint - AppMath.one);
     switch (action.action) {
       case ActionType.pencil:
-        applyAction(canvas, action.clipPath, (final Canvas c) => renderPencilStroke(c, tail, action.brush!));
+        applyAction(
+          canvas,
+          action.clipPath,
+          (final Canvas c) => renderPencilStroke(c, tail, action.brush!),
+        );
       case ActionType.eraser:
-        applyAction(canvas, action.clipPath, (final Canvas c) => renderPencilEraserStroke(c, tail, action.brush!));
+        applyAction(
+          canvas,
+          action.clipPath,
+          (final Canvas c) => renderPencilEraserStroke(c, tail, action.brush!),
+        );
       default:
         _renderAction(canvas, action);
     }
@@ -579,10 +601,7 @@ class LayerProvider extends ChangeNotifier {
 
   /// Converts the layer to an image for storage.
   ui.Image toImageForStorage(final Size size) {
-    return renderImageWH(
-      size.width.toInt(),
-      size.height.toInt(),
-    );
+    return renderImageWH(size.width.toInt(), size.height.toInt());
   }
 
   /// Renders the layer to an image with the given width and height.
@@ -618,10 +637,7 @@ class LayerProvider extends ChangeNotifier {
   void applyAction(
     final Canvas canvas,
     final ui.Path? clipPath,
-    final void Function(
-      Canvas,
-    )
-    actionFunction,
+    final void Function(Canvas) actionFunction,
   ) {
     if (clipPath != null) {
       canvas.save();
@@ -643,7 +659,9 @@ class LayerProvider extends ChangeNotifier {
   /// lives in [_renderAction] so this method stays a thin dispatcher.
   void renderLayer(final Canvas canvas) {
     final Paint layerPaint = Paint()
-      ..color = AppColors.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt())
+      ..color = AppColors.black.withAlpha(
+        (AppLimits.rgbChannelMax * opacity).toInt(),
+      )
       ..blendMode = blendMode;
 
     // Fast path: when the layer is just its cached raster (not mid-stroke, no
@@ -877,10 +895,7 @@ class LayerProvider extends ChangeNotifier {
         applyAction(
           canvas,
           userAction.clipPath,
-          (final Canvas theCanvasToUse) => renderText(
-            theCanvasToUse,
-            userAction.textObject!,
-          ),
+          (final Canvas theCanvasToUse) => renderText(theCanvasToUse, userAction.textObject!),
         );
         break;
     }
