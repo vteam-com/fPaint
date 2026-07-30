@@ -4,6 +4,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.2] - 2026-07-30
+
+### Update
+- fPaint is now reusable by other Flutter app
+
 ## [1.9.1] - 2026-07-16
 
 ### Update
