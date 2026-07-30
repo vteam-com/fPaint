@@ -31,6 +31,7 @@ class LayerSelector extends StatelessWidget {
   const LayerSelector({
     super.key,
     required this.context,
+    required this.layers,
     required this.layer,
     required this.minimal,
     required this.isSelected,
@@ -49,11 +50,16 @@ class LayerSelector extends StatelessWidget {
   /// The layer to display.
   final LayerProvider layer;
 
+  /// The document this layer belongs to. Passed in by the parent (which already
+  /// holds it) rather than resolved from context, so the selector still works
+  /// when built outside the editor's [InheritedControllerScope] (e.g. in an
+  /// overlay/dialog subtree rooted above that scope).
+  final LayersProvider layers;
+
   /// Whether to display the layer in minimal mode.
   final bool minimal;
   @override
   Widget build(final BuildContext context) {
-    final LayersProvider layers = LayersProvider.of(context);
     return Container(
       margin: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
       padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
@@ -67,7 +73,6 @@ class LayerSelector extends StatelessWidget {
       ),
       child: minimal
           ? _buildForSmallSurface(
-              context,
               layer,
             )
           : _buildForLargeSurface(
@@ -117,7 +122,7 @@ class LayerSelector extends StatelessWidget {
             key: Keys.layerRenameApplyButton,
             onPressed: () {
               Navigator.pop(dialogContext, controller.text);
-              LayersProvider.of(dialogContext).update();
+              layers.update();
             },
             text: l10n.apply,
           ),
@@ -176,11 +181,8 @@ class LayerSelector extends StatelessWidget {
 
   /// Builds the layer selector for a small surface.
   Widget _buildForSmallSurface(
-    final BuildContext context,
     final LayerProvider layer,
   ) {
-    final LayersProvider layers = LayersProvider.of(context);
-
     return AppTooltip(
       message: information(),
       child: Column(

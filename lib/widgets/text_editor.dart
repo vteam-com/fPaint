@@ -6,6 +6,7 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
@@ -53,32 +54,39 @@ class _TextEditorState extends State<TextEditor> {
   /// Displays the text editing dialog for the currently selected text object.
   void _showEditTextDialog() {
     final AppLocalizations l10n = context.l10n;
+    // Capture the editor's layer model so the sheet subtree (and any color
+    // picker opened from within it) can resolve [LayersProvider.of]; the sheet
+    // is pushed onto the overlay, above the editor's scope.
+    final LayersProvider layersModel = LayersProvider.of(context, listen: false);
 
     showAppBottomSheet<void>(
       context: context,
       barrierColor: AppColors.transparent,
       builder: (final BuildContext _) {
-        return TextEditorDialog(
-          title: l10n.editText,
-          submitLabel: l10n.apply,
-          position: textObject.position,
-          initialText: textObject.text,
-          initialStyle: TextToolState.fromTextObject(textObject),
-          onDelete: () {
-            _deleteText();
-          },
-          onSubmitted: (final TextObject updatedTextObject) {
-            textObject.text = updatedTextObject.text;
-            textObject.position = updatedTextObject.position;
-            textObject.size = updatedTextObject.size;
-            textObject.color = updatedTextObject.color;
-            textObject.fontWeight = updatedTextObject.fontWeight;
-            textObject.fontStyle = updatedTextObject.fontStyle;
-            textObject.textAlign = updatedTextObject.textAlign;
-            appProvider.selectedTextObject = null;
-            appProvider.adoptTextToolStateFromObject(updatedTextObject);
-            appProvider.update();
-          },
+        return InheritedControllerScope<LayersProvider>(
+          controller: layersModel,
+          child: TextEditorDialog(
+            title: l10n.editText,
+            submitLabel: l10n.apply,
+            position: textObject.position,
+            initialText: textObject.text,
+            initialStyle: TextToolState.fromTextObject(textObject),
+            onDelete: () {
+              _deleteText();
+            },
+            onSubmitted: (final TextObject updatedTextObject) {
+              textObject.text = updatedTextObject.text;
+              textObject.position = updatedTextObject.position;
+              textObject.size = updatedTextObject.size;
+              textObject.color = updatedTextObject.color;
+              textObject.fontWeight = updatedTextObject.fontWeight;
+              textObject.fontStyle = updatedTextObject.fontStyle;
+              textObject.textAlign = updatedTextObject.textAlign;
+              appProvider.selectedTextObject = null;
+              appProvider.adoptTextToolStateFromObject(updatedTextObject);
+              appProvider.update();
+            },
+          ),
         );
       },
     ).then((_) {

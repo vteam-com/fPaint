@@ -35,13 +35,15 @@ const String _loadedImageDefaultName = 'Loaded Image';
 
 final Logger _log = Logger(logNameImportFiles);
 
-/// Shows import feedback via the global overlay so it survives async gaps and
-/// does not depend on a possibly-unmounted [BuildContext].
-void _showImportFeedback(
-  final String message, {
-  final Duration duration = AppDefaults.fileImportFeedbackDuration,
-}) {
-  showGlobalSnackBarMessage(message, duration: duration);
+/// Shows an import error via the global overlay (so it survives async gaps and
+/// does not depend on a possibly-unmounted [BuildContext]), with a copy button
+/// so the user can copy the (often exception-bearing) message.
+void _showImportError(final String message) {
+  showGlobalSnackBarMessage(
+    message,
+    duration: AppDefaults.fileImportFeedbackDuration,
+    copyable: true,
+  );
 }
 
 /// Handles the creation of a new file within the application.
@@ -263,12 +265,12 @@ Future<bool> openFileFromPath({
       }
     } catch (e) {
       // General error catch, readImageFromFilePath might have already shown a SnackBar for decode errors
-      _showImportFeedback(l10n.errorProcessingFile(e.toString()));
+      _showImportError(l10n.errorProcessingFile(e.toString()));
       return false;
     }
   } else {
     // Show unsupported format message
-    _showImportFeedback(l10n.fileFormatNotSupported(extension));
+    _showImportError(l10n.fileFormatNotSupported(extension));
     return false;
   }
 }
@@ -344,7 +346,7 @@ Future<bool> _decodeAndApplyImage(
 
     return true; // Success
   } catch (e) {
-    _showImportFeedback(l10n.failedToLoadImage(e.toString()));
+    _showImportError(l10n.failedToLoadImage(e.toString()));
     return false; // Failure
   }
 }
@@ -360,7 +362,7 @@ Future<bool> readImageFromFilePath(
     final Uint8List fileBytes = await File(path).readAsBytes();
     return await _decodeAndApplyImage(layers, fileBytes, l10n, imageName: imageName);
   } catch (e) {
-    _showImportFeedback(l10n.errorReadingFile(e.toString()));
+    _showImportError(l10n.errorReadingFile(e.toString()));
     return false;
   }
 }
@@ -389,10 +391,10 @@ Future<bool> _readHeifFromFilePath(
     final Uint8List decodableBytes = await decodeHeicBytes(fileBytes);
     return await _decodeAndApplyImage(layers, decodableBytes, l10n, imageName: imageName);
   } on HeicConversionException {
-    _showImportFeedback(l10n.fileFormatNotSupportedOnPlatform(extension));
+    _showImportError(l10n.fileFormatNotSupportedOnPlatform(extension));
     return false;
   } catch (e) {
-    _showImportFeedback(l10n.errorReadingFile(e.toString()));
+    _showImportError(l10n.errorReadingFile(e.toString()));
     return false;
   }
 }
@@ -410,7 +412,7 @@ Future<bool> _readHeifFromBytes(
     final Uint8List decodableBytes = await decodeHeicBytes(bytes);
     return await _decodeAndApplyImage(layers, decodableBytes, l10n, imageName: imageName);
   } on HeicConversionException {
-    _showImportFeedback(l10n.fileFormatNotSupportedOnPlatform(extension));
+    _showImportError(l10n.fileFormatNotSupportedOnPlatform(extension));
     return false;
   }
 }
@@ -440,7 +442,7 @@ Future<void> onFileDropped({
 
   final String extension = path.split('.').last.toLowerCase();
   if (!isFileExtensionSupported(extension)) {
-    _showImportFeedback(context.l10n.fileFormatNotSupported(extension));
+    _showImportError(context.l10n.fileFormatNotSupported(extension));
     return;
   }
 
@@ -512,6 +514,6 @@ Future<void> addFileAsLayer({
     layers.selectedLayer.addImage(imageToAdd: image);
     layers.update();
   } catch (e) {
-    _showImportFeedback(l10n.failedToLoadImage(e.toString()));
+    _showImportError(l10n.failedToLoadImage(e.toString()));
   }
 }

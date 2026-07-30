@@ -42,5 +42,17 @@ void main() {
       final Uint8List bytes = await prepareWebpBytes(layers);
       expect(bytes, isNotEmpty);
     });
+
+    test('ORA then PNG export does not dispose the cached image twice', () async {
+      // The page editor saves via exportOra() then exportThumbnailPng(). The
+      // ORA export's preview capture must not dispose layers.cachedImage, or the
+      // following PNG capture reads a disposed image and trips an assertion.
+      final Uint8List ora = await prepareOraBytes(layers);
+      final Uint8List png = await preparePngBytes(layers);
+      expect(ora, isNotEmpty);
+      expect(png, isNotEmpty);
+      expect(png[0], 137);
+      expect(png[1], 80);
+    });
   });
 }

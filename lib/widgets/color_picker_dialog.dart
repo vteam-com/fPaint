@@ -6,6 +6,7 @@ import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_preview.dart';
@@ -356,17 +357,25 @@ void showColorPicker({
   required final ValueChanged<Color> onSelectedColor,
   final Widget? titleIcon,
 }) {
+  // The bottom sheet is pushed onto the app's navigator/overlay, which sits
+  // *above* the [InheritedControllerScope] that the editor inserts. Capture the
+  // model from this (in-scope) context and re-provide it into the sheet subtree
+  // so [ColorPickerDialog] can resolve it via [LayersProvider.of].
+  final LayersProvider layersModel = LayersProvider.of(context, listen: false);
   showAppBottomSheet<void>(
     context: context,
     barrierColor: AppColors.transparent,
     builder: (final BuildContext _) {
-      return ColorPickerDialog(
-        title: title,
-        titleIcon: titleIcon ?? AppSvgIcon(icon: AppIcon.waterDrop, color: color),
-        color: color,
-        onColorChanged: (final Color color) {
-          onSelectedColor(color);
-        },
+      return InheritedControllerScope<LayersProvider>(
+        controller: layersModel,
+        child: ColorPickerDialog(
+          title: title,
+          titleIcon: titleIcon ?? AppSvgIcon(icon: AppIcon.waterDrop, color: color),
+          color: color,
+          onColorChanged: (final Color color) {
+            onSelectedColor(color);
+          },
+        ),
       );
     },
   );

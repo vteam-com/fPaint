@@ -886,7 +886,11 @@ Future<({bool disposeImage, ui.Image image})> _captureOraMergedImage(final Layer
     return (disposeImage: false, image: cachedImage);
   }
 
-  return (disposeImage: true, image: await layers.capturePainterToImage());
+  // capturePainterToImage() stores the result in layers.cachedImage (and clears
+  // hasChanged), so the provider owns it — disposing it here would leave
+  // cachedImage dangling and trip an Image.dispose assertion on the next
+  // capture (e.g. a following preparePngBytes for a thumbnail).
+  return (disposeImage: false, image: await layers.capturePainterToImage());
 }
 
 /// Builds the ORA thumbnail directly from the merged image without a PNG round-trip.

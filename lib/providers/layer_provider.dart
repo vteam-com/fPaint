@@ -411,6 +411,20 @@ class LayerProvider extends ChangeNotifier {
     });
   }
 
+  @override
+  void dispose() {
+    // Cancel the pending thumbnail-rebuild debounce so no timer outlives this
+    // layer (e.g. a headless render that never mounts a UI to consume it).
+    _debounceTimer.cancel();
+    _cachedImage?.dispose();
+    _cachedImage = null;
+    _cachedThumbnailImage?.dispose();
+    _cachedThumbnailImage = null;
+    _strokeBaseline?.dispose();
+    _strokeBaseline = null;
+    super.dispose();
+  }
+
   /// Captures the current committed composite as the baseline for a freehand
   /// stroke (brush/pencil/eraser).
   ///

@@ -701,22 +701,28 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       context: context,
       barrierColor: AppColors.transparent,
       builder: (final BuildContext _) {
-        return TextEditorDialog(
-          title: l10n.addText,
-          submitLabel: l10n.addText,
-          position: position,
-          initialText: '',
-          initialStyle: appProvider.textToolState.copy(),
-          onSubmitted: (final TextObject textObject) {
-            appProvider.adoptTextToolStateFromObject(textObject);
-            appProvider.recordExecuteDrawingActionToSelectedLayer(
-              action: UserActionDrawing(
-                action: ActionType.text,
-                positions: <ui.Offset>[position],
-                textObject: textObject,
-              ),
-            );
-          },
+        // The sheet is pushed onto the overlay, above the editor's provider
+        // scope; re-provide the layer model so a color picker opened from the
+        // text editor can still resolve [LayersProvider.of].
+        return InheritedControllerScope<LayersProvider>(
+          controller: appProvider.layers,
+          child: TextEditorDialog(
+            title: l10n.addText,
+            submitLabel: l10n.addText,
+            position: position,
+            initialText: '',
+            initialStyle: appProvider.textToolState.copy(),
+            onSubmitted: (final TextObject textObject) {
+              appProvider.adoptTextToolStateFromObject(textObject);
+              appProvider.recordExecuteDrawingActionToSelectedLayer(
+                action: UserActionDrawing(
+                  action: ActionType.text,
+                  positions: <ui.Offset>[position],
+                  textObject: textObject,
+                ),
+              );
+            },
+          ),
         );
       },
     );
