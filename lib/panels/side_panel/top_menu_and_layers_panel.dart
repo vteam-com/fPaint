@@ -73,6 +73,7 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
               onDoubleTap: () => widget.layers.layersToggleVisibility(layer),
               child: LayerSelector(
                 context: widget.parentContext,
+                layers: widget.layers,
                 layer: layer,
                 minimal: !widget.shellProvider.isSidePanelExpanded,
                 isSelected: layer.isSelected,

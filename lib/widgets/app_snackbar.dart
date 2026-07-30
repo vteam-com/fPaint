@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
+import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_progress.dart';
 import 'package:logging/logging.dart';
 
@@ -76,12 +79,16 @@ class AppNotificationOverlay {
   static const Duration _defaultDuration = Duration(seconds: 4);
 
   /// Shows a text notification at the bottom of the screen.
+  ///
+  /// When [copyable] is true (e.g. for errors), a copy button appears on the far
+  /// right that copies the full message (and [subtitle]) to the clipboard.
   static void show(
     final BuildContext context,
     final String message, {
     final String? subtitle,
     final Duration? duration,
     final bool isProgress = false,
+    final bool copyable = false,
   }) {
     _dismiss();
 
@@ -131,6 +138,26 @@ class AppNotificationOverlay {
                           ),
                         ],
                       )
+                    : copyable
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Flexible(
+                            child: _buildSnackBarTextContent(
+                              message,
+                              subtitle: subtitle,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.big),
+                          AppButtonIcon(
+                            icon: AppIcon.copy,
+                            tooltip: context.l10n.copyToClipboard,
+                            color: AppColors.white,
+                            onPressed: () => _copyToClipboard(message, subtitle),
+                          ),
+                        ],
+                      )
                     : _buildSnackBarTextContent(
                         message,
                         subtitle: subtitle,
@@ -146,6 +173,13 @@ class AppNotificationOverlay {
     if (isProgress == false) {
       _timer = Timer(duration ?? _defaultDuration, _dismiss);
     }
+  }
+
+  /// Copies the notification's [message] (and [subtitle], when present) to the
+  /// system clipboard.
+  static void _copyToClipboard(final String message, final String? subtitle) {
+    final String text = subtitle == null ? message : '$message\n$subtitle';
+    unawaited(Clipboard.setData(ClipboardData(text: text)));
   }
 
   /// Dismisses the active notification overlay, if any.
@@ -167,6 +201,7 @@ void showSnackBarIfMounted(
   final String message, {
   final String? subtitle,
   final Duration? duration,
+  final bool copyable = false,
 }) {
   if (!context.mounted) {
     return;
@@ -177,6 +212,7 @@ void showSnackBarIfMounted(
     message,
     subtitle: subtitle,
     duration: duration,
+    copyable: copyable,
   );
 }
 
@@ -185,6 +221,7 @@ void showGlobalSnackBarMessage(
   final String message, {
   final String? subtitle,
   final Duration? duration,
+  final bool copyable = false,
 }) {
   final BuildContext? context = _resolveGlobalSnackBarContext();
   if (context == null) {
@@ -196,6 +233,7 @@ void showGlobalSnackBarMessage(
     message,
     subtitle: subtitle,
     duration: duration,
+    copyable: copyable,
   );
 }
 
@@ -298,16 +336,20 @@ void showGlobalSavedFileSnackBar(
 /// Convenience extension so any [BuildContext] can show a notification overlay.
 extension AppSnackBarBuildContextX on BuildContext {
   /// Shows a notification overlay message if the context is still mounted.
+  ///
+  /// Pass [copyable] as true for errors so a copy button is shown.
   void showSnackBarMessage(
     final String message, {
     final String? subtitle,
     final Duration? duration,
+    final bool copyable = false,
   }) {
     showSnackBarIfMounted(
       this,
       message,
       subtitle: subtitle,
       duration: duration,
+      copyable: copyable,
     );
   }
 

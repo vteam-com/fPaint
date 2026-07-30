@@ -334,7 +334,10 @@ Future<void> _openRecentFile(
       await AppPreferences.of(context).addRecentFile(path);
     }
   } else if (context.mounted) {
-    context.showSnackBarMessage(context.l10n.errorReadingFile(path));
+    context.showSnackBarMessage(
+      context.l10n.errorReadingFile(path),
+      copyable: true,
+    );
   }
 }
 

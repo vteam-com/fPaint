@@ -78,6 +78,10 @@ class LayersProvider extends ChangeNotifier {
     _canvasRepaintNotifier.dispose();
     _layerListStructureNotifier.dispose();
     _topColorsNotifier.dispose();
+    // Dispose each layer so its debounce timer and cached textures are released.
+    for (final LayerProvider layer in _list) {
+      layer.dispose();
+    }
     super.dispose();
   }
 
