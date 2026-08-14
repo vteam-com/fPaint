@@ -24,12 +24,12 @@ final TextStyle _snackBarSubtitleStyle = AppTextStyle.subtitle.copyWith(
   fontSize: AppFontSize.medium,
 );
 
-String _fileNameFromPath(final String path) {
+String _fileNameFromPath(String path) {
   final List<String> parts = path.split(_pathSeparatorPattern);
   return parts.isEmpty ? path : parts.last;
 }
 
-OverlayState? _resolveSnackBarOverlayState(final BuildContext context) {
+OverlayState? _resolveSnackBarOverlayState(BuildContext context) {
   return appSnackBarNavigatorKey.currentState?.overlay ?? Overlay.maybeOf(context, rootOverlay: true);
 }
 
@@ -39,8 +39,8 @@ BuildContext? _resolveGlobalSnackBarContext() {
 
 /// Builds the text block shown inside snackbar notifications.
 Widget _buildSnackBarTextContent(
-  final String message, {
-  final String? subtitle,
+  String message, {
+  String? subtitle,
 }) {
   if (subtitle == null) {
     return Text(
@@ -83,12 +83,12 @@ class AppNotificationOverlay {
   /// When [copyable] is true (e.g. for errors), a copy button appears on the far
   /// right that copies the full message (and [subtitle]) to the clipboard.
   static void show(
-    final BuildContext context,
-    final String message, {
-    final String? subtitle,
-    final Duration? duration,
-    final bool isProgress = false,
-    final bool copyable = false,
+    BuildContext context,
+    String message, {
+    String? subtitle,
+    Duration? duration,
+    bool isProgress = false,
+    bool copyable = false,
   }) {
     _dismiss();
 
@@ -98,7 +98,7 @@ class AppNotificationOverlay {
     }
 
     _activeEntry = OverlayEntry(
-      builder: (final BuildContext _) {
+      builder: (BuildContext _) {
         return Positioned(
           bottom: AppSpacing.large,
           left: AppSpacing.large,
@@ -177,7 +177,7 @@ class AppNotificationOverlay {
 
   /// Copies the notification's [message] (and [subtitle], when present) to the
   /// system clipboard.
-  static void _copyToClipboard(final String message, final String? subtitle) {
+  static void _copyToClipboard(String message, String? subtitle) {
     final String text = subtitle == null ? message : '$message\n$subtitle';
     unawaited(Clipboard.setData(ClipboardData(text: text)));
   }
@@ -197,11 +197,11 @@ class AppNotificationOverlay {
 
 /// Shows a notification overlay only when [context] is still mounted.
 void showSnackBarIfMounted(
-  final BuildContext context,
-  final String message, {
-  final String? subtitle,
-  final Duration? duration,
-  final bool copyable = false,
+  BuildContext context,
+  String message, {
+  String? subtitle,
+  Duration? duration,
+  bool copyable = false,
 }) {
   if (!context.mounted) {
     return;
@@ -218,10 +218,10 @@ void showSnackBarIfMounted(
 
 /// Shows a global notification overlay message using the app navigator context.
 void showGlobalSnackBarMessage(
-  final String message, {
-  final String? subtitle,
-  final Duration? duration,
-  final bool copyable = false,
+  String message, {
+  String? subtitle,
+  Duration? duration,
+  bool copyable = false,
 }) {
   final BuildContext? context = _resolveGlobalSnackBarContext();
   if (context == null) {
@@ -239,8 +239,8 @@ void showGlobalSnackBarMessage(
 
 /// Shows a persistent notification with a progress indicator.
 void showGlobalProgressSnackBarMessage(
-  final String message, {
-  final String? subtitle,
+  String message, {
+  String? subtitle,
 }) {
   final BuildContext? context = _resolveGlobalSnackBarContext();
   if (context == null) {
@@ -262,9 +262,9 @@ void dismissGlobalSnackBarMessage() {
 
 /// Runs an asynchronous task while showing global progress feedback.
 Future<T> runWithGlobalProgressSnackBar<T>({
-  required final Future<T> Function() task,
-  required final VoidCallback showInProgress,
-  final VoidCallback? showOnSuccess,
+  required Future<T> Function() task,
+  required VoidCallback showInProgress,
+  VoidCallback? showOnSuccess,
 }) async {
   showInProgress();
 
@@ -285,10 +285,10 @@ Future<T> runWithGlobalProgressSnackBar<T>({
 
 /// Runs a file save task with global saving and saved notifications.
 Future<T> runWithGlobalFileSaveSnackBar<T>({
-  required final String initialFilePath,
-  required final String Function() completedFilePathBuilder,
-  required final Future<T> Function() task,
-  final Duration? completedDuration,
+  required String initialFilePath,
+  required String Function() completedFilePathBuilder,
+  required Future<T> Function() task,
+  Duration? completedDuration,
 }) {
   return runWithGlobalProgressSnackBar<T>(
     showInProgress: () {
@@ -305,7 +305,7 @@ Future<T> runWithGlobalFileSaveSnackBar<T>({
 }
 
 /// Shows a persistent save-in-progress notification with the target file name.
-void showGlobalSavingFileSnackBar(final String filePath) {
+void showGlobalSavingFileSnackBar(String filePath) {
   final BuildContext? context = _resolveGlobalSnackBarContext();
   if (context == null) {
     return;
@@ -319,8 +319,8 @@ void showGlobalSavingFileSnackBar(final String filePath) {
 
 /// Shows a global save confirmation snackbar with the saved file name.
 void showGlobalSavedFileSnackBar(
-  final String filePath, {
-  final Duration? duration,
+  String filePath, {
+  Duration? duration,
 }) {
   final BuildContext? context = _resolveGlobalSnackBarContext();
   if (context == null) {
@@ -339,10 +339,10 @@ extension AppSnackBarBuildContextX on BuildContext {
   ///
   /// Pass [copyable] as true for errors so a copy button is shown.
   void showSnackBarMessage(
-    final String message, {
-    final String? subtitle,
-    final Duration? duration,
-    final bool copyable = false,
+    String message, {
+    String? subtitle,
+    Duration? duration,
+    bool copyable = false,
   }) {
     showSnackBarIfMounted(
       this,
@@ -355,8 +355,8 @@ extension AppSnackBarBuildContextX on BuildContext {
 
   /// Shows a save confirmation snackbar with the saved file name as subtitle.
   void showSavedFileSnackBar(
-    final String filePath, {
-    final Duration? duration,
+    String filePath, {
+    Duration? duration,
   }) {
     showSnackBarMessage(
       l10n.savedLabel,

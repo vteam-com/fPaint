@@ -9,7 +9,6 @@ import 'package:file_picker/file_picker.dart' show FileType;
 import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,6 +38,7 @@ import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 import 'package:image/image.dart' as img;
+import 'package:material_ui/material_ui.dart';
 
 /// Number of incremental steps used in human-like drag gestures.
 const double _humanDragSteps = 3;
@@ -377,7 +377,7 @@ class InteractionTracker {
 // ---------------------------------------------------------------------------
 
 /// Configures the test viewport to the integration-test tablet landscape size.
-void configureTestViewport(final WidgetTester tester) {
+void configureTestViewport(WidgetTester tester) {
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
   tester.view.devicePixelRatio = _unitTestDevicePixelRatio;
@@ -388,7 +388,7 @@ void configureTestViewport(final WidgetTester tester) {
 }
 
 /// Centers and zooms the canvas to fit the viewport.
-Future<void> prepareCanvasViewport(final WidgetTester tester) async {
+Future<void> prepareCanvasViewport(WidgetTester tester) async {
   final Finder centerButton = find.byKey(Keys.floatActionCenter);
   if (centerButton.evaluate().isNotEmpty) {
     await tapByKey(tester, Keys.floatActionCenter);
@@ -406,9 +406,9 @@ Future<void> prepareCanvasViewport(final WidgetTester tester) async {
 
 /// Captures the post-interaction frame, optionally pumping once first.
 Future<void> _captureRecordedInteraction(
-  final WidgetTester tester, {
-  required final bool settle,
-  final bool pumpBeforeCapture = true,
+  WidgetTester tester, {
+  required bool settle,
+  bool pumpBeforeCapture = true,
 }) async {
   if (pumpBeforeCapture) {
     await tester.pump();
@@ -421,8 +421,8 @@ Future<void> _captureRecordedInteraction(
 }
 
 Future<void> _waitForEffectPreviewCommit(
-  final WidgetTester tester, {
-  required final AppProvider appProvider,
+  WidgetTester tester, {
+  required AppProvider appProvider,
 }) async {
   for (int index = 0; index < _effectControlsWaitPumpCount; index++) {
     if (!appProvider.effectPreviewModel.isVisible && !tester.binding.hasScheduledFrame) {
@@ -435,27 +435,27 @@ Future<void> _waitForEffectPreviewCommit(
 }
 
 /// Returns the [BuildContext] from the rendered [MainView].
-BuildContext mainViewContext(final WidgetTester tester) {
+BuildContext mainViewContext(WidgetTester tester) {
   return tester.element(find.byType(MainView));
 }
 
 /// Returns the non-listening [AppProvider] from the rendered [MainView].
 AppProvider appProviderFromTester(
-  final WidgetTester tester, {
-  final bool listen = false,
+  WidgetTester tester, {
+  bool listen = false,
 }) {
   return AppProvider.of(mainViewContext(tester), listen: listen);
 }
 
 /// Returns the [LayersProvider] from the rendered [MainView].
-LayersProvider layersProviderFromTester(final WidgetTester tester) {
+LayersProvider layersProviderFromTester(WidgetTester tester) {
   return LayersProvider.of(mainViewContext(tester));
 }
 
 /// Pumps one frame plus a dialog transition duration.
 Future<void> pumpForDialogTransition(
-  final WidgetTester tester, {
-  final int transitionMs = _dialogTransitionMs,
+  WidgetTester tester, {
+  int transitionMs = _dialogTransitionMs,
 }) async {
   await tester.pump();
 
@@ -469,12 +469,12 @@ Future<void> pumpForDialogTransition(
 }
 
 /// Opens the main menu and waits for its transition to finish.
-Future<void> openMainMenu(final WidgetTester tester) async {
+Future<void> openMainMenu(WidgetTester tester) async {
   await tapByKey(tester, Keys.mainMenuButton);
   await pumpForDialogTransition(tester);
 }
 
-Future<ui.Image> _captureRenderedMainViewCanvasImage(final WidgetTester tester) async {
+Future<ui.Image> _captureRenderedMainViewCanvasImage(WidgetTester tester) async {
   await tester.pump();
 
   final BuildContext context = mainViewContext(tester);
@@ -534,11 +534,11 @@ Future<ui.Image> _captureRenderedMainViewCanvasImage(final WidgetTester tester) 
 
 /// Records a tap-like interaction, performs it, and captures the result.
 Future<void> _performRecordedTap(
-  final WidgetTester tester, {
-  required final Offset position,
-  required final Future<void> Function() tapAction,
-  required final bool settle,
-  final bool pumpBeforeCapture = true,
+  WidgetTester tester, {
+  required Offset position,
+  required Future<void> Function() tapAction,
+  required bool settle,
+  bool pumpBeforeCapture = true,
 }) async {
   InteractionTracker.recordTap(position);
   await tapAction();
@@ -551,9 +551,9 @@ Future<void> _performRecordedTap(
 
 /// Simulates a human-like drag from [start] to [end] in incremental steps.
 Future<void> dragLikeHuman(
-  final WidgetTester tester,
-  final Offset start,
-  final Offset end,
+  WidgetTester tester,
+  Offset start,
+  Offset end,
 ) async {
   InteractionTracker.recordDrag(start, end);
 
@@ -577,8 +577,8 @@ Future<void> dragLikeHuman(
 /// When a [UnitTestVideoRecorder] is active, a frame with a red target
 /// overlay is automatically captured after the tap.
 Future<void> tapLikeHuman(
-  final WidgetTester tester,
-  final Offset position,
+  WidgetTester tester,
+  Offset position,
 ) async {
   await _performRecordedTap(
     tester,
@@ -602,8 +602,8 @@ Future<void> tapLikeHuman(
 /// This is useful for actions that intentionally kick off longer-running work,
 /// such as export flows, where an immediate `pumpAndSettle` can hang the test.
 Future<void> tapLikeHumanWithoutSettling(
-  final WidgetTester tester,
-  final Offset position,
+  WidgetTester tester,
+  Offset position,
 ) async {
   await _performRecordedTap(
     tester,
@@ -621,8 +621,8 @@ Future<void> tapLikeHumanWithoutSettling(
 }
 
 Future<void> pressListTileWithoutSettling(
-  final WidgetTester tester,
-  final Finder target,
+  WidgetTester tester,
+  Finder target,
 ) async {
   expect(target, findsOneWidget, reason: 'Should find exactly one visible list tile');
 
@@ -644,8 +644,8 @@ Future<void> pressListTileWithoutSettling(
 }
 
 Future<void> openPopupMenuButtonWithoutSettling<T>(
-  final WidgetTester tester,
-  final Finder target,
+  WidgetTester tester,
+  Finder target,
 ) async {
   expect(target, findsOneWidget, reason: 'Should find exactly one visible popup menu button');
 
@@ -658,8 +658,8 @@ Future<void> openPopupMenuButtonWithoutSettling<T>(
 }
 
 Future<void> tapFinderWithoutSettling(
-  final WidgetTester tester,
-  final Finder target,
+  WidgetTester tester,
+  Finder target,
 ) async {
   expect(target, findsOneWidget, reason: 'Should find exactly one visible tappable widget');
 
@@ -681,7 +681,7 @@ Future<void> tapFinderWithoutSettling(
 ///
 /// When a [UnitTestVideoRecorder] is active, a frame with a red target
 /// overlay is automatically captured after the tap.
-Future<void> tapByKey(final WidgetTester tester, final Key key) async {
+Future<void> tapByKey(WidgetTester tester, Key key) async {
   final Finder found = find.byKey(key);
   if (key == Keys.toolSelector && found.evaluate().isEmpty) {
     await activateSelectorTool(tester);
@@ -708,7 +708,7 @@ bool _hasSelectorModeButtons() {
       find.byKey(Keys.toolSelectorModeWand).evaluate().isNotEmpty;
 }
 
-Future<void> _waitForSelectorModeButtons(final WidgetTester tester) async {
+Future<void> _waitForSelectorModeButtons(WidgetTester tester) async {
   for (int i = 0; i < 30; i++) {
     if (_hasSelectorModeButtons()) {
       return;
@@ -718,8 +718,8 @@ Future<void> _waitForSelectorModeButtons(final WidgetTester tester) async {
 }
 
 Future<void> _waitForWandSelectionIdle(
-  final WidgetTester tester, {
-  required final AppProvider appProvider,
+  WidgetTester tester, {
+  required AppProvider appProvider,
 }) async {
   for (int index = 0; index < _wandSelectionWaitPumpCount; index++) {
     final bool hasPendingRequest = appProvider.wandSelection.hasPendingRequest;
@@ -731,7 +731,7 @@ Future<void> _waitForWandSelectionIdle(
 }
 
 /// Activates selector mode using whichever selector entry is currently visible.
-Future<void> activateSelectorTool(final WidgetTester tester) async {
+Future<void> activateSelectorTool(WidgetTester tester) async {
   if (_hasSelectorModeButtons()) {
     return;
   }
@@ -765,11 +765,11 @@ Future<void> activateSelectorTool(final WidgetTester tester) async {
 
 /// Finds the widget matching [tooltip] and taps it.
 Future<void> tapByTooltip(
-  final WidgetTester tester,
-  final String tooltip,
+  WidgetTester tester,
+  String tooltip,
 ) async {
   Finder found = find.byWidgetPredicate(
-    (final Widget w) => w is AppTooltip && w.message == tooltip,
+    (Widget w) => w is AppTooltip && w.message == tooltip,
   );
 
   // Retry once after toggling shell mode in case the tool strip is hidden.
@@ -777,7 +777,7 @@ Future<void> tapByTooltip(
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
     found = find.byWidgetPredicate(
-      (final Widget w) => w is AppTooltip && w.message == tooltip,
+      (Widget w) => w is AppTooltip && w.message == tooltip,
     );
   }
 
@@ -788,12 +788,12 @@ Future<void> tapByTooltip(
 
 /// Drags the widget identified by [tooltip] by [delta].
 Future<void> dragByTooltip(
-  final WidgetTester tester, {
-  required final String tooltip,
-  required final Offset delta,
+  WidgetTester tester, {
+  required String tooltip,
+  required Offset delta,
 }) async {
   final Finder found = find.byWidgetPredicate(
-    (final Widget w) => w is AppTooltip && w.message == tooltip,
+    (Widget w) => w is AppTooltip && w.message == tooltip,
   );
   expect(found, findsOneWidget, reason: 'Should find draggable widget with tooltip: $tooltip');
   final Offset start = tester.getCenter(found.first);
@@ -803,9 +803,9 @@ Future<void> dragByTooltip(
 
 /// Selects a rectangular area on the canvas.
 Future<void> selectRectangleArea(
-  final WidgetTester tester, {
-  required final Offset startPosition,
-  required final Offset endPosition,
+  WidgetTester tester, {
+  required Offset startPosition,
+  required Offset endPosition,
 }) async {
   await activateSelectorTool(tester);
   await tester.pump();
@@ -819,9 +819,9 @@ Future<void> selectRectangleArea(
 
 /// Selects an oval area on the canvas.
 Future<void> selectCircleArea(
-  final WidgetTester tester, {
-  required final Offset center,
-  required final double radius,
+  WidgetTester tester, {
+  required Offset center,
+  required double radius,
 }) async {
   await activateSelectorTool(tester);
   await tester.pump();
@@ -838,8 +838,8 @@ Future<void> selectCircleArea(
 /// Selects a straight-edge region on the canvas by clicking each vertex and
 /// closing the marquee on the starting point.
 Future<void> selectLineRegion(
-  final WidgetTester tester, {
-  required final List<Offset> points,
+  WidgetTester tester, {
+  required List<Offset> points,
 }) async {
   expect(
     points.length,
@@ -862,8 +862,8 @@ Future<void> selectLineRegion(
 
 /// Selects a free-style lasso area on the canvas.
 Future<void> selectLassoArea(
-  final WidgetTester tester, {
-  required final List<Offset> points,
+  WidgetTester tester, {
+  required List<Offset> points,
 }) async {
   expect(
     points.length,
@@ -906,7 +906,7 @@ enum TransformOverlayHandle {
   center,
 }
 
-int _transformOverlayHandleIndex(final TransformOverlayHandle handle) {
+int _transformOverlayHandleIndex(TransformOverlayHandle handle) {
   switch (handle) {
     case TransformOverlayHandle.topLeft:
       return _transformOverlayHandleTopLeftIndex;
@@ -931,8 +931,8 @@ int _transformOverlayHandleIndex(final TransformOverlayHandle handle) {
 
 /// Selects a contiguous region with the magic wand selector.
 Future<void> selectWandArea(
-  final WidgetTester tester, {
-  required final Offset position,
+  WidgetTester tester, {
+  required Offset position,
   int? tolerance,
 }) async {
   await activateSelectorTool(tester);
@@ -958,7 +958,7 @@ Future<void> selectWandArea(
 /// There is no longer a dedicated "replace" button: replace is the state where
 /// both Add and Subtract toggles are off, so tapping the active toggle restores
 /// it.
-Future<void> setSelectorMathReplace(final WidgetTester tester) async {
+Future<void> setSelectorMathReplace(WidgetTester tester) async {
   await activateSelectorTool(tester);
   await tester.pump();
   final AppProvider appProvider = appProviderFromTester(tester);
@@ -977,7 +977,7 @@ Future<void> setSelectorMathReplace(final WidgetTester tester) async {
 }
 
 /// Sets selector math mode to add.
-Future<void> setSelectorMathAdd(final WidgetTester tester) async {
+Future<void> setSelectorMathAdd(WidgetTester tester) async {
   await activateSelectorTool(tester);
   await tester.pump();
   await tapByTooltip(tester, _selectorMathAddTooltip);
@@ -985,7 +985,7 @@ Future<void> setSelectorMathAdd(final WidgetTester tester) async {
 }
 
 /// Sets selector math mode to remove.
-Future<void> setSelectorMathRemove(final WidgetTester tester) async {
+Future<void> setSelectorMathRemove(WidgetTester tester) async {
   await activateSelectorTool(tester);
   await tester.pump();
   await tapByTooltip(tester, _selectorMathRemoveTooltip);
@@ -993,7 +993,7 @@ Future<void> setSelectorMathRemove(final WidgetTester tester) async {
 }
 
 /// Inverts the current selector path.
-Future<void> invertCurrentSelection(final WidgetTester tester) async {
+Future<void> invertCurrentSelection(WidgetTester tester) async {
   await activateSelectorTool(tester);
   await tester.pump();
   await tapByTooltip(tester, _selectorInvertTooltip);
@@ -1008,12 +1008,12 @@ Future<void> invertCurrentSelection(final WidgetTester tester) async {
 /// Shows the intensity dialog, optionally adjusts the slider to [strength],
 /// and taps Apply.
 Future<void> applyEffectViaUi(
-  final WidgetTester tester,
-  final SelectionEffect effect, {
-  final double strength = AppEffects.defaultIntensity,
-  final double? size,
-  final bool requireApply = false,
-  final bool forceFullSelection = false,
+  WidgetTester tester,
+  SelectionEffect effect, {
+  double strength = AppEffects.defaultIntensity,
+  double? size,
+  bool requireApply = false,
+  bool forceFullSelection = false,
 }) async {
   final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
@@ -1197,9 +1197,9 @@ Future<void> applyEffectViaUi(
 
 /// Drags one overlay handle of the current selection by [delta].
 Future<void> dragSelectionHandle(
-  final WidgetTester tester, {
-  required final TransformOverlayHandle handle,
-  required final Offset delta,
+  WidgetTester tester, {
+  required TransformOverlayHandle handle,
+  required Offset delta,
 }) async {
   final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
@@ -1220,8 +1220,8 @@ Future<void> dragSelectionHandle(
 
 /// Scales the current selection through the top overlay control.
 Future<void> scaleSelectionWithOverlayControl(
-  final WidgetTester tester, {
-  required final Offset delta,
+  WidgetTester tester, {
+  required Offset delta,
 }) async {
   final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
@@ -1231,8 +1231,8 @@ Future<void> scaleSelectionWithOverlayControl(
 
 /// Rotates the current selection through the top overlay control.
 Future<void> rotateSelectionWithOverlayControl(
-  final WidgetTester tester, {
-  required final Offset delta,
+  WidgetTester tester, {
+  required Offset delta,
 }) async {
   final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
@@ -1242,8 +1242,8 @@ Future<void> rotateSelectionWithOverlayControl(
 
 /// Deforms the current selection through the transform overlay and applies it.
 Future<void> deformSelectionWithTransformOverlay(
-  final WidgetTester tester, {
-  required final Map<TransformOverlayHandle, Offset> handleDeltas,
+  WidgetTester tester, {
+  required Map<TransformOverlayHandle, Offset> handleDeltas,
 }) async {
   final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = context.l10n;
@@ -1272,8 +1272,8 @@ Future<void> deformSelectionWithTransformOverlay(
 
 /// Cycles the transform overlay until all deform handles are visible.
 Future<void> _ensureAllTransformHandlesVisible(
-  final WidgetTester tester, {
-  required final AppLocalizations l10n,
+  WidgetTester tester, {
+  required AppLocalizations l10n,
 }) async {
   final Finder handles = find.byType(OverlayDragHandle);
 
@@ -1298,8 +1298,8 @@ Future<void> _ensureAllTransformHandlesVisible(
 
 /// Sets the brush size directly via [AppProvider].
 Future<void> setBrushSizeViaProvider(
-  final WidgetTester tester,
-  final double brushSize,
+  WidgetTester tester,
+  double brushSize,
 ) async {
   final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
@@ -1309,9 +1309,9 @@ Future<void> setBrushSizeViaProvider(
 
 /// Configures brush and fill colors on [AppProvider] if provided.
 Future<void> _applyBrushAndFillColors(
-  final WidgetTester tester, {
-  final Color? brushColor,
-  final Color? fillColor,
+  WidgetTester tester, {
+  Color? brushColor,
+  Color? fillColor,
 }) async {
   if (brushColor == null && fillColor == null) {
     return;
@@ -1330,8 +1330,8 @@ Future<void> _applyBrushAndFillColors(
 
 /// Selects a drawing action directly through [AppProvider].
 Future<void> _selectDrawingAction(
-  final WidgetTester tester,
-  final ActionType action,
+  WidgetTester tester,
+  ActionType action,
 ) async {
   final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context);
@@ -1342,12 +1342,12 @@ Future<void> _selectDrawingAction(
 
 /// Draws a freehand stroke through [points] using human-like gestures.
 Future<void> drawFreehandStrokeWithHumanGestures(
-  final WidgetTester tester, {
-  required final List<Offset> points,
-  final ActionType action = ActionType.pencil,
-  final double? brushSize,
-  final Color? brushColor,
-  final Color? fillColor,
+  WidgetTester tester, {
+  required List<Offset> points,
+  ActionType action = ActionType.pencil,
+  double? brushSize,
+  Color? brushColor,
+  Color? fillColor,
 }) async {
   expect(
     points.length,
@@ -1380,12 +1380,12 @@ Future<void> drawFreehandStrokeWithHumanGestures(
 
 /// Draws a line from [startPosition] to [endPosition] using human-like gestures.
 Future<void> drawLineWithHumanGestures(
-  final WidgetTester tester, {
-  required final Offset startPosition,
-  required final Offset endPosition,
-  final double? brushSize,
-  final Color? brushColor,
-  final Color? fillColor,
+  WidgetTester tester, {
+  required Offset startPosition,
+  required Offset endPosition,
+  double? brushSize,
+  Color? brushColor,
+  Color? fillColor,
 }) async {
   if (brushSize != null) {
     await setBrushSizeViaProvider(tester, brushSize);
@@ -1400,12 +1400,12 @@ Future<void> drawLineWithHumanGestures(
 
 /// Draws a rectangle from [startPosition] to [endPosition] using human-like gestures.
 Future<void> drawRectangleWithHumanGestures(
-  final WidgetTester tester, {
-  required final Offset startPosition,
-  required final Offset endPosition,
-  final double? brushSize,
-  final Color? brushColor,
-  final Color? fillColor,
+  WidgetTester tester, {
+  required Offset startPosition,
+  required Offset endPosition,
+  double? brushSize,
+  Color? brushColor,
+  Color? fillColor,
 }) async {
   if (brushSize != null) {
     await setBrushSizeViaProvider(tester, brushSize);
@@ -1433,12 +1433,12 @@ Future<void> drawRectangleWithHumanGestures(
 
 /// Draws a circle centered at [center] with the given [radius].
 Future<void> drawCircleWithHumanGestures(
-  final WidgetTester tester, {
-  required final Offset center,
-  required final double radius,
-  final double? brushSize,
-  final Color? brushColor,
-  final Color? fillColor,
+  WidgetTester tester, {
+  required Offset center,
+  required double radius,
+  double? brushSize,
+  Color? brushColor,
+  Color? fillColor,
 }) async {
   if (brushSize != null) {
     await setBrushSizeViaProvider(tester, brushSize);
@@ -1470,9 +1470,9 @@ Future<void> drawCircleWithHumanGestures(
 /// real async I/O (`image.toByteData`) that cannot complete in the fake async
 /// zone of widget tests.
 Future<void> performFloodFillSolid(
-  final WidgetTester tester, {
-  required final Offset position,
-  required final Color color,
+  WidgetTester tester, {
+  required Offset position,
+  required Color color,
   int? tolerance,
 }) async {
   // Select fill tool and solid mode via UI
@@ -1523,9 +1523,9 @@ Future<void> performFloodFillSolid(
 /// Use this instead of [performFloodFillSolid] when screen-to-canvas conversion
 /// via [AppProvider.toCanvas] is unreliable (e.g. after zoom-out).
 Future<void> performFloodFillSolidAtCanvasPosition(
-  final WidgetTester tester, {
-  required final Offset canvasPosition,
-  required final Color color,
+  WidgetTester tester, {
+  required Offset canvasPosition,
+  required Color color,
   int? tolerance,
 }) async {
   // Select fill tool and solid mode via UI
@@ -1585,9 +1585,9 @@ Future<void> performFloodFillSolidAtCanvasPosition(
 /// for each entry in [gradientPoints].  When omitted the positions are
 /// distributed evenly (0.0 for the first stop, 1.0 for the last).
 Future<void> performFloodFillGradient(
-  final WidgetTester tester, {
-  required final FillMode gradientMode,
-  required final List<GradientPoint> gradientPoints,
+  WidgetTester tester, {
+  required FillMode gradientMode,
+  required List<GradientPoint> gradientPoints,
   List<double>? gradientStopPositions,
   Offset Function(Offset)? toCanvas,
 }) async {
@@ -1600,12 +1600,12 @@ Future<void> performFloodFillGradient(
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 
   final int stopCount = gradientPoints.length;
-  final List<Color> stopColors = gradientPoints.map((final GradientPoint p) => p.color).toList();
+  final List<Color> stopColors = gradientPoints.map((GradientPoint p) => p.color).toList();
   final List<double> resolvedPositions =
       gradientStopPositions ??
       List<double>.generate(
         stopCount,
-        (final int i) => stopCount <= 1 ? 0.0 : i / (stopCount - 1),
+        (int i) => stopCount <= 1 ? 0.0 : i / (stopCount - 1),
       );
 
   // 2. Seed the live fill model's endpoint colors and reset to two stops.
@@ -1687,8 +1687,8 @@ class PaintingLayerHelpers {
   /// list button wiring, so this helper mutates the provider directly to avoid
   /// depending on a flaky row control inside the reorderable layer list.
   static Future<void> addNewLayer(
-    final WidgetTester tester,
-    final String name,
+    WidgetTester tester,
+    String name,
   ) async {
     final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
@@ -1717,8 +1717,8 @@ class PaintingLayerHelpers {
 
   /// Switches to the layer at [layerIndex].
   static Future<void> switchToLayer(
-    final WidgetTester tester,
-    final int layerIndex,
+    WidgetTester tester,
+    int layerIndex,
   ) async {
     final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
@@ -1728,8 +1728,8 @@ class PaintingLayerHelpers {
 
   /// Switches to the first layer matching [layerName].
   static Future<void> switchToLayerByName(
-    final WidgetTester tester,
-    final String layerName,
+    WidgetTester tester,
+    String layerName,
   ) async {
     final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
@@ -1746,9 +1746,9 @@ class PaintingLayerHelpers {
 
   /// Merges layer at [fromIndex] into the layer below it.
   static Future<void> mergeLayer(
-    final WidgetTester tester,
-    final int fromIndex,
-    final int toIndex,
+    WidgetTester tester,
+    int fromIndex,
+    int toIndex,
   ) async {
     final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
@@ -1759,8 +1759,8 @@ class PaintingLayerHelpers {
 
   /// Removes the layer at [layerIndex].
   static Future<void> removeLayer(
-    final WidgetTester tester,
-    final int layerIndex,
+    WidgetTester tester,
+    int layerIndex,
   ) async {
     final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
@@ -1772,8 +1772,8 @@ class PaintingLayerHelpers {
 
   /// Renames the currently selected layer.
   static Future<void> renameLayer(
-    final WidgetTester tester,
-    final String newName,
+    WidgetTester tester,
+    String newName,
   ) async {
     final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
@@ -1783,7 +1783,7 @@ class PaintingLayerHelpers {
   }
 
   /// Prints the current layer structure for debugging.
-  static Future<void> printLayerStructure(final WidgetTester tester) async {
+  static Future<void> printLayerStructure(WidgetTester tester) async {
     await tester.pump();
     final BuildContext context = mainViewContext(tester);
     final LayersProvider layersProvider = LayersProvider.of(context);
@@ -1809,13 +1809,13 @@ class PaintingLayerHelpers {
 /// picker dialog are not manipulated directly because their continuous
 /// nature makes exact values fragile in widget tests.
 Future<void> placeTextViaUI(
-  final WidgetTester tester, {
-  required final Offset canvasPosition,
-  required final String text,
-  required final double fontSize,
-  required final Color color,
-  final FontWeight fontWeight = FontWeight.normal,
-  final String? fontFamily,
+  WidgetTester tester, {
+  required Offset canvasPosition,
+  required String text,
+  required double fontSize,
+  required Color color,
+  FontWeight fontWeight = FontWeight.normal,
+  String? fontFamily,
 }) async {
   final BuildContext context = mainViewContext(tester);
   final AppProvider appProvider = AppProvider.of(context, listen: false);
@@ -1886,10 +1886,10 @@ Future<void> placeTextViaUI(
 /// menu, entering the new dimensions, selecting the anchor position, and
 /// tapping Apply.
 Future<void> resizeCanvasViaUI(
-  final WidgetTester tester, {
-  required final int width,
-  required final int height,
-  required final CanvasResizePosition position,
+  WidgetTester tester, {
+  required int width,
+  required int height,
+  required CanvasResizePosition position,
 }) async {
   // Open the main menu.
   await tapByKey(tester, Keys.mainMenuButton);
@@ -1956,8 +1956,8 @@ Future<void> resizeCanvasViaUI(
 /// Uses [WidgetTester.runAsync] to escape the fake async zone, which is
 /// required for [RenderRepaintBoundary.toImage] to complete in widget tests.
 Future<void> saveUnitTestScreenshot(
-  final WidgetTester tester, {
-  required final String filename,
+  WidgetTester tester, {
+  required String filename,
 }) async {
   await tester.pump();
 
@@ -1992,8 +1992,8 @@ Future<void> saveUnitTestScreenshot(
 ///
 /// Uses [WidgetTester.runAsync] for the same reason as [saveUnitTestScreenshot].
 Future<void> saveUnitTestArtworkScreenshot(
-  final WidgetTester tester, {
-  required final String filename,
+  WidgetTester tester, {
+  required String filename,
 }) async {
   final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
@@ -2021,8 +2021,8 @@ Future<void> saveUnitTestArtworkScreenshot(
 ///
 /// Uses [WidgetTester.runAsync] for the same reason as [saveUnitTestScreenshot].
 Future<void> saveUnitTestOraArchive(
-  final WidgetTester tester, {
-  required final String filename,
+  WidgetTester tester, {
+  required String filename,
 }) async {
   final BuildContext context = mainViewContext(tester);
   final LayersProvider layersProvider = LayersProvider.of(context);
@@ -2039,8 +2039,8 @@ Future<void> saveUnitTestOraArchive(
 
 /// Saves the current artwork as a flattened PNG to the test output directory.
 Future<void> saveUnitTestPng(
-  final WidgetTester tester, {
-  required final String filename,
+  WidgetTester tester, {
+  required String filename,
 }) async {
   await tester.runAsync(() async {
     final ui.Image image = await _captureRenderedMainViewCanvasImage(tester);
@@ -2059,8 +2059,8 @@ Future<void> saveUnitTestPng(
 
 /// Saves the current artwork as a JPEG to the test output directory.
 Future<void> saveUnitTestJpeg(
-  final WidgetTester tester, {
-  required final String filename,
+  WidgetTester tester, {
+  required String filename,
 }) async {
   await tester.runAsync(() async {
     final ui.Image image = await _captureRenderedMainViewCanvasImage(tester);
@@ -2076,8 +2076,8 @@ Future<void> saveUnitTestJpeg(
 
 /// Saves all layers as a layered TIFF to the test output directory.
 Future<void> saveUnitTestTiff(
-  final WidgetTester tester, {
-  required final String filename,
+  WidgetTester tester, {
+  required String filename,
 }) async {
   await tester.runAsync(() async {
     final String normalizedFileName = normalizeTiffExportFileName(filename);
@@ -2102,8 +2102,8 @@ Future<void> saveUnitTestTiff(
 
 /// Saves the current artwork as a WebP to the test output directory.
 Future<void> saveUnitTestWebp(
-  final WidgetTester tester, {
-  required final String filename,
+  WidgetTester tester, {
+  required String filename,
 }) async {
   await tester.runAsync(() async {
     final ui.Image image = await _captureRenderedMainViewCanvasImage(tester);
@@ -2161,7 +2161,7 @@ enum UnitTestExportFormat {
   final List<String> allowedExtensions;
 
   /// Returns the localized action text displayed in the export sheet.
-  String actionLabel(final AppLocalizations l10n) {
+  String actionLabel(AppLocalizations l10n) {
     if (kIsWeb) {
       return l10n.downloadAsFile(shareActionFileName);
     }
@@ -2180,13 +2180,13 @@ class _UnitTestSaveDialogFilePicker extends FilePickerPlatform {
 
   @override
   Future<String?> saveFile({
-    final String? dialogTitle,
-    final String? fileName,
-    final String? initialDirectory,
-    final FileType type = FileType.any,
-    final List<String>? allowedExtensions,
-    final Uint8List? bytes,
-    final bool lockParentWindow = false,
+    String? dialogTitle,
+    String? fileName,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    Uint8List? bytes,
+    bool lockParentWindow = false,
   }) async {
     lastSuggestedFileName = fileName;
     lastAllowedExtensions = allowedExtensions == null ? null : List<String>.from(allowedExtensions);
@@ -2195,8 +2195,8 @@ class _UnitTestSaveDialogFilePicker extends FilePickerPlatform {
 }
 
 File _buildUnitTestExportOutputFile(
-  final UnitTestExportFormat format,
-  final String filename,
+  UnitTestExportFormat format,
+  String filename,
 ) {
   final String normalizedFileName = format == UnitTestExportFormat.tiff
       ? normalizeTiffExportFileName(filename)
@@ -2204,15 +2204,15 @@ File _buildUnitTestExportOutputFile(
   return File('$_unitTestOutputDirectoryPath/$normalizedFileName');
 }
 
-Future<void> _pumpUnitTestExportUiTransition(final WidgetTester tester) async {
+Future<void> _pumpUnitTestExportUiTransition(WidgetTester tester) async {
   for (int index = 0; index < _unitTestExportUiTransitionPumpCount; index++) {
     await tester.pump(_unitTestExportUiTransitionPumpDuration);
   }
 }
 
 Future<void> _positionUnitTestExportSheet(
-  final WidgetTester tester,
-  final UnitTestExportFormat format,
+  WidgetTester tester,
+  UnitTestExportFormat format,
 ) async {
   final Finder bottomSheetScrollable = find.descendant(
     of: find.byType(ConstrainedBox),
@@ -2234,7 +2234,7 @@ Future<void> _positionUnitTestExportSheet(
   await tester.pump();
 }
 
-Future<void> pumpForUnitTestUiSettle(final WidgetTester tester) async {
+Future<void> pumpForUnitTestUiSettle(WidgetTester tester) async {
   await tester.pump();
 
   for (int index = 0; index < _unitTestUiSettlePumpCount; index++) {
@@ -2246,8 +2246,8 @@ Future<void> pumpForUnitTestUiSettle(final WidgetTester tester) async {
 }
 
 Future<void> _openUnitTestExportSheetFromMainMenu(
-  final WidgetTester tester,
-  final AppLocalizations l10n,
+  WidgetTester tester,
+  AppLocalizations l10n,
 ) async {
   final Finder mainMenuButton = find.byKey(Keys.mainMenuButton);
   await openPopupMenuButtonWithoutSettling<int>(tester, mainMenuButton);
@@ -2267,9 +2267,9 @@ Future<void> _openUnitTestExportSheetFromMainMenu(
 
 /// Drives the real export UI: open the export sheet, then choose the format.
 Future<void> saveUnitTestArtworkViaExportUi(
-  final WidgetTester tester, {
-  required final UnitTestExportFormat format,
-  required final String filename,
+  WidgetTester tester, {
+  required UnitTestExportFormat format,
+  required String filename,
 }) async {
   final BuildContext context = mainViewContext(tester);
   final AppLocalizations l10n = AppLocalizations.of(context)!;
@@ -2336,7 +2336,7 @@ Future<void> saveUnitTestArtworkViaExportUi(
   }
 }
 
-Future<void> dismissOpenUnitTestExportSheet(final WidgetTester tester) async {
+Future<void> dismissOpenUnitTestExportSheet(WidgetTester tester) async {
   if (!_unitTestExportSheetIsOpen) {
     return;
   }
@@ -2513,7 +2513,7 @@ List<String> buildUnitTestVideoAssemblyArguments({
   ];
 }
 
-String buildUnitTestTemporaryVideoOutputPath(final String outputPath) {
+String buildUnitTestTemporaryVideoOutputPath(String outputPath) {
   final int extensionSeparatorIndex = outputPath.lastIndexOf('.');
   if (extensionSeparatorIndex == -1) {
     return '$outputPath.$_temporaryVideoOutputSuffix';

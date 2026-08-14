@@ -23,7 +23,7 @@ class AppDialog extends StatelessWidget {
   /// An optional icon shown before the title text.
   final Widget? titleIcon;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
@@ -81,9 +81,9 @@ class AppDialog extends StatelessWidget {
 
 /// Shows a dialog using the widgets-layer [showGeneralDialog].
 Future<T?> showAppDialog<T>({
-  required final BuildContext context,
-  required final WidgetBuilder builder,
-  final bool barrierDismissible = true,
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
 }) {
   return showAppOverlay<T>(
     context: context,

@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<void> paintLayerSun(final PaintingScenarioSession session) async {
+Future<void> paintLayerSun(PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _sunLayerName);
   final Offset sunCenter = session.canvasCenter + _sunOffset;
 

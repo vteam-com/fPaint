@@ -10,7 +10,7 @@ import 'package:fpaint/widgets/material_free.dart';
 class ShortcutsHelpDialog extends StatelessWidget {
   const ShortcutsHelpDialog({super.key});
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final String mod = _getPlatformModifier(context);
     final String moveDuplicateModifier = _getMoveDuplicateModifier();
     final String duplicateMoveNewLayerShortcut =
@@ -89,7 +89,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
       title: l10n.keyboardShortcuts,
       maxWidth: AppLayout.shortcutDialogMaxWidth,
       content: LayoutBuilder(
-        builder: (final BuildContext _, final BoxConstraints constraints) {
+        builder: (BuildContext _, BoxConstraints constraints) {
           final double groupWidth = _shortcutGroupWidth(constraints.maxWidth);
 
           return Wrap(
@@ -98,7 +98,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
             runSpacing: AppSpacing.large,
             children: shortcutGroups
                 .map(
-                  (final ({String title, List<Map<String, String>> shortcuts}) group) => SizedBox(
+                  (({String title, List<Map<String, String>> shortcuts}) group) => SizedBox(
                     width: groupWidth,
                     child: _buildShortcutGroup(
                       group.title,
@@ -122,9 +122,9 @@ class ShortcutsHelpDialog extends StatelessWidget {
 
   /// Builds a single shortcut row with key caps and description text.
   Widget _buildShortcut(
-    final String keys,
-    final String description, {
-    required final double groupWidth,
+    String keys,
+    String description, {
+    required double groupWidth,
   }) {
     final bool shouldStack = _shouldStackShortcutRow(keys, groupWidth);
 
@@ -151,7 +151,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
   }
 
   /// Builds the section title for a shortcut category.
-  Widget _buildShortcutCategory(final String title) {
+  Widget _buildShortcutCategory(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.small),
       child: AppText(
@@ -163,16 +163,16 @@ class ShortcutsHelpDialog extends StatelessWidget {
 
   /// Builds a fixed-width group of shortcuts under a category heading.
   Widget _buildShortcutGroup(
-    final String title,
-    final List<Map<String, String>> shortcuts, {
-    required final double groupWidth,
+    String title,
+    List<Map<String, String>> shortcuts, {
+    required double groupWidth,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         _buildShortcutCategory(title),
         ...shortcuts.map(
-          (final Map<String, String> shortcut) => _buildShortcut(
+          (Map<String, String> shortcut) => _buildShortcut(
             shortcut[ShortcutMapKeys.keys]!,
             shortcut[ShortcutMapKeys.description]!,
             groupWidth: groupWidth,
@@ -183,7 +183,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
   }
 
   /// Builds the bordered key-cap chip shown before each shortcut label.
-  Widget _buildShortcutKeys(final String keys) {
+  Widget _buildShortcutKeys(String keys) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.small, vertical: AppSpacing.small),
       decoration: BoxDecoration(
@@ -203,7 +203,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
     return isMacOS ? ShortcutModifiers.option : ShortcutModifiers.ctrl;
   }
 
-  String _getPlatformModifier(final BuildContext _) {
+  String _getPlatformModifier(BuildContext _) {
     final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
     return isMacOS ? ShortcutModifiers.cmd : ShortcutModifiers.ctrl;
   }
@@ -213,14 +213,14 @@ class ShortcutsHelpDialog extends StatelessWidget {
     return isMacOS ? ShortcutModifiers.option : ShortcutModifiers.alt;
   }
 
-  Map<String, String> _shortcutEntry(final String keys, final String description) {
+  Map<String, String> _shortcutEntry(String keys, String description) {
     return <String, String>{
       ShortcutMapKeys.keys: keys,
       ShortcutMapKeys.description: description,
     };
   }
 
-  double _shortcutGroupWidth(final double availableWidth) {
+  double _shortcutGroupWidth(double availableWidth) {
     if (availableWidth < AppLayout.shortcutHelpTwoColumnBreakpoint) {
       return availableWidth;
     }
@@ -228,7 +228,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
     return (availableWidth - AppSpacing.large) / AppMath.pair;
   }
 
-  bool _shouldStackShortcutRow(final String keys, final double groupWidth) {
+  bool _shouldStackShortcutRow(String keys, double groupWidth) {
     return groupWidth < AppLayout.shortcutHelpRowStackBreakpoint ||
         keys.length > AppLayout.shortcutHelpInlineKeyMaxCharacters;
   }

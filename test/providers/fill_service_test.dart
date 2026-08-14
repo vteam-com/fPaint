@@ -244,7 +244,7 @@ void main() {
         fillModel: fillModel,
         tolerance: 50,
         clipPath: null,
-        toCanvas: (final Offset o) => o,
+        toCanvas: (Offset o) => o,
       );
 
       expect(result.action, ActionType.fill);
@@ -267,7 +267,7 @@ void main() {
         fillModel: fillModel,
         tolerance: 50,
         clipPath: null,
-        toCanvas: (final Offset o) => o,
+        toCanvas: (Offset o) => o,
       );
       // Out-of-bounds start returns empty fill action
       expect(result.action, ActionType.fill);
@@ -290,7 +290,7 @@ void main() {
         fillModel: fillModel,
         tolerance: 50,
         clipPath: null,
-        toCanvas: (final Offset o) => o,
+        toCanvas: (Offset o) => o,
       );
       expect(result.action, ActionType.region);
       expect(result.gradient, isA<LinearGradient>());
@@ -321,7 +321,7 @@ void main() {
         fillModel: fillModel,
         tolerance: 50,
         clipPath: null,
-        toCanvas: (final Offset o) => o,
+        toCanvas: (Offset o) => o,
       );
 
       expect(result.action, ActionType.region);
@@ -348,7 +348,7 @@ void main() {
         fillModel: fillModel,
         tolerance: 50,
         clipPath: null,
-        toCanvas: (final Offset o) => o,
+        toCanvas: (Offset o) => o,
       );
       expect(result.action, ActionType.region);
       expect(result.gradient, isA<RadialGradient>());
@@ -371,7 +371,7 @@ void main() {
         fillModel: fillModel,
         tolerance: 50,
         clipPath: clip,
-        toCanvas: (final Offset o) => o,
+        toCanvas: (Offset o) => o,
       );
       expect(result.clipPath, clip);
     });
@@ -393,7 +393,7 @@ void main() {
         fillModel: fillModel,
         tolerance: 50,
         clipPath: overridePath,
-        toCanvas: (final Offset o) => o,
+        toCanvas: (Offset o) => o,
         regionPathOverride: overridePath,
       );
 
@@ -405,7 +405,7 @@ void main() {
     test('uses bounds-relative alignment for linear gradients on offset regions', () async {
       final ui.Image image = await _recordTestImage(
         size: _offsetGradientImageSize,
-        painter: (final Canvas canvas) {
+        painter: (Canvas canvas) {
           canvas.drawRect(
             Rect.fromLTWH(0, 0, _offsetGradientImageSize.width, _offsetGradientImageSize.height),
             Paint()..color = const Color(0xFFFFFFFF),
@@ -427,7 +427,7 @@ void main() {
         fillModel: fillModel,
         tolerance: 50,
         clipPath: null,
-        toCanvas: (final Offset o) => o,
+        toCanvas: (Offset o) => o,
         regionPathOverride: overridePath,
       );
 
@@ -454,7 +454,7 @@ void main() {
         fillModel: fillModel,
         tolerance: 50,
         clipPath: null,
-        toCanvas: (final Offset o) => o * 3,
+        toCanvas: (Offset o) => o * 3,
       );
       // Should successfully create a region with the transformed coordinates
       expect(result.action, ActionType.region);
@@ -481,7 +481,7 @@ void main() {
         fillModel: fillModel,
         tolerance: 50,
         clipPath: null,
-        toCanvas: (final Offset o) => o,
+        toCanvas: (Offset o) => o,
       );
 
       fillModel.gradientStopColors[0] = const Color(0xFFFFA500);
@@ -503,7 +503,7 @@ void main() {
 Future<ui.Image> _createTestImage() async {
   return _recordTestImage(
     size: const Size(20, 20),
-    painter: (final Canvas canvas) {
+    painter: (Canvas canvas) {
       canvas.drawRect(
         const Rect.fromLTWH(0, 0, 20, 20),
         Paint()..color = const Color(0xFFFFFFFF),
@@ -516,7 +516,7 @@ Future<ui.Image> _createTestImage() async {
 Future<ui.Image> _createRingTestImage() async {
   return _recordTestImage(
     size: _ringImageSize,
-    painter: (final Canvas canvas) {
+    painter: (Canvas canvas) {
       canvas.drawRect(
         Rect.fromLTWH(0, 0, _ringImageSize.width, _ringImageSize.height),
         Paint()..color = const Color(0xFF000000),
@@ -537,7 +537,7 @@ Future<ui.Image> _createRingTestImage() async {
 Future<ui.Image> _createDiagonalTouchImage() async {
   return _recordTestImage(
     size: _diagonalImageSize,
-    painter: (final Canvas canvas) {
+    painter: (Canvas canvas) {
       canvas.drawRect(
         Rect.fromLTWH(0, 0, _diagonalImageSize.width, _diagonalImageSize.height),
         Paint()..color = const Color(0xFF000000),
@@ -556,8 +556,8 @@ Future<ui.Image> _createDiagonalTouchImage() async {
 
 /// Records one synthetic test image at [size] using [painter].
 Future<ui.Image> _recordTestImage({
-  required final Size size,
-  required final void Function(Canvas canvas) painter,
+  required Size size,
+  required void Function(Canvas canvas) painter,
 }) async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final Canvas canvas = Canvas(recorder);

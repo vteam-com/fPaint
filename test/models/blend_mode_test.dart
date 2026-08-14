@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('blendModeToText', () {
@@ -56,14 +56,14 @@ void main() {
   });
 
   group('getSupportedBlendModes', () {
-    testWidgets('returns all 15 blend modes with localized descriptions', (final WidgetTester tester) async {
+    testWidgets('returns all 15 blend modes with localized descriptions', (WidgetTester tester) async {
       late Map<String, Map<String, Object>> modes;
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
-            builder: (final BuildContext context) {
+            builder: (BuildContext context) {
               modes = getSupportedBlendModes(context.l10n);
               return const SizedBox();
             },
@@ -101,14 +101,14 @@ void main() {
   });
 
   group('blendModeToText with l10n', () {
-    testWidgets('srcOver returns localized Normal label', (final WidgetTester tester) async {
+    testWidgets('srcOver returns localized Normal label', (WidgetTester tester) async {
       late String result;
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
-            builder: (final BuildContext context) {
+            builder: (BuildContext context) {
               result = blendModeToText(BlendMode.srcOver, context.l10n);
               return const SizedBox();
             },

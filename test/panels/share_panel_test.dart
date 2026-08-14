@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -11,6 +10,7 @@ import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const int _exportPanelTransitionPumpCount = 4;
@@ -52,13 +52,13 @@ void main() {
     );
   }
 
-  Future<void> pumpExportPanelTransition(final WidgetTester tester) async {
+  Future<void> pumpExportPanelTransition(WidgetTester tester) async {
     for (int index = 0; index < _exportPanelTransitionPumpCount; index++) {
       await tester.pump(_exportPanelTransitionPumpDuration);
     }
   }
 
-  Future<void> openExportPanel(final WidgetTester tester) async {
+  Future<void> openExportPanel(WidgetTester tester) async {
     await tester.tap(find.byKey(Keys.mainMenuButton));
     await pumpExportPanelTransition(tester);
 
@@ -69,7 +69,7 @@ void main() {
   }
 
   group('sharePanel', () {
-    testWidgets('shows the loaded image path at the top when one is available', (final WidgetTester tester) async {
+    testWidgets('shows the loaded image path at the top when one is available', (WidgetTester tester) async {
       shellProvider.loadedFileName = _loadedImagePath;
 
       await tester.pumpWidget(buildHarness());
@@ -87,14 +87,14 @@ void main() {
         find.descendant(
           of: bottomSheet,
           matching: find.byWidgetPredicate(
-            (final Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.image,
+            (Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.image,
           ),
         ),
         findsOneWidget,
       );
     });
 
-    testWidgets('omits the loaded image path header when no file is loaded', (final WidgetTester tester) async {
+    testWidgets('omits the loaded image path header when no file is loaded', (WidgetTester tester) async {
       await tester.pumpWidget(buildHarness());
       await tester.pump();
 
@@ -110,7 +110,7 @@ void main() {
         find.descendant(
           of: bottomSheet,
           matching: find.byWidgetPredicate(
-            (final Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.image,
+            (Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.image,
           ),
         ),
         findsNothing,

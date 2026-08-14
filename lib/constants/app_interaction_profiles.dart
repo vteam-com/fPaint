@@ -1,7 +1,7 @@
-import 'app_interaction.dart';
-import 'app_layout.dart';
-import 'interaction_input_modality.dart';
-import 'interaction_layout_profile.dart';
+import 'package:fpaint/constants/app_interaction.dart';
+import 'package:fpaint/constants/app_layout.dart';
+import 'package:fpaint/constants/interaction_input_modality.dart';
+import 'package:fpaint/constants/interaction_layout_profile.dart';
 
 /// Shared interaction profiles for desktop mouse and tablet touch/pen flows.
 class AppInteractionProfiles {
@@ -49,7 +49,7 @@ class AppInteractionProfiles {
   );
 
   /// Returns the interaction layout profile that matches [modality].
-  static InteractionLayoutProfile forModality(final InteractionInputModality modality) {
+  static InteractionLayoutProfile forModality(InteractionInputModality modality) {
     switch (modality) {
       case InteractionInputModality.pen:
         return pen;

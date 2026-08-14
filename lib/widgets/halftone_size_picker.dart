@@ -29,7 +29,7 @@ class HalftoneSizePicker extends BasePicker<int> {
 /// The state for [HalftoneSizePicker].
 class HalftoneSizePickerState extends BasePickerState<int> {
   @override
-  int clampValue(final int value) {
+  int clampValue(int value) {
     return value.clamp(AppMath.zero, AppLimits.percentMax);
   }
 
@@ -40,12 +40,12 @@ class HalftoneSizePickerState extends BasePickerState<int> {
       min: AppMath.zero.toDouble(),
       max: AppLimits.percentMax.toDouble(),
       divisions: AppLimits.sliderDivisions,
-      onChanged: (final double value) => updateValue(value.toInt()),
+      onChanged: (double value) => updateValue(value.toInt()),
     );
   }
 
   @override
-  String formatValue(final int value) {
+  String formatValue(int value) {
     final AppLocalizations l10n = context.l10n;
     return l10n.percentageValue(value);
   }
@@ -53,11 +53,11 @@ class HalftoneSizePickerState extends BasePickerState<int> {
 
 /// Shows a dialog containing a [HalftoneSizePicker].
 void showHalftoneSizePicker({
-  required final BuildContext context,
-  required final int value,
-  required final bool enabled,
-  required final ValueChanged<int> onChanged,
-  required final ValueChanged<bool> onEnabledChanged,
+  required BuildContext context,
+  required int value,
+  required bool enabled,
+  required ValueChanged<int> onChanged,
+  required ValueChanged<bool> onEnabledChanged,
 }) {
   final AppLocalizations l10n = context.l10n;
   int currentValue = value;
@@ -66,16 +66,16 @@ void showHalftoneSizePicker({
   showAppBottomSheet<void>(
     context: context,
     barrierColor: AppColors.transparent,
-    builder: (final BuildContext _) {
+    builder: (BuildContext _) {
       return StatefulBuilder(
-        builder: (final BuildContext _, final void Function(void Function()) setSheetState) {
+        builder: (BuildContext _, void Function(void Function()) setSheetState) {
           return AppBottomSheetContent(
             title: l10n.toolHalftone,
             titleIcon: const AppSvgIcon(icon: AppIcon.halftone),
             titleTrailing: AppSwitch(
               key: Keys.toolFillHalftoneToggle,
               value: isEnabled,
-              onChanged: (final bool nextValue) {
+              onChanged: (bool nextValue) {
                 setSheetState(() {
                   isEnabled = nextValue;
                 });
@@ -87,7 +87,7 @@ void showHalftoneSizePicker({
               reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (final Widget child, final Animation<double> animation) {
+              transitionBuilder: (Widget child, Animation<double> animation) {
                 return ClipRect(
                   child: FadeTransition(
                     opacity: animation,
@@ -103,7 +103,7 @@ void showHalftoneSizePicker({
                       key: const ValueKey<String>('halftone_size_picker_enabled'),
                       title: l10n.toolHalftone,
                       value: currentValue,
-                      onChanged: (final int newValue) {
+                      onChanged: (int newValue) {
                         currentValue = newValue;
                         onChanged(newValue);
                       },

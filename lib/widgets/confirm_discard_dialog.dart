@@ -9,11 +9,11 @@ import 'package:fpaint/widgets/material_free.dart';
 ///
 /// - Parameters:
 ///   - context: The [BuildContext] used to display the dialog.
-Future<bool> confirmDiscardCurrentWork(final BuildContext context) async {
+Future<bool> confirmDiscardCurrentWork(BuildContext context) async {
   final AppLocalizations l10n = context.l10n;
   final bool? discardCurrentFile = await showAppDialog<bool>(
     context: context,
-    builder: (final BuildContext context) {
+    builder: (BuildContext context) {
       return AppDialog(
         title: l10n.discardCurrentDocumentQuestion,
         actions: <Widget>[

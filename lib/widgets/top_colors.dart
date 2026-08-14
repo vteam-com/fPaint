@@ -76,7 +76,7 @@ class _TopColorsState extends State<TopColors> {
   }
 
   @override
-  void didUpdateWidget(final TopColors oldWidget) {
+  void didUpdateWidget(TopColors oldWidget) {
     super.didUpdateWidget(oldWidget);
     final bool refreshSignalChanged = oldWidget.refreshRevision != widget.refreshRevision;
     final bool autoRefreshModeChanged = oldWidget.autoRefreshOnIdle != widget.autoRefreshOnIdle;
@@ -91,11 +91,11 @@ class _TopColorsState extends State<TopColors> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
     final List<ColorUsage> sortedColors = sortColorByHueAndPopularity();
 
-    final List<Widget> colorPreviews = sortedColors.map((final ColorUsage colorUsed) {
+    final List<Widget> colorPreviews = sortedColors.map((ColorUsage colorUsed) {
       final List<String> components = getColorComponentsAsHex(colorUsed.color);
       final String alpha = components[0];
       final String red = components[1];
@@ -168,7 +168,7 @@ class _TopColorsState extends State<TopColors> {
 
     // Sort each hue group by percentage (descending), then by hue (ascending)
     for (final List<ColorUsage> group in groupedByHue.values) {
-      group.sort((final ColorUsage a, final ColorUsage b) {
+      group.sort((ColorUsage a, ColorUsage b) {
         final int percentageComparison = b.percentage.compareTo(a.percentage);
         if (percentageComparison != 0) {
           return percentageComparison;
@@ -181,24 +181,24 @@ class _TopColorsState extends State<TopColors> {
 
     // Sort hue groups by total percentage usage (descending)
     final List<List<ColorUsage>> sortedGroups = groupedByHue.values.toList();
-    sortedGroups.sort((final List<ColorUsage> a, final List<ColorUsage> b) {
+    sortedGroups.sort((List<ColorUsage> a, List<ColorUsage> b) {
       final double totalA = a.fold(
         0,
-        (final double sum, final ColorUsage item) => sum + item.percentage,
+        (double sum, ColorUsage item) => sum + item.percentage,
       );
       final double totalB = b.fold(
         0,
-        (final double sum, final ColorUsage item) => sum + item.percentage,
+        (double sum, ColorUsage item) => sum + item.percentage,
       );
       return totalB.compareTo(totalA);
     });
 
     // Flatten the sorted groups into a final sorted list
-    return sortedGroups.expand((final List<ColorUsage> group) => group).toList();
+    return sortedGroups.expand((List<ColorUsage> group) => group).toList();
   }
 
   /// Debounces a refresh so the top-colors list updates after canvas edits go idle.
-  void _scheduleAutoRefreshIfNeeded({final bool force = false}) {
+  void _scheduleAutoRefreshIfNeeded({bool force = false}) {
     if (!widget.autoRefreshOnIdle) {
       return;
     }

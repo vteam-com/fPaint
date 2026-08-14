@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
-  testWidgets('overlay controls render feedback and semantic button states', (final WidgetTester tester) async {
+  testWidgets('overlay controls render feedback and semantic button states', (WidgetTester tester) async {
     int tapCount = 0;
 
     await tester.pumpWidget(
@@ -51,7 +51,7 @@ void main() {
 
     await tester.tap(
       find.byWidgetPredicate(
-        (final Widget w) => w is AppTooltip && w.message == 'Confirm',
+        (Widget w) => w is AppTooltip && w.message == 'Confirm',
       ),
     );
     await tester.pump();
@@ -60,12 +60,12 @@ void main() {
     expect(tapCount, 1);
 
     final Finder confirmTooltip = find.byWidgetPredicate(
-      (final Widget widget) => widget is AppTooltip && widget.message == 'Confirm',
+      (Widget widget) => widget is AppTooltip && widget.message == 'Confirm',
     );
     final Finder confirmButton = find.descendant(
       of: confirmTooltip,
       matching: find.byWidgetPredicate(
-        (final Widget widget) =>
+        (Widget widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
             (widget.decoration! as BoxDecoration).shape == BoxShape.circle,
@@ -74,7 +74,7 @@ void main() {
     final Finder zoomButton = find.ancestor(
       of: find.text('100%'),
       matching: find.byWidgetPredicate(
-        (final Widget widget) =>
+        (Widget widget) =>
             widget is Container &&
             widget.decoration is BoxDecoration &&
             (widget.decoration! as BoxDecoration).shape == BoxShape.rectangle,
@@ -82,7 +82,7 @@ void main() {
     );
     final Finder zoomText = find.descendant(of: zoomButton, matching: find.byType(Text));
     final Finder cancelIcon = find.descendant(
-      of: find.byWidgetPredicate((final Widget widget) => widget is AppTooltip && widget.message == 'Cancel'),
+      of: find.byWidgetPredicate((Widget widget) => widget is AppTooltip && widget.message == 'Cancel'),
       matching: find.byType(AppSvgIcon),
     );
 

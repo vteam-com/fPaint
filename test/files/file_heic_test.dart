@@ -95,7 +95,7 @@ void main() {
   });
 }
 
-bool _isHeicBytes(final Uint8List data) {
+bool _isHeicBytes(Uint8List data) {
   if (data.length < _minimumHeicHeaderLength) {
     return false;
   }

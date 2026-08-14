@@ -36,7 +36,7 @@ class ToolFamilyRail extends StatelessWidget {
   /// Whether the rail is rendered in the compact (minimal) layout.
   final bool minimal;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context);
 
     return ListenableBuilder(
@@ -47,7 +47,7 @@ class ToolFamilyRail extends StatelessWidget {
         appProvider.selectedActionRepaintListenable,
         appProvider.toolOptionsRepaintListenable,
       ]),
-      builder: (final BuildContext context, final Widget? _) {
+      builder: (BuildContext context, Widget? _) {
         return _toolSections(context, appProvider);
       },
     );
@@ -56,9 +56,9 @@ class ToolFamilyRail extends StatelessWidget {
   /// Brush controls for the [armedEffect]: brush size and strength. The effect
   /// is applied by painting it onto the canvas.
   Widget _effectControls(
-    final AppLocalizations l10n,
-    final AppProvider appProvider,
-    final SelectionEffect armedEffect,
+    AppLocalizations l10n,
+    AppProvider appProvider,
+    SelectionEffect armedEffect,
   ) {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.small),
@@ -72,7 +72,7 @@ class ToolFamilyRail extends StatelessWidget {
             valueLabel: appProvider.brushSize.toStringAsFixed(AppMath.zero),
             min: AppInteraction.minCanvasScale,
             max: AppLimits.pixelBrushSizeMax.toDouble(),
-            onChanged: (final double value) => appProvider.brushSize = value,
+            onChanged: (double value) => appProvider.brushSize = value,
           ),
           AppSlider(
             key: Keys.effectPaintStrengthSlider,
@@ -81,7 +81,7 @@ class ToolFamilyRail extends StatelessWidget {
             valueLabel: '${(appProvider.effectBrushModel.strength * AppMath.percentScale).round()}%',
             min: armedEffect.bipolar ? -AppEffects.maxIntensity : AppEffects.minIntensity,
             max: AppEffects.maxIntensity,
-            onChanged: (final double value) => appProvider.setEffectBrushStrength(value),
+            onChanged: (double value) => appProvider.setEffectBrushStrength(value),
           ),
         ],
       ),
@@ -90,7 +90,7 @@ class ToolFamilyRail extends StatelessWidget {
 
   /// Preserves the widget keys existing tests tap; tools without a prior key
   /// (pencil, brush, eraser) keep none.
-  static Key? _gestureToolKey(final ActionType action) {
+  static Key? _gestureToolKey(ActionType action) {
     switch (action) {
       case ActionType.smudge:
         return Keys.toolSmudge;
@@ -120,10 +120,10 @@ class ToolFamilyRail extends StatelessWidget {
   /// A single rail button: a gesture tool that sets the active action, or an
   /// effect that arms/disarms itself as a brush.
   Widget _toolButton(
-    final AppLocalizations l10n,
-    final AppProvider appProvider,
-    final ToolDescriptor descriptor,
-    final SelectionEffect? armedEffect,
+    AppLocalizations l10n,
+    AppProvider appProvider,
+    ToolDescriptor descriptor,
+    SelectionEffect? armedEffect,
   ) {
     final EdgeInsets padding = EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small);
     final BoxConstraints? constraints = minimal ? const BoxConstraints() : null;
@@ -156,10 +156,10 @@ class ToolFamilyRail extends StatelessWidget {
 
   /// A wrapped grid of tool buttons for one section.
   Widget _toolGrid(
-    final AppLocalizations l10n,
-    final AppProvider appProvider,
-    final List<ToolDescriptor> descriptors,
-    final SelectionEffect? armedEffect,
+    AppLocalizations l10n,
+    AppProvider appProvider,
+    List<ToolDescriptor> descriptors,
+    SelectionEffect? armedEffect,
   ) {
     return Wrap(
       spacing: minimal ? AppSpacing.thin : AppSpacing.small,
@@ -175,7 +175,7 @@ class ToolFamilyRail extends StatelessWidget {
   /// **Elements** (line, rectangle, circle, fill, text). Exactly one tool is
   /// active across both, so its controls (gesture params, or the armed effect's
   /// controls) render beneath whichever section owns it.
-  Widget _toolSections(final BuildContext context, final AppProvider appProvider) {
+  Widget _toolSections(BuildContext context, AppProvider appProvider) {
     final AppLocalizations l10n = context.l10n;
     final SelectionEffect? armedEffect = appProvider.effectBrushModel.effect;
     final ActionType selectedAction = appProvider.selectedAction;

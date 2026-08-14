@@ -11,7 +11,7 @@ class AppSwitch extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   final bool value;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: MouseRegion(

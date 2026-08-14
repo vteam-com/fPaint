@@ -33,8 +33,8 @@ class WandSelectionManager {
 
   /// Queues a new request, invalidating any older in-flight result.
   void queueRequest({
-    required final Offset position,
-    required final bool sampleAllLayers,
+    required Offset position,
+    required bool sampleAllLayers,
   }) {
     _requestVersion += AppMath.one;
     _pendingPosition = position;
@@ -79,7 +79,7 @@ class WandSelectionManager {
   }
 
   /// Returns the cached source data when [signature] still matches, else null.
-  FillImageData? cachedImageData(final int signature) {
+  FillImageData? cachedImageData(int signature) {
     if (signature == _cachedSignature &&
         _cachedPixels != null &&
         _cachedWidth > AppMath.zero &&
@@ -95,10 +95,10 @@ class WandSelectionManager {
 
   /// Stores freshly rasterized source pixels under [signature].
   void storeCache({
-    required final int signature,
-    required final Uint8List pixels,
-    required final int width,
-    required final int height,
+    required int signature,
+    required Uint8List pixels,
+    required int width,
+    required int height,
   }) {
     _cachedSignature = signature;
     _cachedPixels = pixels;

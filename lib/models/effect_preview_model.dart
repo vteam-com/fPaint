@@ -29,12 +29,12 @@ class EffectPreviewModel extends VisibleModel {
 
   /// Starts preview state for [selectedEffect] over [selectionBounds].
   void start({
-    required final SelectionEffect selectedEffect,
-    required final ui.Image selectionImage,
-    required final ui.Path selectionPath,
-    required final ui.Rect selectionBounds,
-    required final double initialStrength,
-    required final double initialSize,
+    required SelectionEffect selectedEffect,
+    required ui.Image selectionImage,
+    required ui.Path selectionPath,
+    required ui.Rect selectionBounds,
+    required double initialStrength,
+    required double initialSize,
   }) {
     effect = selectedEffect;
     sourceImage = selectionImage;

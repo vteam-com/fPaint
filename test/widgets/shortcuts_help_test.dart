@@ -30,7 +30,7 @@ void main() {
     return isApplePlatform ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.controlLeft;
   }
 
-  Widget buildTestWidget({final Size size = const Size(1200, 900)}) {
+  Widget buildTestWidget({Size size = const Size(1200, 900)}) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: MediaQuery(
@@ -39,9 +39,9 @@ void main() {
           locale: const Locale('en'),
           delegates: AppLocalizations.localizationsDelegates,
           child: Navigator(
-            onGenerateRoute: (final RouteSettings _) {
+            onGenerateRoute: (RouteSettings _) {
               return PageRouteDirectionality(
-                builder: (final BuildContext context) {
+                builder: (BuildContext context) {
                   return const ShortcutsHelpDialog();
                 },
               );
@@ -53,9 +53,9 @@ void main() {
   }
 
   Widget buildShortcutHandlerTestWidget({
-    required final AppProvider appProvider,
-    required final ShellProvider shellProvider,
-    final Future<void> Function()? onSave,
+    required AppProvider appProvider,
+    required ShellProvider shellProvider,
+    Future<void> Function()? onSave,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -65,9 +65,9 @@ void main() {
           locale: const Locale('en'),
           delegates: AppLocalizations.localizationsDelegates,
           child: Navigator(
-            onGenerateRoute: (final RouteSettings _) {
+            onGenerateRoute: (RouteSettings _) {
               return PageRouteDirectionality(
-                builder: (final BuildContext context) {
+                builder: (BuildContext context) {
                   return shortCutsForMainApp(
                     context,
                     shellProvider,
@@ -85,56 +85,56 @@ void main() {
   }
 
   group('ShortcutsHelpDialog', () {
-    testWidgets('renders the dialog', (final WidgetTester tester) async {
+    testWidgets('renders the dialog', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.byType(ShortcutsHelpDialog), findsOneWidget);
     });
 
-    testWidgets('displays Keyboard Shortcuts title', (final WidgetTester tester) async {
+    testWidgets('displays Keyboard Shortcuts title', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('Keyboard Shortcuts'), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('shows File Operations category', (final WidgetTester tester) async {
+    testWidgets('shows File Operations category', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('File Operations'), findsOneWidget);
     });
 
-    testWidgets('shows Editing category', (final WidgetTester tester) async {
+    testWidgets('shows Editing category', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('Editing'), findsOneWidget);
     });
 
-    testWidgets('shows View category', (final WidgetTester tester) async {
+    testWidgets('shows View category', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('View'), findsOneWidget);
     });
 
-    testWidgets('shows Tools category', (final WidgetTester tester) async {
+    testWidgets('shows Tools category', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('Tools'), findsOneWidget);
     });
 
-    testWidgets('shows Layers category', (final WidgetTester tester) async {
+    testWidgets('shows Layers category', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('Layers'), findsOneWidget);
     });
 
-    testWidgets('shows Selection category with modifier shortcuts', (final WidgetTester tester) async {
+    testWidgets('shows Selection category with modifier shortcuts', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
@@ -154,28 +154,28 @@ void main() {
       expect(find.textContaining(wandModifier), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('shows Save shortcut', (final WidgetTester tester) async {
+    testWidgets('shows Save shortcut', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('Save'), findsOneWidget);
     });
 
-    testWidgets('shows Undo shortcut', (final WidgetTester tester) async {
+    testWidgets('shows Undo shortcut', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('Undo'), findsOneWidget);
     });
 
-    testWidgets('shows Close button', (final WidgetTester tester) async {
+    testWidgets('shows Close button', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('Close'), findsOneWidget);
     });
 
-    testWidgets('shows platform modifier key', (final WidgetTester tester) async {
+    testWidgets('shows platform modifier key', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
@@ -185,21 +185,21 @@ void main() {
       expect(hasCmd || hasCtrl, isTrue);
     });
 
-    testWidgets('shows Brush Tool shortcut', (final WidgetTester tester) async {
+    testWidgets('shows Brush Tool shortcut', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('Brush Tool'), findsOneWidget);
     });
 
-    testWidgets('shows Eraser Tool shortcut', (final WidgetTester tester) async {
+    testWidgets('shows Eraser Tool shortcut', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
       expect(find.text('Eraser Tool'), findsOneWidget);
     });
 
-    testWidgets('shows Tab shortcut for shell toggle', (final WidgetTester tester) async {
+    testWidgets('shows Tab shortcut for shell toggle', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
@@ -207,7 +207,7 @@ void main() {
       expect(find.text('Toggle Shell'), findsOneWidget);
     });
 
-    testWidgets('shows F1 help shortcut entry', (final WidgetTester tester) async {
+    testWidgets('shows F1 help shortcut entry', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
@@ -215,7 +215,7 @@ void main() {
       expect(find.text('Keyboard Shortcuts'), findsAtLeastNWidgets(2));
     });
 
-    testWidgets('shows same-layer and new-layer duplicate shortcut entries', (final WidgetTester tester) async {
+    testWidgets('shows same-layer and new-layer duplicate shortcut entries', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
@@ -227,7 +227,7 @@ void main() {
       expect(find.text(duplicateNewLayerDescription), findsNWidgets(2));
     });
 
-    testWidgets('uses a wider adaptive dialog on large screens', (final WidgetTester tester) async {
+    testWidgets('uses a wider adaptive dialog on large screens', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget(size: const Size(1400, 900)));
       await tester.pump();
 
@@ -235,7 +235,7 @@ void main() {
       expect(dialogSize.width, greaterThan(AppLayout.dialogWidth));
     });
 
-    testWidgets('keeps long shortcut descriptions readable on phone-sized screens', (final WidgetTester tester) async {
+    testWidgets('keeps long shortcut descriptions readable on phone-sized screens', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget(size: const Size(360, 800)));
       await tester.pump();
 
@@ -245,7 +245,7 @@ void main() {
   });
 
   group('shortCutsForMainApp', () {
-    testWidgets('opens keyboard shortcuts dialog with F1', (final WidgetTester tester) async {
+    testWidgets('opens keyboard shortcuts dialog with F1', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final AppPreferences preferences = AppPreferences();
       await preferences.getPref();
@@ -266,7 +266,7 @@ void main() {
       expect(find.byType(ShortcutsHelpDialog), findsOneWidget);
     });
 
-    testWidgets('Cmd/Ctrl+D starts a same-layer duplicate transform', (final WidgetTester tester) async {
+    testWidgets('Cmd/Ctrl+D starts a same-layer duplicate transform', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final AppPreferences preferences = AppPreferences();
       await preferences.getPref();
@@ -293,7 +293,7 @@ void main() {
       expect(appProvider.imagePlacementModel.layerRestoreState, isNotNull);
     });
 
-    testWidgets('Shift+Cmd/Ctrl+D starts a new-layer duplicate transform', (final WidgetTester tester) async {
+    testWidgets('Shift+Cmd/Ctrl+D starts a new-layer duplicate transform', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final AppPreferences preferences = AppPreferences();
       await preferences.getPref();
@@ -322,7 +322,7 @@ void main() {
       expect(appProvider.imagePlacementModel.layerRestoreState, isNull);
     });
 
-    testWidgets('Cmd/Ctrl+S invokes onSave', (final WidgetTester tester) async {
+    testWidgets('Cmd/Ctrl+S invokes onSave', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final AppPreferences preferences = AppPreferences();
       await preferences.getPref();
@@ -350,7 +350,7 @@ void main() {
       expect(saveCount, 1);
     });
 
-    testWidgets('single-key tool shortcuts switch the selected tool', (final WidgetTester tester) async {
+    testWidgets('single-key tool shortcuts switch the selected tool', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final AppPreferences preferences = AppPreferences();
       await preferences.getPref();
@@ -386,7 +386,7 @@ void main() {
       expect(appProvider.selectedAction, ActionType.brush);
     });
 
-    testWidgets('Cmd/Ctrl + and - zoom the canvas', (final WidgetTester tester) async {
+    testWidgets('Cmd/Ctrl + and - zoom the canvas', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final AppPreferences preferences = AppPreferences();
       await preferences.getPref();
@@ -422,7 +422,7 @@ void main() {
       expect(shellProvider.canvasPlacement, CanvasAutoPlacement.manual);
     });
 
-    testWidgets('Cmd/Ctrl+0 resets zoom to 100%', (final WidgetTester tester) async {
+    testWidgets('Cmd/Ctrl+0 resets zoom to 100%', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final AppPreferences preferences = AppPreferences();
       await preferences.getPref();
@@ -482,9 +482,9 @@ class PageRouteDirectionality extends PageRoute<void> {
 
   @override
   Widget buildPage(
-    final BuildContext context,
-    final Animation<double> animation,
-    final Animation<double> secondaryAnimation,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
   ) {
     return builder(context);
   }

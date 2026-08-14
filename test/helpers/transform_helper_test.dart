@@ -1,14 +1,14 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Creates a solid-colored test image.
 Future<ui.Image> _createTestImage({
-  final int width = 100,
-  final int height = 100,
+  int width = 100,
+  int height = 100,
 }) async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   Canvas(recorder).drawRect(
@@ -26,7 +26,7 @@ void main() {
       TestWidgetsFlutterBinding.ensureInitialized();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         hapticChannel,
-        (final MethodCall _) async => null,
+        (MethodCall _) async => null,
       );
     });
 

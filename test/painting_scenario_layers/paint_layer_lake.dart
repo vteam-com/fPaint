@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<void> paintLayerLake(final PaintingScenarioSession session) async {
+Future<void> paintLayerLake(PaintingScenarioSession session) async {
   final BuildContext sceneContext = session.tester.element(find.byType(MainView));
   final AppProvider sceneAppProvider = AppProvider.of(sceneContext, listen: false);
   final LayersProvider sceneLayersProvider = LayersProvider.of(sceneContext);
@@ -58,7 +58,7 @@ Future<void> paintLayerLake(final PaintingScenarioSession session) async {
   ]) {
     await drawFreehandStrokeWithHumanGestures(
       session.tester,
-      points: wavePoints.map((final Offset point) => session.canvasCenter + point).toList(),
+      points: wavePoints.map((Offset point) => session.canvasCenter + point).toList(),
       brushSize: _pondHighlightBrushSize,
       brushColor: _pondHighlightColor,
     );
@@ -73,7 +73,7 @@ Future<void> paintLayerLake(final PaintingScenarioSession session) async {
   ]) {
     await drawFreehandStrokeWithHumanGestures(
       session.tester,
-      points: reflectionStreak.map((final Offset point) => session.canvasCenter + point).toList(),
+      points: reflectionStreak.map((Offset point) => session.canvasCenter + point).toList(),
       brushSize: _pondSunReflectionBrushSize,
       brushColor: _pondSunReflectionColor,
     );
@@ -117,10 +117,10 @@ Future<void> paintLayerLake(final PaintingScenarioSession session) async {
   );
 
   final int pondLayerIndex = sceneLayersProvider.list.indexWhere(
-    (final LayerProvider layer) => layer.name == _pondLayerName,
+    (LayerProvider layer) => layer.name == _pondLayerName,
   );
   final int landLayerIndex = sceneLayersProvider.list.indexWhere(
-    (final LayerProvider layer) => layer.name == _landLayerName,
+    (LayerProvider layer) => layer.name == _landLayerName,
   );
 
   expect(pondLayerIndex, isNonNegative, reason: 'Pond layer should exist before merge');
@@ -134,7 +134,7 @@ Future<void> paintLayerLake(final PaintingScenarioSession session) async {
     reason: 'Merging the pond into land should restore the original layer count',
   );
   expect(
-    sceneLayersProvider.list.any((final LayerProvider layer) => layer.name == _pondLayerName),
+    sceneLayersProvider.list.any((LayerProvider layer) => layer.name == _pondLayerName),
     isFalse,
     reason: 'Pond layer should be removed after merge',
   );

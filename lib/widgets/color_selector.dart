@@ -41,13 +41,13 @@ class _ColorSelectorState extends State<ColorSelector> {
   }
 
   @override
-  void didUpdateWidget(covariant final ColorSelector oldWidget) {
+  void didUpdateWidget(covariant ColorSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
     fromInputColorToHueBrightnessAndAlpha();
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     const double maxHue = 359.7;
 
     if (hue > maxHue) {
@@ -74,7 +74,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                     min: 0,
                     max: maxHue,
                     divisions: AppLimits.hueDivisions * AppMath.pair,
-                    onChanged: (final double value) {
+                    onChanged: (double value) {
                       setState(() {
                         hue = value;
                         if (brightness == 0 || brightness == 1) {
@@ -95,7 +95,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                     min: 0,
                     max: 1,
                     divisions: AppLimits.sliderDivisions,
-                    onChanged: (final double value) {
+                    onChanged: (double value) {
                       setState(() {
                         brightness = value;
                         widget.onColorChanged(hsvToColor(hue, brightness, alpha));
@@ -120,7 +120,7 @@ class _ColorSelectorState extends State<ColorSelector> {
                         min: 0,
                         max: 1,
                         divisions: AppLimits.sliderDivisions,
-                        onChanged: (final double value) {
+                        onChanged: (double value) {
                           setState(() {
                             alpha = value;
                             widget.onColorChanged(
@@ -154,7 +154,7 @@ class _ColorSelectorState extends State<ColorSelector> {
 /// Paints a hue gradient on a canvas.
 class HueGradientPainter extends CustomPainter {
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     const List<Color> colors = <Color>[
       Color.fromRGBO(255, 0, 0, 1), // 1 Red
       Color.fromRGBO(255, 255, 0, 1), // 2 Yellow
@@ -178,7 +178,7 @@ class HueGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final HueGradientPainter oldDelegate) {
+  bool shouldRepaint(covariant HueGradientPainter oldDelegate) {
     return false; // Hue gradient is static, never needs repaint based on properties.
   }
 }
@@ -192,7 +192,7 @@ class BrightnessGradientPainter extends CustomPainter {
   final double hue;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     final Rect rect = Offset.zero & size;
     final Gradient gradient = LinearGradient(
       colors: <Color>[
@@ -207,7 +207,7 @@ class BrightnessGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final BrightnessGradientPainter oldDelegate) {
+  bool shouldRepaint(covariant BrightnessGradientPainter oldDelegate) {
     return oldDelegate.hue != hue;
   }
 }
@@ -224,7 +224,7 @@ class AlphaGradientPainter extends CustomPainter {
   final double brightness;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     final Rect rect = Offset.zero & size;
     final Gradient gradient = LinearGradient(
       colors: <Color>[
@@ -238,16 +238,16 @@ class AlphaGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final AlphaGradientPainter oldDelegate) {
+  bool shouldRepaint(covariant AlphaGradientPainter oldDelegate) {
     return oldDelegate.hue != hue || oldDelegate.brightness != brightness;
   }
 }
 
 /// Converts HSV values to a Color.
 Color hsvToColor(
-  final double hue,
-  final double brightness,
-  final double alpha,
+  double hue,
+  double brightness,
+  double alpha,
 ) {
   final HSLColor hslColor = HSLColor.fromAHSL(alpha, hue, 1.0, brightness);
   return hslColor.toColor();

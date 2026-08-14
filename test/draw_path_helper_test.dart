@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   test('expandPathInDirectionWithOffset expands path to the left', () {

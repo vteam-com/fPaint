@@ -65,7 +65,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   }
 
   @override
-  void didUpdateWidget(final GradientColorListEditor oldWidget) {
+  void didUpdateWidget(GradientColorListEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
     final bool stopCountChanged = oldWidget.fillModel.gradientStopPositions.length != _posControllers.length;
     if (stopCountChanged || _positionTextOutOfSync()) {
@@ -75,7 +75,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
     final bool canRemoveAny = _stops.length > FillModel.gradientStopMin;
 
@@ -112,7 +112,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   }
 
   /// Builds the "Add color stop" button shown beneath the stop list.
-  Widget _buildAddButton(final AppLocalizations l10n) {
+  Widget _buildAddButton(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.small),
       child: AppButtonIcon(
@@ -128,7 +128,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   ///
   /// Endpoint stops (index 0 and last) display their fixed value in a
   /// read-only style.  Inner stops use an editable [AppTextField].
-  Widget _buildPositionField(final int index, final bool isEndpoint, final AppLocalizations l10n) {
+  Widget _buildPositionField(int index, bool isEndpoint, AppLocalizations l10n) {
     if (_posControllers.length <= index) {
       return const SizedBox.shrink();
     }
@@ -148,7 +148,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
               hintText: l10n.gradientStopPosition,
               keyboardType: const TextInputType.numberWithOptions(),
               textAlign: TextAlign.center,
-              onSubmitted: (final String v) => _changePosition(index, v),
+              onSubmitted: (String v) => _changePosition(index, v),
             ),
     );
   }
@@ -158,10 +158,10 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   /// Shows up/down reorder arrows, a color-preview swatch, an editable
   /// position-percentage field, and (when [canRemove] is true) a remove button.
   Widget _buildStopRow(
-    final BuildContext context,
-    final AppLocalizations l10n,
-    final int index,
-    final bool canRemoveAny,
+    BuildContext context,
+    AppLocalizations l10n,
+    int index,
+    bool canRemoveAny,
   ) {
     final Color stopColor = _stops[index];
     final bool isFirst = index == 0;
@@ -201,7 +201,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
                 context: context,
                 title: l10n.gradientPointColor,
                 color: stopColor,
-                onSelectedColor: (final Color picked) => _changeColor(index, picked),
+                onSelectedColor: (Color picked) => _changeColor(index, picked),
               );
             },
           ),
@@ -232,7 +232,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   /// Any stop except the last can swap with the next slot. When that swap
   /// touches an endpoint, the endpoint percentages remain anchored at 0% and
   /// 100% while the adjacent colors exchange places.
-  bool _canMoveDown(final int index) {
+  bool _canMoveDown(int index) {
     return index < _stops.length - AppMath.one;
   }
 
@@ -241,11 +241,11 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   /// Any stop except the first can swap with the previous slot. When that swap
   /// touches an endpoint, the endpoint percentages remain anchored at 0% and
   /// 100% while the adjacent colors exchange places.
-  bool _canMoveUp(final int index) {
+  bool _canMoveUp(int index) {
     return index > AppMath.zero;
   }
 
-  void _changeColor(final int index, final Color newColor) {
+  void _changeColor(int index, Color newColor) {
     setState(() {
       _stops[index] = newColor;
     });
@@ -255,7 +255,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   /// Applies a new position value (entered by the user as an integer 0–100)
   /// to stop [index].  The value is clamped so it stays between the surrounding
   /// stop positions (exclusive).
-  void _changePosition(final int index, final String raw) {
+  void _changePosition(int index, String raw) {
     if (index == AppMath.zero || index == _positions.length - 1) {
       _syncPositionControllers();
       return;
@@ -295,7 +295,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   }
 
   /// Moves the stop at [index] one position toward the end of the list.
-  void _moveDown(final int index) {
+  void _moveDown(int index) {
     if (!_canMoveDown(index)) {
       return;
     }
@@ -309,7 +309,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   }
 
   /// Moves the stop at [index] one position toward the start of the list.
-  void _moveUp(final int index) {
+  void _moveUp(int index) {
     if (!_canMoveUp(index)) {
       return;
     }
@@ -353,7 +353,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   /// Endpoint stops (0% and 100%) are never removed.
   ///
   /// Existing stop percentages remain unchanged after removal.
-  void _removeStop(final int index) {
+  void _removeStop(int index) {
     if (_stops.length <= FillModel.gradientStopMin) {
       return;
     }
@@ -375,10 +375,10 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   /// When [enabled] is false the button is rendered at reduced opacity and its
   /// [onPressed] callback is a no-op.
   Widget _reorderButton({
-    required final Key key,
-    required final AppIcon icon,
-    required final bool enabled,
-    required final VoidCallback onPressed,
+    required Key key,
+    required AppIcon icon,
+    required bool enabled,
+    required VoidCallback onPressed,
   }) {
     return AppButtonIcon(
       key: key,
@@ -399,7 +399,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
   /// Stop positions stay anchored to their slots so the gradient stop list
   /// remains monotonic after reordering and on-canvas handle dragging keeps
   /// valid neighbor bounds.
-  void _swapAdjacentStops(final int a, final int b) {
+  void _swapAdjacentStops(int a, int b) {
     final Color tmpColor = _stops[b];
     _stops[b] = _stops[a];
     _stops[a] = tmpColor;
@@ -413,9 +413,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
     _posControllers
       ..clear()
       ..addAll(
-        _positions
-            .map((final double p) => TextEditingController(text: (p * _kMaxStopPercent).round().toString()))
-            .toList(),
+        _positions.map((double p) => TextEditingController(text: (p * _kMaxStopPercent).round().toString())).toList(),
       );
   }
 }

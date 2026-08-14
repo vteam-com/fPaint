@@ -21,7 +21,7 @@ enum CanvasResizePosition {
 /// Calculates the offset required to keep the anchor point in the same position after a resize.
 ///
 /// The [anchor] parameter specifies the anchor point to use for the calculation.
-Offset anchorFactors(final CanvasResizePosition anchor) {
+Offset anchorFactors(CanvasResizePosition anchor) {
   switch (anchor) {
     case CanvasResizePosition.topLeft:
       return const Offset(0, 0);
@@ -46,9 +46,9 @@ Offset anchorFactors(final CanvasResizePosition anchor) {
 
 /// Calculates the translation offset for the given anchor position.
 Offset anchorTranslate(
-  final CanvasResizePosition anchor,
-  final Size fromSize,
-  final Size toSize,
+  CanvasResizePosition anchor,
+  Size fromSize,
+  Size toSize,
 ) {
   final Offset factors = anchorFactors(anchor);
 

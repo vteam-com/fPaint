@@ -13,17 +13,17 @@ const Size _size = Size(8, 8);
 
 LayerProvider _layer() => LayerProvider(name: 'L', size: _size, onThumbnailChanged: () {});
 
-Future<ui.Image> _solid(final Color color) {
+Future<ui.Image> _solid(Color color) {
   return renderCanvasImage(
     width: _canvas,
     height: _canvas,
-    draw: (final ui.Canvas canvas) {
+    draw: (ui.Canvas canvas) {
       canvas.drawRect(const Rect.fromLTWH(0, 0, 8, 8), Paint()..color = color);
     },
   );
 }
 
-UserActionDrawing _imageAction(final ui.Image image, final Offset at) {
+UserActionDrawing _imageAction(ui.Image image, Offset at) {
   return UserActionDrawing(
     action: ActionType.image,
     positions: <Offset>[at, Offset(at.dx + image.width, at.dy + image.height)],
@@ -33,7 +33,7 @@ UserActionDrawing _imageAction(final ui.Image image, final Offset at) {
 
 /// Renders [layer] exactly as the canvas composites it (group saveLayer +
 /// renderLayer) and reads back straight RGBA bytes for comparison.
-Future<Uint8List> _renderBytes(final LayerProvider layer) async {
+Future<Uint8List> _renderBytes(LayerProvider layer) async {
   final ui.Image image = await layer.toImageForStorageAsync(_size);
   final Uint8List? pixels = await extractImagePixels(image, format: ui.ImageByteFormat.rawStraightRgba);
   image.dispose();
@@ -41,7 +41,7 @@ Future<Uint8List> _renderBytes(final LayerProvider layer) async {
   return pixels!;
 }
 
-int _alphaAt(final Uint8List rgba, final int x, final int y) =>
+int _alphaAt(Uint8List rgba, int x, int y) =>
     rgba[((y * _canvas) + x) * AppMath.bytesPerPixel + AppMath.rgbChannelAlpha];
 
 void main() {
@@ -186,7 +186,7 @@ void main() {
         <Offset>[Offset(3, 3), Offset(5, 2)],
         <Offset>[Offset(5, 2), Offset(6, 6)],
       ];
-      UserActionDrawing brushAction(final List<Offset> pts) => UserActionDrawing(
+      UserActionDrawing brushAction(List<Offset> pts) => UserActionDrawing(
         action: ActionType.brush,
         positions: List<Offset>.of(pts),
         brush: brush,
@@ -252,7 +252,7 @@ void main() {
       final MyBrush brush = MyBrush(color: const Color(0xFF000000), size: 2);
       const Color fill = Color(0xFF000000);
       final int total = (AppInteraction.strokePreviewFoldThreshold * 2) + 3;
-      UserActionDrawing brushSegment(final int i) => UserActionDrawing(
+      UserActionDrawing brushSegment(int i) => UserActionDrawing(
         action: ActionType.brush,
         positions: <Offset>[
           Offset((i % 7).toDouble(), (i % 5).toDouble()),

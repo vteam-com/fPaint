@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('confirmDiscardCurrentWork', () {
-    testWidgets('shows dialog with discard and no buttons', (final WidgetTester tester) async {
+    testWidgets('shows dialog with discard and no buttons', (WidgetTester tester) async {
       late BuildContext savedContext;
 
       await tester.pumpWidget(
@@ -14,7 +14,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
-              builder: (final BuildContext context) {
+              builder: (BuildContext context) {
                 savedContext = context;
                 return const SizedBox();
               },
@@ -39,7 +39,7 @@ void main() {
       expect(result, isFalse);
     });
 
-    testWidgets('returns true when discard is tapped', (final WidgetTester tester) async {
+    testWidgets('returns true when discard is tapped', (WidgetTester tester) async {
       late BuildContext savedContext;
 
       await tester.pumpWidget(
@@ -48,7 +48,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
-              builder: (final BuildContext context) {
+              builder: (BuildContext context) {
                 savedContext = context;
                 return const SizedBox();
               },

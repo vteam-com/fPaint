@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/app_tooltip.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Default callback implementations for SelectionRectWidget tests.
 typedef SelectionRectCallbacks = ({
@@ -38,17 +38,17 @@ SelectionRectCallbacks createDefaultSelectionRectCallbacks({
     onDuplicate: onDuplicate ?? () async {},
     onDuplicateMove: onDuplicateMove,
     onToggleTransformMode: onToggleTransformMode ?? () {},
-    onDrag: onDrag ?? (final Offset _) {},
-    onResize: onResize ?? (final NineGridHandle _, final Offset _) {},
-    onScale: onScale ?? (final double _) {},
-    onRotate: onRotate ?? (final double _) {},
-    onEffectSelected: onEffectSelected ?? (final SelectionEffect _, final BuildContext _) async {},
+    onDrag: onDrag ?? (Offset _) {},
+    onResize: onResize ?? (NineGridHandle _, Offset _) {},
+    onScale: onScale ?? (double _) {},
+    onRotate: onRotate ?? (double _) {},
+    onEffectSelected: onEffectSelected ?? (SelectionEffect _, BuildContext _) async {},
   );
 }
 
 /// Finds an AppTooltip widget by its message text.
 Finder findTooltipByMessage(String message) {
   return find.byWidgetPredicate(
-    (final Widget widget) => widget is AppTooltip && widget.message == message,
+    (Widget widget) => widget is AppTooltip && widget.message == message,
   );
 }

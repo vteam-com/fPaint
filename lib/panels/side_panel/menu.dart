@@ -23,7 +23,7 @@ class MainMenu extends StatelessWidget {
   const MainMenu({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final ShellProvider shellProvider = ShellProvider.of(context);
     final AppLocalizations l10n = context.l10n;
 
@@ -31,8 +31,8 @@ class MainMenu extends StatelessWidget {
       key: Keys.mainMenuButton,
       tooltip: l10n.menuTooltip,
       child: const AppSvgIcon(icon: AppIcon.moreVert),
-      onSelected: (final int result) => onDropDownMenuSelection(context, result),
-      itemBuilder: (final BuildContext _) => <AppPopupMenuItem<int>>[
+      onSelected: (int result) => onDropDownMenuSelection(context, result),
+      itemBuilder: (BuildContext _) => <AppPopupMenuItem<int>>[
         buildMenuItem(
           value: MenuIds.newFile,
           text: l10n.startOver,
@@ -88,8 +88,8 @@ class MainMenu extends StatelessWidget {
 
 /// Handles the selection of a dropdown menu item.
 void onDropDownMenuSelection(
-  final BuildContext context,
-  final int result,
+  BuildContext context,
+  int result,
 ) async {
   final ShellProvider shellProvider = ShellProvider.of(context);
   final LayersProvider layers = LayersProvider.of(context);
@@ -102,7 +102,7 @@ void onDropDownMenuSelection(
     case MenuIds.openFile:
       showAppBottomSheet<void>(
         context: context,
-        builder: (final BuildContext _) {
+        builder: (BuildContext _) {
           return ImportDialog(parentContext: context);
         },
       );
@@ -149,11 +149,11 @@ void onDropDownMenuSelection(
 
 /// Builds a menu item.
 AppPopupMenuItem<int> buildMenuItem({
-  required final int value,
-  required final String text,
-  final String? subtitle,
-  final AppIcon? icon,
-  final Key? key,
+  required int value,
+  required String text,
+  String? subtitle,
+  AppIcon? icon,
+  Key? key,
 }) {
   return AppPopupMenuItem<int>(
     value: value,

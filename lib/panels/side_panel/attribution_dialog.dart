@@ -30,12 +30,12 @@ class _AttributionSection {
   final List<String> licenses;
 }
 
-String _normalizeAttributionText(final String text) {
+String _normalizeAttributionText(String text) {
   final String withoutYearDifferences = text.replaceAll(_yearsPattern, _normalizedYearToken);
   return withoutYearDifferences.replaceAll(_whitespacePattern, ' ').trim();
 }
 
-String _formatPackageName(final String packageName) {
+String _formatPackageName(String packageName) {
   final String? packageVersion = dependencyVersions[packageName];
   if (packageVersion == null || packageVersion == _sdkPlaceholderVersion) {
     return packageName;
@@ -56,7 +56,7 @@ Future<List<_AttributionSection>> _loadAttributions() async {
     final List<String> packages = licenseEntry.packages.toList(growable: false)..sort();
     final List<String> dependencyPackages =
         packages
-            .where((final String packageName) {
+            .where((String packageName) {
               final String? packageVersion = dependencyVersions[packageName];
               return packageVersion != null && packageVersion != _sdkPlaceholderVersion;
             })
@@ -116,7 +116,7 @@ Future<List<_AttributionSection>> _loadAttributions() async {
 }
 
 /// Shows the Attribution dialog.
-Future<void> showAttributionDialog(final BuildContext context) async {
+Future<void> showAttributionDialog(BuildContext context) async {
   final List<_AttributionSection> attributions = await _loadAttributions();
   final Set<String> expandedPackageKeys = <String>{};
 
@@ -128,12 +128,12 @@ Future<void> showAttributionDialog(final BuildContext context) async {
 
   await showAppDialog<void>(
     context: context,
-    builder: (final BuildContext dialogContext) {
+    builder: (BuildContext dialogContext) {
       return StatefulBuilder(
         builder:
             (
-              final BuildContext _,
-              final void Function(void Function()) setState,
+              BuildContext _,
+              void Function(void Function()) setState,
             ) {
               return AppDialog(
                 title: dialogTitle,

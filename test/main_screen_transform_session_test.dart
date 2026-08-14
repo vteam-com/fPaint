@@ -1,6 +1,5 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -17,6 +16,7 @@ import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/transform_widget.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const int _testImageDimension = 12;
@@ -36,9 +36,9 @@ Future<ui.Image> _createTestImage() async {
 }
 
 void _startTransformOverlay(
-  final AppProvider appProvider,
-  final ui.Image image, {
-  final TransformSessionSource source = TransformSessionSource.selection,
+  AppProvider appProvider,
+  ui.Image image, {
+  TransformSessionSource source = TransformSessionSource.selection,
 }) {
   appProvider.transformModel.start(
     image: image,
@@ -49,10 +49,10 @@ void _startTransformOverlay(
 }
 
 Widget _buildHarness({
-  required final AppPreferences preferences,
-  required final AppProvider appProvider,
-  required final ShellProvider shellProvider,
-  final Widget? home,
+  required AppPreferences preferences,
+  required AppProvider appProvider,
+  required ShellProvider shellProvider,
+  Widget? home,
 }) {
   return InheritedControllerScope<ShellProvider>(
     controller: shellProvider,
@@ -73,7 +73,7 @@ Widget _buildHarness({
   );
 }
 
-void _expectRectMatches(final Rect actual, final Rect expected) {
+void _expectRectMatches(Rect actual, Rect expected) {
   expect(actual.left, closeTo(expected.left, _geometryEpsilon));
   expect(actual.top, closeTo(expected.top, _geometryEpsilon));
   expect(actual.width, closeTo(expected.width, _geometryEpsilon));
@@ -81,8 +81,8 @@ void _expectRectMatches(final Rect actual, final Rect expected) {
 }
 
 void _expectSelectionOverlayAligned(
-  final WidgetTester tester,
-  final AppProvider appProvider,
+  WidgetTester tester,
+  AppProvider appProvider,
 ) {
   final SelectionRectWidget widget = tester.widget<SelectionRectWidget>(
     find.byType(SelectionRectWidget),
@@ -113,7 +113,7 @@ void main() {
   });
 
   testWidgets('keeps side panel visible while transform overlay is active', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -147,7 +147,7 @@ void main() {
   });
 
   testWidgets('keeps side panel visible when duplicating from an active selection', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -174,7 +174,7 @@ void main() {
   });
 
   testWidgets('shows the target layer in a snackbar after confirming a duplicate', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -209,7 +209,7 @@ void main() {
   });
 
   testWidgets('keeps side panel visible when pasting an image from the clipboard', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -240,7 +240,7 @@ void main() {
   });
 
   testWidgets('keeps side panel visible with modify actions during layer modify mode', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -269,7 +269,7 @@ void main() {
   });
 
   testWidgets('keeps selection overlay aligned while side panel resizes or closes', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -307,7 +307,7 @@ void main() {
   });
 
   testWidgets('desktop shell button cycles expanded, narrow, hidden, and expanded', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -351,7 +351,7 @@ void main() {
   });
 
   testWidgets('keeps layer modify transform overlay visible while side panel resizes or closes', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -387,7 +387,7 @@ void main() {
   });
 
   testWidgets('uses compact horizontal padding for modify mode in a narrow side panel', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     await appProvider.modifySelectedLayer();
     await tester.pump(_modifyModePreparationDuration);
@@ -416,7 +416,7 @@ void main() {
 
     expect(
       find.byWidgetPredicate(
-        (final Widget widget) =>
+        (Widget widget) =>
             widget is Padding &&
             widget.padding ==
                 const EdgeInsets.symmetric(
@@ -451,7 +451,7 @@ void main() {
 
     expect(
       find.byWidgetPredicate(
-        (final Widget widget) =>
+        (Widget widget) =>
             widget is Padding &&
             widget.padding ==
                 const EdgeInsets.symmetric(
@@ -464,7 +464,7 @@ void main() {
   });
 
   testWidgets('keeps bottom-right tools visible while transform overlay is active', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     final ui.Image image = await _createTestImage();
     addTearDown(image.dispose);
@@ -485,7 +485,7 @@ void main() {
     expect(find.byKey(Keys.floatActionZoomIn), findsOneWidget);
   });
 
-  testWidgets('pinch zoom still works while transform overlay is active', (final WidgetTester tester) async {
+  testWidgets('pinch zoom still works while transform overlay is active', (WidgetTester tester) async {
     final ui.Image image = await _createTestImage();
     addTearDown(image.dispose);
     _startTransformOverlay(appProvider, image);
@@ -531,7 +531,7 @@ void main() {
   });
 
   testWidgets('single-pointer canvas drawing stays disabled while transform overlay is active', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     final ui.Image image = await _createTestImage();
     addTearDown(image.dispose);

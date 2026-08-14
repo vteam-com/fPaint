@@ -53,10 +53,10 @@ class _AnimatedMarchingAntsPathState extends State<AnimatedMarchingAntsPath> wit
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (final BuildContext _, final Widget? _) {
+      builder: (BuildContext _, Widget? _) {
         return CustomPaint(
           painter: MarchingAntsPainter(
             path: widget.path,
@@ -97,7 +97,7 @@ class MarchingAntsPainter extends CustomPainter {
   final double phase;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     // First, draw a solid border
     final Paint paint = Paint()
       ..color = AppColors.overlayLight
@@ -167,7 +167,7 @@ class MarchingAntsPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final CustomPainter oldDelegate) {
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
   }
 }

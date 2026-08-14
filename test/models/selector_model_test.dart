@@ -8,9 +8,9 @@ import 'package:fpaint/models/selector_model.dart';
 class _ThrowingCombineSelectorModel extends SelectorModel {
   @override
   Path combinePaths(
-    final PathOperation operation,
-    final Path firstPath,
-    final Path secondPath,
+    PathOperation operation,
+    Path firstPath,
+    Path secondPath,
   ) {
     throw StateError('Path.combine() failed');
   }

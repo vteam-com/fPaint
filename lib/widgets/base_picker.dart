@@ -49,7 +49,7 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
   }
 
   @override
-  void didUpdateWidget(covariant final BasePicker<T> oldWidget) {
+  void didUpdateWidget(covariant BasePicker<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.value != widget.value || oldWidget.min != widget.min || oldWidget.max != widget.max) {
       setState(() {
@@ -60,7 +60,7 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
 
   /// Builds the picker UI.
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
@@ -80,16 +80,16 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
   Widget buildPickerWidget();
 
   /// Clamps the value to the min/max bounds if they are provided.
-  T clampValue(final T value);
+  T clampValue(T value);
 
   /// Gets the current value.
   T get currentValue => _value;
 
   /// Formats the value for display.
-  String formatValue(final T value);
+  String formatValue(T value);
 
   /// Updates the value and notifies the parent.
-  void updateValue(final T newValue) {
+  void updateValue(T newValue) {
     final T clampedValue = clampValue(newValue);
     setState(() {
       _value = clampedValue;
@@ -100,15 +100,15 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
 
 /// Shows a modal bottom sheet wrapper for picker widgets.
 Future<void> showPickerDialog({
-  required final BuildContext context,
-  required final String title,
-  required final Widget child,
-  final Widget? titleIcon,
+  required BuildContext context,
+  required String title,
+  required Widget child,
+  Widget? titleIcon,
 }) async {
   await showAppBottomSheet<void>(
     context: context,
     barrierColor: AppColors.transparent,
-    builder: (final BuildContext _) {
+    builder: (BuildContext _) {
       return AppBottomSheetContent(
         title: title,
         titleIcon: titleIcon,

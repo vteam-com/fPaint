@@ -25,11 +25,11 @@ bool initOnce = false;
 /// positioning within the new dimensions.
 ///
 /// The [context] parameter is the [BuildContext] used to display the modal.
-void showCanvasSettings(final BuildContext context) {
+void showCanvasSettings(BuildContext context) {
   initOnce = true;
   showAppBottomSheet<void>(
     context: context,
-    builder: (final BuildContext context) {
+    builder: (BuildContext context) {
       final AppLocalizations l10n = context.l10n;
       final LayersProvider layers = LayersProvider.of(context);
       if (initOnce) {
@@ -44,7 +44,7 @@ void showCanvasSettings(final BuildContext context) {
       CanvasResizePosition canvasResizePosition = layers.canvasResizePosition;
 
       return StatefulBuilder(
-        builder: (final BuildContext context, final StateSetter setSheetState) {
+        builder: (BuildContext context, StateSetter setSheetState) {
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.large),
@@ -67,7 +67,7 @@ void showCanvasSettings(final BuildContext context) {
                           hintText: l10n.width,
                           keyboardType: TextInputType.number,
                           controller: widthController,
-                          onChanged: (final String value) {
+                          onChanged: (String value) {
                             if (resizeLockAspectRatio) {
                               if (initialAspectRatio == 0) {
                                 return; // Avoid division by zero
@@ -108,7 +108,7 @@ void showCanvasSettings(final BuildContext context) {
                           hintText: l10n.height,
                           keyboardType: TextInputType.number,
                           controller: heightController,
-                          onChanged: (final String value) {
+                          onChanged: (String value) {
                             if (resizeLockAspectRatio) {
                               final double currentParsedHeight =
                                   double.tryParse(value) ??
@@ -128,7 +128,7 @@ void showCanvasSettings(final BuildContext context) {
                       AppText(l10n.contentAlignment),
                       NineGridSelector(
                         selectedPosition: canvasResizePosition,
-                        onPositionSelected: (final CanvasResizePosition newPosition) {
+                        onPositionSelected: (CanvasResizePosition newPosition) {
                           setSheetState(() {
                             canvasResizePosition = newPosition;
                           });

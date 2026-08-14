@@ -9,7 +9,7 @@ const String _tiffExportExtension = '.${FileExtensions.tif}';
 const String defaultTiffExportFileName = 'image.${FileExtensions.tif}';
 
 /// Ensures TIFF exports always use the canonical `.tif` suffix.
-String normalizeTiffExportFileName(final String fileNameOrPath) {
+String normalizeTiffExportFileName(String fileNameOrPath) {
   if (fileNameOrPath.isEmpty) {
     return defaultTiffExportFileName;
   }
@@ -24,7 +24,7 @@ String normalizeTiffExportFileName(final String fileNameOrPath) {
   return '${fileNameOrPath.substring(0, extensionIndex)}$_tiffExportExtension';
 }
 
-int _lastPathSeparatorIndex(final String fileNameOrPath) {
+int _lastPathSeparatorIndex(String fileNameOrPath) {
   final int unixSeparatorIndex = fileNameOrPath.lastIndexOf(_unixPathSeparator);
   final int windowsSeparatorIndex = fileNameOrPath.lastIndexOf(_windowsPathSeparator);
 

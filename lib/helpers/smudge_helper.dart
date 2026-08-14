@@ -106,7 +106,7 @@ class _PixelBrushComputationResult {
 // ---------------------------------------------------------------------------
 
 /// Resolves the spacing between resampled pixel-brush points for [brushSize].
-double resolvePixelBrushStepSpacing(final double brushSize) {
+double resolvePixelBrushStepSpacing(double brushSize) {
   final double radius = math.max(
     AppInteraction.smudgeMinimumRadius,
     brushSize * AppInteraction.smudgeBrushRadiusFactor,
@@ -141,15 +141,15 @@ double resolvePixelBrushStepSpacing(final double brushSize) {
 /// back to synchronous execution on web where `dart:isolate` transfer APIs are
 /// unavailable.
 Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
-  required final Uint8List livePixels,
-  required final int imageWidth,
-  required final int imageHeight,
-  required final List<Offset> segmentPoints,
-  required final double brushSize,
-  final double intensity = AppInteraction.pixelBrushDefaultIntensity,
-  required final PixelBrushMode mode,
-  final Uint8List? clipMask,
-  final bool preferSynchronous = false,
+  required Uint8List livePixels,
+  required int imageWidth,
+  required int imageHeight,
+  required List<Offset> segmentPoints,
+  required double brushSize,
+  double intensity = AppInteraction.pixelBrushDefaultIntensity,
+  required PixelBrushMode mode,
+  Uint8List? clipMask,
+  bool preferSynchronous = false,
 }) async {
   if (segmentPoints.length < AppMath.one) {
     return null;
@@ -222,7 +222,7 @@ Future<PixelBrushSegmentResult?> rasterizePixelBrushSegment({
 /// have not yet been processed (i.e. the tail of the stroke since the last
 /// call). This keeps each isolate invocation O(segment) instead of
 /// O(full-stroke) and ensures effects accumulate correctly.
-_PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input) {
+_PixelBrushIsolateOutput _runPixelBrushTask(_PixelBrushIsolateInput input) {
   final _PixelBrushComputationResult result = _runPixelBrushComputationLod(
     livePixels: input.livePixelData.materialize().asUint8List(),
     clipMask: input.clipMaskData?.materialize().asUint8List(),
@@ -259,14 +259,14 @@ _PixelBrushIsolateOutput _runPixelBrushTask(final _PixelBrushIsolateInput input)
 /// the crisp layer. One disc is cheap at full res (a drag pays LOD across its
 /// hundreds of dabs; a tap does not).
 _PixelBrushComputationResult _runPixelBrushComputationLod({
-  required final Uint8List livePixels,
-  required final Uint8List? clipMask,
-  required final int imageWidth,
-  required final int imageHeight,
-  required final List<Offset> segmentPoints,
-  required final double brushSize,
-  required final double intensity,
-  required final PixelBrushMode mode,
+  required Uint8List livePixels,
+  required Uint8List? clipMask,
+  required int imageWidth,
+  required int imageHeight,
+  required List<Offset> segmentPoints,
+  required double brushSize,
+  required double intensity,
+  required PixelBrushMode mode,
 }) {
   final double radius = math.max(
     AppInteraction.smudgeMinimumRadius,
@@ -334,11 +334,11 @@ _PixelBrushComputationResult _runPixelBrushComputationLod({
 
 /// Bilinear upscale of a straight-RGBA buffer.
 Uint8List _upsampleRgbaBilinear(
-  final Uint8List src,
-  final int srcWidth,
-  final int srcHeight,
-  final int dstWidth,
-  final int dstHeight,
+  Uint8List src,
+  int srcWidth,
+  int srcHeight,
+  int dstWidth,
+  int dstHeight,
 ) {
   final Uint8List out = Uint8List(dstWidth * dstHeight * AppMath.bytesPerPixel);
   final double fx = srcWidth / dstWidth;
@@ -377,14 +377,14 @@ Uint8List _upsampleRgbaBilinear(
 /// Applies one pixel-brush segment on a working buffer and returns the updated
 /// full image pixels plus a change flag.
 _PixelBrushComputationResult _runPixelBrushComputation({
-  required final Uint8List livePixels,
-  required final Uint8List? clipMask,
-  required final int imageWidth,
-  required final int imageHeight,
-  required final List<Offset> segmentPoints,
-  required final double brushSize,
-  required final double intensity,
-  required final PixelBrushMode mode,
+  required Uint8List livePixels,
+  required Uint8List? clipMask,
+  required int imageWidth,
+  required int imageHeight,
+  required List<Offset> segmentPoints,
+  required double brushSize,
+  required double intensity,
+  required PixelBrushMode mode,
 }) {
   // Start from the caller's current live pixel state.
   final Uint8List pixels = livePixels;

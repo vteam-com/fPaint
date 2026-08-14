@@ -20,10 +20,10 @@ const String _colorPreviewHexPairSeparator = ' ';
 ///   [color]     The color to preview.
 ///   [onPressed] A callback that is called when the color preview is tapped.
 Widget colorPreviewWithTransparentPaper({
-  required final Key key,
-  required final bool minimal,
-  required final Color color,
-  required final GestureTapCallback onPressed,
+  required Key key,
+  required bool minimal,
+  required Color color,
+  required GestureTapCallback onPressed,
 }) {
   return SizedBox(
     key: key,
@@ -83,7 +83,7 @@ class ColorPreview extends StatelessWidget {
   final String? tooltipText;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final double size = minimal ? AppSpacing.largest : AppLayout.layerPreviewCompactSize;
 
     final String text = this.text ?? colorToHexString(color);
@@ -134,9 +134,9 @@ class ColorPreview extends StatelessWidget {
 
 /// Renders either the raw preview text or the normalized alpha/RGB stacked layout.
 Widget _buildColorPreviewLabel({
-  required final String text,
-  required final Color textColor,
-  required final _ColorPreviewTextLayout? textLayout,
+  required String text,
+  required Color textColor,
+  required _ColorPreviewTextLayout? textLayout,
 }) {
   final Widget label = textLayout == null
       ? AppText(
@@ -189,7 +189,7 @@ class _ColorPreviewTextLayout {
 }
 
 /// Normalizes supported hex text variants into an alpha-first display layout.
-_ColorPreviewTextLayout? _parseColorPreviewTextLayout(final String text) {
+_ColorPreviewTextLayout? _parseColorPreviewTextLayout(String text) {
   final String trimmedText = text.trim();
   if (trimmedText.isEmpty) {
     return null;
@@ -225,20 +225,20 @@ _ColorPreviewTextLayout? _parseColorPreviewTextLayout(final String text) {
   );
 }
 
-String _formatColorPreviewRgbPairs(final String rgbText) {
+String _formatColorPreviewRgbPairs(String rgbText) {
   return '${rgbText.substring(AppMath.zero, AppMath.pair)}$_colorPreviewHexPairSeparator'
       '${rgbText.substring(AppMath.pair, AppMath.four)}$_colorPreviewHexPairSeparator'
       '${rgbText.substring(AppMath.four, AppMath.six)}';
 }
 
-bool _isColorPreviewHexPair(final String value) {
+bool _isColorPreviewHexPair(String value) {
   return value.length == AppMath.pair && _isColorPreviewHexValue(value);
 }
 
-bool _isColorPreviewHexRgb(final String value) {
+bool _isColorPreviewHexRgb(String value) {
   return value.length == AppLimits.hexRgbLength && _isColorPreviewHexValue(value);
 }
 
-bool _isColorPreviewHexValue(final String value) {
+bool _isColorPreviewHexValue(String value) {
   return int.tryParse(value, radix: AppMath.hexRadix) != null;
 }

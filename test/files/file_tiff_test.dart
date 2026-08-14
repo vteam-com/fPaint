@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
@@ -11,6 +10,7 @@ import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/tiff_constants.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:material_ui/material_ui.dart';
 
 const String _sampleSketchBookTiffPath = 'test.tif';
 const ui.Size _sampleSketchBookCanvasSize = ui.Size(4112, 2440);
@@ -236,7 +236,7 @@ void main() {
         () => readTiffFromFilePath(layers, '/does/not/exist.tif'),
         throwsA(
           isA<TiffFileException>().having(
-            (final TiffFileException e) => e.message,
+            (TiffFileException e) => e.message,
             'message',
             contains('not found'),
           ),
@@ -288,9 +288,9 @@ void main() {
 }
 
 Future<ui.Image> _createSolidUiImage(
-  final int width,
-  final int height,
-  final Color color,
+  int width,
+  int height,
+  Color color,
 ) async {
   final img.Image image = img.Image(width: width, height: height);
   img.fill(
@@ -306,6 +306,6 @@ Future<ui.Image> _createSolidUiImage(
   return decodeImageFromList(Uint8List.fromList(img.encodePng(image)));
 }
 
-int _toImageChannel(final double channel) {
+int _toImageChannel(double channel) {
   return (channel * AppLimits.rgbChannelMax).round().clamp(0, AppLimits.rgbChannelMax);
 }

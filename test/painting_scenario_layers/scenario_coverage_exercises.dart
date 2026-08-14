@@ -15,8 +15,8 @@ const Duration _coverageLayerDragProbeHoldDuration = Duration(milliseconds: 120)
 /// each so the tap is visible in the recorded video and async backward
 /// callbacks (e.g. canvas rotations with toImage) complete fully.
 Future<void> _undoTimes(
-  final WidgetTester tester,
-  final int count,
+  WidgetTester tester,
+  int count,
 ) async {
   for (int i = 0; i < count; i++) {
     final Finder undoButton = find.byKey(Keys.floatActionUndo);
@@ -35,7 +35,7 @@ Future<void> _undoTimes(
 
 /// Exercises various UI code paths to increase test coverage.
 Future<void> exerciseCoverageScenarios(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   // Clear stale undo/redo entries from scene painting so they don't
   // interfere with coverage exercises that use undo.
@@ -94,7 +94,7 @@ Future<void> exerciseCoverageScenarios(
 /// This protects against regressions where drag overlay feedback renders layer
 /// rows with unbounded width constraints.
 Future<void> _exerciseLayerDragFeedbackRegression(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -108,10 +108,10 @@ Future<void> _exerciseLayerDragFeedbackRegression(
     expect(thumbnails, findsAtLeastNWidgets(_minimumLayerThumbnailsForDragProbe));
 
     final int signatureStartIndex = layersProvider.list.indexWhere(
-      (final LayerProvider layer) => layer.name == _signatureLayerName,
+      (LayerProvider layer) => layer.name == _signatureLayerName,
     );
     final int birdsStartIndex = layersProvider.list.indexWhere(
-      (final LayerProvider layer) => layer.name == _birdsLayerName,
+      (LayerProvider layer) => layer.name == _birdsLayerName,
     );
     expect(signatureStartIndex, isNot(-1));
     expect(birdsStartIndex, isNot(-1));
@@ -156,7 +156,7 @@ Future<void> _exerciseLayerDragFeedbackRegression(
     expect(tester.takeException(), isNull);
 
     int signatureMovedIndex = layersProvider.list.indexWhere(
-      (final LayerProvider layer) => layer.name == _signatureLayerName,
+      (LayerProvider layer) => layer.name == _signatureLayerName,
     );
 
     if (signatureMovedIndex == signatureStartIndex) {
@@ -171,7 +171,7 @@ Future<void> _exerciseLayerDragFeedbackRegression(
       InteractionTracker.recordTap(drop);
       await UnitTestVideoRecorder.captureAfterInteraction(tester, settle: false);
       signatureMovedIndex = layersProvider.list.indexWhere(
-        (final LayerProvider layer) => layer.name == _signatureLayerName,
+        (LayerProvider layer) => layer.name == _signatureLayerName,
       );
     }
 
@@ -185,7 +185,7 @@ Future<void> _exerciseLayerDragFeedbackRegression(
     await tester.pump();
 
     final int signatureRestoredIndex = layersProvider.list.indexWhere(
-      (final LayerProvider layer) => layer.name == _signatureLayerName,
+      (LayerProvider layer) => layer.name == _signatureLayerName,
     );
     expect(signatureRestoredIndex, signatureStartIndex);
   } finally {
@@ -200,7 +200,7 @@ Future<void> _exerciseLayerDragFeedbackRegression(
 
 /// Exercises layer add, rename, visibility toggle, delete.
 Future<void> _exerciseLayerOperations(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -237,7 +237,7 @@ Future<void> _exerciseLayerOperations(
 
 /// Exercises keyboard shortcuts: select-all, escape, delete, tab, undo.
 Future<void> _exerciseKeyboardShortcuts(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
 
@@ -320,7 +320,7 @@ Future<void> _exerciseKeyboardShortcuts(
 
 /// Exercises switching between pencil, eraser, and brush tools with strokes.
 Future<void> _exerciseToolSwitching(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -380,7 +380,7 @@ Future<void> _exerciseToolSwitching(
 
 /// Exercises the text editor dialog by triggering it via selectedTextObject.
 Future<void> _exerciseTextEditor(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -423,7 +423,7 @@ Future<void> _exerciseTextEditor(
   } else {
     // Fallback: find bold toggle by icon for text_editor.dart's inline dialog.
     final Finder boldIcon = find.byWidgetPredicate(
-      (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.formatBold,
+      (Widget w) => w is AppSvgIcon && w.icon == AppIcon.formatBold,
     );
     if (boldIcon.evaluate().isNotEmpty) {
       final Finder boldIconBtn = find.ancestor(
@@ -455,7 +455,7 @@ Future<void> _exerciseTextEditor(
 
   // Toggle italic button — find the AppSvgIcon with formatItalic.
   final Finder italicIcon = find.byWidgetPredicate(
-    (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.formatItalic,
+    (Widget w) => w is AppSvgIcon && w.icon == AppIcon.formatItalic,
   );
   if (italicIcon.evaluate().isNotEmpty) {
     // Tap the parent AppButtonIcon.
@@ -560,7 +560,7 @@ Future<void> _exerciseTextEditor(
 
 /// Creates a selection via provider and exercises selector tool panel buttons.
 Future<void> _exerciseSelectionToolPanel(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -627,7 +627,7 @@ Future<void> _exerciseSelectionToolPanel(
 
 /// Makes a selection and exercises flip H/V and rotate 90° on it.
 Future<void> _exerciseSelectionFlipRotate(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -687,7 +687,7 @@ Future<void> _exerciseSelectionFlipRotate(
 
 /// Exercises regionDuplicate() + confirmTransform(), regionCopy, regionCut.
 Future<void> _exerciseSelectionCropAndDuplicate(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -724,7 +724,7 @@ Future<void> _exerciseSelectionCropAndDuplicate(
 
 /// Opens and closes the main menu to exercise menu build code.
 Future<void> _exerciseMenuDialogs(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
 
@@ -741,7 +741,7 @@ Future<void> _exerciseMenuDialogs(
 
 /// Exercises canvas rotate-90 and flip H/V when no selection is active.
 Future<void> _exerciseCanvasTransforms(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -853,7 +853,7 @@ Future<void> _exerciseCanvasTransforms(
 
 /// Exercises selection using rectangle area.
 Future<void> _exerciseSelectionOperations(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -896,7 +896,7 @@ Future<void> _exerciseSelectionOperations(
 
 /// Exercises the blend mode on a layer.
 Future<void> _exerciseLayerBlendMode(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -923,7 +923,7 @@ Future<void> _exerciseLayerBlendMode(
 
 /// Taps the side panel buttons to cover their onPressed callbacks.
 Future<void> _exerciseSidePanelButtons(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -965,7 +965,7 @@ Future<void> _exerciseSidePanelButtons(
 
 /// Opens the canvas settings dialog via the main menu and exercises its controls.
 Future<void> _exerciseCanvasSettingsDialog(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
 
@@ -999,7 +999,7 @@ Future<void> _exerciseCanvasSettingsDialog(
 /// Switches through line, rectangle, circle, fill, and text tools to cover
 /// their tool-option panels in tools_panel.dart.
 Future<void> _exerciseMoreToolSwitching(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1049,7 +1049,7 @@ Future<void> _exerciseMoreToolSwitching(
 
 /// Actually draws shapes using line, rectangle, and circle tools on the canvas.
 Future<void> _exerciseShapeDrawing(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
 
@@ -1132,7 +1132,7 @@ Future<void> _exerciseShapeDrawing(
 
 /// Collapses and re-expands the side panel to cover the toggle button callback.
 Future<void> _exerciseSidePanelToggle(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1154,7 +1154,7 @@ Future<void> _exerciseSidePanelToggle(
 /// Long-presses a layer thumbnail to open the popup menu, then exercises
 /// the rename dialog.
 Future<void> _exerciseLayerRenameDialog(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1205,7 +1205,7 @@ Future<void> _exerciseLayerRenameDialog(
 
 /// Navigates to settings and platforms pages via menu selections.
 Future<void> _exerciseMenuNavigations(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1219,7 +1219,7 @@ Future<void> _exerciseMenuNavigations(
     await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
     // Go back by finding the back button (AppIcon.arrowLeft).
     final Finder backBtn = find.byWidgetPredicate(
-      (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.arrowLeft,
+      (Widget w) => w is AppSvgIcon && w.icon == AppIcon.arrowLeft,
     );
     if (backBtn.evaluate().isNotEmpty) {
       final Finder parentBtn = find.ancestor(
@@ -1241,7 +1241,7 @@ Future<void> _exerciseMenuNavigations(
     await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
     // Go back.
     final Finder backBtn2 = find.byWidgetPredicate(
-      (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.arrowLeft,
+      (Widget w) => w is AppSvgIcon && w.icon == AppIcon.arrowLeft,
     );
     if (backBtn2.evaluate().isNotEmpty) {
       final Finder parentBtn2 = find.ancestor(
@@ -1262,7 +1262,7 @@ Future<void> _exerciseMenuNavigations(
 
 /// Toggles the shell mode to hidden and back to cover those code paths.
 Future<void> _exerciseShellModeToggle(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1313,7 +1313,7 @@ Future<void> _exerciseShellModeToggle(
 
 /// Taps the brush and fill color preview buttons to trigger the color picker.
 Future<void> _exerciseToolColorPickers(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
 
@@ -1366,7 +1366,7 @@ Future<void> _exerciseToolColorPickers(
 
 /// Adds a new layer via the popup menu and then deletes it.
 Future<void> _exerciseLayerAddDelete(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1409,7 +1409,7 @@ Future<void> _exerciseLayerAddDelete(
 
 /// Taps the floating zoom and center buttons to cover their callbacks.
 Future<void> _exerciseFloatingButtons(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1464,7 +1464,7 @@ Future<void> _exerciseFloatingButtons(
 /// Draws a selection rectangle using actual pointer events on the canvas,
 /// then exercises transform and selection overlay drag handles.
 Future<void> _exerciseSelectionViaGesture(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1540,7 +1540,7 @@ Future<void> _exerciseSelectionViaGesture(
 /// Taps and double-taps layer thumbnails to exercise layer selection and
 /// visibility toggle in the layers panel.
 Future<void> _exerciseLayerTapInteractions(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1578,7 +1578,7 @@ Future<void> _exerciseLayerTapInteractions(
 
 /// Taps buttons in the tools panel to exercise callback paths in tools_panel.dart.
 Future<void> _exerciseToolPanelButtons(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1611,7 +1611,7 @@ Future<void> _exerciseToolPanelButtons(
   // Find and tap the brush style button (AppIcon.lineStyle).
   final Finder lineStyleButton = find.ancestor(
     of: find.byWidgetPredicate(
-      (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.lineStyle,
+      (Widget w) => w is AppSvgIcon && w.icon == AppIcon.lineStyle,
     ),
     matching: find.byType(AppButtonIcon),
   );
@@ -1621,7 +1621,7 @@ Future<void> _exerciseToolPanelButtons(
     final Finder lineStyleTapTarget = find
         .ancestor(
           of: find.byWidgetPredicate(
-            (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.lineStyle,
+            (Widget w) => w is AppSvgIcon && w.icon == AppIcon.lineStyle,
           ),
           matching: find.byType(AppButtonIcon),
         )
@@ -1643,7 +1643,7 @@ Future<void> _exerciseToolPanelButtons(
   // Tap tolerance button (AppIcon.support).
   final Finder toleranceButton = find.ancestor(
     of: find.byWidgetPredicate(
-      (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.support,
+      (Widget w) => w is AppSvgIcon && w.icon == AppIcon.support,
     ),
     matching: find.byType(AppButtonIcon),
   );
@@ -1653,7 +1653,7 @@ Future<void> _exerciseToolPanelButtons(
     final Finder toleranceTapTarget = find
         .ancestor(
           of: find.byWidgetPredicate(
-            (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.support,
+            (Widget w) => w is AppSvgIcon && w.icon == AppIcon.support,
           ),
           matching: find.byType(AppButtonIcon),
         )
@@ -1671,7 +1671,7 @@ Future<void> _exerciseToolPanelButtons(
   // Exercise top colors refresh button.
   final Finder refreshButton = find.ancestor(
     of: find.byWidgetPredicate(
-      (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.refresh,
+      (Widget w) => w is AppSvgIcon && w.icon == AppIcon.refresh,
     ),
     matching: find.byType(AppButtonIcon),
   );
@@ -1681,7 +1681,7 @@ Future<void> _exerciseToolPanelButtons(
     final Finder refreshTapTarget = find
         .ancestor(
           of: find.byWidgetPredicate(
-            (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.refresh,
+            (Widget w) => w is AppSvgIcon && w.icon == AppIcon.refresh,
           ),
           matching: find.byType(AppButtonIcon),
         )
@@ -1702,7 +1702,7 @@ Future<void> _exerciseToolPanelButtons(
 
 /// Exercises layer popup menu actions that aren't covered elsewhere.
 Future<void> _exerciseLayerPopupMenuActions(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1721,7 +1721,7 @@ Future<void> _exerciseLayerPopupMenuActions(
 
   // Find the layer selector's popup menu (more_vert icon) via AppPopupMenuButton.
   final Finder moreVertButtons = find.byWidgetPredicate(
-    (final Widget w) => w is AppPopupMenuButton<String>,
+    (Widget w) => w is AppPopupMenuButton<String>,
   );
 
   if (moreVertButtons.evaluate().isNotEmpty) {
@@ -1804,7 +1804,7 @@ Future<void> _exerciseLayerPopupMenuActions(
 /// Creates a selection and then taps the tool panel buttons for invert,
 /// effects, and cancel that are only visible when a selection is active.
 Future<void> _exerciseSelectionToolPanelButtons(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1851,7 +1851,7 @@ Future<void> _exerciseSelectionToolPanelButtons(
 /// Exercises advanced selection features: transform, effects, wand mode,
 /// and image placement cancel.
 Future<void> _exerciseSelectionAdvanced(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1948,7 +1948,7 @@ Future<void> _exerciseSelectionAdvanced(
 
 /// Exercises canvas resize lock aspect ratio toggle.
 Future<void> _exerciseCanvasResizeLockAspectRatio(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -1970,7 +1970,7 @@ Future<void> _exerciseCanvasResizeLockAspectRatio(
 
 /// Exercises canvas settings validation error paths (non-numeric and negative).
 Future<void> _exerciseCanvasSettingsValidation(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
 
@@ -2037,7 +2037,7 @@ Future<void> _exerciseCanvasSettingsValidation(
 
 /// Exercises the tolerance picker slider and top-colors tap in the fill tool.
 Future<void> _exerciseToleranceAndTopColors(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
 
@@ -2119,7 +2119,7 @@ Future<void> _exerciseToleranceAndTopColors(
 
 /// Exercises the brush style picker dropdown.
 Future<void> _exerciseBrushStylePicker(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext brushContext = mainViewContext(tester);
@@ -2162,7 +2162,7 @@ Future<void> _exerciseBrushStylePicker(
 
 /// Navigates to settings page and exercises Apple Pencil toggle.
 Future<void> _exerciseSettingsPage(
-  final PaintingScenarioSession session,
+  PaintingScenarioSession session,
 ) async {
   final WidgetTester tester = session.tester;
   final BuildContext context = mainViewContext(tester);
@@ -2189,7 +2189,7 @@ Future<void> _exerciseSettingsPage(
 
     // Go back.
     final Finder backBtn = find.byWidgetPredicate(
-      (final Widget w) => w is AppSvgIcon && w.icon == AppIcon.arrowLeft,
+      (Widget w) => w is AppSvgIcon && w.icon == AppIcon.arrowLeft,
     );
     if (backBtn.evaluate().isNotEmpty) {
       final Finder parentBtn = find.ancestor(

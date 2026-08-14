@@ -21,8 +21,8 @@ class AppPreferences extends ChangeNotifier {
 
   /// Retrieves the [AppPreferences] instance from the widget tree.
   static AppPreferences of(
-    final BuildContext context, {
-    final bool listen = false,
+    BuildContext context, {
+    bool listen = false,
   }) => InheritedControllerScope.of<AppPreferences>(context, listen: listen);
 
   /// Indicates whether the preferences have been loaded.
@@ -112,12 +112,12 @@ class AppPreferences extends ChangeNotifier {
   List<String> get recentFiles => List<String>.unmodifiable(_recentFiles);
 
   /// Returns the macOS security-scoped bookmark string for [path], or null.
-  String? getBookmark(final String path) => _recentFileBookmarks[path];
+  String? getBookmark(String path) => _recentFileBookmarks[path];
 
   /// Returns the remembered selected layer index for [path], or null when the
   /// file has no stored selection. Only used for formats that cannot embed the
   /// selection; layered formats (ORA, TIFF) carry it inside the file instead.
-  int? lastSelectedLayerFor(final String path) => _lastLayerIndexByPath[path];
+  int? lastSelectedLayerFor(String path) => _lastLayerIndexByPath[path];
 
   /// Gets the SharedPreferences instance.
   Future<SharedPreferences> getPref() async {
@@ -127,45 +127,45 @@ class AppPreferences extends ChangeNotifier {
 
   /// Sets the side panel distance.
   Future<void> setSidePanelDistance(
-    final double value,
+    double value,
   ) async {
     _sidePanelDistance = value;
     await (await getPref()).setDouble(keySidePanelDistance, value);
   }
 
   /// Sets the brush size.
-  Future<void> setBrushSize(final double size) async {
+  Future<void> setBrushSize(double size) async {
     _brushSize = size;
     await (await getPref()).setDouble(keyBrushSize, size);
   }
 
   /// Sets the smudge intensity.
-  Future<void> setSmudgeIntensity(final double value) async {
+  Future<void> setSmudgeIntensity(double value) async {
     _smudgeIntensity = value.clamp(AppEffects.minIntensity, AppEffects.maxIntensity);
     await (await getPref()).setDouble(keySmudgeIntensity, _smudgeIntensity);
   }
 
   /// Sets the blur-brush intensity.
-  Future<void> setBlurBrushIntensity(final double value) async {
+  Future<void> setBlurBrushIntensity(double value) async {
     _blurBrushIntensity = value.clamp(AppEffects.minIntensity, AppEffects.maxIntensity);
     await (await getPref()).setDouble(keyBlurBrushIntensity, _blurBrushIntensity);
   }
 
   /// Sets the brush color.
-  Future<void> setBrushColor(final Color color) async {
+  Future<void> setBrushColor(Color color) async {
     _brushColor = color;
     await (await getPref()).setInt(keyLastBrushColor, color.toARGB32());
   }
 
   /// Sets the fill color.
-  Future<void> setFillColor(final Color color) async {
+  Future<void> setFillColor(Color color) async {
     _fillColor = color;
     await (await getPref()).setInt(keyLastFillColor, color.toARGB32());
   }
 
   /// Sets whether to use Apple Pencil only.
   Future<void> setUseApplePencil(
-    final bool value,
+    bool value,
   ) async {
     _useApplePencil = value;
     await (await getPref()).setBool(keyUseApplePencil, value);
@@ -174,7 +174,7 @@ class AppPreferences extends ChangeNotifier {
 
   /// Sets whether overwriting saves should keep timestamped backups.
   Future<void> setKeepSaveBackups(
-    final bool value,
+    bool value,
   ) async {
     _keepSaveBackups = value;
     await (await getPref()).setBool(keyKeepSaveBackups, value);
@@ -184,7 +184,7 @@ class AppPreferences extends ChangeNotifier {
   /// Sets the preferred app language code.
   ///
   /// Pass null to use the system locale.
-  Future<void> setLanguageCode(final String? value) async {
+  Future<void> setLanguageCode(String? value) async {
     _languageCode = value;
     final SharedPreferences prefs = await getPref();
     if (value == null) {
@@ -197,7 +197,7 @@ class AppPreferences extends ChangeNotifier {
   }
 
   /// Persists the source file path associated with the recovery draft.
-  Future<void> setRecoveryDraftSourceFilePath(final String? value) async {
+  Future<void> setRecoveryDraftSourceFilePath(String? value) async {
     final SharedPreferences prefs = await getPref();
     if (value == null || value.isEmpty) {
       await prefs.remove(keyRecoveryDraftSourceFilePath);
@@ -222,7 +222,7 @@ class AppPreferences extends ChangeNotifier {
   /// The path is moved to the front if already present. The list is capped at
   /// [AppLimits.maxRecentFiles]. On macOS a security-scoped bookmark is created
   /// and stored so the file can be re-opened across sessions.
-  Future<void> addRecentFile(final String path) async {
+  Future<void> addRecentFile(String path) async {
     _recentFiles.remove(path);
     _recentFiles.insert(0, path);
     if (_recentFiles.length > AppLimits.maxRecentFiles) {
@@ -241,7 +241,7 @@ class AppPreferences extends ChangeNotifier {
   }
 
   /// Removes a file path from the recent files list.
-  Future<void> removeRecentFile(final String path) async {
+  Future<void> removeRecentFile(String path) async {
     _recentFiles.remove(path);
     _recentFileBookmarks.remove(path);
     final SharedPreferences prefs = await getPref();
@@ -257,8 +257,8 @@ class AppPreferences extends ChangeNotifier {
   /// capped at [AppLimits.maxRecentFiles] so only the most recently worked-on
   /// files are retained.
   Future<void> recordLastSelectedLayer(
-    final String path,
-    final int index,
+    String path,
+    int index,
   ) async {
     final Map<String, int> reordered = <String, int>{path: index};
     for (final MapEntry<String, int> entry in _lastLayerIndexByPath.entries) {
@@ -275,14 +275,14 @@ class AppPreferences extends ChangeNotifier {
     await prefs.setStringList(keyLastLayerFiles, _lastLayerIndexByPath.keys.toList());
     await prefs.setStringList(
       keyLastLayerIndices,
-      _lastLayerIndexByPath.values.map((final int value) => value.toString()).toList(),
+      _lastLayerIndexByPath.values.map((int value) => value.toString()).toList(),
     );
   }
 
   /// Rebuilds [_lastLayerIndexByPath] from the two persisted parallel lists.
   void _loadLastLayerSelections({
-    required final List<String> files,
-    required final List<String> indices,
+    required List<String> files,
+    required List<String> indices,
   }) {
     _lastLayerIndexByPath.clear();
     final int sharedCount = files.length < indices.length ? files.length : indices.length;
@@ -297,21 +297,19 @@ class AppPreferences extends ChangeNotifier {
   /// Removes bookmarks for files that are no longer present in the MRU list.
   void _pruneRecentFileBookmarks() {
     _recentFileBookmarks.removeWhere(
-      (final String path, final String _) => !_recentFiles.contains(path),
+      (String path, String _) => !_recentFiles.contains(path),
     );
   }
 
   /// Persists bookmark strings in the same order as [keyRecentFiles].
-  Future<void> _persistRecentFileBookmarks(final SharedPreferences prefs) async {
+  Future<void> _persistRecentFileBookmarks(SharedPreferences prefs) async {
     _pruneRecentFileBookmarks();
     if (_recentFiles.isEmpty) {
       await prefs.remove(keyRecentFileBookmarks);
       return;
     }
 
-    final List<String> bookmarkEntries = _recentFiles
-        .map((final String path) => _recentFileBookmarks[path] ?? '')
-        .toList();
+    final List<String> bookmarkEntries = _recentFiles.map((String path) => _recentFileBookmarks[path] ?? '').toList();
     await prefs.setStringList(keyRecentFileBookmarks, bookmarkEntries);
   }
 
@@ -391,8 +389,8 @@ class AppPreferences extends ChangeNotifier {
 
   /// Loads bookmark entries and repairs legacy macOS-pref storage formats.
   static _LoadedRecentFileBookmarks _loadRecentFileBookmarks({
-    required final List<String> recentFiles,
-    required final List<String> storedEntries,
+    required List<String> recentFiles,
+    required List<String> storedEntries,
   }) {
     final Map<String, String> bookmarks = <String, String>{};
     final int sharedEntryCount = storedEntries.length < recentFiles.length ? storedEntries.length : recentFiles.length;
@@ -418,8 +416,8 @@ class AppPreferences extends ChangeNotifier {
 
   /// Decodes a persisted bookmark entry for a single MRU path.
   static _DecodedRecentFileBookmark _decodeStoredRecentFileBookmark({
-    required final String entry,
-    required final String path,
+    required String entry,
+    required String path,
   }) {
     if (entry.isEmpty) {
       return const _DecodedRecentFileBookmark(

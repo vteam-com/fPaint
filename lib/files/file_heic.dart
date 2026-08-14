@@ -34,7 +34,7 @@ bool get isHeicExportSupported => Platform.isMacOS;
 /// On Linux and Windows, the `heic_to_png_jpg` package is attempted
 /// (uses `package:image` internally). A [HeicConversionException] is thrown
 /// on failure.
-Future<Uint8List> decodeHeicBytes(final Uint8List heicBytes) async {
+Future<Uint8List> decodeHeicBytes(Uint8List heicBytes) async {
   // Native Flutter codec handles HEIC on Apple platforms and Android.
   if (Platform.isMacOS || Platform.isIOS || Platform.isAndroid) {
     return heicBytes;
@@ -47,7 +47,7 @@ Future<Uint8List> decodeHeicBytes(final Uint8List heicBytes) async {
 ///
 /// On macOS, uses the system `sips` tool to convert PNG → HEIC.
 /// Throws [HeicConversionException] on unsupported platforms or failure.
-Future<Uint8List> encodeToHeic(final Uint8List pngBytes) async {
+Future<Uint8List> encodeToHeic(Uint8List pngBytes) async {
   if (!Platform.isMacOS) {
     throw const HeicConversionException(_errorEncodePrefix);
   }
@@ -92,7 +92,7 @@ Future<Uint8List> encodeToHeic(final Uint8List pngBytes) async {
 /// Converts HEIC bytes to PNG using the same minimal desktop fallback strategy
 /// previously supplied by `heic_to_png_jpg`.
 Future<Uint8List> _decodeHeicBytesWithImagePackage(
-  final Uint8List heicBytes,
+  Uint8List heicBytes,
 ) async {
   try {
     final img.Image? decodedImage = img.decodeImage(heicBytes);

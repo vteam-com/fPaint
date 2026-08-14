@@ -4,19 +4,19 @@ import 'package:fpaint/widgets/material_free.dart';
 
 void main() {
   group('AppSwitchListTile', () {
-    testWidgets('renders and toggles on tap', (final WidgetTester tester) async {
+    testWidgets('renders and toggles on tap', (WidgetTester tester) async {
       bool value = false;
 
       await tester.pumpWidget(
         WidgetsApp(
           color: const Color(0xFF000000),
-          builder: (final BuildContext context, final Widget? child) {
+          builder: (BuildContext context, Widget? child) {
             return StatefulBuilder(
-              builder: (final BuildContext context, final StateSetter setState) {
+              builder: (BuildContext context, StateSetter setState) {
                 return AppSwitchListTile(
                   title: const AppText('Test Switch'),
                   value: value,
-                  onChanged: (final bool v) {
+                  onChanged: (bool v) {
                     setState(() => value = v);
                   },
                 );

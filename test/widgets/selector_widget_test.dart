@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
@@ -7,6 +6,7 @@ import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../helpers/platform_helpers.dart';
 import '../helpers/selector_widget_test_helpers.dart';
@@ -15,15 +15,15 @@ import '../helpers/widget_test_harness.dart';
 const Duration _snackBarDismissDuration = Duration(seconds: 4);
 
 Widget _buildHarness({
-  required final Path? path1,
+  required Path? path1,
   Path? path2,
   bool enableMoveAndResize = true,
   bool isDrawing = false,
-  required final SelectionRectCallbacks callbacks,
+  required SelectionRectCallbacks callbacks,
 }) {
   return buildLocalizedScaffoldTestApp(
     mediaQueryData: const MediaQueryData(size: Size(1200, 900)),
-    bodyBuilder: (final BuildContext context) {
+    bodyBuilder: (BuildContext context) {
       return SelectionRectWidget(
         path1: path1,
         path2: path2,
@@ -46,7 +46,7 @@ Widget _buildHarness({
 
 void main() {
   group('SelectionRectWidget', () {
-    testWidgets('renders empty when path1 is null', (final WidgetTester tester) async {
+    testWidgets('renders empty when path1 is null', (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildHarness(
           path1: null,
@@ -58,7 +58,7 @@ void main() {
       expect(find.byType(SizedBox), findsOneWidget);
     });
 
-    testWidgets('shows effect button when not drawing and move/resize enabled', (final WidgetTester tester) async {
+    testWidgets('shows effect button when not drawing and move/resize enabled', (WidgetTester tester) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(100, 100, 200, 160));
 
       await tester.pumpWidget(
@@ -72,7 +72,7 @@ void main() {
       expect(find.byKey(Keys.effectsButton), findsOneWidget);
     });
 
-    testWidgets('hides quick actions while drawing', (final WidgetTester tester) async {
+    testWidgets('hides quick actions while drawing', (WidgetTester tester) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(100, 100, 200, 160));
 
       await tester.pumpWidget(
@@ -87,7 +87,7 @@ void main() {
       expect(find.byKey(Keys.effectsButton), findsNothing);
     });
 
-    testWidgets('effect menu selection calls onEffectSelected callback', (final WidgetTester tester) async {
+    testWidgets('effect menu selection calls onEffectSelected callback', (WidgetTester tester) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(120, 90, 180, 140));
       SelectionEffect? selected;
 
@@ -95,7 +95,7 @@ void main() {
         _buildHarness(
           path1: path,
           callbacks: createDefaultSelectionRectCallbacks(
-            onEffectSelected: (final SelectionEffect effect, final BuildContext _) async {
+            onEffectSelected: (SelectionEffect effect, BuildContext _) async {
               selected = effect;
             },
           ),
@@ -119,7 +119,7 @@ void main() {
       expect(selected, SelectionEffect.values.first);
     });
 
-    testWidgets('move and resize callbacks are callable by gestures', (final WidgetTester tester) async {
+    testWidgets('move and resize callbacks are callable by gestures', (WidgetTester tester) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
       int dragCalls = 0;
       int resizeCalls = 0;
@@ -128,10 +128,10 @@ void main() {
         _buildHarness(
           path1: path,
           callbacks: createDefaultSelectionRectCallbacks(
-            onDrag: (final Offset _) {
+            onDrag: (Offset _) {
               dragCalls++;
             },
-            onResize: (final NineGridHandle _, final Offset _) {
+            onResize: (NineGridHandle _, Offset _) {
               resizeCalls++;
             },
           ),
@@ -151,7 +151,7 @@ void main() {
     });
 
     testWidgets('copy, duplicate and transform controls invoke callbacks', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
       int copyCalls = 0;
@@ -201,7 +201,7 @@ void main() {
     });
 
     testWidgets('quick actions use neutral styling and only copy shows snackbar feedback', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
 
@@ -232,7 +232,7 @@ void main() {
       final Finder copyBackground = find.descendant(
         of: copyTooltip,
         matching: find.byWidgetPredicate(
-          (final Widget widget) =>
+          (Widget widget) =>
               widget is Container &&
               widget.decoration is BoxDecoration &&
               (widget.decoration! as BoxDecoration).shape == BoxShape.circle,
@@ -241,7 +241,7 @@ void main() {
       final Finder effectsBackground = find.descendant(
         of: effectsButton,
         matching: find.byWidgetPredicate(
-          (final Widget widget) =>
+          (Widget widget) =>
               widget is Container &&
               widget.decoration is BoxDecoration &&
               (widget.decoration! as BoxDecoration).shape == BoxShape.circle,
@@ -271,7 +271,7 @@ void main() {
     });
 
     testWidgets('quick action surface stays inside selection overlay bounds', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(200, 140, 172, 120));
 
@@ -297,7 +297,7 @@ void main() {
       expect(tester.getRect(effectsTooltip).right, lessThanOrEqualTo(tester.getRect(selectionStack).right));
     });
 
-    testWidgets('translate, scale and rotate handle drags invoke callbacks', (final WidgetTester tester) async {
+    testWidgets('translate, scale and rotate handle drags invoke callbacks', (WidgetTester tester) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(100, 100, 200, 160));
       int translateCalls = 0;
       int scaleCalls = 0;
@@ -307,13 +307,13 @@ void main() {
         _buildHarness(
           path1: path,
           callbacks: createDefaultSelectionRectCallbacks(
-            onDrag: (final Offset _) {
+            onDrag: (Offset _) {
               translateCalls++;
             },
-            onScale: (final double _) {
+            onScale: (double _) {
               scaleCalls++;
             },
-            onRotate: (final double _) {
+            onRotate: (double _) {
               rotateCalls++;
             },
           ),
@@ -340,7 +340,7 @@ void main() {
     });
 
     testWidgets('modifier-assisted move duplicates instead of translating the current selection', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
       int dragCalls = 0;
@@ -352,12 +352,12 @@ void main() {
         _buildHarness(
           path1: path,
           callbacks: createDefaultSelectionRectCallbacks(
-            onDuplicateMove: (final Offset offset, final bool duplicateOnNewLayerValue) async {
+            onDuplicateMove: (Offset offset, bool duplicateOnNewLayerValue) async {
               duplicateMoveCalls++;
               duplicateMoveOffset += offset;
               duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
             },
-            onDrag: (final Offset _) {
+            onDrag: (Offset _) {
               dragCalls++;
             },
           ),
@@ -378,7 +378,7 @@ void main() {
     });
 
     testWidgets('shift plus modifier-assisted move requests a new-layer duplicate', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(140, 140, 200, 200));
       int dragCalls = 0;
@@ -388,10 +388,10 @@ void main() {
         _buildHarness(
           path1: path,
           callbacks: createDefaultSelectionRectCallbacks(
-            onDuplicateMove: (final Offset _, final bool duplicateOnNewLayerValue) async {
+            onDuplicateMove: (Offset _, bool duplicateOnNewLayerValue) async {
               duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
             },
-            onDrag: (final Offset _) {
+            onDrag: (Offset _) {
               dragCalls++;
             },
           ),
@@ -412,7 +412,7 @@ void main() {
     });
 
     testWidgets('modifier-assisted translate handle drag duplicates instead of translating', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final Path path = Path()..addRect(const Rect.fromLTWH(100, 100, 200, 160));
       int translateCalls = 0;
@@ -423,11 +423,11 @@ void main() {
         _buildHarness(
           path1: path,
           callbacks: createDefaultSelectionRectCallbacks(
-            onDuplicateMove: (final Offset _, final bool duplicateOnNewLayerValue) async {
+            onDuplicateMove: (Offset _, bool duplicateOnNewLayerValue) async {
               duplicateMoveCalls++;
               duplicateMoveOnNewLayer = duplicateOnNewLayerValue;
             },
-            onDrag: (final Offset _) {
+            onDrag: (Offset _) {
               translateCalls++;
             },
           ),
@@ -450,7 +450,7 @@ void main() {
       expect(duplicateMoveOnNewLayer, isFalse);
     });
 
-    testWidgets('supports secondary path while move/resize is disabled', (final WidgetTester tester) async {
+    testWidgets('supports secondary path while move/resize is disabled', (WidgetTester tester) async {
       final Path path1 = Path()..addRect(const Rect.fromLTWH(80, 80, 180, 120));
       final Path path2 = Path()..addRect(const Rect.fromLTWH(110, 110, 90, 60));
       int dragCalls = 0;
@@ -462,10 +462,10 @@ void main() {
           path2: path2,
           enableMoveAndResize: false,
           callbacks: createDefaultSelectionRectCallbacks(
-            onDrag: (final Offset _) {
+            onDrag: (Offset _) {
               dragCalls++;
             },
-            onResize: (final NineGridHandle _, final Offset _) {
+            onResize: (NineGridHandle _, Offset _) {
               resizeCalls++;
             },
           ),
@@ -483,7 +483,7 @@ void main() {
     });
 
     testWidgets('mode controls stay snapped below the top toolbar regardless of selection bounds', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final Path nearTopPath = Path()..addRect(const Rect.fromLTWH(200, 10, 200, 150));
       final Path lowerPath = Path()..addRect(const Rect.fromLTWH(200, 320, 200, 150));

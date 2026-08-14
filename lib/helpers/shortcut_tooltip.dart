@@ -7,8 +7,8 @@ const String _shortcutKeySeparator = ' ';
 
 /// Appends a shortcut label to a tooltip when both are available.
 String? tooltipWithShortcut(
-  final String? tooltip,
-  final String? shortcut,
+  String? tooltip,
+  String? shortcut,
 ) {
   if (tooltip == null || tooltip.isEmpty || shortcut == null || shortcut.isEmpty) {
     return tooltip;
@@ -23,12 +23,12 @@ String primaryModifierShortcutLabel() {
 }
 
 /// Returns a shortcut label for a primary-modifier + key combination.
-String primaryModifiedShortcut(final String key) {
+String primaryModifiedShortcut(String key) {
   return '${primaryModifierShortcutLabel()}$_shortcutKeySeparator$key';
 }
 
 /// Returns a shortcut label for a plain single key.
-String singleKeyShortcut(final String key) {
+String singleKeyShortcut(String key) {
   return key;
 }
 

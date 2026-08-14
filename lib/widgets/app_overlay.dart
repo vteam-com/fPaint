@@ -6,10 +6,10 @@ export 'app_overlay_surface.dart';
 
 /// Shows a general-purpose application overlay with consistent barrier setup.
 Future<T?> showAppOverlay<T>({
-  required final BuildContext context,
-  required final WidgetBuilder builder,
-  final bool barrierDismissible = true,
-  final Color barrierColor = AppColors.scrim,
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
+  Color barrierColor = AppColors.scrim,
 }) {
   return showGeneralDialog<T>(
     context: context,
@@ -18,9 +18,9 @@ Future<T?> showAppOverlay<T>({
     barrierColor: barrierColor,
     pageBuilder:
         (
-          final BuildContext dialogContext,
-          final Animation<double> _,
-          final Animation<double> _,
+          BuildContext dialogContext,
+          Animation<double> _,
+          Animation<double> _,
         ) {
           return builder(dialogContext);
         },

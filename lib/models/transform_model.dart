@@ -66,9 +66,9 @@ class TransformModel extends VisibleModel {
   /// Begins a transform operation with the given [image] captured from the selection
   /// at the given [bounds].
   void start({
-    required final ui.Image image,
-    required final Rect bounds,
-    final TransformSessionSource source = TransformSessionSource.selection,
+    required ui.Image image,
+    required Rect bounds,
+    TransformSessionSource source = TransformSessionSource.selection,
   }) {
     sourceImage = image;
     sourceBounds = bounds;
@@ -92,17 +92,17 @@ class TransformModel extends VisibleModel {
   }
 
   /// Moves a single corner by [delta] in canvas coordinates.
-  void moveCorner(final int index, final Offset delta) {
+  void moveCorner(int index, Offset delta) {
     corners[index] = corners[index] + delta;
   }
 
   /// Moves one edge midpoint control handle by [delta] in canvas coordinates.
-  void moveEdgeHandle(final int index, final Offset delta) {
+  void moveEdgeHandle(int index, Offset delta) {
     edgeMidpoints[index] = edgeMidpoints[index] + delta;
   }
 
   /// Moves an entire edge by [delta], keeping its two corners and midpoint in sync.
-  void moveConnectedEdge(final int index, final Offset delta) {
+  void moveConnectedEdge(int index, Offset delta) {
     final (int, int)? cornerIndices = _cornerIndicesForEdge(index);
     if (cornerIndices == null || index < 0 || index >= edgeMidpoints.length) {
       return;
@@ -115,7 +115,7 @@ class TransformModel extends VisibleModel {
   }
 
   /// Moves all corners by [delta] in canvas coordinates (translate).
-  void moveAll(final Offset delta) {
+  void moveAll(Offset delta) {
     for (int i = 0; i < corners.length; i++) {
       corners[i] = corners[i] + delta;
     }
@@ -155,12 +155,12 @@ class TransformModel extends VisibleModel {
   }
 
   /// Whether the given corner handle is active.
-  bool isCornerActive(final int index) {
+  bool isCornerActive(int index) {
     return activeControlType == TransformActiveControlType.corner && activeControlIndex == index;
   }
 
   /// Whether the given edge control is active.
-  bool isEdgeActive(final int index) {
+  bool isEdgeActive(int index) {
     return activeEdgeIndex == index;
   }
 
@@ -233,19 +233,19 @@ class TransformModel extends VisibleModel {
   }
 
   /// Marks a corner handle as active.
-  void setActiveCorner(final int index) {
+  void setActiveCorner(int index) {
     activeControlType = TransformActiveControlType.corner;
     activeControlIndex = index;
   }
 
   /// Marks an edge handle as active.
-  void setActiveEdgeHandle(final int index) {
+  void setActiveEdgeHandle(int index) {
     activeControlType = TransformActiveControlType.edgeHandle;
     activeControlIndex = index;
   }
 
   /// Marks an edge line drag zone as active.
-  void setActiveEdgeLine(final int index) {
+  void setActiveEdgeLine(int index) {
     activeControlType = TransformActiveControlType.edgeLine;
     activeControlIndex = index;
   }
@@ -285,7 +285,7 @@ class TransformModel extends VisibleModel {
   }
 
   /// Updates the live rotation feedback by [angleRadians].
-  void updateRotationFeedback(final double angleRadians) {
+  void updateRotationFeedback(double angleRadians) {
     final double previousDegrees = activeRotationDegrees;
     activeRotationDegrees += angleRadians * AppMath.degreesPerHalfTurn / math.pi;
     triggerRotationSnapHaptic(previousDegrees, activeRotationDegrees);
@@ -298,18 +298,18 @@ class TransformModel extends VisibleModel {
   }
 
   /// Uniformly scales the full quad around its center by [factor].
-  void scaleUniform(final double factor) {
+  void scaleUniform(double factor) {
     final double clampedFactor = factor.clamp(
       AppInteraction.transformScaleFactorMin,
       AppInteraction.transformScaleFactorMax,
     );
     final Offset scaleCenter = center;
 
-    corners = corners.map((final Offset corner) {
+    corners = corners.map((Offset corner) {
       final Offset vector = corner - scaleCenter;
       return scaleCenter + (vector * clampedFactor);
     }).toList();
-    edgeMidpoints = edgeMidpoints.map((final Offset midpoint) {
+    edgeMidpoints = edgeMidpoints.map((Offset midpoint) {
       final Offset vector = midpoint - scaleCenter;
       return scaleCenter + (vector * clampedFactor);
     }).toList();
@@ -320,19 +320,19 @@ class TransformModel extends VisibleModel {
   }
 
   /// Rotates the full quad around its center by [angleRadians].
-  void rotate(final double angleRadians) {
+  void rotate(double angleRadians) {
     final Offset rotationCenter = center;
     final double cosine = math.cos(angleRadians);
     final double sine = math.sin(angleRadians);
 
-    corners = corners.map((final Offset corner) {
+    corners = corners.map((Offset corner) {
       final Offset vector = corner - rotationCenter;
       return Offset(
         rotationCenter.dx + (vector.dx * cosine) - (vector.dy * sine),
         rotationCenter.dy + (vector.dx * sine) + (vector.dy * cosine),
       );
     }).toList();
-    edgeMidpoints = edgeMidpoints.map((final Offset midpoint) {
+    edgeMidpoints = edgeMidpoints.map((Offset midpoint) {
       final Offset vector = midpoint - rotationCenter;
       return Offset(
         rotationCenter.dx + (vector.dx * cosine) - (vector.dy * sine),
@@ -358,7 +358,7 @@ class TransformModel extends VisibleModel {
   }
 
   /// Returns the midpoint of an edge between two corners.
-  Offset edgeMidpoint(final int index1, final int index2) {
+  Offset edgeMidpoint(int index1, int index2) {
     final int? edgeIndex = _edgeIndexForCorners(index1, index2);
     final List<Offset> activeEdgeMidpoints = effectiveEdgeMidpoints;
     if (edgeIndex != null && activeEdgeMidpoints.length == edgeHandleCount) {
@@ -418,7 +418,7 @@ class TransformModel extends VisibleModel {
   }
 
   /// Maps a corner-pair edge query onto the stored edge midpoint index.
-  int? _edgeIndexForCorners(final int index1, final int index2) {
+  int? _edgeIndexForCorners(int index1, int index2) {
     final Set<int> indices = <int>{index1, index2};
     if (indices.length != AppMath.pair) {
       return null;
@@ -439,7 +439,7 @@ class TransformModel extends VisibleModel {
   }
 
   /// Returns the straight midpoint between two corners.
-  Offset _straightEdgeMidpoint(final int index1, final int index2) {
+  Offset _straightEdgeMidpoint(int index1, int index2) {
     return Offset(
       (corners[index1].dx + corners[index2].dx) / AppMath.pair,
       (corners[index1].dy + corners[index2].dy) / AppMath.pair,
@@ -447,7 +447,7 @@ class TransformModel extends VisibleModel {
   }
 
   /// Maps an edge midpoint index onto the two corner indices it connects.
-  (int, int)? _cornerIndicesForEdge(final int edgeIndex) {
+  (int, int)? _cornerIndicesForEdge(int edgeIndex) {
     switch (edgeIndex) {
       case topEdgeIndex:
         return (topLeftIndex, topRightIndex);

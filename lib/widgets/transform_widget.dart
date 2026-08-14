@@ -91,7 +91,7 @@ class TransformEdgeDragZone extends StatelessWidget {
   /// Start point of the draggable edge segment in screen coordinates.
   final Offset segmentStart;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final Offset segmentDelta = segmentEnd - segmentStart;
     final double zoneThickness = max(
       interactionProfile.dragHandleSize,
@@ -111,11 +111,11 @@ class TransformEdgeDragZone extends StatelessWidget {
         angle: zoneAngle,
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onPanStart: (final DragStartDetails _) => onDragStart?.call(),
-          onPanUpdate: (final DragUpdateDetails details) {
+          onPanStart: (DragStartDetails _) => onDragStart?.call(),
+          onPanUpdate: (DragUpdateDetails details) {
             onDragDelta(_toScreenDelta(details.delta, zoneAngle));
           },
-          onPanEnd: (final DragEndDetails _) => onDragEnd?.call(),
+          onPanEnd: (DragEndDetails _) => onDragEnd?.call(),
           onPanCancel: onDragCancel,
           child: MouseRegion(
             cursor: cursor,
@@ -127,7 +127,7 @@ class TransformEdgeDragZone extends StatelessWidget {
   }
 
   /// Converts the rotated drag-zone local delta back into screen space.
-  Offset _toScreenDelta(final Offset localDelta, final double angle) {
+  Offset _toScreenDelta(Offset localDelta, double angle) {
     final double cosine = cos(angle);
     final double sine = sin(angle);
 
@@ -140,7 +140,7 @@ class TransformEdgeDragZone extends StatelessWidget {
 
 class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin<TransformWidget> {
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final ui.Image? image = model.sourceImage;
     if (image == null || model.corners.isEmpty) {
       return const SizedBox();
@@ -152,11 +152,9 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
         shellProvider?.interactionLayoutProfile ?? AppInteractionProfiles.mouse;
 
     // Convert corners to screen space
-    final List<Offset> screenCorners = model.corners.map((final Offset c) => _toScreen(c)).toList();
-    final List<Offset> screenEdgeMidpoints = model.effectiveEdgeMidpoints
-        .map((final Offset c) => _toScreen(c))
-        .toList();
-    final List<Offset> screenBoundaryPoints = model.boundaryPoints.map((final Offset c) => _toScreen(c)).toList();
+    final List<Offset> screenCorners = model.corners.map((Offset c) => _toScreen(c)).toList();
+    final List<Offset> screenEdgeMidpoints = model.effectiveEdgeMidpoints.map((Offset c) => _toScreen(c)).toList();
+    final List<Offset> screenBoundaryPoints = model.boundaryPoints.map((Offset c) => _toScreen(c)).toList();
     final bool areCornerHandlesEnabled = model.areCornerHandlesEnabled;
     final bool areEdgeHandlesEnabled = model.areEdgeHandlesEnabled;
     final bool areEdgeDragZonesEnabled = areCornerHandlesEnabled || areEdgeHandlesEnabled;
@@ -255,8 +253,8 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
 
   /// Builds the centre move handle at [screenCenter].
   Widget _buildCenterHandle(
-    final Offset screenCenter,
-    final InteractionLayoutProfile interactionProfile,
+    Offset screenCenter,
+    InteractionLayoutProfile interactionProfile,
   ) {
     return OverlayDragHandle(
       backgroundColor: model.isCenterActive ? AppColors.selected : AppColors.overlayDark,
@@ -264,11 +262,11 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
       position: screenCenter,
       size: interactionProfile.dragHandleSize,
       cursor: SystemMouseCursors.move,
-      onPanStart: (final DragStartDetails _) {
+      onPanStart: (DragStartDetails _) {
         model.setActiveCenter();
         onChanged();
       },
-      onPanUpdate: (final DragUpdateDetails details) {
+      onPanUpdate: (DragUpdateDetails details) {
         model.moveAll(details.delta / canvasScale);
         onChanged();
       },
@@ -285,9 +283,9 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
 
   /// Builds a corner perspective-drag handle for [index].
   Widget _buildCornerHandle(
-    final int index,
-    final List<Offset> screenCorners,
-    final InteractionLayoutProfile interactionProfile,
+    int index,
+    List<Offset> screenCorners,
+    InteractionLayoutProfile interactionProfile,
   ) {
     return OverlayDragHandle(
       backgroundColor: model.isCornerActive(index) ? AppColors.selected : AppColors.overlayDark,
@@ -295,11 +293,11 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
       position: screenCorners[index],
       size: interactionProfile.dragHandleSize,
       cursor: SystemMouseCursors.grab,
-      onPanStart: (final DragStartDetails _) {
+      onPanStart: (DragStartDetails _) {
         model.setActiveCorner(index);
         onChanged();
       },
-      onPanUpdate: (final DragUpdateDetails details) {
+      onPanUpdate: (DragUpdateDetails details) {
         model.moveCorner(index, details.delta / canvasScale);
         onChanged();
       },
@@ -316,10 +314,10 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
 
   /// Builds one invisible drag target for a single edge segment.
   Widget _buildEdgeDragZone({
-    required final int edgeIndex,
-    required final InteractionLayoutProfile interactionProfile,
-    required final Offset segmentStart,
-    required final Offset segmentEnd,
+    required int edgeIndex,
+    required InteractionLayoutProfile interactionProfile,
+    required Offset segmentStart,
+    required Offset segmentEnd,
   }) {
     return TransformEdgeDragZone(
       edgeIndex: edgeIndex,
@@ -329,7 +327,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
         model.setActiveEdgeLine(edgeIndex);
         onChanged();
       },
-      onDragDelta: (final Offset delta) {
+      onDragDelta: (Offset delta) {
         model.moveConnectedEdge(edgeIndex, delta / canvasScale);
         onChanged();
       },
@@ -348,9 +346,9 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
 
   /// Builds drag targets along each visible edge segment of the transform mesh.
   List<Widget> _buildEdgeDragZones({
-    required final InteractionLayoutProfile interactionProfile,
-    required final List<Offset> screenCorners,
-    required final List<Offset> screenEdgeMidpoints,
+    required InteractionLayoutProfile interactionProfile,
+    required List<Offset> screenCorners,
+    required List<Offset> screenEdgeMidpoints,
   }) {
     return <Widget>[
       _buildEdgeDragZone(
@@ -406,9 +404,9 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
 
   /// Builds an edge midpoint skew-drag handle for [edgeIndex] at [position].
   Widget _buildEdgeHandle(
-    final int edgeIndex,
-    final Offset position,
-    final InteractionLayoutProfile interactionProfile,
+    int edgeIndex,
+    Offset position,
+    InteractionLayoutProfile interactionProfile,
   ) {
     return OverlayDragHandle(
       backgroundColor: model.isEdgeActive(edgeIndex) ? AppColors.selected : AppColors.overlayDark,
@@ -416,11 +414,11 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
       position: position,
       size: interactionProfile.dragHandleSize,
       cursor: SystemMouseCursors.grab,
-      onPanStart: (final DragStartDetails _) {
+      onPanStart: (DragStartDetails _) {
         model.setActiveEdgeHandle(edgeIndex);
         onChanged();
       },
-      onPanUpdate: (final DragUpdateDetails details) {
+      onPanUpdate: (DragUpdateDetails details) {
         model.moveEdgeHandle(edgeIndex, details.delta / canvasScale);
         onChanged();
       },
@@ -438,10 +436,10 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
   /// Builds the transform mode controls, confirm/cancel buttons, and feedback bubble.
   /// Groups all controls together at the top of the selection to avoid overlap with handles.
   Widget _buildModeControls({
-    required final InteractionLayoutProfile interactionProfile,
-    required final AppLocalizations l10n,
-    required final Offset screenCenter,
-    required final List<Offset> screenCorners,
+    required InteractionLayoutProfile interactionProfile,
+    required AppLocalizations l10n,
+    required Offset screenCenter,
+    required List<Offset> screenCorners,
   }) {
     final double buttonSize = interactionProfile.buttonSize;
     final double spacing = interactionProfile.buttonSpacing;
@@ -497,13 +495,13 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
                 onChanged();
               }
             },
-            onPanStart: (final DragStartDetails _) {
+            onPanStart: (DragStartDetails _) {
               if (!model.isTranslateMode) {
                 model.setTranslateMode();
                 onChanged();
               }
             },
-            onPanUpdate: (final DragUpdateDetails details) {
+            onPanUpdate: (DragUpdateDetails details) {
               if (!model.isTranslateMode) {
                 model.setTranslateMode();
               }
@@ -525,11 +523,11 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
                 onChanged();
               }
             },
-            onPanStart: (final DragStartDetails _) {
+            onPanStart: (DragStartDetails _) {
               model.beginScaleGesture();
               onChanged();
             },
-            onPanUpdate: (final DragUpdateDetails details) {
+            onPanUpdate: (DragUpdateDetails details) {
               if (!model.isScaleMode || !model.isScaleFeedbackVisible) {
                 model.beginScaleGesture();
               }
@@ -544,7 +542,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
               model.scaleUniform(currentDistance / previousDistance);
               onChanged();
             },
-            onPanEnd: (final DragEndDetails _) {
+            onPanEnd: (DragEndDetails _) {
               model.endScaleGesture();
               onChanged();
             },
@@ -566,11 +564,11 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
                 onChanged();
               }
             },
-            onPanStart: (final DragStartDetails _) {
+            onPanStart: (DragStartDetails _) {
               model.beginRotateGesture();
               onChanged();
             },
-            onPanUpdate: (final DragUpdateDetails details) {
+            onPanUpdate: (DragUpdateDetails details) {
               if (!model.isRotateMode || !model.isRotationFeedbackVisible) {
                 model.beginRotateGesture();
               }
@@ -588,7 +586,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
               model.updateRotationFeedback(angleDelta);
               onChanged();
             },
-            onPanEnd: (final DragEndDetails _) {
+            onPanEnd: (DragEndDetails _) {
               model.endRotateGesture();
               onChanged();
             },
@@ -637,7 +635,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
   }
 
   /// Returns the lowest on-screen Y value of the transformed quad.
-  double _screenQuadBottom(final List<Offset> screenCorners) {
+  double _screenQuadBottom(List<Offset> screenCorners) {
     double maxY = screenCorners[TransformModel.topLeftIndex].dy;
     for (final Offset corner in screenCorners) {
       if (corner.dy > maxY) {
@@ -648,7 +646,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
   }
 
   /// Returns the highest on-screen Y value of the transformed quad.
-  double _screenQuadTop(final List<Offset> screenCorners) {
+  double _screenQuadTop(List<Offset> screenCorners) {
     double minY = screenCorners[TransformModel.topLeftIndex].dy;
     for (final Offset corner in screenCorners) {
       if (corner.dy < minY) {
@@ -658,7 +656,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
     return minY;
   }
 
-  Offset _toScreen(final Offset canvasPoint) {
+  Offset _toScreen(Offset canvasPoint) {
     return canvasPoint * canvasScale + canvasOffset;
   }
 }
@@ -690,7 +688,7 @@ class _TransformPreviewPainter extends CustomPainter {
   static const int _leftMidBoundaryPointIndex = AppMath.six + AppMath.one;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     // Draw warped image
     drawPerspectiveImage(
       canvas,
@@ -736,7 +734,7 @@ class _TransformPreviewPainter extends CustomPainter {
   /// Returns the polyline segment for one highlighted boundary edge.
   ///
   /// Each transform edge uses three boundary points: corner -> midpoint -> corner.
-  Path _edgePath(final int edgeIndex) {
+  Path _edgePath(int edgeIndex) {
     final Path edgePath = Path();
     switch (edgeIndex) {
       case TransformModel.topEdgeIndex:
@@ -802,7 +800,7 @@ class _TransformPreviewPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(final _TransformPreviewPainter oldDelegate) {
+  bool shouldRepaint(_TransformPreviewPainter oldDelegate) {
     // Regenerating the perspective mesh is expensive; only repaint when the
     // transform geometry, highlighted edge, or source image actually changes.
     return oldDelegate.activeEdgeIndex != activeEdgeIndex ||

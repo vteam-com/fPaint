@@ -25,7 +25,7 @@ class EffectBrushModel {
   /// Arms [newEffect] for painting, resetting to the default strength and its
   /// default size. Bipolar effects brighten/strengthen by default; drag the
   /// strength slider through 0 to reverse.
-  void arm(final SelectionEffect newEffect) {
+  void arm(SelectionEffect newEffect) {
     effect = newEffect;
     strength = AppEffects.defaultIntensity;
     size = newEffect.defaultSize;

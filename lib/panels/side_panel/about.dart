@@ -14,14 +14,14 @@ import 'package:url_launcher/url_launcher.dart';
 /// screen resolution and a link to the application's GitHub repository.
 ///
 /// The [context] parameter is the [BuildContext] used to show the dialog.
-void showAboutBox(final BuildContext context) {
+void showAboutBox(BuildContext context) {
   final AppLocalizations l10n = context.l10n;
   final MediaQueryData mediaQuery = MediaQuery.of(context);
   final String screenResolution = '${mediaQuery.size.width.toInt()} x ${mediaQuery.size.height.toInt()}';
 
   showAppDialog<void>(
     context: context,
-    builder: (final BuildContext dialogContext) {
+    builder: (BuildContext dialogContext) {
       return AppDialog(
         title: '$appName $packageVersion',
         content: Column(

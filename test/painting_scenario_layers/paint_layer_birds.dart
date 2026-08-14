@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<void> paintLayerBirds(final PaintingScenarioSession session) async {
+Future<void> paintLayerBirds(PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _birdsLayerName);
 
   await _drawBird(

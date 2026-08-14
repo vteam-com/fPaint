@@ -15,9 +15,9 @@ class AppDropdown<T> extends StatelessWidget {
   final ValueChanged<T?> onChanged;
   final T? value;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppDropdownItem<T>? selected = items.cast<AppDropdownItem<T>?>().firstWhere(
-      (final AppDropdownItem<T>? item) => item?.value == value,
+      (AppDropdownItem<T>? item) => item?.value == value,
       orElse: () => null,
     );
 
@@ -30,7 +30,7 @@ class AppDropdown<T> extends StatelessWidget {
         final T? result = await showAppOverlay<T>(
           context: context,
           barrierColor: AppColors.transparent,
-          builder: (final BuildContext dialogContext) {
+          builder: (BuildContext dialogContext) {
             return Stack(
               children: <Widget>[
                 Positioned.fill(
@@ -48,7 +48,7 @@ class AppDropdown<T> extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: items.map((final AppDropdownItem<T> item) {
+                        children: items.map((AppDropdownItem<T> item) {
                           return AppOverlayMenuItem(
                             onTap: () => Navigator.pop(dialogContext, item.value),
                             child: item.child,

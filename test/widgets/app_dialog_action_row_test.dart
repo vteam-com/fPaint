@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart';
 
 const Key _dangerKey = Key('danger-action-box');
 const Key _iconKey = Key('icon-action-box');
@@ -11,7 +11,7 @@ const Key _primaryKey = Key('primary-action-box');
 
 void main() {
   group('AppDialogButtonRow', () {
-    testWidgets('places danger left icon center and primary on the far right', (final WidgetTester tester) async {
+    testWidgets('places danger left icon center and primary on the far right', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -43,7 +43,7 @@ void main() {
       expect((iconCenter.dx - rowRect.center.dx).abs(), lessThanOrEqualTo(AppSpacing.medium));
     });
 
-    testWidgets('classifies legacy dialog buttons without semantic wrappers', (final WidgetTester tester) async {
+    testWidgets('classifies legacy dialog buttons without semantic wrappers', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -72,7 +72,7 @@ void main() {
       expect((cancelCenter.dy - applyCenter.dy).abs(), lessThanOrEqualTo(AppSpacing.small));
     });
 
-    testWidgets('stacks trailing actions vertically when width is too small', (final WidgetTester tester) async {
+    testWidgets('stacks trailing actions vertically when width is too small', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -111,7 +111,7 @@ class _TestDialogAction extends AppButtonRowWidget {
   final AppButtonRowSlot slot;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return SizedBox(
       key: boxKey,
       width: AppSpacing.largest,

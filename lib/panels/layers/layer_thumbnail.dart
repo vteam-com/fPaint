@@ -49,10 +49,10 @@ class _LayerThumbnailState extends State<LayerThumbnail> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     const int patternSize = _transparentPatternSize;
     return LayoutBuilder(
-      builder: (final BuildContext _, final BoxConstraints constraints) {
+      builder: (BuildContext _, BoxConstraints constraints) {
         // Align to transparency pattern grid to ensure proper rendering of the transparency background
         final int size = (constraints.maxWidth / patternSize).floor() * patternSize;
 
@@ -95,7 +95,7 @@ class _LayerThumbnailState extends State<LayerThumbnail> {
   /// Prefers placing the popup above the thumbnail. If there is not enough
   /// room above, it places it below. If neither side fits, it clamps the
   /// popup flush to the top edge of the overlay.
-  double _computeVerticalOffset(final double previewSize) {
+  double _computeVerticalOffset(double previewSize) {
     final RenderBox? box = context.findRenderObject() as RenderBox?;
     final OverlayState overlay = Overlay.of(context);
     final RenderBox? overlayBox = overlay.context.findRenderObject() as RenderBox?;
@@ -146,7 +146,7 @@ class _LayerThumbnailState extends State<LayerThumbnail> {
     }
 
     _overlayEntry = OverlayEntry(
-      builder: (final BuildContext _) => CompositedTransformFollower(
+      builder: (BuildContext _) => CompositedTransformFollower(
         link: _layerLink,
         showWhenUnlinked: false,
         offset: Offset(0, offsetY),

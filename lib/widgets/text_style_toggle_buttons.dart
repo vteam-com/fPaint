@@ -16,7 +16,7 @@ class TextStyleToggleButtons extends StatelessWidget {
   final TextToolState value;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -50,8 +50,8 @@ class TextStyleToggleButtons extends StatelessWidget {
 
   /// Returns a copied style state with updated font emphasis values.
   TextToolState _copyWith({
-    final FontStyle? fontStyle,
-    final FontWeight? fontWeight,
+    FontStyle? fontStyle,
+    FontWeight? fontWeight,
   }) {
     final TextToolState nextValue = value.copy();
     if (fontWeight != null) {

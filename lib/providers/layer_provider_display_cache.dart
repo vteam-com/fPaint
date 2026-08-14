@@ -27,7 +27,7 @@ extension LayerDisplayCache on LayerProvider {
   /// sufficiency check and the builder use this so they agree — otherwise a
   /// requiredScale above the achievable cap (high DPR / zoomed in) would look
   /// perpetually "insufficient" and rebuild every frame forever.
-  double _targetDisplayScale(final double requiredScale) {
+  double _targetDisplayScale(double requiredScale) {
     double scale = requiredScale.clamp(_displayScaleEpsilon, AppMath.one.toDouble());
     final int longestSide = max(size.width.toInt(), size.height.toInt());
     if (longestSide > AppMath.zero && longestSide * scale > _displayCacheMaxSide) {
@@ -37,7 +37,7 @@ extension LayerDisplayCache on LayerProvider {
   }
 
   /// Whether the current display cache is sharp enough for [requiredScale].
-  bool _displayCacheSufficientFor(final double requiredScale) =>
+  bool _displayCacheSufficientFor(double requiredScale) =>
       _displayCache != null && _displayCacheScale + _displayScaleEpsilon >= _targetDisplayScale(requiredScale);
 
   /// Whether this layer contains a text action.
@@ -47,7 +47,7 @@ extension LayerDisplayCache on LayerProvider {
   /// is resident), not baked into a downscaled cache built off the main paint —
   /// otherwise the projection can render text as empty boxes. Text is cheap to
   /// re-render full-res, so bypassing the cache for it costs nothing meaningful.
-  bool get _hasTextContent => actionStack.any((final UserActionDrawing a) => a.action == ActionType.text);
+  bool get _hasTextContent => actionStack.any((UserActionDrawing a) => a.action == ActionType.text);
 
   /// Draws the layer for on-screen display at [requiredScale].
   ///
@@ -61,9 +61,9 @@ extension LayerDisplayCache on LayerProvider {
   /// opacity/blend into a standalone image and re-applying it at draw time would
   /// double it, so non-default layers render full-res (correct, and uncommon).
   void renderLayerForDisplay(
-    final Canvas canvas,
-    final double requiredScale,
-    final void Function() requestRebuild,
+    Canvas canvas,
+    double requiredScale,
+    void Function() requestRebuild,
   ) {
     final bool cacheEligible =
         _livePreviewBaseline == null &&
@@ -98,7 +98,7 @@ extension LayerDisplayCache on LayerProvider {
   /// (Re)builds the display cache at the achievable scale for [requiredScale].
   /// Samples the full-res content once; cheap to draw thereafter. No-op if
   /// already sufficient or a build is already in flight.
-  Future<void> buildDisplayCache(final double requiredScale) async {
+  Future<void> buildDisplayCache(double requiredScale) async {
     if (_displayCacheBuilding || !supportsIncrementalPixelBrushCache) {
       return;
     }
@@ -119,7 +119,7 @@ extension LayerDisplayCache on LayerProvider {
       final ui.Image built = await renderCanvasImage(
         width: targetWidth,
         height: targetHeight,
-        draw: (final ui.Canvas canvas) {
+        draw: (ui.Canvas canvas) {
           canvas.scale(targetWidth / size.width, targetHeight / size.height);
           renderLayer(canvas);
         },
@@ -138,8 +138,8 @@ extension LayerDisplayCache on LayerProvider {
   /// when there is no cache yet; the painter will build a fresh one that already
   /// includes the newly-appended action.
   Future<void> updateDisplayCacheWithPatch({
-    required final ui.Image patchImage,
-    required final Rect patchBounds,
+    required ui.Image patchImage,
+    required Rect patchBounds,
   }) async {
     final ui.Image? base = _displayCache;
     if (base == null || !supportsIncrementalPixelBrushCache) {
@@ -162,7 +162,7 @@ extension LayerDisplayCache on LayerProvider {
     final ui.Image next = await renderCanvasImage(
       width: base.width,
       height: base.height,
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.drawImage(base, Offset.zero, Paint());
         renderRegionErase(canvas, Path()..addRect(scaledBounds));
         canvas.drawImageRect(
@@ -236,14 +236,14 @@ extension LayerDisplayCache on LayerProvider {
   /// raster thread and stall unrelated GPU work (e.g. a smudge commit's texture
   /// upload). A medium-quality downscale into a 64 px target is perceptually
   /// identical at thumbnail size and an order of magnitude cheaper.
-  Future<ui.Image> _renderThumbnailFromImage(final ui.Image source) {
+  Future<ui.Image> _renderThumbnailFromImage(ui.Image source) {
     final Size thumbnailSize = scaleSizeTo(size, maxHeight: AppLayout.thumbnailMaxHeight);
     final int thumbnailWidth = max(AppMath.one, thumbnailSize.width.round());
     final int thumbnailHeight = max(AppMath.one, thumbnailSize.height.round());
     return renderCanvasImage(
       width: thumbnailWidth,
       height: thumbnailHeight,
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.drawImageRect(
           source,
           Rect.fromLTWH(0, 0, source.width.toDouble(), source.height.toDouble()),

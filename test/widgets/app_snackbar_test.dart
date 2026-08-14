@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/app_progress.dart';
 import 'package:fpaint/widgets/app_snackbar.dart';
+import 'package:material_ui/material_ui.dart';
 
 Widget _buildSnackbarTestApp({
-  required final Widget child,
-  final GlobalKey<NavigatorState>? navigatorKey,
+  required Widget child,
+  GlobalKey<NavigatorState>? navigatorKey,
 }) {
   return MaterialApp(
     navigatorKey: navigatorKey,
@@ -20,7 +20,7 @@ Widget _buildSnackbarTestApp({
 }
 
 Widget _buildNestedOverlayTestApp({
-  required final Widget child,
+  required Widget child,
 }) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -34,7 +34,7 @@ Widget _buildNestedOverlayTestApp({
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
-                builder: (final BuildContext context) => child,
+                builder: (BuildContext context) => child,
               ),
             ],
           ),
@@ -46,13 +46,13 @@ Widget _buildNestedOverlayTestApp({
 
 void main() {
   group('AppNotificationOverlay', () {
-    testWidgets('shows and auto-dismisses notification', (final WidgetTester tester) async {
+    testWidgets('shows and auto-dismisses notification', (WidgetTester tester) async {
       late BuildContext savedContext;
 
       await tester.pumpWidget(
         _buildSnackbarTestApp(
           child: Builder(
-            builder: (final BuildContext context) {
+            builder: (BuildContext context) {
               savedContext = context;
               return const SizedBox();
             },
@@ -72,13 +72,13 @@ void main() {
       expect(find.text('Test notification'), findsNothing);
     });
 
-    testWidgets('shows notification with custom duration', (final WidgetTester tester) async {
+    testWidgets('shows notification with custom duration', (WidgetTester tester) async {
       late BuildContext savedContext;
 
       await tester.pumpWidget(
         _buildSnackbarTestApp(
           child: Builder(
-            builder: (final BuildContext context) {
+            builder: (BuildContext context) {
               savedContext = context;
               return const SizedBox();
             },
@@ -101,13 +101,13 @@ void main() {
       expect(find.text('Quick message'), findsNothing);
     });
 
-    testWidgets('replaces previous notification', (final WidgetTester tester) async {
+    testWidgets('replaces previous notification', (WidgetTester tester) async {
       late BuildContext savedContext;
 
       await tester.pumpWidget(
         _buildSnackbarTestApp(
           child: Builder(
-            builder: (final BuildContext context) {
+            builder: (BuildContext context) {
               savedContext = context;
               return const SizedBox();
             },
@@ -129,13 +129,13 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets('shows optional subtitle below the message', (final WidgetTester tester) async {
+    testWidgets('shows optional subtitle below the message', (WidgetTester tester) async {
       late BuildContext savedContext;
 
       await tester.pumpWidget(
         _buildSnackbarTestApp(
           child: Builder(
-            builder: (final BuildContext context) {
+            builder: (BuildContext context) {
               savedContext = context;
               return const SizedBox();
             },
@@ -163,13 +163,13 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets('inserts the notification into the root overlay', (final WidgetTester tester) async {
+    testWidgets('inserts the notification into the root overlay', (WidgetTester tester) async {
       late BuildContext savedContext;
 
       await tester.pumpWidget(
         _buildNestedOverlayTestApp(
           child: Builder(
-            builder: (final BuildContext context) {
+            builder: (BuildContext context) {
               savedContext = context;
               return const SizedBox();
             },
@@ -190,13 +190,13 @@ void main() {
   });
 
   group('AppSnackBarBuildContextX', () {
-    testWidgets('showSnackBarMessage displays notification', (final WidgetTester tester) async {
+    testWidgets('showSnackBarMessage displays notification', (WidgetTester tester) async {
       late BuildContext savedContext;
 
       await tester.pumpWidget(
         _buildSnackbarTestApp(
           child: Builder(
-            builder: (final BuildContext context) {
+            builder: (BuildContext context) {
               savedContext = context;
               return const SizedBox();
             },
@@ -215,14 +215,14 @@ void main() {
     });
 
     testWidgets('showSavedFileSnackBar displays localized title and filename subtitle', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       late BuildContext savedContext;
 
       await tester.pumpWidget(
         _buildSnackbarTestApp(
           child: Builder(
-            builder: (final BuildContext context) {
+            builder: (BuildContext context) {
               savedContext = context;
               return const SizedBox();
             },
@@ -241,7 +241,7 @@ void main() {
     });
 
     testWidgets('showGlobalSavedFileSnackBar displays localized title and filename subtitle', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       await tester.pumpWidget(
         _buildSnackbarTestApp(
@@ -261,7 +261,7 @@ void main() {
     });
 
     testWidgets('showGlobalSavingFileSnackBar stays visible with progress until dismissed', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       await tester.pumpWidget(
         _buildSnackbarTestApp(
@@ -290,7 +290,7 @@ void main() {
     });
 
     testWidgets('runWithGlobalFileSaveSnackBar shows progress then saved', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final Completer<void> completer = Completer<void>();
 
@@ -324,7 +324,7 @@ void main() {
     });
 
     testWidgets('runWithGlobalFileSaveSnackBar dismisses progress on error', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final Completer<void> completer = Completer<void>();
 

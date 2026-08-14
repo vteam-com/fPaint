@@ -35,8 +35,8 @@ class UndoProvider extends ChangeNotifier {
   /// The [listen] parameter determines whether the widget should rebuild when the
   /// [UndoProvider]'s state changes.
   static UndoProvider of(
-    final BuildContext context, {
-    final bool listen = false,
+    BuildContext context, {
+    bool listen = false,
   }) => InheritedControllerScope.of<UndoProvider>(context, listen: listen);
 
   final List<RecordAction> _undoStack = <RecordAction>[];
@@ -51,7 +51,7 @@ class UndoProvider extends ChangeNotifier {
   /// Used by owners to decide whether a candidate image is safe to dispose: an
   /// image present here can still be restored by an undo/redo and must be kept.
   Iterable<ui.Image> get liveRetainedImages =>
-      _undoStack.followedBy(_redoStack).expand((final RecordAction r) => r.retainedImages);
+      _undoStack.followedBy(_redoStack).expand((RecordAction r) => r.retainedImages);
 
   /// Gets whether there are any actions that can be undone.
   bool get canUndo => _undoStack.isNotEmpty;
@@ -60,7 +60,7 @@ class UndoProvider extends ChangeNotifier {
   bool get canRedo => _redoStack.isNotEmpty;
 
   /// Records an action to the undo stack.
-  void recordAction(final RecordAction action) {
+  void recordAction(RecordAction action) {
     _undoStack.add(action);
     // Enforce the global cap: evict the oldest records beyond the limit. Their
     // content stays on the canvas (it just can no longer be undone); detach them
@@ -90,10 +90,10 @@ class UndoProvider extends ChangeNotifier {
   /// The [retainedImages] are GPU textures the action's closures can resurrect
   /// on undo/redo; the owner disposes them once this record leaves history.
   RecordAction executeAction({
-    required final String name,
-    required final void Function() backward,
-    required final void Function() forward,
-    final List<ui.Image> retainedImages = const <ui.Image>[],
+    required String name,
+    required void Function() backward,
+    required void Function() forward,
+    List<ui.Image> retainedImages = const <ui.Image>[],
   }) {
     final RecordAction action = RecordAction(
       name: name,
@@ -147,12 +147,12 @@ class UndoProvider extends ChangeNotifier {
   /// Reports already-detached [records] as permanently dropped so their retained
   /// textures can be freed. Call this only *after* the records have been removed
   /// from the live stacks, so the owner's reachability check excludes them.
-  void _dropRecords(final List<RecordAction> records) {
+  void _dropRecords(List<RecordAction> records) {
     if (onRecordsDropped == null || records.isEmpty) {
       return;
     }
     final List<RecordAction> withImages = records
-        .where((final RecordAction r) => r.retainedImages.isNotEmpty)
+        .where((RecordAction r) => r.retainedImages.isNotEmpty)
         .toList(growable: false);
     if (withImages.isNotEmpty) {
       onRecordsDropped!(withImages);
@@ -165,8 +165,8 @@ class UndoProvider extends ChangeNotifier {
   /// Useful for tools with expensive replay cost (for example pixel-brush
   /// smudge/blur) where long histories can degrade runtime performance.
   void trimUndoHistoryWhere({
-    required final bool Function(RecordAction) predicate,
-    required final int maxKeep,
+    required bool Function(RecordAction) predicate,
+    required int maxKeep,
   }) {
     if (maxKeep < AppMath.zero) {
       return;
@@ -207,7 +207,7 @@ class UndoProvider extends ChangeNotifier {
   }
 
   /// Gets the history of actions as a string.
-  String getHistoryString(final List<RecordAction> list) {
+  String getHistoryString(List<RecordAction> list) {
     try {
       return this.getActionsAsStrings(list, AppLimits.topColorCount).join('\n');
     } catch (error) {
@@ -218,12 +218,12 @@ class UndoProvider extends ChangeNotifier {
 
   /// Gets the actions as a list of strings.
   List<String> getActionsAsStrings(
-    final List<RecordAction> list, [
-    final int? numberOfHistoryAction,
+    List<RecordAction> list, [
+    int? numberOfHistoryAction,
   ]) {
     return list
         .take(numberOfHistoryAction ?? list.length)
-        .map((final RecordAction action) => action.toString())
+        .map((RecordAction action) => action.toString())
         .toList()
         .reversed
         .toList();

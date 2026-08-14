@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<void> paintLayerLand(final PaintingScenarioSession session) async {
+Future<void> paintLayerLand(PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _landLayerName);
 
   await drawRectangleWithHumanGestures(

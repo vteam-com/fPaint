@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' show MaterialLocalizations, TimeOfDay;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_ora.dart';
@@ -23,6 +22,7 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:logging/logging.dart';
+import 'package:material_ui/material_ui.dart' show MaterialLocalizations, TimeOfDay;
 
 final Logger _log = Logger(logNameRecentFiles);
 
@@ -33,8 +33,8 @@ typedef RecentFileMetadataLoader = Future<RecentFileMetadata> Function(String pa
 
 /// Returns thumbnail-ready bytes for MRU previews, including ORA archives.
 Future<Uint8List?> resolveRecentFileThumbnailBytes({
-  required final Uint8List fileBytes,
-  required final String path,
+  required Uint8List fileBytes,
+  required String path,
 }) async {
   if (!_isOraPath(path)) {
     return fileBytes;
@@ -43,7 +43,7 @@ Future<Uint8List?> resolveRecentFileThumbnailBytes({
   return extractOraPreviewPngBytes(fileBytes);
 }
 
-bool _isOraPath(final String path) {
+bool _isOraPath(String path) {
   return path.toLowerCase().endsWith(_oraFileSuffix);
 }
 
@@ -77,7 +77,7 @@ class _ImportDialogState extends State<ImportDialog> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppPreferences prefs = AppPreferences.of(widget.parentContext);
     final AppLocalizations l10n = context.l10n;
     final List<String> recentFiles = prefs.recentFiles.take(AppLimits.recentFilesDisplayCount).toList();
@@ -95,7 +95,7 @@ class _ImportDialogState extends State<ImportDialog> {
           AppSwitchListTile(
             title: AppText(l10n.addAsNewLayer),
             value: _addAsLayer,
-            onChanged: (final bool value) {
+            onChanged: (bool value) {
               setState(() {
                 _addAsLayer = value;
               });
@@ -184,7 +184,7 @@ class _ImportDialogState extends State<ImportDialog> {
   }
 
   /// Builds the clickable clipboard source tile shown when an image is available.
-  Widget _buildClipboardTile(final AppLocalizations l10n) {
+  Widget _buildClipboardTile(AppLocalizations l10n) {
     return GestureDetector(
       onTap: _handleClipboardImport,
       child: MouseRegion(
@@ -218,7 +218,7 @@ class _ImportDialogState extends State<ImportDialog> {
     );
   }
 
-  Widget _buildSectionHeader(final String label) {
+  Widget _buildSectionHeader(String label) {
     return Row(
       children: <Widget>[
         AppText(label, variant: AppTextVariant.subtitle),
@@ -252,7 +252,7 @@ class _ImportDialogState extends State<ImportDialog> {
 }
 
 /// Shared surface styling for the import dialog source tiles and recent rows.
-Widget _buildImportTileSurface({required final Widget child}) {
+Widget _buildImportTileSurface({required Widget child}) {
   return DecoratedBox(
     decoration: BoxDecoration(
       color: AppColors.surfaceVariant,
@@ -270,7 +270,7 @@ Widget _buildImportTileSurface({required final Widget child}) {
 }
 
 /// Opens the file picker and adds the selected file as a new layer.
-Future<void> _browseAndAddAsLayer(final BuildContext context) async {
+Future<void> _browseAndAddAsLayer(BuildContext context) async {
   final LayersProvider layers = LayersProvider.of(context);
 
   try {
@@ -301,9 +301,9 @@ Future<void> _browseAndAddAsLayer(final BuildContext context) async {
 
 /// Opens a recent file by path, handling unsaved changes and file existence.
 Future<void> _openRecentFile(
-  final BuildContext context,
-  final String path,
-  final String? bookmark,
+  BuildContext context,
+  String path,
+  String? bookmark,
 ) async {
   final LayersProvider layers = LayersProvider.of(context);
   final ShellProvider shellProvider = ShellProvider.of(context);
@@ -319,7 +319,7 @@ Future<void> _openRecentFile(
   final bool success = await MacOsBookmarkService.withResolvedBookmark(
     bookmarkBase64: bookmark,
     fallbackPath: path,
-    action: (final String resolvedPath) => openFileFromPath(
+    action: (String resolvedPath) => openFileFromPath(
       context: context,
       layers: layers,
       path: resolvedPath,
@@ -343,9 +343,9 @@ Future<void> _openRecentFile(
 
 /// Adds a recent file as a new layer, checking that the file exists.
 Future<void> _addRecentAsLayer(
-  final BuildContext context,
-  final String path,
-  final String? bookmark,
+  BuildContext context,
+  String path,
+  String? bookmark,
 ) async {
   final LayersProvider layers = LayersProvider.of(context);
 
@@ -356,7 +356,7 @@ Future<void> _addRecentAsLayer(
   await MacOsBookmarkService.withResolvedBookmark(
     bookmarkBase64: bookmark,
     fallbackPath: path,
-    action: (final String resolvedPath) => addFileAsLayer(context: context, layers: layers, path: resolvedPath),
+    action: (String resolvedPath) => addFileAsLayer(context: context, layers: layers, path: resolvedPath),
   );
   if (context.mounted) {
     await AppPreferences.of(context).addRecentFile(path);
@@ -397,7 +397,7 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final String fileName = widget.path.split(Platform.pathSeparator).last;
     final String parentPath = File(widget.path).parent.path;
     final AppLocalizations l10n = context.l10n;
@@ -521,7 +521,7 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
       await MacOsBookmarkService.withResolvedBookmark(
         bookmarkBase64: widget.bookmark,
         fallbackPath: widget.path,
-        action: (final String resolvedPath) async {
+        action: (String resolvedPath) async {
           final File file = File(resolvedPath);
           if (!await file.exists()) {
             if (mounted) {
@@ -582,7 +582,7 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
       await MacOsBookmarkService.withResolvedBookmark(
         bookmarkBase64: widget.bookmark,
         fallbackPath: widget.path,
-        action: (final String resolvedPath) async {
+        action: (String resolvedPath) async {
           final File file = File(resolvedPath);
           if (!file.existsSync()) {
             if (mounted) {
@@ -631,8 +631,8 @@ class _RecentFileEntryState extends State<_RecentFileEntry> {
 
 /// Formats [lastModified] using the active locale's short date and time.
 String _formatLastModified(
-  final BuildContext context,
-  final DateTime lastModified,
+  BuildContext context,
+  DateTime lastModified,
 ) {
   final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(context);
   final bool alwaysUse24HourFormat = MediaQuery.maybeOf(context)?.alwaysUse24HourFormat ?? false;

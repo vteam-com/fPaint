@@ -26,7 +26,7 @@ class BrushIntensityPicker extends BasePicker<double> {
 /// The state for [BrushIntensityPicker].
 class _BrushIntensityPickerState extends BasePickerState<double> {
   @override
-  double clampValue(final double value) {
+  double clampValue(double value) {
     return value.clamp(widget.min!, widget.max!);
   }
 
@@ -42,18 +42,18 @@ class _BrushIntensityPickerState extends BasePickerState<double> {
   }
 
   @override
-  String formatValue(final double value) {
+  String formatValue(double value) {
     return '${(value * AppMath.percentScale).round()}%';
   }
 }
 
 /// Shows a dialog containing a [BrushIntensityPicker].
 void showBrushIntensityPicker({
-  required final BuildContext context,
-  required final String title,
-  required final double value,
-  required final ValueChanged<double> onChanged,
-  final Widget? titleIcon,
+  required BuildContext context,
+  required String title,
+  required double value,
+  required ValueChanged<double> onChanged,
+  Widget? titleIcon,
 }) {
   final AppLocalizations l10n = context.l10n;
   showPickerDialog(

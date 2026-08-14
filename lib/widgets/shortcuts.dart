@@ -22,11 +22,11 @@ import 'package:fpaint/widgets/shortcuts_help.dart';
 /// The [appProvider] parameter is the [AppProvider] instance used to manage the application's state.
 /// The [child] parameter is the widget to wrap with the keyboard shortcuts and actions.
 Widget shortCutsForMainApp(
-  final BuildContext context,
-  final ShellProvider shellProvider,
-  final AppProvider appProvider,
-  final Widget child, {
-  required final Future<void> Function() onSave,
+  BuildContext context,
+  ShellProvider shellProvider,
+  AppProvider appProvider,
+  Widget child, {
+  required Future<void> Function() onSave,
 }) {
   void showLockedLayerMessage() {
     context.showSnackBarMessage(
@@ -40,13 +40,13 @@ Widget shortCutsForMainApp(
     shortcuts: shortcuts,
     actions: <Type, Action<Intent>>{
       UndoIntent: CallbackAction<UndoIntent>(
-        onInvoke: (final UndoIntent _) => appProvider.undoAction(),
+        onInvoke: (UndoIntent _) => appProvider.undoAction(),
       ),
       RedoIntent: CallbackAction<RedoIntent>(
-        onInvoke: (final RedoIntent _) => appProvider.redoAction(),
+        onInvoke: (RedoIntent _) => appProvider.redoAction(),
       ),
       ZoomInIntent: CallbackAction<ZoomInIntent>(
-        onInvoke: (final ZoomInIntent _) {
+        onInvoke: (ZoomInIntent _) {
           shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
           appProvider.applyScaleToCanvas(
             scaleDelta: AppVisual.enlarge,
@@ -56,7 +56,7 @@ Widget shortCutsForMainApp(
         },
       ),
       ZoomOutIntent: CallbackAction<ZoomOutIntent>(
-        onInvoke: (final ZoomOutIntent _) {
+        onInvoke: (ZoomOutIntent _) {
           shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
           appProvider.applyScaleToCanvas(
             scaleDelta: AppVisual.shrink,
@@ -66,7 +66,7 @@ Widget shortCutsForMainApp(
         },
       ),
       ResetZoomIntent: CallbackAction<ResetZoomIntent>(
-        onInvoke: (final ResetZoomIntent _) {
+        onInvoke: (ResetZoomIntent _) {
           shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
           appProvider.applyScaleToCanvas(
             scaleDelta: AppVisual.full / appProvider.layers.scale,
@@ -76,10 +76,10 @@ Widget shortCutsForMainApp(
         },
       ),
       SaveIntent: CallbackAction<SaveIntent>(
-        onInvoke: (final SaveIntent _) async => await onSave(),
+        onInvoke: (SaveIntent _) async => await onSave(),
       ),
       CutIntent: CallbackAction<CutIntent>(
-        onInvoke: (final CutIntent _) async {
+        onInvoke: (CutIntent _) async {
           if (appProvider.isSelectedLayerLocked) {
             showLockedLayerMessage();
             return null;
@@ -90,10 +90,10 @@ Widget shortCutsForMainApp(
         },
       ),
       CopyIntent: CallbackAction<CopyIntent>(
-        onInvoke: (final CopyIntent _) async => await appProvider.regionCopy(),
+        onInvoke: (CopyIntent _) async => await appProvider.regionCopy(),
       ),
       NewDocumentFromClipboardImage: CallbackAction<NewDocumentFromClipboardImage>(
-        onInvoke: (final NewDocumentFromClipboardImage _) async {
+        onInvoke: (NewDocumentFromClipboardImage _) async {
           if (appProvider.layers.hasChanged && await confirmDiscardCurrentWork(context) == false) {
             return;
           }
@@ -102,10 +102,10 @@ Widget shortCutsForMainApp(
         },
       ),
       PasteIntent: CallbackAction<PasteIntent>(
-        onInvoke: (final PasteIntent _) async => await appProvider.paste(),
+        onInvoke: (PasteIntent _) async => await appProvider.paste(),
       ),
       DuplicateIntent: CallbackAction<DuplicateIntent>(
-        onInvoke: (final DuplicateIntent _) async {
+        onInvoke: (DuplicateIntent _) async {
           if (appProvider.isSelectedLayerLocked) {
             showLockedLayerMessage();
             return null;
@@ -116,13 +116,13 @@ Widget shortCutsForMainApp(
         },
       ),
       DuplicateNewLayerIntent: CallbackAction<DuplicateNewLayerIntent>(
-        onInvoke: (final DuplicateNewLayerIntent _) async => await appProvider.regionDuplicate(),
+        onInvoke: (DuplicateNewLayerIntent _) async => await appProvider.regionDuplicate(),
       ),
 
       //-------------------------------------------------------------
       // toggle shell mode aka the tools
       ToggleShellModeIntent: CallbackAction<ToggleShellModeIntent>(
-        onInvoke: (final ToggleShellModeIntent _) async {
+        onInvoke: (ToggleShellModeIntent _) async {
           switch (shellProvider.shellMode) {
             case ShellMode.hidden:
               shellProvider.shellMode = ShellMode.full;
@@ -137,7 +137,7 @@ Widget shortCutsForMainApp(
       //-------------------------------------------------------------
       // Select all
       SelectAllIntent: CallbackAction<SelectAllIntent>(
-        onInvoke: (final SelectAllIntent _) async {
+        onInvoke: (SelectAllIntent _) async {
           appProvider.selectAll();
           appProvider.activateSelectionAction();
           return null;
@@ -145,31 +145,31 @@ Widget shortCutsForMainApp(
       ),
 
       ToolBrushIntent: CallbackAction<ToolBrushIntent>(
-        onInvoke: (final ToolBrushIntent _) {
+        onInvoke: (ToolBrushIntent _) {
           appProvider.selectedAction = ActionType.brush;
           return null;
         },
       ),
       ToolEraserIntent: CallbackAction<ToolEraserIntent>(
-        onInvoke: (final ToolEraserIntent _) {
+        onInvoke: (ToolEraserIntent _) {
           appProvider.selectedAction = ActionType.eraser;
           return null;
         },
       ),
       ToolSelectionIntent: CallbackAction<ToolSelectionIntent>(
-        onInvoke: (final ToolSelectionIntent _) {
+        onInvoke: (ToolSelectionIntent _) {
           appProvider.selectedAction = ActionType.selector;
           return null;
         },
       ),
       ToolFillIntent: CallbackAction<ToolFillIntent>(
-        onInvoke: (final ToolFillIntent _) {
+        onInvoke: (ToolFillIntent _) {
           appProvider.selectedAction = ActionType.fill;
           return null;
         },
       ),
       ToolTextIntent: CallbackAction<ToolTextIntent>(
-        onInvoke: (final ToolTextIntent _) {
+        onInvoke: (ToolTextIntent _) {
           appProvider.selectedAction = ActionType.text;
           return null;
         },
@@ -178,7 +178,7 @@ Widget shortCutsForMainApp(
       //-------------------------------------------------------------
       // Escape current action
       EscapeIntent: CallbackAction<EscapeIntent>(
-        onInvoke: (final EscapeIntent _) async {
+        onInvoke: (EscapeIntent _) async {
           // Discard any live gradient-fill session before restoring the tool, so
           // Escape backs out of the fill (no undo entry) rather than applying it.
           appProvider.cancelGradientPreview();
@@ -193,7 +193,7 @@ Widget shortCutsForMainApp(
       //-------------------------------------------------------------
       // Delete/Erase
       DeleteIntent: CallbackAction<DeleteIntent>(
-        onInvoke: (final DeleteIntent _) async {
+        onInvoke: (DeleteIntent _) async {
           if (appProvider.isSelectedLayerLocked && appProvider.selectorModel.path1 != null) {
             showLockedLayerMessage();
             return null;
@@ -206,7 +206,7 @@ Widget shortCutsForMainApp(
 
       // Add a help action
       HelpIntent: CallbackAction<HelpIntent>(
-        onInvoke: (final HelpIntent _) {
+        onInvoke: (HelpIntent _) {
           showShortcutsHelp(context);
           return null;
         },
@@ -235,7 +235,7 @@ class _MainAppShortcutScopeState extends State<_MainAppShortcutScope> {
   void initState() {
     super.initState();
     _focusNode = FocusNode();
-    WidgetsBinding.instance.addPostFrameCallback((final _) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _focusNode.requestFocus();
       }
@@ -249,10 +249,10 @@ class _MainAppShortcutScopeState extends State<_MainAppShortcutScope> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return Listener(
       behavior: HitTestBehavior.translucent,
-      onPointerDown: (final PointerDownEvent _) {
+      onPointerDown: (PointerDownEvent _) {
         _restoreShortcutFocus();
       },
       child: Shortcuts(
@@ -410,10 +410,10 @@ class HelpIntent extends Intent {
 }
 
 /// Shows the keyboard shortcuts help dialog.
-void showShortcutsHelp(final BuildContext context) {
+void showShortcutsHelp(BuildContext context) {
   showAppDialog<void>(
     context: context,
-    builder: (final BuildContext _) => const ShortcutsHelpDialog(),
+    builder: (BuildContext _) => const ShortcutsHelpDialog(),
   );
 }
 

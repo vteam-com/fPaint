@@ -24,7 +24,7 @@ class BrushStylePicker extends BasePicker<BrushStyle> {
 /// The state for [BrushStylePicker].
 class _BrushStylePickerState extends BasePickerState<BrushStyle> {
   @override
-  BrushStyle clampValue(final BrushStyle value) {
+  BrushStyle clampValue(BrushStyle value) {
     return value; // No clamping needed for enums
   }
 
@@ -34,13 +34,13 @@ class _BrushStylePickerState extends BasePickerState<BrushStyle> {
   }
 
   @override
-  String formatValue(final BrushStyle value) {
+  String formatValue(BrushStyle value) {
     return _brushStyleLabel(context.l10n, value);
   }
 }
 
 /// Returns the localized display name for a [BrushStyle].
-String _brushStyleLabel(final AppLocalizations l10n, final BrushStyle style) {
+String _brushStyleLabel(AppLocalizations l10n, BrushStyle style) {
   return switch (style) {
     BrushStyle.solid => l10n.brushStyleSolid,
     BrushStyle.dash => l10n.brushStyleDash,
@@ -58,12 +58,12 @@ String _brushStyleLabel(final AppLocalizations l10n, final BrushStyle style) {
 /// The [value] parameter is the currently selected brush style.
 /// The [onChanged] parameter is a callback that is called when the selected brush style changes.
 Widget brushStyleDropDown(
-  final BuildContext context,
-  final BrushStyle value,
-  final void Function(BrushStyle) onChanged,
+  BuildContext context,
+  BrushStyle value,
+  void Function(BrushStyle) onChanged,
 ) {
   final AppLocalizations l10n = context.l10n;
-  final List<AppDropdownItem<int>> items = BrushStyle.values.map<AppDropdownItem<int>>((final BrushStyle value) {
+  final List<AppDropdownItem<int>> items = BrushStyle.values.map<AppDropdownItem<int>>((BrushStyle value) {
     return AppDropdownItem<int>(
       value: value.index,
       child: AppText(_brushStyleLabel(l10n, value)),
@@ -73,7 +73,7 @@ Widget brushStyleDropDown(
   return AppDropdown<int>(
     value: value.index,
     items: items,
-    onChanged: (final int? index) {
+    onChanged: (int? index) {
       if (index != null) {
         onChanged(BrushStyle.values[index]);
       }
@@ -87,9 +87,9 @@ Widget brushStyleDropDown(
 /// The [brushStyle] parameter is the currently selected brush style.
 /// The [onChanged] parameter is a callback that is called when the brush style changes.
 void showBrushStylePicker(
-  final BuildContext context,
-  final BrushStyle brushStyle,
-  final void Function(BrushStyle) onChanged,
+  BuildContext context,
+  BrushStyle brushStyle,
+  void Function(BrushStyle) onChanged,
 ) {
   final AppLocalizations l10n = context.l10n;
   showPickerDialog(

@@ -12,14 +12,14 @@ const Duration _effectPreviewBottomSheetWaitFrameDuration = Duration(millisecond
 
 /// Shows effect intensity controls for a live effect preview.
 void showEffectPreviewBottomSheet(
-  final BuildContext context, {
-  required final AppProvider appProvider,
-  required final AppLocalizations l10n,
+  BuildContext context, {
+  required AppProvider appProvider,
+  required AppLocalizations l10n,
 }) {
   showAppBottomSheet<void>(
     context: context,
     barrierColor: AppColors.transparent,
-    builder: (final BuildContext sheetCtx) => SafeArea(
+    builder: (BuildContext sheetCtx) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.small),
         child: ConstrainedBox(
@@ -43,10 +43,10 @@ void showEffectPreviewBottomSheet(
 /// Starts a selection-effect preview and opens the controls as soon as preview
 /// mode becomes visible, without waiting for the preview render to finish.
 Future<void> startEffectPreviewWithBottomSheet(
-  final BuildContext context, {
-  required final AppProvider appProvider,
-  required final AppLocalizations l10n,
-  required final SelectionEffect effect,
+  BuildContext context, {
+  required AppProvider appProvider,
+  required AppLocalizations l10n,
+  required SelectionEffect effect,
 }) async {
   final Future<void> previewFuture = appProvider.startEffectPreview(effect);
 

@@ -15,7 +15,7 @@ typedef SelectionStateSnapshot = ({
 });
 
 /// Captures the current selection state so duplicate-apply undo can restore it.
-SelectionStateSnapshot captureSelectionState(final AppProvider appProvider) {
+SelectionStateSnapshot captureSelectionState(AppProvider appProvider) {
   return (
     isVisible: appProvider.selectorModel.isVisible,
     isDrawing: appProvider.selectorModel.isDrawing,
@@ -28,8 +28,8 @@ SelectionStateSnapshot captureSelectionState(final AppProvider appProvider) {
 
 /// Restores a previously captured selection state.
 void restoreSelectionState(
-  final AppProvider appProvider,
-  final SelectionStateSnapshot selectionSnapshot,
+  AppProvider appProvider,
+  SelectionStateSnapshot selectionSnapshot,
 ) {
   appProvider.selectorModel.isVisible = selectionSnapshot.isVisible;
   appProvider.selectorModel.isDrawing = selectionSnapshot.isDrawing;
@@ -43,7 +43,7 @@ void restoreSelectionState(
 }
 
 /// Replaces the active selection with a rectangle matching [bounds].
-void selectRectOnCanvas(final AppProvider appProvider, final Rect bounds) {
+void selectRectOnCanvas(AppProvider appProvider, Rect bounds) {
   appProvider.selectorModel.isVisible = true;
   appProvider.selectorModel.isDrawing = false;
   appProvider.selectorModel.path1 = Path()..addRect(bounds);
@@ -55,8 +55,8 @@ void selectRectOnCanvas(final AppProvider appProvider, final Rect bounds) {
 
 /// Restores [targetLayer] from [restoreState] after an image-placement undo.
 void _restoreLayerFromSnapshot({
-  required final LayerProvider targetLayer,
-  required final ImagePlacementLayerRestoreState restoreState,
+  required LayerProvider targetLayer,
+  required ImagePlacementLayerRestoreState restoreState,
 }) {
   targetLayer.actionStack
     ..clear()
@@ -74,13 +74,13 @@ void _restoreLayerFromSnapshot({
 /// Commits a placed image as a new layer, selected-layer append, or layer
 /// replacement with undo support.
 void commitPlacedImage(
-  final AppProvider appProvider, {
-  required final ui.Image image,
-  required final Offset offset,
-  required final ImagePlacementCommitMode commitMode,
-  required final ImagePlacementLayerRestoreState? layerRestoreState,
-  final SelectionStateSnapshot? selectionSnapshot,
-  final Rect? selectionBounds,
+  AppProvider appProvider, {
+  required ui.Image image,
+  required Offset offset,
+  required ImagePlacementCommitMode commitMode,
+  required ImagePlacementLayerRestoreState? layerRestoreState,
+  SelectionStateSnapshot? selectionSnapshot,
+  Rect? selectionBounds,
 }) {
   final int currentIndex = appProvider.layers.selectedLayerIndex;
   int newLayerIndex = -1;

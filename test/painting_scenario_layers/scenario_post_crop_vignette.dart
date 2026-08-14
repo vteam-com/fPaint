@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<void> applyPostCropVignette(final PaintingScenarioSession session) async {
+Future<void> applyPostCropVignette(PaintingScenarioSession session) async {
   final BuildContext context = session.tester.element(find.byType(MainView));
   final AppProvider appProvider = AppProvider.of(context, listen: false);
 

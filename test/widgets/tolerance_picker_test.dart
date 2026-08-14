@@ -1,16 +1,16 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('TolerancePicker', () {
-    testWidgets('TolerancePickerState clamps value correctly', (final WidgetTester tester) async {
+    testWidgets('TolerancePickerState clamps value correctly', (WidgetTester tester) async {
       final TolerancePicker picker = TolerancePicker(
         title: 'Tolerance',
         value: 50,
-        onChanged: (final int value) {},
+        onChanged: (int value) {},
       );
 
       final TolerancePickerState state = picker.createState();
@@ -20,11 +20,11 @@ void main() {
       expect(state.clampValue(150), 100); // Above max
     });
 
-    testWidgets('TolerancePickerState formats value correctly', (final WidgetTester tester) async {
+    testWidgets('TolerancePickerState formats value correctly', (WidgetTester tester) async {
       final TolerancePicker picker = TolerancePicker(
         title: 'Tolerance',
         value: 50,
-        onChanged: (final int value) {},
+        onChanged: (int value) {},
       );
 
       final TolerancePickerState state = picker.createState();
@@ -33,7 +33,7 @@ void main() {
       expect(state.formatValue(100), '100');
     });
 
-    testWidgets('TolerancePicker renders with correct title and range', (final WidgetTester tester) async {
+    testWidgets('TolerancePicker renders with correct title and range', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -41,7 +41,7 @@ void main() {
               child: TolerancePicker(
                 title: 'Tolerance',
                 value: 50,
-                onChanged: (final int value) {},
+                onChanged: (int value) {},
               ),
             ),
           ),
@@ -52,7 +52,7 @@ void main() {
       expect(find.byType(AppSlider), findsOneWidget);
     });
 
-    testWidgets('TolerancePicker slider has correct properties', (final WidgetTester tester) async {
+    testWidgets('TolerancePicker slider has correct properties', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -60,7 +60,7 @@ void main() {
               child: TolerancePicker(
                 title: 'Tolerance',
                 value: 50,
-                onChanged: (final int value) {},
+                onChanged: (int value) {},
               ),
             ),
           ),
@@ -74,16 +74,16 @@ void main() {
       expect(slider.divisions, 100);
     });
 
-    testWidgets('showTolerancePicker displays dialog with TolerancePicker', (final WidgetTester tester) async {
+    testWidgets('showTolerancePicker displays dialog with TolerancePicker', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Builder(
-            builder: (final BuildContext context) {
+            builder: (BuildContext context) {
               return AppButtonPrimary(
                 onPressed: () {
-                  showTolerancePicker(context, 25, (final int value) {});
+                  showTolerancePicker(context, 25, (int value) {});
                 },
                 text: 'Show Picker',
               );
@@ -99,7 +99,7 @@ void main() {
       expect(find.byType(TolerancePicker), findsOneWidget);
     });
 
-    testWidgets('TolerancePicker calls onChanged when value changes', (final WidgetTester tester) async {
+    testWidgets('TolerancePicker calls onChanged when value changes', (WidgetTester tester) async {
       int? changedValue;
       await tester.pumpWidget(
         MaterialApp(
@@ -107,7 +107,7 @@ void main() {
             child: TolerancePicker(
               title: 'Tolerance',
               value: 50,
-              onChanged: (final int value) {
+              onChanged: (int value) {
                 changedValue = value;
               },
             ),

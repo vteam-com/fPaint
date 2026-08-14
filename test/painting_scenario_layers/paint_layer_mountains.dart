@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<void> paintLayerMountains(final PaintingScenarioSession session) async {
+Future<void> paintLayerMountains(PaintingScenarioSession session) async {
   await _setLayerVisibilityByName(session.tester, layerName: _skyLayerName, isVisible: false);
 
   // Back mountain: largest and most blurred.
@@ -49,11 +49,11 @@ Future<void> paintLayerMountains(final PaintingScenarioSession session) async {
 }
 
 Future<void> _paintMountainOnSelectedLayer(
-  final PaintingScenarioSession session, {
-  required final List<Offset> selectionPoints,
-  required final Offset peak,
-  required final Offset gradientQuickDropPoint,
-  required final Offset fillPoint,
+  PaintingScenarioSession session, {
+  required List<Offset> selectionPoints,
+  required Offset peak,
+  required Offset gradientQuickDropPoint,
+  required Offset fillPoint,
 }) async {
   final Offset snowTransitionPoint = Offset.lerp(peak, gradientQuickDropPoint, _mountainSnowTransitionFactor)!;
   final Offset foothillTransitionPoint = Offset.lerp(
@@ -64,7 +64,7 @@ Future<void> _paintMountainOnSelectedLayer(
 
   await selectLassoArea(
     session.tester,
-    points: selectionPoints.map((final Offset point) => session.canvasCenter + point).toList(),
+    points: selectionPoints.map((Offset point) => session.canvasCenter + point).toList(),
   );
   await performFloodFillGradient(
     session.tester,
@@ -86,10 +86,10 @@ Future<void> _paintMountainOnSelectedLayer(
 }
 
 Future<void> _paintMountainSnowCap(
-  final PaintingScenarioSession session, {
-  required final List<Offset> selectionPoints,
-  required final Offset peak,
-  required final Offset gradientQuickDropPoint,
+  PaintingScenarioSession session, {
+  required List<Offset> selectionPoints,
+  required Offset peak,
+  required Offset gradientQuickDropPoint,
 }) async {
   final Offset baseLeft = selectionPoints.first;
   final Offset baseRight = selectionPoints[4];
@@ -119,17 +119,17 @@ Future<void> _paintMountainSnowCap(
 }
 
 Future<void> _mergeMountainLayerIntoBase(
-  final PaintingScenarioSession session,
-  final String sourceLayerName,
+  PaintingScenarioSession session,
+  String sourceLayerName,
 ) async {
   final BuildContext mountainContext = session.tester.element(find.byType(MainView));
   final LayersProvider mountainLayersProvider = LayersProvider.of(mountainContext);
 
   final int sourceLayerIndex = mountainLayersProvider.list.indexWhere(
-    (final LayerProvider layer) => layer.name == sourceLayerName,
+    (LayerProvider layer) => layer.name == sourceLayerName,
   );
   final int mountainsLayerIndex = mountainLayersProvider.list.indexWhere(
-    (final LayerProvider layer) => layer.name == _mountainsLayerName,
+    (LayerProvider layer) => layer.name == _mountainsLayerName,
   );
   expect(sourceLayerIndex, isNonNegative, reason: 'Source mountain layer should exist for merge');
   expect(mountainsLayerIndex, isNonNegative, reason: 'Mountains layer should exist for merge');

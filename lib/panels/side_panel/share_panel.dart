@@ -40,33 +40,33 @@ const String _displayHeic = 'image.HEIC';
 ///
 /// HEIC is conditionally included based on platform support.
 List<_ShareExportEntry> _exportEntries({
-  required final bool includeHeic,
-  required final AppPreferences preferences,
+  required bool includeHeic,
+  required AppPreferences preferences,
 }) => <_ShareExportEntry>[
   _ShareExportEntry(
     _displayPng,
-    (final LayersProvider layers) => onExportAsPng(layers, preferences: preferences),
+    (LayersProvider layers) => onExportAsPng(layers, preferences: preferences),
   ),
   _ShareExportEntry(
     _displayJpg,
-    (final LayersProvider layers) => onExportAsJpeg(layers, preferences: preferences),
+    (LayersProvider layers) => onExportAsJpeg(layers, preferences: preferences),
   ),
   _ShareExportEntry(
     _displayOra,
-    (final LayersProvider layers) => onExportAsOra(layers, preferences: preferences),
+    (LayersProvider layers) => onExportAsOra(layers, preferences: preferences),
   ),
   _ShareExportEntry(
     _displayWebp,
-    (final LayersProvider layers) => onExportAsWebp(layers, preferences: preferences),
+    (LayersProvider layers) => onExportAsWebp(layers, preferences: preferences),
   ),
   _ShareExportEntry(
     _displayTif,
-    (final LayersProvider layers) => onExportAsTiff(layers, preferences: preferences),
+    (LayersProvider layers) => onExportAsTiff(layers, preferences: preferences),
   ),
   if (includeHeic)
     _ShareExportEntry(
       _displayHeic,
-      (final LayersProvider layers) => onExportAsHeic(layers, preferences: preferences),
+      (LayersProvider layers) => onExportAsHeic(layers, preferences: preferences),
     ),
 ];
 
@@ -74,7 +74,7 @@ List<_ShareExportEntry> _exportEntries({
 ///
 /// If the app is running on the web, the action text will be "Download as [fileName]".
 /// Otherwise, it will be "Save as [fileName]".
-Widget textAction(final String fileName, final AppLocalizations l10n) {
+Widget textAction(String fileName, AppLocalizations l10n) {
   if (kIsWeb) {
     return AppText(l10n.downloadAsFile(fileName));
   }
@@ -82,9 +82,9 @@ Widget textAction(final String fileName, final AppLocalizations l10n) {
 }
 
 Future<void> _runSharePanelAction(
-  final BuildContext context,
-  final Future<void> Function() onAction,
-  final bool dismissOnAction,
+  BuildContext context,
+  Future<void> Function() onAction,
+  bool dismissOnAction,
 ) async {
   await onAction();
   if (dismissOnAction && context.mounted) {
@@ -94,10 +94,10 @@ Future<void> _runSharePanelAction(
 
 /// Runs a share-panel export while showing global export progress feedback.
 Future<void> _runSharePanelExportAction({
-  required final BuildContext context,
-  required final Future<void> Function() onAction,
-  required final String displayFileName,
-  required final bool dismissOnAction,
+  required BuildContext context,
+  required Future<void> Function() onAction,
+  required String displayFileName,
+  required bool dismissOnAction,
 }) async {
   final AppLocalizations l10n = context.l10n;
 
@@ -134,13 +134,13 @@ Future<void> _runSharePanelExportAction({
 ///
 /// The [context] parameter is the [BuildContext] used to display the modal.
 Future<void> sharePanel(
-  final BuildContext context, {
-  final bool dismissOnAction = true,
+  BuildContext context, {
+  bool dismissOnAction = true,
 }) {
   final LayersProvider layers = LayersProvider.of(context);
   return showAppBottomSheet<void>(
     context: context,
-    builder: (final BuildContext context) {
+    builder: (BuildContext context) {
       final AppLocalizations l10n = context.l10n;
       final AppPreferences preferences = AppPreferences.of(context);
       final String loadedFilePath = ShellProvider.of(context).loadedFileName.trim();
@@ -202,7 +202,7 @@ Future<void> sharePanel(
 ///
 /// The [context] parameter is the [BuildContext] used to access the LayersProvider
 /// and display any error messages.
-Future<void> _onExportToClipboard(final BuildContext context) async {
+Future<void> _onExportToClipboard(BuildContext context) async {
   final Uint8List image = await capturePainterToImageBytes(LayersProvider.of(context));
   await copyImageBytesToClipboard(image);
 }
@@ -215,7 +215,7 @@ Future<void> _onExportToClipboard(final BuildContext context) async {
 /// The [layers] parameter is the `LayersProvider` instance used to access the
 /// canvas content.
 Future<Uint8List> capturePainterToImageBytes(
-  final LayersProvider layers,
+  LayersProvider layers,
 ) async {
   return await layers.capturePainterToImageBytes();
 }

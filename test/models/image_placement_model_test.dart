@@ -1,13 +1,13 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/image_placement_model.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Creates a 1×1 pixel image for testing.
 Future<ui.Image> _createTestImage({
-  final int width = 100,
-  final int height = 50,
+  int width = 100,
+  int height = 50,
 }) async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   Canvas(recorder).drawRect(

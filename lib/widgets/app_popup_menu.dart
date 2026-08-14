@@ -19,9 +19,9 @@ class AppPopupMenuItem<T> {
 
 /// Shows a popup menu at the given position, replacing Material [showMenu].
 Future<T?> showAppMenu<T>({
-  required final BuildContext context,
-  required final RelativeRect position,
-  required final List<AppPopupMenuItem<T>> items,
+  required BuildContext context,
+  required RelativeRect position,
+  required List<AppPopupMenuItem<T>> items,
 }) async {
   final OverlayState overlayState = Overlay.of(context);
   final RenderObject? overlayRenderObject = overlayState.context.findRenderObject();
@@ -34,7 +34,7 @@ Future<T?> showAppMenu<T>({
   return showAppOverlay<T>(
     context: context,
     barrierColor: AppColors.transparent,
-    builder: (final BuildContext dialogContext) {
+    builder: (BuildContext dialogContext) {
       return Stack(
         children: <Widget>[
           Positioned.fill(
@@ -60,7 +60,7 @@ Future<T?> showAppMenu<T>({
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: items.map((final AppPopupMenuItem<T> item) {
+                      children: items.map((AppPopupMenuItem<T> item) {
                         return AppOverlayMenuItem(
                           key: item.key,
                           onTap: () => Navigator.pop(dialogContext, item.value),
@@ -93,7 +93,7 @@ class AppPopupMenuButton<T> extends StatelessWidget {
   final void Function(T value) onSelected;
   final String? tooltip;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AppButton(
       tooltip: tooltip,
       onPressed: () async {

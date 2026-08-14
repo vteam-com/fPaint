@@ -34,7 +34,7 @@ const double _fenceShadowLeftEdgeHandleXDelta = _fenceShadowTopLeftHandleXDelta 
 const double _fenceShadowRightEdgeHandleXDelta = _fenceShadowTopRightHandleXDelta / AppMath.pair;
 const double _fenceShadowSideEdgeHandleYDelta = _fenceShadowTopHandleDelta / AppMath.pair;
 
-Future<void> paintLayerFence(final PaintingScenarioSession session) async {
+Future<void> paintLayerFence(PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _fenceLayerName);
 
   // top fence horizontal rail
@@ -76,7 +76,7 @@ Future<void> paintLayerFence(final PaintingScenarioSession session) async {
   await session.videoRecorder.captureFrame();
 }
 
-Future<void> paintLayerFenceShadow(final PaintingScenarioSession session) async {
+Future<void> paintLayerFenceShadow(PaintingScenarioSession session) async {
   // While still on the fence layer, select the fence silhouette with the magic
   // wand at high tolerance so every picket and rail is captured.
   // Anchor the wand on the tan top rail instead of the purple side stripe so

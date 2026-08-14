@@ -26,7 +26,7 @@ const String _errorNoDecodedTiffLayers = 'No layers could be decoded from TIFF f
 
 /// Converts all layers from [layers] into a layered TIFF with a flattened root
 /// image and one SubIFD per layer, bottom-to-top.
-Future<Uint8List> convertLayersToTiff(final LayersProvider layers) async {
+Future<Uint8List> convertLayersToTiff(LayersProvider layers) async {
   final List<_LayerFrame> layerFrames = await _buildLayerFrames(layers);
   final img.Image compositeImage = await _buildCompositeFrame(layers);
 
@@ -38,8 +38,8 @@ Future<Uint8List> convertLayersToTiff(final LayersProvider layers) async {
 
 /// Serializes layer properties into a JSON string for ImageDescription.
 String _encodeLayerMetadata(
-  final LayerProvider layer, {
-  required final bool selected,
+  LayerProvider layer, {
+  required bool selected,
 }) {
   return jsonEncode(<String, dynamic>{
     TiffConstants.metaKeyName: layer.name,
@@ -73,7 +73,7 @@ class _LayerFrame {
 }
 
 /// Renders each layer, crops away transparent margins, and prepares TIFF pages.
-Future<List<_LayerFrame>> _buildLayerFrames(final LayersProvider layers) async {
+Future<List<_LayerFrame>> _buildLayerFrames(LayersProvider layers) async {
   final List<_LayerFrame> frames = <_LayerFrame>[];
 
   for (int i = layers.length - 1; i >= 0; i--) {
@@ -104,7 +104,7 @@ Future<List<_LayerFrame>> _buildLayerFrames(final LayersProvider layers) async {
   return frames;
 }
 
-Future<img.Image> _buildCompositeFrame(final LayersProvider layers) async {
+Future<img.Image> _buildCompositeFrame(LayersProvider layers) async {
   final img.Image? compositeImage = await _decodeUiImageToPackageImage(
     await layers.capturePainterToImage(),
   );
@@ -118,8 +118,8 @@ Future<img.Image> _buildCompositeFrame(final LayersProvider layers) async {
 
 /// Returns the export bounds for a layer, falling back to the full canvas when blank.
 Future<Rect> _resolveLayerExportBounds(
-  final ui.Image layerImage,
-  final Size canvasSize,
+  ui.Image layerImage,
+  Size canvasSize,
 ) async {
   final Rect? bounds = await getNonTransparentBounds(layerImage);
   if (bounds == null) {
@@ -134,7 +134,7 @@ Future<Rect> _resolveLayerExportBounds(
   );
 }
 
-Future<img.Image?> _decodeUiImageToPackageImage(final ui.Image uiImage) async {
+Future<img.Image?> _decodeUiImageToPackageImage(ui.Image uiImage) async {
   final ByteData? byteData = await uiImage.toByteData(format: ui.ImageByteFormat.png);
   if (byteData == null) {
     return null;
@@ -152,8 +152,8 @@ final Logger _log = Logger(logNameFileTiff);
 /// [convertLayersToTiff].  Plain-text descriptions are treated as the layer
 /// name for backward compatibility with third-party TIFF files.
 Future<void> readTiffFileFromBytes(
-  final LayersProvider layers,
-  final Uint8List bytes,
+  LayersProvider layers,
+  Uint8List bytes,
 ) async {
   final _DecodedTiffDocument decodedDocument = _decodeTiffDocument(bytes);
 
@@ -190,7 +190,7 @@ Future<void> readTiffFileFromBytes(
 /// falls back to frame-by-frame decoding for flat TIFFs, and throws a
 /// [TiffFileException] when the payload is invalid or contains no usable
 /// layers.
-_DecodedTiffDocument _decodeTiffDocument(final Uint8List bytes) {
+_DecodedTiffDocument _decodeTiffDocument(Uint8List bytes) {
   final img.TiffDecoder decoder = img.TiffDecoder();
   final img.TiffInfo? tiffInfo = decoder.startDecode(bytes);
 
@@ -217,8 +217,8 @@ _DecodedTiffDocument _decodeTiffDocument(final Uint8List bytes) {
 /// with a warning, while an entirely empty TIFF still fails with a
 /// [TiffFileException].
 List<_DecodedTiffLayer> _decodeFrameLayers(
-  final img.TiffDecoder decoder,
-  final img.TiffInfo tiffInfo,
+  img.TiffDecoder decoder,
+  img.TiffInfo tiffInfo,
 ) {
   final int numFrames = decoder.numFrames();
   if (numFrames == 0) {
@@ -270,8 +270,8 @@ class _DecodedTiffLayer {
 
 /// Decodes SketchBook-style layer pages stored in a root SubIFD array.
 List<_DecodedTiffLayer>? _tryDecodeSubIfdLayers(
-  final Uint8List bytes,
-  final img.TiffInfo tiffInfo,
+  Uint8List bytes,
+  img.TiffInfo tiffInfo,
 ) {
   if (tiffInfo.images.isEmpty) {
     return null;
@@ -316,9 +316,9 @@ List<_DecodedTiffLayer>? _tryDecodeSubIfdLayers(
 
 /// Reads a TIFF image directory directly from [subIfdOffset].
 img.TiffImage? _readTiffImageAtOffset(
-  final Uint8List bytes,
-  final bool isBigEndian,
-  final int subIfdOffset,
+  Uint8List bytes,
+  bool isBigEndian,
+  int subIfdOffset,
 ) {
   try {
     return img.TiffImage(
@@ -334,14 +334,14 @@ img.TiffImage? _readTiffImageAtOffset(
   }
 }
 
-bool _shouldSkipSubIfdImage(final img.TiffImage tiffImage) {
+bool _shouldSkipSubIfdImage(img.TiffImage tiffImage) {
   final int? newSubfileType = _readIntTag(tiffImage, TiffConstants.tagNewSubfileType);
   final String? pageName = _readTextTag(tiffImage, TiffConstants.tagPageName);
 
   return newSubfileType == TiffConstants.subfileTypeReducedResolution || pageName == TiffConstants.pageNameThumbnail;
 }
 
-Offset _extractSubIfdOffset(final img.TiffImage tiffImage) {
+Offset _extractSubIfdOffset(img.TiffImage tiffImage) {
   final double xPosition = _readDoubleTag(tiffImage, TiffConstants.tagXPosition) ?? 0.0;
   final double yPosition = _readDoubleTag(tiffImage, TiffConstants.tagYPosition) ?? 0.0;
   return Offset(xPosition, yPosition);
@@ -349,8 +349,8 @@ Offset _extractSubIfdOffset(final img.TiffImage tiffImage) {
 
 /// Builds layer metadata for a SketchBook-style SubIFD image.
 _LayerMeta _extractSubIfdLayerMeta(
-  final img.TiffImage tiffImage,
-  final int layerIndex,
+  img.TiffImage tiffImage,
+  int layerIndex,
 ) {
   final String? description = _readDescriptionTag(tiffImage);
   if (description != null && description.isNotEmpty) {
@@ -380,7 +380,7 @@ _LayerMeta _extractSubIfdLayerMeta(
   );
 }
 
-String _fallbackLayerName(final int layerIndex) {
+String _fallbackLayerName(int layerIndex) {
   final StringBuffer buffer = StringBuffer(TiffConstants.fallbackLayerNamePrefix);
   buffer.write(TiffConstants.fallbackLayerNameSeparator);
   buffer.write(layerIndex + 1);
@@ -388,20 +388,20 @@ String _fallbackLayerName(final int layerIndex) {
 }
 
 List<int> _readIntTagList(
-  final img.TiffImage tiffImage,
-  final int tag,
+  img.TiffImage tiffImage,
+  int tag,
 ) {
   final img.IfdValue? value = tiffImage.tags[tag]?.read();
   if (value == null || value.length == 0) {
     return const <int>[];
   }
 
-  return List<int>.generate(value.length, (final int index) => value.toInt(index));
+  return List<int>.generate(value.length, (int index) => value.toInt(index));
 }
 
 int? _readIntTag(
-  final img.TiffImage tiffImage,
-  final int tag,
+  img.TiffImage tiffImage,
+  int tag,
 ) {
   final img.IfdValue? value = tiffImage.tags[tag]?.read();
   if (value == null || value.length == 0) {
@@ -412,8 +412,8 @@ int? _readIntTag(
 }
 
 double? _readDoubleTag(
-  final img.TiffImage tiffImage,
-  final int tag,
+  img.TiffImage tiffImage,
+  int tag,
 ) {
   final img.IfdValue? value = tiffImage.tags[tag]?.read();
   if (value == null || value.length == 0) {
@@ -425,8 +425,8 @@ double? _readDoubleTag(
 
 /// Reads ASCII or byte-backed text from a TIFF tag.
 String? _readTextTag(
-  final img.TiffImage tiffImage,
-  final int tag,
+  img.TiffImage tiffImage,
+  int tag,
 ) {
   final img.IfdValue? value = tiffImage.tags[tag]?.read();
   if (value == null || value.length == 0) {
@@ -438,7 +438,7 @@ String? _readTextTag(
     return text.isEmpty ? null : text;
   }
 
-  final List<int> bytes = value.toData().where((final int byte) => byte != 0).toList(growable: false);
+  final List<int> bytes = value.toData().where((int byte) => byte != 0).toList(growable: false);
   if (bytes.isEmpty) {
     return null;
   }
@@ -448,7 +448,7 @@ String? _readTextTag(
 }
 
 /// Converts associated-alpha TIFF pixels into straight-alpha PNG pixels.
-void _unMultiplyAlpha(final img.Image image) {
+void _unMultiplyAlpha(img.Image image) {
   for (int y = 0; y < image.height; y++) {
     for (int x = 0; x < image.width; x++) {
       final img.Pixel pixel = image.getPixel(x, y);
@@ -473,8 +473,8 @@ void _unMultiplyAlpha(final img.Image image) {
 }
 
 int _unMultiplyChannel(
-  final int channel,
-  final int alpha,
+  int channel,
+  int alpha,
 ) {
   return (channel * AppLimits.rgbChannelMax / alpha).round().clamp(0, AppLimits.rgbChannelMax);
 }
@@ -483,10 +483,10 @@ int _unMultiplyChannel(
 ///
 /// Returns the created [LayerProvider] so callers can restore the selection.
 Future<LayerProvider> _appendDecodedTiffLayer(
-  final LayersProvider layers, {
-  required final _LayerMeta meta,
-  required final img.Image image,
-  required final Offset offset,
+  LayersProvider layers, {
+  required _LayerMeta meta,
+  required img.Image image,
+  required Offset offset,
 }) async {
   final LayerProvider newLayer = layers.addTop(name: meta.name);
   newLayer.opacity = meta.opacity;
@@ -528,7 +528,7 @@ class _LayerMeta {
 /// Reads the ImageDescription tag from the [frameIndex]-th frame of
 /// [tiffInfo] and parses layer metadata.  Falls back to sensible defaults
 /// when the tag is missing or not JSON.
-_LayerMeta _extractLayerMeta(final img.TiffInfo tiffInfo, final int frameIndex) {
+_LayerMeta _extractLayerMeta(img.TiffInfo tiffInfo, int frameIndex) {
   String layerName = _fallbackLayerName(frameIndex);
   const double opacity = 1.0;
   const ui.BlendMode blendMode = ui.BlendMode.srcOver;
@@ -560,13 +560,13 @@ _LayerMeta _extractLayerMeta(final img.TiffInfo tiffInfo, final int frameIndex) 
 }
 
 /// Reads the ImageDescription string from a [tiffImage]'s tag map.
-String? _readDescriptionTag(final img.TiffImage tiffImage) {
+String? _readDescriptionTag(img.TiffImage tiffImage) {
   return _readTextTag(tiffImage, TiffConstants.tagImageDescription);
 }
 
 /// Attempts to decode [description] as a JSON object carrying layer metadata.
 /// Returns `null` if parsing fails or the string is not valid JSON object.
-_LayerMeta? _tryParseJsonMeta(final String description, final int frameIndex) {
+_LayerMeta? _tryParseJsonMeta(String description, int frameIndex) {
   if (!description.startsWith('{')) {
     return null;
   }
@@ -602,8 +602,8 @@ _LayerMeta? _tryParseJsonMeta(final String description, final int frameIndex) {
 
 /// Loads a TIFF file from disk and decodes it into [layers].
 Future<void> readTiffFromFilePath(
-  final LayersProvider layers,
-  final String path,
+  LayersProvider layers,
+  String path,
 ) async {
   final File tiffFile = File(path);
   if (!await tiffFile.exists()) {
@@ -626,9 +626,9 @@ Future<void> readTiffFromFilePath(
 }
 
 // Private helper to convert Uint8List to ui.Image
-Future<ui.Image> _decodeImageFromList(final Uint8List list) {
+Future<ui.Image> _decodeImageFromList(Uint8List list) {
   final Completer<ui.Image> completer = Completer<ui.Image>();
-  ui.decodeImageFromList(list, (final ui.Image img) {
+  ui.decodeImageFromList(list, (ui.Image img) {
     completer.complete(img);
   });
   return completer.future;

@@ -52,7 +52,7 @@ Future<void> main() async {
   await mainApp.draftRecoveryController.initialize();
 
   // Platform channel for file opening.
-  _fileChannel.setMethodCallHandler((final MethodCall call) async {
+  _fileChannel.setMethodCallHandler((MethodCall call) async {
     if (call.method == _fileOpenedMethod) {
       final String filePath = _normalizePlatformFilePath(call.arguments as String);
       await _queueOrHandlePlatformFile(filePath);
@@ -63,7 +63,7 @@ Future<void> main() async {
   runApp(mainApp);
 
   // After the app is running, check for a file that was pending at launch.
-  WidgetsBinding.instance.addPostFrameCallback((final _) async {
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
     String? pendingFile;
 
     try {
@@ -96,7 +96,7 @@ Future<void> main() async {
   });
 }
 
-Future<void> _queueOrHandlePlatformFile(final String filePath) async {
+Future<void> _queueOrHandlePlatformFile(String filePath) async {
   if (_platformFileHandlingReady == false || mainApp.navigatorKey.currentContext == null) {
     _queuedPlatformFilePath = filePath;
     _scheduleQueuedPlatformFileHandling();
@@ -115,7 +115,7 @@ void _scheduleQueuedPlatformFileHandling() {
     return;
   }
 
-  WidgetsBinding.instance.addPostFrameCallback((final _) async {
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
     if (_queuedPlatformFilePath == null || _isProcessingQueuedPlatformFile) {
       return;
     }
@@ -144,7 +144,7 @@ void _scheduleQueuedPlatformFileHandling() {
 ///
 /// This keeps the Flutter and native sides in sync so repeated launches do not
 /// reuse a path that has already been handled.
-Future<void> _consumePlatformFile(final String filePath) async {
+Future<void> _consumePlatformFile(String filePath) async {
   try {
     await _handleFileOpened(filePath);
   } finally {
@@ -167,7 +167,7 @@ Future<void> _clearPendingPlatformFile() async {
 
 /// Handles native platform edit commands that need to trigger Flutter actions.
 @visibleForTesting
-Future<void> handlePlatformEditMethodCall(final MethodCall call) async {
+Future<void> handlePlatformEditMethodCall(MethodCall call) async {
   switch (call.method) {
     case _editUndoMethod:
       mainApp.appProvider.undoAction();
@@ -184,7 +184,7 @@ Future<void> handlePlatformEditMethodCall(final MethodCall call) async {
 ///
 /// Finder and other macOS entry points may send a `file://` URL instead of a
 /// plain path, so this normalizes both representations for the file loaders.
-String _normalizePlatformFilePath(final String filePathOrUrl) {
+String _normalizePlatformFilePath(String filePathOrUrl) {
   if (filePathOrUrl.startsWith(_fileUrlPrefix) == false) {
     return filePathOrUrl;
   }
@@ -197,13 +197,13 @@ String _normalizePlatformFilePath(final String filePathOrUrl) {
 }
 
 /// Handles a file opened from the platform (e.g. double-click in Finder).
-Future<void> _handleFileOpened(final String filePath) async {
+Future<void> _handleFileOpened(String filePath) async {
   // Check if there are unsaved changes before clearing
   if (mainApp.appProvider.layers.hasChanged) {
     final bool shouldProceed =
         await showAppDialog<bool>(
           context: mainApp.navigatorKey.currentContext!,
-          builder: (final BuildContext context) {
+          builder: (BuildContext context) {
             final AppLocalizations l10n = context.l10n;
 
             return AppDialog(
@@ -284,7 +284,7 @@ class MyApp extends StatelessWidget {
   /// Provides functionalities for undo and redo operations.
   final UndoProvider undoProvider = UndoProvider();
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return InheritedScope<DraftRecoveryController>(
       controller: draftRecoveryController,
       child: InheritedControllerScope<ShellProvider>(
@@ -299,7 +299,7 @@ class MyApp extends StatelessWidget {
                 controller: undoProvider,
                 child: ListenableBuilder(
                   listenable: Listenable.merge(<Listenable>[appProvider, appPreferences]),
-                  builder: (final BuildContext _, final Widget? _) {
+                  builder: (BuildContext _, Widget? _) {
                     return RepaintBoundary(
                       key: Keys.appScreenshotBoundary,
                       child: WidgetsApp(
@@ -307,21 +307,20 @@ class MyApp extends StatelessWidget {
                         navigatorKey: navigatorKey,
                         title: appName,
                         color: AppColors.primary,
-                        pageRouteBuilder: <T>(final RouteSettings settings, final WidgetBuilder builder) {
+                        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
                           return PageRouteBuilder<T>(
                             settings: settings,
-                            pageBuilder:
-                                (
-                                  final BuildContext context,
-                                  final Animation<double> _,
-                                  final Animation<double> _,
-                                ) => builder(context),
+                            pageBuilder: (
+                              BuildContext context,
+                              Animation<double> _,
+                              Animation<double> _,
+                            ) => builder(context),
                           );
                         },
                         localizationsDelegates: AppLocalizations.localizationsDelegates,
                         supportedLocales: AppLocalizations.supportedLocales,
                         locale: appPreferences.preferredLocale,
-                        localeResolutionCallback: (final Locale? locale, final Iterable<Locale> supportedLocales) {
+                        localeResolutionCallback: (Locale? locale, Iterable<Locale> supportedLocales) {
                           if (locale == null) {
                             return const Locale('en');
                           }
@@ -335,7 +334,7 @@ class MyApp extends StatelessWidget {
                           return const Locale('en');
                         },
                         routes: <String, WidgetBuilder>{
-                          '/': (final BuildContext context) => shortCutsForMainApp(
+                          '/': (BuildContext context) => shortCutsForMainApp(
                             context,
                             shellProvider,
                             appProvider,
@@ -354,10 +353,10 @@ class MyApp extends StatelessWidget {
                               );
                             },
                           ),
-                          '/settings': (final _) => const SettingsPage(),
-                          '/platforms': (final _) => const PlatformsPage(),
+                          '/settings': (_) => const SettingsPage(),
+                          '/platforms': (_) => const PlatformsPage(),
                         },
-                        builder: (final BuildContext _, final Widget? child) {
+                        builder: (BuildContext _, Widget? child) {
                           return DefaultTextStyle(
                             style: const TextStyle(fontFamily: appFontFamily),
                             child: child ?? const SizedBox.shrink(),

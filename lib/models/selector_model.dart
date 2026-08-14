@@ -8,11 +8,11 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 // Exports
 export 'package:fpaint/helpers/draw_path_helper.dart';
 
-bool _isFiniteOffset(final Offset offset) {
+bool _isFiniteOffset(Offset offset) {
   return offset.isFinite;
 }
 
-bool _hasFinitePathBounds(final Path path) {
+bool _hasFinitePathBounds(Path path) {
   final Rect bounds = path.getBounds();
   return bounds.left.isFinite && bounds.top.isFinite && bounds.right.isFinite && bounds.bottom.isFinite;
 }
@@ -42,7 +42,7 @@ class SelectorModel extends VisibleModel {
   }
 
   /// Inverts the selection.
-  void invert(final Rect containerRect) {
+  void invert(Rect containerRect) {
     if (path1 != null) {
       final Path outerPath = Path()..addRect(containerRect);
       final Path? invertedPath = _combinePathsSafely(
@@ -57,7 +57,7 @@ class SelectorModel extends VisibleModel {
   }
 
   /// Translates the selection.
-  void translate(final Offset offset) {
+  void translate(Offset offset) {
     final Rect bounds = boundingRect;
 
     if (bounds.width <= 0 || bounds.height <= 0) {
@@ -70,8 +70,8 @@ class SelectorModel extends VisibleModel {
 
   /// Resizes the selection using a nine grid handle.
   void nindeGridResize(
-    final NineGridHandle handle,
-    final Offset offset,
+    NineGridHandle handle,
+    Offset offset,
   ) {
     if (this.path1 != null) {
       final Rect previousBounds = this.path1!.getBounds();
@@ -81,7 +81,7 @@ class SelectorModel extends VisibleModel {
   }
 
   /// Rotates the selection around its center by [angleRadians].
-  void rotate(final double angleRadians) {
+  void rotate(double angleRadians) {
     if (this.path1 != null) {
       this.path1 = rotatePathAroundCenter(this.path1!, angleRadians);
       if (this.path2 != null) {
@@ -91,7 +91,7 @@ class SelectorModel extends VisibleModel {
   }
 
   /// Scales the selection uniformly around its center by [factor].
-  void scaleUniform(final double factor) {
+  void scaleUniform(double factor) {
     if (this.path1 != null) {
       final double clampedFactor = factor.clamp(
         AppInteraction.transformScaleFactorMin,
@@ -105,7 +105,7 @@ class SelectorModel extends VisibleModel {
   }
 
   /// Adds the first point to the selection.
-  void addP1(final Offset p1) {
+  void addP1(Offset p1) {
     if (!_isFiniteOffset(p1)) {
       return;
     }
@@ -143,8 +143,8 @@ class SelectorModel extends VisibleModel {
   }
 
   /// Adds the second point to the selection.
-  void addP2(final Offset p2) {
-    if (!_isFiniteOffset(p2) || points.any((final Offset point) => !_isFiniteOffset(point))) {
+  void addP2(Offset p2) {
+    if (!_isFiniteOffset(p2) || points.any((Offset point) => !_isFiniteOffset(point))) {
       return;
     }
 
@@ -256,9 +256,9 @@ class SelectorModel extends VisibleModel {
 
   /// Attempts to combine two paths and ignores invalid geometry results.
   Path? _combinePathsSafely(
-    final PathOperation operation,
-    final Path firstPath,
-    final Path secondPath,
+    PathOperation operation,
+    Path firstPath,
+    Path secondPath,
   ) {
     if (!_hasFinitePathBounds(firstPath) || !_hasFinitePathBounds(secondPath)) {
       return null;
@@ -278,9 +278,9 @@ class SelectorModel extends VisibleModel {
   @visibleForTesting
   /// Combines two paths using the provided [operation].
   Path combinePaths(
-    final PathOperation operation,
-    final Path firstPath,
-    final Path secondPath,
+    PathOperation operation,
+    Path firstPath,
+    Path secondPath,
   ) {
     return Path.combine(operation, firstPath, secondPath);
   }
@@ -290,8 +290,8 @@ class SelectorModel extends VisibleModel {
   /// Returns `true` when the new point closes the polygon back to the first
   /// vertex and the selection can be committed.
   bool addStraightLineRegionPoint(
-    final Offset position, {
-    required final double closeDistance,
+    Offset position, {
+    required double closeDistance,
   }) {
     if (!_isFiniteOffset(position)) {
       return false;
@@ -317,8 +317,8 @@ class SelectorModel extends VisibleModel {
 
   /// Updates the preview edge for the straight-line region selection.
   void updateStraightLineRegionPreview(
-    final Offset position, {
-    required final double closeDistance,
+    Offset position, {
+    required double closeDistance,
   }) {
     if (points.isEmpty || !_isFiniteOffset(position)) {
       return;
@@ -333,7 +333,7 @@ class SelectorModel extends VisibleModel {
     );
   }
 
-  void _setWorkingPath(final Path path) {
+  void _setWorkingPath(Path path) {
     if (math == SelectorMath.replace) {
       path1 = path;
       path2 = null;
@@ -344,8 +344,8 @@ class SelectorModel extends VisibleModel {
   }
 
   bool _isClosingStraightLineRegion(
-    final Offset position, {
-    required final double closeDistance,
+    Offset position, {
+    required double closeDistance,
   }) {
     return points.length >= AppMath.triple && (position - points.first).distance <= closeDistance;
   }
@@ -364,8 +364,8 @@ class SelectorModel extends VisibleModel {
   /// Builds the current straight-line region path from committed vertices plus
   /// an optional preview edge, closing the polygon only when requested.
   Path _buildStraightLineRegionPath({
-    final Offset? previewPoint,
-    final bool closePath = false,
+    Offset? previewPoint,
+    bool closePath = false,
   }) {
     if (points.isEmpty) {
       return Path();

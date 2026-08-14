@@ -26,7 +26,7 @@ class DashedRectangle extends StatelessWidget {
   final double width;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return CustomPaint(
       size: Size(width, height),
       painter: _DashedRectanglePainter(fillColor: fillColor),
@@ -51,7 +51,7 @@ class _DashedRectanglePainter extends CustomPainter {
   final double dashSpace = 0.0;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     // Create a paint object for filling the rectangle
     final Paint fillPaint = Paint()
       ..color = fillColor
@@ -110,11 +110,11 @@ class _DashedRectanglePainter extends CustomPainter {
   /// The [blackPaint] parameter is the paint object to use for the black dashes.
   /// The [whitePaint] parameter is the paint object to use for the white dashes.
   void _drawDashedLine(
-    final Canvas canvas,
-    final Offset start,
-    final Offset end,
-    final Paint blackPaint,
-    final Paint whitePaint,
+    Canvas canvas,
+    Offset start,
+    Offset end,
+    Paint blackPaint,
+    Paint whitePaint,
   ) {
     final double dx = end.dx - start.dx;
     final double dy = end.dy - start.dy;
@@ -146,5 +146,5 @@ class _DashedRectanglePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

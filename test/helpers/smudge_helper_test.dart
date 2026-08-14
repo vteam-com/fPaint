@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
+import 'package:material_ui/material_ui.dart';
 
 const int _testWidth = 12;
 const int _testHeight = 4;
@@ -14,7 +14,7 @@ Future<ui.Image> _createSplitImage() {
   return renderCanvasImage(
     width: _testWidth,
     height: _testHeight,
-    draw: (final ui.Canvas canvas) {
+    draw: (ui.Canvas canvas) {
       canvas.drawRect(
         Rect.fromLTWH(0, 0, 6, _testHeight.toDouble()),
         Paint()..color = const Color(0xFFFF0000),
@@ -50,7 +50,7 @@ Uint8List _redLeftTransparentRightPixels() {
 /// something to push), but the bilinear-upsample back smears every column toward
 /// its neighbour — so a pixel that comes back bit-exact proves it bypassed the
 /// LOD round-trip entirely.
-Uint8List _verticalStripes(final int size) {
+Uint8List _verticalStripes(int size) {
   final Uint8List pixels = Uint8List(size * size * AppMath.bytesPerPixel);
   for (int y = 0; y < size; y++) {
     for (int x = 0; x < size; x++) {
@@ -64,14 +64,14 @@ Uint8List _verticalStripes(final int size) {
   return pixels;
 }
 
-Future<ui.Image> _resultToImage(final PixelBrushSegmentResult result) {
+Future<ui.Image> _resultToImage(PixelBrushSegmentResult result) {
   return imageFromPixels(result.pixels, result.width, result.height);
 }
 
 Future<Color> _readPixel(
-  final ui.Image image,
-  final int x,
-  final int y,
+  ui.Image image,
+  int x,
+  int y,
 ) async {
   final Uint8List? pixels = await extractImagePixels(
     image,
@@ -87,7 +87,7 @@ Future<Color> _readPixel(
   );
 }
 
-Future<Uint8List> _imagePixels(final ui.Image source) async {
+Future<Uint8List> _imagePixels(ui.Image source) async {
   final Uint8List? pixels = await extractImagePixels(
     source,
     format: ui.ImageByteFormat.rawStraightRgba,
@@ -138,7 +138,7 @@ void main() {
     final ui.Image maskImage = await renderCanvasImage(
       width: _testWidth,
       height: _testHeight,
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.drawPath(clipPath, ui.Paint()..color = const Color(0xFFFFFFFF));
       },
     );

@@ -95,7 +95,7 @@ void main() {
 
   group('soft brush feathering', () {
     test('a soft stroke has a translucent feathered edge unlike a solid one', () async {
-      Future<ui.Image> renderStroke(final BrushStyle style) async {
+      Future<ui.Image> renderStroke(BrushStyle style) async {
         final ui.PictureRecorder recorder = ui.PictureRecorder();
         final Canvas canvas = Canvas(recorder);
         final Paint paint = Paint()
@@ -110,7 +110,7 @@ void main() {
         return recorder.endRecording().toImage(64, 64);
       }
 
-      int alphaAt(final ByteData data, final int x, final int y) => data.getUint8((y * 64 + x) * 4 + 3);
+      int alphaAt(ByteData data, int x, int y) => data.getUint8((y * 64 + x) * 4 + 3);
 
       final ui.Image solid = await renderStroke(BrushStyle.solid);
       final ui.Image soft = await renderStroke(BrushStyle.soft);
@@ -175,7 +175,7 @@ void main() {
     test('a grain stroke has non-uniform (textured) alpha unlike a solid one', () async {
       await BrushGrain.instance.prewarm();
 
-      Future<ByteData> renderCenterline(final BrushStyle style) async {
+      Future<ByteData> renderCenterline(BrushStyle style) async {
         final ui.PictureRecorder recorder = ui.PictureRecorder();
         final Canvas canvas = Canvas(recorder);
         final Paint paint = Paint()
@@ -193,7 +193,7 @@ void main() {
         return bytes;
       }
 
-      int alphaAt(final ByteData data, final int x) => data.getUint8((32 * 128 + x) * 4 + 3);
+      int alphaAt(ByteData data, int x) => data.getUint8((32 * 128 + x) * 4 + 3);
 
       final ByteData solid = await renderCenterline(BrushStyle.solid);
       final ByteData grain = await renderCenterline(BrushStyle.grain);
@@ -202,10 +202,10 @@ void main() {
       final List<int> grainAlphas = <int>[for (int x = 20; x < 108; x += 8) alphaAt(grain, x)];
 
       // Solid is uniformly opaque along the centerline.
-      expect(solidAlphas.every((final int a) => a > 250), isTrue);
+      expect(solidAlphas.every((int a) => a > 250), isTrue);
       // Grain paints, but the paper texture makes its alpha vary (not all opaque).
-      expect(grainAlphas.any((final int a) => a > 0), isTrue);
-      expect(grainAlphas.any((final int a) => a < 250), isTrue);
+      expect(grainAlphas.any((int a) => a > 0), isTrue);
+      expect(grainAlphas.any((int a) => a < 250), isTrue);
     });
   });
 
@@ -514,7 +514,7 @@ void main() {
   });
 }
 
-Future<Color> _pixelColorAt(final ui.Image image, final int x, final int y) async {
+Future<Color> _pixelColorAt(ui.Image image, int x, int y) async {
   final ByteData? imageBytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
   expect(imageBytes, isNotNull);

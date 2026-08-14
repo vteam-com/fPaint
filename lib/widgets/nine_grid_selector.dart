@@ -23,7 +23,7 @@ class NineGridSelector extends StatelessWidget {
   final CanvasResizePosition selectedPosition;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: AppLayout.gridSelectorSize,
       height: AppLayout.gridSelectorSize,
@@ -39,7 +39,7 @@ class NineGridSelector extends StatelessWidget {
           mainAxisSpacing: AppSpacing.small,
         ),
         itemCount: AppMath.triple * AppMath.triple,
-        itemBuilder: (final BuildContext _, final int index) {
+        itemBuilder: (BuildContext _, int index) {
           return GestureDetector(
             onTap: () => onPositionSelected(CanvasResizePosition.values[index]),
             child: DecoratedBox(
@@ -58,7 +58,7 @@ class NineGridSelector extends StatelessWidget {
   }
 
   /// Returns the appropriate [AppIcon] for the given direction.
-  AppIcon getDirectionIcon(final int direction) {
+  AppIcon getDirectionIcon(int direction) {
     const List<AppIcon> directionIcons = <AppIcon>[
       AppIcon.arrowUpLeft,
       AppIcon.arrowUp,

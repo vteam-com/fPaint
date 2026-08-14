@@ -79,7 +79,7 @@ class TextObject {
   }
 
   /// Checks if a point is within the text bounds
-  bool containsPoint(final Offset point) {
+  bool containsPoint(Offset point) {
     return getBounds().contains(point);
   }
 

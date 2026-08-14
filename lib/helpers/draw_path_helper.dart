@@ -24,9 +24,9 @@ enum NineGridHandle {
 ///
 /// The [expansionOffset] specifies the amount to expand the path in the x and y directions.
 Path expandPathInDirectionWithOffset(
-  final Path path,
-  final Offset expansionOffset,
-  final NineGridHandle anchorPosition,
+  Path path,
+  Offset expansionOffset,
+  NineGridHandle anchorPosition,
 ) {
   final Rect bounds = path.getBounds();
 
@@ -124,12 +124,12 @@ Path expandPathInDirectionWithOffset(
   return path.transform(scaleMatrix.storage);
 }
 
-bool _isResizableExtent(final double extent) {
+bool _isResizableExtent(double extent) {
   return extent.isFinite && extent > 0.0;
 }
 
 /// Rotates the given [path] around its bounding-box center by [angleRadians].
-Path rotatePathAroundCenter(final Path path, final double angleRadians) {
+Path rotatePathAroundCenter(Path path, double angleRadians) {
   final Rect bounds = path.getBounds();
   final double cx = bounds.center.dx;
   final double cy = bounds.center.dy;
@@ -144,9 +144,9 @@ Path rotatePathAroundCenter(final Path path, final double angleRadians) {
 
 /// Scales the given [path] around its bounding-box center.
 Path scalePathAroundCenter(
-  final Path path,
-  final double scaleX,
-  final double? scaleY,
+  Path path,
+  double scaleX,
+  double? scaleY,
 ) {
   final Rect bounds = path.getBounds();
   final double cx = bounds.center.dx;
@@ -167,9 +167,9 @@ Path scalePathAroundCenter(
 /// If both [maxWith] and [maxHeight] are null, the original [inputSize] is returned.
 /// If only one of [maxWith] or [maxHeight] is provided, the size is scaled to fit within that dimension while maintaining aspect ratio.
 Size scaleSizeTo(
-  final Size inputSize, {
-  final double? maxWith,
-  final double? maxHeight,
+  Size inputSize, {
+  double? maxWith,
+  double? maxHeight,
 }) {
   if (maxWith == null && maxHeight == null) {
     return inputSize;

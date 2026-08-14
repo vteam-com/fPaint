@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/widgets/tool_attribute_widget.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('ToolAttributeWidget', () {
     testWidgets('reveals expanded content after enabling it', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       const Key contentKey = Key('content');
       const Key toggleKey = Key('toggle');
@@ -17,7 +17,7 @@ void main() {
           home: Scaffold(
             body: Center(
               child: StatefulBuilder(
-                builder: (final BuildContext context, final StateSetter setState) {
+                builder: (BuildContext context, StateSetter setState) {
                   return SizedBox(
                     width: 240,
                     child: ToolAttributeWidget(
@@ -25,7 +25,7 @@ void main() {
                       compact: false,
                       enabled: isEnabled,
                       enabledToggleKey: toggleKey,
-                      onEnabledChanged: (final bool value) {
+                      onEnabledChanged: (bool value) {
                         setState(() {
                           isEnabled = value;
                         });

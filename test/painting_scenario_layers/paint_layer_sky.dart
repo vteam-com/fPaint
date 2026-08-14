@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<void> paintLayerSky(final PaintingScenarioSession session) async {
+Future<void> paintLayerSky(PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _skyLayerName);
   // Four-stop linear gradient with 3 distinct shades of blue:
   //   0%  – deep navy at the zenith

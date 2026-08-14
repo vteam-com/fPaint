@@ -43,12 +43,12 @@ extension LayerProviderStorageExport on LayerProvider {
   }
 
   /// Renders the layer directly into [bounds] for cropped export snapshots.
-  ui.Image toImageForStorageBounds(final ui.Rect bounds) {
+  ui.Image toImageForStorageBounds(ui.Rect bounds) {
     final ui.Rect normalizedBounds = _normalizeStorageBounds(bounds);
     return renderCanvasImageSync(
       width: max(normalizedBounds.width.ceil(), AppMath.one),
       height: max(normalizedBounds.height.ceil(), AppMath.one),
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.translate(-normalizedBounds.left, -normalizedBounds.top);
         renderLayer(canvas);
       },
@@ -56,7 +56,7 @@ extension LayerProviderStorageExport on LayerProvider {
   }
 
   /// Returns a conservative export-bounds estimate for [userAction].
-  ui.Rect? _estimateActionBoundsForStorage(final UserActionDrawing userAction) {
+  ui.Rect? _estimateActionBoundsForStorage(UserActionDrawing userAction) {
     switch (userAction.action) {
       case ActionType.pencil:
       case ActionType.brush:
@@ -113,8 +113,8 @@ extension LayerProviderStorageExport on LayerProvider {
 
   /// Returns the bounds of [positions], inflated by [outset] for stroke width.
   ui.Rect? _estimateBoundsFromPositions({
-    required final List<ui.Offset> positions,
-    required final double outset,
+    required List<ui.Offset> positions,
+    required double outset,
   }) {
     if (positions.isEmpty) {
       return null;
@@ -136,7 +136,7 @@ extension LayerProviderStorageExport on LayerProvider {
   }
 
   /// Estimates the maximum painted distance from a stroke path for [brush].
-  double _estimateStrokeOutset(final MyBrush brush) {
+  double _estimateStrokeOutset(MyBrush brush) {
     switch (brush.style) {
       case BrushStyle.slash:
         return brush.size * AppStroke.dashWidthFactor * AppVisual.half;
@@ -154,7 +154,7 @@ extension LayerProviderStorageExport on LayerProvider {
   }
 
   /// Rounds [bounds] outward to integer pixel edges for raster export.
-  ui.Rect _normalizeStorageBounds(final ui.Rect bounds) {
+  ui.Rect _normalizeStorageBounds(ui.Rect bounds) {
     return ui.Rect.fromLTRB(
       bounds.left.floorToDouble(),
       bounds.top.floorToDouble(),

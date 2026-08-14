@@ -1,15 +1,15 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/transform_model.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Creates a test image.
 Future<ui.Image> _createTestImage({
-  final int width = 100,
-  final int height = 50,
+  int width = 100,
+  int height = 50,
 }) async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   Canvas(recorder).drawRect(
@@ -25,7 +25,7 @@ void main() {
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       const MethodChannel('com.vteam.fpaint/haptic'),
-      (final MethodCall methodCall) async => null,
+      (MethodCall methodCall) async => null,
     );
   });
 

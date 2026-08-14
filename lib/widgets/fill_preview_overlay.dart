@@ -28,7 +28,7 @@ class FillPreviewOverlay extends StatelessWidget {
   final double scale;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return IgnorePointer(
       child: CustomPaint(
         size: Size.infinite,
@@ -50,7 +50,7 @@ class _FillPreviewPainter extends CustomPainter {
   final double scale;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     final Path? path = action.path;
     if (path == null) {
       return;
@@ -68,7 +68,7 @@ class _FillPreviewPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final _FillPreviewPainter oldDelegate) {
+  bool shouldRepaint(covariant _FillPreviewPainter oldDelegate) {
     return oldDelegate.action != action || oldDelegate.canvasOffset != canvasOffset || oldDelegate.scale != scale;
   }
 }

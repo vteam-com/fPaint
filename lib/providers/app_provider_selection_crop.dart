@@ -135,14 +135,14 @@ extension AppProviderSelectionCrop on AppProvider {
 
   /// Renders the selection [cropPath] as an opaque white mask sized to the canvas.
   Future<ui.Image> _renderSelectionMask(
-    final ui.Path cropPath,
-    final int width,
-    final int height,
+    ui.Path cropPath,
+    int width,
+    int height,
   ) {
     return renderCanvasImage(
       width: width,
       height: height,
-      draw: (final ui.Canvas maskCanvas) {
+      draw: (ui.Canvas maskCanvas) {
         maskCanvas.drawPath(
           cropPath,
           ui.Paint()
@@ -160,18 +160,18 @@ extension AppProviderSelectionCrop on AppProvider {
 
   /// Clips [layer] to [cropPath] and returns the result cropped to [bounds].
   Future<ui.Image> _cropLayerToSelection(
-    final LayerProvider layer, {
-    required final ui.Path cropPath,
-    required final Rect bounds,
-    required final int width,
-    required final int height,
+    LayerProvider layer, {
+    required ui.Path cropPath,
+    required Rect bounds,
+    required int width,
+    required int height,
   }) async {
     final ui.Image layerImage = layer.renderImageWH(width, height);
 
     final ui.Image maskedImage = await renderCanvasImage(
       width: width,
       height: height,
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.save();
         canvas.clipPath(cropPath);
         canvas.drawImage(layerImage, Offset.zero, ui.Paint());

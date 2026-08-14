@@ -29,7 +29,7 @@ class MacOsBookmarkService {
 
   /// Creates a security-scoped bookmark for [path] and returns it as a
   /// base-64 string, or `null` if the platform is not macOS or the call fails.
-  static Future<String?> createBookmark(final String path) async {
+  static Future<String?> createBookmark(String path) async {
     if (!_isMacOS) {
       return null;
     }
@@ -45,9 +45,9 @@ class MacOsBookmarkService {
   /// Replaces [targetPath] with [replacementPath] while asking macOS to keep
   /// the previous file as [backupFileName] beside it.
   static Future<bool> replaceFileWithBackup({
-    required final String targetPath,
-    required final String replacementPath,
-    required final String backupFileName,
+    required String targetPath,
+    required String replacementPath,
+    required String backupFileName,
   }) async {
     if (!_isMacOS) {
       return false;
@@ -71,9 +71,9 @@ class MacOsBookmarkService {
   /// If [bookmarkBase64] is `null` or the platform is not macOS, [action] is
   /// called with [fallbackPath] directly.
   static Future<T> withResolvedBookmark<T>({
-    required final String? bookmarkBase64,
-    required final String fallbackPath,
-    required final Future<T> Function(String) action,
+    required String? bookmarkBase64,
+    required String fallbackPath,
+    required Future<T> Function(String) action,
   }) async {
     if (!_isMacOS || bookmarkBase64 == null) {
       return action(fallbackPath);

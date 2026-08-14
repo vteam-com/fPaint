@@ -66,7 +66,7 @@ class _AppTextFieldState extends State<AppTextField> {
   }
 
   @override
-  void didUpdateWidget(final AppTextField oldWidget) {
+  void didUpdateWidget(AppTextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       _controller.removeListener(_onTextChanged);
@@ -86,7 +86,7 @@ class _AppTextFieldState extends State<AppTextField> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final TextStyle effectiveStyle = widget.style ?? AppTextStyle.input;
 
     return DecoratedBox(

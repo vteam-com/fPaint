@@ -5,8 +5,8 @@ part of 'canvas_gesture_handler.dart';
 extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
   /// Appends a sampled pointer position to the active pixel-brush stroke.
   void _appendPixelBrushPoint(
-    final Offset position,
-    final double brushSize,
+    Offset position,
+    double brushSize,
   ) {
     final double spacing = resolvePixelBrushStepSpacing(brushSize);
     if (_pixelBrushStrokePoints.isNotEmpty && (_pixelBrushStrokePoints.last - position).distance < spacing) {
@@ -55,7 +55,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
   ///
   /// The in-progress generation is re-checked across each await so a stroke
   /// started mid-render is dropped rather than corrupting layer state.
-  Future<void> _commitPixelBrushStroke(final AppProvider appProvider) async {
+  Future<void> _commitPixelBrushStroke(AppProvider appProvider) async {
     final ImagePlacementLayerRestoreState? layerRestoreState = _pixelBrushLayerRestoreState;
     final ui.Rect? patchBounds = _pixelBrushStrokePatchBounds;
     if (layerRestoreState == null || patchBounds == null || _pixelBrushStrokePoints.length < AppMath.one) {
@@ -219,7 +219,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
       patchImage = await renderCanvasImage(
         width: fpWidth,
         height: fpHeight,
-        draw: (final ui.Canvas canvas) {
+        draw: (ui.Canvas canvas) {
           canvas.drawImageRect(
             lowImage,
             ui.Rect.fromLTWH(0, 0, lowWidth.toDouble(), lowHeight.toDouble()),
@@ -284,7 +284,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
   /// when anything that affects the smudge source changes (action counts, layer
   /// visibility/opacity/blend, selection, canvas size) — but NOT on `clearCache`,
   /// so it stays stable across a run of smudge strokes.
-  List<int> _currentSmudgeSignature(final AppProvider appProvider) {
+  List<int> _currentSmudgeSignature(AppProvider appProvider) {
     final LayersProvider layers = appProvider.layers;
     final int selected = layers.selectedLayerIndex.clamp(AppMath.zero, layers.length - AppMath.one);
     final List<int> signature = <int>[
@@ -308,11 +308,11 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
   /// Blits a patch's pixels back into the cached source region [_smudgeSourceBytes]
   /// (destination in region-local coordinates, stride [_smudgeSourceWidth]).
   void _blitRegionIntoSmudgeCache({
-    required final Uint8List region,
-    required final int regionWidth,
-    required final int regionHeight,
-    required final int destLeft,
-    required final int destTop,
+    required Uint8List region,
+    required int regionWidth,
+    required int regionHeight,
+    required int destLeft,
+    required int destTop,
   }) {
     final Uint8List? dest = _smudgeSourceBytes;
     if (dest == null) {
@@ -336,7 +336,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
   }
 
   /// Element-wise equality for two nullable int lists (cache signatures).
-  bool _intListEquals(final List<int>? a, final List<int>? b) {
+  bool _intListEquals(List<int>? a, List<int>? b) {
     if (a == null || b == null || a.length != b.length) {
       return false;
     }
@@ -356,9 +356,9 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
   /// undoable action, drops the (now-stale) full-res cache — rebuilt lazily on
   /// demand — and refreshes the thumbnail cheaply. No full-canvas GPU work.
   void _applyCommittedPixelBrushPatch({
-    required final AppProvider appProvider,
-    required final ImagePlacementLayerRestoreState layerRestoreState,
-    required final PixelBrushLayerPatch committedPatch,
+    required AppProvider appProvider,
+    required ImagePlacementLayerRestoreState layerRestoreState,
+    required PixelBrushLayerPatch committedPatch,
   }) {
     // Textures this record can resurrect: the committed patch plus every image
     // its restore-state snapshots reintroduce on undo/redo. Listing them lets
@@ -409,7 +409,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     );
 
     appProvider.undoProvider.trimUndoHistoryWhere(
-      predicate: (final RecordAction action) {
+      predicate: (RecordAction action) {
         return action.name == PixelBrushMode.smudge.name || action.name == PixelBrushMode.blur.name;
       },
       maxKeep: AppInteraction.pixelBrushMaxUndoGestures,
@@ -418,8 +418,8 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
 
   /// Restores the selected layer state captured before the current pixel-brush stroke.
   void _restorePixelBrushLayerState({
-    required final AppProvider appProvider,
-    required final ImagePlacementLayerRestoreState restoreState,
+    required AppProvider appProvider,
+    required ImagePlacementLayerRestoreState restoreState,
   }) {
     final LayerProvider targetLayer = appProvider.layers.get(restoreState.layerIndex);
     appProvider.layers.selectedLayerIndex = restoreState.layerIndex;
@@ -444,9 +444,9 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
   /// once in [_commitPixelBrushStroke] on pointer-up. This keeps the drag O(1) at
   /// any canvas size.
   void _startPixelBrushStroke(
-    final AppProvider appProvider,
-    final Offset position,
-    final PixelBrushMode mode,
+    AppProvider appProvider,
+    Offset position,
+    PixelBrushMode mode,
   ) {
     // A prior stroke whose pointer-up was cancelled or arrived with a mismatched
     // pointer id never ran _clearPixelBrushStroke; reclaim its state first.

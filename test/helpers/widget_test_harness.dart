@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:material_ui/material_ui.dart';
 
 Widget buildLocalizedTestApp({
-  required final Widget home,
+  required Widget home,
 }) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -12,13 +12,13 @@ Widget buildLocalizedTestApp({
 }
 
 Widget buildLocalizedScaffoldTestApp({
-  required final Widget Function(BuildContext context) bodyBuilder,
-  final MediaQueryData? mediaQueryData,
+  required Widget Function(BuildContext context) bodyBuilder,
+  MediaQueryData? mediaQueryData,
 }) {
   return buildLocalizedTestApp(
     home: Scaffold(
       body: Builder(
-        builder: (final BuildContext context) {
+        builder: (BuildContext context) {
           final Widget body = bodyBuilder(context);
           if (mediaQueryData == null) {
             return body;

@@ -39,7 +39,7 @@ class CanvasPanelPainter extends CustomPainter {
   final void Function(LayerProvider layer, double requiredScale)? onNeedsDisplayCache;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     if (size.width <= 0 || size.height <= 0) {
       return;
     }
@@ -64,7 +64,7 @@ class CanvasPanelPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(final CanvasPanelPainter oldDelegate) {
+  bool shouldRepaint(CanvasPanelPainter oldDelegate) {
     return oldDelegate._layers != _layers ||
         oldDelegate.includeTransparentBackground != includeTransparentBackground ||
         oldDelegate.displayScale != displayScale;

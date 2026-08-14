@@ -2,8 +2,8 @@ part of 'file_tiff.dart';
 
 /// Writes a classic TIFF with one flattened root image and one SubIFD per source layer.
 Uint8List _encodeLayeredTiff({
-  required final img.Image compositeImage,
-  required final List<_LayerFrame> layerFrames,
+  required img.Image compositeImage,
+  required List<_LayerFrame> layerFrames,
 }) {
   final _TiffDirectoryLayout rootLayout = _buildRootDirectoryLayout(
     compositeImage: compositeImage,
@@ -26,7 +26,7 @@ Uint8List _encodeLayeredTiff({
   }
 
   rootLayout.populateSubIfdOffsets(
-    layerLayouts.map((final _TiffDirectoryLayout layout) => layout.startOffset).toList(growable: false),
+    layerLayouts.map((_TiffDirectoryLayout layout) => layout.startOffset).toList(growable: false),
   );
 
   final ByteData byteData = ByteData(nextOffset);
@@ -49,8 +49,8 @@ Uint8List _encodeLayeredTiff({
 
 /// Builds the root TIFF directory that stores the flattened composite image.
 _TiffDirectoryLayout _buildRootDirectoryLayout({
-  required final img.Image compositeImage,
-  required final int layerCount,
+  required img.Image compositeImage,
+  required int layerCount,
 }) {
   final List<_TiffTagEntry> entries = <_TiffTagEntry>[];
   final List<_TiffDataBlock> blocks = <_TiffDataBlock>[];
@@ -113,7 +113,7 @@ _TiffDirectoryLayout _buildRootDirectoryLayout({
 }
 
 /// Builds a TIFF directory for one cropped layer page.
-_TiffDirectoryLayout _buildLayerDirectoryLayout(final _LayerFrame frame) {
+_TiffDirectoryLayout _buildLayerDirectoryLayout(_LayerFrame frame) {
   final List<_TiffTagEntry> entries = <_TiffTagEntry>[];
   final List<_TiffDataBlock> blocks = <_TiffDataBlock>[];
   final _TiffDataBlock pixelBlock = _pixelBlock(
@@ -168,9 +168,9 @@ _TiffDirectoryLayout _buildLayerDirectoryLayout(final _LayerFrame frame) {
 
 /// Writes one TIFF directory and all of its data blocks into the output buffer.
 void _writeDirectoryLayout(
-  final ByteData byteData,
-  final Uint8List bytes,
-  final _TiffDirectoryLayout layout,
+  ByteData byteData,
+  Uint8List bytes,
+  _TiffDirectoryLayout layout,
 ) {
   int offset = layout.startOffset;
 
@@ -224,7 +224,7 @@ List<int> _rgbaSampleFormatValues() {
 }
 
 /// Creates an inline SHORT TIFF entry.
-_TiffTagEntry _shortValueEntry(final int tag, final int value) {
+_TiffTagEntry _shortValueEntry(int tag, int value) {
   return _TiffTagEntry(
     tag: tag,
     type: TiffConstants.typeShort,
@@ -234,7 +234,7 @@ _TiffTagEntry _shortValueEntry(final int tag, final int value) {
 }
 
 /// Creates an inline LONG TIFF entry.
-_TiffTagEntry _longValueEntry(final int tag, final int value) {
+_TiffTagEntry _longValueEntry(int tag, int value) {
   return _TiffTagEntry(
     tag: tag,
     type: TiffConstants.typeLong,
@@ -245,10 +245,10 @@ _TiffTagEntry _longValueEntry(final int tag, final int value) {
 
 /// Creates an offset-backed TIFF entry whose payload lives in a data block.
 _TiffTagEntry _offsetBlockEntry(
-  final int tag,
-  final int type,
-  final int count,
-  final _TiffDataBlock block,
+  int tag,
+  int type,
+  int count,
+  _TiffDataBlock block,
 ) {
   return _TiffTagEntry(
     tag: tag,
@@ -259,7 +259,7 @@ _TiffTagEntry _offsetBlockEntry(
 }
 
 /// Creates a packed PageNumber TIFF entry containing the current and total page indices.
-_TiffTagEntry _pageNumberEntry(final int currentPage, final int totalPages) {
+_TiffTagEntry _pageNumberEntry(int currentPage, int totalPages) {
   return _TiffTagEntry(
     tag: TiffConstants.tagPageNumber,
     type: TiffConstants.typeShort,
@@ -270,9 +270,9 @@ _TiffTagEntry _pageNumberEntry(final int currentPage, final int totalPages) {
 
 /// Encodes a string TIFF entry using ASCII data storage.
 _TiffTagEntry _asciiEntry(
-  final int tag,
-  final String text,
-  final List<_TiffDataBlock> blocks,
+  int tag,
+  String text,
+  List<_TiffDataBlock> blocks,
 ) {
   final Uint8List data = _encodeAscii(text);
   return _inlineOrBlockEntry(
@@ -286,9 +286,9 @@ _TiffTagEntry _asciiEntry(
 
 /// Encodes a SHORT array TIFF entry.
 _TiffTagEntry _shortArrayEntry(
-  final int tag,
-  final List<int> values,
-  final List<_TiffDataBlock> blocks,
+  int tag,
+  List<int> values,
+  List<_TiffDataBlock> blocks,
 ) {
   final Uint8List data = _encodeShortValues(values);
   return _inlineOrBlockEntry(
@@ -302,9 +302,9 @@ _TiffTagEntry _shortArrayEntry(
 
 /// Encodes text as a NUL-terminated SHORT array for SketchBook layer-name tags.
 _TiffTagEntry _shortTextEntry(
-  final int tag,
-  final String text,
-  final List<_TiffDataBlock> blocks,
+  int tag,
+  String text,
+  List<_TiffDataBlock> blocks,
 ) {
   return _shortArrayEntry(
     tag,
@@ -315,10 +315,10 @@ _TiffTagEntry _shortTextEntry(
 
 /// Encodes a RATIONAL TIFF entry backed by a separate data block.
 _TiffTagEntry _rationalEntry(
-  final int tag,
-  final int numerator,
-  final int denominator,
-  final List<_TiffDataBlock> blocks,
+  int tag,
+  int numerator,
+  int denominator,
+  List<_TiffDataBlock> blocks,
 ) {
   final _TiffDataBlock block = _rationalBlock(numerator, denominator);
   blocks.add(block);
@@ -327,11 +327,11 @@ _TiffTagEntry _rationalEntry(
 
 /// Stores small TIFF payloads inline and larger payloads in a referenced block.
 _TiffTagEntry _inlineOrBlockEntry({
-  required final int tag,
-  required final int type,
-  required final int count,
-  required final Uint8List data,
-  required final List<_TiffDataBlock> blocks,
+  required int tag,
+  required int type,
+  required int count,
+  required Uint8List data,
+  required List<_TiffDataBlock> blocks,
 }) {
   if (data.length <= AppMath.bytesPerPixel) {
     return _TiffTagEntry(
@@ -349,7 +349,7 @@ _TiffTagEntry _inlineOrBlockEntry({
 }
 
 /// Encodes a list of integers as little-endian SHORT values.
-Uint8List _encodeShortValues(final List<int> values) {
+Uint8List _encodeShortValues(List<int> values) {
   final ByteData data = ByteData(values.length * AppMath.pair);
   int offset = TiffConstants.noValue;
 
@@ -362,7 +362,7 @@ Uint8List _encodeShortValues(final List<int> values) {
 }
 
 /// Encodes a NUL-terminated UTF-16-like SHORT payload for SketchBook layer names.
-List<int> _encodeShortText(final String text) {
+List<int> _encodeShortText(String text) {
   final String trimmed = text.trim();
   if (trimmed.isEmpty) {
     return <int>[TiffConstants.noValue];
@@ -372,12 +372,12 @@ List<int> _encodeShortText(final String text) {
 }
 
 /// Encodes a canvas coordinate using SketchBook's fixed-point position scale.
-int _encodeSketchBookPosition(final double coordinate) {
+int _encodeSketchBookPosition(double coordinate) {
   return (coordinate * TiffConstants.sketchBookPositionDenominator).round();
 }
 
 /// Encodes a list of integers as little-endian LONG values.
-Uint8List _encodeLongValues(final List<int> values) {
+Uint8List _encodeLongValues(List<int> values) {
   final ByteData data = ByteData(values.length * AppMath.bytesPerPixel);
   int offset = TiffConstants.noValue;
 
@@ -390,14 +390,14 @@ Uint8List _encodeLongValues(final List<int> values) {
 }
 
 /// Wraps a LONG array payload in a TIFF data block.
-_TiffDataBlock _longArrayBlock(final List<int> values) {
+_TiffDataBlock _longArrayBlock(List<int> values) {
   return _TiffDataBlock(_encodeLongValues(values));
 }
 
 /// Builds the raw RGBA pixel payload block for a TIFF page.
 _TiffDataBlock _pixelBlock(
-  final img.Image image, {
-  required final bool writeBottomUp,
+  img.Image image, {
+  required bool writeBottomUp,
 }) {
   return _TiffDataBlock(
     _encodeAssociatedRgbaPixels(
@@ -408,7 +408,7 @@ _TiffDataBlock _pixelBlock(
 }
 
 /// Encodes a single RATIONAL payload into a TIFF data block.
-_TiffDataBlock _rationalBlock(final int numerator, final int denominator) {
+_TiffDataBlock _rationalBlock(int numerator, int denominator) {
   final ByteData data = ByteData(TiffConstants.rationalSize);
   data.setUint32(TiffConstants.noValue, numerator, Endian.little);
   data.setUint32(AppMath.bytesPerPixel, denominator, Endian.little);
@@ -417,8 +417,8 @@ _TiffDataBlock _rationalBlock(final int numerator, final int denominator) {
 
 /// Encodes bottom-up or top-down premultiplied RGBA pixels for TIFF storage.
 Uint8List _encodeAssociatedRgbaPixels(
-  final img.Image image, {
-  required final bool writeBottomUp,
+  img.Image image, {
+  required bool writeBottomUp,
 }) {
   final Uint8List pixelBytes = Uint8List(
     image.width * image.height * AppMath.bytesPerPixel,
@@ -455,8 +455,8 @@ Uint8List _encodeAssociatedRgbaPixels(
 
 /// Premultiplies one color channel against its alpha value.
 int _premultiplyChannel(
-  final int channel,
-  final int alpha,
+  int channel,
+  int alpha,
 ) {
   if (alpha <= TiffConstants.noValue) {
     return TiffConstants.noValue;
@@ -471,7 +471,7 @@ int _premultiplyChannel(
 }
 
 /// Encodes a NUL-terminated ASCII payload for TIFF text fields.
-Uint8List _encodeAscii(final String text) {
+Uint8List _encodeAscii(String text) {
   final String trimmed = text.trim();
   if (trimmed.isEmpty) {
     return Uint8List(TiffConstants.noValue);
@@ -510,12 +510,12 @@ class _TiffTagEntry {
 /// A precomputed TIFF directory with its referenced data blocks.
 class _TiffDirectoryLayout {
   _TiffDirectoryLayout({
-    required final List<_TiffTagEntry> entries,
+    required List<_TiffTagEntry> entries,
     required this.blocks,
     this.subIfdEntry,
     this.subIfdBlock,
   }) : entries = (List<_TiffTagEntry>.from(entries)
-         ..sort((final _TiffTagEntry a, final _TiffTagEntry b) => a.tag.compareTo(b.tag))),
+         ..sort((_TiffTagEntry a, _TiffTagEntry b) => a.tag.compareTo(b.tag))),
        ifdSize = TiffConstants.ifdCountSize + entries.length * TiffConstants.ifdEntrySize + TiffConstants.nextIfdSize,
        totalByteSize =
            TiffConstants.ifdCountSize +
@@ -523,7 +523,7 @@ class _TiffDirectoryLayout {
            TiffConstants.nextIfdSize +
            blocks.fold<int>(
              TiffConstants.noValue,
-             (final int total, final _TiffDataBlock block) => total + block.bytes.length,
+             (int total, _TiffDataBlock block) => total + block.bytes.length,
            );
 
   final List<_TiffTagEntry> entries;
@@ -545,7 +545,7 @@ class _TiffDirectoryLayout {
   }
 
   /// Writes the final SubIFD offsets into the root SubIFD payload block.
-  void populateSubIfdOffsets(final List<int> offsets) {
+  void populateSubIfdOffsets(List<int> offsets) {
     if (subIfdEntry == null || subIfdBlock == null) {
       return;
     }

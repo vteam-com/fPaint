@@ -41,7 +41,7 @@ class FillModel extends VisibleModel {
   int get halftoneMaxDotSizePercent => _halftoneMaxDotSizePercent;
 
   /// Relative maximum dot size for halftone flood fill in percent.
-  set halftoneMaxDotSizePercent(final int value) {
+  set halftoneMaxDotSizePercent(int value) {
     _halftoneMaxDotSizePercent = value.clamp(AppMath.zero, AppLimits.percentMax);
   }
 
@@ -52,7 +52,7 @@ class FillModel extends VisibleModel {
   FillMode get mode => _mode;
 
   /// Sets the fill mode.
-  set mode(final FillMode newMode) {
+  set mode(FillMode newMode) {
     _mode = newMode;
     if (_mode == FillMode.solid) {
       clear();
@@ -92,7 +92,7 @@ class FillModel extends VisibleModel {
   }
 
   /// Adds a gradient point to the list of gradient points.
-  void addPoint(final GradientPoint pointToAdd) {
+  void addPoint(GradientPoint pointToAdd) {
     this.gradientPoints.add(pointToAdd);
   }
 
@@ -100,12 +100,12 @@ class FillModel extends VisibleModel {
   Offset get centerPoint => Offset(
     gradientPoints.fold<double>(
           0.0,
-          (final double sum, final GradientPoint point) => sum + point.offset.dx,
+          (double sum, GradientPoint point) => sum + point.offset.dx,
         ) /
         gradientPoints.length,
     gradientPoints.fold<double>(
           0.0,
-          (final double sum, final GradientPoint point) => sum + point.offset.dy,
+          (double sum, GradientPoint point) => sum + point.offset.dy,
         ) /
         gradientPoints.length,
   );

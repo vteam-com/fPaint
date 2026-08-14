@@ -23,13 +23,13 @@ class _TestSaveFilePicker extends FilePickerPlatform {
 
   @override
   Future<String?> saveFile({
-    final String? dialogTitle,
-    final String? fileName,
-    final String? initialDirectory,
-    final FileType type = FileType.any,
-    final List<String>? allowedExtensions,
-    final Uint8List? bytes,
-    final bool lockParentWindow = false,
+    String? dialogTitle,
+    String? fileName,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    Uint8List? bytes,
+    bool lockParentWindow = false,
   }) async {
     return filePath;
   }
@@ -120,7 +120,7 @@ void main() {
       FilePickerPlatform.instance = _TestSaveFilePicker(exportPath);
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         _fileChannel,
-        (final MethodCall methodCall) async {
+        (MethodCall methodCall) async {
           methodCalls.add(methodCall.method);
           switch (methodCall.method) {
             case 'createBookmark':

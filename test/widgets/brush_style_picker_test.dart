@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/widgets/brush_style_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('BrushStylePicker', () {
-    testWidgets('renders with initial value and localized label', (final WidgetTester tester) async {
+    testWidgets('renders with initial value and localized label', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -16,7 +16,7 @@ void main() {
             body: BrushStylePicker(
               title: 'Style',
               value: BrushStyle.solid,
-              onChanged: (final BrushStyle _) {},
+              onChanged: (BrushStyle _) {},
             ),
           ),
         ),
@@ -26,7 +26,7 @@ void main() {
       expect(find.textContaining('Solid'), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('renders dash style label', (final WidgetTester tester) async {
+    testWidgets('renders dash style label', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -35,7 +35,7 @@ void main() {
             body: BrushStylePicker(
               title: 'Style',
               value: BrushStyle.dash,
-              onChanged: (final BrushStyle _) {},
+              onChanged: (BrushStyle _) {},
             ),
           ),
         ),
@@ -46,7 +46,7 @@ void main() {
   });
 
   group('brushStyleDropDown', () {
-    testWidgets('displays all brush styles in dropdown', (final WidgetTester tester) async {
+    testWidgets('displays all brush styles in dropdown', (WidgetTester tester) async {
       BrushStyle? selected;
 
       await tester.pumpWidget(
@@ -55,11 +55,11 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
-              builder: (final BuildContext context) {
+              builder: (BuildContext context) {
                 return brushStyleDropDown(
                   context,
                   BrushStyle.solid,
-                  (final BrushStyle value) {
+                  (BrushStyle value) {
                     selected = value;
                   },
                 );
@@ -80,20 +80,20 @@ void main() {
   });
 
   group('showBrushStylePicker', () {
-    testWidgets('opens a picker dialog', (final WidgetTester tester) async {
+    testWidgets('opens a picker dialog', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
-              builder: (final BuildContext context) {
+              builder: (BuildContext context) {
                 return AppButtonPrimary(
                   onPressed: () {
                     showBrushStylePicker(
                       context,
                       BrushStyle.dotted,
-                      (final BrushStyle _) {},
+                      (BrushStyle _) {},
                     );
                   },
                   text: 'Open Picker',

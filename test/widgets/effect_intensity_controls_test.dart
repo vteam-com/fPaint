@@ -1,6 +1,5 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -8,6 +7,7 @@ import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/effect_intensity_controls.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const int _previewImageSize = 4;
@@ -23,15 +23,15 @@ Future<ui.Image> _createPreviewImage() async {
 }
 
 Future<void> _pumpControls(
-  final WidgetTester tester, {
-  required final AppProvider appProvider,
+  WidgetTester tester, {
+  required AppProvider appProvider,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: Builder(
-        builder: (final BuildContext context) {
+        builder: (BuildContext context) {
           final AppLocalizations l10n = AppLocalizations.of(context)!;
           return EffectIntensityControls(
             appProvider: appProvider,
@@ -63,7 +63,7 @@ void main() {
     appProvider.dispose();
   });
 
-  testWidgets('shows size slider for pixelate preview', (final WidgetTester tester) async {
+  testWidgets('shows size slider for pixelate preview', (WidgetTester tester) async {
     final ui.Image previewImage = await _createPreviewImage();
     addTearDown(previewImage.dispose);
 
@@ -82,7 +82,7 @@ void main() {
     expect(find.byKey(Keys.effectSizeSlider), findsOneWidget);
   });
 
-  testWidgets('shows size slider for noise preview', (final WidgetTester tester) async {
+  testWidgets('shows size slider for noise preview', (WidgetTester tester) async {
     final ui.Image previewImage = await _createPreviewImage();
     addTearDown(previewImage.dispose);
 
@@ -101,7 +101,7 @@ void main() {
     expect(find.byKey(Keys.effectSizeSlider), findsOneWidget);
   });
 
-  testWidgets('hides size slider for blur preview', (final WidgetTester tester) async {
+  testWidgets('hides size slider for blur preview', (WidgetTester tester) async {
     final ui.Image previewImage = await _createPreviewImage();
     addTearDown(previewImage.dispose);
 

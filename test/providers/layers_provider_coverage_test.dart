@@ -1,13 +1,13 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../helpers/layers_provider_test_helper.dart';
 
@@ -115,7 +115,7 @@ void main() {
       // Red should be present (from both layers, aggregated).
       expect(result.isNotEmpty, true);
       final ColorUsage red = result.firstWhere(
-        (final ColorUsage c) => c.color == Colors.red,
+        (ColorUsage c) => c.color == Colors.red,
       );
       expect(red.percentage > 0.5, true);
     });

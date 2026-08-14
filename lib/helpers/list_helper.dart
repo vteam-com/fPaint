@@ -26,9 +26,9 @@
 ///   A list of evenly spaced values between the start and end values.
 ///   If numEntries is less than or equal to 1, an empty list is returned.
 List<double> calculateSpread(
-  final double start,
-  final double end,
-  final int numEntries,
+  double start,
+  double end,
+  int numEntries,
 ) {
   // Check if numEntries is valid
   if (numEntries <= 1) {
@@ -52,7 +52,7 @@ List<double> calculateSpread(
 /// Checks if an index is within the bounds of a list.
 ///
 /// Returns true if the index is greater than or equal to 0 and less than the length of the list, otherwise returns false.
-bool isIndexInRange(final List<dynamic> array, final int index) {
+bool isIndexInRange(List<dynamic> array, int index) {
   return index >= 0 && index < array.length;
 }
 
@@ -64,7 +64,7 @@ class KeyValue {
   dynamic value;
 
   @override
-  bool operator ==(final Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -94,7 +94,7 @@ class Pair<F, S> {
   S second;
 
   @override
-  bool operator ==(final Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -117,7 +117,7 @@ class Triple<F, S, T> {
   T third;
 
   @override
-  bool operator ==(final Object other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
@@ -134,7 +134,7 @@ class Triple<F, S, T> {
 /// Extension on Iterable to find the first match.
 extension FindFirstMatchExtension<T> on Iterable<T> {
   /// Returns the first element that satisfies the given test, or null if no such element is found.
-  T? findFirstMatch(final bool Function(T) test) {
+  T? findFirstMatch(bool Function(T) test) {
     for (final T item in this) {
       if (test(item)) {
         return item;

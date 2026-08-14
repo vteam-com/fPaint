@@ -22,7 +22,7 @@ class _SettingsPageState extends State<SettingsPage> {
   static const String _languageCodeFr = 'fr';
   static const String _systemLanguage = 'system';
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppPreferences appPreferences = AppPreferences.of(context, listen: true);
     final AppLocalizations l10n = context.l10n;
 
@@ -64,7 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         subtitle: AppText(l10n.languageSubtitle, variant: AppTextVariant.subtitle),
                         trailing: AppDropdown<String>(
                           value: selectedLanguage,
-                          onChanged: (final String? value) {
+                          onChanged: (String? value) {
                             if (value == null) {
                               return;
                             }
@@ -98,7 +98,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         subtitle: AppText(l10n.useApplePencilOnlySubtitle, variant: AppTextVariant.subtitle),
                         trailing: AppToggleSwitch(
                           value: appPreferences.useApplePencil,
-                          onChanged: (final bool value) {
+                          onChanged: (bool value) {
                             setState(() {
                               appPreferences.setUseApplePencil(value);
                             });
@@ -117,7 +117,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           subtitle: AppText(l10n.keepSaveBackupsSubtitle, variant: AppTextVariant.subtitle),
                           trailing: AppToggleSwitch(
                             value: appPreferences.keepSaveBackups,
-                            onChanged: (final bool value) {
+                            onChanged: (bool value) {
                               setState(() {
                                 appPreferences.setKeepSaveBackups(value);
                               });

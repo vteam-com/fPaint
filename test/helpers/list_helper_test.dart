@@ -111,9 +111,9 @@ void main() {
     group('Extensions', () {
       test('findFirstMatch from Iterable', () {
         final List<int> list = <int>[1, 2, 3, 4, 5];
-        expect(list.findFirstMatch((final int x) => x > 3), 4);
-        expect(list.findFirstMatch((final int x) => x == 3), 3);
-        expect(list.findFirstMatch((final int x) => x > 10), isNull);
+        expect(list.findFirstMatch((int x) => x > 3), 4);
+        expect(list.findFirstMatch((int x) => x == 3), 3);
+        expect(list.findFirstMatch((int x) => x > 10), isNull);
       });
     });
   });

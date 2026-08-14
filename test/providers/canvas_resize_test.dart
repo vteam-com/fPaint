@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../helpers/layers_provider_test_helper.dart';
 

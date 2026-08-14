@@ -18,7 +18,7 @@ class AppScaffold extends StatelessWidget {
   /// The primary content of the scaffold.
   final Widget body;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return ColoredBox(
       color: backgroundColor,
       child: body,

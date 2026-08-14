@@ -4,12 +4,11 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_effects.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 
-typedef _SelectionEffectApply =
-    Future<ui.Image> Function(
-      ui.Image image,
-      double strength,
-      double size,
-    );
+typedef _SelectionEffectApply = Future<ui.Image> Function(
+  ui.Image image,
+  double strength,
+  double size,
+);
 
 typedef _SelectionEffectSizeValueResolver = int Function(double size);
 
@@ -125,7 +124,7 @@ enum SelectionEffect {
   double get defaultSize => _config.defaultSize;
 
   /// Returns the integer size value shown for effects that support size control.
-  int sizeValue(final double size) {
+  int sizeValue(double size) {
     return _config.sizeValueResolver(size);
   }
 
@@ -137,9 +136,9 @@ enum SelectionEffect {
   ///
   /// [size] controls effect-specific block or grain sizing where supported.
   Future<ui.Image> apply(
-    final ui.Image image, {
-    final double strength = AppEffects.defaultIntensity,
-    final double? size,
+    ui.Image image, {
+    double strength = AppEffects.defaultIntensity,
+    double? size,
   }) {
     // Bipolar effects map strength directly (symmetric ±1 range); unipolar
     // effects scale up so the slider max reaches double the authored strength.
@@ -149,82 +148,82 @@ enum SelectionEffect {
   }
 }
 
-int _defaultSelectionEffectSizeValue(final double _) {
+int _defaultSelectionEffectSizeValue(double _) {
   return AppEffects.noiseMinCellSize;
 }
 
-int _noiseSelectionEffectSizeValue(final double size) {
+int _noiseSelectionEffectSizeValue(double size) {
   final double clampedSize = size.clamp(AppEffects.minSize, AppEffects.maxSize);
   return AppEffects.noiseMinCellSize +
       (((AppEffects.noiseMaxCellSize - AppEffects.noiseMinCellSize).toDouble()) * clampedSize).round();
 }
 
-int _pixelateSelectionEffectSizeValue(final double size) {
+int _pixelateSelectionEffectSizeValue(double size) {
   final double clampedSize = size.clamp(AppEffects.minSize, AppEffects.maxSize);
   return AppEffects.pixelateMinBlockSize +
       (((AppEffects.pixelateMaxBlockSize - AppEffects.pixelateMinBlockSize).toDouble()) * clampedSize).round();
 }
 
 Future<ui.Image> _applyBlurEffect(
-  final ui.Image image,
-  final double strength,
-  final double _,
+  ui.Image image,
+  double strength,
+  double _,
 ) {
   return applyGaussianBlur(image, AppEffects.blurSigma, strength: strength);
 }
 
 Future<ui.Image> _applyBrightnessEffect(
-  final ui.Image image,
-  final double strength,
-  final double _,
+  ui.Image image,
+  double strength,
+  double _,
 ) {
   return applyBrightness(image, strength: strength);
 }
 
 Future<ui.Image> _applyContrastEffect(
-  final ui.Image image,
-  final double strength,
-  final double _,
+  ui.Image image,
+  double strength,
+  double _,
 ) {
   return applyContrast(image, strength: strength);
 }
 
 Future<ui.Image> _applyGrayscaleEffect(
-  final ui.Image image,
-  final double strength,
-  final double _,
+  ui.Image image,
+  double strength,
+  double _,
 ) {
   return applyGrayscale(image, strength: strength);
 }
 
 Future<ui.Image> _applyHueSaturationEffect(
-  final ui.Image image,
-  final double strength,
-  final double _,
+  ui.Image image,
+  double strength,
+  double _,
 ) {
   return applyHueSaturation(image, strength: strength);
 }
 
 Future<ui.Image> _applyNoiseEffect(
-  final ui.Image image,
-  final double strength,
-  final double size,
+  ui.Image image,
+  double strength,
+  double size,
 ) {
   return applyNoise(image, strength: strength, size: size);
 }
 
 Future<ui.Image> _applyPixelateEffect(
-  final ui.Image image,
-  final double strength,
-  final double size,
+  ui.Image image,
+  double strength,
+  double size,
 ) {
   return applyPixelate(image, strength: strength, size: size);
 }
 
 Future<ui.Image> _applyShadowEffect(
-  final ui.Image image,
-  final double strength,
-  final double _,
+  ui.Image image,
+  double strength,
+  double _,
 ) {
   return applyShadow(image, strength: strength);
 }
@@ -234,9 +233,9 @@ Future<ui.Image> _applyShadowEffect(
 /// no-op returning the source image unchanged. Heavy blurring is left to the
 /// dedicated Blur effect (which uses the stronger blur sigma and scale).
 Future<ui.Image> _applySharpnessEffect(
-  final ui.Image image,
-  final double strength,
-  final double _,
+  ui.Image image,
+  double strength,
+  double _,
 ) {
   if (strength == AppEffects.minIntensity) {
     return Future<ui.Image>.value(image);
@@ -248,9 +247,9 @@ Future<ui.Image> _applySharpnessEffect(
 }
 
 Future<ui.Image> _applyVignetteEffect(
-  final ui.Image image,
-  final double strength,
-  final double _,
+  ui.Image image,
+  double strength,
+  double _,
 ) {
   return applyVignette(image, strength: strength);
 }

@@ -3,13 +3,13 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:archive/archive.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:xml/xml.dart';
 
 void main() {
@@ -59,34 +59,34 @@ void main() {
     final Archive archive = ZipDecoder().decodeBytes(archiveData);
 
     expect(
-      archive.files.any((final ArchiveFile file) => file.name == 'mimetype'),
+      archive.files.any((ArchiveFile file) => file.name == 'mimetype'),
       true,
     );
     expect(
-      archive.files.any((final ArchiveFile file) => file.name == 'stack.xml'),
+      archive.files.any((ArchiveFile file) => file.name == 'stack.xml'),
       true,
     );
     expect(
-      archive.files.any((final ArchiveFile file) => file.name == 'mergedimage.png'),
+      archive.files.any((ArchiveFile file) => file.name == 'mergedimage.png'),
       true,
     );
     expect(
-      archive.files.any((final ArchiveFile file) => file.name == 'Thumbnails/thumbnail.png'),
+      archive.files.any((ArchiveFile file) => file.name == 'Thumbnails/thumbnail.png'),
       true,
     );
 
-    final ArchiveFile mimetypeFile = archive.files.firstWhere((final ArchiveFile f) => f.name == 'mimetype');
+    final ArchiveFile mimetypeFile = archive.files.firstWhere((ArchiveFile f) => f.name == 'mimetype');
     final String mimetype = String.fromCharCodes(mimetypeFile.content);
     expect(mimetype, 'image/openraster');
     expect(mimetypeFile.compression, CompressionType.none);
 
     final ArchiveFile mergedImageFile = archive.files.firstWhere(
-      (final ArchiveFile file) => file.name == 'mergedimage.png',
+      (ArchiveFile file) => file.name == 'mergedimage.png',
     );
     expect(mergedImageFile.compression, CompressionType.none);
 
     final ArchiveFile firstLayerFile = archive.files.firstWhere(
-      (final ArchiveFile file) => file.name == 'data/layer-0.png',
+      (ArchiveFile file) => file.name == 'data/layer-0.png',
     );
     expect(firstLayerFile.compression, CompressionType.none);
   });
@@ -115,11 +115,11 @@ void main() {
     final Archive archive = ZipDecoder().decodeBytes(archiveData);
 
     expect(
-      archive.files.any((final ArchiveFile file) => file.name == 'mergedimage.png'),
+      archive.files.any((ArchiveFile file) => file.name == 'mergedimage.png'),
       isFalse,
     );
     expect(
-      archive.files.any((final ArchiveFile file) => file.name == 'Thumbnails/thumbnail.png'),
+      archive.files.any((ArchiveFile file) => file.name == 'Thumbnails/thumbnail.png'),
       isFalse,
     );
     expect(await extractOraPreviewPngBytes(archiveData), isNull);
@@ -176,7 +176,7 @@ void main() {
     final List<int> archiveData = await createOraArchive(exportedLayers);
     final Archive archive = ZipDecoder().decodeBytes(archiveData);
     final ArchiveFile stackFile = archive.files.firstWhere(
-      (final ArchiveFile file) => file.name == 'stack.xml',
+      (ArchiveFile file) => file.name == 'stack.xml',
     );
     final XmlDocument xmlDoc = XmlDocument.parse(
       String.fromCharCodes(stackFile.content),
@@ -205,7 +205,7 @@ void main() {
     final List<int> archiveData = await createOraArchive(exportedLayers);
     final Archive archive = ZipDecoder().decodeBytes(archiveData);
     final ArchiveFile stackFile = archive.files.firstWhere(
-      (final ArchiveFile file) => file.name == 'stack.xml',
+      (ArchiveFile file) => file.name == 'stack.xml',
     );
     final XmlDocument xmlDoc = XmlDocument.parse(
       String.fromCharCodes(stackFile.content),
@@ -237,14 +237,14 @@ void main() {
     final List<int> archiveData = await createOraArchive(exportedLayers);
     final Archive archive = ZipDecoder().decodeBytes(archiveData);
     final ArchiveFile stackFile = archive.files.firstWhere(
-      (final ArchiveFile file) => file.name == 'stack.xml',
+      (ArchiveFile file) => file.name == 'stack.xml',
     );
     final XmlDocument xmlDoc = XmlDocument.parse(String.fromCharCodes(stackFile.content));
 
     // Exactly one layer element carries selected="true", and it is layer A.
     final Iterable<XmlElement> selectedElements = xmlDoc
         .findAllElements('layer')
-        .where((final XmlElement e) => e.getAttribute('selected') == 'true');
+        .where((XmlElement e) => e.getAttribute('selected') == 'true');
     expect(selectedElements.length, 1);
     expect(selectedElements.single.getAttribute('name'), 'A');
 
@@ -264,7 +264,7 @@ void main() {
     // Strip any selected markers to emulate an ORA written by another app.
     final Archive archive = ZipDecoder().decodeBytes(archiveData);
     final ArchiveFile stackFile = archive.files.firstWhere(
-      (final ArchiveFile file) => file.name == 'stack.xml',
+      (ArchiveFile file) => file.name == 'stack.xml',
     );
     final String strippedStackXml = String.fromCharCodes(stackFile.content).replaceAll(' selected="true"', '');
     final Archive rebuilt = Archive();
@@ -303,7 +303,7 @@ void main() {
     final List<int> archiveData = await createOraArchive(exportedLayers);
     final Archive archive = ZipDecoder().decodeBytes(archiveData);
     final ArchiveFile stackFile = archive.files.firstWhere(
-      (final ArchiveFile file) => file.name == 'stack.xml',
+      (ArchiveFile file) => file.name == 'stack.xml',
     );
     final XmlDocument xmlDoc = XmlDocument.parse(
       String.fromCharCodes(stackFile.content),
@@ -314,7 +314,7 @@ void main() {
     expect(xmlLayer.getAttribute('y'), '6');
 
     final ArchiveFile layerFile = archive.files.firstWhere(
-      (final ArchiveFile file) => file.name == 'data/layer-0.png',
+      (ArchiveFile file) => file.name == 'data/layer-0.png',
     );
     final ui.Image exportedLayerImage = await decodeImage(
       Uint8List.fromList(layerFile.content as List<int>),

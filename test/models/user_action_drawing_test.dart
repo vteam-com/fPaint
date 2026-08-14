@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('UserActionDrawing', () {
@@ -115,7 +115,7 @@ void main() {
       expect(ActionType.selector.icon, AppIcon.selector);
     });
 
-    testWidgets('AppSvgIcon uses isSelected', (final WidgetTester tester) async {
+    testWidgets('AppSvgIcon uses isSelected', (WidgetTester tester) async {
       const AppSvgIcon selected = AppSvgIcon(icon: AppIcon.create, isSelected: true);
       expect(selected.isSelected, true);
 

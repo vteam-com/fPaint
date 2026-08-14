@@ -7,14 +7,14 @@ import 'package:fpaint/widgets/app_overlay.dart';
 /// Pass [barrierColor] as [AppColors.transparent] to leave the background
 /// fully visible (e.g. when the canvas should remain in view during the sheet).
 Future<T?> showAppBottomSheet<T>({
-  required final BuildContext context,
-  required final WidgetBuilder builder,
-  final Color barrierColor = AppColors.scrim,
+  required BuildContext context,
+  required WidgetBuilder builder,
+  Color barrierColor = AppColors.scrim,
 }) {
   return showAppOverlay<T>(
     context: context,
     barrierColor: barrierColor,
-    builder: (final BuildContext dialogContext) {
+    builder: (BuildContext dialogContext) {
       return Align(
         alignment: Alignment.bottomCenter,
         child: ConstrainedBox(
@@ -70,7 +70,7 @@ class AppBottomSheetContent extends StatelessWidget {
   final Widget? titleTrailing;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final Widget content = title == null
         ? child
         : Column(

@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Regression test: the color picker is shown via a bottom sheet that
 /// [showGeneralDialog] roots at the app navigator — above the
@@ -14,7 +14,7 @@ import 'package:fpaint/widgets/color_picker_dialog.dart';
 /// `No InheritedControllerScope<LayersProvider> found in context`.
 void main() {
   testWidgets('color picker resolves LayersProvider when opened from the '
-      'editor scope via an overlay', (final WidgetTester tester) async {
+      'editor scope via an overlay', (WidgetTester tester) async {
     final LayersProvider layers = LayersProvider(undoProvider: UndoProvider());
     addTearDown(layers.dispose);
 
@@ -25,14 +25,14 @@ void main() {
         home: InheritedControllerScope<LayersProvider>(
           controller: layers,
           child: Builder(
-            builder: (final BuildContext context) => Scaffold(
+            builder: (BuildContext context) => Scaffold(
               body: Center(
                 child: ElevatedButton(
                   onPressed: () => showColorPicker(
                     context: context,
                     title: 'Pick',
                     color: const Color(0xFF112233),
-                    onSelectedColor: (final Color _) {},
+                    onSelectedColor: (Color _) {},
                   ),
                   child: const Text('open'),
                 ),

@@ -9,8 +9,8 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 
 LayerProvider _createLayer({
-  final String name = 'Test',
-  final Size size = const Size(100, 100),
+  String name = 'Test',
+  Size size = const Size(100, 100),
 }) {
   return LayerProvider(
     name: name,
@@ -518,7 +518,7 @@ void main() {
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final Canvas canvas = Canvas(recorder);
       bool called = false;
-      layer.applyAction(canvas, null, (final Canvas c) => called = true);
+      layer.applyAction(canvas, null, (Canvas c) => called = true);
       expect(called, true);
       recorder.endRecording();
     });
@@ -529,7 +529,7 @@ void main() {
       final Canvas canvas = Canvas(recorder);
       final ui.Path clip = ui.Path()..addRect(const Rect.fromLTWH(0, 0, 50, 50));
       bool called = false;
-      layer.applyAction(canvas, clip, (final Canvas c) => called = true);
+      layer.applyAction(canvas, clip, (Canvas c) => called = true);
       expect(called, true);
       recorder.endRecording();
     });

@@ -5,15 +5,15 @@ import 'package:fpaint/widgets/material_free.dart';
 
 /// Builds a standard icon action button for shell and selection toolbars.
 Widget buildToolbarIconButton({
-  final Key? key,
-  final String? tooltip,
-  required final AppIcon icon,
-  required final InteractionLayoutProfile interactionProfile,
-  final bool enabled = true,
-  final bool isSelected = false,
-  final Color? color,
-  final bool useSourceColors = false,
-  required final VoidCallback onPressed,
+  Key? key,
+  String? tooltip,
+  required AppIcon icon,
+  required InteractionLayoutProfile interactionProfile,
+  bool enabled = true,
+  bool isSelected = false,
+  Color? color,
+  bool useSourceColors = false,
+  required VoidCallback onPressed,
 }) {
   return AppButtonIcon(
     key: key,

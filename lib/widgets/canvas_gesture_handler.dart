@@ -116,7 +116,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context, listen: false);
     final AppPreferences appPreferences = AppPreferences.of(context);
     final ShellProvider shellProvider = ShellProvider.of(context);
@@ -125,10 +125,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       // Rebuild only the cursor wrapper when the tool / selector mode changes,
       // keeping the (expensive) Listener gesture subtree built once.
       listenable: appProvider.toolOptionsRepaintListenable,
-      builder: (final BuildContext _, final Widget? listenerChild) {
+      builder: (BuildContext _, Widget? listenerChild) {
         return MouseRegion(
           cursor: _canvasCursor(appProvider),
-          onExit: (final PointerExitEvent _) {
+          onExit: (PointerExitEvent _) {
             if (_activePointerId == -1 && appProvider.brushSizePreviewPosition != null) {
               appProvider.hideDrawingToolPreview();
             }
@@ -137,7 +137,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         );
       },
       child: Listener(
-        onPointerSignal: (final PointerSignalEvent event) {
+        onPointerSignal: (PointerSignalEvent event) {
           _registerInputModality(shellProvider, event.kind);
           if (event is PointerScrollEvent) {
             _handleUserPanningTheCanvas(
@@ -156,7 +156,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             }
           }
         },
-        onPointerHover: (final PointerHoverEvent event) {
+        onPointerHover: (PointerHoverEvent event) {
           _registerInputModality(shellProvider, event.kind);
           if (_activePointerId != -1 || !_supportsHoverPreview(event.kind)) {
             return;
@@ -171,10 +171,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             appProvider.hideDrawingToolPreview();
           }
         },
-        onPointerPanZoomStart: (final PointerPanZoomStartEvent _) {
+        onPointerPanZoomStart: (PointerPanZoomStartEvent _) {
           shellProvider.interactionInputModality = InteractionInputModality.mouse;
         },
-        onPointerPanZoomUpdate: (final PointerPanZoomUpdateEvent event) {
+        onPointerPanZoomUpdate: (PointerPanZoomUpdateEvent event) {
           _registerInputModality(shellProvider, event.kind);
           if (event.scale == 1) {
             // Panning
@@ -193,10 +193,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             );
           }
         },
-        onPointerPanZoomEnd: (final PointerPanZoomEndEvent _) {
+        onPointerPanZoomEnd: (PointerPanZoomEndEvent _) {
           // No-op
         },
-        onPointerDown: (final PointerDownEvent event) {
+        onPointerDown: (PointerDownEvent event) {
           _registerInputModality(shellProvider, event.kind);
           if (event.kind == PointerDeviceKind.touch) {
             _pointerPositions[event.pointer] = event.localPosition;
@@ -216,7 +216,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             _handlePointerStart(appProvider, event);
           }
         },
-        onPointerMove: (final PointerMoveEvent event) {
+        onPointerMove: (PointerMoveEvent event) {
           _registerInputModality(shellProvider, event.kind);
           if (event.kind == PointerDeviceKind.touch) {
             _pointerPositions[event.pointer] = event.localPosition;
@@ -237,7 +237,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             _handlePointerMove(appProvider, event);
           }
         },
-        onPointerUp: (final PointerUpEvent event) {
+        onPointerUp: (PointerUpEvent event) {
           if (event.kind == PointerDeviceKind.touch) {
             _pointerPositions.remove(event.pointer);
             _getDistanceBetweenTouchPoints(); // Recalculate distance
@@ -250,7 +250,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             _handlePointerEnd(appProvider, event);
           }
         },
-        onPointerCancel: (final PointerCancelEvent event) {
+        onPointerCancel: (PointerCancelEvent event) {
           if (event.kind == PointerDeviceKind.touch) {
             _pointerPositions.remove(event.pointer);
             _getDistanceBetweenTouchPoints(); // Recalculate distance
@@ -275,7 +275,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// The Edge Detection (magic wand) selector uses a crosshair to signal
   /// "click a point to sample a color region"; every other tool defers to the
   /// default cursor (and to any overlay handles layered above the canvas).
-  MouseCursor _canvasCursor(final AppProvider appProvider) {
+  MouseCursor _canvasCursor(AppProvider appProvider) {
     // A horizontal tolerance drag pins the pointer at its start: hide the OS
     // cursor so it does not appear to wander across the canvas while scrubbing.
     if (appProvider.isTolerancePointerLocked) {
@@ -298,23 +298,23 @@ class PixelBrushLayerPatch {
 }
 
 /// Maps a pixel-brush [mode] to its persisted layer action type.
-ActionType pixelBrushActionType(final PixelBrushMode mode) {
+ActionType pixelBrushActionType(PixelBrushMode mode) {
   return mode == PixelBrushMode.smudge ? ActionType.smudge : ActionType.blurBrush;
 }
 
 /// Returns whether [actionType] is a persisted pixel-brush action.
-bool isPixelBrushPersistedActionType(final ActionType actionType) {
+bool isPixelBrushPersistedActionType(ActionType actionType) {
   return actionType == ActionType.smudge || actionType == ActionType.blurBrush;
 }
 
 /// Restores the target layer baseline state and applies [patch] as the latest
 /// pixel-brush action for [mode].
 void applyPixelBrushPatchToLayer({
-  required final ImagePlacementLayerRestoreState restoreState,
-  required final LayerProvider targetLayer,
-  required final PixelBrushLayerPatch patch,
-  required final PixelBrushMode mode,
-  final bool retainCache = false,
+  required ImagePlacementLayerRestoreState restoreState,
+  required LayerProvider targetLayer,
+  required PixelBrushLayerPatch patch,
+  required PixelBrushMode mode,
+  bool retainCache = false,
 }) {
   targetLayer.actionStack
     ..clear()
@@ -355,8 +355,8 @@ void applyPixelBrushPatchToLayer({
 ///
 /// This keeps redraw cost bounded over long drawing sessions.
 void compactPixelBrushLayerHistory({
-  required final LayerProvider targetLayer,
-  required final int maxGestureCount,
+  required LayerProvider targetLayer,
+  required int maxGestureCount,
 }) {
   int persistedPixelBrushCount = AppMath.zero;
   for (final UserActionDrawing action in targetLayer.actionStack) {
@@ -389,12 +389,12 @@ void compactPixelBrushLayerHistory({
 
 /// Copies an RGBA rectangle from [pixels] into a tightly packed patch buffer.
 Uint8List copyPixelBrushRect({
-  required final Uint8List pixels,
-  required final int imageWidth,
-  required final int left,
-  required final int top,
-  required final int width,
-  required final int height,
+  required Uint8List pixels,
+  required int imageWidth,
+  required int left,
+  required int top,
+  required int width,
+  required int height,
 }) {
   final Uint8List result = Uint8List(width * height * AppMath.bytesPerPixel);
   final int rowByteCount = width * AppMath.bytesPerPixel;

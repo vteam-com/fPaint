@@ -45,7 +45,7 @@ const int bytesPerPixel = AppMath.bytesPerPixel;
 ///
 /// Returns:
 ///   The index of the pixel in the byte array.
-int index(final int x, final int y, final int width) {
+int index(int x, int y, int width) {
   return (y * width + x) * bytesPerPixel;
 }
 
@@ -102,7 +102,7 @@ class _GridPoint {
   final int y;
 
   @override
-  bool operator ==(final Object other) {
+  bool operator ==(Object other) {
     return other is _GridPoint && other.x == x && other.y == y;
   }
 
@@ -136,7 +136,7 @@ class _SpanStack {
   bool get isEmpty => _size == AppMath.zero;
 
   /// Pushes a candidate pixel coordinate onto the span stack.
-  void push(final int x, final int y) {
+  void push(int x, int y) {
     if (_size >= _capacity) {
       _grow();
     }
@@ -174,7 +174,7 @@ class _RunBuffer {
   int _capacity;
 
   /// Appends one horizontal run triple: y, startX, endX.
-  void add(final int y, final int startX, final int endX) {
+  void add(int y, int startX, int endX) {
     if (_size >= _capacity) {
       _grow();
     }
@@ -208,7 +208,7 @@ class _RunBuffer {
 }
 
 /// Executes scan line flood-fill and returns compact horizontal run output.
-_FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
+_FloodFillTaskOutput _runFloodFillTask(_FloodFillTaskInput input) {
   final Uint8List pixels = input.pixelData.materialize().asUint8List();
   final int width = input.width;
   final int height = input.height;
@@ -433,9 +433,9 @@ _FloodFillTaskOutput _runFloodFillTask(final _FloodFillTaskInput input) {
 
 /// Builds a normalized contour path from horizontal run triples.
 Path _buildPathFromRuns({
-  required final Int32List runs,
-  required final int left,
-  required final int top,
+  required Int32List runs,
+  required int left,
+  required int top,
 }) {
   final SplayTreeMap<int, List<_RunSegment>> groupedRuns = _groupRunsByRow(runs);
   final List<_BoundarySegment> boundarySegments = _buildBoundarySegments(groupedRuns);
@@ -447,7 +447,7 @@ Path _buildPathFromRuns({
 }
 
 /// Groups flood-fill runs by row and normalizes them into sorted intervals.
-SplayTreeMap<int, List<_RunSegment>> _groupRunsByRow(final Int32List runs) {
+SplayTreeMap<int, List<_RunSegment>> _groupRunsByRow(Int32List runs) {
   final SplayTreeMap<int, List<_RunSegment>> groupedRuns = SplayTreeMap<int, List<_RunSegment>>();
 
   int i = AppMath.zero;
@@ -467,7 +467,7 @@ SplayTreeMap<int, List<_RunSegment>> _groupRunsByRow(final Int32List runs) {
   }
 
   for (final MapEntry<int, List<_RunSegment>> entry in groupedRuns.entries) {
-    entry.value.sort((final _RunSegment a, final _RunSegment b) {
+    entry.value.sort((_RunSegment a, _RunSegment b) {
       final int startCompare = a.startX.compareTo(b.startX);
       if (startCompare != AppMath.zero) {
         return startCompare;
@@ -484,7 +484,7 @@ SplayTreeMap<int, List<_RunSegment>> _groupRunsByRow(final Int32List runs) {
 }
 
 /// Merges overlapping or touching row intervals into maximal runs.
-List<_RunSegment> _normalizeRowRuns(final List<_RunSegment> sortedRuns) {
+List<_RunSegment> _normalizeRowRuns(List<_RunSegment> sortedRuns) {
   if (sortedRuns.isEmpty) {
     return const <_RunSegment>[];
   }
@@ -509,7 +509,7 @@ List<_RunSegment> _normalizeRowRuns(final List<_RunSegment> sortedRuns) {
 
 /// Builds directed contour segments without invoking path unions.
 List<_BoundarySegment> _buildBoundarySegments(
-  final SplayTreeMap<int, List<_RunSegment>> groupedRuns,
+  SplayTreeMap<int, List<_RunSegment>> groupedRuns,
 ) {
   final List<_BoundarySegment> segments = <_BoundarySegment>[];
   Map<int, int> activeLeftEdges = <int, int>{};
@@ -627,11 +627,11 @@ List<_BoundarySegment> _buildBoundarySegments(
 
 /// Emits the exposed horizontal edges for [baseRuns] after subtracting [overlapRuns].
 void _emitExposedHorizontalSegments({
-  required final List<_RunSegment> baseRuns,
-  required final List<_RunSegment> overlapRuns,
-  required final int y,
-  required final bool isTopBoundary,
-  required final List<_BoundarySegment> segments,
+  required List<_RunSegment> baseRuns,
+  required List<_RunSegment> overlapRuns,
+  required int y,
+  required bool isTopBoundary,
+  required List<_BoundarySegment> segments,
 }) {
   int overlapIndex = AppMath.zero;
 
@@ -676,11 +676,11 @@ void _emitExposedHorizontalSegments({
 
 /// Adds one oriented horizontal contour segment.
 void _addHorizontalBoundarySegment({
-  required final int startX,
-  required final int endXExclusive,
-  required final int y,
-  required final bool isTopBoundary,
-  required final List<_BoundarySegment> segments,
+  required int startX,
+  required int endXExclusive,
+  required int y,
+  required bool isTopBoundary,
+  required List<_BoundarySegment> segments,
 }) {
   if (startX >= endXExclusive) {
     return;
@@ -693,13 +693,13 @@ void _addHorizontalBoundarySegment({
 
 /// Advances one set of vertical contour edges by a single row.
 Map<int, int> _advanceVerticalEdges({
-  required final List<_RunSegment> currentRuns,
-  required final Map<int, int> activeEdges,
-  required final int currentY,
-  required final int previousY,
-  required final bool isConsecutiveRow,
-  required final bool isLeftBoundary,
-  required final List<_BoundarySegment> segments,
+  required List<_RunSegment> currentRuns,
+  required Map<int, int> activeEdges,
+  required int currentY,
+  required int previousY,
+  required bool isConsecutiveRow,
+  required bool isLeftBoundary,
+  required List<_BoundarySegment> segments,
 }) {
   final Map<int, int> nextActiveEdges = <int, int>{};
 
@@ -724,10 +724,10 @@ Map<int, int> _advanceVerticalEdges({
 
 /// Flushes the still-open vertical contour edges into boundary segments.
 void _closeActiveVerticalEdges({
-  required final Map<int, int> activeEdges,
-  required final int endYExclusive,
-  required final bool isLeftBoundary,
-  required final List<_BoundarySegment> segments,
+  required Map<int, int> activeEdges,
+  required int endYExclusive,
+  required bool isLeftBoundary,
+  required List<_BoundarySegment> segments,
 }) {
   for (final MapEntry<int, int> entry in activeEdges.entries) {
     final _GridPoint start = isLeftBoundary ? _GridPoint(entry.key, endYExclusive) : _GridPoint(entry.key, entry.value);
@@ -738,9 +738,9 @@ void _closeActiveVerticalEdges({
 
 /// Traces closed contour loops from the directed boundary segments.
 Path _traceBoundaryPath({
-  required final List<_BoundarySegment> segments,
-  required final int left,
-  required final int top,
+  required List<_BoundarySegment> segments,
+  required int left,
+  required int top,
 }) {
   final Path path = Path();
   if (segments.isEmpty) {
@@ -795,8 +795,8 @@ Path _traceBoundaryPath({
 
 /// Returns the next unconsumed segment that starts at the current contour point.
 int? _findNextUnusedSegment({
-  required final List<int>? candidateIndices,
-  required final List<bool> usedSegments,
+  required List<int>? candidateIndices,
+  required List<bool> usedSegments,
 }) {
   if (candidateIndices == null) {
     return null;
@@ -812,12 +812,12 @@ int? _findNextUnusedSegment({
 
 /// Extracts a region from raw RGBA [pixels] using scan line flood fill.
 Future<Region> extractRegionByColorEdgeAndOffsetFromPixels({
-  required final Uint8List pixels,
-  required final int width,
-  required final int height,
-  required final int x,
-  required final int y,
-  required final int tolerance,
+  required Uint8List pixels,
+  required int width,
+  required int height,
+  required int x,
+  required int y,
+  required int tolerance,
 }) async {
   final Region region = Region();
 

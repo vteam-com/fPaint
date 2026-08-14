@@ -23,7 +23,7 @@ class MainScreen extends StatelessWidget {
   /// The minimum size of the side panel.
   final double minSidePanelSize = AppLayout.sidePanelCollapsed;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     final AppPreferences appPreferences = AppPreferences.of(context, listen: true);
     final AppProvider appProvider = AppProvider.of(context);
@@ -48,7 +48,7 @@ class MainScreen extends StatelessWidget {
     );
 
     return DropTarget(
-      onDragDone: (final DropDoneDetails details) {
+      onDragDone: (DropDoneDetails details) {
         _handleDroppedFiles(context, details);
       },
       child: AppScaffold(
@@ -57,7 +57,7 @@ class MainScreen extends StatelessWidget {
           children: <Widget>[
             ListenableBuilder(
               listenable: shellProvider,
-              builder: (final BuildContext _, final Widget? _) {
+              builder: (BuildContext _, Widget? _) {
                 return ShellTopBar(
                   shellProvider: shellProvider,
                   appProvider: appProvider,
@@ -67,7 +67,7 @@ class MainScreen extends StatelessWidget {
             Expanded(
               child: ListenableBuilder(
                 listenable: shellProvider.mainScreenLayoutListenable,
-                builder: (final BuildContext _, final Widget? _) {
+                builder: (BuildContext _, Widget? _) {
                   final ShellMode shellMode = shellProvider.shellMode;
 
                   return shellMode == ShellMode.hidden
@@ -108,9 +108,9 @@ class MainScreen extends StatelessWidget {
   /// If the shell mode is hidden, the main view is returned. Otherwise, a multi-split view
   /// is returned, which contains the side panel and main view.
   Widget _buildMainContent(
-    final BuildContext context,
-    final ShellProvider shellProvider,
-    final AppPreferences appPreferences,
+    BuildContext context,
+    ShellProvider shellProvider,
+    AppPreferences appPreferences,
   ) {
     if (shellProvider.shellMode == ShellMode.hidden) {
       return const MainView();
@@ -126,13 +126,13 @@ class MainScreen extends StatelessWidget {
   ///
   /// A multi-split view is returned, which contains the side panel and main view.
   Widget _buildMidToLargeDevices(
-    final ShellProvider shellProvider,
-    final AppPreferences appPreferences,
+    ShellProvider shellProvider,
+    AppPreferences appPreferences,
   ) {
     return MultiSplitView(
       key: Key('key_side_panel_size_${shellProvider.isSidePanelExpanded}'),
       axis: Axis.horizontal,
-      onDividerDoubleTap: (final int _) {
+      onDividerDoubleTap: (int _) {
         shellProvider.isSidePanelExpanded = !shellProvider.isSidePanelExpanded;
       },
       initialAreas: <Area>[
@@ -140,13 +140,13 @@ class MainScreen extends StatelessWidget {
           size: shellProvider.isSidePanelExpanded ? AppLayout.sidePanelExpanded : minSidePanelSize,
           min: shellProvider.isSidePanelExpanded ? AppLayout.sidePanelExpandedMin : minSidePanelSize,
           max: shellProvider.isSidePanelExpanded ? AppLayout.sidePanelExpandedMax : minSidePanelSize,
-          builder: (final BuildContext _, final Area _) => SidePanel(
+          builder: (BuildContext _, Area _) => SidePanel(
             minimal: !shellProvider.isSidePanelExpanded,
             preferences: appPreferences,
           ),
         ),
         Area(
-          builder: (final BuildContext _, final Area _) => const MainView(),
+          builder: (BuildContext _, Area _) => const MainView(),
         ),
       ],
     );
@@ -157,9 +157,9 @@ class MainScreen extends StatelessWidget {
   /// Uses a stack layout where the main view is always visible,
   /// and the side panel can be shown as an overlay when needed.
   Widget _buildMobilePhoneLayout(
-    final BuildContext context,
-    final ShellProvider shellProvider,
-    final AppPreferences appPreferences,
+    BuildContext context,
+    ShellProvider shellProvider,
+    AppPreferences appPreferences,
   ) {
     return Stack(
       children: <Widget>[
@@ -191,8 +191,8 @@ class MainScreen extends StatelessWidget {
 
   /// Handles files dropped onto the main screen from the desktop.
   void _handleDroppedFiles(
-    final BuildContext context,
-    final DropDoneDetails details,
+    BuildContext context,
+    DropDoneDetails details,
   ) {
     // Only handle file drops on non-web platforms where file paths are
     // available.

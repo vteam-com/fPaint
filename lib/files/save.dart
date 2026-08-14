@@ -34,7 +34,7 @@ enum SaveFileFormat {
   bool get supportsLayers => this == SaveFileFormat.ora || this == SaveFileFormat.tiff;
 
   /// Resolves a save format from a file name.
-  static SaveFileFormat? fromFileName(final String fileName) {
+  static SaveFileFormat? fromFileName(String fileName) {
     final String extension = fileName.split('.').last.toLowerCase();
     switch (extension) {
       case FileExtensions.png:
@@ -59,8 +59,8 @@ enum SaveFileFormat {
 
 /// Saves all layers as a layered TIFF file.
 Future<void> saveAsTiff(
-  final LayersProvider layers,
-  final String fileName,
+  LayersProvider layers,
+  String fileName,
 ) async {
   try {
     final String normalizedFileName = normalizeTiffExportFileName(fileName);
@@ -85,9 +85,9 @@ Future<void> saveAsTiff(
 ///
 /// Returns a [Future] that completes when the file has been successfully saved.
 Future<void> saveFile(
-  final ShellProvider shellProvider,
-  final LayersProvider layers,
-  final AppPreferences preferences,
+  ShellProvider shellProvider,
+  LayersProvider layers,
+  AppPreferences preferences,
 ) async {
   final String fileName = shellProvider.loadedFileName;
   final SaveFileFormat? format = SaveFileFormat.fromFileName(fileName);
@@ -103,21 +103,21 @@ Future<void> saveFile(
         await _saveWithResolvedFileAccess(
           preferences: preferences,
           fileName: fileName,
-          saveAction: (final String resolvedFileName) => saveAsPng(layers, resolvedFileName),
+          saveAction: (String resolvedFileName) => saveAsPng(layers, resolvedFileName),
         );
         break;
       case SaveFileFormat.jpeg:
         await _saveWithResolvedFileAccess(
           preferences: preferences,
           fileName: fileName,
-          saveAction: (final String resolvedFileName) => saveAsJpeg(layers, resolvedFileName),
+          saveAction: (String resolvedFileName) => saveAsJpeg(layers, resolvedFileName),
         );
         break;
       case SaveFileFormat.ora:
         await _saveWithResolvedFileAccess(
           preferences: preferences,
           fileName: fileName,
-          saveAction: (final String resolvedFileName) => saveAsOra(layers, resolvedFileName),
+          saveAction: (String resolvedFileName) => saveAsOra(layers, resolvedFileName),
         );
         break;
       case SaveFileFormat.tiff:
@@ -125,7 +125,7 @@ Future<void> saveFile(
         await _saveWithResolvedFileAccess(
           preferences: preferences,
           fileName: normalizedFileName,
-          saveAction: (final String resolvedFileName) => saveAsTiff(layers, resolvedFileName),
+          saveAction: (String resolvedFileName) => saveAsTiff(layers, resolvedFileName),
         );
         if (shellProvider.loadedFileName != normalizedFileName) {
           shellProvider.loadedFileName = normalizedFileName;
@@ -136,14 +136,14 @@ Future<void> saveFile(
         await _saveWithResolvedFileAccess(
           preferences: preferences,
           fileName: fileName,
-          saveAction: (final String resolvedFileName) => saveAsWebp(layers, resolvedFileName),
+          saveAction: (String resolvedFileName) => saveAsWebp(layers, resolvedFileName),
         );
         break;
       case SaveFileFormat.heic:
         await _saveWithResolvedFileAccess(
           preferences: preferences,
           fileName: fileName,
-          saveAction: (final String resolvedFileName) => saveAsHeic(layers, resolvedFileName),
+          saveAction: (String resolvedFileName) => saveAsHeic(layers, resolvedFileName),
         );
         break;
     }
@@ -167,9 +167,9 @@ Future<void> saveFile(
 
 /// Saves a file through the macOS security-scoped bookmark when one exists.
 Future<void> _saveWithResolvedFileAccess({
-  required final AppPreferences preferences,
-  required final String fileName,
-  required final Future<void> Function(String) saveAction,
+  required AppPreferences preferences,
+  required String fileName,
+  required Future<void> Function(String) saveAction,
 }) async {
   final String? existingBookmark = preferences.getBookmark(fileName);
   final String? bookmark = existingBookmark ?? await MacOsBookmarkService.createBookmark(fileName);

@@ -37,14 +37,14 @@ class ShellProvider extends ChangeNotifier {
   /// The [listen] parameter determines whether the widget should rebuild when the
   /// [ShellProvider]'s state changes.
   static ShellProvider of(
-    final BuildContext context, {
-    final bool listen = false,
+    BuildContext context, {
+    bool listen = false,
   }) => InheritedControllerScope.of<ShellProvider>(context, listen: listen);
 
   /// Returns [ShellProvider] when found in the tree, otherwise null.
   static ShellProvider? maybeOf(
-    final BuildContext context, {
-    final bool listen = false,
+    BuildContext context, {
+    bool listen = false,
   }) => InheritedControllerScope.maybeOf<ShellProvider>(context, listen: listen);
 
   //=============================================================================
@@ -64,7 +64,7 @@ class ShellProvider extends ChangeNotifier {
   bool get deviceSizeSmall => _deviceSizeSmall;
 
   /// Sets whether the device size is small and rebuilds shell layout when needed.
-  set deviceSizeSmall(final bool value) {
+  set deviceSizeSmall(bool value) {
     if (_deviceSizeSmall == value) {
       return;
     }
@@ -74,7 +74,7 @@ class ShellProvider extends ChangeNotifier {
   }
 
   /// Synchronizes the viewport size class without notifying listeners.
-  void syncDeviceSizeSmall(final bool value) {
+  void syncDeviceSizeSmall(bool value) {
     _deviceSizeSmall = value;
   }
 
@@ -102,7 +102,7 @@ class ShellProvider extends ChangeNotifier {
   InteractionInputModality get interactionInputModality => _interactionInputModality;
 
   /// Sets [interactionInputModality] and notifies listeners only on change.
-  set interactionInputModality(final InteractionInputModality value) {
+  set interactionInputModality(InteractionInputModality value) {
     if (_interactionInputModality == value) {
       return;
     }
@@ -125,7 +125,7 @@ class ShellProvider extends ChangeNotifier {
   Listenable get mainScreenLayoutListenable => _mainScreenLayoutNotifier;
 
   /// Sets the current shell mode.
-  set shellMode(final ShellMode value) {
+  set shellMode(ShellMode value) {
     if (_shellMode == value) {
       return;
     }
@@ -143,7 +143,7 @@ class ShellProvider extends ChangeNotifier {
   Listenable get sidePanelExpandedListenable => _sidePanelExpandedNotifier;
 
   /// Sets whether the side panel is expanded.
-  set isSidePanelExpanded(final bool value) {
+  set isSidePanelExpanded(bool value) {
     if (_isSidePanelExpanded == value) {
       return;
     }
@@ -161,7 +161,7 @@ class ShellProvider extends ChangeNotifier {
   bool get showMenu => _showMenu;
 
   /// Sets whether the menu is visible.
-  set showMenu(final bool value) {
+  set showMenu(bool value) {
     _showMenu = value;
     _mainScreenLayoutNotifier.notifyListeners();
     update();

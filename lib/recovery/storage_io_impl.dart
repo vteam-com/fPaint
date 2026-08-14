@@ -39,7 +39,7 @@ class _IoDraftRecoveryStorage implements DraftRecoveryStorage {
     }
 
     try {
-      return draftFile.readAsBytes();
+      return await draftFile.readAsBytes();
     } catch (e) {
       _log.severe('Error reading draft file: ${draftFile.path}', e);
       rethrow;
@@ -47,7 +47,7 @@ class _IoDraftRecoveryStorage implements DraftRecoveryStorage {
   }
 
   @override
-  Future<void> writeDraft(final Uint8List bytes) async {
+  Future<void> writeDraft(Uint8List bytes) async {
     final File draftFile = await _getDraftFile();
     try {
       await draftFile.writeAsBytes(bytes, flush: true);

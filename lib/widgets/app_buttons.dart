@@ -111,11 +111,10 @@ class AppButtonVisualState {
 }
 
 /// Builds button content from the current [AppButtonVisualState].
-typedef AppButtonBuilder =
-    Widget Function(
-      BuildContext context,
-      AppButtonVisualState state,
-    );
+typedef AppButtonBuilder = Widget Function(
+  BuildContext context,
+  AppButtonVisualState state,
+);
 
 /// A text-only button replacing Material [TextButton].
 class AppButtonText extends StatelessWidget {
@@ -127,7 +126,7 @@ class AppButtonText extends StatelessWidget {
   final VoidCallback onPressed;
   final String text;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return _AppLabelButton(
       semantic: AppButtonLabelSemantic.subtle,
       onPressed: onPressed,
@@ -146,7 +145,7 @@ class AppButtonDanger extends StatelessWidget {
   final VoidCallback onPressed;
   final String text;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return _AppLabelButton(
       semantic: AppButtonLabelSemantic.dangerous,
       onPressed: onPressed,
@@ -165,7 +164,7 @@ class AppButtonPrimary extends StatelessWidget {
   final VoidCallback onPressed;
   final String text;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return _AppLabelButton(
       semantic: AppButtonLabelSemantic.filled,
       onPressed: onPressed,
@@ -186,7 +185,7 @@ class _AppLabelButton extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AppButton(
       onPressed: onPressed,
       hoverScale: AppVisual.full,
@@ -240,7 +239,7 @@ class AppButtonIcon extends StatelessWidget {
   final bool useSourceColors;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AppButton(
       onPressed: enabled ? onPressed : null,
       tooltip: enabled ? tooltip : null,
@@ -355,9 +354,9 @@ mixin _MinimumPressDurationStateMixin<T extends StatefulWidget> on State<T> {
   /// Defers release to the next frame so quick taps still paint the pressed
   /// state at least once without introducing timer-based test flakiness.
   void releasePressedOnNextFrame({
-    required final bool isPressed,
-    required final bool Function() isStillPressed,
-    required final VoidCallback release,
+    required bool isPressed,
+    required bool Function() isStillPressed,
+    required VoidCallback release,
   }) {
     if (!isPressed) {
       return;
@@ -376,7 +375,7 @@ class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMi
   bool _isHovered = false;
   bool _isPressed = false;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppButtonVisualState state = AppButtonVisualState(
       isHovered: _isHovered,
       isPressed: _isPressed,
@@ -402,8 +401,8 @@ class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMi
     );
 
     Widget button = GestureDetector(
-      onTapDown: widget.onPressed == null ? null : (final TapDownDetails _) => _setPressed(true),
-      onTapUp: widget.onPressed == null ? null : (final TapUpDetails _) => _releasePressedWithMinimumDuration(),
+      onTapDown: widget.onPressed == null ? null : (TapDownDetails _) => _setPressed(true),
+      onTapUp: widget.onPressed == null ? null : (TapUpDetails _) => _releasePressedWithMinimumDuration(),
       onTapCancel: widget.onPressed == null ? null : _releasePressedWithMinimumDuration,
       onTap: widget.onPressed,
       onPanStart: widget.onPanStart == null ? null : _handlePanStart,
@@ -434,12 +433,12 @@ class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMi
     widget.onPanCancel?.call();
   }
 
-  void _handlePanEnd(final DragEndDetails details) {
+  void _handlePanEnd(DragEndDetails details) {
     _setPressed(false);
     widget.onPanEnd?.call(details);
   }
 
-  void _handlePanStart(final DragStartDetails details) {
+  void _handlePanStart(DragStartDetails details) {
     _setPressed(true);
     widget.onPanStart?.call(details);
   }
@@ -465,7 +464,7 @@ class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMi
     return AppVisual.full;
   }
 
-  void _setHovered(final bool isHovered) {
+  void _setHovered(bool isHovered) {
     if (_isHovered == isHovered) {
       return;
     }
@@ -475,7 +474,7 @@ class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMi
   }
 
   /// Toggles icon pressed state and tracks press-cycle metadata.
-  void _setPressed(final bool isPressed) {
+  void _setPressed(bool isPressed) {
     if (_isPressed == isPressed) {
       return;
     }
@@ -489,7 +488,7 @@ class _AppButtonState extends State<AppButton> with _MinimumPressDurationStateMi
 }
 
 /// Wraps previews with baseline layout context so button samples render safely.
-Widget _buildButtonPreviewContainer(final Widget child) {
+Widget _buildButtonPreviewContainer(Widget child) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: Center(
@@ -565,7 +564,7 @@ Widget appButtonBuilderPreview() {
   return _buildButtonPreviewContainer(
     AppButton(
       onPressed: _noopPreviewAction,
-      builder: (final BuildContext _, final AppButtonVisualState state) {
+      builder: (BuildContext _, AppButtonVisualState state) {
         final String label = state.isPressed ? _previewLabelPrimary : _previewLabelBuilder;
         return Text(label);
       },

@@ -1,19 +1,19 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('NineGridSelector', () {
-    testWidgets('renders 3x3 grid with 9 items', (final WidgetTester tester) async {
+    testWidgets('renders 3x3 grid with 9 items', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: NineGridSelector(
             selectedPosition: CanvasResizePosition.center,
-            onPositionSelected: (final CanvasResizePosition position) {},
+            onPositionSelected: (CanvasResizePosition position) {},
           ),
         ),
       );
@@ -22,12 +22,12 @@ void main() {
       expect(find.byType(GestureDetector), findsNWidgets(9));
     });
 
-    testWidgets('displays correct icons for each position', (final WidgetTester tester) async {
+    testWidgets('displays correct icons for each position', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: NineGridSelector(
             selectedPosition: CanvasResizePosition.center,
-            onPositionSelected: (final CanvasResizePosition position) {},
+            onPositionSelected: (CanvasResizePosition position) {},
           ),
         ),
       );
@@ -36,12 +36,12 @@ void main() {
       expect(find.byType(AppSvgIcon), findsNWidgets(9));
     });
 
-    testWidgets('highlights selected position with blue color', (final WidgetTester tester) async {
+    testWidgets('highlights selected position with blue color', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: NineGridSelector(
             selectedPosition: CanvasResizePosition.topLeft,
-            onPositionSelected: (final CanvasResizePosition position) {},
+            onPositionSelected: (CanvasResizePosition position) {},
           ),
         ),
       );
@@ -61,14 +61,14 @@ void main() {
       expect(hasBlueSelected, true);
     });
 
-    testWidgets('calls onPositionSelected when position is tapped', (final WidgetTester tester) async {
+    testWidgets('calls onPositionSelected when position is tapped', (WidgetTester tester) async {
       CanvasResizePosition? selectedPosition;
 
       await tester.pumpWidget(
         MaterialApp(
           home: NineGridSelector(
             selectedPosition: CanvasResizePosition.center,
-            onPositionSelected: (final CanvasResizePosition position) {
+            onPositionSelected: (CanvasResizePosition position) {
               selectedPosition = position;
             },
           ),
@@ -82,12 +82,12 @@ void main() {
       expect(selectedPosition, CanvasResizePosition.topLeft);
     });
 
-    testWidgets('has correct container dimensions and styling', (final WidgetTester tester) async {
+    testWidgets('has correct container dimensions and styling', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: NineGridSelector(
             selectedPosition: CanvasResizePosition.center,
-            onPositionSelected: (final CanvasResizePosition position) {},
+            onPositionSelected: (CanvasResizePosition position) {},
           ),
         ),
       );
@@ -101,10 +101,10 @@ void main() {
       expect(decoration.borderRadius, isNotNull);
     });
 
-    testWidgets('getDirectionIcon returns correct icons for each position', (final WidgetTester tester) async {
+    testWidgets('getDirectionIcon returns correct icons for each position', (WidgetTester tester) async {
       final NineGridSelector selector = NineGridSelector(
         selectedPosition: CanvasResizePosition.center,
-        onPositionSelected: (final CanvasResizePosition position) {},
+        onPositionSelected: (CanvasResizePosition position) {},
       );
 
       expect(selector.getDirectionIcon(0), AppIcon.arrowUpLeft); // topLeft
@@ -118,12 +118,12 @@ void main() {
       expect(selector.getDirectionIcon(8), AppIcon.arrowDownRight); // bottomRight
     });
 
-    testWidgets('selected position shows image icon instead of direction icon', (final WidgetTester tester) async {
+    testWidgets('selected position shows image icon instead of direction icon', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: NineGridSelector(
             selectedPosition: CanvasResizePosition.center,
-            onPositionSelected: (final CanvasResizePosition position) {},
+            onPositionSelected: (CanvasResizePosition position) {},
           ),
         ),
       );
@@ -131,8 +131,8 @@ void main() {
       expect(find.byType(AppSvgIcon), findsNWidgets(9));
 
       final List<AppSvgIcon> icons = tester.widgetList<AppSvgIcon>(find.byType(AppSvgIcon)).toList();
-      expect(icons.where((final AppSvgIcon icon) => icon.icon == AppIcon.image), hasLength(1));
-      expect(icons.where((final AppSvgIcon icon) => icon.icon == AppIcon.cropSquare), isEmpty);
+      expect(icons.where((AppSvgIcon icon) => icon.icon == AppIcon.image), hasLength(1));
+      expect(icons.where((AppSvgIcon icon) => icon.icon == AppIcon.cropSquare), isEmpty);
     });
   });
 }

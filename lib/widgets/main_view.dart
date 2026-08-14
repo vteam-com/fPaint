@@ -42,7 +42,7 @@ class MainView extends StatefulWidget {
 /// State for [MainView], composing the canvas and editing overlays.
 class MainViewState extends State<MainView> {
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context);
 
     final ShellProvider shellProvider = ShellProvider.of(context);
@@ -51,8 +51,8 @@ class MainViewState extends State<MainView> {
       key: Keys.mainViewScreenshotBoundary,
       child: ListenableBuilder(
         listenable: shellProvider.canvasFitRequestListenable,
-        builder: (final BuildContext _, final Widget? _) => LayoutBuilder(
-          builder: (final BuildContext context, final BoxConstraints constraints) {
+        builder: (BuildContext _, Widget? _) => LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
             // Keep the canvas viewport and every screen-space overlay in the same
             // layout pass so side-panel resizes cannot leave overlays one frame behind.
             if (shellProvider.canvasPlacement == CanvasAutoPlacement.fit) {
@@ -64,7 +64,7 @@ class MainViewState extends State<MainView> {
 
             return ListenableBuilder(
               listenable: appProvider.mainViewCompositeListenable,
-              builder: (final BuildContext _, final Widget? _) {
+              builder: (BuildContext _, Widget? _) {
                 final bool hasActiveTransformOverlay = appProvider.hasActiveTransformOverlay;
                 // The brush-size ring is a paint-tool affordance. The selector
                 // (incl. Edge Detection wand) never paints, so it is hidden there
@@ -175,7 +175,7 @@ class MainViewState extends State<MainView> {
                       _buildEyeDropper(
                         appProvider: appProvider,
                         position: appProvider.eyeDropPositionForBrush!,
-                        onColorPicked: (final Color color) {
+                        onColorPicked: (Color color) {
                           appProvider.brushColor = color;
                         },
                         onDismiss: () {
@@ -187,7 +187,7 @@ class MainViewState extends State<MainView> {
                       _buildEyeDropper(
                         appProvider: appProvider,
                         position: appProvider.eyeDropPositionForFill!,
-                        onColorPicked: (final Color color) {
+                        onColorPicked: (Color color) {
                           appProvider.fillColor = color;
                         },
                         onDismiss: () {
@@ -211,10 +211,10 @@ class MainViewState extends State<MainView> {
                             !appProvider.transformModel.isVisible &&
                             !appProvider.selectorModel.isDrawing,
                         isDrawing: appProvider.selectorModel.isDrawing,
-                        onDrag: (final Offset offset) {
+                        onDrag: (Offset offset) {
                           appProvider.selectionTranslateByScreenDelta(offset);
                         },
-                        onDuplicateMove: (final Offset offset, final bool duplicateOnNewLayer) async {
+                        onDuplicateMove: (Offset offset, bool duplicateOnNewLayer) async {
                           if (!duplicateOnNewLayer && appProvider.isSelectedLayerLocked) {
                             _showLockedLayerMessage(appProvider);
                             return;
@@ -225,13 +225,13 @@ class MainViewState extends State<MainView> {
                             onNewLayer: duplicateOnNewLayer,
                           );
                         },
-                        onScale: (final double factor) {
+                        onScale: (double factor) {
                           appProvider.selectionScaleUniform(factor);
                         },
-                        onResize: (final NineGridHandle handle, final Offset offset) {
+                        onResize: (NineGridHandle handle, Offset offset) {
                           appProvider.selectionResize(handle, offset);
                         },
-                        onRotate: (final double angleRadians) {
+                        onRotate: (double angleRadians) {
                           appProvider.selectionRotate(angleRadians);
                         },
                         onToggleTransformMode: () async {
@@ -252,7 +252,7 @@ class MainViewState extends State<MainView> {
                         onCancel: () {
                           appProvider.clearSelectionAndRestorePreviousTool();
                         },
-                        onEffectSelected: (final SelectionEffect effect, final BuildContext _) async {
+                        onEffectSelected: (SelectionEffect effect, BuildContext _) async {
                           if (appProvider.isSelectedLayerLocked) {
                             _showLockedLayerMessage(appProvider);
                             return;
@@ -288,7 +288,7 @@ class MainViewState extends State<MainView> {
                         height: double.infinity,
                         child: FillWidget(
                           fillModel: appProvider.fillModel,
-                          onUpdate: (final GradientPoint _) {
+                          onUpdate: (GradientPoint _) {
                             appProvider.updateGradientPreview();
                           },
                           onApply: appProvider.applyGradientPreview,
@@ -362,16 +362,16 @@ class MainViewState extends State<MainView> {
 
   /// Builds a [MagnifyingEyeDropper] for either brush or fill color picking.
   Widget _buildEyeDropper({
-    required final AppProvider appProvider,
-    required final Offset position,
-    required final ValueChanged<Color> onColorPicked,
-    required final VoidCallback onDismiss,
+    required AppProvider appProvider,
+    required Offset position,
+    required ValueChanged<Color> onColorPicked,
+    required VoidCallback onDismiss,
   }) {
     return MagnifyingEyeDropper(
       layers: appProvider.layers,
       pointerPosition: position,
       pixelPosition: appProvider.toCanvas(position),
-      onColorPicked: (final Color color) async {
+      onColorPicked: (Color color) async {
         onColorPicked(color);
         onDismiss();
         appProvider.update();
@@ -387,7 +387,7 @@ class MainViewState extends State<MainView> {
   ///
   /// This method is responsible for creating the widget that displays the
   /// canvas, applying the necessary transformations for panning and scaling.
-  Widget _displayCanvas(final AppProvider appProvider) {
+  Widget _displayCanvas(AppProvider appProvider) {
     return DecoratedBox(
       decoration: const BoxDecoration(
         gradient: RadialGradient(
@@ -421,7 +421,7 @@ class MainViewState extends State<MainView> {
     );
   }
 
-  void _showLockedLayerMessage(final AppProvider appProvider) {
+  void _showLockedLayerMessage(AppProvider appProvider) {
     showSnackBarIfMounted(
       context,
       context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
@@ -436,7 +436,7 @@ class _ToleranceAnchorMarker extends StatelessWidget {
   const _ToleranceAnchorMarker();
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       width: AppInteraction.toleranceAnchorMarkerSize,
       height: AppInteraction.toleranceAnchorMarkerSize,
@@ -472,7 +472,7 @@ class _BrushSizePreviewOverlay extends StatelessWidget {
   final Color color;
   final double diameter;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return CustomPaint(
       key: Keys.brushSizePreviewOverlay,
       painter: _BrushSizePreviewOverlayPainter(color: color),
@@ -490,7 +490,7 @@ class _BrushSizePreviewOverlayPainter extends CustomPainter {
   final Color color;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     final Offset center = size.center(Offset.zero);
     final double radius = math.max(
       AppMath.zero.toDouble(),
@@ -531,7 +531,7 @@ class _BrushSizePreviewOverlayPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final _BrushSizePreviewOverlayPainter oldDelegate) {
+  bool shouldRepaint(covariant _BrushSizePreviewOverlayPainter oldDelegate) {
     return oldDelegate.color != color;
   }
 }
@@ -543,7 +543,7 @@ const double _kPixelBrushBandMinWidth = 1.5;
 /// [points] (canvas space) mapped via `canvasOffset + point * scale` — the same
 /// transform the canvas panel uses. A single point yields a zero-length segment
 /// so a round cap renders the footprint.
-Path _pixelBrushStrokePath(final List<Offset> points, final Offset canvasOffset, final double scale) {
+Path _pixelBrushStrokePath(List<Offset> points, Offset canvasOffset, double scale) {
   final Path path = Path();
   final Offset first = canvasOffset + (points.first * scale);
   path.moveTo(first.dx, first.dy);
@@ -597,7 +597,7 @@ class _PixelBrushGestureMarqueePainter extends CustomPainter {
   static const int _dashLightAlpha = 190;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     if (points.isEmpty) {
       return;
     }
@@ -634,7 +634,7 @@ class _PixelBrushGestureMarqueePainter extends CustomPainter {
   /// Draws [path] as a thin dark/light dashed line: dark dashes occupy the first
   /// half of each `2·_dashLength` period, light dashes the second, so together
   /// they read as a continuous marching-ants marquee.
-  void _drawDashedCentreLine(final Canvas canvas, final Path path) {
+  void _drawDashedCentreLine(Canvas canvas, Path path) {
     final Path darkDashes = _dashPath(path, AppMath.zero.toDouble());
     final Path lightDashes = _dashPath(path, _dashLength);
     canvas.drawPath(darkDashes, _dashPaint(AppColors.black.withAlpha(_dashDarkAlpha)));
@@ -644,7 +644,7 @@ class _PixelBrushGestureMarqueePainter extends CustomPainter {
   /// Extracts dashes of [_dashLength] (spaced one gap apart) from [source],
   /// starting [phase] px along each contour. A zero-length path (a tap) yields
   /// no dashes, leaving just the footprint band.
-  Path _dashPath(final Path source, final double phase) {
+  Path _dashPath(Path source, double phase) {
     final Path dashed = Path();
     for (final PathMetric metric in source.computeMetrics()) {
       double distance = phase;
@@ -657,7 +657,7 @@ class _PixelBrushGestureMarqueePainter extends CustomPainter {
     return dashed;
   }
 
-  Paint _dashPaint(final Color color) => Paint()
+  Paint _dashPaint(Color color) => Paint()
     ..color = color
     ..style = PaintingStyle.stroke
     ..strokeWidth = _marqueeLineWidth
@@ -665,7 +665,7 @@ class _PixelBrushGestureMarqueePainter extends CustomPainter {
     ..strokeJoin = StrokeJoin.round;
 
   @override
-  bool shouldRepaint(covariant final _PixelBrushGestureMarqueePainter oldDelegate) {
+  bool shouldRepaint(covariant _PixelBrushGestureMarqueePainter oldDelegate) {
     return !identical(oldDelegate.points, points) ||
         oldDelegate.brushSize != brushSize ||
         oldDelegate.canvasOffset != canvasOffset ||
@@ -706,11 +706,11 @@ class _PixelBrushProcessingShimmerState extends State<_PixelBrushProcessingShimm
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return RepaintBoundary(
       child: AnimatedBuilder(
         animation: _controller,
-        builder: (final BuildContext _, final Widget? _) => CustomPaint(
+        builder: (BuildContext _, Widget? _) => CustomPaint(
           size: Size.infinite,
           painter: _PixelBrushProcessingShimmerPainter(
             points: widget.points,
@@ -754,7 +754,7 @@ class _PixelBrushProcessingShimmerPainter extends CustomPainter {
   static const double _stripeFraction = 0.35;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     if (points.isEmpty) {
       return;
     }
@@ -804,7 +804,7 @@ class _PixelBrushProcessingShimmerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final _PixelBrushProcessingShimmerPainter oldDelegate) {
+  bool shouldRepaint(covariant _PixelBrushProcessingShimmerPainter oldDelegate) {
     return oldDelegate.progress != progress ||
         !identical(oldDelegate.points, points) ||
         oldDelegate.brushSize != brushSize ||
