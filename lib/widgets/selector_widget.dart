@@ -168,14 +168,14 @@ const int _selectionModeButtonCount = AppMath.four;
 const int _selectionQuickActionButtonCount = AppMath.triple;
 const double _selectionToolbarSurfacePadding = AppSpacing.small;
 
-Offset _topLeft(final Rect b) => b.topLeft;
-Offset _topRight(final Rect b) => b.topRight;
-Offset _bottomLeft(final Rect b) => b.bottomLeft;
-Offset _bottomRight(final Rect b) => b.bottomRight;
-Offset _centerLeft(final Rect b) => Offset(b.left, b.center.dy);
-Offset _centerRight(final Rect b) => Offset(b.right, b.center.dy);
-Offset _centerTop(final Rect b) => Offset(b.center.dx, b.top);
-Offset _centerBottom(final Rect b) => Offset(b.center.dx, b.bottom);
+Offset _topLeft(Rect b) => b.topLeft;
+Offset _topRight(Rect b) => b.topRight;
+Offset _bottomLeft(Rect b) => b.bottomLeft;
+Offset _bottomRight(Rect b) => b.bottomRight;
+Offset _centerLeft(Rect b) => Offset(b.left, b.center.dy);
+Offset _centerRight(Rect b) => Offset(b.right, b.center.dy);
+Offset _centerTop(Rect b) => Offset(b.center.dx, b.top);
+Offset _centerBottom(Rect b) => Offset(b.center.dx, b.bottom);
 
 class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFocusMixin<SelectionRectWidget> {
   Size _activeResizeDimensions = Size.zero;
@@ -186,7 +186,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
   bool _isDuplicateMovePending = false;
   Offset _pendingDuplicateMoveDelta = Offset.zero;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     if (widget.path1 == null) {
       return const SizedBox();
     }
@@ -232,8 +232,8 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
           position: bounds.center,
           size: handleSize,
           cursor: SystemMouseCursors.move,
-          onPanStart: (final DragStartDetails _) => _beginTranslateFeedback(),
-          onPanUpdate: (final DragUpdateDetails details) => _handleMoveDelta(details.delta),
+          onPanStart: (DragStartDetails _) => _beginTranslateFeedback(),
+          onPanUpdate: (DragUpdateDetails details) => _handleMoveDelta(details.delta),
           onPanEnd: _endFeedback,
           onPanCancel: _endFeedback,
         ),
@@ -245,7 +245,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
             position: desc.position(bounds),
             size: handleSize,
             cursor: desc.cursor,
-            onPanUpdate: (final DragUpdateDetails details) {
+            onPanUpdate: (DragUpdateDetails details) {
               widget.onResize(desc.handle, details.delta);
               _updateResizeFeedback();
             },
@@ -291,10 +291,10 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
 
   /// Builds the contextual selection toolbar and feedback bubble.
   Widget _buildModeControls(
-    final Rect bounds,
-    final AppLocalizations l10n,
-    final InteractionLayoutProfile interactionProfile, {
-    required final bool showQuickActions,
+    Rect bounds,
+    AppLocalizations l10n,
+    InteractionLayoutProfile interactionProfile, {
+    required bool showQuickActions,
   }) {
     final double buttonSize = interactionProfile.buttonSize;
     final double spacing = interactionProfile.buttonSpacing;
@@ -348,9 +348,9 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
             iconSize: iconSize,
             isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.translate,
             cursor: SystemMouseCursors.move,
-            onPanStart: (final DragStartDetails _) => _beginTranslateFeedback(),
-            onPanUpdate: (final DragUpdateDetails details) => _handleMoveDelta(details.delta),
-            onPanEnd: (final DragEndDetails _) => _endFeedback(),
+            onPanStart: (DragStartDetails _) => _beginTranslateFeedback(),
+            onPanUpdate: (DragUpdateDetails details) => _handleMoveDelta(details.delta),
+            onPanEnd: (DragEndDetails _) => _endFeedback(),
             onPanCancel: _endFeedback,
           ),
           buildOverlayModeButton(
@@ -360,8 +360,8 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
             iconSize: iconSize,
             isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.scale,
             cursor: SystemMouseCursors.grab,
-            onPanStart: (final DragStartDetails _) => _beginScaleFeedback(),
-            onPanUpdate: (final DragUpdateDetails details) {
+            onPanStart: (DragStartDetails _) => _beginScaleFeedback(),
+            onPanUpdate: (DragUpdateDetails details) {
               final double previousDistance = (scaleHandleCenter - bounds.center).distance;
               final Offset pointer = scaleHandleCenter + details.delta;
               final double currentDistance = (pointer - bounds.center).distance;
@@ -372,7 +372,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
               _updateScaleFeedback(factor);
               widget.onScale(factor);
             },
-            onPanEnd: (final DragEndDetails _) => _endFeedback(),
+            onPanEnd: (DragEndDetails _) => _endFeedback(),
             onPanCancel: _endFeedback,
           ),
           buildOverlayModeButton(
@@ -382,8 +382,8 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
             iconSize: iconSize,
             isSelected: _feedbackMode == _SelectionOverlayFeedbackMode.rotate,
             cursor: SystemMouseCursors.grab,
-            onPanStart: (final DragStartDetails _) => _beginRotateFeedback(),
-            onPanUpdate: (final DragUpdateDetails details) {
+            onPanStart: (DragStartDetails _) => _beginRotateFeedback(),
+            onPanUpdate: (DragUpdateDetails details) {
               final Offset pointer = rotateHandleCenter + details.delta;
               final double previousAngle = atan2(
                 rotateHandleCenter.dy - bounds.center.dy,
@@ -397,7 +397,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
               _updateRotateFeedback(angleDelta);
               widget.onRotate(angleDelta);
             },
-            onPanEnd: (final DragEndDetails _) => _endFeedback(),
+            onPanEnd: (DragEndDetails _) => _endFeedback(),
             onPanCancel: _endFeedback,
           ),
           buildOverlayModeButton(
@@ -460,16 +460,16 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
 
   /// Returns the width of one toolbar group's button content.
   double _controlGroupContentWidth({
-    required final double buttonSize,
-    required final double spacing,
-    required final int buttonCount,
+    required double buttonSize,
+    required double spacing,
+    required int buttonCount,
   }) {
     final int gapCount = max(AppMath.zero, buttonCount - AppMath.one);
     return (buttonSize * buttonCount) + (spacing * gapCount);
   }
 
   /// Returns the full grouped-surface width after adding shared panel padding.
-  double _controlSurfaceWidth({required final double contentWidth}) {
+  double _controlSurfaceWidth({required double contentWidth}) {
     return contentWidth + (_selectionToolbarSurfacePadding * AppMath.pair);
   }
 
@@ -491,7 +491,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
   }
 
   /// Returns the localized label for the active feedback bubble.
-  String _feedbackLabel(final AppLocalizations l10n) {
+  String _feedbackLabel(AppLocalizations l10n) {
     if (widget.isDrawing && widget.path1 != null) {
       final Rect bounds = widget.path1!.getBounds();
       return l10n.dimensionsValue(
@@ -534,7 +534,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
   }
 
   /// Executes the copy action and confirms it with a transient snackbar.
-  Future<void> _handleCopy(final AppLocalizations l10n) async {
+  Future<void> _handleCopy(AppLocalizations l10n) async {
     await widget.onCopy();
     if (!mounted) {
       return;
@@ -549,7 +549,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
 
   /// Routes move deltas either to marquee translation or, when the platform
   /// duplicate modifier is held, to the duplicate-and-move handoff callback.
-  void _handleMoveDelta(final Offset delta) {
+  void _handleMoveDelta(Offset delta) {
     if (_shouldDuplicateMoveGesture) {
       if (!_isDuplicateMovePending && _pendingDuplicateMoveDelta == Offset.zero) {
         _duplicateMoveOnNewLayer = _duplicateMoveCreatesNewLayer;
@@ -578,9 +578,9 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
 
   /// Returns the total width of the contextual toolbar for the current state.
   double _selectionToolbarWidth({
-    required final double buttonSize,
-    required final double spacing,
-    required final bool showQuickActions,
+    required double buttonSize,
+    required double spacing,
+    required bool showQuickActions,
   }) {
     final double modeControlsWidth = _controlSurfaceWidth(
       contentWidth: _controlGroupContentWidth(
@@ -625,7 +625,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
 
   /// Accumulates [angleRadians] into the live rotation feedback and triggers
   /// haptic feedback when the cumulative angle crosses a snap interval.
-  void _updateRotateFeedback(final double angleRadians) {
+  void _updateRotateFeedback(double angleRadians) {
     setState(() {
       if (_feedbackMode != _SelectionOverlayFeedbackMode.rotate) {
         _feedbackMode = _SelectionOverlayFeedbackMode.rotate;
@@ -639,7 +639,7 @@ class _SelectionRectWidgetState extends State<SelectionRectWidget> with EscapeFo
 
   /// Multiplies the live scale percentage by [factor] and triggers haptic
   /// feedback when the cumulative scale crosses a snap interval.
-  void _updateScaleFeedback(final double factor) {
+  void _updateScaleFeedback(double factor) {
     setState(() {
       if (_feedbackMode != _SelectionOverlayFeedbackMode.scale) {
         _feedbackMode = _SelectionOverlayFeedbackMode.scale;
@@ -670,7 +670,7 @@ class _EffectsPopupButton extends StatefulWidget {
 
 class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return buildOverlayCircleButton(
       key: Keys.effectsButton,
       tooltip: widget.l10n.effects,
@@ -686,7 +686,7 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
 
   /// Opens a popup menu anchored below this button listing all available
   /// [SelectionEffect] options with their icons and localized labels.
-  void _showEffectsMenu(final BuildContext context) {
+  void _showEffectsMenu(BuildContext context) {
     final RenderBox button = context.findRenderObject()! as RenderBox;
     final Offset offset = button.localToGlobal(
       Offset(button.size.width / AppMath.pair, button.size.height),
@@ -702,7 +702,7 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
       ),
       items: SelectionEffect.values
           .map(
-            (final SelectionEffect effect) => AppPopupMenuItem<SelectionEffect>(
+            (SelectionEffect effect) => AppPopupMenuItem<SelectionEffect>(
               value: effect,
               child: Row(
                 spacing: AppSpacing.medium,
@@ -717,7 +717,7 @@ class _EffectsPopupButtonState extends State<_EffectsPopupButton> {
             ),
           )
           .toList(),
-    ).then((final SelectionEffect? selected) {
+    ).then((SelectionEffect? selected) {
       if (mounted && selected != null) {
         // ignore: use_build_context_synchronously
         widget.onEffectSelected(selected, context);

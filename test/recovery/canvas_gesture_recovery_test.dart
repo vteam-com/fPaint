@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
@@ -17,6 +16,7 @@ import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../helpers/recovery_test_helpers.dart';
 
@@ -26,7 +26,7 @@ import '../helpers/recovery_test_helpers.dart';
 /// re-rendered display. An opaque layer must stay fully opaque; any value below
 /// 255 is the transparent seam the canvas backdrop shows through as the white
 /// rectangle around the stroke.
-Future<int> _committedPatchMinDisplayAlpha(final Rect patchBounds, final double scale) async {
+Future<int> _committedPatchMinDisplayAlpha(Rect patchBounds, double scale) async {
   final LayerProvider layer = LayerProvider(
     name: 'Seam',
     size: const Size(64, 64),
@@ -52,7 +52,7 @@ Future<int> _committedPatchMinDisplayAlpha(final Rect patchBounds, final double 
   final ui.Image patch = await renderCanvasImage(
     width: patchBounds.width.toInt(),
     height: patchBounds.height.toInt(),
-    draw: (final ui.Canvas canvas) => canvas.drawRect(
+    draw: (ui.Canvas canvas) => canvas.drawRect(
       Rect.fromLTWH(0, 0, patchBounds.width, patchBounds.height),
       Paint()..color = const Color(0xFF992222),
     ),
@@ -69,7 +69,7 @@ Future<int> _committedPatchMinDisplayAlpha(final Rect patchBounds, final double 
   final ui.Image displayed = await renderCanvasImage(
     width: 64,
     height: 64,
-    draw: (final ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, scale, () {}),
+    draw: (ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, scale, () {}),
   );
   final ByteData? bytes = await displayed.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
   displayed.dispose();
@@ -83,7 +83,7 @@ Future<int> _committedPatchMinDisplayAlpha(final Rect patchBounds, final double 
 }
 
 void main() {
-  testWidgets('pointer up flushes a recovery draft immediately', (final WidgetTester tester) async {
+  testWidgets('pointer up flushes a recovery draft immediately', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final AppProvider appProvider = AppProvider(preferences: preferences);
     final ShellProvider shellProvider = ShellProvider();
@@ -93,7 +93,7 @@ void main() {
       layers: appProvider.layers,
       shellProvider: shellProvider,
       storage: storage,
-      encoder: (final LayersProvider _) async => <int>[1, 2, 3],
+      encoder: (LayersProvider _) async => <int>[1, 2, 3],
       saveDebounce: const Duration(seconds: 10),
     );
 
@@ -143,7 +143,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('text dialog does not lock subsequent tools', (final WidgetTester tester) async {
+  testWidgets('text dialog does not lock subsequent tools', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final AppProvider appProvider = AppProvider(preferences: preferences);
     final ShellProvider shellProvider = ShellProvider();
@@ -153,7 +153,7 @@ void main() {
       layers: appProvider.layers,
       shellProvider: shellProvider,
       storage: storage,
-      encoder: (final LayersProvider _) async => <int>[1, 2, 3],
+      encoder: (LayersProvider _) async => <int>[1, 2, 3],
       saveDebounce: const Duration(seconds: 10),
     );
 
@@ -214,7 +214,7 @@ void main() {
   });
 
   testWidgets('straight-line selector closes only after returning to the first point', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final AppProvider appProvider = AppProvider(preferences: preferences);
@@ -225,7 +225,7 @@ void main() {
       layers: appProvider.layers,
       shellProvider: shellProvider,
       storage: storage,
-      encoder: (final LayersProvider _) async => <int>[1, 2, 3],
+      encoder: (LayersProvider _) async => <int>[1, 2, 3],
       saveDebounce: const Duration(seconds: 10),
     );
 
@@ -263,7 +263,7 @@ void main() {
 
     final Offset canvasTopLeft = tester.getTopLeft(find.byType(CanvasGestureHandler));
 
-    Future<void> tapCanvas(final Offset canvasPosition) async {
+    Future<void> tapCanvas(Offset canvasPosition) async {
       await tester.tapAt(canvasTopLeft + canvasPosition);
       await tester.pump();
     }
@@ -296,7 +296,7 @@ void main() {
   });
 
   testWidgets('straight-line selector closes on double tap without returning to the first point', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final AppProvider appProvider = AppProvider(preferences: preferences);
@@ -307,7 +307,7 @@ void main() {
       layers: appProvider.layers,
       shellProvider: shellProvider,
       storage: storage,
-      encoder: (final LayersProvider _) async => <int>[1, 2, 3],
+      encoder: (LayersProvider _) async => <int>[1, 2, 3],
       saveDebounce: const Duration(seconds: 10),
     );
 
@@ -345,7 +345,7 @@ void main() {
 
     final Offset canvasTopLeft = tester.getTopLeft(find.byType(CanvasGestureHandler));
 
-    Future<void> tapCanvas(final Offset canvasPosition) async {
+    Future<void> tapCanvas(Offset canvasPosition) async {
       await tester.tapAt(canvasTopLeft + canvasPosition);
       await tester.pump();
     }
@@ -411,7 +411,7 @@ void main() {
     final ui.Image patchImage = await renderCanvasImage(
       width: 8,
       height: 8,
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.drawRect(
           const Rect.fromLTWH(0, 0, 8, 8),
           Paint()..color = const Color(0xFFFFFFFF),
@@ -429,7 +429,7 @@ void main() {
       mode: PixelBrushMode.smudge,
     );
 
-    final List<ActionType> actions = layer.actionStack.map((final UserActionDrawing action) => action.action).toList();
+    final List<ActionType> actions = layer.actionStack.map((UserActionDrawing action) => action.action).toList();
     expect(actions, contains(ActionType.region));
     expect(actions, contains(ActionType.smudge));
     // No separate `cut`: the patch action replaces its region with BlendMode.src.

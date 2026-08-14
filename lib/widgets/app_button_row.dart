@@ -38,7 +38,7 @@ class AppButtonRow extends StatelessWidget {
   final List<Widget> actions;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final _AppButtonRowGroups groups = _AppButtonRowGroups.fromActions(actions);
     final List<Widget> trailingActions = <Widget>[
       ...groups.secondary,
@@ -103,7 +103,7 @@ class AppRowDangerButton extends AppButtonRowWidget {
   AppButtonRowSlot get slot => AppButtonRowSlot.danger;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AppButtonDanger(
       onPressed: onPressed,
       text: text,
@@ -138,7 +138,7 @@ class AppRowIconButton extends AppButtonRowWidget {
   AppButtonRowSlot get slot => AppButtonRowSlot.icon;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AppButtonIcon(
       icon: icon,
       onPressed: onPressed,
@@ -167,7 +167,7 @@ class AppRowSecondaryButton extends AppButtonRowWidget {
   AppButtonRowSlot get slot => AppButtonRowSlot.secondary;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AppButtonText(
       onPressed: onPressed,
       text: text,
@@ -190,7 +190,7 @@ class AppRowPrimaryButton extends AppButtonRowWidget {
   AppButtonRowSlot get slot => AppButtonRowSlot.primary;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AppButtonPrimary(
       onPressed: onPressed,
       text: text,
@@ -206,9 +206,9 @@ class _AppButtonRowGroup extends StatelessWidget {
   final List<Widget> actions;
   final CrossAxisAlignment verticalAlignment;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (final BuildContext _, final BoxConstraints constraints) {
+      builder: (BuildContext _, BoxConstraints constraints) {
         if (_shouldStackVertically(constraints.maxWidth)) {
           return Column(
             mainAxisSize: MainAxisSize.min,
@@ -228,7 +228,7 @@ class _AppButtonRowGroup extends StatelessWidget {
   }
 
   /// Returns a coarse width estimate for [action] so narrow containers can stack safely.
-  double _estimatedActionWidth(final Widget action) {
+  double _estimatedActionWidth(Widget action) {
     return _describeAppButtonRowAction(action).estimatedWidth;
   }
 
@@ -240,19 +240,19 @@ class _AppButtonRowGroup extends StatelessWidget {
 
     final double contentWidth = actions.fold<double>(
       0.0,
-      (final double total, final Widget action) => total + _estimatedActionWidth(action),
+      (double total, Widget action) => total + _estimatedActionWidth(action),
     );
     final int gaps = actions.length - 1;
     return contentWidth + (gaps * AppSpacing.medium);
   }
 
-  bool _shouldStackVertically(final double maxWidth) {
+  bool _shouldStackVertically(double maxWidth) {
     return maxWidth.isFinite && maxWidth < _estimatedHorizontalWidth;
   }
 }
 
 class _AppButtonRowGroups {
-  factory _AppButtonRowGroups.fromActions(final List<Widget> actions) {
+  factory _AppButtonRowGroups.fromActions(List<Widget> actions) {
     final List<Widget> danger = <Widget>[];
     final List<Widget> icon = <Widget>[];
     final List<Widget> secondary = <Widget>[];
@@ -293,7 +293,7 @@ class _AppButtonRowGroups {
 
 /// Maps each supported action widget to the semantic button-row slot metadata
 /// used by both grouping and width estimation.
-_AppButtonRowActionDescription _describeAppButtonRowAction(final Widget action) {
+_AppButtonRowActionDescription _describeAppButtonRowAction(Widget action) {
   if (action is AppButtonRowWidget) {
     return _actionDescriptionForButtonRowSlot(action.slot);
   }
@@ -312,7 +312,7 @@ _AppButtonRowActionDescription _describeAppButtonRowAction(final Widget action) 
 /// Returns the shared layout metadata for a semantic button-row slot so all
 /// row calculations stay aligned on a single source of truth.
 _AppButtonRowActionDescription _actionDescriptionForButtonRowSlot(
-  final AppButtonRowSlot slot,
+  AppButtonRowSlot slot,
 ) {
   return switch (slot) {
     AppButtonRowSlot.icon => const _AppButtonRowActionDescription(
@@ -346,8 +346,8 @@ class _AppButtonRowActionDescription {
 
 /// Wraps button-row previews with directionality and a constrained width.
 Widget _buildButtonRowPreviewContainer({
-  required final double width,
-  required final Widget child,
+  required double width,
+  required Widget child,
 }) {
   return Directionality(
     textDirection: TextDirection.ltr,

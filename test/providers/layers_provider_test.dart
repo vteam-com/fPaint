@@ -1,13 +1,13 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../helpers/layers_provider_test_helper.dart';
 
@@ -117,7 +117,7 @@ void main() {
 
       expect(layersProvider.length, initialLength - 1);
       expect(layersProvider.get(0), layerToKeep); // LayerToKeep should remain
-      expect(layersProvider.list.any((final LayerProvider l) => l.name == 'Layer2'), isFalse);
+      expect(layersProvider.list.any((LayerProvider l) => l.name == 'Layer2'), isFalse);
     });
 
     test('remove last layer adjusts selection to new last layer', () {
@@ -161,12 +161,12 @@ void main() {
 
     test('reorderLayer ignores out-of-range indexes', () {
       layersProvider.addTop(name: 'LayerA');
-      final List<String> namesBefore = layersProvider.list.map((final LayerProvider l) => l.name).toList();
+      final List<String> namesBefore = layersProvider.list.map((LayerProvider l) => l.name).toList();
 
       layersProvider.reorderLayer(fromIndex: _outOfRangeIndex, toIndex: _firstLayerIndex);
       layersProvider.reorderLayer(fromIndex: _firstLayerIndex, toIndex: _outOfRangeIndex);
 
-      final List<String> namesAfter = layersProvider.list.map((final LayerProvider l) => l.name).toList();
+      final List<String> namesAfter = layersProvider.list.map((LayerProvider l) => l.name).toList();
       expect(namesAfter, namesBefore);
     });
   });
@@ -182,7 +182,7 @@ void main() {
       );
 
       final List<LayerProvider> selectedLayers = layersProvider.list
-          .where((final LayerProvider layer) => layer.isSelected)
+          .where((LayerProvider layer) => layer.isSelected)
           .toList();
 
       expect(layersProvider.selectedLayerIndex, _firstLayerIndex);
@@ -702,7 +702,7 @@ void main() {
   });
 }
 
-Future<Color> _pixelColorAt(final ui.Image image, final int x, final int y) async {
+Future<Color> _pixelColorAt(ui.Image image, int x, int y) async {
   final ByteData? imageBytes = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
 
   expect(imageBytes, isNotNull);

@@ -1,6 +1,5 @@
 // ignore_for_file: unnecessary_import
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/color_helper.dart' hide hsvToColor;
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -12,10 +11,11 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('ColorSelector Widget Tests', () {
-    testWidgets('Initial rendering reflects input color', (final WidgetTester tester) async {
+    testWidgets('Initial rendering reflects input color', (WidgetTester tester) async {
       // Using blue as it has a non-zero hue, to avoid potential issues with hue=0 being default/uninitialized for slider
       const Color initialColor = Color.fromARGB(255, 0, 0, 255); // Blue
 
@@ -24,7 +24,7 @@ void main() {
           home: Scaffold(
             body: ColorSelector(
               color: initialColor,
-              onColorChanged: (final Color color) {
+              onColorChanged: (Color color) {
                 //
               },
             ),
@@ -51,18 +51,18 @@ void main() {
       expect(alphaSlider.value, closeTo(hslColor.alpha, 0.01));
     });
 
-    testWidgets('Hue slider interaction calls onColorChanged and updates color', (final WidgetTester tester) async {
+    testWidgets('Hue slider interaction calls onColorChanged and updates color', (WidgetTester tester) async {
       Color currentColor = const Color.fromARGB(255, 255, 0, 0); // Initial Red
       Color? newColorReported;
 
       await tester.pumpWidget(
         StatefulBuilder(
-          builder: (final BuildContext context, final StateSetter setState) {
+          builder: (BuildContext context, StateSetter setState) {
             return MaterialApp(
               home: Scaffold(
                 body: ColorSelector(
                   color: currentColor,
-                  onColorChanged: (final Color color) {
+                  onColorChanged: (Color color) {
                     setState(() {
                       newColorReported = color;
                       currentColor = color; // Keep widget updated if it rebuilds with new color
@@ -104,7 +104,7 @@ void main() {
       expect(hslNewColor.alpha, closeTo(initialHsl.alpha, 0.01));
     });
 
-    testWidgets('Brightness slider interaction calls onColorChanged', (final WidgetTester tester) async {
+    testWidgets('Brightness slider interaction calls onColorChanged', (WidgetTester tester) async {
       const Color currentColor = Color.fromARGB(255, 255, 0, 0); // Initial Red
       Color? newColorReported;
 
@@ -113,7 +113,7 @@ void main() {
           home: Scaffold(
             body: ColorSelector(
               color: currentColor,
-              onColorChanged: (final Color color) {
+              onColorChanged: (Color color) {
                 newColorReported = color;
               },
             ),
@@ -130,7 +130,7 @@ void main() {
       expect(HSLColor.fromColor(newColorReported!).lightness, closeTo(0.8, 0.01));
     });
 
-    testWidgets('Alpha slider interaction calls onColorChanged', (final WidgetTester tester) async {
+    testWidgets('Alpha slider interaction calls onColorChanged', (WidgetTester tester) async {
       const Color currentColor = Color.fromARGB(255, 255, 0, 0); // Initial Red
       Color? newColorReported;
 
@@ -139,7 +139,7 @@ void main() {
           home: Scaffold(
             body: ColorSelector(
               color: currentColor,
-              onColorChanged: (final Color color) {
+              onColorChanged: (Color color) {
                 newColorReported = color;
               },
             ),
@@ -158,14 +158,14 @@ void main() {
 
     testWidgets(
       'didUpdateWidget updates internal HSV and Alpha state',
-      (final WidgetTester tester) async {
+      (WidgetTester tester) async {
         Color testColor = Colors.cyan; // Start with Cyan (H=180)
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
               body: ColorSelector(
                 color: testColor,
-                onColorChanged: (final Color color) {},
+                onColorChanged: (Color color) {},
               ),
             ),
           ),
@@ -186,7 +186,7 @@ void main() {
             home: Scaffold(
               body: ColorSelector(
                 color: testColor,
-                onColorChanged: (final Color color) {},
+                onColorChanged: (Color color) {},
               ),
             ),
           ),
@@ -205,12 +205,12 @@ void main() {
   });
 
   group('CustomPainters Tests', () {
-    testWidgets('HueGradientPainter shouldRepaint is false', (final WidgetTester tester) async {
+    testWidgets('HueGradientPainter shouldRepaint is false', (WidgetTester tester) async {
       final HueGradientPainter painter = HueGradientPainter();
       expect(painter.shouldRepaint(HueGradientPainter()), isFalse);
     });
 
-    testWidgets('BrightnessGradientPainter shouldRepaint based on hue', (final WidgetTester tester) async {
+    testWidgets('BrightnessGradientPainter shouldRepaint based on hue', (WidgetTester tester) async {
       final BrightnessGradientPainter painter1 = BrightnessGradientPainter(hue: 0);
       final BrightnessGradientPainter painter2 = BrightnessGradientPainter(hue: 0);
       final BrightnessGradientPainter painter3 = BrightnessGradientPainter(hue: 120);
@@ -218,7 +218,7 @@ void main() {
       expect(painter1.shouldRepaint(painter3), isTrue); // Different hue
     });
 
-    testWidgets('AlphaGradientPainter shouldRepaint based on hue or brightness', (final WidgetTester tester) async {
+    testWidgets('AlphaGradientPainter shouldRepaint based on hue or brightness', (WidgetTester tester) async {
       final AlphaGradientPainter painter1 = AlphaGradientPainter(hue: 0, brightness: 0.5);
       final AlphaGradientPainter painter2 = AlphaGradientPainter(hue: 0, brightness: 0.5); // Same as painter1
       final AlphaGradientPainter painter3 = AlphaGradientPainter(hue: 120, brightness: 0.5); // Different hue
@@ -233,7 +233,7 @@ void main() {
   group('showColorPicker Utility', () {
     testWidgets(
       'showColorPicker calls showDialog with ColorPickerDialog',
-      (final WidgetTester tester) async {
+      (WidgetTester tester) async {
         Color selectedColorOut = Colors.transparent;
         const Key titleIconKey = Key('color_picker_title_icon');
         final ShellProvider shellProvider = ShellProvider()..deviceSizeSmall = false;
@@ -261,7 +261,7 @@ void main() {
                 theme: ThemeData(),
                 home: Scaffold(
                   body: Builder(
-                    builder: (final BuildContext context) {
+                    builder: (BuildContext context) {
                       return AppButtonPrimary(
                         onPressed: () {
                           showColorPicker(
@@ -272,7 +272,7 @@ void main() {
                               icon: AppIcon.colorLens,
                             ),
                             color: Colors.red, // Initial color for the dialog's ColorSelector
-                            onSelectedColor: (final Color color) {
+                            onSelectedColor: (Color color) {
                               selectedColorOut = color;
                             },
                           );
@@ -295,7 +295,7 @@ void main() {
         expect(find.text('Test Picker'), findsOneWidget);
         expect(
           find.byWidgetPredicate(
-            (final Widget widget) => widget is AppSvgIcon && widget.key == titleIconKey,
+            (Widget widget) => widget is AppSvgIcon && widget.key == titleIconKey,
           ),
           findsOneWidget,
         );

@@ -38,7 +38,7 @@ class ToolsPanel extends StatelessWidget {
   /// A boolean indicating whether the panel is in minimal mode.
   final bool minimal;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context);
 
     return SingleChildScrollView(
@@ -50,7 +50,7 @@ class ToolsPanel extends StatelessWidget {
             minimal: minimal,
             gestureParams: ListenableBuilder(
               listenable: appProvider.toolOptionsRepaintListenable,
-              builder: (final BuildContext _, final Widget? _) {
+              builder: (BuildContext _, Widget? _) {
                 final ActionType selectedTool = appProvider.selectedAction;
 
                 return AnimatedSwitcher(
@@ -58,7 +58,7 @@ class ToolsPanel extends StatelessWidget {
                   reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
                   switchInCurve: Curves.easeOutCubic,
                   switchOutCurve: Curves.easeInCubic,
-                  transitionBuilder: (final Widget child, final Animation<double> animation) {
+                  transitionBuilder: (Widget child, Animation<double> animation) {
                     return FadeTransition(
                       opacity: animation,
                       child: SizeTransition(
@@ -92,10 +92,10 @@ class ToolsPanel extends StatelessWidget {
 
   /// Adds a tool option for brush or fill color.
   void addToolOptionColor(
-    final List<Widget> widgets,
-    final AppProvider appProvider,
-    final BuildContext context,
-    final bool isBrush,
+    List<Widget> widgets,
+    AppProvider appProvider,
+    BuildContext context,
+    bool isBrush,
   ) {
     final AppLocalizations l10n = context.l10n;
     final String name = isBrush ? l10n.brushColor : l10n.fillColor;
@@ -111,7 +111,7 @@ class ToolsPanel extends StatelessWidget {
       previewKey: previewKey,
       color: color,
       isPickFromCanvasActive: isPickFromCanvasActive,
-      onColorChanged: (final Color selectedColor) {
+      onColorChanged: (Color selectedColor) {
         if (isBrush) {
           appProvider.brushColor = selectedColor;
         } else {
@@ -133,8 +133,8 @@ class ToolsPanel extends StatelessWidget {
 
   /// Adds a tool option for color tolerance.
   Widget addToolOptionTolerance(
-    final BuildContext context,
-    final AppProvider appProvider,
+    BuildContext context,
+    AppProvider appProvider,
   ) {
     final AppLocalizations l10n = context.l10n;
 
@@ -144,7 +144,7 @@ class ToolsPanel extends StatelessWidget {
       childLeft: AppButtonIcon(
         icon: AppIcon.support,
         onPressed: () {
-          showTolerancePicker(context, appProvider.tolerance, (final int newValue) {
+          showTolerancePicker(context, appProvider.tolerance, (int newValue) {
             appProvider.tolerance = newValue;
           });
         },
@@ -154,7 +154,7 @@ class ToolsPanel extends StatelessWidget {
           : TolerancePicker(
               title: l10n.tolerance,
               value: appProvider.tolerance,
-              onChanged: (final int value) {
+              onChanged: (int value) {
                 appProvider.tolerance = value;
               },
             ),
@@ -163,23 +163,23 @@ class ToolsPanel extends StatelessWidget {
 
   /// Adds a tool option for top colors.
   void addToolOptionTopColors(
-    final List<Widget> widgets,
-    final LayersProvider layers,
-    final AppProvider appProvider,
-    final bool minimal,
-    final AppLocalizations l10n,
+    List<Widget> widgets,
+    LayersProvider layers,
+    AppProvider appProvider,
+    bool minimal,
+    AppLocalizations l10n,
   ) {
     widgets.add(
       ListenableBuilder(
         listenable: layers.topColorsListenable,
-        builder: (final BuildContext _, final Widget? _) {
+        builder: (BuildContext _, Widget? _) {
           return _CollapsibleTopColors(
             compact: minimal,
             name: l10n.topColors(layers.topColors.length),
             child: TopColors(
               colorUsages: layers.topColors,
               onRefresh: layers.evaluateTopColor,
-              onColorPicked: (final Color color) {
+              onColorPicked: (Color color) {
                 if (appProvider.selectedAction == ActionType.rectangle ||
                     appProvider.selectedAction == ActionType.circle ||
                     appProvider.selectedAction == ActionType.fill) {
@@ -201,8 +201,8 @@ class ToolsPanel extends StatelessWidget {
 
   /// Returns a list of widgets representing the attributes for the selected tool.
   List<Widget> getWidgetForSelectedTool({
-    required final BuildContext context,
-    required final AppProvider appProvider,
+    required BuildContext context,
+    required AppProvider appProvider,
   }) {
     final List<Widget> widgets = <Widget>[];
     final AppLocalizations l10n = context.l10n;
@@ -316,7 +316,7 @@ class ToolsPanel extends StatelessWidget {
                     value: appProvider.brushSize,
                     min: min,
                     max: max,
-                    onChanged: (final double newValue) {
+                    onChanged: (double newValue) {
                       appProvider.brushSize = newValue;
                     },
                   );
@@ -330,7 +330,7 @@ class ToolsPanel extends StatelessWidget {
                       value: appProvider.brushSize,
                       min: min,
                       max: max,
-                      onChanged: (final double value) {
+                      onChanged: (double value) {
                         appProvider.brushSize = value;
                       },
                     ),
@@ -355,7 +355,7 @@ class ToolsPanel extends StatelessWidget {
                     title: l10n.effectIntensity,
                     titleIcon: AppSvgIcon(icon: selectedTool.icon),
                     value: appProvider.brushIntensity,
-                    onChanged: (final double newValue) {
+                    onChanged: (double newValue) {
                       appProvider.brushIntensity = newValue;
                     },
                   );
@@ -370,7 +370,7 @@ class ToolsPanel extends StatelessWidget {
                       max: AppEffects.maxIntensity,
                       divisions: AppLimits.sliderDivisions,
                       valueLabel: '${(appProvider.brushIntensity * AppMath.percentScale).round()}%',
-                      onChanged: (final double value) {
+                      onChanged: (double value) {
                         appProvider.brushIntensity = value;
                       },
                     ),
@@ -392,7 +392,7 @@ class ToolsPanel extends StatelessWidget {
                   showBrushStylePicker(
                     context,
                     appProvider.brushStyle,
-                    (final BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
+                    (BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
                   );
                 },
               ),
@@ -401,7 +401,7 @@ class ToolsPanel extends StatelessWidget {
                   : brushStyleDropDown(
                       context,
                       appProvider.brushStyle,
-                      (final BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
+                      (BrushStyle selectedBrushStyle) => appProvider.brushStyle = selectedBrushStyle,
                     ),
             ),
           );
@@ -433,9 +433,9 @@ class ToolsPanel extends StatelessWidget {
 
   /// Adds the gradient color list editor for linear/radial fill modes.
   void _addGradientColorEditor(
-    final List<Widget> widgets,
-    final AppProvider appProvider,
-    final BuildContext context,
+    List<Widget> widgets,
+    AppProvider appProvider,
+    BuildContext context,
   ) {
     final AppLocalizations l10n = context.l10n;
     widgets.add(
@@ -452,7 +452,7 @@ class ToolsPanel extends StatelessWidget {
                     context: context,
                     title: l10n.gradientColors,
                     color: appProvider.fillModel.gradientStopColors.first,
-                    onSelectedColor: (final Color picked) {
+                    onSelectedColor: (Color picked) {
                       appProvider.fillModel.gradientStopColors[0] = picked;
                       if (appProvider.fillModel.gradientPoints.isNotEmpty) {
                         appProvider.fillModel.gradientPoints.first.color = picked;
@@ -475,20 +475,20 @@ class ToolsPanel extends StatelessWidget {
 
   /// Adds the halftone size slider for flood fills.
   void _addHalftoneSlider(
-    final List<Widget> widgets,
-    final AppProvider appProvider,
-    final BuildContext context,
+    List<Widget> widgets,
+    AppProvider appProvider,
+    BuildContext context,
   ) {
     final AppLocalizations l10n = context.l10n;
     final bool halftoneEnabled = appProvider.fillModel.halftoneEnabled;
     final int halftonePercent = appProvider.fillModel.halftoneMaxDotSizePercent;
 
-    void updateHalftonePercent(final int value) {
+    void updateHalftonePercent(int value) {
       appProvider.setFillHalftoneMaxDotSizePercent(value);
       appProvider.updateGradientPreview();
     }
 
-    void updateHalftoneEnabled(final bool value) {
+    void updateHalftoneEnabled(bool value) {
       appProvider.setFillHalftoneEnabled(value);
       appProvider.updateGradientPreview();
     }
@@ -525,7 +525,7 @@ class ToolsPanel extends StatelessWidget {
                 min: AppMath.zero.toDouble(),
                 max: AppLimits.percentMax.toDouble(),
                 divisions: AppLimits.sliderDivisions,
-                onChanged: halftoneEnabled ? (final double value) => updateHalftonePercent(value.toInt()) : null,
+                onChanged: halftoneEnabled ? (double value) => updateHalftonePercent(value.toInt()) : null,
               ),
       ),
     );
@@ -533,14 +533,14 @@ class ToolsPanel extends StatelessWidget {
 
   /// Adds a color-related tool option row with preview, picker, and selector.
   void _addToolOptionColor({
-    required final List<Widget> widgets,
-    required final BuildContext context,
-    required final String name,
-    required final Key previewKey,
-    required final Color color,
-    required final bool isPickFromCanvasActive,
-    required final ValueChanged<Color> onColorChanged,
-    required final VoidCallback onPickFromCanvas,
+    required List<Widget> widgets,
+    required BuildContext context,
+    required String name,
+    required Key previewKey,
+    required Color color,
+    required bool isPickFromCanvasActive,
+    required ValueChanged<Color> onColorChanged,
+    required VoidCallback onPickFromCanvas,
   }) {
     widgets.add(
       ToolAttributeWidget(
@@ -605,13 +605,13 @@ class _CollapsibleTopColorsState extends State<_CollapsibleTopColors> {
   bool _expanded = false;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return ToolAttributeWidget(
       compact: widget.compact,
       name: widget.name,
       enabled: _expanded,
       enabledToggleKey: Keys.toolPanelTopColorsToggle,
-      onEnabledChanged: (final bool value) => setState(() => _expanded = value),
+      onEnabledChanged: (bool value) => setState(() => _expanded = value),
       childRight: widget.child,
     );
   }
@@ -619,14 +619,14 @@ class _CollapsibleTopColorsState extends State<_CollapsibleTopColors> {
 
 /// Builds a shared picker button used across the tools panel grids.
 Widget _buildActionPicker({
-  final Key? key,
-  required final bool minimal,
-  required final String name,
-  required final AppIcon icon,
-  final bool isSelected = false,
-  final Color? color,
-  final bool useSourceColors = false,
-  required final VoidCallback onPressed,
+  Key? key,
+  required bool minimal,
+  required String name,
+  required AppIcon icon,
+  bool isSelected = false,
+  Color? color,
+  bool useSourceColors = false,
+  required VoidCallback onPressed,
 }) {
   return AppButtonIcon(
     key: key,

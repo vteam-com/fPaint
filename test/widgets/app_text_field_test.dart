@@ -4,14 +4,14 @@ import 'package:fpaint/widgets/app_text_field.dart';
 
 void main() {
   group('AppTextField', () {
-    testWidgets('creates own controller when none provided', (final WidgetTester tester) async {
+    testWidgets('creates own controller when none provided', (WidgetTester tester) async {
       String? changedValue;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: AppTextField(
             hintText: 'Enter text',
-            onChanged: (final String value) => changedValue = value,
+            onChanged: (String value) => changedValue = value,
           ),
         ),
       );
@@ -24,7 +24,7 @@ void main() {
       expect(changedValue, 'Hello');
     });
 
-    testWidgets('uses provided controller', (final WidgetTester tester) async {
+    testWidgets('uses provided controller', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(text: 'Initial');
 
       await tester.pumpWidget(
@@ -38,7 +38,7 @@ void main() {
       controller.dispose();
     });
 
-    testWidgets('didUpdateWidget handles controller change', (final WidgetTester tester) async {
+    testWidgets('didUpdateWidget handles controller change', (WidgetTester tester) async {
       final TextEditingController controller1 = TextEditingController(text: 'One');
       final TextEditingController controller2 = TextEditingController(text: 'Two');
 
@@ -69,13 +69,13 @@ void main() {
       controller2.dispose();
     });
 
-    testWidgets('onSubmitted fires', (final WidgetTester tester) async {
+    testWidgets('onSubmitted fires', (WidgetTester tester) async {
       String? submitted;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
           child: AppTextField(
-            onSubmitted: (final String value) => submitted = value,
+            onSubmitted: (String value) => submitted = value,
           ),
         ),
       );
@@ -86,7 +86,7 @@ void main() {
       expect(submitted, 'Submit me');
     });
 
-    testWidgets('hint text hides while typing and returns when cleared', (final WidgetTester tester) async {
+    testWidgets('hint text hides while typing and returns when cleared', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,

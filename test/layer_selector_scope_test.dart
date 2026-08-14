@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Regression test for the embedded-editor startup crash:
 /// `No InheritedControllerScope<LayersProvider> found in context`.
@@ -17,7 +17,7 @@ import 'package:fpaint/providers/undo_provider.dart';
 /// looking it up, so it renders wherever it is mounted.
 void main() {
   testWidgets('LayerSelector renders without a LayersProvider scope ancestor', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     final UndoProvider undo = UndoProvider();
     final LayersProvider layers = LayersProvider(undoProvider: undo)..size = const Size(800, 800);
@@ -39,7 +39,7 @@ void main() {
         // No InheritedControllerScope anywhere in the tree, mimicking an overlay
         // subtree that roots above the editor's scope.
         home: Builder(
-          builder: (final BuildContext context) => Scaffold(
+          builder: (BuildContext context) => Scaffold(
             body: LayerSelector(
               context: context,
               layers: layers,

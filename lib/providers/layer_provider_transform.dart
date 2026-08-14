@@ -14,7 +14,7 @@ extension LayerTransform on LayerProvider {
   /// Returns the original GPU textures replaced by rotated copies. The caller
   /// ([LayersProvider.rotateCanvas90Clockwise]) disposes them through a
   /// reachability check, so a texture an undo record can still restore is kept.
-  Future<List<ui.Image>> rotate90Clockwise(final Size oldCanvasSize) async {
+  Future<List<ui.Image>> rotate90Clockwise(Size oldCanvasSize) async {
     final double oldCanvasHeight = oldCanvasSize.height;
 
     final List<UserActionDrawing> newActionStack = <UserActionDrawing>[];
@@ -86,7 +86,7 @@ extension LayerTransform on LayerProvider {
         newImage = await renderCanvasImage(
           width: newImageWidth.toInt(),
           height: newImageHeight.toInt(),
-          draw: (final ui.Canvas canvas) {
+          draw: (ui.Canvas canvas) {
             canvas.translate(newImageWidth / AppMath.pair, newImageHeight / AppMath.pair);
             canvas.rotate(-pi / AppMath.pair); // 90 degrees clockwise (Flutter canvas +angle is CCW)
             canvas.drawImage(
@@ -144,20 +144,20 @@ extension LayerTransform on LayerProvider {
   ///
   /// [canvasSize] is the current canvas size used to compute mirrored positions.
   /// Returns the original textures replaced by flipped copies (see [_flip]).
-  Future<List<ui.Image>> flipHorizontal(final Size canvasSize) => _flip(canvasSize, isHorizontal: true);
+  Future<List<ui.Image>> flipHorizontal(Size canvasSize) => _flip(canvasSize, isHorizontal: true);
 
   /// Flips all actions and content in the layer vertically (top ↔ bottom).
   ///
   /// [canvasSize] is the current canvas size used to compute mirrored positions.
   /// Returns the original textures replaced by flipped copies (see [_flip]).
-  Future<List<ui.Image>> flipVertical(final Size canvasSize) => _flip(canvasSize, isHorizontal: false);
+  Future<List<ui.Image>> flipVertical(Size canvasSize) => _flip(canvasSize, isHorizontal: false);
 
   /// Shared implementation for flipping layer content on one axis.
   ///
   /// Returns the original GPU textures replaced by flipped copies. The caller
   /// disposes them through a reachability check, so a texture an undo record can
   /// still restore is kept rather than freed.
-  Future<List<ui.Image>> _flip(final Size canvasSize, {required final bool isHorizontal}) async {
+  Future<List<ui.Image>> _flip(Size canvasSize, {required bool isHorizontal}) async {
     final double extent = isHorizontal ? canvasSize.width : canvasSize.height;
     final List<UserActionDrawing> newActionStack = <UserActionDrawing>[];
     final List<ui.Image> replacedImages = <ui.Image>[];
@@ -220,9 +220,9 @@ extension LayerTransform on LayerProvider {
 
   /// Transforms a path for a flip operation.
   ui.Path? _transformPath(
-    final ui.Path? path,
-    final double extent, {
-    required final bool isHorizontal,
+    ui.Path? path,
+    double extent, {
+    required bool isHorizontal,
   }) {
     if (path == null) {
       return null;
@@ -242,8 +242,8 @@ extension LayerTransform on LayerProvider {
   ///
   /// Delegates to the shared [flipImage] helper.
   Future<ui.Image?> _flipImage(
-    final ui.Image? image, {
-    required final bool isHorizontal,
+    ui.Image? image, {
+    required bool isHorizontal,
   }) async {
     if (image == null) {
       return null;
@@ -253,9 +253,9 @@ extension LayerTransform on LayerProvider {
 
   /// Flips a text object's position for a flip operation.
   TextObject? _flipTextObject(
-    final TextObject? textObject,
-    final double extent, {
-    required final bool isHorizontal,
+    TextObject? textObject,
+    double extent, {
+    required bool isHorizontal,
   }) {
     if (textObject == null) {
       return null;

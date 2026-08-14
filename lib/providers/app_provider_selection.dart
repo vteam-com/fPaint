@@ -111,7 +111,7 @@ extension AppProviderSelection on AppProvider {
 
   /// Duplicates the current selection and applies an initial move offset to the
   /// new transform session without forcing translate mode to stay selected.
-  Future<void> regionDuplicateMove(final Offset offset, {final bool onNewLayer = true}) async {
+  Future<void> regionDuplicateMove(Offset offset, {bool onNewLayer = true}) async {
     if (onNewLayer) {
       await regionDuplicate();
     } else {
@@ -178,7 +178,7 @@ extension AppProviderSelection on AppProvider {
     return renderCanvasImage(
       width: bounds.width.toInt(),
       height: bounds.height.toInt(),
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.translate(-bounds.left, -bounds.top);
         canvas.clipPath(selectorModel.path1!);
         canvas.drawImage(image, Offset.zero, Paint());
@@ -203,10 +203,10 @@ extension AppProviderSelection on AppProvider {
 
   /// Prepares image placement state for follow-up transform or commit flows.
   void _prepareImagePlacement(
-    final ui.Image image, {
-    final Offset? initialPosition,
-    final ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
-    final ImagePlacementLayerRestoreState? layerRestoreState,
+    ui.Image image, {
+    Offset? initialPosition,
+    ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
+    ImagePlacementLayerRestoreState? layerRestoreState,
   }) {
     final Offset center = Offset(
       layers.size.width / AppMath.pair,
@@ -230,7 +230,7 @@ extension AppProviderSelection on AppProvider {
 
   /// Starts a duplicate transform using [commitMode] for the eventual commit.
   Future<void> _startDuplicateTransform({
-    required final ImagePlacementCommitMode commitMode,
+    required ImagePlacementCommitMode commitMode,
   }) async {
     final ui.Image? clippedImage = await createSelectionImage();
     final Path? selectionPath = selectorModel.path1;
@@ -253,11 +253,11 @@ extension AppProviderSelection on AppProvider {
 
   /// Prepares [image] and immediately enters a transform session from it.
   Future<void> _beginPreparedImageTransform(
-    final ui.Image image, {
-    required final TransformSessionSource source,
-    final Offset? initialPosition,
-    final ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
-    final ImagePlacementLayerRestoreState? layerRestoreState,
+    ui.Image image, {
+    required TransformSessionSource source,
+    Offset? initialPosition,
+    ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
+    ImagePlacementLayerRestoreState? layerRestoreState,
   }) async {
     _prepareImagePlacement(
       image,
@@ -270,9 +270,9 @@ extension AppProviderSelection on AppProvider {
 
   /// Starts a transform session from [image] constrained to [bounds].
   void _startTransformSession({
-    required final ui.Image image,
-    required final Rect bounds,
-    final TransformSessionSource source = TransformSessionSource.selection,
+    required ui.Image image,
+    required Rect bounds,
+    TransformSessionSource source = TransformSessionSource.selection,
   }) {
     transformModel.start(
       image: image,
@@ -284,7 +284,7 @@ extension AppProviderSelection on AppProvider {
 
   /// Starts a transform session from the prepared image placement state.
   Future<void> _startPreparedImageTransform({
-    required final TransformSessionSource source,
+    required TransformSessionSource source,
   }) async {
     final ui.Image? sourceImage = imagePlacementModel.image;
     if (sourceImage == null) {
@@ -505,21 +505,21 @@ extension AppProviderSelection on AppProvider {
 
   bool get _isLayerModifySession => isLayerModifyMode;
 
-  bool _isPreparedImageTransformSource(final TransformSessionSource source) {
+  bool _isPreparedImageTransformSource(TransformSessionSource source) {
     return source == TransformSessionSource.duplicateSelection || source == TransformSessionSource.clipboardPaste;
   }
 
   /// Renders the current image-placement preview into a baked image.
   Future<ui.Image> _renderPlacedImage({
-    required final ui.Image sourceImage,
-    required final double outWidth,
-    required final double outHeight,
-    required final double rotation,
+    required ui.Image sourceImage,
+    required double outWidth,
+    required double outHeight,
+    required double rotation,
   }) {
     return renderCanvasImage(
       width: outWidth.ceil(),
       height: outHeight.ceil(),
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.translate(outWidth / AppMath.pair, outHeight / AppMath.pair);
         canvas.rotate(rotation);
         canvas.translate(-outWidth / AppMath.pair, -outHeight / AppMath.pair);
@@ -542,7 +542,7 @@ extension AppProviderSelection on AppProvider {
   ///
   /// When no selection exists the entire active layer is used as the
   /// implicit target (auto-select-all).
-  Future<void> flipSelectionHorizontal(final String actionName) async {
+  Future<void> flipSelectionHorizontal(String actionName) async {
     await _flipSelection(actionName, isHorizontal: true);
   }
 
@@ -550,14 +550,14 @@ extension AppProviderSelection on AppProvider {
   ///
   /// When no selection exists the entire active layer is used as the
   /// implicit target (auto-select-all).
-  Future<void> flipSelectionVertical(final String actionName) async {
+  Future<void> flipSelectionVertical(String actionName) async {
     await _flipSelection(actionName, isHorizontal: false);
   }
 
   /// Shared implementation for selection-aware flipping.
   Future<void> _flipSelection(
-    final String actionName, {
-    required final bool isHorizontal,
+    String actionName, {
+    required bool isHorizontal,
   }) async {
     _ensureSelection();
 
@@ -587,7 +587,7 @@ extension AppProviderSelection on AppProvider {
   /// The rotated image is centered within the original selection bounds.
   /// When no selection exists the entire active layer is used as the
   /// implicit target (auto-select-all).
-  Future<void> rotateSelection90(final String actionName) async {
+  Future<void> rotateSelection90(String actionName) async {
     _ensureSelection();
 
     final ui.Image? clippedImage = await createSelectionImage();
@@ -616,10 +616,10 @@ extension AppProviderSelection on AppProvider {
   /// Erases [erasePath] from the selected layer and places [replacement] at
   /// [offset], wrapped in an undoable action named [name].
   bool replaceRegion({
-    required final String name,
-    required final Path erasePath,
-    required final ui.Image replacement,
-    required final Offset offset,
+    required String name,
+    required Path erasePath,
+    required ui.Image replacement,
+    required Offset offset,
   }) {
     if (isSelectedLayerLocked) {
       return false;
@@ -653,8 +653,8 @@ extension AppProviderSelection on AppProvider {
 
   /// Starts a selector creation.
   void selectorCreationStart(
-    final Offset position, {
-    final bool sampleAllLayers = false,
+    Offset position, {
+    bool sampleAllLayers = false,
   }) {
     cancelEffectPreview();
     if (selectorModel.mode == SelectorMode.wand) {
@@ -687,7 +687,7 @@ extension AppProviderSelection on AppProvider {
   /// Maps a horizontal screen drag [screenDx] from the wand sample anchor onto a
   /// tolerance, starting from [startTolerance]. Dragging right loosens (grows)
   /// the selection; dragging left tightens it.
-  int wandToleranceForDrag(final int startTolerance, final double screenDx) {
+  int wandToleranceForDrag(int startTolerance, double screenDx) {
     final int delta = (screenDx / AppInteraction.wandToleranceDragPixelsPerUnit).round();
     return (startTolerance + delta).clamp(AppMath.one, AppLimits.percentMax);
   }
@@ -696,9 +696,9 @@ extension AppProviderSelection on AppProvider {
   /// using [tolerance]. Drives the live "tap to sample, drag to grow/shrink"
   /// gesture — each drag step resamples the same anchor at the new tolerance.
   void wandSelectionResampleAt(
-    final Offset position, {
-    required final int tolerance,
-    required final bool sampleAllLayers,
+    Offset position, {
+    required int tolerance,
+    required bool sampleAllLayers,
   }) {
     if (selectorModel.mode != SelectorMode.wand) {
       return;
@@ -710,31 +710,31 @@ extension AppProviderSelection on AppProvider {
   }
 
   /// Translates the active selection by [screenDelta], a screen-space offset.
-  void selectionTranslateByScreenDelta(final Offset screenDelta) {
+  void selectionTranslateByScreenDelta(Offset screenDelta) {
     selectorModel.translate(screenDelta / layers.scale);
     repaintMainView();
   }
 
   /// Scales the active selection uniformly by [factor].
-  void selectionScaleUniform(final double factor) {
+  void selectionScaleUniform(double factor) {
     selectorModel.scaleUniform(factor);
     repaintMainView();
   }
 
   /// Resizes the active selection by dragging [handle] by [screenDelta].
-  void selectionResize(final NineGridHandle handle, final Offset screenDelta) {
+  void selectionResize(NineGridHandle handle, Offset screenDelta) {
     selectorModel.nindeGridResize(handle, screenDelta / layers.scale);
     repaintMainView();
   }
 
   /// Rotates the active selection by [angleRadians].
-  void selectionRotate(final double angleRadians) {
+  void selectionRotate(double angleRadians) {
     selectorModel.rotate(angleRadians);
     repaintMainView();
   }
 
   /// Adds an additional point to the selector creation.
-  void selectorCreationAdditionalPoint(final Offset position) {
+  void selectorCreationAdditionalPoint(Offset position) {
     if (selectorModel.mode == SelectorMode.wand) {
       // Ignore since the PointerDown already did the job
     } else if (selectorModel.mode == SelectorMode.line) {
@@ -746,7 +746,7 @@ extension AppProviderSelection on AppProvider {
   }
 
   /// Updates the selector preview while a multi-click straight-line region is in progress.
-  void selectorCreationPreview(final Offset position) {
+  void selectorCreationPreview(Offset position) {
     if (selectorModel.mode != SelectorMode.line || !selectorModel.isDrawing) {
       return;
     }
@@ -821,7 +821,7 @@ extension AppProviderSelection on AppProvider {
   }
 
   /// Gets the path adjusted to the canvas size and position.
-  Path? getPathAdjustToCanvasSizeAndPosition(final Path? path) {
+  Path? getPathAdjustToCanvasSizeAndPosition(Path? path) {
     if (path != null) {
       final Matrix4 matrix = Matrix4.identity()
         ..translateByVector3(Vector3(canvasOffset.dx, canvasOffset.dy, 0.0))
@@ -833,8 +833,8 @@ extension AppProviderSelection on AppProvider {
 
   /// Gets the region path from a layer image.
   Future<FillRegion> getRegionPathFromLayerImage(
-    final ui.Offset position, {
-    required final bool sampleAllLayers,
+    ui.Offset position, {
+    required bool sampleAllLayers,
   }) async {
     final FillImageData? imageData = await getSelectedLayerFillImageData(
       sampleAllLayers: sampleAllLayers,
@@ -893,7 +893,7 @@ extension AppProviderSelection on AppProvider {
   /// Returns cached wand source RGBA bytes, refreshing cache when signature changes.
   /// Samples either the selected layer only or all visible layers for the current request.
   Future<FillImageData?> getSelectedLayerFillImageData({
-    required final bool sampleAllLayers,
+    required bool sampleAllLayers,
   }) async {
     final int signature = _createSelectedLayerFloodSourceSignature(
       sampleAllLayers: sampleAllLayers,
@@ -940,7 +940,7 @@ extension AppProviderSelection on AppProvider {
   /// Creates a stable fingerprint for wand source cache invalidation.
   /// Includes the sampling mode in the signature.
   int _createSelectedLayerFloodSourceSignature({
-    required final bool sampleAllLayers,
+    required bool sampleAllLayers,
   }) {
     if (sampleAllLayers) {
       return Object.hash(
@@ -950,7 +950,7 @@ extension AppProviderSelection on AppProvider {
         sampleAllLayers,
         layers.list
             .map(
-              (final LayerProvider l) => Object.hash(
+              (LayerProvider l) => Object.hash(
                 l,
                 l.actionStack.length,
                 l.redoStack.length,

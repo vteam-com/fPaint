@@ -10,7 +10,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   ///
   /// The original value is saved in [_previousSelectorMath] and restored by
   /// [_restoreSelectionMath] once the gesture completes.
-  void _applySelectionModifierMath(final AppProvider appProvider) {
+  void _applySelectionModifierMath(AppProvider appProvider) {
     final bool isShiftPressed = HardwareKeyboard.instance.isShiftPressed;
     final bool isAltPressed = HardwareKeyboard.instance.isAltPressed;
 
@@ -34,7 +34,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
   /// Returns whether drawing may start on the selected layer, surfacing a
   /// message and aborting when the layer is hidden or locked.
-  bool _canStartDrawingOnSelectedLayer(final AppProvider appProvider) {
+  bool _canStartDrawingOnSelectedLayer(AppProvider appProvider) {
     if (appProvider.layers.selectedLayer.isVisible == false) {
       final AppLocalizations l10n = context.l10n;
       context.showSnackBarMessage(
@@ -74,8 +74,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// Captures an eyedropper sample at [adjustedPosition] when an eyedropper is
   /// armed. Returns whether the pointer-down was consumed.
   bool _handleEyeDropperPointerStart(
-    final AppProvider appProvider,
-    final ui.Offset adjustedPosition,
+    AppProvider appProvider,
+    ui.Offset adjustedPosition,
   ) {
     if (appProvider.eyeDropPositionForBrush != null) {
       appProvider.layers.capturePainterToImage();
@@ -101,9 +101,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// tolerance changes. Solid fill commits on pointer-up; gradient fill leaves
   /// its handle session open on release (finalized via Apply/Cancel).
   Future<void> _handleFillPointerStart(
-    final AppProvider appProvider,
-    final ui.Offset screenPosition,
-    final ui.Offset adjustedPosition,
+    AppProvider appProvider,
+    ui.Offset screenPosition,
+    ui.Offset adjustedPosition,
   ) async {
     final bool sampleAllLayers = _isSampleAllLayersModifierPressed();
 
@@ -133,10 +133,10 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// Anchors a tap-to-fill / drag-to-adjust-tolerance gesture (shared by solid
   /// and gradient fill) at [screenPosition] and shows the top Fill Tolerance bar.
   void _startFillToleranceDrag(
-    final AppProvider appProvider,
-    final ui.Offset screenPosition,
-    final ui.Offset adjustedPosition, {
-    required final bool sampleAllLayers,
+    AppProvider appProvider,
+    ui.Offset screenPosition,
+    ui.Offset adjustedPosition, {
+    required bool sampleAllLayers,
   }) {
     _toleranceDragAnchorScreen = screenPosition;
     _toleranceDragAnchorCanvas = adjustedPosition;
@@ -151,9 +151,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
   /// Handles two-finger pan and pinch updates for manual canvas navigation.
   void _handleMultiTouchUpdate(
-    final PointerMoveEvent event,
-    final AppProvider appProvider,
-    final ShellProvider shellProvider,
+    PointerMoveEvent event,
+    AppProvider appProvider,
+    ShellProvider shellProvider,
   ) {
     appProvider.canvasOffset += event.delta;
     final double newDistance = _getDistanceBetweenTouchPoints();
@@ -180,15 +180,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// effect brush armed: an armed effect paints (clipped to the current
   /// selection) just like any other brush, so it takes precedence over the
   /// selector tool instead of starting a new marquee.
-  bool _isSelectionGesture(final AppProvider appProvider) =>
+  bool _isSelectionGesture(AppProvider appProvider) =>
       appProvider.selectedAction == ActionType.selector &&
       !appProvider.transformModel.isVisible &&
       !appProvider.effectBrushModel.isArmed;
 
   /// Finalizes an active pointer interaction and clears temporary drawing state.
   void _handlePointerEnd(
-    final AppProvider appProvider,
-    final PointerEvent event,
+    AppProvider appProvider,
+    PointerEvent event,
   ) async {
     appProvider.layers.selectedLayer.isUserDrawing = false;
     // Pair with beginStrokePreview: release the frozen baseline (no-op for tools
@@ -249,8 +249,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// (points, bounds, marquee); the armed Adjust effect is committed on
   /// pointer-up by [_commitEffectBrushStroke].
   void _startEffectBrushStroke(
-    final AppProvider appProvider,
-    final ui.Offset adjustedPosition,
+    AppProvider appProvider,
+    ui.Offset adjustedPosition,
   ) {
     _clearPixelBrushStroke();
     _effectBrushStroke = true;
@@ -265,7 +265,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   }
 
   /// Commits the active paint-mode effect stroke through the provider.
-  Future<void> _commitEffectBrushStroke(final AppProvider appProvider) async {
+  Future<void> _commitEffectBrushStroke(AppProvider appProvider) async {
     final ui.Rect? patchBounds = _pixelBrushStrokePatchBounds;
     final SelectionEffect? effect = appProvider.effectBrushModel.effect;
     if (patchBounds == null || effect == null || _pixelBrushStrokePoints.length < AppMath.one) {
@@ -284,8 +284,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
   /// Handles pointer move events for drawing, selection, and eyedropper interactions.
   void _handlePointerMove(
-    final AppProvider appProvider,
-    final PointerEvent event,
+    AppProvider appProvider,
+    PointerEvent event,
   ) {
     if (appProvider.hasActiveTransformOverlay) {
       return;
@@ -365,8 +365,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// Acts as a dispatcher: each tool's behaviour lives in a focused handler so this
   /// method only decides which one applies for the current pointer-down.
   void _handlePointerStart(
-    final AppProvider appProvider,
-    final PointerDownEvent event,
+    AppProvider appProvider,
+    PointerDownEvent event,
   ) async {
     if (appProvider.hasActiveTransformOverlay) {
       return;
@@ -412,9 +412,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// Begins a selection at [adjustedPosition], applying modifier math and
   /// closing an in-progress straight-line selection on a double tap.
   void _handleSelectionPointerStart(
-    final AppProvider appProvider,
-    final PointerDownEvent event,
-    final ui.Offset adjustedPosition,
+    AppProvider appProvider,
+    PointerDownEvent event,
+    ui.Offset adjustedPosition,
   ) {
     _applySelectionModifierMath(appProvider);
     if (_tryCloseStraightLineSelectionOnDoubleTap(appProvider, event, adjustedPosition)) {
@@ -447,8 +447,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// Feedback (wand finger-HUD vs. fill top-bar) is left to the callers. Shared
   /// by the Edge Detection wand and the paint-bucket tolerance drags.
   int? _toleranceForDragStep(
-    final AppProvider appProvider,
-    final Offset screenPosition,
+    AppProvider appProvider,
+    Offset screenPosition,
   ) {
     final Offset? anchorScreen = _toleranceDragAnchorScreen;
     if (anchorScreen == null || _toleranceDragAnchorCanvas == null) {
@@ -468,8 +468,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
   /// Resamples the wand selection at the fixed anchor for the dragged tolerance.
   void _updateWandToleranceFromDrag(
-    final AppProvider appProvider,
-    final Offset screenPosition,
+    AppProvider appProvider,
+    Offset screenPosition,
   ) {
     final int? tolerance = _toleranceForDragStep(appProvider, screenPosition);
     // Keep the HUD pinned at the sample tap (the pointer is locked there), not
@@ -492,8 +492,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// fill re-resolves the region from the anchor; gradient fill re-resolves from
   /// its handles.
   void _updateFillToleranceFromDrag(
-    final AppProvider appProvider,
-    final Offset screenPosition,
+    AppProvider appProvider,
+    Offset screenPosition,
   ) {
     final int? tolerance = _toleranceForDragStep(appProvider, screenPosition);
     if (tolerance == null) {
@@ -513,7 +513,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// Commits the solid-fill tolerance drag on pointer-up: the previewed transient
   /// is committed as one undoable action, or — when a quick tap released before
   /// the debounced preview rendered — a fresh fill is committed at the anchor.
-  void _commitSolidFillDrag(final AppProvider appProvider) {
+  void _commitSolidFillDrag(AppProvider appProvider) {
     final Offset? anchorCanvas = _toleranceDragAnchorCanvas;
     final bool hadPreview = appProvider.fillPreviewAction != null;
     // Cancels the pending render, invalidates in-flight ones, and commits the
@@ -536,8 +536,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// dialog to create a new one. Releases the active pointer because a modal may
   /// consume the matching pointer-up.
   void _handleTextPointerStart(
-    final AppProvider appProvider,
-    final ui.Offset adjustedPosition,
+    AppProvider appProvider,
+    ui.Offset adjustedPosition,
   ) {
     TextObject? selectedText;
 
@@ -560,9 +560,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   }
 
   void _handleUserPanningTheCanvas(
-    final ShellProvider shellProvider,
-    final AppProvider appProvider,
-    final Offset offsetDelta,
+    ShellProvider shellProvider,
+    AppProvider appProvider,
+    Offset offsetDelta,
   ) {
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
     appProvider.canvasPan(
@@ -574,10 +574,10 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
   /// Applies user-driven canvas scaling around [anchorPoint].
   void _handleUserScalingTheCanvas(
-    final ShellProvider shellProvider,
-    final AppProvider appProvider,
-    final Offset anchorPoint,
-    final double scaleDelta,
+    ShellProvider shellProvider,
+    AppProvider appProvider,
+    Offset anchorPoint,
+    double scaleDelta,
   ) {
     if (scaleDelta == 1) {
       return;
@@ -596,9 +596,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// Seeds the gradient fill handles around [adjustedPosition] for the active
   /// linear or radial fill mode and commits the initial gradient action.
   void _initializeGradientFill(
-    final AppProvider appProvider,
-    final ui.Offset adjustedPosition, {
-    required final bool sampleAllLayers,
+    AppProvider appProvider,
+    ui.Offset adjustedPosition, {
+    required bool sampleAllLayers,
   }) {
     appProvider.fillModel.sampleAllLayers = sampleAllLayers;
     if (appProvider.fillModel.mode == FillMode.linear) {
@@ -650,8 +650,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
   /// Updates the shell interaction modality based on the current pointer kind.
   void _registerInputModality(
-    final ShellProvider shellProvider,
-    final PointerDeviceKind kind,
+    ShellProvider shellProvider,
+    PointerDeviceKind kind,
   ) {
     switch (kind) {
       case PointerDeviceKind.touch:
@@ -671,7 +671,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
   /// Restores [selectorModel.math] to the value captured before a
   /// modifier-key override, then clears the saved value.
-  void _restoreSelectionMath(final AppProvider appProvider) {
+  void _restoreSelectionMath(AppProvider appProvider) {
     if (_previousSelectorMath != null) {
       appProvider.selectorModel.math = _previousSelectorMath!;
       _previousSelectorMath = null;
@@ -680,12 +680,12 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   }
 
   /// Returns whether the current tool should show a live size marker while drawing.
-  bool _shouldShowDrawingToolPreview(final AppProvider appProvider) {
+  bool _shouldShowDrawingToolPreview(AppProvider appProvider) {
     return appProvider.selectedAction.isSupported(ActionOptions.brushSize) &&
         appProvider.selectedAction != ActionType.text;
   }
 
-  void _showLockedLayerMessage(final AppProvider appProvider) {
+  void _showLockedLayerMessage(AppProvider appProvider) {
     context.showSnackBarMessage(
       context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
     );
@@ -695,12 +695,12 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   ///
   /// When the user finishes editing, the resulting [TextObject] is recorded
   /// as a drawing action on the currently selected layer.
-  void _showTextDialog(final AppProvider appProvider, final Offset position) {
+  void _showTextDialog(AppProvider appProvider, Offset position) {
     final AppLocalizations l10n = context.l10n;
     showAppBottomSheet<void>(
       context: context,
       barrierColor: AppColors.transparent,
-      builder: (final BuildContext _) {
+      builder: (BuildContext _) {
         // The sheet is pushed onto the overlay, above the editor's provider
         // scope; re-provide the layer model so a color picker opened from the
         // text editor can still resolve [LayersProvider.of].
@@ -712,7 +712,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
             position: position,
             initialText: '',
             initialStyle: appProvider.textToolState.copy(),
-            onSubmitted: (final TextObject textObject) {
+            onSubmitted: (TextObject textObject) {
               appProvider.adoptTextToolStateFromObject(textObject);
               appProvider.recordExecuteDrawingActionToSelectedLayer(
                 action: UserActionDrawing(
@@ -731,8 +731,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// Starts a brush/pencil/eraser or pixel-brush stroke at [adjustedPosition]
   /// for the active drawing tool.
   void _startDrawingPointer(
-    final AppProvider appProvider,
-    final ui.Offset adjustedPosition,
+    AppProvider appProvider,
+    ui.Offset adjustedPosition,
   ) {
     appProvider.layers.selectedLayer.isUserDrawing = true;
 
@@ -770,7 +770,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   }
 
   /// Returns whether [kind] can report hover location before pointer down.
-  bool _supportsHoverPreview(final PointerDeviceKind kind) {
+  bool _supportsHoverPreview(PointerDeviceKind kind) {
     return kind == PointerDeviceKind.mouse ||
         kind == PointerDeviceKind.stylus ||
         kind == PointerDeviceKind.invertedStylus;
@@ -779,9 +779,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   /// Closes an in-progress line selection when two taps occur within the
   /// configured time and distance thresholds.
   bool _tryCloseStraightLineSelectionOnDoubleTap(
-    final AppProvider appProvider,
-    final PointerDownEvent event,
-    final Offset canvasPosition,
+    AppProvider appProvider,
+    PointerDownEvent event,
+    Offset canvasPosition,
   ) {
     if (appProvider.selectorModel.mode != SelectorMode.line || !appProvider.selectorModel.isDrawing) {
       return false;
@@ -815,8 +815,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
   /// Updates the live drawing marker to the current pointer location.
   void _updateDrawingToolPreview(
-    final AppProvider appProvider,
-    final Offset localPosition,
+    AppProvider appProvider,
+    Offset localPosition,
   ) {
     if (!_shouldShowDrawingToolPreview(appProvider)) {
       return;

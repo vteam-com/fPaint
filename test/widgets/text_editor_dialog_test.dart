@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -6,14 +5,15 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('TextEditorDialog', () {
-    testWidgets('renders and can enter text', (final WidgetTester tester) async {
+    testWidgets('renders and can enter text', (WidgetTester tester) async {
       TextObject? result;
       await tester.pumpWidget(
         _buildDialog(
-          onSubmitted: (final TextObject obj) {
+          onSubmitted: (TextObject obj) {
             result = obj;
           },
         ),
@@ -37,11 +37,11 @@ void main() {
       expect(result!.size, 24);
     });
 
-    testWidgets('cancel does not call onSubmitted', (final WidgetTester tester) async {
+    testWidgets('cancel does not call onSubmitted', (WidgetTester tester) async {
       TextObject? result;
       await tester.pumpWidget(
         _buildDialog(
-          onSubmitted: (final TextObject obj) {
+          onSubmitted: (TextObject obj) {
             result = obj;
           },
         ),
@@ -56,11 +56,11 @@ void main() {
       expect(result, isNull);
     });
 
-    testWidgets('bold toggle changes font weight', (final WidgetTester tester) async {
+    testWidgets('bold toggle changes font weight', (WidgetTester tester) async {
       TextObject? result;
       await tester.pumpWidget(
         _buildDialog(
-          onSubmitted: (final TextObject obj) {
+          onSubmitted: (TextObject obj) {
             result = obj;
           },
         ),
@@ -82,11 +82,11 @@ void main() {
       expect(result!.fontWeight, FontWeight.bold);
     });
 
-    testWidgets('alignment dropdown changes text alignment', (final WidgetTester tester) async {
+    testWidgets('alignment dropdown changes text alignment', (WidgetTester tester) async {
       TextObject? result;
       await tester.pumpWidget(
         _buildDialog(
-          onSubmitted: (final TextObject obj) {
+          onSubmitted: (TextObject obj) {
             result = obj;
           },
         ),
@@ -108,11 +108,11 @@ void main() {
       expect(result!.textAlign, TextAlign.center);
     });
 
-    testWidgets('add text with empty text does not call onSubmitted', (final WidgetTester tester) async {
+    testWidgets('add text with empty text does not call onSubmitted', (WidgetTester tester) async {
       TextObject? result;
       await tester.pumpWidget(
         _buildDialog(
-          onSubmitted: (final TextObject obj) {
+          onSubmitted: (TextObject obj) {
             result = obj;
           },
         ),
@@ -128,7 +128,7 @@ void main() {
 }
 
 Widget _buildDialog({
-  required final ValueChanged<TextObject> onSubmitted,
+  required ValueChanged<TextObject> onSubmitted,
 }) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,

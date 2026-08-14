@@ -12,7 +12,7 @@ const String _colorPercentageTiny = '<0.1%';
 /// - Color state management
 
 /// Adjusts the brightness of the input color to the specified value within the valid range (0.0 to 1.0).
-Color adjustBrightness(final Color color, final double brightness) {
+Color adjustBrightness(Color color, double brightness) {
   final double clampedBrightness = brightness.clamp(0.0, 1.0);
 
   // Convert color to HSL
@@ -47,10 +47,10 @@ enum ColorState {
 /// Otherwise, the returned string will have the RGB values followed by the alpha value.
 ///
 String colorToHexString(
-  final Color color, {
-  final bool alphaFirst = true,
-  final bool includeAlpha = true,
-  final String separator = '',
+  Color color, {
+  bool alphaFirst = true,
+  bool includeAlpha = true,
+  String separator = '',
 }) {
   final List<String> components = getColorComponentsAsHex(color, includeAlpha, alphaFirst);
   return '#${components.join(separator)}';
@@ -63,9 +63,9 @@ String colorToHexString(
 ///
 /// Returns an array of hexadecimal strings representing the color components.
 List<String> getColorComponentsAsHex(
-  final Color color, [
-  final bool includeAlpha = true,
-  final bool alphaIsFirst = true,
+  Color color, [
+  bool includeAlpha = true,
+  bool alphaIsFirst = true,
 ]) {
   final String alpha = (color.a * AppLimits.rgbChannelMax)
       .toInt()
@@ -111,7 +111,7 @@ List<String> getColorComponentsAsHex(
 ///
 /// Returns the contrast color as a [Color] object.
 ///
-Color contrastColor(final Color color) {
+Color contrastColor(Color color) {
   // Calculate the luminance of the color including alpha
   final double luminance =
       (AppColors.lumaRedWeight * (color.r * AppLimits.rgbChannelMax) +
@@ -136,7 +136,7 @@ Color contrastColor(final Color color) {
 /// @param hexColor The hexadecimal color string to convert to a Color object.
 /// @return The Color object representing the given hexadecimal color string, or Colors.transparent if the string is not in a valid format.
 ///
-Color getColorFromString(final String hexColor) {
+Color getColorFromString(String hexColor) {
   String newHexColor = hexColor.trim().replaceAll('#', '');
   if (newHexColor.length == AppLimits.hexRgbLength) {
     newHexColor = '$_hexOpaqueAlpha$newHexColor';
@@ -154,7 +154,7 @@ Color getColorFromString(final String hexColor) {
 /// percentage (0.0 to 1.0).
 ///
 /// Returns a [Color] object corresponding to the given HSV values.
-Color hsvToColor(final double hue, final double brightness) {
+Color hsvToColor(double hue, double brightness) {
   final Color color = HSVColor.fromAHSV(1.0, hue, 1.0, 1.0).toColor();
   return adjustBrightness(color, brightness);
 }
@@ -178,7 +178,7 @@ class ColorUsage {
   ///
   /// Uses [decimals] fractional digits and returns "<0.1%" for tiny values
   /// when very low precision is requested.
-  String toStringPercentage([final int decimals = AppMath.triple]) {
+  String toStringPercentage([int decimals = AppMath.triple]) {
     if (decimals < AppMath.pair && this.percentage < AppMath.tinyPercentage) {
       return _colorPercentageTiny;
     }

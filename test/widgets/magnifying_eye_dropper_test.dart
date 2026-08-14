@@ -1,10 +1,11 @@
 import 'dart:ui' as ui;
-import 'package:flutter/material.dart';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
+import 'package:material_ui/material_ui.dart';
 
 // Fake that overrides only the members used by the widget under test.
 class FakeLayersProvider extends Fake implements LayersProvider {
@@ -13,8 +14,8 @@ class FakeLayersProvider extends Fake implements LayersProvider {
 
   @override
   Future<Color?> getColorAtOffset(
-    final Offset offset, {
-    final bool useCachedImage = false,
+    Offset offset, {
+    bool useCachedImage = false,
   }) async {
     return Colors.red;
   }
@@ -34,7 +35,7 @@ void main() {
       colorPickedCalled = false;
     });
 
-    testWidgets('renders nothing when cachedImage is null', (final WidgetTester tester) async {
+    testWidgets('renders nothing when cachedImage is null', (WidgetTester tester) async {
       fakeLayersProvider.cachedImage = null;
 
       await tester.pumpWidget(
@@ -45,7 +46,7 @@ void main() {
             layers: fakeLayersProvider,
             pointerPosition: const Offset(100, 100),
             pixelPosition: const Offset(50, 50),
-            onColorPicked: (final Color color) {
+            onColorPicked: (Color color) {
               pickedColor = color;
               colorPickedCalled = true;
             },
@@ -61,7 +62,7 @@ void main() {
       expect(find.byType(SizedBox), findsOneWidget);
     });
 
-    testWidgets('renders magnifying eye dropper when cachedImage exists', (final WidgetTester tester) async {
+    testWidgets('renders magnifying eye dropper when cachedImage exists', (WidgetTester tester) async {
       // Create a mock image
       final ui.Image mockImage = await createMockImage(100, 100);
       fakeLayersProvider.cachedImage = mockImage;
@@ -76,7 +77,7 @@ void main() {
                 layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
-                onColorPicked: (final Color color) {
+                onColorPicked: (Color color) {
                   pickedColor = color;
                   colorPickedCalled = true;
                 },
@@ -98,7 +99,7 @@ void main() {
       expect(find.byType(CustomPaint), findsWidgets);
     });
 
-    testWidgets('calls onClosed when cancel button is pressed', (final WidgetTester tester) async {
+    testWidgets('calls onClosed when cancel button is pressed', (WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
       fakeLayersProvider.cachedImage = mockImage;
 
@@ -112,7 +113,7 @@ void main() {
                 layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
-                onColorPicked: (final Color color) {
+                onColorPicked: (Color color) {
                   pickedColor = color;
                   colorPickedCalled = true;
                 },
@@ -133,7 +134,7 @@ void main() {
       expect(closedCalled, true);
     });
 
-    testWidgets('calls onColorPicked when confirm button is pressed', (final WidgetTester tester) async {
+    testWidgets('calls onColorPicked when confirm button is pressed', (WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
       fakeLayersProvider.cachedImage = mockImage;
 
@@ -147,7 +148,7 @@ void main() {
                 layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
-                onColorPicked: (final Color color) {
+                onColorPicked: (Color color) {
                   pickedColor = color;
                   colorPickedCalled = true;
                 },
@@ -169,7 +170,7 @@ void main() {
       expect(pickedColor, Colors.red); // Fake color from getColorAtOffset
     });
 
-    testWidgets('positions widget correctly relative to pointer', (final WidgetTester tester) async {
+    testWidgets('positions widget correctly relative to pointer', (WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
       fakeLayersProvider.cachedImage = mockImage;
 
@@ -186,7 +187,7 @@ void main() {
                   layers: fakeLayersProvider,
                   pointerPosition: const Offset(200, 200),
                   pixelPosition: const Offset(50, 50),
-                  onColorPicked: (final Color color) {},
+                  onColorPicked: (Color color) {},
                   onClosed: () {},
                 ),
               ],
@@ -203,7 +204,7 @@ void main() {
       expect(positioned.top, lessThan(200.0)); // Should be above center
     });
 
-    testWidgets('displays magnified image in custom paint', (final WidgetTester tester) async {
+    testWidgets('displays magnified image in custom paint', (WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
       fakeLayersProvider.cachedImage = mockImage;
 
@@ -217,7 +218,7 @@ void main() {
                 layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
-                onColorPicked: (final Color color) {},
+                onColorPicked: (Color color) {},
                 onClosed: () {},
               ),
             ],
@@ -231,13 +232,13 @@ void main() {
       final Iterable<CustomPaint> customPaints = tester.widgetList<CustomPaint>(find.byType(CustomPaint));
       // Find the one with MagnifyingGlassPainter
       final CustomPaint magnifyingPaint = customPaints.firstWhere(
-        (final CustomPaint paint) => paint.painter is MagnifyingGlassPainter,
+        (CustomPaint paint) => paint.painter is MagnifyingGlassPainter,
         orElse: () => customPaints.first,
       );
       expect(magnifyingPaint.painter, isA<MagnifyingGlassPainter>());
     });
 
-    testWidgets('shows selected color in dashed rectangle', (final WidgetTester tester) async {
+    testWidgets('shows selected color in dashed rectangle', (WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
       fakeLayersProvider.cachedImage = mockImage;
 
@@ -251,7 +252,7 @@ void main() {
                 layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
-                onColorPicked: (final Color color) {},
+                onColorPicked: (Color color) {},
                 onClosed: () {},
               ),
             ],
@@ -267,7 +268,7 @@ void main() {
   });
 
   group('MagnifyingGlassPainter', () {
-    testWidgets('shouldRepaint returns true', (final WidgetTester tester) async {
+    testWidgets('shouldRepaint returns true', (WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(50, 50);
       final MagnifyingGlassPainter painter = MagnifyingGlassPainter(
         croppedImage: mockImage,
@@ -277,7 +278,7 @@ void main() {
       expect(painter.shouldRepaint(painter), true);
     });
 
-    testWidgets('paints magnified circle with borders', (final WidgetTester tester) async {
+    testWidgets('paints magnified circle with borders', (WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(50, 50);
       final MagnifyingGlassPainter painter = MagnifyingGlassPainter(
         croppedImage: mockImage,
@@ -296,14 +297,14 @@ void main() {
   });
 
   group('ImagePainter', () {
-    testWidgets('shouldRepaint returns false', (final WidgetTester tester) async {
+    testWidgets('shouldRepaint returns false', (WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(50, 50);
       final ImagePainter painter = ImagePainter(mockImage);
 
       expect(painter.shouldRepaint(painter), false);
     });
 
-    testWidgets('paints image on canvas', (final WidgetTester tester) async {
+    testWidgets('paints image on canvas', (WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(50, 50);
       final ImagePainter painter = ImagePainter(mockImage);
 
@@ -320,7 +321,7 @@ void main() {
 }
 
 // Helper functions for creating mock images
-Future<ui.Image> createMockImage(final int width, final int height) async {
+Future<ui.Image> createMockImage(int width, int height) async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);
   final ui.Paint paint = ui.Paint()..color = Colors.blue;

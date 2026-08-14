@@ -1,15 +1,15 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
+import 'package:material_ui/material_ui.dart';
 
 Widget _buildTestApp({
-  required final FillModel fillModel,
-  required final void Function(GradientPoint) onUpdate,
-  final VoidCallback? onApply,
-  final VoidCallback? onCancel,
+  required FillModel fillModel,
+  required void Function(GradientPoint) onUpdate,
+  VoidCallback? onApply,
+  VoidCallback? onCancel,
 }) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -45,7 +45,7 @@ FillModel _createRadialFillModel() {
 
 void main() {
   group('FillWidget', () {
-    testWidgets('renders linear gradient with marching ants and handles', (final WidgetTester tester) async {
+    testWidgets('renders linear gradient with marching ants and handles', (WidgetTester tester) async {
       final FillModel model = _createLinearFillModel();
       final List<GradientPoint> updatedPoints = <GradientPoint>[];
 
@@ -62,7 +62,7 @@ void main() {
       expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}1')), findsOneWidget);
     });
 
-    testWidgets('renders all gradient stop handles when there are inner colors', (final WidgetTester tester) async {
+    testWidgets('renders all gradient stop handles when there are inner colors', (WidgetTester tester) async {
       final FillModel model = _createLinearFillModel();
       model.gradientStopColors = <Color>[
         Colors.red,
@@ -73,7 +73,7 @@ void main() {
       await tester.pumpWidget(
         _buildTestApp(
           fillModel: model,
-          onUpdate: (final GradientPoint _) {},
+          onUpdate: (GradientPoint _) {},
         ),
       );
       await tester.pump();
@@ -83,13 +83,13 @@ void main() {
       expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}2')), findsOneWidget);
     });
 
-    testWidgets('renders radial gradient with handles', (final WidgetTester tester) async {
+    testWidgets('renders radial gradient with handles', (WidgetTester tester) async {
       final FillModel model = _createRadialFillModel();
 
       await tester.pumpWidget(
         _buildTestApp(
           fillModel: model,
-          onUpdate: (final GradientPoint _) {},
+          onUpdate: (GradientPoint _) {},
         ),
       );
       await tester.pump();
@@ -98,7 +98,7 @@ void main() {
       expect(find.byKey(const Key('${Keys.gradientHandleKeyPrefixText}1')), findsOneWidget);
     });
 
-    testWidgets('dragging handle calls onUpdate', (final WidgetTester tester) async {
+    testWidgets('dragging handle calls onUpdate', (WidgetTester tester) async {
       final FillModel model = _createLinearFillModel();
       final List<GradientPoint> updatedPoints = <GradientPoint>[];
 
@@ -125,13 +125,13 @@ void main() {
       expect(updatedPoints, isNotEmpty);
     });
 
-    testWidgets('tap down shows details, tap up hides', (final WidgetTester tester) async {
+    testWidgets('tap down shows details, tap up hides', (WidgetTester tester) async {
       final FillModel model = _createLinearFillModel();
 
       await tester.pumpWidget(
         _buildTestApp(
           fillModel: model,
-          onUpdate: (final GradientPoint _) {},
+          onUpdate: (GradientPoint _) {},
         ),
       );
       await tester.pump();
@@ -146,7 +146,7 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets('inner handle movement is clamped by neighbor stops', (final WidgetTester tester) async {
+    testWidgets('inner handle movement is clamped by neighbor stops', (WidgetTester tester) async {
       final FillModel model = _createLinearFillModel();
       model.gradientStopColors = <Color>[Colors.red, Colors.green, Colors.yellow, Colors.blue];
       model.gradientStopPositions = <double>[0.0, 0.25, 0.75, 1.0];
@@ -154,7 +154,7 @@ void main() {
       await tester.pumpWidget(
         _buildTestApp(
           fillModel: model,
-          onUpdate: (final GradientPoint _) {},
+          onUpdate: (GradientPoint _) {},
         ),
       );
       await tester.pump();
@@ -173,7 +173,7 @@ void main() {
       expect(model.gradientStopPositions[2], lessThanOrEqualTo(1.0));
     });
 
-    testWidgets('inner handle movement tolerates out-of-order neighbor positions', (final WidgetTester tester) async {
+    testWidgets('inner handle movement tolerates out-of-order neighbor positions', (WidgetTester tester) async {
       final FillModel model = _createLinearFillModel();
       model.gradientStopColors = <Color>[Colors.red, Colors.green, Colors.yellow, Colors.orange, Colors.blue];
       model.gradientStopPositions = <double>[0.0, 0.5, 0.75, 0.25, 1.0];
@@ -181,7 +181,7 @@ void main() {
       await tester.pumpWidget(
         _buildTestApp(
           fillModel: model,
-          onUpdate: (final GradientPoint _) {},
+          onUpdate: (GradientPoint _) {},
         ),
       );
       await tester.pump();
@@ -193,7 +193,7 @@ void main() {
       expect(model.gradientStopPositions[2], lessThanOrEqualTo(model.gradientStopPositions[1]));
     });
 
-    testWidgets('Apply and Cancel controls invoke their callbacks', (final WidgetTester tester) async {
+    testWidgets('Apply and Cancel controls invoke their callbacks', (WidgetTester tester) async {
       final FillModel model = _createLinearFillModel();
       int applyCount = 0;
       int cancelCount = 0;
@@ -201,7 +201,7 @@ void main() {
       await tester.pumpWidget(
         _buildTestApp(
           fillModel: model,
-          onUpdate: (final GradientPoint _) {},
+          onUpdate: (GradientPoint _) {},
           onApply: () => applyCount++,
           onCancel: () => cancelCount++,
         ),
@@ -222,13 +222,13 @@ void main() {
       expect(cancelCount, 1);
     });
 
-    testWidgets('radial mode builds marching-ants path and handles', (final WidgetTester tester) async {
+    testWidgets('radial mode builds marching-ants path and handles', (WidgetTester tester) async {
       final FillModel model = _createRadialFillModel();
 
       await tester.pumpWidget(
         _buildTestApp(
           fillModel: model,
-          onUpdate: (final GradientPoint _) {},
+          onUpdate: (GradientPoint _) {},
         ),
       );
       await tester.pump();

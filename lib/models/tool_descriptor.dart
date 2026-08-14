@@ -57,7 +57,7 @@ class ToolDescriptor {
   AppIcon get icon => effect?.icon ?? action!.icon;
 
   /// The localized label / tooltip for the rail button.
-  String label(final AppLocalizations l10n) => effect != null ? effectLabel(l10n, effect!) : toolLabel(l10n, action!);
+  String label(AppLocalizations l10n) => effect != null ? effectLabel(l10n, effect!) : toolLabel(l10n, action!);
 }
 
 /// The **Brush** section: the freehand painters ([kBrushToolOrder]) followed by

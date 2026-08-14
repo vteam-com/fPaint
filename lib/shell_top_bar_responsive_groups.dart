@@ -49,11 +49,11 @@ class _ToolbarActionRemovalCandidate {
 
 /// Builds the responsive toolbar domains that must stay visually grouped.
 List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
-  required final BuildContext context,
-  required final ShellProvider shellProvider,
-  required final AppProvider appProvider,
-  required final InteractionLayoutProfile interactionProfile,
-  required final List<_ToolbarActionEntry> primaryActions,
+  required BuildContext context,
+  required ShellProvider shellProvider,
+  required AppProvider appProvider,
+  required InteractionLayoutProfile interactionProfile,
+  required List<_ToolbarActionEntry> primaryActions,
 }) {
   final AppLocalizations l10n = context.l10n;
   final bool hasActiveSelection =
@@ -185,9 +185,9 @@ List<_ToolbarActionGroup> _buildResponsiveToolbarActionGroups({
 
 /// Selects grouped toolbar domains and prunes only inside each domain when space is tight.
 List<_ResolvedToolbarActionGroup> _selectResponsiveToolbarActionGroups({
-  required final List<_ToolbarActionGroup> groups,
-  required final double maxWidth,
-  required final double groupSpacing,
+  required List<_ToolbarActionGroup> groups,
+  required double maxWidth,
+  required double groupSpacing,
 }) {
   if (maxWidth <= AppMath.zero) {
     return const <_ResolvedToolbarActionGroup>[];
@@ -195,7 +195,7 @@ List<_ResolvedToolbarActionGroup> _selectResponsiveToolbarActionGroups({
 
   final List<List<_ToolbarActionEntry>> visibleActionsByGroup = groups
       .map<List<_ToolbarActionEntry>>(
-        (final _ToolbarActionGroup group) => List<_ToolbarActionEntry>.from(group.actions),
+        (_ToolbarActionGroup group) => List<_ToolbarActionEntry>.from(group.actions),
       )
       .toList();
 
@@ -244,9 +244,9 @@ List<_ResolvedToolbarActionGroup> _selectResponsiveToolbarActionGroups({
 
 /// Estimates the total width of the currently visible grouped toolbar domains.
 double _estimateToolbarGroupsWidth({
-  required final List<_ToolbarActionGroup> groups,
-  required final List<List<_ToolbarActionEntry>> visibleActionsByGroup,
-  required final double groupSpacing,
+  required List<_ToolbarActionGroup> groups,
+  required List<List<_ToolbarActionEntry>> visibleActionsByGroup,
+  required double groupSpacing,
 }) {
   double requiredWidth = AppMath.zero.toDouble();
   int visibleGroupCount = AppMath.zero;
@@ -273,9 +273,9 @@ double _estimateToolbarGroupsWidth({
 
 /// Estimates one grouped toolbar domain including its shared surface padding.
 double _estimateToolbarGroupWidth({
-  required final _ToolbarActionGroup group,
-  required final List<_ToolbarActionEntry> actions,
-  required final double spacing,
+  required _ToolbarActionGroup group,
+  required List<_ToolbarActionEntry> actions,
+  required double spacing,
 }) {
   if (actions.isEmpty) {
     return AppMath.zero.toDouble();
@@ -290,8 +290,8 @@ double _estimateToolbarGroupWidth({
 
 /// Finds the next removable action while preserving at least one action in required groups.
 _ToolbarActionRemovalCandidate? _findLeastImportantResponsiveGroupAction({
-  required final List<_ToolbarActionGroup> groups,
-  required final List<List<_ToolbarActionEntry>> visibleActionsByGroup,
+  required List<_ToolbarActionGroup> groups,
+  required List<List<_ToolbarActionEntry>> visibleActionsByGroup,
 }) {
   _ToolbarActionRemovalCandidate? removalCandidate;
 

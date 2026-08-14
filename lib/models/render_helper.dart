@@ -14,9 +14,9 @@ import 'package:fpaint/models/text_object.dart';
 /// The [positions] parameter is the ordered list of stroke points.
 /// The [brush] parameter is the brush to use for the stroke.
 void renderPencilStroke(
-  final Canvas canvas,
-  final List<Offset> positions,
-  final MyBrush brush,
+  Canvas canvas,
+  List<Offset> positions,
+  MyBrush brush,
 ) {
   final Paint paint = Paint();
   paint.color = brush.color;
@@ -33,9 +33,9 @@ void renderPencilStroke(
 /// The [positions] parameter is the ordered list of stroke points.
 /// The [brush] parameter is the brush to use for the stroke.
 void renderPencilEraserStroke(
-  final Canvas canvas,
-  final List<Offset> positions,
-  final MyBrush brush,
+  Canvas canvas,
+  List<Offset> positions,
+  MyBrush brush,
 ) {
   final Paint paint = Paint();
   paint.strokeWidth = brush.size;
@@ -55,9 +55,9 @@ void renderPencilEraserStroke(
 /// image — is byte-identical to drawing the whole stroke at once. That identity
 /// is what keeps the in-progress preview matching the committed render.
 void _renderFreehandStroke(
-  final Canvas canvas,
-  final List<Offset> positions,
-  final Paint paint,
+  Canvas canvas,
+  List<Offset> positions,
+  Paint paint,
 ) {
   if (positions.isEmpty) {
     return;
@@ -87,11 +87,11 @@ void _renderFreehandStroke(
 /// The [brush] parameter is the brush to use for the stroke.
 /// The [fillColor] parameter is the fill color of the rectangle.
 void renderRectangle(
-  final Canvas canvas,
-  final Offset p1,
-  final Offset p2,
-  final MyBrush brush,
-  final Color fillColor,
+  Canvas canvas,
+  Offset p1,
+  Offset p2,
+  MyBrush brush,
+  Color fillColor,
 ) {
   // Draw the base rectangle
   final Paint paint = Paint();
@@ -123,11 +123,11 @@ void renderRectangle(
 /// The [brush] parameter is the brush to use for the stroke.
 /// The [fillColor] parameter is the fill color of the circle.
 void renderCircle(
-  final Canvas canvas,
-  final Offset p1,
-  final Offset p2,
-  final MyBrush brush,
-  final Color fillColor,
+  Canvas canvas,
+  Offset p1,
+  Offset p2,
+  MyBrush brush,
+  Color fillColor,
 ) {
   final Paint paint = Paint();
   paint.color = fillColor;
@@ -166,10 +166,10 @@ void renderCircle(
 /// The [brush] parameter is the brush to use for the stroke.
 /// The [fillColor] parameter is the fill color of the path.
 void renderPath(
-  final Canvas canvas,
-  final List<Offset> positions,
-  final MyBrush brush,
-  final Color fillColor,
+  Canvas canvas,
+  List<Offset> positions,
+  MyBrush brush,
+  Color fillColor,
 ) {
   final Paint paint = Paint();
   paint.color = fillColor;
@@ -202,11 +202,11 @@ void renderPath(
 /// The [brush] parameter is the brush to use for the stroke.
 /// The [fillColor] parameter is the fill color of the line.
 void renderLine(
-  final Canvas canvas,
-  final Offset p1,
-  final Offset p2,
-  final MyBrush brush,
-  final Color fillColor,
+  Canvas canvas,
+  Offset p1,
+  Offset p2,
+  MyBrush brush,
+  Color fillColor,
 ) {
   final Paint paint = Paint();
   paint.color = fillColor;
@@ -234,11 +234,11 @@ void renderLine(
 /// The [fillColor] parameter is the fill color of the region.
 /// The [gradient] parameter is the gradient to use for the fill.
 void renderRegion(
-  final Canvas canvas,
-  final Path path,
-  final Color? fillColor,
-  final Gradient? gradient,
-  final HalftoneFill? halftoneFill,
+  Canvas canvas,
+  Path path,
+  Color? fillColor,
+  Gradient? gradient,
+  HalftoneFill? halftoneFill,
 ) {
   final bool shouldRenderHalftone =
       halftoneFill != null &&
@@ -261,10 +261,10 @@ void renderRegion(
 
 /// Renders a two-color halftone fill clipped to [path].
 void _renderHalftoneRegion(
-  final Canvas canvas,
-  final Path path,
-  final Gradient? gradient,
-  final HalftoneFill halftoneFill,
+  Canvas canvas,
+  Path path,
+  Gradient? gradient,
+  HalftoneFill halftoneFill,
 ) {
   final Rect bounds = path.getBounds();
   if (bounds.isEmpty) {
@@ -317,7 +317,7 @@ void _renderHalftoneRegion(
 }
 
 /// Resolves halftone spacing while capping total dot work for large regions.
-double resolveHalftoneSpacing(final Rect bounds) {
+double resolveHalftoneSpacing(Rect bounds) {
   final double boundsArea = bounds.width * bounds.height;
   if (boundsArea <= AppMath.zero) {
     return AppHalftone.dotSpacing;
@@ -329,9 +329,9 @@ double resolveHalftoneSpacing(final Rect bounds) {
 
 /// Samples the halftone intensity at [point] from the region's fill geometry.
 double _halftoneIntensityAt({
-  required final Offset point,
-  required final Rect bounds,
-  required final Gradient? gradient,
+  required Offset point,
+  required Rect bounds,
+  required Gradient? gradient,
 }) {
   if (gradient == null) {
     return AppVisual.full;
@@ -374,7 +374,7 @@ double _halftoneIntensityAt({
 }
 
 /// Converts a gradient [alignment] into an absolute point inside [bounds].
-Offset _alignmentToPoint(final Rect bounds, final Alignment alignment) {
+Offset _alignmentToPoint(Rect bounds, Alignment alignment) {
   final double halfWidth = bounds.width * AppVisual.half;
   final double halfHeight = bounds.height * AppVisual.half;
   return Offset(
@@ -387,7 +387,7 @@ Offset _alignmentToPoint(final Rect bounds, final Alignment alignment) {
 ///
 /// The [canvas] parameter is the canvas to draw on.
 /// The [path] parameter is the path to render.
-void renderRegionErase(final Canvas canvas, final Path path) {
+void renderRegionErase(Canvas canvas, Path path) {
   final Paint paint = Paint();
   paint.color = const Color(0x00000000);
   paint.blendMode = BlendMode.clear;
@@ -401,20 +401,20 @@ void renderRegionErase(final Canvas canvas, final Path path) {
 /// The [topLeftPosition] parameter is the top-left position of the image.
 /// The [image] parameter is the image to render.
 void renderImage(
-  final Canvas canvas,
-  final Offset topLeftPosition,
-  final ui.Image image,
+  Canvas canvas,
+  Offset topLeftPosition,
+  ui.Image image,
 ) {
   canvas.drawImage(image, topLeftPosition, Paint()..filterQuality = FilterQuality.medium);
 }
 
 /// The Gaussian blur sigma applied to a soft ("airbrush") stroke of [brushSize].
-double softStrokeBlurSigma(final double brushSize) => brushSize * AppStroke.softBlurSigmaFactor;
+double softStrokeBlurSigma(double brushSize) => brushSize * AppStroke.softBlurSigmaFactor;
 
 /// How far a soft ("airbrush") stroke of [brushSize] paints beyond its nominal
 /// half-width, once the Gaussian feather is included. Used to size export/cache
 /// bounds so the soft edge is not clipped.
-double softStrokeOutset(final double brushSize) =>
+double softStrokeOutset(double brushSize) =>
     brushSize * AppVisual.half + softStrokeBlurSigma(brushSize) * AppStroke.softBlurExtentSigmas;
 
 /// Draws a path with a brush style.
@@ -425,11 +425,11 @@ double softStrokeOutset(final double brushSize) =>
 /// The [brushStyle] parameter is the brush style to use.
 /// The [brushSize] parameter is the brush size to use.
 void drawPathWithBrushStyle(
-  final Canvas canvas,
-  final Paint paint,
-  final Path path,
-  final BrushStyle brushStyle,
-  final double brushSize,
+  Canvas canvas,
+  Paint paint,
+  Path path,
+  BrushStyle brushStyle,
+  double brushSize,
 ) {
   switch (brushStyle) {
     case BrushStyle.solid:
@@ -498,11 +498,11 @@ void drawPathWithBrushStyle(
 /// The [dashWidth] parameter is the width of the dashes.
 /// The [dashGap] parameter is the gap between the dashes.
 void drawPathDash(
-  final Path path,
-  final Canvas canvas,
-  final Paint paint,
-  final double dashWidth,
-  final double dashGap,
+  Path path,
+  Canvas canvas,
+  Paint paint,
+  double dashWidth,
+  double dashGap,
 ) {
   final Path dashedPath = createDashedPath(
     path,
@@ -518,9 +518,9 @@ void drawPathDash(
 /// The [dashWidth] parameter is the width of the dashes.
 /// The [dashGap] parameter is the gap between the dashes.
 Path createDashedPath(
-  final Path source, {
-  required final double dashWidth,
-  required final double dashGap,
+  Path source, {
+  required double dashWidth,
+  required double dashGap,
 }) {
   final Path dashedPath = Path();
   for (final ui.PathMetric pathMetric in source.computeMetrics()) {
@@ -544,10 +544,10 @@ Path createDashedPath(
 ///
 /// Each dot is a filled circle with radius equal to half the stroke width.
 void _drawPathDots(
-  final Path path,
-  final Canvas canvas,
-  final Paint paint,
-  final double brushSize,
+  Path path,
+  Canvas canvas,
+  Paint paint,
+  double brushSize,
 ) {
   final double radius = paint.strokeWidth / AppMath.pair;
   final double gap = brushSize * AppStroke.dashGapFactor;
@@ -572,11 +572,11 @@ void _drawPathDots(
 /// Each cycle consists of one dash followed by [dotCount] dots,
 /// separated by gaps proportional to [brushSize].
 void _drawPathDashDot(
-  final Path path,
-  final Canvas canvas,
-  final Paint paint,
-  final double brushSize, {
-  required final int dotCount,
+  Path path,
+  Canvas canvas,
+  Paint paint,
+  double brushSize, {
+  required int dotCount,
 }) {
   final double dashWidth = brushSize * AppStroke.dashWidthFactor;
   final double radius = paint.strokeWidth / AppMath.pair;
@@ -612,10 +612,10 @@ void _drawPathDashDot(
 /// Each slash is a short line segment perpendicular-ish to the path direction,
 /// spaced evenly along the path.
 void _drawPathSlashes(
-  final Path path,
-  final Canvas canvas,
-  final Paint paint,
-  final double brushSize,
+  Path path,
+  Canvas canvas,
+  Paint paint,
+  double brushSize,
 ) {
   final double slashLength = paint.strokeWidth * AppStroke.dashWidthFactor;
   final double gap = brushSize * AppStroke.dashGapFactor;
@@ -644,8 +644,8 @@ void _drawPathSlashes(
 /// The [canvas] parameter is the canvas to draw on.
 /// The [textObject] parameter is the text object to render.
 void renderText(
-  final Canvas canvas,
-  final TextObject textObject,
+  Canvas canvas,
+  TextObject textObject,
 ) {
   if (textObject.text.isEmpty) {
     return; // Don't render empty or placeholder text

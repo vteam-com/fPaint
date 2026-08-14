@@ -18,7 +18,7 @@ class TextAlignmentDropdown extends StatelessWidget {
   final TextAlign value;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return SizedBox(
       width: AppLayout.inputFieldWidth,
       child: AppDropdown<TextAlign>(
@@ -38,7 +38,7 @@ class TextAlignmentDropdown extends StatelessWidget {
             child: AppText(l10n.textAlignRight),
           ),
         ],
-        onChanged: (final TextAlign? nextValue) {
+        onChanged: (TextAlign? nextValue) {
           if (nextValue == null) {
             return;
           }

@@ -12,7 +12,7 @@ class ImagePainter extends CustomPainter {
   final ui.Image image;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     final ui.Paint paint = Paint();
 
     // Calculate the scale factors to fit the image into the destination rectangle
@@ -36,5 +36,5 @@ class ImagePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

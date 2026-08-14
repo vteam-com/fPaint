@@ -17,7 +17,7 @@ const String _blendModeNormalFallback = 'Normal';
 /// - Overlay/Soft Light/Hard Light: Contrast adjustments
 /// - Color operations: Hue, Saturation, Color, Luminosity adjustments
 /// - Dodge/Burn: Contrast modifications
-Map<String, Map<String, Object>> getSupportedBlendModes(final AppLocalizations l10n) => <String, Map<String, Object>>{
+Map<String, Map<String, Object>> getSupportedBlendModes(AppLocalizations l10n) => <String, Map<String, Object>>{
   'Normal': <String, Object>{
     'flutterBlendMode': BlendMode.srcOver,
     'description': l10n.blendModeNormalDescription,
@@ -91,9 +91,9 @@ Map<String, Map<String, Object>> getSupportedBlendModes(final AppLocalizations l
 /// [selectedBlendMode] The currently selected blend mode (for highlighting).
 /// Returns the selected BlendMode, or BlendMode.srcOver if cancelled.
 Future<BlendMode> showBlendModeMenu({
-  required final BuildContext context,
-  final Offset position = Offset.zero,
-  final BlendMode? selectedBlendMode,
+  required BuildContext context,
+  Offset position = Offset.zero,
+  BlendMode? selectedBlendMode,
 }) async {
   final AppLocalizations l10n = context.l10n;
   final Map<String, Map<String, Object>> blendModes = getSupportedBlendModes(l10n);
@@ -105,7 +105,7 @@ Future<BlendMode> showBlendModeMenu({
           position.dx + 1,
           position.dy + 1,
         ),
-        items: blendModes.entries.map((final MapEntry<String, Map<String, Object>> entry) {
+        items: blendModes.entries.map((MapEntry<String, Map<String, Object>> entry) {
           final BlendMode menuFlutterBlendMode = (entry.value['flutterBlendMode'] as BlendMode?) ?? BlendMode.srcOver;
 
           return AppPopupMenuItem<BlendMode>(
@@ -138,7 +138,7 @@ Future<BlendMode> showBlendModeMenu({
 /// [blendMode] The BlendMode to convert to text.
 /// [l10n] Optional localizations for translated blend mode names.
 /// Returns a capitalized string representation of the blend mode.
-String blendModeToText(final BlendMode blendMode, [final AppLocalizations? l10n]) {
+String blendModeToText(BlendMode blendMode, [AppLocalizations? l10n]) {
   if (blendMode == BlendMode.srcOver) {
     return l10n?.blendModeNormalLabel ?? _blendModeNormalFallback;
   }

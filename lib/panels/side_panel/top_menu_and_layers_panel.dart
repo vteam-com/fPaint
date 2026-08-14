@@ -13,20 +13,20 @@ class TopMenuAndLayersPanel extends StatelessWidget {
   const TopMenuAndLayersPanel({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final ShellProvider shellProvider = ShellProvider.of(context);
     final LayersProvider layers = LayersProvider.of(context);
     final AppLocalizations l10n = context.l10n;
 
     return ListenableBuilder(
       listenable: shellProvider.sidePanelExpandedListenable,
-      builder: (final BuildContext _, final Widget? _) {
+      builder: (BuildContext _, Widget? _) {
         return Column(
           children: <Widget>[
             SidePanelHeader(title: l10n.sidePanelLayersSection),
             ListenableBuilder(
               listenable: layers.layerListStructureListenable,
-              builder: (final BuildContext context2, final Widget? _) {
+              builder: (BuildContext context2, Widget? _) {
                 return Expanded(
                   child: _ReorderableLayerList(
                     layers: layers,
@@ -60,14 +60,14 @@ class _ReorderableLayerList extends StatefulWidget {
 class _ReorderableLayerListState extends State<_ReorderableLayerList> {
   int? _draggedIndex;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return ListView.builder(
       itemCount: widget.layers.length,
-      itemBuilder: (final BuildContext _, final int index) {
+      itemBuilder: (BuildContext _, int index) {
         final LayerProvider layer = widget.layers.get(index);
         final Widget child = ListenableBuilder(
           listenable: layer,
-          builder: (final BuildContext _, final Widget? _) {
+          builder: (BuildContext _, Widget? _) {
             return GestureDetector(
               onTap: () => widget.layers.selectedLayerIndex = index,
               onDoubleTap: () => widget.layers.layersToggleVisibility(layer),
@@ -84,13 +84,13 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
         );
 
         final Widget dropTarget = DragTarget<int>(
-          onWillAcceptWithDetails: (final DragTargetDetails<int> details) => details.data != index,
-          onAcceptWithDetails: (final DragTargetDetails<int> details) {
+          onWillAcceptWithDetails: (DragTargetDetails<int> details) => details.data != index,
+          onAcceptWithDetails: (DragTargetDetails<int> details) {
             final int oldIndex = details.data;
             final int newIndex = index;
             widget.layers.reorderLayer(fromIndex: oldIndex, toIndex: newIndex);
           },
-          builder: (final BuildContext _, final List<int?> _, final List<dynamic> _) {
+          builder: (BuildContext _, List<int?> _, List<dynamic> _) {
             return Opacity(
               opacity: _draggedIndex == index ? AppVisual.low : AppVisual.full,
               child: child,
@@ -105,7 +105,7 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
             feedback: Opacity(opacity: AppVisual.medium, child: child),
             childWhenDragging: Opacity(opacity: AppVisual.low, child: child),
             onDragStarted: () => setState(() => _draggedIndex = index),
-            onDragEnd: (final _) => setState(() => _draggedIndex = null),
+            onDragEnd: (_) => setState(() => _draggedIndex = null),
             child: dropTarget,
           );
         }
@@ -116,7 +116,7 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
           feedback: Opacity(opacity: AppVisual.medium, child: child),
           childWhenDragging: Opacity(opacity: AppVisual.low, child: child),
           onDragStarted: () => setState(() => _draggedIndex = index),
-          onDragEnd: (final _) => setState(() => _draggedIndex = null),
+          onDragEnd: (_) => setState(() => _draggedIndex = null),
           child: dropTarget,
         );
       },

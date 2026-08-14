@@ -146,7 +146,7 @@ void main() {
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         _fileChannel,
-        (final MethodCall methodCall) async {
+        (MethodCall methodCall) async {
           methodCalls.add(methodCall.method);
           switch (methodCall.method) {
             case 'resolveBookmark':
@@ -212,7 +212,7 @@ void main() {
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         _fileChannel,
-        (final MethodCall methodCall) async {
+        (MethodCall methodCall) async {
           methodCalls.add(methodCall.method);
           switch (methodCall.method) {
             case 'replaceFileWithBackup':
@@ -250,7 +250,7 @@ void main() {
 
       final List<File> backupFiles = (await tempDirectory.list().toList())
           .whereType<File>()
-          .where((final File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
+          .where((File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
           .toList();
 
       expect(await File(filePath).exists(), isTrue);
@@ -300,7 +300,7 @@ void main() {
 
       final List<File> backupFiles = (await tempDirectory.list().toList())
           .whereType<File>()
-          .where((final File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
+          .where((File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
           .toList();
 
       expect(await currentFile.exists(), isTrue);
@@ -310,8 +310,8 @@ void main() {
 
     test('keeps only the 3 newest backups', () async {
       Future<File> createBackup({
-        required final String fileName,
-        required final int secondsOffset,
+        required String fileName,
+        required int secondsOffset,
       }) async {
         final File backupFile = File('${tempDirectory.path}/$fileName');
         await backupFile.writeAsString(fileName);
@@ -342,7 +342,7 @@ void main() {
 
       final List<File> backupFiles = (await tempDirectory.list().toList())
           .whereType<File>()
-          .where((final File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
+          .where((File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
           .toList();
 
       expect(backupFiles, hasLength(3));
@@ -356,17 +356,17 @@ void main() {
       await saveWithOptionalBackup(
         filePath: filePath,
         preferences: preferences,
-        backupAction: (final File _) async {
+        backupAction: (File _) async {
           throw const FileSystemException('backup rename blocked');
         },
-        saveAction: (final String resolvedPath) async {
+        saveAction: (String resolvedPath) async {
           await File(resolvedPath).writeAsString('new-content');
         },
       );
 
       final List<File> backupFiles = (await tempDirectory.list().toList())
           .whereType<File>()
-          .where((final File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
+          .where((File file) => file.path.contains('project_back-') && file.path.endsWith('.ora'))
           .toList();
 
       expect(await currentFile.readAsString(), 'new-content');

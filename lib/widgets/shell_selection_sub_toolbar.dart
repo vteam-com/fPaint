@@ -27,15 +27,15 @@ const int _selectionEffectsButtonCount = AppMath.one;
 const int _selectionToggleButtonCount = AppMath.one;
 
 /// Returns whether the shell should show a dedicated selection sub-toolbar.
-bool shouldShowSelectionSubToolbar(final AppProvider appProvider) {
+bool shouldShowSelectionSubToolbar(AppProvider appProvider) {
   return appProvider.selectedAction == ActionType.selector || appProvider.selectorModel.isVisible;
 }
 
 /// Estimates the width needed by the selection sub-toolbar.
 double estimateSelectionSubToolbarWidth(
-  final double toolbarIconActionEstimatedWidth, {
-  required final bool hasVisibleSelection,
-  final bool includeToggleButton = false,
+  double toolbarIconActionEstimatedWidth, {
+  required bool hasVisibleSelection,
+  bool includeToggleButton = false,
 }) {
   int totalButtons = _selectionModeButtonCount;
 
@@ -57,12 +57,12 @@ double estimateSelectionSubToolbarWidth(
 
 /// Builds the selection-focused sub-toolbar embedded in the top shell toolbar.
 Widget buildSelectionSubToolbar({
-  required final BuildContext context,
-  required final ShellProvider shellProvider,
-  required final AppProvider appProvider,
-  required final InteractionLayoutProfile interactionProfile,
-  final bool horizontallyScrollable = false,
-  final Widget? trailingToggleButton,
+  required BuildContext context,
+  required ShellProvider shellProvider,
+  required AppProvider appProvider,
+  required InteractionLayoutProfile interactionProfile,
+  bool horizontallyScrollable = false,
+  Widget? trailingToggleButton,
 }) {
   final AppLocalizations l10n = context.l10n;
   final bool hasVisibleSelection = appProvider.selectorModel.isVisible;
@@ -273,7 +273,7 @@ class _SelectionEffectsToolbarButton extends StatefulWidget {
 
 class _SelectionEffectsToolbarButtonState extends State<_SelectionEffectsToolbarButton> {
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return buildToolbarIconButton(
       key: Keys.effectsButton,
       tooltip: widget.l10n.effects,
@@ -290,9 +290,9 @@ class _SelectionEffectsToolbarButtonState extends State<_SelectionEffectsToolbar
 
 /// Opens an effects menu for the active selection and starts previewing the chosen effect.
 void _showSelectionEffectsMenu({
-  required final BuildContext context,
-  required final AppProvider appProvider,
-  required final AppLocalizations l10n,
+  required BuildContext context,
+  required AppProvider appProvider,
+  required AppLocalizations l10n,
 }) {
   final RenderBox button = context.findRenderObject()! as RenderBox;
   final Offset offset = button.localToGlobal(
@@ -309,7 +309,7 @@ void _showSelectionEffectsMenu({
     ),
     items: SelectionEffect.values
         .map(
-          (final SelectionEffect effect) => AppPopupMenuItem<SelectionEffect>(
+          (SelectionEffect effect) => AppPopupMenuItem<SelectionEffect>(
             value: effect,
             child: Row(
               spacing: AppSpacing.medium,
@@ -324,7 +324,7 @@ void _showSelectionEffectsMenu({
           ),
         )
         .toList(),
-  ).then((final SelectionEffect? selected) {
+  ).then((SelectionEffect? selected) {
     if (selected == null) {
       return;
     }

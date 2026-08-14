@@ -15,24 +15,24 @@ const double _displayScale = 0.5;
 const double _patchSide = 20;
 
 LayerProvider _layer({
-  final Size size = _canvasSize,
-  final void Function() onThumbnailChanged = _noop,
+  Size size = _canvasSize,
+  void Function() onThumbnailChanged = _noop,
 }) => LayerProvider(name: 'L', size: size, onThumbnailChanged: onThumbnailChanged);
 
 void _noop() {}
 
 Future<ui.Image> _solid(
-  final Color color, {
-  final int width = _canvasWidth,
-  final int height = _canvasHeight,
+  Color color, {
+  int width = _canvasWidth,
+  int height = _canvasHeight,
 }) => renderCanvasImage(
   width: width,
   height: height,
-  draw: (final ui.Canvas canvas) =>
+  draw: (ui.Canvas canvas) =>
       canvas.drawRect(Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()), Paint()..color = color),
 );
 
-UserActionDrawing _imageAction(final ui.Image image) => UserActionDrawing(
+UserActionDrawing _imageAction(ui.Image image) => UserActionDrawing(
   action: ActionType.image,
   positions: <Offset>[Offset.zero, Offset(image.width.toDouble(), image.height.toDouble())],
   image: image,
@@ -51,12 +51,12 @@ UserActionDrawing _textAction() => UserActionDrawing(
 
 /// Renders [layer] for display at [scale] into a throwaway target and returns
 /// how many times a cache rebuild was requested during the paint.
-Future<int> _renderForDisplay(final LayerProvider layer, final double scale) async {
+Future<int> _renderForDisplay(LayerProvider layer, double scale) async {
   int rebuilds = 0;
   final ui.Image out = await renderCanvasImage(
     width: _canvasWidth,
     height: _canvasHeight,
-    draw: (final ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, scale, () => rebuilds++),
+    draw: (ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, scale, () => rebuilds++),
   );
   out.dispose();
   return rebuilds;
@@ -67,11 +67,11 @@ const int _fullyOpaqueAlpha = 255;
 
 /// Renders [layer] for display at [scale] and returns the minimum alpha byte
 /// across all pixels — used to detect a transparent seam.
-Future<int> _minDisplayAlpha(final LayerProvider layer, final double scale) async {
+Future<int> _minDisplayAlpha(LayerProvider layer, double scale) async {
   final ui.Image out = await renderCanvasImage(
     width: _canvasWidth,
     height: _canvasHeight,
-    draw: (final ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, scale, () {}),
+    draw: (ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, scale, () {}),
   );
   final ByteData? bytes = await out.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
   out.dispose();
@@ -89,7 +89,7 @@ Future<int> _minDisplayAlpha(final LayerProvider layer, final double scale) asyn
 /// display cache (built at [scale]) and returns the minimum alpha of the
 /// re-rendered display. A fully opaque layer + opaque patch must stay opaque
 /// everywhere; any value below [_fullyOpaqueAlpha] is a transparent seam.
-Future<int> _foldedPatchMinDisplayAlpha(final Rect patchBounds, final double scale) async {
+Future<int> _foldedPatchMinDisplayAlpha(Rect patchBounds, double scale) async {
   final LayerProvider layer = _layer();
   layer.actionStack.add(_imageAction(await _solid(const Color(0xFF00AA00))));
   await layer.buildDisplayCache(scale);
@@ -231,7 +231,7 @@ void main() {
       final ui.Image out = await renderCanvasImage(
         width: _canvasWidth,
         height: _canvasHeight,
-        draw: (final ui.Canvas canvas) => layer.renderLayer(canvas),
+        draw: (ui.Canvas canvas) => layer.renderLayer(canvas),
       );
       final ByteData? bytes = await out.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
       out.dispose();
@@ -285,7 +285,7 @@ void main() {
       final ui.Image out = await renderCanvasImage(
         width: _canvasWidth,
         height: _canvasHeight,
-        draw: (final ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, 1.0, () => rebuilds++),
+        draw: (ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, 1.0, () => rebuilds++),
       );
       out.dispose();
       expect(rebuilds, 0);

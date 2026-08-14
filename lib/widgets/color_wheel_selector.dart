@@ -44,7 +44,7 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
   }
 
   @override
-  void didUpdateWidget(covariant final ColorWheelSelector oldWidget) {
+  void didUpdateWidget(covariant ColorWheelSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.color != widget.color) {
@@ -53,7 +53,7 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       spacing: AppSpacing.medium,
@@ -64,15 +64,15 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
           child: GestureDetector(
             key: Keys.colorPickerWheelSelector,
             behavior: HitTestBehavior.opaque,
-            onPanDown: (final DragDownDetails details) {
+            onPanDown: (DragDownDetails details) {
               _dragTarget = _resolveDragTarget(details.localPosition);
               _updateFromLocalPosition(details.localPosition);
             },
-            onPanStart: (final DragStartDetails details) {
+            onPanStart: (DragStartDetails details) {
               _dragTarget = _resolveDragTarget(details.localPosition);
               _updateFromLocalPosition(details.localPosition);
             },
-            onPanUpdate: (final DragUpdateDetails details) {
+            onPanUpdate: (DragUpdateDetails details) {
               _updateFromLocalPosition(details.localPosition);
             },
             onPanEnd: (_) {
@@ -81,7 +81,7 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
             onPanCancel: () {
               _dragTarget = null;
             },
-            onTapDown: (final TapDownDetails details) {
+            onTapDown: (TapDownDetails details) {
               _dragTarget = _resolveDragTarget(details.localPosition);
               _updateFromLocalPosition(details.localPosition);
               _dragTarget = null;
@@ -115,7 +115,7 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
                   min: 0,
                   max: 1,
                   divisions: AppLimits.sliderDivisions,
-                  onChanged: (final double value) {
+                  onChanged: (double value) {
                     setState(() {
                       _alpha = value;
                     });
@@ -152,7 +152,7 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
   }
 
   /// Resolves whether [localPosition] targets the hue ring or SV triangle.
-  _ColorWheelDragTarget? _resolveDragTarget(final Offset localPosition) {
+  _ColorWheelDragTarget? _resolveDragTarget(Offset localPosition) {
     final Size size = const Size.square(AppLayout.colorWheelDiameter);
     final ({
       Offset blackVertex,
@@ -202,7 +202,7 @@ class _ColorWheelSelectorState extends State<ColorWheelSelector> {
 
   /// Updates hue/saturation/value based on pointer movement inside the active
   /// ring or triangle target.
-  void _updateFromLocalPosition(final Offset localPosition) {
+  void _updateFromLocalPosition(Offset localPosition) {
     final Size size = const Size.square(AppLayout.colorWheelDiameter);
     final ({
       Offset blackVertex,
@@ -287,7 +287,7 @@ class _ColorWheelPainter extends CustomPainter {
   final double value;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     final ({
       Offset blackVertex,
       Offset center,
@@ -398,7 +398,7 @@ class _ColorWheelPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final _ColorWheelPainter oldDelegate) {
+  bool shouldRepaint(covariant _ColorWheelPainter oldDelegate) {
     return oldDelegate.alpha != alpha ||
         oldDelegate.hue != hue ||
         oldDelegate.saturation != saturation ||
@@ -421,7 +421,7 @@ class _WheelAlphaGradientPainter extends CustomPainter {
   final double value;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     final Rect rect = Offset.zero & size;
     final Gradient gradient = LinearGradient(
       colors: <Color>[
@@ -435,7 +435,7 @@ class _WheelAlphaGradientPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final _WheelAlphaGradientPainter oldDelegate) {
+  bool shouldRepaint(covariant _WheelAlphaGradientPainter oldDelegate) {
     return oldDelegate.alpha != alpha ||
         oldDelegate.hue != hue ||
         oldDelegate.saturation != saturation ||
@@ -452,7 +452,7 @@ class _WheelAlphaGradientPainter extends CustomPainter {
   double ringInnerRadius,
   Offset whiteVertex,
 })
-_buildWheelGeometry(final Size size, final double hue) {
+_buildWheelGeometry(Size size, double hue) {
   final double outerRadius = math.min(size.width, size.height) / AppMath.pair;
   final Offset center = Offset(size.width / AppMath.pair, size.height / AppMath.pair);
   final double ringInnerRadius = outerRadius - AppLayout.colorWheelRingThickness;
@@ -472,18 +472,18 @@ _buildWheelGeometry(final Size size, final double hue) {
   );
 }
 
-double _degreesToRadians(final double degrees) {
+double _degreesToRadians(double degrees) {
   return (degrees * AppMath.pi) / AppMath.degreesPerHalfTurn;
 }
 
-double _normalizeDegrees(final double degrees) {
+double _normalizeDegrees(double degrees) {
   return (degrees % AppMath.degreesPerFullTurn + AppMath.degreesPerFullTurn) % AppMath.degreesPerFullTurn;
 }
 
 Offset _offsetOnCircle(
-  final Offset center,
-  final double radius,
-  final double angleDegrees,
+  Offset center,
+  double radius,
+  double angleDegrees,
 ) {
   final double radians = _degreesToRadians(angleDegrees);
   return Offset(
@@ -492,13 +492,13 @@ Offset _offsetOnCircle(
   );
 }
 
-double _radiansToDegrees(final double radians) {
+double _radiansToDegrees(double radians) {
   return (radians * AppMath.degreesPerHalfTurn) / AppMath.pi;
 }
 
 ({double black, double color, double white}) _triangleWeightsForHsv({
-  required final double saturation,
-  required final double value,
+  required double saturation,
+  required double value,
 }) {
   final double clampedValue = value.clamp(0.0, AppVisual.full);
   final double clampedSaturation = saturation.clamp(0.0, AppVisual.full);
@@ -510,10 +510,10 @@ double _radiansToDegrees(final double radians) {
 }
 
 Offset _trianglePointForWeights({
-  required final Offset blackVertex,
-  required final Offset colorVertex,
-  required final ({double black, double color, double white}) weights,
-  required final Offset whiteVertex,
+  required Offset blackVertex,
+  required Offset colorVertex,
+  required ({double black, double color, double white}) weights,
+  required Offset whiteVertex,
 }) {
   return Offset(
     (blackVertex.dx * weights.black) + (whiteVertex.dx * weights.white) + (colorVertex.dx * weights.color),
@@ -524,11 +524,11 @@ Offset _trianglePointForWeights({
 /// Finds the best in-triangle point that approximates [targetColor] for the
 /// current hue triangle.
 Offset _triangleBestPointForColor({
-  required final Offset blackVertex,
-  required final Offset colorVertex,
-  required final Color hueColor,
-  required final Color targetColor,
-  required final Offset whiteVertex,
+  required Offset blackVertex,
+  required Offset colorVertex,
+  required Color hueColor,
+  required Color targetColor,
+  required Offset whiteVertex,
 }) {
   final Path trianglePath = Path()
     ..moveTo(blackVertex.dx, blackVertex.dy)
@@ -577,8 +577,8 @@ Offset _triangleBestPointForColor({
 }
 
 Color _triangleColorForWeights({
-  required final Color hueColor,
-  required final ({double black, double color, double white}) weights,
+  required Color hueColor,
+  required ({double black, double color, double white}) weights,
 }) {
   return Color.fromARGB(
     AppLimits.rgbChannelMax,
@@ -588,7 +588,7 @@ Color _triangleColorForWeights({
   );
 }
 
-double _colorDistanceSquared(final Color left, final Color right) {
+double _colorDistanceSquared(Color left, Color right) {
   final double redDelta = left.r - right.r;
   final double greenDelta = left.g - right.g;
   final double blueDelta = left.b - right.b;
@@ -596,8 +596,8 @@ double _colorDistanceSquared(final Color left, final Color right) {
 }
 
 int _weightedTriangleChannel({
-  required final ({double black, double color, double white}) weights,
-  required final double hueChannel,
+  required ({double black, double color, double white}) weights,
+  required double hueChannel,
 }) {
   final double weightedHueChannel = hueChannel * AppLimits.rgbChannelMax;
   final double weightedValue = (weights.white * AppLimits.rgbChannelMax) + (weights.color * weightedHueChannel);
@@ -607,10 +607,10 @@ int _weightedTriangleChannel({
 /// Returns barycentric triangle weights for [point], or null when the point is
 /// outside the SV triangle or the triangle is degenerate.
 ({double black, double color, double white})? _triangleWeightsForPoint({
-  required final Offset point,
-  required final Offset whiteVertex,
-  required final Offset blackVertex,
-  required final Offset colorVertex,
+  required Offset point,
+  required Offset whiteVertex,
+  required Offset blackVertex,
+  required Offset colorVertex,
 }) {
   final Offset whiteToBlack = blackVertex - whiteVertex;
   final Offset whiteToColor = colorVertex - whiteVertex;

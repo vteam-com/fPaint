@@ -13,7 +13,7 @@ class AppOverlayMenuItem extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: MouseRegion(

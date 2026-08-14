@@ -9,7 +9,7 @@ import 'package:fpaint/providers/layer_provider.dart';
 const Size _defaultSize = Size(800, 600);
 
 /// Creates a [LayerProvider] for testing.
-LayerProvider _createLayer({final String name = 'Test'}) {
+LayerProvider _createLayer({String name = 'Test'}) {
   return LayerProvider(
     name: name,
     size: _defaultSize,
@@ -470,7 +470,7 @@ void main() {
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final Canvas canvas = Canvas(recorder);
       bool called = false;
-      layer.applyAction(canvas, null, (final Canvas c) {
+      layer.applyAction(canvas, null, (Canvas c) {
         called = true;
       });
       expect(called, isTrue);
@@ -485,7 +485,7 @@ void main() {
       layer.applyAction(
         canvas,
         Path()..addRect(const Rect.fromLTWH(0, 0, 50, 50)),
-        (final Canvas c) {
+        (Canvas c) {
           called = true;
         },
       );

@@ -59,7 +59,7 @@ class LayerSelector extends StatelessWidget {
   /// Whether to display the layer in minimal mode.
   final bool minimal;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
       padding: EdgeInsets.all(minimal ? AppSpacing.thin : AppSpacing.small),
@@ -105,7 +105,7 @@ class LayerSelector extends StatelessWidget {
 
     final String? newName = await showAppDialog<String>(
       context: context,
-      builder: (final BuildContext dialogContext) => AppDialog(
+      builder: (BuildContext dialogContext) => AppDialog(
         title: l10n.layerNameTitle,
         content: AppTextField(
           key: Keys.layerRenameTextField,
@@ -138,13 +138,13 @@ class LayerSelector extends StatelessWidget {
 
   /// Builds the layer selector for a large surface.
   Widget _buildForLargeSurface(
-    final BuildContext context,
-    final LayersProvider layers,
-    final LayerProvider layer,
-    final bool allowRemoveLayer,
+    BuildContext context,
+    LayersProvider layers,
+    LayerProvider layer,
+    bool allowRemoveLayer,
   ) {
     return LayoutBuilder(
-      builder: (final BuildContext _, final BoxConstraints constraints) {
+      builder: (BuildContext _, BoxConstraints constraints) {
         final bool hasBoundedWidth = constraints.hasBoundedWidth;
         return Row(
           mainAxisSize: hasBoundedWidth ? MainAxisSize.max : MainAxisSize.min,
@@ -181,7 +181,7 @@ class LayerSelector extends StatelessWidget {
 
   /// Builds the layer selector for a small surface.
   Widget _buildForSmallSurface(
-    final LayerProvider layer,
+    LayerProvider layer,
   ) {
     return AppTooltip(
       message: information(),
@@ -199,10 +199,10 @@ class LayerSelector extends StatelessWidget {
 
   /// Builds the layer controls widget.
   Widget _buildLayerControls(
-    final BuildContext context,
-    final LayersProvider layers,
-    final LayerProvider layer,
-    final bool allowRemoveLayer,
+    BuildContext context,
+    LayersProvider layers,
+    LayerProvider layer,
+    bool allowRemoveLayer,
   ) {
     final AppLocalizations l10n = context.l10n;
     return Wrap(
@@ -253,7 +253,7 @@ class LayerSelector extends StatelessWidget {
                   context: context,
                   title: l10n.layerBackgroundColor,
                   color: this.layer.backgroundColor ?? AppColors.transparent,
-                  onSelectedColor: (final Color color) {
+                  onSelectedColor: (Color color) {
                     this.layer.backgroundColor = color;
                     layer.clearCache();
                     layers.update();
@@ -273,10 +273,10 @@ class LayerSelector extends StatelessWidget {
   }
 
   /// Builds the layer name widget.
-  Widget _buildLayerName(final LayersProvider layers) {
+  Widget _buildLayerName(LayersProvider layers) {
     final AppLocalizations l10n = context.l10n;
     return LayoutBuilder(
-      builder: (final BuildContext _, final BoxConstraints constraints) {
+      builder: (BuildContext _, BoxConstraints constraints) {
         final bool hasBoundedWidth = constraints.hasBoundedWidth;
         return Row(
           mainAxisSize: hasBoundedWidth ? MainAxisSize.max : MainAxisSize.min,
@@ -327,8 +327,8 @@ class LayerSelector extends StatelessWidget {
               onPressed: () => layers.layersToggleVisibility(layer),
             ),
             AppPopupMenuButton<String>(
-              itemBuilder: (final BuildContext _) => _buildPopupMenuItems(),
-              onSelected: (final String value) => _handlePopupMenuSelection(value, layers),
+              itemBuilder: (BuildContext _) => _buildPopupMenuItems(),
+              onSelected: (String value) => _handlePopupMenuSelection(value, layers),
               child: const AppSvgIcon(icon: AppIcon.moreVert),
             ),
           ],
@@ -455,8 +455,8 @@ class LayerSelector extends StatelessWidget {
 
   /// Builds the thumbnail preview widget.
   Widget _buildThumbnailPreview(
-    final LayersProvider layers,
-    final LayerProvider layer,
+    LayersProvider layers,
+    LayerProvider layer,
   ) {
     return SizedBox(
       height: AppLayout.layerPreviewSize,
@@ -469,8 +469,8 @@ class LayerSelector extends StatelessWidget {
         onSlideStart: () {
           // appProvider.update();
         },
-        onChanged: (final double value) => layer.opacity = value,
-        onChangeEnd: (final double value) {
+        onChanged: (double value) => layer.opacity = value,
+        onChangeEnd: (double value) {
           layer.opacity = value;
           layer.clearCache();
           layers.update();
@@ -483,8 +483,8 @@ class LayerSelector extends StatelessWidget {
 
   /// Builds the thumbnail preview and visibility widget.
   Widget _buildThumbnailPreviewAndVisibility(
-    final LayersProvider layers,
-    final LayerProvider layer,
+    LayersProvider layers,
+    LayerProvider layer,
   ) {
     return GestureDetector(
       onLongPress: () {
@@ -492,7 +492,7 @@ class LayerSelector extends StatelessWidget {
           context: context,
           position: const RelativeRect.fromLTRB(0, 0, 0, 0),
           items: _buildPopupMenuItems(),
-        ).then((final String? value) {
+        ).then((String? value) {
           if (value != null) {
             _handlePopupMenuSelection(value, layers);
           }
@@ -521,8 +521,8 @@ class LayerSelector extends StatelessWidget {
 
   /// Handles the selection of a popup menu item.
   Future<void> _handlePopupMenuSelection(
-    final String value,
-    final LayersProvider layers,
+    String value,
+    LayersProvider layers,
   ) async {
     switch (value) {
       case _menuActionRename:
@@ -572,7 +572,7 @@ class LayerSelector extends StatelessWidget {
   }
 
   /// Method to insert a new layer above the currently selected one
-  void _onAddLayer(final LayersProvider layers) {
+  void _onAddLayer(LayersProvider layers) {
     final AppLocalizations l10n = context.l10n;
     final UndoProvider undoProvider = UndoProvider.of(context);
 
@@ -595,15 +595,15 @@ class LayerSelector extends StatelessWidget {
 
   /// Method to flatten all layers
   void _onMergeLayer(
-    final LayersProvider layers,
-    final int indexFrom,
-    final int indexTo,
+    LayersProvider layers,
+    int indexFrom,
+    int indexTo,
   ) {
     layers.mergeLayers(indexFrom, indexTo);
   }
 
   /// Floats the current layer into modify mode.
-  Future<void> _onModifyLayer(final LayersProvider layers) async {
+  Future<void> _onModifyLayer(LayersProvider layers) async {
     final AppProvider appProvider = AppProvider.of(context);
     layers.selectedLayerIndex = layers.getLayerIndex(layer);
 
@@ -615,7 +615,7 @@ class LayerSelector extends StatelessWidget {
     await appProvider.modifySelectedLayer();
   }
 
-  void _showLockedLayerMessage(final AppProvider appProvider) {
+  void _showLockedLayerMessage(AppProvider appProvider) {
     context.showSnackBarMessage(
       context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
     );

@@ -45,10 +45,10 @@ class ImagePlacementModel extends VisibleModel {
 
   /// Begins placement of [imageToPlace] at the given [initialPosition].
   void start({
-    required final ui.Image imageToPlace,
-    required final Offset initialPosition,
-    final ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
-    final ImagePlacementLayerRestoreState? layerRestoreState,
+    required ui.Image imageToPlace,
+    required Offset initialPosition,
+    ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
+    ImagePlacementLayerRestoreState? layerRestoreState,
   }) {
     image = imageToPlace;
     position = initialPosition;

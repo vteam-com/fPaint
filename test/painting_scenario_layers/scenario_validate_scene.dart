@@ -1,20 +1,19 @@
 part of '../painting_scenario_test.dart';
 
 Future<void> validateScenarioScene(
-  final PaintingScenarioSession session, {
-  required final LayersProvider layersProvider,
+  PaintingScenarioSession session, {
+  required LayersProvider layersProvider,
 }) async {
   await PaintingLayerHelpers.printLayerStructure(session.tester);
 
   expect(
     layersProvider.length,
     _expectedLayerCountAfterScene,
-    reason:
-        'Should have background + sky + mountains + clouds + sun + land + house + house shadow + fence + fence shadow + birds + signature',
+    reason: 'Should have background + sky + mountains + clouds + sun + land + house + house shadow + fence + fence shadow + birds + signature',
   );
 
   expect(
-    layersProvider.list.map((final LayerProvider layer) => layer.name).toList(),
+    layersProvider.list.map((LayerProvider layer) => layer.name).toList(),
     <String>[
       _signatureLayerName,
       _birdsLayerName,

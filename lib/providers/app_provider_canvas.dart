@@ -12,7 +12,7 @@ import 'package:fpaint/providers/app_provider_selection.dart';
 /// rotation, flipping, and document lifecycle.
 extension AppProviderCanvas on AppProvider {
   /// Clears the canvas.
-  void canvasClear(final Size size) {
+  void canvasClear(Size size) {
     layers.clear();
     layers.size = size;
     layers.addWhiteBackgroundLayer();
@@ -21,21 +21,21 @@ extension AppProviderCanvas on AppProvider {
   }
 
   /// Converts a screen point to a canvas point.
-  Offset toCanvas(final Offset point) {
+  Offset toCanvas(Offset point) {
     return (point - canvasOffset) / layers.scale;
   }
 
   /// Converts a canvas point to a screen point.
-  Offset fromCanvas(final Offset point) {
+  Offset fromCanvas(Offset point) {
     return (point * layers.scale) + canvasOffset;
   }
 
   /// Applies a scale to the canvas.
   void applyScaleToCanvas({
-    required final double scaleDelta,
-    final ui.Offset? anchorPoint,
-    final bool notifyListener = true,
-    final bool notifyViewport = false,
+    required double scaleDelta,
+    ui.Offset? anchorPoint,
+    bool notifyListener = true,
+    bool notifyViewport = false,
   }) {
     final Offset before = anchorPoint == null ? Offset.zero : toCanvas(anchorPoint);
 
@@ -68,15 +68,15 @@ extension AppProviderCanvas on AppProvider {
 
   /// Pans the canvas.
   void canvasPan({
-    required final Offset offsetDelta,
-    final bool notifyListener = true,
-    final bool notifyViewport = false,
+    required Offset offsetDelta,
+    bool notifyListener = true,
+    bool notifyViewport = false,
   }) {
     canvasOffset += offsetDelta;
 
     if (fillModel.isVisible) {
       fillModel.gradientPoints.forEach(
-        (final GradientPoint point) => point.offset += offsetDelta,
+        (GradientPoint point) => point.offset += offsetDelta,
       );
     }
     if (notifyListener) {
@@ -88,8 +88,8 @@ extension AppProviderCanvas on AppProvider {
 
   /// Centers the canvas within the view.
   void canvasFitToContainer({
-    required final double containerWidth,
-    required final double containerHeight,
+    required double containerWidth,
+    required double containerHeight,
   }) {
     final double scaleX = containerWidth / layers.width;
     final double scaleY = containerHeight / layers.height;
@@ -120,7 +120,7 @@ extension AppProviderCanvas on AppProvider {
   bool get canvasResizeLockAspectRatio => layers.canvasResizeLockAspectRatio;
 
   /// Sets whether the canvas resize lock aspect ratio is enabled.
-  set canvasResizeLockAspectRatio(final bool value) {
+  set canvasResizeLockAspectRatio(bool value) {
     layers.canvasResizeLockAspectRatio = value;
     update();
   }
@@ -142,7 +142,7 @@ extension AppProviderCanvas on AppProvider {
   ///
   /// When a selection exists, only the selected region on the active layer
   /// is rotated.  Otherwise the entire canvas (all layers) is rotated.
-  Future<void> rotateCanvas90(final String actionName) async {
+  Future<void> rotateCanvas90(String actionName) async {
     if (selectorModel.isVisible) {
       await rotateSelection90(actionName);
       update();
@@ -156,7 +156,7 @@ extension AppProviderCanvas on AppProvider {
   ///
   /// When a selection exists, only the selected region on the active layer
   /// is flipped.  Otherwise the entire canvas (all layers) is flipped.
-  Future<void> flipCanvasHorizontal(final String actionName) async {
+  Future<void> flipCanvasHorizontal(String actionName) async {
     if (selectorModel.isVisible) {
       await flipSelectionHorizontal(actionName);
     } else {
@@ -169,7 +169,7 @@ extension AppProviderCanvas on AppProvider {
   ///
   /// When a selection exists, only the selected region on the active layer
   /// is flipped.  Otherwise the entire canvas (all layers) is flipped.
-  Future<void> flipCanvasVertical(final String actionName) async {
+  Future<void> flipCanvasVertical(String actionName) async {
     if (selectorModel.isVisible) {
       await flipSelectionVertical(actionName);
     } else {

@@ -28,10 +28,10 @@ class _AppProgressIndicatorState extends State<AppProgressIndicator> with Single
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: _controller,
-      builder: (final BuildContext _, final Widget? _) {
+      builder: (BuildContext _, Widget? _) {
         return CustomPaint(
           size: const Size(AppLayout.loaderRadius, AppLayout.loaderRadius),
           painter: _SpinnerPainter(
@@ -60,7 +60,7 @@ class _SpinnerPainter extends CustomPainter {
   final double strokeWidth;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     final double radius = size.shortestSide / AppMath.pair;
     final Offset center = Offset(size.width / AppMath.pair, size.height / AppMath.pair);
 
@@ -78,7 +78,7 @@ class _SpinnerPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final _SpinnerPainter oldDelegate) {
+  bool shouldRepaint(covariant _SpinnerPainter oldDelegate) {
     return oldDelegate.progress != progress;
   }
 }

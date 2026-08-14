@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<void> paintLayerClouds(final PaintingScenarioSession session) async {
+Future<void> paintLayerClouds(PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _cloudsLayerName);
 
   for (final (Offset center, double radius) in <(Offset, double)>[

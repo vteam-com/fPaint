@@ -1,18 +1,18 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/widgets/app_tooltip.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/transform_widget.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../helpers/widget_test_harness.dart';
 
 Future<ui.Image> _createTestImage({
-  final int width = 120,
-  final int height = 80,
+  int width = 120,
+  int height = 80,
 }) async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   Canvas(recorder).drawRect(
@@ -23,14 +23,14 @@ Future<ui.Image> _createTestImage({
 }
 
 Widget _buildHarness({
-  required final TransformModel model,
-  required final VoidCallback onChanged,
+  required TransformModel model,
+  required VoidCallback onChanged,
 }) {
   return buildLocalizedScaffoldTestApp(
     mediaQueryData: const MediaQueryData(size: Size(1200, 900)),
-    bodyBuilder: (final BuildContext context) {
+    bodyBuilder: (BuildContext context) {
       return StatefulBuilder(
-        builder: (final BuildContext context, final void Function(void Function()) setState) {
+        builder: (BuildContext context, void Function(void Function()) setState) {
           return TransformWidget(
             model: model,
             canvasOffset: Offset.zero,
@@ -49,7 +49,7 @@ Widget _buildHarness({
 }
 
 Finder _findTransformButton(
-  final WidgetTester tester,
+  WidgetTester tester,
 ) {
   final BuildContext context = tester.element(find.byType(TransformWidget));
   final AppLocalizations l10n = AppLocalizations.of(context)!;
@@ -58,7 +58,7 @@ Finder _findTransformButton(
 }
 
 Finder _findTranslateButton(
-  final WidgetTester tester,
+  WidgetTester tester,
 ) {
   final BuildContext context = tester.element(find.byType(TransformWidget));
   final AppLocalizations l10n = AppLocalizations.of(context)!;
@@ -67,11 +67,11 @@ Finder _findTranslateButton(
 }
 
 Finder _findOverlayButtonByTooltip(
-  final WidgetTester tester,
-  final String tooltipMessage,
+  WidgetTester tester,
+  String tooltipMessage,
 ) {
   final Finder transformTooltip = find.byWidgetPredicate(
-    (final Widget widget) => widget is AppTooltip && widget.message == tooltipMessage,
+    (Widget widget) => widget is AppTooltip && widget.message == tooltipMessage,
   );
 
   return find
@@ -87,7 +87,7 @@ Finder _findTransformHandles() => find.byType(OverlayDragHandle);
 void main() {
   group('TransformWidget', () {
     testWidgets('transform button cycles enabled handle groups and only renders active handles', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
@@ -127,7 +127,7 @@ void main() {
     });
 
     testWidgets('center handle only renders and moves the selection in all-handles mode', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
@@ -165,7 +165,7 @@ void main() {
     });
 
     testWidgets('translate button enables all-handles mode and drags the full selection', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
@@ -208,7 +208,7 @@ void main() {
     });
 
     testWidgets('transform button resets to corners when leaving scale mode', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
@@ -251,7 +251,7 @@ void main() {
     });
 
     testWidgets('dragging an edge line moves the connected edge points together', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
@@ -270,7 +270,7 @@ void main() {
       await tester.pump();
 
       final Finder topEdgeZones = find.byWidgetPredicate(
-        (final Widget widget) => widget is TransformEdgeDragZone && widget.edgeIndex == TransformModel.topEdgeIndex,
+        (Widget widget) => widget is TransformEdgeDragZone && widget.edgeIndex == TransformModel.topEdgeIndex,
       );
 
       expect(topEdgeZones, findsNWidgets(2));
@@ -286,7 +286,7 @@ void main() {
       expect(changedCallCount, greaterThan(0));
     });
 
-    testWidgets('active edge state is set during drag and cleared after release', (final WidgetTester tester) async {
+    testWidgets('active edge state is set during drag and cleared after release', (WidgetTester tester) async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
       model.start(image: image, bounds: const Rect.fromLTWH(100, 150, 200, 100));
@@ -300,7 +300,7 @@ void main() {
       await tester.pump();
 
       final Finder topEdgeZones = find.byWidgetPredicate(
-        (final Widget widget) => widget is TransformEdgeDragZone && widget.edgeIndex == TransformModel.topEdgeIndex,
+        (Widget widget) => widget is TransformEdgeDragZone && widget.edgeIndex == TransformModel.topEdgeIndex,
       );
 
       final TestGesture gesture = await tester.startGesture(tester.getCenter(topEdgeZones.first));
@@ -320,7 +320,7 @@ void main() {
     });
 
     testWidgets('dragging a left edge line vertically keeps the movement vertical', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final TransformModel model = TransformModel();
       final ui.Image image = await _createTestImage();
@@ -335,7 +335,7 @@ void main() {
       await tester.pump();
 
       final Finder leftEdgeZones = find.byWidgetPredicate(
-        (final Widget widget) => widget is TransformEdgeDragZone && widget.edgeIndex == TransformModel.leftEdgeIndex,
+        (Widget widget) => widget is TransformEdgeDragZone && widget.edgeIndex == TransformModel.leftEdgeIndex,
       );
 
       expect(leftEdgeZones, findsNWidgets(2));

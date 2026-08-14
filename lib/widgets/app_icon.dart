@@ -24,7 +24,7 @@ class AppSvgIcon extends StatelessWidget {
   final bool useSourceColors;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final double resolvedSize = size ?? AppLayout.iconSize;
     final ColorFilter? resolvedColorFilter = useSourceColors ? null : ColorFilter.mode(defaultColor, BlendMode.srcIn);
 

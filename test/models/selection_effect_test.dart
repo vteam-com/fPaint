@@ -49,7 +49,7 @@ void main() {
       expect(SelectionEffect.noise.supportsSizeControl, isTrue);
 
       for (final SelectionEffect effect in SelectionEffect.values.where(
-        (final SelectionEffect effect) => effect != SelectionEffect.pixelate && effect != SelectionEffect.noise,
+        (SelectionEffect effect) => effect != SelectionEffect.pixelate && effect != SelectionEffect.noise,
       )) {
         expect(effect.supportsSizeControl, isFalse);
       }
@@ -123,7 +123,7 @@ void main() {
       final Image gray = await recorder.endRecording().toImage(4, 4);
       addTearDown(gray.dispose);
 
-      Future<int> redAt(final Image image) async {
+      Future<int> redAt(Image image) async {
         final ByteData data = (await image.toByteData(format: ImageByteFormat.rawRgba))!;
         return data.getUint8(AppMath.rgbChannelRed);
       }

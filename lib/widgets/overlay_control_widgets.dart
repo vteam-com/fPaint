@@ -29,25 +29,25 @@ const String _overlayButtonContentAssertionMessage = 'buildOverlayButton require
 /// semantic content tint automatically. Other child widgets inherit merged
 /// text and icon themes when possible.
 Widget buildOverlayButton({
-  required final MouseCursor cursor,
-  required final String tooltip,
-  final AppIcon? icon,
-  final Widget? child,
-  final AppButtonContentSemantic contentSemantic = AppButtonContentSemantic.enabled,
-  final bool useSourceColors = false,
-  final bool isSelected = false,
-  final bool showBorder = true,
-  final double width = AppInteraction.imagePlacementButtonSize,
-  final double height = AppInteraction.imagePlacementButtonSize,
-  final double iconSize = AppLayout.iconSize,
-  final BoxShape shape = BoxShape.rectangle,
-  final BorderRadiusGeometry borderRadius = const BorderRadius.all(Radius.circular(AppRadius.large)),
-  final Key? key,
-  final VoidCallback? onTap,
-  final GestureDragStartCallback? onPanStart,
-  final GestureDragUpdateCallback? onPanUpdate,
-  final GestureDragEndCallback? onPanEnd,
-  final GestureDragCancelCallback? onPanCancel,
+  required MouseCursor cursor,
+  required String tooltip,
+  AppIcon? icon,
+  Widget? child,
+  AppButtonContentSemantic contentSemantic = AppButtonContentSemantic.enabled,
+  bool useSourceColors = false,
+  bool isSelected = false,
+  bool showBorder = true,
+  double width = AppInteraction.imagePlacementButtonSize,
+  double height = AppInteraction.imagePlacementButtonSize,
+  double iconSize = AppLayout.iconSize,
+  BoxShape shape = BoxShape.rectangle,
+  BorderRadiusGeometry borderRadius = const BorderRadius.all(Radius.circular(AppRadius.large)),
+  Key? key,
+  VoidCallback? onTap,
+  GestureDragStartCallback? onPanStart,
+  GestureDragUpdateCallback? onPanUpdate,
+  GestureDragEndCallback? onPanEnd,
+  GestureDragCancelCallback? onPanCancel,
 }) {
   assert(
     (icon == null) != (child == null),
@@ -68,7 +68,7 @@ Widget buildOverlayButton({
     onPanUpdate: onPanUpdate,
     onPanEnd: onPanEnd,
     onPanCancel: onPanCancel,
-    builder: (final BuildContext _, final AppButtonVisualState state) {
+    builder: (BuildContext _, AppButtonVisualState state) {
       final Color backgroundColor = (isSelected || state.isPressed)
           ? AppColors.buttonSelected
           : AppColors.buttonBackground;
@@ -99,22 +99,22 @@ Widget buildOverlayButton({
 
 /// Builds a circular control button used by canvas overlays.
 Widget buildOverlayCircleButton({
-  required final MouseCursor cursor,
-  required final String tooltip,
-  final AppIcon? icon,
-  final Widget? child,
-  final AppButtonContentSemantic contentSemantic = AppButtonContentSemantic.enabled,
-  final bool useSourceColors = false,
-  final bool isSelected = false,
-  final bool showBorder = true,
-  final double size = AppInteraction.imagePlacementButtonSize,
-  final double iconSize = AppLayout.iconSize,
-  final Key? key,
-  final VoidCallback? onTap,
-  final GestureDragStartCallback? onPanStart,
-  final GestureDragUpdateCallback? onPanUpdate,
-  final GestureDragEndCallback? onPanEnd,
-  final GestureDragCancelCallback? onPanCancel,
+  required MouseCursor cursor,
+  required String tooltip,
+  AppIcon? icon,
+  Widget? child,
+  AppButtonContentSemantic contentSemantic = AppButtonContentSemantic.enabled,
+  bool useSourceColors = false,
+  bool isSelected = false,
+  bool showBorder = true,
+  double size = AppInteraction.imagePlacementButtonSize,
+  double iconSize = AppLayout.iconSize,
+  Key? key,
+  VoidCallback? onTap,
+  GestureDragStartCallback? onPanStart,
+  GestureDragUpdateCallback? onPanUpdate,
+  GestureDragEndCallback? onPanEnd,
+  GestureDragCancelCallback? onPanCancel,
 }) {
   return buildOverlayButton(
     key: key,
@@ -141,11 +141,11 @@ Widget buildOverlayCircleButton({
 /// Builds and semantically tints either the explicit child or the requested
 /// overlay icon so callers do not need to manage content colors manually.
 Widget _buildOverlayButtonContent({
-  required final AppIcon? icon,
-  required final Widget? child,
-  required final Color contentColor,
-  required final double iconSize,
-  required final bool useSourceColors,
+  required AppIcon? icon,
+  required Widget? child,
+  required Color contentColor,
+  required double iconSize,
+  required bool useSourceColors,
 }) {
   if (icon != null) {
     return AppSvgIcon(
@@ -192,17 +192,17 @@ Widget _buildOverlayButtonContent({
 /// [AppColors.buttonSelected], and icon tint comes from
 /// [AppButtonContentSemantic.enabled].
 Widget buildOverlayModeButton({
-  required final String tooltip,
-  required final AppIcon icon,
-  required final MouseCursor cursor,
-  final double size = AppInteraction.imagePlacementButtonSize,
-  final double iconSize = AppLayout.iconSize,
-  final bool isSelected = false,
-  final VoidCallback? onTap,
-  final GestureDragStartCallback? onPanStart,
-  final GestureDragUpdateCallback? onPanUpdate,
-  final GestureDragEndCallback? onPanEnd,
-  final GestureDragCancelCallback? onPanCancel,
+  required String tooltip,
+  required AppIcon icon,
+  required MouseCursor cursor,
+  double size = AppInteraction.imagePlacementButtonSize,
+  double iconSize = AppLayout.iconSize,
+  bool isSelected = false,
+  VoidCallback? onTap,
+  GestureDragStartCallback? onPanStart,
+  GestureDragUpdateCallback? onPanUpdate,
+  GestureDragEndCallback? onPanEnd,
+  GestureDragCancelCallback? onPanCancel,
 }) {
   return buildOverlayCircleButton(
     tooltip: tooltip,
@@ -222,7 +222,7 @@ Widget buildOverlayModeButton({
 }
 
 /// Builds the floating feedback bubble used by selection and transform controls.
-Widget buildOverlayFeedbackBubble({required final String label}) {
+Widget buildOverlayFeedbackBubble({required String label}) {
   return Container(
     padding: const EdgeInsets.symmetric(
       horizontal: AppSpacing.small,
@@ -253,8 +253,8 @@ Widget buildOverlayFeedbackBubble({required final String label}) {
 
 /// Wraps overlay actions in a shared surface so related controls scan as one unit.
 Widget buildOverlayControlSurface({
-  required final Widget child,
-  final EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.small),
+  required Widget child,
+  EdgeInsetsGeometry padding = const EdgeInsets.all(AppSpacing.small),
 }) {
   return DecoratedBox(
     decoration: BoxDecoration(
@@ -281,12 +281,12 @@ Widget buildOverlayControlSurface({
 
 /// Builds the shared positioned scaffold for selection and transform overlay controls.
 Widget buildPositionedOverlayControls({
-  required final double left,
-  required final OverlayPlacement placement,
-  required final double spacing,
-  required final List<Widget> controlGroups,
-  required final bool isFeedbackVisible,
-  required final Widget feedbackBubble,
+  required double left,
+  required OverlayPlacement placement,
+  required double spacing,
+  required List<Widget> controlGroups,
+  required bool isFeedbackVisible,
+  required Widget feedbackBubble,
 }) {
   final Widget feedbackSpacer = SizedBox(height: spacing);
   final Widget buttonsRow = Row(
@@ -313,12 +313,12 @@ Widget buildPositionedOverlayControls({
 /// Builds the standard Apply (green check) and Cancel (red X) button row
 /// used by canvas overlays such as transform, image placement, and eye dropper.
 Widget buildOverlayConfirmCancelButtons({
-  required final AppLocalizations l10n,
-  required final VoidCallback onConfirm,
-  required final VoidCallback onCancel,
-  final double buttonSize = AppInteraction.imagePlacementButtonSize,
-  final double spacing = AppInteraction.imagePlacementButtonSpacing,
-  final double iconSize = AppLayout.iconSize,
+  required AppLocalizations l10n,
+  required VoidCallback onConfirm,
+  required VoidCallback onCancel,
+  double buttonSize = AppInteraction.imagePlacementButtonSize,
+  double spacing = AppInteraction.imagePlacementButtonSpacing,
+  double iconSize = AppLayout.iconSize,
 }) {
   return Row(
     mainAxisSize: MainAxisSize.min,
@@ -395,7 +395,7 @@ class OverlayDragHandle extends StatelessWidget {
   /// Base size of the handle in logical pixels.
   final double size;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final double activeSize = size * AppVisual.previewTextScale;
 
     return Positioned(
@@ -404,7 +404,7 @@ class OverlayDragHandle extends StatelessWidget {
       child: GestureDetector(
         onPanStart: onPanStart,
         onPanUpdate: onPanUpdate,
-        onPanEnd: (final DragEndDetails _) => onPanEnd?.call(),
+        onPanEnd: (DragEndDetails _) => onPanEnd?.call(),
         onPanCancel: onPanCancel,
         child: MouseRegion(
           cursor: cursor,
@@ -471,10 +471,10 @@ mixin EscapeFocusMixin<T extends StatefulWidget> on State<T> {
   }
 
   /// Wraps [child] in a [Focus] widget that calls [onEscapePressed] on Escape.
-  Widget wrapWithEscapeFocus({required final Widget child}) {
+  Widget wrapWithEscapeFocus({required Widget child}) {
     return Focus(
       focusNode: _escapeFocusNode,
-      onKeyEvent: (final FocusNode _, final KeyEvent _) {
+      onKeyEvent: (FocusNode _, KeyEvent _) {
         if (HardwareKeyboard.instance.isLogicalKeyPressed(LogicalKeyboardKey.escape)) {
           onEscapePressed();
           return KeyEventResult.handled;
@@ -517,10 +517,10 @@ class OverlayPlacement {
   /// The feedback bubble appears above the buttons row for top/centred placement,
   /// and below for bottom placement.
   List<Widget> orderedColumnChildren({
-    required final Widget buttonsRow,
-    required final bool isFeedbackVisible,
-    required final Widget feedbackBubble,
-    required final Widget feedbackSpacer,
+    required Widget buttonsRow,
+    required bool isFeedbackVisible,
+    required Widget feedbackBubble,
+    required Widget feedbackSpacer,
   }) {
     if (isFlippedToBottom) {
       return <Widget>[
@@ -544,10 +544,10 @@ class OverlayPlacement {
 /// (the fallback position below content). When both positions would clip,
 /// the controls are centred within [viewportHeight].
 OverlayPlacement computeOverlayPlacement({
-  required final double viewportHeight,
-  required final double idealTop,
-  required final double bottomTop,
-  required final bool isFeedbackVisible,
+  required double viewportHeight,
+  required double idealTop,
+  required double bottomTop,
+  required bool isFeedbackVisible,
 }) {
   const double buttonSize = AppInteraction.imagePlacementButtonSize;
   final double controlsHeight = isFeedbackVisible

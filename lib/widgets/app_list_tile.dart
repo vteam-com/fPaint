@@ -19,7 +19,7 @@ class AppListTile extends StatelessWidget {
   final Widget? title;
   final Widget? trailing;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final Widget row = Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.large,
@@ -79,7 +79,7 @@ class AppSwitchListTile extends StatelessWidget {
   final Widget title;
   final bool value;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AppListTile(
       title: title,
       trailing: AppToggleSwitch(value: value, onChanged: onChanged),
@@ -100,7 +100,7 @@ class AppToggleSwitch extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   final bool value;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return AppSwitch(value: value, onChanged: onChanged);
   }
 }

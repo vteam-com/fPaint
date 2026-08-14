@@ -44,11 +44,11 @@ class _SidePanelState extends State<SidePanel> {
       Area(
         size: topPanelHeight,
         min: AppLayout.minPanelExtent,
-        builder: (final BuildContext _, final Area _) => const TopMenuAndLayersPanel(),
+        builder: (BuildContext _, Area _) => const TopMenuAndLayersPanel(),
       ),
       Area(
         min: AppLayout.minPanelExtent,
-        builder: (final BuildContext _, final Area _) => Padding(
+        builder: (BuildContext _, Area _) => Padding(
           padding: const EdgeInsets.only(top: AppSpacing.small),
           child: ToolsPanel(
             minimal: widget.minimal,
@@ -68,12 +68,12 @@ class _SidePanelState extends State<SidePanel> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context);
 
     return ListenableBuilder(
       listenable: appProvider.layerModifyModeListenable,
-      builder: (final BuildContext _, final Widget? _) {
+      builder: (BuildContext _, Widget? _) {
         if (_isModifyMode(appProvider)) {
           return _buildModifyModePanel(context, appProvider);
         }
@@ -104,15 +104,15 @@ class _SidePanelState extends State<SidePanel> {
 
   /// Builds the minimal side panel shown while a layer Modify session is active.
   Widget _buildModifyModePanel(
-    final BuildContext context,
-    final AppProvider appProvider,
+    BuildContext context,
+    AppProvider appProvider,
   ) {
     final AppLocalizations l10n = context.l10n;
 
     return DecoratedBox(
       decoration: const BoxDecoration(color: AppColors.shellChromeBackground),
       child: LayoutBuilder(
-        builder: (final BuildContext _, final BoxConstraints constraints) {
+        builder: (BuildContext _, BoxConstraints constraints) {
           final double horizontalPadding;
           if (constraints.maxWidth <= AppLayout.sidePanelCollapsed + AppLayout.toolbarButtonWidth) {
             horizontalPadding = AppSpacing.small;
@@ -164,7 +164,7 @@ class _SidePanelState extends State<SidePanel> {
     );
   }
 
-  bool _isModifyMode(final AppProvider appProvider) {
+  bool _isModifyMode(AppProvider appProvider) {
     return appProvider.isLayerModifyMode;
   }
 

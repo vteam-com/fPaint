@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/widgets/truncated_text.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('TruncatedTextWidget', () {
-    testWidgets('displays short text without truncation', (final WidgetTester tester) async {
+    testWidgets('displays short text without truncation', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: TruncatedTextWidget(text: 'Short'),
@@ -15,7 +15,7 @@ void main() {
       expect(find.text('Short'), findsOneWidget);
     });
 
-    testWidgets('truncates long text with ellipsis', (final WidgetTester tester) async {
+    testWidgets('truncates long text with ellipsis', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: TruncatedTextWidget(text: 'VeryLongText', maxLength: 6),
@@ -25,7 +25,7 @@ void main() {
       expect(find.text('Ver…ext'), findsOneWidget);
     });
 
-    testWidgets('uses default maxLength of 6', (final WidgetTester tester) async {
+    testWidgets('uses default maxLength of 6', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: TruncatedTextWidget(text: 'VeryLongText'),
@@ -35,7 +35,7 @@ void main() {
       expect(find.text('Ver…ext'), findsOneWidget);
     });
 
-    testWidgets('handles very short maxLength', (final WidgetTester tester) async {
+    testWidgets('handles very short maxLength', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: TruncatedTextWidget(text: 'Test', maxLength: 2),
@@ -45,7 +45,7 @@ void main() {
       expect(find.text('T…t'), findsOneWidget);
     });
 
-    testWidgets('handles empty text', (final WidgetTester tester) async {
+    testWidgets('handles empty text', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: TruncatedTextWidget(text: ''),
@@ -55,7 +55,7 @@ void main() {
       expect(find.text(''), findsOneWidget);
     });
 
-    testWidgets('handles text exactly at maxLength', (final WidgetTester tester) async {
+    testWidgets('handles text exactly at maxLength', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: TruncatedTextWidget(text: 'Exact', maxLength: 5),
@@ -65,7 +65,7 @@ void main() {
       expect(find.text('Exact'), findsOneWidget);
     });
 
-    testWidgets('renders with correct styling', (final WidgetTester tester) async {
+    testWidgets('renders with correct styling', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: TruncatedTextWidget(text: 'Test'),
@@ -77,7 +77,7 @@ void main() {
       expect(textWidget.style?.color, AppColors.white);
     });
 
-    testWidgets('uses SizedBox with infinite width', (final WidgetTester tester) async {
+    testWidgets('uses SizedBox with infinite width', (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: TruncatedTextWidget(text: 'Test'),

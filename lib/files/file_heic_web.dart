@@ -39,6 +39,9 @@ extension type _HeifImage._(JSObject _) implements JSObject {
   @JS('get_height')
   external int _getHeight();
 
+  // JS interop requires an opaque JSFunction here; the call site passes
+  // `displayCallback.toJS`, which has no Dart function type.
+  // ignore: always_specify_types
   external void _display(JSObject displayData, JSFunction callback);
 
   external void _free();
@@ -55,7 +58,7 @@ extension type _HeifDecoder._(JSObject _) implements JSObject {
 bool get isHeicExportSupported => false;
 
 /// Converts HEIC bytes into PNG bytes using a minimal libheif-js bridge.
-Future<Uint8List> decodeHeicBytes(final Uint8List heicBytes) async {
+Future<Uint8List> decodeHeicBytes(Uint8List heicBytes) async {
   await _ensureLibheifLoaded();
 
   try {
@@ -87,7 +90,7 @@ Future<Uint8List> decodeHeicBytes(final Uint8List heicBytes) async {
       final web.ImageData imageData = context.createImageData(width.toJS, height);
       final Completer<void> completer = Completer<void>();
 
-      void displayCallback(final JSObject? displayData) {
+      void displayCallback(JSObject? displayData) {
         if (displayData == null) {
           if (!completer.isCompleted) {
             completer.completeError(
@@ -123,7 +126,7 @@ Future<Uint8List> decodeHeicBytes(final Uint8List heicBytes) async {
 /// HEIC encoding is not supported on web.
 ///
 /// Always throws [HeicConversionException].
-Future<Uint8List> encodeToHeic(final Uint8List _) async {
+Future<Uint8List> encodeToHeic(Uint8List _) async {
   throw const HeicConversionException(_errorEncodePrefix);
 }
 
@@ -162,7 +165,7 @@ Future<void> _loadLibheifScript() {
 
   script.addEventListener(
     _eventLoad,
-    (final web.Event _) {
+    (web.Event _) {
       globalContext[_globalLibheifModule] = _createLibheifModule();
       if (!completer.isCompleted) {
         completer.complete();
@@ -172,7 +175,7 @@ Future<void> _loadLibheifScript() {
 
   script.addEventListener(
     _eventError,
-    (final web.Event _) {
+    (web.Event _) {
       if (!completer.isCompleted) {
         completer.completeError(
           const HeicConversionException('$_errorScriptLoadPrefix $_libheifBundleUrl'),

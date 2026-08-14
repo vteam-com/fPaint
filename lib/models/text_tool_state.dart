@@ -11,7 +11,7 @@ class TextToolState {
     this.textAlign = TextAlign.left,
   });
 
-  factory TextToolState.fromTextObject(final TextObject textObject) {
+  factory TextToolState.fromTextObject(TextObject textObject) {
     return TextToolState(
       size: textObject.size,
       color: textObject.color,
@@ -40,9 +40,9 @@ class TextToolState {
 
   /// Builds a [TextObject] using the current tool style at [position].
   TextObject buildTextObject({
-    required final String text,
-    required final Offset position,
-    final String? fontFamily,
+    required String text,
+    required Offset position,
+    String? fontFamily,
   }) {
     return TextObject(
       text: text,

@@ -25,7 +25,7 @@ class TolerancePicker extends BasePicker<int> {
 /// The state for [TolerancePicker].
 class TolerancePickerState extends BasePickerState<int> {
   @override
-  int clampValue(final int value) {
+  int clampValue(int value) {
     return value.clamp(1, AppLimits.percentMax);
   }
 
@@ -36,21 +36,21 @@ class TolerancePickerState extends BasePickerState<int> {
       min: 1,
       max: AppLimits.percentMax.toDouble(),
       divisions: AppLimits.sliderDivisions,
-      onChanged: (final double value) => updateValue(value.toInt()),
+      onChanged: (double value) => updateValue(value.toInt()),
     );
   }
 
   @override
-  String formatValue(final int value) {
+  String formatValue(int value) {
     return value.toStringAsFixed(0);
   }
 }
 
 /// Shows a dialog containing a [TolerancePicker].
 void showTolerancePicker(
-  final BuildContext context,
-  final int value,
-  final ValueChanged<int> onChanged,
+  BuildContext context,
+  int value,
+  ValueChanged<int> onChanged,
 ) {
   final AppLocalizations l10n = context.l10n;
   showPickerDialog(
@@ -60,7 +60,7 @@ void showTolerancePicker(
     child: TolerancePicker(
       title: l10n.tolerance,
       value: value.toInt(),
-      onChanged: (final int newValue) {
+      onChanged: (int newValue) {
         onChanged(newValue);
       },
     ),

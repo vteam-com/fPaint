@@ -1,15 +1,16 @@
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
+import 'package:material_ui/material_ui.dart';
+
 import '../helpers/recovery_test_helpers.dart';
 
 void main() {
-  testWidgets('autosave writes and clears the recovery draft', (final WidgetTester tester) async {
+  testWidgets('autosave writes and clears the recovery draft', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider()..loadedFileName = '/tmp/example.ora';
@@ -19,7 +20,7 @@ void main() {
       layers: layers,
       shellProvider: shellProvider,
       storage: storage,
-      encoder: (final LayersProvider _) async => <int>[1, 2, 3],
+      encoder: (LayersProvider _) async => <int>[1, 2, 3],
       saveDebounce: Duration.zero,
     );
 
@@ -40,7 +41,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('restore loads the stored recovery draft', (final WidgetTester tester) async {
+  testWidgets('restore loads the stored recovery draft', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
@@ -54,7 +55,7 @@ void main() {
       layers: layers,
       shellProvider: shellProvider,
       storage: storage,
-      restorer: (final LayersProvider targetLayers, final Uint8List bytes) async {
+      restorer: (LayersProvider targetLayers, Uint8List bytes) async {
         restoredBytes = bytes;
         targetLayers.addBottom('Recovered Layer');
       },
@@ -75,7 +76,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('automatic restore loads the stored recovery draft without a prompt', (final WidgetTester tester) async {
+  testWidgets('automatic restore loads the stored recovery draft without a prompt', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
@@ -89,7 +90,7 @@ void main() {
       layers: layers,
       shellProvider: shellProvider,
       storage: storage,
-      restorer: (final LayersProvider targetLayers, final Uint8List bytes) async {
+      restorer: (LayersProvider targetLayers, Uint8List bytes) async {
         restoredBytes = bytes;
         targetLayers.addBottom('Recovered Automatically');
       },
@@ -111,7 +112,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('restore discards empty stored recovery drafts', (final WidgetTester tester) async {
+  testWidgets('restore discards empty stored recovery drafts', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
@@ -138,7 +139,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('restoreDraftIfAvailable clears pref when no draft exists', (final WidgetTester tester) async {
+  testWidgets('restoreDraftIfAvailable clears pref when no draft exists', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
@@ -161,7 +162,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('discardDraft clears storage and preferences', (final WidgetTester tester) async {
+  testWidgets('discardDraft clears storage and preferences', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
@@ -186,7 +187,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('didChangeAppLifecycleState flushes on paused', (final WidgetTester tester) async {
+  testWidgets('didChangeAppLifecycleState flushes on paused', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider()..loadedFileName = '/tmp/lifecycle.ora';
@@ -196,7 +197,7 @@ void main() {
       layers: layers,
       shellProvider: shellProvider,
       storage: storage,
-      encoder: (final LayersProvider _) async => <int>[4, 5, 6],
+      encoder: (LayersProvider _) async => <int>[4, 5, 6],
       saveDebounce: const Duration(seconds: 60),
     );
 
@@ -212,7 +213,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('reconcileDraft skips delete during startup when no writes occurred', (final WidgetTester tester) async {
+  testWidgets('reconcileDraft skips delete during startup when no writes occurred', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
@@ -237,7 +238,7 @@ void main() {
     controller.dispose();
   });
 
-  testWidgets('reconcileDraft deletes draft when not changed after startup check', (final WidgetTester tester) async {
+  testWidgets('reconcileDraft deletes draft when not changed after startup check', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
     final LayersProvider layers = createRecoveryTestLayers();
     final ShellProvider shellProvider = ShellProvider();
@@ -250,8 +251,8 @@ void main() {
       layers: layers,
       shellProvider: shellProvider,
       storage: storage,
-      encoder: (final LayersProvider _) async => <int>[7, 8, 9],
-      restorer: (final LayersProvider targetLayers, final Uint8List bytes) async {
+      encoder: (LayersProvider _) async => <int>[7, 8, 9],
+      restorer: (LayersProvider targetLayers, Uint8List bytes) async {
         targetLayers.addBottom('Restored');
       },
       saveDebounce: Duration.zero,

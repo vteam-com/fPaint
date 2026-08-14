@@ -7,7 +7,7 @@ class CanvasPanel extends StatelessWidget {
   const CanvasPanel({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final LayersProvider layers = LayersProvider.of(context);
     // On-screen resolution per canvas pixel (zoom × devicePixelRatio): the live
     // painter serves layers from a display-resolution cache sized for this rather

@@ -10,7 +10,7 @@ const String _errorFailedToGetWebpRgbaBytes = 'Failed to get raw RGBA bytes from
 ///
 /// [image] The source image.
 /// Returns the image bytes in WebP format.
-Future<Uint8List> convertImageToWebp(final ui.Image image) async {
+Future<Uint8List> convertImageToWebp(ui.Image image) async {
   final ByteData byteData = await requireImageByteData<WebpConversionException>(
     image: image,
     format: ui.ImageByteFormat.rawStraightRgba,

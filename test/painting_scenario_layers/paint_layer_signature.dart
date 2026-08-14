@@ -1,8 +1,8 @@
 part of '../painting_scenario_test.dart';
 
 Future<void> paintLayerSignature(
-  final PaintingScenarioSession session, {
-  required final LayersProvider layersProvider,
+  PaintingScenarioSession session, {
+  required LayersProvider layersProvider,
 }) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _signatureLayerName);
 

@@ -19,7 +19,7 @@ class SidePanelHeader extends StatelessWidget {
   final String title;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final Widget headerTitle = Opacity(
       opacity: AppVisual.half,
       child: AppText(title, variant: AppTextVariant.title),
@@ -28,7 +28,7 @@ class SidePanelHeader extends StatelessWidget {
     return Padding(
       padding: padding,
       child: LayoutBuilder(
-        builder: (final BuildContext _, final BoxConstraints constraints) {
+        builder: (BuildContext _, BoxConstraints constraints) {
           if (!constraints.hasBoundedWidth) {
             return Align(
               alignment: AlignmentDirectional.centerStart,

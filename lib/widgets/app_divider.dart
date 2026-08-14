@@ -11,7 +11,7 @@ class AppDivider extends StatelessWidget {
   final Color color;
   final double height;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: height,

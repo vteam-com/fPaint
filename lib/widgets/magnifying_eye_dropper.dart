@@ -81,7 +81,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   }
 
   @override
-  void didUpdateWidget(covariant final MagnifyingEyeDropper oldWidget) {
+  void didUpdateWidget(covariant MagnifyingEyeDropper oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (oldWidget.pixelPosition != widget.pixelPosition || oldWidget.layers.cachedImage != widget.layers.cachedImage) {
@@ -90,7 +90,7 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     if (widget.layers.cachedImage == null) {
       return const SizedBox();
     }
@@ -213,12 +213,12 @@ class ImagePainter extends CustomPainter {
   final ui.Image image;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     canvas.drawImage(image, Offset.zero, Paint());
   }
 
   @override
-  bool shouldRepaint(covariant final CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 /// Draws the magnifying glass.
@@ -236,7 +236,7 @@ class MagnifyingGlassPainter extends CustomPainter {
   final Color color;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     const double scaleFactor = AppInteraction.magnifierImageScale;
 
     final Paint paint = Paint()
@@ -272,5 +272,5 @@ class MagnifyingGlassPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

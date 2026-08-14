@@ -66,8 +66,8 @@ class LayersProvider extends ChangeNotifier {
   /// The [listen] parameter determines whether the widget should rebuild when the
   /// [LayersProvider]'s state changes.
   static LayersProvider of(
-    final BuildContext context, {
-    final bool listen = false,
+    BuildContext context, {
+    bool listen = false,
   }) => InheritedControllerScope.of<LayersProvider>(context, listen: listen);
 
   @override
@@ -88,9 +88,9 @@ class LayersProvider extends ChangeNotifier {
   /// Disposes the GPU textures retained by [dropped] undo records that no longer
   /// appear anywhere in the live document. Invoked by [UndoProvider] when records
   /// are trimmed, redo-cleared, or fully cleared.
-  void _disposeDroppedRecordImages(final List<RecordAction> dropped) {
+  void _disposeDroppedRecordImages(List<RecordAction> dropped) {
     disposeCommittedImagesIfUnreferenced(
-      dropped.expand((final RecordAction record) => record.retainedImages),
+      dropped.expand((RecordAction record) => record.retainedImages),
     );
   }
 
@@ -100,7 +100,7 @@ class LayersProvider extends ChangeNotifier {
   /// This is the single authority for freeing committed pixel-brush/merge/transform
   /// textures: the reachability check guarantees a still-restorable image is never
   /// disposed (no use-after-free), while orphaned textures are reclaimed promptly.
-  void disposeCommittedImagesIfUnreferenced(final Iterable<ui.Image> candidates) {
+  void disposeCommittedImagesIfUnreferenced(Iterable<ui.Image> candidates) {
     final Set<ui.Image> unique = candidates.toSet();
     if (unique.isEmpty) {
       return;
@@ -178,9 +178,9 @@ class LayersProvider extends ChangeNotifier {
   Size get size => _size;
 
   /// Sets the size of the canvas.
-  set size(final Size size) {
+  set size(Size size) {
     _size = size;
-    _list.forEach((final LayerProvider layer) => layer.size = size);
+    _list.forEach((LayerProvider layer) => layer.size = size);
     notifyListeners(); // Add this line
   }
 
@@ -201,7 +201,7 @@ class LayersProvider extends ChangeNotifier {
   bool get canvasResizeLockAspectRatio => _resizeLockAspectRatio;
 
   /// Sets whether the canvas resize lock aspect ratio is enabled.
-  set canvasResizeLockAspectRatio(final bool value) {
+  set canvasResizeLockAspectRatio(bool value) {
     _resizeLockAspectRatio = value;
     notifyListeners();
   }
@@ -218,7 +218,7 @@ class LayersProvider extends ChangeNotifier {
   double get scale => _scale;
 
   /// Sets the scale of the canvas.
-  set scale(final double value) {
+  set scale(double value) {
     final double clamped = value.clamp(AppInteraction.minCanvasScale, AppInteraction.maxCanvasScale);
     if (_scale != clamped) {
       _scale = clamped;
@@ -234,7 +234,7 @@ class LayersProvider extends ChangeNotifier {
   /// takes the cheap cached path. Called by the live painter when a layer's
   /// display cache is missing/stale; the per-layer guard collapses duplicate
   /// requests, so calling it every frame during a rebuild is safe.
-  void scheduleDisplayCacheRebuild(final LayerProvider layer, final double requiredScale) {
+  void scheduleDisplayCacheRebuild(LayerProvider layer, double requiredScale) {
     unawaited(
       layer.buildDisplayCache(requiredScale).then((_) {
         _canvasRepaintNotifier.notifyListeners();
@@ -255,16 +255,16 @@ class LayersProvider extends ChangeNotifier {
   CanvasResizePosition get canvasResizePosition => _canvasResizePosition;
 
   /// Sets the canvas resize position.
-  set canvasResizePosition(final CanvasResizePosition value) {
+  set canvasResizePosition(CanvasResizePosition value) {
     _canvasResizePosition = value;
     notifyListeners();
   } // center
 
   /// Resizes the canvas and repositions content according to the anchor.
   void canvasResize(
-    final int newWidth,
-    final int newHeight,
-    final CanvasResizePosition position,
+    int newWidth,
+    int newHeight,
+    CanvasResizePosition position,
   ) {
     if (newWidth <= 0 || newHeight <= 0) {
       return;
@@ -317,7 +317,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Adds a white background layer to the canvas.
-  LayerProvider addWhiteBackgroundLayer([final String? name]) {
+  LayerProvider addWhiteBackgroundLayer([String? name]) {
     final LayerProvider firstLayer = newLayer(name ?? _defaultBackgroundName);
     firstLayer.backgroundColor = AppColors.white;
     _list.add(firstLayer);
@@ -340,8 +340,8 @@ class LayersProvider extends ChangeNotifier {
   /// the stack, selects the first layer, clears the dirty flag, and
   /// notifies listeners exactly once at the end.
   Future<void> replaceAll({
-    required final Size canvasSize,
-    required final Future<void> Function() addLayers,
+    required Size canvasSize,
+    required Future<void> Function() addLayers,
   }) async {
     clear();
     _size = canvasSize;
@@ -365,7 +365,7 @@ class LayersProvider extends ChangeNotifier {
   bool get isNotEmpty => _list.isNotEmpty;
 
   /// Gets whether any of the layers have changed.
-  bool get hasChanged => _list.any((final LayerProvider layer) => layer.hasChanged);
+  bool get hasChanged => _list.any((LayerProvider layer) => layer.hasChanged);
 
   int _selectedLayerIndex = 0;
 
@@ -374,8 +374,8 @@ class LayersProvider extends ChangeNotifier {
 
   /// Synchronizes the selected index, layer ids, and per-layer selection flags.
   void _setSelectedLayerIndex({
-    required final int index,
-    final bool notify = true,
+    required int index,
+    bool notify = true,
   }) {
     for (int i = 0; i < length; i++) {
       get(i).isSelected = i == index;
@@ -387,7 +387,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Sets the index of the selected layer.
-  set selectedLayerIndex(final int index) {
+  set selectedLayerIndex(int index) {
     if (this.isIndexInRange(index)) {
       _setSelectedLayerIndex(index: index);
     }
@@ -397,13 +397,13 @@ class LayersProvider extends ChangeNotifier {
   LayerProvider get selectedLayer => this.get(this.selectedLayerIndex);
 
   /// Toggles the visibility of a layer.
-  void layersToggleVisibility(final LayerProvider layer) {
+  void layersToggleVisibility(LayerProvider layer) {
     layer.isVisible = !layer.isVisible;
     notifyListeners();
   }
 
   /// Toggles the edit lock of a layer.
-  void layersToggleLock(final LayerProvider layer) {
+  void layersToggleLock(LayerProvider layer) {
     layer.isLocked = !layer.isLocked;
     notifyListeners();
   }
@@ -425,21 +425,21 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Checks if the given index is within the range of the layer list.
-  bool isIndexInRange(final int indexLayer) => indexLayer >= 0 && indexLayer < _list.length;
+  bool isIndexInRange(int indexLayer) => indexLayer >= 0 && indexLayer < _list.length;
 
   /// Gets the index of the given layer.
-  int getLayerIndex(final LayerProvider layer) {
+  int getLayerIndex(LayerProvider layer) {
     return _list.indexOf(layer);
   }
 
   /// Gets the layer at the given index.
-  LayerProvider get(final int index) {
+  LayerProvider get(int index) {
     ensureLayerAtIndex(index);
     return _list[index];
   }
 
   /// Creates a new layer with the given name.
-  LayerProvider newLayer(final String name) {
+  LayerProvider newLayer(String name) {
     return LayerProvider(
       name: name,
       size: _size,
@@ -461,7 +461,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Ensures that a layer exists at the given index.
-  void ensureLayerAtIndex(final int index) {
+  void ensureLayerAtIndex(int index) {
     while (_list.length <= index) {
       _list.add(newLayer('$_defaultLayerPrefix ${_list.length + 1}'));
       _syncLayerIds();
@@ -470,13 +470,13 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Adds a layer to the top of the canvas.
-  LayerProvider addTop({final String? name}) => this.insertAt(0, name);
+  LayerProvider addTop({String? name}) => this.insertAt(0, name);
 
   /// Adds a layer to the bottom of the canvas.
-  LayerProvider addBottom([final String? name]) => this.insertAt(this.length, name);
+  LayerProvider addBottom([String? name]) => this.insertAt(this.length, name);
 
   /// Inserts a layer at the given index.
-  void insert(final int index, final LayerProvider layerToInsert) {
+  void insert(int index, LayerProvider layerToInsert) {
     if (isIndexInRange(index)) {
       _list.insert(index, layerToInsert);
     } else {
@@ -487,7 +487,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Inserts a new layer at the given index.
-  LayerProvider insertAt(final int index, [String? name]) {
+  LayerProvider insertAt(int index, [String? name]) {
     name ??= '$_defaultLayerPrefix${this.length}';
     final LayerProvider layer = newLayer(name);
     this.insert(index, layer);
@@ -497,7 +497,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Removes a layer from the canvas.
-  bool remove(final LayerProvider layer) {
+  bool remove(LayerProvider layer) {
     final bool wasRemoved = _list.remove(layer);
     if (wasRemoved) {
       _syncLayerIds();
@@ -508,7 +508,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Removes a layer from the canvas by its index.
-  void removeByIndex(final int index) {
+  void removeByIndex(int index) {
     if (isIndexInRange(index)) {
       _list.removeAt(index);
       _syncLayerIds();
@@ -526,8 +526,8 @@ class LayersProvider extends ChangeNotifier {
   ///
   /// The drop target index is interpreted as the item being dropped onto.
   void reorderLayer({
-    required final int fromIndex,
-    required final int toIndex,
+    required int fromIndex,
+    required int toIndex,
   }) {
     if (!isIndexInRange(fromIndex) || !isIndexInRange(toIndex)) {
       return;
@@ -546,13 +546,13 @@ class LayersProvider extends ChangeNotifier {
     selectedLayerIndex = insertIndex;
   }
 
-  bool _sourceLayerRequiresRasterizedMerge(final LayerProvider layer) {
+  bool _sourceLayerRequiresRasterizedMerge(LayerProvider layer) {
     if (layer.backgroundColor != null || layer.blendMode != ui.BlendMode.srcOver || layer.opacity != AppVisual.full) {
       return true;
     }
 
     return layer.actionStack.any(
-      (final UserActionDrawing action) => action.action == ActionType.cut || action.action == ActionType.eraser,
+      (UserActionDrawing action) => action.action == ActionType.cut || action.action == ActionType.eraser,
     );
   }
 
@@ -564,7 +564,7 @@ class LayersProvider extends ChangeNotifier {
   /// This handles both simple layers that can be merged directly and complex layers
   /// that require rasterization due to special blend modes, opacity, background color,
   /// or certain action types like cut or eraser.
-  List<UserActionDrawing> _buildMergedActionsForSourceLayer(final LayerProvider layer) {
+  List<UserActionDrawing> _buildMergedActionsForSourceLayer(LayerProvider layer) {
     if (!_sourceLayerRequiresRasterizedMerge(layer)) {
       return List<UserActionDrawing>.from(layer.actionStack);
     }
@@ -584,7 +584,7 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Merges two layers together.
-  void mergeLayers(final int indexFrom, final int indexTo) {
+  void mergeLayers(int indexFrom, int indexTo) {
     if (indexFrom == indexTo) {
       // nothing to merge
       return;
@@ -643,7 +643,7 @@ class LayersProvider extends ChangeNotifier {
   List<LayerProvider> get list => _list;
 
   /// Hides or shows all layers except the given layer.
-  void hideShowAllExcept(final LayerProvider exceptLayer, final bool show) {
+  void hideShowAllExcept(LayerProvider exceptLayer, bool show) {
     for (final LayerProvider layer in _list) {
       if (layer == exceptLayer) {
         layer.isVisible = true;
@@ -663,7 +663,7 @@ class LayersProvider extends ChangeNotifier {
 
   /// Evaluates the top colors used in the canvas.
   void evaluateTopColor() {
-    this.getTopColorUsed().then((final List<ColorUsage> topColorsFound) {
+    this.getTopColorUsed().then((List<ColorUsage> topColorsFound) {
       topColors = topColorsFound;
       _notifyTopColorsChanged();
     });
@@ -685,7 +685,7 @@ class LayersProvider extends ChangeNotifier {
       if (layer.isVisible) {
         for (final ColorUsage colorUsed in layer.topColorsUsed) {
           final ColorUsage existingColor = topColors.firstWhere(
-            (final ColorUsage c) => c.color == colorUsed.color,
+            (ColorUsage c) => c.color == colorUsed.color,
             orElse: () => colorUsed,
           );
           if (existingColor == colorUsed) {
@@ -698,7 +698,7 @@ class LayersProvider extends ChangeNotifier {
     }
 
     topColors.sort(
-      (final ColorUsage a, final ColorUsage b) => b.percentage.compareTo(a.percentage),
+      (ColorUsage a, ColorUsage b) => b.percentage.compareTo(a.percentage),
     );
     topColors = topColors.take(AppLimits.topColorCount).toList();
     return topColors;
@@ -711,15 +711,13 @@ class LayersProvider extends ChangeNotifier {
     // of replaying the full action stack for any layer whose cache was cleared
     // by a recent stroke but whose debounced thumbnail update has not yet fired.
     await Future.wait(
-      _list
-          .where((final LayerProvider layer) => layer.isVisible)
-          .map((final LayerProvider layer) => layer.ensureCachePrimed()),
+      _list.where((LayerProvider layer) => layer.isVisible).map((LayerProvider layer) => layer.ensureCachePrimed()),
     );
 
     final ui.Image compositeImage = await renderCanvasImage(
       width: this.size.width.toInt(),
       height: this.size.height.toInt(),
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         for (final LayerProvider layer in _list.reversed) {
           if (layer.isVisible) {
             layer.renderLayer(canvas);
@@ -742,12 +740,12 @@ class LayersProvider extends ChangeNotifier {
   /// region-sized image. Used to grab the selected layer's own alpha for the
   /// pixel-brush source so smudge/blur preserves its transparency while still
   /// smearing composite colours.
-  Future<ui.Image> captureLayerRegion(final int layerIndex, final ui.Rect region) {
+  Future<ui.Image> captureLayerRegion(int layerIndex, ui.Rect region) {
     final LayerProvider layer = get(layerIndex.clamp(0, length - 1));
     return renderCanvasImage(
       width: region.width.toInt(),
       height: region.height.toInt(),
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.translate(-region.left, -region.top);
         layer.renderLayer(canvas);
       },
@@ -803,15 +801,15 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// Flips the entire canvas and all its layers horizontally (left ↔ right).
-  Future<void> flipCanvasHorizontal(final String actionName) => _flipCanvas(isHorizontal: true, actionName: actionName);
+  Future<void> flipCanvasHorizontal(String actionName) => _flipCanvas(isHorizontal: true, actionName: actionName);
 
   /// Flips the entire canvas and all its layers vertically (top ↔ bottom).
-  Future<void> flipCanvasVertical(final String actionName) => _flipCanvas(isHorizontal: false, actionName: actionName);
+  Future<void> flipCanvasVertical(String actionName) => _flipCanvas(isHorizontal: false, actionName: actionName);
 
   /// Shared implementation for flipping all layers on one axis.
   Future<void> _flipCanvas({
-    required final bool isHorizontal,
-    required final String actionName,
+    required bool isHorizontal,
+    required String actionName,
   }) async {
     final Size canvasSize = Size(width, height);
 
@@ -851,8 +849,8 @@ class LayersProvider extends ChangeNotifier {
   /// When [useCachedImage] is true, the current [cachedImage] snapshot is used
   /// directly and its RGBA bytes are cached for subsequent samples.
   Future<Color?> getColorAtOffset(
-    final Offset offset, {
-    final bool useCachedImage = false,
+    Offset offset, {
+    bool useCachedImage = false,
   }) async {
     try {
       final ui.Image image = useCachedImage && cachedImage != null ? cachedImage! : await capturePainterToImage();
@@ -888,8 +886,8 @@ class LayersProvider extends ChangeNotifier {
 
   /// Returns RGBA bytes for [image], reusing the cached snapshot bytes when requested.
   Future<ByteData?> _getRawRgbaBytes({
-    required final ui.Image image,
-    required final bool cacheBytes,
+    required ui.Image image,
+    required bool cacheBytes,
   }) async {
     if (cacheBytes && identical(_cachedImageRawRgbaSource, image) && _cachedImageRawRgba != null) {
       return _cachedImageRawRgba;

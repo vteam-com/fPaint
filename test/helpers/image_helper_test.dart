@@ -1,19 +1,19 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:material_ui/material_ui.dart';
 
 const int _testWidth = 40;
 const int _testHeight = 30;
 
 /// Creates a solid-color test image.
 ui.Image _createTestImage({
-  final Color color = Colors.red,
-  final int width = _testWidth,
-  final int height = _testHeight,
+  Color color = Colors.red,
+  int width = _testWidth,
+  int height = _testHeight,
 }) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   Canvas(recorder).drawRect(
@@ -57,7 +57,7 @@ void main() {
   group('downsampleRgbaBox', () {
     // Builds a [width]x[height] straight-RGBA buffer from per-pixel [pixel]
     // callbacks returning an (r, g, b, a) 4-list.
-    Uint8List buildRgba(final int width, final int height, final List<int> Function(int x, int y) pixel) {
+    Uint8List buildRgba(int width, int height, List<int> Function(int x, int y) pixel) {
       final Uint8List out = Uint8List(width * height * 4);
       for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -75,7 +75,7 @@ void main() {
     test('preserves a uniform buffer without cross-channel bleed', () {
       // Every source pixel is (10, 20, 30, 40); a 2x2 -> 1x1 box average must
       // return exactly that, proving each channel offset is handled separately.
-      final Uint8List src = buildRgba(2, 2, (final int x, final int y) => <int>[10, 20, 30, 40]);
+      final Uint8List src = buildRgba(2, 2, (int x, int y) => <int>[10, 20, 30, 40]);
       final Uint8List dst = downsampleRgbaBox(src, 2, 2, 1, 1);
       expect(dst.length, 1 * 1 * 4);
       expect(dst, <int>[10, 20, 30, 40]);
@@ -89,14 +89,14 @@ void main() {
         <int>[180, 0, 0, 255],
         <int>[250, 0, 0, 255],
       ];
-      final Uint8List src = buildRgba(2, 2, (final int x, final int y) => reds[(y * 2) + x]);
+      final Uint8List src = buildRgba(2, 2, (int x, int y) => reds[(y * 2) + x]);
       final Uint8List dst = downsampleRgbaBox(src, 2, 2, 1, 1);
       expect(dst[0], (0 + 90 + 180 + 250) ~/ 4);
       expect(dst[3], 255);
     });
 
     test('produces the requested destination dimensions', () {
-      final Uint8List src = buildRgba(4, 4, (final int x, final int y) => <int>[x * 10, y * 10, 0, 255]);
+      final Uint8List src = buildRgba(4, 4, (int x, int y) => <int>[x * 10, y * 10, 0, 255]);
       final Uint8List dst = downsampleRgbaBox(src, 4, 4, 2, 2);
       expect(dst.length, 2 * 2 * 4);
     });

@@ -14,9 +14,9 @@ import 'package:fpaint/providers/fill_service.dart';
 /// Returns whether the platform-specific modifier requests origin-based flood fill.
 @visibleForTesting
 bool isFloodFillOriginModifierPressedForPlatform({
-  required final TargetPlatform platform,
-  required final bool isAltPressed,
-  required final bool isControlPressed,
+  required TargetPlatform platform,
+  required bool isAltPressed,
+  required bool isControlPressed,
 }) {
   final bool isApplePlatform = platform == TargetPlatform.macOS || platform == TargetPlatform.iOS;
   return isApplePlatform ? isAltPressed : isControlPressed;
@@ -25,9 +25,9 @@ bool isFloodFillOriginModifierPressedForPlatform({
 /// Returns whether flood fill should use the active selection path as its region.
 @visibleForTesting
 bool shouldUseSelectionRegionFloodFill({
-  required final bool isSelectionVisible,
-  required final ui.Path? selectionPath,
-  required final bool isOriginFloodFillModifierPressed,
+  required bool isSelectionVisible,
+  required ui.Path? selectionPath,
+  required bool isOriginFloodFillModifierPressed,
 }) {
   return isSelectionVisible && selectionPath != null && !isOriginFloodFillModifierPressed;
 }
@@ -36,10 +36,10 @@ bool shouldUseSelectionRegionFloodFill({
 /// region into the active selection instead of painting immediately.
 @visibleForTesting
 bool shouldCreateSelectionFromFloodFillTap({
-  required final ActionType selectedAction,
-  required final SelectorMode selectorMode,
-  required final bool isSelectionVisible,
-  required final ui.Path? selectionPath,
+  required ActionType selectedAction,
+  required SelectorMode selectorMode,
+  required bool isSelectionVisible,
+  required ui.Path? selectionPath,
 }) {
   return selectedAction == ActionType.selector &&
       selectorMode == SelectorMode.wand &&
@@ -74,11 +74,11 @@ extension AppProviderTools on AppProvider {
 
   /// Updates an action.
   void updateAction({
-    final Offset? start,
-    required final Offset end,
-    final ActionType? type,
-    final Color? colorFill,
-    final Color? colorBrush,
+    Offset? start,
+    required Offset end,
+    ActionType? type,
+    Color? colorFill,
+    Color? colorBrush,
   }) {
     if (start != null && type != null && colorFill != null && colorBrush != null) {
       recordExecuteDrawingActionToSelectedLayer(
@@ -98,14 +98,14 @@ extension AppProviderTools on AppProvider {
   }
 
   /// Updates the end of an action.
-  void updateActionEnd(final Offset position) {
+  void updateActionEnd(Offset position) {
     if (layers.selectedLayer.lastUserAction != null) {
       layers.selectedLayer.lastUserAction!.positions.last = position;
     }
   }
 
   /// Appends a line from the last user action.
-  void appendLineFromLastUserAction(final Offset positionEndOfNewLine) {
+  void appendLineFromLastUserAction(Offset positionEndOfNewLine) {
     final UserActionDrawing? last = layers.selectedLayer.lastUserAction;
     if (last == null || last.positions.isEmpty) {
       return;
@@ -136,8 +136,8 @@ extension AppProviderTools on AppProvider {
   /// selection exists yet. Returns `true` when the tap was consumed by the new
   /// selection behavior.
   Future<bool> prepareFloodFillSelection(
-    final Offset position, {
-    final bool sampleAllLayers = false,
+    Offset position, {
+    bool sampleAllLayers = false,
   }) async {
     if (!shouldCreateSelectionFromFloodFillTap(
       selectedAction: selectedAction,
@@ -168,8 +168,8 @@ extension AppProviderTools on AppProvider {
 
   /// Performs a flood fill with a solid color, committed as one undoable action.
   void floodFillSolidAction(
-    final Offset position, {
-    final bool sampleAllLayers = false,
+    Offset position, {
+    bool sampleAllLayers = false,
   }) async {
     if (await prepareFloodFillSelection(
       position,
@@ -190,8 +190,8 @@ extension AppProviderTools on AppProvider {
   /// skip the full-canvas readback. Honours fill color, halftone, and any
   /// selection clip. Returns null when the resolved region is empty.
   Future<UserActionDrawing?> _buildSolidFillAction(
-    final Offset position, {
-    required final bool sampleAllLayers,
+    Offset position, {
+    required bool sampleAllLayers,
   }) async {
     final FillImageData? imageData = await getSelectedLayerFillImageData(sampleAllLayers: sampleAllLayers);
     if (imageData == null) {
@@ -213,7 +213,7 @@ extension AppProviderTools on AppProvider {
   /// Builds a gradient flood-fill action from [fillModel], resolving the region
   /// from the **cached** layer pixels (+ isolate). Returns null when the gradient
   /// config or resolved region is unusable (an empty, path-less action).
-  Future<UserActionDrawing?> _buildGradientFillAction(final FillModel fillModel) async {
+  Future<UserActionDrawing?> _buildGradientFillAction(FillModel fillModel) async {
     final FillImageData? imageData = await getSelectedLayerFillImageData(sampleAllLayers: fillModel.sampleAllLayers);
     if (imageData == null) {
       return null;
@@ -235,8 +235,8 @@ extension AppProviderTools on AppProvider {
   /// The region resolve is cached + isolate-run; a version token drops stale
   /// async results. Committed on pointer-up via [AppProvider.commitFillPreview].
   Future<void> updateSolidFillPreview(
-    final Offset position, {
-    required final bool sampleAllLayers,
+    Offset position, {
+    required bool sampleAllLayers,
   }) async {
     if (isSelectedLayerLocked) {
       return;

@@ -37,9 +37,9 @@ class WebPEncoder {
 
 /// Convenience helper that encodes raw RGBA bytes into a lossless WebP file.
 Uint8List encodeWebpLossless(
-  final Uint8List rgba,
-  final int width,
-  final int height,
+  Uint8List rgba,
+  int width,
+  int height,
 ) {
   assert(rgba.length == width * height * WebPEncodingConstants.rgbaBytesPerPixel);
 

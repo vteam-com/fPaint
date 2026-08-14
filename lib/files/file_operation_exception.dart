@@ -65,10 +65,10 @@ class WebpConversionException extends FileOperationException {
 
 /// Throws a typed [FileOperationException] while preserving [stackTrace].
 Never throwFileOperationException<T extends FileOperationException>({
-  required final String message,
-  required final Object error,
-  required final StackTrace stackTrace,
-  required final FileOperationExceptionBuilder<T> exceptionBuilder,
+  required String message,
+  required Object error,
+  required StackTrace stackTrace,
+  required FileOperationExceptionBuilder<T> exceptionBuilder,
 }) {
   Error.throwWithStackTrace(
     exceptionBuilder(message, cause: error),
@@ -78,10 +78,10 @@ Never throwFileOperationException<T extends FileOperationException>({
 
 /// Returns non-null byte data for [image] encoded as [format], or throws.
 Future<ByteData> requireImageByteData<T extends FileOperationException>({
-  required final ui.Image image,
-  required final ui.ImageByteFormat format,
-  required final String errorMessage,
-  required final FileOperationExceptionBuilder<T> exceptionBuilder,
+  required ui.Image image,
+  required ui.ImageByteFormat format,
+  required String errorMessage,
+  required FileOperationExceptionBuilder<T> exceptionBuilder,
 }) async {
   final ByteData? byteData = await image.toByteData(format: format);
   if (byteData == null) {

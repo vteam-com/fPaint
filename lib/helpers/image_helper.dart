@@ -15,8 +15,8 @@ Uint8List? _sessionClipboardImageBytes;
 
 /// Extracts pixel bytes from [image] using the requested [format].
 Future<Uint8List?> extractImagePixels(
-  final ui.Image image, {
-  final ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba,
+  ui.Image image, {
+  ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba,
 }) async {
   final ByteData? byteData = await image.toByteData(format: format);
   return byteData?.buffer.asUint8List();
@@ -24,9 +24,9 @@ Future<Uint8List?> extractImagePixels(
 
 /// Renders drawing commands into a new [ui.Image] with the given dimensions.
 Future<ui.Image> renderCanvasImage({
-  required final int width,
-  required final int height,
-  required final void Function(ui.Canvas) draw,
+  required int width,
+  required int height,
+  required void Function(ui.Canvas) draw,
 }) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);
@@ -39,9 +39,9 @@ Future<ui.Image> renderCanvasImage({
 /// Mirrors [renderCanvasImage] for callers on synchronous paint/export paths
 /// that need the image without awaiting.
 ui.Image renderCanvasImageSync({
-  required final int width,
-  required final int height,
-  required final void Function(ui.Canvas) draw,
+  required int width,
+  required int height,
+  required void Function(ui.Canvas) draw,
 }) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);
@@ -51,9 +51,9 @@ ui.Image renderCanvasImageSync({
 
 /// Creates a [ui.Image] from straight RGBA pixel data.
 Future<ui.Image> imageFromPixels(
-  final Uint8List pixels,
-  final int width,
-  final int height,
+  Uint8List pixels,
+  int width,
+  int height,
 ) async {
   final ui.ImmutableBuffer buffer = await ui.ImmutableBuffer.fromUint8List(pixels);
   final ui.ImageDescriptor descriptor = ui.ImageDescriptor.raw(
@@ -73,9 +73,9 @@ Future<ui.Image> imageFromPixels(
 /// for large raster buffers on Impeller (multi-second for ~1 MP). This direct
 /// decode path avoids the codec abstraction and uploads the texture directly.
 Future<ui.Image> imageFromPixelsDecode(
-  final Uint8List pixels,
-  final int width,
-  final int height,
+  Uint8List pixels,
+  int width,
+  int height,
 ) {
   final Completer<ui.Image> completer = Completer<ui.Image>();
   ui.decodeImageFromPixels(
@@ -92,7 +92,7 @@ Future<ui.Image> imageFromPixelsDecode(
 ///
 /// Returns a list of [ColorUsage] objects, each representing a color and its
 /// usage percentage in the image.
-Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
+Future<List<ColorUsage>> getImageColors(ui.Image image) async {
   final Uint8List? pixels = await extractImagePixels(image);
   if (pixels == null) {
     return <ColorUsage>[];
@@ -117,14 +117,14 @@ Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
   );
 
   int index = 0;
-  colorCount.forEach((final int packedColor, final int count) {
+  colorCount.forEach((int packedColor, int count) {
     final ui.Color color = ui.Color(packedColor);
     colorUsages[index++] = ColorUsage(color, count / totalPixels);
   });
 
   // Sort in-place
   colorUsages.sort(
-    (final ColorUsage a, final ColorUsage b) => b.percentage.compareTo(a.percentage),
+    (ColorUsage a, ColorUsage b) => b.percentage.compareTo(a.percentage),
   );
 
   if (colorUsages.length <= AppLimits.topColorCount) {
@@ -138,7 +138,7 @@ Future<List<ColorUsage>> getImageColors(final ui.Image image) async {
 /// Converts a [Uint8List] of image data to a [ui.Image].
 ///
 /// The [Uint8List] should contain the raw bytes of the image.
-Future<ui.Image> fromBytesToImage(final Uint8List list) async {
+Future<ui.Image> fromBytesToImage(Uint8List list) async {
   // Decode the image
   final ui.Codec codec = await ui.instantiateImageCodec(list);
   final ui.FrameInfo frameInfo = await codec.getNextFrame();
@@ -147,7 +147,7 @@ Future<ui.Image> fromBytesToImage(final Uint8List list) async {
 }
 
 /// Converts a [ui.Image] to a [Uint8List] of raw RGBA data.
-Future<Uint8List?> convertImageToUint8List(final ui.Image image) async {
+Future<Uint8List?> convertImageToUint8List(ui.Image image) async {
   return extractImagePixels(
     image,
     format: ui.ImageByteFormat.rawStraightRgba,
@@ -155,7 +155,7 @@ Future<Uint8List?> convertImageToUint8List(final ui.Image image) async {
 }
 
 /// Copies a [ui.Image] to the system clipboard as a PNG.
-Future<void> copyImageToClipboard(final ui.Image image) async {
+Future<void> copyImageToClipboard(ui.Image image) async {
   final ByteData? data = await image.toByteData(format: ui.ImageByteFormat.png);
   if (data == null) {
     return;
@@ -167,7 +167,7 @@ Future<void> copyImageToClipboard(final ui.Image image) async {
 }
 
 /// Copies PNG [imageBytes] to the system clipboard.
-Future<void> copyImageBytesToClipboard(final Uint8List imageBytes) async {
+Future<void> copyImageBytesToClipboard(Uint8List imageBytes) async {
   _sessionClipboardImageBytes = imageBytes;
   try {
     await Pasteboard.writeImage(imageBytes).timeout(AppDefaults.clipboardAccessTimeout);
@@ -221,11 +221,11 @@ Future<bool> clipboardHasImage() async {
 /// source pixels that map into it, so soft content (smudge/blur) loses no
 /// perceptible detail.
 Uint8List downsampleRgbaBox(
-  final Uint8List src,
-  final int srcWidth,
-  final int srcHeight,
-  final int dstWidth,
-  final int dstHeight,
+  Uint8List src,
+  int srcWidth,
+  int srcHeight,
+  int dstWidth,
+  int dstHeight,
 ) {
   final Uint8List out = Uint8List(dstWidth * dstHeight * AppMath.bytesPerPixel);
   for (int dy = AppMath.zero; dy < dstHeight; dy++) {
@@ -264,15 +264,15 @@ Uint8List downsampleRgbaBox(
 /// When [isHorizontal] is `true` the image is mirrored left ↔ right;
 /// otherwise it is mirrored top ↔ bottom.
 Future<ui.Image> flipImage(
-  final ui.Image image, {
-  required final bool isHorizontal,
+  ui.Image image, {
+  required bool isHorizontal,
 }) async {
   final double w = image.width.toDouble();
   final double h = image.height.toDouble();
   return renderCanvasImage(
     width: w.toInt(),
     height: h.toInt(),
-    draw: (final ui.Canvas canvas) {
+    draw: (ui.Canvas canvas) {
       if (isHorizontal) {
         canvas.translate(w, 0);
         canvas.scale(-1, 1);
@@ -288,13 +288,13 @@ Future<ui.Image> flipImage(
 /// Rotates an [image] 90 degrees clockwise.
 ///
 /// The returned image has its width and height swapped.
-Future<ui.Image> rotateImage90(final ui.Image image) async {
+Future<ui.Image> rotateImage90(ui.Image image) async {
   final double w = image.width.toDouble();
   final double h = image.height.toDouble();
   return renderCanvasImage(
     width: h.toInt(),
     height: w.toInt(),
-    draw: (final ui.Canvas canvas) {
+    draw: (ui.Canvas canvas) {
       // Rotate 90° CW: translate to new width (old height), then rotate.
       canvas.translate(h, 0);
       canvas.rotate(math.pi / AppMath.pair);
@@ -306,7 +306,7 @@ Future<ui.Image> rotateImage90(final ui.Image image) async {
 /// Crops a [ui.Image] to a specified [Rect].
 ///
 /// The [image] parameter is the image to crop, and [rect] is the rectangle to crop to.
-ui.Image cropImage(final ui.Image image, final ui.Rect rect) {
+ui.Image cropImage(ui.Image image, ui.Rect rect) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);
 
@@ -328,7 +328,7 @@ ui.Image cropImage(final ui.Image image, final ui.Rect rect) {
 /// Returns the tight bounding box of non-transparent pixels in [image].
 ///
 /// Returns `null` when the image is fully transparent.
-Future<ui.Rect?> getNonTransparentBounds(final ui.Image image) async {
+Future<ui.Rect?> getNonTransparentBounds(ui.Image image) async {
   final Uint8List? pixels = await extractImagePixels(image);
   if (pixels == null) {
     return null;
@@ -386,7 +386,7 @@ class Debouncer {
   /// Calls the [callback] after the specified [duration].
   /// If the method is called again before the duration elapses,
   /// the previous timer is canceled and a new one is started.
-  void run(final VoidCallback callback) {
+  void run(VoidCallback callback) {
     _timer?.cancel(); // Cancel any existing timer
     _timer = Timer(duration, callback); // Start a new timer
   }

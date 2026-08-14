@@ -37,15 +37,15 @@ class AppSlider extends StatelessWidget {
   /// Optional dynamic value shown in the header row on the right.
   final String? valueLabel;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final Widget slider = LayoutBuilder(
-      builder: (final BuildContext _, final BoxConstraints constraints) {
+      builder: (BuildContext _, BoxConstraints constraints) {
         final double trackWidth = constraints.maxWidth;
         final double fraction = (value - min) / (max - min);
 
         return GestureDetector(
-          onPanStart: (final DragStartDetails details) => _handleDrag(details.localPosition.dx, trackWidth),
-          onPanUpdate: (final DragUpdateDetails details) => _handleDrag(details.localPosition.dx, trackWidth),
+          onPanStart: (DragStartDetails details) => _handleDrag(details.localPosition.dx, trackWidth),
+          onPanUpdate: (DragUpdateDetails details) => _handleDrag(details.localPosition.dx, trackWidth),
           child: CustomPaint(
             size: Size(trackWidth, AppLayout.sliderHeight),
             painter: _SliderPainter(
@@ -96,7 +96,7 @@ class AppSlider extends StatelessWidget {
 
   /// Converts a horizontal drag offset [dx] within [trackWidth] into a clamped,
   /// optionally snapped value and notifies [onChanged].
-  void _handleDrag(final double dx, final double trackWidth) {
+  void _handleDrag(double dx, double trackWidth) {
     if (onChanged == null) {
       return;
     }
@@ -128,7 +128,7 @@ class _SliderPainter extends CustomPainter {
   final Color inactiveColor;
 
   @override
-  void paint(final Canvas canvas, final Size size) {
+  void paint(Canvas canvas, Size size) {
     final double centerY = size.height / AppMath.pair;
     final double thumbX = fraction * size.width;
 
@@ -159,7 +159,7 @@ class _SliderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant final _SliderPainter oldDelegate) {
+  bool shouldRepaint(covariant _SliderPainter oldDelegate) {
     return oldDelegate.fraction != fraction ||
         oldDelegate.activeColor != activeColor ||
         oldDelegate.inactiveColor != inactiveColor;

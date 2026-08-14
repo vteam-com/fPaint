@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/gradient_color_list_editor.dart';
+import 'package:material_ui/material_ui.dart';
 
 Widget _buildTestApp({
-  required final FillModel fillModel,
-  required final VoidCallback onChanged,
+  required FillModel fillModel,
+  required VoidCallback onChanged,
 }) {
   return MaterialApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -35,7 +35,7 @@ FillModel _createModel() {
 
 void main() {
   group('GradientColorListEditor', () {
-    testWidgets('shows endpoint labels and add button', (final WidgetTester tester) async {
+    testWidgets('shows endpoint labels and add button', (WidgetTester tester) async {
       final FillModel model = _createModel();
 
       await tester.pumpWidget(
@@ -52,7 +52,7 @@ void main() {
       expect(find.byKey(Keys.gradientStopAddButton), findsOneWidget);
     });
 
-    testWidgets('adds inner stop with midpoint position and notifies', (final WidgetTester tester) async {
+    testWidgets('adds inner stop with midpoint position and notifies', (WidgetTester tester) async {
       final FillModel model = _createModel();
       int notifyCount = 0;
 
@@ -75,7 +75,7 @@ void main() {
       expect(notifyCount, greaterThan(0));
     });
 
-    testWidgets('swaps endpoint colors when only two stops remain', (final WidgetTester tester) async {
+    testWidgets('swaps endpoint colors when only two stops remain', (WidgetTester tester) async {
       final FillModel model = _createModel();
       int notifyCount = 0;
 
@@ -96,7 +96,7 @@ void main() {
       expect(notifyCount, greaterThan(0));
     });
 
-    testWidgets('uses disabled tint for unavailable reorder arrows', (final WidgetTester tester) async {
+    testWidgets('uses disabled tint for unavailable reorder arrows', (WidgetTester tester) async {
       final FillModel model = _createModel();
 
       await tester.pumpWidget(
@@ -129,7 +129,7 @@ void main() {
       expect(lastDown.color, AppButtonContentSemantic.disabled.color);
     });
 
-    testWidgets('middle stops can move in both directions in larger gradients', (final WidgetTester tester) async {
+    testWidgets('middle stops can move in both directions in larger gradients', (WidgetTester tester) async {
       final FillModel model = _createModel();
       model.gradientStopColors = <Color>[Colors.red, Colors.green, Colors.yellow, Colors.blue];
       model.gradientStopPositions = <double>[0.0, 0.25, 0.75, 1.0];
@@ -160,7 +160,7 @@ void main() {
       expect(lastInnerDown.enabled, isTrue);
     });
 
-    testWidgets('swapping with an endpoint keeps endpoint positions fixed', (final WidgetTester tester) async {
+    testWidgets('swapping with an endpoint keeps endpoint positions fixed', (WidgetTester tester) async {
       final FillModel model = _createModel();
       model.gradientStopColors = <Color>[Colors.red, Colors.green, Colors.yellow, Colors.blue];
       model.gradientStopPositions = <double>[0.0, 0.25, 0.75, 1.0];
@@ -181,7 +181,7 @@ void main() {
       expect(model.gradientPoints.last.color, Colors.blue);
     });
 
-    testWidgets('editable inner position updates model on submit', (final WidgetTester tester) async {
+    testWidgets('editable inner position updates model on submit', (WidgetTester tester) async {
       final FillModel model = _createModel();
       model.gradientStopColors = <Color>[Colors.red, Colors.green, Colors.blue];
       model.gradientStopPositions = <double>[0.0, 0.5, 1.0];
@@ -205,7 +205,7 @@ void main() {
       expect(model.gradientStopPositions.last, 1.0);
     });
 
-    testWidgets('invalid inner position input is ignored', (final WidgetTester tester) async {
+    testWidgets('invalid inner position input is ignored', (WidgetTester tester) async {
       final FillModel model = _createModel();
       model.gradientStopColors = <Color>[Colors.red, Colors.green, Colors.blue];
       model.gradientStopPositions = <double>[0.0, 0.5, 1.0];
@@ -225,7 +225,7 @@ void main() {
       expect(model.gradientStopPositions[1], closeTo(0.5, 0.001));
     });
 
-    testWidgets('removes inner stop and keeps endpoints fixed', (final WidgetTester tester) async {
+    testWidgets('removes inner stop and keeps endpoints fixed', (WidgetTester tester) async {
       final FillModel model = _createModel();
       model.gradientStopColors = <Color>[Colors.red, Colors.green, Colors.blue];
       model.gradientStopPositions = <double>[0.0, 0.6, 1.0];
@@ -249,7 +249,7 @@ void main() {
       expect(model.gradientStopPositions.last, 1.0);
     });
 
-    testWidgets('reorders inner stop colors while preserving slot positions', (final WidgetTester tester) async {
+    testWidgets('reorders inner stop colors while preserving slot positions', (WidgetTester tester) async {
       final FillModel model = _createModel();
       model.gradientStopColors = <Color>[Colors.red, Colors.green, Colors.yellow, Colors.blue];
       model.gradientStopPositions = <double>[0.0, 0.25, 0.75, 1.0];

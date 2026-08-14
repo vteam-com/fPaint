@@ -79,7 +79,7 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
   }
 
   @override
-  void didChangeAppLifecycleState(final AppLifecycleState state) {
+  void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.hidden ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
@@ -97,7 +97,7 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
 
   /// Restores a stored draft automatically when one is available.
   Future<void> restoreDraftIfAvailable({
-    required final AppProvider appProvider,
+    required AppProvider appProvider,
   }) async {
     try {
       final bool hasDraft = await _storage.hasDraft();
@@ -124,8 +124,8 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
 
   /// Applies draft bytes to the in-memory document and resets view state.
   Future<void> _restoreDraft({
-    required final AppProvider appProvider,
-    required final Uint8List bytes,
+    required AppProvider appProvider,
+    required Uint8List bytes,
   }) async {
     try {
       final String? sourceFilePath = await preferences.getRecoveryDraftSourceFilePath();
@@ -210,15 +210,15 @@ class DraftRecoveryController with WidgetsBindingObserver implements DraftFlushe
     return storage.create();
   }
 
-  static Future<List<int>> _encoderNotConfigured(final LayersProvider _) {
+  static Future<List<int>> _encoderNotConfigured(LayersProvider _) {
     throw StateError(
       'DraftRecoveryController requires an encoder to write recovery drafts.',
     );
   }
 
   static Future<void> _restorerNotConfigured(
-    final LayersProvider _,
-    final Uint8List _,
+    LayersProvider _,
+    Uint8List _,
   ) {
     throw StateError(
       'DraftRecoveryController requires a restorer to read recovery drafts.',

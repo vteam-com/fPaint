@@ -26,7 +26,7 @@ class TruncatedTextWidget extends StatelessWidget {
   final String text;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final String truncatedText = _truncateText(text);
 
     return SizedBox(
@@ -43,7 +43,7 @@ class TruncatedTextWidget extends StatelessWidget {
   /// If the text is shorter than or equal to [maxLength], it is returned as is.
   /// If the text is longer than [maxLength], it is truncated to show the first and last few characters,
   /// with an ellipsis in the middle.
-  String _truncateText(final String text) {
+  String _truncateText(String text) {
     if (text.length <= maxLength) {
       return text; // No truncation needed for short texts
     }

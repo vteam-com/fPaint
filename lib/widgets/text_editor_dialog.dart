@@ -51,7 +51,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
 
     return AppBottomSheetContent(
@@ -86,7 +86,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
             min: AppSpacing.small + AppMath.pair.toDouble(),
             max: AppLimits.textSizeMax.toDouble(),
             divisions: AppLimits.textSizeDivisions,
-            onChanged: (final double value) {
+            onChanged: (double value) {
               setState(() {
                 _style.size = value;
               });
@@ -98,7 +98,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
             children: <Widget>[
               TextStyleToggleButtons(
                 value: _style,
-                onChanged: (final TextToolState value) {
+                onChanged: (TextToolState value) {
                   setState(() {
                     _style = value;
                   });
@@ -108,7 +108,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
               TextAlignmentDropdown(
                 l10n: l10n,
                 value: _style.textAlign,
-                onChanged: (final TextAlign value) {
+                onChanged: (TextAlign value) {
                   setState(() {
                     _style.textAlign = value;
                   });
@@ -131,7 +131,7 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
                       context: context,
                       title: l10n.textColor,
                       color: _style.color,
-                      onSelectedColor: (final Color color) {
+                      onSelectedColor: (Color color) {
                         setState(() {
                           _style.color = color;
                         });

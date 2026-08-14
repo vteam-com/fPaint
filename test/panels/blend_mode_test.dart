@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart' show MaterialApp, Scaffold;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart' show MaterialApp, Scaffold;
 
 void main() {
   group('getSupportedBlendModes', () {
@@ -126,7 +126,7 @@ void main() {
   });
 
   group('showBlendModeMenu widget test', () {
-    testWidgets('shows and selects blend mode', (final WidgetTester tester) async {
+    testWidgets('shows and selects blend mode', (WidgetTester tester) async {
       BlendMode? selectedMode;
 
       await tester.pumpWidget(
@@ -135,7 +135,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
-              builder: (final BuildContext context) {
+              builder: (BuildContext context) {
                 return GestureDetector(
                   onTap: () async {
                     selectedMode = await showBlendModeMenu(
@@ -167,7 +167,7 @@ void main() {
       expect(selectedMode, BlendMode.multiply);
     });
 
-    testWidgets('returns srcOver when cancelled', (final WidgetTester tester) async {
+    testWidgets('returns srcOver when cancelled', (WidgetTester tester) async {
       BlendMode? selectedMode;
 
       await tester.pumpWidget(
@@ -176,7 +176,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
-              builder: (final BuildContext context) {
+              builder: (BuildContext context) {
                 return GestureDetector(
                   onTap: () async {
                     selectedMode = await showBlendModeMenu(

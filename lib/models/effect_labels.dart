@@ -3,8 +3,8 @@ import 'package:fpaint/models/selection_effect.dart';
 
 /// Returns the localized label for a [SelectionEffect].
 String effectLabel(
-  final AppLocalizations l10n,
-  final SelectionEffect effect,
+  AppLocalizations l10n,
+  SelectionEffect effect,
 ) {
   switch (effect) {
     case SelectionEffect.blur:

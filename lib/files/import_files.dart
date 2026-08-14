@@ -38,7 +38,7 @@ final Logger _log = Logger(logNameImportFiles);
 /// Shows an import error via the global overlay (so it survives async gaps and
 /// does not depend on a possibly-unmounted [BuildContext]), with a copy button
 /// so the user can copy the (often exception-bearing) message.
-void _showImportError(final String message) {
+void _showImportError(String message) {
   showGlobalSnackBarMessage(
     message,
     duration: AppDefaults.fileImportFeedbackDuration,
@@ -53,7 +53,7 @@ void _showImportError(final String message) {
 /// and integrates it into the application's context.
 ///
 /// [context] The BuildContext of the widget that invokes this function.
-Future<void> onFileNew(final BuildContext context) async {
+Future<void> onFileNew(BuildContext context) async {
   final AppProvider appProvider = AppProvider.of(context);
   final ShellProvider shellProvider = ShellProvider.of(context);
   final AppLocalizations l10n = context.l10n;
@@ -68,7 +68,7 @@ Future<void> onFileNew(final BuildContext context) async {
   if (context.mounted) {
     await showAppDialog<Size>(
       context: context,
-      builder: (final BuildContext context) {
+      builder: (BuildContext context) {
         final TextEditingController widthController = TextEditingController(text: _defaultCanvasDimension);
         final TextEditingController heightController = TextEditingController(text: _defaultCanvasDimension);
 
@@ -139,7 +139,7 @@ Future<void> onFileNew(final BuildContext context) async {
 ///
 /// Returns:
 /// - A `Future<void>` indicating the completion of the file open operation.
-Future<void> onFileOpen(final BuildContext context) async {
+Future<void> onFileOpen(BuildContext context) async {
   final ShellProvider shellProvider = ShellProvider.of(context);
   final LayersProvider layers = LayersProvider.of(context);
   final AppLocalizations l10n = context.l10n;
@@ -222,10 +222,10 @@ Future<void> onFileOpen(final BuildContext context) async {
 /// - A `Future<bool>` that completes with true if the file was successfully opened,
 ///   or false if the file type is not supported.
 Future<bool> openFileFromPath({
-  required final BuildContext context,
-  required final LayersProvider layers,
-  required final String path,
-  final AppPreferences? preferences,
+  required BuildContext context,
+  required LayersProvider layers,
+  required String path,
+  AppPreferences? preferences,
 }) async {
   if (!context.mounted) {
     return false;
@@ -282,10 +282,10 @@ Future<bool> openFileFromPath({
 /// current layer range (flat files typically reload as a single base layer).
 /// No-op when the load failed or no preference is available.
 void _restoreFlatLayerSelection(
-  final AppPreferences? preferences,
-  final LayersProvider layers,
-  final String path, {
-  required final bool loaded,
+  AppPreferences? preferences,
+  LayersProvider layers,
+  String path, {
+  required bool loaded,
 }) {
   if (!loaded || preferences == null) {
     return;
@@ -317,7 +317,7 @@ final List<String> supportedImageFileExtensions = <String>[
 /// [extension] The file extension to check (e.g., "jpg", "png").
 ///
 /// Returns `true` if the file extension is supported, otherwise `false`.
-bool isFileExtensionSupported(final String extension) {
+bool isFileExtensionSupported(String extension) {
   return supportedImageFileExtensions.contains(extension.toLowerCase());
 }
 
@@ -328,10 +328,10 @@ bool isFileExtensionSupported(final String extension) {
 /// Decodes image bytes, clears layers, sets canvas size, and adds the image.
 /// Handles decoding errors and shows a SnackBar.
 Future<bool> _decodeAndApplyImage(
-  final LayersProvider layers,
-  final Uint8List imageBytes,
-  final AppLocalizations l10n, {
-  final String imageName = _loadedImageDefaultName,
+  LayersProvider layers,
+  Uint8List imageBytes,
+  AppLocalizations l10n, {
+  String imageName = _loadedImageDefaultName,
 }) async {
   try {
     final ui.Image image = await decodeImageFromList(imageBytes);
@@ -353,10 +353,10 @@ Future<bool> _decodeAndApplyImage(
 
 /// Reads an image from the specified file path.
 Future<bool> readImageFromFilePath(
-  final LayersProvider layers,
-  final String path,
-  final AppLocalizations l10n, {
-  final String imageName = _loadedImageDefaultName,
+  LayersProvider layers,
+  String path,
+  AppLocalizations l10n, {
+  String imageName = _loadedImageDefaultName,
 }) async {
   try {
     final Uint8List fileBytes = await File(path).readAsBytes();
@@ -369,10 +369,10 @@ Future<bool> readImageFromFilePath(
 
 /// Reads an image file from a byte array.
 Future<bool> readImageFileFromBytes(
-  final LayersProvider layers,
-  final Uint8List bytes,
-  final AppLocalizations l10n, {
-  final String imageName = _loadedImageDefaultName,
+  LayersProvider layers,
+  Uint8List bytes,
+  AppLocalizations l10n, {
+  String imageName = _loadedImageDefaultName,
 }) async {
   return await _decodeAndApplyImage(layers, bytes, l10n, imageName: imageName);
 }
@@ -380,11 +380,11 @@ Future<bool> readImageFileFromBytes(
 /// Reads a HEIF-family file from disk, decodes it via the platform-specific
 /// decoder, and applies the result to [layers].
 Future<bool> _readHeifFromFilePath(
-  final LayersProvider layers,
-  final String path,
-  final AppLocalizations l10n, {
-  required final String extension,
-  final String imageName = _loadedImageDefaultName,
+  LayersProvider layers,
+  String path,
+  AppLocalizations l10n, {
+  required String extension,
+  String imageName = _loadedImageDefaultName,
 }) async {
   try {
     final Uint8List fileBytes = await File(path).readAsBytes();
@@ -402,11 +402,11 @@ Future<bool> _readHeifFromFilePath(
 /// Reads a HEIF-family image from bytes, decodes it via the platform-specific
 /// decoder, and applies the result to [layers].
 Future<bool> _readHeifFromBytes(
-  final LayersProvider layers,
-  final Uint8List bytes,
-  final AppLocalizations l10n, {
-  required final String extension,
-  final String imageName = _loadedImageDefaultName,
+  LayersProvider layers,
+  Uint8List bytes,
+  AppLocalizations l10n, {
+  required String extension,
+  String imageName = _loadedImageDefaultName,
 }) async {
   try {
     final Uint8List decodableBytes = await decodeHeicBytes(bytes);
@@ -433,8 +433,8 @@ enum DropFileAction {
 /// Otherwise a dialog asks the user whether to open the file (replacing the
 /// current content) or to add it as a new layer.
 Future<void> onFileDropped({
-  required final BuildContext context,
-  required final String path,
+  required BuildContext context,
+  required String path,
 }) async {
   final LayersProvider layers = LayersProvider.of(context);
   final ShellProvider shellProvider = ShellProvider.of(context);
@@ -447,13 +447,13 @@ Future<void> onFileDropped({
   }
 
   final bool canvasHasContent = layers.list.any(
-    (final LayerProvider layer) => layer.actionStack.isNotEmpty,
+    (LayerProvider layer) => layer.actionStack.isNotEmpty,
   );
 
   if (canvasHasContent) {
     final DropFileAction? action = await showAppDialog<DropFileAction>(
       context: context,
-      builder: (final BuildContext dialogContext) {
+      builder: (BuildContext dialogContext) {
         final AppLocalizations l10n = dialogContext.l10n;
         return AppDialog(
           title: l10n.dropFileTitle,
@@ -499,9 +499,9 @@ Future<void> onFileDropped({
 /// Decodes the image at [path] and adds it as a new layer on top of the
 /// current layer stack.
 Future<void> addFileAsLayer({
-  required final BuildContext context,
-  required final LayersProvider layers,
-  required final String path,
+  required BuildContext context,
+  required LayersProvider layers,
+  required String path,
 }) async {
   final String fileName = path.split(Platform.pathSeparator).last;
   final AppLocalizations l10n = context.l10n;

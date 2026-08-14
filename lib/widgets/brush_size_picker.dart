@@ -13,8 +13,8 @@ class BrushSizePicker extends BasePicker<double> {
     required super.title,
     required super.value,
     required super.onChanged,
-    required final double min,
-    required final double max,
+    required double min,
+    required double max,
   }) : super(min: min, max: max, divisions: (max * AppMath.baseTen).toInt());
 
   @override
@@ -24,7 +24,7 @@ class BrushSizePicker extends BasePicker<double> {
 /// The state for [BrushSizePicker].
 class _BrushSizePickerState extends BasePickerState<double> {
   @override
-  double clampValue(final double value) {
+  double clampValue(double value) {
     final double min = widget.min!;
     final double max = widget.max!;
     return value.clamp(min, max);
@@ -42,20 +42,20 @@ class _BrushSizePickerState extends BasePickerState<double> {
   }
 
   @override
-  String formatValue(final double value) {
+  String formatValue(double value) {
     return value.toStringAsFixed(1);
   }
 }
 
 /// Shows a dialog containing a [BrushSizePicker].
 void showBrushSizePicker({
-  required final BuildContext context,
-  required final String title,
-  required final double value,
-  required final double min,
-  required final double max,
-  required final ValueChanged<double> onChanged,
-  final Widget? titleIcon,
+  required BuildContext context,
+  required String title,
+  required double value,
+  required double min,
+  required double max,
+  required ValueChanged<double> onChanged,
+  Widget? titleIcon,
 }) {
   final AppLocalizations l10n = context.l10n;
   showPickerDialog(
@@ -67,7 +67,7 @@ void showBrushSizePicker({
       value: value,
       min: min,
       max: max,
-      onChanged: (final double newValue) {
+      onChanged: (double newValue) {
         onChanged(newValue);
       },
     ),

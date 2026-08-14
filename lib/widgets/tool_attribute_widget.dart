@@ -38,7 +38,7 @@ class ToolAttributeWidget extends StatelessWidget {
   final ValueChanged<bool>? onEnabledChanged;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     if (compact && childRight == null) {
       if (!_showsEnabledToggle) {
         return SizedBox(
@@ -124,7 +124,7 @@ class ToolAttributeWidget extends StatelessWidget {
   }
 
   /// Builds the expanded attribute area, keeping the title toggle in the former caption slot.
-  Widget _buildExpandedContent(final Widget childRightWidget) {
+  Widget _buildExpandedContent(Widget childRightWidget) {
     if (!_showsEnabledToggle) {
       return childRightWidget;
     }
@@ -147,7 +147,7 @@ class ToolAttributeWidget extends StatelessWidget {
           reverseDuration: AppDefaults.toolPanelRevealAnimationDuration,
           switchInCurve: Curves.easeOutCubic,
           switchOutCurve: Curves.easeInCubic,
-          transitionBuilder: (final Widget child, final Animation<double> animation) {
+          transitionBuilder: (Widget child, Animation<double> animation) {
             return ClipRect(
               child: FadeTransition(
                 opacity: animation,
@@ -191,6 +191,6 @@ Widget toolAttributeWidgetPreview() {
 
 double _toolAttributeWidgetPreviewHeight = AppVisual.half;
 bool _toolAttributeWidgetPreviewEnabled = true;
-void _noopEnabledChanged(final bool value) {
+void _noopEnabledChanged(bool value) {
   _toolAttributeWidgetPreviewEnabled != value;
 }

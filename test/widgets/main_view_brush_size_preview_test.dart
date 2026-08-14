@@ -1,5 +1,4 @@
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -9,14 +8,15 @@ import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/main_view.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../helpers/widget_test_harness.dart';
 
 Widget _buildHarness({
-  required final AppPreferences preferences,
-  required final AppProvider appProvider,
-  required final ShellProvider shellProvider,
+  required AppPreferences preferences,
+  required AppProvider appProvider,
+  required ShellProvider shellProvider,
 }) {
   return InheritedControllerScope<AppPreferences>(
     controller: preferences,
@@ -49,7 +49,7 @@ void main() {
   });
 
   testWidgets('shows and hides centered brush-size preview while brush size changes', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     const Color activeColor = Color(0xFF123456);
     appProvider.brushColor = activeColor;
@@ -81,7 +81,7 @@ void main() {
   });
 
   testWidgets('shows brush-size preview at the drawing position while dragging', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     appProvider.selectedAction = ActionType.brush;
     appProvider.brushSize = 24.0;
@@ -123,7 +123,7 @@ void main() {
   });
 
   testWidgets('shows brush-size preview while hovering a mouse before drawing', (
-    final WidgetTester tester,
+    WidgetTester tester,
   ) async {
     appProvider.selectedAction = ActionType.brush;
     appProvider.brushSize = 24.0;

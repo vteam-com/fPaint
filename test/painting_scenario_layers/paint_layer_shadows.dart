@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<void> paintLayerHouseShadow(final PaintingScenarioSession session) async {
+Future<void> paintLayerHouseShadow(PaintingScenarioSession session) async {
   // Ensure we are on the House layer before wand-selecting.
   await PaintingLayerHelpers.switchToLayerByName(session.tester, _houseLayerName);
 
@@ -69,11 +69,11 @@ Future<void> paintLayerHouseShadow(final PaintingScenarioSession session) async 
   // Move the house shadow layer below the house layer.
   final LayersProvider layersProvider = LayersProvider.of(context);
   final LayerProvider shadowLayer = layersProvider.list.firstWhere(
-    (final LayerProvider layer) => layer.name == _houseShadowLayerName,
+    (LayerProvider layer) => layer.name == _houseShadowLayerName,
   );
   layersProvider.remove(shadowLayer);
   final int houseIdx = layersProvider.list.indexWhere(
-    (final LayerProvider layer) => layer.name == _houseLayerName,
+    (LayerProvider layer) => layer.name == _houseLayerName,
   );
   layersProvider.insert(houseIdx + 1, shadowLayer);
   layersProvider.selectedLayerIndex = layersProvider.getLayerIndex(shadowLayer);

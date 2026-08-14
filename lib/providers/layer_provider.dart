@@ -25,14 +25,14 @@ part 'layer_provider_transform.dart';
 class LayerProvider extends ChangeNotifier {
   LayerProvider({
     required this._name,
-    required final Size size,
+    required Size size,
     required this.onThumbnailChanged,
     this.parentGroupName = '',
     this.id = '',
-    final bool isSelected = false,
-    final bool isVisible = true,
-    final bool isLocked = false,
-    final double opacity = 1.0,
+    bool isSelected = false,
+    bool isVisible = true,
+    bool isLocked = false,
+    double opacity = 1.0,
   }) {
     _size = size;
     _isSelected = isSelected;
@@ -54,7 +54,7 @@ class LayerProvider extends ChangeNotifier {
   String get name => _name;
 
   /// Sets the name of the layer.
-  set name(final String value) {
+  set name(String value) {
     _name = value;
     notifyListeners();
   }
@@ -77,7 +77,7 @@ class LayerProvider extends ChangeNotifier {
   bool get isSelected => _isSelected;
 
   /// Sets whether the layer is selected.
-  set isSelected(final bool value) {
+  set isSelected(bool value) {
     if (_isSelected == value) {
       return;
     }
@@ -93,7 +93,7 @@ class LayerProvider extends ChangeNotifier {
   bool get isLocked => _isLocked;
 
   /// Sets whether the layer is locked against direct edits.
-  set isLocked(final bool value) {
+  set isLocked(bool value) {
     _isLocked = value;
     notifyListeners();
   }
@@ -129,7 +129,7 @@ class LayerProvider extends ChangeNotifier {
   Size get size => _size;
 
   /// Sets the size of the layer.
-  set size(final Size value) {
+  set size(Size value) {
     _size = value;
     clearCache();
   }
@@ -147,7 +147,7 @@ class LayerProvider extends ChangeNotifier {
 
       for (final ColorUsage colorUsage in imageColors) {
         if (!topColorsUsed.any(
-          (final ColorUsage c) => c.color == colorUsage.color,
+          (ColorUsage c) => c.color == colorUsage.color,
         )) {
           topColorsUsed.add(colorUsage);
         }
@@ -164,7 +164,7 @@ class LayerProvider extends ChangeNotifier {
   bool get isVisible => _isVisible;
 
   /// Sets whether the layer is visible.
-  set isVisible(final bool value) {
+  set isVisible(bool value) {
     _isVisible = value;
     clearCache();
   }
@@ -178,7 +178,7 @@ class LayerProvider extends ChangeNotifier {
   double get opacity => _opacity;
 
   /// Sets the opacity of the layer.
-  set opacity(final double value) {
+  set opacity(double value) {
     // Guard against no-op writes: the pixel-brush commit re-assigns the layer's
     // original (unchanged) opacity every stroke, and an unconditional clearCache
     // here would null the incrementally-composited cache and schedule a
@@ -197,7 +197,7 @@ class LayerProvider extends ChangeNotifier {
   bool get isEmpty => actionStack.isEmpty;
 
   /// Offsets all actions in the layer by the given offset.
-  void offset(final Offset offset) {
+  void offset(Offset offset) {
     for (final UserActionDrawing action in actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
         action.positions[i] = action.positions[i].translate(
@@ -225,7 +225,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   /// Scales all actions in the layer by the given scale factor.
-  void scale(final double scale) {
+  void scale(double scale) {
     for (final UserActionDrawing action in actionStack) {
       for (int i = 0; i < action.positions.length; i++) {
         action.positions[i] = Offset(
@@ -241,7 +241,7 @@ class LayerProvider extends ChangeNotifier {
   UserActionDrawing? get lastUserAction => actionStack.isEmpty ? null : actionStack.last;
 
   /// Appends a drawing action to the action stack.
-  void appendDrawingAction(final UserActionDrawing userAction) {
+  void appendDrawingAction(UserActionDrawing userAction) {
     actionStack.add(userAction);
     hasChanged = true;
     clearCache();
@@ -253,16 +253,16 @@ class LayerProvider extends ChangeNotifier {
   /// composites its patch straight into [_cachedImage] (see
   /// [composePixelBrushLayerCache]/[installPixelBrushLayerCache]) rather than
   /// paying [clearCache]'s full-stack replay + thumbnail rebuild.
-  void appendDrawingActionRetainingCache(final UserActionDrawing userAction) {
+  void appendDrawingActionRetainingCache(UserActionDrawing userAction) {
     actionStack.add(userAction);
     hasChanged = true;
   }
 
   /// Adds an image to the layer.
   UserActionDrawing addImage({
-    required final ui.Image imageToAdd,
-    final ui.Offset offset = Offset.zero,
-    final ActionType tool = ActionType.image,
+    required ui.Image imageToAdd,
+    ui.Offset offset = Offset.zero,
+    ActionType tool = ActionType.image,
   }) {
     final UserActionDrawing newAction = UserActionDrawing(
       action: tool,
@@ -284,7 +284,7 @@ class LayerProvider extends ChangeNotifier {
   }
 
   /// Appends a position to the last action.
-  void lastActionAppendPosition({required final Offset position}) {
+  void lastActionAppendPosition({required Offset position}) {
     actionStack.last.positions.add(position);
   }
 
@@ -458,7 +458,7 @@ class LayerProvider extends ChangeNotifier {
     _strokeBaseline = renderCanvasImageSync(
       width: width,
       height: height,
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.saveLayer(null, Paint());
         _renderActionStack(canvas);
         canvas.restore();
@@ -531,7 +531,7 @@ class LayerProvider extends ChangeNotifier {
     _strokeBaseline = renderCanvasImageSync(
       width: width,
       height: height,
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.drawImage(baseline, Offset.zero, Paint());
         _renderInProgressTail(canvas);
       },
@@ -549,7 +549,7 @@ class LayerProvider extends ChangeNotifier {
 
   /// Draws the in-progress actions/segments not yet folded into the baseline,
   /// starting at ([_strokeFoldedActionIndex], [_strokeFoldedPointCount]).
-  void _renderInProgressTail(final ui.Canvas canvas) {
+  void _renderInProgressTail(ui.Canvas canvas) {
     final int count = actionStack.length;
     int index = _strokeFoldedActionIndex;
     int fromPoint = _strokeFoldedPointCount;
@@ -576,9 +576,9 @@ class LayerProvider extends ChangeNotifier {
   /// folded ones without re-drawing them. Only pencil/eraser grow point-by-point;
   /// other action types are always folded whole (via [_renderAction]).
   void _renderFreehandActionTail(
-    final ui.Canvas canvas,
-    final UserActionDrawing action,
-    final int fromPoint,
+    ui.Canvas canvas,
+    UserActionDrawing action,
+    int fromPoint,
   ) {
     final List<Offset> tail = action.positions.sublist(fromPoint - AppMath.one);
     switch (action.action) {
@@ -586,13 +586,13 @@ class LayerProvider extends ChangeNotifier {
         applyAction(
           canvas,
           action.clipPath,
-          (final Canvas c) => renderPencilStroke(c, tail, action.brush!),
+          (Canvas c) => renderPencilStroke(c, tail, action.brush!),
         );
       case ActionType.eraser:
         applyAction(
           canvas,
           action.clipPath,
-          (final Canvas c) => renderPencilEraserStroke(c, tail, action.brush!),
+          (Canvas c) => renderPencilEraserStroke(c, tail, action.brush!),
         );
       default:
         _renderAction(canvas, action);
@@ -600,16 +600,16 @@ class LayerProvider extends ChangeNotifier {
   }
 
   /// Converts the layer to an image for storage.
-  ui.Image toImageForStorage(final Size size) {
+  ui.Image toImageForStorage(Size size) {
     return renderImageWH(size.width.toInt(), size.height.toInt());
   }
 
   /// Renders the layer to an image with the given width and height.
-  ui.Image renderImageWH(final int width, final int height) {
+  ui.Image renderImageWH(int width, int height) {
     return renderCanvasImageSync(
       width: width,
       height: height,
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.saveLayer(null, Paint());
         renderLayer(canvas);
       },
@@ -622,11 +622,11 @@ class LayerProvider extends ChangeNotifier {
   /// result is read back with `toByteData()`: reading back a `toImageSync()`
   /// image stalls the GPU for seconds on Impeller, whereas an async `toImage()`
   /// readback is milliseconds.
-  Future<ui.Image> toImageForStorageAsync(final Size size) {
+  Future<ui.Image> toImageForStorageAsync(Size size) {
     return renderCanvasImage(
       width: size.width.toInt(),
       height: size.height.toInt(),
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.saveLayer(null, Paint());
         renderLayer(canvas);
       },
@@ -635,9 +635,9 @@ class LayerProvider extends ChangeNotifier {
 
   /// Applies an action to the canvas, clipping it if necessary.
   void applyAction(
-    final Canvas canvas,
-    final ui.Path? clipPath,
-    final void Function(Canvas) actionFunction,
+    Canvas canvas,
+    ui.Path? clipPath,
+    void Function(Canvas) actionFunction,
   ) {
     if (clipPath != null) {
       canvas.save();
@@ -657,7 +657,7 @@ class LayerProvider extends ChangeNotifier {
   /// Orchestrates the three rendering paths: a fast live-preview composite, the
   /// cached raster, or a full replay of the action stack. The per-action drawing
   /// lives in [_renderAction] so this method stays a thin dispatcher.
-  void renderLayer(final Canvas canvas) {
+  void renderLayer(Canvas canvas) {
     final Paint layerPaint = Paint()
       ..color = AppColors.black.withAlpha(
         (AppLimits.rgbChannelMax * opacity).toInt(),
@@ -720,7 +720,7 @@ class LayerProvider extends ChangeNotifier {
   /// patch without replaying the action stack or touching the cache.
   ///
   /// Returns whether the live-preview path handled rendering.
-  bool _tryRenderLivePreview(final Canvas canvas) {
+  bool _tryRenderLivePreview(Canvas canvas) {
     final ui.Image? baseline = _livePreviewBaseline;
     if (baseline == null) {
       return false;
@@ -738,7 +738,7 @@ class LayerProvider extends ChangeNotifier {
 
   /// Replays the full action stack onto [canvas], first painting the optional
   /// background fill.
-  void _renderActionStack(final Canvas canvas) {
+  void _renderActionStack(Canvas canvas) {
     if (backgroundColor != null) {
       final Paint bgPaint = Paint();
       bgPaint.color = backgroundColor!;
@@ -754,13 +754,13 @@ class LayerProvider extends ChangeNotifier {
   }
 
   /// Renders a single [userAction] onto [canvas] using the matching draw helper.
-  void _renderAction(final Canvas canvas, final UserActionDrawing userAction) {
+  void _renderAction(Canvas canvas, UserActionDrawing userAction) {
     switch (userAction.action) {
       case ActionType.pencil:
         applyAction(
           canvas,
           userAction.clipPath,
-          (final Canvas theCanvasToUse) => renderPencilStroke(
+          (Canvas theCanvasToUse) => renderPencilStroke(
             theCanvasToUse,
             userAction.positions,
             userAction.brush!,
@@ -772,7 +772,7 @@ class LayerProvider extends ChangeNotifier {
         applyAction(
           canvas,
           userAction.clipPath,
-          (final Canvas theCanvasToUse) => renderPath(
+          (Canvas theCanvasToUse) => renderPath(
             theCanvasToUse,
             userAction.positions,
             userAction.brush!,
@@ -795,7 +795,7 @@ class LayerProvider extends ChangeNotifier {
             // clear-then-srcOver pair leaves alpha c+(1-c)² < 1 at anti-aliased
             // edges — the transparent ring that showed as a white rectangle around
             // the stroke. src gives c·1+(1-c)·1 = 1, so no seam and no separate cut.
-            (final Canvas theCanvasToUse) => theCanvasToUse.drawImage(
+            (Canvas theCanvasToUse) => theCanvasToUse.drawImage(
               userAction.image!,
               userAction.positions.first,
               Paint()
@@ -810,7 +810,7 @@ class LayerProvider extends ChangeNotifier {
         applyAction(
           canvas,
           userAction.clipPath,
-          (final Canvas theCanvasToUse) => renderLine(
+          (Canvas theCanvasToUse) => renderLine(
             theCanvasToUse,
             userAction.positions.first,
             userAction.positions.last,
@@ -824,7 +824,7 @@ class LayerProvider extends ChangeNotifier {
         applyAction(
           canvas,
           userAction.clipPath,
-          (final Canvas theCanvasToUse) => renderCircle(
+          (Canvas theCanvasToUse) => renderCircle(
             theCanvasToUse,
             userAction.positions.first,
             userAction.positions.last,
@@ -838,7 +838,7 @@ class LayerProvider extends ChangeNotifier {
         applyAction(
           canvas,
           userAction.clipPath,
-          (final Canvas theCanvasToUse) => renderRectangle(
+          (Canvas theCanvasToUse) => renderRectangle(
             theCanvasToUse,
             userAction.positions.first,
             userAction.positions.last,
@@ -857,7 +857,7 @@ class LayerProvider extends ChangeNotifier {
         applyAction(
           canvas,
           userAction.clipPath,
-          (final Canvas theCanvasToUse) => renderRegion(
+          (Canvas theCanvasToUse) => renderRegion(
             theCanvasToUse,
             userAction.path!,
             userAction.fillColor,
@@ -871,7 +871,7 @@ class LayerProvider extends ChangeNotifier {
         applyAction(
           canvas,
           userAction.clipPath,
-          (final Canvas theCanvasToUse) => renderPencilEraserStroke(
+          (Canvas theCanvasToUse) => renderPencilEraserStroke(
             theCanvasToUse,
             userAction.positions,
             userAction.brush!,
@@ -895,7 +895,7 @@ class LayerProvider extends ChangeNotifier {
         applyAction(
           canvas,
           userAction.clipPath,
-          (final Canvas theCanvasToUse) => renderText(theCanvasToUse, userAction.textObject!),
+          (Canvas theCanvasToUse) => renderText(theCanvasToUse, userAction.textObject!),
         );
         break;
     }

@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<LayersProvider> cropScenarioCanvas(final PaintingScenarioSession session) async {
+Future<LayersProvider> cropScenarioCanvas(PaintingScenarioSession session) async {
   final BuildContext context = session.tester.element(find.byType(MainScreen));
   final LayersProvider layersProvider = LayersProvider.of(context);
   final Size preCropCanvasSize = layersProvider.size;

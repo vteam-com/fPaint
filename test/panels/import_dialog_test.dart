@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -9,6 +8,7 @@ import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../helpers/widget_test_harness.dart';
 
@@ -22,13 +22,13 @@ class _FakePreferences extends AppPreferences {
   bool get isLoaded => true;
 
   @override
-  String? getBookmark(final String path) => _bookmarks[path];
+  String? getBookmark(String path) => _bookmarks[path];
 
   @override
   List<String> get recentFiles => List<String>.unmodifiable(_recent);
 
   @override
-  Future<void> removeRecentFile(final String path) async {
+  Future<void> removeRecentFile(String path) async {
     _recent.remove(path);
     _bookmarks.remove(path);
     notifyListeners();
@@ -39,15 +39,15 @@ const int _thumbnailPumpAttempts = 20;
 const Duration _thumbnailPumpStep = Duration(milliseconds: 50);
 
 Widget _buildHarness({
-  required final AppPreferences prefs,
-  final Future<ui.Image?> Function()? clipboardImageLoader,
-  final RecentFileMetadataLoader? recentFileMetadataLoader,
-  final Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader,
+  required AppPreferences prefs,
+  Future<ui.Image?> Function()? clipboardImageLoader,
+  RecentFileMetadataLoader? recentFileMetadataLoader,
+  Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader,
 }) {
   return InheritedControllerScope<AppPreferences>(
     controller: prefs,
     child: buildLocalizedScaffoldTestApp(
-      bodyBuilder: (final BuildContext context) {
+      bodyBuilder: (BuildContext context) {
         return ImportDialog(
           parentContext: context,
           clipboardImageLoader: clipboardImageLoader,
@@ -60,11 +60,11 @@ Widget _buildHarness({
 }
 
 Future<void> _pumpImportDialog(
-  final WidgetTester tester, {
-  required final AppPreferences prefs,
-  final Future<ui.Image?> Function()? clipboardImageLoader,
-  final RecentFileMetadataLoader? recentFileMetadataLoader,
-  final Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader,
+  WidgetTester tester, {
+  required AppPreferences prefs,
+  Future<ui.Image?> Function()? clipboardImageLoader,
+  RecentFileMetadataLoader? recentFileMetadataLoader,
+  Future<ui.Image?> Function(String path, String? bookmark)? recentFileThumbnailLoader,
 }) async {
   await tester.pumpWidget(
     _buildHarness(
@@ -87,9 +87,9 @@ Future<ui.Image> _buildClipboardTestImage() {
 }
 
 Future<ui.Image> _buildSolidTestImage({
-  required final Color color,
-  required final int width,
-  required final int height,
+  required Color color,
+  required int width,
+  required int height,
 }) {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   final ui.Canvas canvas = ui.Canvas(recorder);
@@ -112,8 +112,8 @@ Future<ui.Image> _buildSolidTestImage({
 }
 
 Future<void> _pumpUntilThumbnailCount(
-  final WidgetTester tester, {
-  required final int expectedCount,
+  WidgetTester tester, {
+  required int expectedCount,
 }) async {
   for (int attempt = 0; attempt < _thumbnailPumpAttempts; attempt += 1) {
     await tester.pump(_thumbnailPumpStep);
@@ -126,8 +126,8 @@ Future<void> _pumpUntilThumbnailCount(
 }
 
 ui.Image _thumbnailForPath(
-  final WidgetTester tester, {
-  required final String path,
+  WidgetTester tester, {
+  required String path,
 }) {
   final Finder rowFinder = find.byKey(ValueKey<String>(path));
   expect(rowFinder, findsOneWidget);
@@ -146,10 +146,10 @@ ui.Image _thumbnailForPath(
 }
 
 void _expectThumbnailDimensions(
-  final WidgetTester tester, {
-  required final String path,
-  required final int expectedWidth,
-  required final int expectedHeight,
+  WidgetTester tester, {
+  required String path,
+  required int expectedWidth,
+  required int expectedHeight,
 }) {
   final ui.Image thumbnail = _thumbnailForPath(tester, path: path);
 
@@ -159,7 +159,7 @@ void _expectThumbnailDimensions(
 
 void main() {
   group('ImportDialog', () {
-    testWidgets('renders browse button and recent files list from preferences', (final WidgetTester tester) async {
+    testWidgets('renders browse button and recent files list from preferences', (WidgetTester tester) async {
       final AppPreferences prefs = _FakePreferences(<String>[
         '/tmp/non_existing_image_a.png',
         '/tmp/non_existing_image_b.png',
@@ -169,7 +169,7 @@ void main() {
         tester,
         prefs: prefs,
         clipboardImageLoader: () async => null,
-        recentFileThumbnailLoader: (final String path, final String? bookmark) async => null,
+        recentFileThumbnailLoader: (String path, String? bookmark) async => null,
       );
 
       final BuildContext context = tester.element(find.byType(ImportDialog));
@@ -183,14 +183,14 @@ void main() {
       expect(find.text(l10n.cancel), findsOneWidget);
     });
 
-    testWidgets('shows loading then fallback thumbnail for missing recent file', (final WidgetTester tester) async {
+    testWidgets('shows loading then fallback thumbnail for missing recent file', (WidgetTester tester) async {
       final AppPreferences prefs = _FakePreferences(<String>['/tmp/non_existing_image_c.png']);
 
       await _pumpImportDialog(
         tester,
         prefs: prefs,
         clipboardImageLoader: () async => null,
-        recentFileThumbnailLoader: (final String path, final String? bookmark) async => null,
+        recentFileThumbnailLoader: (String path, String? bookmark) async => null,
       );
 
       // After async file check fails, thumbnail should switch away from spinner.
@@ -200,7 +200,7 @@ void main() {
       expect(find.text('non_existing_image_c.png'), findsOneWidget);
     });
 
-    testWidgets('renders parent path and modified date for recent files', (final WidgetTester tester) async {
+    testWidgets('renders parent path and modified date for recent files', (WidgetTester tester) async {
       final String recentFilePath =
           '${Directory.systemTemp.path}${Platform.pathSeparator}fpaint_recent_metadata_${DateTime.now().microsecondsSinceEpoch}.png';
       final File recentFile = File(recentFilePath);
@@ -211,11 +211,11 @@ void main() {
         tester,
         prefs: prefs,
         clipboardImageLoader: () async => null,
-        recentFileMetadataLoader: (final String path, final String? bookmark) async => (
+        recentFileMetadataLoader: (String path, String? bookmark) async => (
           exists: true,
           lastModified: lastModified,
         ),
-        recentFileThumbnailLoader: (final String path, final String? bookmark) async => null,
+        recentFileThumbnailLoader: (String path, String? bookmark) async => null,
       );
       await tester.pump(const Duration(milliseconds: 50));
       await tester.pump();
@@ -229,10 +229,10 @@ void main() {
             alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
           )}';
       final Finder parentPathAppText = find.byWidgetPredicate(
-        (final Widget widget) => widget is AppText && widget.data == recentFile.parent.path,
+        (Widget widget) => widget is AppText && widget.data == recentFile.parent.path,
       );
       final Finder modifiedLabelAppText = find.byWidgetPredicate(
-        (final Widget widget) => widget is AppText && widget.data == modifiedLabel,
+        (Widget widget) => widget is AppText && widget.data == modifiedLabel,
       );
 
       expect(find.text(recentFile.parent.path), findsOneWidget);
@@ -244,7 +244,7 @@ void main() {
     });
 
     testWidgets('keeps thumbnails attached to the correct recent files after deletion', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       final int thumbnailHeight = AppLayout.thumbnailMaxHeight.toInt();
       final List<ui.Image> testThumbnails = <ui.Image>[];
@@ -285,7 +285,7 @@ void main() {
           tester,
           prefs: prefs,
           clipboardImageLoader: () async => null,
-          recentFileThumbnailLoader: (final String path, final String? bookmark) async => thumbnailsByPath[path],
+          recentFileThumbnailLoader: (String path, String? bookmark) async => thumbnailsByPath[path],
         );
         await _pumpUntilThumbnailCount(tester, expectedCount: 3);
 
@@ -340,7 +340,7 @@ void main() {
       }
     });
 
-    testWidgets('add as layer switch toggles in dialog state', (final WidgetTester tester) async {
+    testWidgets('add as layer switch toggles in dialog state', (WidgetTester tester) async {
       final AppPreferences prefs = _FakePreferences(<String>[]);
 
       await _pumpImportDialog(
@@ -361,7 +361,7 @@ void main() {
       expect(find.text(l10n.addAsNewLayer), findsOneWidget);
     });
 
-    testWidgets('shows clipboard tile when an image is available', (final WidgetTester tester) async {
+    testWidgets('shows clipboard tile when an image is available', (WidgetTester tester) async {
       final AppPreferences prefs = _FakePreferences(<String>[]);
       final ui.Image clipboardImage = await _buildClipboardTestImage();
 

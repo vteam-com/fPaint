@@ -70,12 +70,12 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final LayersProvider layersModel = LayersProvider.of(context);
 
     return PopScope(
       canPop: true,
-      onPopInvokedWithResult: (final bool didPop, _) {
+      onPopInvokedWithResult: (bool didPop, _) {
         if (didPop) {
           widget.onColorChanged(_currentColor);
         }
@@ -133,7 +133,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   }
 
   /// Builds the content of the dialog.
-  Widget _buildContent(final LayersProvider layers) {
+  Widget _buildContent(LayersProvider layers) {
     final AppLocalizations l10n = context.l10n;
 
     return Padding(
@@ -200,11 +200,11 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
           // Top colors used in the image
           ListenableBuilder(
             listenable: layers.topColorsListenable,
-            builder: (final BuildContext _, final Widget? _) {
+            builder: (BuildContext _, Widget? _) {
               return TopColors(
                 colorUsages: layers.topColors,
                 onRefresh: layers.evaluateTopColor,
-                onColorPicked: (final Color color) {
+                onColorPicked: (Color color) {
                   _setColor(color);
                 },
                 showHeader: false,
@@ -242,7 +242,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 child: AppTextField(
                   controller: _hexController,
                   hintText: l10n.hexColor,
-                  onChanged: (final String value) {
+                  onChanged: (String value) {
                     try {
                       final Color color = getColorFromString(value);
                       setState(() {
@@ -277,10 +277,10 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
   /// Builds one mode label button in the sliders/wheel toggle row.
   Widget _buildPickerModeLabel({
-    required final Key key,
-    required final String label,
-    required final bool selected,
-    required final VoidCallback onPressed,
+    required Key key,
+    required String label,
+    required bool selected,
+    required VoidCallback onPressed,
   }) {
     return AppButton(
       key: key,
@@ -299,7 +299,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
   }
 
   /// Builds the control that switches between slider and wheel pickers.
-  Widget _buildPickerModeToggle(final AppLocalizations l10n) {
+  Widget _buildPickerModeToggle(AppLocalizations l10n) {
     final bool wheelSelected = _pickerMode == _ColorPickerMode.wheel;
 
     return Row(
@@ -315,7 +315,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
         AppSwitch(
           key: Keys.colorPickerModeToggle,
           value: wheelSelected,
-          onChanged: (final bool useWheel) {
+          onChanged: (bool useWheel) {
             _setPickerMode(
               useWheel ? _ColorPickerMode.wheel : _ColorPickerMode.sliders,
             );
@@ -331,14 +331,14 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
     );
   }
 
-  void _setColor(final Color color) {
+  void _setColor(Color color) {
     setState(() {
       _currentColor = color;
       _hexController.text = colorToHexString(color);
     });
   }
 
-  void _setPickerMode(final _ColorPickerMode mode) {
+  void _setPickerMode(_ColorPickerMode mode) {
     if (_pickerMode == mode) {
       return;
     }
@@ -351,11 +351,11 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
 
 /// Displays a color picker bottom sheet with the given title and initial color.
 void showColorPicker({
-  required final BuildContext context,
-  required final String title,
-  required final Color color,
-  required final ValueChanged<Color> onSelectedColor,
-  final Widget? titleIcon,
+  required BuildContext context,
+  required String title,
+  required Color color,
+  required ValueChanged<Color> onSelectedColor,
+  Widget? titleIcon,
 }) {
   // The bottom sheet is pushed onto the app's navigator/overlay, which sits
   // *above* the [InheritedControllerScope] that the editor inserts. Capture the
@@ -365,14 +365,14 @@ void showColorPicker({
   showAppBottomSheet<void>(
     context: context,
     barrierColor: AppColors.transparent,
-    builder: (final BuildContext _) {
+    builder: (BuildContext _) {
       return InheritedControllerScope<LayersProvider>(
         controller: layersModel,
         child: ColorPickerDialog(
           title: title,
           titleIcon: titleIcon ?? AppSvgIcon(icon: AppIcon.waterDrop, color: color),
           color: color,
-          onColorChanged: (final Color color) {
+          onColorChanged: (Color color) {
             onSelectedColor(color);
           },
         ),

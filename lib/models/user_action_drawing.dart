@@ -83,7 +83,7 @@ enum ActionType {
   final AppIcon icon;
 
   /// Checks if the action type supports the given attribute.
-  bool isSupported(final ActionOptions attribute) {
+  bool isSupported(ActionOptions attribute) {
     return toolsSupportedAttributes[this]?.contains(attribute) ?? false;
   }
 

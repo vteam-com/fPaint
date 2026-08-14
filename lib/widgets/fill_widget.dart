@@ -43,7 +43,7 @@ const double defaultHandleSize = AppInteraction.selectionHandleSize;
 class _FillWidgetState extends State<FillWidget> {
   bool showDetails = false;
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final List<Widget> stackChildren = <Widget>[];
 
     // For radial gradients, show a circular marching ants path
@@ -125,13 +125,13 @@ class _FillWidgetState extends State<FillWidget> {
 
   /// Builds a fill knob for the given gradient point.
   Widget _builFillKnob({
-    required final Key key,
-    required final BuildContext context,
-    required final Color color,
-    required final int handleIndex,
-    required final int handleCount,
-    required final GradientPoint? point,
-    required final bool canDragEndpoint,
+    required Key key,
+    required BuildContext context,
+    required Color color,
+    required int handleIndex,
+    required int handleCount,
+    required GradientPoint? point,
+    required bool canDragEndpoint,
   }) {
     final int handleSize = (showDetails ? (defaultHandleSize * AppVisual.previewTextScale) : defaultHandleSize).toInt();
     final Offset handleOffset = _handleOffsetForStop(
@@ -146,7 +146,7 @@ class _FillWidgetState extends State<FillWidget> {
       child: GestureDetector(
         key: key,
         onPanUpdate: canDragEndpoint
-            ? (final DragUpdateDetails details) {
+            ? (DragUpdateDetails details) {
                 setState(() {
                   showDetails = true;
                   point!.offset += details.delta;
@@ -154,20 +154,20 @@ class _FillWidgetState extends State<FillWidget> {
                 });
               }
             : isInnerHandle
-            ? (final DragUpdateDetails details) {
+            ? (DragUpdateDetails details) {
                 _moveInnerHandleByDelta(
                   stopIndex: handleIndex,
                   delta: details.delta,
                 );
               }
             : null,
-        onPanEnd: (final DragEndDetails _) => setState(() => showDetails = false),
-        onTapDown: (final TapDownDetails _) {
+        onPanEnd: (DragEndDetails _) => setState(() => showDetails = false),
+        onTapDown: (TapDownDetails _) {
           setState(() {
             showDetails = true;
           });
         },
-        onTapUp: (final TapUpDetails _) {
+        onTapUp: (TapUpDetails _) {
           setState(() {
             showDetails = false;
           });
@@ -184,7 +184,7 @@ class _FillWidgetState extends State<FillWidget> {
             context: context,
             title: l10n.gradientPointColor,
             color: color,
-            onSelectedColor: (final Color selectedColor) {
+            onSelectedColor: (Color selectedColor) {
               setState(() {
                 // Sync the changed color back into gradientStopColors so the
                 // side-panel editor reflects the pick made on the canvas handle.
@@ -229,7 +229,7 @@ class _FillWidgetState extends State<FillWidget> {
 
   /// Builds the on-canvas Apply (commit) / Cancel (discard) controls for the
   /// live gradient-fill session.
-  Widget _buildSessionControls(final BuildContext context) {
+  Widget _buildSessionControls(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
     final Offset anchor = widget.fillModel.centerPoint;
     return Positioned(
@@ -264,8 +264,8 @@ class _FillWidgetState extends State<FillWidget> {
   /// For both linear and radial gradients, inner handles are placed according
   /// to [FillModel.gradientStopPositions].
   Offset _handleOffsetForStop({
-    required final int stopIndex,
-    required final int stopCount,
+    required int stopIndex,
+    required int stopCount,
   }) {
     if (widget.fillModel.gradientPoints.length < AppMath.pair) {
       return Offset.zero;
@@ -291,8 +291,8 @@ class _FillWidgetState extends State<FillWidget> {
 
   /// Moves an inner stop by projecting [delta] onto the gradient axis.
   void _moveInnerHandleByDelta({
-    required final int stopIndex,
-    required final Offset delta,
+    required int stopIndex,
+    required Offset delta,
   }) {
     if (widget.fillModel.gradientPoints.length < AppMath.pair) {
       return;

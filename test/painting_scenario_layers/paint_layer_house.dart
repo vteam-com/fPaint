@@ -1,6 +1,6 @@
 part of '../painting_scenario_test.dart';
 
-Future<void> paintLayerHouse(final PaintingScenarioSession session) async {
+Future<void> paintLayerHouse(PaintingScenarioSession session) async {
   await PaintingLayerHelpers.addNewLayer(session.tester, _houseLayerName);
 
   final BuildContext context = session.tester.element(find.byType(MainView));

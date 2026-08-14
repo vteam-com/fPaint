@@ -8,9 +8,9 @@ import 'package:fpaint/helpers/image_helper.dart';
 
 /// Runs [apply] only when [strength] is above the minimum effect intensity.
 Future<ui.Image> _applyWithStrengthGuard(
-  final ui.Image image, {
-  required final double strength,
-  required final Future<ui.Image> Function() apply,
+  ui.Image image, {
+  required double strength,
+  required Future<ui.Image> Function() apply,
 }) async {
   // Skip only at exactly zero (no change). Negative strength is meaningful for
   // bipolar effects (darken, reduce contrast, reverse hue), so it applies.
@@ -22,9 +22,9 @@ Future<ui.Image> _applyWithStrengthGuard(
 
 /// Mutates raw RGBA pixels and rebuilds an image from the result.
 Future<ui.Image> _applyPixelTransform(
-  final ui.Image image, {
-  required final double strength,
-  required final void Function(Uint8List) mutate,
+  ui.Image image, {
+  required double strength,
+  required void Function(Uint8List) mutate,
 }) {
   return _applyWithStrengthGuard(
     image,
@@ -42,7 +42,7 @@ Future<ui.Image> _applyPixelTransform(
 }
 
 /// Converts normalized opacity values to the 0-255 byte range.
-int _opacityToByte(final double opacity) {
+int _opacityToByte(double opacity) {
   return (opacity.clamp(AppEffects.minIntensity, AppEffects.maxIntensity) * AppLimits.rgbChannelMax).round();
 }
 
@@ -50,9 +50,9 @@ int _opacityToByte(final double opacity) {
 ///
 /// [strength] ranges from 0.0 (no blur) to 1.0 (full blur at the authored [sigma]).
 Future<ui.Image> applyGaussianBlur(
-  final ui.Image image,
-  final double sigma, {
-  final double strength = AppEffects.defaultIntensity,
+  ui.Image image,
+  double sigma, {
+  double strength = AppEffects.defaultIntensity,
 }) {
   return _applyWithStrengthGuard(
     image,
@@ -62,7 +62,7 @@ Future<ui.Image> applyGaussianBlur(
       return renderCanvasImage(
         width: image.width,
         height: image.height,
-        draw: (final Canvas canvas) {
+        draw: (Canvas canvas) {
           canvas.saveLayer(
             Rect.fromLTWH(
               0,
@@ -92,9 +92,9 @@ Future<ui.Image> applyGaussianBlur(
 ///
 /// [size] controls the block size of the pixelation.
 Future<ui.Image> applyPixelate(
-  final ui.Image image, {
-  final double strength = AppEffects.defaultIntensity,
-  final double size = AppEffects.pixelateDefaultSize,
+  ui.Image image, {
+  double strength = AppEffects.defaultIntensity,
+  double size = AppEffects.pixelateDefaultSize,
 }) async {
   return _applyWithStrengthGuard(
     image,
@@ -109,7 +109,7 @@ Future<ui.Image> applyPixelate(
       final ui.Image small = await renderCanvasImage(
         width: smallW,
         height: smallH,
-        draw: (final Canvas canvas) {
+        draw: (Canvas canvas) {
           canvas.drawImageRect(
             image,
             Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble()),
@@ -122,7 +122,7 @@ Future<ui.Image> applyPixelate(
       final ui.Image pixelated = await renderCanvasImage(
         width: w,
         height: h,
-        draw: (final Canvas canvas) {
+        draw: (Canvas canvas) {
           canvas.drawImageRect(
             small,
             Rect.fromLTWH(0, 0, smallW.toDouble(), smallH.toDouble()),
@@ -146,8 +146,8 @@ Future<ui.Image> applyPixelate(
 /// [strength] blends the grayscale result over the original: 0.0 = unchanged,
 /// 1.0 = fully desaturated.
 Future<ui.Image> applyGrayscale(
-  final ui.Image image, {
-  final double strength = AppEffects.defaultIntensity,
+  ui.Image image, {
+  double strength = AppEffects.defaultIntensity,
 }) {
   return _applyWithStrengthGuard(
     image,
@@ -181,7 +181,7 @@ Future<ui.Image> applyGrayscale(
       return renderCanvasImage(
         width: image.width,
         height: image.height,
-        draw: (final Canvas canvas) {
+        draw: (Canvas canvas) {
           canvas.drawImage(image, Offset.zero, Paint());
           canvas.saveLayer(
             null,
@@ -207,8 +207,8 @@ Future<ui.Image> applyGrayscale(
 /// [strength] scales the sharpening amount: 0.0 = no sharpening,
 /// 1.0 = full authored strength.
 Future<ui.Image> applySharpen(
-  final ui.Image image, {
-  final double strength = AppEffects.defaultIntensity,
+  ui.Image image, {
+  double strength = AppEffects.defaultIntensity,
 }) async {
   return _applyWithStrengthGuard(
     image,
@@ -222,7 +222,7 @@ Future<ui.Image> applySharpen(
       final ui.Image blurred = await renderCanvasImage(
         width: w,
         height: h,
-        draw: (final Canvas canvas) {
+        draw: (Canvas canvas) {
           canvas.saveLayer(
             rect,
             Paint()
@@ -268,10 +268,10 @@ Future<ui.Image> applySharpen(
 ///
 /// [size] controls the grain size of the noise.
 Future<ui.Image> applyNoise(
-  final ui.Image image, {
-  final double strength = AppEffects.defaultIntensity,
-  final double size = AppEffects.noiseDefaultSize,
-  final Random? random,
+  ui.Image image, {
+  double strength = AppEffects.defaultIntensity,
+  double size = AppEffects.noiseDefaultSize,
+  Random? random,
 }) {
   final int effectiveRange = max(1, (AppEffects.noiseRange * strength).round());
   final int effectiveOffset = effectiveRange ~/ 2;
@@ -281,7 +281,7 @@ Future<ui.Image> applyNoise(
   return _applyPixelTransform(
     image,
     strength: strength,
-    mutate: (final Uint8List pixels) {
+    mutate: (Uint8List pixels) {
       for (int y = 0; y < image.height; y += cellSize) {
         final int cellHeight = min(cellSize, image.height - y);
         for (int x = 0; x < image.width; x += cellSize) {
@@ -314,13 +314,13 @@ Future<ui.Image> applyNoise(
   );
 }
 
-int _resolvePixelateBlockSize(final double size) {
+int _resolvePixelateBlockSize(double size) {
   final double clampedSize = size.clamp(AppEffects.minSize, AppEffects.maxSize);
   final double blockSpan = (AppEffects.pixelateMaxBlockSize - AppEffects.pixelateMinBlockSize).toDouble();
   return AppEffects.pixelateMinBlockSize + (blockSpan * clampedSize).round();
 }
 
-int _resolveNoiseCellSize(final double size) {
+int _resolveNoiseCellSize(double size) {
   final double clampedSize = size.clamp(AppEffects.minSize, AppEffects.maxSize);
   final double cellSpan = (AppEffects.noiseMaxCellSize - AppEffects.noiseMinCellSize).toDouble();
   return AppEffects.noiseMinCellSize + (cellSpan * clampedSize).round();
@@ -331,8 +331,8 @@ int _resolveNoiseCellSize(final double size) {
 /// [strength] scales the edge-darkening: 0.0 = no vignette,
 /// 1.0 = full authored strength.
 Future<ui.Image> applyVignette(
-  final ui.Image image, {
-  final double strength = AppEffects.defaultIntensity,
+  ui.Image image, {
+  double strength = AppEffects.defaultIntensity,
 }) {
   return _applyWithStrengthGuard(
     image,
@@ -357,7 +357,7 @@ Future<ui.Image> applyVignette(
       return renderCanvasImage(
         width: w,
         height: h,
-        draw: (final Canvas canvas) {
+        draw: (Canvas canvas) {
           canvas.drawImage(image, Offset.zero, Paint());
           canvas.drawRect(rect, vignettePaint);
         },
@@ -368,15 +368,15 @@ Future<ui.Image> applyVignette(
 
 /// Blends [top] over [bottom] at [opacity] (0.0–1.0) and returns the result.
 Future<ui.Image> _blendOver(
-  final ui.Image bottom,
-  final ui.Image top,
-  final double opacity,
+  ui.Image bottom,
+  ui.Image top,
+  double opacity,
 ) {
   final int opacityByte = _opacityToByte(opacity);
   return renderCanvasImage(
     width: bottom.width,
     height: bottom.height,
-    draw: (final Canvas canvas) {
+    draw: (Canvas canvas) {
       canvas.drawImage(bottom, Offset.zero, Paint());
       canvas.drawImage(
         top,
@@ -397,14 +397,14 @@ Future<ui.Image> _blendOver(
 ///
 /// [strength] ranges from 0.0 (no change) to 1.0 (maximum brightening).
 Future<ui.Image> applyBrightness(
-  final ui.Image image, {
-  final double strength = AppEffects.defaultIntensity,
+  ui.Image image, {
+  double strength = AppEffects.defaultIntensity,
 }) {
   final int offset = (AppEffects.brightnessOffset * strength).round();
   return _applyPixelTransform(
     image,
     strength: strength,
-    mutate: (final Uint8List pixels) {
+    mutate: (Uint8List pixels) {
       for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
         for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
           pixels[i + c] = (pixels[i + c] + offset).clamp(0, AppLimits.rgbChannelMax);
@@ -418,14 +418,14 @@ Future<ui.Image> applyBrightness(
 ///
 /// [strength] ranges from 0.0 (no change) to 1.0 (maximum contrast boost).
 Future<ui.Image> applyContrast(
-  final ui.Image image, {
-  final double strength = AppEffects.defaultIntensity,
+  ui.Image image, {
+  double strength = AppEffects.defaultIntensity,
 }) {
   final double factor = 1.0 + (AppEffects.contrastMax - 1.0) * strength;
   return _applyPixelTransform(
     image,
     strength: strength,
-    mutate: (final Uint8List pixels) {
+    mutate: (Uint8List pixels) {
       for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
         for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
           final int channelValue = pixels[i + c];
@@ -442,14 +442,14 @@ Future<ui.Image> applyContrast(
 ///
 /// [strength] ranges from 0.0 (no hue shift) to 1.0 (maximum rotation).
 Future<ui.Image> applyHueSaturation(
-  final ui.Image image, {
-  final double strength = AppEffects.defaultIntensity,
+  ui.Image image, {
+  double strength = AppEffects.defaultIntensity,
 }) {
   final double hueShift = AppEffects.hueRotationMax * strength;
   return _applyPixelTransform(
     image,
     strength: strength,
-    mutate: (final Uint8List pixels) {
+    mutate: (Uint8List pixels) {
       for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
         final int r = pixels[i + AppMath.rgbChannelRed];
         final int g = pixels[i + AppMath.rgbChannelGreen];
@@ -473,14 +473,14 @@ Future<ui.Image> applyHueSaturation(
 ///
 /// [strength] ranges from 0.0 (no change) to 1.0 (maximum darkening of shadows).
 Future<ui.Image> applyShadow(
-  final ui.Image image, {
-  final double strength = AppEffects.defaultIntensity,
+  ui.Image image, {
+  double strength = AppEffects.defaultIntensity,
 }) {
   final double darken = AppEffects.shadowDarkening * strength;
   return _applyPixelTransform(
     image,
     strength: strength,
-    mutate: (final Uint8List pixels) {
+    mutate: (Uint8List pixels) {
       for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
         final int r = pixels[i];
         final int g = pixels[i + 1];
@@ -498,7 +498,7 @@ Future<ui.Image> applyShadow(
 }
 
 /// Converts RGB (0–255) to HSL (h: 0–360, s: 0–1, l: 0–1).
-List<double> _rgbToHsl(final int r, final int g, final int b) {
+List<double> _rgbToHsl(int r, int g, int b) {
   final double rn = r / AppLimits.rgbChannelMax;
   final double gn = g / AppLimits.rgbChannelMax;
   final double bn = b / AppLimits.rgbChannelMax;
@@ -525,7 +525,7 @@ List<double> _rgbToHsl(final int r, final int g, final int b) {
 }
 
 /// Converts HSL (h: 0–360, s: 0–1, l: 0–1) to RGB (0–255).
-List<int> _hslToRgb(final double h, final double s, final double l) {
+List<int> _hslToRgb(double h, double s, double l) {
   final double c = (1 - (AppMath.pair * l - 1).abs()) * s;
   final double x = c * (1 - ((h / AppMath.degrees60) % AppMath.two - 1).abs());
   final double m = l - c / AppMath.pair;

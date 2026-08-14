@@ -56,15 +56,15 @@ class FillService {
   /// Performs a flood fill with a solid color. Pass [imageData] (cached RGBA
   /// bytes) to skip the readback during live previews, or [sourceImage] otherwise.
   Future<UserActionDrawing> createFloodFillSolidAction({
-    required final Offset position,
-    required final Color fillColor,
-    final ui.Image? sourceImage,
-    final FillImageData? imageData,
-    final Color? halftoneDotColor,
-    final double? halftoneMaxDotSizeFactor,
-    required final int tolerance,
-    required final Path? clipPath,
-    final Path? regionPathOverride,
+    required Offset position,
+    required Color fillColor,
+    ui.Image? sourceImage,
+    FillImageData? imageData,
+    Color? halftoneDotColor,
+    double? halftoneMaxDotSizeFactor,
+    required int tolerance,
+    required Path? clipPath,
+    Path? regionPathOverride,
   }) async {
     final ui.Path path = await _resolveFloodFillPath(
       sourceImage: sourceImage,
@@ -86,11 +86,11 @@ class FillService {
   /// Builds a solid fill action for an already-resolved region [path], skipping
   /// the flood-fill readback — cheap enough to call live while dragging.
   UserActionDrawing buildSolidFillActionForPath({
-    required final ui.Path path,
-    required final Color fillColor,
-    final Color? halftoneDotColor,
-    final double? halftoneMaxDotSizeFactor,
-    required final Path? clipPath,
+    required ui.Path path,
+    required Color fillColor,
+    Color? halftoneDotColor,
+    double? halftoneMaxDotSizeFactor,
+    required Path? clipPath,
   }) {
     final ui.Rect bounds = path.getBounds();
 
@@ -117,8 +117,8 @@ class FillService {
   /// from the current handles: the first handle for radial, the midpoint between
   /// handles for linear.
   Offset gradientFloodFillStartPoint(
-    final FillModel fillModel,
-    final Offset Function(Offset) toCanvas,
+    FillModel fillModel,
+    Offset Function(Offset) toCanvas,
   ) {
     return fillModel.mode == FillMode.radial
         ? toCanvas(fillModel.gradientPoints.first.offset)
@@ -128,13 +128,13 @@ class FillService {
   /// Performs a flood fill with a gradient. Pass [imageData] (cached RGBA bytes)
   /// to skip the readback during live previews, or [sourceImage] otherwise.
   Future<UserActionDrawing> createFloodFillGradientAction({
-    required final FillModel fillModel,
-    required final int tolerance,
-    required final Path? clipPath,
-    required final Offset Function(Offset) toCanvas,
-    final ui.Image? sourceImage,
-    final FillImageData? imageData,
-    final Path? regionPathOverride,
+    required FillModel fillModel,
+    required int tolerance,
+    required Path? clipPath,
+    required Offset Function(Offset) toCanvas,
+    ui.Image? sourceImage,
+    FillImageData? imageData,
+    Path? regionPathOverride,
   }) async {
     if (!_hasUsableGradientConfiguration(fillModel)) {
       return _buildEmptyFloodFillAction();
@@ -160,10 +160,10 @@ class FillService {
   /// skipping the flood-fill readback — cheap enough to call live while dragging.
   /// Returns an empty (path-less) action when the region or config is unusable.
   UserActionDrawing buildGradientFillActionForPath({
-    required final ui.Path path,
-    required final FillModel fillModel,
-    required final Offset Function(Offset) toCanvas,
-    required final Path? clipPath,
+    required ui.Path path,
+    required FillModel fillModel,
+    required Offset Function(Offset) toCanvas,
+    required Path? clipPath,
   }) {
     if (!_hasUsableGradientConfiguration(fillModel)) {
       return _buildEmptyFloodFillAction();
@@ -207,11 +207,11 @@ class FillService {
   /// from the raster flood-fill region sampled at [position]. Prefers
   /// [imageData] (cached RGBA bytes — no readback) over [sourceImage].
   Future<ui.Path> _resolveFloodFillPath({
-    final ui.Image? sourceImage,
-    final FillImageData? imageData,
-    required final Offset position,
-    required final int tolerance,
-    required final Path? regionPathOverride,
+    ui.Image? sourceImage,
+    FillImageData? imageData,
+    required Offset position,
+    required int tolerance,
+    required Path? regionPathOverride,
   }) async {
     if (regionPathOverride != null) {
       return Path.from(regionPathOverride);
@@ -229,9 +229,9 @@ class FillService {
 
   /// Builds the gradient geometry used by smooth and halftone flood fills.
   Gradient _buildFloodFillGradient({
-    required final ui.Rect bounds,
-    required final FillModel fillModel,
-    required final Offset Function(Offset) toCanvas,
+    required ui.Rect bounds,
+    required FillModel fillModel,
+    required Offset Function(Offset) toCanvas,
   }) {
     // Snapshot stop data so previously recorded fills do not change when the
     // shared fill model is edited for a later action.
@@ -261,7 +261,7 @@ class FillService {
   }
 
   /// Returns whether [fillModel] has enough gradient data for flood fill.
-  bool _hasUsableGradientConfiguration(final FillModel fillModel) {
+  bool _hasUsableGradientConfiguration(FillModel fillModel) {
     final int pointCount = fillModel.gradientPoints.length;
     final int colorCount = fillModel.gradientStopColors.length;
     final int stopCount = fillModel.gradientStopPositions.length;
@@ -270,8 +270,8 @@ class FillService {
 
   /// Converts an absolute [point] inside [bounds] into a gradient alignment.
   Alignment _pointToBoundsAlignment({
-    required final ui.Rect bounds,
-    required final ui.Offset point,
+    required ui.Rect bounds,
+    required ui.Offset point,
   }) {
     return Alignment(
       ((point.dx - bounds.left) / bounds.width) * AppMath.pair - AppVisual.full,
@@ -281,10 +281,10 @@ class FillService {
 
   /// Gets the region path from a layer image.
   Future<FillRegion> getRegionPathFromImage({
-    final ui.Image? image,
-    required final ui.Offset position,
-    required final int tolerance,
-    final FillImageData? imageData,
+    ui.Image? image,
+    required ui.Offset position,
+    required int tolerance,
+    FillImageData? imageData,
   }) async {
     // Guard against NaN or infinite coordinates
     if (position.dx.isNaN || position.dy.isNaN || position.dx.isInfinite || position.dy.isInfinite) {
@@ -320,7 +320,7 @@ class FillService {
   }
 
   /// Builds a reusable flood-fill raster payload from [image].
-  Future<FillImageData?> _buildFillImageData(final ui.Image? image) async {
+  Future<FillImageData?> _buildFillImageData(ui.Image? image) async {
     if (image == null) {
       return null;
     }

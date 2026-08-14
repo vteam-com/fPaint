@@ -28,9 +28,9 @@ void main() {
   }
 
   Future<Image> createFilledLayerImage({
-    required final int width,
-    required final int height,
-    required final Color color,
+    required int width,
+    required int height,
+    required Color color,
   }) async {
     final PictureRecorder recorder = PictureRecorder();
     final Canvas canvas = Canvas(recorder);
@@ -706,7 +706,7 @@ void main() {
       // whole-region-rectangle masking bug).
       final Image patch = committed.image!;
       final ByteData patchData = (await patch.toByteData(format: ImageByteFormat.rawRgba))!;
-      int alphaAt(final int x, final int y) => patchData.getUint8(
+      int alphaAt(int x, int y) => patchData.getUint8(
         (((y * patch.width) + x) * AppMath.bytesPerPixel) + AppEffects.alphaChannelIndex,
       );
       expect(alphaAt(45, 35), greaterThan(AppMath.zero));
@@ -752,7 +752,7 @@ void main() {
       // Patch region origin is the stroke bounds inflated by one radius, floored.
       const int originX = 20 - 10; // stroke left - radius
       const int originY = 20 - 10; // stroke top - radius
-      int alphaAt(final int canvasX, final int canvasY) => patchData.getUint8(
+      int alphaAt(int canvasX, int canvasY) => patchData.getUint8(
         ((((canvasY - originY) * patch.width) + (canvasX - originX)) * AppMath.bytesPerPixel) +
             AppEffects.alphaChannelIndex,
       );
@@ -797,7 +797,7 @@ void main() {
       // Patch region origin is the stroke bounds inflated by one radius, floored.
       const int originX = 20 - 10; // stroke left - radius
       const int originY = 20 - 10; // stroke top - radius
-      int alphaAt(final int canvasX, final int canvasY) => patchData.getUint8(
+      int alphaAt(int canvasX, int canvasY) => patchData.getUint8(
         ((((canvasY - originY) * patch.width) + (canvasX - originX)) * AppMath.bytesPerPixel) +
             AppEffects.alphaChannelIndex,
       );

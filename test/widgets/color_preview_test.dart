@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_preview.dart';
+import 'package:material_ui/material_ui.dart';
 
 const double _waterDropIconViewBoxSize = 24.0;
 const double _waterDropVisibleWidth = 16.0;
@@ -16,7 +16,7 @@ const double _compactPreviewInnerSize = AppSpacing.largest - (AppSpacing.small *
 void main() {
   group('ColorPreview', () {
     testWidgets('renders the drop through the shared app icon asset without shrinking the preview footprint', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       const Color previewColor = Color(0xFF3399FF);
       const Size expectedSize = Size(AppLayout.layerPreviewCompactSize, AppLayout.layerPreviewCompactSize);
@@ -77,7 +77,7 @@ void main() {
       expect(transforms.first.transform.storage[5], closeTo(_waterDropVerticalScale, _scaleTolerance));
     });
 
-    testWidgets('calls onPressed when tapped', (final WidgetTester tester) async {
+    testWidgets('calls onPressed when tapped', (WidgetTester tester) async {
       int tapCount = 0;
 
       await tester.pumpWidget(
@@ -107,7 +107,7 @@ void main() {
       expect(tapCount, 1);
     });
 
-    testWidgets('shows alpha above RGB pairs for displayed color values', (final WidgetTester tester) async {
+    testWidgets('shows alpha above RGB pairs for displayed color values', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(
@@ -127,7 +127,7 @@ void main() {
       expect(find.text('3399FF\n80'), findsNothing);
     });
 
-    testWidgets('scales stacked text to avoid overflow in compact previews', (final WidgetTester tester) async {
+    testWidgets('scales stacked text to avoid overflow in compact previews', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Center(

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/pages/platforms_page.dart';
@@ -6,11 +5,12 @@ import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../helpers/recovery_test_helpers.dart';
 
 void main() {
-  testWidgets('SettingsPage updates preferences and opens shortcuts help', (final WidgetTester tester) async {
+  testWidgets('SettingsPage updates preferences and opens shortcuts help', (WidgetTester tester) async {
     final AppPreferences preferences = await createRecoveryTestPreferences();
 
     await tester.pumpWidget(
@@ -67,7 +67,7 @@ void main() {
     );
   });
 
-  testWidgets('PlatformsPage renders all supported platform cards', (final WidgetTester tester) async {
+  testWidgets('PlatformsPage renders all supported platform cards', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,

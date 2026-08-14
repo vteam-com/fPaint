@@ -7,7 +7,7 @@ import 'package:fpaint/widgets/marching_ants_path.dart';
 
 void main() {
   group('AnimatedMarchingAntsPath', () {
-    testWidgets('renders with a path', (final WidgetTester tester) async {
+    testWidgets('renders with a path', (WidgetTester tester) async {
       final Path testPath = Path()..addRect(const Rect.fromLTWH(10, 10, 100, 100));
 
       await tester.pumpWidget(
@@ -21,7 +21,7 @@ void main() {
       expect(find.byType(CustomPaint), findsOneWidget);
     });
 
-    testWidgets('renders with line points', (final WidgetTester tester) async {
+    testWidgets('renders with line points', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -35,7 +35,7 @@ void main() {
       expect(find.byType(AnimatedMarchingAntsPath), findsOneWidget);
     });
 
-    testWidgets('renders with both path and line points', (final WidgetTester tester) async {
+    testWidgets('renders with both path and line points', (WidgetTester tester) async {
       final Path testPath = Path()..addRect(const Rect.fromLTWH(10, 10, 100, 100));
 
       await tester.pumpWidget(
@@ -52,7 +52,7 @@ void main() {
       expect(find.byType(AnimatedMarchingAntsPath), findsOneWidget);
     });
 
-    testWidgets('renders with no path or line (empty)', (final WidgetTester tester) async {
+    testWidgets('renders with no path or line (empty)', (WidgetTester tester) async {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
@@ -63,7 +63,7 @@ void main() {
       expect(find.byType(AnimatedMarchingAntsPath), findsOneWidget);
     });
 
-    testWidgets('animation ticks correctly', (final WidgetTester tester) async {
+    testWidgets('animation ticks correctly', (WidgetTester tester) async {
       final Path testPath = Path()..addRect(const Rect.fromLTWH(0, 0, 200, 200));
 
       await tester.pumpWidget(
@@ -82,7 +82,7 @@ void main() {
       expect(find.byType(AnimatedMarchingAntsPath), findsOneWidget);
     });
 
-    testWidgets('disposes correctly', (final WidgetTester tester) async {
+    testWidgets('disposes correctly', (WidgetTester tester) async {
       final Path testPath = Path()..addRect(const Rect.fromLTWH(0, 0, 50, 50));
 
       await tester.pumpWidget(

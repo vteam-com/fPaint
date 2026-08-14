@@ -12,7 +12,7 @@ Future<ui.Image> _texture() {
   return renderCanvasImage(
     width: 2,
     height: 2,
-    draw: (final ui.Canvas canvas) {
+    draw: (ui.Canvas canvas) {
       canvas.drawRect(
         const Rect.fromLTWH(0, 0, 2, 2),
         Paint()..color = const Color(0xFFFF0000),
@@ -21,7 +21,7 @@ Future<ui.Image> _texture() {
   );
 }
 
-UserActionDrawing _imageAction(final ui.Image image) {
+UserActionDrawing _imageAction(ui.Image image) {
   return UserActionDrawing(
     action: ActionType.image,
     positions: const <Offset>[Offset.zero, Offset(2, 2)],
@@ -104,7 +104,7 @@ void main() {
       );
 
       undo.trimUndoHistoryWhere(
-        predicate: (final RecordAction r) => r.name == 'smudge',
+        predicate: (RecordAction r) => r.name == 'smudge',
         maxKeep: 1,
       );
 

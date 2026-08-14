@@ -19,7 +19,7 @@ void main() {
       final List<ActionType?> gestureActions = <ToolDescriptor>[
         ...brushSectionTools(),
         ...elementSectionTools(),
-      ].where((final ToolDescriptor d) => d.action != null).map((final ToolDescriptor d) => d.action).toList();
+      ].where((ToolDescriptor d) => d.action != null).map((ToolDescriptor d) => d.action).toList();
       expect(gestureActions, contains(ActionType.smudge));
     });
 
@@ -58,20 +58,20 @@ void main() {
     });
 
     test('every gesture tool is covered exactly once across the sections', () {
-      final List<ToolDescriptor> gestures = fullRail().where((final ToolDescriptor d) => d.action != null).toList();
+      final List<ToolDescriptor> gestures = fullRail().where((ToolDescriptor d) => d.action != null).toList();
       expect(gestures.length, kGestureToolOrder.length);
     });
 
     test('effects live only in the Brush section and cover every effect', () {
-      final List<ToolDescriptor> effects = fullRail().where((final ToolDescriptor d) => d.effect != null).toList();
+      final List<ToolDescriptor> effects = fullRail().where((ToolDescriptor d) => d.effect != null).toList();
       expect(effects.length, SelectionEffect.values.length);
-      expect(elementSectionTools().where((final ToolDescriptor d) => d.effect != null), isEmpty);
+      expect(elementSectionTools().where((ToolDescriptor d) => d.effect != null), isEmpty);
     });
   });
 
   group('brush and element sections', () {
-    List<ActionType> gestureActionsOf(final List<ToolDescriptor> tools) =>
-        tools.where((final ToolDescriptor d) => d.action != null).map((final ToolDescriptor d) => d.action!).toList();
+    List<ActionType> gestureActionsOf(List<ToolDescriptor> tools) =>
+        tools.where((ToolDescriptor d) => d.action != null).map((ToolDescriptor d) => d.action!).toList();
 
     test('Brush section holds the freehand painters plus every effect', () {
       final List<ToolDescriptor> tools = brushSectionTools();
@@ -81,7 +81,7 @@ void main() {
         containsAll(<ActionType>[ActionType.pencil, ActionType.brush, ActionType.smudge, ActionType.eraser]),
       );
       // Effects live in the Brush section.
-      final List<ToolDescriptor> effects = tools.where((final ToolDescriptor d) => d.effect != null).toList();
+      final List<ToolDescriptor> effects = tools.where((ToolDescriptor d) => d.effect != null).toList();
       expect(effects.length, SelectionEffect.values.length);
     });
 
@@ -92,7 +92,7 @@ void main() {
         <ActionType>[ActionType.line, ActionType.rectangle, ActionType.circle, ActionType.fill, ActionType.text],
       );
       // The Elements section carries no effects.
-      expect(elementSectionTools().where((final ToolDescriptor d) => d.effect != null), isEmpty);
+      expect(elementSectionTools().where((ToolDescriptor d) => d.effect != null), isEmpty);
     });
 
     test('the two sections are disjoint and together cover every gesture tool', () {

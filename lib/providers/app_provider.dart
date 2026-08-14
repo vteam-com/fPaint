@@ -32,9 +32,9 @@ export 'package:fpaint/providers/layers_provider.dart';
 /// coordinates, and performing region-based operations like erasing and cutting.
 class AppProvider extends ChangeNotifier {
   AppProvider({
-    final AppPreferences? preferences,
-    final LayersProvider? layersProvider,
-    final UndoProvider? undoProvider,
+    AppPreferences? preferences,
+    LayersProvider? layersProvider,
+    UndoProvider? undoProvider,
   }) : preferences = preferences ?? AppPreferences(),
        layers = layersProvider ?? LayersProvider(),
        _undoProvider = undoProvider ?? UndoProvider() {
@@ -92,7 +92,7 @@ class AppProvider extends ChangeNotifier {
   String? get languageCode => preferences.languageCode;
 
   /// Sets the preferred app language code and notifies listeners.
-  Future<void> setLanguageCode(final String? value) async {
+  Future<void> setLanguageCode(String? value) async {
     await preferences.setLanguageCode(value);
     update();
   }
@@ -113,8 +113,8 @@ class AppProvider extends ChangeNotifier {
   /// when its state changes. Otherwise, the returned instance will not notify
   /// listeners.
   static AppProvider of(
-    final BuildContext context, {
-    final bool listen = false,
+    BuildContext context, {
+    bool listen = false,
   }) => InheritedControllerScope.of<AppProvider>(context, listen: listen);
 
   /// Listenable used to repaint the main canvas and overlay surface only.
@@ -190,7 +190,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Rebuilds side-panel mode chrome only when layer-modify mode toggles.
-  void notifyLayerModifyModeChanged({required final bool wasActive}) {
+  void notifyLayerModifyModeChanged({required bool wasActive}) {
     if (wasActive != isLayerModifyMode) {
       repaintLayerModifyMode();
     }
@@ -218,7 +218,7 @@ class AppProvider extends ChangeNotifier {
 
   /// Records and executes a drawing action to the selected layer.
   bool recordExecuteDrawingActionToSelectedLayer({
-    required final UserActionDrawing action,
+    required UserActionDrawing action,
   }) {
     if (isSelectedLayerLocked) {
       return false;
@@ -280,7 +280,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Sets the selected action.
-  set selectedAction(final ActionType value) {
+  set selectedAction(ActionType value) {
     final bool selectedActionChanged = value != _selectedAction;
 
     // Picking any tool cancels an armed paint-mode effect brush, so only one
@@ -367,7 +367,7 @@ class AppProvider extends ChangeNotifier {
   /// Marks the smudge/blur commit as running ([committing] true) or finished,
   /// refreshing the overlay so the processing shimmer appears/clears. No-op when
   /// the state is unchanged.
-  void setPixelBrushCommitting({required final bool committing}) {
+  void setPixelBrushCommitting({required bool committing}) {
     if (_isPixelBrushCommitting == committing) {
       return;
     }
@@ -379,8 +379,8 @@ class AppProvider extends ChangeNotifier {
   /// swept-band marquee. Snapshots [points] so later mutation of the stroke list
   /// can't tear a frame mid-paint.
   void showPixelBrushGesture({
-    required final List<Offset> points,
-    required final double size,
+    required List<Offset> points,
+    required double size,
   }) {
     _pixelBrushGesturePoints = List<Offset>.of(points);
     _pixelBrushGestureSize = size;
@@ -399,14 +399,14 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Sets the brush size.
-  set brushSize(final double value) {
+  set brushSize(double value) {
     preferences.setBrushSize(value);
     _showBrushSizePreview(value);
     repaintToolOptions();
     update();
   }
 
-  void _showBrushSizePreview(final double value) {
+  void _showBrushSizePreview(double value) {
     _brushSizePreviewTimer?.cancel();
     _brushSizePreviewSize = value;
     _brushSizePreviewPosition = null;
@@ -416,8 +416,8 @@ class AppProvider extends ChangeNotifier {
 
   /// Shows the brush-size preview at the current pointer position while the user draws.
   void showDrawingToolPreviewAt({
-    required final double size,
-    required final Offset position,
+    required double size,
+    required Offset position,
   }) {
     _brushSizePreviewTimer?.cancel();
     _brushSizePreviewSize = size;
@@ -450,7 +450,7 @@ class AppProvider extends ChangeNotifier {
   Offset? get wandToleranceHudPosition => _wandToleranceHudPosition;
 
   /// Shows or updates the live Edge Detection tolerance HUD at [position].
-  void showWandToleranceHud({required final int tolerance, required final Offset position}) {
+  void showWandToleranceHud({required int tolerance, required Offset position}) {
     _wandToleranceHudTolerance = tolerance;
     _wandToleranceHudPosition = position;
     repaintMainView();
@@ -479,7 +479,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Sets the active pixel-brush intensity for the selected tool.
-  set brushIntensity(final double value) {
+  set brushIntensity(double value) {
     switch (_selectedAction) {
       case ActionType.smudge:
         preferences.setSmudgeIntensity(value);
@@ -502,7 +502,7 @@ class AppProvider extends ChangeNotifier {
   BrushStyle get brushStyle => _brushStyle;
 
   /// Sets the brush style.
-  set brushStyle(final BrushStyle value) {
+  set brushStyle(BrushStyle value) {
     _brushStyle = value;
     repaintToolOptions();
     update();
@@ -515,7 +515,7 @@ class AppProvider extends ChangeNotifier {
   Color get brushColor => preferences.brushColor;
 
   /// Sets the brush color.
-  set brushColor(final Color value) {
+  set brushColor(Color value) {
     preferences.setBrushColor(value);
     repaintToolOptions();
     update();
@@ -528,7 +528,7 @@ class AppProvider extends ChangeNotifier {
   Color get fillColor => preferences.fillColor;
 
   /// Sets the fill color.
-  set fillColor(final Color value) {
+  set fillColor(Color value) {
     preferences.setFillColor(value);
     repaintToolOptions();
     update();
@@ -542,7 +542,7 @@ class AppProvider extends ChangeNotifier {
   int get tolerance => _tolerance;
 
   /// Sets the tolerance.
-  set tolerance(final int value) {
+  set tolerance(int value) {
     _tolerance = max(1, min(AppLimits.percentMax, value));
     repaintToolOptions();
     update();
@@ -578,7 +578,7 @@ class AppProvider extends ChangeNotifier {
   int? get fillTolerancePreview => _fillTolerancePreview;
 
   /// Shows/updates the top "Fill Tolerance" bar with [value].
-  void showFillTolerancePreview(final int value) {
+  void showFillTolerancePreview(int value) {
     if (_fillTolerancePreview == value) {
       return;
     }
@@ -608,7 +608,7 @@ class AppProvider extends ChangeNotifier {
 
   /// Pins the tolerance drag to [screenAnchor]: hides the cursor and shows the
   /// fixed anchor marker.
-  void beginTolerancePointerLock(final Offset screenAnchor) {
+  void beginTolerancePointerLock(Offset screenAnchor) {
     _tolerancePointerAnchor = screenAnchor;
     repaintToolOptions(); // rebuild the cursor MouseRegion to hide the cursor
     repaintMainView(); // draw the fixed anchor marker
@@ -675,7 +675,7 @@ class AppProvider extends ChangeNotifier {
   );
 
   /// Applies a complete text-tool style snapshot and notifies listeners.
-  void applyTextToolState(final TextToolState value) {
+  void applyTextToolState(TextToolState value) {
     textToolState.size = value.size;
     textToolState.color = value.color;
     textToolState.fontWeight = value.fontWeight;
@@ -686,7 +686,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Copies the style of [textObject] into the shared text tool state.
-  void adoptTextToolStateFromObject(final TextObject textObject) {
+  void adoptTextToolStateFromObject(TextObject textObject) {
     applyTextToolState(TextToolState.fromTextObject(textObject));
   }
 
@@ -697,7 +697,7 @@ class AppProvider extends ChangeNotifier {
   Offset? get eyeDropPositionForBrush => _eyeDropPositionForBrush;
 
   /// Sets the eye drop position for the brush.
-  set eyeDropPositionForBrush(final Offset? value) {
+  set eyeDropPositionForBrush(Offset? value) {
     final bool activeChanged = (_eyeDropPositionForBrush == null) != (value == null);
     _eyeDropPositionForBrush = value;
     if (activeChanged) {
@@ -713,7 +713,7 @@ class AppProvider extends ChangeNotifier {
   Offset? get eyeDropPositionForFill => _eyeDropPositionForFill;
 
   /// Sets the eye drop position for the fill.
-  set eyeDropPositionForFill(final Offset? value) {
+  set eyeDropPositionForFill(Offset? value) {
     final bool activeChanged = (_eyeDropPositionForFill == null) != (value == null);
     _eyeDropPositionForFill = value;
     if (activeChanged) {
@@ -752,28 +752,28 @@ class AppProvider extends ChangeNotifier {
   TextObject? selectedTextObject;
 
   /// Sets the active fill mode and rebuilds tool options.
-  void setFillMode(final FillMode value) {
+  void setFillMode(FillMode value) {
     fillModel.mode = value;
     repaintToolOptions();
     update();
   }
 
   /// Sets whether flood fill should render as a halftone pattern.
-  void setFillHalftoneEnabled(final bool value) {
+  void setFillHalftoneEnabled(bool value) {
     fillModel.halftoneEnabled = value;
     repaintToolOptions();
     update();
   }
 
   /// Sets the maximum halftone dot size percentage.
-  void setFillHalftoneMaxDotSizePercent(final int value) {
+  void setFillHalftoneMaxDotSizePercent(int value) {
     fillModel.halftoneMaxDotSizePercent = value;
     repaintToolOptions();
     update();
   }
 
   /// Sets the active selector mode and rebuilds tool options.
-  void setSelectorMode(final SelectorMode value) {
+  void setSelectorMode(SelectorMode value) {
     selectorModel.mode = value;
     repaintToolOptions();
     update();
@@ -786,21 +786,21 @@ class AppProvider extends ChangeNotifier {
   bool get isWandSelectionActive => selectedAction == ActionType.selector && selectorModel.mode == SelectorMode.wand;
 
   /// Sets the active selector math mode and rebuilds tool options.
-  void setSelectorMath(final SelectorMath value) {
+  void setSelectorMath(SelectorMath value) {
     selectorModel.math = value;
     repaintToolOptions();
     update();
   }
 
   /// Sets the shared text-tool font size.
-  void setTextToolSize(final double value) {
+  void setTextToolSize(double value) {
     textToolState.size = value;
     repaintToolOptions();
     update();
   }
 
   /// Sets the shared text-tool color.
-  void setTextToolColor(final Color value) {
+  void setTextToolColor(Color value) {
     textToolState.color = value;
     repaintToolOptions();
     update();

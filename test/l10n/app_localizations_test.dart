@@ -6,7 +6,7 @@ import 'package:fpaint/l10n/app_localizations.dart';
 /// Accesses every string property and parameterized method on the given
 /// [AppLocalizations] instance so that the corresponding locale file is
 /// exercised by code-coverage.
-void _exerciseAllStrings(final AppLocalizations l10n) {
+void _exerciseAllStrings(AppLocalizations l10n) {
   // Simple getters ---------------------------------------------------------
   expect(l10n.about, isNotEmpty);
   expect(l10n.addText, isNotEmpty);

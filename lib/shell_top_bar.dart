@@ -65,7 +65,7 @@ class ShellTopBar extends StatelessWidget {
   final ShellProvider shellProvider;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final InteractionLayoutProfile interactionProfile = shellProvider.interactionLayoutProfile;
     final AppLocalizations l10n = context.l10n;
     final Widget leadingToolbarButton = shellProvider.deviceSizeSmall
@@ -132,9 +132,9 @@ class ShellTopBar extends StatelessWidget {
 
 /// Builds the desktop shell control that cycles expanded, narrow, and hidden states.
 Widget _buildDesktopShellCycleButton({
-  required final ShellProvider shellProvider,
-  required final String tooltip,
-  required final InteractionLayoutProfile interactionProfile,
+  required ShellProvider shellProvider,
+  required String tooltip,
+  required InteractionLayoutProfile interactionProfile,
 }) {
   return buildToolbarIconButton(
     key: Keys.floatActionToggle,
@@ -147,7 +147,7 @@ Widget _buildDesktopShellCycleButton({
   );
 }
 
-AppIcon _desktopShellCycleIcon(final ShellProvider shellProvider) {
+AppIcon _desktopShellCycleIcon(ShellProvider shellProvider) {
   if (shellProvider.shellMode == ShellMode.hidden) {
     return AppIcon.menu;
   }
@@ -158,7 +158,7 @@ AppIcon _desktopShellCycleIcon(final ShellProvider shellProvider) {
 }
 
 /// Rotates the desktop shell button through expanded, narrow, and hidden states.
-void _cycleDesktopShellState(final ShellProvider shellProvider) {
+void _cycleDesktopShellState(ShellProvider shellProvider) {
   if (shellProvider.shellMode == ShellMode.hidden) {
     shellProvider.shellMode = ShellMode.full;
     shellProvider.isSidePanelExpanded = true;
@@ -175,16 +175,16 @@ void _cycleDesktopShellState(final ShellProvider shellProvider) {
 
 /// Builds the responsive middle strip for the top toolbar.
 Widget _buildResponsiveToolbarActions(
-  final BuildContext context,
-  final ShellProvider shellProvider,
-  final AppProvider appProvider,
-  final InteractionLayoutProfile interactionProfile,
+  BuildContext context,
+  ShellProvider shellProvider,
+  AppProvider appProvider,
+  InteractionLayoutProfile interactionProfile,
 ) {
   return ListenableBuilder(
     listenable: appProvider.toolbarActionsListenable,
-    builder: (final BuildContext _, final Widget? _) {
+    builder: (BuildContext _, Widget? _) {
       return LayoutBuilder(
-        builder: (final BuildContext _, final BoxConstraints constraints) {
+        builder: (BuildContext _, BoxConstraints constraints) {
           final List<_ToolbarActionEntry> primaryActions = _buildPrimaryToolbarActionEntries(
             context,
             shellProvider,
@@ -240,7 +240,7 @@ Widget _buildResponsiveToolbarActions(
               spacing: interactionProfile.buttonSpacing,
               children: visibleGroups
                   .map<Widget>(
-                    (final _ResolvedToolbarActionGroup group) => _buildResponsiveToolbarGroupWidget(group),
+                    (_ResolvedToolbarActionGroup group) => _buildResponsiveToolbarGroupWidget(group),
                   )
                   .toList(),
             ),
@@ -253,11 +253,11 @@ Widget _buildResponsiveToolbarActions(
 
 /// Builds one responsive toolbar domain, allowing configured domains to scroll
 /// horizontally instead of overflowing the overall toolbar row.
-Widget _buildResponsiveToolbarGroupWidget(final _ResolvedToolbarActionGroup group) {
+Widget _buildResponsiveToolbarGroupWidget(_ResolvedToolbarActionGroup group) {
   final Widget groupWidget = group.usesCustomSurface
       ? group.actions.single.child
       : _buildToolbarButtonGroup(
-          children: group.actions.map((final _ToolbarActionEntry entry) => entry.child).toList(),
+          children: group.actions.map((_ToolbarActionEntry entry) => entry.child).toList(),
           spacing: group.spacing,
         );
 
@@ -270,10 +270,10 @@ Widget _buildResponsiveToolbarGroupWidget(final _ResolvedToolbarActionGroup grou
 
 /// Builds the primary document actions shown on wide desktop toolbars.
 List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
-  final BuildContext context,
-  final ShellProvider shellProvider,
-  final AppProvider appProvider,
-  final InteractionLayoutProfile interactionProfile,
+  BuildContext context,
+  ShellProvider shellProvider,
+  AppProvider appProvider,
+  InteractionLayoutProfile interactionProfile,
 ) {
   final AppLocalizations l10n = context.l10n;
 
@@ -295,7 +295,7 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
         interactionProfile: interactionProfile,
         onPressed: () => showAppBottomSheet<void>(
           context: context,
-          builder: (final BuildContext _) {
+          builder: (BuildContext _) {
             return ImportDialog(parentContext: context);
           },
         ),
@@ -374,24 +374,24 @@ List<_ToolbarActionEntry> _buildPrimaryToolbarActionEntries(
 
 /// Builds the wide desktop toolbar using the dedicated canvas toolbar dock.
 Widget _buildWideDesktopToolbarActions({
-  required final BuildContext context,
-  required final ShellProvider shellProvider,
-  required final AppProvider appProvider,
-  required final List<_ToolbarActionEntry> primaryActions,
+  required BuildContext context,
+  required ShellProvider shellProvider,
+  required AppProvider appProvider,
+  required List<_ToolbarActionEntry> primaryActions,
 }) {
   return buildCanvasToolbarActions(
     context,
     shellProvider,
     appProvider,
     distributeWideGroups: true,
-    primaryActionButtons: primaryActions.map((final _ToolbarActionEntry entry) => entry.child).toList(),
+    primaryActionButtons: primaryActions.map((_ToolbarActionEntry entry) => entry.child).toList(),
   );
 }
 
 /// Filters toolbar actions using the current viewport-level priority floor.
 List<_ToolbarActionEntry> _filterToolbarActionsForViewport({
-  required final List<_ToolbarActionEntry> actions,
-  required final ShellProvider shellProvider,
+  required List<_ToolbarActionEntry> actions,
+  required ShellProvider shellProvider,
 }) {
   if (shellProvider.deviceSizeSmall == false) {
     return actions;
@@ -399,17 +399,17 @@ List<_ToolbarActionEntry> _filterToolbarActionsForViewport({
 
   return actions
       .where(
-        (final _ToolbarActionEntry entry) => entry.importance.index <= _ToolbarActionImportance.medium.index,
+        (_ToolbarActionEntry entry) => entry.importance.index <= _ToolbarActionImportance.medium.index,
       )
       .toList();
 }
 
 /// Builds top-toolbar actions with explicit importance for narrow layouts.
 List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
-  final BuildContext context,
-  final ShellProvider shellProvider,
-  final AppProvider appProvider,
-  final InteractionLayoutProfile interactionProfile,
+  BuildContext context,
+  ShellProvider shellProvider,
+  AppProvider appProvider,
+  InteractionLayoutProfile interactionProfile,
 ) {
   final List<_ToolbarActionEntry> primaryActions = _buildPrimaryToolbarActionEntries(
     context,
@@ -526,8 +526,8 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
 
 /// Estimates the width of [actions] including inter-button spacing.
 double _estimateToolbarActionWidth(
-  final List<_ToolbarActionEntry> actions,
-  final double spacing,
+  List<_ToolbarActionEntry> actions,
+  double spacing,
 ) {
   double requiredWidth = AppMath.zero.toDouble();
 
@@ -542,7 +542,7 @@ double _estimateToolbarActionWidth(
 }
 
 /// Returns the least important action, preferring later actions when tied.
-int _indexOfLeastImportantAction(final List<_ToolbarActionEntry> actions) {
+int _indexOfLeastImportantAction(List<_ToolbarActionEntry> actions) {
   int removalIndex = -AppMath.one;
 
   for (int index = actions.length - AppMath.one; index >= AppMath.zero; index--) {
@@ -560,21 +560,21 @@ int _indexOfLeastImportantAction(final List<_ToolbarActionEntry> actions) {
 /// The [shellProvider] parameter is the [ShellProvider] instance used to manage the application's shell.
 /// The [appProvider] parameter is the [AppProvider] instance used to manage the application's state.
 Widget buildCanvasToolbarActions(
-  final BuildContext context,
-  final ShellProvider shellProvider,
-  final AppProvider appProvider, {
-  final bool distributeWideGroups = false,
-  final List<Widget>? primaryActionButtons,
+  BuildContext context,
+  ShellProvider shellProvider,
+  AppProvider appProvider, {
+  bool distributeWideGroups = false,
+  List<Widget>? primaryActionButtons,
 }) {
   return ListenableBuilder(
     listenable: appProvider.viewportRepaintListenable,
-    builder: (final BuildContext _, final Widget? _) {
+    builder: (BuildContext _, Widget? _) {
       return ListenableBuilder(
         listenable: appProvider,
-        builder: (final BuildContext _, final Widget? _) {
+        builder: (BuildContext _, Widget? _) {
           return ListenableBuilder(
             listenable: appProvider.undoProvider,
-            builder: (final BuildContext _, final Widget? _) {
+            builder: (BuildContext _, Widget? _) {
               final AppLocalizations l10n = context.l10n;
               final InteractionLayoutProfile interactionProfile = shellProvider.interactionLayoutProfile;
               final bool hasActiveSelection =
@@ -708,8 +708,8 @@ Widget buildCanvasToolbarActions(
 
 /// Builds a toolbar button group, collapsing empty groups out of the layout.
 Widget _buildToolbarButtonGroup({
-  required final List<Widget> children,
-  required final double spacing,
+  required List<Widget> children,
+  required double spacing,
 }) {
   if (children.isEmpty) {
     return const SizedBox.shrink();
@@ -726,9 +726,9 @@ Widget _buildToolbarButtonGroup({
 
 /// Builds the small-screen shell control that toggles between hidden and full.
 Widget _buildSmallScreenShellToggleButton({
-  required final ShellProvider shellProvider,
-  required final String tooltip,
-  required final InteractionLayoutProfile interactionProfile,
+  required ShellProvider shellProvider,
+  required String tooltip,
+  required InteractionLayoutProfile interactionProfile,
 }) {
   return buildToolbarIconButton(
     key: Keys.floatActionToggle,
@@ -743,10 +743,10 @@ Widget _buildSmallScreenShellToggleButton({
 
 /// Builds the selector toggle floating action button.
 Widget _buildSelectorToggleButton({
-  required final AppProvider appProvider,
-  required final AppLocalizations l10n,
-  required final bool hasActiveSelection,
-  required final InteractionLayoutProfile interactionProfile,
+  required AppProvider appProvider,
+  required AppLocalizations l10n,
+  required bool hasActiveSelection,
+  required InteractionLayoutProfile interactionProfile,
 }) {
   return buildToolbarIconButton(
     key: Keys.floatActionSelector,
@@ -770,13 +770,13 @@ Widget _buildSelectorToggleButton({
 /// This keeps undo/redo construction in one place so both actions stay in sync
 /// for enabled-state handling, shortcut labeling, and dispatch behavior.
 Widget _buildUndoRedoButton({
-  required final InteractionLayoutProfile interactionProfile,
-  required final bool enabled,
-  required final Key key,
-  required final AppIcon icon,
-  required final String historyLabel,
-  required final String shortcutKey,
-  required final void Function() action,
+  required InteractionLayoutProfile interactionProfile,
+  required bool enabled,
+  required Key key,
+  required AppIcon icon,
+  required String historyLabel,
+  required String shortcutKey,
+  required void Function() action,
 }) {
   return _buildHistoryButton(
     key: key,
@@ -793,12 +793,12 @@ Widget _buildUndoRedoButton({
 
 /// Builds a shared floating action button for undo/redo history actions.
 Widget _buildHistoryButton({
-  required final Key key,
-  required final AppIcon icon,
-  required final String tooltip,
-  required final void Function() action,
-  required final InteractionLayoutProfile interactionProfile,
-  required final bool enabled,
+  required Key key,
+  required AppIcon icon,
+  required String tooltip,
+  required void Function() action,
+  required InteractionLayoutProfile interactionProfile,
+  required bool enabled,
 }) {
   return buildToolbarIconButton(
     key: key,
@@ -814,13 +814,13 @@ Widget _buildHistoryButton({
 
 /// Builds a zoom control button that applies [scaleDelta] around the canvas center.
 Widget _buildZoomButton({
-  required final Key key,
-  required final ShellProvider shellProvider,
-  required final AppProvider appProvider,
-  required final InteractionLayoutProfile interactionProfile,
-  required final String tooltip,
-  required final AppIcon icon,
-  required final double scaleDelta,
+  required Key key,
+  required ShellProvider shellProvider,
+  required AppProvider appProvider,
+  required InteractionLayoutProfile interactionProfile,
+  required String tooltip,
+  required AppIcon icon,
+  required double scaleDelta,
 }) {
   return buildToolbarIconButton(
     key: key,
@@ -841,8 +841,8 @@ Widget _buildZoomButton({
 
 /// Builds the center/fit control that recenter the canvas and displays zoom and size.
 Widget _buildCenterAndDimensionButton(
-  final ShellProvider shellProvider,
-  final AppProvider appProvider,
+  ShellProvider shellProvider,
+  AppProvider appProvider,
 ) {
   final String zoomPercentage = (appProvider.layers.scale * AppLimits.percentMax).toInt().toString();
   final String canvasWidth = appProvider.layers.size.width.toInt().toString();
@@ -875,7 +875,7 @@ Widget _buildCenterAndDimensionButton(
 }
 
 /// Toggles the small-screen shell action between hidden and full states.
-void _toggleSmallScreenShellState(final ShellProvider shellProvider) {
+void _toggleSmallScreenShellState(ShellProvider shellProvider) {
   switch (shellProvider.shellMode) {
     case ShellMode.hidden:
       shellProvider.shellMode = ShellMode.full;

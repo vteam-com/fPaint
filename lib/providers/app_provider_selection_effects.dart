@@ -44,8 +44,8 @@ extension AppProviderSelectionEffects on AppProvider {
 
   /// Updates one or both effect preview controls and re-renders the preview.
   Future<void> _updateEffectPreviewControls({
-    final double? strength,
-    final double? size,
+    double? strength,
+    double? size,
   }) async {
     if (!effectPreviewModel.isVisible) {
       return;
@@ -63,9 +63,9 @@ extension AppProviderSelectionEffects on AppProvider {
 
   /// Re-applies the selection mask so effect output stays inside the region.
   Future<ui.Image> _maskEffectImageToSelection(
-    final ui.Image image, {
-    required final Path selectionPath,
-    required final Rect bounds,
+    ui.Image image, {
+    required Path selectionPath,
+    required Rect bounds,
   }) async {
     final Path localSelectionPath = selectionPath.shift(
       Offset(-bounds.left, -bounds.top),
@@ -74,7 +74,7 @@ extension AppProviderSelectionEffects on AppProvider {
     return renderCanvasImage(
       width: image.width,
       height: image.height,
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.save();
         canvas.clipPath(localSelectionPath, doAntiAlias: true);
         canvas.drawImage(image, Offset.zero, ui.Paint());
@@ -85,7 +85,7 @@ extension AppProviderSelectionEffects on AppProvider {
 
   /// Applies the active effect and re-masks it to the original selection.
   Future<ui.Image> _buildMaskedEffectImage(
-    final _SelectionEffectPreviewState state,
+    _SelectionEffectPreviewState state,
   ) async {
     final ui.Image processedImage = await state.effect.apply(
       state.sourceImage,
@@ -136,9 +136,9 @@ extension AppProviderSelectionEffects on AppProvider {
   /// sheet flow (the Brush section applies effects by painting them, so it does
   /// not use this preview path).
   Future<void> startEffectPreview(
-    final SelectionEffect effect, {
-    final double strength = AppEffects.defaultIntensity,
-    final double? size,
+    SelectionEffect effect, {
+    double strength = AppEffects.defaultIntensity,
+    double? size,
   }) async {
     if (isSelectedLayerLocked) {
       return;
@@ -164,12 +164,12 @@ extension AppProviderSelectionEffects on AppProvider {
   }
 
   /// Updates the active preview intensity and re-renders the effect live.
-  Future<void> updateEffectPreviewStrength(final double strength) async {
+  Future<void> updateEffectPreviewStrength(double strength) async {
     await _updateEffectPreviewControls(strength: strength);
   }
 
   /// Updates the active preview size and re-renders the effect live.
-  Future<void> updateEffectPreviewSize(final double size) async {
+  Future<void> updateEffectPreviewSize(double size) async {
     await _updateEffectPreviewControls(size: size);
   }
 
@@ -226,7 +226,7 @@ extension AppProviderSelectionEffects on AppProvider {
   }
 
   /// Arms [effect] for painting onto the canvas, cancelling any Apply preview.
-  void armEffectBrush(final SelectionEffect effect) {
+  void armEffectBrush(SelectionEffect effect) {
     if (effectPreviewModel.isVisible) {
       effectPreviewModel.clear();
       effectPreviewRenderVersion++;
@@ -244,7 +244,7 @@ extension AppProviderSelectionEffects on AppProvider {
   }
 
   /// Updates the strength used by painted effect strokes.
-  void setEffectBrushStrength(final double strength) {
+  void setEffectBrushStrength(double strength) {
     effectBrushModel.strength = strength;
     repaintToolOptions();
   }
@@ -256,13 +256,13 @@ extension AppProviderSelectionEffects on AppProvider {
   /// Cost scales with the brushed region, not the whole canvas, so this avoids
   /// the full-canvas readback stall a layer-wide filter would incur.
   Future<void> commitEffectBrushStroke({
-    required final SelectionEffect effect,
-    required final double strength,
-    required final double size,
-    required final List<Offset> strokePoints,
-    required final Rect strokeBounds,
-    required final double brushSize,
-    required final Path? clipPath,
+    required SelectionEffect effect,
+    required double strength,
+    required double size,
+    required List<Offset> strokePoints,
+    required Rect strokeBounds,
+    required double brushSize,
+    required Path? clipPath,
   }) async {
     if (isSelectedLayerLocked || strokePoints.isEmpty) {
       return;
@@ -306,7 +306,7 @@ extension AppProviderSelectionEffects on AppProvider {
     final ui.Image patch = await renderCanvasImage(
       width: width,
       height: height,
-      draw: (final ui.Canvas canvas) {
+      draw: (ui.Canvas canvas) {
         canvas.save();
         if (clipPath != null) {
           canvas.clipPath(clipPath.shift(-regionOrigin), doAntiAlias: true);
@@ -346,9 +346,9 @@ extension AppProviderSelectionEffects on AppProvider {
   /// of separated beads. So the quad below winds `a-n → b-n → b+n → a+n` to
   /// match the ovals, NOT the geometrically-natural `a+n → b+n → b-n → a-n`.
   Path _effectBrushBandPath(
-    final List<Offset> strokePoints,
-    final Offset regionOrigin,
-    final double radius,
+    List<Offset> strokePoints,
+    Offset regionOrigin,
+    double radius,
   ) {
     final Path band = Path();
     for (final Offset point in strokePoints) {

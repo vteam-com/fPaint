@@ -19,7 +19,7 @@ class AppOverlaySurface extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     Widget content = child;
 
     if (padding != null) {

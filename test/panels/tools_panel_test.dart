@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -16,6 +15,7 @@ import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_slider.dart';
 import 'package:fpaint/widgets/halftone_size_picker.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -30,8 +30,8 @@ void main() {
   });
 
   Future<void> pumpToolsPanel(
-    final WidgetTester tester, {
-    final bool minimal = false,
+    WidgetTester tester, {
+    bool minimal = false,
   }) async {
     await tester.pumpWidget(
       InheritedControllerScope<LayersProvider>(
@@ -54,14 +54,14 @@ void main() {
   group('ToolsPanel fill halftone slider', () {
     const int halfHalftonePercent = AppLimits.percentMax ~/ AppMath.pair;
 
-    testWidgets('is available for solid and gradient fill modes while disabled', (final WidgetTester tester) async {
+    testWidgets('is available for solid and gradient fill modes while disabled', (WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
       expect(find.byKey(Keys.toolFillHalftoneToggle), findsOneWidget);
       expect(find.byKey(Keys.toolFillHalftoneSlider), findsNothing);
       expect(
         find.byWidgetPredicate(
-          (final Widget widget) => widget is AppButtonIcon && widget.icon == AppIcon.halftone,
+          (Widget widget) => widget is AppButtonIcon && widget.icon == AppIcon.halftone,
         ),
         findsOneWidget,
       );
@@ -80,7 +80,7 @@ void main() {
     });
 
     testWidgets('does not show a second solid color control when halftone is enabled', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       await pumpToolsPanel(tester);
 
@@ -101,7 +101,7 @@ void main() {
       expect(find.byKey(Keys.toolPanelHalftoneDotColor), findsNothing);
     });
 
-    testWidgets('starts disabled with a retained default slider value', (final WidgetTester tester) async {
+    testWidgets('starts disabled with a retained default slider value', (WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
       expect(appProvider.fillModel.halftoneMaxDotSizePercent, AppHalftone.defaultDotSizePercent);
@@ -118,7 +118,7 @@ void main() {
       expect(halftoneSlider.onChanged, isNotNull);
     });
 
-    testWidgets('retains the slider value when halftone is toggled off', (final WidgetTester tester) async {
+    testWidgets('retains the slider value when halftone is toggled off', (WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
       await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
@@ -150,7 +150,7 @@ void main() {
   });
 
   group('ToolsPanel minimal picker branding', () {
-    testWidgets('shows the brush-size icon in the bottom-sheet header', (final WidgetTester tester) async {
+    testWidgets('shows the brush-size icon in the bottom-sheet header', (WidgetTester tester) async {
       appProvider.selectedAction = ActionType.brush;
 
       await pumpToolsPanel(tester, minimal: true);
@@ -163,21 +163,21 @@ void main() {
         find.descendant(
           of: find.byType(AppBottomSheetContent),
           matching: find.byWidgetPredicate(
-            (final Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.lineWeight,
+            (Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.lineWeight,
           ),
         ),
         findsOneWidget,
       );
     });
 
-    testWidgets('shows and drives the halftone toggle inside the bottom sheet', (final WidgetTester tester) async {
+    testWidgets('shows and drives the halftone toggle inside the bottom sheet', (WidgetTester tester) async {
       await pumpToolsPanel(tester, minimal: true);
 
       expect(appProvider.fillModel.halftoneEnabled, isFalse);
 
       await tester.tap(
         find.byWidgetPredicate(
-          (final Widget widget) => widget is AppButtonIcon && widget.icon == AppIcon.halftone,
+          (Widget widget) => widget is AppButtonIcon && widget.icon == AppIcon.halftone,
         ),
       );
       await tester.pumpAndSettle();
@@ -215,7 +215,7 @@ void main() {
   });
 
   group('ToolsPanel smudge tool', () {
-    testWidgets('selects smudge and keeps size and intensity controls available', (final WidgetTester tester) async {
+    testWidgets('selects smudge and keeps size and intensity controls available', (WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
       await tester.tap(find.byKey(Keys.toolSmudge));
@@ -228,7 +228,7 @@ void main() {
       expect(find.byKey(Keys.toolBrushIntensitySlider), findsOneWidget);
     });
 
-    testWidgets('updates smudge intensity from the inline slider', (final WidgetTester tester) async {
+    testWidgets('updates smudge intensity from the inline slider', (WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
       appProvider.selectedAction = ActionType.smudge;
@@ -242,7 +242,7 @@ void main() {
     });
 
     testWidgets('updates tool button selection when selectedAction changes externally', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       await pumpToolsPanel(tester);
 
@@ -259,7 +259,7 @@ void main() {
 
   group('ToolsPanel Brush section', () {
     testWidgets('tapping an effect arms it as a brush and reveals its controls', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       await pumpToolsPanel(tester);
 
@@ -286,7 +286,7 @@ void main() {
     });
 
     testWidgets('arming an effect deselects the gesture tool; picking one disarms it', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       await pumpToolsPanel(tester);
 
@@ -312,7 +312,7 @@ void main() {
 
   group('ToolsPanel sections', () {
     testWidgets('selection clipboard actions are not shown in side panel', (
-      final WidgetTester tester,
+      WidgetTester tester,
     ) async {
       await pumpToolsPanel(tester);
 
@@ -329,7 +329,7 @@ void main() {
       expect(find.byKey(Keys.toolSelectorCut), findsNothing);
     });
 
-    testWidgets('selection mode buttons are not shown in side panel', (final WidgetTester tester) async {
+    testWidgets('selection mode buttons are not shown in side panel', (WidgetTester tester) async {
       await pumpToolsPanel(tester);
 
       expect(find.byKey(Keys.toolSelectorModeCircle), findsNothing);
@@ -339,7 +339,7 @@ void main() {
       expect(find.byKey(Keys.toolSelectorModeWand), findsNothing);
     });
 
-    testWidgets('selection dismiss button is not shown in side panel', (final WidgetTester tester) async {
+    testWidgets('selection dismiss button is not shown in side panel', (WidgetTester tester) async {
       appProvider.selectedAction = ActionType.smudge;
       appProvider.activateSelectionAction();
       appProvider.setSelectorMode(SelectorMode.circle);
@@ -351,7 +351,7 @@ void main() {
       expect(find.byKey(Keys.toolSelectorCancel), findsNothing);
     });
 
-    testWidgets('selection section no longer renders side-panel selector row', (final WidgetTester tester) async {
+    testWidgets('selection section no longer renders side-panel selector row', (WidgetTester tester) async {
       appProvider.selectedAction = ActionType.selector;
       appProvider.selectorModel.isVisible = true;
       appProvider.selectorModel.path1 = Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10));

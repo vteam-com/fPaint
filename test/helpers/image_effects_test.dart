@@ -2,10 +2,10 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_effects.dart';
+import 'package:material_ui/material_ui.dart';
 
 const int _testImageWidth = 50;
 const int _testImageHeight = 50;
@@ -15,9 +15,9 @@ const double _halfStrength = 0.5;
 
 /// Creates a solid-color test image.
 Future<ui.Image> _createTestImage({
-  final Color color = Colors.red,
-  final int width = _testImageWidth,
-  final int height = _testImageHeight,
+  Color color = Colors.red,
+  int width = _testImageWidth,
+  int height = _testImageHeight,
 }) async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
   Canvas(recorder).drawRect(
@@ -63,7 +63,7 @@ Future<ui.Image> _createTransparentBorderImage() async {
   );
 }
 
-Future<Uint8List> _imageBytes(final ui.Image image) async {
+Future<Uint8List> _imageBytes(ui.Image image) async {
   final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
   expect(byteData, isNotNull);
   return byteData!.buffer.asUint8List();

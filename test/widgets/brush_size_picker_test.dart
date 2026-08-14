@@ -1,14 +1,14 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart';
 
 void main() {
   group('BrushSizePicker Widget Tests', () {
-    testWidgets('Initial rendering reflects input properties', (final WidgetTester tester) async {
+    testWidgets('Initial rendering reflects input properties', (WidgetTester tester) async {
       const String title = 'Test Brush Size';
       const double initialValue = 15.0;
       const double minValue = 1.0;
@@ -22,7 +22,7 @@ void main() {
               value: initialValue,
               min: minValue,
               max: maxValue,
-              onChanged: (final double value) {},
+              onChanged: (double value) {},
             ),
           ),
         ),
@@ -39,14 +39,14 @@ void main() {
       expect(sliderWidget.max, maxValue);
     });
 
-    testWidgets('Slider interaction calls onChanged and updates UI', (final WidgetTester tester) async {
+    testWidgets('Slider interaction calls onChanged and updates UI', (WidgetTester tester) async {
       const String title = 'My Size';
       double currentValue = 20.0;
       double? reportedValue;
 
       await tester.pumpWidget(
         StatefulBuilder(
-          builder: (final BuildContext context, final StateSetter setState) {
+          builder: (BuildContext context, StateSetter setState) {
             return MaterialApp(
               home: Scaffold(
                 body: BrushSizePicker(
@@ -54,7 +54,7 @@ void main() {
                   value: currentValue,
                   min: 5.0,
                   max: 50.0,
-                  onChanged: (final double value) {
+                  onChanged: (double value) {
                     setState(() {
                       currentValue = value; // Simulate parent updating the state
                       reportedValue = value;
@@ -94,7 +94,7 @@ void main() {
       expect(finalSliderWidget.value, 35.5);
     });
 
-    testWidgets('didUpdateWidget updates slider if value changes', (final WidgetTester tester) async {
+    testWidgets('didUpdateWidget updates slider if value changes', (WidgetTester tester) async {
       double value = 10.0;
       await tester.pumpWidget(
         MaterialApp(
@@ -104,7 +104,7 @@ void main() {
               value: value,
               min: 1.0,
               max: 50.0,
-              onChanged: (final double v) {},
+              onChanged: (double v) {},
             ),
           ),
         ),
@@ -125,7 +125,7 @@ void main() {
               value: value,
               min: 1.0,
               max: 50.0,
-              onChanged: (final double v) {},
+              onChanged: (double v) {},
             ),
           ),
         ),
@@ -137,7 +137,7 @@ void main() {
       expect(find.text('25.0'), findsOneWidget);
     });
 
-    testWidgets('Value is clamped to min/max on init and update', (final WidgetTester tester) async {
+    testWidgets('Value is clamped to min/max on init and update', (WidgetTester tester) async {
       // Test clamping on initial build
       await tester.pumpWidget(
         MaterialApp(
@@ -147,7 +147,7 @@ void main() {
               value: 0.0, // Below min
               min: 5.0,
               max: 20.0,
-              onChanged: (final double v) {},
+              onChanged: (double v) {},
             ),
           ),
         ),
@@ -165,7 +165,7 @@ void main() {
               value: 30.0, // Above max
               min: 5.0,
               max: 20.0,
-              onChanged: (final double v) {},
+              onChanged: (double v) {},
             ),
           ),
         ),
@@ -184,7 +184,7 @@ void main() {
               value: 10.0,
               min: 5.0,
               max: 20.0,
-              onChanged: (final double v) {},
+              onChanged: (double v) {},
             ),
           ),
         ),
@@ -201,7 +201,7 @@ void main() {
               value: 3.0,
               min: 4.0, // New min
               max: 20.0,
-              onChanged: (final double v) {},
+              onChanged: (double v) {},
             ),
           ),
         ),
@@ -214,7 +214,7 @@ void main() {
   });
 
   group('showBrushSizePicker Utility', () {
-    testWidgets('showBrushSizePicker calls showDialog with BrushSizePicker', (final WidgetTester tester) async {
+    testWidgets('showBrushSizePicker calls showDialog with BrushSizePicker', (WidgetTester tester) async {
       double changedValue = 0;
       const Key titleIconKey = Key('brush_size_picker_title_icon');
 
@@ -224,7 +224,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
-              builder: (final BuildContext context) {
+              builder: (BuildContext context) {
                 return AppButtonPrimary(
                   onPressed: () {
                     showBrushSizePicker(
@@ -237,7 +237,7 @@ void main() {
                       value: 25.0,
                       min: 1.0,
                       max: 50.0,
-                      onChanged: (final double value) {
+                      onChanged: (double value) {
                         changedValue = value;
                       },
                     );
@@ -257,7 +257,7 @@ void main() {
       expect(find.text('Select Dialog Test'), findsOneWidget); // Dialog title
       expect(
         find.byWidgetPredicate(
-          (final Widget widget) => widget is AppSvgIcon && widget.key == titleIconKey,
+          (Widget widget) => widget is AppSvgIcon && widget.key == titleIconKey,
         ),
         findsOneWidget,
       );

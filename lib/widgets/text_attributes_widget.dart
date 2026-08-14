@@ -24,7 +24,7 @@ class TextAttributesWidget extends StatelessWidget {
   final bool minimal;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppProvider appProvider = AppProvider.of(context);
     final AppLocalizations l10n = context.l10n;
 
@@ -47,7 +47,7 @@ class TextAttributesWidget extends StatelessWidget {
                 value: appProvider.textToolState.size,
                 min: 1,
                 max: AppLimits.brushSizeMax.toDouble(),
-                onChanged: (final double newValue) {
+                onChanged: (double newValue) {
                   appProvider.setTextToolSize(newValue);
                 },
               );
@@ -60,7 +60,7 @@ class TextAttributesWidget extends StatelessWidget {
                   value: appProvider.textToolState.size,
                   min: 1,
                   max: AppLimits.brushSizeMax.toDouble(),
-                  onChanged: (final double value) {
+                  onChanged: (double value) {
                     appProvider.setTextToolSize(value);
                   },
                 ),
@@ -78,7 +78,7 @@ class TextAttributesWidget extends StatelessWidget {
               : TextAlignmentDropdown(
                   l10n: l10n,
                   value: appProvider.textToolState.textAlign,
-                  onChanged: (final TextAlign value) {
+                  onChanged: (TextAlign value) {
                     final TextToolState nextValue = appProvider.textToolState.copy();
                     nextValue.textAlign = value;
                     appProvider.applyTextToolState(nextValue);
@@ -99,7 +99,7 @@ class TextAttributesWidget extends StatelessWidget {
                 context: context,
                 title: l10n.fontColor,
                 color: appProvider.textToolState.color,
-                onSelectedColor: (final Color color) {
+                onSelectedColor: (Color color) {
                   appProvider.setTextToolColor(color);
                 },
               );
@@ -109,7 +109,7 @@ class TextAttributesWidget extends StatelessWidget {
               ? null
               : ColorSelector(
                   color: appProvider.textToolState.color,
-                  onColorChanged: (final Color color) {
+                  onColorChanged: (Color color) {
                     appProvider.setTextToolColor(color);
                   },
                 ),

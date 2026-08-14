@@ -7,7 +7,6 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
@@ -34,6 +33,7 @@ import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/tolerance_picker.dart';
 import 'package:fpaint/widgets/top_colors.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/painting_test_helpers.dart';
@@ -384,10 +384,10 @@ const String _finalTiffFilename = 'final.tif';
 const String _finalWebpFilename = 'final.webp';
 
 Offset _transformBirdPoint(
-  final Offset topLeft,
-  final Offset point, {
-  required final double scale,
-  required final double rotationRadians,
+  Offset topLeft,
+  Offset point, {
+  required double scale,
+  required double rotationRadians,
 }) {
   final Offset centeredPoint = point - _birdPivot;
   final Offset scaledPoint = Offset(
@@ -405,12 +405,12 @@ Offset _transformBirdPoint(
 }
 
 Future<void> _drawBird(
-  final WidgetTester tester, {
-  required final Offset canvasCenter,
-  required final Offset topLeftOffset,
-  required final double scale,
-  required final double rotationRadians,
-  required final double brushSize,
+  WidgetTester tester, {
+  required Offset canvasCenter,
+  required Offset topLeftOffset,
+  required double scale,
+  required double rotationRadians,
+  required double brushSize,
 }) async {
   final Offset birdTopLeft = canvasCenter + topLeftOffset;
 
@@ -453,9 +453,9 @@ class PaintingScenarioSession {
 }
 
 Future<void> _setLayerVisibilityByName(
-  final WidgetTester tester, {
-  required final String layerName,
-  required final bool isVisible,
+  WidgetTester tester, {
+  required String layerName,
+  required bool isVisible,
 }) async {
   final BuildContext context = tester.element(find.byType(MainView));
   final LayersProvider layersProvider = LayersProvider.of(context);
@@ -480,7 +480,7 @@ class _ScenarioPhaseTiming {
   final Duration duration;
 }
 
-String _formatScenarioDuration(final Duration duration) {
+String _formatScenarioDuration(Duration duration) {
   final int minutes = duration.inMinutes;
   final int seconds = duration.inSeconds.remainder(_scenarioTimingSecondsPerMinute);
   final int milliseconds = duration.inMilliseconds.remainder(_scenarioTimingMillisecondsPerSecond);
@@ -488,9 +488,9 @@ String _formatScenarioDuration(final Duration duration) {
 }
 
 Future<void> _runTimedScenarioPhase(
-  final List<_ScenarioPhaseTiming> phaseTimings, {
-  required final String label,
-  required final Future<void> Function() phase,
+  List<_ScenarioPhaseTiming> phaseTimings, {
+  required String label,
+  required Future<void> Function() phase,
 }) async {
   final Stopwatch stopwatch = Stopwatch()..start();
   await phase();
@@ -507,9 +507,9 @@ Future<void> _runTimedScenarioPhase(
 }
 
 Future<T> _runTimedScenarioPhaseWithValue<T>(
-  final List<_ScenarioPhaseTiming> phaseTimings, {
-  required final String label,
-  required final Future<T> Function() phase,
+  List<_ScenarioPhaseTiming> phaseTimings, {
+  required String label,
+  required Future<T> Function() phase,
 }) async {
   final Stopwatch stopwatch = Stopwatch()..start();
   final T value = await phase();
@@ -527,12 +527,12 @@ Future<T> _runTimedScenarioPhaseWithValue<T>(
 }
 
 void _printScenarioTimingSummary(
-  final List<_ScenarioPhaseTiming> phaseTimings, {
-  required final Duration totalDuration,
+  List<_ScenarioPhaseTiming> phaseTimings, {
+  required Duration totalDuration,
 }) {
   final List<_ScenarioPhaseTiming> sortedTimings = List<_ScenarioPhaseTiming>.from(phaseTimings)
     ..sort(
-      (final _ScenarioPhaseTiming left, final _ScenarioPhaseTiming right) => right.duration.compareTo(left.duration),
+      (_ScenarioPhaseTiming left, _ScenarioPhaseTiming right) => right.duration.compareTo(left.duration),
     );
 
   debugPrint(
@@ -551,7 +551,7 @@ void main() {
 
   group('Painting Scenario (Unit Test)', () {
     /// Painting scenario runs entirely in unit tests without a simulator
-    testWidgets('Draw house', (final WidgetTester tester) async {
+    testWidgets('Draw house', (WidgetTester tester) async {
       // ---------------------------------------------------------------
       // Boot the full app — no simulator, no emulator, just widget test
       // ---------------------------------------------------------------

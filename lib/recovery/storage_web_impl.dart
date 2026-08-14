@@ -24,5 +24,5 @@ class _WebDraftRecoveryStorage implements DraftRecoveryStorage {
   }
 
   @override
-  Future<void> writeDraft(final Uint8List bytes) async {}
+  Future<void> writeDraft(Uint8List bytes) async {}
 }

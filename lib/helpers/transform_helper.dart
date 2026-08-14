@@ -26,11 +26,11 @@ const int _leftEdgeMidpointIndex = 3;
 /// [corners] The 4 destination corners in order: topLeft, topRight, bottomRight, bottomLeft.
 /// [subdivisions] The number of grid subdivisions for rendering quality.
 void drawPerspectiveImage(
-  final Canvas canvas,
-  final ui.Image image,
-  final List<Offset> corners,
-  final int subdivisions, {
-  final List<Offset>? edgeMidpoints,
+  Canvas canvas,
+  ui.Image image,
+  List<Offset> corners,
+  int subdivisions, {
+  List<Offset>? edgeMidpoints,
 }) {
   final double imageWidth = image.width.toDouble();
   final double imageHeight = image.height.toDouble();
@@ -108,10 +108,10 @@ void drawPerspectiveImage(
 /// [corners] The 4 destination corners in canvas coordinates.
 /// [subdivisions] The number of grid subdivisions for rendering quality.
 Future<ui.Image> renderTransformedImage(
-  final ui.Image sourceImage,
-  final List<Offset> corners,
-  final int subdivisions, {
-  final List<Offset>? edgeMidpoints,
+  ui.Image sourceImage,
+  List<Offset> corners,
+  int subdivisions, {
+  List<Offset>? edgeMidpoints,
 }) async {
   final List<Offset> controlPoints = <Offset>[
     ...corners,
@@ -134,7 +134,7 @@ Future<ui.Image> renderTransformedImage(
   return renderCanvasImage(
     width: max(1, width.ceil()),
     height: max(1, height.ceil()),
-    draw: (final ui.Canvas canvas) {
+    draw: (ui.Canvas canvas) {
       // Translate so the quad's top-left is at (0,0)
       canvas.translate(-minX, -minY);
 
@@ -151,9 +151,9 @@ Future<ui.Image> renderTransformedImage(
 
 /// Bilinear interpolates a point inside the quad defined by [corners].
 Offset _interpolateBilinear({
-  required final List<Offset> corners,
-  required final double u,
-  required final double v,
+  required List<Offset> corners,
+  required double u,
+  required double v,
 }) {
   final double topX =
       corners[_topLeftCornerIndex].dx + (corners[_topRightCornerIndex].dx - corners[_topLeftCornerIndex].dx) * u;
@@ -178,10 +178,10 @@ Offset _interpolateBilinear({
 /// top, right, bottom, and left edge controls instead of collapsing them back
 /// to straight corner-to-corner edges.
 Offset _interpolateCoonsPatch({
-  required final List<Offset> corners,
-  required final List<Offset> edgeMidpoints,
-  required final double u,
-  required final double v,
+  required List<Offset> corners,
+  required List<Offset> edgeMidpoints,
+  required double u,
+  required double v,
 }) {
   final Offset topPoint = _interpolatePiecewiseLinear(
     start: corners[_topLeftCornerIndex],
@@ -220,10 +220,10 @@ Offset _interpolateCoonsPatch({
 
 /// Interpolates along one boundary segment split into start-midpoint-end spans.
 Offset _interpolatePiecewiseLinear({
-  required final Offset start,
-  required final Offset midpoint,
-  required final Offset end,
-  required final double t,
+  required Offset start,
+  required Offset midpoint,
+  required Offset end,
+  required double t,
 }) {
   if (t <= AppVisual.half) {
     return Offset.lerp(start, midpoint, t / AppVisual.half)!;
@@ -240,8 +240,8 @@ const MethodChannel _hapticChannel = MethodChannel('com.vteam.fpaint/haptic');
 /// [previousDegrees] is the rotation before the latest delta was applied.
 /// [currentDegrees] is the rotation after.
 void triggerRotationSnapHaptic(
-  final double previousDegrees,
-  final double currentDegrees,
+  double previousDegrees,
+  double currentDegrees,
 ) {
   const double interval = AppMath.rotationSnapInterval;
 
@@ -260,8 +260,8 @@ void triggerRotationSnapHaptic(
 /// [previousPercent] is the scale percentage before the latest factor was applied.
 /// [currentPercent] is the scale percentage after.
 void triggerScaleSnapHaptic(
-  final double previousPercent,
-  final double currentPercent,
+  double previousPercent,
+  double currentPercent,
 ) {
   const double interval = AppMath.scaleSnapInterval;
 
@@ -280,8 +280,8 @@ void triggerScaleSnapHaptic(
 /// Triggers when the sign of `width − height` changes between
 /// [previousBounds] and [currentBounds].
 void triggerSquareSnapHaptic(
-  final Rect previousBounds,
-  final Rect currentBounds,
+  Rect previousBounds,
+  Rect currentBounds,
 ) {
   final double prevDiff = previousBounds.width - previousBounds.height;
   final double currDiff = currentBounds.width - currentBounds.height;
@@ -296,8 +296,8 @@ void triggerSquareSnapHaptic(
 /// of [AppMath.wandToleranceSnapInterval] while dragging, so the drag feels
 /// notched without buzzing on every single unit.
 void triggerWandToleranceHaptic(
-  final int previousTolerance,
-  final int currentTolerance,
+  int previousTolerance,
+  int currentTolerance,
 ) {
   const int interval = AppMath.wandToleranceSnapInterval;
   if ((previousTolerance ~/ interval) != (currentTolerance ~/ interval)) {

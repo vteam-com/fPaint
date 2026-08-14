@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
@@ -11,6 +10,7 @@ import 'package:fpaint/widgets/color_preview.dart';
 import 'package:fpaint/widgets/color_selector.dart';
 import 'package:fpaint/widgets/color_wheel_selector.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart';
 
 const List<Color> _presetColors = <Color>[
   AppColors.black,
@@ -25,9 +25,9 @@ const List<Color> _presetColors = <Color>[
 ];
 
 Widget _buildTestWidget({
-  required final Color initialColor,
-  required final ValueChanged<Color> onColorChanged,
-  final bool small = false,
+  required Color initialColor,
+  required ValueChanged<Color> onColorChanged,
+  bool small = false,
 }) {
   final ShellProvider shellProvider = ShellProvider()..deviceSizeSmall = small;
   final LayersProvider layersProvider = LayersProvider();
@@ -52,56 +52,56 @@ Widget _buildTestWidget({
 
 void main() {
   group('ColorPickerDialog', () {
-    testWidgets('renders and shows preset colors', (final WidgetTester tester) async {
+    testWidgets('renders and shows preset colors', (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildTestWidget(
           initialColor: Colors.red,
-          onColorChanged: (final Color _) {},
+          onColorChanged: (Color _) {},
         ),
       );
       await tester.pump();
 
       final Finder presetPreviews = find.byWidgetPredicate(
-        (final Widget widget) => widget is ColorPreview && widget.minimal && _presetColors.contains(widget.color),
+        (Widget widget) => widget is ColorPreview && widget.minimal && _presetColors.contains(widget.color),
       );
 
       expect(presetPreviews, findsNWidgets(_presetColors.length));
     });
 
-    testWidgets('tapping preset color updates state', (final WidgetTester tester) async {
+    testWidgets('tapping preset color updates state', (WidgetTester tester) async {
       // ignore: unused_local_variable
       Color? result;
       await tester.pumpWidget(
         _buildTestWidget(
           initialColor: Colors.red,
-          onColorChanged: (final Color c) => result = c,
+          onColorChanged: (Color c) => result = c,
         ),
       );
       await tester.pump();
 
       final Finder presetPreviews = find.byWidgetPredicate(
-        (final Widget widget) => widget is ColorPreview && widget.minimal && _presetColors.contains(widget.color),
+        (Widget widget) => widget is ColorPreview && widget.minimal && _presetColors.contains(widget.color),
       );
       expect(presetPreviews, findsNWidgets(_presetColors.length));
 
       await tester.tap(
         find.byWidgetPredicate(
-          (final Widget widget) => widget is ColorPreview && widget.minimal && widget.color == AppColors.orange,
+          (Widget widget) => widget is ColorPreview && widget.minimal && widget.color == AppColors.orange,
         ),
       );
       await tester.pump();
 
       final ColorPreview preview = tester.widget<ColorPreview>(
-        find.byWidgetPredicate((final Widget widget) => widget is ColorPreview && widget.minimal == false).first,
+        find.byWidgetPredicate((Widget widget) => widget is ColorPreview && widget.minimal == false).first,
       );
       expect(preview.color, AppColors.orange);
     });
 
-    testWidgets('typing hex value updates color', (final WidgetTester tester) async {
+    testWidgets('typing hex value updates color', (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildTestWidget(
           initialColor: Colors.red,
-          onColorChanged: (final Color _) {},
+          onColorChanged: (Color _) {},
         ),
       );
       await tester.pump();
@@ -115,11 +115,11 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets('copy button copies hex to clipboard', (final WidgetTester tester) async {
+    testWidgets('copy button copies hex to clipboard', (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildTestWidget(
           initialColor: Colors.blue,
-          onColorChanged: (final Color _) {},
+          onColorChanged: (Color _) {},
         ),
       );
       await tester.pump();
@@ -135,11 +135,11 @@ void main() {
       await tester.pump(const Duration(seconds: 5));
     });
 
-    testWidgets('small device renders full screen layout', (final WidgetTester tester) async {
+    testWidgets('small device renders full screen layout', (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildTestWidget(
           initialColor: Colors.green,
-          onColorChanged: (final Color _) {},
+          onColorChanged: (Color _) {},
           small: true,
         ),
       );
@@ -149,11 +149,11 @@ void main() {
       expect(find.byType(ColorPickerDialog), findsOneWidget);
     });
 
-    testWidgets('toggle switches between slider and wheel pickers', (final WidgetTester tester) async {
+    testWidgets('toggle switches between slider and wheel pickers', (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildTestWidget(
           initialColor: Colors.red,
-          onColorChanged: (final Color _) {},
+          onColorChanged: (Color _) {},
         ),
       );
       await tester.pump();
@@ -174,11 +174,11 @@ void main() {
       expect(find.byType(ColorWheelSelector), findsNothing);
     });
 
-    testWidgets('wheel picker updates the selected color', (final WidgetTester tester) async {
+    testWidgets('wheel picker updates the selected color', (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildTestWidget(
           initialColor: Colors.red,
-          onColorChanged: (final Color _) {},
+          onColorChanged: (Color _) {},
         ),
       );
       await tester.pump();
@@ -202,7 +202,7 @@ void main() {
       final ColorPreview preview = tester.widget<ColorPreview>(
         find
             .byWidgetPredicate(
-              (final Widget widget) => widget is ColorPreview && widget.minimal == false,
+              (Widget widget) => widget is ColorPreview && widget.minimal == false,
             )
             .first,
       );
@@ -213,11 +213,11 @@ void main() {
       expect(previewHsl.saturation, greaterThan(AppVisual.half));
     });
 
-    testWidgets('wheel triangle updates value and saturation', (final WidgetTester tester) async {
+    testWidgets('wheel triangle updates value and saturation', (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildTestWidget(
           initialColor: Colors.red,
-          onColorChanged: (final Color _) {},
+          onColorChanged: (Color _) {},
         ),
       );
       await tester.pump();
@@ -241,7 +241,7 @@ void main() {
       final ColorPreview preview = tester.widget<ColorPreview>(
         find
             .byWidgetPredicate(
-              (final Widget widget) => widget is ColorPreview && widget.minimal == false,
+              (Widget widget) => widget is ColorPreview && widget.minimal == false,
             )
             .first,
       );
@@ -252,11 +252,11 @@ void main() {
       expect(previewHsv.value, greaterThan(0.5));
     });
 
-    testWidgets('cancel pops dialog', (final WidgetTester tester) async {
+    testWidgets('cancel pops dialog', (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildTestWidget(
           initialColor: Colors.red,
-          onColorChanged: (final Color _) {},
+          onColorChanged: (Color _) {},
         ),
       );
       await tester.pump();
@@ -267,11 +267,11 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets('paste reads clipboard hex', (final WidgetTester tester) async {
+    testWidgets('paste reads clipboard hex', (WidgetTester tester) async {
       // Mock clipboard to return a hex color string.
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
         SystemChannels.platform,
-        (final MethodCall methodCall) async {
+        (MethodCall methodCall) async {
           if (methodCall.method == 'Clipboard.getData') {
             return <String, dynamic>{'text': '#FF00FF'};
           }
@@ -282,7 +282,7 @@ void main() {
       await tester.pumpWidget(
         _buildTestWidget(
           initialColor: Colors.red,
-          onColorChanged: (final Color _) {},
+          onColorChanged: (Color _) {},
         ),
       );
       await tester.pump();

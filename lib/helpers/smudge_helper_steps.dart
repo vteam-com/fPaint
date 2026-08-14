@@ -9,14 +9,14 @@ part of 'smudge_helper.dart';
 ///
 /// Returns `true` when at least one pixel was modified.
 bool _applySmudgeStep({
-  required final Uint8List pixels,
-  required final int imageWidth,
-  required final int imageHeight,
-  required final Offset fromCenter,
-  required final Offset toCenter,
-  required final double radius,
-  required final double intensity,
-  required final Uint8List? clipMask,
+  required Uint8List pixels,
+  required int imageWidth,
+  required int imageHeight,
+  required Offset fromCenter,
+  required Offset toCenter,
+  required double radius,
+  required double intensity,
+  required Uint8List? clipMask,
 }) {
   final double radiusSquared = radius * radius;
   final int integerRadius = radius.ceil() + AppInteraction.smudgeBoundsPadding;
@@ -156,12 +156,12 @@ bool _applySmudgeStep({
 ///
 /// Shared by the directional smudge step and the radial press dab.
 bool _blendPremultipliedSample({
-  required final Uint8List pixels,
-  required final Uint8List snapshot,
-  required final int destinationIndex,
-  required final int destinationSnapshotIndex,
-  required final int sourceSnapshotIndex,
-  required final double blend,
+  required Uint8List pixels,
+  required Uint8List snapshot,
+  required int destinationIndex,
+  required int destinationSnapshotIndex,
+  required int sourceSnapshotIndex,
+  required double blend,
 }) {
   final int srcAlpha = snapshot[sourceSnapshotIndex + AppMath.rgbChannelAlpha];
   final int dstAlpha = snapshot[destinationSnapshotIndex + AppMath.rgbChannelAlpha];
@@ -199,13 +199,13 @@ bool _blendPremultipliedSample({
 /// blended in premultiplied space. Returns `true` when at least one pixel was
 /// modified.
 bool _applyPressStep({
-  required final Uint8List pixels,
-  required final int imageWidth,
-  required final int imageHeight,
-  required final Offset center,
-  required final double radius,
-  required final double intensity,
-  required final Uint8List? clipMask,
+  required Uint8List pixels,
+  required int imageWidth,
+  required int imageHeight,
+  required Offset center,
+  required double radius,
+  required double intensity,
+  required Uint8List? clipMask,
 }) {
   final double radiusSquared = radius * radius;
   final int integerRadius = radius.ceil() + AppInteraction.smudgeBoundsPadding;
@@ -312,13 +312,13 @@ bool _applyPressStep({
 /// Uses a small kernel average sampled from the current [pixels] buffer.
 /// Returns `true` when at least one pixel was modified.
 bool _applyBlurStep({
-  required final Uint8List pixels,
-  required final int imageWidth,
-  required final int imageHeight,
-  required final Offset center,
-  required final double radius,
-  required final double intensity,
-  required final Uint8List? clipMask,
+  required Uint8List pixels,
+  required int imageWidth,
+  required int imageHeight,
+  required Offset center,
+  required double radius,
+  required double intensity,
+  required Uint8List? clipMask,
 }) {
   final double radiusSquared = radius * radius;
   final int intRadius = radius.ceil();
@@ -462,9 +462,9 @@ bool _applyBlurStep({
 
 /// Creates a binary alpha mask for [clipPath] that matches the source image size.
 Future<Uint8List?> createPixelBrushClipMask({
-  required final int width,
-  required final int height,
-  required final ui.Path? clipPath,
+  required int width,
+  required int height,
+  required ui.Path? clipPath,
 }) async {
   if (clipPath == null) {
     return null;
@@ -473,7 +473,7 @@ Future<Uint8List?> createPixelBrushClipMask({
   final ui.Image maskImage = await renderCanvasImage(
     width: width,
     height: height,
-    draw: (final ui.Canvas canvas) {
+    draw: (ui.Canvas canvas) {
       canvas.drawPath(
         clipPath,
         ui.Paint()..color = AppColors.white,
@@ -485,12 +485,12 @@ Future<Uint8List?> createPixelBrushClipMask({
 
 /// Copies a rectangular subset of [pixels] into a packed RGBA byte array.
 Uint8List _copyPixelRect({
-  required final Uint8List pixels,
-  required final int imageWidth,
-  required final int left,
-  required final int top,
-  required final int width,
-  required final int height,
+  required Uint8List pixels,
+  required int imageWidth,
+  required int left,
+  required int top,
+  required int width,
+  required int height,
 }) {
   final Uint8List result = Uint8List(width * height * AppMath.bytesPerPixel);
   final int rowByteCount = width * AppMath.bytesPerPixel;
@@ -515,13 +515,13 @@ Uint8List _copyPixelRect({
 
 /// Writes a rectangular sub-buffer back into [destination] at [left]/[top].
 void _writePixelRect({
-  required final Uint8List source,
-  required final Uint8List destination,
-  required final int imageWidth,
-  required final int left,
-  required final int top,
-  required final int width,
-  required final int height,
+  required Uint8List source,
+  required Uint8List destination,
+  required int imageWidth,
+  required int left,
+  required int top,
+  required int width,
+  required int height,
 }) {
   final int rowByteCount = width * AppMath.bytesPerPixel;
   for (int row = AppMath.zero; row < height; row++) {
@@ -542,10 +542,10 @@ void _writePixelRect({
 
 /// Returns whether [clipMask] includes the given pixel coordinate.
 bool _isMaskVisible(
-  final Uint8List? clipMask,
-  final int imageWidth,
-  final int x,
-  final int y,
+  Uint8List? clipMask,
+  int imageWidth,
+  int x,
+  int y,
 ) {
   if (clipMask == null) {
     return true;
@@ -554,15 +554,15 @@ bool _isMaskVisible(
 }
 
 /// Clamps [value] into the valid pixel range for an image extent.
-int _clampPixel(final int value, final int extent) {
+int _clampPixel(int value, int extent) {
   return value.clamp(AppMath.zero, extent - AppMath.one);
 }
 
 /// Computes the byte offset for an RGBA pixel in a row-major image buffer.
 int _pixelIndex({
-  required final int width,
-  required final int x,
-  required final int y,
+  required int width,
+  required int x,
+  required int y,
 }) {
   return ((y * width) + x) * AppMath.bytesPerPixel;
 }

@@ -24,7 +24,7 @@ class PlatformsPage extends StatelessWidget {
   const PlatformsPage({super.key});
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
 
     return AppScaffold(
@@ -111,10 +111,10 @@ class PlatformsPage extends StatelessWidget {
 
   /// A widget that displays a platform item with an image, name, description, and URL.
   Widget platformItem(
-    final String name,
-    final String image,
-    final String description,
-    final String url,
+    String name,
+    String image,
+    String description,
+    String url,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.small, horizontal: AppSpacing.large),

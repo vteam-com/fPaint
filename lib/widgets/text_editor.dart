@@ -36,7 +36,7 @@ class _TextEditorState extends State<TextEditor> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     // Return an empty container since the dialog handles everything
     return const SizedBox.shrink();
   }
@@ -44,7 +44,7 @@ class _TextEditorState extends State<TextEditor> {
   void _deleteText() {
     // Find and remove the text object from the action stack
     final List<UserActionDrawing> actionStack = appProvider.layers.selectedLayer.actionStack;
-    actionStack.removeWhere((final UserActionDrawing action) => action.textObject == textObject);
+    actionStack.removeWhere((UserActionDrawing action) => action.textObject == textObject);
 
     appProvider.selectedTextObject = null;
     appProvider.layers.selectedLayer.clearCache();
@@ -62,7 +62,7 @@ class _TextEditorState extends State<TextEditor> {
     showAppBottomSheet<void>(
       context: context,
       barrierColor: AppColors.transparent,
-      builder: (final BuildContext _) {
+      builder: (BuildContext _) {
         return InheritedControllerScope<LayersProvider>(
           controller: layersModel,
           child: TextEditorDialog(
@@ -74,7 +74,7 @@ class _TextEditorState extends State<TextEditor> {
             onDelete: () {
               _deleteText();
             },
-            onSubmitted: (final TextObject updatedTextObject) {
+            onSubmitted: (TextObject updatedTextObject) {
               textObject.text = updatedTextObject.text;
               textObject.position = updatedTextObject.position;
               textObject.size = updatedTextObject.size;

@@ -23,10 +23,10 @@ class _AppTooltipState extends State<AppTooltip> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return MouseRegion(
-      onEnter: (final _) => _show(),
-      onExit: (final _) => _hide(),
+      onEnter: (_) => _show(),
+      onExit: (_) => _hide(),
       child: widget.child,
     );
   }
@@ -48,7 +48,7 @@ class _AppTooltipState extends State<AppTooltip> {
     );
 
     _overlayEntry = OverlayEntry(
-      builder: (final BuildContext _) {
+      builder: (BuildContext _) {
         return Positioned(
           left: target.dx - AppLayout.toolbarButtonSize,
           top: target.dy + AppSpacing.small,

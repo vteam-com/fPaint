@@ -6,7 +6,7 @@ import 'package:fpaint/models/user_action_drawing.dart';
 /// Gesture tools and effects share one Brush section in the rail, so there is
 /// no separate "brush mode" vs. "effect mode"; a tool is a gesture when it
 /// carries an [ActionType] and an effect otherwise.
-String toolLabel(final AppLocalizations l10n, final ActionType action) {
+String toolLabel(AppLocalizations l10n, ActionType action) {
   switch (action) {
     case ActionType.pencil:
       return l10n.toolPencil;

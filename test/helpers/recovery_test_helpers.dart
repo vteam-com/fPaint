@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_storage.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Canonical recovery test canvas size to keep scenarios deterministic.
@@ -19,8 +19,8 @@ Future<AppPreferences> createRecoveryTestPreferences() async {
 
 /// Resets an existing app provider layer stack to a clean white canvas.
 void resetAppProviderLayersForRecovery(
-  final AppProvider appProvider, {
-  final Size canvasSize = recoveryTestCanvasSize,
+  AppProvider appProvider, {
+  Size canvasSize = recoveryTestCanvasSize,
 }) {
   appProvider.layers.list.clear();
   appProvider.layers.size = canvasSize;
@@ -31,7 +31,7 @@ void resetAppProviderLayersForRecovery(
 
 /// Creates a fresh layers provider prepared for recovery tests.
 LayersProvider createRecoveryTestLayers({
-  final Size canvasSize = recoveryTestCanvasSize,
+  Size canvasSize = recoveryTestCanvasSize,
 }) {
   final LayersProvider layers = LayersProvider();
   layers.list.clear();
@@ -64,7 +64,7 @@ class MemoryDraftRecoveryStorage implements DraftRecoveryStorage {
   }
 
   @override
-  Future<void> writeDraft(final Uint8List nextBytes) async {
+  Future<void> writeDraft(Uint8List nextBytes) async {
     bytes = nextBytes;
   }
 }

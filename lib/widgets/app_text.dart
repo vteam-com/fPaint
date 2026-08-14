@@ -62,7 +62,7 @@ class AppText extends StatelessWidget {
   final AppTextVariant variant;
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     TextStyle style = switch (variant) {
       AppTextVariant.title => AppTextStyle.title,
       AppTextVariant.body => AppTextStyle.body,

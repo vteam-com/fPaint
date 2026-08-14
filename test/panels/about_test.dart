@@ -1,22 +1,22 @@
 import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, LicenseRegistry;
-import 'package:flutter/material.dart' show MaterialApp, Scaffold;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/version.dart';
 import 'package:fpaint/panels/side_panel/about.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:material_ui/material_ui.dart' show MaterialApp, Scaffold;
 
 void main() {
   group('showAboutBox', () {
-    testWidgets('shows about dialog and dismisses', (final WidgetTester tester) async {
+    testWidgets('shows about dialog and dismisses', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
-              builder: (final BuildContext context) {
+              builder: (BuildContext context) {
                 return GestureDetector(
                   onTap: () => showAboutBox(context),
                   child: const AppText('Show About'),
@@ -42,7 +42,7 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('opens flutter attribution dialog and closes it', (final WidgetTester tester) async {
+    testWidgets('opens flutter attribution dialog and closes it', (WidgetTester tester) async {
       LicenseRegistry.addLicense(() async* {
         yield const LicenseEntryWithLineBreaks(
           <String>['archive'],
@@ -60,7 +60,7 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             body: Builder(
-              builder: (final BuildContext context) {
+              builder: (BuildContext context) {
                 return GestureDetector(
                   onTap: () => showAboutBox(context),
                   child: const AppText('Show About'),

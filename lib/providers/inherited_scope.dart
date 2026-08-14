@@ -28,5 +28,5 @@ class InheritedScope<T> extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(final InheritedScope<T> oldWidget) => controller != oldWidget.controller;
+  bool updateShouldNotify(InheritedScope<T> oldWidget) => controller != oldWidget.controller;
 }

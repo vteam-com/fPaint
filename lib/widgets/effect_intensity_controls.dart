@@ -60,7 +60,7 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     final SelectionEffect? effect = widget.appProvider.effectPreviewModel.effect;
     if (effect == null) {
       return const SizedBox.shrink();
@@ -80,7 +80,7 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
             valueLabel: '${(_strength * AppMath.percentScale).round()}%',
             min: effect.bipolar ? -AppEffects.maxIntensity : AppEffects.minIntensity,
             max: AppEffects.maxIntensity,
-            onChanged: (final double value) async {
+            onChanged: (double value) async {
               setState(() => _strength = value);
               await widget.appProvider.updateEffectPreviewStrength(value);
             },
@@ -95,7 +95,7 @@ class _EffectIntensityControlsState extends State<EffectIntensityControls> {
               valueLabel: '${effect.sizeValue(_size)}',
               min: AppEffects.minSize,
               max: AppEffects.maxSize,
-              onChanged: (final double value) async {
+              onChanged: (double value) async {
                 setState(() => _size = value);
                 await widget.appProvider.updateEffectPreviewSize(value);
               },

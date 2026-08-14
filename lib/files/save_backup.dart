@@ -14,15 +14,15 @@ typedef BackupFileAction = Future<File> Function(File targetFile);
 
 /// Resolves sandboxed file access before saving with optional backup rotation.
 Future<void> saveWithOptionalBackupAndResolvedFileAccess({
-  required final String filePath,
-  required final String? bookmarkBase64,
-  required final AppPreferences? preferences,
-  required final Future<void> Function(String) saveAction,
+  required String filePath,
+  required String? bookmarkBase64,
+  required AppPreferences? preferences,
+  required Future<void> Function(String) saveAction,
 }) async {
   await MacOsBookmarkService.withResolvedBookmark<void>(
     bookmarkBase64: bookmarkBase64,
     fallbackPath: filePath,
-    action: (final String resolvedFilePath) => saveWithOptionalBackup(
+    action: (String resolvedFilePath) => saveWithOptionalBackup(
       filePath: resolvedFilePath,
       preferences: preferences,
       saveAction: saveAction,
@@ -32,10 +32,10 @@ Future<void> saveWithOptionalBackupAndResolvedFileAccess({
 
 /// Saves [filePath], optionally rotating the existing file into a backup first.
 Future<void> saveWithOptionalBackup({
-  required final String filePath,
-  required final AppPreferences? preferences,
-  required final Future<void> Function(String) saveAction,
-  final BackupFileAction backupAction = _renameCurrentFileToBackup,
+  required String filePath,
+  required AppPreferences? preferences,
+  required Future<void> Function(String) saveAction,
+  BackupFileAction backupAction = _renameCurrentFileToBackup,
 }) async {
   final File targetFile = File(filePath);
   final bool keepSaveBackups = preferences?.keepSaveBackups ?? AppDefaults.keepSaveBackups;
@@ -80,8 +80,8 @@ Future<void> saveWithOptionalBackup({
 
 /// Tries the macOS native replace flow that keeps a sibling backup file.
 Future<bool> _trySaveWithSecurityScopedBackupReplacement({
-  required final File targetFile,
-  required final Future<void> Function(String) saveAction,
+  required File targetFile,
+  required Future<void> Function(String) saveAction,
 }) async {
   if (!MacOsBookmarkService.supportsReplaceFileWithBackup) {
     return false;
@@ -91,7 +91,7 @@ Future<bool> _trySaveWithSecurityScopedBackupReplacement({
   final File temporaryFile = _buildTemporarySaveFile(targetFile, timestamp);
   try {
     await saveAction(temporaryFile.path);
-    return MacOsBookmarkService.replaceFileWithBackup(
+    return await MacOsBookmarkService.replaceFileWithBackup(
       targetPath: targetFile.path,
       replacementPath: temporaryFile.path,
       backupFileName: _buildBackupFileName(targetFile, timestamp),
@@ -102,7 +102,7 @@ Future<bool> _trySaveWithSecurityScopedBackupReplacement({
 }
 
 /// Best-effort cleanup for temporary save files consumed by native replace.
-Future<void> _deleteTemporarySaveFileIfPresent(final File temporaryFile) async {
+Future<void> _deleteTemporarySaveFileIfPresent(File temporaryFile) async {
   try {
     if (await temporaryFile.exists()) {
       await temporaryFile.delete();
@@ -113,7 +113,7 @@ Future<void> _deleteTemporarySaveFileIfPresent(final File temporaryFile) async {
 }
 
 /// Renames the current [targetFile] into a timestamped backup file.
-Future<File> _renameCurrentFileToBackup(final File targetFile) {
+Future<File> _renameCurrentFileToBackup(File targetFile) {
   final String backupPath = _buildBackupPath(
     targetFile,
     DateTime.now(),
@@ -123,8 +123,8 @@ Future<File> _renameCurrentFileToBackup(final File targetFile) {
 
 /// Restores [backupFile] back into [targetFile] after a failed save attempt.
 Future<void> _restoreBackupFile({
-  required final File targetFile,
-  required final File backupFile,
+  required File targetFile,
+  required File backupFile,
 }) async {
   if (!await backupFile.exists()) {
     return;
@@ -138,7 +138,7 @@ Future<void> _restoreBackupFile({
 }
 
 /// Removes older backups once the backup count exceeds the configured limit.
-Future<void> _pruneOldBackups(final File targetFile) async {
+Future<void> _pruneOldBackups(File targetFile) async {
   final List<File> backupFiles = await _listBackupFiles(targetFile);
   if (backupFiles.length <= AppLimits.maxSaveFileBackups) {
     return;
@@ -150,8 +150,7 @@ Future<void> _pruneOldBackups(final File targetFile) async {
   }
 
   orderedBackups.sort(
-    (final ({File file, DateTime modified}) a, final ({File file, DateTime modified}) b) =>
-        a.modified.compareTo(b.modified),
+    (({File file, DateTime modified}) a, ({File file, DateTime modified}) b) => a.modified.compareTo(b.modified),
   );
 
   final int backupsToDelete = orderedBackups.length - AppLimits.maxSaveFileBackups;
@@ -161,7 +160,7 @@ Future<void> _pruneOldBackups(final File targetFile) async {
 }
 
 /// Returns all backup files that belong to [targetFile].
-Future<List<File>> _listBackupFiles(final File targetFile) async {
+Future<List<File>> _listBackupFiles(File targetFile) async {
   final ({String extension, String stem}) nameParts = _splitFileName(targetFile);
   final String extension = nameParts.extension;
   final String stem = nameParts.stem;
@@ -184,8 +183,8 @@ Future<List<File>> _listBackupFiles(final File targetFile) async {
 
 /// Builds the backup file path for [targetFile] using [timestamp].
 String _buildBackupPath(
-  final File targetFile,
-  final DateTime timestamp,
+  File targetFile,
+  DateTime timestamp,
 ) {
   final String backupFileName = _buildBackupFileName(targetFile, timestamp);
   return '${targetFile.parent.path}${Platform.pathSeparator}$backupFileName';
@@ -193,8 +192,8 @@ String _buildBackupPath(
 
 /// Builds the sibling backup file name for [targetFile] using [timestamp].
 String _buildBackupFileName(
-  final File targetFile,
-  final DateTime timestamp,
+  File targetFile,
+  DateTime timestamp,
 ) {
   final ({String extension, String stem}) nameParts = _splitFileName(targetFile);
   return '${nameParts.stem}$_backupFileNameMarker${_formatBackupTimestamp(timestamp)}${nameParts.extension}';
@@ -202,8 +201,8 @@ String _buildBackupFileName(
 
 /// Builds a temporary output file that preserves [targetFile]'s extension.
 File _buildTemporarySaveFile(
-  final File targetFile,
-  final DateTime timestamp,
+  File targetFile,
+  DateTime timestamp,
 ) {
   final ({String extension, String stem}) nameParts = _splitFileName(targetFile);
   final String temporaryFileName =
@@ -212,7 +211,7 @@ File _buildTemporarySaveFile(
 }
 
 /// Formats [timestamp] for deterministic, sortable backup file names.
-String _formatBackupTimestamp(final DateTime timestamp) {
+String _formatBackupTimestamp(DateTime timestamp) {
   final String year = timestamp.year.toString().padLeft(AppMath.four, '0');
   final String month = timestamp.month.toString().padLeft(AppMath.two, '0');
   final String day = timestamp.day.toString().padLeft(AppMath.two, '0');
@@ -225,7 +224,7 @@ String _formatBackupTimestamp(final DateTime timestamp) {
 }
 
 /// Returns the file name portion of [entity].
-String _fileNameFor(final FileSystemEntity entity) {
+String _fileNameFor(FileSystemEntity entity) {
   final List<String> pathSegments = entity.uri.pathSegments;
   if (pathSegments.isEmpty) {
     return entity.path;
@@ -234,7 +233,7 @@ String _fileNameFor(final FileSystemEntity entity) {
 }
 
 /// Splits [entity]'s file name into a stem and extension.
-({String extension, String stem}) _splitFileName(final FileSystemEntity entity) {
+({String extension, String stem}) _splitFileName(FileSystemEntity entity) {
   final String fileName = _fileNameFor(entity);
   final int extensionSeparator = fileName.lastIndexOf('.');
   final String extension = extensionSeparator >= AppMath.zero ? fileName.substring(extensionSeparator) : '';

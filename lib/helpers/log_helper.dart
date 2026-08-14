@@ -29,7 +29,7 @@ const String logNameUndoProvider = 'UndoProvider';
 /// to `dart:developer` so they appear in Flutter DevTools.
 void initLogging() {
   Logger.root.level = kDebugMode ? Level.ALL : Level.WARNING;
-  Logger.root.onRecord.listen((final LogRecord record) {
+  Logger.root.onRecord.listen((LogRecord record) {
     developer.log(
       record.message,
       time: record.time,
