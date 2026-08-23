@@ -4,6 +4,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.3] - 2026-08-23
+
+### Update
+
+- Upgraded to Flutter 3.47.0.
+- Updated dependencies, including `file_picker` 12, `archive` 4.2.0, `desktop_drop` 0.8.0 and `image` 4.9.2, and pinned the previously floating `intl`, `logging` and `material_ui` versions.
+- Migrated the save and open dialogs to the reworked `file_picker` 12 API, which returns a URI instead of a path and replaces the removed single-file picking and window-locking options.
+
 ## [1.9.2] - 2026-07-30
 
 ### Update
