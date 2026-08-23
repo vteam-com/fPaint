@@ -159,6 +159,19 @@ Future<void> onExportAsTiff(
   );
 }
 
+/// Converts a save-dialog [Uri] into a local file path.
+///
+/// `FilePicker.saveFile` returns a `file://` URI on Linux and Windows, and a
+/// bare path (parsed as a scheme-less URI) on macOS and iOS, so both shapes are
+/// handled here.
+String? filePathFromPickerUri(Uri? uri) {
+  if (uri == null) {
+    return null;
+  }
+  final String filePath = uri.scheme == 'file' ? uri.toFilePath() : uri.path;
+  return filePath.isEmpty ? null : filePath;
+}
+
 /// Shows a file-save dialog and invokes [onFileSelected] when a valid path is chosen.
 Future<void> _exportWithFilePicker({
   required String dialogTitle,
@@ -168,14 +181,19 @@ Future<void> _exportWithFilePicker({
   AppPreferences? preferences,
   String Function(String)? resolveRecentFilePath,
 }) async {
-  final String? filePath = await FilePicker.saveFile(
+  final Uri? selectedFileUri = await FilePicker.saveFile(
     dialogTitle: dialogTitle,
     initialDirectory: '.',
     fileName: fileName,
+    // The dialog only chooses a destination here; the real bytes are written by
+    // [onFileSelected], which also handles backup rotation and bookmark access.
+    bytes: Uint8List(0),
     type: FileType.custom,
     allowedExtensions: allowedExtensions,
-    lockParentWindow: true,
+    windowsOptions: const WindowsOptions(lockParentWindow: true),
+    linuxOptions: const LinuxOptions(lockParentWindow: true),
   );
+  final String? filePath = filePathFromPickerUri(selectedFileUri);
   if (filePath != null && filePath.isNotEmpty) {
     final String selectedFilePath = resolveRecentFilePath == null ? filePath : resolveRecentFilePath(filePath);
     final String? bookmark =
