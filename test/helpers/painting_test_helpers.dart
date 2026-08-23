@@ -5,8 +5,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:file_picker/file_picker.dart' show FileType;
-import 'package:file_picker/src/platform/file_picker_platform_interface.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -2179,18 +2178,22 @@ class _UnitTestSaveDialogFilePicker extends FilePickerPlatform {
   final String selectedFilePath;
 
   @override
-  Future<String?> saveFile({
+  Future<Uri?> saveFile({
+    required String fileName,
+    required Uint8List bytes,
+    String mimeType = 'application/octet-stream',
     String? dialogTitle,
-    String? fileName,
     String? initialDirectory,
     FileType type = FileType.any,
     List<String>? allowedExtensions,
-    Uint8List? bytes,
-    bool lockParentWindow = false,
+    void Function(FilePickerStatus)? onFileSaving,
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
   }) async {
     lastSuggestedFileName = fileName;
     lastAllowedExtensions = allowedExtensions == null ? null : List<String>.from(allowedExtensions);
-    return selectedFilePath;
+    return Uri.file(selectedFilePath);
   }
 }
 

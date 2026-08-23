@@ -31,6 +31,19 @@ const String _fileExtensionJpg = 'jpg';
 const String _fileExtensionJpeg = 'jpeg';
 const String _fileExtensionHeic = 'heic';
 const String _fileExtensionAvif = 'avif';
+
+/// Returns the lower-case extension of [fileName], without the leading dot.
+///
+/// `PlatformFile` no longer exposes an `extension` getter, so it is derived from
+/// the file name here.
+String _fileExtensionFromName(String fileName) {
+  final int dotIndex = fileName.lastIndexOf('.');
+  if (dotIndex < 0 || dotIndex == fileName.length - 1) {
+    return '';
+  }
+  return fileName.substring(dotIndex + 1).toLowerCase();
+}
+
 const String _loadedImageDefaultName = 'Loaded Image';
 
 final Logger _log = Logger(logNameImportFiles);
@@ -152,22 +165,21 @@ Future<void> onFileOpen(BuildContext context) async {
   }
 
   try {
-    final FilePickerResult? result = await FilePicker.pickFiles(
+    final PlatformFile? result = await FilePicker.pickFile(
       dialogTitle: l10n.fpaintLoadImage,
       // type: FileType.custom,
       // allowedExtensions: supportedImageFileExtensions,
-      allowMultiple: false,
-      withData: true,
-      lockParentWindow: true,
+      windowsOptions: const WindowsOptions(lockParentWindow: true),
+      linuxOptions: const LinuxOptions(lockParentWindow: true),
     );
 
     if (result != null) {
       // layers.clear(); // Removed from here
 
       if (kIsWeb) {
-        final Uint8List bytes = result.files.single.bytes!;
-        final String fileName = result.files.single.name; // Get filename for naming the layer
-        final String extension = result.files.single.extension?.toLowerCase() ?? '';
+        final Uint8List bytes = await result.readAsBytes();
+        final String fileName = result.name; // Get filename for naming the layer
+        final String extension = _fileExtensionFromName(fileName);
         if (extension == _fileExtensionOra) {
           // Assuming readOraFileFromBytes handles its own clearing and sizing or needs similar refactor
           await readOraFileFromBytes(layers, bytes);
@@ -186,7 +198,7 @@ Future<void> onFileOpen(BuildContext context) async {
           await readImageFileFromBytes(layers, bytes, l10n, imageName: fileName);
         }
       } else {
-        final String path = result.files.single.path!;
+        final String path = result.path!;
         shellProvider.loadedFileName = path;
         if (context.mounted) {
           await openFileFromPath(

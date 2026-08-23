@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show LicenseEntryWithLineBreaks, Licens
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
+import 'package:fpaint/models/dependency_versions.dart';
 import 'package:fpaint/models/version.dart';
 import 'package:fpaint/panels/side_panel/about.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -79,7 +80,7 @@ void main() {
 
       // Attribution dialog should be visible with deduplicated versioned package heading.
       expect(find.textContaining('Attribution ('), findsOneWidget);
-      expect(find.text('archive (v4.0.9)'), findsOneWidget);
+      expect(find.text('archive (v${dependencyVersions['archive']})'), findsOneWidget);
 
       final AppLocalizations l10n = await AppLocalizations.delegate.load(const Locale('en'));
       expect(find.text(l10n.close), findsOneWidget);

@@ -274,15 +274,14 @@ Future<void> _browseAndAddAsLayer(BuildContext context) async {
   final LayersProvider layers = LayersProvider.of(context);
 
   try {
-    final FilePickerResult? result = await FilePicker.pickFiles(
+    final PlatformFile? result = await FilePicker.pickFile(
       dialogTitle: context.l10n.fpaintLoadImage,
-      allowMultiple: false,
-      withData: true,
-      lockParentWindow: true,
+      windowsOptions: const WindowsOptions(lockParentWindow: true),
+      linuxOptions: const LinuxOptions(lockParentWindow: true),
     );
 
     if (result != null && !kIsWeb) {
-      final String path = result.files.single.path!;
+      final String path = result.path!;
       if (context.mounted) {
         await addFileAsLayer(context: context, layers: layers, path: path);
         if (context.mounted) {

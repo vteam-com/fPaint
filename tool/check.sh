@@ -2,7 +2,7 @@
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CHECK_FAILURE_EXIT_CODE="1"
-FCHECK_VERSION="1.4.1"
+FCHECK_VERSION="1.5.0"
 TEST_OUTPUT_DIR="$ROOT_DIR/test/output"
 COVERAGE_LCOV_FILE="$ROOT_DIR/coverage/lcov.info"
 COVERAGE_SUMMARY_FILE="$TEST_OUTPUT_DIR/cc.txt"
