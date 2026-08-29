@@ -4,6 +4,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.4] - 2026-08-29
+
+### Update
+
+- Upgraded to Flutter 3.47.2.
+- Updated packages
+
+### Fix
+
+- Fixed a build failure on macOS, Linux, Windows and web caused by the `file_picker` platform implementations lagging behind their shared interface. All of them are now aligned on `file_picker_platform_interface` 3.2.0.
+
 ## [1.9.3] - 2026-08-23
 
 ### Update
