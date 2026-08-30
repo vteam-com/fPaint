@@ -312,7 +312,16 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
 
-    if (event.buttons == 1 && _activePointerId == event.pointer) {
+    if ((event.buttons & kPrimaryButton) != 0 && _activePointerId == event.pointer) {
+      // The Surface pen eraser (invertedStylus) extends its erase stroke here
+      // regardless of the selected tool. It must not fall through into the
+      // selection / fill / pixel-brush / armed-effect dispatch below.
+      if (event.kind == PointerDeviceKind.invertedStylus) {
+        _updateDrawingToolPreview(appProvider, event.localPosition);
+        _appendPenEraserStrokeLine(appProvider, adjustedPosition);
+        return;
+      }
+
       if (isSelectionActive) {
         if (appProvider.selectorModel.mode == SelectorMode.wand) {
           _updateWandToleranceFromDrag(appProvider, event.localPosition);
@@ -372,11 +381,33 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
 
-    if (event.buttons != 1 || _activePointerId != -1) {
+    // A valid stroke press must carry the primary "operation" bit (the pen tip
+    // / finger / mouse button is down). The Windows Surface pen's eraser end is
+    // reported as an [PointerDeviceKind.invertedStylus] whose buttons combine
+    // the stylus-contact bit (== kPrimaryButton) with the stylus-secondary /
+    // eraser bit, so it is accepted here too (the old `buttons == 1` exact test
+    // silently dropped eraser contact, which reports buttons == 0x05).
+    final bool isPenEraser = event.kind == PointerDeviceKind.invertedStylus;
+    if ((event.buttons & kPrimaryButton) == 0 || _activePointerId != -1) {
       return;
     }
 
     final ui.Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
+
+    // The pen eraser physically should always erase, regardless of the armed
+    // tool, so it takes precedence over tool-specific gestures (eyedropper,
+    // selection, text, fill, smudge/blur, armed effects). It is routed straight
+    // into the drawing path with a forced eraser action and needs no toggle of
+    // the persisted selected action (which would disturb the armed effect,
+    // eyedropper, and wand-selection state).
+    if (isPenEraser) {
+      _activePointerId = event.pointer;
+      _updateDrawingToolPreview(appProvider, event.localPosition);
+      if (_canStartDrawingOnSelectedLayer(appProvider)) {
+        _startDrawingPointer(appProvider, adjustedPosition, forcedAction: ActionType.eraser);
+      }
+      return;
+    }
 
     if (_handleEyeDropperPointerStart(appProvider, adjustedPosition)) {
       return;
@@ -730,23 +761,33 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
   /// Starts a brush/pencil/eraser or pixel-brush stroke at [adjustedPosition]
   /// for the active drawing tool.
+  ///
+  /// When [forcedAction] is provided (the Surface pen eraser), that action is
+  /// drawn instead of the persisted [AppProvider.selectedAction] — the pen
+  /// eraser must always erase, and arming it must not mutate the persisted
+  /// selected action (which would disturb an armed effect, eyedropper, or wand
+  /// selection).
   void _startDrawingPointer(
     AppProvider appProvider,
-    ui.Offset adjustedPosition,
-  ) {
+    ui.Offset adjustedPosition, {
+    ActionType? forcedAction,
+  }) {
+    final ActionType action = forcedAction ?? appProvider.selectedAction;
     appProvider.layers.selectedLayer.isUserDrawing = true;
 
-    if (appProvider.effectBrushModel.isArmed) {
+    // An armed effect is a brush too, but a forced (pen-eraser) stroke always
+    // takes precedence: a physical eraser end must not trigger an effect.
+    if (appProvider.effectBrushModel.isArmed && forcedAction == null) {
       _startEffectBrushStroke(appProvider, adjustedPosition);
       return;
     }
 
-    if (appProvider.selectedAction == ActionType.smudge) {
+    if (action == ActionType.smudge) {
       _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.smudge);
       return;
     }
 
-    if (appProvider.selectedAction == ActionType.blurBrush) {
+    if (action == ActionType.blurBrush) {
       _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.blur);
       return;
     }
@@ -757,7 +798,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.layers.selectedLayer.beginStrokePreview();
     appProvider.recordExecuteDrawingActionToSelectedLayer(
       action: UserActionDrawing(
-        action: appProvider.selectedAction,
+        action: action,
         positions: <ui.Offset>[adjustedPosition, adjustedPosition],
         brush: MyBrush(
           color: appProvider.brushColor,
@@ -765,6 +806,46 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
           style: appProvider.brushStyle,
         ),
         fillColor: appProvider.fillColor,
+      ),
+    );
+  }
+
+  /// Extends the Surface pen eraser (invertedStylus) stroke toward
+  /// [adjustedPosition], appending to the active eraser stroke when it continues
+  /// or starting a new eraser segment otherwise.
+  ///
+  /// Mirrors the pencil/eraser line extension in
+  /// [AppProvider.appendLineFromLastUserAction] but is driven by the physical
+  /// eraser side of the pen rather than the selected tool, so it never depends
+  /// on [AppProvider.selectedAction] being the eraser.
+  void _appendPenEraserStrokeLine(
+    AppProvider appProvider,
+    Offset adjustedPosition,
+  ) {
+    final UserActionDrawing? last = appProvider.layers.selectedLayer.lastUserAction;
+    if (last == null || last.positions.isEmpty) {
+      return;
+    }
+
+    if (last.action == ActionType.eraser) {
+      appProvider.layers.selectedLayer.lastActionAppendPosition(position: adjustedPosition);
+      appProvider.layers.repaintCanvas();
+      return;
+    }
+
+    appProvider.recordExecuteDrawingActionToSelectedLayer(
+      action: UserActionDrawing(
+        positions: <Offset>[
+          last.positions.last,
+          adjustedPosition,
+        ],
+        action: ActionType.eraser,
+        brush: MyBrush(
+          color: appProvider.brushColor,
+          size: appProvider.brushSize,
+          style: appProvider.brushStyle,
+        ),
+        clipPath: appProvider.selectorModel.isVisible ? appProvider.selectorModel.path1 : null,
       ),
     );
   }
