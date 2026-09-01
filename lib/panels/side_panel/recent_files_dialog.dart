@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' as flutter_material show MaterialLocalizations, TimeOfDay;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_ora.dart';
@@ -22,7 +23,6 @@ import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:logging/logging.dart';
-import 'package:material_ui/material_ui.dart' show MaterialLocalizations, TimeOfDay;
 
 final Logger _log = Logger(logNameRecentFiles);
 
@@ -633,11 +633,13 @@ String _formatLastModified(
   BuildContext context,
   DateTime lastModified,
 ) {
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(context);
+  final flutter_material.MaterialLocalizations materialLocalizations = flutter_material.MaterialLocalizations.of(
+    context,
+  );
   final bool alwaysUse24HourFormat = MediaQuery.maybeOf(context)?.alwaysUse24HourFormat ?? false;
   final String shortDate = materialLocalizations.formatShortDate(lastModified);
   final String shortTime = materialLocalizations.formatTimeOfDay(
-    TimeOfDay.fromDateTime(lastModified),
+    flutter_material.TimeOfDay.fromDateTime(lastModified),
     alwaysUse24HourFormat: alwaysUse24HourFormat,
   );
   return '$shortDate $shortTime';

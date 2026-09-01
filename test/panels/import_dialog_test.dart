@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart' as flutter_material show MaterialLocalizations, TimeOfDay;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -161,8 +162,8 @@ void main() {
   group('ImportDialog', () {
     testWidgets('renders browse button and recent files list from preferences', (WidgetTester tester) async {
       final AppPreferences prefs = _FakePreferences(<String>[
-        '/tmp/non_existing_image_a.png',
-        '/tmp/non_existing_image_b.png',
+        '${Directory.systemTemp.path}${Platform.pathSeparator}non_existing_image_a.png',
+        '${Directory.systemTemp.path}${Platform.pathSeparator}non_existing_image_b.png',
       ]);
 
       await _pumpImportDialog(
@@ -184,7 +185,9 @@ void main() {
     });
 
     testWidgets('shows loading then fallback thumbnail for missing recent file', (WidgetTester tester) async {
-      final AppPreferences prefs = _FakePreferences(<String>['/tmp/non_existing_image_c.png']);
+      final AppPreferences prefs = _FakePreferences(<String>[
+        '${Directory.systemTemp.path}${Platform.pathSeparator}non_existing_image_c.png',
+      ]);
 
       await _pumpImportDialog(
         tester,
@@ -221,11 +224,13 @@ void main() {
       await tester.pump();
 
       final BuildContext context = tester.element(find.byType(ImportDialog));
-      final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(context);
+      final flutter_material.MaterialLocalizations materialLocalizations = flutter_material.MaterialLocalizations.of(
+        context,
+      );
       final String modifiedLabel =
           '${materialLocalizations.formatShortDate(lastModified)} '
           '${materialLocalizations.formatTimeOfDay(
-            TimeOfDay.fromDateTime(lastModified),
+            flutter_material.TimeOfDay.fromDateTime(lastModified),
             alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
           )}';
       final Finder parentPathAppText = find.byWidgetPredicate(
