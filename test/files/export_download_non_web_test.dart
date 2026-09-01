@@ -83,7 +83,7 @@ void main() {
       await preferences.getPref();
       final AppProvider appProvider = AppProvider(preferences: preferences);
       final Directory tempDirectory = await Directory.systemTemp.createTemp(_recentExportTestDirectoryPrefix);
-      final String exportPath = '${tempDirectory.path}/$_recentExportFileName';
+      final String exportPath = '${tempDirectory.path}${Platform.pathSeparator}$_recentExportFileName';
       final FilePickerPlatform originalFilePicker = FilePickerPlatform.instance;
 
       FilePickerPlatform.instance = _TestSaveFilePicker(exportPath);
@@ -113,8 +113,8 @@ void main() {
       final Directory tempDirectory = await Directory.systemTemp.createTemp(
         '${_recentExportTestDirectoryPrefix}bookmark_',
       );
-      final String exportPath = '${tempDirectory.path}/secured-export.png';
-      final String resolvedPath = '${tempDirectory.path}/resolved-export.png';
+      final String exportPath = '${tempDirectory.path}${Platform.pathSeparator}secured-export.png';
+      final String resolvedPath = '${tempDirectory.path}${Platform.pathSeparator}resolved-export.png';
       final FilePickerPlatform originalFilePicker = FilePickerPlatform.instance;
       final TargetPlatform? previousPlatform = debugDefaultTargetPlatformOverride;
       final List<String> methodCalls = <String>[];

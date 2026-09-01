@@ -327,8 +327,10 @@ class LayerProvider extends ChangeNotifier {
   // During a freehand stroke the layer composites a baseline captured once at
   // stroke start (all committed actions) plus only the in-progress action(s),
   // instead of replaying the whole action stack on every pointer-move frame.
-  // This bounds per-frame cost to O(active stroke) rather than O(history).
+  // This keeps committed history out of the per-frame live preview.
   ui.Image? _strokeBaseline;
+  ui.Image? _strokeBaselineDisplay;
+  ui.Picture? _strokeBaselinePicture;
   int _strokeBaselineActionCount = 0;
 
   // Fold cursor for the in-progress stroke: tracks how much of the live stroke
@@ -432,6 +434,10 @@ class LayerProvider extends ChangeNotifier {
     _cachedThumbnailImage = null;
     _strokeBaseline?.dispose();
     _strokeBaseline = null;
+    _strokeBaselineDisplay?.dispose();
+    _strokeBaselineDisplay = null;
+    _strokeBaselinePicture?.dispose();
+    _strokeBaselinePicture = null;
     super.dispose();
   }
 
@@ -447,23 +453,42 @@ class LayerProvider extends ChangeNotifier {
   void beginStrokePreview() {
     _strokeBaseline?.dispose();
     _strokeBaseline = null;
-    final int width = size.width.toInt();
-    final int height = size.height.toInt();
-    if (width <= 0 || height <= 0) {
-      return;
-    }
+    _strokeBaselineDisplay?.dispose();
+    _strokeBaselineDisplay = null;
+    _strokeBaselinePicture?.dispose();
+    _strokeBaselinePicture = null;
+
     _strokeBaselineActionCount = actionStack.length;
     _strokeFoldedActionIndex = _strokeBaselineActionCount;
     _strokeFoldedPointCount = 0;
-    _strokeBaseline = renderCanvasImageSync(
-      width: width,
-      height: height,
-      draw: (ui.Canvas canvas) {
-        canvas.saveLayer(null, Paint());
-        _renderActionStack(canvas);
-        canvas.restore();
-      },
-    );
+
+    // Prefer the small on-screen projection. Taking ownership keeps
+    // appendDrawingAction/clearCache from disposing it immediately afterwards.
+    if (_displayCache != null && supportsIncrementalPixelBrushCache) {
+      _strokeBaselineDisplay = _displayCache;
+      _displayCache = null;
+      _displayCacheScale = 0.0;
+      return;
+    }
+
+    // Reuse the committed raster when no display projection is available.
+    // Taking ownership keeps
+    // appendDrawingAction/clearCache from disposing it immediately afterwards.
+    if (_cachedImage != null && supportsIncrementalPixelBrushCache) {
+      _strokeBaseline = _cachedImage;
+      _cachedImage = null;
+      return;
+    }
+
+    // Recording the committed actions avoids allocating and rasterizing a
+    // full-canvas texture on pointer-down. The raster thread replays this
+    // picture behind the small active tail until the stroke is committed.
+    final ui.PictureRecorder recorder = ui.PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    canvas.saveLayer(null, Paint());
+    _renderActionStack(canvas);
+    canvas.restore();
+    _strokeBaselinePicture = recorder.endRecording();
   }
 
   /// Clears the freehand-stroke baseline, returning [renderLayer] to its normal
@@ -475,76 +500,13 @@ class LayerProvider extends ChangeNotifier {
   void clearStrokePreview() {
     _strokeBaseline?.dispose();
     _strokeBaseline = null;
+    _strokeBaselineDisplay?.dispose();
+    _strokeBaselineDisplay = null;
+    _strokeBaselinePicture?.dispose();
+    _strokeBaselinePicture = null;
     _strokeBaselineActionCount = 0;
     _strokeFoldedActionIndex = 0;
     _strokeFoldedPointCount = 0;
-  }
-
-  /// Folds the in-progress stroke into [_strokeBaseline] only when the un-baked
-  /// tail has grown past [AppInteraction.strokePreviewFoldThreshold] — a pencil/
-  /// eraser action gaining that many points, or that many brush actions queued.
-  /// Below the threshold the tail is cheap to replay each frame, so a full-canvas
-  /// re-bake would be pure overhead (notably on short strokes / large canvases).
-  void _foldInProgressStrokeIfTailLarge() {
-    final int count = actionStack.length;
-    if (_strokeFoldedActionIndex >= count) {
-      return;
-    }
-    final int unbakedActions = count - _strokeFoldedActionIndex;
-    final int unbakedCursorPoints = actionStack[_strokeFoldedActionIndex].positions.length - _strokeFoldedPointCount;
-    if (unbakedActions <= AppInteraction.strokePreviewFoldThreshold &&
-        unbakedCursorPoints <= AppInteraction.strokePreviewFoldThreshold) {
-      return;
-    }
-    _foldInProgressStrokeIntoBaseline();
-  }
-
-  /// Bakes the stroke segments appended since the last frame into
-  /// [_strokeBaseline] so the active-stroke composite never re-draws the whole
-  /// growing stroke. Because freehand segments partition the polyline (each
-  /// drawn exactly once) and committed actions are drawn whole, the accumulated
-  /// baseline stays byte-identical to a full action-stack replay — and to the
-  /// committed cache built once the stroke ends.
-  void _foldInProgressStrokeIntoBaseline() {
-    final ui.Image? baseline = _strokeBaseline;
-    if (baseline == null) {
-      return;
-    }
-    final int count = actionStack.length;
-    if (_strokeFoldedActionIndex >= count) {
-      return;
-    }
-    // Anything new since the last fold? Either the cursor action grew (a pencil/
-    // eraser stroke gaining points) or newer actions were appended (brush adds a
-    // fresh action per move).
-    final bool cursorGrew = _strokeFoldedPointCount < actionStack[_strokeFoldedActionIndex].positions.length;
-    final bool hasNewerActions = _strokeFoldedActionIndex < count - AppMath.one;
-    if (!cursorGrew && !hasNewerActions) {
-      return;
-    }
-    final int width = size.width.toInt();
-    final int height = size.height.toInt();
-    if (width <= AppMath.zero || height <= AppMath.zero) {
-      return;
-    }
-
-    _strokeBaseline = renderCanvasImageSync(
-      width: width,
-      height: height,
-      draw: (ui.Canvas canvas) {
-        canvas.drawImage(baseline, Offset.zero, Paint());
-        _renderInProgressTail(canvas);
-      },
-    );
-    // Safe per the engine's texture ref-counting: the new baseline's pending
-    // raster keeps the old texture alive until it resolves (the GPU brush relies
-    // on the same invariant). This is the freehand-stroke baseline, never the
-    // smudge/blur live-preview baseline.
-    baseline.dispose();
-
-    final UserActionDrawing last = actionStack[count - AppMath.one];
-    _strokeFoldedActionIndex = count - AppMath.one;
-    _strokeFoldedPointCount = last.positions.length;
   }
 
   /// Draws the in-progress actions/segments not yet folded into the baseline,
@@ -688,20 +650,25 @@ class LayerProvider extends ChangeNotifier {
       return;
     }
 
-    // Fast freehand-stroke path: the baseline accumulates the committed actions
-    // (captured at stroke start) plus every stroke segment already drawn. Each
-    // frame folds in only the segments appended since the last frame, so cost is
-    // O(new points) instead of O(active stroke) — turning an O(stroke^2) drag
-    // into O(stroke). Clear blends in the active action (eraser) clear into the
-    // accumulated baseline, exactly as a full replay would.
-    if (_strokeBaseline != null && isUserDrawing) {
-      // Fold the in-progress stroke into the baseline only once enough segments
-      // have accumulated to be worth a full-canvas re-bake; otherwise replay the
-      // small un-baked tail directly. Short strokes never re-bake (matching the
-      // previous cost), long strokes stay O(threshold) per frame instead of
-      // O(stroke). Either way baseline + tail == a full replay == the commit.
-      _foldInProgressStrokeIfTailLarge();
-      canvas.drawImage(_strokeBaseline!, Offset.zero, Paint());
+    // Fast freehand-stroke path: draw committed content from a frozen cache or
+    // recorded picture, then replay only the active stroke. This avoids any
+    // synchronous full-canvas rasterization while pointer events are arriving.
+    if ((_strokeBaseline != null || _strokeBaselineDisplay != null || _strokeBaselinePicture != null) &&
+        isUserDrawing) {
+      final ui.Image? baseline = _strokeBaseline;
+      if (baseline != null) {
+        canvas.drawImage(baseline, Offset.zero, Paint());
+      } else if (_strokeBaselineDisplay != null) {
+        final ui.Image displayBaseline = _strokeBaselineDisplay!;
+        canvas.drawImageRect(
+          displayBaseline,
+          Rect.fromLTWH(0, 0, displayBaseline.width.toDouble(), displayBaseline.height.toDouble()),
+          Offset.zero & size,
+          Paint()..filterQuality = FilterQuality.medium,
+        );
+      } else {
+        canvas.drawPicture(_strokeBaselinePicture!);
+      }
       _renderInProgressTail(canvas);
       canvas.restore();
       return;
