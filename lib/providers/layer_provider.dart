@@ -27,6 +27,7 @@ class LayerProvider extends ChangeNotifier {
     required this._name,
     required Size size,
     required this.onThumbnailChanged,
+    this.isThumbnailVisible,
     this.parentGroupName = '',
     this.id = '',
     bool isSelected = false,
@@ -117,10 +118,18 @@ class LayerProvider extends ChangeNotifier {
   bool isUserDrawing = false;
 
   /// A debouncer to prevent excessive thumbnail updates.
-  final Debouncer _debounceTimer = Debouncer();
+  final Debouncer _debounceTimer = Debouncer(AppDefaults.thumbnailDebounceDuration);
 
   /// A callback function that is called when the thumbnail image changes.
   final void Function() onThumbnailChanged;
+
+  /// Whether the layers panel is on screen. When it is not, thumbnail rebuilds
+  /// are deferred (see [thumbnailNeedsRebuild]) instead of run. Null means
+  /// always visible.
+  final bool Function()? isThumbnailVisible;
+
+  /// Set when a thumbnail rebuild was skipped because the panel was hidden.
+  bool thumbnailNeedsRebuild = false;
   //---------------------------------------------
   // Size
   Size _size = const Size(0, 0);
@@ -379,23 +388,6 @@ class LayerProvider extends ChangeNotifier {
   /// (layer_provider_display_cache.dart).
   bool _displayCacheBuilding = false;
 
-  /// Updates the thumbnail image of the layer.
-  Future<void> updateThumbnail() async {
-    final ui.Image fullImage = await renderCanvasImage(
-      width: size.width.toInt(),
-      height: size.height.toInt(),
-      draw: renderLayer,
-    );
-    final ui.Image thumbnail = await _renderThumbnailFromImage(fullImage);
-    // Dispose old textures before replacing; ui.Images are not GC-freed.
-    _cachedImage?.dispose();
-    _cachedThumbnailImage?.dispose();
-    _cachedImage = fullImage;
-    _cachedThumbnailImage = thumbnail;
-    _cacheTopColorsUsed();
-    this.onThumbnailChanged();
-  }
-
   /// Clears the cached image and refreshes the thumbnail.
   void clearCache() {
     // Free the full-res render cache now — it is only read inside renderLayer,
@@ -485,9 +477,7 @@ class LayerProvider extends ChangeNotifier {
     // picture behind the small active tail until the stroke is committed.
     final ui.PictureRecorder recorder = ui.PictureRecorder();
     final Canvas canvas = Canvas(recorder);
-    canvas.saveLayer(null, Paint());
     _renderActionStack(canvas);
-    canvas.restore();
     _strokeBaselinePicture = recorder.endRecording();
   }
 
@@ -568,30 +558,11 @@ class LayerProvider extends ChangeNotifier {
 
   /// Renders the layer to an image with the given width and height.
   ui.Image renderImageWH(int width, int height) {
+    final Rect bounds = Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble());
     return renderCanvasImageSync(
       width: width,
       height: height,
-      draw: (ui.Canvas canvas) {
-        canvas.saveLayer(null, Paint());
-        renderLayer(canvas);
-      },
-    );
-  }
-
-  /// Async counterpart to [toImageForStorage]/[renderImageWH].
-  ///
-  /// Uses `Picture.toImage()` rather than `toImageSync()`. This matters when the
-  /// result is read back with `toByteData()`: reading back a `toImageSync()`
-  /// image stalls the GPU for seconds on Impeller, whereas an async `toImage()`
-  /// readback is milliseconds.
-  Future<ui.Image> toImageForStorageAsync(Size size) {
-    return renderCanvasImage(
-      width: size.width.toInt(),
-      height: size.height.toInt(),
-      draw: (ui.Canvas canvas) {
-        canvas.saveLayer(null, Paint());
-        renderLayer(canvas);
-      },
+      draw: (ui.Canvas canvas) => renderLayer(canvas, compositeBounds: bounds),
     );
   }
 
@@ -619,7 +590,10 @@ class LayerProvider extends ChangeNotifier {
   /// Orchestrates the three rendering paths: a fast live-preview composite, the
   /// cached raster, or a full replay of the action stack. The per-action drawing
   /// lives in [_renderAction] so this method stays a thin dispatcher.
-  void renderLayer(Canvas canvas) {
+  void renderLayer(
+    Canvas canvas, {
+    Rect? compositeBounds,
+  }) {
     final Paint layerPaint = Paint()
       ..color = AppColors.black.withAlpha(
         (AppLimits.rgbChannelMax * opacity).toInt(),
@@ -643,10 +617,48 @@ class LayerProvider extends ChangeNotifier {
     // already drawn beneath this one. A group `saveLayer` is therefore always
     // required here to contain those blends to this layer (it also applies the
     // opacity/blend mode to the composited result).
-    canvas.saveLayer(null, layerPaint);
+    //
+    // Use the current local clip rather than null bounds. At high zoom the full
+    // document can transform to tens of thousands of device pixels; null bounds
+    // made Impeller allocate that entire offscreen target even though the outer
+    // viewport clips almost all of it. Explicit visible bounds keep the texture
+    // viewport-sized and below the GPU's maximum texture dimension.
+    final Rect visibleLayerBounds = (compositeBounds ?? canvas.getLocalClipBounds()).intersect(Offset.zero & size);
+    if (visibleLayerBounds.isEmpty) {
+      return;
+    }
+    canvas.saveLayer(visibleLayerBounds, layerPaint);
+    _renderLayerContents(canvas);
+    canvas.restore();
+  }
 
+  /// Renders this layer into a viewport-sized target before applying document
+  /// pan and zoom. This keeps Impeller's offscreen allocation bounded by the
+  /// window even when the document is zoomed far beyond GPU texture limits.
+  void renderLayerInViewport(
+    Canvas canvas, {
+    required Rect viewportBounds,
+    required Offset canvasOffset,
+    required double canvasScale,
+    required Rect visibleCanvasBounds,
+  }) {
+    final Paint layerPaint = Paint()
+      ..color = AppColors.black.withAlpha(
+        (AppLimits.rgbChannelMax * opacity).toInt(),
+      )
+      ..blendMode = blendMode;
+
+    canvas.saveLayer(viewportBounds, layerPaint);
+    canvas.translate(canvasOffset.dx, canvasOffset.dy);
+    canvas.scale(canvasScale);
+    canvas.clipRect(visibleCanvasBounds, doAntiAlias: false);
+    _renderLayerContents(canvas);
+    canvas.restore();
+  }
+
+  /// Draws layer-local content without opening an isolation group.
+  void _renderLayerContents(Canvas canvas) {
     if (_tryRenderLivePreview(canvas)) {
-      canvas.restore();
       return;
     }
 
@@ -670,7 +682,6 @@ class LayerProvider extends ChangeNotifier {
         canvas.drawPicture(_strokeBaselinePicture!);
       }
       _renderInProgressTail(canvas);
-      canvas.restore();
       return;
     }
 
@@ -679,8 +690,6 @@ class LayerProvider extends ChangeNotifier {
     } else {
       _renderActionStack(canvas);
     }
-
-    canvas.restore();
   }
 
   /// Fast live-preview path: composites the captured baseline plus the current

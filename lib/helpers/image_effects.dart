@@ -36,8 +36,35 @@ Future<ui.Image> _applyPixelTransform(
       }
 
       mutate(pixels);
-      return imageFromPixels(pixels, image.width, image.height);
+      return imageFromPixelsDecode(pixels, image.width, image.height);
     },
+  );
+}
+
+/// Applies a 4x5 [ColorFilter.matrix] to [image] entirely on the GPU.
+///
+/// Preferred over [_applyPixelTransform] whenever the effect is expressible as
+/// an affine per-channel transform: it avoids the GPU->CPU readback, the
+/// main-isolate per-pixel loop, and the texture re-upload.
+Future<ui.Image> _applyColorMatrix(
+  ui.Image image, {
+  required double strength,
+  required List<double> matrix,
+}) {
+  return _applyWithStrengthGuard(
+    image,
+    strength: strength,
+    apply: () => renderCanvasImage(
+      width: image.width,
+      height: image.height,
+      draw: (Canvas canvas) {
+        canvas.drawImage(
+          image,
+          Offset.zero,
+          Paint()..colorFilter = ColorFilter.matrix(matrix),
+        );
+      },
+    ),
   );
 }
 
@@ -49,16 +76,20 @@ int _opacityToByte(double opacity) {
 /// Applies a Gaussian blur with the given [sigma] to [image], scaled by [strength].
 ///
 /// [strength] ranges from 0.0 (no blur) to 1.0 (full blur at the authored [sigma]).
+///
+/// [pixelScale] scales pixel-space parameters so a downscaled proxy renders the
+/// same apparent result as the full-resolution image.
 Future<ui.Image> applyGaussianBlur(
   ui.Image image,
   double sigma, {
   double strength = AppEffects.defaultIntensity,
+  double pixelScale = AppEffects.defaultPixelScale,
 }) {
   return _applyWithStrengthGuard(
     image,
     strength: strength,
     apply: () {
-      final double effectiveSigma = sigma * strength;
+      final double effectiveSigma = sigma * strength * pixelScale;
       return renderCanvasImage(
         width: image.width,
         height: image.height,
@@ -91,10 +122,14 @@ Future<ui.Image> applyGaussianBlur(
 /// 1.0 = fully pixelated.
 ///
 /// [size] controls the block size of the pixelation.
+///
+/// [pixelScale] scales the block size so a downscaled proxy renders the same
+/// apparent result as the full-resolution image.
 Future<ui.Image> applyPixelate(
   ui.Image image, {
   double strength = AppEffects.defaultIntensity,
   double size = AppEffects.pixelateDefaultSize,
+  double pixelScale = AppEffects.defaultPixelScale,
 }) async {
   return _applyWithStrengthGuard(
     image,
@@ -102,7 +137,7 @@ Future<ui.Image> applyPixelate(
     apply: () async {
       final int w = image.width;
       final int h = image.height;
-      final int blockSize = _resolvePixelateBlockSize(size);
+      final int blockSize = max(1, (_resolvePixelateBlockSize(size) * pixelScale).round());
       final int smallW = max(1, w ~/ blockSize);
       final int smallH = max(1, h ~/ blockSize);
 
@@ -119,24 +154,36 @@ Future<ui.Image> applyPixelate(
         },
       );
 
-      final ui.Image pixelated = await renderCanvasImage(
+      // Upscale and blend in one pass: materializing a full-size pixelated
+      // intermediate and blending it separately costs two extra full-resolution
+      // textures, which is what exhausts VRAM on very large canvases.
+      final bool isFullStrength = strength >= AppEffects.maxIntensity;
+      final ui.Image result = await renderCanvasImage(
         width: w,
         height: h,
         draw: (Canvas canvas) {
+          if (!isFullStrength) {
+            canvas.drawImage(image, Offset.zero, Paint());
+          }
+          final Paint blockPaint = Paint()..filterQuality = FilterQuality.none;
+          if (!isFullStrength) {
+            blockPaint.color = Color.fromARGB(
+              _opacityToByte(strength),
+              AppLimits.rgbChannelMax,
+              AppLimits.rgbChannelMax,
+              AppLimits.rgbChannelMax,
+            );
+          }
           canvas.drawImageRect(
             small,
             Rect.fromLTWH(0, 0, smallW.toDouble(), smallH.toDouble()),
             Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble()),
-            Paint()..filterQuality = FilterQuality.none,
+            blockPaint,
           );
         },
       );
-
-      if (strength >= AppEffects.maxIntensity) {
-        return pixelated;
-      }
-
-      return _blendOver(image, pixelated, strength);
+      small.dispose();
+      return result;
     },
   );
 }
@@ -209,45 +256,80 @@ Future<ui.Image> applyGrayscale(
 Future<ui.Image> applySharpen(
   ui.Image image, {
   double strength = AppEffects.defaultIntensity,
+  double pixelScale = AppEffects.defaultPixelScale,
 }) async {
   return _applyWithStrengthGuard(
     image,
     strength: strength,
     apply: () async {
       final double effectiveAmount = AppEffects.sharpenAmount * strength;
+      final double effectiveSigma = AppEffects.sharpenBlurSigma * pixelScale;
       final int w = image.width;
       final int h = image.height;
       final Rect rect = Rect.fromLTWH(0, 0, w.toDouble(), h.toDouble());
 
-      final ui.Image blurred = await renderCanvasImage(
-        width: w,
-        height: h,
-        draw: (Canvas canvas) {
-          canvas.saveLayer(
-            rect,
-            Paint()
-              ..imageFilter = ui.ImageFilter.blur(
-                sigmaX: AppEffects.sharpenBlurSigma,
-                sigmaY: AppEffects.sharpenBlurSigma,
-                tileMode: TileMode.decal,
-              ),
-          );
-          canvas.drawImage(image, Offset.zero, Paint());
-          canvas.restore();
-        },
-      );
+      void drawBlurred(Canvas canvas) {
+        canvas.saveLayer(
+          rect,
+          Paint()
+            ..imageFilter = ui.ImageFilter.blur(
+              sigmaX: effectiveSigma,
+              sigmaY: effectiveSigma,
+              tileMode: TileMode.decal,
+            ),
+        );
+        canvas.drawImage(image, Offset.zero, Paint());
+        canvas.restore();
+      }
 
-      final Uint8List? origPixels = await extractImagePixels(image);
-      final Uint8List? blurPixels = await extractImagePixels(blurred);
+      // The original and its blurred copy are stacked vertically into one image
+      // so a single readback covers both planes. An unsharp mask needs unclamped
+      // intermediates, so the blend itself cannot run in an 8-bit render target;
+      // halving the GPU->CPU syncs is the win available here.
+      final bool canStack = h * AppMath.pair <= AppLimits.maxRenderTargetDimension;
+      final int planeLength = w * h * AppMath.bytesPerPixel;
+
+      final Uint8List? origPixels;
+      final Uint8List? blurPixels;
+      final int blurOffset;
+      if (canStack) {
+        final ui.Image atlas = await renderCanvasImage(
+          width: w,
+          height: h * AppMath.pair,
+          draw: (Canvas canvas) {
+            canvas.drawImage(image, Offset.zero, Paint());
+            canvas.save();
+            canvas.translate(0, h.toDouble());
+            canvas.clipRect(rect);
+            drawBlurred(canvas);
+            canvas.restore();
+          },
+        );
+        origPixels = await extractImagePixels(atlas);
+        blurPixels = origPixels;
+        blurOffset = planeLength;
+        atlas.dispose();
+      } else {
+        final ui.Image blurred = await renderCanvasImage(
+          width: w,
+          height: h,
+          draw: drawBlurred,
+        );
+        origPixels = await extractImagePixels(image);
+        blurPixels = await extractImagePixels(blurred);
+        blurOffset = 0;
+        blurred.dispose();
+      }
+
       if (origPixels == null || blurPixels == null) {
         return image;
       }
 
-      final Uint8List result = Uint8List(origPixels.length);
-      for (int i = 0; i < origPixels.length; i += AppMath.bytesPerPixel) {
+      final Uint8List result = Uint8List(planeLength);
+      for (int i = 0; i < planeLength; i += AppMath.bytesPerPixel) {
         for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
           final int original = origPixels[i + c];
-          final int blurredChannel = blurPixels[i + c];
+          final int blurredChannel = blurPixels[blurOffset + i + c];
           result[i + c] = (original + effectiveAmount * (original - blurredChannel)).round().clamp(
             0,
             AppLimits.rgbChannelMax,
@@ -256,7 +338,7 @@ Future<ui.Image> applySharpen(
         result[i + AppEffects.alphaChannelIndex] = origPixels[i + AppEffects.alphaChannelIndex];
       }
 
-      return imageFromPixels(result, w, h);
+      return imageFromPixelsDecode(result, w, h);
     },
   );
 }
@@ -271,11 +353,12 @@ Future<ui.Image> applyNoise(
   ui.Image image, {
   double strength = AppEffects.defaultIntensity,
   double size = AppEffects.noiseDefaultSize,
+  double pixelScale = AppEffects.defaultPixelScale,
   Random? random,
 }) {
   final int effectiveRange = max(1, (AppEffects.noiseRange * strength).round());
   final int effectiveOffset = effectiveRange ~/ 2;
-  final int cellSize = _resolveNoiseCellSize(size);
+  final int cellSize = max(1, (_resolveNoiseCellSize(size) * pixelScale).round());
   final Random rng = random ?? Random();
 
   return _applyPixelTransform(
@@ -366,33 +449,6 @@ Future<ui.Image> applyVignette(
   );
 }
 
-/// Blends [top] over [bottom] at [opacity] (0.0–1.0) and returns the result.
-Future<ui.Image> _blendOver(
-  ui.Image bottom,
-  ui.Image top,
-  double opacity,
-) {
-  final int opacityByte = _opacityToByte(opacity);
-  return renderCanvasImage(
-    width: bottom.width,
-    height: bottom.height,
-    draw: (Canvas canvas) {
-      canvas.drawImage(bottom, Offset.zero, Paint());
-      canvas.drawImage(
-        top,
-        Offset.zero,
-        Paint()
-          ..color = Color.fromARGB(
-            opacityByte,
-            AppLimits.rgbChannelMax,
-            AppLimits.rgbChannelMax,
-            AppLimits.rgbChannelMax,
-          ),
-      );
-    },
-  );
-}
-
 /// Adjusts the brightness of [image] by adding a per-channel offset.
 ///
 /// [strength] ranges from 0.0 (no change) to 1.0 (maximum brightening).
@@ -400,17 +456,16 @@ Future<ui.Image> applyBrightness(
   ui.Image image, {
   double strength = AppEffects.defaultIntensity,
 }) {
-  final int offset = (AppEffects.brightnessOffset * strength).round();
-  return _applyPixelTransform(
+  final double offset = AppEffects.brightnessOffset * strength;
+  return _applyColorMatrix(
     image,
     strength: strength,
-    mutate: (Uint8List pixels) {
-      for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
-        for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
-          pixels[i + c] = (pixels[i + c] + offset).clamp(0, AppLimits.rgbChannelMax);
-        }
-      }
-    },
+    matrix: <double>[
+      1, 0, 0, 0, offset, //
+      0, 1, 0, 0, offset, //
+      0, 0, 1, 0, offset, //
+      0, 0, 0, 1, 0, //
+    ],
   );
 }
 
@@ -422,19 +477,17 @@ Future<ui.Image> applyContrast(
   double strength = AppEffects.defaultIntensity,
 }) {
   final double factor = 1.0 + (AppEffects.contrastMax - 1.0) * strength;
-  return _applyPixelTransform(
+  // c' = factor * (c - midtone) + midtone, expanded into scale + translate.
+  final double translate = AppEffects.shadowMidtone * (1.0 - factor);
+  return _applyColorMatrix(
     image,
     strength: strength,
-    mutate: (Uint8List pixels) {
-      for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
-        for (int c = 0; c < AppEffects.rgbChannelCount; c++) {
-          final int channelValue = pixels[i + c];
-          pixels[i + c] = ((factor * (channelValue - AppEffects.shadowMidtone)) + AppEffects.shadowMidtone)
-              .round()
-              .clamp(0, AppLimits.rgbChannelMax);
-        }
-      }
-    },
+    matrix: <double>[
+      factor, 0, 0, 0, translate, //
+      0, factor, 0, 0, translate, //
+      0, 0, factor, 0, translate, //
+      0, 0, 0, 1, 0, //
+    ],
   );
 }
 
@@ -445,27 +498,28 @@ Future<ui.Image> applyHueSaturation(
   ui.Image image, {
   double strength = AppEffects.defaultIntensity,
 }) {
-  final double hueShift = AppEffects.hueRotationMax * strength;
-  return _applyPixelTransform(
+  final double radians = AppEffects.hueRotationMax * strength * pi / AppMath.degreesPerHalfTurn;
+  final double cosine = cos(radians);
+  final double sine = sin(radians);
+
+  // Rodrigues rotation about the gray axis (1,1,1): the resulting matrix is
+  // circulant, so it needs only a diagonal term and two off-diagonal terms.
+  // Every row sums to 1, which leaves neutral grays untouched.
+  final double shared = (1.0 - cosine) / AppMath.triple;
+  final double swing = sine / sqrt(AppMath.triple.toDouble());
+  final double diagonal = cosine + shared;
+  final double lagging = shared - swing;
+  final double leading = shared + swing;
+
+  return _applyColorMatrix(
     image,
     strength: strength,
-    mutate: (Uint8List pixels) {
-      for (int i = 0; i < pixels.length; i += AppMath.bytesPerPixel) {
-        final int r = pixels[i + AppMath.rgbChannelRed];
-        final int g = pixels[i + AppMath.rgbChannelGreen];
-        final int b = pixels[i + AppMath.rgbChannelBlue];
-        final List<double> hsl = _rgbToHsl(r, g, b);
-        hsl[0] = (hsl[0] + hueShift) % AppEffects.hueFullCircle;
-        final List<int> rgb = _hslToRgb(
-          hsl[AppMath.rgbChannelRed],
-          hsl[AppMath.rgbChannelGreen],
-          hsl[AppMath.rgbChannelBlue],
-        );
-        pixels[i + AppMath.rgbChannelRed] = rgb[AppMath.rgbChannelRed];
-        pixels[i + AppMath.rgbChannelGreen] = rgb[AppMath.rgbChannelGreen];
-        pixels[i + AppMath.rgbChannelBlue] = rgb[AppMath.rgbChannelBlue];
-      }
-    },
+    matrix: <double>[
+      diagonal, lagging, leading, 0, 0, //
+      leading, diagonal, lagging, 0, 0, //
+      lagging, leading, diagonal, 0, 0, //
+      0, 0, 0, 1, 0, //
+    ],
   );
 }
 
@@ -495,69 +549,4 @@ Future<ui.Image> applyShadow(
       }
     },
   );
-}
-
-/// Converts RGB (0–255) to HSL (h: 0–360, s: 0–1, l: 0–1).
-List<double> _rgbToHsl(int r, int g, int b) {
-  final double rn = r / AppLimits.rgbChannelMax;
-  final double gn = g / AppLimits.rgbChannelMax;
-  final double bn = b / AppLimits.rgbChannelMax;
-  final double cMax = max(rn, max(gn, bn));
-  final double cMin = min(rn, min(gn, bn));
-  final double delta = cMax - cMin;
-  final double l = (cMax + cMin) / AppMath.pair;
-  if (delta == AppMath.zero.toDouble()) {
-    return <double>[AppMath.zero.toDouble(), AppMath.zero.toDouble(), l];
-  }
-  final double s = delta / (1 - (AppMath.pair * l - 1).abs());
-  double h;
-  if (cMax == rn) {
-    h = AppMath.degrees60 * (((gn - bn) / delta) % AppMath.six);
-  } else if (cMax == gn) {
-    h = AppMath.degrees60 * ((bn - rn) / delta + AppMath.two);
-  } else {
-    h = AppMath.degrees60 * ((rn - gn) / delta + AppMath.four);
-  }
-  if (h < AppMath.zero.toDouble()) {
-    h += AppEffects.hueFullCircle;
-  }
-  return <double>[h, s, l];
-}
-
-/// Converts HSL (h: 0–360, s: 0–1, l: 0–1) to RGB (0–255).
-List<int> _hslToRgb(double h, double s, double l) {
-  final double c = (1 - (AppMath.pair * l - 1).abs()) * s;
-  final double x = c * (1 - ((h / AppMath.degrees60) % AppMath.two - 1).abs());
-  final double m = l - c / AppMath.pair;
-  double rn, gn, bn;
-  if (h < AppMath.degrees60) {
-    rn = c;
-    gn = x;
-    bn = AppMath.zero.toDouble();
-  } else if (h < AppMath.degrees120) {
-    rn = x;
-    gn = c;
-    bn = AppMath.zero.toDouble();
-  } else if (h < AppMath.degrees180) {
-    rn = AppMath.zero.toDouble();
-    gn = c;
-    bn = x;
-  } else if (h < AppMath.degrees240) {
-    rn = AppMath.zero.toDouble();
-    gn = x;
-    bn = c;
-  } else if (h < AppMath.degrees300) {
-    rn = x;
-    gn = AppMath.zero.toDouble();
-    bn = c;
-  } else {
-    rn = c;
-    gn = AppMath.zero.toDouble();
-    bn = x;
-  }
-  return <int>[
-    ((rn + m) * AppLimits.rgbChannelMax).round().clamp(AppMath.zero, AppLimits.rgbChannelMax),
-    ((gn + m) * AppLimits.rgbChannelMax).round().clamp(AppMath.zero, AppLimits.rgbChannelMax),
-    ((bn + m) * AppLimits.rgbChannelMax).round().clamp(AppMath.zero, AppLimits.rgbChannelMax),
-  ];
 }

@@ -2,7 +2,12 @@
 class AppInteraction {
   static const double minCanvasScale = 0.1;
   static const double maxCanvasScale = 10.0;
-  static const double multiTouchScaleThreshold = 50.0;
+  static const double singleTouchDrawSlop = 8.0;
+
+  /// Minimum relative distance change between synchronized touch contacts that
+  /// is interpreted as a pinch rather than ordinary contact jitter.
+  static const double touchPinchScaleDeadzone = 0.008;
+
   static const Duration selectionDoubleTapTimeout = Duration(milliseconds: 300);
   static const double selectionDoubleTapSlop = 24.0;
 

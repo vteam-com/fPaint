@@ -59,6 +59,19 @@ class _ReorderableLayerList extends StatefulWidget {
 
 class _ReorderableLayerListState extends State<_ReorderableLayerList> {
   int? _draggedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.layers.thumbnailsVisible = true;
+  }
+
+  @override
+  void dispose() {
+    widget.layers.thumbnailsVisible = false;
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(

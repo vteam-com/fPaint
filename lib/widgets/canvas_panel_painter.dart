@@ -8,9 +8,13 @@ import 'package:fpaint/providers/layer_provider.dart';
 class CanvasPanelPainter extends CustomPainter {
   CanvasPanelPainter(
     this._layers, {
+    required this.canvasOffset,
+    required this.canvasScale,
     this.includeTransparentBackground = false,
     this.displayScale = 1.0,
+    required this.visibleCanvasBounds,
     this.onNeedsDisplayCache,
+    this.isInteractiveViewportChange,
     super.repaint,
   });
 
@@ -26,6 +30,12 @@ class CanvasPanelPainter extends CustomPainter {
   /// The layers to paint.
   final List<LayerProvider> _layers;
 
+  /// Document origin in viewport coordinates.
+  final Offset canvasOffset;
+
+  /// Screen pixels per document pixel.
+  final double canvasScale;
+
   /// Whether to include the transparent background.
   final bool includeTransparentBackground;
 
@@ -34,9 +44,15 @@ class CanvasPanelPainter extends CustomPainter {
   /// (or zoomed in past it) they fall back to full-res and request a rebuild.
   final double displayScale;
 
+  /// Visible viewport expressed in document coordinates.
+  final Rect visibleCanvasBounds;
+
   /// Called (during paint) when a layer needs its display cache (re)built for
   /// the current [displayScale]. The owner schedules the async build and repaints.
   final void Function(LayerProvider layer, double requiredScale)? onNeedsDisplayCache;
+
+  /// Whether an active pan or pinch should use faster, unfiltered cache blits.
+  final bool Function()? isInteractiveViewportChange;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -45,19 +61,41 @@ class CanvasPanelPainter extends CustomPainter {
     }
 
     if (includeTransparentBackground) {
+      canvas.save();
+      canvas.translate(canvasOffset.dx, canvasOffset.dy);
+      canvas.scale(canvasScale);
+      canvas.clipRect(visibleCanvasBounds, doAntiAlias: false);
       canvas.drawRect(
-        Offset.zero & size,
+        visibleCanvasBounds,
         Paint()..shader = _resolveTransparentBackgroundShader(),
       );
+      canvas.restore();
     }
 
+    final Rect viewportBounds = Offset.zero & size;
     final void Function(LayerProvider, double)? requestRebuild = onNeedsDisplayCache;
+    final bool useLowQualitySampling = isInteractiveViewportChange?.call() ?? false;
     for (final LayerProvider layer in _layers.reversed) {
       if (layer.isVisible) {
         if (requestRebuild == null) {
-          layer.renderLayer(canvas);
+          layer.renderLayerInViewport(
+            canvas,
+            viewportBounds: viewportBounds,
+            canvasOffset: canvasOffset,
+            canvasScale: canvasScale,
+            visibleCanvasBounds: visibleCanvasBounds,
+          );
         } else {
-          layer.renderLayerForDisplay(canvas, displayScale, () => requestRebuild(layer, displayScale));
+          layer.renderLayerForViewportDisplay(
+            canvas,
+            displayScale,
+            () => requestRebuild(layer, displayScale),
+            viewportBounds: viewportBounds,
+            canvasOffset: canvasOffset,
+            canvasScale: canvasScale,
+            visibleCanvasBounds: visibleCanvasBounds,
+            filterQuality: useLowQualitySampling ? FilterQuality.none : FilterQuality.medium,
+          );
         }
       }
     }
@@ -66,8 +104,11 @@ class CanvasPanelPainter extends CustomPainter {
   @override
   bool shouldRepaint(CanvasPanelPainter oldDelegate) {
     return oldDelegate._layers != _layers ||
+        oldDelegate.canvasOffset != canvasOffset ||
+        oldDelegate.canvasScale != canvasScale ||
         oldDelegate.includeTransparentBackground != includeTransparentBackground ||
-        oldDelegate.displayScale != displayScale;
+        oldDelegate.displayScale != displayScale ||
+        oldDelegate.visibleCanvasBounds != visibleCanvasBounds;
   }
 
   /// Returns a repeating checkerboard shader. The tile is rasterized once and

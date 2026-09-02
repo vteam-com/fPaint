@@ -34,8 +34,8 @@ void main() {
       expect(preferences.fillColor, AppColors.blue);
     });
 
-    test('useApplePencil defaults to AppDefaults value', () {
-      expect(preferences.useApplePencil, AppDefaults.useApplePencil);
+    test('penOnlyDrawing defaults to AppDefaults value', () {
+      expect(preferences.penOnlyDrawing, AppDefaults.penOnlyDrawing);
     });
 
     test('keepSaveBackups defaults to AppDefaults value', () {
@@ -96,23 +96,23 @@ void main() {
     });
   });
 
-  group('setUseApplePencil', () {
-    test('updates useApplePencil', () async {
-      await preferences.setUseApplePencil(false);
-      expect(preferences.useApplePencil, isFalse);
+  group('setPenOnlyDrawing', () {
+    test('updates penOnlyDrawing', () async {
+      await preferences.setPenOnlyDrawing(false);
+      expect(preferences.penOnlyDrawing, isFalse);
     });
 
     test('notifies listeners', () async {
       int notifyCount = 0;
       preferences.addListener(() => notifyCount++);
-      await preferences.setUseApplePencil(false);
+      await preferences.setPenOnlyDrawing(false);
       expect(notifyCount, 1);
     });
 
     test('persists to SharedPreferences', () async {
-      await preferences.setUseApplePencil(false);
+      await preferences.setPenOnlyDrawing(false);
       final SharedPreferences prefs = await preferences.getPref();
-      expect(prefs.getBool(AppPreferences.keyUseApplePencil), isFalse);
+      expect(prefs.getBool(AppPreferences.keyPenOnlyDrawing), isFalse);
     });
   });
 
@@ -233,13 +233,13 @@ void main() {
       expect(prefs2.preferredLocale, const Locale('es'));
     });
 
-    test('loads saved useApplePencil on re-init', () async {
+    test('loads saved penOnlyDrawing on re-init', () async {
       SharedPreferences.setMockInitialValues(<String, Object>{
-        AppPreferences.keyUseApplePencil: false,
+        AppPreferences.keyPenOnlyDrawing: false,
       });
       final AppPreferences prefs2 = AppPreferences();
       await prefs2.getPref();
-      expect(prefs2.useApplePencil, isFalse);
+      expect(prefs2.penOnlyDrawing, isFalse);
     });
 
     test('loads saved keepSaveBackups on re-init', () async {

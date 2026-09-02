@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -56,7 +57,16 @@ Future<int> _renderForDisplay(LayerProvider layer, double scale) async {
   final ui.Image out = await renderCanvasImage(
     width: _canvasWidth,
     height: _canvasHeight,
-    draw: (ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, scale, () => rebuilds++),
+    draw: (ui.Canvas canvas) => layer.renderLayerForViewportDisplay(
+      canvas,
+      scale,
+      () => rebuilds++,
+      viewportBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
+      canvasOffset: Offset.zero,
+      canvasScale: 1.0,
+      visibleCanvasBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
+      filterQuality: FilterQuality.medium,
+    ),
   );
   out.dispose();
   return rebuilds;
@@ -71,7 +81,16 @@ Future<int> _minDisplayAlpha(LayerProvider layer, double scale) async {
   final ui.Image out = await renderCanvasImage(
     width: _canvasWidth,
     height: _canvasHeight,
-    draw: (ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, scale, () {}),
+    draw: (ui.Canvas canvas) => layer.renderLayerForViewportDisplay(
+      canvas,
+      scale,
+      () {},
+      viewportBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
+      canvasOffset: Offset.zero,
+      canvasScale: 1.0,
+      visibleCanvasBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
+      filterQuality: FilterQuality.medium,
+    ),
   );
   final ByteData? bytes = await out.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
   out.dispose();
@@ -126,6 +145,16 @@ void main() {
       await layer.buildDisplayCache(_displayScale);
 
       expect(await _renderForDisplay(layer, _displayScale), 0);
+    });
+
+    test('a cache build reports whether it produced a new projection', () async {
+      final LayerProvider layer = _layer();
+      layer.actionStack.add(_imageAction(await _solid(const Color(0xFF00FF00))));
+
+      final Future<bool> firstBuild = layer.buildDisplayCache(_displayScale);
+      expect(await layer.buildDisplayCache(_displayScale), isFalse);
+      expect(await firstBuild, isTrue);
+      expect(await layer.buildDisplayCache(_displayScale), isFalse);
     });
 
     test('a missing cache renders full-res and requests one rebuild', () async {
@@ -285,7 +314,16 @@ void main() {
       final ui.Image out = await renderCanvasImage(
         width: _canvasWidth,
         height: _canvasHeight,
-        draw: (ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, 1.0, () => rebuilds++),
+        draw: (ui.Canvas canvas) => layer.renderLayerForViewportDisplay(
+          canvas,
+          1.0,
+          () => rebuilds++,
+          viewportBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
+          canvasOffset: Offset.zero,
+          canvasScale: 1.0,
+          visibleCanvasBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
+          filterQuality: FilterQuality.medium,
+        ),
       );
       out.dispose();
       expect(rebuilds, 0);
@@ -298,9 +336,9 @@ void main() {
       await layer.buildDisplayCache(_displayScale);
 
       layer.refreshThumbnailFromDisplayCache();
-      // Debounced by AppDefaults.debounceDuration (1s); wait past it and let the
+      // Debounced by AppDefaults.thumbnailDebounceDuration; wait past it and let the
       // async thumbnail render settle.
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      await Future<void>.delayed(AppDefaults.thumbnailDebounceDuration + const Duration(milliseconds: 500));
 
       expect(thumbnailChanged, isTrue);
     });
@@ -310,7 +348,7 @@ void main() {
       final LayerProvider layer = _layer(onThumbnailChanged: () => thumbnailChanged = true);
 
       layer.refreshThumbnailFromDisplayCache();
-      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      await Future<void>.delayed(AppDefaults.thumbnailDebounceDuration + const Duration(milliseconds: 500));
 
       expect(thumbnailChanged, isFalse);
     });

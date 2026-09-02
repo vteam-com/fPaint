@@ -15,6 +15,7 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/app_provider_selection_commit.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/providers/layer_crop_state.dart';
+import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/providers/wand_selection_manager.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -615,11 +616,15 @@ extension AppProviderSelection on AppProvider {
 
   /// Erases [erasePath] from the selected layer and places [replacement] at
   /// [offset], wrapped in an undoable action named [name].
+  ///
+  /// Set [erasesEntireLayer] when [erasePath] covers the whole canvas, so the
+  /// action stack can collapse the generations it hides.
   bool replaceRegion({
     required String name,
     required Path erasePath,
     required ui.Image replacement,
     required Offset offset,
+    bool erasesEntireLayer = false,
   }) {
     if (isSelectedLayerLocked) {
       return false;
@@ -633,6 +638,7 @@ extension AppProviderSelection on AppProvider {
             action: ActionType.cut,
             positions: <ui.Offset>[],
             path: erasePath,
+            erasesEntireLayer: erasesEntireLayer,
           ),
         );
         layers.selectedLayer.addImage(
@@ -903,14 +909,36 @@ extension AppProviderSelection on AppProvider {
       return cached;
     }
 
-    final bool ownsImage = !sampleAllLayers;
-    // Async `toImage()` render, not `toImageForStorage`'s `toImageSync()`: the
-    // image is read back with `convertImageToUint8List` (`toByteData()`) below,
-    // and reading back a `toImageSync()` image stalls the GPU for seconds on
-    // Impeller (large canvases) — the same fix already applied to the brush path.
-    final ui.Image image = sampleAllLayers
-        ? layers.cachedImage ?? await layers.capturePainterToImage()
-        : await layers.selectedLayer.toImageForStorageAsync(layers.size);
+    final int canvasWidth = layers.width.toInt();
+    final int canvasHeight = layers.height.toInt();
+    final int longestSide = canvasWidth > canvasHeight ? canvasWidth : canvasHeight;
+    final double sourceScale = longestSide > AppLimits.floodFillSourceMaxDimension
+        ? AppLimits.floodFillSourceMaxDimension / longestSide
+        : AppVisual.full;
+    final int sourceWidth = (canvasWidth * sourceScale).round().clamp(AppMath.one, canvasWidth);
+    final int sourceHeight = (canvasHeight * sourceScale).round().clamp(AppMath.one, canvasHeight);
+    final double sourceScaleX = sourceWidth / canvasWidth;
+    final double sourceScaleY = sourceHeight / canvasHeight;
+
+    final ui.Image image = await renderCanvasImage(
+      width: sourceWidth,
+      height: sourceHeight,
+      draw: (ui.Canvas canvas) {
+        canvas.scale(sourceScaleX, sourceScaleY);
+        if (sampleAllLayers) {
+          for (final LayerProvider layer in layers.list.reversed) {
+            if (layer.isVisible) {
+              layer.renderLayer(canvas, compositeBounds: Offset.zero & layers.size);
+            }
+          }
+          return;
+        }
+        layers.selectedLayer.renderLayer(
+          canvas,
+          compositeBounds: Offset.zero & layers.size,
+        );
+      },
+    );
 
     try {
       final Uint8List? pixels = await convertImageToUint8List(image);
@@ -923,17 +951,19 @@ extension AppProviderSelection on AppProvider {
         pixels: pixels,
         width: image.width,
         height: image.height,
+        canvasScaleX: sourceScaleX,
+        canvasScaleY: sourceScaleY,
       );
 
       return FillImageData(
         pixels: pixels,
         width: image.width,
         height: image.height,
+        canvasScaleX: sourceScaleX,
+        canvasScaleY: sourceScaleY,
       );
     } finally {
-      if (ownsImage) {
-        image.dispose();
-      }
+      image.dispose();
     }
   }
 

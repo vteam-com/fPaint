@@ -8,6 +8,7 @@ typedef _SelectionEffectApply = Future<ui.Image> Function(
   ui.Image image,
   double strength,
   double size,
+  double pixelScale,
 );
 
 typedef _SelectionEffectSizeValueResolver = int Function(double size);
@@ -135,16 +136,20 @@ enum SelectionEffect {
   /// sign selects the direction (e.g. + brightens, - darkens).
   ///
   /// [size] controls effect-specific block or grain sizing where supported.
+  ///
+  /// [pixelScale] scales pixel-space parameters (blur radius, block and grain
+  /// size) so a downscaled preview proxy matches the full-resolution result.
   Future<ui.Image> apply(
     ui.Image image, {
     double strength = AppEffects.defaultIntensity,
     double? size,
+    double pixelScale = AppEffects.defaultPixelScale,
   }) {
     // Bipolar effects map strength directly (symmetric ±1 range); unipolar
     // effects scale up so the slider max reaches double the authored strength.
     final double appliedStrength = _config.bipolar ? strength : strength * AppEffects.intensityAppliedScale;
     final double appliedSize = size ?? defaultSize;
-    return _config.apply(image, appliedStrength, appliedSize);
+    return _config.apply(image, appliedStrength, appliedSize, pixelScale);
   }
 }
 
@@ -168,13 +173,15 @@ Future<ui.Image> _applyBlurEffect(
   ui.Image image,
   double strength,
   double _,
+  double pixelScale,
 ) {
-  return applyGaussianBlur(image, AppEffects.blurSigma, strength: strength);
+  return applyGaussianBlur(image, AppEffects.blurSigma, strength: strength, pixelScale: pixelScale);
 }
 
 Future<ui.Image> _applyBrightnessEffect(
   ui.Image image,
   double strength,
+  double _,
   double _,
 ) {
   return applyBrightness(image, strength: strength);
@@ -184,6 +191,7 @@ Future<ui.Image> _applyContrastEffect(
   ui.Image image,
   double strength,
   double _,
+  double _,
 ) {
   return applyContrast(image, strength: strength);
 }
@@ -191,6 +199,7 @@ Future<ui.Image> _applyContrastEffect(
 Future<ui.Image> _applyGrayscaleEffect(
   ui.Image image,
   double strength,
+  double _,
   double _,
 ) {
   return applyGrayscale(image, strength: strength);
@@ -200,6 +209,7 @@ Future<ui.Image> _applyHueSaturationEffect(
   ui.Image image,
   double strength,
   double _,
+  double _,
 ) {
   return applyHueSaturation(image, strength: strength);
 }
@@ -208,21 +218,24 @@ Future<ui.Image> _applyNoiseEffect(
   ui.Image image,
   double strength,
   double size,
+  double pixelScale,
 ) {
-  return applyNoise(image, strength: strength, size: size);
+  return applyNoise(image, strength: strength, size: size, pixelScale: pixelScale);
 }
 
 Future<ui.Image> _applyPixelateEffect(
   ui.Image image,
   double strength,
   double size,
+  double pixelScale,
 ) {
-  return applyPixelate(image, strength: strength, size: size);
+  return applyPixelate(image, strength: strength, size: size, pixelScale: pixelScale);
 }
 
 Future<ui.Image> _applyShadowEffect(
   ui.Image image,
   double strength,
+  double _,
   double _,
 ) {
   return applyShadow(image, strength: strength);
@@ -236,19 +249,21 @@ Future<ui.Image> _applySharpnessEffect(
   ui.Image image,
   double strength,
   double _,
+  double pixelScale,
 ) {
   if (strength == AppEffects.minIntensity) {
     return Future<ui.Image>.value(image);
   }
   if (strength < AppEffects.minIntensity) {
-    return applyGaussianBlur(image, AppEffects.softenSigma, strength: -strength);
+    return applyGaussianBlur(image, AppEffects.softenSigma, strength: -strength, pixelScale: pixelScale);
   }
-  return applySharpen(image, strength: strength);
+  return applySharpen(image, strength: strength, pixelScale: pixelScale);
 }
 
 Future<ui.Image> _applyVignetteEffect(
   ui.Image image,
   double strength,
+  double _,
   double _,
 ) {
   return applyVignette(image, strength: strength);

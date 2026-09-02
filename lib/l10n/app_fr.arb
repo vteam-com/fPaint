@@ -211,6 +211,8 @@
   "no": "Non",
   "paste": "Coller",
   "pencilSize": "Taille du crayon",
+  "penOnlyDrawingSubtitle": "Lorsque cette option est activee, les outils de dessin acceptent uniquement le stylet; le toucher reste disponible pour naviguer sur la toile.",
+  "penOnlyDrawingTitle": "Dessin au stylet uniquement",
   "percentageValue": "Echelle : {value} %",
   "@percentageValue": {
     "placeholders": {
@@ -284,8 +286,6 @@
   "translate": "Deplacer",
   "unsavedChanges": "Modifications non enregistrees",
   "unsavedChangesDiscardAndOpenPrompt": "Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?",
-  "useApplePencilOnlySubtitle": "Si active, seul l'Apple Pencil sera utilise pour dessiner.",
-  "useApplePencilOnlyTitle": "Utiliser uniquement l'Apple Pencil",
   "webBrowser": "Navigateur Web",
   "width": "Largeur"
 }

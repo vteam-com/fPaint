@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -57,6 +58,7 @@ void main() {
 
     // Drain the layer's debounced thumbnail rebuild so no timer outlives the
     // test tree at teardown.
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await tester.pump(AppDefaults.thumbnailDebounceDuration);
+    await tester.pumpAndSettle();
   });
 }

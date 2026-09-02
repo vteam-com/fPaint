@@ -35,7 +35,8 @@ class AppPreferences extends ChangeNotifier {
   static const String keyLastBrushColor = 'keyLastBrushColor';
   static const String keyLastFillColor = 'keyLastFillColor';
   static const String keySidePanelDistance = 'keySidePanelDistance';
-  static const String keyUseApplePencil = 'keyUseApplePencil';
+  // Keep the legacy token so existing installations retain their preference.
+  static const String keyPenOnlyDrawing = 'keyUseApplePencil';
   static const String keyKeepSaveBackups = 'keyKeepSaveBackups';
   static const String keyLanguageCode = 'keyLanguageCode';
   static const String keyRecoveryDraftSourceFilePath = 'keyRecoveryDraftSourceFilePath';
@@ -59,7 +60,7 @@ class AppPreferences extends ChangeNotifier {
   double _blurBrushIntensity = AppDefaults.blurBrushIntensity;
   Color _brushColor = AppColors.black;
   Color _fillColor = AppColors.blue;
-  bool _useApplePencil = true;
+  bool _penOnlyDrawing = true;
   bool _keepSaveBackups = AppDefaults.keepSaveBackups;
   String? _languageCode;
   List<String> _recentFiles = <String>[];
@@ -92,8 +93,8 @@ class AppPreferences extends ChangeNotifier {
   /// Gets the fill color.
   Color get fillColor => _fillColor;
 
-  /// Gets whether to use Apple Pencil only.
-  bool get useApplePencil => _useApplePencil;
+  /// Gets whether drawing tools should accept pen input only.
+  bool get penOnlyDrawing => _penOnlyDrawing;
 
   /// Gets whether overwriting saves should keep timestamped backups.
   bool get keepSaveBackups => _keepSaveBackups;
@@ -163,12 +164,12 @@ class AppPreferences extends ChangeNotifier {
     await (await getPref()).setInt(keyLastFillColor, color.toARGB32());
   }
 
-  /// Sets whether to use Apple Pencil only.
-  Future<void> setUseApplePencil(
+  /// Sets whether drawing tools should accept pen input only.
+  Future<void> setPenOnlyDrawing(
     bool value,
   ) async {
-    _useApplePencil = value;
-    await (await getPref()).setBool(keyUseApplePencil, value);
+    _penOnlyDrawing = value;
+    await (await getPref()).setBool(keyPenOnlyDrawing, value);
     notifyListeners();
   }
 
@@ -364,7 +365,7 @@ class AppPreferences extends ChangeNotifier {
 
     _fillColor = Color(_prefs!.getInt(keyLastFillColor) ?? AppColors.blue.toARGB32());
 
-    _useApplePencil = _prefs!.getBool(keyUseApplePencil) ?? AppDefaults.useApplePencil;
+    _penOnlyDrawing = _prefs!.getBool(keyPenOnlyDrawing) ?? AppDefaults.penOnlyDrawing;
 
     _keepSaveBackups = _prefs!.getBool(keyKeepSaveBackups) ?? AppDefaults.keepSaveBackups;
 

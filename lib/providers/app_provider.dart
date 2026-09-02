@@ -17,6 +17,7 @@ import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
+import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layers_provider.dart';
@@ -320,6 +321,11 @@ class AppProvider extends ChangeNotifier {
 
     if (value != ActionType.selector) {
       wandSelection.reset();
+    }
+
+    if (value == ActionType.fill) {
+      // Start the GPU readback before the first canvas tap.
+      unawaited(getSelectedLayerFillImageData(sampleAllLayers: false));
     }
 
     if (selectedActionChanged || wasEffectBrushArmed) {

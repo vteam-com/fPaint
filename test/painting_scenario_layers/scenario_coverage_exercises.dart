@@ -2160,7 +2160,7 @@ Future<void> _exerciseBrushStylePicker(
 // Settings page
 // ---------------------------------------------------------------------------
 
-/// Navigates to settings page and exercises Apple Pencil toggle.
+/// Navigates to settings page and exercises the pen-only drawing toggle.
 Future<void> _exerciseSettingsPage(
   PaintingScenarioSession session,
 ) async {
@@ -2177,13 +2177,13 @@ Future<void> _exerciseSettingsPage(
     await tester.tap(settingsItem.last);
     await pumpForDialogTransition(tester, transitionMs: _coverageDialogTransitionMs);
 
-    // Toggle Apple Pencil setting if available.
-    final Finder applePencilToggle = find.text(l10n.useApplePencilOnlyTitle);
-    if (applePencilToggle.evaluate().isNotEmpty) {
-      await tester.tap(applePencilToggle);
+    // Toggle pen-only drawing if available.
+    final Finder penOnlyDrawingToggle = find.text(l10n.penOnlyDrawingTitle);
+    if (penOnlyDrawingToggle.evaluate().isNotEmpty) {
+      await tester.tap(penOnlyDrawingToggle);
       await tester.pump();
       // Toggle back.
-      await tester.tap(applePencilToggle);
+      await tester.tap(penOnlyDrawingToggle);
       await tester.pump();
     }
 

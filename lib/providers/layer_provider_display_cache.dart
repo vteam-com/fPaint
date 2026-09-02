@@ -13,6 +13,9 @@ part of 'layer_provider.dart';
 /// This is the Flutter analog of Krita's "Instant Preview" / Level-of-Detail
 /// projection.
 extension LayerDisplayCache on LayerProvider {
+  /// Whether an on-screen projection is currently available.
+  bool get hasDisplayCache => _displayCache != null;
+
   /// Upper bound on the display cache's longest side (px), capping memory/GPU cost
   /// regardless of zoom (~viewport sized). Beyond this the on-screen image is a
   /// touch soft when zoomed in — the same tradeoff as Krita's Instant Preview.
@@ -51,45 +54,55 @@ extension LayerDisplayCache on LayerProvider {
 
   /// Draws the layer for on-screen display at [requiredScale].
   ///
-  /// When a sufficient display-resolution cache exists it is drawn scaled (the
-  /// cheap path); otherwise the layer is rendered full-res now and
-  /// [requestRebuild] is invoked to (re)build the cache for later frames. The
-  /// cache is bypassed while the layer is mid-stroke or cannot be incrementally
-  /// composited, so live edits always paint from the authoritative content.
-  ///
-  /// Only default (opacity 1, srcOver) layers use the cache: baking a non-trivial
-  /// opacity/blend into a standalone image and re-applying it at draw time would
-  /// double it, so non-default layers render full-res (correct, and uncommon).
-  void renderLayerForDisplay(
+  /// When a display-resolution cache exists it is drawn scaled immediately. If
+  /// it is too soft for the current zoom, [requestRebuild] sharpens it in the
+  /// background while the existing projection remains visible. Only a missing
+  /// Draws this layer into an untransformed viewport canvas.
+  void renderLayerForViewportDisplay(
     Canvas canvas,
     double requiredScale,
-    void Function() requestRebuild,
-  ) {
+    void Function() requestRebuild, {
+    required Rect viewportBounds,
+    required Offset canvasOffset,
+    required double canvasScale,
+    required Rect visibleCanvasBounds,
+    required FilterQuality filterQuality,
+  }) {
     final bool cacheEligible =
         _livePreviewBaseline == null &&
         !isUserDrawing &&
         _strokeBaseline == null &&
         supportsIncrementalPixelBrushCache &&
         !_hasTextContent;
-
     final ui.Image? cache = _displayCache;
-    if (cacheEligible && cache != null && _displayCacheSufficientFor(requiredScale)) {
-      final Paint paint = Paint()
-        ..color = AppColors.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt())
-        ..blendMode = blendMode
-        ..filterQuality = FilterQuality.medium;
+    if (cacheEligible && cache != null) {
+      canvas.save();
+      canvas.translate(canvasOffset.dx, canvasOffset.dy);
+      canvas.scale(canvasScale);
+      canvas.clipRect(visibleCanvasBounds, doAntiAlias: false);
       canvas.drawImageRect(
         cache,
         Rect.fromLTWH(0, 0, cache.width.toDouble(), cache.height.toDouble()),
         Rect.fromLTWH(0, 0, size.width, size.height),
-        paint,
+        Paint()
+          ..color = AppColors.black.withAlpha((AppLimits.rgbChannelMax * opacity).toInt())
+          ..blendMode = blendMode
+          ..filterQuality = filterQuality,
       );
+      canvas.restore();
+      if (!_displayCacheSufficientFor(requiredScale)) {
+        requestRebuild();
+      }
       return;
     }
 
-    // No usable cache (missing, stale, or zoomed in past its resolution): draw
-    // full-res now and schedule a (re)build for subsequent frames.
-    renderLayer(canvas);
+    renderLayerInViewport(
+      canvas,
+      viewportBounds: viewportBounds,
+      canvasOffset: canvasOffset,
+      canvasScale: canvasScale,
+      visibleCanvasBounds: visibleCanvasBounds,
+    );
     if (cacheEligible) {
       requestRebuild();
     }
@@ -98,17 +111,17 @@ extension LayerDisplayCache on LayerProvider {
   /// (Re)builds the display cache at the achievable scale for [requiredScale].
   /// Samples the full-res content once; cheap to draw thereafter. No-op if
   /// already sufficient or a build is already in flight.
-  Future<void> buildDisplayCache(double requiredScale) async {
+  Future<bool> buildDisplayCache(double requiredScale) async {
     if (_displayCacheBuilding || !supportsIncrementalPixelBrushCache) {
-      return;
+      return false;
     }
     if (_displayCacheSufficientFor(requiredScale)) {
-      return;
+      return false;
     }
     final int canvasWidth = size.width.toInt();
     final int canvasHeight = size.height.toInt();
     if (canvasWidth <= AppMath.zero || canvasHeight <= AppMath.zero) {
-      return;
+      return false;
     }
     final double scale = _targetDisplayScale(requiredScale);
     final int targetWidth = max(AppMath.one, (canvasWidth * scale).round());
@@ -130,6 +143,7 @@ extension LayerDisplayCache on LayerProvider {
     } finally {
       _displayCacheBuilding = false;
     }
+    return true;
   }
 
   /// Incrementally folds a committed pixel-brush [patchImage] (full-res, covering
@@ -226,6 +240,55 @@ extension LayerDisplayCache on LayerProvider {
     );
   }
 
+  /// Rebuilds the layer's raster cache and panel thumbnail.
+  ///
+  /// A full-resolution cache costs width*height*4 bytes and an equally large
+  /// render target to build. Past [AppLimits.fullResolutionCacheMaxPixels] that
+  /// allocation is what Impeller fails on ("could not create a complete
+  /// framebuffer"), so large canvases render the thumbnail directly and let the
+  /// display-resolution projection serve on-screen drawing instead.
+  Future<void> updateThumbnail() async {
+    final bool thumbnailWanted = isThumbnailVisible?.call() ?? true;
+
+    if (size.width * size.height > AppLimits.fullResolutionCacheMaxPixels) {
+      // The thumbnail is the only product here, so a hidden panel means there
+      // is no work worth doing at all.
+      if (!thumbnailWanted) {
+        thumbnailNeedsRebuild = true;
+        return;
+      }
+      final ui.Image thumbnail = await renderThumbnailDirect();
+      _cachedThumbnailImage?.dispose();
+      _cachedThumbnailImage = thumbnail;
+      thumbnailNeedsRebuild = false;
+      _cacheTopColorsUsed();
+      onThumbnailChanged();
+      return;
+    }
+
+    // The full-resolution raster also feeds renderLayer's fast path, so it is
+    // still built when the panel is hidden; only the thumbnail is deferred.
+    final ui.Image fullImage = await renderCanvasImage(
+      width: size.width.toInt(),
+      height: size.height.toInt(),
+      draw: renderLayer,
+    );
+    // Dispose old textures before replacing; ui.Images are not GC-freed.
+    _cachedImage?.dispose();
+    _cachedImage = fullImage;
+
+    if (thumbnailWanted) {
+      final ui.Image thumbnail = await _renderThumbnailFromImage(fullImage);
+      _cachedThumbnailImage?.dispose();
+      _cachedThumbnailImage = thumbnail;
+      thumbnailNeedsRebuild = false;
+      _cacheTopColorsUsed();
+    } else {
+      thumbnailNeedsRebuild = true;
+    }
+    onThumbnailChanged();
+  }
+
   /// Builds the layer-panel thumbnail (~[AppLayout.thumbnailMaxHeight] px tall)
   /// by downscaling [source] directly into a tiny render target with a cheap
   /// bilinear filter.
@@ -250,6 +313,23 @@ extension LayerDisplayCache on LayerProvider {
           Rect.fromLTWH(0, 0, thumbnailWidth.toDouble(), thumbnailHeight.toDouble()),
           Paint()..filterQuality = FilterQuality.medium,
         );
+      },
+    );
+  }
+
+  /// Renders the layer-panel thumbnail straight into its final tiny target.
+  /// Unlike [_renderThumbnailFromImage] this never materializes a
+  /// full-resolution intermediate, so its cost is independent of canvas size.
+  Future<ui.Image> renderThumbnailDirect() {
+    final Size thumbnailSize = scaleSizeTo(size, maxHeight: AppLayout.thumbnailMaxHeight);
+    final int thumbnailWidth = max(AppMath.one, thumbnailSize.width.round());
+    final int thumbnailHeight = max(AppMath.one, thumbnailSize.height.round());
+    return renderCanvasImage(
+      width: thumbnailWidth,
+      height: thumbnailHeight,
+      draw: (ui.Canvas canvas) {
+        canvas.scale(thumbnailWidth / size.width, thumbnailHeight / size.height);
+        renderLayer(canvas, compositeBounds: Offset.zero & size);
       },
     );
   }

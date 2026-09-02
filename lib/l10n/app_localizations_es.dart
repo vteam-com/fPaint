@@ -652,10 +652,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Tienes cambios no guardados. Quieres descartarlos y abrir el nuevo archivo?';
 
   @override
-  String get useApplePencilOnlySubtitle => 'Si esta activado, solo se usara el Apple Pencil para dibujar.';
+  String get penOnlyDrawingSubtitle =>
+      'Si esta activado, las herramientas de dibujo solo aceptan el lapiz digital; el tacto sigue disponible para navegar por el lienzo.';
 
   @override
-  String get useApplePencilOnlyTitle => 'Usar solo Apple Pencil';
+  String get penOnlyDrawingTitle => 'Dibujar solo con lapiz digital';
 
   @override
   String get webBrowser => 'Navegador web';

@@ -65,7 +65,7 @@ Uint8List _verticalStripes(int size) {
 }
 
 Future<ui.Image> _resultToImage(PixelBrushSegmentResult result) {
-  return imageFromPixels(result.pixels, result.width, result.height);
+  return imageFromPixelsDecode(result.pixels, result.width, result.height);
 }
 
 Future<Color> _readPixel(

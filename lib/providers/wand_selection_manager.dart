@@ -24,6 +24,8 @@ class WandSelectionManager {
   Uint8List? _cachedPixels;
   int _cachedWidth = AppMath.zero;
   int _cachedHeight = AppMath.zero;
+  double _cachedCanvasScaleX = AppVisual.full;
+  double _cachedCanvasScaleY = AppVisual.full;
 
   /// Monotonic token that invalidates stale async magic-wand computations.
   int get requestVersion => _requestVersion;
@@ -76,6 +78,8 @@ class WandSelectionManager {
     _cachedPixels = null;
     _cachedWidth = AppMath.zero;
     _cachedHeight = AppMath.zero;
+    _cachedCanvasScaleX = AppVisual.full;
+    _cachedCanvasScaleY = AppVisual.full;
   }
 
   /// Returns the cached source data when [signature] still matches, else null.
@@ -88,6 +92,8 @@ class WandSelectionManager {
         pixels: _cachedPixels!,
         width: _cachedWidth,
         height: _cachedHeight,
+        canvasScaleX: _cachedCanvasScaleX,
+        canvasScaleY: _cachedCanvasScaleY,
       );
     }
     return null;
@@ -99,10 +105,14 @@ class WandSelectionManager {
     required Uint8List pixels,
     required int width,
     required int height,
+    double canvasScaleX = AppVisual.full,
+    double canvasScaleY = AppVisual.full,
   }) {
     _cachedSignature = signature;
     _cachedPixels = pixels;
     _cachedWidth = width;
     _cachedHeight = height;
+    _cachedCanvasScaleX = canvasScaleX;
+    _cachedCanvasScaleY = canvasScaleY;
   }
 }

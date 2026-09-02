@@ -21,6 +21,7 @@ class UserActionDrawing {
     this.image,
     this.clipPath,
     this.textObject,
+    this.erasesEntireLayer = false,
   });
 
   /// The type of action performed.
@@ -52,6 +53,10 @@ class UserActionDrawing {
 
   /// Optional text for the action.
   final TextObject? textObject;
+
+  /// Whether this action erases the whole layer, making every earlier action
+  /// invisible. Marks a collapse point for the action stack.
+  final bool erasesEntireLayer;
 
   @override
   String toString() {

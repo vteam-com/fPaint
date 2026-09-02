@@ -4,7 +4,21 @@ import 'package:fpaint/widgets/canvas_panel_painter.dart';
 
 /// A widget that displays the canvas panel.
 class CanvasPanel extends StatelessWidget {
-  const CanvasPanel({super.key});
+  const CanvasPanel({
+    super.key,
+    required this.canvasOffset,
+    required this.canvasScale,
+    required this.visibleCanvasBounds,
+  });
+
+  /// Document origin in viewport coordinates.
+  final Offset canvasOffset;
+
+  /// Screen pixels per document pixel.
+  final double canvasScale;
+
+  /// The viewport expressed in document coordinates.
+  final Rect visibleCanvasBounds;
 
   @override
   Widget build(BuildContext context) {
@@ -13,22 +27,23 @@ class CanvasPanel extends StatelessWidget {
     // painter serves layers from a display-resolution cache sized for this rather
     // than sampling the full 62 MP layer textures every frame.
     final double displayScale = layers.scale * MediaQuery.devicePixelRatioOf(context);
-    // RepaintBoundary isolates the expensive multi-layer canvas composite into
-    // its own raster layer. Without it, any repaint elsewhere in the main-view
-    // Stack (brush-size hover preview, marching-ants animation, transform mesh,
-    // eyedropper) drags the full canvas re-raster along with it. The painter's
-    // stable `canvasPainterRepaint` listenable means the layer only re-rasters
-    // when pixels actually change — not on every pan/hover rebuild.
-    return RepaintBoundary(
-      child: CustomPaint(
-        size: Size.infinite,
-        painter: CanvasPanelPainter(
-          layers.list,
-          includeTransparentBackground: true,
-          displayScale: displayScale,
-          onNeedsDisplayCache: layers.scheduleDisplayCacheRebuild,
-          repaint: layers.canvasPainterRepaint,
-        ),
+    // This render object stays viewport-sized; pan and zoom are applied inside
+    // the painter. Keeping the document transform out of the widget tree stops
+    // Impeller's raster cache from allocating a zoomed full-document texture.
+    // MainView provides the viewport-sized repaint boundary, while this
+    // painter's stable listenable limits redraws to actual pixel changes.
+    return CustomPaint(
+      size: Size.infinite,
+      painter: CanvasPanelPainter(
+        layers.list,
+        canvasOffset: canvasOffset,
+        canvasScale: canvasScale,
+        includeTransparentBackground: true,
+        displayScale: displayScale,
+        visibleCanvasBounds: visibleCanvasBounds,
+        onNeedsDisplayCache: layers.scheduleDisplayCacheRebuild,
+        isInteractiveViewportChange: () => layers.isInteractiveViewportChange,
+        repaint: layers.canvasPainterRepaint,
       ),
     );
   }

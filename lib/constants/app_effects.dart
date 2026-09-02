@@ -12,6 +12,9 @@ class AppEffects {
   /// Strength multiplier for the unsharp-mask sharpen effect.
   static const double sharpenAmount = 1.5;
 
+  /// Pixel-space scale for effects rendered at full resolution.
+  static const double defaultPixelScale = 1.0;
+
   /// Downscale factor for the pixelation effect (pixels are grouped into blocks).
   static const int pixelateBlockSize = 8;
 

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -206,11 +207,29 @@ void main() {
     });
 
     test('scale getter and setter', () {
+      int repaintCount = 0;
+      layers.canvasPainterRepaint.addListener(() => repaintCount++);
+
       layers.scale = 2.0;
       expect(layers.scale, 2.0);
+      expect(repaintCount, 0);
       // Clamp to max
       layers.scale = 100.0;
       expect(layers.scale, lessThanOrEqualTo(10.0));
+      expect(repaintCount, 0);
+    });
+
+    test('interactive viewport changes defer display-cache sharpening', () async {
+      final LayerProvider layer = layers.selectedLayer;
+      expect(await layer.buildDisplayCache(AppInteraction.minCanvasScale), isTrue);
+
+      layers.beginInteractiveViewportChange();
+      expect(layers.isInteractiveViewportChange, isTrue);
+      layers.scheduleDisplayCacheRebuild(layer, AppInteraction.minCanvasScale * 2);
+
+      expect(await layer.buildDisplayCache(AppInteraction.minCanvasScale * 2), isTrue);
+      layers.endInteractiveViewportChange();
+      expect(layers.isInteractiveViewportChange, isFalse);
     });
 
     test('size setter updates layers', () {
