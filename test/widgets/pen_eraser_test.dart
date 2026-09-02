@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -45,7 +46,7 @@ Future<void> _stroke(WidgetTester tester, Offset start, PointerDeviceKind kind, 
   await gesture.moveBy(const Offset(40, 0));
   await gesture.up();
   await tester.pump();
-  await tester.pump(const Duration(seconds: 1));
+  await tester.pump(AppDefaults.thumbnailDebounceDuration);
   await tester.pump();
 }
 
@@ -106,6 +107,28 @@ void main() {
 
     await _stroke(tester, start, PointerDeviceKind.mouse, kPrimaryButton);
 
+    expect(appProvider.layers.selectedLayer.lastUserAction?.action, ActionType.brush);
+  });
+
+  testWidgets('a selected brush still draws with a single touch stroke', (WidgetTester tester) async {
+    appProvider.selectedAction = ActionType.brush;
+    final Offset start = await canvasStart(tester);
+
+    await _stroke(tester, start, PointerDeviceKind.touch, kPrimaryButton);
+
+    expect(appProvider.layers.selectedLayer.lastUserAction?.action, ActionType.brush);
+  });
+
+  testWidgets('pen-only drawing blocks touch but accepts a normal stylus', (WidgetTester tester) async {
+    await preferences.setPenOnlyDrawing(true);
+    appProvider.selectedAction = ActionType.brush;
+    final Offset start = await canvasStart(tester);
+    final int initialActionCount = appProvider.layers.selectedLayer.actionStack.length;
+
+    await _stroke(tester, start, PointerDeviceKind.touch, kPrimaryButton);
+    expect(appProvider.layers.selectedLayer.actionStack.length, initialActionCount);
+
+    await _stroke(tester, start, PointerDeviceKind.stylus, kPrimaryButton);
     expect(appProvider.layers.selectedLayer.lastUserAction?.action, ActionType.brush);
   });
 }

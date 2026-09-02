@@ -116,8 +116,8 @@ void _exerciseAllStrings(AppLocalizations l10n) {
   expect(l10n.transform, isNotEmpty);
   expect(l10n.unsavedChanges, isNotEmpty);
   expect(l10n.unsavedChangesDiscardAndOpenPrompt, isNotEmpty);
-  expect(l10n.useApplePencilOnlySubtitle, isNotEmpty);
-  expect(l10n.useApplePencilOnlyTitle, isNotEmpty);
+  expect(l10n.penOnlyDrawingSubtitle, isNotEmpty);
+  expect(l10n.penOnlyDrawingTitle, isNotEmpty);
   expect(l10n.webBrowser, isNotEmpty);
   expect(l10n.width, isNotEmpty);
   expect(l10n.toolPencil, isNotEmpty);

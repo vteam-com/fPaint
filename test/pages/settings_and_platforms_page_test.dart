@@ -27,7 +27,7 @@ void main() {
 
     expect(find.text('Settings...'), findsOneWidget);
     expect(find.text('Language'), findsOneWidget);
-    expect(find.text('Use Apple Pencil Only'), findsOneWidget);
+    expect(find.text('Pen-only drawing'), findsOneWidget);
     expect(find.text('Keep Save Backups'), findsOneWidget);
 
     await tester.tap(find.byType(AppDropdown<String>));
@@ -37,10 +37,10 @@ void main() {
 
     expect(preferences.languageCode, 'fr');
 
-    await tester.tap(find.text('Use Apple Pencil Only'));
+    await tester.tap(find.text('Pen-only drawing'));
     await tester.pumpAndSettle();
 
-    expect(preferences.useApplePencil, isTrue);
+    expect(preferences.penOnlyDrawing, isTrue);
 
     await tester.tap(find.text('Keep Save Backups'));
     await tester.pumpAndSettle();

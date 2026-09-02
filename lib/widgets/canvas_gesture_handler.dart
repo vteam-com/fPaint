@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
@@ -49,14 +50,17 @@ class CanvasGestureHandler extends StatefulWidget {
 class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   int _activePointerId = -1;
   final List<int> _activePointers = <int>[];
-  double _baseDistance = 0.0;
 
   /// Whether the active gesture is a paint-mode effect stroke: it reuses the
   /// pixel-brush gesture capture but commits the armed Adjust effect on
   /// pointer-up instead of a smudge/blur dab.
   bool _effectBrushStroke = false;
+  Offset? _lastMultiTouchFocalPoint;
+  double _lastScaleDistance = 0.0;
   Offset? _lastSelectionTapCanvasPosition;
   Duration? _lastSelectionTapTimestamp;
+  final Set<int> _multiTouchPointersMoved = <int>{};
+  PointerDownEvent? _pendingTouchDownEvent;
 
   /// Canvas clip path active when the stroke began (may be null).
   ui.Path? _pixelBrushClipPath;
@@ -85,7 +89,6 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// The selector math mode active before a modifier-key override was applied.
   /// Non-null only during a modifier-driven selection gesture.
   SelectorMath? _previousSelectorMath;
-  double _scaleFactor = 1.0;
   Uint8List? _smudgeSourceBytes;
   int _smudgeSourceHeight = 0;
   int _smudgeSourceRegionLeft = 0;
@@ -108,6 +111,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
 
   /// Tolerance captured when the tolerance-drag gesture began.
   int _toleranceDragStartTolerance = AppDefaults.tolerance;
+  bool _viewportRepaintScheduled = false;
   @override
   void dispose() {
     // Free the per-session smudge source cache (a full-canvas CPU buffer).
@@ -199,17 +203,30 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         onPointerDown: (PointerDownEvent event) {
           _registerInputModality(shellProvider, event.kind);
           if (event.kind == PointerDeviceKind.touch) {
+            // A centered brush-size preview may still be visible from a recent
+            // size adjustment. Clear it as soon as touch navigation begins so
+            // it cannot flash between the first and second pinch contacts.
+            appProvider.hideDrawingToolPreview();
             _pointerPositions[event.pointer] = event.localPosition;
-            _getDistanceBetweenTouchPoints();
+            if (!_activePointers.contains(event.pointer)) {
+              _activePointers.add(event.pointer);
+            }
 
-            _activePointers.add(event.pointer);
-
-            if (_activePointers.length == AppMath.pair) {
-              // Set the initial focal point between two fingers
-              _baseDistance = _getDistanceBetweenTouchPoints();
+            if (_activePointers.length >= AppMath.pair) {
+              if (_activePointers.length == AppMath.pair) {
+                if (_activePointerId != -1) {
+                  _cancelActiveTouchInteraction(appProvider);
+                }
+                _lastScaleDistance = _getDistanceBetweenTouchPoints();
+                _lastMultiTouchFocalPoint = _getMultiTouchFocalPoint();
+                _multiTouchPointersMoved.clear();
+                appProvider.layers.beginInteractiveViewportChange();
+              }
+              _pendingTouchDownEvent = null;
+              appProvider.hideDrawingToolPreview();
             } else {
-              if (event.buttons == 1 && !appPreferences.useApplePencil) {
-                _handlePointerStart(appProvider, event);
+              if (event.buttons == 1 && !appPreferences.penOnlyDrawing) {
+                _pendingTouchDownEvent = event;
               }
             }
           } else {
@@ -220,16 +237,24 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           _registerInputModality(shellProvider, event.kind);
           if (event.kind == PointerDeviceKind.touch) {
             _pointerPositions[event.pointer] = event.localPosition;
-            _getDistanceBetweenTouchPoints();
 
-            if (_activePointers.length == AppMath.pair) {
+            if (_shouldProcessMultiTouchUpdate(event.pointer)) {
               _handleMultiTouchUpdate(
-                event,
                 appProvider,
                 shellProvider,
               );
+              _multiTouchPointersMoved.clear();
             } else {
-              if (event.buttons == 1 && !appPreferences.useApplePencil) {
+              if (event.buttons == 1 && !appPreferences.penOnlyDrawing) {
+                final PointerDownEvent? pendingTouchDownEvent = _pendingTouchDownEvent;
+                if (pendingTouchDownEvent != null && pendingTouchDownEvent.pointer == event.pointer) {
+                  if ((event.localPosition - pendingTouchDownEvent.localPosition).distance <
+                      AppInteraction.singleTouchDrawSlop) {
+                    return;
+                  }
+                  _pendingTouchDownEvent = null;
+                  _handlePointerStart(appProvider, pendingTouchDownEvent);
+                }
                 _handlePointerMove(appProvider, event);
               }
             }
@@ -239,24 +264,55 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         },
         onPointerUp: (PointerUpEvent event) {
           if (event.kind == PointerDeviceKind.touch) {
+            final bool wasMultiTouch = _activePointers.length >= AppMath.pair;
             _pointerPositions.remove(event.pointer);
-            _getDistanceBetweenTouchPoints(); // Recalculate distance
             _activePointers.remove(event.pointer);
             if (_activePointers.length < AppMath.pair) {
-              _baseDistance = 0.0; // Reset base distance
+              _lastScaleDistance = 0.0;
+              _lastMultiTouchFocalPoint = null;
+              _multiTouchPointersMoved.clear();
+              if (wasMultiTouch) {
+                appProvider.layers.endInteractiveViewportChange();
+              }
+            } else if (wasMultiTouch) {
+              _lastScaleDistance = _getDistanceBetweenTouchPoints();
+              _lastMultiTouchFocalPoint = _getMultiTouchFocalPoint();
+              _multiTouchPointersMoved.clear();
             }
-            _handlePointerEnd(appProvider, event);
+            if (wasMultiTouch) {
+              _pendingTouchDownEvent = null;
+            } else {
+              final PointerDownEvent? pendingTouchDownEvent = _pendingTouchDownEvent;
+              if (pendingTouchDownEvent != null && pendingTouchDownEvent.pointer == event.pointer) {
+                _pendingTouchDownEvent = null;
+                _handlePointerStart(appProvider, pendingTouchDownEvent);
+              }
+              _handlePointerEnd(appProvider, event);
+            }
           } else {
             _handlePointerEnd(appProvider, event);
           }
         },
         onPointerCancel: (PointerCancelEvent event) {
           if (event.kind == PointerDeviceKind.touch) {
+            final bool wasMultiTouch = _activePointers.length >= AppMath.pair;
             _pointerPositions.remove(event.pointer);
-            _getDistanceBetweenTouchPoints(); // Recalculate distance
             _activePointers.remove(event.pointer);
+            _pendingTouchDownEvent = null;
             if (_activePointers.length < AppMath.pair) {
-              _baseDistance = 0.0; // Reset base distance
+              _lastScaleDistance = 0.0;
+              _lastMultiTouchFocalPoint = null;
+              _multiTouchPointersMoved.clear();
+              if (wasMultiTouch) {
+                appProvider.layers.endInteractiveViewportChange();
+              }
+            } else if (wasMultiTouch) {
+              _lastScaleDistance = _getDistanceBetweenTouchPoints();
+              _lastMultiTouchFocalPoint = _getMultiTouchFocalPoint();
+              _multiTouchPointersMoved.clear();
+            }
+            if (!wasMultiTouch && _activePointerId == event.pointer) {
+              _cancelActiveTouchInteraction(appProvider);
             }
             // Release a tolerance pointer lock so a cancelled touch cannot leave
             // the cursor hidden for a later mouse user.
@@ -282,6 +338,21 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       return SystemMouseCursors.none;
     }
     return appProvider.isWandSelectionActive ? SystemMouseCursors.precise : MouseCursor.defer;
+  }
+
+  /// Collapses high-frequency input samples into one canvas rebuild per frame.
+  void _scheduleViewportRepaint(AppProvider appProvider) {
+    if (_viewportRepaintScheduled) {
+      return;
+    }
+
+    _viewportRepaintScheduled = true;
+    SchedulerBinding.instance.scheduleFrameCallback((Duration _) {
+      _viewportRepaintScheduled = false;
+      if (mounted) {
+        appProvider.repaintViewport();
+      }
+    });
   }
 }
 

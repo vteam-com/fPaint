@@ -31,6 +31,8 @@ class FillImageData {
     required this.pixels,
     required this.width,
     required this.height,
+    this.canvasScaleX = AppVisual.full,
+    this.canvasScaleY = AppVisual.full,
   });
 
   /// Raster bytes in RGBA format. Must not be modified after construction.
@@ -41,6 +43,12 @@ class FillImageData {
 
   /// Height of the raster in pixels.
   final int height;
+
+  /// Raster-to-canvas scale on the horizontal axis.
+  final double canvasScaleX;
+
+  /// Raster-to-canvas scale on the vertical axis.
+  final double canvasScaleY;
 }
 
 /// Builds fill actions from image-based flood-fill regions.
@@ -291,13 +299,13 @@ class FillService {
       return FillRegion(path: ui.Path(), offset: ui.Offset.zero);
     }
 
-    final int x = position.dx.toInt();
-    final int y = position.dy.toInt();
-
     final FillImageData? source = imageData ?? await _buildFillImageData(image);
     if (source == null) {
       return FillRegion(path: ui.Path(), offset: ui.Offset.zero);
     }
+
+    final int x = (position.dx * source.canvasScaleX).toInt();
+    final int y = (position.dy * source.canvasScaleY).toInt();
 
     // Guard against out-of-bounds or invalid coordinates
     if (x < AppMath.zero || y < AppMath.zero || x >= source.width || y >= source.height) {
@@ -313,9 +321,25 @@ class FillService {
       y: y,
       tolerance: tolerance,
     );
+    if (source.canvasScaleX == AppVisual.full && source.canvasScaleY == AppVisual.full) {
+      return FillRegion(path: region.path, offset: region.offset);
+    }
+
+    final ui.Path canvasPath = region.path.transform(
+      (Matrix4.identity()..scaleByDouble(
+            AppVisual.full / source.canvasScaleX,
+            AppVisual.full / source.canvasScaleY,
+            AppVisual.full,
+            AppVisual.full,
+          ))
+          .storage,
+    );
     return FillRegion(
-      path: region.path,
-      offset: region.offset,
+      path: canvasPath,
+      offset: ui.Offset(
+        region.offset.dx / source.canvasScaleX,
+        region.offset.dy / source.canvasScaleY,
+      ),
     );
   }
 

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -69,7 +70,16 @@ Future<int> _committedPatchMinDisplayAlpha(Rect patchBounds, double scale) async
   final ui.Image displayed = await renderCanvasImage(
     width: 64,
     height: 64,
-    draw: (ui.Canvas canvas) => layer.renderLayerForDisplay(canvas, scale, () {}),
+    draw: (ui.Canvas canvas) => layer.renderLayerForViewportDisplay(
+      canvas,
+      scale,
+      () {},
+      viewportBounds: const Rect.fromLTWH(0, 0, 64, 64),
+      canvasOffset: Offset.zero,
+      canvasScale: 1.0,
+      visibleCanvasBounds: const Rect.fromLTWH(0, 0, 64, 64),
+      filterQuality: ui.FilterQuality.medium,
+    ),
   );
   final ByteData? bytes = await displayed.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
   displayed.dispose();
@@ -137,7 +147,7 @@ void main() {
 
     expect(storage.bytes, Uint8List.fromList(<int>[1, 2, 3]));
 
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(AppDefaults.thumbnailDebounceDuration);
     await tester.pump();
 
     controller.dispose();
@@ -207,7 +217,7 @@ void main() {
 
     expect(appProvider.layers.selectedLayer.actionStack, isNotEmpty);
 
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(AppDefaults.thumbnailDebounceDuration);
     await tester.pump();
 
     controller.dispose();
@@ -289,7 +299,7 @@ void main() {
     expect(appProvider.selectorModel.path1, isNotNull);
     expect(appProvider.selectorModel.path1!.getBounds(), const Rect.fromLTWH(50, 50, 70, 70));
 
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(AppDefaults.thumbnailDebounceDuration);
     await tester.pump();
 
     controller.dispose();
@@ -370,7 +380,7 @@ void main() {
     expect(appProvider.selectorModel.path1, isNotNull);
     expect(appProvider.selectorModel.path1!.getBounds(), const Rect.fromLTWH(50, 50, 120, 90));
 
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(AppDefaults.thumbnailDebounceDuration);
     await tester.pump();
 
     controller.dispose();

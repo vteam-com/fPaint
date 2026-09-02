@@ -29,4 +29,30 @@ class AppLimits {
   static const int maxRecentFiles = 10;
   static const int recentFilesDisplayCount = 5;
   static const int maxSaveFileBackups = 3;
+
+  /// Conservative upper bound for a single render-target dimension. ANGLE on
+  /// D3D11 caps textures at 16384; staying well under it avoids allocation
+  /// failures that surface as an EGL "context lost" device reset.
+  static const int maxRenderTargetDimension = 8192;
+
+  /// Longest side of the downscaled image used for live effect previews.
+  static const int effectPreviewMaxDimension = 2048;
+
+  /// Longest side of the raster sampled by flood fill. Larger canvases are
+  /// sampled at this bounded resolution to avoid a full-size GPU readback.
+  static const int floodFillSourceMaxDimension = 2048;
+
+  /// Whole-layer image generations kept in a layer's action stack. Each one
+  /// costs a full-canvas texture, so only the current and previous are kept;
+  /// older generations are already invisible behind the full-layer erase.
+  static const int fullLayerImageGenerations = 2;
+
+  /// Whole-layer effect records kept in undo history, matching the one
+  /// restorable generation left by [fullLayerImageGenerations].
+  static const int fullLayerEffectUndoHistory = 1;
+
+  /// Largest canvas (in pixels) that still gets a retained full-resolution
+  /// layer cache. Above this the render target alone is hundreds of MB, which
+  /// Impeller cannot allocate reliably, so the display projection is used.
+  static const int fullResolutionCacheMaxPixels = 16000000;
 }

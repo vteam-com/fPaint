@@ -5,28 +5,36 @@ class _SelectionEffectPreviewState {
   _SelectionEffectPreviewState({
     required this.effect,
     required this.sourceImage,
+    required this.pixelScale,
     required this.selectionPath,
     required this.bounds,
     required this.strength,
     required this.size,
+    required this.coversEntireLayer,
   });
 
   final SelectionEffect effect;
   final ui.Image sourceImage;
+  final double pixelScale;
   final Path selectionPath;
   final Rect bounds;
   final double strength;
   final double size;
+  final bool coversEntireLayer;
 }
 
 /// Effect-preview operations split from the main selection file to keep the
 /// primary selection workflow under the repo's LOC quality gate.
 extension AppProviderSelectionEffects on AppProvider {
   /// Returns a stable snapshot of the current effect preview state.
-  _SelectionEffectPreviewState? _currentEffectPreviewState() {
+  ///
+  /// When [fullResolution] is false the snapshot targets the downscaled proxy,
+  /// which is what live preview renders from.
+  _SelectionEffectPreviewState? _currentEffectPreviewState({bool fullResolution = false}) {
     if (!effectPreviewModel.isVisible ||
         effectPreviewModel.effect == null ||
         effectPreviewModel.sourceImage == null ||
+        effectPreviewModel.proxyImage == null ||
         effectPreviewModel.erasePath == null ||
         effectPreviewModel.bounds == null) {
       return null;
@@ -34,11 +42,13 @@ extension AppProviderSelectionEffects on AppProvider {
 
     return _SelectionEffectPreviewState(
       effect: effectPreviewModel.effect!,
-      sourceImage: effectPreviewModel.sourceImage!,
+      sourceImage: fullResolution ? effectPreviewModel.sourceImage! : effectPreviewModel.proxyImage!,
+      pixelScale: fullResolution ? AppEffects.defaultPixelScale : effectPreviewModel.proxyScale,
       selectionPath: Path.from(effectPreviewModel.erasePath!),
       bounds: effectPreviewModel.bounds!,
       strength: effectPreviewModel.strength,
       size: effectPreviewModel.size,
+      coversEntireLayer: effectPreviewModel.coversEntireLayer,
     );
   }
 
@@ -66,10 +76,16 @@ extension AppProviderSelectionEffects on AppProvider {
     ui.Image image, {
     required Path selectionPath,
     required Rect bounds,
+    required double pixelScale,
   }) async {
-    final Path localSelectionPath = selectionPath.shift(
+    Path localSelectionPath = selectionPath.shift(
       Offset(-bounds.left, -bounds.top),
     );
+    if (pixelScale != AppEffects.defaultPixelScale) {
+      localSelectionPath = localSelectionPath.transform(
+        (Matrix4.identity()..scaleByDouble(pixelScale, pixelScale, 1.0, 1.0)).storage,
+      );
+    }
 
     return renderCanvasImage(
       width: image.width,
@@ -91,13 +107,38 @@ extension AppProviderSelectionEffects on AppProvider {
       state.sourceImage,
       strength: state.strength,
       size: state.size,
+      pixelScale: state.pixelScale,
     );
 
-    return _maskEffectImageToSelection(
+    // A whole-layer effect's mask is the full-canvas rect, so clipping to it is
+    // a no-op that would cost another full-resolution texture and render pass.
+    if (state.coversEntireLayer) {
+      if (identical(processedImage, state.sourceImage)) {
+        // Zero-strength no-op: hand back a copy so the caller can take
+        // ownership without freeing the retained source.
+        return renderCanvasImage(
+          width: processedImage.width,
+          height: processedImage.height,
+          draw: (ui.Canvas canvas) => canvas.drawImage(processedImage, Offset.zero, ui.Paint()),
+        );
+      }
+      return processedImage;
+    }
+
+    final ui.Image maskedImage = await _maskEffectImageToSelection(
       processedImage,
       selectionPath: state.selectionPath,
       bounds: state.bounds,
+      pixelScale: state.pixelScale,
     );
+
+    // A zero-strength effect returns its source unchanged; disposing that would
+    // destroy the preview's retained source image.
+    if (!identical(processedImage, state.sourceImage)) {
+      processedImage.dispose();
+    }
+
+    return maskedImage;
   }
 
   /// Captures the effect source image, mask path, and bounds for the current
@@ -106,7 +147,7 @@ extension AppProviderSelectionEffects on AppProvider {
   ///
   /// Returns null when the source image could not be produced. Callers own the
   /// returned image and must dispose it.
-  Future<({ui.Image image, Path path, Rect bounds})?> _captureEffectTarget() async {
+  Future<({ui.Image image, Path path, Rect bounds, bool coversEntireLayer})?> _captureEffectTarget() async {
     final bool hasSelection = selectorModel.isVisible && selectorModel.path1 != null;
 
     if (hasSelection) {
@@ -118,6 +159,7 @@ extension AppProviderSelectionEffects on AppProvider {
         image: clippedImage,
         path: Path.from(selectorModel.path1!),
         bounds: selectorModel.path1!.getBounds(),
+        coversEntireLayer: false,
       );
     }
 
@@ -126,7 +168,37 @@ extension AppProviderSelectionEffects on AppProvider {
       image: layers.selectedLayer.toImageForStorage(layers.size),
       path: Path()..addRect(bounds),
       bounds: bounds,
+      coversEntireLayer: true,
     );
+  }
+
+  /// Builds the downscaled image that live preview renders from.
+  ///
+  /// Returns [source] itself (scale 1.0) when it already fits the preview
+  /// budget, so callers must not dispose the result independently.
+  Future<({ui.Image image, double scale})> _buildEffectPreviewProxy(ui.Image source) async {
+    final int longestSide = source.width > source.height ? source.width : source.height;
+    if (longestSide <= AppLimits.effectPreviewMaxDimension) {
+      return (image: source, scale: AppEffects.defaultPixelScale);
+    }
+
+    final double scale = AppLimits.effectPreviewMaxDimension / longestSide;
+    final int proxyWidth = (source.width * scale).round().clamp(AppMath.one, source.width);
+    final int proxyHeight = (source.height * scale).round().clamp(AppMath.one, source.height);
+
+    final ui.Image proxy = await renderCanvasImage(
+      width: proxyWidth,
+      height: proxyHeight,
+      draw: (ui.Canvas canvas) {
+        canvas.drawImageRect(
+          source,
+          Rect.fromLTWH(0, 0, source.width.toDouble(), source.height.toDouble()),
+          Rect.fromLTWH(0, 0, proxyWidth.toDouble(), proxyHeight.toDouble()),
+          ui.Paint()..filterQuality = FilterQuality.medium,
+        );
+      },
+    );
+    return (image: proxy, scale: scale);
   }
 
   /// Starts live preview mode for the selected [effect], [strength], and [size].
@@ -144,14 +216,19 @@ extension AppProviderSelectionEffects on AppProvider {
       return;
     }
 
-    final ({ui.Image image, Path path, Rect bounds})? target = await _captureEffectTarget();
+    final ({ui.Image image, Path path, Rect bounds, bool coversEntireLayer})? target = await _captureEffectTarget();
     if (target == null) {
       return;
     }
 
+    final ({ui.Image image, double scale}) proxy = await _buildEffectPreviewProxy(target.image);
+
     effectPreviewModel.start(
       selectedEffect: effect,
       selectionImage: target.image,
+      selectionProxyImage: proxy.image,
+      selectionProxyScale: proxy.scale,
+      selectionCoversEntireLayer: target.coversEntireLayer,
       selectionPath: target.path,
       selectionBounds: target.bounds,
       initialStrength: strength,
@@ -175,12 +252,13 @@ extension AppProviderSelectionEffects on AppProvider {
 
   /// Commits the current effect preview as a single undoable action.
   Future<void> confirmEffectPreview() async {
-    final _SelectionEffectPreviewState? state = _currentEffectPreviewState();
+    final _SelectionEffectPreviewState? state = _currentEffectPreviewState(fullResolution: true);
     if (state == null) {
       return;
     }
 
     final ui.Image maskedImage = await _buildMaskedEffectImage(state);
+    final bool coversEntireLayer = effectPreviewModel.coversEntireLayer;
 
     effectPreviewModel.clear();
     repaintToolOptions();
@@ -190,9 +268,30 @@ extension AppProviderSelectionEffects on AppProvider {
       erasePath: state.selectionPath,
       replacement: maskedImage,
       offset: Offset(state.bounds.left, state.bounds.top),
+      erasesEntireLayer: coversEntireLayer,
     );
 
+    if (coversEntireLayer) {
+      _collapseWholeLayerEffectHistory();
+    }
+
     update();
+  }
+
+  /// Bounds the cost of repeated whole-layer effects.
+  ///
+  /// Every such effect pins a full-canvas texture in the action stack and is
+  /// replayed on each cache rebuild, so only the current and previous
+  /// generations are kept; undo history is trimmed to match what survives.
+  void _collapseWholeLayerEffectHistory() {
+    undoProvider.trimUndoHistoryWhere(
+      predicate: (RecordAction action) =>
+          SelectionEffect.values.any((SelectionEffect effect) => effect.name == action.name),
+      maxKeep: AppLimits.fullLayerEffectUndoHistory,
+    );
+
+    final List<ui.Image> orphaned = layers.selectedLayer.collapseFullyErasedActions();
+    layers.disposeCommittedImagesIfUnreferenced(orphaned);
   }
 
   /// Cancels the active effect preview without committing changes.
@@ -218,9 +317,11 @@ extension AppProviderSelectionEffects on AppProvider {
     final ui.Image previewImage = await _buildMaskedEffectImage(state);
 
     if (!effectPreviewModel.isVisible || requestVersion != effectPreviewRenderVersion) {
+      previewImage.dispose();
       return;
     }
 
+    effectPreviewModel.previewImage?.dispose();
     effectPreviewModel.previewImage = previewImage;
     update();
   }

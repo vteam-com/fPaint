@@ -12,6 +12,15 @@ class EffectPreviewModel extends VisibleModel {
   /// Original clipped pixels captured from the active selection.
   ui.Image? sourceImage;
 
+  /// Downscaled copy of [sourceImage] used for live preview rendering.
+  ///
+  /// Live preview at full resolution allocates a render target per slider tick,
+  /// which exhausts VRAM on very large canvases. Commits still use [sourceImage].
+  ui.Image? proxyImage;
+
+  /// Ratio of [proxyImage] size to [sourceImage] size (1.0 when not downscaled).
+  double proxyScale = AppEffects.defaultPixelScale;
+
   /// Latest processed image produced for live preview.
   ui.Image? previewImage;
 
@@ -20,6 +29,9 @@ class EffectPreviewModel extends VisibleModel {
 
   /// Selection bounds in canvas coordinates.
   ui.Rect? bounds;
+
+  /// Whether the effect targets the whole layer rather than a selection.
+  bool coversEntireLayer = false;
 
   /// Current intensity used for the live preview.
   double strength = AppEffects.defaultIntensity;
@@ -35,9 +47,16 @@ class EffectPreviewModel extends VisibleModel {
     required ui.Rect selectionBounds,
     required double initialStrength,
     required double initialSize,
+    ui.Image? selectionProxyImage,
+    double selectionProxyScale = AppEffects.defaultPixelScale,
+    bool selectionCoversEntireLayer = false,
   }) {
+    _disposeImages();
     effect = selectedEffect;
     sourceImage = selectionImage;
+    proxyImage = selectionProxyImage ?? selectionImage;
+    proxyScale = selectionProxyScale;
+    coversEntireLayer = selectionCoversEntireLayer;
     previewImage = null;
     erasePath = selectionPath;
     bounds = selectionBounds;
@@ -48,13 +67,27 @@ class EffectPreviewModel extends VisibleModel {
 
   @override
   void clear() {
+    _disposeImages();
     effect = null;
-    sourceImage = null;
-    previewImage = null;
     erasePath = null;
     bounds = null;
+    coversEntireLayer = false;
     strength = AppEffects.defaultIntensity;
     size = AppEffects.minSize;
     super.clear();
+  }
+
+  /// Releases the GPU textures this model owns.
+  void _disposeImages() {
+    // The proxy can alias the source when no downscale was needed.
+    if (!identical(proxyImage, sourceImage)) {
+      proxyImage?.dispose();
+    }
+    sourceImage?.dispose();
+    previewImage?.dispose();
+    sourceImage = null;
+    proxyImage = null;
+    previewImage = null;
+    proxyScale = AppEffects.defaultPixelScale;
   }
 }

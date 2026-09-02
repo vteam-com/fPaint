@@ -9,10 +9,12 @@ import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/side_panel/side_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
+import 'package:fpaint/widgets/canvas_panel.dart';
 import 'package:fpaint/widgets/main_view.dart';
 import 'package:fpaint/widgets/selector_widget.dart';
 import 'package:fpaint/widgets/transform_widget.dart';
@@ -21,6 +23,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const int _testImageDimension = 12;
 const double _geometryEpsilon = 0.001;
+const double _pinchInitialScale = 0.5;
+const double _pinchExpectedScale = 0.6;
+const double _pinchInitialRadius = 30.0;
+const double _pinchFinalRadius = 36.0;
+const Offset _touchContactNoise = Offset(2.0, 0.0);
+const Size _largeCanvasSize = Size(5329.0, 9195.0);
 const Duration _modifyModePreparationDuration = Duration(seconds: 1);
 const Duration _snackBarDismissDuration = Duration(seconds: 4);
 const Size _desktopTestViewSize = Size(1600, 900);
@@ -485,7 +493,7 @@ void main() {
     expect(find.byKey(Keys.floatActionZoomIn), findsOneWidget);
   });
 
-  testWidgets('pinch zoom still works while transform overlay is active', (WidgetTester tester) async {
+  testWidgets('pinch zoom works while transform overlay is active', (WidgetTester tester) async {
     final ui.Image image = await _createTestImage();
     addTearDown(image.dispose);
     _startTransformOverlay(appProvider, image);
@@ -503,27 +511,199 @@ void main() {
     expect(canvasGestureHandler, findsOneWidget);
 
     final Offset center = tester.getCenter(canvasGestureHandler);
-    final double initialScale = appProvider.layers.scale;
+    final Offset localCenter = center - tester.getTopLeft(canvasGestureHandler);
+    appProvider.layers.scale = _pinchInitialScale;
+    final Offset canvasPointAtFocalPoint = appProvider.toCanvas(localCenter);
 
     final TestGesture finger1 = await tester.startGesture(
-      center + const Offset(-30, 0),
+      center + const Offset(-_pinchInitialRadius, 0),
       pointer: 1,
       kind: ui.PointerDeviceKind.touch,
     );
+    expect(find.byKey(Keys.brushSizePreviewOverlay), findsNothing);
     await tester.pump();
     final TestGesture finger2 = await tester.startGesture(
-      center + const Offset(30, 0),
+      center + const Offset(_pinchInitialRadius, 0),
       pointer: 2,
       kind: ui.PointerDeviceKind.touch,
     );
+    expect(find.byKey(Keys.brushSizePreviewOverlay), findsNothing);
     await tester.pump();
 
-    await finger1.moveTo(center + const Offset(-60, 0));
+    await finger1.moveTo(center + const Offset(-_pinchFinalRadius, 0));
     await tester.pump();
-    await finger2.moveTo(center + const Offset(60, 0));
+    await finger2.moveTo(center + const Offset(_pinchFinalRadius, 0));
     await tester.pump();
 
-    expect(appProvider.layers.scale, greaterThan(initialScale));
+    expect(appProvider.layers.scale, closeTo(_pinchExpectedScale, _geometryEpsilon));
+    expect(appProvider.toCanvas(localCenter).dx, closeTo(canvasPointAtFocalPoint.dx, _geometryEpsilon));
+    expect(appProvider.toCanvas(localCenter).dy, closeTo(canvasPointAtFocalPoint.dy, _geometryEpsilon));
+
+    await finger1.up();
+    await finger2.up();
+    await tester.pump();
+  });
+
+  testWidgets('maximum zoom bounds layer compositing to the visible viewport', (WidgetTester tester) async {
+    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+    appProvider.layers.size = _largeCanvasSize;
+    appProvider.layers.scale = AppInteraction.maxCanvasScale;
+    appProvider.canvasOffset = Offset.zero;
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    final Finder canvasGestureHandler = find.byType(CanvasGestureHandler);
+    final Finder canvasPanelFinder = find.byType(CanvasPanel);
+    final CanvasPanel canvasPanel = tester.widget<CanvasPanel>(canvasPanelFinder);
+    final Size viewportSize = tester.getSize(canvasGestureHandler);
+
+    expect(tester.getSize(canvasPanelFinder), viewportSize);
+    expect(
+      canvasPanel.visibleCanvasBounds.width,
+      closeTo(viewportSize.width / AppInteraction.maxCanvasScale, _geometryEpsilon),
+    );
+    expect(
+      canvasPanel.visibleCanvasBounds.height,
+      closeTo(viewportSize.height / AppInteraction.maxCanvasScale, _geometryEpsilon),
+    );
+    expect(
+      find.descendant(of: canvasPanelFinder, matching: find.byType(RepaintBoundary)),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
+    for (final LayerProvider layer in appProvider.layers.list) {
+      layer.cancelPendingThumbnailRebuild();
+    }
+  });
+
+  testWidgets('two-finger touch does not create a drawing action', (WidgetTester tester) async {
+    appProvider.selectedAction = ActionType.brush;
+    appProvider.brushSize = 24.0;
+    shellProvider.shellMode = ShellMode.hidden;
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    final Finder canvasGestureHandler = find.byType(CanvasGestureHandler);
+    final Offset center = tester.getCenter(canvasGestureHandler);
+    final int initialActionCount = appProvider.layers.selectedLayer.actionStack.length;
+    expect(find.byKey(Keys.brushSizePreviewOverlay), findsOneWidget);
+    final TestGesture finger1 = await tester.startGesture(
+      center + const Offset(-_pinchInitialRadius, 0),
+      pointer: 1,
+      kind: ui.PointerDeviceKind.touch,
+    );
+    await finger1.moveBy(_touchContactNoise);
+    await tester.pump();
+    expect(find.byKey(Keys.brushSizePreviewOverlay), findsNothing);
+    final TestGesture finger2 = await tester.startGesture(
+      center + const Offset(_pinchInitialRadius, 0),
+      pointer: 2,
+      kind: ui.PointerDeviceKind.touch,
+    );
+
+    await finger1.moveTo(center + const Offset(-_pinchFinalRadius, 0));
+    await finger2.moveTo(center + const Offset(_pinchFinalRadius, 0));
+    await tester.pump();
+    await finger1.up();
+    await finger2.up();
+    await tester.pump();
+
+    expect(appProvider.layers.selectedLayer.actionStack.length, initialActionCount);
+  });
+
+  testWidgets('pinch zoom continues with a third touch contact', (WidgetTester tester) async {
+    shellProvider.shellMode = ShellMode.hidden;
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    final Finder canvasGestureHandler = find.byType(CanvasGestureHandler);
+    final Offset center = tester.getCenter(canvasGestureHandler);
+    appProvider.layers.scale = _pinchInitialScale;
+    final TestGesture finger1 = await tester.startGesture(
+      center + const Offset(-_pinchInitialRadius, 0),
+      pointer: 1,
+      kind: ui.PointerDeviceKind.touch,
+    );
+    final TestGesture finger2 = await tester.startGesture(
+      center + const Offset(_pinchInitialRadius, 0),
+      pointer: 2,
+      kind: ui.PointerDeviceKind.touch,
+    );
+    final TestGesture extraContact = await tester.startGesture(
+      center + const Offset(0, _pinchInitialRadius),
+      pointer: 3,
+      kind: ui.PointerDeviceKind.touch,
+    );
+
+    await finger1.moveTo(center + const Offset(-_pinchFinalRadius, 0));
+    await finger2.moveTo(center + const Offset(_pinchFinalRadius, 0));
+    await tester.pump();
+
+    expect(appProvider.layers.scale, closeTo(_pinchExpectedScale, _geometryEpsilon));
+
+    await extraContact.up();
+    await finger1.up();
+    await finger2.up();
+    await tester.pump();
+  });
+
+  testWidgets('two-finger panning does not change the canvas zoom scale', (WidgetTester tester) async {
+    shellProvider.shellMode = ShellMode.hidden;
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    final Finder canvasGestureHandler = find.byType(CanvasGestureHandler);
+    final Offset center = tester.getCenter(canvasGestureHandler);
+    const double initialScale = 1.0;
+    appProvider.layers.scale = initialScale;
+
+    final TestGesture finger1 = await tester.startGesture(
+      center + const Offset(-_pinchInitialRadius, 0),
+      pointer: 1,
+      kind: ui.PointerDeviceKind.touch,
+    );
+    final TestGesture finger2 = await tester.startGesture(
+      center + const Offset(_pinchInitialRadius, 0),
+      pointer: 2,
+      kind: ui.PointerDeviceKind.touch,
+    );
+
+    // Pan both fingers right by 50px in 5px steps (pure two-finger panning translation).
+    for (int i = 1; i <= 10; i++) {
+      await finger1.moveTo(center + Offset(-_pinchInitialRadius + (i * 5.0), 0.0));
+      await tester.pump();
+      expect(appProvider.layers.scale, closeTo(initialScale, _geometryEpsilon));
+      await finger2.moveTo(center + Offset(_pinchInitialRadius + (i * 5.0), 0.0));
+      await tester.pump();
+    }
+
+    // The scale must remain unchanged because distance change is zero during translation panning.
+    expect(appProvider.layers.scale, closeTo(initialScale, _geometryEpsilon));
 
     await finger1.up();
     await finger2.up();

@@ -218,6 +218,8 @@
   },
   "paste": "Paste",
   "pencilSize": "Pencil Size",
+  "penOnlyDrawingSubtitle": "When enabled, drawing tools accept pen input only; touch remains available for canvas navigation.",
+  "penOnlyDrawingTitle": "Pen-only drawing",
   "percentageValue": "{value}%",
   "@percentageValue": {
     "placeholders": {
@@ -291,8 +293,6 @@
   "translate": "Translate",
   "unsavedChanges": "Unsaved Changes",
   "unsavedChangesDiscardAndOpenPrompt": "You have unsaved changes. Do you want to discard them and open the new file?",
-  "useApplePencilOnlySubtitle": "If enabled, only the Apple Pencil will be used for drawing.",
-  "useApplePencilOnlyTitle": "Use Apple Pencil Only",
   "webBrowser": "Web Browser",
   "width": "Width"
 }

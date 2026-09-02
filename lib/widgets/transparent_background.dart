@@ -71,7 +71,7 @@ class _TransparentBackgroundPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TransparentBackgroundPainter oldDelegate) => true;
+  bool shouldRepaint(_TransparentBackgroundPainter oldDelegate) => oldDelegate.patternSize != patternSize;
 }
 
 /// Draws a transparent background grid on the canvas.
@@ -97,6 +97,7 @@ void drawTransparentBackgroundOffsetAndSize({
   final Paint paintBackground = Paint()..color = AppColors.grey300;
   canvas.drawRect(containerRect, paintBackground);
 
+  final Paint paintCell = Paint()..color = AppColors.grey400;
   for (double x = 0; x < size.width; x += cellSize) {
     for (double y = 0; y < size.height; y += cellSize) {
       if ((x ~/ cellSize + y ~/ cellSize) % AppMath.pair == 0) {
@@ -107,7 +108,7 @@ void drawTransparentBackgroundOffsetAndSize({
             cellSize,
             cellSize,
           ),
-          Paint()..color = AppColors.grey400,
+          paintCell,
         );
       }
     }

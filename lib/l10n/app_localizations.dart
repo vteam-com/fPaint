@@ -1292,17 +1292,17 @@ abstract class AppLocalizations {
   /// **'You have unsaved changes. Do you want to discard them and open the new file?'**
   String get unsavedChangesDiscardAndOpenPrompt;
 
-  /// No description provided for @useApplePencilOnlySubtitle.
+  /// No description provided for @penOnlyDrawingSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'If enabled, only the Apple Pencil will be used for drawing.'**
-  String get useApplePencilOnlySubtitle;
+  /// **'When enabled, drawing tools accept pen input only; touch remains available for canvas navigation.'**
+  String get penOnlyDrawingSubtitle;
 
-  /// No description provided for @useApplePencilOnlyTitle.
+  /// No description provided for @penOnlyDrawingTitle.
   ///
   /// In en, this message translates to:
-  /// **'Use Apple Pencil Only'**
-  String get useApplePencilOnlyTitle;
+  /// **'Pen-only drawing'**
+  String get penOnlyDrawingTitle;
 
   /// No description provided for @webBrowser.
   ///

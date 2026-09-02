@@ -46,6 +46,11 @@ class LayersProvider extends ChangeNotifier {
   final ChangeNotifier _canvasRepaintNotifier = ChangeNotifier();
   final ChangeNotifier _layerListStructureNotifier = ChangeNotifier();
   final ChangeNotifier _topColorsNotifier = ChangeNotifier();
+  final Map<LayerProvider, double> _deferredDisplayCacheScales = <LayerProvider, double>{};
+  bool _displayCacheRebuildsSuspended = false;
+
+  /// Whether a live pan or pinch should prioritize frame rate over sampling quality.
+  bool get isInteractiveViewportChange => _displayCacheRebuildsSuspended;
 
   /// Stable repaint signal for the canvas painter (layer state + active-interaction
   /// repaints), merged once so the painter does not allocate a fresh
@@ -211,7 +216,8 @@ class LayersProvider extends ChangeNotifier {
   /// Sets the scale of the canvas.
   ///
   /// The scale value is clamped between 10% and 400% to ensure a valid range.
-  /// Calling this method will notify any listeners of the [AppProvider] that the scale has changed.
+  /// Viewport owners notify after updating scale and offset together, avoiding
+  /// an intermediate canvas repaint with stale transform state.
   double _scale = 1;
 
   /// Gets the scale of the canvas.
@@ -222,10 +228,6 @@ class LayersProvider extends ChangeNotifier {
     final double clamped = value.clamp(AppInteraction.minCanvasScale, AppInteraction.maxCanvasScale);
     if (_scale != clamped) {
       _scale = clamped;
-      // Repaint the canvas so the painter re-evaluates the required display
-      // resolution — zooming in past a layer's display-cache resolution must
-      // trigger a sharper rebuild.
-      _canvasRepaintNotifier.notifyListeners();
     }
   }
 
@@ -235,11 +237,37 @@ class LayersProvider extends ChangeNotifier {
   /// display cache is missing/stale; the per-layer guard collapses duplicate
   /// requests, so calling it every frame during a rebuild is safe.
   void scheduleDisplayCacheRebuild(LayerProvider layer, double requiredScale) {
+    if (_displayCacheRebuildsSuspended && layer.hasDisplayCache) {
+      _deferredDisplayCacheScales[layer] = requiredScale;
+      return;
+    }
     unawaited(
-      layer.buildDisplayCache(requiredScale).then((_) {
-        _canvasRepaintNotifier.notifyListeners();
+      layer.buildDisplayCache(requiredScale).then((bool didBuild) {
+        if (didBuild) {
+          _canvasRepaintNotifier.notifyListeners();
+        }
       }),
     );
+  }
+
+  /// Defers display-cache sharpening while a real-time viewport gesture runs.
+  void beginInteractiveViewportChange() {
+    _displayCacheRebuildsSuspended = true;
+    repaintCanvas();
+  }
+
+  /// Rebuilds display caches once at the final gesture scale.
+  void endInteractiveViewportChange() {
+    if (!_displayCacheRebuildsSuspended) {
+      return;
+    }
+    _displayCacheRebuildsSuspended = false;
+    repaintCanvas();
+    final Map<LayerProvider, double> deferredScales = Map<LayerProvider, double>.of(
+      _deferredDisplayCacheScales,
+    );
+    _deferredDisplayCacheScales.clear();
+    deferredScales.forEach(scheduleDisplayCacheRebuild);
   }
 
   /// The cached image of the canvas.
@@ -444,17 +472,41 @@ class LayersProvider extends ChangeNotifier {
       name: name,
       size: _size,
       onThumbnailChanged: _onLayerThumbnailChanged,
+      isThumbnailVisible: () => _thumbnailsVisible,
     );
+  }
+
+  bool _thumbnailsVisible = true;
+
+  /// Whether the layers panel is on screen.
+  bool get thumbnailsVisible => _thumbnailsVisible;
+
+  /// Sets whether the layers panel is on screen.
+  ///
+  /// While false, layers skip thumbnail rebuilds entirely; turning it back on
+  /// flushes the ones that were deferred.
+  set thumbnailsVisible(bool value) {
+    if (_thumbnailsVisible == value) {
+      return;
+    }
+    _thumbnailsVisible = value;
+    if (!value) {
+      return;
+    }
+    for (final LayerProvider layer in _list) {
+      if (layer.thumbnailNeedsRebuild) {
+        unawaited(layer.updateThumbnail());
+      }
+    }
   }
 
   /// Invoked when a layer finishes (re)building its cached raster/thumbnail.
   ///
   /// The cache rebuild is debounced and completes asynchronously, after which
   /// the layer's on-canvas appearance can differ from the last painted frame
-  /// (e.g. a freshly committed text or stroke). The canvas is wrapped in a
-  /// `RepaintBoundary` that only re-rasterizes when [canvasPainterRepaint]
-  /// fires, so the canvas must be explicitly repainted here — otherwise it
-  /// keeps a stale raster showing the layer mid-build.
+  /// (e.g. a freshly committed text or stroke). The canvas painter listens only
+  /// to [canvasPainterRepaint], so it must be explicitly repainted here —
+  /// otherwise it keeps showing the layer mid-build.
   void _onLayerThumbnailChanged() {
     _notifyTopColorsChanged();
     repaintCanvas();

@@ -718,7 +718,7 @@ void main() {
       );
 
       // Drain any pending debounce timers to avoid a "Pending timers" warning.
-      await tester.pump(AppDefaults.debounceDuration);
+      await tester.pump(AppDefaults.thumbnailDebounceDuration);
 
       scenarioStopwatch.stop();
       _printScenarioTimingSummary(

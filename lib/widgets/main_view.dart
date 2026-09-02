@@ -400,22 +400,21 @@ class MainViewState extends State<MainView> {
         ),
       ),
       child: SizedBox.expand(
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              left: appProvider.canvasOffset.dx,
-              top: appProvider.canvasOffset.dy,
-              child: Transform.scale(
-                scale: appProvider.layers.scale,
-                alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: appProvider.layers.width,
-                  height: appProvider.layers.height,
-                  child: const CanvasPanel(),
-                ),
-              ),
-            ),
-          ],
+        child: LayoutBuilder(
+          builder: (BuildContext _, BoxConstraints constraints) {
+            final double canvasScale = appProvider.layers.scale;
+            final Rect visibleCanvasBounds = Rect.fromLTWH(
+              -appProvider.canvasOffset.dx / canvasScale,
+              -appProvider.canvasOffset.dy / canvasScale,
+              constraints.maxWidth / canvasScale,
+              constraints.maxHeight / canvasScale,
+            ).intersect(Offset.zero & appProvider.layers.size);
+            return CanvasPanel(
+              canvasOffset: appProvider.canvasOffset,
+              canvasScale: canvasScale,
+              visibleCanvasBounds: visibleCanvasBounds,
+            );
+          },
         ),
       ),
     );

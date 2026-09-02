@@ -94,19 +94,19 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       const AppDivider(),
                       AppListTile(
-                        title: AppText(l10n.useApplePencilOnlyTitle),
-                        subtitle: AppText(l10n.useApplePencilOnlySubtitle, variant: AppTextVariant.subtitle),
+                        title: AppText(l10n.penOnlyDrawingTitle),
+                        subtitle: AppText(l10n.penOnlyDrawingSubtitle, variant: AppTextVariant.subtitle),
                         trailing: AppToggleSwitch(
-                          value: appPreferences.useApplePencil,
+                          value: appPreferences.penOnlyDrawing,
                           onChanged: (bool value) {
                             setState(() {
-                              appPreferences.setUseApplePencil(value);
+                              appPreferences.setPenOnlyDrawing(value);
                             });
                           },
                         ),
                         onTap: () {
                           setState(() {
-                            appPreferences.setUseApplePencil(!appPreferences.useApplePencil);
+                            appPreferences.setPenOnlyDrawing(!appPreferences.penOnlyDrawing);
                           });
                         },
                       ),

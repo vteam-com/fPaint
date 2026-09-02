@@ -654,10 +654,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'You have unsaved changes. Do you want to discard them and open the new file?';
 
   @override
-  String get useApplePencilOnlySubtitle => 'If enabled, only the Apple Pencil will be used for drawing.';
+  String get penOnlyDrawingSubtitle =>
+      'When enabled, drawing tools accept pen input only; touch remains available for canvas navigation.';
 
   @override
-  String get useApplePencilOnlyTitle => 'Use Apple Pencil Only';
+  String get penOnlyDrawingTitle => 'Pen-only drawing';
 
   @override
   String get webBrowser => 'Web Browser';

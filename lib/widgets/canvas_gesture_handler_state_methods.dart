@@ -57,18 +57,49 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     _lastSelectionTapCanvasPosition = null;
   }
 
-  /// Returns the distance between the first two active touch points.
-  ///
-  /// Returns 0.0 when fewer than two touch pointers are active.
+  /// Returns the distance between the two contacts controlling touch navigation.
   double _getDistanceBetweenTouchPoints() {
-    if (_pointerPositions.length >= AppMath.pair) {
-      final List<Offset> positions = _pointerPositions.values.toList();
-      final Offset pos1 = positions[0];
-      final Offset pos2 = positions[1];
-      return (pos2 - pos1).distance;
-    } else {
+    if (_activePointers.length < AppMath.pair) {
       return 0.0;
     }
+    final Offset? firstPosition = _pointerPositions[_activePointers[AppMath.zero]];
+    final Offset? secondPosition = _pointerPositions[_activePointers[AppMath.one]];
+    if (firstPosition == null || secondPosition == null) {
+      return 0.0;
+    }
+    return (secondPosition - firstPosition).distance;
+  }
+
+  /// Returns the midpoint between the first two active touch pointers.
+  Offset? _getMultiTouchFocalPoint() {
+    if (_activePointers.length < AppMath.pair) {
+      return null;
+    }
+    final Offset? firstPosition = _pointerPositions[_activePointers[AppMath.zero]];
+    final Offset? secondPosition = _pointerPositions[_activePointers[AppMath.one]];
+    if (firstPosition == null || secondPosition == null) {
+      return null;
+    }
+    return Offset(
+      (firstPosition.dx + secondPosition.dx) / AppMath.pair,
+      (firstPosition.dy + secondPosition.dy) / AppMath.pair,
+    );
+  }
+
+  /// Allows a navigation update only after both controlling contacts advance.
+  bool _shouldProcessMultiTouchUpdate(int pointer) {
+    if (_activePointers.length < AppMath.pair) {
+      return false;
+    }
+
+    final int firstPointer = _activePointers[AppMath.zero];
+    final int secondPointer = _activePointers[AppMath.one];
+    if (pointer != firstPointer && pointer != secondPointer) {
+      return false;
+    }
+
+    _multiTouchPointersMoved.add(pointer);
+    return _multiTouchPointersMoved.contains(firstPointer) && _multiTouchPointersMoved.contains(secondPointer);
   }
 
   /// Captures an eyedropper sample at [adjustedPosition] when an eyedropper is
@@ -149,29 +180,36 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.beginTolerancePointerLock(screenPosition);
   }
 
-  /// Handles two-finger pan and pinch updates for manual canvas navigation.
+  /// Handles synchronized two-finger panning and pinch scaling.
   void _handleMultiTouchUpdate(
-    PointerMoveEvent event,
     AppProvider appProvider,
     ShellProvider shellProvider,
   ) {
-    appProvider.canvasOffset += event.delta;
     final double newDistance = _getDistanceBetweenTouchPoints();
-    final double distanceDelta = _baseDistance - newDistance;
-
-    if (distanceDelta.abs() > AppInteraction.multiTouchScaleThreshold) {
-      _scaleFactor = _getDistanceBetweenTouchPoints() / _baseDistance;
-      _scaleFactor = max(AppInteraction.minCanvasScale, min(_scaleFactor, AppInteraction.maxCanvasScale));
-
-      final Offset before = appProvider.toCanvas(event.localPosition);
-      appProvider.layers.scale = _scaleFactor;
-      final Offset after = appProvider.toCanvas(event.localPosition);
-      final Offset adjustment = after - before;
-      appProvider.canvasOffset += adjustment * appProvider.layers.scale;
+    final Offset? focalPoint = _getMultiTouchFocalPoint();
+    final Offset? previousFocalPoint = _lastMultiTouchFocalPoint;
+    if (_lastScaleDistance <= 0.0 || newDistance <= 0.0 || focalPoint == null || previousFocalPoint == null) {
+      return;
     }
 
+    appProvider.canvasPan(
+      offsetDelta: focalPoint - previousFocalPoint,
+      notifyListener: false,
+    );
+
+    final double scaleFactor = newDistance / _lastScaleDistance;
+    if ((scaleFactor - AppMath.one).abs() >= AppInteraction.touchPinchScaleDeadzone) {
+      appProvider.applyScaleToCanvas(
+        scaleDelta: scaleFactor,
+        anchorPoint: focalPoint,
+        notifyListener: false,
+      );
+    }
+
+    _lastScaleDistance = newDistance;
+    _lastMultiTouchFocalPoint = focalPoint;
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-    appProvider.repaintViewport();
+    _scheduleViewportRepaint(appProvider);
   }
 
   /// Whether a canvas gesture should create or extend a selection.
@@ -184,6 +222,21 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       appProvider.selectedAction == ActionType.selector &&
       !appProvider.transformModel.isVisible &&
       !appProvider.effectBrushModel.isArmed;
+
+  /// Cancels transient state for a touch that became a pinch or was cancelled.
+  /// Pixel/effect brushes must not run their expensive pointer-up commit here.
+  void _cancelActiveTouchInteraction(AppProvider appProvider) {
+    appProvider.layers.selectedLayer.isUserDrawing = false;
+    appProvider.layers.selectedLayer.clearStrokePreview();
+    appProvider.hideDrawingToolPreview();
+    appProvider.hideWandToleranceHud();
+    appProvider.hideFillTolerancePreview();
+    appProvider.endTolerancePointerLock();
+    appProvider.clearPixelBrushGesture();
+    _clearToleranceDragAnchor();
+    _clearPixelBrushStroke();
+    _activePointerId = -1;
+  }
 
   /// Finalizes an active pointer interaction and clears temporary drawing state.
   void _handlePointerEnd(
@@ -599,8 +652,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.canvasPan(
       offsetDelta: offsetDelta,
       notifyListener: false,
-      notifyViewport: true,
     );
+    _scheduleViewportRepaint(appProvider);
   }
 
   /// Applies user-driven canvas scaling around [anchorPoint].
@@ -620,8 +673,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       scaleDelta: scaleDelta,
       anchorPoint: anchorPoint,
       notifyListener: false,
-      notifyViewport: true,
     );
+    _scheduleViewportRepaint(appProvider);
   }
 
   /// Seeds the gradient fill handles around [adjustedPosition] for the active

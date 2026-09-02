@@ -656,10 +656,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?';
 
   @override
-  String get useApplePencilOnlySubtitle => 'Si active, seul l\'Apple Pencil sera utilise pour dessiner.';
+  String get penOnlyDrawingSubtitle =>
+      'Lorsque cette option est activee, les outils de dessin acceptent uniquement le stylet; le toucher reste disponible pour naviguer sur la toile.';
 
   @override
-  String get useApplePencilOnlyTitle => 'Utiliser uniquement l\'Apple Pencil';
+  String get penOnlyDrawingTitle => 'Dessin au stylet uniquement';
 
   @override
   String get webBrowser => 'Navigateur Web';

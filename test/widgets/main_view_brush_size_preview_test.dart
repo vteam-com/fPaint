@@ -104,8 +104,7 @@ void main() {
     await tester.pump();
 
     final Finder previewFinder = find.byKey(Keys.brushSizePreviewOverlay);
-    expect(previewFinder, findsOneWidget);
-    expect(tester.getCenter(previewFinder), dragStart);
+    expect(previewFinder, findsNothing);
 
     const Offset dragDelta = Offset(36, 28);
     await gesture.moveBy(dragDelta);
@@ -116,7 +115,7 @@ void main() {
 
     await gesture.up();
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(AppDefaults.thumbnailDebounceDuration);
     await tester.pump();
 
     expect(find.byKey(Keys.brushSizePreviewOverlay), findsNothing);

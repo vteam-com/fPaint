@@ -380,7 +380,7 @@
 </g>
 <g>
   <path d="M 280.0 318.0 H 256.0 Q 250.0 318.0 250.0 324.0 V 1866.0 Q 250.0 1872.0 256.0 1872.0 H 460.0" class="edgeVertical"/>
-  <title>file_picker -> android_file_picker v1.0.3</title>
+  <title>file_picker -> android_file_picker v1.1.0</title>
 </g>
 <g>
   <path d="M 280.0 1726.0 H 253.0 Q 247.0 1726.0 247.0 1732.0 V 3274.0 Q 247.0 3280.0 253.0 3280.0 H 460.0" class="edgeVertical"/>
@@ -440,7 +440,7 @@
 </g>
 <g>
   <path d="M 280.0 318.0 H 211.0 Q 205.0 318.0 205.0 324.0 V 2570.0 Q 205.0 2576.0 211.0 2576.0 H 460.0" class="edgeVertical"/>
-  <title>file_picker -> file_picker_darwin v1.0.4</title>
+  <title>file_picker -> file_picker_darwin v1.1.0</title>
 </g>
 <g>
   <path d="M 280.0 582.0 H 208.0 Q 202.0 582.0 202.0 588.0 V 2890.0 Q 202.0 2896.0 208.0 2896.0 H 460.0" class="edgeVertical"/>
@@ -452,7 +452,7 @@
 </g>
 <g>
   <path d="M 280.0 318.0 H 202.0 Q 196.0 318.0 196.0 324.0 V 2634.0 Q 196.0 2640.0 202.0 2640.0 H 460.0" class="edgeVertical"/>
-  <title>file_picker -> file_picker_linux v1.0.2</title>
+  <title>file_picker -> file_picker_linux v1.1.0</title>
 </g>
 <g>
   <path d="M 280.0 1286.0 H 199.0 Q 193.0 1286.0 193.0 1292.0 V 3658.0 Q 193.0 3664.0 199.0 3664.0 H 460.0" class="edgeVertical"/>
@@ -460,7 +460,7 @@
 </g>
 <g>
   <path d="M 280.0 318.0 H 196.0 Q 190.0 318.0 190.0 324.0 V 2698.0 Q 190.0 2704.0 196.0 2704.0 H 460.0" class="edgeVertical"/>
-  <title>file_picker -> file_picker_platform_interface v3.2.0</title>
+  <title>file_picker -> file_picker_platform_interface v3.3.0</title>
 </g>
 <g>
   <path d="M 280.0 846.0 H 193.0 Q 187.0 846.0 187.0 852.0 V 3274.0 Q 187.0 3280.0 193.0 3280.0 H 460.0" class="edgeVertical"/>
@@ -468,7 +468,7 @@
 </g>
 <g>
   <path d="M 280.0 318.0 H 190.0 Q 184.0 318.0 184.0 324.0 V 2762.0 Q 184.0 2768.0 190.0 2768.0 H 460.0" class="edgeVertical"/>
-  <title>file_picker -> file_picker_web v3.0.3</title>
+  <title>file_picker -> file_picker_web v3.1.0</title>
 </g>
 <g>
   <path d="M 280.0 1374.0 H 187.0 Q 181.0 1374.0 181.0 1380.0 V 3850.0 Q 181.0 3856.0 187.0 3856.0 H 460.0" class="edgeVertical"/>
@@ -576,7 +576,7 @@
 </g>
 <g>
   <path d="M 280.0 318.0 H 109.0 Q 103.0 318.0 103.0 324.0 V 5258.0 Q 103.0 5264.0 109.0 5264.0 H 460.0" class="edgeVertical"/>
-  <title>file_picker -> windows_file_picker v1.1.0</title>
+  <title>file_picker -> windows_file_picker v1.2.0</title>
 </g>
 <g>
   <path d="M 920.0 142.0 H 932.0 Q 938.0 142.0 938.0 148.0 V 1930.0 Q 938.0 1936.0 932.0 1936.0 H 740.0" class="edgeVertical"/>
@@ -845,7 +845,7 @@
 <g class="platformBadge platformBadge--windows"><title>Windows</title><rect x="390.5" y="235.0" width="13.0" height="13.0" rx="6.5" ry="6.5" fill="#2563eb" stroke="#1d4ed8" stroke-width="0.6"/><text x="397.0" y="242.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">W</text></g>
 <g class="platformBadge platformBadge--web"><title>Browser</title><rect x="407.5" y="235.0" width="13.0" height="13.0" rx="6.5" ry="6.5" fill="#0891b2" stroke="#0e7490" stroke-width="0.6"/><text x="414.0" y="242.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">B</text></g>
 <text x="380.0" y="216.0" class="packageLabelNodeName packageLabelCaption" text-anchor="middle">desktop_drop</text>
-<text x="380.0" y="229.0" class="packageLabelNodeVersion" text-anchor="middle">v0.8.2</text>
+<text x="380.0" y="229.0" class="packageLabelNodeVersion" text-anchor="middle">v0.8.4</text>
 </g>
 <g class="badge outgoingBadge">
   <path d="M 274.0,230.0 L 286.0,223.0 Q 289.0,223.0 289.0,226.0 L 289.0,234.0 Q 289.0,237.0 286.0,237.0 Z" fill="#10b981"/>
@@ -862,7 +862,7 @@
 <g class="platformBadge platformBadge--windows"><title>Windows</title><rect x="399.0" y="323.0" width="13.0" height="13.0" rx="6.5" ry="6.5" fill="#2563eb" stroke="#1d4ed8" stroke-width="0.6"/><text x="405.5" y="330.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">W</text></g>
 <g class="platformBadge platformBadge--web"><title>Browser</title><rect x="416.0" y="323.0" width="13.0" height="13.0" rx="6.5" ry="6.5" fill="#0891b2" stroke="#0e7490" stroke-width="0.6"/><text x="422.5" y="330.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">B</text></g>
 <text x="380.0" y="304.0" class="packageLabelNodeName packageLabelCaption" text-anchor="middle">file_picker</text>
-<text x="380.0" y="317.0" class="packageLabelNodeVersion" text-anchor="middle">v12.1.2</text>
+<text x="380.0" y="317.0" class="packageLabelNodeVersion" text-anchor="middle">v12.2.0</text>
 </g>
 <g class="badge outgoingBadge">
   <path d="M 274.0,318.0 L 286.0,311.0 Q 289.0,311.0 289.0,314.0 L 289.0,322.0 Q 289.0,325.0 286.0,325.0 Z" fill="#10b981"/>
@@ -938,7 +938,7 @@
 <rect x="280.0" y="988.0" width="200.0" height="68.0" rx="8.0" ry="8.0" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1"/>
 <g class="packageMetadataPill"><title>Flutter &gt;=3.44.0</title><rect x="341.2" y="1043.0" width="77.6" height="9.0" rx="4.5" ry="4.5" class="packageMetadataPillShape"/><text x="380.0" y="1048" class="packageLabelMetadata" text-anchor="middle" dominant-baseline="middle">Flutter &gt;=3.44.0</text></g>
 <text x="380.0" y="1008.0" class="packageLabelNodeName packageLabelCaption" text-anchor="middle">material_ui</text>
-<text x="380.0" y="1021.0" class="packageLabelNodeVersion" text-anchor="middle">v1.1.0</text>
+<text x="380.0" y="1021.0" class="packageLabelNodeVersion" text-anchor="middle">v1.1.1</text>
 </g>
 <g class="badge outgoingBadge">
   <path d="M 274.0,1022.0 L 286.0,1015.0 Q 289.0,1015.0 289.0,1018.0 L 289.0,1026.0 Q 289.0,1029.0 286.0,1029.0 Z" fill="#10b981"/>
@@ -1093,7 +1093,7 @@
 <g class="packageMetadataPill"><title>Flutter &gt;=3.38.0</title><rect x="561.2" y="1885.0" width="77.6" height="9.0" rx="4.5" ry="4.5" class="packageMetadataPillShape"/><text x="600.0" y="1890" class="packageLabelMetadata" text-anchor="middle" dominant-baseline="middle">Flutter &gt;=3.38.0</text></g>
 <g class="platformBadge platformBadge--android"><title>Android</title><rect x="593.5" y="1869.0" width="13.0" height="13.0" rx="6.5" ry="6.5" fill="#16a34a" stroke="#15803d" stroke-width="0.6"/><text x="600.0" y="1876.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">A</text></g>
 <text x="468.0" y="1864.0" class="packageLabelDerivedName packageLabelCaption" text-anchor="start">android_file_picker</text>
-<text x="732.0" y="1864.0" class="packageLabelDerivedVersion" text-anchor="end">^1.0.3</text>
+<text x="732.0" y="1864.0" class="packageLabelDerivedVersion" text-anchor="end">^1.1.0</text>
 </g>
 <g class="badge incomingBadge">
   <path d="M 466.0,1872.0 L 454.0,1865.0 Q 451.0,1865.0 451.0,1868.0 L 451.0,1876.0 Q 451.0,1879.0 454.0,1879.0 Z" fill="#3b82f6"/>
@@ -1203,7 +1203,7 @@
 <g class="platformBadge platformBadge--ios"><title>iOS</title><rect x="585.0" y="2573.0" width="13.0" height="13.0" rx="6.5" ry="6.5" fill="#111827" stroke="#0f172a" stroke-width="0.6"/><text x="591.5" y="2580.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">I</text></g>
 <g class="platformBadge platformBadge--macos"><title>macOS</title><rect x="602.0" y="2573.0" width="13.0" height="13.0" rx="6.5" ry="6.5" fill="#475569" stroke="#334155" stroke-width="0.6"/><text x="608.5" y="2580.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">M</text></g>
 <text x="468.0" y="2568.0" class="packageLabelDerivedName packageLabelCaption" text-anchor="start">file_picker_darwin</text>
-<text x="732.0" y="2568.0" class="packageLabelDerivedVersion" text-anchor="end">^1.0.4</text>
+<text x="732.0" y="2568.0" class="packageLabelDerivedVersion" text-anchor="end">^1.1.0</text>
 </g>
 <g class="badge incomingBadge">
   <path d="M 466.0,2576.0 L 454.0,2569.0 Q 451.0,2569.0 451.0,2572.0 L 451.0,2580.0 Q 451.0,2583.0 454.0,2583.0 Z" fill="#3b82f6"/>
@@ -1212,7 +1212,7 @@
 <g class="packageMetadataPill"><title>Flutter &gt;=3.38.0</title><rect x="561.2" y="2653.0" width="77.6" height="9.0" rx="4.5" ry="4.5" class="packageMetadataPillShape"/><text x="600.0" y="2658" class="packageLabelMetadata" text-anchor="middle" dominant-baseline="middle">Flutter &gt;=3.38.0</text></g>
 <g class="platformBadge platformBadge--linux"><title>Linux</title><rect x="593.5" y="2637.0" width="13.0" height="13.0" rx="6.5" ry="6.5" fill="#7c3aed" stroke="#6d28d9" stroke-width="0.6"/><text x="600.0" y="2644.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">L</text></g>
 <text x="468.0" y="2632.0" class="packageLabelDerivedName packageLabelCaption" text-anchor="start">file_picker_linux</text>
-<text x="732.0" y="2632.0" class="packageLabelDerivedVersion" text-anchor="end">^1.0.2</text>
+<text x="732.0" y="2632.0" class="packageLabelDerivedVersion" text-anchor="end">^1.1.0</text>
 </g>
 <g class="badge incomingBadge">
   <path d="M 466.0,2640.0 L 454.0,2633.0 Q 451.0,2633.0 451.0,2636.0 L 451.0,2644.0 Q 451.0,2647.0 454.0,2647.0 Z" fill="#3b82f6"/>
@@ -1220,7 +1220,7 @@
 <rect x="460.0" y="2678.0" width="280.0" height="52.0" rx="8.0" ry="8.0" fill="#f8fafc" stroke="#64748b" stroke-width="1" stroke-dasharray="4,2"/>
 <g class="packageMetadataPill"><title>Flutter &gt;=3.38.0</title><rect x="561.2" y="2717.0" width="77.6" height="9.0" rx="4.5" ry="4.5" class="packageMetadataPillShape"/><text x="600.0" y="2722" class="packageLabelMetadata" text-anchor="middle" dominant-baseline="middle">Flutter &gt;=3.38.0</text></g>
 <text x="468.0" y="2696.0" class="packageLabelDerivedName packageLabelCaption" text-anchor="start">file_picker_platform_interface</text>
-<text x="732.0" y="2696.0" class="packageLabelDerivedVersion" text-anchor="end">^3.2.0</text>
+<text x="732.0" y="2696.0" class="packageLabelDerivedVersion" text-anchor="end">^3.3.0</text>
 </g>
 <g class="badge incomingBadge">
   <path d="M 466.0,2704.0 L 454.0,2697.0 Q 451.0,2697.0 451.0,2700.0 L 451.0,2708.0 Q 451.0,2711.0 454.0,2711.0 Z" fill="#3b82f6"/>
@@ -1231,7 +1231,7 @@
 <g class="packageMetadataPill"><title>Flutter &gt;=3.38.0</title><rect x="561.2" y="2781.0" width="77.6" height="9.0" rx="4.5" ry="4.5" class="packageMetadataPillShape"/><text x="600.0" y="2786" class="packageLabelMetadata" text-anchor="middle" dominant-baseline="middle">Flutter &gt;=3.38.0</text></g>
 <g class="platformBadge platformBadge--web"><title>Browser</title><rect x="593.5" y="2765.0" width="13.0" height="13.0" rx="6.5" ry="6.5" fill="#0891b2" stroke="#0e7490" stroke-width="0.6"/><text x="600.0" y="2772.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">B</text></g>
 <text x="468.0" y="2760.0" class="packageLabelDerivedName packageLabelCaption" text-anchor="start">file_picker_web</text>
-<text x="732.0" y="2760.0" class="packageLabelDerivedVersion" text-anchor="end">^3.0.3</text>
+<text x="732.0" y="2760.0" class="packageLabelDerivedVersion" text-anchor="end">^3.1.0</text>
 </g>
 <g class="badge incomingBadge">
   <path d="M 466.0,2768.0 L 454.0,2761.0 Q 451.0,2761.0 451.0,2764.0 L 451.0,2772.0 Q 451.0,2775.0 454.0,2775.0 Z" fill="#3b82f6"/>
@@ -1650,7 +1650,7 @@
 <g class="packageMetadataPill"><title>Flutter &gt;=3.38.0</title><rect x="561.2" y="5277.0" width="77.6" height="9.0" rx="4.5" ry="4.5" class="packageMetadataPillShape"/><text x="600.0" y="5282" class="packageLabelMetadata" text-anchor="middle" dominant-baseline="middle">Flutter &gt;=3.38.0</text></g>
 <g class="platformBadge platformBadge--windows"><title>Windows</title><rect x="593.5" y="5261.0" width="13.0" height="13.0" rx="6.5" ry="6.5" fill="#2563eb" stroke="#1d4ed8" stroke-width="0.6"/><text x="600.0" y="5268.5" class="packageLabelPlatformBadge" text-anchor="middle" dominant-baseline="middle">W</text></g>
 <text x="468.0" y="5256.0" class="packageLabelDerivedName packageLabelCaption" text-anchor="start">windows_file_picker</text>
-<text x="732.0" y="5256.0" class="packageLabelDerivedVersion" text-anchor="end">^1.1.0</text>
+<text x="732.0" y="5256.0" class="packageLabelDerivedVersion" text-anchor="end">^1.2.0</text>
 </g>
 <g class="badge incomingBadge">
   <path d="M 466.0,5264.0 L 454.0,5257.0 Q 451.0,5257.0 451.0,5260.0 L 451.0,5268.0 Q 451.0,5271.0 454.0,5271.0 Z" fill="#3b82f6"/>
