@@ -7,8 +7,6 @@ import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/panels/tools/tool_family_rail.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_canvas.dart';
-import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/brush_intensity_picker.dart';
 import 'package:fpaint/widgets/brush_size_picker.dart';

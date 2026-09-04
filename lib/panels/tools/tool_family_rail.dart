@@ -7,7 +7,6 @@ import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_divider.dart';
 import 'package:fpaint/widgets/app_slider.dart';

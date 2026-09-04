@@ -1,4 +1,4 @@
-part of 'app_provider_selection.dart';
+part of 'app_provider.dart';
 
 /// Snapshot of the active effect preview state needed for rendering/commit.
 class _SelectionEffectPreviewState {

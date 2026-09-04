@@ -3,7 +3,6 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/widgets/effect_intensity_controls.dart';
 import 'package:fpaint/widgets/material_free.dart';
 

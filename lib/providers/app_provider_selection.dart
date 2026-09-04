@@ -1,26 +1,4 @@
-import 'dart:async';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-
-import 'package:flutter/widgets.dart';
-import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/helpers/image_helper.dart';
-import 'package:fpaint/helpers/transform_helper.dart';
-import 'package:fpaint/models/image_placement_layer_restore_state.dart';
-import 'package:fpaint/models/selection_effect.dart';
-import 'package:fpaint/models/selector_model.dart';
-import 'package:fpaint/models/transform_model.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
-import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_selection_commit.dart';
-import 'package:fpaint/providers/fill_service.dart';
-import 'package:fpaint/providers/layer_crop_state.dart';
-import 'package:fpaint/providers/undo_provider.dart';
-import 'package:fpaint/providers/wand_selection_manager.dart';
-import 'package:vector_math/vector_math_64.dart';
-
-part 'app_provider_selection_effects.dart';
-part 'app_provider_selection_crop.dart';
+part of 'app_provider.dart';
 
 /// Selection, region, transform, effect, and crop operations.
 extension AppProviderSelection on AppProvider {

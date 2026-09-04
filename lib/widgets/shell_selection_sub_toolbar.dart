@@ -10,7 +10,6 @@ import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/effect_preview_bottom_sheet.dart';

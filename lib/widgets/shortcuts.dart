@@ -5,8 +5,6 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_canvas.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/confirm_discard_dialog.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -37,6 +35,7 @@ Widget shortCutsForMainApp(
   final Map<ShortcutActivator, Intent> shortcuts = _buildShortcuts();
 
   return _MainAppShortcutScope(
+    appProvider: appProvider,
     shortcuts: shortcuts,
     actions: <Type, Action<Intent>>{
       UndoIntent: CallbackAction<UndoIntent>(
@@ -183,8 +182,7 @@ Widget shortCutsForMainApp(
           // Escape backs out of the fill (no undo entry) rather than applying it.
           appProvider.cancelGradientPreview();
           appProvider.clearSelectionAndRestorePreviousTool();
-          appProvider.eyeDropPositionForBrush = null;
-          appProvider.eyeDropPositionForFill = null;
+          appProvider.deactivateEyeDropShortcut();
           appProvider.update();
           return null;
         },
@@ -218,11 +216,13 @@ Widget shortCutsForMainApp(
 
 class _MainAppShortcutScope extends StatefulWidget {
   const _MainAppShortcutScope({
+    required this.appProvider,
     required this.shortcuts,
     required this.actions,
     required this.child,
   });
   final Map<Type, Action<Intent>> actions;
+  final AppProvider appProvider;
   final Widget child;
   final Map<ShortcutActivator, Intent> shortcuts;
   @override
@@ -235,6 +235,7 @@ class _MainAppShortcutScopeState extends State<_MainAppShortcutScope> {
   void initState() {
     super.initState();
     _focusNode = FocusNode();
+    HardwareKeyboard.instance.addHandler(_handleKeyEvent);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _focusNode.requestFocus();
@@ -244,6 +245,7 @@ class _MainAppShortcutScopeState extends State<_MainAppShortcutScope> {
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
     _focusNode.dispose();
     super.dispose();
   }
@@ -267,6 +269,43 @@ class _MainAppShortcutScopeState extends State<_MainAppShortcutScope> {
         ),
       ),
     );
+  }
+
+  /// Handles keyboard events for modifier keys such as Alt / Option eyedropper shortcut.
+  bool _handleKeyEvent(KeyEvent event) {
+    final bool isAltKey =
+        event.logicalKey == LogicalKeyboardKey.altLeft ||
+        event.logicalKey == LogicalKeyboardKey.altRight ||
+        event.logicalKey == LogicalKeyboardKey.alt;
+
+    final AppProvider appProvider = widget.appProvider;
+
+    final FocusNode? primaryFocus = FocusManager.instance.primaryFocus;
+    final bool isTextEditingFocused =
+        primaryFocus != null &&
+        primaryFocus.context != null &&
+        primaryFocus.context!.findAncestorWidgetOfExactType<EditableText>() != null;
+
+    if (isTextEditingFocused) {
+      if (appProvider.isEyeDropShortcutActive) {
+        appProvider.deactivateEyeDropShortcut();
+      }
+      return false;
+    }
+
+    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+    final bool isAltPressed = keyboard.isAltPressed;
+    final bool isControlOrMetaPressed = keyboard.isControlPressed || keyboard.isMetaPressed;
+
+    if (event is KeyDownEvent && isAltKey && !isControlOrMetaPressed) {
+      if (!appProvider.isEyeDropShortcutActive && isAltPressed) {
+        appProvider.activateEyeDropShortcut();
+      }
+    } else if (!isAltPressed && appProvider.isEyeDropShortcutActive) {
+      appProvider.deactivateEyeDropShortcut();
+    }
+
+    return false;
   }
 
   void _restoreShortcutFocus() {

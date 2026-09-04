@@ -2,30 +2,45 @@
 
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/models/brush_grain.dart';
 import 'package:fpaint/models/effect_brush_model.dart';
 import 'package:fpaint/models/effect_preview_model.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/image_placement_model.dart';
+import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/text_tool_state.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
+import 'package:fpaint/providers/layer_crop_state.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/undo_provider.dart';
-import 'package:fpaint/providers/wand_selection_manager.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 // Exports
 export 'package:fpaint/providers/layers_provider.dart';
+
+part 'app_provider_canvas.dart';
+part 'app_provider_selection.dart';
+part 'app_provider_selection_commit.dart';
+part 'app_provider_selection_crop.dart';
+part 'app_provider_selection_effects.dart';
+part 'app_provider_tools.dart';
+part 'wand_selection_manager.dart';
+part 'wand_selection_request.dart';
 
 /// The `AppProvider` class is a `ChangeNotifier` that manages the state of the application,
 /// including the canvas, layers, and selection tools. It provides methods for interacting
@@ -293,6 +308,7 @@ class AppProvider extends ChangeNotifier {
 
     // Switching tools exits eyedropper mode so pointer interactions follow the new tool.
     if (selectedActionChanged) {
+      isEyeDropShortcutActive = false;
       eyeDropPositionForBrush = null;
       eyeDropPositionForFill = null;
     }
@@ -697,6 +713,38 @@ class AppProvider extends ChangeNotifier {
   }
 
   //-------------------------
+  bool isEyeDropShortcutActive = false;
+
+  Offset? _lastPointerPosition;
+
+  /// Gets the last known main-view pointer position.
+  // ignore: unnecessary_getters_setters
+  Offset? get lastPointerPosition => _lastPointerPosition;
+
+  /// Sets the last known main-view pointer position.
+  set lastPointerPosition(Offset? value) {
+    _lastPointerPosition = value;
+  }
+
+  /// Activates the eyedropper via keyboard shortcut (Alt / Option).
+  void activateEyeDropShortcut({Offset? position}) {
+    isEyeDropShortcutActive = true;
+    final Offset initialPos = position ?? _lastPointerPosition ?? canvasCenter;
+    if (_selectedAction == ActionType.fill) {
+      eyeDropPositionForFill = initialPos;
+    } else {
+      eyeDropPositionForBrush = initialPos;
+    }
+  }
+
+  /// Deactivates the keyboard shortcut eyedropper.
+  void deactivateEyeDropShortcut() {
+    isEyeDropShortcutActive = false;
+    eyeDropPositionForBrush = null;
+    eyeDropPositionForFill = null;
+  }
+
+  //-------------------------
   Offset? _eyeDropPositionForBrush;
 
   /// The eye drop position for the brush.
@@ -705,9 +753,13 @@ class AppProvider extends ChangeNotifier {
   /// Sets the eye drop position for the brush.
   set eyeDropPositionForBrush(Offset? value) {
     final bool activeChanged = (_eyeDropPositionForBrush == null) != (value == null);
+    final bool positionChanged = _eyeDropPositionForBrush != value;
     _eyeDropPositionForBrush = value;
     if (activeChanged) {
       repaintToolOptions();
+    }
+    if (positionChanged) {
+      repaintMainView();
     }
   }
 
@@ -721,9 +773,13 @@ class AppProvider extends ChangeNotifier {
   /// Sets the eye drop position for the fill.
   set eyeDropPositionForFill(Offset? value) {
     final bool activeChanged = (_eyeDropPositionForFill == null) != (value == null);
+    final bool positionChanged = _eyeDropPositionForFill != value;
     _eyeDropPositionForFill = value;
     if (activeChanged) {
       repaintToolOptions();
+    }
+    if (positionChanged) {
+      repaintMainView();
     }
   }
 

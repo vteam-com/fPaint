@@ -34,7 +34,7 @@ UserActionDrawing _imageAction(ui.Image image, Offset at) {
 /// Renders [layer] exactly as the canvas composites it (group saveLayer +
 /// renderLayer) and reads back straight RGBA bytes for comparison.
 Future<Uint8List> _renderBytes(LayerProvider layer) async {
-  final ui.Image image = await layer.toImageForStorageAsync(_size);
+  final ui.Image image = layer.toImageForStorage(_size);
   final Uint8List? pixels = await extractImagePixels(image, format: ui.ImageByteFormat.rawStraightRgba);
   image.dispose();
   expect(pixels, isNotNull);

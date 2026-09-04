@@ -1,15 +1,4 @@
-import 'dart:ui' as ui;
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
-import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/models/selector_model.dart';
-import 'package:fpaint/models/user_action_drawing.dart';
-import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_canvas.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
-import 'package:fpaint/providers/fill_service.dart';
+part of 'app_provider.dart';
 
 /// Returns whether the platform-specific modifier requests origin-based flood fill.
 @visibleForTesting

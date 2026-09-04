@@ -9,8 +9,6 @@ import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
-import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const ui.Rect _selectionRect = ui.Rect.fromLTWH(1, 1, 3, 3);

@@ -1,11 +1,4 @@
-import 'dart:typed_data';
-
-import 'package:flutter/widgets.dart';
-import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/providers/fill_service.dart';
-import 'package:fpaint/providers/wand_selection_request.dart';
-
-export 'package:fpaint/providers/wand_selection_request.dart';
+part of 'app_provider.dart';
 
 /// Owns the magic-wand selection request queue and the rasterized source cache.
 ///

@@ -1,4 +1,4 @@
-part of 'app_provider_selection.dart';
+part of 'app_provider.dart';
 
 extension AppProviderSelectionCrop on AppProvider {
   /// Crops the canvas to the current selection bounds.

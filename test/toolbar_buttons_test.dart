@@ -8,7 +8,6 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/shell_top_bar.dart';
