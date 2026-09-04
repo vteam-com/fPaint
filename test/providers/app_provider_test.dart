@@ -66,6 +66,32 @@ void main() {
       expect(appProvider.eyeDropPositionForFill, isNull);
     });
 
+    test('isEyeDropShortcutActive is initially false', () {
+      expect(appProvider.isEyeDropShortcutActive, isFalse);
+    });
+
+    test('activateEyeDropShortcut sets active state and position for brush', () {
+      appProvider.selectedAction = ActionType.brush;
+      appProvider.activateEyeDropShortcut(position: const Offset(10, 20));
+      expect(appProvider.isEyeDropShortcutActive, isTrue);
+      expect(appProvider.eyeDropPositionForBrush, const Offset(10, 20));
+
+      appProvider.deactivateEyeDropShortcut();
+      expect(appProvider.isEyeDropShortcutActive, isFalse);
+      expect(appProvider.eyeDropPositionForBrush, isNull);
+    });
+
+    test('activateEyeDropShortcut sets position for fill when fill tool selected', () {
+      appProvider.selectedAction = ActionType.fill;
+      appProvider.activateEyeDropShortcut(position: const Offset(30, 40));
+      expect(appProvider.isEyeDropShortcutActive, isTrue);
+      expect(appProvider.eyeDropPositionForFill, const Offset(30, 40));
+
+      appProvider.deactivateEyeDropShortcut();
+      expect(appProvider.isEyeDropShortcutActive, isFalse);
+      expect(appProvider.eyeDropPositionForFill, isNull);
+    });
+
     test('selectedTextObject is null', () {
       expect(appProvider.selectedTextObject, isNull);
     });

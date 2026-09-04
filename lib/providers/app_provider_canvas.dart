@@ -1,12 +1,4 @@
-import 'dart:math';
-import 'dart:ui' as ui;
-
-import 'package:flutter/widgets.dart';
-import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/helpers/image_helper.dart';
-import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
+part of 'app_provider.dart';
 
 /// Canvas viewport operations: pan, zoom, scale, coordinate conversion,
 /// rotation, flipping, and document lifecycle.

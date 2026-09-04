@@ -30,8 +30,6 @@ class Keys {
   static const Key textEditorBoldButton = Key('text-editor-bold-button');
   static const Key textEditorItalicButton = Key('text-editor-italic-button');
   static const Key textEditorAlignmentDropdown = Key('text-editor-alignment-dropdown');
-  static const Key magnifyingEyeDropperCloseButton = Key('magnifying-eye-dropper-close-button');
-  static const Key magnifyingEyeDropperConfirmButton = Key('magnifying-eye-dropper-confirm-button');
   static const Key colorPickerModeToggle = Key('color-picker-mode-toggle');
   static const Key colorPickerModeSlidersButton = Key('color-picker-mode-sliders-button');
   static const Key colorPickerModeWheelButton = Key('color-picker-mode-wheel-button');

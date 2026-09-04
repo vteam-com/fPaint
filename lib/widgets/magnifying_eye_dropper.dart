@@ -4,13 +4,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
-import 'package:fpaint/l10n/app_localizations_x.dart';
-import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/draw_rect.dart';
-import 'package:fpaint/widgets/material_free.dart';
-import 'package:fpaint/widgets/overlay_control_widgets.dart';
-import 'package:vector_math/vector_math_64.dart' as vm64;
 
 /// A widget that displays a magnifying eye dropper for selecting colors from an image.
 class MagnifyingEyeDropper extends StatefulWidget {
@@ -19,25 +14,15 @@ class MagnifyingEyeDropper extends StatefulWidget {
   /// The [layers] parameter specifies the layers provider.
   /// The [pointerPosition] parameter specifies the position of the pointer.
   /// The [pixelPosition] parameter specifies the position of the pixel to sample.
-  /// The [onColorPicked] parameter is a callback that is called when a color is picked.
-  /// The [onClosed] parameter is a callback that is called when the eye dropper is closed.
   const MagnifyingEyeDropper({
     required this.layers,
     required this.pointerPosition,
     required this.pixelPosition,
-    required this.onColorPicked,
-    required this.onClosed,
     super.key,
   });
 
   /// The layers provider.
   final LayersProvider layers;
-
-  /// A callback that is called when the eye dropper is closed.
-  final void Function() onClosed;
-
-  /// A callback that is called when a color is picked.
-  final void Function(Color color) onColorPicked;
 
   /// The position of the pixel to sample.
   final Offset pixelPosition;
@@ -57,23 +42,9 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
   /// The selected color.
   Color? _selectedColor;
 
-  /// The size of the button.
-  final double buttonSize = AppSpacing.largest;
-
-  /// The magnification factor.
-  final double magnifyFactor = AppInteraction.magnifierScale;
-
   /// The size of the region.
   final double regionSize = AppLayout.previewRegionSize;
 
-  /// The size of the spacer.
-  final double spacer = AppSpacing.small;
-
-  /// The total height of the widget.
-  late final double totalHeightOfTheWidget = buttonSize + spacer + regionSize + spacer + buttonSize;
-
-  /// The width of the widget.
-  final double widgetWidth = AppLayout.magnifierWidgetWidth;
   @override
   void initState() {
     super.initState();
@@ -95,83 +66,50 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
       return const SizedBox();
     }
 
-    final double offsetFromCenter = (widgetWidth / 2) / magnifyFactor;
+    const int gridCount = AppInteraction.magnifierGridCount;
+    const int halfGrid = (gridCount - 1) ~/ 2;
+
+    final int centerPixelX = widget.pixelPosition.dx.floor();
+    final int centerPixelY = widget.pixelPosition.dy.floor();
 
     final ui.Rect region = Rect.fromLTWH(
-      widget.pixelPosition.dx - offsetFromCenter,
-      widget.pixelPosition.dy - offsetFromCenter,
-      offsetFromCenter,
-      offsetFromCenter,
+      (centerPixelX - halfGrid).toDouble(),
+      (centerPixelY - halfGrid).toDouble(),
+      gridCount.toDouble(),
+      gridCount.toDouble(),
     );
 
     final ui.Image croppedImage = cropImage(widget.layers.cachedImage!, region);
 
     // Magnifying Glass Effect
     return Positioned(
-      left: widget.pointerPosition.dx - (widgetWidth),
-      top: widget.pointerPosition.dy - (totalHeightOfTheWidget / AppMath.pair),
-      child: Column(
-        spacing: spacer.toDouble(),
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          //
-          // Cancel 'X'
-          //
-          buildOverlayCircleButton(
-            key: Keys.magnifyingEyeDropperCloseButton,
-            tooltip: context.l10n.cancel,
-            icon: AppIcon.close,
-            contentSemantic: AppButtonContentSemantic.dangerous,
-            cursor: SystemMouseCursors.click,
-            onTap: widget.onClosed,
-          ),
-
-          //
-          // Show Color
-          //
-          SizedBox(
-            width: regionSize,
-            height: regionSize,
-            child: Stack(
-              alignment: AlignmentDirectional.center,
-              children: <Widget>[
-                SizedBox(
-                  width: regionSize,
-                  height: regionSize,
-                  child: CustomPaint(
-                    painter: MagnifyingGlassPainter(
-                      croppedImage: croppedImage,
-                      color: _selectedColor ?? AppColors.black,
-                    ),
+      left: widget.pointerPosition.dx - (regionSize / AppMath.pair),
+      top: widget.pointerPosition.dy - (regionSize / AppMath.pair),
+      child: IgnorePointer(
+        child: SizedBox(
+          width: regionSize,
+          height: regionSize,
+          child: Stack(
+            alignment: AlignmentDirectional.center,
+            children: <Widget>[
+              SizedBox(
+                width: regionSize,
+                height: regionSize,
+                child: CustomPaint(
+                  painter: MagnifyingGlassPainter(
+                    croppedImage: croppedImage,
+                    color: _selectedColor ?? AppColors.black,
                   ),
                 ),
-                DashedRectangle(
-                  fillColor: _selectedColor ?? AppColors.transparent,
-                  width: AppLayout.magnifierTargetSize,
-                  height: AppLayout.magnifierTargetSize,
-                ),
-              ],
-            ),
+              ),
+              DashedRectangle(
+                fillColor: _selectedColor ?? AppColors.transparent,
+                width: AppLayout.magnifierTargetSize,
+                height: AppLayout.magnifierTargetSize,
+              ),
+            ],
           ),
-
-          //
-          // Confirmed CheckBox
-          //
-          buildOverlayCircleButton(
-            key: Keys.magnifyingEyeDropperConfirmButton,
-            tooltip: context.l10n.apply,
-            icon: AppIcon.check,
-            contentSemantic: AppButtonContentSemantic.enabled,
-            cursor: SystemMouseCursors.click,
-            onTap: () {
-              final Color? selectedColor = _selectedColor;
-              if (selectedColor == null) {
-                return;
-              }
-              widget.onColorPicked(selectedColor);
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -237,21 +175,25 @@ class MagnifyingGlassPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const double scaleFactor = AppInteraction.magnifierImageScale;
+    canvas.save();
+    final Rect circleRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    canvas.clipPath(Path()..addOval(circleRect));
 
-    final Paint paint = Paint()
-      ..shader = ImageShader(
-        croppedImage,
-        TileMode.clamp,
-        TileMode.clamp,
-        (Matrix4.identity()..scaleByVector3(vm64.Vector3.all(scaleFactor))).storage,
-      );
+    canvas.drawRect(circleRect, Paint()..color = AppColors.grey300);
 
-    canvas.drawCircle(
-      Offset(size.width / AppMath.pair, size.height / AppMath.pair),
-      size.width / AppMath.pair,
-      paint,
+    final Rect srcRect = Rect.fromLTWH(
+      0,
+      0,
+      croppedImage.width.toDouble(),
+      croppedImage.height.toDouble(),
     );
+    canvas.drawImageRect(
+      croppedImage,
+      srcRect,
+      circleRect,
+      Paint()..filterQuality = ui.FilterQuality.none,
+    );
+    canvas.restore();
 
     canvas.drawCircle(
       Offset(size.width / AppMath.pair, size.height / AppMath.pair),

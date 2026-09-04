@@ -6,7 +6,6 @@ import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/panels/layers/blend_mode.dart';
 import 'package:fpaint/panels/layers/layer_thumbnail.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/color_picker_dialog.dart';

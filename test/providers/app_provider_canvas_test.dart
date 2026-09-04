@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

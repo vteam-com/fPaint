@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+part of 'app_provider.dart';
 
 /// A single queued magic-wand selection request.
 @immutable

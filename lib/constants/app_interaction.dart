@@ -26,8 +26,7 @@ class AppInteraction {
   /// Diameter of the fixed marker pinned at the start of a horizontal tolerance
   /// drag (while the cursor is hidden), for the wand and the paint bucket.
   static const double toleranceAnchorMarkerSize = 18.0;
-  static const double magnifierScale = 6.0;
-  static const double magnifierImageScale = 8.0;
+  static const int magnifierGridCount = 11;
   static const double smudgeMinimumRadius = 1.0;
   static const double smudgeBrushRadiusFactor = 0.5;
   static const double smudgeInputPointSpacing = 1.0;

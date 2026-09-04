@@ -1,3 +1,5 @@
+import 'package:fpaint/constants/app_interaction.dart';
+
 /// Shared layout and sizing tokens.
 class AppLayout {
   static const double minPanelExtent = 100.0;
@@ -28,7 +30,7 @@ class AppLayout {
   static const double gridSelectorSize = 120.0;
   static const double previewRegionSize = 100.0;
   static const double magnifierWidgetWidth = 50.0;
-  static const double magnifierTargetSize = 30.0;
+  static const double magnifierTargetSize = previewRegionSize / AppInteraction.magnifierGridCount;
   static const double canvasDefaultWidth = 1024.0;
   static const double canvasDefaultHeight = 768.0;
   static const double desktopWindowWidth = 1200.0;

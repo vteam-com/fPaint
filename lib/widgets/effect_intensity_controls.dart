@@ -4,7 +4,6 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/effect_labels.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/widgets/app_button_row.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_slider.dart';

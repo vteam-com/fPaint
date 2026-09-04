@@ -10,9 +10,6 @@ import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_canvas.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
-import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
 import 'package:fpaint/widgets/canvas_panel.dart';
@@ -175,24 +172,12 @@ class MainViewState extends State<MainView> {
                       _buildEyeDropper(
                         appProvider: appProvider,
                         position: appProvider.eyeDropPositionForBrush!,
-                        onColorPicked: (Color color) {
-                          appProvider.brushColor = color;
-                        },
-                        onDismiss: () {
-                          appProvider.eyeDropPositionForBrush = null;
-                        },
                       ),
 
                     if (!hasActiveTransformOverlay && appProvider.eyeDropPositionForFill != null)
                       _buildEyeDropper(
                         appProvider: appProvider,
                         position: appProvider.eyeDropPositionForFill!,
-                        onColorPicked: (Color color) {
-                          appProvider.fillColor = color;
-                        },
-                        onDismiss: () {
-                          appProvider.eyeDropPositionForFill = null;
-                        },
                       ),
 
                     //
@@ -364,22 +349,11 @@ class MainViewState extends State<MainView> {
   Widget _buildEyeDropper({
     required AppProvider appProvider,
     required Offset position,
-    required ValueChanged<Color> onColorPicked,
-    required VoidCallback onDismiss,
   }) {
     return MagnifyingEyeDropper(
       layers: appProvider.layers,
       pointerPosition: position,
       pixelPosition: appProvider.toCanvas(position),
-      onColorPicked: (Color color) async {
-        onColorPicked(color);
-        onDismiss();
-        appProvider.update();
-      },
-      onClosed: () {
-        onDismiss();
-        appProvider.update();
-      },
     );
   }
 

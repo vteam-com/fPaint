@@ -6,7 +6,6 @@ import 'package:fpaint/panels/side_panel/top_menu_and_layers_panel.dart';
 import 'package:fpaint/panels/tools/tools_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/side_panel_header.dart';
 import 'package:multi_split_view/multi_split_view.dart';

@@ -13,7 +13,6 @@ import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';

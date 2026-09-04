@@ -1,9 +1,4 @@
-import 'dart:ui' as ui;
-
-import 'package:flutter/widgets.dart';
-import 'package:fpaint/models/image_placement_layer_restore_state.dart';
-import 'package:fpaint/models/selector_model.dart';
-import 'package:fpaint/providers/app_provider.dart';
+part of 'app_provider.dart';
 
 typedef SelectionStateSnapshot = ({
   bool isVisible,

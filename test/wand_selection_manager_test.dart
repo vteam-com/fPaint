@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/fill_service.dart';
-import 'package:fpaint/providers/wand_selection_manager.dart';
 
 void main() {
   group('WandSelectionManager', () {

@@ -7,7 +7,6 @@ import 'package:fpaint/helpers/draft_flusher.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_canvas.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_storage.dart';
 import 'package:fpaint/recovery/storage_io_impl.dart'

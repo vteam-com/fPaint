@@ -20,9 +20,6 @@ import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_canvas.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
-import 'package:fpaint/providers/app_provider_tools.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/inherited_scope.dart';
 import 'package:fpaint/providers/shell_provider.dart';
@@ -31,6 +28,7 @@ import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
+part 'canvas_gesture_handler_eyedropper.dart';
 part 'canvas_gesture_handler_pixel_brush.dart';
 part 'canvas_gesture_handler_state_methods.dart';
 
@@ -163,6 +161,20 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         onPointerHover: (PointerHoverEvent event) {
           _registerInputModality(shellProvider, event.kind);
           if (_activePointerId != -1 || !_supportsHoverPreview(event.kind)) {
+            return;
+          }
+
+          appProvider.lastPointerPosition = event.localPosition;
+
+          if (appProvider.eyeDropPositionForBrush != null) {
+            appProvider.eyeDropPositionForBrush = event.localPosition;
+            appProvider.repaintMainView();
+            return;
+          }
+
+          if (appProvider.eyeDropPositionForFill != null) {
+            appProvider.eyeDropPositionForFill = event.localPosition;
+            appProvider.repaintMainView();
             return;
           }
 

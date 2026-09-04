@@ -1,7 +1,6 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
@@ -24,15 +23,9 @@ class FakeLayersProvider extends Fake implements LayersProvider {
 void main() {
   group('MagnifyingEyeDropper', () {
     late FakeLayersProvider fakeLayersProvider;
-    late Color pickedColor;
-    late bool closedCalled;
-    late bool colorPickedCalled;
 
     setUp(() {
       fakeLayersProvider = FakeLayersProvider();
-      pickedColor = Colors.transparent;
-      closedCalled = false;
-      colorPickedCalled = false;
     });
 
     testWidgets('renders nothing when cachedImage is null', (WidgetTester tester) async {
@@ -46,13 +39,6 @@ void main() {
             layers: fakeLayersProvider,
             pointerPosition: const Offset(100, 100),
             pixelPosition: const Offset(50, 50),
-            onColorPicked: (Color color) {
-              pickedColor = color;
-              colorPickedCalled = true;
-            },
-            onClosed: () {
-              closedCalled = true;
-            },
           ),
         ),
       );
@@ -77,13 +63,6 @@ void main() {
                 layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
-                onColorPicked: (Color color) {
-                  pickedColor = color;
-                  colorPickedCalled = true;
-                },
-                onClosed: () {
-                  closedCalled = true;
-                },
               ),
             ],
           ),
@@ -94,83 +73,10 @@ void main() {
       await tester.pump();
 
       expect(find.byType(MagnifyingEyeDropper), findsOneWidget);
-      expect(find.byKey(Keys.magnifyingEyeDropperCloseButton), findsOneWidget);
-      expect(find.byKey(Keys.magnifyingEyeDropperConfirmButton), findsOneWidget);
       expect(find.byType(CustomPaint), findsWidgets);
     });
 
-    testWidgets('calls onClosed when cancel button is pressed', (WidgetTester tester) async {
-      final ui.Image mockImage = await createMockImage(100, 100);
-      fakeLayersProvider.cachedImage = mockImage;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Stack(
-            children: <Widget>[
-              MagnifyingEyeDropper(
-                layers: fakeLayersProvider,
-                pointerPosition: const Offset(200, 200),
-                pixelPosition: const Offset(50, 50),
-                onColorPicked: (Color color) {
-                  pickedColor = color;
-                  colorPickedCalled = true;
-                },
-                onClosed: () {
-                  closedCalled = true;
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-
-      await tester.pump();
-
-      await tester.tap(find.byKey(Keys.magnifyingEyeDropperCloseButton));
-      await tester.pump();
-
-      expect(closedCalled, true);
-    });
-
-    testWidgets('calls onColorPicked when confirm button is pressed', (WidgetTester tester) async {
-      final ui.Image mockImage = await createMockImage(100, 100);
-      fakeLayersProvider.cachedImage = mockImage;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Stack(
-            children: <Widget>[
-              MagnifyingEyeDropper(
-                layers: fakeLayersProvider,
-                pointerPosition: const Offset(200, 200),
-                pixelPosition: const Offset(50, 50),
-                onColorPicked: (Color color) {
-                  pickedColor = color;
-                  colorPickedCalled = true;
-                },
-                onClosed: () {
-                  closedCalled = true;
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-
-      await tester.pump();
-
-      await tester.tap(find.byKey(Keys.magnifyingEyeDropperConfirmButton));
-      await tester.pump();
-
-      expect(colorPickedCalled, true);
-      expect(pickedColor, Colors.red); // Fake color from getColorAtOffset
-    });
-
-    testWidgets('positions widget correctly relative to pointer', (WidgetTester tester) async {
+    testWidgets('positions widget centered on pointer position', (WidgetTester tester) async {
       final ui.Image mockImage = await createMockImage(100, 100);
       fakeLayersProvider.cachedImage = mockImage;
 
@@ -187,8 +93,6 @@ void main() {
                   layers: fakeLayersProvider,
                   pointerPosition: const Offset(200, 200),
                   pixelPosition: const Offset(50, 50),
-                  onColorPicked: (Color color) {},
-                  onClosed: () {},
                 ),
               ],
             ),
@@ -199,9 +103,9 @@ void main() {
       await tester.pump();
 
       final Positioned positioned = tester.widget(find.byType(Positioned));
-      // Widget should be positioned to the left of the pointer
-      expect(positioned.left, 150.0); // 200 - 50 (widgetWidth)
-      expect(positioned.top, lessThan(200.0)); // Should be above center
+      // Widget should be centered over pointer position (200 - 100/2 = 150)
+      expect(positioned.left, 150.0);
+      expect(positioned.top, 150.0);
     });
 
     testWidgets('displays magnified image in custom paint', (WidgetTester tester) async {
@@ -218,8 +122,6 @@ void main() {
                 layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
-                onColorPicked: (Color color) {},
-                onClosed: () {},
               ),
             ],
           ),
@@ -252,8 +154,6 @@ void main() {
                 layers: fakeLayersProvider,
                 pointerPosition: const Offset(200, 200),
                 pixelPosition: const Offset(50, 50),
-                onColorPicked: (Color color) {},
-                onClosed: () {},
               ),
             ],
           ),

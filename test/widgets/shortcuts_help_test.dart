@@ -8,8 +8,6 @@ import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
-import 'package:fpaint/providers/app_provider_canvas.dart';
-import 'package:fpaint/providers/app_provider_selection.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_dialog.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
