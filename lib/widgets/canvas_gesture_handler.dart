@@ -58,6 +58,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   Offset? _lastSelectionTapCanvasPosition;
   Duration? _lastSelectionTapTimestamp;
   final Set<int> _multiTouchPointersMoved = <int>{};
+  int _panningPointerId = -1;
   PointerDownEvent? _pendingTouchDownEvent;
 
   /// Canvas clip path active when the stroke began (may be null).
@@ -142,10 +143,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         onPointerSignal: (PointerSignalEvent event) {
           _registerInputModality(shellProvider, event.kind);
           if (event is PointerScrollEvent) {
-            _handleUserPanningTheCanvas(
+            _handleUserScalingTheCanvas(
               shellProvider,
               appProvider,
-              Offset(-event.scrollDelta.dx, -event.scrollDelta.dy),
+              event.localPosition,
+              exp(-event.scrollDelta.dy / AppInteraction.mouseWheelZoomScrollPixels),
             );
           } else {
             if (event is PointerScaleEvent) {
@@ -242,6 +244,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
               }
             }
           } else {
+            if (event.kind == PointerDeviceKind.mouse && event.buttons == kSecondaryMouseButton) {
+              _panningPointerId = event.pointer;
+              return;
+            }
             _handlePointerStart(appProvider, event);
           }
         },
@@ -271,6 +277,14 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
               }
             }
           } else {
+            if (_panningPointerId == event.pointer) {
+              _handleUserPanningTheCanvas(
+                shellProvider,
+                appProvider,
+                event.delta,
+              );
+              return;
+            }
             _handlePointerMove(appProvider, event);
           }
         },
@@ -302,6 +316,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
               _handlePointerEnd(appProvider, event);
             }
           } else {
+            if (_panningPointerId == event.pointer) {
+              _panningPointerId = -1;
+              return;
+            }
             _handlePointerEnd(appProvider, event);
           }
         },
@@ -330,6 +348,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             // the cursor hidden for a later mouse user.
             appProvider.endTolerancePointerLock();
           } else {
+            if (_panningPointerId == event.pointer) {
+              _panningPointerId = -1;
+              return;
+            }
             _handlePointerEnd(appProvider, event);
           }
         },

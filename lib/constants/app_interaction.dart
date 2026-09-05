@@ -4,6 +4,9 @@ class AppInteraction {
   static const double maxCanvasScale = 10.0;
   static const double singleTouchDrawSlop = 8.0;
 
+  /// Wheel-scroll distance that produces one natural-log unit of canvas zoom.
+  static const double mouseWheelZoomScrollPixels = 360.0;
+
   /// Minimum relative distance change between synchronized touch contacts that
   /// is interpreted as a pinch rather than ordinary contact jitter.
   static const double touchPinchScaleDeadzone = 0.008;
