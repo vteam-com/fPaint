@@ -17,16 +17,21 @@ const ui.Size _sampleSketchBookCanvasSize = ui.Size(4112, 2440);
 const List<String> _expectedSketchBookLayerNames = <String>['Layer3', 'Layer2', 'Layer1'];
 const ui.Size _layeredExportCanvasSize = ui.Size(16, 12);
 const List<String> _expectedLayeredExportRoundTripNames = <String>['Hidden', 'Foreground', 'Background'];
+// SketchBook writes YPosition from the canvas bottom, so the expected top-left
+// dy is canvasHeight - YPosition - layerHeight (2440 - 1430 - 361 = 649, etc.).
 const List<ui.Offset> _expectedSketchBookLayerOffsets = <ui.Offset>[
-  ui.Offset(2497, 1430),
-  ui.Offset(1875, 1347),
-  ui.Offset(1523, 1183),
+  ui.Offset(2497, 649),
+  ui.Offset(1875, 604),
+  ui.Offset(1523, 591),
 ];
 const List<ui.Size> _expectedSketchBookLayerSizes = <ui.Size>[
   ui.Size(274, 361),
   ui.Size(518, 489),
   ui.Size(511, 666),
 ];
+// Raw YPosition tag values (in pixels) from test.tif's layer SubIFDs, ordered
+// top layer first to match the imported layer stack.
+const List<double> _sketchBookYPositions = <double>[1430, 1347, 1183];
 const ui.Size _croppedLayerCanvasSize = ui.Size(20, 20);
 const ui.Offset _croppedLayerOffset = ui.Offset(5, 7);
 const ui.Size _croppedLayerImageSize = ui.Size(4, 3);
@@ -99,6 +104,27 @@ void main() {
           ui.Offset(expectedOffset.dx + expectedSize.width, expectedOffset.dy + expectedSize.height),
         );
       }
+    });
+
+    test('imports SketchBook layer rasters with BGRA channel order', () async {
+      final LayersProvider layers = LayersProvider();
+      layers.clear();
+
+      final Uint8List bytes = await File(_sampleSketchBookTiffPath).readAsBytes();
+      await readTiffFileFromBytes(layers, bytes);
+
+      // Layer1 carries a saturated blue ink stroke at canvas (1790, 615).
+      // SketchBook stores layer rasters as premultiplied BGRA despite tagging
+      // them RGB, so reading the samples verbatim imported this as orange.
+      final LayerProvider inkLayer = layers.get(2);
+      expect(inkLayer.name, 'Layer1');
+
+      final ui.Image layerImage = inkLayer.toImageForStorage(layers.size);
+      final List<int> rgba = await _readRawPixel(layerImage, 1790, 615);
+
+      expect(rgba[0], closeTo(34, 4));
+      expect(rgba[1], closeTo(134, 4));
+      expect(rgba[2], closeTo(210, 4));
     });
 
     test('exports layered TIFF as root image plus SubIFD layers', () async {
@@ -178,6 +204,63 @@ void main() {
       expect(layers.selectedLayerIndex, 0);
     });
 
+    test('places SketchBook layers using bottom-left YPosition origin', () async {
+      final LayersProvider layers = LayersProvider();
+      layers.clear();
+
+      final Uint8List bytes = await File(_sampleSketchBookTiffPath).readAsBytes();
+      await readTiffFileFromBytes(layers, bytes);
+
+      // Verified against the file's own flattened root composite, whose ink
+      // spans y 593..1255. Reading YPosition as a top-left coordinate instead
+      // put every layer ~600px too low, so assert the mirrored dy exactly.
+      for (int index = 0; index < layers.length; index++) {
+        final LayerProvider layer = layers.get(index);
+        final ui.Offset topLeft = layer.lastUserAction!.positions.first;
+        final ui.Offset bottomRight = layer.lastUserAction!.positions.last;
+        final double yPosition = _sketchBookYPositions[index];
+        final double layerHeight = _expectedSketchBookLayerSizes[index].height;
+
+        expect(topLeft.dy, _sampleSketchBookCanvasSize.height - yPosition - layerHeight);
+        expect(bottomRight.dy, _sampleSketchBookCanvasSize.height - yPosition);
+        expect(bottomRight.dx, lessThanOrEqualTo(_sampleSketchBookCanvasSize.width));
+      }
+    });
+
+    test('restores blend mode and opacity from the SketchBook LayerModel tag', () async {
+      final LayersProvider layers = LayersProvider();
+      layers.clear();
+      layers.size = _croppedLayerCanvasSize;
+      layers.addWhiteBackgroundLayer('Background');
+
+      final LayerProvider blendedLayer = layers.addTop(name: 'Blended');
+      blendedLayer.backgroundColor = Colors.red;
+      blendedLayer.blendMode = ui.BlendMode.multiply;
+      blendedLayer.opacity = 0.5;
+
+      final Uint8List bytes = await convertLayersToTiff(layers);
+
+      // The LayerModel payload is what SketchBook reads, so it must carry the
+      // real blend ordinal and opacity rather than a hardcoded constant.
+      final img.TiffDecoder decoder = img.TiffDecoder();
+      final img.TiffInfo? info = decoder.startDecode(bytes);
+      expect(info, isNotNull);
+      // Real SketchBook 8.7.1 stores the blend ordinal at field 7 (after the
+      // constant 161), so the multiply layer must serialize exactly like this.
+      expect(
+        String.fromCharCodes(bytes).contains('0.500, 00000000, 1, 0, 1, 0, 161, 1, 0, 0, 00000'),
+        isTrue,
+      );
+
+      layers.clear();
+      await readTiffFileFromBytes(layers, bytes);
+
+      final LayerProvider imported = layers.get(0);
+      expect(imported.name, 'Blended');
+      expect(imported.blendMode, ui.BlendMode.multiply);
+      expect(imported.opacity, closeTo(0.5, 0.01));
+    });
+
     test('exports cropped layer rasters with preserved offsets', () async {
       final LayersProvider layers = LayersProvider();
       layers.clear();
@@ -208,6 +291,18 @@ void main() {
           _croppedLayerOffset.dy + _croppedLayerImageSize.height,
         ),
       );
+
+      // Layer rasters are stored as BGRA for SketchBook, so a full round trip
+      // must still hand back the original red rather than swapped blue.
+      final ui.Image importedImage = importedLayer.toImageForStorage(layers.size);
+      final List<int> rgba = await _readRawPixel(
+        importedImage,
+        _croppedLayerOffset.dx.toInt() + 1,
+        _croppedLayerOffset.dy.toInt() + 1,
+      );
+      expect(rgba[0], closeTo(_toImageChannel(Colors.red.r), 2));
+      expect(rgba[1], closeTo(_toImageChannel(Colors.red.g), 2));
+      expect(rgba[2], closeTo(_toImageChannel(Colors.red.b), 2));
     });
 
     test('invalid TIFF bytes throw without mutating existing layers', () async {
@@ -308,4 +403,14 @@ Future<ui.Image> _createSolidUiImage(
 
 int _toImageChannel(double channel) {
   return (channel * AppLimits.rgbChannelMax).round().clamp(0, AppLimits.rgbChannelMax);
+}
+
+Future<List<int>> _readRawPixel(
+  ui.Image image,
+  int x,
+  int y,
+) async {
+  final ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+  final int offset = (y * image.width + x) * 4;
+  return List<int>.generate(4, (int index) => byteData!.getUint8(offset + index));
 }

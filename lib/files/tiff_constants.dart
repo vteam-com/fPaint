@@ -236,9 +236,6 @@ class TiffConstants {
   static const String sketchBookRootModelPayload =
       '003, 003, ffffffff, 001, 1, 000, 000, 000, 000, 000, 000, 000, 000, 000, 000';
 
-  /// SketchBook-style layer model payload written on each layer SubIFD.
-  static const String sketchBookLayerModelPayload = '1.000, 00000000, 1, 0, 1, 0, 161, 0, 0, 0, 00000';
-
   /// SketchBook-style layer flags payload written on each layer SubIFD.
   static const String sketchBookLayerFlagsPayload = '0, 0, 0, 0, 0, 0, 0, 0';
 
@@ -270,6 +267,41 @@ class TiffConstants {
   /// JSON key marking the last-selected layer in the ImageDescription payload.
   static const String metaKeySelected = 'selected';
 
+  /// JSON key declaring the stored channel order in the ImageDescription payload.
+  static const String metaKeyChannelOrder = 'channelOrder';
+
+  /// Channel-order value for layer rasters stored as premultiplied BGRA.
+  static const String channelOrderBgra = 'bgra';
+
+  /// Software-tag prefix shared by SketchBook / Alias layered TIFF writers.
+  static const String aliasSoftwarePrefix = 'Alias';
+
   /// Public `package:image` type string for ASCII TIFF values.
   static const String ifdValueTypeAscii = 'ascii';
+
+  // -- SketchBook LayerModel payload layout -------------------------------
+  /// Separator between fields of the SketchBook LayerModel payload.
+  static const String layerModelFieldSeparator = ',';
+
+  /// Field index of the layer opacity (0.000–1.000) in the LayerModel payload.
+  static const int layerModelIndexOpacity = 0;
+
+  /// Field index of the blend-mode ordinal in the LayerModel payload.
+  ///
+  /// Verified against real SketchBook 8.7.1 files: a multiply ink layer is
+  /// `1.000, 00000000, 1, 0, 1, 0, 161, 1, 0, 0, 00000` — the ordinal is the
+  /// field after the constant `161`, not before it.
+  static const int layerModelIndexBlendMode = 7;
+
+  /// Field index of the layer visibility flag in the LayerModel payload.
+  static const int layerModelIndexVisible = 2;
+
+  /// Minimum number of fields a LayerModel payload must have to be parsed.
+  static const int layerModelMinFieldCount = 8;
+
+  /// Decimal places used for the opacity field of a LayerModel payload.
+  static const int layerModelOpacityDecimals = 3;
+
+  /// LayerModel visibility value meaning the layer is hidden.
+  static const int layerModelHidden = 0;
 }

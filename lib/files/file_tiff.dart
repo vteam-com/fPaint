@@ -48,7 +48,33 @@ String _encodeLayerMetadata(
     TiffConstants.metaKeyVisible: layer.isVisible,
     TiffConstants.metaKeyLocked: layer.isLocked,
     TiffConstants.metaKeySelected: selected,
+    TiffConstants.metaKeyChannelOrder: TiffConstants.channelOrderBgra,
   });
+}
+
+/// Serializes [layer] into a SketchBook LayerModel payload.
+///
+/// This keeps opacity, visibility, and blend mode readable by SketchBook, which
+/// never sees fPaint's JSON ImageDescription. Blend modes SketchBook has no
+/// ordinal for are written as Normal, matching how the importer treats unknown
+/// ordinals.
+String _encodeSketchBookLayerModel(LayerProvider layer) {
+  final int blendOrdinal = _sketchBookBlendModeOrdinals[layer.blendMode] ?? 0;
+  final int visibleFlag = layer.isVisible ? 1 : TiffConstants.layerModelHidden;
+
+  return <String>[
+    layer.opacity.toStringAsFixed(TiffConstants.layerModelOpacityDecimals),
+    '00000000',
+    '$visibleFlag',
+    '0',
+    '1',
+    '0',
+    '161',
+    '$blendOrdinal',
+    '0',
+    '0',
+    '00000',
+  ].join('${TiffConstants.layerModelFieldSeparator} ');
 }
 
 /// A decoded layer frame ready for TIFF encoding.
@@ -58,6 +84,8 @@ class _LayerFrame {
     required this.description,
     required this.layerName,
     required this.offset,
+    required this.bottomUpOffsetY,
+    required this.layerModel,
   });
 
   final img.Image image;
@@ -70,6 +98,15 @@ class _LayerFrame {
 
   /// Top-left canvas position for the cropped layer pixels.
   final Offset offset;
+
+  /// Distance from the canvas bottom to the bottom of the cropped pixels.
+  ///
+  /// SketchBook's YPosition tag is measured from the bottom of the canvas, so
+  /// this is what gets written rather than [offset]'s top-left `dy`.
+  final double bottomUpOffsetY;
+
+  /// SketchBook LayerModel payload carrying opacity, visibility, and blend mode.
+  final String layerModel;
 }
 
 /// Renders each layer, crops away transparent margins, and prepares TIFF pages.
@@ -93,6 +130,8 @@ Future<List<_LayerFrame>> _buildLayerFrames(LayersProvider layers) async {
         description: _encodeLayerMetadata(layer, selected: i == layers.selectedLayerIndex),
         layerName: layer.name,
         offset: exportBounds.topLeft,
+        bottomUpOffsetY: layers.size.height - exportBounds.bottom,
+        layerModel: _encodeSketchBookLayerModel(layer),
       ),
     );
   }
@@ -284,6 +323,8 @@ List<_DecodedTiffLayer>? _tryDecodeSubIfdLayers(
   }
 
   final bool isBigEndian = tiffInfo.bigEndian ?? false;
+  final double canvasHeight = tiffInfo.height.toDouble();
+  final bool aliasAuthored = _isAliasAuthoredRoot(rootImage);
   final List<_DecodedTiffLayer> decodedLayers = <_DecodedTiffLayer>[];
 
   for (final int subIfdOffset in subIfdOffsets) {
@@ -298,6 +339,10 @@ List<_DecodedTiffLayer>? _tryDecodeSubIfdLayers(
       img.flipVertical(decodedImage);
     }
 
+    if (_layerStoresBgraPixels(subIfdImage, aliasAuthored: aliasAuthored)) {
+      _swapRedBlue(decodedImage);
+    }
+
     if (_readIntTag(subIfdImage, TiffConstants.tagExtraSamples) == TiffConstants.extraSamplesAssociatedAlpha) {
       _unMultiplyAlpha(decodedImage);
     }
@@ -306,7 +351,7 @@ List<_DecodedTiffLayer>? _tryDecodeSubIfdLayers(
       _DecodedTiffLayer(
         image: decodedImage,
         meta: _extractSubIfdLayerMeta(subIfdImage, decodedLayers.length),
-        offset: _extractSubIfdOffset(subIfdImage),
+        offset: _extractSubIfdOffset(subIfdImage, canvasHeight),
       ),
     );
   }
@@ -334,6 +379,46 @@ img.TiffImage? _readTiffImageAtOffset(
   }
 }
 
+/// Returns true when the root directory was written by SketchBook / Alias.
+bool _isAliasAuthoredRoot(img.TiffImage rootImage) {
+  final String? software = _readTextTag(rootImage, TiffConstants.tagSoftware);
+  return software != null && software.startsWith(TiffConstants.aliasSoftwarePrefix);
+}
+
+/// Returns true when a layer SubIFD stores its pixels in BGRA channel order.
+///
+/// SketchBook writes layer rasters as premultiplied BGRA even though the tags
+/// claim RGB, while the root composite and thumbnail SubIFD stay RGBA. fPaint
+/// exports declare their channel order in the JSON ImageDescription payload,
+/// which SketchBook never writes on layers, so that JSON is the tiebreaker:
+/// older fPaint exports without the key were RGBA and must not be swapped.
+bool _layerStoresBgraPixels(
+  img.TiffImage tiffImage, {
+  required bool aliasAuthored,
+}) {
+  final String? description = _readDescriptionTag(tiffImage);
+  if (description == null || !description.startsWith('{')) {
+    return aliasAuthored;
+  }
+
+  try {
+    final dynamic decoded = jsonDecode(description);
+    return decoded is Map<String, dynamic> &&
+        decoded[TiffConstants.metaKeyChannelOrder] == TiffConstants.channelOrderBgra;
+  } on FormatException {
+    return aliasAuthored;
+  }
+}
+
+/// Swaps the red and blue channels of every pixel in [image] in place.
+void _swapRedBlue(img.Image image) {
+  for (final img.Pixel pixel in image) {
+    final num red = pixel.r;
+    pixel.r = pixel.b;
+    pixel.b = red;
+  }
+}
+
 bool _shouldSkipSubIfdImage(img.TiffImage tiffImage) {
   final int? newSubfileType = _readIntTag(tiffImage, TiffConstants.tagNewSubfileType);
   final String? pageName = _readTextTag(tiffImage, TiffConstants.tagPageName);
@@ -341,10 +426,25 @@ bool _shouldSkipSubIfdImage(img.TiffImage tiffImage) {
   return newSubfileType == TiffConstants.subfileTypeReducedResolution || pageName == TiffConstants.pageNameThumbnail;
 }
 
-Offset _extractSubIfdOffset(img.TiffImage tiffImage) {
+/// Converts a SketchBook SubIFD position into a top-left canvas offset.
+///
+/// SketchBook writes XPosition/YPosition in pixels, but YPosition measures the
+/// distance from the *bottom* of the canvas to the bottom of the layer tile
+/// (it pairs with the bottom-left Orientation used for the layer rasters).
+/// Flutter layers are placed from the top-left, so the vertical component has
+/// to be mirrored against the canvas height or every layer lands too low.
+Offset _extractSubIfdOffset(
+  img.TiffImage tiffImage,
+  double canvasHeight,
+) {
   final double xPosition = _readDoubleTag(tiffImage, TiffConstants.tagXPosition) ?? 0.0;
-  final double yPosition = _readDoubleTag(tiffImage, TiffConstants.tagYPosition) ?? 0.0;
-  return Offset(xPosition, yPosition);
+  final double? yPosition = _readDoubleTag(tiffImage, TiffConstants.tagYPosition);
+
+  if (yPosition == null) {
+    return Offset(xPosition, 0.0);
+  }
+
+  return Offset(xPosition, canvasHeight - yPosition - tiffImage.height);
 }
 
 /// Builds layer metadata for a SketchBook-style SubIFD image.
@@ -370,13 +470,93 @@ _LayerMeta _extractSubIfdLayerMeta(
 
   final String? pageName = _readTextTag(tiffImage, TiffConstants.tagPageName);
   final String? sketchBookLayerName = _readTextTag(tiffImage, TiffConstants.tagSketchBookLayerName);
+  final _SketchBookLayerModel? layerModel = _parseSketchBookLayerModel(tiffImage);
 
   return _LayerMeta(
     name: pageName ?? sketchBookLayerName ?? _fallbackLayerName(layerIndex),
-    opacity: 1.0,
-    blendMode: ui.BlendMode.srcOver,
-    visible: true,
+    opacity: layerModel?.opacity ?? 1.0,
+    blendMode: layerModel?.blendMode ?? ui.BlendMode.srcOver,
+    visible: layerModel?.visible ?? true,
     locked: false,
+  );
+}
+
+/// SketchBook blend-mode ordinals mapped onto Flutter blend modes.
+///
+/// The ordinal lives in field 7 of the SketchBook LayerModel payload (tag 272 /
+/// tag 50784) and follows SketchBook's own layer-mode menu order. Modes with no
+/// Flutter equivalent are left out so they fall back to [ui.BlendMode.srcOver]
+/// rather than rendering as something visibly wrong.
+const Map<int, ui.BlendMode> _sketchBookBlendModes = <int, ui.BlendMode>{
+  0: ui.BlendMode.srcOver, // Normal
+  1: ui.BlendMode.multiply,
+  2: ui.BlendMode.screen,
+  3: ui.BlendMode.overlay,
+  4: ui.BlendMode.darken,
+  5: ui.BlendMode.lighten,
+  6: ui.BlendMode.colorDodge,
+  7: ui.BlendMode.colorBurn,
+  8: ui.BlendMode.hardLight,
+  9: ui.BlendMode.softLight,
+  10: ui.BlendMode.difference,
+  11: ui.BlendMode.exclusion,
+  12: ui.BlendMode.hue,
+  13: ui.BlendMode.saturation,
+  14: ui.BlendMode.color,
+  15: ui.BlendMode.luminosity,
+};
+
+/// Flutter blend modes mapped back onto SketchBook ordinals for export.
+final Map<ui.BlendMode, int> _sketchBookBlendModeOrdinals = <ui.BlendMode, int>{
+  for (final MapEntry<int, ui.BlendMode> entry in _sketchBookBlendModes.entries) entry.value: entry.key,
+};
+
+/// Layer properties recovered from a SketchBook LayerModel payload.
+class _SketchBookLayerModel {
+  const _SketchBookLayerModel({
+    required this.opacity,
+    required this.blendMode,
+    required this.visible,
+  });
+
+  final double opacity;
+  final ui.BlendMode blendMode;
+  final bool visible;
+}
+
+/// Parses opacity, blend mode, and visibility from a SketchBook LayerModel tag.
+///
+/// The payload is a comma-separated list such as
+/// `1.000, 00000000, 1, 0, 1, 0, 161, 1, 0, 0, 00000`, where field 0 is the
+/// opacity, field 2 the visibility flag, and field 7 the blend-mode ordinal
+/// (the example above is a multiply layer from a real SketchBook 8.7.1 file).
+/// Returns `null` when the tag is absent or too short to trust, so callers keep
+/// their existing defaults.
+_SketchBookLayerModel? _parseSketchBookLayerModel(img.TiffImage tiffImage) {
+  final String? payload =
+      _readTextTag(tiffImage, TiffConstants.tagSketchBookLayerModel) ?? _readTextTag(tiffImage, TiffConstants.tagModel);
+
+  if (payload == null) {
+    return null;
+  }
+
+  final List<String> fields = payload
+      .split(TiffConstants.layerModelFieldSeparator)
+      .map((String field) => field.trim())
+      .toList(growable: false);
+
+  if (fields.length < TiffConstants.layerModelMinFieldCount) {
+    return null;
+  }
+
+  final double opacity = (double.tryParse(fields[TiffConstants.layerModelIndexOpacity]) ?? 1.0).clamp(0.0, 1.0);
+  final int? blendOrdinal = int.tryParse(fields[TiffConstants.layerModelIndexBlendMode]);
+  final int? visibleFlag = int.tryParse(fields[TiffConstants.layerModelIndexVisible]);
+
+  return _SketchBookLayerModel(
+    opacity: opacity,
+    blendMode: _sketchBookBlendModes[blendOrdinal] ?? ui.BlendMode.srcOver,
+    visible: visibleFlag != TiffConstants.layerModelHidden,
   );
 }
 
