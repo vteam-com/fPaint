@@ -58,6 +58,7 @@ _TiffDirectoryLayout _buildRootDirectoryLayout({
   final _TiffDataBlock pixelBlock = _pixelBlock(
     compositeImage,
     writeBottomUp: false,
+    storeBgra: false,
   );
   final _TiffDataBlock subIfdBlock = _longArrayBlock(
     List<int>.filled(layerCount, TiffConstants.noValue, growable: false),
@@ -119,6 +120,7 @@ _TiffDirectoryLayout _buildLayerDirectoryLayout(_LayerFrame frame) {
   final _TiffDataBlock pixelBlock = _pixelBlock(
     frame.image,
     writeBottomUp: true,
+    storeBgra: true,
   );
 
   entries.add(_longValueEntry(TiffConstants.tagImageWidth, frame.image.width));
@@ -128,7 +130,7 @@ _TiffDirectoryLayout _buildLayerDirectoryLayout(_LayerFrame frame) {
   entries.add(_shortValueEntry(TiffConstants.tagPhotometricInterpretation, TiffConstants.photometricRgb));
   entries.add(_shortValueEntry(TiffConstants.tagFillOrder, TiffConstants.fillOrderMsbToLsb));
   entries.add(_asciiEntry(TiffConstants.tagImageDescription, frame.description, blocks));
-  entries.add(_asciiEntry(TiffConstants.tagModel, TiffConstants.sketchBookLayerModelPayload, blocks));
+  entries.add(_asciiEntry(TiffConstants.tagModel, frame.layerModel, blocks));
   entries.add(_offsetBlockEntry(TiffConstants.tagStripOffsets, TiffConstants.typeLong, 1, pixelBlock));
   entries.add(_shortValueEntry(TiffConstants.tagOrientation, TiffConstants.orientationBottomLeft));
   entries.add(_shortValueEntry(TiffConstants.tagSamplesPerPixel, TiffConstants.rgbaChannelCount));
@@ -147,14 +149,14 @@ _TiffDirectoryLayout _buildLayerDirectoryLayout(_LayerFrame frame) {
   entries.add(
     _rationalEntry(
       TiffConstants.tagYPosition,
-      _encodeSketchBookPosition(frame.offset.dy),
+      _encodeSketchBookPosition(frame.bottomUpOffsetY),
       TiffConstants.sketchBookPositionDenominator,
       blocks,
     ),
   );
   entries.add(_shortValueEntry(TiffConstants.tagExtraSamples, TiffConstants.extraSamplesAssociatedAlpha));
   entries.add(_shortArrayEntry(TiffConstants.tagSampleFormat, _rgbaSampleFormatValues(), blocks));
-  entries.add(_asciiEntry(TiffConstants.tagSketchBookLayerModel, TiffConstants.sketchBookLayerModelPayload, blocks));
+  entries.add(_asciiEntry(TiffConstants.tagSketchBookLayerModel, frame.layerModel, blocks));
   entries.add(_asciiEntry(TiffConstants.tagSketchBookLayerFlags, TiffConstants.sketchBookLayerFlagsPayload, blocks));
   entries.add(_shortTextEntry(TiffConstants.tagSketchBookLayerName, frame.layerName, blocks));
 
@@ -394,15 +396,17 @@ _TiffDataBlock _longArrayBlock(List<int> values) {
   return _TiffDataBlock(_encodeLongValues(values));
 }
 
-/// Builds the raw RGBA pixel payload block for a TIFF page.
+/// Builds the raw pixel payload block for a TIFF page.
 _TiffDataBlock _pixelBlock(
   img.Image image, {
   required bool writeBottomUp,
+  required bool storeBgra,
 }) {
   return _TiffDataBlock(
     _encodeAssociatedRgbaPixels(
       image,
       writeBottomUp: writeBottomUp,
+      storeBgra: storeBgra,
     ),
   );
 }
@@ -415,37 +419,30 @@ _TiffDataBlock _rationalBlock(int numerator, int denominator) {
   return _TiffDataBlock(data.buffer.asUint8List());
 }
 
-/// Encodes bottom-up or top-down premultiplied RGBA pixels for TIFF storage.
+/// Encodes bottom-up or top-down premultiplied pixels for TIFF storage.
+///
+/// SketchBook expects layer rasters as premultiplied BGRA while the root
+/// composite stays RGBA, so [storeBgra] selects the channel order.
 Uint8List _encodeAssociatedRgbaPixels(
   img.Image image, {
   required bool writeBottomUp,
+  required bool storeBgra,
 }) {
   final Uint8List pixelBytes = Uint8List(
     image.width * image.height * AppMath.bytesPerPixel,
   );
   int offset = TiffConstants.noValue;
 
-  if (writeBottomUp) {
-    for (int y = image.height - 1; y >= TiffConstants.noValue; y--) {
-      for (int x = TiffConstants.noValue; x < image.width; x++) {
-        final img.Pixel pixel = image.getPixel(x, y);
-        final int alpha = pixel.a.toInt();
-        pixelBytes[offset++] = _premultiplyChannel(pixel.r.toInt(), alpha);
-        pixelBytes[offset++] = _premultiplyChannel(pixel.g.toInt(), alpha);
-        pixelBytes[offset++] = _premultiplyChannel(pixel.b.toInt(), alpha);
-        pixelBytes[offset++] = alpha;
-      }
-    }
-    return pixelBytes;
-  }
-
-  for (int y = TiffConstants.noValue; y < image.height; y++) {
+  for (int row = TiffConstants.noValue; row < image.height; row++) {
+    final int y = writeBottomUp ? image.height - 1 - row : row;
     for (int x = TiffConstants.noValue; x < image.width; x++) {
       final img.Pixel pixel = image.getPixel(x, y);
       final int alpha = pixel.a.toInt();
-      pixelBytes[offset++] = _premultiplyChannel(pixel.r.toInt(), alpha);
+      final int red = _premultiplyChannel(pixel.r.toInt(), alpha);
+      final int blue = _premultiplyChannel(pixel.b.toInt(), alpha);
+      pixelBytes[offset++] = storeBgra ? blue : red;
       pixelBytes[offset++] = _premultiplyChannel(pixel.g.toInt(), alpha);
-      pixelBytes[offset++] = _premultiplyChannel(pixel.b.toInt(), alpha);
+      pixelBytes[offset++] = storeBgra ? red : blue;
       pixelBytes[offset++] = alpha;
     }
   }
