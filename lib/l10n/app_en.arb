@@ -22,7 +22,7 @@
   },
   "blendModeOverlayDescription": "Combines multiply and screen modes: darkens dark areas, and lightens light areas.",
   "blendModeSaturationDescription": "Uses the source's saturation and the destination's hue and luminance.",
-  "blendModeScreenDescription": "Multiplies the inverses of the source and destination, resulting in a lighter output.",
+  "blendModeScreenDescription": "Multiplies the inverses of the source and destination colors, resulting in a lighter output.",
   "blendModeSoftLightDescription": "Softens the contrast by darkening or lightening the destination depending on the source.",
   "browseFiles": "Browse Files...",
   "brush": "Brush",

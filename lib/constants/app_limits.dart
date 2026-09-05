@@ -3,6 +3,7 @@ class AppLimits {
   static const int rgbChannelMax = 255;
   static const int percentMax = 100;
   static const int topColorCount = 20;
+  static const int recentColorCount = 7;
   static const int brushSizeMax = 200;
 
   /// Maximum number of undoable actions kept in global history. Older records

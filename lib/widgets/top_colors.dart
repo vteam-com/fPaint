@@ -34,6 +34,7 @@ class TopColors extends StatefulWidget {
     this.showHeader = true,
     this.autoRefreshOnIdle = false,
     this.refreshRevision = 0,
+    this.sortColors = true,
   });
 
   /// Whether the widget should refresh automatically after idle.
@@ -56,6 +57,9 @@ class TopColors extends StatefulWidget {
 
   /// Whether to display the title and refresh row.
   final bool showHeader;
+
+  /// Whether to group and sort colors by hue and popularity before display.
+  final bool sortColors;
   @override
   State<TopColors> createState() => _TopColorsState();
 }
@@ -93,7 +97,7 @@ class _TopColorsState extends State<TopColors> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
-    final List<ColorUsage> sortedColors = sortColorByHueAndPopularity();
+    final List<ColorUsage> sortedColors = widget.sortColors ? sortColorByHueAndPopularity() : widget.colorUsages;
 
     final List<Widget> colorPreviews = sortedColors.map((ColorUsage colorUsed) {
       final List<String> components = getColorComponentsAsHex(colorUsed.color);

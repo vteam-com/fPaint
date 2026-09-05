@@ -155,6 +155,7 @@ void main() {
     test('can be set and read', () {
       appProvider.brushColor = const Color(0xFFFF0000);
       expect(appProvider.brushColor, const Color(0xFFFF0000));
+      expect(appProvider.layers.recentColors.colors.first, const Color(0xFFFF0000));
     });
 
     test('notifies listeners', () {

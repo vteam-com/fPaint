@@ -539,6 +539,7 @@ class AppProvider extends ChangeNotifier {
   /// Sets the brush color.
   set brushColor(Color value) {
     preferences.setBrushColor(value);
+    layers.recentColors.record(value);
     repaintToolOptions();
     update();
   }
@@ -552,6 +553,7 @@ class AppProvider extends ChangeNotifier {
   /// Sets the fill color.
   set fillColor(Color value) {
     preferences.setFillColor(value);
+    layers.recentColors.record(value);
     repaintToolOptions();
     update();
   }

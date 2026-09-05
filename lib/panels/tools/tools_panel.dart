@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -169,27 +170,21 @@ class ToolsPanel extends StatelessWidget {
   ) {
     widgets.add(
       ListenableBuilder(
-        listenable: layers.topColorsListenable,
+        listenable: Listenable.merge(<Listenable>[layers.topColorsListenable, layers.recentColors]),
         builder: (BuildContext _, Widget? _) {
+          final List<ColorUsage> paletteColors = layers.recentColors.prioritizeTopColors(layers.topColors);
           return _CollapsibleTopColors(
             compact: minimal,
-            name: l10n.topColors(layers.topColors.length),
+            name: l10n.topColors(paletteColors.length),
             child: TopColors(
-              colorUsages: layers.topColors,
+              colorUsages: paletteColors,
               onRefresh: layers.evaluateTopColor,
-              onColorPicked: (Color color) {
-                if (appProvider.selectedAction == ActionType.rectangle ||
-                    appProvider.selectedAction == ActionType.circle ||
-                    appProvider.selectedAction == ActionType.fill) {
-                  appProvider.fillColor = color;
-                } else {
-                  appProvider.brushColor = color;
-                }
-              },
+              onColorPicked: (Color color) => _applyPaletteColor(appProvider, color),
               minimal: minimal,
               showHeader: false,
               autoRefreshOnIdle: true,
               refreshRevision: layers.topColorsRefreshRevision,
+              sortColors: false,
             ),
           );
         },
@@ -575,6 +570,17 @@ class ToolsPanel extends StatelessWidget {
               ),
       ),
     );
+  }
+
+  /// Applies a palette color to the active tool and records it as recent.
+  void _applyPaletteColor(AppProvider appProvider, Color color) {
+    if (appProvider.selectedAction == ActionType.rectangle ||
+        appProvider.selectedAction == ActionType.circle ||
+        appProvider.selectedAction == ActionType.fill) {
+      appProvider.fillColor = color;
+    } else {
+      appProvider.brushColor = color;
+    }
   }
 }
 
