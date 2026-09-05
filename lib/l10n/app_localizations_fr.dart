@@ -488,6 +488,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get pencilSize => 'Taille du crayon';
 
   @override
+  String get penOnlyDrawingSubtitle =>
+      'Lorsque cette option est activee, les outils de dessin acceptent uniquement le stylet; le toucher reste disponible pour naviguer sur la toile.';
+
+  @override
+  String get penOnlyDrawingTitle => 'Dessin au stylet uniquement';
+
+  @override
   String percentageValue(Object value) {
     return 'Echelle : $value %';
   }
@@ -654,13 +661,6 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get unsavedChangesDiscardAndOpenPrompt =>
       'Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?';
-
-  @override
-  String get penOnlyDrawingSubtitle =>
-      'Lorsque cette option est activee, les outils de dessin acceptent uniquement le stylet; le toucher reste disponible pour naviguer sur la toile.';
-
-  @override
-  String get penOnlyDrawingTitle => 'Dessin au stylet uniquement';
 
   @override
   String get webBrowser => 'Navigateur Web';

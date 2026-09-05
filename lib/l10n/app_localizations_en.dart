@@ -76,7 +76,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get blendModeScreenDescription =>
-      'Multiplies the inverses of the source and destination, resulting in a lighter output.';
+      'Multiplies the inverses of the source and destination colors, resulting in a lighter output.';
 
   @override
   String get blendModeSoftLightDescription =>
@@ -486,6 +486,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pencilSize => 'Pencil Size';
 
   @override
+  String get penOnlyDrawingSubtitle =>
+      'When enabled, drawing tools accept pen input only; touch remains available for canvas navigation.';
+
+  @override
+  String get penOnlyDrawingTitle => 'Pen-only drawing';
+
+  @override
   String percentageValue(Object value) {
     return '$value%';
   }
@@ -652,13 +659,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get unsavedChangesDiscardAndOpenPrompt =>
       'You have unsaved changes. Do you want to discard them and open the new file?';
-
-  @override
-  String get penOnlyDrawingSubtitle =>
-      'When enabled, drawing tools accept pen input only; touch remains available for canvas navigation.';
-
-  @override
-  String get penOnlyDrawingTitle => 'Pen-only drawing';
 
   @override
   String get webBrowser => 'Web Browser';

@@ -2,8 +2,11 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
-import 'package:fpaint/providers/layer_provider.dart';
+import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/providers/undo_provider.dart';
 import 'package:material_ui/material_ui.dart';
 
 void main() {
@@ -266,5 +269,41 @@ void main() {
       // Verify blend mode is still set
       expect(layer.blendMode, ui.BlendMode.darken);
     });
+  });
+
+  test('Recent colors retain neutrals and limit custom history', () {
+    final LayersProvider layers = LayersProvider(undoProvider: UndoProvider());
+    addTearDown(layers.dispose);
+
+    for (int value = 1; value <= AppLimits.recentColorCount; value++) {
+      layers.recentColors.record(Color(value));
+    }
+
+    expect(layers.recentColors.colors, hasLength(AppLimits.recentColorCount));
+    expect(layers.recentColors.colors.first, const Color(AppLimits.recentColorCount));
+    expect(layers.recentColors.colors, containsAll(<Color>[AppColors.white, AppColors.grey, AppColors.black]));
+
+    layers.recentColors.record(const Color(AppLimits.recentColorCount));
+    expect(
+      layers.recentColors.colors.where((Color color) => color == const Color(AppLimits.recentColorCount)),
+      hasLength(1),
+    );
+  });
+
+  test('Recent colors take precedence over top-used colors', () {
+    final LayersProvider layers = LayersProvider(undoProvider: UndoProvider());
+    addTearDown(layers.dispose);
+    final Color recentColor = const Color(AppLimits.recentColorCount);
+    layers.recentColors.record(recentColor);
+    final List<ColorUsage> topColors = List<ColorUsage>.generate(
+      AppLimits.topColorCount,
+      (int index) => ColorUsage(Color(index), AppVisual.full),
+    );
+
+    final List<ColorUsage> paletteColors = layers.recentColors.prioritizeTopColors(topColors);
+
+    expect(paletteColors, hasLength(AppLimits.topColorCount));
+    expect(paletteColors.first.color, recentColor);
+    expect(paletteColors.where((ColorUsage colorUsage) => colorUsage.color == recentColor), hasLength(1));
   });
 }

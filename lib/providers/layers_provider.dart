@@ -12,6 +12,7 @@ import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layer_provider.dart';
+import 'package:fpaint/providers/recent_colors.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:logging/logging.dart';
 
@@ -41,7 +42,6 @@ class LayersProvider extends ChangeNotifier {
     _setSelectedLayerIndex(index: 0, notify: false);
     clearHasChanged();
   }
-
   final UndoProvider _undoProvider;
   final ChangeNotifier _canvasRepaintNotifier = ChangeNotifier();
   final ChangeNotifier _layerListStructureNotifier = ChangeNotifier();
@@ -52,9 +52,7 @@ class LayersProvider extends ChangeNotifier {
   /// Whether a live pan or pinch should prioritize frame rate over sampling quality.
   bool get isInteractiveViewportChange => _displayCacheRebuildsSuspended;
 
-  /// Stable repaint signal for the canvas painter (layer state + active-interaction
-  /// repaints), merged once so the painter does not allocate a fresh
-  /// `Listenable.merge` and re-subscribe on every widget rebuild.
+  /// Stable repaint signal for the canvas painter, merged once to avoid repeated `Listenable.merge` subscriptions.
   late final Listenable canvasPainterRepaint = Listenable.merge(<Listenable>[
     this,
     _canvasRepaintNotifier,
@@ -83,6 +81,7 @@ class LayersProvider extends ChangeNotifier {
     _canvasRepaintNotifier.dispose();
     _layerListStructureNotifier.dispose();
     _topColorsNotifier.dispose();
+    recentColors.dispose();
     // Dispose each layer so its debounce timer and cached textures are released.
     for (final LayerProvider layer in _list) {
       layer.dispose();
@@ -705,13 +704,14 @@ class LayersProvider extends ChangeNotifier {
     }
   }
 
-  //-------------------------
-  // Top Colors used
   /// The list of top colors used in the canvas.
   List<ColorUsage> topColors = <ColorUsage>[
     ColorUsage(AppColors.white, 1),
     ColorUsage(AppColors.black, 1),
   ];
+
+  /// The most recently committed colors, including the neutral palette.
+  final RecentColors recentColors = RecentColors();
 
   /// Evaluates the top colors used in the canvas.
   void evaluateTopColor() {

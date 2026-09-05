@@ -484,6 +484,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get pencilSize => 'Tamaño del lápiz';
 
   @override
+  String get penOnlyDrawingSubtitle =>
+      'Si esta activado, las herramientas de dibujo solo aceptan el lapiz digital; el tacto sigue disponible para navegar por el lienzo.';
+
+  @override
+  String get penOnlyDrawingTitle => 'Dibujar solo con lapiz digital';
+
+  @override
   String percentageValue(Object value) {
     return 'Escala: $value%';
   }
@@ -650,13 +657,6 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get unsavedChangesDiscardAndOpenPrompt =>
       'Tienes cambios no guardados. Quieres descartarlos y abrir el nuevo archivo?';
-
-  @override
-  String get penOnlyDrawingSubtitle =>
-      'Si esta activado, las herramientas de dibujo solo aceptan el lapiz digital; el tacto sigue disponible para navegar por el lienzo.';
-
-  @override
-  String get penOnlyDrawingTitle => 'Dibujar solo con lapiz digital';
 
   @override
   String get webBrowser => 'Navegador web';

@@ -209,7 +209,7 @@ abstract class AppLocalizations {
   /// No description provided for @blendModeScreenDescription.
   ///
   /// In en, this message translates to:
-  /// **'Multiplies the inverses of the source and destination, resulting in a lighter output.'**
+  /// **'Multiplies the inverses of the source and destination colors, resulting in a lighter output.'**
   String get blendModeScreenDescription;
 
   /// No description provided for @blendModeSoftLightDescription.
@@ -974,6 +974,18 @@ abstract class AppLocalizations {
   /// **'Pencil Size'**
   String get pencilSize;
 
+  /// No description provided for @penOnlyDrawingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, drawing tools accept pen input only; touch remains available for canvas navigation.'**
+  String get penOnlyDrawingSubtitle;
+
+  /// No description provided for @penOnlyDrawingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen-only drawing'**
+  String get penOnlyDrawingTitle;
+
   /// No description provided for @percentageValue.
   ///
   /// In en, this message translates to:
@@ -1291,18 +1303,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You have unsaved changes. Do you want to discard them and open the new file?'**
   String get unsavedChangesDiscardAndOpenPrompt;
-
-  /// No description provided for @penOnlyDrawingSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'When enabled, drawing tools accept pen input only; touch remains available for canvas navigation.'**
-  String get penOnlyDrawingSubtitle;
-
-  /// No description provided for @penOnlyDrawingTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Pen-only drawing'**
-  String get penOnlyDrawingTitle;
 
   /// No description provided for @webBrowser.
   ///
