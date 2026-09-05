@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -30,6 +31,8 @@ const Size _largeCanvasSize = Size(5329.0, 9195.0);
 const Duration _modifyModePreparationDuration = Duration(seconds: 1);
 const Duration _snackBarDismissDuration = Duration(seconds: 4);
 const Size _desktopTestViewSize = Size(1600, 900);
+const Offset _mouseWheelScrollDelta = Offset(0.0, -120.0);
+const Offset _secondaryDragDelta = Offset(40.0, 30.0);
 
 Future<ui.Image> _createTestImage() async {
   final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -540,6 +543,64 @@ void main() {
     await finger1.up();
     await finger2.up();
     await tester.pump();
+  });
+
+  testWidgets('mouse wheel zooms around the pointer position', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    final Finder canvasGestureHandler = find.byType(CanvasGestureHandler);
+    final Offset pointerPosition = tester.getCenter(canvasGestureHandler);
+    final Offset localPointerPosition = pointerPosition - tester.getTopLeft(canvasGestureHandler);
+    final Offset canvasPointBeforeZoom = appProvider.toCanvas(localPointerPosition);
+    final double scaleBeforeZoom = appProvider.layers.scale;
+
+    await tester.sendEventToBinding(
+      PointerScrollEvent(
+        kind: ui.PointerDeviceKind.mouse,
+        position: pointerPosition,
+        scrollDelta: _mouseWheelScrollDelta,
+      ),
+    );
+    await tester.pump();
+
+    expect(appProvider.layers.scale, greaterThan(scaleBeforeZoom));
+    expect(appProvider.toCanvas(localPointerPosition).dx, closeTo(canvasPointBeforeZoom.dx, _geometryEpsilon));
+    expect(appProvider.toCanvas(localPointerPosition).dy, closeTo(canvasPointBeforeZoom.dy, _geometryEpsilon));
+  });
+
+  testWidgets('right mouse drag pans without drawing', (WidgetTester tester) async {
+    appProvider.selectedAction = ActionType.brush;
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    final Finder canvasGestureHandler = find.byType(CanvasGestureHandler);
+    final Offset start = tester.getCenter(canvasGestureHandler);
+    final int actionCountBeforePan = appProvider.layers.selectedLayer.actionStack.length;
+    final Offset offsetBeforePan = appProvider.canvasOffset;
+    final TestGesture gesture = await tester.startGesture(
+      start,
+      kind: ui.PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await gesture.moveBy(_secondaryDragDelta);
+    await gesture.up();
+    await tester.pump();
+
+    expect(appProvider.canvasOffset, offsetBeforePan + _secondaryDragDelta);
+    expect(appProvider.layers.selectedLayer.actionStack.length, actionCountBeforePan);
   });
 
   testWidgets('maximum zoom bounds layer compositing to the visible viewport', (WidgetTester tester) async {
