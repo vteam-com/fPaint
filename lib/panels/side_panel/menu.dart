@@ -7,12 +7,14 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/menu_model.dart';
+import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/panels/side_panel/about.dart';
 import 'package:fpaint/panels/side_panel/canvas_settings.dart';
 import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
+import 'package:fpaint/providers/editor_scopes.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
@@ -65,20 +67,19 @@ class MainMenu extends StatelessWidget {
           icon: AppIcon.edit,
           key: Keys.mainMenuCanvasSize,
         ),
-        // Settings and Platforms push named routes only fPaint's own shell
-        // registers; embedded hosts have no generator for them.
-        if (!shellProvider.isEmbedded) ...<AppPopupMenuItem<int>>[
-          buildMenuItem(
-            value: MenuIds.settings,
-            text: l10n.settings,
-            icon: AppIcon.settings,
-          ),
+        buildMenuItem(
+          value: MenuIds.settings,
+          text: l10n.settings,
+          icon: AppIcon.settings,
+        ),
+        // Platforms pushes a named route only fPaint's own shell registers;
+        // embedded hosts have no generator for it.
+        if (!shellProvider.isEmbedded)
           buildMenuItem(
             value: MenuIds.platforms,
             text: l10n.platforms,
             icon: AppIcon.outbound,
           ),
-        ],
         buildMenuItem(
           value: MenuIds.about,
           text: l10n.about,
@@ -137,7 +138,27 @@ void onDropDownMenuSelection(
       break;
 
     case MenuIds.settings:
-      Navigator.pushNamed(context, '/settings');
+      if (shellProvider.isEmbedded) {
+        // Embedded hosts do not register fPaint's named routes, so push the
+        // page directly, re-providing the editor scopes the host inserted
+        // below its navigator.
+        final Widget settings = reprovideEditorControllerScopes(
+          context,
+          const SettingsPage(),
+        );
+        await Navigator.push(
+          context,
+          PageRouteBuilder<void>(
+            pageBuilder: (
+              BuildContext _,
+              Animation<double> _,
+              Animation<double> _,
+            ) => settings,
+          ),
+        );
+      } else {
+        Navigator.pushNamed(context, '/settings');
+      }
       break;
 
     case MenuIds.platforms:
