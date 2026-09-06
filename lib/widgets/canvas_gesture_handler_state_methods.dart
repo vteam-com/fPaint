@@ -451,7 +451,8 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
     final bool sampleAllLayers =
-        appProvider.selectorModel.mode == SelectorMode.wand && _isSampleAllLayersModifierPressed();
+        appProvider.selectorModel.mode == SelectorMode.wand &&
+        (appProvider.selectorModel.allLayers || _isSampleAllLayersModifierPressed());
     if (appProvider.selectorModel.mode == SelectorMode.wand) {
       // Anchor the sample tap so a subsequent drag can grow/shrink the selection
       // live (Edge Detection = tap to sample, drag on canvas to adjust).

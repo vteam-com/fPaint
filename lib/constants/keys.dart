@@ -60,6 +60,7 @@ class Keys {
   static const Key toolSelectorCancel = Key('tool-selector-cancel');
   static const Key toolSelectorCopy = Key('tool-selector-copy');
   static const Key toolSelectorCut = Key('tool-selector-cut');
+  static const Key toolSelectorAllLayers = Key('tool-selector-all-layers');
 
   static const Key toolPanelTopColorsToggle = Key('tool-panel-top-colors-toggle');
   static const Key toolPanelFillColor = Key('toolPanelFillColor');

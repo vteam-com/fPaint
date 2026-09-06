@@ -233,6 +233,7 @@
   "saveLabel": "Guardar",
   "savingLabel": "Guardando...",
   "scale": "Escalar",
+  "selectionAllLayers": "Todas las capas",
   "selectionIsHidden": "La seleccion esta oculta.",
   "selectValue": "Seleccionar {value}",
   "@selectValue": {

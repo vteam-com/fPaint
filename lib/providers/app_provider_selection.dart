@@ -28,11 +28,16 @@ extension AppProviderSelection on AppProvider {
     if (!isWandSelectionActive) {
       return;
     }
-    unawaited(getSelectedLayerFillImageData(sampleAllLayers: false));
+    unawaited(getSelectedLayerFillImageData(sampleAllLayers: selectorModel.allLayers));
   }
 
   /// Erases a region on the canvas.
   void regionErase() {
+    if (selectorModel.allLayers) {
+      regionEraseAllLayers();
+      return;
+    }
+
     if (isSelectedLayerLocked) {
       return;
     }
@@ -51,6 +56,11 @@ extension AppProviderSelection on AppProvider {
 
   /// Cuts a region on the canvas.
   Future<void> regionCut() async {
+    if (selectorModel.allLayers) {
+      await regionCutAllLayers();
+      return;
+    }
+
     if (isSelectedLayerLocked) {
       return;
     }
@@ -59,9 +69,13 @@ extension AppProviderSelection on AppProvider {
     regionErase();
   }
 
-  /// Copies a region on the canvas.
+  /// Copies a region on the canvas. With the "All layers" scope active the
+  /// clipboard receives the merged visible composite instead of the selected
+  /// layer's pixels.
   Future<void> regionCopy() async {
-    final ui.Image? clippedImage = await createSelectionImage();
+    final ui.Image? clippedImage = selectorModel.allLayers
+        ? await createSelectionImageMerged()
+        : await createSelectionImage();
     if (clippedImage == null) {
       return;
     }
@@ -375,6 +389,13 @@ extension AppProviderSelection on AppProvider {
 
   /// Begins a perspective/skew transform on the current selection.
   Future<void> startTransform() async {
+    // Layer-modify sessions always float the selected layer alone, even while
+    // the "All layers" scope is active.
+    if (selectorModel.allLayers && !isLayerModifyMode) {
+      await startTransformAllLayers();
+      return;
+    }
+
     if (isSelectedLayerLocked) {
       return;
     }
@@ -401,6 +422,17 @@ extension AppProviderSelection on AppProvider {
     final ui.Image? sourceImage = transformModel.sourceImage;
     if (sourceImage == null) {
       transformModel.clear();
+      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
+      update();
+      return;
+    }
+
+    if (isCrossLayerTransformActive) {
+      await confirmTransformAllLayers();
+      selectorModel.clear();
+      transformModel.clear();
+      // The merged overlay preview was never committed anywhere; free it.
+      sourceImage.dispose();
       notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
       update();
       return;
@@ -460,6 +492,16 @@ extension AppProviderSelection on AppProvider {
   void cancelTransform() {
     final bool wasLayerModifyMode = isLayerModifyMode;
     cancelEffectPreview();
+
+    if (isCrossLayerTransformActive) {
+      final ui.Image? mergedPreview = transformModel.sourceImage;
+      disposeCrossLayerLift();
+      transformModel.clear();
+      mergedPreview?.dispose();
+      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
+      update();
+      return;
+    }
 
     if (_isPreparedImageTransformSource(transformModel.source)) {
       transformModel.clear();

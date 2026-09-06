@@ -535,6 +535,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scale => 'Mettre a l\'echelle';
 
   @override
+  String get selectionAllLayers => 'Tous les calques';
+
+  @override
   String get selectionIsHidden => 'La selection est masquee.';
 
   @override

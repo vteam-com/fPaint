@@ -23,6 +23,11 @@ class SelectorModel extends VisibleModel {
   SelectorMath math = SelectorMath.replace;
   bool isDrawing = false;
 
+  /// Sticky "All layers" scope: the wand samples the merged visible composite
+  /// and transform/cut/copy act on every visible, unlocked layer instead of
+  /// only the selected one. Like [mode], it survives [clear].
+  bool allLayers = false;
+
   List<Offset> points = <Offset>[];
   Path? path1;
   Path? path2; // use when Selector.math is not Selector.replace

@@ -531,6 +531,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get scale => 'Escalar';
 
   @override
+  String get selectionAllLayers => 'Todas las capas';
+
+  @override
   String get selectionIsHidden => 'La seleccion esta oculta.';
 
   @override
