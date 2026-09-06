@@ -60,8 +60,9 @@ class ShellProvider extends ChangeNotifier {
 
   /// Whether the editor runs embedded inside a host app instead of fPaint's
   /// own shell. The host's navigator does not register fPaint's app-level
-  /// named routes (`/settings`, `/platforms`), so the menu hides the items
-  /// that push them. Set once by the host when constructing the provider.
+  /// named routes, so the menu hides the Platforms item and pushes the
+  /// Settings page directly instead of via its named route. Set once by the
+  /// host when constructing the provider.
   bool isEmbedded = false;
 
   bool _deviceSizeSmall = false;
