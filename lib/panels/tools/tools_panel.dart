@@ -84,6 +84,34 @@ class ToolsPanel extends StatelessWidget {
               },
             ),
           ),
+          // Top colors palette: pinned at the bottom, after the Elements
+          // section, for every tool that supports it.
+          ListenableBuilder(
+            listenable: Listenable.merge(<Listenable>[
+              appProvider.selectedActionRepaintListenable,
+              appProvider.toolOptionsRepaintListenable,
+            ]),
+            builder: (BuildContext context, Widget? _) {
+              final ActionType selectedTool = appProvider.selectedAction;
+              final bool showTopColors =
+                  appProvider.effectBrushModel.effect == null &&
+                  selectedTool != ActionType.text &&
+                  selectedTool.isSupported(ActionOptions.topColors);
+              if (!showTopColors) {
+                return const SizedBox.shrink();
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(left: AppSpacing.medium),
+                child: buildToolOptionTopColors(
+                  LayersProvider.of(context),
+                  appProvider,
+                  minimal,
+                  context.l10n,
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -160,35 +188,32 @@ class ToolsPanel extends StatelessWidget {
     );
   }
 
-  /// Adds a tool option for top colors.
-  void addToolOptionTopColors(
-    List<Widget> widgets,
+  /// Builds the tool option for top colors.
+  Widget buildToolOptionTopColors(
     LayersProvider layers,
     AppProvider appProvider,
     bool minimal,
     AppLocalizations l10n,
   ) {
-    widgets.add(
-      ListenableBuilder(
-        listenable: Listenable.merge(<Listenable>[layers.topColorsListenable, layers.recentColors]),
-        builder: (BuildContext _, Widget? _) {
-          final List<ColorUsage> paletteColors = layers.recentColors.prioritizeTopColors(layers.topColors);
-          return _CollapsibleTopColors(
-            compact: minimal,
-            name: l10n.topColors(paletteColors.length),
-            child: TopColors(
-              colorUsages: paletteColors,
-              onRefresh: layers.evaluateTopColor,
-              onColorPicked: (Color color) => _applyPaletteColor(appProvider, color),
-              minimal: minimal,
-              showHeader: false,
-              autoRefreshOnIdle: true,
-              refreshRevision: layers.topColorsRefreshRevision,
-              sortColors: false,
-            ),
-          );
-        },
-      ),
+    return ListenableBuilder(
+      listenable: Listenable.merge(<Listenable>[layers.topColorsListenable, layers.recentColors]),
+      builder: (BuildContext _, Widget? _) {
+        final List<ColorUsage> paletteColors = layers.recentColors.prioritizeTopColors(layers.topColors);
+        return _CollapsibleTopColors(
+          compact: minimal,
+          name: l10n.topColors(paletteColors.length),
+          child: TopColors(
+            colorUsages: paletteColors,
+            onRefresh: layers.evaluateTopColor,
+            onColorPicked: (Color color) => _applyPaletteColor(appProvider, color),
+            minimal: minimal,
+            showHeader: false,
+            autoRefreshOnIdle: true,
+            refreshRevision: layers.topColorsRefreshRevision,
+            sortColors: false,
+          ),
+        );
+      },
     );
   }
 
@@ -199,7 +224,6 @@ class ToolsPanel extends StatelessWidget {
   }) {
     final List<Widget> widgets = <Widget>[];
     final AppLocalizations l10n = context.l10n;
-    final LayersProvider layers = LayersProvider.of(context);
     final ActionType selectedTool = appProvider.selectedAction;
 
     switch (selectedTool) {
@@ -267,7 +291,6 @@ class ToolsPanel extends StatelessWidget {
           _addHalftoneSlider(widgets, appProvider, context);
         }
         widgets.add(addToolOptionTolerance(context, appProvider));
-        addToolOptionTopColors(widgets, layers, appProvider, minimal, l10n);
         break;
 
       case ActionType.text:
@@ -413,11 +436,6 @@ class ToolsPanel extends StatelessWidget {
         // Color Tolerance used by Fill and Magic wand
         if (selectedTool.isSupported(ActionOptions.tolerance)) {
           widgets.add(addToolOptionTolerance(context, appProvider));
-        }
-
-        // Top colors
-        if (selectedTool.isSupported(ActionOptions.topColors)) {
-          addToolOptionTopColors(widgets, layers, appProvider, minimal, l10n);
         }
     }
 
