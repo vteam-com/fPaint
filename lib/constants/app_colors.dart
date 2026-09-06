@@ -41,6 +41,7 @@ class AppColors {
   static const Color primary = blue; // Light blue
   static const Color secondary = Color(0xFF1976D2); // Blue
   static const Color accent = Color(0xFF42A5F5); // Lighter blue
+  static const Color textSelection = Color(0x662196F3); // Primary at 40% for selected text highlight
 
   // Background colors
   static const Color background = Color.fromARGB(255, 21, 21, 21); // Dark background

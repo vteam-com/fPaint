@@ -242,6 +242,7 @@ class _ColorPickerDialogState extends State<ColorPickerDialog> {
                 child: AppTextField(
                   controller: _hexController,
                   hintText: l10n.hexColor,
+                  selectAllOnFocus: true,
                   onChanged: (String value) {
                     try {
                       final Color color = getColorFromString(value);
