@@ -110,6 +110,7 @@ class LayerSelector extends StatelessWidget {
           key: Keys.layerRenameTextField,
           controller: controller,
           autofocus: true,
+          selectAllOnFocus: true,
           hintText: l10n.layerNameTitle,
         ),
         actions: <Widget>[

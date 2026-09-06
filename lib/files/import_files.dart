@@ -94,11 +94,13 @@ Future<void> onFileNew(BuildContext context) async {
                 controller: widthController,
                 keyboardType: TextInputType.number,
                 hintText: l10n.width,
+                selectAllOnFocus: true,
               ),
               AppTextField(
                 controller: heightController,
                 keyboardType: TextInputType.number,
                 hintText: l10n.height,
+                selectAllOnFocus: true,
               ),
             ],
           ),

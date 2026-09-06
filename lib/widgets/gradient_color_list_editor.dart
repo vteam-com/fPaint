@@ -148,6 +148,7 @@ class _GradientColorListEditorState extends State<GradientColorListEditor> {
               hintText: l10n.gradientStopPosition,
               keyboardType: const TextInputType.numberWithOptions(),
               textAlign: TextAlign.center,
+              selectAllOnFocus: true,
               onSubmitted: (String v) => _changePosition(index, v),
             ),
     );

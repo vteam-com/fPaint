@@ -1,5 +1,7 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/widgets/app_text_field.dart';
 
 void main() {
@@ -105,6 +107,88 @@ void main() {
       await tester.pump();
 
       expect(find.text('Enter text'), findsOneWidget);
+    });
+  });
+
+  group('AppTextField selection', () {
+    testWidgets('uses the app text selection highlight color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: AppTextField(),
+        ),
+      );
+
+      final EditableText editable = tester.widget<EditableText>(find.byType(EditableText));
+      expect(editable.selectionColor, AppColors.textSelection);
+    });
+
+    testWidgets('ctrl+A selects the entire text', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AppTextField(controller: controller),
+        ),
+      );
+
+      await tester.enterText(find.byType(EditableText), 'Hello world');
+      await tester.pump();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, controller.text.length);
+      controller.dispose();
+    });
+
+    testWidgets('tap focuses the field and places the cursor', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: '1024');
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AppTextField(controller: controller),
+        ),
+      );
+
+      await tester.tap(find.byType(AppTextField));
+      await tester.pump();
+
+      final EditableTextState editable = tester.state<EditableTextState>(find.byType(EditableText));
+      expect(editable.widget.focusNode.hasFocus, isTrue);
+      expect(controller.selection.isValid, isTrue);
+      expect(controller.selection.isCollapsed, isTrue);
+      controller.dispose();
+    });
+
+    testWidgets('selectAllOnFocus selects everything on first click only', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: '1024');
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: AppTextField(
+            controller: controller,
+            selectAllOnFocus: true,
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(AppTextField));
+      await tester.pump();
+
+      expect(controller.selection.baseOffset, 0);
+      expect(controller.selection.extentOffset, controller.text.length);
+
+      // A second click on the already focused field places the cursor instead.
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.byType(AppTextField));
+      await tester.pump();
+
+      expect(controller.selection.isCollapsed, isTrue);
+      controller.dispose();
     });
   });
 }

@@ -40,6 +40,9 @@ void showCanvasSettings(BuildContext context) {
 
       // Use a mutable variable for initialAspectRatio, local to the builder
       double initialAspectRatio = (layers.size.height != 0) ? (layers.size.width / layers.size.height) : 1.0;
+      // Guards against the width and height onChanged handlers re-triggering
+      // each other while one of them programmatically updates the other field.
+      bool isSyncingAspectRatio = false;
       bool resizeLockAspectRatio = layers.canvasResizeLockAspectRatio;
       CanvasResizePosition canvasResizePosition = layers.canvasResizePosition;
 
@@ -67,16 +70,21 @@ void showCanvasSettings(BuildContext context) {
                           hintText: l10n.width,
                           keyboardType: TextInputType.number,
                           controller: widthController,
+                          selectAllOnFocus: true,
                           onChanged: (String value) {
-                            if (resizeLockAspectRatio) {
-                              if (initialAspectRatio == 0) {
-                                return; // Avoid division by zero
-                              }
-                              final double currentParsedWidth =
-                                  double.tryParse(value) ?? double.tryParse(widthController.text) ?? layers.size.width;
-                              final double newHeight = currentParsedWidth / initialAspectRatio;
-                              heightController.value = TextEditingValue(text: newHeight.toInt().toString());
+                            if (!resizeLockAspectRatio || isSyncingAspectRatio) {
+                              return;
                             }
+                            if (initialAspectRatio == 0) {
+                              return; // Avoid division by zero
+                            }
+                            final double? currentParsedWidth = double.tryParse(value);
+                            if (currentParsedWidth == null) {
+                              return; // Keep the other field while input is incomplete
+                            }
+                            isSyncingAspectRatio = true;
+                            heightController.text = (currentParsedWidth / initialAspectRatio).round().toString();
+                            isSyncingAspectRatio = false;
                           },
                         ),
                       ),
@@ -108,15 +116,18 @@ void showCanvasSettings(BuildContext context) {
                           hintText: l10n.height,
                           keyboardType: TextInputType.number,
                           controller: heightController,
+                          selectAllOnFocus: true,
                           onChanged: (String value) {
-                            if (resizeLockAspectRatio) {
-                              final double currentParsedHeight =
-                                  double.tryParse(value) ??
-                                  double.tryParse(heightController.text) ??
-                                  layers.size.height;
-                              final double newWidth = currentParsedHeight * initialAspectRatio;
-                              widthController.text = newWidth.toInt().toString();
+                            if (!resizeLockAspectRatio || isSyncingAspectRatio) {
+                              return;
                             }
+                            final double? currentParsedHeight = double.tryParse(value);
+                            if (currentParsedHeight == null) {
+                              return; // Keep the other field while input is incomplete
+                            }
+                            isSyncingAspectRatio = true;
+                            widthController.text = (currentParsedHeight * initialAspectRatio).round().toString();
+                            isSyncingAspectRatio = false;
                           },
                         ),
                       ),
