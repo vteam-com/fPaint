@@ -65,16 +65,20 @@ class MainMenu extends StatelessWidget {
           icon: AppIcon.edit,
           key: Keys.mainMenuCanvasSize,
         ),
-        buildMenuItem(
-          value: MenuIds.settings,
-          text: l10n.settings,
-          icon: AppIcon.settings,
-        ),
-        buildMenuItem(
-          value: MenuIds.platforms,
-          text: l10n.platforms,
-          icon: AppIcon.outbound,
-        ),
+        // Settings and Platforms push named routes only fPaint's own shell
+        // registers; embedded hosts have no generator for them.
+        if (!shellProvider.isEmbedded) ...<AppPopupMenuItem<int>>[
+          buildMenuItem(
+            value: MenuIds.settings,
+            text: l10n.settings,
+            icon: AppIcon.settings,
+          ),
+          buildMenuItem(
+            value: MenuIds.platforms,
+            text: l10n.platforms,
+            icon: AppIcon.outbound,
+          ),
+        ],
         buildMenuItem(
           value: MenuIds.about,
           text: l10n.about,

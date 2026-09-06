@@ -27,11 +27,16 @@ bool initOnce = false;
 /// The [context] parameter is the [BuildContext] used to display the modal.
 void showCanvasSettings(BuildContext context) {
   initOnce = true;
+  // The bottom sheet is pushed onto the app's navigator/overlay, which sits
+  // *above* the [InheritedControllerScope] that the editor inserts. Capture the
+  // providers from this (in-scope) context so the sheet builder can use them.
+  final LayersProvider layers = LayersProvider.of(context, listen: false);
+  final ShellProvider shellProvider = ShellProvider.of(context, listen: false);
+  final AppProvider appProvider = AppProvider.of(context, listen: false);
   showAppBottomSheet<void>(
     context: context,
     builder: (BuildContext context) {
       final AppLocalizations l10n = context.l10n;
-      final LayersProvider layers = LayersProvider.of(context);
       if (initOnce) {
         widthController.text = layers.size.width.toInt().toString();
         heightController.text = layers.size.height.toInt().toString();
@@ -176,11 +181,10 @@ void showCanvasSettings(BuildContext context) {
                               canvasResizePosition,
                             );
 
-                            final ShellProvider shellProvider = ShellProvider.of(context, listen: false);
                             shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
                             shellProvider.update();
 
-                            AppProvider.of(context, listen: false).update();
+                            appProvider.update();
                             Navigator.pop(context);
                           }
                         },
