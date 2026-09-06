@@ -58,6 +58,12 @@ class ShellProvider extends ChangeNotifier {
   /// The name of the loaded file.
   String loadedFileName = '';
 
+  /// Whether the editor runs embedded inside a host app instead of fPaint's
+  /// own shell. The host's navigator does not register fPaint's app-level
+  /// named routes (`/settings`, `/platforms`), so the menu hides the items
+  /// that push them. Set once by the host when constructing the provider.
+  bool isEmbedded = false;
+
   bool _deviceSizeSmall = false;
 
   /// Whether the device size is small.
