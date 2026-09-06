@@ -1058,6 +1058,12 @@ abstract class AppLocalizations {
   /// **'Scale'**
   String get scale;
 
+  /// No description provided for @selectionAllLayers.
+  ///
+  /// In en, this message translates to:
+  /// **'All layers'**
+  String get selectionAllLayers;
+
   /// No description provided for @selectionIsHidden.
   ///
   /// In en, this message translates to:

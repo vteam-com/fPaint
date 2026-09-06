@@ -18,6 +18,7 @@ import 'package:fpaint/widgets/overlay_control_widgets.dart';
 import 'package:fpaint/widgets/toolbar_icon_button.dart';
 
 const int _selectionModeButtonCount = AppMath.four + AppMath.one;
+const int _selectionScopeButtonCount = AppMath.one;
 const int _selectionClipboardButtonCount = AppMath.pair;
 const int _selectionMathButtonCount = AppMath.triple;
 const int _selectionInvertButtonCount = AppMath.one;
@@ -36,7 +37,7 @@ double estimateSelectionSubToolbarWidth(
   required bool hasVisibleSelection,
   bool includeToggleButton = false,
 }) {
-  int totalButtons = _selectionModeButtonCount;
+  int totalButtons = _selectionModeButtonCount + _selectionScopeButtonCount;
 
   if (hasVisibleSelection) {
     totalButtons +=
@@ -134,6 +135,20 @@ Widget buildSelectionSubToolbar({
           // stalled on the first sample's layer render + readback.
           appProvider.prewarmWandSourceCache();
         });
+      },
+    ),
+    // Sticky scope toggle: with "All layers" on, the wand samples the merged
+    // composite and transform/cut/copy act on every visible, unlocked layer.
+    buildToolbarIconButton(
+      key: Keys.toolSelectorAllLayers,
+      tooltip: l10n.selectionAllLayers,
+      icon: AppIcon.layers,
+      interactionProfile: interactionProfile,
+      isSelected: appProvider.selectorModel.allLayers,
+      onPressed: () {
+        Future<void>.microtask(
+          () => appProvider.setSelectorAllLayers(!appProvider.selectorModel.allLayers),
+        );
       },
     ),
   ];

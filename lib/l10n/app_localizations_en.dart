@@ -533,6 +533,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scale => 'Scale';
 
   @override
+  String get selectionAllLayers => 'All layers';
+
+  @override
   String get selectionIsHidden => 'Selection is hidden.';
 
   @override

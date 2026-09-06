@@ -37,6 +37,7 @@ part 'app_provider_canvas.dart';
 part 'app_provider_selection.dart';
 part 'app_provider_selection_commit.dart';
 part 'app_provider_selection_crop.dart';
+part 'app_provider_selection_cross_layer.dart';
 part 'app_provider_selection_effects.dart';
 part 'app_provider_tools.dart';
 part 'wand_selection_manager.dart';
@@ -796,6 +797,10 @@ class AppProvider extends ChangeNotifier {
 
   /// The transform model for perspective/skew operations.
   final TransformModel transformModel = TransformModel();
+
+  /// Per-layer lifted images while an "All layers" transform session is
+  /// active; null otherwise. Owned by [AppProviderSelectionCrossLayer].
+  List<CrossLayerLiftEntry>? crossLayerLift;
 
   /// Whether an interactive transform overlay is currently active.
   bool get hasActiveTransformOverlay => transformModel.isVisible;

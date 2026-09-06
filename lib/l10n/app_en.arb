@@ -242,6 +242,7 @@
   "saveLabel": "Save",
   "savingLabel": "Saving...",
   "scale": "Scale",
+  "selectionAllLayers": "All layers",
   "selectionIsHidden": "Selection is hidden.",
   "selectValue": "Select {value}",
   "@selectValue": {
