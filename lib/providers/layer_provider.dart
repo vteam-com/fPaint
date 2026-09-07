@@ -8,12 +8,14 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/models/layer_state_snapshot.dart';
 import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 
 part 'layer_provider_display_cache.dart';
 part 'layer_provider_live_preview.dart';
+part 'layer_provider_snapshot.dart';
 part 'layer_provider_transform.dart';
 
 /// Represents a layer in the painting application.

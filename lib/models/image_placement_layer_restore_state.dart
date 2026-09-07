@@ -1,6 +1,4 @@
-import 'dart:ui' as ui;
-
-import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/models/layer_state_snapshot.dart';
 
 /// Describes how a placed image should be committed.
 enum ImagePlacementCommitMode {
@@ -14,32 +12,12 @@ class ImagePlacementLayerRestoreState {
   /// Creates an [ImagePlacementLayerRestoreState].
   const ImagePlacementLayerRestoreState({
     required this.layerIndex,
-    required this.originalActions,
-    required this.originalRedoActions,
-    required this.originalHasChanged,
-    required this.originalBackgroundColor,
-    required this.originalBlendMode,
-    required this.originalOpacity,
+    required this.layerState,
   });
 
   /// The layer index that should receive the committed placement.
   final int layerIndex;
 
-  /// The original action stack to restore on cancel or undo.
-  final List<UserActionDrawing> originalActions;
-
-  /// The original redo stack to restore on cancel or undo.
-  final List<UserActionDrawing> originalRedoActions;
-
-  /// Whether the source layer had unsaved changes.
-  final bool originalHasChanged;
-
-  /// The original layer background color.
-  final ui.Color? originalBackgroundColor;
-
-  /// The original layer blend mode.
-  final ui.BlendMode originalBlendMode;
-
-  /// The original layer opacity.
-  final double originalOpacity;
+  /// The layer's captured content state to restore on cancel or undo.
+  final LayerStateSnapshot layerState;
 }

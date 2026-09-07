@@ -205,7 +205,7 @@ void main() {
   });
 
   group('undo/redo', () {
-    test('undoAction calls undo and notifies', () {
+    test('undoAction calls undo and notifies', () async {
       int notifyCount = 0;
       appProvider.undoProvider.executeAction(
         name: 'test',
@@ -213,20 +213,20 @@ void main() {
         backward: () {},
       );
       appProvider.addListener(() => notifyCount++);
-      appProvider.undoAction();
+      await appProvider.undoAction();
       expect(notifyCount, 1);
     });
 
-    test('redoAction calls redo and notifies', () {
+    test('redoAction calls redo and notifies', () async {
       appProvider.undoProvider.executeAction(
         name: 'test',
         forward: () {},
         backward: () {},
       );
-      appProvider.undoAction();
+      await appProvider.undoAction();
       int notifyCount = 0;
       appProvider.addListener(() => notifyCount++);
-      appProvider.redoAction();
+      await appProvider.redoAction();
       expect(notifyCount, 1);
     });
   });

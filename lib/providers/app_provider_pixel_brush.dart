@@ -1,45 +1,91 @@
-part of 'canvas_gesture_handler.dart';
+part of 'app_provider.dart';
 
-/// Pixel-brush (smudge/blur) stroke lifecycle for [_CanvasGestureHandlerState]:
-/// point sampling, live preview kicks, commit, and layer-state restore.
-extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
-  /// Appends a sampled pointer position to the active pixel-brush stroke.
-  void _appendPixelBrushPoint(
-    Offset position,
-    double brushSize,
-  ) {
-    final double spacing = resolvePixelBrushStepSpacing(brushSize);
-    if (_pixelBrushStrokePoints.isNotEmpty && (_pixelBrushStrokePoints.last - position).distance < spacing) {
-      return;
+/// Pixel-brush (smudge/blur) and paint-mode effect stroke lifecycle: start,
+/// extend, cancel, and the one-shot commit pipeline. State lives in
+/// [PixelBrushStrokeSession] ([AppProvider.pixelBrushSession]); the gesture
+/// widget only routes pointer events here — the same shape as
+/// [commitEffectBrushStroke], which this extension calls for effect strokes.
+extension AppProviderPixelBrush on AppProvider {
+  /// Starts tracking a pixel-brush stroke from [position] with the given [mode].
+  ///
+  /// Lightweight: it captures only the undo restore-state, the clip path, and the
+  /// first point, then publishes the gesture marquee. No source readback, worker,
+  /// or live rasterization happens during the drag — the whole effect is rendered
+  /// once in [commitPixelBrushGesture] on pointer-up. This keeps the drag O(1) at
+  /// any canvas size.
+  void startPixelBrushStroke(Offset position, PixelBrushMode mode) {
+    // A prior stroke whose pointer-up was cancelled or arrived with a mismatched
+    // pointer id never ran cancelPixelBrushStroke; reclaim its state first.
+    if (pixelBrushSession.layerRestoreState != null) {
+      pixelBrushSession.clearStroke();
     }
-    _pixelBrushStrokePoints.add(position);
-
-    final double radius = max(
-      AppInteraction.smudgeMinimumRadius,
-      brushSize * AppInteraction.smudgeBrushRadiusFactor,
-    );
-    final double padding = (radius.ceil() + AppInteraction.smudgeBoundsPadding).toDouble();
-    final ui.Rect pointBounds = ui.Rect.fromLTRB(
-      position.dx - padding,
-      position.dy - padding,
-      position.dx + padding + AppMath.one.toDouble(),
-      position.dy + padding + AppMath.one.toDouble(),
-    );
-    _pixelBrushStrokePatchBounds = _pixelBrushStrokePatchBounds == null
-        ? pointBounds
-        : _pixelBrushStrokePatchBounds!.expandToInclude(pointBounds);
+    pixelBrushSession.generation++;
+    pixelBrushSession.mode = mode;
+    pixelBrushSession.intensity = brushIntensity;
+    pixelBrushSession.layerRestoreState = _captureSelectedLayerRestoreState();
+    pixelBrushSession.clipPath = _activeSelectionClipPath();
+    pixelBrushSession.patchBounds = null;
+    extendPixelBrushStroke(position);
   }
 
-  /// Clears the in-progress pixel-brush stroke state.
-  void _clearPixelBrushStroke() {
-    // Bump the generation so any in-flight one-shot commit render is dropped
-    // instead of applying to a layer that has moved on.
-    _pixelBrushStrokeGeneration++;
-    _pixelBrushStrokePoints.clear();
-    _pixelBrushLayerRestoreState = null;
-    _pixelBrushClipPath = null;
-    _pixelBrushStrokePatchBounds = null;
-    _effectBrushStroke = false;
+  /// Starts a paint-mode effect stroke. Reuses the pixel-brush gesture capture
+  /// (points, bounds, marquee); the armed Adjust effect is committed on
+  /// pointer-up by [commitPixelBrushGesture].
+  void startEffectBrushStroke(Offset position) {
+    pixelBrushSession.clearStroke();
+    pixelBrushSession.isEffectBrushStroke = true;
+    pixelBrushSession.clipPath = _activeSelectionClipPath();
+    extendPixelBrushStroke(position);
+  }
+
+  /// Extends the active gesture with [position] and redraws the swept-band
+  /// marquee. No live rasterization: the smudge/blur is rendered once on
+  /// pointer-up, so the drag stays responsive at any canvas size.
+  void extendPixelBrushStroke(Offset position) {
+    pixelBrushSession.appendPoint(position, brushSize);
+    showPixelBrushGesture(
+      points: pixelBrushSession.strokePoints,
+      size: brushSize,
+    );
+  }
+
+  /// Abandons the in-progress gesture, invalidating any in-flight commit render.
+  void cancelPixelBrushStroke() {
+    pixelBrushSession.clearStroke();
+  }
+
+  /// Commits the active gesture: the armed Adjust effect for an effect-brush
+  /// stroke, otherwise the smudge/blur one-shot render.
+  Future<void> commitPixelBrushGesture() async {
+    if (pixelBrushSession.isEffectBrushStroke) {
+      await _commitArmedEffectBrushStroke();
+    } else {
+      await _commitPixelBrushStroke();
+    }
+  }
+
+  /// The active selection path to clip the stroke to, if any.
+  ui.Path? _activeSelectionClipPath() {
+    return selectorModel.isVisible && selectorModel.path1 != null ? ui.Path.from(selectorModel.path1!) : null;
+  }
+
+  /// Commits the active paint-mode effect stroke through
+  /// [commitEffectBrushStroke].
+  Future<void> _commitArmedEffectBrushStroke() async {
+    final ui.Rect? patchBounds = pixelBrushSession.patchBounds;
+    final SelectionEffect? effect = effectBrushModel.effect;
+    if (patchBounds == null || effect == null || pixelBrushSession.strokePoints.length < AppMath.one) {
+      return;
+    }
+    await commitEffectBrushStroke(
+      effect: effect,
+      strength: effectBrushModel.strength,
+      size: effectBrushModel.size,
+      strokePoints: List<ui.Offset>.of(pixelBrushSession.strokePoints),
+      strokeBounds: patchBounds,
+      brushSize: brushSize,
+      clipPath: pixelBrushSession.clipPath,
+    );
   }
 
   /// Renders the whole smudge/blur stroke in one pass and commits it as an
@@ -47,34 +93,35 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
   ///
   /// The GPU→CPU readback of the composite backdrop is a fixed multi-second
   /// stall on this renderer, so it is done **once per session, not per stroke**:
-  /// [_smudgeSourceBytes] caches the composite pixels, each stroke crops its
-  /// region from that cache (a CPU copy, no readback), and after committing we
-  /// blit the result region back into the cache so it stays current. The cache is
+  /// the session caches the composite pixels, each stroke crops its region from
+  /// that cache (a CPU copy, no readback), and after committing we blit the
+  /// result region back into the cache so it stays current. The cache is
   /// re-read only when [_currentSmudgeSignature] shows the composite changed
   /// (another edit, layer switch, undo).
   ///
   /// The in-progress generation is re-checked across each await so a stroke
   /// started mid-render is dropped rather than corrupting layer state.
-  Future<void> _commitPixelBrushStroke(AppProvider appProvider) async {
-    final ImagePlacementLayerRestoreState? layerRestoreState = _pixelBrushLayerRestoreState;
-    final ui.Rect? patchBounds = _pixelBrushStrokePatchBounds;
-    if (layerRestoreState == null || patchBounds == null || _pixelBrushStrokePoints.length < AppMath.one) {
+  Future<void> _commitPixelBrushStroke() async {
+    final PixelBrushStrokeSession session = pixelBrushSession;
+    final ImagePlacementLayerRestoreState? layerRestoreState = session.layerRestoreState;
+    final ui.Rect? patchBounds = session.patchBounds;
+    if (layerRestoreState == null || patchBounds == null || session.strokePoints.length < AppMath.one) {
       return;
     }
 
-    final int generation = _pixelBrushStrokeGeneration;
-    final PixelBrushMode mode = _pixelBrushMode;
-    final double intensity = _pixelBrushIntensity;
-    final double brushSize = appProvider.brushSize;
-    final ui.Path? clipPath = _pixelBrushClipPath;
-    final List<Offset> strokePoints = List<Offset>.of(_pixelBrushStrokePoints);
-    final int selectedLayerIndex = appProvider.layers.selectedLayerIndex;
-    final int canvasWidth = appProvider.layers.size.width.toInt();
-    final int canvasHeight = appProvider.layers.size.height.toInt();
+    final int generation = session.generation;
+    final PixelBrushMode mode = session.mode;
+    final double intensity = session.intensity;
+    final double strokeBrushSize = brushSize;
+    final ui.Path? clipPath = session.clipPath;
+    final List<Offset> strokePoints = List<Offset>.of(session.strokePoints);
+    final int selectedLayerIndex = layers.selectedLayerIndex;
+    final int canvasWidth = layers.size.width.toInt();
+    final int canvasHeight = layers.size.height.toInt();
 
     final double radius = max(
       AppInteraction.smudgeMinimumRadius,
-      brushSize * AppInteraction.smudgeBrushRadiusFactor,
+      strokeBrushSize * AppInteraction.smudgeBrushRadiusFactor,
     );
 
     // Region to process: the footprint inflated by one radius (so every source
@@ -93,14 +140,14 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     // region of the composite (not the whole 62 MP canvas), so a cold/invalidated
     // cache — or a stroke reaching outside the cached region — reads back just the
     // padded stroke region, not the full canvas.
-    final List<int> signature = _currentSmudgeSignature(appProvider);
-    final bool cacheValid =
-        _smudgeSourceBytes != null &&
-        _intListEquals(_smudgeSourceSignature, signature) &&
-        cropLeft >= _smudgeSourceRegionLeft &&
-        cropTop >= _smudgeSourceRegionTop &&
-        cropRight <= _smudgeSourceRegionLeft + _smudgeSourceWidth &&
-        cropBottom <= _smudgeSourceRegionTop + _smudgeSourceHeight;
+    final List<int> signature = _currentSmudgeSignature();
+    final bool cacheValid = session.isSourceCacheValidFor(
+      signature: signature,
+      cropLeft: cropLeft,
+      cropTop: cropTop,
+      cropRight: cropRight,
+      cropBottom: cropBottom,
+    );
     if (!cacheValid) {
       final int margin = AppInteraction.smudgeSourceCacheMargin.round();
       final int regionLeft = max(AppMath.zero, cropLeft - margin);
@@ -121,26 +168,28 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
       // transparency and not pulling an opaque backdrop's colour into the smear
       // (which baked white over a white background and darkened a region when a
       // sparse layer sat over an opaque one). Standard "sample active layer".
-      final ui.Image layerSource = await appProvider.layers.captureLayerRegion(selectedLayerIndex, regionRect);
-      if (!mounted || generation != _pixelBrushStrokeGeneration) {
+      final ui.Image layerSource = await layers.captureLayerRegion(selectedLayerIndex, regionRect);
+      if (generation != session.generation) {
         layerSource.dispose();
         return;
       }
       final Uint8List? layerBytes = await extractImagePixels(layerSource, format: ui.ImageByteFormat.rawStraightRgba);
       layerSource.dispose();
-      if (layerBytes == null || !mounted || generation != _pixelBrushStrokeGeneration) {
+      if (layerBytes == null || generation != session.generation) {
         return;
       }
-      _smudgeSourceBytes = layerBytes;
-      _smudgeSourceRegionLeft = regionLeft;
-      _smudgeSourceRegionTop = regionTop;
-      _smudgeSourceWidth = regionWidth;
-      _smudgeSourceHeight = regionHeight;
+      session.storeSourceCache(
+        bytes: layerBytes,
+        regionLeft: regionLeft,
+        regionTop: regionTop,
+        regionWidth: regionWidth,
+        regionHeight: regionHeight,
+      );
     }
-    final Uint8List sourceBytes = _smudgeSourceBytes!;
-    final int regionLeft = _smudgeSourceRegionLeft;
-    final int regionTop = _smudgeSourceRegionTop;
-    final int regionStride = _smudgeSourceWidth;
+    final Uint8List sourceBytes = session.sourceBytes!;
+    final int regionLeft = session.sourceRegionLeft;
+    final int regionTop = session.sourceRegionTop;
+    final int regionStride = session.sourceWidth;
 
     // Crop the stroke's region out of the cached region bytes (region-local
     // coordinates) and build the region-local clip mask if a selection is active.
@@ -159,7 +208,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
             height: cropHeight,
             clipPath: clipPath.shift(Offset(-cropLeft.toDouble(), -cropTop.toDouble())),
           );
-    if (!mounted || generation != _pixelBrushStrokeGeneration) {
+    if (generation != session.generation) {
       return;
     }
 
@@ -172,13 +221,13 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
       imageWidth: cropWidth,
       imageHeight: cropHeight,
       segmentPoints: localPoints,
-      brushSize: brushSize,
+      brushSize: strokeBrushSize,
       intensity: intensity,
       mode: mode,
       clipMask: clipMask,
       preferSynchronous: false,
     );
-    if (result == null || !mounted || generation != _pixelBrushStrokeGeneration) {
+    if (result == null || generation != session.generation) {
       return;
     }
 
@@ -230,7 +279,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
       );
       lowImage.dispose();
     }
-    if (!mounted || generation != _pixelBrushStrokeGeneration) {
+    if (generation != session.generation) {
       patchImage.dispose();
       return;
     }
@@ -247,18 +296,18 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     // work — the fix for the multi-second commit stall. Full resolution is
     // rebuilt lazily on demand (export/sampling) by replaying the appended
     // action; the live canvas never needs it.
-    final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
+    final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
     await targetLayer.updateDisplayCacheWithPatch(
       patchImage: patchImage,
       patchBounds: committedBounds,
     );
-    if (!mounted || generation != _pixelBrushStrokeGeneration) {
+    if (generation != session.generation) {
       patchImage.dispose();
       return;
     }
 
     _applyCommittedPixelBrushPatch(
-      appProvider: appProvider,
+      mode: mode,
       layerRestoreState: layerRestoreState,
       committedPatch: PixelBrushLayerPatch(
         bounds: committedBounds,
@@ -270,22 +319,21 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     // the smudged region, so blit it back in (region-local coords, CPU, no
     // readback) and record the post-commit signature so the next nearby stroke
     // is a cache hit.
-    _blitRegionIntoSmudgeCache(
+    session.blitIntoSourceCache(
       region: result.pixels,
       regionWidth: cropWidth,
       regionHeight: cropHeight,
       destLeft: cropLeft - regionLeft,
       destTop: cropTop - regionTop,
     );
-    _smudgeSourceSignature = _currentSmudgeSignature(appProvider);
+    session.setSourceSignature(_currentSmudgeSignature());
   }
 
   /// A cheap fingerprint of the composite-through-selected-layer state. Changes
   /// when anything that affects the smudge source changes (action counts, layer
   /// visibility/opacity/blend, selection, canvas size) — but NOT on `clearCache`,
   /// so it stays stable across a run of smudge strokes.
-  List<int> _currentSmudgeSignature(AppProvider appProvider) {
-    final LayersProvider layers = appProvider.layers;
+  List<int> _currentSmudgeSignature() {
     final int selected = layers.selectedLayerIndex.clamp(AppMath.zero, layers.length - AppMath.one);
     final List<int> signature = <int>[
       selected,
@@ -305,58 +353,15 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     return signature;
   }
 
-  /// Blits a patch's pixels back into the cached source region [_smudgeSourceBytes]
-  /// (destination in region-local coordinates, stride [_smudgeSourceWidth]).
-  void _blitRegionIntoSmudgeCache({
-    required Uint8List region,
-    required int regionWidth,
-    required int regionHeight,
-    required int destLeft,
-    required int destTop,
-  }) {
-    final Uint8List? dest = _smudgeSourceBytes;
-    if (dest == null) {
-      return;
-    }
-    final int rowBytes = regionWidth * AppMath.bytesPerPixel;
-    for (int row = AppMath.zero; row < regionHeight; row++) {
-      final int destOffset = (((destTop + row) * _smudgeSourceWidth) + destLeft) * AppMath.bytesPerPixel;
-      dest.setRange(destOffset, destOffset + rowBytes, region, row * rowBytes);
-    }
-  }
-
-  /// Frees the smudge source region cache (on tool change / teardown).
-  void _clearSmudgeSourceCache() {
-    _smudgeSourceBytes = null;
-    _smudgeSourceRegionLeft = 0;
-    _smudgeSourceRegionTop = 0;
-    _smudgeSourceWidth = 0;
-    _smudgeSourceHeight = 0;
-    _smudgeSourceSignature = null;
-  }
-
-  /// Element-wise equality for two nullable int lists (cache signatures).
-  bool _intListEquals(List<int>? a, List<int>? b) {
-    if (a == null || b == null || a.length != b.length) {
-      return false;
-    }
-    for (int i = AppMath.zero; i < a.length; i++) {
-      if (a[i] != b[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   /// Commits [committedPatch] to the layer as an undoable pixel-brush action and
-  /// trims the undo history. Shared by the GPU and CPU commit paths.
+  /// trims the undo history.
   ///
   /// The committed patch has already been folded into the layer's
   /// display-resolution projection by the caller, so `forward` only appends the
   /// undoable action, drops the (now-stale) full-res cache — rebuilt lazily on
   /// demand — and refreshes the thumbnail cheaply. No full-canvas GPU work.
   void _applyCommittedPixelBrushPatch({
-    required AppProvider appProvider,
+    required PixelBrushMode mode,
     required ImagePlacementLayerRestoreState layerRestoreState,
     required PixelBrushLayerPatch committedPatch,
   }) {
@@ -367,18 +372,18 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
     // full-canvas texture leak without risking a use-after-free.
     final List<ui.Image> retainedImages = <ui.Image>[
       committedPatch.image,
-      for (final UserActionDrawing action in layerRestoreState.originalActions)
+      for (final UserActionDrawing action in layerRestoreState.layerState.actions)
         if (action.image != null) action.image!,
-      for (final UserActionDrawing action in layerRestoreState.originalRedoActions)
+      for (final UserActionDrawing action in layerRestoreState.layerState.redoActions)
         if (action.image != null) action.image!,
     ];
 
-    appProvider.undoProvider.executeAction(
-      name: _pixelBrushMode.name,
+    undoProvider.executeAction(
+      name: mode.name,
       retainedImages: retainedImages,
       forward: () {
-        final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
-        appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
+        final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
+        layers.selectedLayerIndex = layerRestoreState.layerIndex;
         targetLayer.clearLivePixelBrushPreview();
         // Append without clearing caches (that would schedule a full-canvas
         // thumbnail rebuild); the display projection already reflects this patch.
@@ -386,7 +391,7 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
           restoreState: layerRestoreState,
           targetLayer: targetLayer,
           patch: committedPatch,
-          mode: _pixelBrushMode,
+          mode: mode,
           retainCache: true,
         );
         // Full-res is now stale but the live display isn't served from it; drop
@@ -397,74 +402,21 @@ extension _CanvasGestureHandlerPixelBrushMethods on _CanvasGestureHandlerState {
           targetLayer: targetLayer,
           maxGestureCount: AppInteraction.pixelBrushMaxUndoGestures,
         );
-        appProvider.update();
+        update();
       },
       backward: () {
-        _restorePixelBrushLayerState(
-          appProvider: appProvider,
-          restoreState: layerRestoreState,
-        );
-        appProvider.update();
+        final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
+        layers.selectedLayerIndex = layerRestoreState.layerIndex;
+        targetLayer.restoreFromSnapshot(layerRestoreState.layerState);
+        update();
       },
     );
 
-    appProvider.undoProvider.trimUndoHistoryWhere(
+    undoProvider.trimUndoHistoryWhere(
       predicate: (RecordAction action) {
         return action.name == PixelBrushMode.smudge.name || action.name == PixelBrushMode.blur.name;
       },
       maxKeep: AppInteraction.pixelBrushMaxUndoGestures,
-    );
-  }
-
-  /// Restores the selected layer state captured before the current pixel-brush stroke.
-  void _restorePixelBrushLayerState({
-    required AppProvider appProvider,
-    required ImagePlacementLayerRestoreState restoreState,
-  }) {
-    final LayerProvider targetLayer = appProvider.layers.get(restoreState.layerIndex);
-    appProvider.layers.selectedLayerIndex = restoreState.layerIndex;
-    targetLayer.actionStack
-      ..clear()
-      ..addAll(restoreState.originalActions);
-    targetLayer.redoStack
-      ..clear()
-      ..addAll(restoreState.originalRedoActions);
-    targetLayer.backgroundColor = restoreState.originalBackgroundColor;
-    targetLayer.blendMode = restoreState.originalBlendMode;
-    targetLayer.opacity = restoreState.originalOpacity;
-    targetLayer.hasChanged = restoreState.originalHasChanged;
-    targetLayer.clearCache();
-  }
-
-  /// Starts tracking a pixel-brush stroke from [position] with the given [mode].
-  ///
-  /// Lightweight: it captures only the undo restore-state, the clip path, and the
-  /// first point, then publishes the gesture marquee. No source readback, worker,
-  /// or live rasterization happens during the drag — the whole effect is rendered
-  /// once in [_commitPixelBrushStroke] on pointer-up. This keeps the drag O(1) at
-  /// any canvas size.
-  void _startPixelBrushStroke(
-    AppProvider appProvider,
-    Offset position,
-    PixelBrushMode mode,
-  ) {
-    // A prior stroke whose pointer-up was cancelled or arrived with a mismatched
-    // pointer id never ran _clearPixelBrushStroke; reclaim its state first.
-    if (_pixelBrushLayerRestoreState != null) {
-      _clearPixelBrushStroke();
-    }
-    _pixelBrushStrokeGeneration++;
-    _pixelBrushMode = mode;
-    _pixelBrushIntensity = appProvider.brushIntensity;
-    _pixelBrushLayerRestoreState = appProvider.captureSelectedLayerRestoreState();
-    _pixelBrushClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null
-        ? ui.Path.from(appProvider.selectorModel.path1!)
-        : null;
-    _pixelBrushStrokePatchBounds = null;
-    _appendPixelBrushPoint(position, appProvider.brushSize);
-    appProvider.showPixelBrushGesture(
-      points: _pixelBrushStrokePoints,
-      size: appProvider.brushSize,
     );
   }
 }

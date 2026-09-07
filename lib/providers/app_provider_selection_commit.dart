@@ -48,24 +48,6 @@ void selectRectOnCanvas(AppProvider appProvider, Rect bounds) {
   appProvider.repaintToolOptions();
 }
 
-/// Restores [targetLayer] from [restoreState] after an image-placement undo.
-void _restoreLayerFromSnapshot({
-  required LayerProvider targetLayer,
-  required ImagePlacementLayerRestoreState restoreState,
-}) {
-  targetLayer.actionStack
-    ..clear()
-    ..addAll(restoreState.originalActions);
-  targetLayer.redoStack
-    ..clear()
-    ..addAll(restoreState.originalRedoActions);
-  targetLayer.backgroundColor = restoreState.originalBackgroundColor;
-  targetLayer.blendMode = restoreState.originalBlendMode;
-  targetLayer.opacity = restoreState.originalOpacity;
-  targetLayer.hasChanged = restoreState.originalHasChanged;
-  targetLayer.clearCache();
-}
-
 /// Commits a placed image as a new layer, selected-layer append, or layer
 /// replacement with undo support.
 void commitPlacedImage(
@@ -131,10 +113,7 @@ void commitPlacedImage(
       if (commitMode != ImagePlacementCommitMode.newLayer && layerRestoreState != null) {
         final LayerProvider targetLayer = appProvider.layers.get(layerRestoreState.layerIndex);
         appProvider.layers.selectedLayerIndex = layerRestoreState.layerIndex;
-        _restoreLayerFromSnapshot(
-          targetLayer: targetLayer,
-          restoreState: layerRestoreState,
-        );
+        targetLayer.restoreFromSnapshot(layerRestoreState.layerState);
         if (selectionSnapshot != null) {
           restoreSelectionState(appProvider, selectionSnapshot);
         }

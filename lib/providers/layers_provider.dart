@@ -814,7 +814,7 @@ class LayersProvider extends ChangeNotifier {
     // For a true undo, we'd need to implement rotate90CounterClockwise or store/restore actionStacks.
     // For now, the backward action will rotate 3 more times to get back to original.
 
-    _undoProvider.executeAction(
+    await _undoProvider.executeActionAsync(
       name: 'Rotate Canvas 90° clock wise',
       forward: () async {
         final List<ui.Image> replaced = <ui.Image>[];
@@ -878,7 +878,7 @@ class LayersProvider extends ChangeNotifier {
       this.update();
     }
 
-    _undoProvider.executeAction(
+    await _undoProvider.executeActionAsync(
       name: actionName,
       forward: applyFlip,
       backward: applyFlip,
