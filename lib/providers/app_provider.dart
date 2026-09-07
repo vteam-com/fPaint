@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/models/brush_grain.dart';
 import 'package:fpaint/models/effect_brush_model.dart';
@@ -27,6 +28,7 @@ import 'package:fpaint/providers/fill_service.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layer_crop_state.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/providers/pixel_brush_commit.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -34,12 +36,16 @@ import 'package:vector_math/vector_math_64.dart';
 export 'package:fpaint/providers/layers_provider.dart';
 
 part 'app_provider_canvas.dart';
+part 'app_provider_pixel_brush.dart';
 part 'app_provider_selection.dart';
 part 'app_provider_selection_commit.dart';
 part 'app_provider_selection_crop.dart';
 part 'app_provider_selection_cross_layer.dart';
 part 'app_provider_selection_effects.dart';
 part 'app_provider_tools.dart';
+part 'fill_preview_session.dart';
+part 'pixel_brush_session.dart';
+part 'transform_session.dart';
 part 'wand_selection_manager.dart';
 part 'wand_selection_request.dart';
 
@@ -56,6 +62,7 @@ class AppProvider extends ChangeNotifier {
        layers = layersProvider ?? LayersProvider(),
        _undoProvider = undoProvider ?? UndoProvider() {
     this.preferences.addListener(_handlePreferencesChanged);
+    layers.layerListStructureListenable.addListener(_handleLayerStructureChanged);
     _initCanvas();
     // Build the grain ("pencil") brush texture ahead of first use. Fire-and-forget
     // with no completion callback: it populates a shared singleton tile, and must
@@ -68,6 +75,7 @@ class AppProvider extends ChangeNotifier {
   final AppPreferences preferences;
 
   final ChangeNotifier _mainViewRepaintNotifier = ChangeNotifier();
+  final ChangeNotifier _hudOverlayNotifier = ChangeNotifier();
   final ChangeNotifier _layerModifyModeNotifier = ChangeNotifier();
   final ChangeNotifier _toolOptionsNotifier = ChangeNotifier();
   final ChangeNotifier _viewportRepaintNotifier = ChangeNotifier();
@@ -137,6 +145,12 @@ class AppProvider extends ChangeNotifier {
   /// Listenable used to repaint the main canvas and overlay surface only.
   Listenable get mainViewRepaintListenable => _mainViewRepaintNotifier;
 
+  /// Listenable used to repaint only the lightweight gesture HUD overlays
+  /// (brush-size ring, smudge marquee, tolerance HUDs). These update at
+  /// pointer-move frequency, so they get their own channel instead of
+  /// rebuilding the entire main-view overlay stack per input sample.
+  Listenable get hudOverlayRepaintListenable => _hudOverlayNotifier;
+
   /// Listenable used to rebuild tool-option affordance without waking the full app shell.
   Listenable get toolOptionsRepaintListenable => _toolOptionsNotifier;
 
@@ -171,15 +185,15 @@ class AppProvider extends ChangeNotifier {
   Listenable get toolbarActionsListenable => _toolbarActionsListenable;
 
   /// Gets whether layer replacement modify mode is active.
-  bool get isLayerModifyMode =>
-      imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer &&
-      imagePlacementModel.layerRestoreState != null;
+  bool get isLayerModifyMode => transformSession.isLayerModifyMode;
 
   @override
   void dispose() {
     preferences.removeListener(_handlePreferencesChanged);
+    layers.layerListStructureListenable.removeListener(_handleLayerStructureChanged);
     _brushSizePreviewTimer?.cancel();
     _mainViewRepaintNotifier.dispose();
+    _hudOverlayNotifier.dispose();
     _layerModifyModeNotifier.dispose();
     _toolOptionsNotifier.dispose();
     _viewportRepaintNotifier.dispose();
@@ -191,9 +205,24 @@ class AppProvider extends ChangeNotifier {
     update();
   }
 
+  /// Layer-list structural changes (document load/new, add/remove/reorder)
+  /// orphan any in-flight pixel-brush commit (its captured layer index may now
+  /// point at a different layer) and the smudge source cache (its bytes came
+  /// from the old stack, and the count-based signature carries no document
+  /// identity), so both are dropped.
+  void _handleLayerStructureChanged() {
+    pixelBrushSession.clearStroke();
+    pixelBrushSession.clearSourceCache();
+  }
+
   /// Rebuilds the main canvas and overlay surface without notifying the full app shell.
   void repaintMainView() {
     _mainViewRepaintNotifier.notifyListeners();
+  }
+
+  /// Rebuilds only the gesture HUD overlays (see [hudOverlayRepaintListenable]).
+  void repaintHudOverlay() {
+    _hudOverlayNotifier.notifyListeners();
   }
 
   /// Rebuilds tool-option UI without notifying the full app shell.
@@ -237,7 +266,10 @@ class AppProvider extends ChangeNotifier {
   bool recordExecuteDrawingActionToSelectedLayer({
     required UserActionDrawing action,
   }) {
-    if (isSelectedLayerLocked) {
+    // A stroke landing while an async undo/redo replay (canvas rotate/flip) is
+    // still re-rasterizing would clear the redo stack — disposing the very
+    // record being replayed — and interleave mutations; drop it instead.
+    if (isSelectedLayerLocked || _undoProvider.isReplaying) {
       return false;
     }
 
@@ -256,23 +288,30 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Undoes an action.
-  void undoAction() {
+  ///
+  /// Awaits the replay so an asynchronous record (canvas rotate/flip) is fully
+  /// reverted before dependent UI updates run.
+  Future<void> undoAction() async {
     // Finalize any live gradient-fill session first so the transient preview
     // (which is not on the undo stack) never participates in history.
     if (isGradientPreviewActive) {
       applyGradientPreview();
     }
-    _undoProvider.undo();
+    // A pixel-brush commit still rendering must not land after this undo and
+    // resurrect the state the user just reverted; drop the in-flight stroke.
+    pixelBrushSession.clearStroke();
+    await _undoProvider.undo();
     layers.update();
     update();
   }
 
-  /// Redoes an action.
-  void redoAction() {
+  /// Redoes an action; see [undoAction] for the async replay contract.
+  Future<void> redoAction() async {
     if (isGradientPreviewActive) {
       applyGradientPreview();
     }
-    _undoProvider.redo();
+    pixelBrushSession.clearStroke();
+    await _undoProvider.redo();
     layers.update();
     update();
   }
@@ -340,6 +379,12 @@ class AppProvider extends ChangeNotifier {
       wandSelection.reset();
     }
 
+    if (value != ActionType.smudge && value != ActionType.blurBrush) {
+      // Leaving the pixel-brush tools frees the smudge source cache (a large
+      // CPU buffer) — it is rebuilt on the next stroke's first commit.
+      pixelBrushSession.clearSourceCache();
+    }
+
     if (value == ActionType.fill) {
       // Start the GPU readback before the first canvas tap.
       unawaited(getSelectedLayerFillImageData(sampleAllLayers: false));
@@ -395,7 +440,7 @@ class AppProvider extends ChangeNotifier {
       return;
     }
     _isPixelBrushCommitting = committing;
-    repaintMainView();
+    repaintHudOverlay();
   }
 
   /// Publishes the in-progress smudge/blur gesture so the main view can draw its
@@ -407,7 +452,7 @@ class AppProvider extends ChangeNotifier {
   }) {
     _pixelBrushGesturePoints = List<Offset>.of(points);
     _pixelBrushGestureSize = size;
-    repaintMainView();
+    repaintHudOverlay();
   }
 
   /// Clears the smudge/blur gesture marquee and processing state (on commit or
@@ -418,7 +463,7 @@ class AppProvider extends ChangeNotifier {
     }
     _pixelBrushGesturePoints = null;
     _isPixelBrushCommitting = false;
-    repaintMainView();
+    repaintHudOverlay();
   }
 
   /// Sets the brush size.
@@ -433,7 +478,7 @@ class AppProvider extends ChangeNotifier {
     _brushSizePreviewTimer?.cancel();
     _brushSizePreviewSize = value;
     _brushSizePreviewPosition = null;
-    repaintMainView();
+    repaintHudOverlay();
     _brushSizePreviewTimer = Timer(AppDefaults.brushSizePreviewDuration, _hideBrushSizePreview);
   }
 
@@ -445,7 +490,7 @@ class AppProvider extends ChangeNotifier {
     _brushSizePreviewTimer?.cancel();
     _brushSizePreviewSize = size;
     _brushSizePreviewPosition = position;
-    repaintMainView();
+    repaintHudOverlay();
   }
 
   void _hideBrushSizePreview() {
@@ -455,7 +500,7 @@ class AppProvider extends ChangeNotifier {
     _brushSizePreviewTimer?.cancel();
     _brushSizePreviewSize = null;
     _brushSizePreviewPosition = null;
-    repaintMainView();
+    repaintHudOverlay();
   }
 
   /// Hides any active drawing-time brush-size preview immediately.
@@ -476,7 +521,7 @@ class AppProvider extends ChangeNotifier {
   void showWandToleranceHud({required int tolerance, required Offset position}) {
     _wandToleranceHudTolerance = tolerance;
     _wandToleranceHudPosition = position;
-    repaintMainView();
+    repaintHudOverlay();
   }
 
   /// Hides the live Edge Detection tolerance HUD.
@@ -486,7 +531,7 @@ class AppProvider extends ChangeNotifier {
     }
     _wandToleranceHudTolerance = null;
     _wandToleranceHudPosition = null;
-    repaintMainView();
+    repaintHudOverlay();
   }
 
   /// Gets the active pixel-brush intensity for the selected tool.
@@ -576,25 +621,21 @@ class AppProvider extends ChangeNotifier {
   //-------------------------
   // Fill Widget
 
+  /// Owns the live paint-bucket fill preview session (fill config, held
+  /// preview action, render version). See [FillPreviewSession].
+  final FillPreviewSession fillPreviewSession = FillPreviewSession();
+
   /// The fill model.
-  FillModel fillModel = FillModel();
+  FillModel get fillModel => fillPreviewSession.fillModel;
 
-  /// The **held** fill preview action — the region to fill plus its solid
-  /// colour / gradient / halftone. It is drawn by a lightweight canvas overlay
-  /// (`renderRegion`) and is **never** appended to the layer or the undo stack,
-  /// so re-previewing while dragging costs O(region path), not a full-canvas
-  /// re-composite. Committing records it as exactly one undoable action;
-  /// cancelling drops it. See `updateSolidFillPreview` / `updateGradientPreview`
-  /// / `commitFillPreview`.
-  UserActionDrawing? fillPreviewAction;
-
-  /// Monotonic token that invalidates stale async fill-region resolves.
-  int fillPreviewRenderVersion = 0;
+  /// The **held** fill preview action; owned by [FillPreviewSession]. See
+  /// `updateSolidFillPreview` / `updateGradientPreview` / `commitFillPreview`.
+  UserActionDrawing? get fillPreviewAction => fillPreviewSession.heldAction;
 
   /// Whether a live gradient-fill preview session is active. Only
   /// [FillModel.isVisible] gradient sessions set this; solid fills preview only
   /// during the pointer press and commit on release.
-  bool get isGradientPreviewActive => fillModel.isVisible;
+  bool get isGradientPreviewActive => fillPreviewSession.isGradientPreviewActive;
 
   int? _fillTolerancePreview;
 
@@ -608,7 +649,7 @@ class AppProvider extends ChangeNotifier {
       return;
     }
     _fillTolerancePreview = value;
-    repaintMainView();
+    repaintHudOverlay();
   }
 
   /// Hides the top "Fill Tolerance" bar.
@@ -617,7 +658,7 @@ class AppProvider extends ChangeNotifier {
       return;
     }
     _fillTolerancePreview = null;
-    repaintMainView();
+    repaintHudOverlay();
   }
 
   Offset? _tolerancePointerAnchor;
@@ -636,7 +677,7 @@ class AppProvider extends ChangeNotifier {
   void beginTolerancePointerLock(Offset screenAnchor) {
     _tolerancePointerAnchor = screenAnchor;
     repaintToolOptions(); // rebuild the cursor MouseRegion to hide the cursor
-    repaintMainView(); // draw the fixed anchor marker
+    repaintHudOverlay(); // draw the fixed anchor marker
   }
 
   /// Releases the tolerance pointer lock, restoring the cursor.
@@ -646,7 +687,7 @@ class AppProvider extends ChangeNotifier {
     }
     _tolerancePointerAnchor = null;
     repaintToolOptions();
-    repaintMainView();
+    repaintHudOverlay();
   }
 
   /// Commits the held fill preview action (if any) as exactly one undoable
@@ -655,9 +696,7 @@ class AppProvider extends ChangeNotifier {
   /// the base class so the tool-switch setter, undo/redo, and the gesture handler
   /// can finalize without depending on the tools extension.
   void commitFillPreview() {
-    fillPreviewRenderVersion++; // drop any in-flight region resolve
-    final UserActionDrawing? rendered = fillPreviewAction;
-    fillPreviewAction = null;
+    final UserActionDrawing? rendered = fillPreviewSession.takeHeldAction();
     if (rendered != null) {
       recordExecuteDrawingActionToSelectedLayer(action: rendered);
     }
@@ -666,8 +705,7 @@ class AppProvider extends ChangeNotifier {
 
   /// Drops the held fill preview without recording anything.
   void clearFillPreview() {
-    fillPreviewRenderVersion++; // drop any in-flight region resolve
-    fillPreviewAction = null;
+    fillPreviewSession.clearHeldAction();
     repaintMainView();
   }
 
@@ -792,15 +830,15 @@ class AppProvider extends ChangeNotifier {
   /// The selector model.
   SelectorModel selectorModel = SelectorModel();
 
+  /// Owns the floating transform/placement session state (transform overlay,
+  /// prepared image placement, cross-layer lift). See [TransformSession].
+  final TransformSession transformSession = TransformSession();
+
   /// The prepared image placement state used by duplicate, paste, and layer modify sessions.
-  final ImagePlacementModel imagePlacementModel = ImagePlacementModel();
+  ImagePlacementModel get imagePlacementModel => transformSession.imagePlacementModel;
 
   /// The transform model for perspective/skew operations.
-  final TransformModel transformModel = TransformModel();
-
-  /// Per-layer lifted images while an "All layers" transform session is
-  /// active; null otherwise. Owned by [AppProviderSelectionCrossLayer].
-  List<CrossLayerLiftEntry>? crossLayerLift;
+  TransformModel get transformModel => transformSession.transformModel;
 
   /// Whether an interactive transform overlay is currently active.
   bool get hasActiveTransformOverlay => transformModel.isVisible;
@@ -816,6 +854,9 @@ class AppProvider extends ChangeNotifier {
 
   /// Owns the magic-wand selection request queue and rasterized source cache.
   final WandSelectionManager wandSelection = WandSelectionManager();
+
+  /// Owns the in-progress pixel-brush/effect stroke and smudge source cache.
+  final PixelBrushStrokeSession pixelBrushSession = PixelBrushStrokeSession();
 
   /// The selected text object.
   TextObject? selectedTextObject;

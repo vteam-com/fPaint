@@ -7,14 +7,11 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/fill_model.dart';
-import 'package:fpaint/models/image_placement_layer_restore_state.dart';
-import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -23,13 +20,11 @@ import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/inherited_scope.dart';
 import 'package:fpaint/providers/shell_provider.dart';
-import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
 part 'canvas_gesture_handler_eyedropper.dart';
-part 'canvas_gesture_handler_pixel_brush.dart';
 part 'canvas_gesture_handler_state_methods.dart';
 
 /// Handles pointer, pan, and zoom gestures over the canvas widget tree.
@@ -48,11 +43,6 @@ class CanvasGestureHandler extends StatefulWidget {
 class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   int _activePointerId = -1;
   final List<int> _activePointers = <int>[];
-
-  /// Whether the active gesture is a paint-mode effect stroke: it reuses the
-  /// pixel-brush gesture capture but commits the armed Adjust effect on
-  /// pointer-up instead of a smudge/blur dab.
-  bool _effectBrushStroke = false;
   Offset? _lastMultiTouchFocalPoint;
   double _lastScaleDistance = 0.0;
   Offset? _lastSelectionTapCanvasPosition;
@@ -60,40 +50,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   final Set<int> _multiTouchPointersMoved = <int>{};
   int _panningPointerId = -1;
   PointerDownEvent? _pendingTouchDownEvent;
-
-  /// Canvas clip path active when the stroke began (may be null).
-  ui.Path? _pixelBrushClipPath;
-
-  /// Intensity captured when the current pixel-brush stroke started.
-  double _pixelBrushIntensity = AppInteraction.pixelBrushDefaultIntensity;
-
-  /// Layer state captured before the stroke so it can be restored on undo.
-  ImagePlacementLayerRestoreState? _pixelBrushLayerRestoreState;
-
-  /// Which pixel-manipulation mode is active for the current stroke.
-  PixelBrushMode _pixelBrushMode = PixelBrushMode.smudge;
-
-  /// Monotonic token that invalidates a stale one-shot commit render when a new
-  /// stroke starts (or this one is cleared) while it is still rasterizing.
-  int _pixelBrushStrokeGeneration = 0;
-
-  /// Bounds enclosing the stroke's dab footprints; the committed patch's
-  /// preferred bounds.
-  ui.Rect? _pixelBrushStrokePatchBounds;
-
-  /// All accumulated stroke points since the stroke began (canvas space).
-  final List<Offset> _pixelBrushStrokePoints = <Offset>[];
   final Map<int, Offset> _pointerPositions = <int, ui.Offset>{};
 
   /// The selector math mode active before a modifier-key override was applied.
   /// Non-null only during a modifier-driven selection gesture.
   SelectorMath? _previousSelectorMath;
-  Uint8List? _smudgeSourceBytes;
-  int _smudgeSourceHeight = 0;
-  int _smudgeSourceRegionLeft = 0;
-  int _smudgeSourceRegionTop = 0;
-  List<int>? _smudgeSourceSignature;
-  int _smudgeSourceWidth = 0;
 
   /// Canvas-space sample anchor re-sampled / re-previewed on every drag step.
   Offset? _toleranceDragAnchorCanvas;
@@ -111,12 +72,6 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// Tolerance captured when the tolerance-drag gesture began.
   int _toleranceDragStartTolerance = AppDefaults.tolerance;
   bool _viewportRepaintScheduled = false;
-  @override
-  void dispose() {
-    // Free the per-session smudge source cache (a full-canvas CPU buffer).
-    _clearSmudgeSourceCache();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -388,130 +343,4 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
       }
     });
   }
-}
-
-/// Encapsulates a cropped raster patch and its destination bounds for
-/// committing a pixel-brush stroke to a layer.
-class PixelBrushLayerPatch {
-  const PixelBrushLayerPatch({
-    required this.bounds,
-    required this.image,
-  });
-
-  final ui.Rect bounds;
-  final ui.Image image;
-}
-
-/// Maps a pixel-brush [mode] to its persisted layer action type.
-ActionType pixelBrushActionType(PixelBrushMode mode) {
-  return mode == PixelBrushMode.smudge ? ActionType.smudge : ActionType.blurBrush;
-}
-
-/// Returns whether [actionType] is a persisted pixel-brush action.
-bool isPixelBrushPersistedActionType(ActionType actionType) {
-  return actionType == ActionType.smudge || actionType == ActionType.blurBrush;
-}
-
-/// Restores the target layer baseline state and applies [patch] as the latest
-/// pixel-brush action for [mode].
-void applyPixelBrushPatchToLayer({
-  required ImagePlacementLayerRestoreState restoreState,
-  required LayerProvider targetLayer,
-  required PixelBrushLayerPatch patch,
-  required PixelBrushMode mode,
-  bool retainCache = false,
-}) {
-  targetLayer.actionStack
-    ..clear()
-    ..addAll(restoreState.originalActions);
-  targetLayer.redoStack.clear();
-  targetLayer.backgroundColor = restoreState.originalBackgroundColor;
-  targetLayer.blendMode = restoreState.originalBlendMode;
-  targetLayer.opacity = restoreState.originalOpacity;
-  targetLayer.hasChanged = restoreState.originalHasChanged;
-  // When the caller supplies an incrementally-composited cache, append without
-  // clearing it (a full-stack replay + thumbnail rebuild per commit is the
-  // smudge/blur perf bottleneck); otherwise fall back to the cache-clearing
-  // append.
-  final void Function(UserActionDrawing) append = retainCache
-      ? targetLayer.appendDrawingActionRetainingCache
-      : targetLayer.appendDrawingAction;
-  // A single patch action, rendered with BlendMode.src, fully REPLACES its
-  // region (see [_renderAction] for smudge/blurBrush). No separate `cut` clear:
-  // a clear-then-srcOver pair leaves a sub-1 alpha ring at anti-aliased edges
-  // when replayed under the display cache's fractional scale — the white
-  // rectangle around the stroke. src replaces cleanly at any scale.
-  append(
-    UserActionDrawing(
-      action: pixelBrushActionType(mode),
-      positions: <Offset>[patch.bounds.topLeft, patch.bounds.bottomRight],
-      brush: MyBrush(
-        color: AppColors.transparent,
-        size: AppMath.zero.toDouble(),
-      ),
-      fillColor: AppColors.transparent,
-      image: patch.image,
-    ),
-  );
-}
-
-/// Compacts historical pixel-brush actions by flattening the layer when the
-/// number of persisted smudge/blur gestures exceeds [maxGestureCount].
-///
-/// This keeps redraw cost bounded over long drawing sessions.
-void compactPixelBrushLayerHistory({
-  required LayerProvider targetLayer,
-  required int maxGestureCount,
-}) {
-  int persistedPixelBrushCount = AppMath.zero;
-  for (final UserActionDrawing action in targetLayer.actionStack) {
-    if (isPixelBrushPersistedActionType(action.action)) {
-      persistedPixelBrushCount++;
-    }
-  }
-
-  if (persistedPixelBrushCount <= maxGestureCount) {
-    return;
-  }
-
-  final ui.Image flattenedLayerImage = targetLayer.toImageForStorage(targetLayer.size);
-  targetLayer.actionStack
-    ..clear()
-    ..add(
-      UserActionDrawing(
-        action: ActionType.image,
-        positions: <Offset>[
-          Offset.zero,
-          Offset(targetLayer.size.width, targetLayer.size.height),
-        ],
-        image: flattenedLayerImage,
-      ),
-    );
-  targetLayer.redoStack.clear();
-  targetLayer.hasChanged = true;
-  targetLayer.clearCache();
-}
-
-/// Copies an RGBA rectangle from [pixels] into a tightly packed patch buffer.
-Uint8List copyPixelBrushRect({
-  required Uint8List pixels,
-  required int imageWidth,
-  required int left,
-  required int top,
-  required int width,
-  required int height,
-}) {
-  final Uint8List result = Uint8List(width * height * AppMath.bytesPerPixel);
-  final int rowByteCount = width * AppMath.bytesPerPixel;
-  for (int row = AppMath.zero; row < height; row++) {
-    final int sourceOffset = (((top + row) * imageWidth) + left) * AppMath.bytesPerPixel;
-    final int destinationOffset = row * rowByteCount;
-    result.setRange(
-      destinationOffset,
-      destinationOffset + rowByteCount,
-      pixels,
-      sourceOffset,
-    );
-  }
-  return result;
 }

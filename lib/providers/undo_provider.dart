@@ -1,5 +1,6 @@
 // ignore: fcheck_one_class_per_file
 
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
@@ -41,6 +42,17 @@ class UndoProvider extends ChangeNotifier {
 
   final List<RecordAction> _undoStack = <RecordAction>[];
   final List<RecordAction> _redoStack = <RecordAction>[];
+
+  /// True while an asynchronous apply or replay is in flight. Re-entrant
+  /// undo/redo calls and new async actions are dropped so a second request
+  /// cannot interleave with a half-applied one (for example a canvas rotation
+  /// still re-rasterizing every layer).
+  bool _isReplaying = false;
+
+  /// Whether an asynchronous apply/replay is in flight. Guarded mutation
+  /// entry points (drawing, rotate/flip) drop their input while this is true
+  /// rather than interleave with the half-applied record.
+  bool get isReplaying => _isReplaying;
 
   /// Invoked whenever records leave history for good. The owner disposes any
   /// GPU textures the dropped records retained that nothing else references.
@@ -111,27 +123,88 @@ class UndoProvider extends ChangeNotifier {
     return action;
   }
 
+  /// Executes an asynchronous action and records it to the undo stack.
+  ///
+  /// Like [executeAction], but the closures may be asynchronous (for example a
+  /// canvas rotation re-rasterizing every layer). [forward] is awaited so the
+  /// returned future completes only once the action is fully applied; undo and
+  /// redo are blocked (via [isReplaying]) until then, and [undo]/[redo] await
+  /// the closures when replaying the record. Returns null — recording and
+  /// executing nothing — when another async apply/replay is already in flight,
+  /// so two multi-second mutations can never interleave.
+  Future<RecordAction?> executeActionAsync({
+    required String name,
+    required FutureOr<void> Function() backward,
+    required FutureOr<void> Function() forward,
+    List<ui.Image> retainedImages = const <ui.Image>[],
+  }) async {
+    if (_isReplaying) {
+      return null;
+    }
+
+    final RecordAction action = RecordAction(
+      name: name,
+      forward: forward,
+      backward: backward,
+      retainedImages: retainedImages,
+    );
+
+    // The record is on the stack before forward runs, so hold the replay guard
+    // across the apply: without it a Cmd+Z during a multi-second rotate would
+    // run backward() interleaved with the still-applying forward.
+    recordAction(action);
+    _isReplaying = true;
+    try {
+      await action.forward();
+    } finally {
+      _isReplaying = false;
+    }
+    notifyListeners();
+    return action;
+  }
+
   /// Undoes the last action.
-  void undo() {
-    if (!canUndo) {
+  ///
+  /// Completes once the action is fully reverted. A synchronous record is
+  /// reverted before this returns (no suspension); an asynchronous one is
+  /// awaited, and re-entrant calls during the replay are ignored.
+  Future<void> undo() async {
+    if (!canUndo || _isReplaying) {
       return;
     }
 
     final RecordAction action = _undoStack.removeLast();
     _redoStack.add(action);
-    action.backward();
-    notifyListeners();
+    await _replayRecordClosure(action.backward);
   }
 
   /// Redoes the last action that was undone.
-  void redo() {
-    if (!canRedo) {
+  ///
+  /// Completes once the action is fully re-applied; see [undo] for the
+  /// synchronous/asynchronous replay contract.
+  Future<void> redo() async {
+    if (!canRedo || _isReplaying) {
       return;
     }
 
     final RecordAction action = _redoStack.removeLast();
     _undoStack.add(action);
-    action.forward();
+    await _replayRecordClosure(action.forward);
+  }
+
+  /// Runs one record closure and notifies listeners: synchronously for a
+  /// synchronous closure, holding the [_isReplaying] guard across an await for
+  /// an asynchronous one.
+  Future<void> _replayRecordClosure(FutureOr<void> Function() closure) async {
+    final FutureOr<void> result = closure();
+    if (result is Future<void>) {
+      _isReplaying = true;
+      try {
+        await result;
+      } finally {
+        _isReplaying = false;
+      }
+    }
     notifyListeners();
   }
 
@@ -243,10 +316,14 @@ class RecordAction {
   String name;
 
   /// The function to call to execute the action.
-  void Function() forward;
+  ///
+  /// May be asynchronous (registered through
+  /// [UndoProvider.executeActionAsync]); replay awaits it so state mutations
+  /// never interleave with a follow-up action.
+  FutureOr<void> Function() forward;
 
-  /// The function to call to undo the action.
-  void Function() backward;
+  /// The function to call to undo the action; same contract as [forward].
+  FutureOr<void> Function() backward;
 
   /// GPU textures this record's [forward]/[backward] closures can resurrect.
   ///

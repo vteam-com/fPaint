@@ -88,11 +88,6 @@ extension AppProviderSelection on AppProvider {
     await _startDuplicateTransform(commitMode: ImagePlacementCommitMode.newLayer);
   }
 
-  /// Captures the selected layer so destructive tools can restore it on undo.
-  ImagePlacementLayerRestoreState captureSelectedLayerRestoreState() {
-    return _captureSelectedLayerRestoreState();
-  }
-
   /// Duplicates the current selection into the same selected layer.
   Future<void> regionDuplicateSameLayer() async {
     if (isSelectedLayerLocked) {
@@ -182,15 +177,9 @@ extension AppProviderSelection on AppProvider {
   /// Captures the selected layer so same-layer duplicate and layer modify undo
   /// can restore it exactly.
   ImagePlacementLayerRestoreState _captureSelectedLayerRestoreState() {
-    final LayerProvider targetLayer = layers.selectedLayer;
     return ImagePlacementLayerRestoreState(
       layerIndex: layers.selectedLayerIndex,
-      originalActions: List<UserActionDrawing>.from(targetLayer.actionStack),
-      originalRedoActions: List<UserActionDrawing>.from(targetLayer.redoStack),
-      originalHasChanged: targetLayer.hasChanged,
-      originalBackgroundColor: targetLayer.backgroundColor,
-      originalBlendMode: targetLayer.blendMode,
-      originalOpacity: targetLayer.opacity,
+      layerState: layers.selectedLayer.captureSnapshot(),
     );
   }
 
@@ -361,15 +350,7 @@ extension AppProviderSelection on AppProvider {
     if (imagePlacementModel.commitMode == ImagePlacementCommitMode.replaceLayer && layerRestoreState != null) {
       final LayerProvider targetLayer = layers.get(layerRestoreState.layerIndex);
       layers.selectedLayerIndex = layerRestoreState.layerIndex;
-      targetLayer.actionStack
-        ..clear()
-        ..addAll(layerRestoreState.originalActions);
-      targetLayer.redoStack
-        ..clear()
-        ..addAll(layerRestoreState.originalRedoActions);
-      targetLayer.backgroundColor = layerRestoreState.originalBackgroundColor;
-      targetLayer.hasChanged = layerRestoreState.originalHasChanged;
-      targetLayer.clearCache();
+      targetLayer.restoreFromSnapshot(layerRestoreState.layerState);
     }
 
     imagePlacementModel.clear();
@@ -415,119 +396,116 @@ extension AppProviderSelection on AppProvider {
   }
 
   /// Commits the current transform, erasing the original selection region
-  /// and placing the warped result as a new image action.
+  /// and placing the warped result as a new image action. Dispatches on the
+  /// [TransformSessionKind] so each session flavor owns its own commit path.
   Future<void> confirmTransform() async {
     final bool wasLayerModifyMode = isLayerModifyMode;
     cancelEffectPreview();
     final ui.Image? sourceImage = transformModel.sourceImage;
     if (sourceImage == null) {
       transformModel.clear();
-      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-      update();
+      _endTransformSession(wasLayerModifyMode: wasLayerModifyMode);
       return;
     }
 
-    if (isCrossLayerTransformActive) {
-      await confirmTransformAllLayers();
-      selectorModel.clear();
-      transformModel.clear();
-      // The merged overlay preview was never committed anywhere; free it.
-      sourceImage.dispose();
-      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-      update();
-      return;
+    switch (transformSession.kind) {
+      case TransformSessionKind.crossLayer:
+        await confirmTransformAllLayers();
+        selectorModel.clear();
+        transformModel.clear();
+        // The merged overlay preview was never committed anywhere; free it.
+        sourceImage.dispose();
+      case TransformSessionKind.preparedImage:
+        await _confirmPreparedImageTransform();
+      case TransformSessionKind.layerModify:
+      case TransformSessionKind.selection:
+        await _confirmSelectionRegionTransform();
     }
 
-    final ui.Image transformedImage = await renderTransformedImage(
-      sourceImage,
-      transformModel.corners,
-      AppInteraction.transformGridSubdivisions,
-      edgeMidpoints: transformModel.effectiveEdgeMidpoints,
+    _endTransformSession(wasLayerModifyMode: wasLayerModifyMode);
+  }
+
+  /// Commits a duplicate/paste transform through the image-placement pipeline.
+  Future<void> _confirmPreparedImageTransform() async {
+    final ui.Image transformedImage = await _renderConfirmedTransformImage();
+    final Rect quadBounds = transformModel.quadBounds;
+    final SelectionStateSnapshot selectionSnapshot = captureSelectionState(this);
+
+    commitPlacedImage(
+      this,
+      image: transformedImage,
+      offset: Offset(quadBounds.left, quadBounds.top),
+      commitMode: imagePlacementModel.commitMode,
+      layerRestoreState: imagePlacementModel.layerRestoreState,
+      selectionSnapshot: selectionSnapshot,
+      selectionBounds: quadBounds,
     );
 
+    transformModel.clear();
+    imagePlacementModel.clear();
+  }
+
+  /// Commits a selection (or layer-modify) transform by erasing the original
+  /// region and placing the warped result on the selected layer.
+  Future<void> _confirmSelectionRegionTransform() async {
+    final ui.Image transformedImage = await _renderConfirmedTransformImage();
     final Rect quadBounds = transformModel.quadBounds;
-
-    if (_isPreparedImageTransformSource(transformModel.source)) {
-      final SelectionStateSnapshot selectionSnapshot = captureSelectionState(this);
-      final ImagePlacementCommitMode commitMode = imagePlacementModel.commitMode;
-      final ImagePlacementLayerRestoreState? layerRestoreState = imagePlacementModel.layerRestoreState;
-
-      commitPlacedImage(
-        this,
-        image: transformedImage,
-        offset: Offset(quadBounds.left, quadBounds.top),
-        commitMode: commitMode,
-        layerRestoreState: layerRestoreState,
-        selectionSnapshot: selectionSnapshot,
-        selectionBounds: quadBounds,
-      );
-
-      transformModel.clear();
-      imagePlacementModel.clear();
-      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-      update();
-      return;
-    }
-
     final Path erasePath = Path.from(selectorModel.path1!);
-    final Offset imageOffset = Offset(quadBounds.left, quadBounds.top);
 
     replaceRegion(
       name: 'Transform',
       erasePath: erasePath,
       replacement: transformedImage,
-      offset: imageOffset,
+      offset: Offset(quadBounds.left, quadBounds.top),
     );
 
     selectorModel.clear();
     transformModel.clear();
-    if (_isLayerModifySession) {
+    if (transformSession.isLayerModifyMode) {
       imagePlacementModel.clear();
     }
+  }
+
+  /// Renders the transform overlay's source image warped by the current corners.
+  Future<ui.Image> _renderConfirmedTransformImage() {
+    return renderTransformedImage(
+      transformModel.sourceImage!,
+      transformModel.corners,
+      AppInteraction.transformGridSubdivisions,
+      edgeMidpoints: transformModel.effectiveEdgeMidpoints,
+    );
+  }
+
+  /// Shared transform-session epilogue: refresh layer-modify chrome and the app.
+  void _endTransformSession({required bool wasLayerModifyMode}) {
     notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
     update();
   }
 
-  /// Cancels an in-progress transform operation.
+  /// Cancels an in-progress transform operation, dispatching on the
+  /// [TransformSessionKind] so each session flavor cleans up its own state.
   void cancelTransform() {
     final bool wasLayerModifyMode = isLayerModifyMode;
     cancelEffectPreview();
 
-    if (isCrossLayerTransformActive) {
-      final ui.Image? mergedPreview = transformModel.sourceImage;
-      disposeCrossLayerLift();
-      transformModel.clear();
-      mergedPreview?.dispose();
-      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-      update();
-      return;
+    switch (transformSession.kind) {
+      case TransformSessionKind.crossLayer:
+        final ui.Image? mergedPreview = transformModel.sourceImage;
+        transformSession.disposeCrossLayerLift();
+        transformModel.clear();
+        mergedPreview?.dispose();
+      case TransformSessionKind.preparedImage:
+        transformModel.clear();
+        imagePlacementModel.clear();
+      case TransformSessionKind.layerModify:
+        selectorModel.clear();
+        transformModel.clear();
+        imagePlacementModel.clear();
+      case TransformSessionKind.selection:
+        transformModel.clear();
     }
 
-    if (_isPreparedImageTransformSource(transformModel.source)) {
-      transformModel.clear();
-      imagePlacementModel.clear();
-      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-      update();
-      return;
-    }
-
-    if (_isLayerModifySession) {
-      selectorModel.clear();
-      transformModel.clear();
-      imagePlacementModel.clear();
-      notifyLayerModifyModeChanged(wasActive: wasLayerModifyMode);
-      update();
-      return;
-    }
-
-    transformModel.clear();
-    update();
-  }
-
-  bool get _isLayerModifySession => isLayerModifyMode;
-
-  bool _isPreparedImageTransformSource(TransformSessionSource source) {
-    return source == TransformSessionSource.duplicateSelection || source == TransformSessionSource.clipboardPaste;
+    _endTransformSession(wasLayerModifyMode: wasLayerModifyMode);
   }
 
   /// Renders the current image-placement preview into a baked image.

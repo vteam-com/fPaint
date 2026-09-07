@@ -63,13 +63,6 @@ class MainViewState extends State<MainView> {
               listenable: appProvider.mainViewCompositeListenable,
               builder: (BuildContext _, Widget? _) {
                 final bool hasActiveTransformOverlay = appProvider.hasActiveTransformOverlay;
-                // The brush-size ring is a paint-tool affordance. The selector
-                // (incl. Edge Detection wand) never paints, so it is hidden there
-                // — except when an effect brush is armed, which paints (clipped to
-                // the selection) even while the selector tool is active.
-                final bool showBrushSizePreview =
-                    appProvider.isBrushSizePreviewVisible &&
-                    (appProvider.selectedAction != ActionType.selector || appProvider.effectBrushModel.isArmed);
 
                 return Stack(
                   children: <Widget>[
@@ -77,71 +70,18 @@ class MainViewState extends State<MainView> {
                       child: _displayCanvas(appProvider),
                     ),
 
-                    // Live smudge/blur gesture marquee (swept brush-width band).
-                    // The effect renders once on pointer-up; this is the only
-                    // feedback during the drag.
-                    if (appProvider.isPixelBrushGestureVisible)
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          // During the drag: the static marquee. On pointer-up,
-                          // while the commit generates the image: a processing
-                          // shimmer over the same region.
-                          child: appProvider.isPixelBrushCommitting
-                              ? _PixelBrushProcessingShimmer(
-                                  points: appProvider.pixelBrushGesturePoints!,
-                                  brushSize: appProvider.pixelBrushGestureSize,
-                                  canvasOffset: appProvider.canvasOffset,
-                                  scale: appProvider.layers.scale,
-                                )
-                              : CustomPaint(
-                                  painter: _PixelBrushGestureMarqueePainter(
-                                    points: appProvider.pixelBrushGesturePoints!,
-                                    brushSize: appProvider.pixelBrushGestureSize,
-                                    canvasOffset: appProvider.canvasOffset,
-                                    scale: appProvider.layers.scale,
-                                  ),
-                                ),
+                    // Pointer-frequency gesture HUDs (smudge marquee, brush-size
+                    // ring, wand tolerance readout) rebuild on their own narrow
+                    // listenable so a 60 Hz preview update never re-evaluates the
+                    // rest of this overlay stack.
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: ListenableBuilder(
+                          listenable: appProvider.hudOverlayRepaintListenable,
+                          builder: (BuildContext _, Widget? _) => _buildGestureHudOverlays(appProvider),
                         ),
                       ),
-
-                    if (showBrushSizePreview && appProvider.brushSizePreviewPosition == null)
-                      IgnorePointer(
-                        child: Center(
-                          child: _BrushSizePreviewOverlay(
-                            diameter: appProvider.brushSizePreviewSize! * appProvider.layers.scale,
-                            color: appProvider.brushSizePreviewColor,
-                          ),
-                        ),
-                      ),
-
-                    if (showBrushSizePreview && appProvider.brushSizePreviewPosition != null)
-                      Positioned(
-                        left:
-                            appProvider.brushSizePreviewPosition!.dx -
-                            (appProvider.brushSizePreviewSize! * appProvider.layers.scale) / AppMath.pair,
-                        top:
-                            appProvider.brushSizePreviewPosition!.dy -
-                            (appProvider.brushSizePreviewSize! * appProvider.layers.scale) / AppMath.pair,
-                        child: IgnorePointer(
-                          child: _BrushSizePreviewOverlay(
-                            diameter: appProvider.brushSizePreviewSize! * appProvider.layers.scale,
-                            color: appProvider.brushSizePreviewColor,
-                          ),
-                        ),
-                      ),
-
-                    // Live Edge Detection tolerance readout, tagged near the
-                    // finger while dragging to grow/shrink the wand selection.
-                    if (appProvider.isWandToleranceHudVisible && appProvider.wandToleranceHudPosition != null)
-                      Positioned(
-                        left: appProvider.wandToleranceHudPosition!.dx + AppSpacing.large,
-                        top: appProvider.wandToleranceHudPosition!.dy - AppSpacing.largest * AppMath.pair,
-                        child: IgnorePointer(
-                          child: buildOverlayFeedbackBubble(
-                            label: '${appProvider.wandToleranceHudTolerance}%',
-                          ),
-                        ),
-                      ),
+                    ),
 
                     if (!hasActiveTransformOverlay &&
                         appProvider.effectPreviewModel.isVisible &&
@@ -281,35 +221,16 @@ class MainViewState extends State<MainView> {
                         ),
                       ),
 
-                    // Fixed marker pinned at the start of a tolerance drag (wand
-                    // or paint bucket) — the cursor is hidden, so this shows the
-                    // maintained gesture start point.
-                    if (appProvider.tolerancePointerAnchor != null)
-                      Positioned(
-                        left:
-                            appProvider.tolerancePointerAnchor!.dx -
-                            AppInteraction.toleranceAnchorMarkerSize / AppMath.pair,
-                        top:
-                            appProvider.tolerancePointerAnchor!.dy -
-                            AppInteraction.toleranceAnchorMarkerSize / AppMath.pair,
-                        child: const IgnorePointer(child: _ToleranceAnchorMarker()),
-                      ),
-
-                    // Procreate-style "Fill Tolerance NN%" bar, top-center, while
-                    // dragging the paint-bucket tolerance.
-                    if (appProvider.fillTolerancePreview != null)
-                      Positioned(
-                        top: AppSpacing.large,
-                        left: AppMath.zero.toDouble(),
-                        right: AppMath.zero.toDouble(),
-                        child: IgnorePointer(
-                          child: Center(
-                            child: buildOverlayFeedbackBubble(
-                              label: '${context.l10n.colorTolerance}   ${appProvider.fillTolerancePreview}%',
-                            ),
-                          ),
+                    // Tolerance drag HUDs (fixed anchor marker + "Fill Tolerance"
+                    // bar) — same narrow HUD listenable as the gesture HUDs.
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: ListenableBuilder(
+                          listenable: appProvider.hudOverlayRepaintListenable,
+                          builder: (BuildContext _, Widget? _) => _buildToleranceHudOverlays(appProvider),
                         ),
                       ),
+                    ),
 
                     if (!hasActiveTransformOverlay && appProvider.selectedTextObject != null) const TextEditor(),
 
@@ -354,6 +275,112 @@ class MainViewState extends State<MainView> {
       layers: appProvider.layers,
       pointerPosition: position,
       pixelPosition: appProvider.toCanvas(position),
+    );
+  }
+
+  /// Builds the pointer-frequency gesture HUD overlays: the smudge/blur
+  /// marquee (or its processing shimmer), the brush-size preview ring, and the
+  /// live Edge Detection tolerance readout. Rebuilt on
+  /// [AppProvider.hudOverlayRepaintListenable] only.
+  Widget _buildGestureHudOverlays(AppProvider appProvider) {
+    // The brush-size ring is a paint-tool affordance. The selector (incl. Edge
+    // Detection wand) never paints, so it is hidden there — except when an
+    // effect brush is armed, which paints (clipped to the selection) even
+    // while the selector tool is active.
+    final bool showBrushSizePreview =
+        appProvider.isBrushSizePreviewVisible &&
+        (appProvider.selectedAction != ActionType.selector || appProvider.effectBrushModel.isArmed);
+
+    return Stack(
+      children: <Widget>[
+        // Live smudge/blur gesture marquee (swept brush-width band). The
+        // effect renders once on pointer-up; this is the only feedback during
+        // the drag.
+        if (appProvider.isPixelBrushGestureVisible)
+          Positioned.fill(
+            // During the drag: the static marquee. On pointer-up, while the
+            // commit generates the image: a processing shimmer over the same
+            // region.
+            child: appProvider.isPixelBrushCommitting
+                ? _PixelBrushProcessingShimmer(
+                    points: appProvider.pixelBrushGesturePoints!,
+                    brushSize: appProvider.pixelBrushGestureSize,
+                    canvasOffset: appProvider.canvasOffset,
+                    scale: appProvider.layers.scale,
+                  )
+                : CustomPaint(
+                    painter: _PixelBrushGestureMarqueePainter(
+                      points: appProvider.pixelBrushGesturePoints!,
+                      brushSize: appProvider.pixelBrushGestureSize,
+                      canvasOffset: appProvider.canvasOffset,
+                      scale: appProvider.layers.scale,
+                    ),
+                  ),
+          ),
+
+        if (showBrushSizePreview && appProvider.brushSizePreviewPosition == null)
+          Center(
+            child: _BrushSizePreviewOverlay(
+              diameter: appProvider.brushSizePreviewSize! * appProvider.layers.scale,
+              color: appProvider.brushSizePreviewColor,
+            ),
+          ),
+
+        if (showBrushSizePreview && appProvider.brushSizePreviewPosition != null)
+          Positioned(
+            left:
+                appProvider.brushSizePreviewPosition!.dx -
+                (appProvider.brushSizePreviewSize! * appProvider.layers.scale) / AppMath.pair,
+            top:
+                appProvider.brushSizePreviewPosition!.dy -
+                (appProvider.brushSizePreviewSize! * appProvider.layers.scale) / AppMath.pair,
+            child: _BrushSizePreviewOverlay(
+              diameter: appProvider.brushSizePreviewSize! * appProvider.layers.scale,
+              color: appProvider.brushSizePreviewColor,
+            ),
+          ),
+
+        // Live Edge Detection tolerance readout, tagged near the finger while
+        // dragging to grow/shrink the wand selection.
+        if (appProvider.isWandToleranceHudVisible && appProvider.wandToleranceHudPosition != null)
+          Positioned(
+            left: appProvider.wandToleranceHudPosition!.dx + AppSpacing.large,
+            top: appProvider.wandToleranceHudPosition!.dy - AppSpacing.largest * AppMath.pair,
+            child: buildOverlayFeedbackBubble(
+              label: '${appProvider.wandToleranceHudTolerance}%',
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Builds the tolerance-drag HUD overlays: the fixed marker pinned at the
+  /// start of a tolerance drag (wand or paint bucket — the cursor is hidden,
+  /// so this shows the maintained gesture start point) and the Procreate-style
+  /// "Fill Tolerance NN%" bar. Rebuilt on
+  /// [AppProvider.hudOverlayRepaintListenable] only.
+  Widget _buildToleranceHudOverlays(AppProvider appProvider) {
+    return Stack(
+      children: <Widget>[
+        if (appProvider.tolerancePointerAnchor != null)
+          Positioned(
+            left: appProvider.tolerancePointerAnchor!.dx - AppInteraction.toleranceAnchorMarkerSize / AppMath.pair,
+            top: appProvider.tolerancePointerAnchor!.dy - AppInteraction.toleranceAnchorMarkerSize / AppMath.pair,
+            child: const _ToleranceAnchorMarker(),
+          ),
+
+        if (appProvider.fillTolerancePreview != null)
+          Positioned(
+            top: AppSpacing.large,
+            left: AppMath.zero.toDouble(),
+            right: AppMath.zero.toDouble(),
+            child: Center(
+              child: buildOverlayFeedbackBubble(
+                label: '${context.l10n.colorTolerance}   ${appProvider.fillTolerancePreview}%',
+              ),
+            ),
+          ),
+      ],
     );
   }
 

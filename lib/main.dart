@@ -170,10 +170,10 @@ Future<void> _clearPendingPlatformFile() async {
 Future<void> handlePlatformEditMethodCall(MethodCall call) async {
   switch (call.method) {
     case _editUndoMethod:
-      mainApp.appProvider.undoAction();
+      await mainApp.appProvider.undoAction();
       return;
     case _editRedoMethod:
-      mainApp.appProvider.redoAction();
+      await mainApp.appProvider.redoAction();
       return;
     default:
       throw MissingPluginException('Unhandled edit command: ${call.method}');

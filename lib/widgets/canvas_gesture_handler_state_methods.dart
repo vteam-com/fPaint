@@ -156,7 +156,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.endTolerancePointerLock();
     appProvider.clearPixelBrushGesture();
     _clearToleranceDragAnchor();
-    _clearPixelBrushStroke();
+    appProvider.cancelPixelBrushStroke();
     _activePointerId = -1;
   }
 
@@ -184,17 +184,13 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         if (appProvider.selectorModel.mode != SelectorMode.line || !appProvider.selectorModel.isDrawing) {
           _clearSelectionTapTracking();
         }
-      } else if (_pixelBrushLayerRestoreState != null || _effectBrushStroke) {
-        _appendPixelBrushPoint(appProvider.toCanvas(event.localPosition), appProvider.brushSize);
+      } else if (appProvider.pixelBrushSession.isStrokeActive) {
+        appProvider.extendPixelBrushStroke(appProvider.toCanvas(event.localPosition));
         // Marquee stays visible across the (async) one-shot render, switching to
         // a processing shimmer while the commit generates the image, then is
         // cleared once the committed stroke is on the layer.
         appProvider.setPixelBrushCommitting(committing: true);
-        if (_effectBrushStroke) {
-          await _commitEffectBrushStroke(appProvider);
-        } else {
-          await _commitPixelBrushStroke(appProvider);
-        }
+        await appProvider.commitPixelBrushGesture();
         appProvider.clearPixelBrushGesture();
         _clearSelectionTapTracking();
       } else if (appProvider.selectedAction == ActionType.fill &&
@@ -213,7 +209,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       appProvider.endTolerancePointerLock();
       _clearToleranceDragAnchor();
       _activePointerId = -1;
-      _clearPixelBrushStroke();
+      appProvider.cancelPixelBrushStroke();
       appProvider.layers.selectedLayer.clearCache();
       if (!mounted) {
         return;
@@ -224,43 +220,6 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       }
       appProvider.update();
     }
-  }
-
-  /// Starts a paint-mode effect stroke. Reuses the pixel-brush gesture capture
-  /// (points, bounds, marquee); the armed Adjust effect is committed on
-  /// pointer-up by [_commitEffectBrushStroke].
-  void _startEffectBrushStroke(
-    AppProvider appProvider,
-    ui.Offset adjustedPosition,
-  ) {
-    _clearPixelBrushStroke();
-    _effectBrushStroke = true;
-    _pixelBrushClipPath = appProvider.selectorModel.isVisible && appProvider.selectorModel.path1 != null
-        ? ui.Path.from(appProvider.selectorModel.path1!)
-        : null;
-    _appendPixelBrushPoint(adjustedPosition, appProvider.brushSize);
-    appProvider.showPixelBrushGesture(
-      points: _pixelBrushStrokePoints,
-      size: appProvider.brushSize,
-    );
-  }
-
-  /// Commits the active paint-mode effect stroke through the provider.
-  Future<void> _commitEffectBrushStroke(AppProvider appProvider) async {
-    final ui.Rect? patchBounds = _pixelBrushStrokePatchBounds;
-    final SelectionEffect? effect = appProvider.effectBrushModel.effect;
-    if (patchBounds == null || effect == null || _pixelBrushStrokePoints.length < AppMath.one) {
-      return;
-    }
-    await appProvider.commitEffectBrushStroke(
-      effect: effect,
-      strength: appProvider.effectBrushModel.strength,
-      size: appProvider.effectBrushModel.size,
-      strokePoints: List<ui.Offset>.of(_pixelBrushStrokePoints),
-      strokeBounds: patchBounds,
-      brushSize: appProvider.brushSize,
-      clipPath: _pixelBrushClipPath,
-    );
   }
 
   /// Handles pointer move events for drawing, selection, and eyedropper interactions.
@@ -329,16 +288,12 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
         return;
       }
 
-      if (_pixelBrushLayerRestoreState != null || _effectBrushStroke) {
+      if (appProvider.pixelBrushSession.isStrokeActive) {
         // No live rasterization: just extend the gesture and redraw the swept-
         // band marquee. The smudge/blur is rendered once on pointer-up, so the
         // drag stays responsive at any canvas size and the marquee is the sole
         // feedback (its round-capped band already shows the affected footprint).
-        _appendPixelBrushPoint(adjustedPosition, appProvider.brushSize);
-        appProvider.showPixelBrushGesture(
-          points: _pixelBrushStrokePoints,
-          size: appProvider.brushSize,
-        );
+        appProvider.extendPixelBrushStroke(adjustedPosition);
         return;
       }
 
@@ -637,17 +592,17 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // An armed effect is a brush too, but a forced (pen-eraser) stroke always
     // takes precedence: a physical eraser end must not trigger an effect.
     if (appProvider.effectBrushModel.isArmed && forcedAction == null) {
-      _startEffectBrushStroke(appProvider, adjustedPosition);
+      appProvider.startEffectBrushStroke(adjustedPosition);
       return;
     }
 
     if (action == ActionType.smudge) {
-      _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.smudge);
+      appProvider.startPixelBrushStroke(adjustedPosition, PixelBrushMode.smudge);
       return;
     }
 
     if (action == ActionType.blurBrush) {
-      _startPixelBrushStroke(appProvider, adjustedPosition, PixelBrushMode.blur);
+      appProvider.startPixelBrushStroke(adjustedPosition, PixelBrushMode.blur);
       return;
     }
 

@@ -13,6 +13,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/inherited_scope.dart';
+import 'package:fpaint/providers/pixel_brush_commit.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/recovery/draft_recovery_controller.dart';
 import 'package:fpaint/widgets/canvas_gesture_handler.dart';
@@ -43,12 +44,7 @@ Future<int> _committedPatchMinDisplayAlpha(Rect patchBounds, double scale) async
   );
   final ImagePlacementLayerRestoreState restoreState = ImagePlacementLayerRestoreState(
     layerIndex: 0,
-    originalActions: List<UserActionDrawing>.from(layer.actionStack),
-    originalRedoActions: <UserActionDrawing>[],
-    originalHasChanged: layer.hasChanged,
-    originalBackgroundColor: layer.backgroundColor,
-    originalBlendMode: layer.blendMode,
-    originalOpacity: layer.opacity,
+    layerState: layer.captureSnapshot(),
   );
   final ui.Image patch = await renderCanvasImage(
     width: patchBounds.width.toInt(),
@@ -411,12 +407,7 @@ void main() {
 
     final ImagePlacementLayerRestoreState restoreState = ImagePlacementLayerRestoreState(
       layerIndex: 0,
-      originalActions: List<UserActionDrawing>.from(layer.actionStack),
-      originalRedoActions: <UserActionDrawing>[],
-      originalHasChanged: layer.hasChanged,
-      originalBackgroundColor: layer.backgroundColor,
-      originalBlendMode: layer.blendMode,
-      originalOpacity: layer.opacity,
+      layerState: layer.captureSnapshot(),
     );
     final ui.Image patchImage = await renderCanvasImage(
       width: 8,

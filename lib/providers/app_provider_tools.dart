@@ -230,12 +230,12 @@ extension AppProviderTools on AppProvider {
     if (isSelectedLayerLocked) {
       return;
     }
-    final int requestVersion = ++fillPreviewRenderVersion;
+    final int requestVersion = ++fillPreviewSession.renderVersion;
     final UserActionDrawing? action = await _buildSolidFillAction(position, sampleAllLayers: sampleAllLayers);
-    if (requestVersion != fillPreviewRenderVersion) {
+    if (requestVersion != fillPreviewSession.renderVersion) {
       return;
     }
-    fillPreviewAction = action;
+    fillPreviewSession.heldAction = action;
     repaintMainView();
   }
 
@@ -249,12 +249,12 @@ extension AppProviderTools on AppProvider {
     if (!fillModel.isVisible || isSelectedLayerLocked) {
       return;
     }
-    final int requestVersion = ++fillPreviewRenderVersion;
+    final int requestVersion = ++fillPreviewSession.renderVersion;
     final UserActionDrawing? action = await _buildGradientFillAction(fillModel);
-    if (requestVersion != fillPreviewRenderVersion || !fillModel.isVisible) {
+    if (requestVersion != fillPreviewSession.renderVersion || !fillModel.isVisible) {
       return;
     }
-    fillPreviewAction = action;
+    fillPreviewSession.heldAction = action;
     repaintMainView();
   }
 }

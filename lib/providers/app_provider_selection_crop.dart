@@ -35,10 +35,7 @@ extension AppProviderSelectionCrop on AppProvider {
     for (final LayerProvider layer in layers.list) {
       // Capture the undo snapshot before rendering so the layer state is untouched.
       final LayerCropState state = LayerCropState(
-        originalActions: List<UserActionDrawing>.from(layer.actionStack),
-        originalRedoActions: List<UserActionDrawing>.from(layer.redoStack),
-        originalHasChanged: layer.hasChanged,
-        originalBackgroundColor: layer.backgroundColor,
+        layerState: layer.captureSnapshot(),
         croppedImage: await _cropLayerToSelection(
           layer,
           cropPath: cropPath,
@@ -85,9 +82,9 @@ extension AppProviderSelectionCrop on AppProvider {
     final List<ui.Image> retainedImages = <ui.Image>[
       for (final LayerProvider layer in layers.list) ...<ui.Image>[
         cropStates[layer]!.finalImage,
-        for (final UserActionDrawing action in cropStates[layer]!.originalActions)
+        for (final UserActionDrawing action in cropStates[layer]!.layerState.actions)
           if (action.image != null) action.image!,
-        for (final UserActionDrawing action in cropStates[layer]!.originalRedoActions)
+        for (final UserActionDrawing action in cropStates[layer]!.layerState.redoActions)
           if (action.image != null) action.image!,
       ],
     ];
@@ -116,16 +113,7 @@ extension AppProviderSelectionCrop on AppProvider {
         layers.size = originalSize;
 
         for (final LayerProvider layer in layers.list) {
-          final LayerCropState state = cropStates[layer]!;
-          layer.actionStack
-            ..clear()
-            ..addAll(state.originalActions);
-          layer.redoStack
-            ..clear()
-            ..addAll(state.originalRedoActions);
-          layer.hasChanged = state.originalHasChanged;
-          layer.backgroundColor = state.originalBackgroundColor;
-          layer.clearCache();
+          layer.restoreFromSnapshot(cropStates[layer]!.layerState);
         }
 
         update();

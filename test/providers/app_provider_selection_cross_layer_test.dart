@@ -193,8 +193,8 @@ void main() {
       await appProvider.startTransform();
 
       expect(appProvider.transformModel.isVisible, isTrue);
-      expect(appProvider.isCrossLayerTransformActive, isTrue);
-      expect(appProvider.crossLayerLift, hasLength(2));
+      expect(appProvider.transformSession.isCrossLayerActive, isTrue);
+      expect(appProvider.transformSession.crossLayerLift, hasLength(2));
     });
 
     test('excludes locked layers from the lift', () async {
@@ -205,8 +205,8 @@ void main() {
 
       await appProvider.startTransform();
 
-      expect(appProvider.crossLayerLift, hasLength(1));
-      expect(appProvider.crossLayerLift!.single.layer, appProvider.layers.get(1));
+      expect(appProvider.transformSession.crossLayerLift, hasLength(1));
+      expect(appProvider.transformSession.crossLayerLift!.single.layer, appProvider.layers.get(1));
     });
 
     test('does not start when every layer is locked', () async {
@@ -220,7 +220,7 @@ void main() {
       await appProvider.startTransform();
 
       expect(appProvider.transformModel.isVisible, isFalse);
-      expect(appProvider.isCrossLayerTransformActive, isFalse);
+      expect(appProvider.transformSession.isCrossLayerActive, isFalse);
     });
   });
 
@@ -238,7 +238,7 @@ void main() {
       appProvider.transformModel.moveAll(const Offset(25, 15));
       await appProvider.confirmTransform();
 
-      expect(appProvider.isCrossLayerTransformActive, isFalse);
+      expect(appProvider.transformSession.isCrossLayerActive, isFalse);
       expect(appProvider.transformModel.isVisible, isFalse);
       expect(appProvider.selectorModel.isVisible, isFalse);
 
@@ -269,11 +269,13 @@ void main() {
       appProvider.selectAll();
       await appProvider.startTransform();
 
-      final List<Image> lifted = appProvider.crossLayerLift!.map((CrossLayerLiftEntry entry) => entry.image).toList();
+      final List<Image> lifted = appProvider.transformSession.crossLayerLift!
+          .map((CrossLayerLiftEntry entry) => entry.image)
+          .toList();
 
       appProvider.cancelTransform();
 
-      expect(appProvider.isCrossLayerTransformActive, isFalse);
+      expect(appProvider.transformSession.isCrossLayerActive, isFalse);
       expect(appProvider.transformModel.isVisible, isFalse);
       for (final Image image in lifted) {
         expect(image.debugDisposed, isTrue);
@@ -289,7 +291,7 @@ void main() {
       await appProvider.modifySelectedLayer();
 
       expect(appProvider.transformModel.isVisible, isTrue);
-      expect(appProvider.isCrossLayerTransformActive, isFalse);
+      expect(appProvider.transformSession.isCrossLayerActive, isFalse);
 
       appProvider.cancelLayerModifySession();
     });

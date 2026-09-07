@@ -25,9 +25,6 @@ extension AppProviderSelectionCrossLayer on AppProvider {
     return layers.list.where((LayerProvider layer) => layer.isVisible && !layer.isLocked).toList();
   }
 
-  /// Whether the active transform session lifted content from all layers.
-  bool get isCrossLayerTransformActive => crossLayerLift != null;
-
   /// Sets the sticky "All layers" selection scope and re-warms the wand
   /// source cache so the first sample under the new scope is responsive.
   void setSelectorAllLayers(bool value) {
@@ -179,7 +176,7 @@ extension AppProviderSelectionCrossLayer on AppProvider {
       },
     );
 
-    crossLayerLift = lift;
+    transformSession.crossLayerLift = lift;
     _startTransformSession(image: preview, bounds: bounds);
   }
 
@@ -187,8 +184,7 @@ extension AppProviderSelectionCrossLayer on AppProvider {
   /// erases the original region and places the warped result on each touched
   /// layer, all wrapped in one undo entry.
   Future<void> confirmTransformAllLayers() async {
-    final List<CrossLayerLiftEntry> lift = crossLayerLift!;
-    crossLayerLift = null;
+    final List<CrossLayerLiftEntry> lift = transformSession.takeCrossLayerLift()!;
 
     final Rect quadBounds = transformModel.quadBounds;
     final Offset imageOffset = Offset(quadBounds.left, quadBounds.top);
@@ -238,19 +234,6 @@ extension AppProviderSelectionCrossLayer on AppProvider {
         update();
       },
     );
-  }
-
-  /// Releases the lifted per-layer textures when a cross-layer transform
-  /// session ends without committing.
-  void disposeCrossLayerLift() {
-    final List<CrossLayerLiftEntry>? lift = crossLayerLift;
-    if (lift == null) {
-      return;
-    }
-    crossLayerLift = null;
-    for (final CrossLayerLiftEntry entry in lift) {
-      entry.image.dispose();
-    }
   }
 
   /// Clips [layer] to [selectionPath] into a selection-bounds sized image.
