@@ -1,12 +1,8 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
 import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
-import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/save_backup.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -17,7 +13,6 @@ import 'package:logging/logging.dart';
 
 final Logger _log = Logger(logNameSave);
 const String _errorFailedToSaveFilePrefix = 'Failed to save file:';
-const String _errorFailedToSaveTiffPrefix = 'Failed to save TIFF file:';
 
 /// Supported save file formats.
 enum SaveFileFormat {
@@ -54,27 +49,6 @@ enum SaveFileFormat {
       default:
         return null;
     }
-  }
-}
-
-/// Saves all layers as a layered TIFF file.
-Future<void> saveAsTiff(
-  LayersProvider layers,
-  String fileName,
-) async {
-  try {
-    final String normalizedFileName = normalizeTiffExportFileName(fileName);
-    final Uint8List tiffBytes = await convertLayersToTiff(layers);
-    await File(normalizedFileName).writeAsBytes(tiffBytes);
-    layers.clearHasChanged();
-  } on FileOperationException {
-    rethrow;
-  } catch (error, stackTrace) {
-    _log.severe('Error saving as TIFF to $fileName', error, stackTrace);
-    Error.throwWithStackTrace(
-      FileSaveException('$_errorFailedToSaveTiffPrefix "$fileName"', cause: error),
-      stackTrace,
-    );
   }
 }
 

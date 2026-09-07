@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="3044.0" height="8034.0" viewBox="0 0 3044.0 8034.0" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
+<svg width="3041.0" height="8034.0" viewBox="0 0 3041.0 8034.0" xmlns="http://www.w3.org/2000/svg" font-family="Arial, Helvetica, sans-serif">
 <defs>
   <filter id="whiteShadow" x="-20%" y="-20%" width="140%" height="140%">
     <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
@@ -1325,6 +1325,10 @@
   <title>widgets/material_free.dart ▶ widgets/app_button_row.dart</title>
 </g>
 <g>
+  <path d="M 642.0 524.0 H 697.0 Q 703.0 524.0 703.0 530.0 V 1241.0 Q 703.0 1247.0 697.0 1247.0 H 662.0" class="edgeVertical"/>
+  <title>panels/side_panel/share_panel.dart ▶ files/export_download_non_web.dart</title>
+</g>
+<g>
   <path d="M 666.0 3646.0 H 697.0 Q 703.0 3646.0 703.0 3652.0 V 4173.0 Q 703.0 4179.0 697.0 4179.0 H 662.0" class="edgeVertical"/>
   <title>widgets/app_buttons.dart ▶ widgets/app_tooltip.dart</title>
 </g>
@@ -1365,16 +1369,16 @@
   <title>constants/constants.dart ▶ constants/app_brush_grain.dart</title>
 </g>
 <g>
+  <path d="M 666.0 1322.0 H 697.0 Q 703.0 1322.0 703.0 1328.0 V 1465.0 Q 703.0 1471.0 697.0 1471.0 H 662.0" class="edgeVertical"/>
+  <title>files/export_prepare.dart ▶ files/file_jpeg.dart</title>
+</g>
+<g>
   <path d="M 666.0 4754.0 H 697.0 Q 703.0 4754.0 703.0 4760.0 V 4897.0 Q 703.0 4903.0 697.0 4903.0 H 662.0" class="edgeVertical"/>
   <title>providers/editor_scopes.dart ▶ providers/app_preferences.dart</title>
 </g>
 <g>
   <path d="M 666.0 3486.0 H 697.0 Q 703.0 3486.0 703.0 3492.0 V 3629.0 Q 703.0 3635.0 697.0 3635.0 H 662.0" class="edgeVertical"/>
   <title>widgets/material_free.dart ▶ widgets/app_buttons.dart</title>
-</g>
-<g>
-  <path d="M 666.0 1226.0 H 697.0 Q 703.0 1226.0 703.0 1232.0 V 1337.0 Q 703.0 1343.0 697.0 1343.0 H 662.0" class="edgeVertical"/>
-  <title>files/save.dart ▶ files/file_tiff.dart</title>
 </g>
 <g>
   <path d="M 666.0 6656.0 H 700.0 Q 706.0 6656.0 706.0 6662.0 V 7113.0 Q 706.0 7119.0 700.0 7119.0 H 662.0" class="edgeVertical"/>
@@ -1413,8 +1417,8 @@
   <title>widgets/app_popup_menu.dart ▶ widgets/app_overlay.dart</title>
 </g>
 <g>
-  <path d="M 666.0 1322.0 H 700.0 Q 706.0 1322.0 706.0 1328.0 V 1465.0 Q 706.0 1471.0 700.0 1471.0 H 662.0" class="edgeVertical"/>
-  <title>files/export_prepare.dart ▶ files/file_jpeg.dart</title>
+  <path d="M 666.0 1194.0 H 700.0 Q 706.0 1194.0 706.0 1200.0 V 1337.0 Q 706.0 1343.0 700.0 1343.0 H 662.0" class="edgeVertical"/>
+  <title>files/import_files.dart ▶ files/file_tiff.dart</title>
 </g>
 <g>
   <path d="M 666.0 4818.0 H 700.0 Q 706.0 4818.0 706.0 4824.0 V 4961.0 Q 706.0 4967.0 700.0 4967.0 H 662.0" class="edgeVertical"/>
@@ -1461,8 +1465,8 @@
   <title>widgets/material_free.dart ▶ widgets/app_bottom_sheet.dart</title>
 </g>
 <g>
-  <path d="M 666.0 1194.0 H 703.0 Q 709.0 1194.0 709.0 1200.0 V 1337.0 Q 709.0 1343.0 703.0 1343.0 H 662.0" class="edgeVertical"/>
-  <title>files/import_files.dart ▶ files/file_tiff.dart</title>
+  <path d="M 666.0 1226.0 H 703.0 Q 709.0 1226.0 709.0 1232.0 V 1369.0 Q 709.0 1375.0 703.0 1375.0 H 662.0" class="edgeVertical"/>
+  <title>files/save.dart ▶ files/save_backup.dart</title>
 </g>
 <g>
   <path d="M 666.0 6252.0 H 706.0 Q 712.0 6252.0 712.0 6258.0 V 7113.0 Q 712.0 7119.0 706.0 7119.0 H 662.0" class="edgeVertical"/>
@@ -1497,20 +1501,20 @@
   <title>widgets/app_dialog.dart ▶ widgets/app_overlay.dart</title>
 </g>
 <g>
-  <path d="M 666.0 4754.0 H 706.0 Q 712.0 4754.0 712.0 4760.0 V 4929.0 Q 712.0 4935.0 706.0 4935.0 H 662.0" class="edgeVertical"/>
-  <title>providers/editor_scopes.dart ▶ providers/shell_provider.dart</title>
+  <path d="M 666.0 1322.0 H 706.0 Q 712.0 1322.0 712.0 1328.0 V 1497.0 Q 712.0 1503.0 706.0 1503.0 H 662.0" class="edgeVertical"/>
+  <title>files/export_prepare.dart ▶ files/file_webp.dart</title>
 </g>
 <g>
-  <path d="M 666.0 1226.0 H 706.0 Q 712.0 1226.0 712.0 1232.0 V 1369.0 Q 712.0 1375.0 706.0 1375.0 H 662.0" class="edgeVertical"/>
-  <title>files/save.dart ▶ files/save_backup.dart</title>
+  <path d="M 666.0 4754.0 H 706.0 Q 712.0 4754.0 712.0 4760.0 V 4929.0 Q 712.0 4935.0 706.0 4935.0 H 662.0" class="edgeVertical"/>
+  <title>providers/editor_scopes.dart ▶ providers/shell_provider.dart</title>
 </g>
 <g>
   <path d="M 666.0 6188.0 H 709.0 Q 715.0 6188.0 715.0 6194.0 V 7113.0 Q 715.0 7119.0 709.0 7119.0 H 662.0" class="edgeVertical"/>
   <title>models/canvas_resize.dart ▶ constants/constants.dart</title>
 </g>
 <g>
-  <path d="M 642.0 524.0 H 709.0 Q 715.0 524.0 715.0 530.0 V 1241.0 Q 715.0 1247.0 709.0 1247.0 H 662.0" class="edgeVertical"/>
-  <title>panels/side_panel/share_panel.dart ▶ files/export_download_non_web.dart</title>
+  <path d="M 666.0 254.0 H 709.0 Q 715.0 254.0 715.0 260.0 V 1177.0 Q 715.0 1183.0 709.0 1183.0 H 662.0" class="edgeVertical"/>
+  <title>shell_top_bar.dart ▶ files/import_files.dart</title>
 </g>
 <g>
   <path d="M 666.0 3006.0 H 709.0 Q 715.0 3006.0 715.0 3012.0 V 3469.0 Q 715.0 3475.0 709.0 3475.0 H 662.0" class="edgeVertical"/>
@@ -1533,12 +1537,12 @@
   <title>constants/constants.dart ▶ constants/app_radius.dart</title>
 </g>
 <g>
-  <path d="M 666.0 3486.0 H 709.0 Q 715.0 3486.0 715.0 3492.0 V 3693.0 Q 715.0 3699.0 709.0 3699.0 H 662.0" class="edgeVertical"/>
-  <title>widgets/material_free.dart ▶ widgets/app_list_tile.dart</title>
+  <path d="M 666.0 1194.0 H 709.0 Q 715.0 1194.0 715.0 1200.0 V 1433.0 Q 715.0 1439.0 709.0 1439.0 H 662.0" class="edgeVertical"/>
+  <title>files/import_files.dart ▶ files/file_ora.dart</title>
 </g>
 <g>
-  <path d="M 666.0 1322.0 H 709.0 Q 715.0 1322.0 715.0 1328.0 V 1497.0 Q 715.0 1503.0 709.0 1503.0 H 662.0" class="edgeVertical"/>
-  <title>files/export_prepare.dart ▶ files/file_webp.dart</title>
+  <path d="M 666.0 3486.0 H 709.0 Q 715.0 3486.0 715.0 3492.0 V 3693.0 Q 715.0 3699.0 709.0 3699.0 H 662.0" class="edgeVertical"/>
+  <title>widgets/material_free.dart ▶ widgets/app_list_tile.dart</title>
 </g>
 <g>
   <path d="M 666.0 4818.0 H 709.0 Q 715.0 4818.0 715.0 4824.0 V 4993.0 Q 715.0 4999.0 709.0 4999.0 H 662.0" class="edgeVertical"/>
@@ -1549,8 +1553,8 @@
   <title>models/brush_style.dart ▶ constants/constants.dart</title>
 </g>
 <g>
-  <path d="M 666.0 254.0 H 712.0 Q 718.0 254.0 718.0 260.0 V 1177.0 Q 718.0 1183.0 712.0 1183.0 H 662.0" class="edgeVertical"/>
-  <title>shell_top_bar.dart ▶ files/import_files.dart</title>
+  <path d="M 642.0 524.0 H 712.0 Q 718.0 524.0 718.0 530.0 V 1273.0 Q 718.0 1279.0 712.0 1279.0 H 662.0" class="edgeVertical"/>
+  <title>panels/side_panel/share_panel.dart ▶ files/export_download_web.dart</title>
 </g>
 <g>
   <path d="M 666.0 2974.0 H 712.0 Q 718.0 2974.0 718.0 2980.0 V 3469.0 Q 718.0 3475.0 712.0 3475.0 H 662.0" class="edgeVertical"/>
@@ -1565,16 +1569,12 @@
   <title>widgets/text_attributes_widget.dart ▶ widgets/color_preview.dart</title>
 </g>
 <g>
-  <path d="M 666.0 1514.0 H 712.0 Q 718.0 1514.0 718.0 1520.0 V 1913.0 Q 718.0 1919.0 712.0 1919.0 H 662.0" class="edgeVertical"/>
-  <title>files/file_webp.dart ▶ files/file_operation_exception.dart</title>
-</g>
-<g>
   <path d="M 666.0 7130.0 H 712.0 Q 718.0 7130.0 718.0 7136.0 V 7465.0 Q 718.0 7471.0 712.0 7471.0 H 662.0" class="edgeVertical"/>
   <title>constants/constants.dart ▶ constants/app_spacing.dart</title>
 </g>
 <g>
-  <path d="M 666.0 1194.0 H 712.0 Q 718.0 1194.0 718.0 1200.0 V 1433.0 Q 718.0 1439.0 712.0 1439.0 H 662.0" class="edgeVertical"/>
-  <title>files/import_files.dart ▶ files/file_ora.dart</title>
+  <path d="M 666.0 1322.0 H 712.0 Q 718.0 1322.0 718.0 1328.0 V 1657.0 Q 718.0 1663.0 712.0 1663.0 H 662.0" class="edgeVertical"/>
+  <title>files/export_prepare.dart ▶ files/file_heic.dart</title>
 </g>
 <g>
   <path d="M 666.0 3486.0 H 712.0 Q 718.0 3486.0 718.0 3492.0 V 3725.0 Q 718.0 3731.0 712.0 3731.0 H 662.0" class="edgeVertical"/>
@@ -1585,8 +1585,8 @@
   <title>providers/editor_scopes.dart ▶ providers/undo_provider.dart</title>
 </g>
 <g>
-  <path d="M 642.0 524.0 H 715.0 Q 721.0 524.0 721.0 530.0 V 1273.0 Q 721.0 1279.0 715.0 1279.0 H 662.0" class="edgeVertical"/>
-  <title>panels/side_panel/share_panel.dart ▶ files/export_download_web.dart</title>
+  <path d="M 666.0 222.0 H 715.0 Q 721.0 222.0 721.0 228.0 V 1177.0 Q 721.0 1183.0 715.0 1183.0 H 662.0" class="edgeVertical"/>
+  <title>main_screen.dart ▶ files/import_files.dart</title>
 </g>
 <g>
   <path d="M 666.0 2942.0 H 715.0 Q 721.0 2942.0 721.0 2948.0 V 3469.0 Q 721.0 3475.0 715.0 3475.0 H 662.0" class="edgeVertical"/>
@@ -1605,8 +1605,8 @@
   <title>constants/constants.dart ▶ constants/app_stroke.dart</title>
 </g>
 <g>
-  <path d="M 666.0 1322.0 H 715.0 Q 721.0 1322.0 721.0 1328.0 V 1657.0 Q 721.0 1663.0 715.0 1663.0 H 662.0" class="edgeVertical"/>
-  <title>files/export_prepare.dart ▶ files/file_heic.dart</title>
+  <path d="M 666.0 1322.0 H 715.0 Q 721.0 1322.0 721.0 1328.0 V 1689.0 Q 721.0 1695.0 715.0 1695.0 H 662.0" class="edgeVertical"/>
+  <title>files/export_prepare.dart ▶ files/file_heic_web.dart</title>
 </g>
 <g>
   <path d="M 666.0 4786.0 H 715.0 Q 721.0 4786.0 721.0 4792.0 V 5057.0 Q 721.0 5063.0 715.0 5063.0 H 662.0" class="edgeVertical"/>
@@ -1617,8 +1617,8 @@
   <title>widgets/material_free.dart ▶ widgets/app_overlay.dart</title>
 </g>
 <g>
-  <path d="M 666.0 222.0 H 718.0 Q 724.0 222.0 724.0 228.0 V 1177.0 Q 724.0 1183.0 718.0 1183.0 H 662.0" class="edgeVertical"/>
-  <title>main_screen.dart ▶ files/import_files.dart</title>
+  <path d="M 642.0 492.0 H 718.0 Q 724.0 492.0 724.0 498.0 V 1433.0 Q 724.0 1439.0 718.0 1439.0 H 662.0" class="edgeVertical"/>
+  <title>panels/side_panel/recent_files_dialog.dart ▶ files/file_ora.dart</title>
 </g>
 <g>
   <path d="M 666.0 2846.0 H 718.0 Q 724.0 2846.0 724.0 2852.0 V 3437.0 Q 724.0 3443.0 718.0 3443.0 H 662.0" class="edgeVertical"/>
@@ -1637,12 +1637,12 @@
   <title>constants/constants.dart ▶ constants/app_visual.dart</title>
 </g>
 <g>
-  <path d="M 666.0 4504.0 H 718.0 Q 724.0 4504.0 724.0 4510.0 V 4897.0 Q 724.0 4903.0 718.0 4903.0 H 662.0" class="edgeVertical"/>
-  <title>recovery/draft_recovery_controller.dart ▶ providers/app_preferences.dart</title>
+  <path d="M 666.0 1514.0 H 718.0 Q 724.0 1514.0 724.0 1520.0 V 1913.0 Q 724.0 1919.0 718.0 1919.0 H 662.0" class="edgeVertical"/>
+  <title>files/file_webp.dart ▶ files/file_operation_exception.dart</title>
 </g>
 <g>
-  <path d="M 666.0 1322.0 H 718.0 Q 724.0 1322.0 724.0 1328.0 V 1689.0 Q 724.0 1695.0 718.0 1695.0 H 662.0" class="edgeVertical"/>
-  <title>files/export_prepare.dart ▶ files/file_heic_web.dart</title>
+  <path d="M 666.0 4504.0 H 718.0 Q 724.0 4504.0 724.0 4510.0 V 4897.0 Q 724.0 4903.0 718.0 4903.0 H 662.0" class="edgeVertical"/>
+  <title>recovery/draft_recovery_controller.dart ▶ providers/app_preferences.dart</title>
 </g>
 <g>
   <path d="M 666.0 3486.0 H 718.0 Q 724.0 3486.0 724.0 3492.0 V 3789.0 Q 724.0 3795.0 718.0 3795.0 H 662.0" class="edgeVertical"/>
@@ -1677,8 +1677,8 @@
   <title>widgets/text_style_toggle_buttons.dart ▶ widgets/app_buttons.dart</title>
 </g>
 <g>
-  <path d="M 642.0 492.0 H 724.0 Q 730.0 492.0 730.0 498.0 V 1433.0 Q 730.0 1439.0 724.0 1439.0 H 662.0" class="edgeVertical"/>
-  <title>panels/side_panel/recent_files_dialog.dart ▶ files/file_ora.dart</title>
+  <path d="M 666.0 190.0 H 724.0 Q 730.0 190.0 730.0 196.0 V 1209.0 Q 730.0 1215.0 724.0 1215.0 H 662.0" class="edgeVertical"/>
+  <title>main.dart ▶ files/save.dart</title>
 </g>
 <g>
   <path d="M 666.0 4818.0 H 724.0 Q 730.0 4818.0 730.0 4824.0 V 5537.0 Q 730.0 5543.0 724.0 5543.0 H 662.0" class="edgeVertical"/>
@@ -1703,10 +1703,6 @@
 <g>
   <path d="M 666.0 3486.0 H 724.0 Q 730.0 3486.0 730.0 3492.0 V 3853.0 Q 730.0 3859.0 724.0 3859.0 H 662.0" class="edgeVertical"/>
   <title>widgets/material_free.dart ▶ widgets/app_card.dart</title>
-</g>
-<g>
-  <path d="M 666.0 190.0 H 727.0 Q 733.0 190.0 733.0 196.0 V 1209.0 Q 733.0 1215.0 727.0 1215.0 H 662.0" class="edgeVertical"/>
-  <title>main.dart ▶ files/save.dart</title>
 </g>
 <g>
   <path d="M 666.0 4786.0 H 727.0 Q 733.0 4786.0 733.0 4792.0 V 5537.0 Q 733.0 5543.0 727.0 5543.0 H 662.0" class="edgeVertical"/>
@@ -4208,18 +4204,17 @@
   <text x="666.32" y="1216.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. main.dart
 2. panels/side_panel/menu.dart</title></g><g class="badge outgoingBadge">
   <path d="M 674.0,1226.0 L 658.0,1218.4 Q 655.0,1218.4 655.0,1221.4 L 655.0,1230.6 Q 655.0,1233.6 658.0,1233.6 Z" fill="#10b981"/>
-  <text x="660.72" y="1227.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">12</text><title>1. constants/constants.dart
+  <text x="660.72" y="1227.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold" textLength="10.120000000000001" lengthAdjust="spacingAndGlyphs">11</text><title>1. constants/constants.dart
 2. files/export_download_non_web.dart
 3. files/export_download_web.dart
 4. files/export_file_name.dart
 5. files/file_operation_exception.dart
-6. files/file_tiff.dart
-7. files/save_backup.dart
-8. helpers/log_helper.dart
-9. providers/app_preferences.dart
-10. providers/layers_provider.dart
-11. providers/macos_bookmark_service.dart
-12. providers/shell_provider.dart</title></g><text x="472.0" y="1220.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">save.dart</text>
+6. files/save_backup.dart
+7. helpers/log_helper.dart
+8. providers/app_preferences.dart
+9. providers/layers_provider.dart
+10. providers/macos_bookmark_service.dart
+11. providers/shell_provider.dart</title></g><text x="472.0" y="1220.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">save.dart</text>
 <g class="badge incomingBadge">
   <path d="M 656.0,1247.0 L 668.0,1240.0 Q 671.0,1240.0 671.0,1243.0 L 671.0,1251.0 Q 671.0,1254.0 668.0,1254.0 Z" fill="#3b82f6"/>
   <text x="666.32" y="1248.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">2</text><title>1. files/save.dart
@@ -4256,10 +4251,9 @@
 6. providers/layers_provider.dart</title></g><text x="472.0" y="1316.0" text-anchor="middle" dominant-baseline="middle" class="textNormal">export_prepare.dart</text>
 <g class="badge incomingBadge">
   <path d="M 656.0,1343.0 L 668.0,1336.0 Q 671.0,1336.0 671.0,1339.0 L 671.0,1347.0 Q 671.0,1350.0 668.0,1350.0 Z" fill="#3b82f6"/>
-  <text x="666.32" y="1344.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">4</text><title>1. files/export_download_non_web.dart
+  <text x="666.32" y="1344.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">3</text><title>1. files/export_download_non_web.dart
 2. files/export_download_web.dart
-3. files/import_files.dart
-4. files/save.dart</title></g><g class="badge outgoingBadge">
+3. files/import_files.dart</title></g><g class="badge outgoingBadge">
   <path d="M 672.0,1354.0 L 660.0,1347.0 Q 657.0,1347.0 657.0,1350.0 L 657.0,1358.0 Q 657.0,1361.0 660.0,1361.0 Z" fill="#10b981"/>
   <text x="661.68" y="1355.0" text-anchor="middle" fill="white" font-size="8.0" font-weight="bold">6</text><title>1. constants/constants.dart
 2. files/file_operation_exception.dart

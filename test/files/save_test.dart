@@ -16,7 +16,7 @@ const MethodChannel _fileChannel = MethodChannel('com.vteam.fpaint/file');
 const String _bookmarkPath = '/tmp/bookmarked.ora';
 const String _bookmarkValue = 'bookmark-a';
 
-// Mock classes to test saveFile routing logic and saveAsTiff
+// Mock classes to test saveFile routing logic
 class MockLayersProvider {
   Future<Uint8List> capturePainterToImageBytes() async {
     return Uint8List.fromList(<int>[1, 2, 3, 4]); // Return some dummy data
@@ -98,15 +98,6 @@ void main() {
 
       mockShell.loadedFileName = 'test.bmp';
       expect(SaveFileFormat.fromFileName(mockShell.loadedFileName), isNull);
-    });
-
-    test('saveAsTiff function exists and is properly defined', () {
-      // Test that the saveAsTiff function is properly defined
-      expect(saveAsTiff, isNotNull);
-      expect(saveAsTiff.runtimeType.toString(), contains('LayersProvider'));
-
-      // Note: Integration testing of saveAsTiff would require mocking LayersProvider
-      // and file I/O operations. The function existence test ensures it's properly exported.
     });
 
     // Note: Full integration testing of saveFile() and saveAsTiff() would require
