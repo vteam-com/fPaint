@@ -103,9 +103,19 @@ Future<void> onExportAsTiff(
   AppPreferences? preferences,
 }) async {
   _ignoreRecentFilePreferences(preferences);
-  final Uint8List tiffBytes = await convertLayersToTiff(layers);
-  downloadBlob(tiffBytes, normalizeTiffExportFileName(fileName));
-  layers.clearHasChanged();
+  await saveAsTiff(layers, fileName);
+}
+
+/// Saves all layers as a layered TIFF file and triggers a browser download.
+Future<void> saveAsTiff(
+  LayersProvider layers,
+  String? filePath,
+) async {
+  if (filePath != null) {
+    final Uint8List tiffBytes = await convertLayersToTiff(layers);
+    downloadBlob(tiffBytes, normalizeTiffExportFileName(filePath));
+    layers.clearHasChanged();
+  }
 }
 
 /// Saves the current content as a WebP file and triggers a browser download.
