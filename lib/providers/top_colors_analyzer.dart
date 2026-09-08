@@ -1,3 +1,5 @@
+import 'dart:ui' show Color;
+
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/providers/layer_provider.dart';
@@ -19,35 +21,36 @@ class TopColorsAnalyzer {
 
   /// Returns the most used colors across the visible layers in [layers].
   ///
-  /// Each layer contributes its own per-layer usage, averaged over the total
-  /// layer count, and the result is capped at [AppLimits.topColorCount].
+  /// Each color's share is averaged over the number of *visible* layers (hidden
+  /// layers contribute nothing and must not dilute the average), and the result
+  /// is capped at [AppLimits.topColorCount].
+  ///
+  /// Aggregation always builds new [ColorUsage] instances. [ColorUsage] is
+  /// mutable, so accumulating into a layer's own instance would corrupt that
+  /// layer's [LayerProvider.topColorsUsed] and make every re-analysis inflate
+  /// the palette further.
   List<ColorUsage> analyze(List<LayerProvider> layers) {
-    final List<ColorUsage> aggregated = <ColorUsage>[];
-    final int totalLayers = layers.length;
-    if (totalLayers == 0) {
-      return aggregated;
+    final List<LayerProvider> visibleLayers = layers.where((LayerProvider layer) => layer.isVisible).toList();
+    final int visibleLayerCount = visibleLayers.length;
+    if (visibleLayerCount == 0) {
+      return <ColorUsage>[];
     }
 
-    for (final LayerProvider layer in layers) {
-      if (!layer.isVisible) {
-        continue;
-      }
+    final Map<Color, ColorUsage> aggregatedByColor = <Color, ColorUsage>{};
+    for (final LayerProvider layer in visibleLayers) {
       for (final ColorUsage colorUsed in layer.topColorsUsed) {
-        final ColorUsage existingColor = aggregated.firstWhere(
-          (ColorUsage c) => c.color == colorUsed.color,
-          orElse: () => colorUsed,
-        );
-        if (existingColor == colorUsed) {
-          aggregated.add(colorUsed);
+        final double share = colorUsed.percentage / visibleLayerCount;
+        final ColorUsage? existingColor = aggregatedByColor[colorUsed.color];
+        if (existingColor == null) {
+          aggregatedByColor[colorUsed.color] = ColorUsage(colorUsed.color, share);
         } else {
-          existingColor.percentage += colorUsed.percentage / totalLayers;
+          existingColor.percentage += share;
         }
       }
     }
 
-    aggregated.sort(
-      (ColorUsage a, ColorUsage b) => b.percentage.compareTo(a.percentage),
-    );
+    final List<ColorUsage> aggregated = aggregatedByColor.values.toList()
+      ..sort((ColorUsage a, ColorUsage b) => b.percentage.compareTo(a.percentage));
     return aggregated.take(AppLimits.topColorCount).toList();
   }
 }

@@ -101,8 +101,14 @@ class WandSourceSampler {
   /// Creates a stable fingerprint of the pixels the wand would sample.
   ///
   /// Changing any input the raster depends on — canvas size, which layers are
-  /// visible, or each layer's last action — yields a different value, which is
-  /// what invalidates the cache.
+  /// visible, or each layer's content or compositing — yields a different value,
+  /// which is what invalidates the cache.
+  ///
+  /// Both paths hash the same per-layer fields via [_layerSignature], so a
+  /// render-affecting property can never be covered in one mode but stale in
+  /// the other. Compositing matters because [LayerProvider.renderLayer] bakes
+  /// opacity and blend mode into the sampled pixels and paints the background
+  /// fill beneath the action stack.
   int sourceSignature(
     LayersProvider layers, {
     required bool sampleAllLayers,
@@ -120,25 +126,25 @@ class WandSourceSampler {
       ]);
     }
 
-    final LayerProvider layer = layers.selectedLayer;
     return Object.hash(
-      layer,
       layers.selectedLayerIndex,
       layers.width.toInt(),
       layers.height.toInt(),
-      layer.actionStack.length,
-      layer.redoStack.length,
-      layer.lastUserAction,
       sampleAllLayers,
+      _layerSignature(layers.selectedLayer),
     );
   }
 
+  /// Fingerprints one layer's content and compositing state.
   int _layerSignature(LayerProvider layer) => Object.hash(
     layer,
     layer.actionStack.length,
     layer.redoStack.length,
     layer.lastUserAction,
     layer.isVisible,
+    layer.opacity,
+    layer.blendMode,
+    layer.backgroundColor,
   );
 }
 

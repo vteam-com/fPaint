@@ -74,6 +74,55 @@ void main() {
       expect(sampler.sourceSignature(layers, sampleAllLayers: false), isNot(before));
     });
 
+    // Regression: renderLayer bakes opacity and blend mode into the sampled
+    // pixels and paints backgroundColor beneath the action stack, but none of
+    // the three were hashed, so the wand and paint bucket sampled stale pixels
+    // after any compositing change. Each is checked in BOTH sampling modes —
+    // isVisible used to be covered only under all-layer sampling.
+    for (final bool sampleAllLayers in <bool>[false, true]) {
+      final String mode = sampleAllLayers ? 'all-layer' : 'single-layer';
+
+      test('changes when layer opacity changes under $mode sampling', () {
+        final LayersProvider layers = createInitializedLayersProvider();
+        final WandSourceSampler sampler = WandSourceSampler(_RecordingCache());
+        final int before = sampler.sourceSignature(layers, sampleAllLayers: sampleAllLayers);
+
+        layers.selectedLayer.opacity = 0.3;
+
+        expect(sampler.sourceSignature(layers, sampleAllLayers: sampleAllLayers), isNot(before));
+      });
+
+      test('changes when layer blend mode changes under $mode sampling', () {
+        final LayersProvider layers = createInitializedLayersProvider();
+        final WandSourceSampler sampler = WandSourceSampler(_RecordingCache());
+        final int before = sampler.sourceSignature(layers, sampleAllLayers: sampleAllLayers);
+
+        layers.selectedLayer.blendMode = BlendMode.multiply;
+
+        expect(sampler.sourceSignature(layers, sampleAllLayers: sampleAllLayers), isNot(before));
+      });
+
+      test('changes when layer background color changes under $mode sampling', () {
+        final LayersProvider layers = createInitializedLayersProvider();
+        final WandSourceSampler sampler = WandSourceSampler(_RecordingCache());
+        final int before = sampler.sourceSignature(layers, sampleAllLayers: sampleAllLayers);
+
+        layers.selectedLayer.backgroundColor = Colors.red;
+
+        expect(sampler.sourceSignature(layers, sampleAllLayers: sampleAllLayers), isNot(before));
+      });
+
+      test('changes when layer visibility changes under $mode sampling', () {
+        final LayersProvider layers = createInitializedLayersProvider();
+        final WandSourceSampler sampler = WandSourceSampler(_RecordingCache());
+        final int before = sampler.sourceSignature(layers, sampleAllLayers: sampleAllLayers);
+
+        layers.selectedLayer.isVisible = false;
+
+        expect(sampler.sourceSignature(layers, sampleAllLayers: sampleAllLayers), isNot(before));
+      });
+    }
+
     test('changes when a layer is added under all-layer sampling', () {
       final LayersProvider layers = createInitializedLayersProvider();
       final WandSourceSampler sampler = WandSourceSampler(_RecordingCache());

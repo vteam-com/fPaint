@@ -38,8 +38,8 @@ void main() {
       final List<ColorUsage> result = analyzer.analyze(layers);
 
       final ColorUsage red = result.firstWhere((ColorUsage c) => c.color == Colors.red);
-      // 0.5 plus the second layer's 0.7 averaged over the two layers.
-      expect(red.percentage, closeTo(0.85, 0.0001));
+      // Both layers' shares averaged over the two visible layers.
+      expect(red.percentage, closeTo((0.5 + 0.7) / 2, 0.0001));
       expect(result.map((ColorUsage c) => c.color), contains(Colors.blue));
       expect(result.map((ColorUsage c) => c.color), contains(Colors.green));
     });
@@ -77,6 +77,69 @@ void main() {
       ];
 
       expect(analyzer.analyze(<LayerProvider>[_layer(many)]), hasLength(AppLimits.topColorCount));
+    });
+
+    test('averages over visible layers only, ignoring hidden ones', () {
+      final List<LayerProvider> layers = <LayerProvider>[
+        _layer(<ColorUsage>[ColorUsage(Colors.red, 0.5)]),
+        _layer(<ColorUsage>[ColorUsage(Colors.red, 0.5)]),
+        _layer(<ColorUsage>[ColorUsage(Colors.green, 0.9)], isVisible: false),
+        _layer(<ColorUsage>[ColorUsage(Colors.green, 0.9)], isVisible: false),
+      ];
+
+      final List<ColorUsage> result = analyzer.analyze(layers);
+
+      // Two visible layers at 0.5 each average to 0.5. Dividing by the total
+      // layer count instead would dilute this to 0.25.
+      expect(result.first.percentage, closeTo(0.5, 0.0001));
+    });
+
+    test('returns an empty palette when every layer is hidden', () {
+      final List<LayerProvider> layers = <LayerProvider>[
+        _layer(<ColorUsage>[ColorUsage(Colors.red, 0.5)], isVisible: false),
+      ];
+
+      expect(analyzer.analyze(layers), isEmpty);
+    });
+
+    test('never mutates a layer own ColorUsage instances', () {
+      final ColorUsage layerRed = ColorUsage(Colors.red, 0.5);
+      final List<LayerProvider> layers = <LayerProvider>[
+        _layer(<ColorUsage>[layerRed]),
+        _layer(<ColorUsage>[ColorUsage(Colors.red, 0.7)]),
+      ];
+
+      final List<ColorUsage> result = analyzer.analyze(layers);
+
+      expect(layerRed.percentage, closeTo(0.5, 0.0001));
+      expect(identical(result.first, layerRed), isFalse);
+    });
+
+    test('is idempotent across repeated analysis', () {
+      final List<LayerProvider> layers = <LayerProvider>[
+        _layer(<ColorUsage>[ColorUsage(Colors.red, 0.5)]),
+        _layer(<ColorUsage>[ColorUsage(Colors.red, 0.7)]),
+      ];
+
+      final double first = analyzer.analyze(layers).first.percentage;
+      analyzer.analyze(layers);
+      final double third = analyzer.analyze(layers).first.percentage;
+
+      // Aggregating into the layers' own instances made the palette grow on
+      // every call, eventually exceeding 100%.
+      expect(third, closeTo(first, 0.0001));
+      expect(third, lessThanOrEqualTo(1.0));
+    });
+
+    test('merges duplicate colors within a single layer', () {
+      final List<LayerProvider> layers = <LayerProvider>[
+        _layer(<ColorUsage>[ColorUsage(Colors.red, 0.2), ColorUsage(Colors.red, 0.3)]),
+      ];
+
+      final List<ColorUsage> result = analyzer.analyze(layers);
+
+      expect(result.where((ColorUsage c) => c.color == Colors.red), hasLength(1));
+      expect(result.first.percentage, closeTo(0.5, 0.0001));
     });
 
     test('defaultColors provides the pre-analysis palette', () {
