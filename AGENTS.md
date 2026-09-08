@@ -21,6 +21,18 @@
 - Every user-facing string must be localized through Flutter l10n (`AppLocalizations`) unless there is a technical reason not to localize.
 - Non-user-facing tokens (e.g., protocol values, file format identifiers, action IDs, binding/runtime markers) must be declared as named `const String` values, not inline literals.
 
+## Version Control
+
+- **Never commit.** Do not run `git commit`, `git push`, `git tag`, or stage
+  changes for a commit, and do not offer to. Committing is always the
+  developer's action, so that every change is reviewed by a human before it
+  enters history.
+- Instead, when the work is done, leave the changes in the working tree and
+  **suggest a commit message** for the developer to use or edit.
+- Distinguish feature changes from generated churn in that suggestion:
+  `coverage/`, `fcheck_*.svg`, and `test/output/` are usually touched only by
+  running the checks.
+
 ## Tool Design: Brushes & Effects
 
 - Every pixel-changing tool lives in one **Brush** section and is used the same

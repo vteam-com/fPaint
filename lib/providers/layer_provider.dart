@@ -8,6 +8,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/layer_state_snapshot.dart';
 import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/models/text_object.dart';
@@ -635,8 +636,7 @@ class LayerProvider extends ChangeNotifier {
   void renderLayerInViewport(
     Canvas canvas, {
     required Rect viewportBounds,
-    required Offset canvasOffset,
-    required double canvasScale,
+    required ViewportTransform viewport,
     required Rect visibleCanvasBounds,
   }) {
     final Paint layerPaint = Paint()
@@ -646,8 +646,7 @@ class LayerProvider extends ChangeNotifier {
       ..blendMode = blendMode;
 
     canvas.saveLayer(viewportBounds, layerPaint);
-    canvas.translate(canvasOffset.dx, canvasOffset.dy);
-    canvas.scale(canvasScale);
+    canvas.transform(viewport.matrix.storage);
     canvas.clipRect(visibleCanvasBounds, doAntiAlias: false);
     _renderLayerContents(canvas);
     canvas.restore();

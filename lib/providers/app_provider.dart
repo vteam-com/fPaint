@@ -11,6 +11,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/brush_grain.dart';
 import 'package:fpaint/models/effect_brush_model.dart';
 import 'package:fpaint/models/effect_preview_model.dart';
@@ -36,7 +37,6 @@ import 'package:fpaint/providers/selector_geometry_host.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:fpaint/providers/wand_selection_manager_cache.dart';
 import 'package:fpaint/providers/wand_source_sampler.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 // Exports
 export 'package:fpaint/providers/layers_provider.dart';
@@ -92,6 +92,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
   // Live Edge Detection tolerance HUD: the value (raw 1–100) and main-view
   // anchor shown while dragging the wand tolerance. Null when not dragging.
+  bool _isViewportRotationFeedbackVisible = false;
   int? _wandToleranceHudTolerance;
   Offset? _wandToleranceHudPosition;
 
@@ -114,6 +115,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
     layers.selectedLayerIndex = 0;
     canvasOffset = Offset.zero;
     layers.scale = 1;
+    layers.rotation = 0;
   }
 
   /// Preferred app locale, or null to follow system locale.
@@ -260,6 +262,12 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
   /// The offset of the canvas.
   Offset canvasOffset = Offset.zero;
+
+  /// Memoized [AppProviderCanvas.viewportTransform], invalidated by comparing
+  /// the viewport fields rather than by every mutation site remembering to
+  /// clear it.
+  @visibleForTesting
+  ViewportTransform? cachedViewportTransform;
 
   //=============================================================================
   // All things Layers
@@ -849,6 +857,14 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   /// Current canvas zoom. Part of [SelectorGeometryHost].
   @override
   double get canvasScale => layers.scale;
+
+  /// Current viewport rotation in radians, clockwise-positive.
+  double get canvasRotation => layers.rotation;
+
+  /// Converts a screen-space drag delta into canvas space.
+  /// Part of [SelectorGeometryHost].
+  @override
+  Offset canvasDeltaFromScreen(Offset screenDelta) => deltaToCanvas(screenDelta);
 
   /// Canvas width in pixels. Part of [SelectorGeometryHost].
   @override

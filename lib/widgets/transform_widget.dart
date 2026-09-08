@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart' show AppIcon;
@@ -19,18 +20,11 @@ class TransformWidget extends StatefulWidget {
   const TransformWidget({
     super.key,
     required this.model,
-    required this.canvasOffset,
-    required this.canvasScale,
+    required this.viewport,
     required this.onChanged,
     required this.onConfirm,
     required this.onCancel,
   });
-
-  /// The canvas translation offset in screen coordinates.
-  final Offset canvasOffset;
-
-  /// The canvas zoom scale factor.
-  final double canvasScale;
 
   /// The current transform state.
   final TransformModel model;
@@ -44,6 +38,8 @@ class TransformWidget extends StatefulWidget {
   /// Called when the user commits the transform.
   final VoidCallback onConfirm;
 
+  /// The canvas-to-screen viewport transform (pan, zoom and rotation).
+  final ViewportTransform viewport;
   @override
   State<TransformWidget> createState() => _TransformWidgetState();
 }
@@ -113,7 +109,7 @@ class TransformEdgeDragZone extends StatelessWidget {
           behavior: HitTestBehavior.translucent,
           onPanStart: (DragStartDetails _) => onDragStart?.call(),
           onPanUpdate: (DragUpdateDetails details) {
-            onDragDelta(_toScreenDelta(details.delta, zoneAngle));
+            onDragDelta(rotateOffset(details.delta, zoneAngle));
           },
           onPanEnd: (DragEndDetails _) => onDragEnd?.call(),
           onPanCancel: onDragCancel,
@@ -123,17 +119,6 @@ class TransformEdgeDragZone extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  /// Converts the rotated drag-zone local delta back into screen space.
-  Offset _toScreenDelta(Offset localDelta, double angle) {
-    final double cosine = cos(angle);
-    final double sine = sin(angle);
-
-    return Offset(
-      (localDelta.dx * cosine) - (localDelta.dy * sine),
-      (localDelta.dx * sine) + (localDelta.dy * cosine),
     );
   }
 }
@@ -231,11 +216,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
     );
   }
 
-  /// The canvas translation offset in screen coordinates.
-  Offset get canvasOffset => widget.canvasOffset;
-
   /// The canvas zoom scale factor.
-  double get canvasScale => widget.canvasScale;
 
   /// The current transform state.
   TransformModel get model => widget.model;
@@ -250,6 +231,9 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
   VoidCallback get onConfirm => widget.onConfirm;
   @override
   void onEscapePressed() => onCancel();
+
+  /// The canvas translation offset in screen coordinates.
+  ViewportTransform get viewport => widget.viewport;
 
   /// Builds the centre move handle at [screenCenter].
   Widget _buildCenterHandle(
@@ -267,7 +251,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
         onChanged();
       },
       onPanUpdate: (DragUpdateDetails details) {
-        model.moveAll(details.delta / canvasScale);
+        model.moveAll(viewport.deltaToCanvas(details.delta));
         onChanged();
       },
       onPanEnd: () {
@@ -298,7 +282,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
         onChanged();
       },
       onPanUpdate: (DragUpdateDetails details) {
-        model.moveCorner(index, details.delta / canvasScale);
+        model.moveCorner(index, viewport.deltaToCanvas(details.delta));
         onChanged();
       },
       onPanEnd: () {
@@ -328,7 +312,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
         onChanged();
       },
       onDragDelta: (Offset delta) {
-        model.moveConnectedEdge(edgeIndex, delta / canvasScale);
+        model.moveConnectedEdge(edgeIndex, viewport.deltaToCanvas(delta));
         onChanged();
       },
       onDragEnd: () {
@@ -419,7 +403,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
         onChanged();
       },
       onPanUpdate: (DragUpdateDetails details) {
-        model.moveEdgeHandle(edgeIndex, details.delta / canvasScale);
+        model.moveEdgeHandle(edgeIndex, viewport.deltaToCanvas(details.delta));
         onChanged();
       },
       onPanEnd: () {
@@ -506,7 +490,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
                 model.setTranslateMode();
               }
               final Offset pointer = translateHandleCenter + details.delta;
-              model.moveAll((pointer - translateHandleCenter) / canvasScale);
+              model.moveAll(viewport.deltaToCanvas(pointer - translateHandleCenter));
               onChanged();
             },
           ),
@@ -656,9 +640,7 @@ class _TransformWidgetState extends State<TransformWidget> with EscapeFocusMixin
     return minY;
   }
 
-  Offset _toScreen(Offset canvasPoint) {
-    return canvasPoint * canvasScale + canvasOffset;
-  }
+  Offset _toScreen(Offset canvasPoint) => viewport.toScreen(canvasPoint);
 }
 
 /// Custom painter that renders the perspective-warped image preview and quad outline.

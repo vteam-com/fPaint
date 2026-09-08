@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/layer_provider.dart';
@@ -60,8 +61,7 @@ Future<int> _renderForDisplay(LayerProvider layer, double scale) async {
       scale,
       () => rebuilds++,
       viewportBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
-      canvasOffset: Offset.zero,
-      canvasScale: 1.0,
+      viewport: ViewportTransform.identity(),
       visibleCanvasBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
       filterQuality: FilterQuality.medium,
     ),
@@ -84,8 +84,7 @@ Future<int> _minDisplayAlpha(LayerProvider layer, double scale) async {
       scale,
       () {},
       viewportBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
-      canvasOffset: Offset.zero,
-      canvasScale: 1.0,
+      viewport: ViewportTransform.identity(),
       visibleCanvasBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
       filterQuality: FilterQuality.medium,
     ),
@@ -317,8 +316,7 @@ void main() {
           1.0,
           () => rebuilds++,
           viewportBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
-          canvasOffset: Offset.zero,
-          canvasScale: 1.0,
+          viewport: ViewportTransform.identity(),
           visibleCanvasBounds: Rect.fromLTWH(0, 0, _canvasWidth.toDouble(), _canvasHeight.toDouble()),
           filterQuality: FilterQuality.medium,
         ),

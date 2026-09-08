@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/selector_model.dart';
@@ -70,8 +71,7 @@ Future<int> _committedPatchMinDisplayAlpha(Rect patchBounds, double scale) async
       scale,
       () {},
       viewportBounds: const Rect.fromLTWH(0, 0, 64, 64),
-      canvasOffset: Offset.zero,
-      canvasScale: 1.0,
+      viewport: ViewportTransform.identity(),
       visibleCanvasBounds: const Rect.fromLTWH(0, 0, 64, 64),
       filterQuality: ui.FilterQuality.medium,
     ),

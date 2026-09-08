@@ -674,12 +674,12 @@ extension AppProviderSelection on AppProvider {
   void selectAll() => selectorGeometry.selectAll();
 
   /// Gets the path adjusted to the canvas size and position.
+  ///
+  /// Uses the full viewport transform so the path still lands correctly when
+  /// the view is rotated.
   Path? getPathAdjustToCanvasSizeAndPosition(Path? path) {
     if (path != null) {
-      final Matrix4 matrix = Matrix4.identity()
-        ..translateByVector3(Vector3(canvasOffset.dx, canvasOffset.dy, 0.0))
-        ..scaleByVector3(Vector3(layers.scale, layers.scale, layers.scale));
-      return path.transform(matrix.storage);
+      return path.transform(viewportTransform.matrix.storage);
     }
     return null;
   }

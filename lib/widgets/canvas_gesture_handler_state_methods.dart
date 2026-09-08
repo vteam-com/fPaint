@@ -128,6 +128,23 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       );
     }
 
+    // Two-finger twist shares this gesture with pan and pinch, so the canvas
+    // can be turned, moved and zoomed in one continuous motion about the same
+    // focal point.
+    final double? contactAngle = _getTouchContactAngle();
+    final double? previousContactAngle = _lastTouchContactAngle;
+    if (contactAngle != null) {
+      if (previousContactAngle != null) {
+        _applyGestureTwist(
+          appProvider,
+          shellProvider,
+          normalizeRadians(contactAngle - previousContactAngle),
+          focalPoint,
+        );
+      }
+      _lastTouchContactAngle = contactAngle;
+    }
+
     _lastScaleDistance = newDistance;
     _lastMultiTouchFocalPoint = focalPoint;
     shellProvider.canvasPlacement = CanvasAutoPlacement.manual;

@@ -13,6 +13,12 @@ abstract class SelectorGeometryHost {
   /// Current canvas zoom, used to convert screen deltas to canvas space.
   double get canvasScale;
 
+  /// Converts a screen-space drag delta into canvas space.
+  ///
+  /// A rotated viewport turns a screen delta as well as scaling it, so callers
+  /// must not divide by [canvasScale] alone.
+  Offset canvasDeltaFromScreen(Offset screenDelta);
+
   /// Canvas width in pixels.
   double get canvasWidth;
 

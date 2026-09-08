@@ -113,7 +113,7 @@ class SelectorGeometryController {
 
   /// Translates the active selection by [screenDelta], a screen-space offset.
   void translateByScreenDelta(Offset screenDelta) {
-    _model.translate(screenDelta / _host.canvasScale);
+    _model.translate(_host.canvasDeltaFromScreen(screenDelta));
     _host.repaintMainView();
   }
 
@@ -125,7 +125,7 @@ class SelectorGeometryController {
 
   /// Resizes the active selection by dragging [handle] by [screenDelta].
   void resize(NineGridHandle handle, Offset screenDelta) {
-    _model.nindeGridResize(handle, screenDelta / _host.canvasScale);
+    _model.nindeGridResize(handle, _host.canvasDeltaFromScreen(screenDelta));
     _host.repaintMainView();
   }
 

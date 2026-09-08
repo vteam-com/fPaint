@@ -503,6 +503,25 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
       estimatedWidth: _toolbarCenterActionEstimatedWidth,
       importance: _ToolbarActionImportance.medium,
     ),
+    // Only offered while the view is actually rotated: free rotation is easy to
+    // enter by accident and otherwise hard to leave by hand.
+    if (appProvider.layers.isRotated)
+      _ToolbarActionEntry(
+        child: buildToolbarIconButton(
+          tooltip: tooltipWithShortcut(
+            l10n.resetViewRotation,
+            '${ShortcutModifiers.shift} ${ShortcutKeys.bracketLeft}',
+          )!,
+          icon: AppIcon.rotateRight,
+          interactionProfile: interactionProfile,
+          onPressed: () {
+            shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+            appProvider.resetCanvasRotation();
+          },
+        ),
+        estimatedWidth: _toolbarIconActionEstimatedWidth,
+        importance: _ToolbarActionImportance.medium,
+      ),
     _ToolbarActionEntry(
       child: _buildZoomButton(
         key: Keys.floatActionZoomIn,

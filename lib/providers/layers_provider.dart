@@ -8,6 +8,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
@@ -232,6 +233,30 @@ class LayersProvider extends ChangeNotifier {
       _scale = clamped;
     }
   }
+
+  ///-------------------------------------------
+  /// Rotation
+  /// The viewport rotation in radians, clockwise-positive.
+  ///
+  /// A pure *view* property, exactly like [scale]: it turns the canvas under the
+  /// user's hand so an awkward stroke becomes comfortable. No pixel is altered
+  /// and nothing enters the undo stack, which is what separates it from
+  /// [LayersProviderCanvasGeometry.rotateCanvas90Clockwise].
+  double _rotation = 0;
+
+  /// Gets the viewport rotation in radians.
+  double get rotation => _rotation;
+
+  /// Sets the viewport rotation, normalized to (-pi, pi].
+  set rotation(double value) {
+    final double normalized = normalizeRadians(value);
+    if (_rotation != normalized) {
+      _rotation = normalized;
+    }
+  }
+
+  /// Whether the viewport is rotated away from its upright orientation.
+  bool get isRotated => _rotation != 0;
 
   /// Schedules an async (re)build of [layer]'s display-resolution cache for the
   /// current on-screen [requiredScale], then repaints the canvas so the painter

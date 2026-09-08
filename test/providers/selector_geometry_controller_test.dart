@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/providers/selector_geometry_controller.dart';
 import 'package:fpaint/providers/selector_geometry_host.dart';
@@ -7,13 +10,23 @@ import 'package:material_ui/material_ui.dart';
 /// Records what the controller asks of its host, so the geometry can be
 /// exercised without an AppProvider.
 class _FakeHost implements SelectorGeometryHost {
-  _FakeHost({this.canvasScale = 1.0});
+  _FakeHost({this.canvasScale = 1.0, this.canvasRotation = 0.0});
 
   @override
   SelectorModel selectorModel = SelectorModel();
 
   @override
   final double canvasScale;
+
+  /// Viewport rotation in radians used to convert screen deltas.
+  final double canvasRotation;
+
+  @override
+  Offset canvasDeltaFromScreen(Offset screenDelta) => ViewportTransform(
+    offset: Offset.zero,
+    scale: canvasScale,
+    rotation: canvasRotation,
+  ).deltaToCanvas(screenDelta);
 
   @override
   double canvasWidth = 200;
@@ -156,6 +169,21 @@ void main() {
       expect(after.left - before.left, closeTo(10, 0.001));
       expect(after.top - before.top, closeTo(20, 0.001));
       expect(host.mainViewRepaints, 1);
+    });
+
+    test('translate rotates the screen delta when the view is rotated', () {
+      // A quarter-turn view: dragging right on screen must move the selection
+      // up the canvas. Dividing by the zoom alone would move it right.
+      final _FakeHost host = _FakeHost(canvasRotation: pi / 2);
+      final SelectorGeometryController controller = SelectorGeometryController(host);
+      controller.selectAll();
+      final Rect before = host.selectorModel.path1!.getBounds();
+
+      controller.translateByScreenDelta(const Offset(30, 0));
+
+      final Rect after = host.selectorModel.path1!.getBounds();
+      expect(after.left - before.left, closeTo(0, 0.001));
+      expect(after.top - before.top, closeTo(-30, 0.001));
     });
 
     test('resize converts the screen delta into canvas space', () {

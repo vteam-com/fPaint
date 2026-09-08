@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/fill_model.dart';
@@ -25,6 +26,7 @@ import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/text_editor_dialog.dart';
 
 part 'canvas_gesture_handler_eyedropper.dart';
+part 'canvas_gesture_handler_rotation.dart';
 part 'canvas_gesture_handler_state_methods.dart';
 
 /// Handles pointer, pan, and zoom gestures over the canvas widget tree.
@@ -43,18 +45,37 @@ class CanvasGestureHandler extends StatefulWidget {
 class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   int _activePointerId = -1;
   final List<int> _activePointers = <int>[];
+
+  /// Whether the current gesture's twist has cleared the dead zone.
+  bool _hasGestureTwistEngaged = false;
+
+  /// Whether the active right-drag rotates the view rather than panning it.
+  bool _isMouseRotateDrag = false;
   Offset? _lastMultiTouchFocalPoint;
   double _lastScaleDistance = 0.0;
   Offset? _lastSelectionTapCanvasPosition;
   Duration? _lastSelectionTapTimestamp;
+
+  /// Angle between the two controlling touch contacts on the previous update.
+  double? _lastTouchContactAngle;
+
+  /// Absolute trackpad gesture rotation seen on the previous update.
+  double _lastTrackpadRotation = 0;
   final Set<int> _multiTouchPointersMoved = <int>{};
   int _panningPointerId = -1;
+
+  /// Raw gesture twist accumulated so far, including the part still absorbed
+  /// by the rotation dead zone.
+  double _pendingGestureTwist = 0;
   PointerDownEvent? _pendingTouchDownEvent;
   final Map<int, Offset> _pointerPositions = <int, ui.Offset>{};
 
   /// The selector math mode active before a modifier-key override was applied.
   /// Non-null only during a modifier-driven selection gesture.
   SelectorMath? _previousSelectorMath;
+
+  /// Fades out the live angle readout once twisting stops.
+  Timer? _rotationHudTimer;
 
   /// Canvas-space sample anchor re-sampled / re-previewed on every drag step.
   Offset? _toleranceDragAnchorCanvas;
@@ -72,6 +93,11 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   /// Tolerance captured when the tolerance-drag gesture began.
   int _toleranceDragStartTolerance = AppDefaults.tolerance;
   bool _viewportRepaintScheduled = false;
+  @override
+  void dispose() {
+    _rotationHudTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,9 +172,22 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         },
         onPointerPanZoomStart: (PointerPanZoomStartEvent _) {
           shellProvider.interactionInputModality = InteractionInputModality.mouse;
+          _lastTrackpadRotation = 0;
+          _resetGestureTwist();
         },
         onPointerPanZoomUpdate: (PointerPanZoomUpdateEvent event) {
           _registerInputModality(shellProvider, event.kind);
+          // Trackpad rotation arrives as an absolute angle for the gesture, so
+          // it is differenced into a per-update delta.
+          final double rotationDelta = event.rotation - _lastTrackpadRotation;
+          _lastTrackpadRotation = event.rotation;
+          final bool didRotate = _applyGestureTwist(
+            appProvider,
+            shellProvider,
+            rotationDelta,
+            event.localPosition,
+          );
+
           if (event.scale == 1) {
             // Panning
             _handleUserPanningTheCanvas(
@@ -165,9 +204,14 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
               event.scale,
             );
           }
+
+          if (didRotate) {
+            _scheduleViewportRepaint(appProvider);
+          }
         },
         onPointerPanZoomEnd: (PointerPanZoomEndEvent _) {
-          // No-op
+          _lastTrackpadRotation = 0;
+          _resetGestureTwist();
         },
         onPointerDown: (PointerDownEvent event) {
           _registerInputModality(shellProvider, event.kind);
@@ -188,6 +232,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
                 }
                 _lastScaleDistance = _getDistanceBetweenTouchPoints();
                 _lastMultiTouchFocalPoint = _getMultiTouchFocalPoint();
+                _lastTouchContactAngle = _getTouchContactAngle();
+                _resetGestureTwist();
                 _multiTouchPointersMoved.clear();
                 appProvider.layers.beginInteractiveViewportChange();
               }
@@ -201,6 +247,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           } else {
             if (event.kind == PointerDeviceKind.mouse && event.buttons == kSecondaryMouseButton) {
               _panningPointerId = event.pointer;
+              // A mouse cannot twist, so Shift turns the existing right-drag
+              // navigation gesture into a rotate.
+              _isMouseRotateDrag = HardwareKeyboard.instance.isShiftPressed;
+              _resetGestureTwist();
               return;
             }
             _handlePointerStart(appProvider, event);
@@ -233,6 +283,10 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             }
           } else {
             if (_panningPointerId == event.pointer) {
+              if (_isMouseRotateDrag) {
+                _handleMouseRotateDrag(appProvider, shellProvider, event);
+                return;
+              }
               _handleUserPanningTheCanvas(
                 shellProvider,
                 appProvider,
@@ -251,6 +305,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             if (_activePointers.length < AppMath.pair) {
               _lastScaleDistance = 0.0;
               _lastMultiTouchFocalPoint = null;
+              _lastTouchContactAngle = null;
+              _resetGestureTwist();
               _multiTouchPointersMoved.clear();
               if (wasMultiTouch) {
                 appProvider.layers.endInteractiveViewportChange();
@@ -258,6 +314,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             } else if (wasMultiTouch) {
               _lastScaleDistance = _getDistanceBetweenTouchPoints();
               _lastMultiTouchFocalPoint = _getMultiTouchFocalPoint();
+              _lastTouchContactAngle = _getTouchContactAngle();
               _multiTouchPointersMoved.clear();
             }
             if (wasMultiTouch) {
@@ -273,6 +330,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           } else {
             if (_panningPointerId == event.pointer) {
               _panningPointerId = -1;
+              _isMouseRotateDrag = false;
+              _resetGestureTwist();
               return;
             }
             _handlePointerEnd(appProvider, event);
@@ -287,6 +346,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             if (_activePointers.length < AppMath.pair) {
               _lastScaleDistance = 0.0;
               _lastMultiTouchFocalPoint = null;
+              _lastTouchContactAngle = null;
+              _resetGestureTwist();
               _multiTouchPointersMoved.clear();
               if (wasMultiTouch) {
                 appProvider.layers.endInteractiveViewportChange();
@@ -294,6 +355,7 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
             } else if (wasMultiTouch) {
               _lastScaleDistance = _getDistanceBetweenTouchPoints();
               _lastMultiTouchFocalPoint = _getMultiTouchFocalPoint();
+              _lastTouchContactAngle = _getTouchContactAngle();
               _multiTouchPointersMoved.clear();
             }
             if (!wasMultiTouch && _activePointerId == event.pointer) {
@@ -305,6 +367,8 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
           } else {
             if (_panningPointerId == event.pointer) {
               _panningPointerId = -1;
+              _isMouseRotateDrag = false;
+              _resetGestureTwist();
               return;
             }
             _handlePointerEnd(appProvider, event);

@@ -25,6 +25,13 @@ abstract class ShortcutActions {
   static const String zoomIn = 'Zoom In';
   static const String zoomOut = 'Zoom Out';
   static const String resetZoom = 'Reset Zoom';
+  static const String rotateViewCounterClockwise = 'Rotate View Counter-Clockwise';
+  static const String rotateViewClockwise = 'Rotate View Clockwise';
+  static const String resetViewRotation = 'Reset View Rotation';
+  static const String rotateViewTwist = 'Rotate View (any angle)';
+  static const String rotateViewDrag = 'Rotate View';
+  static const String twoFingerTwist = 'Two-finger twist';
+  static const String rightDragSelection = 'Right-drag';
   static const String showKeyboardShortcuts = 'Ctrl /, F1';
   static const String brushTool = 'Brush Tool';
   static const String eraserTool = 'Eraser Tool';
@@ -67,6 +74,8 @@ abstract class ShortcutKeys {
   static const String plus = '+';
   static const String minus = '-';
   static const String tab = 'Tab';
+  static const String bracketLeft = '[';
+  static const String bracketRight = ']';
   static const String b = 'B';
   static const String c = 'C';
   static const String d = 'D';
