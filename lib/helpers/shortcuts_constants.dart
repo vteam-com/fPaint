@@ -24,15 +24,13 @@ abstract class ShortcutActions {
   static const String dragSelection = 'Drag Selection';
   static const String zoomIn = 'Zoom In';
   static const String zoomOut = 'Zoom Out';
-  static const String resetZoom = 'Reset Zoom';
+  static const String fitCanvasToView = 'Fit Canvas to View';
   static const String rotateViewCounterClockwise = 'Rotate View Counter-Clockwise';
   static const String rotateViewClockwise = 'Rotate View Clockwise';
-  static const String resetViewRotation = 'Reset View Rotation';
-  static const String rotateViewTwist = 'Rotate View (any angle)';
-  static const String rotateViewDrag = 'Rotate View';
+  static const String rotateViewTwist = 'Rotate View (trackpad or touch)';
+  static const String rotateViewDrag = 'Rotate View (mouse)';
   static const String twoFingerTwist = 'Two-finger twist';
   static const String rightDragSelection = 'Right-drag';
-  static const String showKeyboardShortcutsSeparator = ', ';
   static const String brushTool = 'Brush Tool';
   static const String eraserTool = 'Eraser Tool';
   static const String selectionTool = 'Selection Tool';
@@ -50,13 +48,10 @@ abstract class ShortcutActions {
 /// Display strings for UI control labels related to shortcuts.
 abstract class ShortcutLabels {
   static const String delete = 'Delete';
-  static const String close = 'Close';
-}
 
-/// Internal map keys used by shortcut-row metadata.
-abstract class ShortcutMapKeys {
-  static const String keys = 'keys';
-  static const String description = 'description';
+  /// Shown between two alternative key bindings for the same action.
+  static const String alternateSeparator = 'or';
+  static const String close = 'Close';
 }
 
 /// Display strings for keyboard modifier keys.

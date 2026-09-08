@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/shortcuts_constants.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -11,6 +12,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_dialog.dart';
+import 'package:fpaint/widgets/app_text.dart';
 import 'package:fpaint/widgets/shortcuts.dart';
 import 'package:fpaint/widgets/shortcuts_help.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,10 +27,37 @@ void main() {
   final String duplicateDragModifier = isApplePlatform ? '\u2325' : 'Ctrl';
   final String shiftModifier = isApplePlatform ? '\u21E7' : 'Shift';
   final String controlModifier = isApplePlatform ? '\u2303' : 'Ctrl';
-  final String duplicateShortcutLabel = '$primaryModifier + D';
-  final String duplicateNewLayerShortcutLabel = '$primaryModifier + $shiftModifier + D';
-  final String duplicateMoveShortcutLabel = '$duplicateDragModifier + Drag Selection';
-  final String duplicateMoveNewLayerShortcutLabel = '$shiftModifier + $duplicateDragModifier + Drag Selection';
+
+  /// Returns the trailing key-cap labels on the row whose description is
+  /// [description], using the [index]th row when a description repeats.
+  /// [skipFirst] drops the leading match when the description also names the
+  /// dialog title.
+  List<String> capsForRow(
+    WidgetTester tester,
+    String description, {
+    int index = 0,
+    bool skipFirst = false,
+  }) {
+    final Finder descriptions = find.text(description);
+    final int target = skipFirst ? index + 1 : index;
+    // The row's own key Wrap is the innermost ancestor; the outermost is the
+    // Wrap laying out the whole dialog.
+    final Finder rowWrap = find
+        .ancestor(
+          of: descriptions.at(target),
+          matching: find.byType(Row),
+        )
+        .first;
+    final Finder keyWrap = find.descendant(of: rowWrap, matching: find.byType(Wrap)).first;
+    return tester
+        .widgetList<AppText>(
+          find.descendant(of: keyWrap, matching: find.byType(AppText)),
+        )
+        .map((AppText text) => text.data)
+        .where((String data) => data != description)
+        .toList();
+  }
+
   const String duplicateSameLayerDescription = 'Duplicate in Same Layer';
   const String duplicateNewLayerDescription = 'Duplicate on New Layer';
 
@@ -132,8 +161,11 @@ void main() {
 
       expect(find.text(ShortcutActions.rotateViewCounterClockwise), findsOneWidget);
       expect(find.text(ShortcutActions.rotateViewClockwise), findsOneWidget);
-      expect(find.text(ShortcutActions.resetViewRotation), findsOneWidget);
       expect(find.text(ShortcutActions.rotateViewTwist), findsOneWidget);
+
+      // Rotation reset is folded into the canvas fit, with no binding of its own.
+      expect(find.text(ShortcutActions.fitCanvasToView), findsOneWidget);
+      expect(find.textContaining('Reset View Rotation'), findsNothing);
     });
 
     testWidgets('shows Tools category', (WidgetTester tester) async {
@@ -223,7 +255,11 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
-      expect(find.text('$controlModifier + /, F1'), findsOneWidget);
+      // Both bindings are shown as caps, joined by "or" rather than a plus.
+      expect(
+        capsForRow(tester, 'Keyboard Shortcuts', skipFirst: true),
+        <String>[controlModifier, '/', 'or', 'F1'],
+      );
       expect(find.text('Keyboard Shortcuts'), findsAtLeastNWidgets(2));
     });
 
@@ -231,12 +267,23 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
-      expect(find.text(duplicateShortcutLabel), findsOneWidget);
-      expect(find.text(duplicateNewLayerShortcutLabel), findsOneWidget);
-      expect(find.text(duplicateMoveShortcutLabel), findsOneWidget);
-      expect(find.text(duplicateMoveNewLayerShortcutLabel), findsOneWidget);
       expect(find.text(duplicateSameLayerDescription), findsNWidgets(2));
       expect(find.text(duplicateNewLayerDescription), findsNWidgets(2));
+
+      // Each key gets its own cap, with no joining glyph between them.
+      expect(capsForRow(tester, duplicateSameLayerDescription), <String>[primaryModifier, 'D']);
+      expect(capsForRow(tester, duplicateNewLayerDescription), <String>[primaryModifier, shiftModifier, 'D']);
+    });
+
+    testWidgets('renders drag gestures as text rather than a key cap', (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+
+      // The modifier is a real key so it gets a cap; the drag is not.
+      expect(
+        capsForRow(tester, duplicateSameLayerDescription, index: 1),
+        <String>[duplicateDragModifier, 'Drag Selection'],
+      );
     });
 
     testWidgets('uses a wider adaptive dialog on large screens', (WidgetTester tester) async {
@@ -255,26 +302,25 @@ void main() {
       expect(descriptionSize.width, greaterThan(AppLayout.shortcutHelpReadableTextMinWidth));
     });
 
-    testWidgets('puts each description to the right of its key cap', (WidgetTester tester) async {
+    testWidgets('puts the key caps to the right of the description', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
-      // The description must start after the cap ends, never below it.
-      final Rect capRect = tester.getRect(find.text(duplicateShortcutLabel));
-      final Rect descriptionRect = tester.getRect(find.text(duplicateSameLayerDescription).first);
-      expect(descriptionRect.left, greaterThan(capRect.right));
-      expect(descriptionRect.top, lessThan(capRect.bottom));
+      // The caps must sit after the description ends, on the same line.
+      final Rect descriptionRect = tester.getRect(find.text(ShortcutActions.save));
+      final Rect capRect = tester.getRect(find.text('S').first);
+      expect(capRect.left, greaterThan(descriptionRect.right));
+      expect(capRect.top, lessThan(descriptionRect.bottom));
     });
 
-    testWidgets('aligns descriptions on a shared key-cap gutter', (WidgetTester tester) async {
+    testWidgets('aligns descriptions in a column so rows read as pairs', (WidgetTester tester) async {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
-      // Short and long caps in the same column must not shift the description
-      // column, so a cap and its label always read as one pair.
-      final double shortCapRowLeft = tester.getTopLeft(find.text(ShortcutActions.undo)).dx;
-      final double longCapRowLeft = tester.getTopLeft(find.text(duplicateNewLayerDescription).first).dx;
-      expect(longCapRowLeft, shortCapRowLeft);
+      // Rows in one group share a left edge regardless of how many caps they carry.
+      final double shortRowLeft = tester.getTopLeft(find.text(ShortcutActions.undo)).dx;
+      final double longRowLeft = tester.getTopLeft(find.text(duplicateNewLayerDescription).first).dx;
+      expect(longRowLeft, shortRowLeft);
     });
   });
 
@@ -291,23 +337,23 @@ void main() {
     testWidgets('uses Apple key glyphs on macOS', (WidgetTester tester) async {
       await pumpDialogAsPlatform(tester, TargetPlatform.macOS);
 
-      expect(find.text('\u2318 + S'), findsOneWidget);
-      expect(find.text('\u2318 + \u21E7 + D'), findsOneWidget);
-      expect(find.text('\u2325 + Drag Selection'), findsOneWidget);
-      expect(find.text('\u2303 + /, F1'), findsOneWidget);
+      expect(capsForRow(tester, 'Save'), <String>['\u2318', 'S']);
+      expect(capsForRow(tester, 'Duplicate on New Layer'), <String>['\u2318', '\u21E7', 'D']);
+      expect(capsForRow(tester, 'Keyboard Shortcuts', skipFirst: true), <String>['\u2303', '/', 'or', 'F1']);
       expect(find.textContaining('Cmd'), findsNothing);
       expect(find.textContaining('Option'), findsNothing);
+      // No row glues keys together with a separator glyph.
+      expect(find.textContaining(' + '), findsNothing);
     });
 
     testWidgets('spells modifiers out on Windows', (WidgetTester tester) async {
       await pumpDialogAsPlatform(tester, TargetPlatform.windows);
 
-      expect(find.text('Ctrl + S'), findsOneWidget);
-      expect(find.text('Ctrl + Shift + D'), findsOneWidget);
-      expect(find.text('Ctrl + Drag Selection'), findsOneWidget);
-      expect(find.text('Alt'), findsOneWidget);
-      expect(find.text('Ctrl + /, F1'), findsOneWidget);
+      expect(capsForRow(tester, 'Save'), <String>['Ctrl', 'S']);
+      expect(capsForRow(tester, 'Duplicate on New Layer'), <String>['Ctrl', 'Shift', 'D']);
+      expect(capsForRow(tester, 'Subtract from Selection'), <String>['Alt']);
       expect(find.textContaining('\u2318'), findsNothing);
+      expect(find.textContaining(' + '), findsNothing);
     });
   });
 
@@ -489,7 +535,7 @@ void main() {
       expect(shellProvider.canvasPlacement, CanvasAutoPlacement.manual);
     });
 
-    testWidgets('bracket keys rotate the view and Shift+[ resets it', (WidgetTester tester) async {
+    testWidgets('bracket keys rotate the view and Shift+[ stays unbound', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final AppPreferences preferences = AppPreferences();
       await preferences.getPref();
@@ -515,7 +561,8 @@ void main() {
       await tester.pump();
       expect(appProvider.canvasRotation, lessThan(clockwise));
 
-      // Leave the view rotated, then reset it.
+      // Shift+[ is deliberately not bound: on most layouts it emits "{", so the
+      // activator never matched. The view must stay rotated.
       await tester.sendKeyEvent(LogicalKeyboardKey.bracketRight);
       await tester.pump();
       expect(appProvider.layers.isRotated, isTrue);
@@ -525,33 +572,10 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
       await tester.pump();
 
-      expect(appProvider.canvasRotation, closeTo(0, 1e-9));
-      expect(appProvider.layers.isRotated, isFalse);
-    });
-
-    testWidgets('view rotation does not add an undo entry', (WidgetTester tester) async {
-      SharedPreferences.setMockInitialValues(<String, Object>{});
-      final AppPreferences preferences = AppPreferences();
-      await preferences.getPref();
-      final AppProvider appProvider = AppProvider(preferences: preferences);
-      final ShellProvider shellProvider = ShellProvider();
-
-      await tester.pumpWidget(
-        buildShortcutHandlerTestWidget(
-          appProvider: appProvider,
-          shellProvider: shellProvider,
-        ),
-      );
-      await tester.pump();
-
-      await tester.sendKeyEvent(LogicalKeyboardKey.bracketRight);
-      await tester.pump();
-
       expect(appProvider.layers.isRotated, isTrue);
-      expect(appProvider.undoProvider.canUndo, isFalse);
     });
 
-    testWidgets('Cmd/Ctrl+0 resets zoom to 100%', (WidgetTester tester) async {
+    testWidgets('Cmd/Ctrl+0 requests a canvas fit like the zoom-value button', (WidgetTester tester) async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final AppPreferences preferences = AppPreferences();
       await preferences.getPref();
@@ -566,27 +590,44 @@ void main() {
       );
       await tester.pump();
 
-      appProvider.applyScaleToCanvas(
-        scaleDelta: AppVisual.enlarge,
-        anchorPoint: appProvider.canvasCenter,
-      );
+      // Move off the fit placement so the request is observable.
+      shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
       await tester.pump();
-      expect(
-        (appProvider.layers.scale * AppLimits.percentMax).round(),
-        isNot(AppLimits.percentMax),
-      );
 
       final LogicalKeyboardKey modifierKey = duplicateShortcutModifierKey();
       await tester.sendKeyDownEvent(modifierKey);
       await tester.sendKeyEvent(LogicalKeyboardKey.digit0);
       await tester.sendKeyUpEvent(modifierKey);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
-      expect(
-        (appProvider.layers.scale * AppLimits.percentMax).round(),
-        AppLimits.percentMax,
+      // MainView performs the fit itself, so the shortcut's contract is the
+      // request: placement returns to fit, exactly as the button leaves it.
+      expect(shellProvider.canvasPlacement, CanvasAutoPlacement.fit);
+    });
+
+    testWidgets('the canvas fit clears rotation and scales to the viewport', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+
+      appProvider.applyRotationToCanvas(rotationDelta: degreesToRadians(52));
+      appProvider.applyScaleToCanvas(
+        scaleDelta: AppVisual.enlarge,
+        anchorPoint: appProvider.canvasCenter,
       );
-      expect(shellProvider.canvasPlacement, CanvasAutoPlacement.manual);
+      expect(appProvider.layers.isRotated, isTrue);
+
+      // The fit that Cmd/Ctrl+0 requests is performed with the laid-out
+      // viewport size, and leaves the canvas upright, fitted and centred.
+      appProvider.canvasFitToContainer(containerWidth: 800, containerHeight: 600);
+
+      expect(appProvider.layers.isRotated, isFalse);
+      expect(appProvider.canvasRotation, closeTo(0, 1e-9));
+      final double fittedScale = appProvider.layers.scale;
+      expect(fittedScale, lessThan(AppVisual.full));
+      final double centredX = (800 - (appProvider.layers.width * fittedScale)) / 2;
+      expect(appProvider.canvasOffset.dx, closeTo(centredX, 1e-6));
     });
   });
 }

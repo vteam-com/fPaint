@@ -355,7 +355,7 @@ void main() {
       expect(tester.widget<AppTooltip>(zoomOutTooltip).message, 'Zoom Out (Ctrl + -)');
       expect(
         tester.widget<AppTooltip>(resetZoomTooltip).message,
-        'Reset Zoom (Ctrl + 0)\n100%\n1024\n768',
+        'Fit Canvas to View (Ctrl + 0)\n100%\n1024\n768',
       );
     });
 
