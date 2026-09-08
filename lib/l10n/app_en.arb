@@ -229,6 +229,7 @@
   "platforms": "Available on...",
   "previewUnavailable": "Preview unavailable",
   "recentFilesLabel": "Recent",
+  "resetViewRotation": "Reset Rotation",
   "resizeRotate": "Resize / Rotate",
   "rotateCanvasTooltip": "Rotate Canvas 90° CW",
   "runOnMostBrowsers": "Run on any OS with most browsers.",

@@ -150,6 +150,45 @@ Future<ui.Image> renderTransformedImage(
 }
 
 /// Bilinear interpolates a point inside the quad defined by [corners].
+/// Bakes a rotated, resized copy of [sourceImage] into a new image.
+///
+/// Used to freeze an image-placement preview (drag/resize/rotate) into a single
+/// raster before it enters a transform session or is committed to a layer. The
+/// caller owns the returned image.
+Future<ui.Image> renderPlacedImage({
+  required ui.Image sourceImage,
+  required double outWidth,
+  required double outHeight,
+  required double rotation,
+}) {
+  return renderCanvasImage(
+    width: outWidth.ceil(),
+    height: outHeight.ceil(),
+    draw: (ui.Canvas canvas) {
+      canvas.translate(outWidth / AppMath.pair, outHeight / AppMath.pair);
+      canvas.rotate(rotation);
+      canvas.translate(-outWidth / AppMath.pair, -outHeight / AppMath.pair);
+      canvas.drawImageRect(
+        sourceImage,
+        Rect.fromLTWH(
+          0,
+          0,
+          sourceImage.width.toDouble(),
+          sourceImage.height.toDouble(),
+        ),
+        Rect.fromLTWH(0, 0, outWidth, outHeight),
+        Paint()..filterQuality = FilterQuality.high,
+      );
+    },
+  );
+}
+
+/// Returns the point at normalized position ([u], [v]) inside the quad
+/// [corners], by interpolating along the top and bottom edges and then between
+/// the two results.
+///
+/// Straight-edged mapping: used when the transform has no edge midpoints to
+/// curve toward.
 Offset _interpolateBilinear({
   required List<Offset> corners,
   required double u,

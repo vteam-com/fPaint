@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -209,6 +210,114 @@ void main() {
       appProvider.canvasClear(const Size(2000, 2000));
       appProvider.canvasFitToContainer(containerWidth: 400, containerHeight: 300);
       expect(appProvider.layers.scale, lessThan(1));
+    });
+  });
+
+  group('applyRotationToCanvas', () {
+    test('rotates the view without editing pixels or adding an undo entry', () {
+      final int actionsBefore = appProvider.layers.selectedLayer.count;
+
+      appProvider.applyRotationToCanvas(rotationDelta: degreesToRadians(30));
+
+      expect(radiansToDegrees(appProvider.canvasRotation), closeTo(30, 1e-6));
+      // A pure view change: no drawing action, nothing to undo.
+      expect(appProvider.layers.selectedLayer.count, actionsBefore);
+      expect(appProvider.undoProvider.canUndo, isFalse);
+    });
+
+    test('keeps the anchored canvas point under the anchor', () {
+      const Offset anchor = Offset(320, 240);
+      final Offset canvasPointBefore = appProvider.toCanvas(anchor);
+
+      appProvider.applyRotationToCanvas(
+        rotationDelta: degreesToRadians(37),
+        anchorPoint: anchor,
+      );
+
+      final Offset screenPointAfter = appProvider.fromCanvas(canvasPointBefore);
+      expect(screenPointAfter.dx, closeTo(anchor.dx, 1e-6));
+      expect(screenPointAfter.dy, closeTo(anchor.dy, 1e-6));
+    });
+
+    test('is a no-op for a zero delta', () {
+      int notifyCount = 0;
+      appProvider.addListener(() => notifyCount++);
+
+      appProvider.applyRotationToCanvas(rotationDelta: 0);
+
+      expect(appProvider.canvasRotation, 0);
+      expect(notifyCount, 0);
+    });
+
+    test('normalizes past a full turn', () {
+      appProvider.applyRotationToCanvas(rotationDelta: degreesToRadians(370));
+      expect(radiansToDegrees(appProvider.canvasRotation), closeTo(10, 1e-6));
+    });
+  });
+
+  group('resetCanvasRotation', () {
+    test('returns the viewport to upright', () {
+      appProvider.applyRotationToCanvas(rotationDelta: degreesToRadians(52));
+      expect(appProvider.layers.isRotated, isTrue);
+
+      appProvider.resetCanvasRotation();
+
+      expect(appProvider.canvasRotation, closeTo(0, 1e-9));
+      expect(appProvider.layers.isRotated, isFalse);
+    });
+
+    test('is a no-op when already upright', () {
+      int notifyCount = 0;
+      appProvider.addListener(() => notifyCount++);
+
+      appProvider.resetCanvasRotation();
+
+      expect(notifyCount, 0);
+    });
+  });
+
+  group('rotation-aware view reset', () {
+    test('resetView clears rotation along with pan and zoom', () {
+      appProvider.canvasOffset = const Offset(30, 40);
+      appProvider.layers.scale = 3;
+      appProvider.applyRotationToCanvas(rotationDelta: degreesToRadians(25));
+
+      appProvider.resetView();
+
+      expect(appProvider.canvasOffset, Offset.zero);
+      expect(appProvider.layers.scale, 1);
+      expect(appProvider.canvasRotation, 0);
+    });
+
+    test('canvasFitToContainer returns the view upright', () {
+      appProvider.applyRotationToCanvas(rotationDelta: degreesToRadians(41));
+
+      appProvider.canvasFitToContainer(containerWidth: 800, containerHeight: 600);
+
+      expect(appProvider.canvasRotation, 0);
+    });
+  });
+
+  group('viewportTransform', () {
+    test('reflects pan, zoom and rotation', () {
+      appProvider.canvasOffset = const Offset(11, 22);
+      appProvider.layers.scale = 1.5;
+      appProvider.layers.rotation = degreesToRadians(20);
+
+      final ViewportTransform viewport = appProvider.viewportTransform;
+
+      expect(viewport.offset, const Offset(11, 22));
+      expect(viewport.scale, 1.5);
+      expect(radiansToDegrees(viewport.rotation), closeTo(20, 1e-6));
+    });
+
+    test('is memoized while the viewport is unchanged and rebuilt after', () {
+      final ViewportTransform first = appProvider.viewportTransform;
+      expect(appProvider.viewportTransform, same(first));
+
+      appProvider.layers.rotation = degreesToRadians(15);
+
+      expect(appProvider.viewportTransform, isNot(same(first)));
     });
   });
 

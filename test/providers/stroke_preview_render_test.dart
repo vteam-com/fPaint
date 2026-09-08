@@ -24,8 +24,7 @@ Future<ui.Image> _solid(Color color) {
 }
 
 UserActionDrawing _imageAction(ui.Image image, Offset at) {
-  return UserActionDrawing(
-    action: ActionType.image,
+  return ImageAction(
     positions: <Offset>[at, Offset(at.dx + image.width, at.dy + image.height)],
     image: image,
   );
@@ -75,7 +74,7 @@ void main() {
       reference.actionStack
         ..add(_imageAction(await _solid(const Color(0xFFFF0000)), Offset.zero))
         ..add(
-          UserActionDrawing(
+          StrokeAction(
             action: ActionType.eraser,
             positions: const <Offset>[Offset(0, 4), Offset(8, 4)],
             brush: MyBrush(color: AppColors.transparent, size: 4),
@@ -89,7 +88,7 @@ void main() {
       stroke.actionStack.add(_imageAction(await _solid(const Color(0xFFFF0000)), Offset.zero));
       stroke.beginStrokePreview();
       stroke.actionStack.add(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.eraser,
           positions: const <Offset>[Offset(0, 4), Offset(8, 4)],
           brush: MyBrush(color: AppColors.transparent, size: 4),
@@ -122,7 +121,7 @@ void main() {
       final LayerProvider reference = _layer();
       reference.actionStack
         ..add(_imageAction(await _solid(const Color(0xFFFFFFFF)), Offset.zero))
-        ..add(UserActionDrawing(action: ActionType.pencil, positions: List<Offset>.of(points), brush: brush));
+        ..add(StrokeAction(action: ActionType.pencil, positions: List<Offset>.of(points), brush: brush));
       final Uint8List referenceBytes = await _renderBytes(reference);
 
       // Stroke: freeze the baseline, then grow the pencil action point-by-point,
@@ -132,7 +131,7 @@ void main() {
       stroke.beginStrokePreview();
       stroke.isUserDrawing = true;
       stroke.actionStack.add(
-        UserActionDrawing(action: ActionType.pencil, positions: <Offset>[points[0], points[1]], brush: brush),
+        StrokeAction(action: ActionType.pencil, positions: <Offset>[points[0], points[1]], brush: brush),
       );
       await _renderBytes(stroke);
       for (int i = 2; i < points.length; i++) {
@@ -157,7 +156,7 @@ void main() {
       final LayerProvider reference = _layer();
       reference.actionStack
         ..add(_imageAction(await _solid(const Color(0xFFFF0000)), Offset.zero))
-        ..add(UserActionDrawing(action: ActionType.eraser, positions: List<Offset>.of(points), brush: brush));
+        ..add(StrokeAction(action: ActionType.eraser, positions: List<Offset>.of(points), brush: brush));
       final Uint8List referenceBytes = await _renderBytes(reference);
 
       final LayerProvider stroke = _layer();
@@ -165,7 +164,7 @@ void main() {
       stroke.beginStrokePreview();
       stroke.isUserDrawing = true;
       stroke.actionStack.add(
-        UserActionDrawing(action: ActionType.eraser, positions: <Offset>[points[0], points[1]], brush: brush),
+        StrokeAction(action: ActionType.eraser, positions: <Offset>[points[0], points[1]], brush: brush),
       );
       await _renderBytes(stroke);
       for (int i = 2; i < points.length; i++) {
@@ -186,7 +185,7 @@ void main() {
         <Offset>[Offset(3, 3), Offset(5, 2)],
         <Offset>[Offset(5, 2), Offset(6, 6)],
       ];
-      UserActionDrawing brushAction(List<Offset> pts) => UserActionDrawing(
+      UserActionDrawing brushAction(List<Offset> pts) => StrokeAction(
         action: ActionType.brush,
         positions: List<Offset>.of(pts),
         brush: brush,
@@ -226,7 +225,7 @@ void main() {
       final LayerProvider reference = _layer();
       reference.actionStack
         ..add(_imageAction(await _solid(const Color(0xFFFFFFFF)), Offset.zero))
-        ..add(UserActionDrawing(action: ActionType.pencil, positions: List<Offset>.of(points), brush: brush));
+        ..add(StrokeAction(action: ActionType.pencil, positions: List<Offset>.of(points), brush: brush));
       final Uint8List referenceBytes = await _renderBytes(reference);
 
       final LayerProvider stroke = _layer();
@@ -234,7 +233,7 @@ void main() {
       stroke.beginStrokePreview();
       stroke.isUserDrawing = true;
       stroke.actionStack.add(
-        UserActionDrawing(action: ActionType.pencil, positions: <Offset>[points[0]], brush: brush),
+        StrokeAction(action: ActionType.pencil, positions: <Offset>[points[0]], brush: brush),
       );
       for (int i = 1; i < points.length; i++) {
         stroke.lastActionAppendPosition(position: points[i]);
@@ -252,7 +251,7 @@ void main() {
       final MyBrush brush = MyBrush(color: const Color(0xFF000000), size: 2);
       const Color fill = Color(0xFF000000);
       final int total = (AppInteraction.strokePreviewFoldThreshold * 2) + 3;
-      UserActionDrawing brushSegment(int i) => UserActionDrawing(
+      UserActionDrawing brushSegment(int i) => StrokeAction(
         action: ActionType.brush,
         positions: <Offset>[
           Offset((i % 7).toDouble(), (i % 5).toDouble()),

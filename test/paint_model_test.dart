@@ -22,7 +22,7 @@ void main() {
 
     test('addShape with Shape object should add to current layer', () {
       final AppProvider appProvider = AppProvider(preferences: AppPreferences());
-      final UserActionDrawing shape = UserActionDrawing(
+      final UserActionDrawing shape = StrokeAction(
         positions: <Offset>[
           const Offset(0, 0),
           const Offset(10, 10),

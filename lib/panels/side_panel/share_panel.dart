@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/files/export_download_non_web.dart'
-    if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
+import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
+import 'package:fpaint/files/save.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
@@ -14,61 +14,27 @@ import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
-/// Callback signature for export-format handlers.
-typedef _ExportHandler = Future<void> Function(LayersProvider layers);
-
-/// A single export-format row in the share panel.
-class _ShareExportEntry {
-  const _ShareExportEntry(this.displayFileName, this.onExport);
-
-  /// File-name label shown in the share panel (e.g. 'image.PNG').
-  final String displayFileName;
-
-  /// Callback that triggers the export / download.
-  final _ExportHandler onExport;
-}
-
-/// Display file names shown in the share panel for each export format.
-const String _displayPng = 'image.PNG';
-const String _displayJpg = 'image.JPG';
-const String _displayOra = 'image.ORA';
-const String _displayWebp = 'image.WEBP';
-const String _displayTif = 'image.TIF';
-const String _displayHeic = 'image.HEIC';
-
-/// All export formats available in the share panel.
+/// Export formats offered in the share panel, in display order.
 ///
-/// HEIC is conditionally included based on platform support.
-List<_ShareExportEntry> _exportEntries({
-  required bool includeHeic,
-  required AppPreferences preferences,
-}) => <_ShareExportEntry>[
-  _ShareExportEntry(
-    _displayPng,
-    (LayersProvider layers) => onExportAsPng(layers, preferences: preferences),
-  ),
-  _ShareExportEntry(
-    _displayJpg,
-    (LayersProvider layers) => onExportAsJpeg(layers, preferences: preferences),
-  ),
-  _ShareExportEntry(
-    _displayOra,
-    (LayersProvider layers) => onExportAsOra(layers, preferences: preferences),
-  ),
-  _ShareExportEntry(
-    _displayWebp,
-    (LayersProvider layers) => onExportAsWebp(layers, preferences: preferences),
-  ),
-  _ShareExportEntry(
-    _displayTif,
-    (LayersProvider layers) => onExportAsTiff(layers, preferences: preferences),
-  ),
-  if (includeHeic)
-    _ShareExportEntry(
-      _displayHeic,
-      (LayersProvider layers) => onExportAsHeic(layers, preferences: preferences),
-    ),
+/// Driven by [SaveFileFormat] so a new format appears here as soon as it is
+/// added to the enum; only the order is stated locally (Open/Closed).
+const List<SaveFileFormat> _shareExportOrder = <SaveFileFormat>[
+  SaveFileFormat.png,
+  SaveFileFormat.jpeg,
+  SaveFileFormat.ora,
+  SaveFileFormat.webp,
+  SaveFileFormat.tiff,
+  SaveFileFormat.heic,
 ];
+
+/// The formats to show, dropping HEIC where the platform cannot encode it.
+List<SaveFileFormat> _exportFormats({required bool includeHeic}) => <SaveFileFormat>[
+  for (final SaveFileFormat format in _shareExportOrder)
+    if (includeHeic || format != SaveFileFormat.heic) format,
+];
+
+/// File-name label shown in the share panel for [format], e.g. `image.PNG`.
+String _displayFileName(SaveFileFormat format) => '$exportBaseFileName.${format.displayName}';
 
 /// Returns a Text widget with the appropriate action text based on the platform.
 ///
@@ -172,18 +138,15 @@ Future<void> sharePanel(
                 );
               },
             ),
-            for (final _ShareExportEntry entry in _exportEntries(
-              includeHeic: isHeicExportSupported,
-              preferences: preferences,
-            ))
+            for (final SaveFileFormat format in _exportFormats(includeHeic: isHeicExportSupported))
               AppListTile(
                 leading: const AppSvgIcon(icon: AppIcon.iosShare),
-                title: textAction(entry.displayFileName, l10n),
+                title: textAction(_displayFileName(format), l10n),
                 onTap: () async {
                   await _runSharePanelExportAction(
                     context: context,
-                    onAction: () => entry.onExport(layers),
-                    displayFileName: entry.displayFileName,
+                    onAction: () => exportAs(format, layers, preferences: preferences),
+                    displayFileName: _displayFileName(format),
                     dismissOnAction: dismissOnAction,
                   );
                 },

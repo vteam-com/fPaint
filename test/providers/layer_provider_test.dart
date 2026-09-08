@@ -127,7 +127,7 @@ void main() {
   group('appendDrawingAction', () {
     test('adds action to stack', () {
       final LayerProvider layer = _createLayer();
-      final UserActionDrawing action = UserActionDrawing(
+      final UserActionDrawing action = StrokeAction(
         action: ActionType.brush,
         positions: <ui.Offset>[const Offset(0, 0), const Offset(10, 10)],
         brush: MyBrush(color: const Color(0xFF000000), size: 5),
@@ -140,12 +140,12 @@ void main() {
 
     test('lastUserAction returns the latest', () {
       final LayerProvider layer = _createLayer();
-      final UserActionDrawing action1 = UserActionDrawing(
+      final UserActionDrawing action1 = StrokeAction(
         action: ActionType.brush,
         positions: <ui.Offset>[const Offset(0, 0), const Offset(10, 10)],
         brush: MyBrush(color: const Color(0xFF000000), size: 5),
       );
-      final UserActionDrawing action2 = UserActionDrawing(
+      final UserActionDrawing action2 = StrokeAction(
         action: ActionType.pencil,
         positions: <ui.Offset>[const Offset(20, 20), const Offset(30, 30)],
         brush: MyBrush(color: const Color(0xFFFF0000), size: 3),
@@ -161,7 +161,7 @@ void main() {
     test('undo removes last action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <ui.Offset>[const Offset(0, 0), const Offset(10, 10)],
           brush: MyBrush(color: const Color(0xFF000000), size: 5),
@@ -176,7 +176,7 @@ void main() {
     test('redo re-applies undone action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <ui.Offset>[const Offset(0, 0), const Offset(10, 10)],
           brush: MyBrush(color: const Color(0xFF000000), size: 5),
@@ -203,14 +203,14 @@ void main() {
     test('multiple undo then redo round-trip', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <ui.Offset>[const Offset(0, 0)],
           brush: MyBrush(color: const Color(0xFF000000), size: 5),
         ),
       );
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.pencil,
           positions: <ui.Offset>[const Offset(10, 10)],
           brush: MyBrush(color: const Color(0xFFFF0000), size: 3),
@@ -230,7 +230,7 @@ void main() {
     test('adds position to last action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <ui.Offset>[const Offset(0, 0)],
           brush: MyBrush(color: const Color(0xFF000000), size: 5),
@@ -246,7 +246,7 @@ void main() {
     test('translates all action positions', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <ui.Offset>[const Offset(10, 20), const Offset(30, 40)],
           brush: MyBrush(color: const Color(0xFF000000), size: 5),
@@ -262,7 +262,7 @@ void main() {
     test('scales all action positions', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <ui.Offset>[const Offset(10, 20), const Offset(30, 40)],
           brush: MyBrush(color: const Color(0xFF000000), size: 5),
@@ -306,7 +306,7 @@ void main() {
     test('renders layer with brush action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <ui.Offset>[const Offset(10, 10), const Offset(50, 50)],
           brush: MyBrush(color: const Color(0xFF000000), size: 5),
@@ -322,7 +322,7 @@ void main() {
     test('renders layer with pencil action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.pencil,
           positions: <ui.Offset>[const Offset(10, 10), const Offset(50, 50)],
           brush: MyBrush(color: const Color(0xFF000000), size: 2),
@@ -337,7 +337,7 @@ void main() {
     test('renders layer with line action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.line,
           positions: <ui.Offset>[const Offset(10, 10), const Offset(90, 90)],
           brush: MyBrush(color: const Color(0xFF000000), size: 3),
@@ -353,7 +353,7 @@ void main() {
     test('renders layer with rectangle action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.rectangle,
           positions: <ui.Offset>[const Offset(10, 10), const Offset(90, 90)],
           brush: MyBrush(color: const Color(0xFF000000), size: 3),
@@ -369,7 +369,7 @@ void main() {
     test('renders layer with circle action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.circle,
           positions: <ui.Offset>[const Offset(50, 50), const Offset(100, 100)],
           brush: MyBrush(color: const Color(0xFF000000), size: 3),
@@ -385,7 +385,7 @@ void main() {
     test('renders layer with eraser action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.eraser,
           positions: <ui.Offset>[const Offset(10, 10), const Offset(50, 50)],
           brush: MyBrush(color: const Color(0xFF000000), size: 10),
@@ -400,8 +400,7 @@ void main() {
     test('renders layer with cut action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.cut,
+        CutAction(
           positions: <ui.Offset>[],
           path: Path()..addRect(const Rect.fromLTWH(10, 10, 50, 50)),
         ),
@@ -415,11 +414,9 @@ void main() {
     test('renders layer with fill action', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        NonRenderingAction(
           action: ActionType.fill,
           positions: <ui.Offset>[const Offset(50, 50)],
-          fillColor: const Color(0xFF0000FF),
-          path: Path()..addRect(const Rect.fromLTWH(0, 0, 100, 100)),
         ),
       );
       final ui.PictureRecorder recorder = ui.PictureRecorder();
@@ -431,7 +428,7 @@ void main() {
     test('renders with clipPath', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <ui.Offset>[const Offset(10, 10), const Offset(50, 50)],
           brush: MyBrush(color: const Color(0xFF000000), size: 5),
@@ -498,7 +495,7 @@ void main() {
     test('rotates positions clockwise', () async {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <Offset>[const Offset(10, 20)],
           brush: MyBrush(color: const Color(0xFF000000), size: 3),
@@ -516,8 +513,7 @@ void main() {
       final LayerProvider layer = _createLayer();
       final Path path = Path()..addRect(const Rect.fromLTWH(10, 20, 30, 40));
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.region,
+        RegionAction(
           positions: <Offset>[const Offset(10, 20)],
           path: path,
           fillColor: const Color(0xFFFF0000),
@@ -533,7 +529,7 @@ void main() {
       final LayerProvider layer = _createLayer();
       final Path clipPath = Path()..addRect(const Rect.fromLTWH(0, 0, 50, 50));
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <Offset>[const Offset(10, 10)],
           brush: MyBrush(color: const Color(0xFF000000), size: 3),
@@ -557,8 +553,7 @@ void main() {
       final ui.Image testImage = imgRec.endRecording().toImageSync(20, 10);
 
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.image,
+        ImageAction(
           positions: <Offset>[const Offset(0, 0), const Offset(20, 10)],
           image: testImage,
         ),
@@ -587,8 +582,7 @@ void main() {
       final ui.Image testImage = imgRec.endRecording().toImageSync(40, 30);
 
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.image,
+        ImageAction(
           positions: <Offset>[const Offset(50, 100), const Offset(90, 130)],
           image: testImage,
         ),
@@ -604,8 +598,7 @@ void main() {
     test('rotates text object position', () async {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.text,
+        TextAction(
           positions: <Offset>[const Offset(10, 20)],
           textObject: TextObject(
             text: 'Hello',
@@ -627,7 +620,7 @@ void main() {
     test('flips positions horizontally', () async {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <Offset>[const Offset(10, 20)],
           brush: MyBrush(color: const Color(0xFF000000), size: 3),
@@ -645,8 +638,7 @@ void main() {
       final LayerProvider layer = _createLayer();
       final Path path = Path()..addRect(const Rect.fromLTWH(10, 20, 30, 40));
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.region,
+        RegionAction(
           positions: <Offset>[const Offset(10, 20)],
           path: path,
           fillColor: const Color(0xFFFF0000),
@@ -662,7 +654,7 @@ void main() {
       final LayerProvider layer = _createLayer();
       final Path clipPath = Path()..addRect(const Rect.fromLTWH(0, 0, 50, 50));
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <Offset>[const Offset(10, 10)],
           brush: MyBrush(color: const Color(0xFF000000), size: 3),
@@ -685,8 +677,7 @@ void main() {
       final ui.Image testImage = imgRec.endRecording().toImageSync(20, 10);
 
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.image,
+        ImageAction(
           positions: <Offset>[const Offset(50, 30), const Offset(70, 40)],
           image: testImage,
         ),
@@ -703,8 +694,7 @@ void main() {
     test('flips text object', () async {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.text,
+        TextAction(
           positions: <Offset>[const Offset(10, 20)],
           textObject: TextObject(
             text: 'Hello',
@@ -725,7 +715,7 @@ void main() {
     test('flips positions vertically', () async {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <Offset>[const Offset(10, 20)],
           brush: MyBrush(color: const Color(0xFF000000), size: 3),
@@ -742,8 +732,7 @@ void main() {
     test('flips text object vertically', () async {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.text,
+        TextAction(
           positions: <Offset>[const Offset(10, 20)],
           textObject: TextObject(
             text: 'Hello',
@@ -769,8 +758,7 @@ void main() {
       final ui.Image testImage = imgRec.endRecording().toImageSync(20, 10);
 
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.image,
+        ImageAction(
           positions: <Offset>[const Offset(50, 30), const Offset(70, 40)],
           image: testImage,
         ),
@@ -789,7 +777,7 @@ void main() {
     test('scales all positions by factor', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           action: ActionType.brush,
           positions: <Offset>[const Offset(10, 20), const Offset(30, 40)],
           brush: MyBrush(color: const Color(0xFF000000), size: 3),
@@ -807,8 +795,7 @@ void main() {
     test('offsets text object position', () {
       final LayerProvider layer = _createLayer();
       layer.appendDrawingAction(
-        UserActionDrawing(
-          action: ActionType.text,
+        TextAction(
           positions: <Offset>[const Offset(10, 20)],
           textObject: TextObject(
             text: 'Hello',

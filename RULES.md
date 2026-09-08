@@ -14,6 +14,17 @@
 - Make sure the tests are passing.
 - Do not regress code coverage; improving it is encouraged.
 
+## Version control
+
+- **Never commit.** Do not run `git commit`, `git push`, `git tag`, or stage
+  changes for a commit, and do not offer to. Committing is always the developer's
+  action, so that every change is reviewed by a human before it enters history.
+- Instead, when the work is done, leave the changes in the working tree and
+  **suggest a commit message** for the developer to use or edit.
+- Also leave generated artifacts out of the suggestion's scope when they were
+  only touched by running the checks (`coverage/`, `fcheck_*.svg`,
+  `test/output/`) — say which files are feature changes and which are churn.
+
 ## Tool design: Brushes & Effects
 
 Every pixel-changing tool lives in one **Brush** section and is used the same

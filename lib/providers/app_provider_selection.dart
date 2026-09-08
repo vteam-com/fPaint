@@ -6,10 +6,6 @@ extension AppProviderSelection on AppProvider {
     return selectedAction == ActionType.selector || selectorModel.isVisible;
   }
 
-  double get _straightLineRegionCloseDistance {
-    return AppInteraction.selectionHandleSize / layers.scale;
-  }
-
   /// Toggles selection overlay behavior from the FAB without coupling to tool state.
   void toggleSelectionOverlayFromFab() {
     if (_isSelectionToggleInCancelState) {
@@ -44,11 +40,7 @@ extension AppProviderSelection on AppProvider {
 
     if (selectorModel.path1 != null) {
       recordExecuteDrawingActionToSelectedLayer(
-        action: UserActionDrawing(
-          action: ActionType.cut,
-          positions: <ui.Offset>[],
-          path: Path.from(selectorModel.path1!),
-        ),
+        action: CutAction(path: Path.from(selectorModel.path1!)),
       );
       update();
     }
@@ -273,7 +265,7 @@ extension AppProviderSelection on AppProvider {
       return;
     }
 
-    final ui.Image bakedImage = await _renderPlacedImage(
+    final ui.Image bakedImage = await renderPlacedImage(
       sourceImage: sourceImage,
       outWidth: imagePlacementModel.displayWidth,
       outHeight: imagePlacementModel.displayHeight,
@@ -322,7 +314,7 @@ extension AppProviderSelection on AppProvider {
     final ImagePlacementCommitMode commitMode = imagePlacementModel.commitMode;
     final ImagePlacementLayerRestoreState? layerRestoreState = imagePlacementModel.layerRestoreState;
 
-    final ui.Image bakedImage = await _renderPlacedImage(
+    final ui.Image bakedImage = await renderPlacedImage(
       sourceImage: sourceImage,
       outWidth: outWidth,
       outHeight: outHeight,
@@ -508,35 +500,6 @@ extension AppProviderSelection on AppProvider {
     _endTransformSession(wasLayerModifyMode: wasLayerModifyMode);
   }
 
-  /// Renders the current image-placement preview into a baked image.
-  Future<ui.Image> _renderPlacedImage({
-    required ui.Image sourceImage,
-    required double outWidth,
-    required double outHeight,
-    required double rotation,
-  }) {
-    return renderCanvasImage(
-      width: outWidth.ceil(),
-      height: outHeight.ceil(),
-      draw: (ui.Canvas canvas) {
-        canvas.translate(outWidth / AppMath.pair, outHeight / AppMath.pair);
-        canvas.rotate(rotation);
-        canvas.translate(-outWidth / AppMath.pair, -outHeight / AppMath.pair);
-        canvas.drawImageRect(
-          sourceImage,
-          Rect.fromLTWH(
-            0,
-            0,
-            sourceImage.width.toDouble(),
-            sourceImage.height.toDouble(),
-          ),
-          Rect.fromLTWH(0, 0, outWidth, outHeight),
-          Paint()..filterQuality = FilterQuality.high,
-        );
-      },
-    );
-  }
-
   /// Flips the selected region horizontally (left ↔ right).
   ///
   /// When no selection exists the entire active layer is used as the
@@ -632,12 +595,7 @@ extension AppProviderSelection on AppProvider {
       name: name,
       forward: () {
         layers.selectedLayer.appendDrawingAction(
-          UserActionDrawing(
-            action: ActionType.cut,
-            positions: <ui.Offset>[],
-            path: erasePath,
-            erasesEntireLayer: erasesEntireLayer,
-          ),
+          CutAction(path: erasePath, erasesEntireLayer: erasesEntireLayer),
         );
         layers.selectedLayer.addImage(
           imageToAdd: replacement,
@@ -659,42 +617,13 @@ extension AppProviderSelection on AppProvider {
   void selectorCreationStart(
     Offset position, {
     bool sampleAllLayers = false,
-  }) {
-    cancelEffectPreview();
-    if (selectorModel.mode == SelectorMode.wand) {
-      selectorModel.isDrawing = true;
-      wandSelection.queueRequest(position: position, sampleAllLayers: sampleAllLayers);
-      unawaited(_processPendingWandSelectionRequests());
-      return;
-    }
-
-    if (selectorModel.mode == SelectorMode.line) {
-      final bool isClosed = selectorModel.addStraightLineRegionPoint(
-        position,
-        closeDistance: _straightLineRegionCloseDistance,
-      );
-      selectorModel.isDrawing = !isClosed;
-      if (isClosed) {
-        selectorModel.applyMath();
-      }
-      repaintToolOptions();
-      update();
-      return;
-    }
-
-    selectorModel.isDrawing = true;
-    selectorModel.addP1(position);
-    repaintToolOptions();
-    update();
-  }
+  }) => selectorGeometry.creationStart(position, sampleAllLayers: sampleAllLayers);
 
   /// Maps a horizontal screen drag [screenDx] from the wand sample anchor onto a
   /// tolerance, starting from [startTolerance]. Dragging right loosens (grows)
   /// the selection; dragging left tightens it.
-  int wandToleranceForDrag(int startTolerance, double screenDx) {
-    final int delta = (screenDx / AppInteraction.wandToleranceDragPixelsPerUnit).round();
-    return (startTolerance + delta).clamp(AppMath.one, AppLimits.percentMax);
-  }
+  int wandToleranceForDrag(int startTolerance, double screenDx) =>
+      selectorGeometry.wandToleranceForDrag(startTolerance, screenDx);
 
   /// Re-runs the Edge Detection wand selection at the fixed sample [position]
   /// using [tolerance]. Drives the live "tap to sample, drag to grow/shrink"
@@ -703,101 +632,35 @@ extension AppProviderSelection on AppProvider {
     Offset position, {
     required int tolerance,
     required bool sampleAllLayers,
-  }) {
-    if (selectorModel.mode != SelectorMode.wand) {
-      return;
-    }
-    this.tolerance = tolerance;
-    selectorModel.isDrawing = true;
-    wandSelection.queueRequest(position: position, sampleAllLayers: sampleAllLayers);
-    unawaited(_processPendingWandSelectionRequests());
-  }
+  }) => selectorGeometry.wandResampleAt(
+    position,
+    tolerance: tolerance,
+    sampleAllLayers: sampleAllLayers,
+  );
 
   /// Translates the active selection by [screenDelta], a screen-space offset.
-  void selectionTranslateByScreenDelta(Offset screenDelta) {
-    selectorModel.translate(screenDelta / layers.scale);
-    repaintMainView();
-  }
+  void selectionTranslateByScreenDelta(Offset screenDelta) => selectorGeometry.translateByScreenDelta(screenDelta);
 
   /// Scales the active selection uniformly by [factor].
-  void selectionScaleUniform(double factor) {
-    selectorModel.scaleUniform(factor);
-    repaintMainView();
-  }
+  void selectionScaleUniform(double factor) => selectorGeometry.scaleUniform(factor);
 
   /// Resizes the active selection by dragging [handle] by [screenDelta].
-  void selectionResize(NineGridHandle handle, Offset screenDelta) {
-    selectorModel.nindeGridResize(handle, screenDelta / layers.scale);
-    repaintMainView();
-  }
+  void selectionResize(NineGridHandle handle, Offset screenDelta) => selectorGeometry.resize(handle, screenDelta);
 
   /// Rotates the active selection by [angleRadians].
-  void selectionRotate(double angleRadians) {
-    selectorModel.rotate(angleRadians);
-    repaintMainView();
-  }
+  void selectionRotate(double angleRadians) => selectorGeometry.rotate(angleRadians);
 
   /// Adds an additional point to the selector creation.
-  void selectorCreationAdditionalPoint(Offset position) {
-    if (selectorModel.mode == SelectorMode.wand) {
-      // Ignore since the PointerDown already did the job
-    } else if (selectorModel.mode == SelectorMode.line) {
-      // Ignore since straight-line region selection commits only on clicks.
-    } else {
-      selectorModel.addP2(position);
-      repaintMainView();
-    }
-  }
+  void selectorCreationAdditionalPoint(Offset position) => selectorGeometry.creationAdditionalPoint(position);
 
   /// Updates the selector preview while a multi-click straight-line region is in progress.
-  void selectorCreationPreview(Offset position) {
-    if (selectorModel.mode != SelectorMode.line || !selectorModel.isDrawing) {
-      return;
-    }
-
-    selectorModel.updateStraightLineRegionPreview(
-      position,
-      closeDistance: _straightLineRegionCloseDistance,
-    );
-    repaintMainView();
-  }
+  void selectorCreationPreview(Offset position) => selectorGeometry.creationPreview(position);
 
   /// Ends the selector creation.
-  void selectorCreationEnd() {
-    if (selectorModel.mode == SelectorMode.wand) {
-      selectorModel.isDrawing = false;
-      repaintToolOptions();
-      update();
-      return;
-    }
-
-    if (selectorModel.mode == SelectorMode.line) {
-      return;
-    }
-
-    selectorModel.isDrawing = false;
-    selectorModel.applyMath();
-    repaintToolOptions();
-    update();
-  }
+  void selectorCreationEnd() => selectorGeometry.creationEnd();
 
   /// Closes an active straight-line region selection and commits it.
-  bool selectorCreationClosePolygon() {
-    if (selectorModel.mode != SelectorMode.line || !selectorModel.isDrawing) {
-      return false;
-    }
-
-    final bool isClosed = selectorModel.closeStraightLineRegion();
-    if (!isClosed) {
-      return false;
-    }
-
-    selectorModel.isDrawing = false;
-    selectorModel.applyMath();
-    repaintToolOptions();
-    update();
-    return true;
-  }
+  bool selectorCreationClosePolygon() => selectorGeometry.creationClosePolygon();
 
   /// Ensures a selection exists. If no selection path is set, selects the
   /// entire canvas so that operations can treat the full layer as the target.
@@ -808,29 +671,15 @@ extension AppProviderSelection on AppProvider {
   }
 
   /// Selects all.
-  void selectAll() {
-    cancelEffectPreview();
-    wandSelection.cancelPendingRequest();
-    selectorModel.isVisible = true;
-    selectorModel.isDrawing = false;
-    selectorModel.path1 = Path()
-      ..addRect(
-        Rect.fromPoints(Offset.zero, Offset(layers.width, layers.height)),
-      );
-    selectorModel.path2 = null;
-    selectorModel.points.clear();
-    selectorModel.math = SelectorMath.replace;
-    repaintToolOptions();
-    update();
-  }
+  void selectAll() => selectorGeometry.selectAll();
 
   /// Gets the path adjusted to the canvas size and position.
+  ///
+  /// Uses the full viewport transform so the path still lands correctly when
+  /// the view is rotated.
   Path? getPathAdjustToCanvasSizeAndPosition(Path? path) {
     if (path != null) {
-      final Matrix4 matrix = Matrix4.identity()
-        ..translateByVector3(Vector3(canvasOffset.dx, canvasOffset.dy, 0.0))
-        ..scaleByVector3(Vector3(layers.scale, layers.scale, layers.scale));
-      return path.transform(matrix.storage);
+      return path.transform(viewportTransform.matrix.storage);
     }
     return null;
   }
@@ -898,108 +747,5 @@ extension AppProviderSelection on AppProvider {
   /// Samples either the selected layer only or all visible layers for the current request.
   Future<FillImageData?> getSelectedLayerFillImageData({
     required bool sampleAllLayers,
-  }) async {
-    final int signature = _createSelectedLayerFloodSourceSignature(
-      sampleAllLayers: sampleAllLayers,
-    );
-    final FillImageData? cached = wandSelection.cachedImageData(signature);
-    if (cached != null) {
-      return cached;
-    }
-
-    final int canvasWidth = layers.width.toInt();
-    final int canvasHeight = layers.height.toInt();
-    final int longestSide = canvasWidth > canvasHeight ? canvasWidth : canvasHeight;
-    final double sourceScale = longestSide > AppLimits.floodFillSourceMaxDimension
-        ? AppLimits.floodFillSourceMaxDimension / longestSide
-        : AppVisual.full;
-    final int sourceWidth = (canvasWidth * sourceScale).round().clamp(AppMath.one, canvasWidth);
-    final int sourceHeight = (canvasHeight * sourceScale).round().clamp(AppMath.one, canvasHeight);
-    final double sourceScaleX = sourceWidth / canvasWidth;
-    final double sourceScaleY = sourceHeight / canvasHeight;
-
-    final ui.Image image = await renderCanvasImage(
-      width: sourceWidth,
-      height: sourceHeight,
-      draw: (ui.Canvas canvas) {
-        canvas.scale(sourceScaleX, sourceScaleY);
-        if (sampleAllLayers) {
-          for (final LayerProvider layer in layers.list.reversed) {
-            if (layer.isVisible) {
-              layer.renderLayer(canvas, compositeBounds: Offset.zero & layers.size);
-            }
-          }
-          return;
-        }
-        layers.selectedLayer.renderLayer(
-          canvas,
-          compositeBounds: Offset.zero & layers.size,
-        );
-      },
-    );
-
-    try {
-      final Uint8List? pixels = await convertImageToUint8List(image);
-      if (pixels == null) {
-        return null;
-      }
-
-      wandSelection.storeCache(
-        signature: signature,
-        pixels: pixels,
-        width: image.width,
-        height: image.height,
-        canvasScaleX: sourceScaleX,
-        canvasScaleY: sourceScaleY,
-      );
-
-      return FillImageData(
-        pixels: pixels,
-        width: image.width,
-        height: image.height,
-        canvasScaleX: sourceScaleX,
-        canvasScaleY: sourceScaleY,
-      );
-    } finally {
-      image.dispose();
-    }
-  }
-
-  /// Creates a stable fingerprint for wand source cache invalidation.
-  /// Includes the sampling mode in the signature.
-  int _createSelectedLayerFloodSourceSignature({
-    required bool sampleAllLayers,
-  }) {
-    if (sampleAllLayers) {
-      return Object.hash(
-        layers,
-        layers.width.toInt(),
-        layers.height.toInt(),
-        sampleAllLayers,
-        layers.list
-            .map(
-              (LayerProvider l) => Object.hash(
-                l,
-                l.actionStack.length,
-                l.redoStack.length,
-                l.lastUserAction,
-                l.isVisible,
-              ),
-            )
-            .toList(),
-      );
-    }
-
-    final LayerProvider layer = layers.selectedLayer;
-    return Object.hash(
-      layer,
-      layers.selectedLayerIndex,
-      layers.width.toInt(),
-      layers.height.toInt(),
-      layer.actionStack.length,
-      layer.redoStack.length,
-      layer.lastUserAction,
-      sampleAllLayers,
-    );
-  }
+  }) => wandSourceSampler.sample(layers, sampleAllLayers: sampleAllLayers);
 }

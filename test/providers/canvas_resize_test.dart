@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -116,7 +118,7 @@ void main() {
       test('Layer positions are offset when canvas is resized', () {
         // Add a drawing action at a known position
         final LayerProvider layer = layersProvider.selectedLayer;
-        final UserActionDrawing action = UserActionDrawing(
+        final UserActionDrawing action = StrokeAction(
           action: ActionType.line,
           positions: <Offset>[const Offset(100, 100), const Offset(200, 200)],
           brush: MyBrush(color: Colors.black, size: 2.0),
@@ -143,11 +145,17 @@ void main() {
       test('Image position is offset when canvas is resized', () {
         final LayerProvider layer = layersProvider.selectedLayer;
 
-        // Create a dummy image action
-        final UserActionDrawing imageAction = UserActionDrawing(
-          action: ActionType.image,
+        final ui.PictureRecorder recorder = ui.PictureRecorder();
+        Canvas(recorder).drawRect(
+          const Rect.fromLTWH(0, 0, 100, 100),
+          Paint()..color = Colors.red,
+        );
+        final ui.Image dummyImage = recorder.endRecording().toImageSync(100, 100);
+        addTearDown(dummyImage.dispose);
+
+        final UserActionDrawing imageAction = ImageAction(
           positions: <Offset>[const Offset(50, 50), const Offset(150, 150)],
-          image: null, // Would be a real image in practice
+          image: dummyImage,
         );
         layer.appendDrawingAction(imageAction);
 
@@ -170,14 +178,14 @@ void main() {
         final LayerProvider layer2 = layersProvider.get(1);
 
         // Add actions to both layers
-        final UserActionDrawing action1 = UserActionDrawing(
+        final UserActionDrawing action1 = StrokeAction(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(100, 100), const Offset(150, 150)],
           brush: MyBrush(color: Colors.red, size: 2.0),
         );
         layer1.appendDrawingAction(action1);
 
-        final UserActionDrawing action2 = UserActionDrawing(
+        final UserActionDrawing action2 = StrokeAction(
           action: ActionType.pencil,
           positions: <Offset>[const Offset(200, 200), const Offset(250, 250)],
           brush: MyBrush(color: Colors.blue, size: 2.0),

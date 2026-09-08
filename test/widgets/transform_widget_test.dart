@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/transform_model.dart';
 import 'package:fpaint/widgets/app_tooltip.dart';
@@ -33,8 +34,7 @@ Widget _buildHarness({
         builder: (BuildContext context, void Function(void Function()) setState) {
           return TransformWidget(
             model: model,
-            canvasOffset: Offset.zero,
-            canvasScale: 1,
+            viewport: ViewportTransform.identity(),
             onChanged: () {
               setState(() {});
               onChanged();

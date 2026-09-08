@@ -63,8 +63,7 @@ extension LayerDisplayCache on LayerProvider {
     double requiredScale,
     void Function() requestRebuild, {
     required Rect viewportBounds,
-    required Offset canvasOffset,
-    required double canvasScale,
+    required ViewportTransform viewport,
     required Rect visibleCanvasBounds,
     required FilterQuality filterQuality,
   }) {
@@ -77,8 +76,9 @@ extension LayerDisplayCache on LayerProvider {
     final ui.Image? cache = _displayCache;
     if (cacheEligible && cache != null) {
       canvas.save();
-      canvas.translate(canvasOffset.dx, canvasOffset.dy);
-      canvas.scale(canvasScale);
+      // Rotation enters here, at composite time. The cache itself stays in
+      // unrotated canvas space, so a rotate gesture never invalidates it.
+      canvas.transform(viewport.matrix.storage);
       canvas.clipRect(visibleCanvasBounds, doAntiAlias: false);
       canvas.drawImageRect(
         cache,
@@ -99,8 +99,7 @@ extension LayerDisplayCache on LayerProvider {
     renderLayerInViewport(
       canvas,
       viewportBounds: viewportBounds,
-      canvasOffset: canvasOffset,
-      canvasScale: canvasScale,
+      viewport: viewport,
       visibleCanvasBounds: visibleCanvasBounds,
     );
     if (cacheEligible) {

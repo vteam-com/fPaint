@@ -33,7 +33,7 @@ void main() {
     });
 
     test('Add user action', () {
-      final UserActionDrawing userAction = UserActionDrawing(
+      final UserActionDrawing userAction = StrokeAction(
         action: ActionType.brush,
         positions: <ui.Offset>[Offset.zero],
         brush: MyBrush(
@@ -49,7 +49,7 @@ void main() {
     });
 
     test('Undo and redo actions', () {
-      final UserActionDrawing userAction = UserActionDrawing(
+      final UserActionDrawing userAction = StrokeAction(
         action: ActionType.brush,
         positions: <ui.Offset>[Offset.zero],
         brush: MyBrush(
@@ -90,7 +90,7 @@ void main() {
       layer.blendMode = ui.BlendMode.multiply;
 
       // Add some content to the layer
-      final UserActionDrawing userAction = UserActionDrawing(
+      final UserActionDrawing userAction = StrokeAction(
         action: ActionType.brush,
         positions: <ui.Offset>[Offset.zero, const Offset(10, 10)],
         brush: MyBrush(
@@ -155,7 +155,7 @@ void main() {
         layer.blendMode = mode;
 
         // Add some content to ensure there's something to render
-        final UserActionDrawing userAction = UserActionDrawing(
+        final UserActionDrawing userAction = StrokeAction(
           action: ActionType.brush,
           positions: <ui.Offset>[Offset.zero, const Offset(5, 5)],
           brush: MyBrush(color: Colors.red, size: 2),
@@ -245,7 +245,7 @@ void main() {
       layer.blendMode = ui.BlendMode.darken;
 
       // Add some drawing content
-      final UserActionDrawing userAction = UserActionDrawing(
+      final UserActionDrawing userAction = StrokeAction(
         action: ActionType.brush,
         positions: <ui.Offset>[const Offset(5, 5)],
         brush: MyBrush(

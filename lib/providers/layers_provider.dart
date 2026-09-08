@@ -8,16 +8,20 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 import 'package:fpaint/providers/recent_colors.dart';
+import 'package:fpaint/providers/top_colors_analyzer.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:logging/logging.dart';
 
 // Exports
 export 'package:fpaint/providers/layer_provider.dart';
+
+part 'layers_provider_canvas_geometry.dart';
 
 final Logger _log = Logger(logNameLayersProvider);
 
@@ -229,6 +233,30 @@ class LayersProvider extends ChangeNotifier {
       _scale = clamped;
     }
   }
+
+  ///-------------------------------------------
+  /// Rotation
+  /// The viewport rotation in radians, clockwise-positive.
+  ///
+  /// A pure *view* property, exactly like [scale]: it turns the canvas under the
+  /// user's hand so an awkward stroke becomes comfortable. No pixel is altered
+  /// and nothing enters the undo stack, which is what separates it from
+  /// [LayersProviderCanvasGeometry.rotateCanvas90Clockwise].
+  double _rotation = 0;
+
+  /// Gets the viewport rotation in radians.
+  double get rotation => _rotation;
+
+  /// Sets the viewport rotation, normalized to (-pi, pi].
+  set rotation(double value) {
+    final double normalized = normalizeRadians(value);
+    if (_rotation != normalized) {
+      _rotation = normalized;
+    }
+  }
+
+  /// Whether the viewport is rotated away from its upright orientation.
+  bool get isRotated => _rotation != 0;
 
   /// Schedules an async (re)build of [layer]'s display-resolution cache for the
   /// current on-screen [requiredScale], then repaints the canvas so the painter
@@ -623,8 +651,7 @@ class LayersProvider extends ChangeNotifier {
     final ui.Image flattenedLayerImage = layer.toImageForStorage(size);
 
     return <UserActionDrawing>[
-      UserActionDrawing(
-        action: ActionType.image,
+      ImageAction(
         positions: <Offset>[
           Offset.zero,
           Offset(size.width, size.height),
@@ -705,13 +732,14 @@ class LayersProvider extends ChangeNotifier {
   }
 
   /// The list of top colors used in the canvas.
-  List<ColorUsage> topColors = <ColorUsage>[
-    ColorUsage(AppColors.white, 1),
-    ColorUsage(AppColors.black, 1),
-  ];
+  List<ColorUsage> topColors = TopColorsAnalyzer.defaultColors;
 
   /// The most recently committed colors, including the neutral palette.
   final RecentColors recentColors = RecentColors();
+
+  /// Aggregates the canvas palette. Composed so the analysis stays testable
+  /// without a provider and this class keeps owning only the layer stack.
+  final TopColorsAnalyzer _topColorsAnalyzer = const TopColorsAnalyzer();
 
   /// Evaluates the top colors used in the canvas.
   void evaluateTopColor() {
@@ -723,38 +751,9 @@ class LayersProvider extends ChangeNotifier {
 
   /// Retrieves the top most used colors across all layers.
   ///
-  /// This method iterates through all layers, collects the top color usage for each layer,
-  /// and then aggregates the results to find the overall top 10 most used colors. The
-  /// percentage for each color is calculated based on the total number of layers.
-  ///
-  /// Returns:
-  ///   A list of [ColorUsage] objects representing the top 10 most used colors.
-  Future<List<ColorUsage>> getTopColorUsed() async {
-    List<ColorUsage> topColors = <ColorUsage>[];
-    final int totalLayers = _list.length;
-
-    for (final LayerProvider layer in _list) {
-      if (layer.isVisible) {
-        for (final ColorUsage colorUsed in layer.topColorsUsed) {
-          final ColorUsage existingColor = topColors.firstWhere(
-            (ColorUsage c) => c.color == colorUsed.color,
-            orElse: () => colorUsed,
-          );
-          if (existingColor == colorUsed) {
-            topColors.add(colorUsed);
-          } else {
-            existingColor.percentage += colorUsed.percentage / totalLayers;
-          }
-        }
-      }
-    }
-
-    topColors.sort(
-      (ColorUsage a, ColorUsage b) => b.percentage.compareTo(a.percentage),
-    );
-    topColors = topColors.take(AppLimits.topColorCount).toList();
-    return topColors;
-  }
+  /// Returns a list of [ColorUsage] objects representing the most used colors,
+  /// capped at [AppLimits.topColorCount].
+  Future<List<ColorUsage>> getTopColorUsed() async => _topColorsAnalyzer.analyze(_list);
 
   /// Captures the canvas panel to an image.
   Future<ui.Image> capturePainterToImage() async {
@@ -801,87 +800,6 @@ class LayersProvider extends ChangeNotifier {
         canvas.translate(-region.left, -region.top);
         layer.renderLayer(canvas);
       },
-    );
-  }
-
-  /// Rotates the entire canvas and all its layers 90 degrees clockwise.
-  Future<void> rotateCanvas90Clockwise() async {
-    final Size oldSize = Size(width, height);
-    final Size newSize = Size(height, width); // Swapped dimensions
-
-    // Need to capture the state of all layers for undo.
-    // This is tricky because layer.rotate90Clockwise modifies actions in place.
-    // For a true undo, we'd need to implement rotate90CounterClockwise or store/restore actionStacks.
-    // For now, the backward action will rotate 3 more times to get back to original.
-
-    await _undoProvider.executeActionAsync(
-      name: 'Rotate Canvas 90° clock wise',
-      forward: () async {
-        final List<ui.Image> replaced = <ui.Image>[];
-        for (final LayerProvider layer in _list) {
-          replaced.addAll(await layer.rotate90Clockwise(oldSize));
-          layer.size = newSize; // Update individual layer's understanding of canvas size
-        }
-        this.size = newSize; // Update LayersProvider's canvas size
-        disposeCommittedImagesIfUnreferenced(replaced);
-        this.update();
-      },
-      backward: () async {
-        // Rotate 3 times to get back to the original orientation.
-        // Each rotation needs the "current" old size before that specific rotation.
-        Size currentOldSize = newSize; // Size before the first CCW rotation
-        Size nextSize = oldSize; // Size after the first CCW rotation
-
-        final List<ui.Image> replaced = <ui.Image>[];
-        for (int i = 0; i < AppMath.triple; i++) {
-          for (final LayerProvider layer in _list) {
-            // Effectively rotating counter-clockwise by passing the "new" size as old,
-            // because rotate90Clockwise expects the size *before* its CW rotation.
-            replaced.addAll(await layer.rotate90Clockwise(currentOldSize));
-            layer.size = nextSize;
-          }
-          this.size = nextSize;
-
-          // Prepare for next rotation
-          currentOldSize = this.size;
-          nextSize = Size(currentOldSize.height, currentOldSize.width);
-        }
-        disposeCommittedImagesIfUnreferenced(replaced);
-        this.update();
-      },
-    );
-  }
-
-  /// Flips the entire canvas and all its layers horizontally (left ↔ right).
-  Future<void> flipCanvasHorizontal(String actionName) => _flipCanvas(isHorizontal: true, actionName: actionName);
-
-  /// Flips the entire canvas and all its layers vertically (top ↔ bottom).
-  Future<void> flipCanvasVertical(String actionName) => _flipCanvas(isHorizontal: false, actionName: actionName);
-
-  /// Shared implementation for flipping all layers on one axis.
-  Future<void> _flipCanvas({
-    required bool isHorizontal,
-    required String actionName,
-  }) async {
-    final Size canvasSize = Size(width, height);
-
-    Future<void> applyFlip() async {
-      final List<ui.Image> replaced = <ui.Image>[];
-      for (final LayerProvider layer in _list) {
-        if (isHorizontal) {
-          replaced.addAll(await layer.flipHorizontal(canvasSize));
-        } else {
-          replaced.addAll(await layer.flipVertical(canvasSize));
-        }
-      }
-      disposeCommittedImagesIfUnreferenced(replaced);
-      this.update();
-    }
-
-    await _undoProvider.executeActionAsync(
-      name: actionName,
-      forward: applyFlip,
-      backward: applyFlip,
     );
   }
 

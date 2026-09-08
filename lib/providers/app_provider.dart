@@ -11,6 +11,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/brush_grain.dart';
 import 'package:fpaint/models/effect_brush_model.dart';
 import 'package:fpaint/models/effect_preview_model.dart';
@@ -29,8 +30,13 @@ import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layer_crop_state.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/pixel_brush_commit.dart';
+import 'package:fpaint/providers/selection_effect_preview_state.dart';
+import 'package:fpaint/providers/selection_effect_renderer.dart';
+import 'package:fpaint/providers/selector_geometry_controller.dart';
+import 'package:fpaint/providers/selector_geometry_host.dart';
 import 'package:fpaint/providers/undo_provider.dart';
-import 'package:vector_math/vector_math_64.dart';
+import 'package:fpaint/providers/wand_selection_manager_cache.dart';
+import 'package:fpaint/providers/wand_source_sampler.dart';
 
 // Exports
 export 'package:fpaint/providers/layers_provider.dart';
@@ -53,7 +59,7 @@ part 'wand_selection_request.dart';
 /// including the canvas, layers, and selection tools. It provides methods for interacting
 /// with the canvas, such as clearing the canvas, converting between canvas and screen
 /// coordinates, and performing region-based operations like erasing and cutting.
-class AppProvider extends ChangeNotifier {
+class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   AppProvider({
     AppPreferences? preferences,
     LayersProvider? layersProvider,
@@ -86,6 +92,7 @@ class AppProvider extends ChangeNotifier {
 
   // Live Edge Detection tolerance HUD: the value (raw 1–100) and main-view
   // anchor shown while dragging the wand tolerance. Null when not dragging.
+  bool _isViewportRotationFeedbackVisible = false;
   int? _wandToleranceHudTolerance;
   Offset? _wandToleranceHudPosition;
 
@@ -108,6 +115,7 @@ class AppProvider extends ChangeNotifier {
     layers.selectedLayerIndex = 0;
     canvasOffset = Offset.zero;
     layers.scale = 1;
+    layers.rotation = 0;
   }
 
   /// Preferred app locale, or null to follow system locale.
@@ -216,6 +224,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Rebuilds the main canvas and overlay surface without notifying the full app shell.
+  @override
   void repaintMainView() {
     _mainViewRepaintNotifier.notifyListeners();
   }
@@ -226,6 +235,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Rebuilds tool-option UI without notifying the full app shell.
+  @override
   void repaintToolOptions() {
     _toolOptionsNotifier.notifyListeners();
   }
@@ -252,6 +262,12 @@ class AppProvider extends ChangeNotifier {
 
   /// The offset of the canvas.
   Offset canvasOffset = Offset.zero;
+
+  /// Memoized [AppProviderCanvas.viewportTransform], invalidated by comparing
+  /// the viewport fields rather than by every mutation site remembering to
+  /// clear it.
+  @visibleForTesting
+  ViewportTransform? cachedViewportTransform;
 
   //=============================================================================
   // All things Layers
@@ -612,6 +628,7 @@ class AppProvider extends ChangeNotifier {
   int get tolerance => _tolerance;
 
   /// Sets the tolerance.
+  @override
   set tolerance(int value) {
     _tolerance = max(1, min(AppLimits.percentMax, value));
     repaintToolOptions();
@@ -828,7 +845,62 @@ class AppProvider extends ChangeNotifier {
   // Selector
 
   /// The selector model.
+  @override
   SelectorModel selectorModel = SelectorModel();
+
+  /// Shapes the active selection (create, move, scale, resize, rotate).
+  ///
+  /// Composed rather than mixed in, so selection geometry stays testable
+  /// against [SelectorGeometryHost] without building the whole provider.
+  late final SelectorGeometryController selectorGeometry = SelectorGeometryController(this);
+
+  /// Current canvas zoom. Part of [SelectorGeometryHost].
+  @override
+  double get canvasScale => layers.scale;
+
+  /// Current viewport rotation in radians, clockwise-positive.
+  double get canvasRotation => layers.rotation;
+
+  /// Converts a screen-space drag delta into canvas space.
+  /// Part of [SelectorGeometryHost].
+  @override
+  Offset canvasDeltaFromScreen(Offset screenDelta) => deltaToCanvas(screenDelta);
+
+  /// Canvas width in pixels. Part of [SelectorGeometryHost].
+  @override
+  double get canvasWidth => layers.width;
+
+  /// Canvas height in pixels. Part of [SelectorGeometryHost].
+  @override
+  double get canvasHeight => layers.height;
+
+  /// Cancels any live effect preview, discarding the pending result.
+  ///
+  /// Declared on the class (not the effects extension) because
+  /// [SelectorGeometryHost] requires it: selection changes must drop a preview
+  /// that was captured against the old region.
+  @override
+  void cancelEffectPreview() {
+    if (!effectPreviewModel.isVisible) {
+      return;
+    }
+
+    effectPreviewModel.clear();
+    effectPreviewRenderVersion++;
+    repaintToolOptions();
+    update();
+  }
+
+  /// Drops a queued magic-wand sample. Part of [SelectorGeometryHost].
+  @override
+  void cancelPendingWandRequest() => wandSelection.cancelPendingRequest();
+
+  /// Queues a magic-wand sample. Part of [SelectorGeometryHost].
+  @override
+  void queueWandRequest({required Offset position, required bool sampleAllLayers}) {
+    wandSelection.queueRequest(position: position, sampleAllLayers: sampleAllLayers);
+    unawaited(_processPendingWandSelectionRequests());
+  }
 
   /// Owns the floating transform/placement session state (transform overlay,
   /// prepared image placement, cross-layer lift). See [TransformSession].
@@ -846,6 +918,12 @@ class AppProvider extends ChangeNotifier {
   /// The effect preview model for live selection-effect intensity updates.
   final EffectPreviewModel effectPreviewModel = EffectPreviewModel();
 
+  /// Pure image pipeline behind effect preview and commit.
+  ///
+  /// Composed rather than inherited so the effect maths stays testable on its
+  /// own and this provider keeps only the session lifecycle.
+  final SelectionEffectRenderer effectRenderer = const SelectionEffectRenderer();
+
   /// The paint-mode state for brushing an Adjust effect onto the canvas.
   final EffectBrushModel effectBrushModel = EffectBrushModel();
 
@@ -854,6 +932,12 @@ class AppProvider extends ChangeNotifier {
 
   /// Owns the magic-wand selection request queue and rasterized source cache.
   final WandSelectionManager wandSelection = WandSelectionManager();
+
+  /// Rasterizes the pixels the wand and paint bucket sample from.
+  ///
+  /// Composed over [wandSelection]'s cache so sampling stays independent of the
+  /// selection state it eventually feeds.
+  late final WandSourceSampler wandSourceSampler = WandSourceSampler(wandSelection);
 
   /// Owns the in-progress pixel-brush/effect stroke and smudge source cache.
   final PixelBrushStrokeSession pixelBrushSession = PixelBrushStrokeSession();
@@ -920,6 +1004,7 @@ class AppProvider extends ChangeNotifier {
   /// Notifies all listeners that the model has been updated.
   /// This method should be called whenever the state of the model changes
   /// to ensure that any UI components observing the model are updated.
+  @override
   void update() {
     notifyListeners();
   }
