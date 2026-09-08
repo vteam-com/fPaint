@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/shortcut_tooltip.dart';
 import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
@@ -11,33 +11,42 @@ class ShortcutsHelpDialog extends StatelessWidget {
   const ShortcutsHelpDialog({super.key});
   @override
   Widget build(BuildContext context) {
-    final String mod = _getPlatformModifier(context);
-    final String moveDuplicateModifier = _getMoveDuplicateModifier();
-    final String duplicateMoveNewLayerShortcut =
-        '${ShortcutModifiers.shift} + $moveDuplicateModifier + ${ShortcutActions.dragSelection}';
+    final String mod = primaryModifierShortcutLabel();
+    final String shift = shiftModifierShortcutLabel();
+    // Duplicate-on-drag and selection-subtract use different modifiers off Apple platforms.
+    final String duplicateDragModifier = duplicateDragModifierShortcutLabel();
+    final String subtractModifier = secondaryModifierShortcutLabel();
+    final String duplicateMoveNewLayerShortcut = shortcutCombination(<String>[
+      shift,
+      duplicateDragModifier,
+      ShortcutActions.dragSelection,
+    ]);
     final AppLocalizations l10n = context.l10n;
     final List<({String title, List<Map<String, String>> shortcuts})> shortcutGroups =
         <({String title, List<Map<String, String>> shortcuts})>[
           (
             title: ShortcutCategories.fileOperations,
             shortcuts: <Map<String, String>>[
-              _shortcutEntry('$mod ${ShortcutKeys.s}', ShortcutActions.save),
-              _shortcutEntry('$mod ${ShortcutKeys.o}', ShortcutActions.open),
-              _shortcutEntry('$mod ${ShortcutKeys.n}', ShortcutActions.newCanvas),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.s]), ShortcutActions.save),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.o]), ShortcutActions.open),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.n]), ShortcutActions.newCanvas),
             ],
           ),
           (
             title: ShortcutCategories.editing,
             shortcuts: <Map<String, String>>[
-              _shortcutEntry('$mod ${ShortcutKeys.z}', ShortcutActions.undo),
-              _shortcutEntry('$mod ${ShortcutKeys.y}', ShortcutActions.redo),
-              _shortcutEntry('$mod ${ShortcutKeys.x}', ShortcutActions.cut),
-              _shortcutEntry('$mod ${ShortcutKeys.c}', ShortcutActions.copy),
-              _shortcutEntry('$mod ${ShortcutKeys.v}', ShortcutActions.paste),
-              _shortcutEntry('$mod ${ShortcutKeys.d}', ShortcutActions.duplicateSameLayer),
-              _shortcutEntry('$mod ${ShortcutModifiers.shift} ${ShortcutKeys.d}', ShortcutActions.duplicateNewLayer),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.z]), ShortcutActions.undo),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.y]), ShortcutActions.redo),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.x]), ShortcutActions.cut),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.c]), ShortcutActions.copy),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.v]), ShortcutActions.paste),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.d]), ShortcutActions.duplicateSameLayer),
               _shortcutEntry(
-                '$moveDuplicateModifier + ${ShortcutActions.dragSelection}',
+                shortcutCombination(<String>[mod, shift, ShortcutKeys.d]),
+                ShortcutActions.duplicateNewLayer,
+              ),
+              _shortcutEntry(
+                shortcutCombination(<String>[duplicateDragModifier, ShortcutActions.dragSelection]),
                 ShortcutActions.duplicateSameLayer,
               ),
               _shortcutEntry(duplicateMoveNewLayerShortcut, ShortcutActions.duplicateNewLayer),
@@ -46,22 +55,22 @@ class ShortcutsHelpDialog extends StatelessWidget {
           (
             title: ShortcutCategories.view,
             shortcuts: <Map<String, String>>[
-              _shortcutEntry('$mod +', ShortcutActions.zoomIn),
-              _shortcutEntry('$mod -', ShortcutActions.zoomOut),
-              _shortcutEntry('$mod 0', ShortcutActions.resetZoom),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.plus]), ShortcutActions.zoomIn),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.minus]), ShortcutActions.zoomOut),
+              _shortcutEntry(shortcutCombination(<String>[mod, ShortcutKeys.zero]), ShortcutActions.resetZoom),
               _shortcutEntry(ShortcutKeys.bracketLeft, ShortcutActions.rotateViewCounterClockwise),
               _shortcutEntry(ShortcutKeys.bracketRight, ShortcutActions.rotateViewClockwise),
               _shortcutEntry(
-                '${ShortcutModifiers.shift} + ${ShortcutKeys.bracketLeft}',
+                shortcutCombination(<String>[shift, ShortcutKeys.bracketLeft]),
                 ShortcutActions.resetViewRotation,
               ),
               _shortcutEntry(ShortcutActions.twoFingerTwist, ShortcutActions.rotateViewTwist),
               _shortcutEntry(
-                '${ShortcutModifiers.shift} + ${ShortcutActions.rightDragSelection}',
+                shortcutCombination(<String>[shift, ShortcutActions.rightDragSelection]),
                 ShortcutActions.rotateViewDrag,
               ),
               _shortcutEntry(ShortcutKeys.tab, l10n.toggleShell),
-              _shortcutEntry(ShortcutActions.showKeyboardShortcuts, l10n.keyboardShortcuts),
+              _shortcutEntry(_showKeyboardShortcutsLabel(), l10n.keyboardShortcuts),
             ],
           ),
           (
@@ -77,20 +86,20 @@ class ShortcutsHelpDialog extends StatelessWidget {
           (
             title: ShortcutCategories.selection,
             shortcuts: <Map<String, String>>[
-              _shortcutEntry(ShortcutModifiers.shift, ShortcutActions.addToSelection),
-              _shortcutEntry(_getSelectionSubtractModifier(), ShortcutActions.subtractFromSelection),
+              _shortcutEntry(shift, ShortcutActions.addToSelection),
+              _shortcutEntry(subtractModifier, ShortcutActions.subtractFromSelection),
               _shortcutEntry(
-                '${ShortcutModifiers.shift} + ${_getSelectionSubtractModifier()}',
+                shortcutCombination(<String>[shift, subtractModifier]),
                 ShortcutActions.intersectWithSelection,
               ),
-              _shortcutEntry(_getPlatformModifier(context), ShortcutActions.wandSampleAllLayers),
-              _shortcutEntry(_getPlatformModifier(context), ShortcutActions.floodFillSampleAllLayers),
+              _shortcutEntry(mod, ShortcutActions.wandSampleAllLayers),
+              _shortcutEntry(mod, ShortcutActions.floodFillSampleAllLayers),
             ],
           ),
           (
             title: ShortcutCategories.layers,
             shortcuts: <Map<String, String>>[
-              _shortcutEntry('$mod ${ShortcutModifiers.shift} ${ShortcutKeys.n}', ShortcutActions.newLayer),
+              _shortcutEntry(shortcutCombination(<String>[mod, shift, ShortcutKeys.n]), ShortcutActions.newLayer),
               _shortcutEntry(ShortcutLabels.delete, ShortcutActions.deleteLayer),
             ],
           ),
@@ -131,33 +140,37 @@ class ShortcutsHelpDialog extends StatelessWidget {
     );
   }
 
-  /// Builds a single shortcut row with key caps and description text.
+  /// Builds a single shortcut row: key cap on the left, description to its right.
   Widget _buildShortcut(
     String keys,
     String description, {
     required double groupWidth,
   }) {
-    final bool shouldStack = _shouldStackShortcutRow(keys, groupWidth);
+    // A fixed-width gutter keeps every description starting at the same x, so a
+    // cap and its label read as one pair. Narrow groups let the cap self-size
+    // instead, otherwise a long label would squeeze the description away.
+    final bool useKeyColumn = groupWidth >= AppLayout.shortcutHelpKeyColumnMinGroupWidth;
+    final Widget keyCap = _buildShortcutKeys(keys);
 
     return Padding(
       padding: const EdgeInsets.only(left: AppSpacing.large, bottom: AppSpacing.small),
-      child: shouldStack
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _buildShortcutKeys(keys),
-                const SizedBox(height: AppSpacing.small),
-                AppText(description),
-              ],
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          if (useKeyColumn)
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: AppLayout.shortcutHelpKeyColumnWidth),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: keyCap,
+              ),
             )
-          : Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _buildShortcutKeys(keys),
-                const SizedBox(width: AppSpacing.large),
-                Expanded(child: AppText(description)),
-              ],
-            ),
+          else
+            keyCap,
+          const SizedBox(width: AppSpacing.medium),
+          Expanded(child: AppText(description)),
+        ],
+      ),
     );
   }
 
@@ -209,21 +222,6 @@ class ShortcutsHelpDialog extends StatelessWidget {
     );
   }
 
-  String _getMoveDuplicateModifier() {
-    final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
-    return isMacOS ? ShortcutModifiers.option : ShortcutModifiers.ctrl;
-  }
-
-  String _getPlatformModifier(BuildContext _) {
-    final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
-    return isMacOS ? ShortcutModifiers.cmd : ShortcutModifiers.ctrl;
-  }
-
-  String _getSelectionSubtractModifier() {
-    final bool isMacOS = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
-    return isMacOS ? ShortcutModifiers.option : ShortcutModifiers.alt;
-  }
-
   Map<String, String> _shortcutEntry(String keys, String description) {
     return <String, String>{
       ShortcutMapKeys.keys: keys,
@@ -239,8 +237,9 @@ class ShortcutsHelpDialog extends StatelessWidget {
     return (availableWidth - AppSpacing.large) / AppMath.pair;
   }
 
-  bool _shouldStackShortcutRow(String keys, double groupWidth) {
-    return groupWidth < AppLayout.shortcutHelpRowStackBreakpoint ||
-        keys.length > AppLayout.shortcutHelpInlineKeyMaxCharacters;
+  /// Builds the label for the shortcut that opens this dialog.
+  String _showKeyboardShortcutsLabel() {
+    final String slashShortcut = shortcutCombination(<String>[controlModifierShortcutLabel(), ShortcutKeys.slash]);
+    return '$slashShortcut${ShortcutActions.showKeyboardShortcutsSeparator}${ShortcutKeys.f1}';
   }
 }

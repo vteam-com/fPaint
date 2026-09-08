@@ -245,7 +245,7 @@ void main() {
       );
 
       expect(pasteTooltip, findsOneWidget);
-      expect(tester.widget<AppTooltip>(pasteTooltip).message, 'Paste (Ctrl V)');
+      expect(tester.widget<AppTooltip>(pasteTooltip).message, 'Paste (Ctrl + V)');
     });
 
     testWidgets('shows shortcut inside undo tooltip when undo is available', (WidgetTester tester) async {
@@ -268,7 +268,7 @@ void main() {
       );
 
       expect(undoTooltip, findsOneWidget);
-      expect(tester.widget<AppTooltip>(undoTooltip).message, contains('(Ctrl Z)'));
+      expect(tester.widget<AppTooltip>(undoTooltip).message, contains('(Ctrl + Z)'));
     });
 
     testWidgets('shows selector key inside selector tooltip when selector is inactive', (
@@ -351,11 +351,11 @@ void main() {
       expect(zoomInTooltip, findsOneWidget);
       expect(zoomOutTooltip, findsOneWidget);
       expect(resetZoomTooltip, findsOneWidget);
-      expect(tester.widget<AppTooltip>(zoomInTooltip).message, 'Zoom In (Ctrl +)');
-      expect(tester.widget<AppTooltip>(zoomOutTooltip).message, 'Zoom Out (Ctrl -)');
+      expect(tester.widget<AppTooltip>(zoomInTooltip).message, 'Zoom In (Ctrl + +)');
+      expect(tester.widget<AppTooltip>(zoomOutTooltip).message, 'Zoom Out (Ctrl + -)');
       expect(
         tester.widget<AppTooltip>(resetZoomTooltip).message,
-        'Reset Zoom (Ctrl 0)\n100%\n1024\n768',
+        'Reset Zoom (Ctrl + 0)\n100%\n1024\n768',
       );
     });
 

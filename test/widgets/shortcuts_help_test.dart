@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,10 +18,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 void main() {
   final bool isApplePlatform =
       defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
-  final String duplicateShortcutLabel = '${isApplePlatform ? 'Cmd' : 'Ctrl'} D';
-  final String duplicateNewLayerShortcutLabel = '${isApplePlatform ? 'Cmd' : 'Ctrl'} Shift D';
-  final String duplicateMoveShortcutLabel = '${isApplePlatform ? 'Option' : 'Ctrl'} + Drag Selection';
-  final String duplicateMoveNewLayerShortcutLabel = 'Shift + ${isApplePlatform ? 'Option' : 'Ctrl'} + Drag Selection';
+  // Apple platforms show the key glyphs printed on Apple keyboards; other platforms spell them out.
+  final String primaryModifier = isApplePlatform ? '\u2318' : 'Ctrl';
+  final String subtractModifier = isApplePlatform ? '\u2325' : 'Alt';
+  // Duplicate-on-drag uses Option on Apple platforms but Control elsewhere.
+  final String duplicateDragModifier = isApplePlatform ? '\u2325' : 'Ctrl';
+  final String shiftModifier = isApplePlatform ? '\u21E7' : 'Shift';
+  final String controlModifier = isApplePlatform ? '\u2303' : 'Ctrl';
+  final String duplicateShortcutLabel = '$primaryModifier + D';
+  final String duplicateNewLayerShortcutLabel = '$primaryModifier + $shiftModifier + D';
+  final String duplicateMoveShortcutLabel = '$duplicateDragModifier + Drag Selection';
+  final String duplicateMoveNewLayerShortcutLabel = '$shiftModifier + $duplicateDragModifier + Drag Selection';
   const String duplicateSameLayerDescription = 'Duplicate in Same Layer';
   const String duplicateNewLayerDescription = 'Duplicate on New Layer';
 
@@ -154,13 +161,10 @@ void main() {
       expect(find.text('Edge Detection: Sample All Layers'), findsOneWidget);
       expect(find.text('Flood Fill: Sample All Layers'), findsOneWidget);
       // Shift key cap must appear for Add to Selection
-      expect(find.text('Shift'), findsAtLeastNWidgets(1));
-      // Platform subtract modifier: Option on macOS/iOS, Alt on other platforms
-      final bool isApple = defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
-      final String subtractModifier = isApple ? 'Option' : 'Alt';
+      expect(find.text(shiftModifier), findsAtLeastNWidgets(1));
+      // Platform subtract modifier: Option glyph on macOS/iOS, Alt on other platforms
       expect(find.textContaining(subtractModifier), findsAtLeastNWidgets(1));
-      final String wandModifier = isApple ? 'Cmd' : 'Ctrl';
-      expect(find.textContaining(wandModifier), findsAtLeastNWidgets(1));
+      expect(find.textContaining(primaryModifier), findsAtLeastNWidgets(1));
     });
 
     testWidgets('shows Save shortcut', (WidgetTester tester) async {
@@ -188,10 +192,9 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
-      // Should find either Cmd or Ctrl depending on platform
-      final bool hasCmd = find.textContaining('Cmd').evaluate().isNotEmpty;
-      final bool hasCtrl = find.textContaining('Ctrl').evaluate().isNotEmpty;
-      expect(hasCmd || hasCtrl, isTrue);
+      // Should find the Command glyph on Apple platforms and Ctrl elsewhere
+      expect(find.textContaining(primaryModifier), findsAtLeastNWidgets(1));
+      expect(find.textContaining(isApplePlatform ? 'Cmd' : '\u2318'), findsNothing);
     });
 
     testWidgets('shows Brush Tool shortcut', (WidgetTester tester) async {
@@ -220,7 +223,7 @@ void main() {
       await tester.pumpWidget(buildTestWidget());
       await tester.pump();
 
-      expect(find.text('Ctrl /, F1'), findsOneWidget);
+      expect(find.text('$controlModifier + /, F1'), findsOneWidget);
       expect(find.text('Keyboard Shortcuts'), findsAtLeastNWidgets(2));
     });
 
@@ -250,6 +253,61 @@ void main() {
 
       final Size descriptionSize = tester.getSize(find.text(duplicateSameLayerDescription).first);
       expect(descriptionSize.width, greaterThan(AppLayout.shortcutHelpReadableTextMinWidth));
+    });
+
+    testWidgets('puts each description to the right of its key cap', (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+
+      // The description must start after the cap ends, never below it.
+      final Rect capRect = tester.getRect(find.text(duplicateShortcutLabel));
+      final Rect descriptionRect = tester.getRect(find.text(duplicateSameLayerDescription).first);
+      expect(descriptionRect.left, greaterThan(capRect.right));
+      expect(descriptionRect.top, lessThan(capRect.bottom));
+    });
+
+    testWidgets('aligns descriptions on a shared key-cap gutter', (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+
+      // Short and long caps in the same column must not shift the description
+      // column, so a cap and its label always read as one pair.
+      final double shortCapRowLeft = tester.getTopLeft(find.text(ShortcutActions.undo)).dx;
+      final double longCapRowLeft = tester.getTopLeft(find.text(duplicateNewLayerDescription).first).dx;
+      expect(longCapRowLeft, shortCapRowLeft);
+    });
+  });
+
+  group('ShortcutsHelpDialog modifier labels per platform', () {
+    /// Renders the dialog as [platform] would, restoring the override before the
+    /// test ends so the framework's debug-variable invariant check stays happy.
+    Future<void> pumpDialogAsPlatform(WidgetTester tester, TargetPlatform platform) async {
+      debugDefaultTargetPlatformOverride = platform;
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+      debugDefaultTargetPlatformOverride = null;
+    }
+
+    testWidgets('uses Apple key glyphs on macOS', (WidgetTester tester) async {
+      await pumpDialogAsPlatform(tester, TargetPlatform.macOS);
+
+      expect(find.text('\u2318 + S'), findsOneWidget);
+      expect(find.text('\u2318 + \u21E7 + D'), findsOneWidget);
+      expect(find.text('\u2325 + Drag Selection'), findsOneWidget);
+      expect(find.text('\u2303 + /, F1'), findsOneWidget);
+      expect(find.textContaining('Cmd'), findsNothing);
+      expect(find.textContaining('Option'), findsNothing);
+    });
+
+    testWidgets('spells modifiers out on Windows', (WidgetTester tester) async {
+      await pumpDialogAsPlatform(tester, TargetPlatform.windows);
+
+      expect(find.text('Ctrl + S'), findsOneWidget);
+      expect(find.text('Ctrl + Shift + D'), findsOneWidget);
+      expect(find.text('Ctrl + Drag Selection'), findsOneWidget);
+      expect(find.text('Alt'), findsOneWidget);
+      expect(find.text('Ctrl + /, F1'), findsOneWidget);
+      expect(find.textContaining('\u2318'), findsNothing);
     });
   });
 
