@@ -34,6 +34,8 @@ import 'package:fpaint/providers/selection_effect_renderer.dart';
 import 'package:fpaint/providers/selector_geometry_controller.dart';
 import 'package:fpaint/providers/selector_geometry_host.dart';
 import 'package:fpaint/providers/undo_provider.dart';
+import 'package:fpaint/providers/wand_selection_manager_cache.dart';
+import 'package:fpaint/providers/wand_source_sampler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 // Exports
@@ -914,6 +916,12 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
   /// Owns the magic-wand selection request queue and rasterized source cache.
   final WandSelectionManager wandSelection = WandSelectionManager();
+
+  /// Rasterizes the pixels the wand and paint bucket sample from.
+  ///
+  /// Composed over [wandSelection]'s cache so sampling stays independent of the
+  /// selection state it eventually feeds.
+  late final WandSourceSampler wandSourceSampler = WandSourceSampler(wandSelection);
 
   /// Owns the in-progress pixel-brush/effect stroke and smudge source cache.
   final PixelBrushStrokeSession pixelBrushSession = PixelBrushStrokeSession();

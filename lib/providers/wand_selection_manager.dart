@@ -5,7 +5,7 @@ part of 'app_provider.dart';
 /// Extracting this state out of `AppProvider` keeps wand request sequencing and
 /// pixel caching together as a single, testable responsibility instead of a
 /// loose cluster of public fields on the app-wide provider.
-class WandSelectionManager {
+class WandSelectionManager implements WandSourceCache {
   /// Whether a magic-wand computation is currently running.
   bool isInProgress = false;
 
@@ -76,6 +76,7 @@ class WandSelectionManager {
   }
 
   /// Returns the cached source data when [signature] still matches, else null.
+  @override
   FillImageData? cachedImageData(int signature) {
     if (signature == _cachedSignature &&
         _cachedPixels != null &&
@@ -93,6 +94,7 @@ class WandSelectionManager {
   }
 
   /// Stores freshly rasterized source pixels under [signature].
+  @override
   void storeCache({
     required int signature,
     required Uint8List pixels,

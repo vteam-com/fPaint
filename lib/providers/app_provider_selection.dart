@@ -265,7 +265,7 @@ extension AppProviderSelection on AppProvider {
       return;
     }
 
-    final ui.Image bakedImage = await _renderPlacedImage(
+    final ui.Image bakedImage = await renderPlacedImage(
       sourceImage: sourceImage,
       outWidth: imagePlacementModel.displayWidth,
       outHeight: imagePlacementModel.displayHeight,
@@ -314,7 +314,7 @@ extension AppProviderSelection on AppProvider {
     final ImagePlacementCommitMode commitMode = imagePlacementModel.commitMode;
     final ImagePlacementLayerRestoreState? layerRestoreState = imagePlacementModel.layerRestoreState;
 
-    final ui.Image bakedImage = await _renderPlacedImage(
+    final ui.Image bakedImage = await renderPlacedImage(
       sourceImage: sourceImage,
       outWidth: outWidth,
       outHeight: outHeight,
@@ -498,35 +498,6 @@ extension AppProviderSelection on AppProvider {
     }
 
     _endTransformSession(wasLayerModifyMode: wasLayerModifyMode);
-  }
-
-  /// Renders the current image-placement preview into a baked image.
-  Future<ui.Image> _renderPlacedImage({
-    required ui.Image sourceImage,
-    required double outWidth,
-    required double outHeight,
-    required double rotation,
-  }) {
-    return renderCanvasImage(
-      width: outWidth.ceil(),
-      height: outHeight.ceil(),
-      draw: (ui.Canvas canvas) {
-        canvas.translate(outWidth / AppMath.pair, outHeight / AppMath.pair);
-        canvas.rotate(rotation);
-        canvas.translate(-outWidth / AppMath.pair, -outHeight / AppMath.pair);
-        canvas.drawImageRect(
-          sourceImage,
-          Rect.fromLTWH(
-            0,
-            0,
-            sourceImage.width.toDouble(),
-            sourceImage.height.toDouble(),
-          ),
-          Rect.fromLTWH(0, 0, outWidth, outHeight),
-          Paint()..filterQuality = FilterQuality.high,
-        );
-      },
-    );
   }
 
   /// Flips the selected region horizontally (left ↔ right).
@@ -776,108 +747,5 @@ extension AppProviderSelection on AppProvider {
   /// Samples either the selected layer only or all visible layers for the current request.
   Future<FillImageData?> getSelectedLayerFillImageData({
     required bool sampleAllLayers,
-  }) async {
-    final int signature = _createSelectedLayerFloodSourceSignature(
-      sampleAllLayers: sampleAllLayers,
-    );
-    final FillImageData? cached = wandSelection.cachedImageData(signature);
-    if (cached != null) {
-      return cached;
-    }
-
-    final int canvasWidth = layers.width.toInt();
-    final int canvasHeight = layers.height.toInt();
-    final int longestSide = canvasWidth > canvasHeight ? canvasWidth : canvasHeight;
-    final double sourceScale = longestSide > AppLimits.floodFillSourceMaxDimension
-        ? AppLimits.floodFillSourceMaxDimension / longestSide
-        : AppVisual.full;
-    final int sourceWidth = (canvasWidth * sourceScale).round().clamp(AppMath.one, canvasWidth);
-    final int sourceHeight = (canvasHeight * sourceScale).round().clamp(AppMath.one, canvasHeight);
-    final double sourceScaleX = sourceWidth / canvasWidth;
-    final double sourceScaleY = sourceHeight / canvasHeight;
-
-    final ui.Image image = await renderCanvasImage(
-      width: sourceWidth,
-      height: sourceHeight,
-      draw: (ui.Canvas canvas) {
-        canvas.scale(sourceScaleX, sourceScaleY);
-        if (sampleAllLayers) {
-          for (final LayerProvider layer in layers.list.reversed) {
-            if (layer.isVisible) {
-              layer.renderLayer(canvas, compositeBounds: Offset.zero & layers.size);
-            }
-          }
-          return;
-        }
-        layers.selectedLayer.renderLayer(
-          canvas,
-          compositeBounds: Offset.zero & layers.size,
-        );
-      },
-    );
-
-    try {
-      final Uint8List? pixels = await convertImageToUint8List(image);
-      if (pixels == null) {
-        return null;
-      }
-
-      wandSelection.storeCache(
-        signature: signature,
-        pixels: pixels,
-        width: image.width,
-        height: image.height,
-        canvasScaleX: sourceScaleX,
-        canvasScaleY: sourceScaleY,
-      );
-
-      return FillImageData(
-        pixels: pixels,
-        width: image.width,
-        height: image.height,
-        canvasScaleX: sourceScaleX,
-        canvasScaleY: sourceScaleY,
-      );
-    } finally {
-      image.dispose();
-    }
-  }
-
-  /// Creates a stable fingerprint for wand source cache invalidation.
-  /// Includes the sampling mode in the signature.
-  int _createSelectedLayerFloodSourceSignature({
-    required bool sampleAllLayers,
-  }) {
-    if (sampleAllLayers) {
-      return Object.hash(
-        layers,
-        layers.width.toInt(),
-        layers.height.toInt(),
-        sampleAllLayers,
-        layers.list
-            .map(
-              (LayerProvider l) => Object.hash(
-                l,
-                l.actionStack.length,
-                l.redoStack.length,
-                l.lastUserAction,
-                l.isVisible,
-              ),
-            )
-            .toList(),
-      );
-    }
-
-    final LayerProvider layer = layers.selectedLayer;
-    return Object.hash(
-      layer,
-      layers.selectedLayerIndex,
-      layers.width.toInt(),
-      layers.height.toInt(),
-      layer.actionStack.length,
-      layer.redoStack.length,
-      layer.lastUserAction,
-      sampleAllLayers,
-    );
-  }
+  }) => wandSourceSampler.sample(layers, sampleAllLayers: sampleAllLayers);
 }
