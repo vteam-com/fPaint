@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -116,6 +117,16 @@ void main() {
       await tester.pump();
 
       expect(find.text('View'), findsOneWidget);
+    });
+
+    testWidgets('lists the view rotation shortcuts', (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestWidget());
+      await tester.pump();
+
+      expect(find.text(ShortcutActions.rotateViewCounterClockwise), findsOneWidget);
+      expect(find.text(ShortcutActions.rotateViewClockwise), findsOneWidget);
+      expect(find.text(ShortcutActions.resetViewRotation), findsOneWidget);
+      expect(find.text(ShortcutActions.rotateViewTwist), findsOneWidget);
     });
 
     testWidgets('shows Tools category', (WidgetTester tester) async {
@@ -418,6 +429,68 @@ void main() {
 
       expect(appProvider.layers.scale, lessThan(zoomedInScale));
       expect(shellProvider.canvasPlacement, CanvasAutoPlacement.manual);
+    });
+
+    testWidgets('bracket keys rotate the view and Shift+[ resets it', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+      final ShellProvider shellProvider = ShellProvider();
+
+      await tester.pumpWidget(
+        buildShortcutHandlerTestWidget(
+          appProvider: appProvider,
+          shellProvider: shellProvider,
+        ),
+      );
+      await tester.pump();
+
+      expect(appProvider.canvasRotation, 0);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.bracketRight);
+      await tester.pump();
+      final double clockwise = appProvider.canvasRotation;
+      expect(clockwise, greaterThan(0));
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.bracketLeft);
+      await tester.pump();
+      expect(appProvider.canvasRotation, lessThan(clockwise));
+
+      // Leave the view rotated, then reset it.
+      await tester.sendKeyEvent(LogicalKeyboardKey.bracketRight);
+      await tester.pump();
+      expect(appProvider.layers.isRotated, isTrue);
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.bracketLeft);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pump();
+
+      expect(appProvider.canvasRotation, closeTo(0, 1e-9));
+      expect(appProvider.layers.isRotated, isFalse);
+    });
+
+    testWidgets('view rotation does not add an undo entry', (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      final AppProvider appProvider = AppProvider(preferences: preferences);
+      final ShellProvider shellProvider = ShellProvider();
+
+      await tester.pumpWidget(
+        buildShortcutHandlerTestWidget(
+          appProvider: appProvider,
+          shellProvider: shellProvider,
+        ),
+      );
+      await tester.pump();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.bracketRight);
+      await tester.pump();
+
+      expect(appProvider.layers.isRotated, isTrue);
+      expect(appProvider.undoProvider.canUndo, isFalse);
     });
 
     testWidgets('Cmd/Ctrl+0 resets zoom to 100%', (WidgetTester tester) async {

@@ -289,8 +289,20 @@ void main() {
       final LayerProvider topLayer = layersProvider.addTop(name: 'Top'); // Index 0, Middle is 1, Background is 2
 
       // Simulate some actions
-      topLayer.actionStack.add(UserActionDrawing(action: ActionType.brush, positions: <Offset>[Offset.zero]));
-      middleLayer.actionStack.add(UserActionDrawing(action: ActionType.brush, positions: <Offset>[Offset.zero]));
+      topLayer.actionStack.add(
+        StrokeAction(
+          action: ActionType.brush,
+          positions: <Offset>[Offset.zero],
+          brush: MyBrush(color: AppColors.black, size: 2),
+        ),
+      );
+      middleLayer.actionStack.add(
+        StrokeAction(
+          action: ActionType.brush,
+          positions: <Offset>[Offset.zero],
+          brush: MyBrush(color: AppColors.black, size: 2),
+        ),
+      );
 
       final int initialLength = layersProvider.length; // 3
 
@@ -308,8 +320,7 @@ void main() {
       final LayerProvider upperLayer = layersProvider.addTop(name: 'Upper');
 
       lowerLayer.actionStack.add(
-        UserActionDrawing(
-          action: ActionType.region,
+        RegionAction(
           positions: <Offset>[],
           path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
           fillColor: Colors.red,
@@ -317,23 +328,20 @@ void main() {
       );
 
       upperLayer.actionStack.add(
-        UserActionDrawing(
-          action: ActionType.region,
+        RegionAction(
           positions: <Offset>[],
           path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
           fillColor: Colors.green,
         ),
       );
       upperLayer.actionStack.add(
-        UserActionDrawing(
-          action: ActionType.cut,
+        CutAction(
           positions: <Offset>[],
           path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
         ),
       );
       upperLayer.actionStack.add(
-        UserActionDrawing(
-          action: ActionType.region,
+        RegionAction(
           positions: <Offset>[],
           path: ui.Path()..addRect(const Rect.fromLTWH(20, 0, 10, 10)),
           fillColor: Colors.green,
@@ -379,16 +387,18 @@ void main() {
 
     test('layer offset updates positions in all layers', () {
       final LayerProvider layer1 = layersProvider.get(0);
-      final UserActionDrawing action1 = UserActionDrawing(
+      final UserActionDrawing action1 = StrokeAction(
         action: ActionType.brush,
         positions: <Offset>[const Offset(10, 10)],
+        brush: MyBrush(color: AppColors.black, size: 2),
       );
       layer1.appendDrawingAction(action1);
 
       final LayerProvider layer2 = layersProvider.addTop();
-      final UserActionDrawing action2 = UserActionDrawing(
+      final UserActionDrawing action2 = StrokeAction(
         action: ActionType.brush,
         positions: <Offset>[const Offset(20, 20)],
+        brush: MyBrush(color: AppColors.black, size: 2),
       );
       layer2.appendDrawingAction(action2);
 
@@ -552,8 +562,7 @@ void main() {
       final LayerProvider layer = layersProvider.addTop(name: 'Hidden');
       layer.isVisible = false;
       layer.actionStack.add(
-        UserActionDrawing(
-          action: ActionType.region,
+        RegionAction(
           positions: <Offset>[],
           path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
           fillColor: Colors.blue,

@@ -4,6 +4,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Add
+
+- Free canvas view rotation at any angle: two-finger twist on touch and trackpad, Shift + right-drag with a mouse, and `[` / `]` keyboard nudges. A 7° dead zone keeps ordinary pinch-zooms upright, angles snap to each 45°, a live readout shows the current angle, and Shift+`[` (or fit-to-window) returns the view upright. This is view-only state: no pixels change and nothing enters the undo stack, unlike the destructive Rotate Canvas 90° action.
+
 ## [1.9.5] - 2026-08-30
 
 ### Add

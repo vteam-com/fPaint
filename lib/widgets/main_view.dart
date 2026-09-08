@@ -3,6 +3,7 @@ import 'dart:ui' show PathMetric;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/fill_model.dart';
@@ -87,20 +88,32 @@ class MainViewState extends State<MainView> {
                         appProvider.effectPreviewModel.isVisible &&
                         appProvider.effectPreviewModel.previewImage != null &&
                         appProvider.effectPreviewModel.bounds != null)
+                      // Placed by the full viewport transform, so the preview
+                      // keeps sitting on its pixels when the view is rotated.
                       Positioned(
-                        left:
-                            appProvider.canvasOffset.dx +
-                            appProvider.effectPreviewModel.bounds!.left * appProvider.layers.scale,
-                        top:
-                            appProvider.canvasOffset.dy +
-                            appProvider.effectPreviewModel.bounds!.top * appProvider.layers.scale,
-                        child: SizedBox(
-                          width: appProvider.effectPreviewModel.bounds!.width * appProvider.layers.scale,
-                          height: appProvider.effectPreviewModel.bounds!.height * appProvider.layers.scale,
-                          child: RawImage(
-                            image: appProvider.effectPreviewModel.previewImage,
-                            fit: BoxFit.fill,
-                            filterQuality: FilterQuality.high,
+                        left: appProvider.canvasOffset.dx,
+                        top: appProvider.canvasOffset.dy,
+                        child: Transform(
+                          transform: Matrix4.identity()
+                            ..rotateZ(appProvider.canvasRotation)
+                            ..scaleByDouble(
+                              appProvider.layers.scale,
+                              appProvider.layers.scale,
+                              1,
+                              1,
+                            ),
+                          alignment: Alignment.topLeft,
+                          child: Transform.translate(
+                            offset: appProvider.effectPreviewModel.bounds!.topLeft,
+                            child: SizedBox(
+                              width: appProvider.effectPreviewModel.bounds!.width,
+                              height: appProvider.effectPreviewModel.bounds!.height,
+                              child: RawImage(
+                                image: appProvider.effectPreviewModel.previewImage,
+                                fit: BoxFit.fill,
+                                filterQuality: FilterQuality.high,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -146,7 +159,7 @@ class MainViewState extends State<MainView> {
                           }
 
                           await appProvider.regionDuplicateMove(
-                            offset / appProvider.layers.scale,
+                            appProvider.deltaToCanvas(offset),
                             onNewLayer: duplicateOnNewLayer,
                           );
                         },
@@ -199,8 +212,7 @@ class MainViewState extends State<MainView> {
                     if (!hasActiveTransformOverlay && appProvider.fillPreviewAction != null)
                       FillPreviewOverlay(
                         action: appProvider.fillPreviewAction!,
-                        canvasOffset: appProvider.canvasOffset,
-                        scale: appProvider.layers.scale,
+                        viewport: appProvider.viewportTransform,
                       ),
 
                     //
@@ -240,8 +252,7 @@ class MainViewState extends State<MainView> {
                     if (appProvider.transformModel.isVisible)
                       TransformWidget(
                         model: appProvider.transformModel,
-                        canvasOffset: appProvider.canvasOffset,
-                        canvasScale: appProvider.layers.scale,
+                        viewport: appProvider.viewportTransform,
                         onChanged: () => appProvider.repaintMainView(),
                         onConfirm: () async {
                           final TransformSessionSource source = appProvider.transformModel.source;
@@ -305,15 +316,13 @@ class MainViewState extends State<MainView> {
                 ? _PixelBrushProcessingShimmer(
                     points: appProvider.pixelBrushGesturePoints!,
                     brushSize: appProvider.pixelBrushGestureSize,
-                    canvasOffset: appProvider.canvasOffset,
-                    scale: appProvider.layers.scale,
+                    viewport: appProvider.viewportTransform,
                   )
                 : CustomPaint(
                     painter: _PixelBrushGestureMarqueePainter(
                       points: appProvider.pixelBrushGesturePoints!,
                       brushSize: appProvider.pixelBrushGestureSize,
-                      canvasOffset: appProvider.canvasOffset,
-                      scale: appProvider.layers.scale,
+                      viewport: appProvider.viewportTransform,
                     ),
                   ),
           ),
@@ -380,6 +389,21 @@ class MainViewState extends State<MainView> {
               ),
             ),
           ),
+
+        // Live viewport angle during a rotate gesture. Without it a snap to a
+        // cardinal angle is invisible, so the user cannot tell a held 90° from
+        // a nearly-90° drift.
+        if (appProvider.isViewportRotationFeedbackVisible)
+          Positioned(
+            top: AppSpacing.large,
+            left: AppMath.zero.toDouble(),
+            right: AppMath.zero.toDouble(),
+            child: Center(
+              child: buildOverlayFeedbackBubble(
+                label: context.l10n.degreesValue(radiansToDegrees(appProvider.canvasRotation).round()),
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -403,16 +427,16 @@ class MainViewState extends State<MainView> {
       child: SizedBox.expand(
         child: LayoutBuilder(
           builder: (BuildContext _, BoxConstraints constraints) {
-            final double canvasScale = appProvider.layers.scale;
-            final Rect visibleCanvasBounds = Rect.fromLTWH(
-              -appProvider.canvasOffset.dx / canvasScale,
-              -appProvider.canvasOffset.dy / canvasScale,
-              constraints.maxWidth / canvasScale,
-              constraints.maxHeight / canvasScale,
-            ).intersect(Offset.zero & appProvider.layers.size);
+            final ViewportTransform viewport = appProvider.viewportTransform;
+            // Under rotation the visible canvas region is a rotated quad, so
+            // culling uses the bounding box of the inverse-mapped viewport
+            // corners; scaling the viewport rect alone would clip visible
+            // content away mid-rotation.
+            final Rect visibleCanvasBounds = viewport
+                .visibleCanvasBounds(Rect.fromLTWH(0, 0, constraints.maxWidth, constraints.maxHeight))
+                .intersect(Offset.zero & appProvider.layers.size);
             return CanvasPanel(
-              canvasOffset: appProvider.canvasOffset,
-              canvasScale: canvasScale,
+              viewport: viewport,
               visibleCanvasBounds: visibleCanvasBounds,
             );
           },
@@ -540,18 +564,18 @@ class _BrushSizePreviewOverlayPainter extends CustomPainter {
 const double _kPixelBrushBandMinWidth = 1.5;
 
 /// Builds the on-screen centre-line path for a smudge/blur gesture: gesture
-/// [points] (canvas space) mapped via `canvasOffset + point * scale` — the same
-/// transform the canvas panel uses. A single point yields a zero-length segment
-/// so a round cap renders the footprint.
-Path _pixelBrushStrokePath(List<Offset> points, Offset canvasOffset, double scale) {
+/// [points] (canvas space) mapped through [viewport] — the same transform the
+/// canvas panel uses. A single point yields a zero-length segment so a round cap
+/// renders the footprint.
+Path _pixelBrushStrokePath(List<Offset> points, ViewportTransform viewport) {
   final Path path = Path();
-  final Offset first = canvasOffset + (points.first * scale);
+  final Offset first = viewport.toScreen(points.first);
   path.moveTo(first.dx, first.dy);
   if (points.length == AppMath.one) {
     path.lineTo(first.dx, first.dy);
   } else {
     for (final Offset point in points.skip(AppMath.one)) {
-      final Offset local = canvasOffset + (point * scale);
+      final Offset local = viewport.toScreen(point);
       path.lineTo(local.dx, local.dy);
     }
   }
@@ -560,20 +584,18 @@ Path _pixelBrushStrokePath(List<Offset> points, Offset canvasOffset, double scal
 
 /// Draws the in-progress smudge/blur gesture as a swept brush-width band with a
 /// thin outline, in main-view space. Points are in canvas coordinates and are
-/// mapped to screen via `canvasOffset + point * scale` — the same transform the
-/// canvas panel uses — so the band tracks the pixels that will be affected.
+/// mapped to screen through [ViewportTransform] — the same transform the canvas
+/// panel uses — so the band tracks the pixels that will be affected.
 class _PixelBrushGestureMarqueePainter extends CustomPainter {
   const _PixelBrushGestureMarqueePainter({
     required this.points,
     required this.brushSize,
-    required this.canvasOffset,
-    required this.scale,
+    required this.viewport,
   });
 
   final List<Offset> points;
   final double brushSize;
-  final Offset canvasOffset;
-  final double scale;
+  final ViewportTransform viewport;
 
   /// Alpha of the soft dark band edge (0–255) — for definition on any content,
   /// deliberately lighter than a hard outline.
@@ -602,8 +624,8 @@ class _PixelBrushGestureMarqueePainter extends CustomPainter {
       return;
     }
 
-    final Path path = _pixelBrushStrokePath(points, canvasOffset, scale);
-    final double bandWidth = math.max(_kPixelBrushBandMinWidth, brushSize * scale);
+    final Path path = _pixelBrushStrokePath(points, viewport);
+    final double bandWidth = math.max(_kPixelBrushBandMinWidth, brushSize * viewport.scale);
 
     // A soft translucent band showing the affected brush-width area, with a
     // faint edge for definition on any content. A single swept stroke per paint
@@ -668,8 +690,7 @@ class _PixelBrushGestureMarqueePainter extends CustomPainter {
   bool shouldRepaint(covariant _PixelBrushGestureMarqueePainter oldDelegate) {
     return !identical(oldDelegate.points, points) ||
         oldDelegate.brushSize != brushSize ||
-        oldDelegate.canvasOffset != canvasOffset ||
-        oldDelegate.scale != scale;
+        oldDelegate.viewport != viewport;
   }
 }
 
@@ -681,13 +702,11 @@ class _PixelBrushProcessingShimmer extends StatefulWidget {
   const _PixelBrushProcessingShimmer({
     required this.points,
     required this.brushSize,
-    required this.canvasOffset,
-    required this.scale,
+    required this.viewport,
   });
   final double brushSize;
-  final Offset canvasOffset;
   final List<Offset> points;
-  final double scale;
+  final ViewportTransform viewport;
   @override
   State<_PixelBrushProcessingShimmer> createState() => _PixelBrushProcessingShimmerState();
 }
@@ -715,8 +734,7 @@ class _PixelBrushProcessingShimmerState extends State<_PixelBrushProcessingShimm
           painter: _PixelBrushProcessingShimmerPainter(
             points: widget.points,
             brushSize: widget.brushSize,
-            canvasOffset: widget.canvasOffset,
-            scale: widget.scale,
+            viewport: widget.viewport,
             progress: _controller.value,
           ),
         ),
@@ -733,15 +751,13 @@ class _PixelBrushProcessingShimmerPainter extends CustomPainter {
   const _PixelBrushProcessingShimmerPainter({
     required this.points,
     required this.brushSize,
-    required this.canvasOffset,
-    required this.scale,
+    required this.viewport,
     required this.progress,
   });
 
   final List<Offset> points;
   final double brushSize;
-  final Offset canvasOffset;
-  final double scale;
+  final ViewportTransform viewport;
   final double progress;
 
   /// Alpha of the faint base band so the region stays visible between sweeps.
@@ -759,8 +775,8 @@ class _PixelBrushProcessingShimmerPainter extends CustomPainter {
       return;
     }
 
-    final Path path = _pixelBrushStrokePath(points, canvasOffset, scale);
-    final double bandWidth = math.max(_kPixelBrushBandMinWidth, brushSize * scale);
+    final Path path = _pixelBrushStrokePath(points, viewport);
+    final double bandWidth = math.max(_kPixelBrushBandMinWidth, brushSize * viewport.scale);
 
     // Faint base band so the affected region reads as "busy" between sweeps.
     canvas.drawPath(
@@ -808,7 +824,6 @@ class _PixelBrushProcessingShimmerPainter extends CustomPainter {
     return oldDelegate.progress != progress ||
         !identical(oldDelegate.points, points) ||
         oldDelegate.brushSize != brushSize ||
-        oldDelegate.canvasOffset != canvasOffset ||
-        oldDelegate.scale != scale;
+        oldDelegate.viewport != viewport;
   }
 }

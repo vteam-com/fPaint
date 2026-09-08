@@ -61,7 +61,7 @@ void applyPixelBrushPatchToLayer({
   // when replayed under the display cache's fractional scale — the white
   // rectangle around the stroke. src replaces cleanly at any scale.
   append(
-    UserActionDrawing(
+    ImageAction(
       action: pixelBrushActionType(mode),
       positions: <ui.Offset>[patch.bounds.topLeft, patch.bounds.bottomRight],
       brush: MyBrush(
@@ -97,8 +97,7 @@ void compactPixelBrushLayerHistory({
   targetLayer.actionStack
     ..clear()
     ..add(
-      UserActionDrawing(
-        action: ActionType.image,
+      ImageAction(
         positions: <ui.Offset>[
           ui.Offset.zero,
           ui.Offset(targetLayer.size.width, targetLayer.size.height),

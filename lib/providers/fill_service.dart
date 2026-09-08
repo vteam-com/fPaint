@@ -55,10 +55,7 @@ class FillImageData {
 class FillService {
   /// Returns an empty fill action used when flood fill cannot resolve a region.
   UserActionDrawing _buildEmptyFloodFillAction() {
-    return UserActionDrawing(
-      action: ActionType.fill,
-      positions: const <ui.Offset>[],
-    );
+    return NonRenderingAction(action: ActionType.fill);
   }
 
   /// Performs a flood fill with a solid color. Pass [imageData] (cached RGBA
@@ -102,8 +99,7 @@ class FillService {
   }) {
     final ui.Rect bounds = path.getBounds();
 
-    return UserActionDrawing(
-      action: ActionType.region,
+    return RegionAction(
       path: path,
       positions: <ui.Offset>[
         bounds.topLeft,
@@ -192,8 +188,7 @@ class FillService {
       toCanvas: toCanvas,
     );
 
-    return UserActionDrawing(
-      action: ActionType.region,
+    return RegionAction(
       path: path,
       positions: <ui.Offset>[
         bounds.topLeft,

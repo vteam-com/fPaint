@@ -493,7 +493,7 @@ void main() {
     test('extends a pencil stroke without creating another undo action', () {
       appProvider.selectedAction = ActionType.pencil;
       appProvider.recordExecuteDrawingActionToSelectedLayer(
-        action: UserActionDrawing(
+        action: StrokeAction(
           action: ActionType.pencil,
           positions: <ui.Offset>[
             const ui.Offset(0, 0),
@@ -523,7 +523,7 @@ void main() {
     test('extends an eraser stroke without creating another undo action', () {
       appProvider.selectedAction = ActionType.eraser;
       appProvider.recordExecuteDrawingActionToSelectedLayer(
-        action: UserActionDrawing(
+        action: StrokeAction(
           action: ActionType.eraser,
           positions: <ui.Offset>[
             const ui.Offset(0, 0),

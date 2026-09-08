@@ -49,6 +49,17 @@ class ShortcutsHelpDialog extends StatelessWidget {
               _shortcutEntry('$mod +', ShortcutActions.zoomIn),
               _shortcutEntry('$mod -', ShortcutActions.zoomOut),
               _shortcutEntry('$mod 0', ShortcutActions.resetZoom),
+              _shortcutEntry(ShortcutKeys.bracketLeft, ShortcutActions.rotateViewCounterClockwise),
+              _shortcutEntry(ShortcutKeys.bracketRight, ShortcutActions.rotateViewClockwise),
+              _shortcutEntry(
+                '${ShortcutModifiers.shift} + ${ShortcutKeys.bracketLeft}',
+                ShortcutActions.resetViewRotation,
+              ),
+              _shortcutEntry(ShortcutActions.twoFingerTwist, ShortcutActions.rotateViewTwist),
+              _shortcutEntry(
+                '${ShortcutModifiers.shift} + ${ShortcutActions.rightDragSelection}',
+                ShortcutActions.rotateViewDrag,
+              ),
               _shortcutEntry(ShortcutKeys.tab, l10n.toggleShell),
               _shortcutEntry(ShortcutActions.showKeyboardShortcuts, l10n.keyboardShortcuts),
             ],

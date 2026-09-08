@@ -11,25 +11,37 @@ import 'package:web/web.dart' as web;
 
 const String _htmlAnchorTag = 'a';
 
-void _ignoreRecentFilePreferences(AppPreferences? preferences) {
-  if (preferences == null) {
-    return;
-  }
+/// Writes the file straight to the browser's downloads.
+///
+/// The web build has no save dialog, so the dialog arguments are ignored; the
+/// signature matches the desktop build so callers stay platform-agnostic.
+/// Format-agnostic on purpose — see the non-web counterpart.
+Future<void> exportToDestination({
+  required String dialogTitle,
+  required String suggestedFileName,
+  required List<String> allowedExtensions,
+  required Future<void> Function(String) write,
+  AppPreferences? preferences,
+  String Function(String)? resolveRecentFilePath,
+}) async {
+  // The browser picks the destination itself, so the dialog title and the
+  // extension filter have nowhere to go, and there is no recent-file list to
+  // record. Only the resolved name reaches the download.
+  _ignoreDesktopOnlyArguments(dialogTitle, allowedExtensions, preferences);
+  final String downloadName = resolveRecentFilePath?.call(suggestedFileName) ?? suggestedFileName;
+  await write(downloadName);
 }
 
-/// Exports the current painter as a PNG image and triggers a download.
-///
-/// This function captures the current painter's image bytes and creates a PNG
-/// file that is then downloaded to the user's device.
-///
-/// [context] The BuildContext to access the current AppProvider.
-Future<void> onExportAsPng(
-  LayersProvider layers, {
-  String fileName = 'image.png',
+/// Consumes the arguments the desktop save dialog needs and the web build has
+/// no use for, keeping one shared [exportToDestination] signature.
+void _ignoreDesktopOnlyArguments(
+  String dialogTitle,
+  List<String> allowedExtensions,
   AppPreferences? preferences,
-}) async {
-  _ignoreRecentFilePreferences(preferences);
-  await saveAsPng(layers, fileName);
+) {
+  if (dialogTitle.isEmpty || allowedExtensions.isEmpty || preferences == null) {
+    return;
+  }
 }
 
 /// Saves the current canvas as a PNG file and triggers a browser download.
@@ -40,21 +52,6 @@ Future<void> saveAsPng(
   downloadBlob(await preparePngBytes(layers), filePath);
 }
 
-/// Exports the current painter as a JPG image and triggers a download.
-///
-/// This function captures the current painter's image bytes, converts it to JPG,
-/// and creates a JPG file that is then downloaded to the user's device.
-///
-/// [context] The BuildContext to access the current AppProvider.
-Future<void> onExportAsJpeg(
-  LayersProvider layers, {
-  String fileName = 'image.jpg',
-  AppPreferences? preferences,
-}) async {
-  _ignoreRecentFilePreferences(preferences);
-  await saveAsJpeg(layers, fileName);
-}
-
 /// Saves the current content as a JPEG file and triggers a browser download.
 Future<void> saveAsJpeg(
   LayersProvider layers,
@@ -63,47 +60,12 @@ Future<void> saveAsJpeg(
   downloadBlob(await prepareJpegBytes(layers), filePath);
 }
 
-/// Exports the current painter as an ORA file and triggers a download.
-///
-/// This function captures the current painter's image bytes, creates an ORA
-/// archive, and then downloads the file to the user's device.
-///
-/// [context] The BuildContext to access the current AppProvider.
-Future<void> onExportAsOra(
-  LayersProvider layers, {
-  String fileName = 'image.ora',
-  AppPreferences? preferences,
-}) async {
-  _ignoreRecentFilePreferences(preferences);
-  await saveAsOra(layers, fileName);
-}
-
 /// Saves the current project as an ORA (OpenRaster) file and triggers a browser download.
 Future<void> saveAsOra(
   LayersProvider layers,
   String filePath,
 ) async {
   downloadBlob(await prepareOraBytes(layers), filePath);
-}
-
-/// Exports the current painter as a WebP image and triggers a download.
-Future<void> onExportAsWebp(
-  LayersProvider layers, {
-  String fileName = 'image.webp',
-  AppPreferences? preferences,
-}) async {
-  _ignoreRecentFilePreferences(preferences);
-  await saveAsWebp(layers, fileName);
-}
-
-/// Exports all layers as a layered TIFF and triggers download.
-Future<void> onExportAsTiff(
-  LayersProvider layers, {
-  String fileName = defaultTiffExportFileName,
-  AppPreferences? preferences,
-}) async {
-  _ignoreRecentFilePreferences(preferences);
-  await saveAsTiff(layers, fileName);
 }
 
 /// Saves all layers as a layered TIFF file and triggers a browser download.
@@ -124,16 +86,6 @@ Future<void> saveAsWebp(
   String filePath,
 ) async {
   downloadBlob(await prepareWebpBytes(layers), filePath);
-}
-
-/// Exports the current painter as a HEIC image and triggers a download.
-Future<void> onExportAsHeic(
-  LayersProvider layers, {
-  String fileName = 'image.heic',
-  AppPreferences? preferences,
-}) async {
-  _ignoreRecentFilePreferences(preferences);
-  await saveAsHeic(layers, fileName);
 }
 
 /// Saves the current content as a HEIC file and triggers a browser download.

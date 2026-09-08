@@ -222,6 +222,7 @@
   "platforms": "Disponible sur...",
   "previewUnavailable": "Aperçu indisponible",
   "recentFilesLabel": "Récents",
+  "resetViewRotation": "Réinitialiser la rotation",
   "resizeRotate": "Redimensionner / Pivoter",
   "rotateCanvasTooltip": "Pivoter la toile de 90 degres sens horaire",
   "runOnMostBrowsers": "Fonctionne sur la plupart des navigateurs.",

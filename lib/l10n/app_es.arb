@@ -220,6 +220,7 @@
   "platforms": "Disponible en...",
   "previewUnavailable": "Vista previa no disponible",
   "recentFilesLabel": "Recientes",
+  "resetViewRotation": "Restablecer rotación",
   "resizeRotate": "Redimensionar / Girar",
   "rotateCanvasTooltip": "Girar lienzo 90 grados en sentido horario",
   "runOnMostBrowsers": "Funciona en la mayoria de navegadores.",

@@ -5,8 +5,11 @@ const String _windowsPathSeparator = r'\';
 const String _extensionSeparator = '.';
 const String _tiffExportExtension = '.${FileExtensions.tif}';
 
+/// Base name used for exported files, before the format extension.
+const String exportBaseFileName = 'image';
+
 /// Default filename used when exporting layered TIFF files.
-const String defaultTiffExportFileName = 'image.${FileExtensions.tif}';
+const String defaultTiffExportFileName = '$exportBaseFileName$_tiffExportExtension';
 
 /// Ensures TIFF exports always use the canonical `.tif` suffix.
 String normalizeTiffExportFileName(String fileNameOrPath) {

@@ -876,7 +876,7 @@ void main() {
     test('adds undo-able action', () {
       expect(appProvider.undoProvider.canUndo, isFalse);
       appProvider.recordExecuteDrawingActionToSelectedLayer(
-        action: UserActionDrawing(
+        action: StrokeAction(
           positions: <Offset>[const Offset(0, 0), const Offset(10, 10)],
           action: ActionType.brush,
           brush: MyBrush(color: const Color(0xFF000000), size: 5),
@@ -888,7 +888,7 @@ void main() {
     test('uses selector path as clipPath when visible', () {
       appProvider.selectAll();
       appProvider.recordExecuteDrawingActionToSelectedLayer(
-        action: UserActionDrawing(
+        action: StrokeAction(
           positions: <Offset>[const Offset(0, 0), const Offset(10, 10)],
           action: ActionType.brush,
           brush: MyBrush(color: const Color(0xFF000000), size: 5),
@@ -910,7 +910,7 @@ void main() {
 
       // A stroke on the gesture tool is clipped to the persistent selection.
       appProvider.recordExecuteDrawingActionToSelectedLayer(
-        action: UserActionDrawing(
+        action: StrokeAction(
           positions: <Offset>[const Offset(0, 0), const Offset(10, 10)],
           action: ActionType.brush,
           brush: MyBrush(color: const Color(0xFF000000), size: 5),

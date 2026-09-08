@@ -507,6 +507,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recentFilesLabel => 'Recent';
 
   @override
+  String get resetViewRotation => 'Reset Rotation';
+
+  @override
   String get resizeRotate => 'Resize / Rotate';
 
   @override

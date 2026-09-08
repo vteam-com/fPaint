@@ -7,56 +7,71 @@ import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/text_object.dart';
 export 'package:fpaint/models/brush_style.dart';
 
-/// Represents a drawing action performed by the user.
-class UserActionDrawing {
-  UserActionDrawing({
-    required this.action,
-    required this.positions,
-    // optionals
-    this.brush,
-    this.fillColor,
-    this.gradient,
-    this.halftoneFill,
-    this.path,
-    this.image,
-    this.clipPath,
-    this.textObject,
-    this.erasesEntireLayer = false,
-  });
+part 'cut_action.dart';
+part 'image_action.dart';
+part 'non_rendering_action.dart';
+part 'region_action.dart';
+part 'stroke_action.dart';
+part 'text_action.dart';
+
+/// A single committed drawing operation on a layer.
+///
+/// Sealed so every consumer switches exhaustively over the concrete variants
+/// instead of force-unwrapping optional fields that only some actions carry.
+/// Each subtype declares exactly the data its rendering needs, which is what
+/// makes the payload accessors below non-nullable (Liskov substitution).
+sealed class UserActionDrawing {
+  UserActionDrawing({required this.action, required this.positions, this.clipPath});
 
   /// The type of action performed.
   final ActionType action;
 
   /// The list of positions where the action was performed.
-  final List<Offset> positions;
+  ///
+  /// Mutable: freehand strokes append points while the gesture is in flight.
+  final List<ui.Offset> positions;
 
-  /// Optional brush used for the action.
-  final MyBrush? brush;
-
-  /// Optional fill color used for the action.
-  final Color? fillColor;
-
-  /// Optional gradient used for the action.
-  final Gradient? gradient;
-
-  /// Optional halftone colors used with [gradient] geometry for region fills.
-  final HalftoneFill? halftoneFill;
-
-  /// Optional path used for the action.
-  ui.Path? path;
-
-  /// Optional image used for the action.
-  final ui.Image? image;
-
-  /// Optional clip path used for the action.
+  /// Optional clip path restricting where the action paints.
   ui.Path? clipPath;
-
-  /// Optional text for the action.
-  final TextObject? textObject;
 
   /// Whether this action erases the whole layer, making every earlier action
   /// invisible. Marks a collapse point for the action stack.
-  final bool erasesEntireLayer;
+  bool get erasesEntireLayer => false;
+
+  /// The brush this action paints with, or null when it does not use one.
+  MyBrush? get brush => null;
+
+  /// The solid color this action fills with, or null when it has none.
+  Color? get fillColor => null;
+
+  /// The gradient this action fills with, or null when it has none.
+  Gradient? get gradient => null;
+
+  /// The halftone treatment applied to a region fill, or null when unused.
+  HalftoneFill? get halftoneFill => null;
+
+  /// The geometry this action fills or erases, or null when it has none.
+  ui.Path? get path => null;
+
+  /// The image this action stamps, or null when it has none.
+  ui.Image? get image => null;
+
+  /// The text this action draws, or null when it has none.
+  TextObject? get textObject => null;
+
+  /// Returns a copy of this action with the supplied payload replaced,
+  /// preserving the concrete variant.
+  ///
+  /// Used by whole-layer geometric transforms (rotate/flip), which rebuild each
+  /// action's geometry without knowing its kind. Arguments that do not apply to
+  /// a given variant are ignored by that variant.
+  UserActionDrawing copyWith({
+    List<ui.Offset>? positions,
+    ui.Path? path,
+    ui.Image? image,
+    ui.Path? clipPath,
+    TextObject? textObject,
+  });
 
   @override
   String toString() {

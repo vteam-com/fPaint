@@ -71,7 +71,7 @@ extension AppProviderTools on AppProvider {
   }) {
     if (start != null && type != null && colorFill != null && colorBrush != null) {
       recordExecuteDrawingActionToSelectedLayer(
-        action: UserActionDrawing(
+        action: StrokeAction(
           positions: <ui.Offset>[start, end],
           action: type,
           brush: MyBrush(
@@ -109,13 +109,13 @@ extension AppProviderTools on AppProvider {
     }
 
     recordExecuteDrawingActionToSelectedLayer(
-      action: UserActionDrawing(
+      action: StrokeAction(
         positions: <ui.Offset>[
           last.positions.last,
           positionEndOfNewLine,
         ],
         action: last.action,
-        brush: last.brush,
+        brush: last.brush ?? MyBrush(color: brushColor, size: brushSize),
         clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
       ),
     );

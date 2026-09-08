@@ -15,8 +15,7 @@ Future<void> paintLayerHouse(PaintingScenarioSession session) async {
   );
 
   appProvider.recordExecuteDrawingActionToSelectedLayer(
-    action: UserActionDrawing(
-      action: ActionType.region,
+    action: RegionAction(
       positions: <ui.Offset>[houseBodyRect.topLeft, houseBodyRect.bottomRight],
       fillColor: _houseBodyHalftoneBackgroundColor,
       halftoneFill: const HalftoneFill(

@@ -11,6 +11,27 @@ class AppInteraction {
   /// is interpreted as a pinch rather than ordinary contact jitter.
   static const double touchPinchScaleDeadzone = 0.008;
 
+  /// Accumulated twist (degrees) a two-finger gesture must exceed before the
+  /// viewport starts rotating.
+  ///
+  /// Without this, ordinary pinch-zooms leave the canvas permanently a degree
+  /// or two crooked, because fingers never scale along a perfectly fixed axis.
+  static const double viewportRotationDeadzoneDegrees = 7.0;
+
+  /// Half-width (degrees) of the snap band around each multiple of
+  /// [AppMath.rotationSnapInterval] where the viewport holds a cardinal angle.
+  static const double viewportRotationSnapToleranceDegrees = 4.0;
+
+  /// Rotation applied by one keyboard rotate-nudge, in degrees.
+  static const double viewportRotationKeyboardStepDegrees = 15.0;
+
+  /// Horizontal screen pixels dragged per 1 degree of viewport rotation during
+  /// a Shift + right-drag, the mouse stand-in for a two-finger twist.
+  static const double viewportRotationDragPixelsPerDegree = 4.0;
+
+  /// How long the live viewport-angle readout stays up after twisting stops.
+  static const Duration viewportRotationHudLinger = Duration(milliseconds: 900);
+
   static const Duration selectionDoubleTapTimeout = Duration(milliseconds: 300);
   static const double selectionDoubleTapSlop = 24.0;
 

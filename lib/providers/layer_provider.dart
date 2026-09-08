@@ -8,6 +8,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/draw_path_helper.dart';
 import 'package:fpaint/helpers/image_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/layer_state_snapshot.dart';
 import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/models/text_object.dart';
@@ -209,7 +210,8 @@ class LayerProvider extends ChangeNotifier {
 
   /// Offsets all actions in the layer by the given offset.
   void offset(Offset offset) {
-    for (final UserActionDrawing action in actionStack) {
+    for (int index = 0; index < actionStack.length; index++) {
+      final UserActionDrawing action = actionStack[index];
       for (int i = 0; i < action.positions.length; i++) {
         action.positions[i] = action.positions[i].translate(
           offset.dx,
@@ -217,18 +219,21 @@ class LayerProvider extends ChangeNotifier {
         );
       }
 
-      if (action.path != null) {
-        action.path = action.path!.shift(offset);
-      }
-
-      if (action.clipPath != null) {
-        action.clipPath = action.clipPath!.shift(offset);
-      }
-
       if (action.textObject != null) {
         action.textObject!.position = action.textObject!.position.translate(
           offset.dx,
           offset.dy,
+        );
+      }
+
+      // Geometry lives on the concrete variant, so shifted paths are applied
+      // through copyWith rather than mutated in place.
+      final ui.Path? shiftedPath = action.path?.shift(offset);
+      final ui.Path? shiftedClipPath = action.clipPath?.shift(offset);
+      if (shiftedPath != null || shiftedClipPath != null) {
+        actionStack[index] = action.copyWith(
+          path: shiftedPath,
+          clipPath: shiftedClipPath,
         );
       }
     }
@@ -275,7 +280,7 @@ class LayerProvider extends ChangeNotifier {
     ui.Offset offset = Offset.zero,
     ActionType tool = ActionType.image,
   }) {
-    final UserActionDrawing newAction = UserActionDrawing(
+    final UserActionDrawing newAction = ImageAction(
       action: tool,
       positions: <ui.Offset>[
         offset,
@@ -535,22 +540,13 @@ class LayerProvider extends ChangeNotifier {
     int fromPoint,
   ) {
     final List<Offset> tail = action.positions.sublist(fromPoint - AppMath.one);
-    switch (action.action) {
-      case ActionType.pencil:
-        applyAction(
-          canvas,
-          action.clipPath,
-          (Canvas c) => renderPencilStroke(c, tail, action.brush!),
-        );
-      case ActionType.eraser:
-        applyAction(
-          canvas,
-          action.clipPath,
-          (Canvas c) => renderPencilEraserStroke(c, tail, action.brush!),
-        );
-      default:
-        _renderAction(canvas, action);
+    // Only freehand strokes can be extended incrementally; every other variant
+    // re-renders whole.
+    if (action is StrokeAction && (action.action == ActionType.pencil || action.action == ActionType.eraser)) {
+      _renderStrokeAction(canvas, action, tail);
+      return;
     }
+    _renderAction(canvas, action);
   }
 
   /// Converts the layer to an image for storage.
@@ -640,8 +636,7 @@ class LayerProvider extends ChangeNotifier {
   void renderLayerInViewport(
     Canvas canvas, {
     required Rect viewportBounds,
-    required Offset canvasOffset,
-    required double canvasScale,
+    required ViewportTransform viewport,
     required Rect visibleCanvasBounds,
   }) {
     final Paint layerPaint = Paint()
@@ -651,8 +646,7 @@ class LayerProvider extends ChangeNotifier {
       ..blendMode = blendMode;
 
     canvas.saveLayer(viewportBounds, layerPaint);
-    canvas.translate(canvasOffset.dx, canvasOffset.dy);
-    canvas.scale(canvasScale);
+    canvas.transform(viewport.matrix.storage);
     canvas.clipRect(visibleCanvasBounds, doAntiAlias: false);
     _renderLayerContents(canvas);
     canvas.restore();
@@ -732,150 +726,158 @@ class LayerProvider extends ChangeNotifier {
   }
 
   /// Renders a single [userAction] onto [canvas] using the matching draw helper.
+  ///
+  /// Dispatches on the sealed action variant, so each branch reads exactly the
+  /// payload its variant guarantees — no nullable re-checks, and the compiler
+  /// flags any new variant that is not handled here.
   void _renderAction(Canvas canvas, UserActionDrawing userAction) {
-    switch (userAction.action) {
-      case ActionType.pencil:
-        applyAction(
-          canvas,
-          userAction.clipPath,
-          (Canvas theCanvasToUse) => renderPencilStroke(
-            theCanvasToUse,
-            userAction.positions,
-            userAction.brush!,
-          ),
-        );
-        break;
+    switch (userAction) {
+      case StrokeAction():
+        _renderStrokeAction(canvas, userAction, userAction.positions);
 
-      case ActionType.brush:
-        applyAction(
-          canvas,
-          userAction.clipPath,
-          (Canvas theCanvasToUse) => renderPath(
-            theCanvasToUse,
-            userAction.positions,
-            userAction.brush!,
-            userAction.fillColor!,
-          ),
-        );
-        break;
-
-      case ActionType.smudge:
-      case ActionType.blurBrush:
-        if (userAction.image != null) {
-          applyAction(
-            canvas,
-            userAction.clipPath,
-            // Draw the committed patch with BlendMode.src (replace), not srcOver.
-            // The patch already holds the final content for its region, so it must
-            // REPLACE (including alpha, for smudge that thins transparency) rather
-            // than composite. src also keeps edges opaque at any scale: replaying
-            // this action under the display cache's fractional canvas.scale, a
-            // clear-then-srcOver pair leaves alpha c+(1-c)² < 1 at anti-aliased
-            // edges — the transparent ring that showed as a white rectangle around
-            // the stroke. src gives c·1+(1-c)·1 = 1, so no seam and no separate cut.
-            (Canvas theCanvasToUse) => theCanvasToUse.drawImage(
-              userAction.image!,
-              userAction.positions.first,
-              Paint()
-                ..filterQuality = FilterQuality.medium
-                ..blendMode = ui.BlendMode.src,
-            ),
-          );
-        }
-        break;
-
-      case ActionType.line:
-        applyAction(
-          canvas,
-          userAction.clipPath,
-          (Canvas theCanvasToUse) => renderLine(
-            theCanvasToUse,
-            userAction.positions.first,
-            userAction.positions.last,
-            userAction.brush!,
-            userAction.fillColor!,
-          ),
-        );
-        break;
-
-      case ActionType.circle:
-        applyAction(
-          canvas,
-          userAction.clipPath,
-          (Canvas theCanvasToUse) => renderCircle(
-            theCanvasToUse,
-            userAction.positions.first,
-            userAction.positions.last,
-            userAction.brush!,
-            userAction.fillColor!,
-          ),
-        );
-        break;
-
-      case ActionType.rectangle:
-        applyAction(
-          canvas,
-          userAction.clipPath,
-          (Canvas theCanvasToUse) => renderRectangle(
-            theCanvasToUse,
-            userAction.positions.first,
-            userAction.positions.last,
-            userAction.brush!,
-            userAction.fillColor!,
-          ),
-        );
-        break;
-
-      case ActionType.fill:
-        // the fill action is added to the layer
-        // as a ActionType.region
-        break;
-
-      case ActionType.region:
+      case RegionAction():
         applyAction(
           canvas,
           userAction.clipPath,
           (Canvas theCanvasToUse) => renderRegion(
             theCanvasToUse,
-            userAction.path!,
+            userAction.path,
             userAction.fillColor,
             userAction.gradient,
             userAction.halftoneFill,
           ),
         );
+
+      case CutAction():
+        renderRegionErase(canvas, userAction.path);
+
+      case ImageAction():
+        _renderImageAction(canvas, userAction);
+
+      case TextAction():
+        applyAction(
+          canvas,
+          userAction.clipPath,
+          (Canvas theCanvasToUse) => renderText(theCanvasToUse, userAction.textObject),
+        );
+
+      case NonRenderingAction():
+        // Paint bucket commits as a RegionAction; the selector renders through
+        // the selection overlay. Nothing to draw here.
         break;
+    }
+  }
+
+  /// Renders a [StrokeAction] over [points], which is the whole stroke or the
+  /// unrendered tail of one.
+  void _renderStrokeAction(Canvas canvas, StrokeAction action, List<Offset> points) {
+    // Shape strokes are always constructed with a fill; falling back to the
+    // brush color keeps a malformed action from crashing a whole-stack replay.
+    final Color fillColor = action.fillColor ?? action.brush.color;
+    switch (action.action) {
+      case ActionType.pencil:
+        applyAction(
+          canvas,
+          action.clipPath,
+          (Canvas theCanvasToUse) => renderPencilStroke(theCanvasToUse, points, action.brush),
+        );
 
       case ActionType.eraser:
         applyAction(
           canvas,
-          userAction.clipPath,
-          (Canvas theCanvasToUse) => renderPencilEraserStroke(
-            theCanvasToUse,
-            userAction.positions,
-            userAction.brush!,
-          ),
+          action.clipPath,
+          (Canvas theCanvasToUse) => renderPencilEraserStroke(theCanvasToUse, points, action.brush),
         );
-        break;
 
-      case ActionType.cut:
-        renderRegionErase(canvas, userAction.path!);
-        break;
-
-      case ActionType.image:
-        renderImage(canvas, userAction.positions.first, userAction.image!);
-        break;
-
-      case ActionType.selector:
-        // the rendering for this tool is done elsewhere
-        break;
-
-      case ActionType.text:
+      case ActionType.brush:
         applyAction(
           canvas,
-          userAction.clipPath,
-          (Canvas theCanvasToUse) => renderText(theCanvasToUse, userAction.textObject!),
+          action.clipPath,
+          (Canvas theCanvasToUse) => renderPath(
+            theCanvasToUse,
+            points,
+            action.brush,
+            fillColor,
+          ),
         );
+
+      case ActionType.line:
+        applyAction(
+          canvas,
+          action.clipPath,
+          (Canvas theCanvasToUse) => renderLine(
+            theCanvasToUse,
+            points.first,
+            points.last,
+            action.brush,
+            fillColor,
+          ),
+        );
+
+      case ActionType.circle:
+        applyAction(
+          canvas,
+          action.clipPath,
+          (Canvas theCanvasToUse) => renderCircle(
+            theCanvasToUse,
+            points.first,
+            points.last,
+            action.brush,
+            fillColor,
+          ),
+        );
+
+      case ActionType.rectangle:
+        applyAction(
+          canvas,
+          action.clipPath,
+          (Canvas theCanvasToUse) => renderRectangle(
+            theCanvasToUse,
+            points.first,
+            points.last,
+            action.brush,
+            fillColor,
+          ),
+        );
+
+      case ActionType.smudge:
+      case ActionType.blurBrush:
+      case ActionType.fill:
+      case ActionType.region:
+      case ActionType.cut:
+      case ActionType.image:
+      case ActionType.selector:
+      case ActionType.text:
+        // Not stroke-rendered: these arrive as their own action variants.
         break;
     }
+  }
+
+  /// Draws an [ImageAction]: a stamped image, or a committed smudge/blur patch.
+  void _renderImageAction(Canvas canvas, ImageAction userAction) {
+    if (userAction.action == ActionType.smudge || userAction.action == ActionType.blurBrush) {
+      applyAction(
+        canvas,
+        userAction.clipPath,
+        // Draw the committed patch with BlendMode.src (replace), not srcOver.
+        // The patch already holds the final content for its region, so it must
+        // REPLACE (including alpha, for smudge that thins transparency) rather
+        // than composite. src also keeps edges opaque at any scale: replaying
+        // this action under the display cache's fractional canvas.scale, a
+        // clear-then-srcOver pair leaves alpha c+(1-c)² < 1 at anti-aliased
+        // edges — the transparent ring that showed as a white rectangle around
+        // the stroke. src gives c·1+(1-c)·1 = 1, so no seam and no separate cut.
+        (Canvas theCanvasToUse) => theCanvasToUse.drawImage(
+          userAction.image,
+          userAction.positions.first,
+          Paint()
+            ..filterQuality = FilterQuality.medium
+            ..blendMode = ui.BlendMode.src,
+        ),
+      );
+      return;
+    }
+
+    renderImage(canvas, userAction.positions.first, userAction.image);
   }
 }

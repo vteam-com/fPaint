@@ -2,6 +2,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -71,6 +72,33 @@ Widget shortCutsForMainApp(
             scaleDelta: AppVisual.full / appProvider.layers.scale,
             anchorPoint: appProvider.canvasCenter,
           );
+          return null;
+        },
+      ),
+      RotateViewCounterClockwiseIntent: CallbackAction<RotateViewCounterClockwiseIntent>(
+        onInvoke: (RotateViewCounterClockwiseIntent _) {
+          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+          appProvider.applyRotationToCanvas(
+            rotationDelta: -degreesToRadians(AppInteraction.viewportRotationKeyboardStepDegrees),
+            anchorPoint: appProvider.canvasCenter,
+          );
+          return null;
+        },
+      ),
+      RotateViewClockwiseIntent: CallbackAction<RotateViewClockwiseIntent>(
+        onInvoke: (RotateViewClockwiseIntent _) {
+          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+          appProvider.applyRotationToCanvas(
+            rotationDelta: degreesToRadians(AppInteraction.viewportRotationKeyboardStepDegrees),
+            anchorPoint: appProvider.canvasCenter,
+          );
+          return null;
+        },
+      ),
+      ResetViewRotationIntent: CallbackAction<ResetViewRotationIntent>(
+        onInvoke: (ResetViewRotationIntent _) {
+          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+          appProvider.resetCanvasRotation();
           return null;
         },
       ),
@@ -346,6 +374,24 @@ class ResetZoomIntent extends Intent {
   const ResetZoomIntent();
 }
 
+/// An [Intent] that rotates the canvas view counter-clockwise by one nudge.
+class RotateViewCounterClockwiseIntent extends Intent {
+  /// Creates a [RotateViewCounterClockwiseIntent].
+  const RotateViewCounterClockwiseIntent();
+}
+
+/// An [Intent] that rotates the canvas view clockwise by one nudge.
+class RotateViewClockwiseIntent extends Intent {
+  /// Creates a [RotateViewClockwiseIntent].
+  const RotateViewClockwiseIntent();
+}
+
+/// An [Intent] that returns the canvas view to upright.
+class ResetViewRotationIntent extends Intent {
+  /// Creates a [ResetViewRotationIntent].
+  const ResetViewRotationIntent();
+}
+
 /// An [Intent] that triggers the save action.
 class SaveIntent extends Intent {
   /// Creates a [SaveIntent].
@@ -508,6 +554,11 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
   shortcuts[const SingleActivator(LogicalKeyboardKey.numpadSubtract, control: true)] = const ZoomOutIntent();
 
   // Reset zoom (Cmd/Ctrl + '0').
+  // Bare bracket keys: rotation is a view nudge used mid-stroke, so it stays
+  // modifier-free like a brush-size change.
+  shortcuts[const SingleActivator(LogicalKeyboardKey.bracketLeft)] = const RotateViewCounterClockwiseIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.bracketRight)] = const RotateViewClockwiseIntent();
+  shortcuts[const SingleActivator(LogicalKeyboardKey.bracketLeft, shift: true)] = const ResetViewRotationIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.digit0, meta: true)] = const ResetZoomIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.digit0, control: true)] = const ResetZoomIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.numpad0, meta: true)] = const ResetZoomIntent();

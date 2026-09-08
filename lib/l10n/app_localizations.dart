@@ -1010,6 +1010,12 @@ abstract class AppLocalizations {
   /// **'Recent'**
   String get recentFilesLabel;
 
+  /// No description provided for @resetViewRotation.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Rotation'**
+  String get resetViewRotation;
+
   /// No description provided for @resizeRotate.
   ///
   /// In en, this message translates to:

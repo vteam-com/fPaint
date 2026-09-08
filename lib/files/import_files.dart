@@ -9,6 +9,7 @@ import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpa
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/file_ora.dart';
 import 'package:fpaint/files/file_tiff.dart';
+import 'package:fpaint/files/import_file_format.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -21,15 +22,6 @@ import 'package:fpaint/widgets/material_free.dart';
 import 'package:logging/logging.dart';
 
 const String _defaultCanvasDimension = '800';
-const String _fileExtensionOra = 'ora';
-const String _fileExtensionTif = 'tif';
-const String _fileExtensionTiff = 'tiff';
-const String _fileExtensionPng = 'png';
-const String _fileExtensionWebp = 'webp';
-const String _fileExtensionJpg = 'jpg';
-const String _fileExtensionJpeg = 'jpeg';
-const String _fileExtensionHeic = 'heic';
-const String _fileExtensionAvif = 'avif';
 
 /// Returns the lower-case extension of [fileName], without the leading dot.
 ///
@@ -181,22 +173,26 @@ Future<void> onFileOpen(BuildContext context) async {
         final Uint8List bytes = await result.readAsBytes();
         final String fileName = result.name; // Get filename for naming the layer
         final String extension = _fileExtensionFromName(fileName);
-        if (extension == _fileExtensionOra) {
-          // Assuming readOraFileFromBytes handles its own clearing and sizing or needs similar refactor
-          await readOraFileFromBytes(layers, bytes);
-        } else if (extension == _fileExtensionTif || extension == _fileExtensionTiff) {
-          // Assuming readTiffFileFromBytes handles its own clearing and sizing or needs similar refactor
-          await readTiffFileFromBytes(layers, bytes);
-        } else if (extension == _fileExtensionHeic || extension == _fileExtensionAvif) {
-          await _readHeifFromBytes(
-            layers,
-            bytes,
-            l10n,
-            extension: extension,
-            imageName: fileName,
-          );
-        } else if (isFileExtensionSupported(extension)) {
-          await readImageFileFromBytes(layers, bytes, l10n, imageName: fileName);
+        final ImportFileFormat? format = ImportFileFormat.fromExtension(extension);
+        if (format != null) {
+          switch (format.decodeKind) {
+            case ImportDecodeKind.ora:
+              // readOraFileFromBytes handles its own clearing and sizing.
+              await readOraFileFromBytes(layers, bytes);
+            case ImportDecodeKind.tiff:
+              // readTiffFileFromBytes handles its own clearing and sizing.
+              await readTiffFileFromBytes(layers, bytes);
+            case ImportDecodeKind.heif:
+              await _readHeifFromBytes(
+                layers,
+                bytes,
+                l10n,
+                extension: extension,
+                imageName: fileName,
+              );
+            case ImportDecodeKind.image:
+              await readImageFileFromBytes(layers, bytes, l10n, imageName: fileName);
+          }
         }
       } else {
         final String path = result.path!;
@@ -249,18 +245,25 @@ Future<bool> openFileFromPath({
   final AppLocalizations l10n = context.l10n;
   final String extension = path.split('.').last.toLowerCase();
 
-  if (isFileExtensionSupported(extension)) {
-    try {
-      if (extension == _fileExtensionOra) {
+  final ImportFileFormat? format = ImportFileFormat.fromExtension(extension);
+  if (format == null) {
+    // Show unsupported format message
+    _showImportError(l10n.fileFormatNotSupported(extension));
+    return false;
+  }
+
+  try {
+    final String fileName = path.split(Platform.pathSeparator).last;
+    switch (format.decodeKind) {
+      case ImportDecodeKind.ora:
         // ORA embeds the selected layer, restored inside the reader.
         await readImageFromFilePathOra(layers, path);
         return true;
-      } else if (extension == _fileExtensionTif || extension == _fileExtensionTiff) {
+      case ImportDecodeKind.tiff:
         // TIFF embeds the selected layer, restored inside the reader.
         await readTiffFromFilePath(layers, path);
         return true;
-      } else if (extension == _fileExtensionHeic || extension == _fileExtensionAvif) {
-        final String fileName = path.split(Platform.pathSeparator).last;
+      case ImportDecodeKind.heif:
         final bool loaded = await _readHeifFromFilePath(
           layers,
           path,
@@ -270,20 +273,14 @@ Future<bool> openFileFromPath({
         );
         _restoreFlatLayerSelection(preferences, layers, path, loaded: loaded);
         return loaded;
-      } else {
-        final String fileName = path.split(Platform.pathSeparator).last;
+      case ImportDecodeKind.image:
         final bool loaded = await readImageFromFilePath(layers, path, l10n, imageName: fileName);
         _restoreFlatLayerSelection(preferences, layers, path, loaded: loaded);
         return loaded;
-      }
-    } catch (e) {
-      // General error catch, readImageFromFilePath might have already shown a SnackBar for decode errors
-      _showImportError(l10n.errorProcessingFile(e.toString()));
-      return false;
     }
-  } else {
-    // Show unsupported format message
-    _showImportError(l10n.fileFormatNotSupported(extension));
+  } catch (e) {
+    // General error catch, readImageFromFilePath might have already shown a SnackBar for decode errors
+    _showImportError(l10n.errorProcessingFile(e.toString()));
     return false;
   }
 }
@@ -309,18 +306,8 @@ void _restoreFlatLayerSelection(
   }
 }
 
-final List<String> supportedImageFileExtensions = <String>[
-  _fileExtensionOra,
-  _fileExtensionPng,
-  // 'psd',
-  _fileExtensionTif,
-  _fileExtensionTiff,
-  _fileExtensionWebp,
-  _fileExtensionJpg,
-  _fileExtensionJpeg,
-  _fileExtensionHeic,
-  _fileExtensionAvif,
-];
+/// Every file extension the app can open.
+final List<String> supportedImageFileExtensions = ImportFileFormat.allExtensions;
 
 /// Checks if the given file extension is supported.
 ///

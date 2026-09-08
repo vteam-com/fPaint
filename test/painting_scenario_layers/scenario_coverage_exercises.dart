@@ -400,8 +400,7 @@ Future<void> _exerciseTextEditor(
   );
   // Add it to the current layer's action stack.
   appProvider.layers.selectedLayer.actionStack.add(
-    UserActionDrawing(
-      action: ActionType.text,
+    TextAction(
       positions: const <Offset>[Offset(10, 10)],
       textObject: textObj,
     ),
@@ -493,8 +492,7 @@ Future<void> _exerciseTextEditor(
 
   // Re-create text object and re-open editor for apply test.
   appProvider.layers.selectedLayer.actionStack.add(
-    UserActionDrawing(
-      action: ActionType.text,
+    TextAction(
       positions: const <Offset>[Offset(10, 10)],
       textObject: textObj,
     ),
@@ -519,8 +517,7 @@ Future<void> _exerciseTextEditor(
     size: 24,
   );
   appProvider.layers.selectedLayer.actionStack.add(
-    UserActionDrawing(
-      action: ActionType.text,
+    TextAction(
       positions: const <Offset>[Offset(20, 20)],
       textObject: textObj2,
     ),

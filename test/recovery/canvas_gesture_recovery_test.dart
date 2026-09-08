@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/smudge_helper.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/selector_model.dart';
@@ -35,8 +36,7 @@ Future<int> _committedPatchMinDisplayAlpha(Rect patchBounds, double scale) async
     onThumbnailChanged: () {},
   );
   layer.appendDrawingAction(
-    UserActionDrawing(
-      action: ActionType.region,
+    RegionAction(
       positions: <Offset>[Offset.zero, const Offset(64, 64)],
       fillColor: const Color(0xFF3388AA),
       path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 64, 64)),
@@ -71,8 +71,7 @@ Future<int> _committedPatchMinDisplayAlpha(Rect patchBounds, double scale) async
       scale,
       () {},
       viewportBounds: const Rect.fromLTWH(0, 0, 64, 64),
-      canvasOffset: Offset.zero,
-      canvasScale: 1.0,
+      viewport: ViewportTransform.identity(),
       visibleCanvasBounds: const Rect.fromLTWH(0, 0, 64, 64),
       filterQuality: ui.FilterQuality.medium,
     ),
@@ -389,16 +388,14 @@ void main() {
       onThumbnailChanged: () {},
     );
     layer.appendDrawingAction(
-      UserActionDrawing(
-        action: ActionType.region,
+      RegionAction(
         positions: <Offset>[const Offset(80, 80), const Offset(120, 160)],
         fillColor: const Color(0xFFFF6699),
         path: ui.Path()..addRect(const Rect.fromLTWH(80, 80, 40, 80)),
       ),
     );
     layer.appendDrawingAction(
-      UserActionDrawing(
-        action: ActionType.region,
+      RegionAction(
         positions: <Offset>[const Offset(120, 80), const Offset(160, 160)],
         fillColor: const Color(0xFF6699FF),
         path: ui.Path()..addRect(const Rect.fromLTWH(120, 80, 40, 80)),

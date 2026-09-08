@@ -2,14 +2,14 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/providers/layer_provider.dart';
 
 /// A custom painter that paints the canvas panel.
 class CanvasPanelPainter extends CustomPainter {
   CanvasPanelPainter(
     this._layers, {
-    required this.canvasOffset,
-    required this.canvasScale,
+    required this.viewport,
     this.includeTransparentBackground = false,
     this.displayScale = 1.0,
     required this.visibleCanvasBounds,
@@ -30,11 +30,8 @@ class CanvasPanelPainter extends CustomPainter {
   /// The layers to paint.
   final List<LayerProvider> _layers;
 
-  /// Document origin in viewport coordinates.
-  final Offset canvasOffset;
-
-  /// Screen pixels per document pixel.
-  final double canvasScale;
+  /// The canvas-to-screen viewport transform (pan, zoom and rotation).
+  final ViewportTransform viewport;
 
   /// Whether to include the transparent background.
   final bool includeTransparentBackground;
@@ -62,8 +59,7 @@ class CanvasPanelPainter extends CustomPainter {
 
     if (includeTransparentBackground) {
       canvas.save();
-      canvas.translate(canvasOffset.dx, canvasOffset.dy);
-      canvas.scale(canvasScale);
+      canvas.transform(viewport.matrix.storage);
       canvas.clipRect(visibleCanvasBounds, doAntiAlias: false);
       canvas.drawRect(
         visibleCanvasBounds,
@@ -81,8 +77,7 @@ class CanvasPanelPainter extends CustomPainter {
           layer.renderLayerInViewport(
             canvas,
             viewportBounds: viewportBounds,
-            canvasOffset: canvasOffset,
-            canvasScale: canvasScale,
+            viewport: viewport,
             visibleCanvasBounds: visibleCanvasBounds,
           );
         } else {
@@ -91,8 +86,7 @@ class CanvasPanelPainter extends CustomPainter {
             displayScale,
             () => requestRebuild(layer, displayScale),
             viewportBounds: viewportBounds,
-            canvasOffset: canvasOffset,
-            canvasScale: canvasScale,
+            viewport: viewport,
             visibleCanvasBounds: visibleCanvasBounds,
             filterQuality: useLowQualitySampling ? FilterQuality.none : FilterQuality.medium,
           );
@@ -104,8 +98,7 @@ class CanvasPanelPainter extends CustomPainter {
   @override
   bool shouldRepaint(CanvasPanelPainter oldDelegate) {
     return oldDelegate._layers != _layers ||
-        oldDelegate.canvasOffset != canvasOffset ||
-        oldDelegate.canvasScale != canvasScale ||
+        oldDelegate.viewport != viewport ||
         oldDelegate.includeTransparentBackground != includeTransparentBackground ||
         oldDelegate.displayScale != displayScale ||
         oldDelegate.visibleCanvasBounds != visibleCanvasBounds;

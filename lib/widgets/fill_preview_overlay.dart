@@ -1,10 +1,11 @@
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 
 /// Paints the live paint-bucket preview — the held [action]'s region filled with
 /// its solid colour / gradient / halftone — as a lightweight canvas overlay,
-/// transformed into screen space by [canvasOffset] and [scale].
+/// transformed into screen space by [viewport].
 ///
 /// It reuses the exact [renderRegion] the committed fill uses (so the preview is
 /// pixel-identical) but draws only the region path: cost is O(region path), never
@@ -14,25 +15,21 @@ class FillPreviewOverlay extends StatelessWidget {
   const FillPreviewOverlay({
     super.key,
     required this.action,
-    required this.canvasOffset,
-    required this.scale,
+    required this.viewport,
   });
 
   /// The held preview action (region path + fill colour / gradient / halftone).
   final UserActionDrawing action;
 
-  /// Canvas-to-screen translation.
-  final Offset canvasOffset;
-
-  /// Canvas-to-screen scale.
-  final double scale;
+  /// The canvas-to-screen viewport transform (pan, zoom and rotation).
+  final ViewportTransform viewport;
 
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: CustomPaint(
         size: Size.infinite,
-        painter: _FillPreviewPainter(action: action, canvasOffset: canvasOffset, scale: scale),
+        painter: _FillPreviewPainter(action: action, viewport: viewport),
       ),
     );
   }
@@ -41,13 +38,11 @@ class FillPreviewOverlay extends StatelessWidget {
 class _FillPreviewPainter extends CustomPainter {
   _FillPreviewPainter({
     required this.action,
-    required this.canvasOffset,
-    required this.scale,
+    required this.viewport,
   });
 
   final UserActionDrawing action;
-  final Offset canvasOffset;
-  final double scale;
+  final ViewportTransform viewport;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -56,8 +51,7 @@ class _FillPreviewPainter extends CustomPainter {
       return;
     }
     canvas.save();
-    canvas.translate(canvasOffset.dx, canvasOffset.dy);
-    canvas.scale(scale);
+    canvas.transform(viewport.matrix.storage);
     // Clip to the active selection, matching how the committed fill is rendered.
     final Path? clip = action.clipPath;
     if (clip != null) {
@@ -69,6 +63,6 @@ class _FillPreviewPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _FillPreviewPainter oldDelegate) {
-    return oldDelegate.action != action || oldDelegate.canvasOffset != canvasOffset || oldDelegate.scale != scale;
+    return oldDelegate.action != action || oldDelegate.viewport != viewport;
   }
 }

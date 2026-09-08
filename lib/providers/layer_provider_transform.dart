@@ -116,14 +116,11 @@ extension LayerTransform on LayerProvider {
         );
       }
 
+      // copyWith preserves the concrete action variant while swapping in the
+      // transformed geometry.
       newActionStack.add(
-        UserActionDrawing(
-          action: oldAction.action,
+        oldAction.copyWith(
           positions: newPositions,
-          brush: oldAction.brush,
-          fillColor: oldAction.fillColor,
-          gradient: oldAction.gradient,
-          halftoneFill: oldAction.halftoneFill,
           path: newPath,
           image: newImage,
           clipPath: newClipPath,
@@ -195,14 +192,11 @@ extension LayerTransform on LayerProvider {
       }
       final TextObject? newTextObject = _flipTextObject(oldAction.textObject, extent, isHorizontal: isHorizontal);
 
+      // copyWith preserves the concrete action variant while swapping in the
+      // transformed geometry.
       newActionStack.add(
-        UserActionDrawing(
-          action: oldAction.action,
+        oldAction.copyWith(
           positions: newPositions,
-          brush: oldAction.brush,
-          fillColor: oldAction.fillColor,
-          gradient: oldAction.gradient,
-          halftoneFill: oldAction.halftoneFill,
           path: newPath,
           image: newImage,
           clipPath: newClipPath,

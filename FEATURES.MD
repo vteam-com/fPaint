@@ -116,6 +116,12 @@ slider where the sign chooses the direction (e.g. darken ↔ brighten).
 
 ## Interaction and UX Enhancements
 
+- Free canvas view rotation at any angle: two-finger twist (touch and trackpad),
+  Shift + right-drag (mouse), and `[` / `]` keyboard nudges. A 7° dead zone keeps
+  ordinary pinch-zooms upright, angles snap to each 45°, a live readout shows the
+  current angle, and Shift+`[` (or fit-to-window) returns the view upright. Pure
+  view state: no pixels change and nothing enters undo — distinct from the
+  destructive Rotate Canvas 90° action
 - Copy and paste UX improvements for touch devices
 - Keyboard shortcut for duplicate: Cmd+D (macOS), Ctrl+D (Windows/Linux)
 - Haptic feedback on scale and rotate gestures

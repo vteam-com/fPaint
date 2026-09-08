@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/widgets/canvas_panel_painter.dart';
 
@@ -6,16 +7,12 @@ import 'package:fpaint/widgets/canvas_panel_painter.dart';
 class CanvasPanel extends StatelessWidget {
   const CanvasPanel({
     super.key,
-    required this.canvasOffset,
-    required this.canvasScale,
+    required this.viewport,
     required this.visibleCanvasBounds,
   });
 
-  /// Document origin in viewport coordinates.
-  final Offset canvasOffset;
-
-  /// Screen pixels per document pixel.
-  final double canvasScale;
+  /// The canvas-to-screen viewport transform (pan, zoom and rotation).
+  final ViewportTransform viewport;
 
   /// The viewport expressed in document coordinates.
   final Rect visibleCanvasBounds;
@@ -36,8 +33,7 @@ class CanvasPanel extends StatelessWidget {
       size: Size.infinite,
       painter: CanvasPanelPainter(
         layers.list,
-        canvasOffset: canvasOffset,
-        canvasScale: canvasScale,
+        viewport: viewport,
         includeTransparentBackground: true,
         displayScale: displayScale,
         visibleCanvasBounds: visibleCanvasBounds,

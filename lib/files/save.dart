@@ -1,9 +1,8 @@
-import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
-import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/save_backup.dart';
+import 'package:fpaint/files/save_file_format.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
@@ -11,45 +10,31 @@ import 'package:fpaint/providers/macos_bookmark_service.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:logging/logging.dart';
 
+export 'package:fpaint/files/save_file_format.dart';
+
 final Logger _log = Logger(logNameSave);
 const String _errorFailedToSaveFilePrefix = 'Failed to save file:';
 
-/// Supported save file formats.
-enum SaveFileFormat {
-  png,
-  jpeg,
-  ora,
-  tiff,
-  webp,
-  heic;
-
-  /// Whether the format embeds individual layers (and can therefore store the
-  /// selected layer inside the file). Flat formats rely on a preference keyed
-  /// by file path instead.
-  bool get supportsLayers => this == SaveFileFormat.ora || this == SaveFileFormat.tiff;
-
-  /// Resolves a save format from a file name.
-  static SaveFileFormat? fromFileName(String fileName) {
-    final String extension = fileName.split('.').last.toLowerCase();
-    switch (extension) {
-      case FileExtensions.png:
-        return SaveFileFormat.png;
-      case FileExtensions.jpg:
-      case FileExtensions.jpeg:
-        return SaveFileFormat.jpeg;
-      case FileExtensions.ora:
-        return SaveFileFormat.ora;
-      case FileExtensions.tif:
-      case FileExtensions.tiff:
-        return SaveFileFormat.tiff;
-      case FileExtensions.webp:
-        return SaveFileFormat.webp;
-      case FileExtensions.heic:
-        return SaveFileFormat.heic;
-      default:
-        return null;
-    }
-  }
+/// Exports the canvas in [format], prompting for a destination where the
+/// platform has one.
+///
+/// The dialog title, offered extensions, suggested name and file-name
+/// normalization all come from [format], so adding a format needs no change
+/// here (Open/Closed).
+Future<void> exportAs(
+  SaveFileFormat format,
+  LayersProvider layers, {
+  String? fileName,
+  AppPreferences? preferences,
+}) async {
+  await exportToDestination(
+    dialogTitle: format.exportDialogTitle,
+    suggestedFileName: format.normalizeFileName(fileName ?? format.defaultExportFileName),
+    allowedExtensions: format.pickerExtensions,
+    write: (String filePath) => format.write(layers, filePath),
+    preferences: preferences,
+    resolveRecentFilePath: format.normalizeFileName,
+  );
 }
 
 /// Saves a file asynchronously.
@@ -72,54 +57,17 @@ Future<void> saveFile(
   }
 
   try {
-    switch (format) {
-      case SaveFileFormat.png:
-        await _saveWithResolvedFileAccess(
-          preferences: preferences,
-          fileName: fileName,
-          saveAction: (String resolvedFileName) => saveAsPng(layers, resolvedFileName),
-        );
-        break;
-      case SaveFileFormat.jpeg:
-        await _saveWithResolvedFileAccess(
-          preferences: preferences,
-          fileName: fileName,
-          saveAction: (String resolvedFileName) => saveAsJpeg(layers, resolvedFileName),
-        );
-        break;
-      case SaveFileFormat.ora:
-        await _saveWithResolvedFileAccess(
-          preferences: preferences,
-          fileName: fileName,
-          saveAction: (String resolvedFileName) => saveAsOra(layers, resolvedFileName),
-        );
-        break;
-      case SaveFileFormat.tiff:
-        final String normalizedFileName = normalizeTiffExportFileName(fileName);
-        await _saveWithResolvedFileAccess(
-          preferences: preferences,
-          fileName: normalizedFileName,
-          saveAction: (String resolvedFileName) => saveAsTiff(layers, resolvedFileName),
-        );
-        if (shellProvider.loadedFileName != normalizedFileName) {
-          shellProvider.loadedFileName = normalizedFileName;
-          shellProvider.update();
-        }
-        break;
-      case SaveFileFormat.webp:
-        await _saveWithResolvedFileAccess(
-          preferences: preferences,
-          fileName: fileName,
-          saveAction: (String resolvedFileName) => saveAsWebp(layers, resolvedFileName),
-        );
-        break;
-      case SaveFileFormat.heic:
-        await _saveWithResolvedFileAccess(
-          preferences: preferences,
-          fileName: fileName,
-          saveAction: (String resolvedFileName) => saveAsHeic(layers, resolvedFileName),
-        );
-        break;
+    final String targetFileName = format.normalizeFileName(fileName);
+    await _saveWithResolvedFileAccess(
+      preferences: preferences,
+      fileName: targetFileName,
+      saveAction: (String resolvedFileName) => format.write(layers, resolvedFileName),
+    );
+
+    // A normalizing format (TIFF) may have retargeted the document.
+    if (shellProvider.loadedFileName != targetFileName) {
+      shellProvider.loadedFileName = targetFileName;
+      shellProvider.update();
     }
 
     // Layered formats embed the selection; flat formats remember it per path.
