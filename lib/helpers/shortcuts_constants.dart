@@ -32,7 +32,7 @@ abstract class ShortcutActions {
   static const String rotateViewDrag = 'Rotate View';
   static const String twoFingerTwist = 'Two-finger twist';
   static const String rightDragSelection = 'Right-drag';
-  static const String showKeyboardShortcuts = 'Ctrl /, F1';
+  static const String showKeyboardShortcutsSeparator = ', ';
   static const String brushTool = 'Brush Tool';
   static const String eraserTool = 'Eraser Tool';
   static const String selectionTool = 'Selection Tool';
@@ -60,17 +60,27 @@ abstract class ShortcutMapKeys {
 }
 
 /// Display strings for keyboard modifier keys.
+///
+/// Apple platforms show the standard key glyphs (as printed on Apple keyboards);
+/// other platforms spell the modifier out.
 abstract class ShortcutModifiers {
-  static const String cmd = 'Cmd';
+  static const String cmd = '\u2318';
   static const String ctrl = 'Ctrl';
-  static const String option = 'Option';
+  static const String ctrlSymbol = '\u2303';
+  static const String option = '\u2325';
   static const String alt = 'Alt';
   static const String shift = 'Shift';
+  static const String shiftSymbol = '\u21E7';
+
+  /// Separator placed between a modifier and the key it is combined with.
+  static const String separator = ' + ';
 }
 
 /// Display strings for individual keyboard keys.
 abstract class ShortcutKeys {
   static const String zero = '0';
+  static const String f1 = 'F1';
+  static const String slash = '/';
   static const String plus = '+';
   static const String minus = '-';
   static const String tab = 'Tab';

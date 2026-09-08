@@ -510,7 +510,7 @@ List<_ToolbarActionEntry> _buildResponsiveToolbarActionEntries(
         child: buildToolbarIconButton(
           tooltip: tooltipWithShortcut(
             l10n.resetViewRotation,
-            '${ShortcutModifiers.shift} ${ShortcutKeys.bracketLeft}',
+            shortcutCombination(<String>[shiftModifierShortcutLabel(), ShortcutKeys.bracketLeft]),
           )!,
           icon: AppIcon.rotateRight,
           interactionProfile: interactionProfile,
