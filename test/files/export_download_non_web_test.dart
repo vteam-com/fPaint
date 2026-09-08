@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/files/export_download_non_web.dart';
+import 'package:fpaint/files/save.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -44,22 +45,16 @@ void main() {
       SharedPreferences.setMockInitialValues(<String, Object>{});
     });
 
-    test('onExportAsPng function exists', () {
+    test('exportAs is defined for every save format', () {
       // Note: Due to factory constructor in LayersProvider, we can't create
-      // mock instances for testing function calls. But we can verify function existence.
-      expect(() => onExportAsPng, returnsNormally);
-    });
-
-    test('onExportAsJpeg function exists', () {
-      expect(() => onExportAsJpeg, returnsNormally);
-    });
-
-    test('onExportAsOra function exists', () {
-      expect(() => onExportAsOra, returnsNormally);
-    });
-
-    test('onExportAsTiff function exists', () {
-      expect(() => onExportAsTiff, returnsNormally);
+      // mock instances for testing function calls. But we can verify that every
+      // format is dispatchable through the single generic entry point.
+      for (final SaveFileFormat format in SaveFileFormat.values) {
+        expect(format.pickerExtensions, isNotEmpty);
+        expect(format.defaultExportFileName, isNotEmpty);
+        expect(format.exportDialogTitle, isNotEmpty);
+      }
+      expect(() => exportAs, returnsNormally);
     });
 
     test('saveAsPng function exists', () {
@@ -96,7 +91,8 @@ void main() {
       });
 
       for (int exportIndex = 0; exportIndex < _repeatExportCount; exportIndex++) {
-        await onExportAsPng(
+        await exportAs(
+          SaveFileFormat.png,
           appProvider.layers,
           preferences: preferences,
         );
@@ -151,7 +147,8 @@ void main() {
         }
       });
 
-      await onExportAsPng(
+      await exportAs(
+        SaveFileFormat.png,
         appProvider.layers,
         preferences: preferences,
       );

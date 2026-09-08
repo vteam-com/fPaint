@@ -6,10 +6,6 @@ extension AppProviderSelection on AppProvider {
     return selectedAction == ActionType.selector || selectorModel.isVisible;
   }
 
-  double get _straightLineRegionCloseDistance {
-    return AppInteraction.selectionHandleSize / layers.scale;
-  }
-
   /// Toggles selection overlay behavior from the FAB without coupling to tool state.
   void toggleSelectionOverlayFromFab() {
     if (_isSelectionToggleInCancelState) {
@@ -650,42 +646,13 @@ extension AppProviderSelection on AppProvider {
   void selectorCreationStart(
     Offset position, {
     bool sampleAllLayers = false,
-  }) {
-    cancelEffectPreview();
-    if (selectorModel.mode == SelectorMode.wand) {
-      selectorModel.isDrawing = true;
-      wandSelection.queueRequest(position: position, sampleAllLayers: sampleAllLayers);
-      unawaited(_processPendingWandSelectionRequests());
-      return;
-    }
-
-    if (selectorModel.mode == SelectorMode.line) {
-      final bool isClosed = selectorModel.addStraightLineRegionPoint(
-        position,
-        closeDistance: _straightLineRegionCloseDistance,
-      );
-      selectorModel.isDrawing = !isClosed;
-      if (isClosed) {
-        selectorModel.applyMath();
-      }
-      repaintToolOptions();
-      update();
-      return;
-    }
-
-    selectorModel.isDrawing = true;
-    selectorModel.addP1(position);
-    repaintToolOptions();
-    update();
-  }
+  }) => selectorGeometry.creationStart(position, sampleAllLayers: sampleAllLayers);
 
   /// Maps a horizontal screen drag [screenDx] from the wand sample anchor onto a
   /// tolerance, starting from [startTolerance]. Dragging right loosens (grows)
   /// the selection; dragging left tightens it.
-  int wandToleranceForDrag(int startTolerance, double screenDx) {
-    final int delta = (screenDx / AppInteraction.wandToleranceDragPixelsPerUnit).round();
-    return (startTolerance + delta).clamp(AppMath.one, AppLimits.percentMax);
-  }
+  int wandToleranceForDrag(int startTolerance, double screenDx) =>
+      selectorGeometry.wandToleranceForDrag(startTolerance, screenDx);
 
   /// Re-runs the Edge Detection wand selection at the fixed sample [position]
   /// using [tolerance]. Drives the live "tap to sample, drag to grow/shrink"
@@ -694,101 +661,35 @@ extension AppProviderSelection on AppProvider {
     Offset position, {
     required int tolerance,
     required bool sampleAllLayers,
-  }) {
-    if (selectorModel.mode != SelectorMode.wand) {
-      return;
-    }
-    this.tolerance = tolerance;
-    selectorModel.isDrawing = true;
-    wandSelection.queueRequest(position: position, sampleAllLayers: sampleAllLayers);
-    unawaited(_processPendingWandSelectionRequests());
-  }
+  }) => selectorGeometry.wandResampleAt(
+    position,
+    tolerance: tolerance,
+    sampleAllLayers: sampleAllLayers,
+  );
 
   /// Translates the active selection by [screenDelta], a screen-space offset.
-  void selectionTranslateByScreenDelta(Offset screenDelta) {
-    selectorModel.translate(screenDelta / layers.scale);
-    repaintMainView();
-  }
+  void selectionTranslateByScreenDelta(Offset screenDelta) => selectorGeometry.translateByScreenDelta(screenDelta);
 
   /// Scales the active selection uniformly by [factor].
-  void selectionScaleUniform(double factor) {
-    selectorModel.scaleUniform(factor);
-    repaintMainView();
-  }
+  void selectionScaleUniform(double factor) => selectorGeometry.scaleUniform(factor);
 
   /// Resizes the active selection by dragging [handle] by [screenDelta].
-  void selectionResize(NineGridHandle handle, Offset screenDelta) {
-    selectorModel.nindeGridResize(handle, screenDelta / layers.scale);
-    repaintMainView();
-  }
+  void selectionResize(NineGridHandle handle, Offset screenDelta) => selectorGeometry.resize(handle, screenDelta);
 
   /// Rotates the active selection by [angleRadians].
-  void selectionRotate(double angleRadians) {
-    selectorModel.rotate(angleRadians);
-    repaintMainView();
-  }
+  void selectionRotate(double angleRadians) => selectorGeometry.rotate(angleRadians);
 
   /// Adds an additional point to the selector creation.
-  void selectorCreationAdditionalPoint(Offset position) {
-    if (selectorModel.mode == SelectorMode.wand) {
-      // Ignore since the PointerDown already did the job
-    } else if (selectorModel.mode == SelectorMode.line) {
-      // Ignore since straight-line region selection commits only on clicks.
-    } else {
-      selectorModel.addP2(position);
-      repaintMainView();
-    }
-  }
+  void selectorCreationAdditionalPoint(Offset position) => selectorGeometry.creationAdditionalPoint(position);
 
   /// Updates the selector preview while a multi-click straight-line region is in progress.
-  void selectorCreationPreview(Offset position) {
-    if (selectorModel.mode != SelectorMode.line || !selectorModel.isDrawing) {
-      return;
-    }
-
-    selectorModel.updateStraightLineRegionPreview(
-      position,
-      closeDistance: _straightLineRegionCloseDistance,
-    );
-    repaintMainView();
-  }
+  void selectorCreationPreview(Offset position) => selectorGeometry.creationPreview(position);
 
   /// Ends the selector creation.
-  void selectorCreationEnd() {
-    if (selectorModel.mode == SelectorMode.wand) {
-      selectorModel.isDrawing = false;
-      repaintToolOptions();
-      update();
-      return;
-    }
-
-    if (selectorModel.mode == SelectorMode.line) {
-      return;
-    }
-
-    selectorModel.isDrawing = false;
-    selectorModel.applyMath();
-    repaintToolOptions();
-    update();
-  }
+  void selectorCreationEnd() => selectorGeometry.creationEnd();
 
   /// Closes an active straight-line region selection and commits it.
-  bool selectorCreationClosePolygon() {
-    if (selectorModel.mode != SelectorMode.line || !selectorModel.isDrawing) {
-      return false;
-    }
-
-    final bool isClosed = selectorModel.closeStraightLineRegion();
-    if (!isClosed) {
-      return false;
-    }
-
-    selectorModel.isDrawing = false;
-    selectorModel.applyMath();
-    repaintToolOptions();
-    update();
-    return true;
-  }
+  bool selectorCreationClosePolygon() => selectorGeometry.creationClosePolygon();
 
   /// Ensures a selection exists. If no selection path is set, selects the
   /// entire canvas so that operations can treat the full layer as the target.
@@ -799,21 +700,7 @@ extension AppProviderSelection on AppProvider {
   }
 
   /// Selects all.
-  void selectAll() {
-    cancelEffectPreview();
-    wandSelection.cancelPendingRequest();
-    selectorModel.isVisible = true;
-    selectorModel.isDrawing = false;
-    selectorModel.path1 = Path()
-      ..addRect(
-        Rect.fromPoints(Offset.zero, Offset(layers.width, layers.height)),
-      );
-    selectorModel.path2 = null;
-    selectorModel.points.clear();
-    selectorModel.math = SelectorMath.replace;
-    repaintToolOptions();
-    update();
-  }
+  void selectAll() => selectorGeometry.selectAll();
 
   /// Gets the path adjusted to the canvas size and position.
   Path? getPathAdjustToCanvasSizeAndPosition(Path? path) {

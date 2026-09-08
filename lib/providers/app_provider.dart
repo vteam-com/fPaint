@@ -31,6 +31,8 @@ import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/pixel_brush_commit.dart';
 import 'package:fpaint/providers/selection_effect_preview_state.dart';
 import 'package:fpaint/providers/selection_effect_renderer.dart';
+import 'package:fpaint/providers/selector_geometry_controller.dart';
+import 'package:fpaint/providers/selector_geometry_host.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -55,7 +57,7 @@ part 'wand_selection_request.dart';
 /// including the canvas, layers, and selection tools. It provides methods for interacting
 /// with the canvas, such as clearing the canvas, converting between canvas and screen
 /// coordinates, and performing region-based operations like erasing and cutting.
-class AppProvider extends ChangeNotifier {
+class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   AppProvider({
     AppPreferences? preferences,
     LayersProvider? layersProvider,
@@ -218,6 +220,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Rebuilds the main canvas and overlay surface without notifying the full app shell.
+  @override
   void repaintMainView() {
     _mainViewRepaintNotifier.notifyListeners();
   }
@@ -228,6 +231,7 @@ class AppProvider extends ChangeNotifier {
   }
 
   /// Rebuilds tool-option UI without notifying the full app shell.
+  @override
   void repaintToolOptions() {
     _toolOptionsNotifier.notifyListeners();
   }
@@ -614,6 +618,7 @@ class AppProvider extends ChangeNotifier {
   int get tolerance => _tolerance;
 
   /// Sets the tolerance.
+  @override
   set tolerance(int value) {
     _tolerance = max(1, min(AppLimits.percentMax, value));
     repaintToolOptions();
@@ -830,7 +835,54 @@ class AppProvider extends ChangeNotifier {
   // Selector
 
   /// The selector model.
+  @override
   SelectorModel selectorModel = SelectorModel();
+
+  /// Shapes the active selection (create, move, scale, resize, rotate).
+  ///
+  /// Composed rather than mixed in, so selection geometry stays testable
+  /// against [SelectorGeometryHost] without building the whole provider.
+  late final SelectorGeometryController selectorGeometry = SelectorGeometryController(this);
+
+  /// Current canvas zoom. Part of [SelectorGeometryHost].
+  @override
+  double get canvasScale => layers.scale;
+
+  /// Canvas width in pixels. Part of [SelectorGeometryHost].
+  @override
+  double get canvasWidth => layers.width;
+
+  /// Canvas height in pixels. Part of [SelectorGeometryHost].
+  @override
+  double get canvasHeight => layers.height;
+
+  /// Cancels any live effect preview, discarding the pending result.
+  ///
+  /// Declared on the class (not the effects extension) because
+  /// [SelectorGeometryHost] requires it: selection changes must drop a preview
+  /// that was captured against the old region.
+  @override
+  void cancelEffectPreview() {
+    if (!effectPreviewModel.isVisible) {
+      return;
+    }
+
+    effectPreviewModel.clear();
+    effectPreviewRenderVersion++;
+    repaintToolOptions();
+    update();
+  }
+
+  /// Drops a queued magic-wand sample. Part of [SelectorGeometryHost].
+  @override
+  void cancelPendingWandRequest() => wandSelection.cancelPendingRequest();
+
+  /// Queues a magic-wand sample. Part of [SelectorGeometryHost].
+  @override
+  void queueWandRequest({required Offset position, required bool sampleAllLayers}) {
+    wandSelection.queueRequest(position: position, sampleAllLayers: sampleAllLayers);
+    unawaited(_processPendingWandSelectionRequests());
+  }
 
   /// Owns the floating transform/placement session state (transform overlay,
   /// prepared image placement, cross-layer lift). See [TransformSession].
@@ -928,6 +980,7 @@ class AppProvider extends ChangeNotifier {
   /// Notifies all listeners that the model has been updated.
   /// This method should be called whenever the state of the model changes
   /// to ensure that any UI components observing the model are updated.
+  @override
   void update() {
     notifyListeners();
   }

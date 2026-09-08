@@ -172,18 +172,6 @@ extension AppProviderSelectionEffects on AppProvider {
     layers.disposeCommittedImagesIfUnreferenced(orphaned);
   }
 
-  /// Cancels the active effect preview without committing changes.
-  void cancelEffectPreview() {
-    if (!effectPreviewModel.isVisible) {
-      return;
-    }
-
-    effectPreviewModel.clear();
-    effectPreviewRenderVersion++;
-    repaintToolOptions();
-    update();
-  }
-
   /// Renders the effect preview image and updates overlay listeners.
   Future<void> _renderEffectPreview() async {
     final SelectionEffectPreviewState? state = _currentEffectPreviewState();

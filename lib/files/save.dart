@@ -1,9 +1,8 @@
-import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/export_download_non_web.dart'
     if (dart.library.html) 'package:fpaint/files/export_download_web.dart';
-import 'package:fpaint/files/export_file_name.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/save_backup.dart';
+import 'package:fpaint/files/save_file_format.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/layers_provider.dart';
@@ -11,119 +10,31 @@ import 'package:fpaint/providers/macos_bookmark_service.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:logging/logging.dart';
 
+export 'package:fpaint/files/save_file_format.dart';
+
 final Logger _log = Logger(logNameSave);
 const String _errorFailedToSaveFilePrefix = 'Failed to save file:';
 
-/// Writes [layers] to [fileName] in one concrete format.
-typedef SaveFormatWriter = Future<void> Function(LayersProvider layers, String fileName);
-
-/// Normalizes the target file name before saving (e.g. collapsing `.tiff` to
-/// `.tif`). Returns the name unchanged by default.
-typedef SaveFormatFileNameNormalizer = String Function(String fileName);
-
-String _unchangedFileName(String fileName) => fileName;
-
-/// Static metadata and writer for a save format.
+/// Exports the canvas in [format], prompting for a destination where the
+/// platform has one.
 ///
-/// Holding the extensions, the writer and the layer capability together keeps
-/// adding a format to a single enum entry: no dispatch `switch` elsewhere has
-/// to be edited (Open/Closed).
-class _SaveFormatConfig {
-  const _SaveFormatConfig({
-    required this.extensions,
-    required this.write,
-    this.supportsLayers = false,
-    this.normalizeFileName = _unchangedFileName,
-  });
-
-  /// Every file extension that maps to this format; the first is canonical.
-  final List<String> extensions;
-
-  /// Writes the document in this format.
-  final SaveFormatWriter write;
-
-  /// Whether the format embeds individual layers (and can therefore store the
-  /// selected layer inside the file). Flat formats rely on a preference keyed
-  /// by file path instead.
-  final bool supportsLayers;
-
-  /// Adjusts the target file name before saving.
-  final SaveFormatFileNameNormalizer normalizeFileName;
-}
-
-/// Supported save file formats.
-enum SaveFileFormat {
-  png(
-    _SaveFormatConfig(
-      extensions: <String>[FileExtensions.png],
-      write: saveAsPng,
-    ),
-  ),
-  jpeg(
-    _SaveFormatConfig(
-      extensions: <String>[FileExtensions.jpg, FileExtensions.jpeg],
-      write: saveAsJpeg,
-    ),
-  ),
-  ora(
-    _SaveFormatConfig(
-      extensions: <String>[FileExtensions.ora],
-      write: saveAsOra,
-      supportsLayers: true,
-    ),
-  ),
-  tiff(
-    _SaveFormatConfig(
-      extensions: <String>[FileExtensions.tif, FileExtensions.tiff],
-      write: saveAsTiff,
-      supportsLayers: true,
-      normalizeFileName: normalizeTiffExportFileName,
-    ),
-  ),
-  webp(
-    _SaveFormatConfig(
-      extensions: <String>[FileExtensions.webp],
-      write: saveAsWebp,
-    ),
-  ),
-  heic(
-    _SaveFormatConfig(
-      extensions: <String>[FileExtensions.heic],
-      write: saveAsHeic,
-    ),
+/// The dialog title, offered extensions, suggested name and file-name
+/// normalization all come from [format], so adding a format needs no change
+/// here (Open/Closed).
+Future<void> exportAs(
+  SaveFileFormat format,
+  LayersProvider layers, {
+  String? fileName,
+  AppPreferences? preferences,
+}) async {
+  await exportToDestination(
+    dialogTitle: format.exportDialogTitle,
+    suggestedFileName: format.normalizeFileName(fileName ?? format.defaultExportFileName),
+    allowedExtensions: format.pickerExtensions,
+    write: (String filePath) => format.write(layers, filePath),
+    preferences: preferences,
+    resolveRecentFilePath: format.normalizeFileName,
   );
-
-  const SaveFileFormat(this._config);
-
-  final _SaveFormatConfig _config;
-
-  /// Every file extension that maps to this format; the first is canonical.
-  List<String> get extensions => _config.extensions;
-
-  /// Whether the format embeds individual layers (and can therefore store the
-  /// selected layer inside the file). Flat formats rely on a preference keyed
-  /// by file path instead.
-  bool get supportsLayers => _config.supportsLayers;
-
-  /// Adjusts [fileName] to the canonical name this format writes.
-  String normalizeFileName(String fileName) => _config.normalizeFileName(fileName);
-
-  /// Writes [layers] to [fileName] in this format.
-  Future<void> write(LayersProvider layers, String fileName) => _config.write(layers, fileName);
-
-  /// Resolves a save format from a file extension, or null when unsupported.
-  static SaveFileFormat? fromExtension(String extension) {
-    final String normalized = extension.toLowerCase();
-    for (final SaveFileFormat format in SaveFileFormat.values) {
-      if (format._config.extensions.contains(normalized)) {
-        return format;
-      }
-    }
-    return null;
-  }
-
-  /// Resolves a save format from a file name.
-  static SaveFileFormat? fromFileName(String fileName) => fromExtension(fileName.split('.').last);
 }
 
 /// Saves a file asynchronously.
