@@ -8,4 +8,5 @@ class FileExtensions {
   static const String tif = 'tif';
   static const String tiff = 'tiff';
   static const String heic = 'heic';
+  static const String avif = 'avif';
 }

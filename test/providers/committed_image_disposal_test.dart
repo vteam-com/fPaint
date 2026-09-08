@@ -22,8 +22,7 @@ Future<ui.Image> _texture() {
 }
 
 UserActionDrawing _imageAction(ui.Image image) {
-  return UserActionDrawing(
-    action: ActionType.image,
+  return ImageAction(
     positions: const <Offset>[Offset.zero, Offset(2, 2)],
     image: image,
   );

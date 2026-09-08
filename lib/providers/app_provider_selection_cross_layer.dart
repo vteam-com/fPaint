@@ -101,11 +101,7 @@ extension AppProviderSelectionCrossLayer on AppProvider {
       forward: () {
         for (final LayerProvider layer in targets) {
           layer.appendDrawingAction(
-            UserActionDrawing(
-              action: ActionType.cut,
-              positions: <ui.Offset>[],
-              path: Path.from(selectionPath),
-            ),
+            CutAction(path: Path.from(selectionPath)),
           );
         }
         update();
@@ -213,11 +209,7 @@ extension AppProviderSelectionCrossLayer on AppProvider {
       forward: () {
         for (int i = 0; i < lift.length; i++) {
           lift[i].layer.appendDrawingAction(
-            UserActionDrawing(
-              action: ActionType.cut,
-              positions: <ui.Offset>[],
-              path: Path.from(selectionPath),
-            ),
+            CutAction(path: Path.from(selectionPath)),
           );
           lift[i].layer.addImage(
             imageToAdd: warpedImages[i],

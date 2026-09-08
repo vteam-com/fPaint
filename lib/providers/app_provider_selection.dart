@@ -44,11 +44,7 @@ extension AppProviderSelection on AppProvider {
 
     if (selectorModel.path1 != null) {
       recordExecuteDrawingActionToSelectedLayer(
-        action: UserActionDrawing(
-          action: ActionType.cut,
-          positions: <ui.Offset>[],
-          path: Path.from(selectorModel.path1!),
-        ),
+        action: CutAction(path: Path.from(selectorModel.path1!)),
       );
       update();
     }
@@ -632,12 +628,7 @@ extension AppProviderSelection on AppProvider {
       name: name,
       forward: () {
         layers.selectedLayer.appendDrawingAction(
-          UserActionDrawing(
-            action: ActionType.cut,
-            positions: <ui.Offset>[],
-            path: erasePath,
-            erasesEntireLayer: erasesEntireLayer,
-          ),
+          CutAction(path: erasePath, erasesEntireLayer: erasesEntireLayer),
         );
         layers.selectedLayer.addImage(
           imageToAdd: replacement,

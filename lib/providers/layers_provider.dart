@@ -623,8 +623,7 @@ class LayersProvider extends ChangeNotifier {
     final ui.Image flattenedLayerImage = layer.toImageForStorage(size);
 
     return <UserActionDrawing>[
-      UserActionDrawing(
-        action: ActionType.image,
+      ImageAction(
         positions: <Offset>[
           Offset.zero,
           Offset(size.width, size.height),

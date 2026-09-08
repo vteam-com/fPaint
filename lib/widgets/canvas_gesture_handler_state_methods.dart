@@ -560,8 +560,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
             onSubmitted: (TextObject textObject) {
               appProvider.adoptTextToolStateFromObject(textObject);
               appProvider.recordExecuteDrawingActionToSelectedLayer(
-                action: UserActionDrawing(
-                  action: ActionType.text,
+                action: TextAction(
                   positions: <ui.Offset>[position],
                   textObject: textObject,
                 ),
@@ -611,7 +610,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // the active action is appended below.
     appProvider.layers.selectedLayer.beginStrokePreview();
     appProvider.recordExecuteDrawingActionToSelectedLayer(
-      action: UserActionDrawing(
+      action: StrokeAction(
         action: action,
         positions: <ui.Offset>[adjustedPosition, adjustedPosition],
         brush: MyBrush(
@@ -648,7 +647,7 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
 
     appProvider.recordExecuteDrawingActionToSelectedLayer(
-      action: UserActionDrawing(
+      action: StrokeAction(
         positions: <Offset>[
           last.positions.last,
           adjustedPosition,

@@ -33,14 +33,12 @@ Future<ui.Image> _solid(
       canvas.drawRect(Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()), Paint()..color = color),
 );
 
-UserActionDrawing _imageAction(ui.Image image) => UserActionDrawing(
-  action: ActionType.image,
+UserActionDrawing _imageAction(ui.Image image) => ImageAction(
   positions: <Offset>[Offset.zero, Offset(image.width.toDouble(), image.height.toDouble())],
   image: image,
 );
 
-UserActionDrawing _textAction() => UserActionDrawing(
-  action: ActionType.text,
+UserActionDrawing _textAction() => TextAction(
   positions: const <Offset>[Offset(4, 4)],
   textObject: TextObject(
     text: 'fPaint',
@@ -250,7 +248,7 @@ void main() {
       layer.actionStack.add(_imageAction(await _solid(const Color(0xFF00AA00))));
       final ui.Image transparentPatch = await _solid(const Color(0x00000000), width: 20, height: 20);
       layer.actionStack.add(
-        UserActionDrawing(
+        ImageAction(
           action: ActionType.blurBrush,
           positions: const <Offset>[Offset(10, 10), Offset(30, 30)],
           image: transparentPatch,

@@ -7,60 +7,275 @@ import 'package:fpaint/models/halftone_fill.dart';
 import 'package:fpaint/models/text_object.dart';
 export 'package:fpaint/models/brush_style.dart';
 
-/// Represents a drawing action performed by the user.
-class UserActionDrawing {
-  UserActionDrawing({
-    required this.action,
-    required this.positions,
-    // optionals
-    this.brush,
-    this.fillColor,
-    this.gradient,
-    this.halftoneFill,
-    this.path,
-    this.image,
-    this.clipPath,
-    this.textObject,
-    this.erasesEntireLayer = false,
-  });
+/// A single committed drawing operation on a layer.
+///
+/// Sealed so every consumer switches exhaustively over the concrete variants
+/// instead of force-unwrapping optional fields that only some actions carry.
+/// Each subtype declares exactly the data its rendering needs, which is what
+/// makes the payload accessors below non-nullable (Liskov substitution).
+sealed class UserActionDrawing {
+  UserActionDrawing({required this.action, required this.positions, this.clipPath});
 
   /// The type of action performed.
   final ActionType action;
 
   /// The list of positions where the action was performed.
-  final List<Offset> positions;
+  ///
+  /// Mutable: freehand strokes append points while the gesture is in flight.
+  final List<ui.Offset> positions;
 
-  /// Optional brush used for the action.
-  final MyBrush? brush;
-
-  /// Optional fill color used for the action.
-  final Color? fillColor;
-
-  /// Optional gradient used for the action.
-  final Gradient? gradient;
-
-  /// Optional halftone colors used with [gradient] geometry for region fills.
-  final HalftoneFill? halftoneFill;
-
-  /// Optional path used for the action.
-  ui.Path? path;
-
-  /// Optional image used for the action.
-  final ui.Image? image;
-
-  /// Optional clip path used for the action.
+  /// Optional clip path restricting where the action paints.
   ui.Path? clipPath;
-
-  /// Optional text for the action.
-  final TextObject? textObject;
 
   /// Whether this action erases the whole layer, making every earlier action
   /// invisible. Marks a collapse point for the action stack.
-  final bool erasesEntireLayer;
+  bool get erasesEntireLayer => false;
+
+  /// The brush this action paints with, or null when it does not use one.
+  MyBrush? get brush => null;
+
+  /// The solid color this action fills with, or null when it has none.
+  Color? get fillColor => null;
+
+  /// The gradient this action fills with, or null when it has none.
+  Gradient? get gradient => null;
+
+  /// The halftone treatment applied to a region fill, or null when unused.
+  HalftoneFill? get halftoneFill => null;
+
+  /// The geometry this action fills or erases, or null when it has none.
+  ui.Path? get path => null;
+
+  /// The image this action stamps, or null when it has none.
+  ui.Image? get image => null;
+
+  /// The text this action draws, or null when it has none.
+  TextObject? get textObject => null;
+
+  /// Returns a copy of this action with the supplied payload replaced,
+  /// preserving the concrete variant.
+  ///
+  /// Used by whole-layer geometric transforms (rotate/flip), which rebuild each
+  /// action's geometry without knowing its kind. Arguments that do not apply to
+  /// a given variant are ignored by that variant.
+  UserActionDrawing copyWith({
+    List<ui.Offset>? positions,
+    ui.Path? path,
+    ui.Image? image,
+    ui.Path? clipPath,
+    TextObject? textObject,
+  });
 
   @override
   String toString() {
     return '$action';
+  }
+}
+
+/// A freehand or two-point stroke painted with a brush.
+///
+/// Covers pencil, brush, eraser, line, circle and rectangle: every action whose
+/// rendering is driven by [positions] plus a [brush].
+class StrokeAction extends UserActionDrawing {
+  StrokeAction({
+    required super.action,
+    required super.positions,
+    required this.brush,
+    this.fillColor,
+    super.clipPath,
+  });
+
+  @override
+  final MyBrush brush;
+
+  @override
+  final Color? fillColor;
+
+  @override
+  StrokeAction copyWith({
+    List<ui.Offset>? positions,
+    ui.Path? path,
+    ui.Image? image,
+    ui.Path? clipPath,
+    TextObject? textObject,
+  }) {
+    return StrokeAction(
+      action: action,
+      positions: positions ?? this.positions,
+      brush: brush,
+      fillColor: fillColor,
+      clipPath: clipPath ?? this.clipPath,
+    );
+  }
+}
+
+/// A closed region filled with a solid color, a gradient, or a halftone.
+///
+/// Produced by the paint bucket and by region fills; rendered from [path].
+class RegionAction extends UserActionDrawing {
+  RegionAction({
+    required super.positions,
+    required this.path,
+    this.fillColor,
+    this.gradient,
+    this.halftoneFill,
+    super.clipPath,
+  }) : super(action: ActionType.region);
+
+  @override
+  final ui.Path path;
+
+  @override
+  final Color? fillColor;
+
+  @override
+  final Gradient? gradient;
+
+  @override
+  final HalftoneFill? halftoneFill;
+
+  @override
+  RegionAction copyWith({
+    List<ui.Offset>? positions,
+    ui.Path? path,
+    ui.Image? image,
+    ui.Path? clipPath,
+    TextObject? textObject,
+  }) {
+    return RegionAction(
+      positions: positions ?? this.positions,
+      path: path ?? this.path,
+      fillColor: fillColor,
+      gradient: gradient,
+      halftoneFill: halftoneFill,
+      clipPath: clipPath ?? this.clipPath,
+    );
+  }
+}
+
+/// Erases the pixels inside a region.
+class CutAction extends UserActionDrawing {
+  CutAction({
+    required this.path,
+    List<ui.Offset>? positions,
+    this.erasesEntireLayer = false,
+    super.clipPath,
+  }) : super(action: ActionType.cut, positions: positions ?? <ui.Offset>[]);
+
+  @override
+  final ui.Path path;
+
+  @override
+  final bool erasesEntireLayer;
+
+  @override
+  CutAction copyWith({
+    List<ui.Offset>? positions,
+    ui.Path? path,
+    ui.Image? image,
+    ui.Path? clipPath,
+    TextObject? textObject,
+  }) {
+    return CutAction(
+      path: path ?? this.path,
+      positions: positions ?? this.positions,
+      erasesEntireLayer: erasesEntireLayer,
+      clipPath: clipPath ?? this.clipPath,
+    );
+  }
+}
+
+/// Stamps a raster image onto the layer.
+///
+/// Also carries the flattened result of a smudge/blur commit, which is why
+/// [action] is configurable rather than fixed to [ActionType.image].
+class ImageAction extends UserActionDrawing {
+  ImageAction({
+    required super.positions,
+    required this.image,
+    super.action = ActionType.image,
+    this.brush,
+    this.fillColor,
+    super.clipPath,
+  });
+
+  @override
+  final ui.Image image;
+
+  @override
+  final MyBrush? brush;
+
+  @override
+  final Color? fillColor;
+
+  @override
+  ImageAction copyWith({
+    List<ui.Offset>? positions,
+    ui.Path? path,
+    ui.Image? image,
+    ui.Path? clipPath,
+    TextObject? textObject,
+  }) {
+    return ImageAction(
+      action: action,
+      positions: positions ?? this.positions,
+      image: image ?? this.image,
+      brush: brush,
+      fillColor: fillColor,
+      clipPath: clipPath ?? this.clipPath,
+    );
+  }
+}
+
+/// Draws a text object onto the layer.
+class TextAction extends UserActionDrawing {
+  TextAction({
+    required super.positions,
+    required this.textObject,
+    super.clipPath,
+  }) : super(action: ActionType.text);
+
+  @override
+  final TextObject textObject;
+
+  @override
+  TextAction copyWith({
+    List<ui.Offset>? positions,
+    ui.Path? path,
+    ui.Image? image,
+    ui.Path? clipPath,
+    TextObject? textObject,
+  }) {
+    return TextAction(
+      positions: positions ?? this.positions,
+      textObject: textObject ?? this.textObject,
+      clipPath: clipPath ?? this.clipPath,
+    );
+  }
+}
+
+/// An action that records intent but paints nothing itself.
+///
+/// The paint bucket commits its pixels as a [RegionAction]; the selector draws
+/// through the selection overlay. Both still need a stack entry so undo and
+/// tool bookkeeping stay in step.
+class NonRenderingAction extends UserActionDrawing {
+  NonRenderingAction({required super.action, List<ui.Offset>? positions, super.clipPath})
+    : super(positions: positions ?? <ui.Offset>[]);
+
+  @override
+  NonRenderingAction copyWith({
+    List<ui.Offset>? positions,
+    ui.Path? path,
+    ui.Image? image,
+    ui.Path? clipPath,
+    TextObject? textObject,
+  }) {
+    return NonRenderingAction(
+      action: action,
+      positions: positions ?? this.positions,
+      clipPath: clipPath ?? this.clipPath,
+    );
   }
 }
 

@@ -35,8 +35,7 @@ Future<int> _committedPatchMinDisplayAlpha(Rect patchBounds, double scale) async
     onThumbnailChanged: () {},
   );
   layer.appendDrawingAction(
-    UserActionDrawing(
-      action: ActionType.region,
+    RegionAction(
       positions: <Offset>[Offset.zero, const Offset(64, 64)],
       fillColor: const Color(0xFF3388AA),
       path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 64, 64)),
@@ -389,16 +388,14 @@ void main() {
       onThumbnailChanged: () {},
     );
     layer.appendDrawingAction(
-      UserActionDrawing(
-        action: ActionType.region,
+      RegionAction(
         positions: <Offset>[const Offset(80, 80), const Offset(120, 160)],
         fillColor: const Color(0xFFFF6699),
         path: ui.Path()..addRect(const Rect.fromLTWH(80, 80, 40, 80)),
       ),
     );
     layer.appendDrawingAction(
-      UserActionDrawing(
-        action: ActionType.region,
+      RegionAction(
         positions: <Offset>[const Offset(120, 80), const Offset(160, 160)],
         fillColor: const Color(0xFF6699FF),
         path: ui.Path()..addRect(const Rect.fromLTWH(120, 80, 40, 80)),

@@ -72,7 +72,7 @@ void main() {
       // Add a second layer on top with some actions.
       final LayerProvider topLayer = layers.addTop(name: 'TopLayer');
       topLayer.appendDrawingAction(
-        UserActionDrawing(
+        StrokeAction(
           positions: <Offset>[const Offset(0, 0), const Offset(10, 10)],
           action: ActionType.brush,
           brush: MyBrush(color: Colors.red, size: 2),
