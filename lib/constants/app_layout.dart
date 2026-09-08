@@ -43,11 +43,11 @@ class AppLayout {
   static const double shortcutDialogMaxWidth = 760.0;
   static const double shortcutHelpTwoColumnBreakpoint = 640.0;
 
-  /// Width of the key-cap gutter, so descriptions line up in a single column.
-  static const double shortcutHelpKeyColumnWidth = 148.0;
+  /// Minimum width of a single key cap, so narrow caps stay square-ish.
+  static const double shortcutHelpKeyCapMinWidth = 28.0;
 
-  /// Below this group width the key-cap gutter is dropped and the cap sizes
-  /// itself, keeping long labels from squeezing the description off-screen.
+  /// Below this group width the caps stack under the description instead of
+  /// sitting beside it, keeping the description readable.
   static const double shortcutHelpKeyColumnMinGroupWidth = 300.0;
   static const double shortcutHelpReadableTextMinWidth = 120.0;
   static const double separatorHeight = 15.0;

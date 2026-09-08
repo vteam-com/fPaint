@@ -67,11 +67,10 @@ Widget shortCutsForMainApp(
       ),
       ResetZoomIntent: CallbackAction<ResetZoomIntent>(
         onInvoke: (ResetZoomIntent _) {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-          appProvider.applyScaleToCanvas(
-            scaleDelta: AppVisual.full / appProvider.layers.scale,
-            anchorPoint: appProvider.canvasCenter,
-          );
+          // Same path as the zoom-value button: the fit needs the laid-out
+          // viewport size, so request the placement rather than computing a
+          // scale here.
+          shellProvider.requestCanvasFitAndRepaint(appProvider.repaintViewport);
           return null;
         },
       ),
@@ -92,13 +91,6 @@ Widget shortCutsForMainApp(
             rotationDelta: degreesToRadians(AppInteraction.viewportRotationKeyboardStepDegrees),
             anchorPoint: appProvider.canvasCenter,
           );
-          return null;
-        },
-      ),
-      ResetViewRotationIntent: CallbackAction<ResetViewRotationIntent>(
-        onInvoke: (ResetViewRotationIntent _) {
-          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-          appProvider.resetCanvasRotation();
           return null;
         },
       ),
@@ -386,12 +378,6 @@ class RotateViewClockwiseIntent extends Intent {
   const RotateViewClockwiseIntent();
 }
 
-/// An [Intent] that returns the canvas view to upright.
-class ResetViewRotationIntent extends Intent {
-  /// Creates a [ResetViewRotationIntent].
-  const ResetViewRotationIntent();
-}
-
 /// An [Intent] that triggers the save action.
 class SaveIntent extends Intent {
   /// Creates a [SaveIntent].
@@ -558,7 +544,6 @@ Map<ShortcutActivator, Intent> _buildShortcuts() {
   // modifier-free like a brush-size change.
   shortcuts[const SingleActivator(LogicalKeyboardKey.bracketLeft)] = const RotateViewCounterClockwiseIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.bracketRight)] = const RotateViewClockwiseIntent();
-  shortcuts[const SingleActivator(LogicalKeyboardKey.bracketLeft, shift: true)] = const ResetViewRotationIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.digit0, meta: true)] = const ResetZoomIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.digit0, control: true)] = const ResetZoomIntent();
   shortcuts[const SingleActivator(LogicalKeyboardKey.numpad0, meta: true)] = const ResetZoomIntent();

@@ -864,13 +864,10 @@ Widget _buildCenterAndDimensionButton(
   return AppButton(
     key: Keys.floatActionCenter,
     tooltip:
-        '${tooltipWithShortcut(ShortcutActions.resetZoom, primaryModifiedShortcut(ShortcutKeys.zero))!}\n$zoomAndSizeDetails',
+        '${tooltipWithShortcut(ShortcutActions.fitCanvasToView, primaryModifiedShortcut(ShortcutKeys.zero))!}\n$zoomAndSizeDetails',
     onPressed: () {
       Future<void>.microtask(() {
-        shellProvider.requestCanvasFit();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          appProvider.repaintViewport();
-        });
+        shellProvider.requestCanvasFitAndRepaint(appProvider.repaintViewport);
       });
     },
     child: Center(

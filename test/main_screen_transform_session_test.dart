@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -601,6 +602,39 @@ void main() {
 
     expect(appProvider.canvasOffset, offsetBeforePan + _secondaryDragDelta);
     expect(appProvider.layers.selectedLayer.actionStack.length, actionCountBeforePan);
+  });
+
+  testWidgets('Shift + secondary-drag rotates the view', (WidgetTester tester) async {
+    shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump();
+
+    final Finder canvasGestureHandler = find.byType(CanvasGestureHandler);
+    final Offset start = tester.getCenter(canvasGestureHandler);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    final TestGesture gesture = await tester.startGesture(
+      start,
+      kind: ui.PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    // Well past the dead zone, which absorbs small twists so an ordinary drag
+    // cannot leave the canvas crooked.
+    await gesture.moveBy(const Offset(400, 0));
+    await gesture.up();
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+
+    // The drag drives angle; the offset shifts only because the rotation is
+    // anchored on the viewport centre.
+    expect(appProvider.layers.isRotated, isTrue);
+    expect(appProvider.canvasRotation, isNot(0));
   });
 
   testWidgets('maximum zoom bounds layer compositing to the visible viewport', (WidgetTester tester) async {

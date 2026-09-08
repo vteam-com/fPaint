@@ -103,6 +103,18 @@ class ShellProvider extends ChangeNotifier {
     update();
   }
 
+  /// Requests a fit and schedules the follow-up viewport repaint.
+  ///
+  /// [MainView] performs the fit in the next layout pass, so the repaint has to
+  /// wait for that frame. Both the zoom-value button and the fit shortcut go
+  /// through here so the two cannot drift apart.
+  void requestCanvasFitAndRepaint(VoidCallback repaintViewport) {
+    requestCanvasFit();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      repaintViewport();
+    });
+  }
+
   InteractionInputModality _interactionInputModality = InteractionInputModality.mouse;
 
   /// Current dominant input modality used to scale interactive controls.
