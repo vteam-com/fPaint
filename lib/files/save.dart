@@ -175,6 +175,7 @@ Future<void> saveFile(
     );
   }
 }
+
 /// Saves a file through the macOS security-scoped bookmark when one exists.
 Future<void> _saveWithResolvedFileAccess({
   required AppPreferences preferences,

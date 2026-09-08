@@ -541,8 +541,7 @@ class LayerProvider extends ChangeNotifier {
     final List<Offset> tail = action.positions.sublist(fromPoint - AppMath.one);
     // Only freehand strokes can be extended incrementally; every other variant
     // re-renders whole.
-    if (action is StrokeAction &&
-        (action.action == ActionType.pencil || action.action == ActionType.eraser)) {
+    if (action is StrokeAction && (action.action == ActionType.pencil || action.action == ActionType.eraser)) {
       _renderStrokeAction(canvas, action, tail);
       return;
     }

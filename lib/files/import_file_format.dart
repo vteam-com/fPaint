@@ -82,8 +82,7 @@ enum ImportFileFormat {
 
   /// Whether the format rebuilds the full layer stack (and so embeds its own
   /// selected-layer marker) rather than decoding to a single flat image.
-  bool get supportsLayers =>
-      _config.decodeKind == ImportDecodeKind.ora || _config.decodeKind == ImportDecodeKind.tiff;
+  bool get supportsLayers => _config.decodeKind == ImportDecodeKind.ora || _config.decodeKind == ImportDecodeKind.tiff;
 
   /// Resolves an import format from a file extension, or null when unsupported.
   static ImportFileFormat? fromExtension(String extension) {
@@ -97,8 +96,7 @@ enum ImportFileFormat {
   }
 
   /// Resolves an import format from a file name.
-  static ImportFileFormat? fromFileName(String fileName) =>
-      fromExtension(fileName.split('.').last);
+  static ImportFileFormat? fromFileName(String fileName) => fromExtension(fileName.split('.').last);
 
   /// Every extension the app can open, for file-picker filters and support
   /// checks.

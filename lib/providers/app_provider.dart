@@ -29,6 +29,8 @@ import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layer_crop_state.dart';
 import 'package:fpaint/providers/layers_provider.dart';
 import 'package:fpaint/providers/pixel_brush_commit.dart';
+import 'package:fpaint/providers/selection_effect_preview_state.dart';
+import 'package:fpaint/providers/selection_effect_renderer.dart';
 import 'package:fpaint/providers/undo_provider.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -845,6 +847,12 @@ class AppProvider extends ChangeNotifier {
 
   /// The effect preview model for live selection-effect intensity updates.
   final EffectPreviewModel effectPreviewModel = EffectPreviewModel();
+
+  /// Pure image pipeline behind effect preview and commit.
+  ///
+  /// Composed rather than inherited so the effect maths stays testable on its
+  /// own and this provider keeps only the session lifecycle.
+  final SelectionEffectRenderer effectRenderer = const SelectionEffectRenderer();
 
   /// The paint-mode state for brushing an Adjust effect onto the canvas.
   final EffectBrushModel effectBrushModel = EffectBrushModel();
