@@ -44,6 +44,23 @@ double brushSizeForDrag({
   return (startSize + delta).clamp(minSize, maxSize);
 }
 
+/// Returns the brush size after scrolling the mouse wheel by [scrollDy]
+/// pixels from [startSize], clamped to [minSize]..[maxSize].
+///
+/// Scrolling up (negative deltas) grows the brush, down (positive deltas)
+/// shrinks it, mirroring the map-zoom convention where scrolling toward the
+/// user zooms in.
+@visibleForTesting
+double brushSizeForWheelScroll({
+  required double startSize,
+  required double scrollDy,
+  required double minSize,
+  required double maxSize,
+}) {
+  final double delta = -scrollDy / AppInteraction.brushSizeWheelScrollPixelsPerUnit;
+  return (startSize + delta).clamp(minSize, maxSize);
+}
+
 /// Returns whether flood fill should use the active selection path as its region.
 @visibleForTesting
 bool shouldUseSelectionRegionFloodFill({
@@ -103,6 +120,24 @@ extension AppProviderTools on AppProvider {
     final double size = brushSizeForDrag(
       startSize: startSize,
       screenDx: screenDx,
+      minSize: activeBrushSizeMin,
+      maxSize: activeBrushSizeMax,
+    );
+    if (size != brushSize) {
+      brushSize = size;
+    }
+    return size;
+  }
+
+  /// Applies a vertical mouse-wheel [scrollDy] from [startSize] to the armed
+  /// tool's brush size, clamped to that tool's range. Returns the applied size.
+  double applyBrushSizeWheelScroll({
+    required double startSize,
+    required double scrollDy,
+  }) {
+    final double size = brushSizeForWheelScroll(
+      startSize: startSize,
+      scrollDy: scrollDy,
       minSize: activeBrushSizeMin,
       maxSize: activeBrushSizeMax,
     );
