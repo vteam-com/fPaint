@@ -42,6 +42,12 @@ class AppInteraction {
   /// should cross the whole range without feeling twitchy at small sizes.
   static const double brushSizeDragPixelsPerUnit = 4.0;
 
+  /// Vertical mouse-wheel scroll pixels per 1 unit of brush size during the
+  /// Ctrl+Alt+wheel resize gesture. A typical wheel notch reports ~120 px of
+  /// scrollDelta, so this maps one notch to a gentle few units (about 4 here)
+  /// rather than the jumpy 30 that reusing the drag sensitivity would give.
+  static const double brushSizeWheelScrollPixelsPerUnit = 30.0;
+
   /// Horizontal screen pixels dragged per 1 unit of Edge Detection wand
   /// tolerance during the tap-to-sample, drag-to-adjust selection gesture.
   static const double wandToleranceDragPixelsPerUnit = 8.0;

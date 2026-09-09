@@ -234,6 +234,26 @@ extension _CanvasGestureHandlerStateEyedropperMethods on _CanvasGestureHandlerSt
     appProvider.showDrawingToolPreviewAt(size: size, position: anchor);
   }
 
+  /// Applies a mouse-wheel [event] scroll to the brush size while Ctrl+Alt
+  /// (or Cmd+Opt on macOS) is held, showing the size HUD ring at the pointer.
+  ///
+  /// Unlike the anchored drag gesture each wheel tick changes the size from its
+  /// current value (no anchor state), so a consecutive chain of notches keeps
+  /// accumulating through the clamped tool range.
+  void _updateBrushSizeFromWheelScroll(
+    AppProvider appProvider,
+    PointerScrollEvent event,
+  ) {
+    final double size = appProvider.applyBrushSizeWheelScroll(
+      startSize: appProvider.brushSize,
+      scrollDy: event.scrollDelta.dy,
+    );
+    appProvider.showDrawingToolPreviewAt(
+      size: size,
+      position: event.localPosition,
+    );
+  }
+
   /// Whether a hold-modifiers-and-drag brush resize is in progress.
   bool get _isBrushSizeDragActive => _brushSizeDragAnchorScreen != null;
 

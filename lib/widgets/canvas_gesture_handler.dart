@@ -133,12 +133,19 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
         onPointerSignal: (PointerSignalEvent event) {
           _registerInputModality(shellProvider, event.kind);
           if (event is PointerScrollEvent) {
-            _handleUserScalingTheCanvas(
-              shellProvider,
-              appProvider,
-              event.localPosition,
-              exp(-event.scrollDelta.dy / AppInteraction.mouseWheelZoomScrollPixels),
-            );
+            if (appProvider.isBrushSizeDragModifierPressed) {
+              // Ctrl+Alt (or Cmd+Opt on macOS) + mouse wheel resizes the brush
+              // instead of zooming the canvas: scroll up to grow, down to
+              // shrink, with the size HUD ring previewing at the pointer.
+              _updateBrushSizeFromWheelScroll(appProvider, event);
+            } else {
+              _handleUserScalingTheCanvas(
+                shellProvider,
+                appProvider,
+                event.localPosition,
+                exp(-event.scrollDelta.dy / AppInteraction.mouseWheelZoomScrollPixels),
+              );
+            }
           } else {
             if (event is PointerScaleEvent) {
               _handleUserScalingTheCanvas(

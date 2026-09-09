@@ -1,4 +1,7 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -150,5 +153,62 @@ void main() {
     final Finder previewFinder = find.byKey(Keys.brushSizePreviewOverlay);
     expect(previewFinder, findsOneWidget);
     expect(tester.getCenter(previewFinder), hoverPosition);
+  });
+  testWidgets('Ctrl+Alt + mouse wheel resizes the brush instead of zooming the canvas', (
+    WidgetTester tester,
+  ) async {
+    appProvider.selectedAction = ActionType.brush;
+    appProvider.brushSize = 24.0;
+
+    await tester.pumpWidget(
+      _buildHarness(
+        preferences: preferences,
+        appProvider: appProvider,
+        shellProvider: shellProvider,
+      ),
+    );
+    await tester.pump(AppDefaults.brushSizePreviewDuration);
+    await tester.pump();
+
+    final Finder canvasGestureHandler = find.byType(CanvasGestureHandler);
+    expect(canvasGestureHandler, findsOneWidget);
+
+    final Offset wheelPosition = tester.getTopLeft(canvasGestureHandler) + const Offset(160, 180);
+
+    // Hold Ctrl+Alt (the brush-size gesture chord) before scrolling.
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.control);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.alt);
+
+    final double sizeBefore = appProvider.brushSize;
+    final double scaleBefore = appProvider.layers.scale;
+
+    // Scroll up one notch: the brush should grow and the canvas must NOT zoom.
+    await tester.sendEventToBinding(
+      PointerScrollEvent(
+        kind: ui.PointerDeviceKind.mouse,
+        position: wheelPosition,
+        scrollDelta: const Offset(0.0, -120.0),
+      ),
+    );
+    await tester.pump();
+
+    expect(appProvider.brushSize, greaterThan(sizeBefore));
+    expect(appProvider.layers.scale, scaleBefore);
+
+    // Scroll down one notch: the brush should shrink below the grown value.
+    await tester.sendEventToBinding(
+      PointerScrollEvent(
+        kind: ui.PointerDeviceKind.mouse,
+        position: wheelPosition,
+        scrollDelta: const Offset(0.0, 120.0),
+      ),
+    );
+    await tester.pump();
+
+    expect(appProvider.brushSize, closeTo(sizeBefore, 1e-9));
+    expect(appProvider.layers.scale, scaleBefore);
+
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.alt);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.control);
   });
 }

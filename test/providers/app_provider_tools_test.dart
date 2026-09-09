@@ -109,6 +109,28 @@ void main() {
       );
     });
   });
+  group('brushSizeForWheelScroll', () {
+    test('grows scrolling up and shrinks scrolling down', () {
+      const double start = 20;
+      // Negative scrollDelta.dy = scrolling up = grow.
+      final double grown = brushSizeForWheelScroll(startSize: start, scrollDy: -120, minSize: 1, maxSize: 100);
+      // Positive scrollDelta.dy = scrolling down = shrink.
+      final double shrunk = brushSizeForWheelScroll(startSize: start, scrollDy: 120, minSize: 1, maxSize: 100);
+
+      expect(grown, start + 120 / AppInteraction.brushSizeWheelScrollPixelsPerUnit);
+      expect(shrunk, start - 120 / AppInteraction.brushSizeWheelScrollPixelsPerUnit);
+      expect(grown, greaterThan(shrunk));
+    });
+
+    test('holds the start size when the wheel has not moved', () {
+      expect(brushSizeForWheelScroll(startSize: 12, scrollDy: 0, minSize: 1, maxSize: 100), 12);
+    });
+
+    test('clamps to the tool range instead of running away', () {
+      expect(brushSizeForWheelScroll(startSize: 90, scrollDy: -100000, minSize: 1, maxSize: 100), 100);
+      expect(brushSizeForWheelScroll(startSize: 10, scrollDy: 100000, minSize: 1, maxSize: 100), 1);
+    });
+  });
 
   group('applyBrushSizeDrag', () {
     late AppProvider appProvider;
@@ -165,6 +187,41 @@ void main() {
     });
   });
 
+  group('applyBrushSizeWheelScroll', () {
+    late AppProvider appProvider;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      appProvider = AppProvider(preferences: preferences);
+    });
+
+    test('writes the wheel size through to the brush', () {
+      appProvider.selectedAction = ActionType.brush;
+      // Scrolling up grows the brush.
+      final double applied = appProvider.applyBrushSizeWheelScroll(startSize: 20, scrollDy: -120);
+
+      expect(applied, 20 + 120 / AppInteraction.brushSizeWheelScrollPixelsPerUnit);
+      expect(appProvider.brushSize, applied);
+    });
+
+    test('offers the wider pixel-brush range for smudge', () {
+      appProvider.selectedAction = ActionType.smudge;
+      expect(appProvider.activeBrushSizeMax, AppLimits.pixelBrushSizeMax.toDouble());
+
+      final double applied = appProvider.applyBrushSizeWheelScroll(startSize: 100, scrollDy: -100000);
+      expect(applied, AppLimits.pixelBrushSizeMax.toDouble());
+    });
+
+    test('never scrolls the size to zero or negative', () {
+      appProvider.selectedAction = ActionType.brush;
+      final double applied = appProvider.applyBrushSizeWheelScroll(startSize: 5, scrollDy: 100000);
+
+      expect(applied, greaterThan(0));
+      expect(applied, appProvider.activeBrushSizeMin);
+    });
+  });
   group('isFloodFillOriginModifierPressedForPlatform', () {
     test('uses Option on Apple platforms', () {
       final bool result = isFloodFillOriginModifierPressedForPlatform(
