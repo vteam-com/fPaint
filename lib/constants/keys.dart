@@ -13,6 +13,7 @@ class Keys {
   static const Key floatActionPaste = Key('floating_action_paste');
   static const Key mainMenuButton = Key('main-menu-button');
   static const Key mainMenuCanvasSize = Key('main-menu-canvas-size');
+  static const Key mainMenuImageSize = Key('main-menu-image-size');
   static const Key sidePanelExportButton = Key('side-panel-export-button');
   static const Key appScreenshotBoundary = Key('app-screenshot-boundary');
   static const Key mainViewScreenshotBoundary = Key('main-view-screenshot-boundary');
@@ -27,6 +28,10 @@ class Keys {
   static const Key canvasSettingsHeightField = Key('canvas-settings-height-field');
   static const Key canvasSettingsAspectRatioToggleButton = Key('canvas-settings-aspect-ratio-toggle-button');
   static const Key canvasSettingsApplyButton = Key('canvas-settings-apply-button');
+  static const Key imageSizeWidthField = Key('image-size-width-field');
+  static const Key imageSizeHeightField = Key('image-size-height-field');
+  static const Key imageSizeAspectRatioToggleButton = Key('image-size-aspect-ratio-toggle-button');
+  static const Key imageSizeApplyButton = Key('image-size-apply-button');
   static const Key textEditorBoldButton = Key('text-editor-bold-button');
   static const Key textEditorItalicButton = Key('text-editor-italic-button');
   static const Key textEditorAlignmentDropdown = Key('text-editor-alignment-dropdown');

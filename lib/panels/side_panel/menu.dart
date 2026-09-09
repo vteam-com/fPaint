@@ -10,6 +10,7 @@ import 'package:fpaint/models/menu_model.dart';
 import 'package:fpaint/pages/settings_page.dart';
 import 'package:fpaint/panels/side_panel/about.dart';
 import 'package:fpaint/panels/side_panel/canvas_settings.dart';
+import 'package:fpaint/panels/side_panel/image_size_settings.dart';
 import 'package:fpaint/panels/side_panel/recent_files_dialog.dart';
 import 'package:fpaint/panels/side_panel/share_panel.dart';
 import 'package:fpaint/providers/app_preferences.dart';
@@ -66,6 +67,12 @@ class MainMenu extends StatelessWidget {
           text: l10n.canvas,
           icon: AppIcon.edit,
           key: Keys.mainMenuCanvasSize,
+        ),
+        buildMenuItem(
+          value: MenuIds.imageSize,
+          text: l10n.imageSize,
+          icon: AppIcon.openInFull,
+          key: Keys.mainMenuImageSize,
         ),
         buildMenuItem(
           value: MenuIds.settings,
@@ -135,6 +142,10 @@ void onDropDownMenuSelection(
 
     case MenuIds.canvasSize:
       showCanvasSettings(context);
+      break;
+
+    case MenuIds.imageSize:
+      showImageSizeSettings(context);
       break;
 
     case MenuIds.settings:

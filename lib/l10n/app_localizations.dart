@@ -758,11 +758,41 @@ abstract class AppLocalizations {
   /// **'Spacing'**
   String get hatchSpacing;
 
+  /// No description provided for @hatchTaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Taper'**
+  String get hatchTaper;
+
   /// No description provided for @height.
   ///
   /// In en, this message translates to:
   /// **'Height'**
   String get height;
+
+  /// No description provided for @imageDimensionsMustBePositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Image dimensions must be positive.'**
+  String get imageDimensionsMustBePositive;
+
+  /// No description provided for @imageSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Image Size...'**
+  String get imageSize;
+
+  /// No description provided for @imageSizeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scales every layer to the new size.'**
+  String get imageSizeHint;
+
+  /// No description provided for @imageSizeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Image Size'**
+  String get imageSizeTitle;
 
   /// No description provided for @hexColor.
   ///
@@ -1022,12 +1052,6 @@ abstract class AppLocalizations {
   /// **'Paste'**
   String get paste;
 
-  /// No description provided for @hatchTaper.
-  ///
-  /// In en, this message translates to:
-  /// **'Taper'**
-  String get hatchTaper;
-
   /// No description provided for @pencilSize.
   ///
   /// In en, this message translates to:
@@ -1256,17 +1280,17 @@ abstract class AppLocalizations {
   /// **'Halftone'**
   String get toolHalftone;
 
-  /// No description provided for @toolHatchMarks.
-  ///
-  /// In en, this message translates to:
-  /// **'Hatch marks'**
-  String get toolHatchMarks;
-
   /// No description provided for @toolHatching.
   ///
   /// In en, this message translates to:
   /// **'Hatching'**
   String get toolHatching;
+
+  /// No description provided for @toolHatchMarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Hatch marks'**
+  String get toolHatchMarks;
 
   /// No description provided for @toolInvert.
   ///

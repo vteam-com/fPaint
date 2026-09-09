@@ -13,6 +13,25 @@ class ImagePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    // Thumbnails are swapped and freed asynchronously (a debounced rebuild, a
+    // layer teardown), so the handle captured when this frame was scheduled can
+    // already be released by the time it paints. Drawing it would trip
+    // `assert(!image.debugDisposed)` in Canvas.drawImageRect; skipping the draw
+    // leaves the transparency pattern showing for the one frame until the
+    // replacement thumbnail notifies and repaints.
+    //
+    // `debugDisposed` throws a StateError when asserts are disabled, so the read
+    // lives inside an assert block: in release the draw simply proceeds (the
+    // engine tolerates it there — only the debug assert fires).
+    bool isDisposed = false;
+    assert(() {
+      isDisposed = image.debugDisposed;
+      return true;
+    }());
+    if (isDisposed) {
+      return;
+    }
+
     final ui.Paint paint = Paint();
 
     // Calculate the scale factors to fit the image into the destination rectangle
@@ -35,6 +54,12 @@ class ImagePainter extends CustomPainter {
     canvas.drawImageRect(image, src, dst, paint);
   }
 
+  /// Repaints when the widget hands over a different image.
+  ///
+  /// This must compare the image: returning a constant `false` makes Flutter
+  /// keep the *old* painter (and its old [ui.Image] handle) when a rebuild
+  /// supplies a new thumbnail. The layer then disposes that superseded texture
+  /// and the retained painter draws a freed image on the next repaint.
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant ImagePainter oldDelegate) => !identical(oldDelegate.image, image);
 }

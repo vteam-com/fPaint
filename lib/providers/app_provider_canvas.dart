@@ -230,6 +230,22 @@ extension AppProviderCanvas on AppProvider {
     }
   }
 
+  /// Resamples every layer to [width] × [height] (see
+  /// [LayersProviderImageResize.resizeImage]).
+  ///
+  /// Any selection is dropped once the size actually changes: its path was
+  /// authored against the old pixel grid and no longer maps onto the content.
+  Future<void> resizeImage(int width, int height) async {
+    cancelEffectPreview();
+    final Size before = layers.size;
+    await layers.resizeImage(width, height);
+    if (layers.size != before && selectorModel.isVisible) {
+      selectorModel.clear();
+      repaintToolOptions();
+    }
+    update();
+  }
+
   /// Rotates 90 degrees clockwise.
   ///
   /// When a selection exists, only the selected region on the active layer
