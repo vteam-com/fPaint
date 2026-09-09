@@ -2,6 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/models/brush_hatch.dart';
+import 'package:fpaint/models/hatch_marks.dart';
+import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
@@ -148,6 +151,55 @@ void main() {
       appProvider.addListener(() => notifyCount++);
       appProvider.brushStyle = BrushStyle.solid;
       expect(notifyCount, 1);
+    });
+  });
+
+  group('hatchPattern', () {
+    test('defaults, clamps on set, and notifies', () {
+      expect(appProvider.hatchPattern, const HatchPattern());
+      int notifyCount = 0;
+      appProvider.addListener(() => notifyCount++);
+      appProvider.hatchPattern = const HatchPattern(angleDegrees: 400, spacing: 1, lineWidth: 99);
+      expect(appProvider.hatchPattern.angleDegrees, AppHatch.maxAngleDegrees);
+      expect(appProvider.hatchPattern.spacing, AppHatch.minSpacing);
+      expect(appProvider.hatchPattern.lineWidth, AppHatch.maxLineWidth);
+      expect(notifyCount, 1);
+    });
+
+    test('setting the pattern or a hatch style prewarms both tile variants', () async {
+      const HatchPattern pattern = HatchPattern(spacing: 7, lineWidth: 2);
+      appProvider.hatchPattern = pattern;
+      await BrushHatch.instance.prewarm(pattern);
+      await BrushHatch.instance.prewarm(pattern.copyWith(crossed: true));
+      expect(BrushHatch.instance.tileFor(pattern), isNotNull);
+      expect(BrushHatch.instance.tileFor(pattern.copyWith(crossed: true)), isNotNull);
+
+      appProvider.brushStyle = BrushStyle.crossHatch;
+      expect(appProvider.brushStyle.isHatch, isTrue);
+      expect(BrushStyle.solid.isHatch, isFalse);
+    });
+
+    test('hatchMarks defaults, clamps on set, and notifies', () {
+      expect(appProvider.hatchMarks, const HatchMarks());
+      int notifyCount = 0;
+      appProvider.addListener(() => notifyCount++);
+      appProvider.hatchMarks = const HatchMarks(length: 9999, taperPercent: -5);
+      expect(appProvider.hatchMarks.length, AppHatchMarks.maxLength);
+      expect(appProvider.hatchMarks.taperPercent, 0);
+      expect(notifyCount, 1);
+      expect(BrushStyle.hatchMarks.isHatch, isFalse);
+    });
+
+    test('fill hatch toggles update the fill model and notify', () {
+      int notifyCount = 0;
+      appProvider.addListener(() => notifyCount++);
+      appProvider.setFillHalftoneEnabled(true);
+      appProvider.setFillHatchEnabled(true);
+      expect(appProvider.fillModel.hatchEnabled, isTrue);
+      expect(appProvider.fillModel.halftoneEnabled, isFalse);
+      appProvider.setFillHatchCrossed(true);
+      expect(appProvider.fillModel.hatchCrossed, isTrue);
+      expect(notifyCount, 3);
     });
   });
 

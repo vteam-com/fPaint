@@ -1,6 +1,7 @@
 part of 'user_action_drawing.dart';
 
-/// A closed region filled with a solid color, a gradient, or a halftone.
+/// A closed region filled with a solid color, a gradient, a halftone, or a
+/// hatch pattern.
 ///
 /// Produced by the paint bucket and by region fills; rendered from [path].
 class RegionAction extends UserActionDrawing {
@@ -10,6 +11,7 @@ class RegionAction extends UserActionDrawing {
     this.fillColor,
     this.gradient,
     this.halftoneFill,
+    this.hatchPattern,
     super.clipPath,
   }) : super(action: ActionType.region);
 
@@ -26,6 +28,9 @@ class RegionAction extends UserActionDrawing {
   final HalftoneFill? halftoneFill;
 
   @override
+  final HatchPattern? hatchPattern;
+
+  @override
   RegionAction copyWith({
     List<ui.Offset>? positions,
     ui.Path? path,
@@ -39,6 +44,7 @@ class RegionAction extends UserActionDrawing {
       fillColor: fillColor,
       gradient: gradient,
       halftoneFill: halftoneFill,
+      hatchPattern: hatchPattern,
       clipPath: clipPath ?? this.clipPath,
     );
   }

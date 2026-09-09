@@ -5,8 +5,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/brush_grain.dart';
+import 'package:fpaint/models/brush_hatch.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/halftone_fill.dart';
+import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/render_helper.dart';
 import 'package:fpaint/models/text_object.dart';
 
@@ -206,6 +208,109 @@ void main() {
       // Grain paints, but the paper texture makes its alpha vary (not all opaque).
       expect(grainAlphas.any((int a) => a > 0), isTrue);
       expect(grainAlphas.any((int a) => a < 250), isTrue);
+    });
+  });
+
+  group('hatch brush', () {
+    const HatchPattern horizontal = HatchPattern(angleDegrees: 0, spacing: 8, lineWidth: 2);
+
+    Paint strokePaint(double width) => Paint()
+      ..color = AppColors.black
+      ..strokeWidth = width
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    test('hatch styles fall back to a solid stroke before the tile exists', () {
+      const HatchPattern uncached = HatchPattern(spacing: 63, lineWidth: 5);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      final Paint paint = strokePaint(6.0);
+      final Path path = Path()
+        ..moveTo(0, 0)
+        ..lineTo(100, 0);
+      drawPathWithBrushStyle(canvas, paint, path, BrushStyle.hatch, 6.0, hatch: uncached);
+      drawPathWithBrushStyle(canvas, paint, path, BrushStyle.crossHatch, 6.0, hatch: uncached);
+      expect(paint.shader, isNull);
+      expect(applyHatchPaint(paint, uncached), isFalse);
+      recorder.endRecording();
+    });
+
+    test('hatch installs a shader + colour filter once the tile is ready', () async {
+      await BrushHatch.instance.prewarm(horizontal);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      final Paint paint = strokePaint(6.0);
+      final Path path = Path()
+        ..moveTo(0, 0)
+        ..lineTo(100, 0);
+      drawPathWithBrushStyle(canvas, paint, path, BrushStyle.hatch, 6.0, hatch: horizontal);
+      expect(paint.shader, isNotNull);
+      expect(paint.colorFilter, isNotNull);
+      recorder.endRecording();
+    });
+
+    test('a hatched stroke is striped across its width while a solid one is not', () async {
+      await BrushHatch.instance.prewarm(horizontal);
+
+      Future<ByteData> renderThickStroke(BrushStyle style) async {
+        final ui.PictureRecorder recorder = ui.PictureRecorder();
+        final Canvas canvas = Canvas(recorder);
+        final Paint paint = strokePaint(40.0);
+        final Path path = Path()
+          ..moveTo(0, 32)
+          ..lineTo(64, 32);
+        drawPathWithBrushStyle(canvas, paint, path, style, 40.0, hatch: horizontal);
+        final ui.Image image = await recorder.endRecording().toImage(64, 64);
+        final ByteData bytes = (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+        image.dispose();
+        return bytes;
+      }
+
+      int alphaAt(ByteData data, int y) => data.getUint8((y * 64 + 32) * 4 + 3);
+
+      final ByteData solid = await renderThickStroke(BrushStyle.solid);
+      final ByteData hatched = await renderThickStroke(BrushStyle.hatch);
+
+      // Walk down the stroke's width (rows 16..47 are inside the 40px stroke).
+      final List<int> solidAlphas = <int>[for (int y = 16; y < 48; y++) alphaAt(solid, y)];
+      final List<int> hatchedAlphas = <int>[for (int y = 16; y < 48; y++) alphaAt(hatched, y)];
+      expect(solidAlphas.every((int a) => a > 250), isTrue);
+      // Horizontal lines every 8px: opaque rows and fully clear rows alternate.
+      expect(hatchedAlphas.where((int a) => a > 250).length, greaterThanOrEqualTo(6));
+      expect(hatchedAlphas.where((int a) => a == 0).length, greaterThanOrEqualTo(16));
+      // The line field is canvas-locked: rows 19/20 (tile centre) carry the line.
+      expect(alphaAt(hatched, 19), greaterThan(250));
+      expect(alphaAt(hatched, 20), greaterThan(250));
+      expect(alphaAt(hatched, 16), 0);
+    });
+
+    test('renderRegion with a hatch pattern draws lines in the fill colour', () async {
+      await BrushHatch.instance.prewarm(horizontal);
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      final Path region = Path()..addRect(const Rect.fromLTWH(0, 0, 32, 32));
+      renderRegion(canvas, region, const Color(0xFFFF0000), null, null, hatchPattern: horizontal);
+      final ui.Image image = await recorder.endRecording().toImage(32, 32);
+      final ByteData bytes = (await image.toByteData(format: ui.ImageByteFormat.rawRgba))!;
+      image.dispose();
+
+      int channel(int x, int y, int offset) => bytes.getUint8((y * 32 + x) * 4 + offset);
+      // Row 3 is a line row (tile centre), rows 0 and 8 are gap rows. Bilinear
+      // tile sampling softens the edge slightly, so allow a little tolerance.
+      expect(channel(10, 3, 3), greaterThan(200));
+      expect(channel(10, 3, 0), greaterThan(200)); // red
+      expect(channel(10, 3, 1), 0); // no green
+      expect(channel(10, 0, 3), lessThan(10));
+      expect(channel(10, 8, 3), lessThan(10));
+    });
+
+    test('renderRegion ignores the hatch pattern for gradient fills', () {
+      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final Canvas canvas = Canvas(recorder);
+      final Path region = Path()..addRect(const Rect.fromLTWH(0, 0, 32, 32));
+      const Gradient gradient = LinearGradient(colors: <Color>[AppColors.black, AppColors.white]);
+      renderRegion(canvas, region, null, gradient, null, hatchPattern: horizontal);
+      recorder.endRecording();
     });
   });
 

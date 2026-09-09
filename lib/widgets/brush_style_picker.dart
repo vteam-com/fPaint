@@ -49,6 +49,9 @@ String _brushStyleLabel(AppLocalizations l10n, BrushStyle style) {
     BrushStyle.slash => l10n.brushStyleSlash,
     BrushStyle.soft => l10n.brushStyleSoft,
     BrushStyle.grain => l10n.brushStyleGrain,
+    BrushStyle.hatch => l10n.brushStyleHatch,
+    BrushStyle.crossHatch => l10n.brushStyleCrossHatch,
+    BrushStyle.hatchMarks => l10n.brushStyleHatchMarks,
   };
 }
 

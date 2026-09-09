@@ -29,10 +29,13 @@
   "brushColor": "Brush Color",
   "brushSize": "Brush Size",
   "brushStyle": "Brush Style",
+  "brushStyleCrossHatch": "Cross-hatch",
   "brushStyleDash": "Dash",
   "brushStyleDashDot": "Dash-Dot",
   "brushStyleDotted": "Dotted",
   "brushStyleGrain": "Grain",
+  "brushStyleHatch": "Hatch",
+  "brushStyleHatchMarks": "Hatch marks",
   "brushStyleSlash": "Slash",
   "brushStyleSoft": "Soft",
   "brushStyleSolid": "Solid",
@@ -165,6 +168,13 @@
   "gradientColors": "Gradient Colors",
   "gradientPointColor": "Gradient Point Color",
   "gradientStopPosition": "Position",
+  "hatchAngle": "Angle",
+  "hatchCrossed": "Cross-hatch",
+  "hatchCurve": "Curve",
+  "hatchLength": "Length",
+  "hatchLineWidth": "Line weight",
+  "hatchSpacing": "Spacing",
+  "hatchTaper": "Taper",
   "height": "Height",
   "hexColor": "Hex Color",
   "hexColorCopiedToClipboard": "Hex Color copied to clipboard",
@@ -226,6 +236,12 @@
       "value": {}
     }
   },
+  "pixelsValue": "{value} px",
+  "@pixelsValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "platforms": "Available on...",
   "previewUnavailable": "Preview unavailable",
   "recentFilesLabel": "Recent",
@@ -269,6 +285,8 @@
   "toolEraser": "Eraser",
   "toolFill": "Fill",
   "toolHalftone": "Halftone",
+  "toolHatching": "Hatching",
+  "toolHatchMarks": "Hatch marks",
   "toolInvert": "Invert",
   "toolLasso": "Lasso",
   "toolLine": "Line",

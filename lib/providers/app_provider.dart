@@ -13,9 +13,12 @@ import 'package:fpaint/helpers/smudge_helper.dart';
 import 'package:fpaint/helpers/transform_helper.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/brush_grain.dart';
+import 'package:fpaint/models/brush_hatch.dart';
 import 'package:fpaint/models/effect_brush_model.dart';
 import 'package:fpaint/models/effect_preview_model.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/hatch_marks.dart';
+import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/image_placement_layer_restore_state.dart';
 import 'package:fpaint/models/image_placement_model.dart';
 import 'package:fpaint/models/selection_effect.dart';
@@ -42,6 +45,7 @@ import 'package:fpaint/providers/wand_source_sampler.dart';
 export 'package:fpaint/providers/layers_provider.dart';
 
 part 'app_provider_canvas.dart';
+part 'app_provider_hatch.dart';
 part 'app_provider_pixel_brush.dart';
 part 'app_provider_selection.dart';
 part 'app_provider_selection_commit.dart';
@@ -75,6 +79,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
     // not touch this provider afterwards (the future can outlive it — e.g. across
     // tests — and notifying a disposed ChangeNotifier throws).
     unawaited(BrushGrain.instance.prewarm());
+    this._prewarmHatchTiles();
   }
 
   /// The application preferences.
@@ -588,9 +593,18 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   /// Sets the brush style.
   set brushStyle(BrushStyle value) {
     _brushStyle = value;
+    if (value.isHatch) {
+      this._prewarmHatchTiles();
+    }
     repaintToolOptions();
     update();
   }
+
+  //-------------------------
+  // Hatch pattern (shared by the hatch brush styles and the hatch fill); the
+  // accessors live in the AppProviderHatch extension (app_provider_hatch.dart).
+  HatchPattern _hatchPattern = const HatchPattern();
+  HatchMarks _hatchMarks = const HatchMarks();
 
   //-------------------------
   // Brush Color

@@ -99,6 +99,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get brushStyle => 'Style de pinceau';
 
   @override
+  String get brushStyleCrossHatch => 'Hachures croisées';
+
+  @override
   String get brushStyleDash => 'Tiret';
 
   @override
@@ -109,6 +112,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get brushStyleGrain => 'Granuleux';
+
+  @override
+  String get brushStyleHatch => 'Hachures';
+
+  @override
+  String get brushStyleHatchMarks => 'Traits de hachure';
 
   @override
   String get brushStyleSlash => 'Barre oblique';
@@ -349,6 +358,24 @@ class AppLocalizationsFr extends AppLocalizations {
   String get gradientStopPosition => 'Emplacement';
 
   @override
+  String get hatchAngle => 'Inclinaison';
+
+  @override
+  String get hatchCrossed => 'Hachures croisées';
+
+  @override
+  String get hatchCurve => 'Courbure';
+
+  @override
+  String get hatchLength => 'Longueur';
+
+  @override
+  String get hatchLineWidth => 'Épaisseur de trait';
+
+  @override
+  String get hatchSpacing => 'Espacement';
+
+  @override
   String get height => 'Hauteur';
 
   @override
@@ -485,6 +512,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paste => 'Coller';
 
   @override
+  String get hatchTaper => 'Effilage';
+
+  @override
   String get pencilSize => 'Taille du crayon';
 
   @override
@@ -497,6 +527,11 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String percentageValue(Object value) {
     return 'Echelle : $value %';
+  }
+
+  @override
+  String pixelsValue(Object value) {
+    return '$value pixels';
   }
 
   @override
@@ -601,6 +636,12 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get toolHalftone => 'Demi-teinte';
+
+  @override
+  String get toolHatchMarks => 'Traits de hachure';
+
+  @override
+  String get toolHatching => 'Hachures';
 
   @override
   String get toolInvert => 'Inverser';

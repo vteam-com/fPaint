@@ -23,6 +23,34 @@ void main() {
     });
   });
 
+  group('pattern toggles', () {
+    test('halftone and hatch default off', () {
+      expect(model.halftoneEnabled, isFalse);
+      expect(model.hatchEnabled, isFalse);
+      expect(model.hatchCrossed, isFalse);
+    });
+
+    test('enabling hatch turns halftone off and vice versa', () {
+      model.halftoneEnabled = true;
+      model.hatchEnabled = true;
+      expect(model.hatchEnabled, isTrue);
+      expect(model.halftoneEnabled, isFalse);
+
+      model.halftoneEnabled = true;
+      expect(model.halftoneEnabled, isTrue);
+      expect(model.hatchEnabled, isFalse);
+    });
+
+    test('disabling one pattern leaves the other untouched', () {
+      model.hatchEnabled = true;
+      model.halftoneEnabled = false;
+      expect(model.hatchEnabled, isTrue);
+      model.hatchEnabled = false;
+      expect(model.hatchEnabled, isFalse);
+      expect(model.halftoneEnabled, isFalse);
+    });
+  });
+
   group('mode setter', () {
     test('can be set to linear', () {
       model.mode = FillMode.linear;

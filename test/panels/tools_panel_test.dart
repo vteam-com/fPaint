@@ -3,6 +3,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -15,6 +16,8 @@ import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/app_slider.dart';
 import 'package:fpaint/widgets/halftone_size_picker.dart';
+import 'package:fpaint/widgets/hatch_marks_picker.dart';
+import 'package:fpaint/widgets/hatch_settings_picker.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -50,6 +53,105 @@ void main() {
     );
     await tester.pump();
   }
+
+  group('ToolsPanel hatch options', () {
+    testWidgets('brush shows the hatch row only for a hatch style and the sheet edits it', (
+      WidgetTester tester,
+    ) async {
+      appProvider.selectedAction = ActionType.brush;
+      await pumpToolsPanel(tester);
+      expect(find.byKey(Keys.toolBrushHatchSlider), findsNothing);
+
+      appProvider.brushStyle = BrushStyle.hatch;
+      await tester.pumpAndSettle();
+      expect(find.byKey(Keys.toolBrushHatchSlider), findsOneWidget);
+
+      // The inline slider edits the shared spacing.
+      tester.widget<AppSlider>(find.byKey(Keys.toolBrushHatchSlider)).onChanged!(12);
+      await tester.pumpAndSettle();
+      expect(appProvider.hatchPattern.spacing, 12);
+
+      // The sheet's cross switch flips the brush style.
+      await tester.tap(find.byKey(Keys.toolBrushHatchButton));
+      await tester.pumpAndSettle();
+      expect(find.byType(HatchSettingsControls), findsOneWidget);
+      await tester.tap(find.byKey(Keys.hatchCrossedToggle));
+      await tester.pumpAndSettle();
+      expect(appProvider.brushStyle, BrushStyle.crossHatch);
+      tester.widget<AppSlider>(find.byKey(Keys.hatchAngleSlider)).onChanged!(60);
+      await tester.pumpAndSettle();
+      expect(appProvider.hatchPattern.angleDegrees, 60);
+      expect(appProvider.hatchPattern.spacing, 12);
+    });
+
+    testWidgets('hatch marks style shows its own row and sheet', (WidgetTester tester) async {
+      appProvider.selectedAction = ActionType.brush;
+      appProvider.brushStyle = BrushStyle.hatchMarks;
+      await pumpToolsPanel(tester);
+      expect(find.byKey(Keys.toolBrushHatchSlider), findsNothing);
+      expect(find.byKey(Keys.toolBrushHatchMarksSlider), findsOneWidget);
+
+      tester.widget<AppSlider>(find.byKey(Keys.toolBrushHatchMarksSlider)).onChanged!(75);
+      await tester.pumpAndSettle();
+      expect(appProvider.hatchMarks.length, 75);
+
+      await tester.tap(find.byKey(Keys.toolBrushHatchMarksButton));
+      await tester.pumpAndSettle();
+      expect(find.byType(HatchMarksControls), findsOneWidget);
+      tester.widget<AppSlider>(find.byKey(Keys.hatchMarksTaperSlider)).onChanged!(40);
+      await tester.pumpAndSettle();
+      expect(appProvider.hatchMarks.taperPercent, 40);
+      expect(appProvider.hatchMarks.length, 75);
+    });
+
+    testWidgets('minimal brush panel shows the hatch button without a slider', (WidgetTester tester) async {
+      appProvider.selectedAction = ActionType.brush;
+      appProvider.brushStyle = BrushStyle.crossHatch;
+      await pumpToolsPanel(tester, minimal: true);
+      expect(find.byKey(Keys.toolBrushHatchButton), findsOneWidget);
+      expect(find.byKey(Keys.toolBrushHatchSlider), findsNothing);
+    });
+
+    testWidgets('solid fill offers a hatch toggle that is exclusive with halftone', (WidgetTester tester) async {
+      await pumpToolsPanel(tester);
+      expect(find.byKey(Keys.toolFillHatchToggle), findsOneWidget);
+      // Like halftone, the inline slider is collapsed while the pattern is off.
+      expect(find.byKey(Keys.toolFillHatchSlider), findsNothing);
+
+      await tester.tap(find.byKey(Keys.toolFillHalftoneToggle));
+      await tester.pumpAndSettle();
+      expect(appProvider.fillModel.halftoneEnabled, isTrue);
+
+      await tester.tap(find.byKey(Keys.toolFillHatchToggle));
+      await tester.pumpAndSettle();
+      expect(appProvider.fillModel.hatchEnabled, isTrue);
+      expect(appProvider.fillModel.halftoneEnabled, isFalse);
+
+      final AppSlider slider = tester.widget<AppSlider>(find.byKey(Keys.toolFillHatchSlider));
+      expect(slider.onChanged, isNotNull);
+      slider.onChanged!(16);
+      await tester.pumpAndSettle();
+      expect(appProvider.hatchPattern.spacing, 16);
+
+      // Editing through the sheet sets the fill's crossed flag, not the brush style.
+      final BrushStyle styleBefore = appProvider.brushStyle;
+      await tester.tap(
+        find.byWidgetPredicate((Widget widget) => widget is AppButtonIcon && widget.icon == AppIcon.hatch),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Keys.hatchCrossedToggle));
+      await tester.pumpAndSettle();
+      expect(appProvider.fillModel.hatchCrossed, isTrue);
+      expect(appProvider.brushStyle, styleBefore);
+      expect(appProvider.hatchPattern, const HatchPattern(spacing: 16));
+    });
+
+    testWidgets('gradient fill modes do not offer the hatch pattern', (WidgetTester tester) async {
+      appProvider.setFillMode(FillMode.linear);
+      await pumpToolsPanel(tester);
+      expect(find.byKey(Keys.toolFillHatchToggle), findsNothing);
+    });
+  });
 
   group('ToolsPanel fill halftone slider', () {
     const int halfHalftonePercent = AppLimits.percentMax ~/ AppMath.pair;

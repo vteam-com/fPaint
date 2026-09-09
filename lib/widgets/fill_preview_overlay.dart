@@ -57,7 +57,14 @@ class _FillPreviewPainter extends CustomPainter {
     if (clip != null) {
       canvas.clipPath(clip, doAntiAlias: true);
     }
-    renderRegion(canvas, path, action.fillColor, action.gradient, action.halftoneFill);
+    renderRegion(
+      canvas,
+      path,
+      action.fillColor,
+      action.gradient,
+      action.halftoneFill,
+      hatchPattern: action.hatchPattern,
+    );
     canvas.restore();
   }
 

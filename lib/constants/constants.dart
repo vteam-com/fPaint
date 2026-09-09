@@ -6,6 +6,8 @@ export 'app_effects.dart';
 export 'app_flood_fill.dart';
 export 'app_font_size.dart';
 export 'app_halftone.dart';
+export 'app_hatch.dart';
+export 'app_hatch_marks.dart';
 export 'app_interaction.dart';
 export 'app_interaction_profiles.dart';
 export 'app_layout.dart';

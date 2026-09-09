@@ -176,8 +176,9 @@ extension AppProviderTools on AppProvider {
 
   /// Builds a solid flood-fill action at [position], resolving the region from
   /// the **cached** layer pixels (+ isolate) so repeated builds during a drag
-  /// skip the full-canvas readback. Honours fill color, halftone, and any
-  /// selection clip. Returns null when the resolved region is empty.
+  /// skip the full-canvas readback. Honours fill color, halftone / hatch
+  /// pattern, and any selection clip. Returns null when the resolved region is
+  /// empty.
   Future<UserActionDrawing?> _buildSolidFillAction(
     Offset position, {
     required bool sampleAllLayers,
@@ -192,6 +193,7 @@ extension AppProviderTools on AppProvider {
       fillColor: fillColor,
       halftoneDotColor: fillModel.halftoneEnabled ? fillColor : null,
       halftoneMaxDotSizeFactor: fillModel.halftoneMaxDotSizeFactor,
+      hatchPattern: fillModel.hatchEnabled ? hatchPattern.copyWith(crossed: fillModel.hatchCrossed) : null,
       tolerance: tolerance,
       clipPath: selectorModel.isVisible ? selectorModel.path1 : null,
       regionPathOverride: _selectionRegionFloodFillOverridePath,

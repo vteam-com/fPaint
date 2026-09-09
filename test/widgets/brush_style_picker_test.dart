@@ -45,6 +45,31 @@ void main() {
     });
   });
 
+  group('hatch labels', () {
+    testWidgets('renders hatch and cross-hatch style labels', (WidgetTester tester) async {
+      for (final (BrushStyle style, String label) in <(BrushStyle, String)>[
+        (BrushStyle.hatch, 'Hatch'),
+        (BrushStyle.crossHatch, 'Cross-hatch'),
+        (BrushStyle.hatchMarks, 'Hatch marks'),
+      ]) {
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: BrushStylePicker(
+                title: 'Style',
+                value: style,
+                onChanged: (BrushStyle _) {},
+              ),
+            ),
+          ),
+        );
+        expect(find.textContaining(label), findsAtLeastNWidgets(1));
+      }
+    });
+  });
+
   group('brushStyleDropDown', () {
     testWidgets('displays all brush styles in dropdown', (WidgetTester tester) async {
       BrushStyle? selected;

@@ -8,7 +8,9 @@ All notable changes to this project will be documented in this file.
 
 ### Add
 
-- Free canvas view rotation at any angle: two-finger twist on touch and trackpad, Shift + right-drag with a mouse, and `[` / `]` keyboard nudges. A 7° dead zone keeps ordinary pinch-zooms upright, angles snap to each 45°, a live readout shows the current angle, and Shift+`[` (or fit-to-window) returns the view upright. This is view-only state: no pixels change and nothing enters the undo stack, unlike the destructive Rotate Canvas 90° action.
+- Hatching and cross-hatching. Two new brush styles, **Hatch** and **Cross-hatch**, shade with a canvas-locked field of parallel lines (a second, perpendicular set for cross-hatch): the stroke acts as a stencil over a stationary pattern, so overlapping strokes build one coherent hatch instead of doubling up, and the Line, Rectangle and Circle outlines take the same styles. The paint bucket gains a matching **Hatching** pattern toggle next to Halftone (the two are mutually exclusive) for solid fills. A shared **Hatching** row (angle, spacing, line weight, cross-hatch switch, with spacing inline and the rest in a bottom sheet) drives both the brush and the fill, so brushed and filled hatching line up on the canvas.
+- **Hatch marks** brush style for pencil and comic-book feathering: instead of a fixed pattern, each stroke lays down individual tapered marks that fan out from the gesture (perpendicular by default), thinning and fading toward their tips, optionally curved. Its own **Hatch marks** row exposes length inline and angle, spacing, length, taper and curve in a bottom sheet; Line, Rectangle and Circle outlines take the style too.
+- Free canvas view rotation at any angle: two-finger twist on touch and trackpad, Shift + right-drag with a mouse, and `[` / `]` keyboard nudges. A 7° dead zone keeps ordinary pinch-zooms upright, angles snap to each 45°, a live readout shows the current angle, and Ctrl+`0` (or fit-to-window) returns the view upright. This is view-only state: no pixels change and nothing enters the undo stack, unlike the destructive Rotate Canvas 90° action.
 
 ## [1.9.5] - 2026-08-30
 

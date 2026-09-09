@@ -7,6 +7,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/halftone_fill.dart';
+import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/flood_fill.dart';
 
@@ -67,6 +68,7 @@ class FillService {
     FillImageData? imageData,
     Color? halftoneDotColor,
     double? halftoneMaxDotSizeFactor,
+    HatchPattern? hatchPattern,
     required int tolerance,
     required Path? clipPath,
     Path? regionPathOverride,
@@ -84,17 +86,20 @@ class FillService {
       fillColor: fillColor,
       halftoneDotColor: halftoneDotColor,
       halftoneMaxDotSizeFactor: halftoneMaxDotSizeFactor,
+      hatchPattern: hatchPattern,
       clipPath: clipPath,
     );
   }
 
   /// Builds a solid fill action for an already-resolved region [path], skipping
   /// the flood-fill readback — cheap enough to call live while dragging.
+  /// [hatchPattern] draws the region as hatch lines in [fillColor] when set.
   UserActionDrawing buildSolidFillActionForPath({
     required ui.Path path,
     required Color fillColor,
     Color? halftoneDotColor,
     double? halftoneMaxDotSizeFactor,
+    HatchPattern? hatchPattern,
     required Path? clipPath,
   }) {
     final ui.Rect bounds = path.getBounds();
@@ -113,6 +118,7 @@ class FillService {
               dotColor: halftoneDotColor,
               maxDotSizeFactor: halftoneMaxDotSizeFactor ?? AppVisual.full,
             ),
+      hatchPattern: hatchPattern,
       clipPath: clipPath,
     );
   }

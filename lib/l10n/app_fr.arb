@@ -26,10 +26,13 @@
   "brushColor": "Couleur du pinceau",
   "brushSize": "Taille du pinceau",
   "brushStyle": "Style de pinceau",
+  "brushStyleCrossHatch": "Hachures croisées",
   "brushStyleDash": "Tiret",
   "brushStyleDashDot": "Tiret-point",
   "brushStyleDotted": "Pointille",
   "brushStyleGrain": "Granuleux",
+  "brushStyleHatch": "Hachures",
+  "brushStyleHatchMarks": "Traits de hachure",
   "brushStyleSlash": "Barre oblique",
   "brushStyleSoft": "Doux",
   "brushStyleSolid": "Continu",
@@ -161,6 +164,13 @@
   "gradientColors": "Couleurs du dégradé",
   "gradientPointColor": "Couleur du point de degrade",
   "gradientStopPosition": "Emplacement",
+  "hatchAngle": "Inclinaison",
+  "hatchCrossed": "Hachures croisées",
+  "hatchCurve": "Courbure",
+  "hatchLength": "Longueur",
+  "hatchLineWidth": "Épaisseur de trait",
+  "hatchSpacing": "Espacement",
+  "hatchTaper": "Effilage",
   "height": "Hauteur",
   "hexColor": "Couleur Hex",
   "hexColorCopiedToClipboard": "Couleur Hex copiee dans le presse-papiers",
@@ -219,6 +229,12 @@
       "value": {}
     }
   },
+  "pixelsValue": "{value} pixels",
+  "@pixelsValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "platforms": "Disponible sur...",
   "previewUnavailable": "Aperçu indisponible",
   "recentFilesLabel": "Récents",
@@ -262,6 +278,8 @@
   "toolEraser": "Gomme",
   "toolFill": "Remplissage",
   "toolHalftone": "Demi-teinte",
+  "toolHatching": "Hachures",
+  "toolHatchMarks": "Traits de hachure",
   "toolInvert": "Inverser",
   "toolLasso": "Lasso libre",
   "toolLine": "Ligne",

@@ -5,7 +5,10 @@ import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/hatch_marks.dart';
+import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
+import 'package:fpaint/panels/tools/hatch_tool_option.dart';
 import 'package:fpaint/panels/tools/tool_family_rail.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
@@ -286,6 +289,7 @@ class ToolsPanel extends StatelessWidget {
         if (appProvider.fillModel.mode == FillMode.solid) {
           addToolOptionColor(widgets, appProvider, context, false);
           _addHalftoneSlider(widgets, appProvider, context);
+          _addFillHatchOption(widgets, appProvider, context);
         } else {
           _addGradientColorEditor(widgets, appProvider, context);
           _addHalftoneSlider(widgets, appProvider, context);
@@ -421,6 +425,34 @@ class ToolsPanel extends StatelessWidget {
                     ),
             ),
           );
+
+          // Hatch geometry, only while a hatch style is the brush style.
+          if (appProvider.brushStyle.isHatch) {
+            widgets.add(
+              buildHatchToolOption(
+                context: context,
+                compact: minimal,
+                pattern: appProvider.hatchPattern.copyWith(crossed: appProvider.brushStyle == BrushStyle.crossHatch),
+                onChanged: (HatchPattern next) => _applyBrushHatch(appProvider, next),
+                buttonKey: Keys.toolBrushHatchButton,
+                sliderKey: Keys.toolBrushHatchSlider,
+              ),
+            );
+          }
+
+          // Tapered-mark geometry, only for the hatch marks style.
+          if (appProvider.brushStyle == BrushStyle.hatchMarks) {
+            widgets.add(
+              buildHatchMarksToolOption(
+                context: context,
+                compact: minimal,
+                marks: appProvider.hatchMarks,
+                onChanged: (HatchMarks next) => appProvider.hatchMarks = next,
+                buttonKey: Keys.toolBrushHatchMarksButton,
+                sliderKey: Keys.toolBrushHatchMarksSlider,
+              ),
+            );
+          }
         }
 
         // Brush color
@@ -440,6 +472,34 @@ class ToolsPanel extends StatelessWidget {
     }
 
     return widgets;
+  }
+
+  /// Adds the toggleable hatch pattern row for solid flood fills.
+  void _addFillHatchOption(
+    List<Widget> widgets,
+    AppProvider appProvider,
+    BuildContext context,
+  ) {
+    final FillModel fillModel = appProvider.fillModel;
+    widgets.add(
+      buildHatchToolOption(
+        context: context,
+        compact: minimal,
+        pattern: appProvider.hatchPattern.copyWith(crossed: fillModel.hatchCrossed),
+        onChanged: (HatchPattern next) {
+          appProvider.hatchPattern = next;
+          appProvider.setFillHatchCrossed(next.crossed);
+          appProvider.updateGradientPreview();
+        },
+        sliderKey: Keys.toolFillHatchSlider,
+        enabled: fillModel.hatchEnabled,
+        onEnabledChanged: (bool value) {
+          appProvider.setFillHatchEnabled(value);
+          appProvider.updateGradientPreview();
+        },
+        enabledToggleKey: Keys.toolFillHatchToggle,
+      ),
+    );
   }
 
   /// Adds the gradient color list editor for linear/radial fill modes.
@@ -588,6 +648,16 @@ class ToolsPanel extends StatelessWidget {
               ),
       ),
     );
+  }
+
+  /// Applies an edited hatch pattern to the brush: the geometry goes to the
+  /// shared setting, the cross switch picks between the two hatch styles.
+  void _applyBrushHatch(AppProvider appProvider, HatchPattern next) {
+    appProvider.hatchPattern = next;
+    final BrushStyle style = next.crossed ? BrushStyle.crossHatch : BrushStyle.hatch;
+    if (appProvider.brushStyle != style) {
+      appProvider.brushStyle = style;
+    }
   }
 
   /// Applies a palette color to the active tool and records it as recent.

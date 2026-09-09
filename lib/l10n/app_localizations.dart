@@ -248,6 +248,12 @@ abstract class AppLocalizations {
   /// **'Brush Style'**
   String get brushStyle;
 
+  /// No description provided for @brushStyleCrossHatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross-hatch'**
+  String get brushStyleCrossHatch;
+
   /// No description provided for @brushStyleDash.
   ///
   /// In en, this message translates to:
@@ -271,6 +277,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grain'**
   String get brushStyleGrain;
+
+  /// No description provided for @brushStyleHatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Hatch'**
+  String get brushStyleHatch;
+
+  /// No description provided for @brushStyleHatchMarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Hatch marks'**
+  String get brushStyleHatchMarks;
 
   /// No description provided for @brushStyleSlash.
   ///
@@ -704,6 +722,42 @@ abstract class AppLocalizations {
   /// **'Position'**
   String get gradientStopPosition;
 
+  /// No description provided for @hatchAngle.
+  ///
+  /// In en, this message translates to:
+  /// **'Angle'**
+  String get hatchAngle;
+
+  /// No description provided for @hatchCrossed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cross-hatch'**
+  String get hatchCrossed;
+
+  /// No description provided for @hatchCurve.
+  ///
+  /// In en, this message translates to:
+  /// **'Curve'**
+  String get hatchCurve;
+
+  /// No description provided for @hatchLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Length'**
+  String get hatchLength;
+
+  /// No description provided for @hatchLineWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Line weight'**
+  String get hatchLineWidth;
+
+  /// No description provided for @hatchSpacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Spacing'**
+  String get hatchSpacing;
+
   /// No description provided for @height.
   ///
   /// In en, this message translates to:
@@ -968,6 +1022,12 @@ abstract class AppLocalizations {
   /// **'Paste'**
   String get paste;
 
+  /// No description provided for @hatchTaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Taper'**
+  String get hatchTaper;
+
   /// No description provided for @pencilSize.
   ///
   /// In en, this message translates to:
@@ -991,6 +1051,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{value}%'**
   String percentageValue(Object value);
+
+  /// No description provided for @pixelsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} px'**
+  String pixelsValue(Object value);
 
   /// No description provided for @platforms.
   ///
@@ -1189,6 +1255,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Halftone'**
   String get toolHalftone;
+
+  /// No description provided for @toolHatchMarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Hatch marks'**
+  String get toolHatchMarks;
+
+  /// No description provided for @toolHatching.
+  ///
+  /// In en, this message translates to:
+  /// **'Hatching'**
+  String get toolHatching;
 
   /// No description provided for @toolInvert.
   ///

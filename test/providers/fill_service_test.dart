@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/fill_model.dart';
+import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/fill_service.dart';
 
@@ -213,6 +214,36 @@ void main() {
       expect(result.halftoneFill!.backgroundColor, AppColors.transparent);
       expect(result.halftoneFill!.dotColor, const Color(0xFFFF0000));
       expect(result.halftoneFill!.maxDotSizeFactor, AppVisual.half);
+    });
+
+    test('captures the hatch pattern on a solid flood fill', () async {
+      final ui.Image image = await _createTestImage();
+      const HatchPattern pattern = HatchPattern(angleDegrees: 30, spacing: 6, lineWidth: 2, crossed: true);
+      final UserActionDrawing result = await fillService.createFloodFillSolidAction(
+        sourceImage: image,
+        position: const Offset(5, 5),
+        fillColor: const Color(0xFF00FF00),
+        hatchPattern: pattern,
+        tolerance: 50,
+        clipPath: null,
+      );
+
+      expect(result, isA<RegionAction>());
+      expect(result.hatchPattern, pattern);
+      expect(result.halftoneFill, isNull);
+      expect(result.copyWith(positions: <Offset>[Offset.zero]).hatchPattern, pattern);
+    });
+
+    test('a flood fill without a hatch pattern has none', () async {
+      final ui.Image image = await _createTestImage();
+      final UserActionDrawing result = await fillService.createFloodFillSolidAction(
+        sourceImage: image,
+        position: const Offset(5, 5),
+        fillColor: const Color(0xFF00FF00),
+        tolerance: 50,
+        clipPath: null,
+      );
+      expect(result.hatchPattern, isNull);
     });
 
     test('uses regionPathOverride instead of the tapped flood-fill origin', () async {
