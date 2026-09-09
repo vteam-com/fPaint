@@ -2,11 +2,11 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
-import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/nine_grid_selector.dart';
+import 'package:fpaint/widgets/size_fields_row.dart';
 
 /// TextEditingController for the width input field.
 final TextEditingController widthController = TextEditingController();
@@ -43,11 +43,6 @@ void showCanvasSettings(BuildContext context) {
         initOnce = false;
       }
 
-      // Use a mutable variable for initialAspectRatio, local to the builder
-      double initialAspectRatio = (layers.size.height != 0) ? (layers.size.width / layers.size.height) : 1.0;
-      // Guards against the width and height onChanged handlers re-triggering
-      // each other while one of them programmatically updates the other field.
-      bool isSyncingAspectRatio = false;
       bool resizeLockAspectRatio = layers.canvasResizeLockAspectRatio;
       CanvasResizePosition canvasResizePosition = layers.canvasResizePosition;
 
@@ -65,78 +60,16 @@ void showCanvasSettings(BuildContext context) {
                     l10n.canvasSizeTitle,
                     variant: AppTextVariant.title,
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(
-                        width: AppLayout.inputFieldWidth,
-                        child: AppTextField(
-                          key: Keys.canvasSettingsWidthField,
-                          hintText: l10n.width,
-                          keyboardType: TextInputType.number,
-                          controller: widthController,
-                          selectAllOnFocus: true,
-                          onChanged: (String value) {
-                            if (!resizeLockAspectRatio || isSyncingAspectRatio) {
-                              return;
-                            }
-                            if (initialAspectRatio == 0) {
-                              return; // Avoid division by zero
-                            }
-                            final double? currentParsedWidth = double.tryParse(value);
-                            if (currentParsedWidth == null) {
-                              return; // Keep the other field while input is incomplete
-                            }
-                            isSyncingAspectRatio = true;
-                            heightController.text = (currentParsedWidth / initialAspectRatio).round().toString();
-                            isSyncingAspectRatio = false;
-                          },
-                        ),
-                      ),
-                      AppButtonIcon(
-                        key: Keys.canvasSettingsAspectRatioToggleButton,
-                        icon: resizeLockAspectRatio ? AppIcon.link : AppIcon.linkOff,
-                        onPressed: () {
-                          setSheetState(() {
-                            final bool newLockState = !resizeLockAspectRatio;
-                            if (newLockState) {
-                              // Attempt to recalculate aspect ratio from current text field values when locking.
-                              final double? currentWidthFromField = double.tryParse(widthController.text);
-                              final double? currentHeightFromField = double.tryParse(heightController.text);
-                              if (currentWidthFromField != null &&
-                                  currentHeightFromField != null &&
-                                  currentWidthFromField > 0 &&
-                                  currentHeightFromField > 0) {
-                                initialAspectRatio = currentWidthFromField / currentHeightFromField;
-                              }
-                            }
-                            resizeLockAspectRatio = newLockState;
-                          });
-                        },
-                      ),
-                      SizedBox(
-                        width: AppLayout.inputFieldWidth,
-                        child: AppTextField(
-                          key: Keys.canvasSettingsHeightField,
-                          hintText: l10n.height,
-                          keyboardType: TextInputType.number,
-                          controller: heightController,
-                          selectAllOnFocus: true,
-                          onChanged: (String value) {
-                            if (!resizeLockAspectRatio || isSyncingAspectRatio) {
-                              return;
-                            }
-                            final double? currentParsedHeight = double.tryParse(value);
-                            if (currentParsedHeight == null) {
-                              return; // Keep the other field while input is incomplete
-                            }
-                            isSyncingAspectRatio = true;
-                            widthController.text = (currentParsedHeight * initialAspectRatio).round().toString();
-                            isSyncingAspectRatio = false;
-                          },
-                        ),
-                      ),
-                    ],
+                  SizeFieldsRow(
+                    widthController: widthController,
+                    heightController: heightController,
+                    lockAspectRatio: resizeLockAspectRatio,
+                    onLockAspectRatioChanged: (bool lock) {
+                      setSheetState(() => resizeLockAspectRatio = lock);
+                    },
+                    widthFieldKey: Keys.canvasSettingsWidthField,
+                    heightFieldKey: Keys.canvasSettingsHeightField,
+                    lockButtonKey: Keys.canvasSettingsAspectRatioToggleButton,
                   ),
                   Column(
                     spacing: AppSpacing.medium,
@@ -157,36 +90,33 @@ void showCanvasSettings(BuildContext context) {
                       AppRowPrimaryButton(
                         key: Keys.canvasSettingsApplyButton,
                         onPressed: () {
-                          final double width = double.tryParse(widthController.text) ?? -1;
-                          final double height = double.tryParse(heightController.text) ?? -1;
-                          if (width == -1 || height == -1) {
-                            context.showSnackBarMessage(
-                              l10n.invalidImageSizeDimensionsMustBeNumbers,
-                            );
-                          } else if (width <= 0 || height <= 0) {
-                            context.showSnackBarMessage(
-                              l10n.canvasDimensionsMustBePositive,
-                            );
-                          } else {
-                            if (layers.canvasResizeLockAspectRatio != resizeLockAspectRatio) {
-                              layers.canvasResizeLockAspectRatio = resizeLockAspectRatio;
-                            }
-                            if (layers.canvasResizePosition != canvasResizePosition) {
-                              layers.canvasResizePosition = canvasResizePosition;
-                            }
-
-                            layers.canvasResize(
-                              width.toInt(),
-                              height.toInt(),
-                              canvasResizePosition,
-                            );
-
-                            shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
-                            shellProvider.update();
-
-                            appProvider.update();
-                            Navigator.pop(context);
+                          final Size? newSize = parsePositiveSize(
+                            context,
+                            widthText: widthController.text,
+                            heightText: heightController.text,
+                            mustBePositiveMessage: l10n.canvasDimensionsMustBePositive,
+                          );
+                          if (newSize == null) {
+                            return;
                           }
+                          if (layers.canvasResizeLockAspectRatio != resizeLockAspectRatio) {
+                            layers.canvasResizeLockAspectRatio = resizeLockAspectRatio;
+                          }
+                          if (layers.canvasResizePosition != canvasResizePosition) {
+                            layers.canvasResizePosition = canvasResizePosition;
+                          }
+
+                          layers.canvasResize(
+                            newSize.width.toInt(),
+                            newSize.height.toInt(),
+                            canvasResizePosition,
+                          );
+
+                          shellProvider.canvasPlacement = CanvasAutoPlacement.manual;
+                          shellProvider.update();
+
+                          appProvider.update();
+                          Navigator.pop(context);
                         },
                         text: l10n.apply,
                       ),

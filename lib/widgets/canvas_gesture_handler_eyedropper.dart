@@ -203,6 +203,51 @@ extension _CanvasGestureHandlerStateEyedropperMethods on _CanvasGestureHandlerSt
     }
   }
 
+  /// Anchors a hold-modifiers-and-drag brush resize at [screenPosition].
+  ///
+  /// Cmd+Option (macOS) / Ctrl+Alt (elsewhere) plus a horizontal drag adjusts
+  /// brush size in place: the pointer is pinned at the anchor so the gesture
+  /// reads as scrubbing a value rather than dragging across the canvas, and the
+  /// existing brush-size HUD ring previews the new diameter at that point.
+  void _startBrushSizeDrag(AppProvider appProvider, ui.Offset screenPosition) {
+    _brushSizeDragAnchorScreen = screenPosition;
+    _brushSizeDragStartSize = appProvider.brushSize;
+    appProvider.beginTolerancePointerLock(screenPosition);
+    appProvider.showDrawingToolPreviewAt(
+      size: appProvider.brushSize,
+      position: screenPosition,
+    );
+  }
+
+  /// Applies the horizontal drag since the resize anchor to the brush size.
+  void _updateBrushSizeFromDrag(AppProvider appProvider, ui.Offset screenPosition) {
+    final ui.Offset? anchor = _brushSizeDragAnchorScreen;
+    if (anchor == null) {
+      return;
+    }
+    final double size = appProvider.applyBrushSizeDrag(
+      startSize: _brushSizeDragStartSize,
+      screenDx: screenPosition.dx - anchor.dx,
+    );
+    // Keep the preview ring pinned at the anchor (the pointer is locked there),
+    // so it grows and shrinks around a fixed centre.
+    appProvider.showDrawingToolPreviewAt(size: size, position: anchor);
+  }
+
+  /// Whether a hold-modifiers-and-drag brush resize is in progress.
+  bool get _isBrushSizeDragActive => _brushSizeDragAnchorScreen != null;
+
+  /// Ends a brush-resize drag, releasing the pointer lock and letting the
+  /// size HUD fade on its usual timer.
+  void _endBrushSizeDrag(AppProvider appProvider) {
+    if (_brushSizeDragAnchorScreen == null) {
+      return;
+    }
+    _brushSizeDragAnchorScreen = null;
+    appProvider.endTolerancePointerLock();
+    appProvider.hideDrawingToolPreview();
+  }
+
   /// Clears the tolerance-drag anchor once the gesture ends or is cancelled
   /// (shared by the Edge Detection wand and the solid-fill tolerance drag).
   void _clearToleranceDragAnchor() {

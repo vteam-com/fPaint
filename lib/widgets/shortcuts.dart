@@ -321,7 +321,11 @@ class _MainAppShortcutScopeState extends State<_MainAppShortcutScope> {
       if (!appProvider.isEyeDropShortcutActive && isAltPressed) {
         appProvider.activateEyeDropShortcut();
       }
-    } else if (!isAltPressed && appProvider.isEyeDropShortcutActive) {
+    } else if (appProvider.isEyeDropShortcutActive && (!isAltPressed || isControlOrMetaPressed)) {
+      // Releasing Alt ends the shortcut — and so does *adding* Ctrl/Cmd, which
+      // escalates the chord into the brush-resize gesture (Cmd+Opt / Ctrl+Alt).
+      // Without the second test, pressing Option before Cmd would leave the
+      // eyedropper armed and it would swallow the resize drag.
       appProvider.deactivateEyeDropShortcut();
     }
 

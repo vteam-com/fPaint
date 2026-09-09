@@ -35,6 +35,13 @@ class AppInteraction {
   static const Duration selectionDoubleTapTimeout = Duration(milliseconds: 300);
   static const double selectionDoubleTapSlop = 24.0;
 
+  /// Horizontal screen pixels dragged per 1 unit of brush size during the
+  /// hold-modifiers-and-drag resize gesture (Cmd+Opt on macOS, Ctrl+Alt
+  /// elsewhere). Finer than the tolerance scrub because brush size spans a much
+  /// wider range (up to 500 for the pixel brushes) — one screen-width sweep
+  /// should cross the whole range without feeling twitchy at small sizes.
+  static const double brushSizeDragPixelsPerUnit = 4.0;
+
   /// Horizontal screen pixels dragged per 1 unit of Edge Detection wand
   /// tolerance during the tap-to-sample, drag-to-adjust selection gesture.
   static const double wandToleranceDragPixelsPerUnit = 8.0;

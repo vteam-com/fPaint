@@ -11,6 +11,39 @@ bool isFloodFillOriginModifierPressedForPlatform({
   return isApplePlatform ? isAltPressed : isControlPressed;
 }
 
+/// Returns whether the platform-specific modifier combination requests the
+/// hold-and-drag brush resize: Cmd+Option on Apple platforms, Ctrl+Alt elsewhere.
+///
+/// Both modifiers are required so the gesture cannot be triggered by the
+/// single-modifier shortcuts that already claim the canvas (Alt eyedropper,
+/// Ctrl/Cmd sample-all-layers).
+@visibleForTesting
+bool isBrushSizeDragModifierPressedForPlatform({
+  required TargetPlatform platform,
+  required bool isAltPressed,
+  required bool isControlPressed,
+  required bool isMetaPressed,
+}) {
+  final bool isApplePlatform = platform == TargetPlatform.macOS || platform == TargetPlatform.iOS;
+  final bool isPrimaryPressed = isApplePlatform ? isMetaPressed : isControlPressed;
+  return isPrimaryPressed && isAltPressed;
+}
+
+/// Returns the brush size for a horizontal drag of [screenDx] pixels from
+/// [startSize], clamped to [minSize]..[maxSize].
+///
+/// Dragging right grows the brush, left shrinks it.
+@visibleForTesting
+double brushSizeForDrag({
+  required double startSize,
+  required double screenDx,
+  required double minSize,
+  required double maxSize,
+}) {
+  final double delta = screenDx / AppInteraction.brushSizeDragPixelsPerUnit;
+  return (startSize + delta).clamp(minSize, maxSize);
+}
+
 /// Returns whether flood fill should use the active selection path as its region.
 @visibleForTesting
 bool shouldUseSelectionRegionFloodFill({
@@ -37,6 +70,48 @@ bool shouldCreateSelectionFromFloodFillTap({
 
 /// Tool state mutations, drawing actions, and flood-fill operations.
 extension AppProviderTools on AppProvider {
+  /// Whether Cmd+Option (macOS) / Ctrl+Alt (elsewhere) is held, arming the
+  /// drag-to-resize-brush gesture.
+  bool get isBrushSizeDragModifierPressed {
+    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+    return isBrushSizeDragModifierPressedForPlatform(
+      platform: defaultTargetPlatform,
+      isAltPressed: keyboard.isAltPressed,
+      isControlPressed: keyboard.isControlPressed,
+      isMetaPressed: keyboard.isMetaPressed,
+    );
+  }
+
+  /// The largest brush size the armed tool accepts. The smudge/blur pixel
+  /// brushes work at much larger radii than the paint tools, matching the range
+  /// their side-panel slider offers.
+  double get activeBrushSizeMax {
+    final bool isPixelBrush = selectedAction == ActionType.smudge || selectedAction == ActionType.blurBrush;
+    return isPixelBrush ? AppLimits.pixelBrushSizeMax.toDouble() : AppLimits.percentMax.toDouble();
+  }
+
+  /// The smallest brush size the armed tool accepts, matching its slider.
+  double get activeBrushSizeMin =>
+      selectedAction == ActionType.pencil ? AppMath.one.toDouble() : AppInteraction.minCanvasScale;
+
+  /// Applies a horizontal [screenDx] drag from [startSize] to the armed tool's
+  /// brush size, clamped to that tool's range. Returns the applied size.
+  double applyBrushSizeDrag({
+    required double startSize,
+    required double screenDx,
+  }) {
+    final double size = brushSizeForDrag(
+      startSize: startSize,
+      screenDx: screenDx,
+      minSize: activeBrushSizeMin,
+      maxSize: activeBrushSizeMax,
+    );
+    if (size != brushSize) {
+      brushSize = size;
+    }
+    return size;
+  }
+
   bool get _isOriginFloodFillModifierPressed {
     final HardwareKeyboard keyboard = HardwareKeyboard.instance;
     return isFloodFillOriginModifierPressedForPlatform(

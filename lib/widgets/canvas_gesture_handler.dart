@@ -46,6 +46,15 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
   int _activePointerId = -1;
   final List<int> _activePointers = <int>[];
 
+  /// Screen-space anchor of a hold-modifiers-and-drag brush resize. Non-null
+  /// only while that gesture is active; horizontal distance from here drives the
+  /// live size.
+  Offset? _brushSizeDragAnchorScreen;
+
+  /// Brush size captured when the resize drag began, so the drag is absolute
+  /// (distance from the anchor) rather than accumulating rounding per step.
+  double _brushSizeDragStartSize = AppDefaults.brushSize;
+
   /// Whether the current gesture's twist has cleared the dead zone.
   bool _hasGestureTwistEngaged = false;
 

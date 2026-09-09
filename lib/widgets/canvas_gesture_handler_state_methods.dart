@@ -182,6 +182,17 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     AppProvider appProvider,
     PointerEvent event,
   ) async {
+    // A resize scrub never touched the layer, so it releases here instead of
+    // running the drawing teardown (stroke commit, cache clear, draft flush).
+    if (_isBrushSizeDragActive) {
+      if (_activePointerId == event.pointer) {
+        _endBrushSizeDrag(appProvider);
+        _activePointerId = -1;
+        appProvider.update();
+      }
+      return;
+    }
+
     appProvider.layers.selectedLayer.isUserDrawing = false;
     // Pair with beginStrokePreview: release the frozen baseline (no-op for tools
     // that never captured one, e.g. smudge/blur, which use the live preview).
@@ -249,6 +260,13 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     }
 
     appProvider.lastPointerPosition = event.localPosition;
+
+    if (_isBrushSizeDragActive) {
+      if (_activePointerId == event.pointer) {
+        _updateBrushSizeFromDrag(appProvider, event.localPosition);
+      }
+      return;
+    }
 
     final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
     final bool isSelectionActive = _isSelectionGesture(appProvider);
@@ -359,6 +377,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     // silently dropped eraser contact, which reports buttons == 0x05).
     final bool isPenEraser = event.kind == PointerDeviceKind.invertedStylus;
     if ((event.buttons & kPrimaryButton) == 0 || _activePointerId != -1) {
+      return;
+    }
+
+    // Cmd+Option (macOS) / Ctrl+Alt (elsewhere) turns the press into a brush
+    // resize scrub. Claimed before every tool gesture so the drag never also
+    // paints, samples, or starts a selection.
+    if (appProvider.isBrushSizeDragModifierPressed && _shouldShowDrawingToolPreview(appProvider)) {
+      _activePointerId = event.pointer;
+      _startBrushSizeDrag(appProvider, event.localPosition);
       return;
     }
 

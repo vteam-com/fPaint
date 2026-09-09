@@ -14,6 +14,157 @@ import 'package:shared_preferences/shared_preferences.dart';
 const ui.Rect _selectionRect = ui.Rect.fromLTWH(1, 1, 3, 3);
 
 void main() {
+  group('isBrushSizeDragModifierPressedForPlatform', () {
+    test('requires Cmd+Option on Apple platforms', () {
+      expect(
+        isBrushSizeDragModifierPressedForPlatform(
+          platform: TargetPlatform.macOS,
+          isAltPressed: true,
+          isControlPressed: false,
+          isMetaPressed: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('requires Ctrl+Alt elsewhere', () {
+      expect(
+        isBrushSizeDragModifierPressedForPlatform(
+          platform: TargetPlatform.windows,
+          isAltPressed: true,
+          isControlPressed: true,
+          isMetaPressed: false,
+        ),
+        isTrue,
+      );
+    });
+
+    test('rejects a single modifier, which other canvas shortcuts claim', () {
+      // Option alone is the eyedropper; Cmd/Ctrl alone is sample-all-layers.
+      for (final TargetPlatform platform in <TargetPlatform>[TargetPlatform.macOS, TargetPlatform.windows]) {
+        expect(
+          isBrushSizeDragModifierPressedForPlatform(
+            platform: platform,
+            isAltPressed: true,
+            isControlPressed: false,
+            isMetaPressed: false,
+          ),
+          isFalse,
+          reason: 'Alt alone must not arm the resize on $platform',
+        );
+        expect(
+          isBrushSizeDragModifierPressedForPlatform(
+            platform: platform,
+            isAltPressed: false,
+            isControlPressed: true,
+            isMetaPressed: true,
+          ),
+          isFalse,
+          reason: 'Ctrl/Cmd alone must not arm the resize on $platform',
+        );
+      }
+    });
+
+    test('does not accept the Windows chord on macOS', () {
+      // Ctrl+Alt on a Mac must stay inert: Ctrl+click is the secondary click.
+      expect(
+        isBrushSizeDragModifierPressedForPlatform(
+          platform: TargetPlatform.macOS,
+          isAltPressed: true,
+          isControlPressed: true,
+          isMetaPressed: false,
+        ),
+        isFalse,
+      );
+    });
+  });
+
+  group('brushSizeForDrag', () {
+    test('grows dragging right and shrinks dragging left', () {
+      const double start = 20;
+      final double grown = brushSizeForDrag(startSize: start, screenDx: 40, minSize: 1, maxSize: 100);
+      final double shrunk = brushSizeForDrag(startSize: start, screenDx: -40, minSize: 1, maxSize: 100);
+
+      expect(grown, start + 40 / AppInteraction.brushSizeDragPixelsPerUnit);
+      expect(shrunk, start - 40 / AppInteraction.brushSizeDragPixelsPerUnit);
+      expect(grown, greaterThan(shrunk));
+    });
+
+    test('holds the start size when the pointer has not moved', () {
+      expect(brushSizeForDrag(startSize: 12, screenDx: 0, minSize: 1, maxSize: 100), 12);
+    });
+
+    test('clamps to the tool range instead of running away', () {
+      expect(brushSizeForDrag(startSize: 90, screenDx: 100000, minSize: 1, maxSize: 100), 100);
+      expect(brushSizeForDrag(startSize: 10, screenDx: -100000, minSize: 1, maxSize: 100), 1);
+    });
+
+    test('a full pixel-brush sweep stays within one screen drag', () {
+      // The whole 1..500 range should be reachable without re-gripping.
+      final double sweep = AppLimits.pixelBrushSizeMax * AppInteraction.brushSizeDragPixelsPerUnit;
+      expect(sweep, lessThanOrEqualTo(2500));
+      expect(
+        brushSizeForDrag(startSize: 1, screenDx: sweep, minSize: 1, maxSize: AppLimits.pixelBrushSizeMax.toDouble()),
+        AppLimits.pixelBrushSizeMax.toDouble(),
+      );
+    });
+  });
+
+  group('applyBrushSizeDrag', () {
+    late AppProvider appProvider;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+      final AppPreferences preferences = AppPreferences();
+      await preferences.getPref();
+      appProvider = AppProvider(preferences: preferences);
+    });
+
+    test('writes the dragged size through to the brush', () {
+      appProvider.selectedAction = ActionType.brush;
+      final double applied = appProvider.applyBrushSizeDrag(startSize: 20, screenDx: 40);
+
+      expect(applied, 20 + 40 / AppInteraction.brushSizeDragPixelsPerUnit);
+      expect(appProvider.brushSize, applied);
+    });
+
+    test('offers the wider pixel-brush range for smudge', () {
+      appProvider.selectedAction = ActionType.smudge;
+      expect(appProvider.activeBrushSizeMax, AppLimits.pixelBrushSizeMax.toDouble());
+
+      final double applied = appProvider.applyBrushSizeDrag(startSize: 100, screenDx: 100000);
+      expect(applied, AppLimits.pixelBrushSizeMax.toDouble());
+    });
+
+    test('holds paint tools to the narrower slider range', () {
+      appProvider.selectedAction = ActionType.brush;
+      expect(appProvider.activeBrushSizeMax, AppLimits.percentMax.toDouble());
+
+      final double applied = appProvider.applyBrushSizeDrag(startSize: 50, screenDx: 100000);
+      expect(applied, AppLimits.percentMax.toDouble());
+    });
+
+    test('never drags the size to zero or negative', () {
+      appProvider.selectedAction = ActionType.brush;
+      final double applied = appProvider.applyBrushSizeDrag(startSize: 5, screenDx: -100000);
+
+      expect(applied, greaterThan(0));
+      expect(applied, appProvider.activeBrushSizeMin);
+    });
+
+    test('is absolute from the anchor, so a drag out and back restores the size', () {
+      appProvider.selectedAction = ActionType.brush;
+      const double start = 30;
+
+      appProvider.applyBrushSizeDrag(startSize: start, screenDx: 120);
+      appProvider.applyBrushSizeDrag(startSize: start, screenDx: 60);
+      final double back = appProvider.applyBrushSizeDrag(startSize: start, screenDx: 0);
+
+      expect(back, start);
+      expect(appProvider.brushSize, start);
+    });
+  });
+
   group('isFloodFillOriginModifierPressedForPlatform', () {
     test('uses Option on Apple platforms', () {
       final bool result = isFloodFillOriginModifierPressedForPlatform(

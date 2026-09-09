@@ -26,4 +26,7 @@ class MenuIds {
 
   /// The ID for the about menu item.
   static const int about = 9;
+
+  /// The ID for the image size (resample all layers) menu item.
+  static const int imageSize = 10;
 }

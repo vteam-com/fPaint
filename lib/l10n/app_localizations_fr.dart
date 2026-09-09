@@ -376,7 +376,22 @@ class AppLocalizationsFr extends AppLocalizations {
   String get hatchSpacing => 'Espacement';
 
   @override
+  String get hatchTaper => 'Effilage';
+
+  @override
   String get height => 'Hauteur';
+
+  @override
+  String get imageDimensionsMustBePositive => 'Les dimensions de l\'image doivent etre positives.';
+
+  @override
+  String get imageSize => 'Taille de l\'image...';
+
+  @override
+  String get imageSizeHint => 'Redimensionne tous les calques a la nouvelle taille.';
+
+  @override
+  String get imageSizeTitle => 'Taille de l\'image';
 
   @override
   String get hexColor => 'Couleur Hex';
@@ -512,9 +527,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paste => 'Coller';
 
   @override
-  String get hatchTaper => 'Effilage';
-
-  @override
   String get pencilSize => 'Taille du crayon';
 
   @override
@@ -638,10 +650,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get toolHalftone => 'Demi-teinte';
 
   @override
-  String get toolHatchMarks => 'Traits de hachure';
+  String get toolHatching => 'Hachures';
 
   @override
-  String get toolHatching => 'Hachures';
+  String get toolHatchMarks => 'Traits de hachure';
 
   @override
   String get toolInvert => 'Inverser';

@@ -10,6 +10,7 @@ import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/helpers/viewport_transform_helper.dart';
 import 'package:fpaint/models/canvas_resize.dart';
+import 'package:fpaint/models/layer_state_snapshot.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 import 'package:fpaint/providers/inherited_provider.dart';
 import 'package:fpaint/providers/layer_provider.dart';
@@ -22,6 +23,7 @@ import 'package:logging/logging.dart';
 export 'package:fpaint/providers/layer_provider.dart';
 
 part 'layers_provider_canvas_geometry.dart';
+part 'layers_provider_image_resize.dart';
 
 final Logger _log = Logger(logNameLayersProvider);
 

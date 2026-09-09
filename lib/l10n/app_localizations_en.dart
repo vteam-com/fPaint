@@ -375,7 +375,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hatchSpacing => 'Spacing';
 
   @override
+  String get hatchTaper => 'Taper';
+
+  @override
   String get height => 'Height';
+
+  @override
+  String get imageDimensionsMustBePositive => 'Image dimensions must be positive.';
+
+  @override
+  String get imageSize => 'Image Size...';
+
+  @override
+  String get imageSizeHint => 'Scales every layer to the new size.';
+
+  @override
+  String get imageSizeTitle => 'Image Size';
 
   @override
   String get hexColor => 'Hex Color';
@@ -510,9 +525,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paste => 'Paste';
 
   @override
-  String get hatchTaper => 'Taper';
-
-  @override
   String get pencilSize => 'Pencil Size';
 
   @override
@@ -636,10 +648,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toolHalftone => 'Halftone';
 
   @override
-  String get toolHatchMarks => 'Hatch marks';
+  String get toolHatching => 'Hatching';
 
   @override
-  String get toolHatching => 'Hatching';
+  String get toolHatchMarks => 'Hatch marks';
 
   @override
   String get toolInvert => 'Invert';
