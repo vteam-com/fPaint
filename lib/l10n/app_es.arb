@@ -26,10 +26,13 @@
   "brushColor": "Color del pincel",
   "brushSize": "Tamaño del pincel",
   "brushStyle": "Estilo de pincel",
+  "brushStyleCrossHatch": "Rayado cruzado",
   "brushStyleDash": "Guion",
   "brushStyleDashDot": "Guion-punto",
   "brushStyleDotted": "Punteado",
   "brushStyleGrain": "Grano",
+  "brushStyleHatch": "Rayado",
+  "brushStyleHatchMarks": "Trazos de rayado",
   "brushStyleSlash": "Barra oblicua",
   "brushStyleSoft": "Suave",
   "brushStyleSolid": "Solido",
@@ -159,6 +162,13 @@
   "gradientColors": "Colores del degradado",
   "gradientPointColor": "Color del punto de degradado",
   "gradientStopPosition": "Posición",
+  "hatchAngle": "Ángulo",
+  "hatchCrossed": "Rayado cruzado",
+  "hatchCurve": "Curvatura",
+  "hatchLength": "Longitud",
+  "hatchLineWidth": "Grosor de línea",
+  "hatchSpacing": "Espaciado",
+  "hatchTaper": "Afinamiento",
   "height": "Alto",
   "hexColor": "Color Hex",
   "hexColorCopiedToClipboard": "Color Hex copiado al portapapeles",
@@ -217,6 +227,12 @@
       "value": {}
     }
   },
+  "pixelsValue": "{value} píxeles",
+  "@pixelsValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "platforms": "Disponible en...",
   "previewUnavailable": "Vista previa no disponible",
   "recentFilesLabel": "Recientes",
@@ -260,6 +276,8 @@
   "toolEraser": "Borrador",
   "toolFill": "Relleno",
   "toolHalftone": "Semitono",
+  "toolHatching": "Rayado",
+  "toolHatchMarks": "Trazos de rayado",
   "toolInvert": "Invertir",
   "toolLasso": "Lazo",
   "toolLine": "Línea",

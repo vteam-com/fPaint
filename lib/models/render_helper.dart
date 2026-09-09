@@ -4,8 +4,12 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/brush_grain.dart';
+import 'package:fpaint/models/brush_hatch.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/halftone_fill.dart';
+import 'package:fpaint/models/hatch_marks.dart';
+import 'package:fpaint/models/hatch_marks_renderer.dart';
+import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/text_object.dart';
 
 /// Renders a pencil stroke on the canvas.
@@ -112,6 +116,8 @@ void renderRectangle(
     path,
     brush.style,
     brush.size,
+    hatch: brush.hatch,
+    marks: brush.marks,
   );
 }
 
@@ -156,6 +162,8 @@ void renderCircle(
     path,
     brush.style,
     brush.size,
+    hatch: brush.hatch,
+    marks: brush.marks,
   );
 }
 
@@ -191,7 +199,7 @@ void renderPath(
   }
   paint.style = PaintingStyle.stroke;
   paint.color = brush.color;
-  drawPathWithBrushStyle(canvas, paint, path, brush.style, brush.size);
+  drawPathWithBrushStyle(canvas, paint, path, brush.style, brush.size, hatch: brush.hatch, marks: brush.marks);
 }
 
 /// Renders a line on the canvas.
@@ -224,6 +232,8 @@ void renderLine(
     path,
     brush.style,
     brush.size,
+    hatch: brush.hatch,
+    marks: brush.marks,
   );
 }
 
@@ -233,13 +243,18 @@ void renderLine(
 /// The [path] parameter is the path to render.
 /// The [fillColor] parameter is the fill color of the region.
 /// The [gradient] parameter is the gradient to use for the fill.
+/// The [hatchPattern] parameter, when set on a solid fill, draws the region as
+/// canvas-locked hatch lines in [fillColor] instead of a flat fill. It is
+/// ignored for gradient fills and falls back to a flat fill until the hatch
+/// tile is ready (see [BrushHatch.prewarm]).
 void renderRegion(
   Canvas canvas,
   Path path,
   Color? fillColor,
   Gradient? gradient,
-  HalftoneFill? halftoneFill,
-) {
+  HalftoneFill? halftoneFill, {
+  HatchPattern? hatchPattern,
+}) {
   final bool shouldRenderHalftone =
       halftoneFill != null &&
       halftoneFill.maxDotSizeFactor.clamp(AppMath.zero.toDouble(), AppVisual.full) > AppMath.zero;
@@ -254,9 +269,28 @@ void renderRegion(
     paint.shader = gradient.createShader(path.getBounds());
   } else {
     paint.color = fillColor!;
+    if (hatchPattern != null) {
+      applyHatchPaint(paint, hatchPattern);
+    }
   }
   paint.style = PaintingStyle.fill;
   canvas.drawPath(path, paint);
+}
+
+/// Turns [paint] into a canvas-locked hatch mask tinted with its current colour.
+///
+/// The hatch tile is sampled in canvas space (repeating, rotated to the pattern
+/// angle) and `srcIn` tints its white line texels with the paint colour, so the
+/// result alpha is `color.alpha × lineCoverage`. Returns false — leaving the
+/// paint untouched, i.e. a solid fallback — until the tile has been generated.
+bool applyHatchPaint(Paint paint, HatchPattern pattern) {
+  final ui.ImageShader? shader = BrushHatch.instance.shaderFor(pattern);
+  if (shader == null) {
+    return false;
+  }
+  paint.shader = shader;
+  paint.colorFilter = ColorFilter.mode(paint.color, BlendMode.srcIn);
+  return true;
 }
 
 /// Renders a two-color halftone fill clipped to [path].
@@ -424,15 +458,29 @@ double softStrokeOutset(double brushSize) =>
 /// The [path] parameter is the path to draw.
 /// The [brushStyle] parameter is the brush style to use.
 /// The [brushSize] parameter is the brush size to use.
+/// The [hatch] parameter is the line geometry for the hatch styles; whether the
+/// lines are crossed comes from [brushStyle], not from [hatch].
+/// The [marks] parameter is the mark geometry for [BrushStyle.hatchMarks].
 void drawPathWithBrushStyle(
   Canvas canvas,
   Paint paint,
   Path path,
   BrushStyle brushStyle,
-  double brushSize,
-) {
+  double brushSize, {
+  HatchPattern hatch = const HatchPattern(),
+  HatchMarks marks = const HatchMarks(),
+}) {
   switch (brushStyle) {
     case BrushStyle.solid:
+      canvas.drawPath(path, paint);
+    case BrushStyle.hatchMarks:
+      drawPathHatchMarks(canvas, path, paint.color, brushSize, marks);
+    case BrushStyle.hatch:
+    case BrushStyle.crossHatch:
+      // The stroke is a mask over a stationary line field, so overlapping
+      // strokes build one coherent hatch instead of doubling up. Falls back to
+      // a solid stroke until the async tile is ready.
+      applyHatchPaint(paint, hatch.copyWith(crossed: brushStyle == BrushStyle.crossHatch));
       canvas.drawPath(path, paint);
     case BrushStyle.soft:
       // Feather the stroke edges into a soft "airbrush" falloff. The paint is

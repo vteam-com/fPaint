@@ -112,6 +112,51 @@ axis. Heavy blur stays the dedicated **Blur** effect.
 
 ---
 
+## Canvas-locked patterns: hatching
+
+**Hatch** and **Cross-hatch** are `BrushStyle`s, not tools: pick Brush (or Line /
+Rectangle / Circle) and choose them from the Brush Style dropdown. The stroke is
+a *mask* over a stationary field of parallel lines sampled in canvas space (the
+same paper-locked `ImageShader` trick as the Grain style), so overlapping strokes
+reveal one coherent hatch rather than stacking lines — which is what makes
+hatching usable for shading. The paint bucket offers the same pattern as a
+**Hatching** toggle beside Halftone (solid fills only; the two patterns are
+mutually exclusive).
+
+The geometry — **angle**, **spacing**, **line weight** — is one shared setting
+(`AppProvider.hatchPattern`, a `HatchPattern`) so brushed and filled hatching
+line up. Whether the lines are *crossed* is **not** part of that geometry: for
+brushes it is the style (`hatch` vs `crossHatch`), for the fill it is
+`FillModel.hatchCrossed`. The **Hatching** row shows spacing inline and opens a
+bottom sheet with all controls plus the cross-hatch switch, which flips the
+brush style or the fill flag depending on where it was opened.
+
+Each committed action captures its own copy (`MyBrush.hatch`,
+`RegionAction.hatchPattern`), so editing the settings later never changes what
+is already on the canvas. Tiles live in `BrushHatch` (a tiny, never-evicted
+cache keyed by spacing / weight / crossed; the angle is a shader-matrix
+rotation). Until a tile is generated the style falls back to a solid stroke, so
+the provider prewarms tiles whenever the geometry or a hatch style is selected.
+Strokes stay within the nominal half-width for export bounds, like Grain.
+
+### Hatch marks (stroke-following)
+
+**Hatch marks** is the third hatch `BrushStyle` and the opposite mechanism:
+nothing is canvas-locked. Every `spacing` pixels along the path a discrete mark
+is emitted, heading `angleDegrees` *relative to the stroke direction* (90° =
+perpendicular, so the drag line is the base and marks fan out to one side), with
+its thick end (the brush size) on the path and its tip `length` pixels away.
+`taperPercent` thins the mark to a point **and** fades it out toward the tip;
+`curvePercent` bends it. This is the pencil / comic-book feathering look where
+each mark reads as its own stroke. Settings live in `HatchMarks`
+(`AppProvider.hatchMarks`, captured per stroke as `MyBrush.marks`) and are edited
+from the **Hatch marks** row (length inline, everything else in its sheet).
+Rendering (`drawPathHatchMarks`) is one filled, gradient-shaded polygon per mark
+around a quadratic spine — synchronous, no tiles — and export bounds outset by
+the mark length. It is a brush style only; the paint bucket keeps the pattern.
+
+---
+
 ## Fill sessions
 
 **Both** fill modes use the same tap-to-sample / drag-to-adjust-tolerance gesture
@@ -206,6 +251,12 @@ change.
 | Section orders + builders (`kBrushToolOrder`, `kElementToolOrder`, `brushSectionTools`, `elementSectionTools`) | [lib/models/tool_descriptor.dart](lib/models/tool_descriptor.dart) |
 | Gesture tool labels | [lib/models/tool_family.dart](lib/models/tool_family.dart) |
 | Effect definitions, polarity, `apply()` | [lib/models/selection_effect.dart](lib/models/selection_effect.dart) |
+| Hatch geometry value type | [lib/models/hatch_pattern.dart](lib/models/hatch_pattern.dart) |
+| Hatch tile cache + canvas-space shader | [lib/models/brush_hatch.dart](lib/models/brush_hatch.dart) |
+| Hatch marks geometry + tapered-mark renderer | [lib/models/hatch_marks.dart](lib/models/hatch_marks.dart), [lib/models/hatch_marks_renderer.dart](lib/models/hatch_marks_renderer.dart) |
+| Hatch marks settings sheet | [lib/widgets/hatch_marks_picker.dart](lib/widgets/hatch_marks_picker.dart) |
+| Hatch rendering (`drawPathWithBrushStyle`, `applyHatchPaint`, `renderRegion`) | [lib/models/render_helper.dart](lib/models/render_helper.dart) |
+| Hatching settings sheet + shared option row | [lib/widgets/hatch_settings_picker.dart](lib/widgets/hatch_settings_picker.dart), [lib/panels/tools/hatch_tool_option.dart](lib/panels/tools/hatch_tool_option.dart) |
 | Effect display labels | [lib/models/effect_labels.dart](lib/models/effect_labels.dart) |
 | Armed effect-brush state | [lib/models/effect_brush_model.dart](lib/models/effect_brush_model.dart) |
 | Gesture actions | [lib/models/user_action_drawing.dart](lib/models/user_action_drawing.dart) |

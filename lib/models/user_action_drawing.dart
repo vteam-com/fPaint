@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/models/brush_style.dart';
 import 'package:fpaint/models/halftone_fill.dart';
+import 'package:fpaint/models/hatch_pattern.dart';
 import 'package:fpaint/models/text_object.dart';
 export 'package:fpaint/models/brush_style.dart';
 
@@ -49,6 +50,9 @@ sealed class UserActionDrawing {
 
   /// The halftone treatment applied to a region fill, or null when unused.
   HalftoneFill? get halftoneFill => null;
+
+  /// The hatch pattern a region fill is drawn with, or null for a flat fill.
+  HatchPattern? get hatchPattern => null;
 
   /// The geometry this action fills or erases, or null when it has none.
   ui.Path? get path => null;

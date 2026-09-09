@@ -98,6 +98,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get brushStyle => 'Brush Style';
 
   @override
+  String get brushStyleCrossHatch => 'Cross-hatch';
+
+  @override
   String get brushStyleDash => 'Dash';
 
   @override
@@ -108,6 +111,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get brushStyleGrain => 'Grain';
+
+  @override
+  String get brushStyleHatch => 'Hatch';
+
+  @override
+  String get brushStyleHatchMarks => 'Hatch marks';
 
   @override
   String get brushStyleSlash => 'Slash';
@@ -348,6 +357,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gradientStopPosition => 'Position';
 
   @override
+  String get hatchAngle => 'Angle';
+
+  @override
+  String get hatchCrossed => 'Cross-hatch';
+
+  @override
+  String get hatchCurve => 'Curve';
+
+  @override
+  String get hatchLength => 'Length';
+
+  @override
+  String get hatchLineWidth => 'Line weight';
+
+  @override
+  String get hatchSpacing => 'Spacing';
+
+  @override
   String get height => 'Height';
 
   @override
@@ -483,6 +510,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paste => 'Paste';
 
   @override
+  String get hatchTaper => 'Taper';
+
+  @override
   String get pencilSize => 'Pencil Size';
 
   @override
@@ -495,6 +525,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String percentageValue(Object value) {
     return '$value%';
+  }
+
+  @override
+  String pixelsValue(Object value) {
+    return '$value px';
   }
 
   @override
@@ -599,6 +634,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get toolHalftone => 'Halftone';
+
+  @override
+  String get toolHatchMarks => 'Hatch marks';
+
+  @override
+  String get toolHatching => 'Hatching';
 
   @override
   String get toolInvert => 'Invert';

@@ -29,8 +29,35 @@ class FillModel extends VisibleModel {
   /// Mode
   FillMode _mode = FillMode.solid;
 
+  bool _halftoneEnabled = false;
+  bool _hatchEnabled = false;
+
   /// Whether flood fill should render as a halftone pattern.
-  bool halftoneEnabled = false;
+  bool get halftoneEnabled => _halftoneEnabled;
+
+  /// Whether flood fill should render as a halftone pattern. Halftone and hatch
+  /// are mutually exclusive patterns: enabling one disables the other.
+  set halftoneEnabled(bool value) {
+    _halftoneEnabled = value;
+    if (value) {
+      _hatchEnabled = false;
+    }
+  }
+
+  /// Whether flood fill should render as a hatch pattern (see `HatchPattern`).
+  bool get hatchEnabled => _hatchEnabled;
+
+  /// Whether flood fill should render as a hatch pattern. Halftone and hatch
+  /// are mutually exclusive patterns: enabling one disables the other.
+  set hatchEnabled(bool value) {
+    _hatchEnabled = value;
+    if (value) {
+      _halftoneEnabled = false;
+    }
+  }
+
+  /// Whether the hatch fill pattern draws a second, perpendicular line set.
+  bool hatchCrossed = false;
 
   /// Whether the active flood fill session samples all visible layers.
   bool sampleAllLayers = false;

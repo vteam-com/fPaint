@@ -745,6 +745,7 @@ class LayerProvider extends ChangeNotifier {
             userAction.fillColor,
             userAction.gradient,
             userAction.halftoneFill,
+            hatchPattern: userAction.hatchPattern,
           ),
         );
 

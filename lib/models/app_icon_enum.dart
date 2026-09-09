@@ -44,6 +44,7 @@ enum AppIcon {
   fillSolid('assets/icons/fill_solid.svg'),
   fillRadial('assets/icons/fill_radial.svg'),
   halftone('assets/icons/halftone.svg'),
+  hatch('assets/icons/hatch.svg'),
   flipHorizontal('assets/icons/flip_horizontal.svg'),
   flipVertical('assets/icons/flip_vertical.svg'),
   fontDownload('assets/icons/font_download.svg'),

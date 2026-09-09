@@ -46,6 +46,8 @@ class Keys {
   static const Key toolFillModeRadial = Key('tool-fill-mode-radial');
   static const Key toolFillHalftoneToggle = Key('tool-fill-halftone-toggle');
   static const Key toolFillHalftoneSlider = Key('tool-fill-halftone-slider');
+  static const Key toolFillHatchToggle = Key('tool-fill-hatch-toggle');
+  static const Key toolFillHatchSlider = Key('tool-fill-hatch-slider');
   static const Key fillApply = Key('fill-apply');
   static const Key fillCancel = Key('fill-cancel');
   static const Key toolSmudge = Key('tool-smudge');
@@ -89,4 +91,17 @@ class Keys {
   static const Key toolBrushIntensityTool = Key('tool-brush-intensity-tool');
   static const Key toolBrushIntensityButton = Key('tool-brush-intensity-button');
   static const Key toolBrushIntensitySlider = Key('tool-brush-intensity-slider');
+  static const Key toolBrushHatchButton = Key('tool-brush-hatch-button');
+  static const Key toolBrushHatchSlider = Key('tool-brush-hatch-slider');
+  static const Key hatchAngleSlider = Key('hatch-angle-slider');
+  static const Key hatchSpacingSlider = Key('hatch-spacing-slider');
+  static const Key hatchLineWidthSlider = Key('hatch-line-width-slider');
+  static const Key hatchCrossedToggle = Key('hatch-crossed-toggle');
+  static const Key toolBrushHatchMarksButton = Key('tool-brush-hatch-marks-button');
+  static const Key toolBrushHatchMarksSlider = Key('tool-brush-hatch-marks-slider');
+  static const Key hatchMarksAngleSlider = Key('hatch-marks-angle-slider');
+  static const Key hatchMarksSpacingSlider = Key('hatch-marks-spacing-slider');
+  static const Key hatchMarksLengthSlider = Key('hatch-marks-length-slider');
+  static const Key hatchMarksTaperSlider = Key('hatch-marks-taper-slider');
+  static const Key hatchMarksCurveSlider = Key('hatch-marks-curve-slider');
 }
