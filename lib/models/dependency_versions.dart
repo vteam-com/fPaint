@@ -53,7 +53,7 @@ const Map<String, String> dependencyVersions = <String, String>{
   'logging': '1.3.0',
   'matcher': '0.12.20',
   'material_color_utilities': '0.13.0',
-  'material_ui': '1.1.1',
+  'material_ui': '1.2.0',
   'meta': '1.19.0',
   'multi_split_view': '3.6.2',
   'objective_c': '9.6.0',
