@@ -10,8 +10,8 @@ import 'package:fpaint/models/selection_effect.dart';
 
 void main() {
   group('SelectionEffect enum', () {
-    test('has 10 values', () {
-      expect(SelectionEffect.values.length, 10);
+    test('has 11 values', () {
+      expect(SelectionEffect.values.length, 11);
     });
 
     test('each has an icon', () {
@@ -109,7 +109,7 @@ void main() {
     test('brightness, contrast and hue are bipolar; others are not', () {
       expect(SelectionEffect.brightness.bipolar, isTrue);
       expect(SelectionEffect.contrast.bipolar, isTrue);
-      expect(SelectionEffect.hueSaturation.bipolar, isTrue);
+      expect(SelectionEffect.hueRotation.bipolar, isTrue);
       expect(SelectionEffect.sharpness.bipolar, isTrue);
       expect(SelectionEffect.blur.bipolar, isFalse);
       expect(SelectionEffect.grayscale.bipolar, isFalse);

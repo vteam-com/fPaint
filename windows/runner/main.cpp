@@ -19,6 +19,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
 
   flutter::DartProject project(L"data");
 
+  // Disable Impeller on Windows: its ANGLE/OpenGL backend is prone to driver
+  // "EGL Context Lost (12302)" errors on some Windows 11 GPUs, which floods
+  // the log with "Could not make the context current to acquire the frame".
+  // Falling back to the Skia renderer restores stable GL context handling.
+  project.set_impeller_switch(flutter::ImpellerSwitch::Disabled);
+
   std::vector<std::string> command_line_arguments =
       GetCommandLineArguments();
 

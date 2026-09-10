@@ -494,7 +494,7 @@ Future<ui.Image> applyContrast(
 /// Rotates the hue of [image] by up to [AppEffects.hueRotationMax] degrees.
 ///
 /// [strength] ranges from 0.0 (no hue shift) to 1.0 (maximum rotation).
-Future<ui.Image> applyHueSaturation(
+Future<ui.Image> applyHueRotation(
   ui.Image image, {
   double strength = AppEffects.defaultIntensity,
 }) {
@@ -518,6 +518,35 @@ Future<ui.Image> applyHueSaturation(
       diagonal, lagging, leading, 0, 0, //
       leading, diagonal, lagging, 0, 0, //
       lagging, leading, diagonal, 0, 0, //
+      0, 0, 0, 1, 0, //
+    ],
+  );
+}
+
+/// Scales the chroma of [image] around its luma, entirely on the GPU.
+///
+/// Each channel is interpolated toward (negative) or away from (positive) its
+/// luma: c' = luma + (c - luma) * (1 + strength). Strength -1 is fully gray,
+/// 0 is unchanged, positive strengths oversaturate. Rows sum to 1, so neutral
+/// grays and alpha are untouched.
+///
+/// [strength] ranges from -1.0 (fully desaturated) to 1.0 (double chroma).
+Future<ui.Image> applySaturation(
+  ui.Image image, {
+  double strength = AppEffects.defaultIntensity,
+}) {
+  final double factor = 1.0 + strength;
+  final double redTerm = AppEffects.lumaRed * (1.0 - factor);
+  final double greenTerm = AppEffects.lumaGreen * (1.0 - factor);
+  final double blueTerm = AppEffects.lumaBlue * (1.0 - factor);
+
+  return _applyColorMatrix(
+    image,
+    strength: strength,
+    matrix: <double>[
+      factor, greenTerm, blueTerm, 0, 0, //
+      redTerm, factor, blueTerm, 0, 0, //
+      redTerm, greenTerm, factor, 0, 0, //
       0, 0, 0, 1, 0, //
     ],
   );

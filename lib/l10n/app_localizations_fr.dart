@@ -246,7 +246,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get effectGrayscale => 'Niveaux de gris';
 
   @override
-  String get effectHueSaturation => 'Décalage de teinte';
+  String get effectHueRotation => 'Teinte';
+
+  @override
+  String get effectSaturation => 'Saturation';
 
   @override
   String get effectIntensity => 'Intensité';
@@ -382,6 +385,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get height => 'Hauteur';
 
   @override
+  String get hexColor => 'Couleur Hex';
+
+  @override
+  String get hexColorCopiedToClipboard => 'Couleur Hex copiee dans le presse-papiers';
+
+  @override
   String get imageDimensionsMustBePositive => 'Les dimensions de l\'image doivent etre positives.';
 
   @override
@@ -392,12 +401,6 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get imageSizeTitle => 'Taille de l\'image';
-
-  @override
-  String get hexColor => 'Couleur Hex';
-
-  @override
-  String get hexColorCopiedToClipboard => 'Couleur Hex copiee dans le presse-papiers';
 
   @override
   String get importLabel => 'Importer...';

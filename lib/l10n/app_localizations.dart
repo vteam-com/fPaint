@@ -518,11 +518,17 @@ abstract class AppLocalizations {
   /// **'Grayscale'**
   String get effectGrayscale;
 
-  /// No description provided for @effectHueSaturation.
+  /// No description provided for @effectHueRotation.
   ///
   /// In en, this message translates to:
-  /// **'Hue Shift'**
-  String get effectHueSaturation;
+  /// **'Hue'**
+  String get effectHueRotation;
+
+  /// No description provided for @effectSaturation.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturation'**
+  String get effectSaturation;
 
   /// No description provided for @effectIntensity.
   ///
@@ -770,6 +776,18 @@ abstract class AppLocalizations {
   /// **'Height'**
   String get height;
 
+  /// No description provided for @hexColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Hex Color'**
+  String get hexColor;
+
+  /// No description provided for @hexColorCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hex Color copied to clipboard'**
+  String get hexColorCopiedToClipboard;
+
   /// No description provided for @imageDimensionsMustBePositive.
   ///
   /// In en, this message translates to:
@@ -793,18 +811,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Image Size'**
   String get imageSizeTitle;
-
-  /// No description provided for @hexColor.
-  ///
-  /// In en, this message translates to:
-  /// **'Hex Color'**
-  String get hexColor;
-
-  /// No description provided for @hexColorCopiedToClipboard.
-  ///
-  /// In en, this message translates to:
-  /// **'Hex Color copied to clipboard'**
-  String get hexColorCopiedToClipboard;
 
   /// No description provided for @importLabel.
   ///

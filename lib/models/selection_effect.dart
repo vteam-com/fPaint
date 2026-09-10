@@ -67,10 +67,17 @@ enum SelectionEffect {
       apply: _applyGrayscaleEffect,
     ),
   ),
-  hueSaturation(
+  saturation(
     _SelectionEffectConfig(
-      icon: AppIcon.effectHueSaturation,
-      apply: _applyHueSaturationEffect,
+      icon: AppIcon.effectSaturation,
+      apply: _applySaturationEffect,
+      bipolar: true,
+    ),
+  ),
+  hueRotation(
+    _SelectionEffectConfig(
+      icon: AppIcon.effectHueRotation,
+      apply: _applyHueRotationEffect,
       bipolar: true,
     ),
   ),
@@ -205,13 +212,24 @@ Future<ui.Image> _applyGrayscaleEffect(
   return applyGrayscale(image, strength: strength);
 }
 
-Future<ui.Image> _applyHueSaturationEffect(
+Future<ui.Image> _applyHueRotationEffect(
   ui.Image image,
   double strength,
   double _,
   double _,
 ) {
-  return applyHueSaturation(image, strength: strength);
+  return applyHueRotation(image, strength: strength);
+}
+
+/// Bipolar saturation: negative strength desaturates toward gray (strength -1
+/// is fully gray); positive strength boosts chroma. Centre (0) is a no-op.
+Future<ui.Image> _applySaturationEffect(
+  ui.Image image,
+  double strength,
+  double _,
+  double _,
+) {
+  return applySaturation(image, strength: strength);
 }
 
 Future<ui.Image> _applyNoiseEffect(
