@@ -22,7 +22,6 @@ class AppSvgIcon extends StatelessWidget {
 
   /// When true, keeps original colors from the SVG file and skips tinting.
   final bool useSourceColors;
-
   @override
   Widget build(BuildContext context) {
     final double resolvedSize = size ?? AppLayout.iconSize;

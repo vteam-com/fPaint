@@ -298,9 +298,7 @@
 <rect x="282.0" y="1200.0" width="396.0" height="898.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: files</title></rect>
 </g>
 <g class="folderLayer">
-<rect x="282.0" y="4888.0" width="396.0" height="1442.0" rx="12.0" ry="12.0" class="layerBackground layerBackgroundWarning"><title>Folder: providers
-
-2 Duplicate Code warnings</title></rect>
+<rect x="282.0" y="4888.0" width="396.0" height="1442.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: providers</title></rect>
 </g>
 <g class="folderLayer">
 <rect x="282.0" y="7564.0" width="396.0" height="482.0" rx="12.0" ry="12.0" class="layerBackground"><title>Folder: helpers</title></rect>
@@ -715,9 +713,7 @@
 <rect x="290.0" y="5758.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/app_provider_selection_crop.dart</title></rect>
 <rect x="290.0" y="5790.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/app_provider_selection_cross_layer.dart</title></rect>
 <rect x="290.0" y="5822.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/app_provider_selection_effects.dart</title></rect>
-<rect x="290.0" y="5854.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode fileNodeWarning"><title>File: providers/app_provider_tools.dart
-
-2 Duplicate Code warnings</title></rect>
+<rect x="290.0" y="5854.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/app_provider_tools.dart</title></rect>
 <rect x="290.0" y="5886.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/fill_preview_session.dart</title></rect>
 <rect x="290.0" y="5918.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/layer_provider_display_cache.dart</title></rect>
 <rect x="290.0" y="5950.0" width="380.0" height="28.0" rx="5.0" ry="5.0" class="fileNode"><title>File: providers/layer_provider_live_preview.dart</title></rect>

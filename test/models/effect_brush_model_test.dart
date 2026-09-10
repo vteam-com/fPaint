@@ -15,7 +15,7 @@ void main() {
     });
 
     test('disarm clears the effect', () {
-      final EffectBrushModel model = EffectBrushModel()..arm(SelectionEffect.hueSaturation);
+      final EffectBrushModel model = EffectBrushModel()..arm(SelectionEffect.hueRotation);
 
       model.disarm();
 

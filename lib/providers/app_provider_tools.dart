@@ -111,6 +111,15 @@ extension AppProviderTools on AppProvider {
   double get activeBrushSizeMin =>
       selectedAction == ActionType.pencil ? AppMath.one.toDouble() : AppInteraction.minCanvasScale;
 
+  /// Applies a computed brush [size] to the armed tool if it differs from the
+  /// current one. Returns the applied size.
+  double _applyBrushSize(double size) {
+    if (size != brushSize) {
+      brushSize = size;
+    }
+    return size;
+  }
+
   /// Applies a horizontal [screenDx] drag from [startSize] to the armed tool's
   /// brush size, clamped to that tool's range. Returns the applied size.
   double applyBrushSizeDrag({
@@ -123,10 +132,7 @@ extension AppProviderTools on AppProvider {
       minSize: activeBrushSizeMin,
       maxSize: activeBrushSizeMax,
     );
-    if (size != brushSize) {
-      brushSize = size;
-    }
-    return size;
+    return _applyBrushSize(size);
   }
 
   /// Applies a vertical mouse-wheel [scrollDy] from [startSize] to the armed
@@ -141,10 +147,7 @@ extension AppProviderTools on AppProvider {
       minSize: activeBrushSizeMin,
       maxSize: activeBrushSizeMax,
     );
-    if (size != brushSize) {
-      brushSize = size;
-    }
-    return size;
+    return _applyBrushSize(size);
   }
 
   bool get _isOriginFloodFillModifierPressed {

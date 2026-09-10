@@ -15,8 +15,10 @@ String effectLabel(
       return l10n.effectContrast;
     case SelectionEffect.grayscale:
       return l10n.effectGrayscale;
-    case SelectionEffect.hueSaturation:
-      return l10n.effectHueSaturation;
+    case SelectionEffect.hueRotation:
+      return l10n.effectHueRotation;
+    case SelectionEffect.saturation:
+      return l10n.effectSaturation;
     case SelectionEffect.noise:
       return l10n.effectNoise;
     case SelectionEffect.pixelate:

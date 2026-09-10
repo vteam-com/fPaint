@@ -39,8 +39,8 @@ The rail is two flat grids, in this order:
 
 **Brush section** —
 Gesture painters: Pencil · Brush · Smudge · Eraser.
-Effects: Blur · Sharpness · Brightness · Contrast · Grayscale ·
-Hue/Saturation · Noise · Pixelate · Shadow · Vignette.
+Effects: Blur · Sharpness · Brightness · Contrast · Grayscale · Saturation ·
+Hue · Noise · Pixelate · Shadow · Vignette.
 
 **Elements section** — Line · Rectangle · Circle · Fill · Text.
 
@@ -102,10 +102,11 @@ Each effect declares its slider polarity:
 - **Unipolar** (`0 → 1`): Blur, Grayscale, Noise, Pixelate, Shadow, Vignette.
   Zero means none; the slider only adds the effect.
 - **Bipolar** (centered `− … 0 … +`): **Sharpness, Brightness, Contrast,
-  Hue/Saturation.** The center (0) is no change and the **sign picks the
-  direction** — darken/brighten, less/more contrast, hue ±, and for Sharpness,
-  soften (blur) vs. sharpen. Bipolar effects default to a positive value so the
-  brush does something out of the box; drag through 0 to reverse.
+  Saturation, Hue.** The center (0) is no change and the **sign picks the
+  direction** — darken/brighten, less/more contrast, desaturate/saturate, hue
+  ±, and for Sharpness, soften (blur) vs. sharpen. Bipolar effects default to a
+  positive value so the brush does something out of the box; drag through 0 to
+  reverse.
 
 Sharpness folds the former separate "Sharpen" and "Edge Soften" into one signed
 axis. Heavy blur stays the dedicated **Blur** effect.
