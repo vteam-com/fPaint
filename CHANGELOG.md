@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-09-11
+
+### Fix
+
+- Transparent images now retain their alpha channel when copied and pasted on Windows.
+- The Text tool now loads its bundled font correctly, applies edited font sizes to the canvas, and keeps text in the edit box readable at the default white input style.
+
 ## [2.0.0] - 2026-09-08
 
 ### Add
