@@ -3,7 +3,7 @@
 // coverage:ignore-file
 
 const Map<String, String> dependencyVersions = <String, String>{
-  'android_file_picker': '1.1.0',
+  'android_file_picker': '1.1.1',
   'archive': '4.2.0',
   'args': '2.7.0',
   'async': '2.13.1',
@@ -28,7 +28,6 @@ const Map<String, String> dependencyVersions = <String, String>{
   'file_picker_web': '3.1.0',
   'file_picker': '12.2.0',
   'file': '7.0.1',
-  'fixnum': '1.1.1',
   'flutter_launcher_icons': '0.14.4',
   'flutter_lints': '6.0.0',
   'flutter_localizations': '0.0.0',
@@ -68,7 +67,7 @@ const Map<String, String> dependencyVersions = <String, String>{
   'path_provider': '2.1.6',
   'path': '1.9.1',
   'petitparser': '7.0.2',
-  'platform': '3.1.6',
+  'platform': '3.2.0',
   'plugin_platform_interface': '2.1.8',
   'posix': '6.5.2',
   'pub_semver': '2.2.1',
@@ -97,7 +96,6 @@ const Map<String, String> dependencyVersions = <String, String>{
   'url_launcher_web': '2.4.3',
   'url_launcher_windows': '3.1.6',
   'url_launcher': '6.3.2',
-  'uuid': '4.6.0',
   'vector_graphics_codec': '1.1.13',
   'vector_graphics_compiler': '1.3.0',
   'vector_graphics': '1.2.3',
