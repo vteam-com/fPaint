@@ -74,11 +74,13 @@ class _TextEditorState extends State<TextEditor> {
             textObject.position = updatedTextObject.position;
             textObject.size = updatedTextObject.size;
             textObject.color = updatedTextObject.color;
+            textObject.fontFamily = updatedTextObject.fontFamily;
             textObject.fontWeight = updatedTextObject.fontWeight;
             textObject.fontStyle = updatedTextObject.fontStyle;
             textObject.textAlign = updatedTextObject.textAlign;
             appProvider.selectedTextObject = null;
             appProvider.adoptTextToolStateFromObject(updatedTextObject);
+            appProvider.layers.selectedLayer.clearCache();
             appProvider.update();
           },
         );

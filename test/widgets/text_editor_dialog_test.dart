@@ -124,6 +124,43 @@ void main() {
 
       expect(result, isNull);
     });
+
+    testWidgets('font size slider updates the submitted canvas text size', (WidgetTester tester) async {
+      TextObject? result;
+      await tester.pumpWidget(
+        _buildDialog(
+          onSubmitted: (TextObject obj) {
+            result = obj;
+          },
+        ),
+      );
+      await tester.pump();
+
+      final AppSlider slider = tester.widget<AppSlider>(find.byType(AppSlider));
+      slider.onChanged!.call(48);
+      await tester.pump();
+      final EditableText editableText = tester.widget<EditableText>(find.byType(EditableText));
+      expect(editableText.style.fontSize, AppTextStyle.input.fontSize);
+      await tester.enterText(find.byType(AppTextField), 'Large');
+      await tester.pump();
+      await tester.tap(find.widgetWithText(AppButtonPrimary, 'Add Text'));
+      await tester.pump();
+
+      expect(result, isNotNull);
+      expect(result!.size, 48);
+    });
+
+    testWidgets('editor text stays white for a dark canvas text color', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildDialog(
+          onSubmitted: (TextObject _) {},
+        ),
+      );
+      await tester.pump();
+
+      final EditableText editableText = tester.widget<EditableText>(find.byType(EditableText));
+      expect(editableText.style.color, AppColors.white);
+    });
   });
 }
 

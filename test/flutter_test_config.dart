@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Font family name used by the app.
-const String _kDefaultFontFamily = 'Inter';
+const String _kDefaultFontFamily = 'packages/fpaint_assets/Inter';
 
 /// Regular-weight Inter font bundled with the app.
 const String _kInterFontFilename = 'Inter-Regular.otf';

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/models/text_object.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -32,6 +33,7 @@ void main() {
 
       expect(textObject.fontWeight, FontWeight.normal);
       expect(textObject.fontStyle, FontStyle.normal);
+      expect(textObject.fontFamily, appFontFamily);
     });
 
     test('getBounds returns correct bounds for non-empty text', () {
@@ -147,6 +149,24 @@ void main() {
       // At minimum, they should have the same position
       expect(normalBounds.left, boldBounds.left);
       expect(normalBounds.top, boldBounds.top);
+    });
+
+    test('larger font size produces larger canvas text bounds', () {
+      final TextObject smallText = TextObject(
+        text: 'Text',
+        position: Offset.zero,
+        color: Colors.black,
+        size: 12,
+      );
+      final TextObject largeText = TextObject(
+        text: 'Text',
+        position: Offset.zero,
+        color: Colors.black,
+        size: 48,
+      );
+
+      expect(largeText.getBounds().height, greaterThan(smallText.getBounds().height));
+      expect(largeText.getBounds().width, greaterThan(smallText.getBounds().width));
     });
   });
 }
