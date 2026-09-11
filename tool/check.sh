@@ -147,7 +147,7 @@ echo --- fCheck
 # Install the pinned version into the isolated cache, then run it.
 # Note: `dart pub cache exec` doesn't exist on all Dart SDK versions; `pub global run` does.
 dart pub global activate fcheck "$FCHECK_VERSION" > /dev/null
-dart pub global run fcheck --strict --svg --fix --list full
+dart pub global run fcheck --strict --svg --fix --exclude "packages/pasteboard/**" --list full
 fcheck_exit_code="$?"
 
 case "$fcheck_exit_code" in

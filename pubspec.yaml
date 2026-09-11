@@ -55,6 +55,10 @@ dependencies:
   web: 1.1.1
   xml: 7.0.1
 
+dependency_overrides:
+  pasteboard:
+    path: packages/pasteboard
+
 dev_dependencies:
   flutter_launcher_icons: 0.14.4
   flutter_lints: 6.0.0
