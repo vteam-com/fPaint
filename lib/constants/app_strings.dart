@@ -6,7 +6,7 @@ const String appName = 'fPaint';
 /// Inter is an open-source sans-serif designed for screens, visually close to
 /// Apple San Francisco. Licensed under the SIL Open Font License 1.1.
 /// Bundle fonts by running `bash tool/download_fonts.sh` once.
-const String appFontFamily = 'Inter';
+const String appFontFamily = 'packages/fpaint_assets/Inter';
 
 /// Barrier label used by [showGeneralDialog] overlays to dismiss on tap outside.
 const String barrierLabelDismiss = 'Dismiss';

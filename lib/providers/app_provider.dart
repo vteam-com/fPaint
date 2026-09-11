@@ -772,6 +772,7 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
   void applyTextToolState(TextToolState value) {
     textToolState.size = value.size;
     textToolState.color = value.color;
+    textToolState.fontFamily = value.fontFamily;
     textToolState.fontWeight = value.fontWeight;
     textToolState.fontStyle = value.fontStyle;
     textToolState.textAlign = value.textAlign;

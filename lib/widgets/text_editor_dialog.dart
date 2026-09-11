@@ -72,8 +72,8 @@ class _TextEditorDialogState extends State<TextEditorDialog> {
             hintText: l10n.enterYourTextHere,
             textAlign: _style.textAlign,
             style: AppTextStyle.input.copyWith(
-              fontSize: _style.size,
-              color: _style.color,
+              color: AppColors.white,
+              fontFamily: _style.fontFamily,
               fontWeight: _style.fontWeight,
               fontStyle: _style.fontStyle,
             ),

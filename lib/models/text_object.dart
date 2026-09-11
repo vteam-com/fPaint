@@ -10,7 +10,7 @@ class TextObject {
     required this.position,
     required this.color,
     required this.size,
-    this.fontFamily,
+    this.fontFamily = appFontFamily,
     this.fontWeight = FontWeight.normal,
     this.fontStyle = FontStyle.normal,
     this.textAlign = TextAlign.left,
@@ -20,7 +20,7 @@ class TextObject {
   Offset position;
   Color color;
   double size;
-  String? fontFamily;
+  String fontFamily;
   FontWeight fontWeight;
   FontStyle fontStyle;
   TextAlign textAlign;
