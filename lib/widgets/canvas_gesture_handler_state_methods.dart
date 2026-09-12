@@ -406,6 +406,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
       return;
     }
 
+    // Shift+Alt+click selects the topmost visible layer that owns the pixel
+    // under the pointer instead of drawing, so the artist can find which
+    // layer to pick without hunting through the panel.
+    if (appProvider.isLayerPickerModifierActive) {
+      _activePointerId = event.pointer;
+      unawaited(_pickLayerOwningPixel(appProvider, adjustedPosition));
+      return;
+    }
+
     if (_handleEyeDropperPointerStart(appProvider, event.localPosition)) {
       _activePointerId = event.pointer;
       return;
@@ -578,6 +587,29 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     context.showSnackBarMessage(
       context.l10n.layerLockedForEditing(appProvider.layers.selectedLayer.name),
     );
+  }
+
+  /// Selects the topmost visible layer owning the pixel at canvas
+  /// [canvasPosition], surfacing a snackbar with the outcome. Triggered by the
+  /// Shift+Alt click-to-pick-layer gesture.
+  Future<void> _pickLayerOwningPixel(
+    AppProvider appProvider,
+    ui.Offset canvasPosition,
+  ) async {
+    final LayerProvider? owningLayer = await appProvider.layers.findTopmostOpaqueLayerAt(canvasPosition);
+    if (!mounted) {
+      return;
+    }
+
+    if (owningLayer == null) {
+      context.showSnackBarMessage(context.l10n.layerPickerNoLayerFound);
+      return;
+    }
+
+    appProvider.layers.selectedLayerIndex = appProvider.layers.getLayerIndex(owningLayer);
+    HapticFeedback.selectionClick();
+    context.showSnackBarMessage(context.l10n.layerPickerSelected(owningLayer.name));
+    appProvider.update();
   }
 
   /// Shows a text editor dialog at the given canvas [position].

@@ -29,4 +29,7 @@ class MenuIds {
 
   /// The ID for the image size (resample all layers) menu item.
   static const int imageSize = 10;
+
+  /// The ID for the keyboard shortcuts menu item.
+  static const int keyboardShortcuts = 11;
 }

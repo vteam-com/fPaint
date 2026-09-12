@@ -621,6 +621,50 @@ void main() {
     });
   });
 
+  group('findTopmostOpaqueLayerAt', () {
+    test('returns null for an offset outside the canvas', () async {
+      final LayerProvider? owner = await layersProvider.findTopmostOpaqueLayerAt(const Offset(-1, -1));
+      expect(owner, isNull);
+    });
+
+    test('returns the opaque background layer when nothing is stacked above it', () async {
+      final LayerProvider? owner = await layersProvider.findTopmostOpaqueLayerAt(const Offset(10, 10));
+      expect(owner, layersProvider.get(0));
+    });
+
+    test('returns the topmost visible layer whose painted region covers the offset', () async {
+      final LayerProvider topLayer = layersProvider.addTop(name: 'Top');
+      topLayer.actionStack.add(
+        RegionAction(
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
+          fillColor: Colors.red,
+        ),
+      );
+
+      final LayerProvider? ownerInsideRegion = await layersProvider.findTopmostOpaqueLayerAt(const Offset(5, 5));
+      expect(ownerInsideRegion, topLayer);
+
+      final LayerProvider? ownerOutsideRegion = await layersProvider.findTopmostOpaqueLayerAt(const Offset(50, 50));
+      expect(ownerOutsideRegion, layersProvider.get(1));
+    });
+
+    test('skips a hidden layer even though it is painted at that offset', () async {
+      final LayerProvider hiddenTopLayer = layersProvider.addTop(name: 'HiddenTop');
+      hiddenTopLayer.actionStack.add(
+        RegionAction(
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
+          fillColor: Colors.red,
+        ),
+      );
+      hiddenTopLayer.isVisible = false;
+
+      final LayerProvider? owner = await layersProvider.findTopmostOpaqueLayerAt(const Offset(5, 5));
+      expect(owner, layersProvider.get(1));
+    });
+  });
+
   group('mergeLayers same index', () {
     test('merging same index does nothing', () {
       final int originalCount = layersProvider.length;

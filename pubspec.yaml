@@ -25,7 +25,7 @@ repository: https://github.com/vteam-com/fPaint
 homepage: https://github.com/vteam-com/fPaint
 issue_tracker: https://github.com/vteam-com/fPaint/issues
 
-version: 2.0.1
+version: 2.0.2
 
 environment:
   sdk: ">=3.13.2"
@@ -34,7 +34,7 @@ environment:
 dependencies:
   archive: 4.2.0
   desktop_drop: 0.8.4
-  file_picker: 12.2.0
+  file_picker: 12.3.0
   flutter:
     sdk: flutter
   flutter_localizations:

@@ -117,6 +117,7 @@ class ShortcutsHelpDialog extends StatelessWidget {
         shortcuts: <_ShortcutEntry>[
           _shortcutEntry(<String>[mod, shift, ShortcutKeys.n], ShortcutActions.newLayer),
           _shortcutEntry(<String>[ShortcutLabels.delete], ShortcutActions.deleteLayer),
+          _shortcutEntry(<String>[shift, subtractModifier], ShortcutActions.selectLayerAtPixel),
         ],
       ),
     ];

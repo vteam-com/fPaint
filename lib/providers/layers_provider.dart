@@ -805,6 +805,40 @@ class LayersProvider extends ChangeNotifier {
     );
   }
 
+  /// Finds the topmost visible layer whose pixel at canvas [offset] is not
+  /// fully transparent, i.e. the layer that "owns" the composited pixel the
+  /// artist sees there. Returns null when [offset] is outside the canvas or
+  /// every visible layer is transparent at that point.
+  Future<LayerProvider?> findTopmostOpaqueLayerAt(Offset offset) async {
+    if (offset.dx < 0 || offset.dy < 0 || offset.dx >= size.width || offset.dy >= size.height) {
+      return null;
+    }
+
+    final ui.Rect samplePixel = ui.Rect.fromLTWH(
+      offset.dx.floorToDouble(),
+      offset.dy.floorToDouble(),
+      AppMath.one.toDouble(),
+      AppMath.one.toDouble(),
+    );
+
+    for (int i = 0; i < length; i++) {
+      final LayerProvider layer = get(i);
+      if (!layer.isVisible) {
+        continue;
+      }
+      final ui.Image sample = await captureLayerRegion(i, samplePixel);
+      try {
+        final ByteData? byteData = await sample.toByteData(format: ui.ImageByteFormat.rawRgba);
+        if (byteData != null && byteData.getUint8(AppMath.rgbaAlphaOffset) > 0) {
+          return layer;
+        }
+      } finally {
+        sample.dispose();
+      }
+    }
+    return null;
+  }
+
   /// Captures the canvas panel to an image and returns the image bytes.
   Future<Uint8List> capturePainterToImageBytes() async {
     final ui.Image image = await capturePainterToImage();

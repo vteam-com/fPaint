@@ -57,6 +57,7 @@ enum AppIcon {
   image('assets/icons/image.svg'),
   info('assets/icons/info.svg'),
   iosShare('assets/icons/ios_share.svg'),
+  keyboard('assets/icons/keyboard.svg'),
   keyboardDoubleArrowLeft('assets/icons/keyboard_double_arrow_left.svg'),
   keyboardDoubleArrowRight('assets/icons/keyboard_double_arrow_right.svg'),
   layers('assets/icons/layers.svg'),

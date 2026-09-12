@@ -19,6 +19,7 @@ import 'package:fpaint/providers/editor_scopes.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
+import 'package:fpaint/widgets/shortcuts.dart';
 
 /// A widget that displays the main menu.
 class MainMenu extends StatelessWidget {
@@ -78,6 +79,11 @@ class MainMenu extends StatelessWidget {
           value: MenuIds.settings,
           text: l10n.settings,
           icon: AppIcon.settings,
+        ),
+        buildMenuItem(
+          value: MenuIds.keyboardShortcuts,
+          text: l10n.keyboardShortcuts,
+          icon: AppIcon.keyboard,
         ),
         // Platforms pushes a named route only fPaint's own shell registers;
         // embedded hosts have no generator for it.
@@ -174,6 +180,10 @@ void onDropDownMenuSelection(
 
     case MenuIds.platforms:
       Navigator.pushNamed(context, '/platforms');
+      break;
+
+    case MenuIds.keyboardShortcuts:
+      showShortcutsHelp(context);
       break;
 
     case MenuIds.about:
