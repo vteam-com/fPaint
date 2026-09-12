@@ -264,6 +264,36 @@ void main() {
     });
   });
 
+  group('isLayerPickerModifierPressed', () {
+    test('requires both Shift and Alt', () {
+      expect(
+        isLayerPickerModifierPressed(isShiftPressed: true, isAltPressed: true),
+        isTrue,
+      );
+    });
+
+    test('rejects Shift alone, which selection math already claims', () {
+      expect(
+        isLayerPickerModifierPressed(isShiftPressed: true, isAltPressed: false),
+        isFalse,
+      );
+    });
+
+    test('rejects Alt alone, which the eyedropper shortcut already claims', () {
+      expect(
+        isLayerPickerModifierPressed(isShiftPressed: false, isAltPressed: true),
+        isFalse,
+      );
+    });
+
+    test('rejects no modifiers', () {
+      expect(
+        isLayerPickerModifierPressed(isShiftPressed: false, isAltPressed: false),
+        isFalse,
+      );
+    });
+  });
+
   group('shouldUseSelectionRegionFloodFill', () {
     test('uses the selection region when a selection is active and modifier is not pressed', () {
       final ui.Path selectionPath = ui.Path()..addRect(_selectionRect);

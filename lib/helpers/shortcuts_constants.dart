@@ -43,6 +43,7 @@ abstract class ShortcutActions {
   static const String floodFillSampleAllLayers = 'Flood Fill: Sample All Layers';
   static const String newLayer = 'New Layer';
   static const String deleteLayer = 'Delete Layer';
+  static const String selectLayerAtPixel = 'Select Layer at Tapped Pixel';
 }
 
 /// Display strings for UI control labels related to shortcuts.

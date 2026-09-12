@@ -218,6 +218,13 @@
   "layerModify": "Modify",
   "layerNameTitle": "Layer Name",
   "layerOpacity": "Opacity: ",
+  "layerPickerNoLayerFound": "No visible layer has a pixel here.",
+  "layerPickerSelected": "Selected {layerName}",
+  "@layerPickerSelected": {
+    "placeholders": {
+      "layerName": {}
+    }
+  },
   "layerRename": "Rename layer",
   "layerShow": "Show layer",
   "layerShowAll": "Show all layers",

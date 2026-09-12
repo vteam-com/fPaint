@@ -214,6 +214,13 @@
   "layerModify": "Modifier",
   "layerNameTitle": "Nom du calque",
   "layerOpacity": "Opacité : ",
+  "layerPickerNoLayerFound": "Aucun calque visible n'a de pixel ici.",
+  "layerPickerSelected": "Calque selectionne : {layerName}",
+  "@layerPickerSelected": {
+    "placeholders": {
+      "layerName": {}
+    }
+  },
   "layerRename": "Renommer le calque",
   "layerShow": "Afficher le calque",
   "layerShowAll": "Afficher tous les calques",

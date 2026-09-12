@@ -212,6 +212,13 @@
   "layerModify": "Modificar",
   "layerNameTitle": "Nombre de la capa",
   "layerOpacity": "Opacidad: ",
+  "layerPickerNoLayerFound": "Ninguna capa visible tiene un pixel aqui.",
+  "layerPickerSelected": "Capa seleccionada: {layerName}",
+  "@layerPickerSelected": {
+    "placeholders": {
+      "layerName": {}
+    }
+  },
   "layerRename": "Renombrar capa",
   "layerShow": "Mostrar capa",
   "layerShowAll": "Mostrar todas las capas",

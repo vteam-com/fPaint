@@ -29,6 +29,20 @@ bool isBrushSizeDragModifierPressedForPlatform({
   return isPrimaryPressed && isAltPressed;
 }
 
+/// Returns whether Shift+Alt is held, arming the "select owning layer"
+/// gesture: clicking the canvas selects the topmost visible layer with an
+/// opaque pixel under the pointer instead of drawing.
+///
+/// Both modifiers are required so the gesture cannot be triggered by the
+/// single-modifier shortcuts that already claim the canvas (Alt eyedropper).
+@visibleForTesting
+bool isLayerPickerModifierPressed({
+  required bool isShiftPressed,
+  required bool isAltPressed,
+}) {
+  return isShiftPressed && isAltPressed;
+}
+
 /// Returns the brush size for a horizontal drag of [screenDx] pixels from
 /// [startSize], clamped to [minSize]..[maxSize].
 ///
@@ -96,6 +110,15 @@ extension AppProviderTools on AppProvider {
       isAltPressed: keyboard.isAltPressed,
       isControlPressed: keyboard.isControlPressed,
       isMetaPressed: keyboard.isMetaPressed,
+    );
+  }
+
+  /// Whether Shift+Alt is held, arming the click-to-select-owning-layer gesture.
+  bool get isLayerPickerModifierActive {
+    final HardwareKeyboard keyboard = HardwareKeyboard.instance;
+    return isLayerPickerModifierPressed(
+      isShiftPressed: keyboard.isShiftPressed,
+      isAltPressed: keyboard.isAltPressed,
     );
   }
 

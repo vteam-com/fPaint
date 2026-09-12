@@ -249,9 +249,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get effectHueRotation => 'Teinte';
 
   @override
-  String get effectSaturation => 'Saturation';
-
-  @override
   String get effectIntensity => 'Intensité';
 
   @override
@@ -262,6 +259,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get effects => 'Effets';
+
+  @override
+  String get effectSaturation => 'Saturation des couleurs';
 
   @override
   String get effectShadow => 'Ombre';
@@ -495,6 +495,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get layerOpacity => 'Opacité : ';
+
+  @override
+  String get layerPickerNoLayerFound => 'Aucun calque visible n\'a de pixel ici.';
+
+  @override
+  String layerPickerSelected(Object layerName) {
+    return 'Calque selectionne : $layerName';
+  }
 
   @override
   String get layerRename => 'Renommer le calque';

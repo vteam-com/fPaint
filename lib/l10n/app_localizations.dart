@@ -524,12 +524,6 @@ abstract class AppLocalizations {
   /// **'Hue'**
   String get effectHueRotation;
 
-  /// No description provided for @effectSaturation.
-  ///
-  /// In en, this message translates to:
-  /// **'Saturation'**
-  String get effectSaturation;
-
   /// No description provided for @effectIntensity.
   ///
   /// In en, this message translates to:
@@ -553,6 +547,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Effects'**
   String get effects;
+
+  /// No description provided for @effectSaturation.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturation'**
+  String get effectSaturation;
 
   /// No description provided for @effectShadow.
   ///
@@ -991,6 +991,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opacity: '**
   String get layerOpacity;
+
+  /// No description provided for @layerPickerNoLayerFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No visible layer has a pixel here.'**
+  String get layerPickerNoLayerFound;
+
+  /// No description provided for @layerPickerSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected {layerName}'**
+  String layerPickerSelected(Object layerName);
 
   /// No description provided for @layerRename.
   ///
