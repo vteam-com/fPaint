@@ -364,7 +364,11 @@ const double _vignetteIntensity = 0.3;
 
 // Text
 const String _signatureText = 'fPaint';
-const String _signatureFontFamily = 'Inter';
+// The family name a font is REGISTERED under, not the pubspec `family:` key.
+// Fonts from a package are namespaced as `packages/<pkg>/<family>`; the bare
+// 'Inter' resolves to nothing and silently falls back to the test harness's
+// block font, which renders the signature as a solid filled rectangle.
+const String _signatureFontFamily = appFontFamily;
 const double _signatureFontSize = 24.0;
 const double _signatureMarginRight = 10.0;
 const double _signatureMarginBottom = 10.0;
