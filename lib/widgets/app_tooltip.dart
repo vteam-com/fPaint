@@ -63,9 +63,16 @@ class _AppTooltipState extends State<AppTooltip> {
                   horizontal: AppSpacing.medium,
                   vertical: AppSpacing.small,
                 ),
-                child: Text(
-                  widget.message,
+                // An overlay entry is its own tree root, so a [Text] inside
+                // it has no [DefaultTextStyle] between itself and the app and
+                // falls back to [WidgetsApp.textStyle] — which MaterialApp sets
+                // to a "consider putting your text in a Material" style drawn
+                // with doubled yellow underlines. Passing a style to the [Text]
+                // was not enough: the fallback still supplied the decoration
+                // that style leaves unset.
+                child: DefaultTextStyle(
                   style: AppTextStyle.label,
+                  child: Text(widget.message),
                 ),
               ),
             ),

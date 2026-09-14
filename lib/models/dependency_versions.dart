@@ -4,7 +4,7 @@
 
 const Map<String, String> dependencyVersions = <String, String>{
   'android_file_picker': '1.1.1',
-  'archive': '4.2.0',
+  'archive': '4.3.0',
   'args': '2.7.0',
   'async': '2.13.1',
   'boolean_selector': '2.1.2',
@@ -39,7 +39,7 @@ const Map<String, String> dependencyVersions = <String, String>{
   'hooks': '2.2.0',
   'http_parser': '4.1.2',
   'http': '1.6.0',
-  'image': '4.9.2',
+  'image': '4.10.1',
   'intl': '0.20.3',
   'jni_flutter': '1.0.3',
   'jni_util': '1.0.0',

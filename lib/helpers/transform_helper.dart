@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
@@ -345,10 +346,22 @@ void triggerWandToleranceHaptic(
 }
 
 /// Triggers a platform-appropriate haptic tick.
+///
+/// A tick is cosmetic: it makes a drag feel notched, and a drag that cannot
+/// buzz must still work. The macOS call is therefore fire-and-forget *with* its
+/// failure swallowed — the invocation returns a Future, and letting that escape
+/// unawaited turned a host with no haptic handler registered (an engine still
+/// starting up, or a Runner built before the handler existed) into a stream of
+/// unhandled [MissingPluginException]s logged on every notch of every drag.
 void _performHaptic() {
-  if (Platform.isMacOS) {
-    _hapticChannel.invokeMethod<void>('hapticAlignment');
-  } else {
+  if (!Platform.isMacOS) {
     HapticFeedback.mediumImpact();
+    return;
   }
+  unawaited(
+    _hapticChannel
+        .invokeMethod<void>('hapticAlignment')
+        // Nothing to retry or report: the drag it accompanies is unaffected.
+        .catchError((Object _) {}),
+  );
 }
