@@ -7,8 +7,17 @@ import 'package:flutter_test/flutter_test.dart';
 /// Font family name used by the app.
 const String _kDefaultFontFamily = 'packages/fpaint_assets/Inter';
 
-/// Regular-weight Inter font bundled with the app.
-const String _kInterFontFilename = 'Inter-Regular.otf';
+/// The Inter faces bundled with the app, keyed by the weight they supply.
+///
+/// All four are registered, not just Regular: a [FontLoader] family only
+/// resolves the weights it was given, so a bold text object measured against a
+/// Regular-only family silently falls back to the harness's block font.
+const Map<int, String> _kInterFontFilenames = <int, String>{
+  400: 'Inter-Regular.otf',
+  500: 'Inter-Medium.otf',
+  600: 'Inter-SemiBold.otf',
+  700: 'Inter-Bold.otf',
+};
 
 /// Path within the workspace to the bundled font assets.
 const String _kAppFontsRelativePath = 'packages/fpaint_assets/assets/fonts';
@@ -22,14 +31,23 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 }
 
 Future<void> _loadInterFont() async {
-  final File fontFile = File('$_kAppFontsRelativePath/$_kInterFontFilename');
+  final FontLoader loader = FontLoader(_kDefaultFontFamily);
+  bool loadedAny = false;
 
-  if (!fontFile.existsSync()) {
-    // Inter font not found — tests will use the default Flutter test font.
+  for (final String filename in _kInterFontFilenames.values) {
+    final File fontFile = File('$_kAppFontsRelativePath/$filename');
+    if (!fontFile.existsSync()) {
+      continue;
+    }
+    final ByteData fontData = ByteData.view(fontFile.readAsBytesSync().buffer);
+    loader.addFont(Future<ByteData>.value(fontData));
+    loadedAny = true;
+  }
+
+  if (!loadedAny) {
+    // Inter fonts not found — tests will use the default Flutter test font.
     return;
   }
 
-  final ByteData fontData = ByteData.view(fontFile.readAsBytesSync().buffer);
-  final FontLoader loader = FontLoader(_kDefaultFontFamily)..addFont(Future<ByteData>.value(fontData));
   await loader.load();
 }
