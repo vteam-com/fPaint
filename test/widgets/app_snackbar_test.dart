@@ -44,6 +44,10 @@ Widget _buildNestedOverlayTestApp({
   );
 }
 
+/// The yellow Flutter underlines text with when it falls back to
+/// [WidgetsApp.textStyle] for want of a [DefaultTextStyle] ancestor.
+const Color _debugFallbackUnderline = Color(0xFFFFFF00);
+
 void main() {
   group('AppNotificationOverlay', () {
     testWidgets('shows and auto-dismisses notification', (WidgetTester tester) async {
@@ -153,11 +157,30 @@ void main() {
       expect(find.text('Saved'), findsOneWidget);
       expect(find.text('image.ora'), findsOneWidget);
 
-      final Text titleText = tester.widget<Text>(find.text('Saved'));
-      final Text subtitleText = tester.widget<Text>(find.text('image.ora'));
+      // Read the style that is actually painted rather than the [Text]'s own
+      // `style` field: the snackbar renders in an overlay, where text with no
+      // inherited style gets Flutter's yellow debug underlines, so each label
+      // is given a complete style through an ancestor [DefaultTextStyle].
+      TextStyle paintedStyle(Finder text) => tester
+          .widget<RichText>(
+            find.descendant(of: text, matching: find.byType(RichText)),
+          )
+          .text
+          .style!;
 
-      expect(titleText.style?.color, AppColors.white);
-      expect(subtitleText.style?.fontSize, AppFontSize.medium);
+      final TextStyle titleStyle = paintedStyle(find.text('Saved'));
+      final TextStyle subtitleStyle = paintedStyle(find.text('image.ora'));
+
+      expect(titleStyle.color, AppColors.white);
+      expect(subtitleStyle.fontSize, AppFontSize.medium);
+      // The reason the wrapper exists. Without an enclosing [DefaultTextStyle]
+      // these labels fall back to [WidgetsApp.textStyle], which MaterialApp
+      // sets to a "consider putting your text in a Material" style drawn with
+      // a doubled yellow underline — what the overlay was actually rendering.
+      expect(titleStyle.decoration, isNot(TextDecoration.underline));
+      expect(subtitleStyle.decoration, isNot(TextDecoration.underline));
+      expect(titleStyle.decorationColor, isNot(_debugFallbackUnderline));
+      expect(subtitleStyle.decorationColor, isNot(_debugFallbackUnderline));
 
       await tester.pump(const Duration(seconds: 5));
       await tester.pump();

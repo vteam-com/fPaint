@@ -6,6 +6,29 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.3] - 2026-09-14
+
+### Fix
+
+- Tooltips and snackbars no longer render their text with doubled yellow underlines. Both are drawn in an overlay entry, which is its own tree root: with no `DefaultTextStyle` ancestor the labels fell back to `MaterialApp`'s "consider putting your text in a Material" debug style, and styling the `Text` alone did not clear the decoration that fallback supplied. Each label is now wrapped in an explicit `DefaultTextStyle`.
+- Alignment haptics on macOS no longer flood the log with `MissingPluginException`s. The haptic tick is cosmetic, so its platform call is fire-and-forget with its failure swallowed; a host with no haptic handler registered (an engine still starting up, or a Runner built before the handler existed) used to log an unhandled exception on every notch of every drag.
+
+### Update
+
+- Upgraded to Flutter 3.47.4 / Dart SDK 3.13.3.
+- Updated dependencies, including `archive` 4.3.0 and `image` 4.10.1.
+
+## [2.0.2] - 2026-09-12
+
+### Add
+
+- Click-to-pick a layer from the canvas: hold Shift+Alt and click to select the topmost visible layer that owns the pixel under the pointer, so you can find the right layer without hunting through the layer panel. A snackbar confirms which layer was selected, or reports that no visible layer has a pixel there.
+- A **Keyboard Shortcuts** entry in the main menu opens the shortcuts reference directly, and the new Shift+Alt layer pick is listed in it alongside the other layer shortcuts.
+
+### Update
+
+- Updated `file_picker` to 12.3.0 and its platform implementations.
+
 ## [2.0.1] - 2026-09-11
 
 ### Fix

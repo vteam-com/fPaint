@@ -43,9 +43,15 @@ Widget _buildSnackBarTextContent(
   String? subtitle,
 }) {
   if (subtitle == null) {
-    return Text(
-      message,
+    // Wrapped, not merely styled: this renders inside an overlay entry, where
+    // a [Text] falls back to [WidgetsApp.textStyle] — MaterialApp's "consider
+    // putting your text in a Material" style, drawn with doubled yellow
+    // underlines — for want of a [DefaultTextStyle] ancestor. A style on the
+    // [Text] alone left that fallback's decoration in place. Every label below
+    // is wrapped the same way.
+    return DefaultTextStyle(
       style: _snackBarBodyStyle,
+      child: Text(message),
     );
   }
 
@@ -53,14 +59,14 @@ Widget _buildSnackBarTextContent(
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: <Widget>[
-      Text(
-        message,
+      DefaultTextStyle(
         style: _snackBarTitleStyle,
+        child: Text(message),
       ),
       const SizedBox(height: AppSpacing.small),
-      Text(
-        subtitle,
+      DefaultTextStyle(
         style: _snackBarSubtitleStyle,
+        child: Text(subtitle),
       ),
     ],
   );
