@@ -998,17 +998,17 @@ abstract class AppLocalizations {
   /// **'No visible layer has a pixel here.'**
   String get layerPickerNoLayerFound;
 
-  /// No description provided for @layerPickerTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Pick layer and color from canvas'**
-  String get layerPickerTooltip;
-
   /// No description provided for @layerPickerSelected.
   ///
   /// In en, this message translates to:
   /// **'Selected {layerName}'**
   String layerPickerSelected(Object layerName);
+
+  /// No description provided for @layerPickerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick layer and color from canvas'**
+  String get layerPickerTooltip;
 
   /// No description provided for @layerRename.
   ///
@@ -1117,6 +1117,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preview unavailable'**
   String get previewUnavailable;
+
+  /// No description provided for @quitWithoutSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Quit Without Saving'**
+  String get quitWithoutSaving;
 
   /// No description provided for @recentFilesLabel.
   ///
@@ -1441,6 +1447,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You have unsaved changes. Do you want to discard them and open the new file?'**
   String get unsavedChangesDiscardAndOpenPrompt;
+
+  /// No description provided for @unsavedChangesIndicatorTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Document has unsaved changes'**
+  String get unsavedChangesIndicatorTooltip;
+
+  /// No description provided for @unsavedChangesQuitPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. Do you want to quit anyway?'**
+  String get unsavedChangesQuitPrompt;
 
   /// No description provided for @webBrowser.
   ///

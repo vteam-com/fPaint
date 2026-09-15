@@ -61,12 +61,24 @@ void main() {
       expect(notifyCount, 1);
     });
 
-    test('isVisible setter clears cache', () {
+    test('isVisible setter notifies only on change', () {
+      // The layers panel builds each row from a ListenableBuilder on the layer,
+      // so without this notification the eye icon keeps its old state until an
+      // unrelated rebuild happens to repaint the row.
       final LayerProvider layer = _createLayer();
+      int notifyCount = 0;
+      layer.addListener(() => notifyCount++);
+
       layer.isVisible = false;
       expect(layer.isVisible, false);
+      expect(notifyCount, 1);
+
+      layer.isVisible = false;
+      expect(notifyCount, 1);
+
       layer.isVisible = true;
       expect(layer.isVisible, true);
+      expect(notifyCount, 2);
     });
 
     test('opacity setter clears cache', () {

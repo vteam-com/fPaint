@@ -250,6 +250,7 @@
   },
   "platforms": "Disponible sur...",
   "previewUnavailable": "Aperçu indisponible",
+  "quitWithoutSaving": "Quitter sans enregistrer",
   "recentFilesLabel": "Récents",
   "resetViewRotation": "Réinitialiser la rotation",
   "resizeRotate": "Redimensionner / Pivoter",
@@ -319,6 +320,8 @@
   "translate": "Deplacer",
   "unsavedChanges": "Modifications non enregistrees",
   "unsavedChangesDiscardAndOpenPrompt": "Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?",
+  "unsavedChangesIndicatorTooltip": "Le document contient des modifications non enregistrees",
+  "unsavedChangesQuitPrompt": "Vous avez des modifications non enregistrees. Voulez-vous quitter quand meme ?",
   "webBrowser": "Navigateur Web",
   "width": "Largeur"
 }

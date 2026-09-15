@@ -257,6 +257,7 @@
   },
   "platforms": "Available on...",
   "previewUnavailable": "Preview unavailable",
+  "quitWithoutSaving": "Quit Without Saving",
   "recentFilesLabel": "Recent",
   "resetViewRotation": "Reset Rotation",
   "resizeRotate": "Resize / Rotate",
@@ -326,6 +327,8 @@
   "translate": "Translate",
   "unsavedChanges": "Unsaved Changes",
   "unsavedChangesDiscardAndOpenPrompt": "You have unsaved changes. Do you want to discard them and open the new file?",
+  "unsavedChangesIndicatorTooltip": "Document has unsaved changes",
+  "unsavedChangesQuitPrompt": "You have unsaved changes. Do you want to quit anyway?",
   "webBrowser": "Web Browser",
   "width": "Width"
 }

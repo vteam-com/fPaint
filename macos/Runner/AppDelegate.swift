@@ -4,6 +4,7 @@ import FlutterMacOS
 private let editRedoMethod = "redo"
 private let editUndoMethod = "undo"
 private let fileOpenedMethod = "fileOpened"
+private let quitRequestedMethod = "quitRequested"
 private let fallbackWindowHeight: CGFloat = 900
 private let fallbackWindowWidth: CGFloat = 1280
 private let mainWindowTitle = "fPaint"
@@ -13,6 +14,9 @@ private let openDocumentFirstIndex = 1
 @main
 class AppDelegate: FlutterAppDelegate {
     static var pendingFilePath: String?  // Temporarily store the file path
+
+    /// Set once Flutter has approved a quit, so the resumed terminate does not ask again.
+    private var isTerminationConfirmed = false
 
     private var liveEditChannel: FlutterMethodChannel? {
         return (mainFlutterWindow as? MainFlutterWindow)?.editChannel
@@ -84,7 +88,30 @@ class AppDelegate: FlutterAppDelegate {
     }
 
     override func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        return .terminateNow
+        // Dart already agreed to this quit, or there is no engine to ask.
+        if isTerminationConfirmed {
+            return .terminateNow
+        }
+
+        guard let channel = liveFileChannel else {
+            return .terminateNow
+        }
+
+        // Ask Flutter whether the document has unsaved work. The dialog is
+        // async, so termination is deferred and resumed from the reply.
+        channel.invokeMethod(quitRequestedMethod, arguments: nil) { [weak self] response in
+            let shouldQuit = (response as? Bool) ?? true
+
+            guard shouldQuit else {
+                NSApp.reply(toApplicationShouldTerminate: false)
+                return
+            }
+
+            self?.isTerminationConfirmed = true
+            NSApp.reply(toApplicationShouldTerminate: true)
+        }
+
+        return .terminateLater
     }
 
     override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

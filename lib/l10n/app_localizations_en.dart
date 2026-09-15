@@ -498,12 +498,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get layerPickerNoLayerFound => 'No visible layer has a pixel here.';
 
   @override
-  String get layerPickerTooltip => 'Pick layer and color from canvas';
-
-  @override
   String layerPickerSelected(Object layerName) {
     return 'Selected $layerName';
   }
+
+  @override
+  String get layerPickerTooltip => 'Pick layer and color from canvas';
 
   @override
   String get layerRename => 'Rename layer';
@@ -563,6 +563,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get previewUnavailable => 'Preview unavailable';
+
+  @override
+  String get quitWithoutSaving => 'Quit Without Saving';
 
   @override
   String get recentFilesLabel => 'Recent';
@@ -732,6 +735,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get unsavedChangesDiscardAndOpenPrompt =>
       'You have unsaved changes. Do you want to discard them and open the new file?';
+
+  @override
+  String get unsavedChangesIndicatorTooltip => 'Document has unsaved changes';
+
+  @override
+  String get unsavedChangesQuitPrompt => 'You have unsaved changes. Do you want to quit anyway?';
 
   @override
   String get webBrowser => 'Web Browser';

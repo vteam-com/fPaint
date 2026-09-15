@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/draft_recovery_encoder.dart';
 import 'package:fpaint/files/import_files.dart';
+import 'package:fpaint/files/quit_confirmation.dart';
 import 'package:fpaint/files/save.dart';
 import 'package:fpaint/helpers/log_helper.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
@@ -56,7 +57,17 @@ Future<void> main() async {
     if (call.method == _fileOpenedMethod) {
       final String filePath = _normalizePlatformFilePath(call.arguments as String);
       await _queueOrHandlePlatformFile(filePath);
+      return null;
     }
+
+    if (call.method == quitRequestedMethod) {
+      return confirmQuitWithUnsavedChanges(
+        layers: mainApp.appProvider.layers,
+        context: mainApp.navigatorKey.currentContext,
+      );
+    }
+
+    return null;
   });
   _editChannel.setMethodCallHandler(handlePlatformEditMethodCall);
 

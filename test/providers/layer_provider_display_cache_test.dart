@@ -348,5 +348,24 @@ void main() {
 
       expect(thumbnailChanged, isFalse);
     });
+
+    test('toggling isVisible keeps the display cache and schedules no thumbnail rebuild', () async {
+      bool thumbnailChanged = false;
+      final LayerProvider layer = _layer(onThumbnailChanged: () => thumbnailChanged = true);
+      layer.actionStack.add(_imageAction(await _solid(const Color(0xFF00FF00))));
+      await layer.buildDisplayCache(_displayScale);
+      expect(layer.hasDisplayCache, isTrue);
+
+      // Visibility is a compositing flag, not content. Dropping the projection
+      // here forced the next paint to replay the action stack at full
+      // resolution, stalling the frame that shows the toggled eye icon.
+      layer.isVisible = false;
+      expect(layer.hasDisplayCache, isTrue);
+      layer.isVisible = true;
+      expect(layer.hasDisplayCache, isTrue);
+
+      await Future<void>.delayed(AppDefaults.thumbnailDebounceDuration + const Duration(milliseconds: 500));
+      expect(thumbnailChanged, isFalse);
+    });
   });
 }
