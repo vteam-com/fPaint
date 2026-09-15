@@ -31,6 +31,9 @@ abstract class ShortcutActions {
   static const String rotateViewDrag = 'Rotate View (mouse)';
   static const String twoFingerTwist = 'Two-finger twist';
   static const String rightDragSelection = 'Right-drag';
+
+  /// Trailing gesture noun for a modifier chord completed by a canvas click.
+  static const String clickCanvas = 'Click';
   static const String brushTool = 'Brush Tool';
   static const String eraserTool = 'Eraser Tool';
   static const String selectionTool = 'Selection Tool';
@@ -75,6 +78,7 @@ abstract class ShortcutModifiers {
 /// Display strings for individual keyboard keys.
 abstract class ShortcutKeys {
   static const String zero = '0';
+  static const String escape = 'Esc';
   static const String f1 = 'F1';
   static const String slash = '/';
   static const String plus = '+';

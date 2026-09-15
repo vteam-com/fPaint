@@ -141,7 +141,7 @@ Widget buildSelectionSubToolbar({
     // composite and transform/cut/copy act on every visible, unlocked layer.
     buildToolbarIconButton(
       key: Keys.toolSelectorAllLayers,
-      tooltip: l10n.selectionAllLayers,
+      tooltip: tooltipWithShortcut(l10n.selectionAllLayers, primaryModifierShortcutLabel()),
       icon: AppIcon.layers,
       interactionProfile: interactionProfile,
       isSelected: appProvider.selectorModel.allLayers,
@@ -185,7 +185,7 @@ Widget buildSelectionSubToolbar({
       // selection replaces the previous one ("New"); enabling one turns the
       // other off, and tapping the active toggle returns to replace.
       buildToolbarIconButton(
-        tooltip: l10n.toolAdd,
+        tooltip: tooltipWithShortcut(l10n.toolAdd, shiftModifierShortcutLabel()),
         icon: AppIcon.selectorMathAdd,
         interactionProfile: interactionProfile,
         isSelected: appProvider.selectorModel.math == SelectorMath.add,
@@ -197,7 +197,7 @@ Widget buildSelectionSubToolbar({
         },
       ),
       buildToolbarIconButton(
-        tooltip: l10n.toolRemove,
+        tooltip: tooltipWithShortcut(l10n.toolRemove, secondaryModifierShortcutLabel()),
         icon: AppIcon.selectorMathRemove,
         interactionProfile: interactionProfile,
         isSelected: appProvider.selectorModel.math == SelectorMath.remove,

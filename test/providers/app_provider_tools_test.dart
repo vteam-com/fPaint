@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/constants/app_interaction.dart';
 import 'package:fpaint/constants/app_limits.dart';
+import 'package:fpaint/helpers/shortcut_tooltip.dart';
+import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/models/fill_model.dart';
 import 'package:fpaint/models/selector_model.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
@@ -291,6 +293,26 @@ void main() {
         isLayerPickerModifierPressed(isShiftPressed: false, isAltPressed: false),
         isFalse,
       );
+    });
+
+    test('the tooltip advertises the chord that actually arms the pick', () {
+      debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+      final String shortcut = shortcutCombination(<String>[
+        shiftModifierShortcutLabel(),
+        secondaryModifierShortcutLabel(),
+        ShortcutActions.clickCanvas,
+      ]);
+
+      // Both modifiers named in the tooltip, and the click that commits it:
+      // the keys alone pick nothing.
+      expect(shortcut, '\u21E7 + \u2325 + Click');
+      expect(
+        isLayerPickerModifierPressed(isShiftPressed: true, isAltPressed: true),
+        isTrue,
+      );
+      expect(tooltipWithShortcut('Pick layer', shortcut), 'Pick layer ($shortcut)');
     });
   });
 

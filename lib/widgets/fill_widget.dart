@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/shortcut_tooltip.dart';
+import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -248,7 +250,7 @@ class _FillWidgetState extends State<FillWidget> {
           ),
           buildOverlayCircleButton(
             key: Keys.fillCancel,
-            tooltip: l10n.cancel,
+            tooltip: tooltipWithShortcut(l10n.cancel, singleKeyShortcut(ShortcutKeys.escape))!,
             icon: AppIcon.close,
             contentSemantic: AppButtonContentSemantic.dangerous,
             cursor: SystemMouseCursors.click,

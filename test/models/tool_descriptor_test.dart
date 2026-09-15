@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/helpers/shortcut_tooltip.dart';
+import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/selection_effect.dart';
 import 'package:fpaint/models/tool_descriptor.dart';
@@ -119,6 +121,60 @@ void main() {
       expect(descriptor.action, isNull);
       expect(descriptor.icon, SelectionEffect.blur.icon);
       expect(descriptor.label(l10n), l10n.effectBlur);
+    });
+  });
+
+  group('tool shortcuts shown in rail tooltips', () {
+    test('maps the bound tools to their bare key', () {
+      expect(toolShortcutLabel(ActionType.brush), ShortcutKeys.b);
+      expect(toolShortcutLabel(ActionType.eraser), ShortcutKeys.e);
+      expect(toolShortcutLabel(ActionType.selector), ShortcutKeys.s);
+      expect(toolShortcutLabel(ActionType.fill), ShortcutKeys.f);
+      expect(toolShortcutLabel(ActionType.text), ShortcutKeys.t);
+    });
+
+    test('returns null for tools reachable from the rail only', () {
+      for (final ActionType action in <ActionType>[
+        ActionType.pencil,
+        ActionType.smudge,
+        ActionType.blurBrush,
+        ActionType.line,
+        ActionType.rectangle,
+        ActionType.circle,
+      ]) {
+        expect(toolShortcutLabel(action), isNull, reason: '${action.name} has no keyboard binding');
+      }
+    });
+
+    test('a gesture descriptor exposes its key, an effect never does', () {
+      expect(const ToolDescriptor.gesture(ActionType.fill).shortcut, ShortcutKeys.f);
+      expect(const ToolDescriptor.gesture(ActionType.pencil).shortcut, isNull);
+      expect(const ToolDescriptor.adjust(SelectionEffect.blur).shortcut, isNull);
+    });
+
+    test('every advertised key is a single uppercase character', () {
+      for (final String key in kToolShortcutKeys.values) {
+        expect(key, matches(RegExp(r'^[A-Z]$')), reason: '$key must render as one key cap');
+      }
+    });
+
+    test('no two tools claim the same key', () {
+      expect(kToolShortcutKeys.values.toSet().length, kToolShortcutKeys.length);
+    });
+  });
+
+  group('tooltipWithShortcut', () {
+    test('appends the key in parentheses when both are present', () {
+      expect(tooltipWithShortcut('Brush', ShortcutKeys.b), 'Brush (B)');
+    });
+
+    test('leaves the tooltip untouched when the tool has no shortcut', () {
+      expect(tooltipWithShortcut('Pencil', null), 'Pencil');
+      expect(tooltipWithShortcut('Pencil', ''), 'Pencil');
+    });
+
+    test('returns null when there is no tooltip to decorate', () {
+      expect(tooltipWithShortcut(null, ShortcutKeys.b), isNull);
     });
   });
 }

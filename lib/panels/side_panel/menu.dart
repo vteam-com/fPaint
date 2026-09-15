@@ -3,6 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/files/save.dart';
+import 'package:fpaint/helpers/shortcut_tooltip.dart';
+import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -32,7 +34,7 @@ class MainMenu extends StatelessWidget {
 
     return AppPopupMenuButton<int>(
       key: Keys.mainMenuButton,
-      tooltip: l10n.menuTooltip,
+      tooltip: tooltipWithShortcut(l10n.menuTooltip, singleKeyShortcut(ShortcutKeys.tab))!,
       child: const AppSvgIcon(icon: AppIcon.moreVert),
       onSelected: (int result) => onDropDownMenuSelection(context, result),
       itemBuilder: (BuildContext _) => <AppPopupMenuItem<int>>[
