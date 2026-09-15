@@ -333,6 +333,13 @@ _PixelBrushComputationResult _runPixelBrushComputationLod({
 }
 
 /// Bilinear upscale of a straight-RGBA buffer.
+///
+/// The colour channels are interpolated in *premultiplied* space and divided
+/// back out by the interpolated alpha. Straight-space interpolation would mix
+/// in the undefined RGB of transparent neighbours — typically the white of a
+/// cleared buffer — so a hard ink/transparent edge came back washed light
+/// (rgb 0 → 85 at alpha 170), painting a white fringe around every large-brush
+/// dab. Alpha itself still interpolates linearly.
 Uint8List _upsampleRgbaBilinear(
   Uint8List src,
   int srcWidth,
@@ -364,11 +371,27 @@ Uint8List _upsampleRgbaBilinear(
       final int i10 = ((sy1 * srcWidth) + sx0) * AppMath.bytesPerPixel;
       final int i11 = ((sy1 * srcWidth) + sx1) * AppMath.bytesPerPixel;
       final int oi = ((dy * dstWidth) + dx) * AppMath.bytesPerPixel;
-      for (int c = AppMath.zero; c < AppMath.bytesPerPixel; c++) {
-        final double top = src[i00 + c] * (AppMath.one - wx) + src[i01 + c] * wx;
-        final double bottom = src[i10 + c] * (AppMath.one - wx) + src[i11 + c] * wx;
-        out[oi + c] = (top * (AppMath.one - wy) + bottom * wy).round().clamp(AppMath.zero, AppLimits.rgbChannelMax);
+
+      // Interpolate alpha first; it weights the colour samples below.
+      final double a00 = src[i00 + AppMath.rgbChannelAlpha].toDouble();
+      final double a01 = src[i01 + AppMath.rgbChannelAlpha].toDouble();
+      final double a10 = src[i10 + AppMath.rgbChannelAlpha].toDouble();
+      final double a11 = src[i11 + AppMath.rgbChannelAlpha].toDouble();
+      final double alphaTop = a00 * (AppMath.one - wx) + a01 * wx;
+      final double alphaBottom = a10 * (AppMath.one - wx) + a11 * wx;
+      final double newAlpha = alphaTop * (AppMath.one - wy) + alphaBottom * wy;
+
+      for (int c = AppMath.zero; c < AppMath.rgbChannelAlpha; c++) {
+        // Weight each sample by its own alpha (premultiplied interpolation)…
+        final double top = (src[i00 + c] * a00) * (AppMath.one - wx) + (src[i01 + c] * a01) * wx;
+        final double bottom = (src[i10 + c] * a10) * (AppMath.one - wx) + (src[i11 + c] * a11) * wx;
+        final double premultiplied = top * (AppMath.one - wy) + bottom * wy;
+        // …then divide back out to recover the straight colour.
+        out[oi + c] = newAlpha > AppMath.zero
+            ? (premultiplied / newAlpha).round().clamp(AppMath.zero, AppLimits.rgbChannelMax)
+            : AppMath.zero;
       }
+      out[oi + AppMath.rgbChannelAlpha] = newAlpha.round().clamp(AppMath.zero, AppLimits.rgbChannelMax);
     }
   }
   return out;

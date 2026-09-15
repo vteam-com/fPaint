@@ -100,6 +100,28 @@ void main() {
       final Uint8List dst = downsampleRgbaBox(src, 4, 4, 2, 2);
       expect(dst.length, 2 * 2 * 4);
     });
+
+    test('weights colour by alpha so transparent RGB cannot bleed in', () {
+      // Regression guard for the smudge white-edge bug. Two opaque black pixels
+      // beside two fully transparent ones whose RGB is white (what a cleared
+      // buffer carries). A plain per-channel average returns mid grey at half
+      // alpha - a pale fringe. Weighting colour by alpha keeps it black.
+      final Uint8List src = buildRgba(2, 2, (int x, int y) {
+        final bool ink = y == 0;
+        return ink ? <int>[0, 0, 0, 255] : <int>[255, 255, 255, 0];
+      });
+      final Uint8List dst = downsampleRgbaBox(src, 2, 2, 1, 1);
+      expect(dst[3], 127, reason: 'alpha is still a plain count average');
+      expect(dst[0], 0, reason: 'only the opaque samples contribute colour');
+      expect(dst[1], 0);
+      expect(dst[2], 0);
+    });
+
+    test('yields zero colour when every source sample is transparent', () {
+      final Uint8List src = buildRgba(2, 2, (int x, int y) => <int>[255, 255, 255, 0]);
+      final Uint8List dst = downsampleRgbaBox(src, 2, 2, 1, 1);
+      expect(dst, <int>[0, 0, 0, 0]);
+    });
   });
 
   group('convertImageToUint8List', () {
@@ -220,6 +242,56 @@ void main() {
 
       await Future<void>.delayed(const Duration(milliseconds: 30));
       expect(callCount, equals(1));
+    });
+  });
+
+  group('premultiplyRgbaInPlace', () {
+    test('scales colour by alpha and returns the same buffer', () {
+      // ui.PixelFormat.rgba8888 is premultiplied; handing it straight bytes made
+      // the engine divide by alpha twice, blowing a 50% mid grey out to 50%
+      // white. This is the conversion that prevents that.
+      final Uint8List pixels = Uint8List.fromList(<int>[128, 128, 128, 128]);
+      final Uint8List result = premultiplyRgbaInPlace(pixels);
+      expect(identical(result, pixels), isTrue, reason: 'converts in place');
+      expect(result[0], 64);
+      expect(result[1], 64);
+      expect(result[2], 64);
+      expect(result[3], 128, reason: 'alpha is untouched');
+    });
+
+    test('leaves fully opaque pixels unchanged', () {
+      final Uint8List pixels = Uint8List.fromList(<int>[10, 200, 255, 255]);
+      premultiplyRgbaInPlace(pixels);
+      expect(pixels, <int>[10, 200, 255, 255]);
+    });
+
+    test('zeroes the colour of fully transparent pixels', () {
+      // A transparent pixel's straight RGB is undefined; zeroing it stops the
+      // white of a cleared buffer bleeding out during GPU interpolation.
+      final Uint8List pixels = Uint8List.fromList(<int>[255, 255, 255, 0]);
+      premultiplyRgbaInPlace(pixels);
+      expect(pixels, <int>[0, 0, 0, 0]);
+    });
+
+    test('round-trips through a decoded image without lightening the colour', () async {
+      // End-to-end proof: a 50%-opaque mid grey must come back as 50% mid grey.
+      // Before the fix it returned (255, 255, 255, 128) - pure white.
+      final Uint8List straight = Uint8List.fromList(<int>[128, 128, 128, 128]);
+      final ui.Image decoded = await imageFromPixelsDecode(
+        premultiplyRgbaInPlace(Uint8List.fromList(straight)),
+        1,
+        1,
+      );
+      final Uint8List? readBack = await extractImagePixels(
+        decoded,
+        format: ui.ImageByteFormat.rawStraightRgba,
+      );
+      decoded.dispose();
+      expect(readBack, isNotNull);
+      expect(readBack![3], 128);
+      expect(readBack[0], closeTo(128, 2));
+      expect(readBack[1], closeTo(128, 2));
+      expect(readBack[2], closeTo(128, 2));
     });
   });
 }

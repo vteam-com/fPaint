@@ -257,14 +257,28 @@ extension AppProviderPixelBrush on AppProvider {
       AppMath.one,
       AppInteraction.smudgeCommitMaxDownsample,
     );
+    // The pipeline works in straight (un-premultiplied) RGBA — the format the
+    // source was read back in and the format the CPU step math expects — but
+    // [imageFromPixelsDecode] uploads as `ui.PixelFormat.rgba8888`, which is
+    // defined as PREMULTIPLIED. Handing it straight bytes makes the engine
+    // divide the colour by alpha a second time, blowing every partially
+    // transparent pixel toward white (a 50% mid grey arrives as 50% white).
+    // That is exactly the feathered rim of every dab, so the stroke came back
+    // with a white edge. Convert at the GPU boundary, the last possible moment.
     final ui.Image patchImage;
     if (patchDownsample <= AppMath.one) {
-      patchImage = await imageFromPixelsDecode(footprintBytes, fpWidth, fpHeight);
+      patchImage = await imageFromPixelsDecode(premultiplyRgbaInPlace(footprintBytes), fpWidth, fpHeight);
     } else {
       final int lowWidth = max(AppMath.one, fpWidth ~/ patchDownsample);
       final int lowHeight = max(AppMath.one, fpHeight ~/ patchDownsample);
+      // Downsample in straight space (alpha-weighted internally), then
+      // premultiply the small buffer for upload.
       final Uint8List lowBytes = downsampleRgbaBox(footprintBytes, fpWidth, fpHeight, lowWidth, lowHeight);
-      final ui.Image lowImage = await imageFromPixelsDecode(lowBytes, lowWidth, lowHeight);
+      final ui.Image lowImage = await imageFromPixelsDecode(
+        premultiplyRgbaInPlace(lowBytes),
+        lowWidth,
+        lowHeight,
+      );
       patchImage = await renderCanvasImage(
         width: fpWidth,
         height: fpHeight,

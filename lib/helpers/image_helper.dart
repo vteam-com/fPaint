@@ -202,6 +202,16 @@ Future<bool> clipboardHasImage() async {
 /// result is GPU-upscaled back for display. Each destination pixel averages the
 /// source pixels that map into it, so soft content (smudge/blur) loses no
 /// perceptible detail.
+///
+/// The colour channels are averaged **weighted by each sample's alpha** (the
+/// sums divided by the summed alpha rather than the sample count), while alpha
+/// itself is a plain count average. The input is straight (un-premultiplied)
+/// RGBA, where a transparent pixel's RGB is undefined — often the white of a
+/// cleared buffer. A plain per-channel average would pull that meaningless
+/// white into any destination pixel straddling an alpha edge, washing the rim
+/// of a smudge dab lighter and leaving a white fringe. Alpha-weighting recovers
+/// the correct straight colour, matching the premultiplied interpolation the GPU
+/// performs. This mirrors the handling in the blur step of [smudge_helper].
 Uint8List downsampleRgbaBox(
   Uint8List src,
   int srcWidth,
@@ -220,10 +230,11 @@ Uint8List downsampleRgbaBox(
       for (int sy = sy0; sy < sy1 && sy < srcHeight; sy++) {
         int si = ((sy * srcWidth) + sx0) * AppMath.bytesPerPixel;
         for (int sx = sx0; sx < sx1 && sx < srcWidth; sx++) {
-          r += src[si + AppMath.rgbaRedOffset];
-          g += src[si + AppMath.rgbaGreenOffset];
-          b += src[si + AppMath.rgbaBlueOffset];
-          a += src[si + AppMath.rgbaAlphaOffset];
+          final int sampleAlpha = src[si + AppMath.rgbaAlphaOffset];
+          r += src[si + AppMath.rgbaRedOffset] * sampleAlpha;
+          g += src[si + AppMath.rgbaGreenOffset] * sampleAlpha;
+          b += src[si + AppMath.rgbaBlueOffset] * sampleAlpha;
+          a += sampleAlpha;
           count++;
           si += AppMath.bytesPerPixel;
         }
@@ -232,13 +243,46 @@ Uint8List downsampleRgbaBox(
         count = AppMath.one;
       }
       final int oi = ((dy * dstWidth) + dx) * AppMath.bytesPerPixel;
-      out[oi + AppMath.rgbaRedOffset] = r ~/ count;
-      out[oi + AppMath.rgbaGreenOffset] = g ~/ count;
-      out[oi + AppMath.rgbaBlueOffset] = b ~/ count;
+      // When every source sample is fully transparent the colour is undefined;
+      // fall back to zero so nothing bleeds in.
+      out[oi + AppMath.rgbaRedOffset] = a > AppMath.zero ? r ~/ a : AppMath.zero;
+      out[oi + AppMath.rgbaGreenOffset] = a > AppMath.zero ? g ~/ a : AppMath.zero;
+      out[oi + AppMath.rgbaBlueOffset] = a > AppMath.zero ? b ~/ a : AppMath.zero;
       out[oi + AppMath.rgbaAlphaOffset] = a ~/ count;
     }
   }
   return out;
+}
+
+/// Converts a straight (un-premultiplied) RGBA buffer to premultiplied RGBA
+/// **in place**, returning the same buffer for convenient chaining.
+///
+/// [ui.PixelFormat.rgba8888] — the format [imageFromPixelsDecode] uploads with —
+/// is defined as premultiplied. Handing it straight bytes makes the engine
+/// divide the colour by alpha a second time, blowing every partially
+/// transparent pixel toward white: a 50%-opaque mid grey (128,128,128,128)
+/// round-trips as (255,255,255,128). That is invisible in fully opaque regions
+/// and glaring on the feathered rim of a brush dab.
+Uint8List premultiplyRgbaInPlace(Uint8List pixels) {
+  for (int index = AppMath.zero; index < pixels.length; index += AppMath.bytesPerPixel) {
+    final int alpha = pixels[index + AppMath.rgbaAlphaOffset];
+    if (alpha == AppLimits.rgbChannelMax) {
+      continue;
+    }
+    if (alpha == AppMath.zero) {
+      pixels[index + AppMath.rgbaRedOffset] = AppMath.zero;
+      pixels[index + AppMath.rgbaGreenOffset] = AppMath.zero;
+      pixels[index + AppMath.rgbaBlueOffset] = AppMath.zero;
+      continue;
+    }
+    for (int channel = AppMath.zero; channel < AppMath.rgbaAlphaOffset; channel++) {
+      pixels[index + channel] = (pixels[index + channel] * alpha / AppLimits.rgbChannelMax).round().clamp(
+        AppMath.zero,
+        AppLimits.rgbChannelMax,
+      );
+    }
+  }
+  return pixels;
 }
 
 /// Flips an [image] horizontally or vertically.
