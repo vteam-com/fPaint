@@ -58,6 +58,11 @@ class ToolDescriptor {
 
   /// The localized label / tooltip for the rail button.
   String label(AppLocalizations l10n) => effect != null ? effectLabel(l10n, effect!) : toolLabel(l10n, action!);
+
+  /// The bare-key shortcut that selects this tool, or null when it has none.
+  ///
+  /// Effects are armed from the rail only, so they never carry a key.
+  String? get shortcut => effect != null ? null : toolShortcutLabel(action!);
 }
 
 /// The **Brush** section: the freehand painters ([kBrushToolOrder]) followed by

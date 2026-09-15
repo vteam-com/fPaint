@@ -1,3 +1,4 @@
+import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/user_action_drawing.dart';
 
@@ -36,3 +37,20 @@ String toolLabel(AppLocalizations l10n, ActionType action) {
       return action.name;
   }
 }
+
+/// The bare-key keyboard shortcut that selects each tool from the rail.
+///
+/// Mirrors the tool bindings registered in `shortCutsForMainApp` — keep the two
+/// in sync so a tooltip never advertises a key that does nothing. Tools absent
+/// from this map are reachable from the rail only.
+const Map<ActionType, String> kToolShortcutKeys = <ActionType, String>{
+  ActionType.brush: ShortcutKeys.b,
+  ActionType.eraser: ShortcutKeys.e,
+  ActionType.selector: ShortcutKeys.s,
+  ActionType.fill: ShortcutKeys.f,
+  ActionType.text: ShortcutKeys.t,
+};
+
+/// The bare-key keyboard shortcut that selects [action], or null when the tool
+/// has no binding.
+String? toolShortcutLabel(ActionType action) => kToolShortcutKeys[action];

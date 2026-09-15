@@ -1,6 +1,8 @@
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/shortcut_tooltip.dart';
+import 'package:fpaint/helpers/shortcuts_constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -167,7 +169,16 @@ class _LayerPickerToggle extends StatelessWidget {
         final bool isArmed = appProvider.layerPickerPosition != null;
         return AppButtonIcon(
           key: Keys.layerPickerToggleButton,
-          tooltip: l10n.layerPickerTooltip,
+          // The chord needs a canvas click to commit, so the gesture is named
+          // alongside the keys: the modifiers alone pick nothing.
+          tooltip: tooltipWithShortcut(
+            l10n.layerPickerTooltip,
+            shortcutCombination(<String>[
+              shiftModifierShortcutLabel(),
+              secondaryModifierShortcutLabel(),
+              ShortcutActions.clickCanvas,
+            ]),
+          ),
           icon: AppIcon.eyedropper,
           isSelected: isArmed,
           onPressed: () {

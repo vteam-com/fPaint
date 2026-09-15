@@ -761,13 +761,22 @@ Future<void> activateSelectorTool(WidgetTester tester) async {
   fail('Selector toolbar controls were not shown from the top shell toolbar.');
 }
 
+/// Whether [message] is the tooltip for [label], ignoring any trailing
+/// keyboard-shortcut hint such as the " (B)" appended to the brush tool.
+///
+/// Callers pass the plain localized label, so a tool gaining or losing a
+/// shortcut never breaks the scenarios that tap it.
+bool _tooltipMatchesLabel(String message, String label) {
+  return message == label || message.startsWith('$label (');
+}
+
 /// Finds the widget matching [tooltip] and taps it.
 Future<void> tapByTooltip(
   WidgetTester tester,
   String tooltip,
 ) async {
   Finder found = find.byWidgetPredicate(
-    (Widget w) => w is AppTooltip && w.message == tooltip,
+    (Widget w) => w is AppTooltip && _tooltipMatchesLabel(w.message, tooltip),
   );
 
   // Retry once after toggling shell mode in case the tool strip is hidden.
@@ -775,7 +784,7 @@ Future<void> tapByTooltip(
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
     found = find.byWidgetPredicate(
-      (Widget w) => w is AppTooltip && w.message == tooltip,
+      (Widget w) => w is AppTooltip && _tooltipMatchesLabel(w.message, tooltip),
     );
   }
 
@@ -791,7 +800,7 @@ Future<void> dragByTooltip(
   required Offset delta,
 }) async {
   final Finder found = find.byWidgetPredicate(
-    (Widget w) => w is AppTooltip && w.message == tooltip,
+    (Widget w) => w is AppTooltip && _tooltipMatchesLabel(w.message, tooltip),
   );
   expect(found, findsOneWidget, reason: 'Should find draggable widget with tooltip: $tooltip');
   final Offset start = tester.getCenter(found.first);

@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
+import 'package:fpaint/helpers/shortcut_tooltip.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
 import 'package:fpaint/models/effect_labels.dart';
@@ -146,7 +147,7 @@ class ToolFamilyRail extends StatelessWidget {
       icon: descriptor.icon,
       // Suppressed while an effect brush is armed — only one tool is active.
       isSelected: appProvider.selectedAction == action && armedEffect == null,
-      tooltip: descriptor.label(l10n),
+      tooltip: tooltipWithShortcut(descriptor.label(l10n), descriptor.shortcut),
       constraints: constraints,
       padding: padding,
       onPressed: () => appProvider.selectedAction = action,
