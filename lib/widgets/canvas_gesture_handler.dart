@@ -165,6 +165,12 @@ class _CanvasGestureHandlerState extends State<CanvasGestureHandler> {
 
           appProvider.lastPointerPosition = event.localPosition;
 
+          if (appProvider.layerPickerPosition != null) {
+            appProvider.layerPickerPosition = event.localPosition;
+            appProvider.repaintMainView();
+            return;
+          }
+
           if (appProvider.eyeDropPositionForBrush != null) {
             appProvider.eyeDropPositionForBrush = event.localPosition;
             appProvider.repaintMainView();

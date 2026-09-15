@@ -3,9 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/l10n/app_localizations_x.dart';
+import 'package:fpaint/models/app_icon_enum.dart';
 import 'package:fpaint/panels/layers/layer_selector.dart';
-import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
+import 'package:fpaint/widgets/app_buttons.dart';
 import 'package:fpaint/widgets/side_panel_header.dart';
 
 /// A widget that displays the layers panel in the top split of the side panel.
@@ -23,7 +25,10 @@ class TopMenuAndLayersPanel extends StatelessWidget {
       builder: (BuildContext _, Widget? _) {
         return Column(
           children: <Widget>[
-            SidePanelHeader(title: l10n.sidePanelLayersSection),
+            SidePanelHeader(
+              title: l10n.sidePanelLayersSection,
+              trailing: const _LayerPickerToggle(),
+            ),
             ListenableBuilder(
               listenable: layers.layerListStructureListenable,
               builder: (BuildContext context2, Widget? _) {
@@ -140,5 +145,40 @@ class _ReorderableLayerListState extends State<_ReorderableLayerList> {
     return defaultTargetPlatform == TargetPlatform.linux ||
         defaultTargetPlatform == TargetPlatform.macOS ||
         defaultTargetPlatform == TargetPlatform.windows;
+  }
+}
+
+/// Header toggle that arms the single-shot pick-layer mode.
+///
+/// The Shift+Alt click chord covers keyboard-equipped desktops; this button is
+/// how pen and touch reach the same gesture. Arming it drops the on-canvas
+/// [LayerPickerPuck], which commits on release and disarms itself.
+class _LayerPickerToggle extends StatelessWidget {
+  const _LayerPickerToggle();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppProvider appProvider = AppProvider.of(context);
+    final AppLocalizations l10n = context.l10n;
+
+    return ListenableBuilder(
+      listenable: appProvider.toolOptionsRepaintListenable,
+      builder: (BuildContext _, Widget? _) {
+        final bool isArmed = appProvider.layerPickerPosition != null;
+        return AppButtonIcon(
+          key: Keys.layerPickerToggleButton,
+          tooltip: l10n.layerPickerTooltip,
+          icon: AppIcon.eyedropper,
+          isSelected: isArmed,
+          onPressed: () {
+            if (isArmed) {
+              appProvider.disarmLayerPicker();
+            } else {
+              appProvider.armLayerPicker();
+            }
+          },
+        );
+      },
+    );
   }
 }

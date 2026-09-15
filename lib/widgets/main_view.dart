@@ -17,6 +17,7 @@ import 'package:fpaint/widgets/canvas_panel.dart';
 import 'package:fpaint/widgets/effect_preview_bottom_sheet.dart';
 import 'package:fpaint/widgets/fill_preview_overlay.dart';
 import 'package:fpaint/widgets/fill_widget.dart';
+import 'package:fpaint/widgets/layer_picker_puck.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:fpaint/widgets/material_free.dart';
 import 'package:fpaint/widgets/overlay_control_widgets.dart';
@@ -131,6 +132,16 @@ class MainViewState extends State<MainView> {
                       _buildEyeDropper(
                         appProvider: appProvider,
                         position: appProvider.eyeDropPositionForFill!,
+                      ),
+
+                    //
+                    // Layer selection from image
+                    //
+                    if (!hasActiveTransformOverlay && appProvider.layerPickerPosition != null)
+                      LayerPickerPuck(
+                        layers: appProvider.layers,
+                        pointerPosition: appProvider.layerPickerPosition!,
+                        pixelPosition: appProvider.toCanvas(appProvider.layerPickerPosition!),
                       ),
 
                     //

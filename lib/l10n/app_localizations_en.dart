@@ -498,6 +498,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get layerPickerNoLayerFound => 'No visible layer has a pixel here.';
 
   @override
+  String get layerPickerTooltip => 'Pick layer and color from canvas';
+
+  @override
   String layerPickerSelected(Object layerName) {
     return 'Selected $layerName';
   }

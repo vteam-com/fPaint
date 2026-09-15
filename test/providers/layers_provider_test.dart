@@ -649,6 +649,38 @@ void main() {
       expect(ownerOutsideRegion, layersProvider.get(1));
     });
 
+    test('picks the layer that is visible through a no-op Multiply layer', () async {
+      // The comic-inking stack: a Multiply ink layer whose raster carries an
+      // opaque white backing sits over flat colour. White multiplies to a
+      // no-op, so the artist sees the colour layer and the pick must land
+      // there -- even though the ink layer is fully opaque at that pixel.
+      final LayerProvider colorLayer = layersProvider.addTop(name: 'Layer-Color1');
+      colorLayer.actionStack.add(
+        RegionAction(
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(40, 40, 20, 20)),
+          fillColor: Colors.blue,
+        ),
+      );
+      final LayerProvider inkLayer = layersProvider.addTop(name: 'Layer-Ink')
+        ..blendMode = ui.BlendMode.multiply
+        ..backgroundColor = Colors.white;
+      inkLayer.actionStack.add(
+        RegionAction(
+          positions: <Offset>[],
+          path: ui.Path()..addRect(const Rect.fromLTWH(0, 0, 10, 10)),
+          fillColor: Colors.black,
+        ),
+      );
+
+      // Where the ink is actually drawn it owns the pixel.
+      expect(await layersProvider.findTopmostOpaqueLayerAt(const Offset(5, 5)), inkLayer);
+      // Where it multiplies to nothing, the colour beneath owns the pixel.
+      expect(await layersProvider.findTopmostOpaqueLayerAt(const Offset(45, 45)), colorLayer);
+      // And bare paper still resolves to the background layer.
+      expect(await layersProvider.findTopmostOpaqueLayerAt(const Offset(90, 90)), layersProvider.get(2));
+    });
+
     test('skips a hidden layer even though it is painted at that offset', () async {
       final LayerProvider hiddenTopLayer = layersProvider.addTop(name: 'HiddenTop');
       hiddenTopLayer.actionStack.add(

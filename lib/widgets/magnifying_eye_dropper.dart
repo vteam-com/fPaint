@@ -1,11 +1,9 @@
-// ignore: fcheck_one_class_per_file
 import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
-import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/providers/layers_provider.dart';
-import 'package:fpaint/widgets/draw_rect.dart';
+import 'package:fpaint/widgets/magnifier_loupe.dart';
 
 /// A widget that displays a magnifying eye dropper for selecting colors from an image.
 class MagnifyingEyeDropper extends StatefulWidget {
@@ -62,55 +60,16 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.layers.cachedImage == null) {
+    final ui.Image? sourceImage = widget.layers.cachedImage;
+    if (sourceImage == null) {
       return const SizedBox();
     }
 
-    const int gridCount = AppInteraction.magnifierGridCount;
-    const int halfGrid = (gridCount - 1) ~/ 2;
-
-    final int centerPixelX = widget.pixelPosition.dx.floor();
-    final int centerPixelY = widget.pixelPosition.dy.floor();
-
-    final ui.Rect region = Rect.fromLTWH(
-      (centerPixelX - halfGrid).toDouble(),
-      (centerPixelY - halfGrid).toDouble(),
-      gridCount.toDouble(),
-      gridCount.toDouble(),
-    );
-
-    final ui.Image croppedImage = cropImage(widget.layers.cachedImage!, region);
-
-    // Magnifying Glass Effect
-    return Positioned(
-      left: widget.pointerPosition.dx - (regionSize / AppMath.pair),
-      top: widget.pointerPosition.dy - (regionSize / AppMath.pair),
-      child: IgnorePointer(
-        child: SizedBox(
-          width: regionSize,
-          height: regionSize,
-          child: Stack(
-            alignment: AlignmentDirectional.center,
-            children: <Widget>[
-              SizedBox(
-                width: regionSize,
-                height: regionSize,
-                child: CustomPaint(
-                  painter: MagnifyingGlassPainter(
-                    croppedImage: croppedImage,
-                    color: _selectedColor ?? AppColors.black,
-                  ),
-                ),
-              ),
-              DashedRectangle(
-                fillColor: _selectedColor ?? AppColors.transparent,
-                width: AppLayout.magnifierTargetSize,
-                height: AppLayout.magnifierTargetSize,
-              ),
-            ],
-          ),
-        ),
-      ),
+    return MagnifierLoupe(
+      sourceImage: sourceImage,
+      pointerPosition: widget.pointerPosition,
+      pixelPosition: widget.pixelPosition,
+      sampledColor: _selectedColor,
     );
   }
 
@@ -140,79 +99,4 @@ class MagnifyingEyeDropperState extends State<MagnifyingEyeDropper> {
       _selectedColor = color;
     });
   }
-}
-
-/// Paints the image.
-class ImagePainter extends CustomPainter {
-  /// Creates an [ImagePainter].
-  ImagePainter(this.image);
-
-  /// The image to paint.
-  final ui.Image image;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawImage(image, Offset.zero, Paint());
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// Draws the magnifying glass.
-class MagnifyingGlassPainter extends CustomPainter {
-  /// Creates a [MagnifyingGlassPainter].
-  MagnifyingGlassPainter({
-    required this.croppedImage,
-    required this.color,
-  });
-
-  /// The cropped image.
-  final ui.Image croppedImage;
-
-  /// The color.
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.save();
-    final Rect circleRect = Rect.fromLTWH(0, 0, size.width, size.height);
-    canvas.clipPath(Path()..addOval(circleRect));
-
-    canvas.drawRect(circleRect, Paint()..color = AppColors.grey300);
-
-    final Rect srcRect = Rect.fromLTWH(
-      0,
-      0,
-      croppedImage.width.toDouble(),
-      croppedImage.height.toDouble(),
-    );
-    canvas.drawImageRect(
-      croppedImage,
-      srcRect,
-      circleRect,
-      Paint()..filterQuality = ui.FilterQuality.none,
-    );
-    canvas.restore();
-
-    canvas.drawCircle(
-      Offset(size.width / AppMath.pair, size.height / AppMath.pair),
-      size.width / AppMath.pair,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = AppStroke.regular
-        ..color = AppColors.black,
-    );
-    canvas.drawCircle(
-      Offset(size.width / AppMath.pair, size.height / AppMath.pair),
-      (size.width / AppMath.pair) - AppStroke.thin,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = AppStroke.regular
-        ..color = AppColors.white,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

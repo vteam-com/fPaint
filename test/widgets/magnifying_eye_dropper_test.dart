@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/providers/layers_provider.dart';
+import 'package:fpaint/widgets/magnifier_loupe.dart';
 import 'package:fpaint/widgets/magnifying_eye_dropper.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -188,29 +189,6 @@ void main() {
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final ui.Canvas canvas = ui.Canvas(recorder);
       const ui.Size size = Size(100, 100);
-
-      painter.paint(canvas, size);
-
-      final ui.Picture picture = recorder.endRecording();
-      expect(picture, isNotNull);
-    });
-  });
-
-  group('ImagePainter', () {
-    testWidgets('shouldRepaint returns false', (WidgetTester tester) async {
-      final ui.Image mockImage = await createMockImage(50, 50);
-      final ImagePainter painter = ImagePainter(mockImage);
-
-      expect(painter.shouldRepaint(painter), false);
-    });
-
-    testWidgets('paints image on canvas', (WidgetTester tester) async {
-      final ui.Image mockImage = await createMockImage(50, 50);
-      final ImagePainter painter = ImagePainter(mockImage);
-
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
-      final ui.Canvas canvas = ui.Canvas(recorder);
-      const ui.Size size = Size(50, 50);
 
       painter.paint(canvas, size);
 

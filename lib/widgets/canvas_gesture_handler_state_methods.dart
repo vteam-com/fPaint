@@ -200,6 +200,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     final bool isSelectionActive = _isSelectionGesture(appProvider);
 
     if (_activePointerId == event.pointer) {
+      // Single-shot: the pick commits on release and the puck disarms, so the
+      // next stroke paints instead of re-picking.
+      if (appProvider.layerPickerPosition != null) {
+        _activePointerId = -1;
+        appProvider.disarmLayerPicker();
+        unawaited(_pickLayerOwningPixel(appProvider, appProvider.toCanvas(event.localPosition)));
+        return;
+      }
+
       if (_handleEyeDropperPointerEnd(appProvider, event.localPosition)) {
         _activePointerId = -1;
         appProvider.update();
@@ -270,6 +279,12 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
     final Offset adjustedPosition = appProvider.toCanvas(event.localPosition);
     final bool isSelectionActive = _isSelectionGesture(appProvider);
+
+    if (appProvider.layerPickerPosition != null) {
+      appProvider.layerPickerPosition = event.localPosition;
+      appProvider.repaintMainView();
+      return;
+    }
 
     final bool isBrushDrop = appProvider.eyeDropPositionForBrush != null;
     final bool isFillDrop = appProvider.eyeDropPositionForFill != null;
@@ -412,6 +427,15 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     if (appProvider.isLayerPickerModifierActive) {
       _activePointerId = event.pointer;
       unawaited(_pickLayerOwningPixel(appProvider, adjustedPosition));
+      return;
+    }
+
+    // The armed picker puck tracks the pointer while it is down and commits on
+    // release, so a finger can be dragged into place while the puck (offset
+    // from the contact point) shows which layer is about to be picked.
+    if (appProvider.layerPickerPosition != null) {
+      _activePointerId = event.pointer;
+      appProvider.layerPickerPosition = event.localPosition;
       return;
     }
 
@@ -579,8 +603,11 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
 
   /// Returns whether the current tool should show a live size marker while drawing.
   bool _shouldShowDrawingToolPreview(AppProvider appProvider) {
+    // An armed pick-layer gesture already owns the cursor with its loupe, so
+    // the brush-size ring stays hidden until the pick commits.
     return appProvider.selectedAction.isSupported(ActionOptions.brushSize) &&
-        appProvider.selectedAction != ActionType.text;
+        appProvider.selectedAction != ActionType.text &&
+        !appProvider.isLayerPickerActive;
   }
 
   void _showLockedLayerMessage(AppProvider appProvider) {
@@ -590,8 +617,9 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
   }
 
   /// Selects the topmost visible layer owning the pixel at canvas
-  /// [canvasPosition], surfacing a snackbar with the outcome. Triggered by the
-  /// Shift+Alt click-to-pick-layer gesture.
+  /// [canvasPosition] and adopts that pixel's color as the active paint color,
+  /// surfacing a snackbar with the outcome. Triggered by the Shift+Alt
+  /// click-to-pick-layer chord and by the armed on-canvas picker puck.
   Future<void> _pickLayerOwningPixel(
     AppProvider appProvider,
     ui.Offset canvasPosition,
@@ -609,6 +637,30 @@ extension _CanvasGestureHandlerStateMethods on _CanvasGestureHandlerState {
     appProvider.layers.selectedLayerIndex = appProvider.layers.getLayerIndex(owningLayer);
     HapticFeedback.selectionClick();
     context.showSnackBarMessage(context.l10n.layerPickerSelected(owningLayer.name));
+    appProvider.update();
+
+    // The pick doubles as an eyedrop: the pixel that identified the layer also
+    // becomes the active paint color, so one gesture answers both "which layer
+    // is this?" and "what color is this?".
+    await _adoptColorAtPixel(appProvider, canvasPosition);
+  }
+
+  /// Adopts the color at canvas [canvasPosition] as the active paint color,
+  /// routing it to the fill color when the fill tool is armed.
+  Future<void> _adoptColorAtPixel(
+    AppProvider appProvider,
+    ui.Offset canvasPosition,
+  ) async {
+    final Color? color = await appProvider.layers.getColorAtOffset(canvasPosition, useCachedImage: true);
+    if (!mounted || color == null) {
+      return;
+    }
+
+    if (appProvider.selectedAction == ActionType.fill) {
+      appProvider.fillColor = color;
+    } else {
+      appProvider.brushColor = color;
+    }
     appProvider.update();
   }
 

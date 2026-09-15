@@ -367,11 +367,13 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
       effectBrushModel.disarm();
     }
 
-    // Switching tools exits eyedropper mode so pointer interactions follow the new tool.
+    // Switching tools exits eyedropper and layer-picker mode so pointer
+    // interactions follow the new tool.
     if (selectedActionChanged) {
       isEyeDropShortcutActive = false;
       eyeDropPositionForBrush = null;
       eyeDropPositionForFill = null;
+      layerPickerPosition = null;
     }
 
     if (value != ActionType.selector) {
@@ -799,22 +801,30 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
     _lastPointerPosition = value;
   }
 
-  /// Activates the eyedropper via keyboard shortcut (Alt / Option).
-  void activateEyeDropShortcut({Offset? position}) {
-    isEyeDropShortcutActive = true;
-    final Offset initialPos = position ?? _lastPointerPosition ?? canvasCenter;
-    if (_selectedAction == ActionType.fill) {
-      eyeDropPositionForFill = initialPos;
-    } else {
-      eyeDropPositionForBrush = initialPos;
-    }
+  //-------------------------
+  /// Screen position of the armed layer-picker puck, or null when the
+  /// single-shot pick-layer mode is disarmed. See [armLayerPicker].
+  Offset? _layerPickerPosition;
+
+  /// Gets the armed layer-picker puck position.
+  Offset? get layerPickerPosition => _layerPickerPosition;
+
+  /// Sets the armed layer-picker puck position.
+  set layerPickerPosition(Offset? value) {
+    _repaintForPickPositionChange(_layerPickerPosition, value);
+    _layerPickerPosition = value;
   }
 
-  /// Deactivates the keyboard shortcut eyedropper.
-  void deactivateEyeDropShortcut() {
-    isEyeDropShortcutActive = false;
-    eyeDropPositionForBrush = null;
-    eyeDropPositionForFill = null;
+  /// Schedules the repaints a pick-from-canvas position change needs: the tool
+  /// options only when the gesture arms or disarms, the main view whenever the
+  /// on-canvas loupe has to move.
+  void _repaintForPickPositionChange(Offset? previous, Offset? next) {
+    if ((previous == null) != (next == null)) {
+      repaintToolOptions();
+    }
+    if (previous != next) {
+      repaintMainView();
+    }
   }
 
   //-------------------------
@@ -825,15 +835,8 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
   /// Sets the eye drop position for the brush.
   set eyeDropPositionForBrush(Offset? value) {
-    final bool activeChanged = (_eyeDropPositionForBrush == null) != (value == null);
-    final bool positionChanged = _eyeDropPositionForBrush != value;
+    _repaintForPickPositionChange(_eyeDropPositionForBrush, value);
     _eyeDropPositionForBrush = value;
-    if (activeChanged) {
-      repaintToolOptions();
-    }
-    if (positionChanged) {
-      repaintMainView();
-    }
   }
 
   //-------------------------
@@ -845,15 +848,8 @@ class AppProvider extends ChangeNotifier implements SelectorGeometryHost {
 
   /// Sets the eye drop position for the fill.
   set eyeDropPositionForFill(Offset? value) {
-    final bool activeChanged = (_eyeDropPositionForFill == null) != (value == null);
-    final bool positionChanged = _eyeDropPositionForFill != value;
+    _repaintForPickPositionChange(_eyeDropPositionForFill, value);
     _eyeDropPositionForFill = value;
-    if (activeChanged) {
-      repaintToolOptions();
-    }
-    if (positionChanged) {
-      repaintMainView();
-    }
   }
 
   //-------------------------
