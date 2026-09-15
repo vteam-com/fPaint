@@ -177,8 +177,21 @@ class LayerProvider extends ChangeNotifier {
 
   /// Sets whether the layer is visible.
   set isVisible(bool value) {
+    // Visibility is a compositing flag, not content: the painter already skips
+    // hidden layers and the caches hold this layer's own pixels, which a
+    // hide/show does not change. Going through clearCache here cost a
+    // full-canvas thumbnail re-render *and* dropped the display projection, so
+    // the next paint replayed the whole action stack at full resolution —
+    // seconds of stall on a large canvas before the eye icon could repaint.
+    if (_isVisible == value) {
+      return;
+    }
     _isVisible = value;
-    clearCache();
+    // The layers panel rebuilds each row from a ListenableBuilder on the layer
+    // itself, so the eye icon only repaints when *this* notifier fires.
+    // clearCache used to do it as a side effect of its debounced thumbnail
+    // rebuild, which is why the icon lagged by seconds instead of never.
+    notifyListeners();
   }
 
   ///---------------------------------------

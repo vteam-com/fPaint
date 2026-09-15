@@ -79,6 +79,15 @@ class LayersProvider extends ChangeNotifier {
     bool listen = false,
   }) => InheritedControllerScope.of<LayersProvider>(context, listen: listen);
 
+  /// Returns the [LayersProvider] when one is in the tree, otherwise null.
+  ///
+  /// Lets chrome that merely reflects document state render outside a full
+  /// editor scope instead of asserting.
+  static LayersProvider? maybeOf(
+    BuildContext context, {
+    bool listen = false,
+  }) => InheritedControllerScope.maybeOf<LayersProvider>(context, listen: listen);
+
   @override
   void dispose() {
     if (identical(_undoProvider.onRecordsDropped, _disposeDroppedRecordImages)) {

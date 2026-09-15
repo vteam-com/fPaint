@@ -496,12 +496,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get layerPickerNoLayerFound => 'Ninguna capa visible tiene un pixel aqui.';
 
   @override
-  String get layerPickerTooltip => 'Elegir capa y color del lienzo';
-
-  @override
   String layerPickerSelected(Object layerName) {
     return 'Capa seleccionada: $layerName';
   }
+
+  @override
+  String get layerPickerTooltip => 'Elegir capa y color del lienzo';
 
   @override
   String get layerRename => 'Renombrar capa';
@@ -561,6 +561,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get previewUnavailable => 'Vista previa no disponible';
+
+  @override
+  String get quitWithoutSaving => 'Salir sin guardar';
 
   @override
   String get recentFilesLabel => 'Recientes';
@@ -730,6 +733,12 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get unsavedChangesDiscardAndOpenPrompt =>
       'Tienes cambios no guardados. Quieres descartarlos y abrir el nuevo archivo?';
+
+  @override
+  String get unsavedChangesIndicatorTooltip => 'El documento tiene cambios no guardados';
+
+  @override
+  String get unsavedChangesQuitPrompt => 'Tienes cambios no guardados. Quieres salir de todos modos?';
 
   @override
   String get webBrowser => 'Navegador web';

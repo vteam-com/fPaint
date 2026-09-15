@@ -22,10 +22,22 @@ private let releaseBookmarkMethod = "releaseBookmark"
 /// Tracks security-scoped URLs currently being accessed, keyed by path.
 private var activeScopedURLs: [String: URL] = [:]
 
-class MainFlutterWindow: NSWindow {
+class MainFlutterWindow: NSWindow, NSWindowDelegate {
   var editChannel: FlutterMethodChannel?
   var fileChannel: FlutterMethodChannel?
   private var hapticChannel: FlutterMethodChannel?
+
+  /// Routes the red close button through the app's quit confirmation.
+  ///
+  /// `applicationShouldTerminateAfterLastWindowClosed` is true, so closing this
+  /// window quits anyway. Closing first would tear down the Flutter view before
+  /// the unsaved-changes dialog could be shown, so the close is refused here
+  /// and termination is requested instead — the dialog then runs in a live
+  /// window, and the approved quit closes the app.
+  func windowShouldClose(_ sender: NSWindow) -> Bool {
+    NSApp.terminate(nil)
+    return false
+  }
 
   override func performKeyEquivalent(with event: NSEvent) -> Bool {
     if isTextEditingResponderActive == false,
@@ -47,6 +59,7 @@ class MainFlutterWindow: NSWindow {
       center()
     }
     
+    delegate = self
     configureFlutterContentIfNeeded()
     super.awakeFromNib()
     

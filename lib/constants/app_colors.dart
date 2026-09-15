@@ -77,6 +77,9 @@ class AppColors {
   static const Color pressed = secondary;
   static const Color layerHiddenWarning = Color.fromARGB(255, 241, 85, 85);
 
+  /// Tint for the unsaved-changes indicator on the main menu button.
+  static const Color unsavedChangesIndicator = orange;
+
   // Overlay button colors
   static const Color buttonBorder = overlayLight;
   static const Color buttonBackground = overlayDark;

@@ -500,12 +500,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get layerPickerNoLayerFound => 'Aucun calque visible n\'a de pixel ici.';
 
   @override
-  String get layerPickerTooltip => 'Choisir le calque et la couleur sur la toile';
-
-  @override
   String layerPickerSelected(Object layerName) {
     return 'Calque selectionne : $layerName';
   }
+
+  @override
+  String get layerPickerTooltip => 'Choisir le calque et la couleur sur la toile';
 
   @override
   String get layerRename => 'Renommer le calque';
@@ -565,6 +565,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get previewUnavailable => 'Aperçu indisponible';
+
+  @override
+  String get quitWithoutSaving => 'Quitter sans enregistrer';
 
   @override
   String get recentFilesLabel => 'Récents';
@@ -734,6 +737,13 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get unsavedChangesDiscardAndOpenPrompt =>
       'Vous avez des modifications non enregistrees. Voulez-vous les ignorer et ouvrir le nouveau fichier ?';
+
+  @override
+  String get unsavedChangesIndicatorTooltip => 'Le document contient des modifications non enregistrees';
+
+  @override
+  String get unsavedChangesQuitPrompt =>
+      'Vous avez des modifications non enregistrees. Voulez-vous quitter quand meme ?';
 
   @override
   String get webBrowser => 'Navigateur Web';

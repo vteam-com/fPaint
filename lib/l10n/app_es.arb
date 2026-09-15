@@ -248,6 +248,7 @@
   },
   "platforms": "Disponible en...",
   "previewUnavailable": "Vista previa no disponible",
+  "quitWithoutSaving": "Salir sin guardar",
   "recentFilesLabel": "Recientes",
   "resetViewRotation": "Restablecer rotación",
   "resizeRotate": "Redimensionar / Girar",
@@ -317,6 +318,8 @@
   "translate": "Mover",
   "unsavedChanges": "Cambios no guardados",
   "unsavedChangesDiscardAndOpenPrompt": "Tienes cambios no guardados. Quieres descartarlos y abrir el nuevo archivo?",
+  "unsavedChangesIndicatorTooltip": "El documento tiene cambios no guardados",
+  "unsavedChangesQuitPrompt": "Tienes cambios no guardados. Quieres salir de todos modos?",
   "webBrowser": "Navegador web",
   "width": "Ancho"
 }

@@ -30,12 +30,24 @@ class MainMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ShellProvider shellProvider = ShellProvider.of(context);
+    // The menu owns Save, so it also carries the unsaved-changes indicator.
+    // Listening keeps the tint in sync as the document is edited and saved.
+    // The menu also renders in chrome-only scopes with no document, so a
+    // missing provider simply means there is nothing to mark as unsaved.
+    final LayersProvider? layers = LayersProvider.maybeOf(context, listen: true);
     final AppLocalizations l10n = context.l10n;
+    final bool hasUnsavedChanges = layers?.hasChanged ?? false;
 
     return AppPopupMenuButton<int>(
       key: Keys.mainMenuButton,
-      tooltip: tooltipWithShortcut(l10n.menuTooltip, singleKeyShortcut(ShortcutKeys.tab))!,
-      child: const AppSvgIcon(icon: AppIcon.moreVert),
+      tooltip: hasUnsavedChanges
+          ? l10n.unsavedChangesIndicatorTooltip
+          : tooltipWithShortcut(l10n.menuTooltip, singleKeyShortcut(ShortcutKeys.tab))!,
+      child: AppSvgIcon(
+        key: hasUnsavedChanges ? Keys.mainMenuUnsavedIndicator : null,
+        icon: AppIcon.moreVert,
+        color: hasUnsavedChanges ? AppColors.unsavedChangesIndicator : null,
+      ),
       onSelected: (int result) => onDropDownMenuSelection(context, result),
       itemBuilder: (BuildContext _) => <AppPopupMenuItem<int>>[
         buildMenuItem(
@@ -64,6 +76,7 @@ class MainMenu extends StatelessWidget {
             text: l10n.saveLabel,
             subtitle: shellProvider.loadedFileName,
             icon: AppIcon.checkCircle,
+            iconColor: hasUnsavedChanges ? AppColors.unsavedChangesIndicator : null,
           ),
         buildMenuItem(
           value: MenuIds.canvasSize,
@@ -200,6 +213,7 @@ AppPopupMenuItem<int> buildMenuItem({
   required String text,
   String? subtitle,
   AppIcon? icon,
+  Color? iconColor,
   Key? key,
 }) {
   return AppPopupMenuItem<int>(
@@ -208,7 +222,7 @@ AppPopupMenuItem<int> buildMenuItem({
       key: key,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        if (icon != null) AppSvgIcon(icon: icon, size: AppSpacing.large),
+        if (icon != null) AppSvgIcon(icon: icon, size: AppSpacing.large, color: iconColor),
         if (icon != null) const SizedBox(width: AppSpacing.small),
         Flexible(
           child: Column(

@@ -13,6 +13,7 @@ class Keys {
   static const Key floatActionPaste = Key('floating_action_paste');
   static const Key mainMenuButton = Key('main-menu-button');
   static const Key mainMenuCanvasSize = Key('main-menu-canvas-size');
+  static const Key mainMenuUnsavedIndicator = Key('main-menu-unsaved-indicator');
   static const Key mainMenuImageSize = Key('main-menu-image-size');
   static const Key sidePanelExportButton = Key('side-panel-export-button');
   static const Key appScreenshotBoundary = Key('app-screenshot-boundary');
