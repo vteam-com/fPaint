@@ -374,4 +374,71 @@ void main() {
     expect(green, AppMath.zero);
     expect(blue, AppMath.zero);
   });
+
+  test('large-brush LOD round-trip preserves colour across a transparent edge', () async {
+    // Regression guard for the straight-RGBA bilinear upsample. A brush radius
+    // above smudgeComputeLodMinRadius (64) routes the dab through the
+    // downsample -> compute -> upsample LOD path. Interpolating all four
+    // channels in straight space mixes the undefined RGB of transparent
+    // neighbours into the rim and, worse, scales the colour down in step with
+    // the alpha - so the smear's leading edge arrives washed pale instead of
+    // saturated, reading as a light fringe. Premultiplied interpolation divides
+    // the alpha back out and recovers the true colour.
+    const int size = 160;
+    final Uint8List pixels = Uint8List(size * size * AppMath.bytesPerPixel);
+    // Left half opaque pure red; right half fully transparent but carrying
+    // WHITE rgb - what a cleared/white-backed readback contains, and the exact
+    // colour that used to bleed across the edge.
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        final int i = ((y * size) + x) * AppMath.bytesPerPixel;
+        pixels[i + AppMath.rgbChannelRed] = AppLimits.rgbChannelMax;
+        if (x < size ~/ 2) {
+          pixels[i + AppMath.rgbChannelAlpha] = AppLimits.rgbChannelMax;
+        } else {
+          pixels[i + AppMath.rgbChannelGreen] = AppLimits.rgbChannelMax;
+          pixels[i + AppMath.rgbChannelBlue] = AppLimits.rgbChannelMax;
+          pixels[i + AppMath.rgbChannelAlpha] = AppMath.zero;
+        }
+      }
+    }
+
+    // brushSize 140 -> radius 70, above the LOD threshold. The stroke drags red
+    // rightward into the transparent half, leaving a partially-covered smear
+    // front a little past x=112 rather than flooding the whole row.
+    final PixelBrushSegmentResult? result = await rasterizePixelBrushSegment(
+      livePixels: pixels,
+      imageWidth: size,
+      imageHeight: size,
+      segmentPoints: const <Offset>[Offset(50, 80), Offset(90, 80)],
+      brushSize: 140,
+      intensity: 1.0,
+      mode: PixelBrushMode.smudge,
+      preferSynchronous: true,
+    );
+
+    expect(result, isNotNull);
+    final Uint8List out = result!.pixels;
+
+    // The smear front: partially covered, so alpha is well below opaque.
+    const int frontX = 120;
+    final int index = ((80 * size) + frontX) * AppMath.bytesPerPixel;
+    final int red = out[index + AppMath.rgbChannelRed];
+    final int green = out[index + AppMath.rgbChannelGreen];
+    final int blue = out[index + AppMath.rgbChannelBlue];
+    final int alpha = out[index + AppMath.rgbChannelAlpha];
+
+    expect(alpha, greaterThan(AppMath.zero), reason: 'the smear reaches this pixel');
+    expect(alpha, lessThan(AppLimits.rgbChannelMax), reason: 'only partially covered');
+    // The smeared ink is pure red, so its straight colour must stay saturated
+    // regardless of how little coverage it has. Straight-space interpolation
+    // scaled red down to equal the alpha (64/64); premultiplied keeps it at max.
+    expect(
+      red,
+      greaterThan(alpha * 2),
+      reason: 'straight interpolation washes the smear front pale (red == alpha)',
+    );
+    expect(green, AppMath.zero, reason: 'no white bleed into green');
+    expect(blue, AppMath.zero, reason: 'no white bleed into blue');
+  });
 }
