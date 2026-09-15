@@ -294,6 +294,65 @@ void main() {
     });
   });
 
+  group('layer picker arming', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
+    });
+
+    test('arming drops the puck at the requested position', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+      addTearDown(appProvider.dispose);
+
+      appProvider.armLayerPicker(position: const ui.Offset(12, 34));
+
+      expect(appProvider.layerPickerPosition, const ui.Offset(12, 34));
+      expect(appProvider.isLayerPickerActive, isTrue);
+    });
+
+    test('arming falls back to the canvas center when no position is known', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+      addTearDown(appProvider.dispose);
+
+      appProvider.armLayerPicker();
+
+      expect(appProvider.layerPickerPosition, appProvider.canvasCenter);
+    });
+
+    test('arming disarms the eyedropper so only one pick gesture is live', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+      addTearDown(appProvider.dispose);
+      appProvider.eyeDropPositionForBrush = const ui.Offset(5, 5);
+
+      appProvider.armLayerPicker(position: const ui.Offset(12, 34));
+
+      expect(appProvider.eyeDropPositionForBrush, isNull);
+      expect(appProvider.eyeDropPositionForFill, isNull);
+      expect(appProvider.isEyeDropShortcutActive, isFalse);
+    });
+
+    test('disarming removes the puck', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+      addTearDown(appProvider.dispose);
+      appProvider.armLayerPicker(position: const ui.Offset(12, 34));
+
+      appProvider.disarmLayerPicker();
+
+      expect(appProvider.layerPickerPosition, isNull);
+      expect(appProvider.isLayerPickerActive, isFalse);
+    });
+
+    test('switching tools disarms the puck', () {
+      final AppProvider appProvider = AppProvider(preferences: AppPreferences());
+      addTearDown(appProvider.dispose);
+      appProvider.selectedAction = ActionType.brush;
+      appProvider.armLayerPicker(position: const ui.Offset(12, 34));
+
+      appProvider.selectedAction = ActionType.fill;
+
+      expect(appProvider.layerPickerPosition, isNull);
+    });
+  });
+
   group('shouldUseSelectionRegionFloodFill', () {
     test('uses the selection region when a selection is active and modifier is not pressed', () {
       final ui.Path selectionPath = ui.Path()..addRect(_selectionRect);

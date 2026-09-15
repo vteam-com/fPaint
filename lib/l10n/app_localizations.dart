@@ -998,6 +998,12 @@ abstract class AppLocalizations {
   /// **'No visible layer has a pixel here.'**
   String get layerPickerNoLayerFound;
 
+  /// No description provided for @layerPickerTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick layer and color from canvas'**
+  String get layerPickerTooltip;
+
   /// No description provided for @layerPickerSelected.
   ///
   /// In en, this message translates to:

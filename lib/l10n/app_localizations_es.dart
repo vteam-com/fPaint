@@ -496,6 +496,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get layerPickerNoLayerFound => 'Ninguna capa visible tiene un pixel aqui.';
 
   @override
+  String get layerPickerTooltip => 'Elegir capa y color del lienzo';
+
+  @override
   String layerPickerSelected(Object layerName) {
     return 'Capa seleccionada: $layerName';
   }

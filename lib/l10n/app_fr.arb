@@ -221,6 +221,7 @@
       "layerName": {}
     }
   },
+  "layerPickerTooltip": "Choisir le calque et la couleur sur la toile",
   "layerRename": "Renommer le calque",
   "layerShow": "Afficher le calque",
   "layerShowAll": "Afficher tous les calques",

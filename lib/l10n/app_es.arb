@@ -219,6 +219,7 @@
       "layerName": {}
     }
   },
+  "layerPickerTooltip": "Elegir capa y color del lienzo",
   "layerRename": "Renombrar capa",
   "layerShow": "Mostrar capa",
   "layerShowAll": "Mostrar todas las capas",

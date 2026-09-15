@@ -225,6 +225,7 @@
       "layerName": {}
     }
   },
+  "layerPickerTooltip": "Pick layer and color from canvas",
   "layerRename": "Rename layer",
   "layerShow": "Show layer",
   "layerShowAll": "Show all layers",

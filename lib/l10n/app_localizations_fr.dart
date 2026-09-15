@@ -500,6 +500,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get layerPickerNoLayerFound => 'Aucun calque visible n\'a de pixel ici.';
 
   @override
+  String get layerPickerTooltip => 'Choisir le calque et la couleur sur la toile';
+
+  @override
   String layerPickerSelected(Object layerName) {
     return 'Calque selectionne : $layerName';
   }

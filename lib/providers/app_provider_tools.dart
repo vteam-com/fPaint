@@ -122,6 +122,44 @@ extension AppProviderTools on AppProvider {
     );
   }
 
+  /// Activates the eyedropper via keyboard shortcut (Alt / Option).
+  void activateEyeDropShortcut({Offset? position}) {
+    isEyeDropShortcutActive = true;
+    final Offset initialPos = position ?? lastPointerPosition ?? canvasCenter;
+    if (selectedAction == ActionType.fill) {
+      eyeDropPositionForFill = initialPos;
+    } else {
+      eyeDropPositionForBrush = initialPos;
+    }
+  }
+
+  /// Deactivates the keyboard shortcut eyedropper.
+  void deactivateEyeDropShortcut() {
+    isEyeDropShortcutActive = false;
+    eyeDropPositionForBrush = null;
+    eyeDropPositionForFill = null;
+  }
+
+  /// Whether the single-shot pick-layer mode is armed, either by the
+  /// Shift+Alt chord or by the Layers panel toggle that drops an on-canvas
+  /// puck for pen and touch input.
+  bool get isLayerPickerActive => isLayerPickerModifierActive || layerPickerPosition != null;
+
+  /// Arms the single-shot pick-layer mode, dropping its puck at [position]
+  /// (defaulting to the last pointer position, then canvas center). Arming it
+  /// disarms the eyedropper so only one pick-from-canvas gesture is live.
+  void armLayerPicker({Offset? position}) {
+    eyeDropPositionForBrush = null;
+    eyeDropPositionForFill = null;
+    isEyeDropShortcutActive = false;
+    layerPickerPosition = position ?? lastPointerPosition ?? canvasCenter;
+  }
+
+  /// Disarms the pick-layer mode, removing its puck.
+  void disarmLayerPicker() {
+    layerPickerPosition = null;
+  }
+
   /// The largest brush size the armed tool accepts. The smudge/blur pixel
   /// brushes work at much larger radii than the paint tools, matching the range
   /// their side-panel slider offers.

@@ -13,10 +13,14 @@ class SidePanelHeader extends StatelessWidget {
       AppSpacing.medium,
       AppSpacing.small,
     ),
+    this.trailing,
   });
 
   final EdgeInsetsGeometry padding;
   final String title;
+
+  /// Optional action pinned to the end of the header row.
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +28,8 @@ class SidePanelHeader extends StatelessWidget {
       opacity: AppVisual.half,
       child: AppText(title, variant: AppTextVariant.title),
     );
+
+    final Widget? trailingAction = trailing;
 
     return Padding(
       padding: padding,
@@ -36,15 +42,29 @@ class SidePanelHeader extends StatelessWidget {
             );
           }
 
-          return Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: SizedBox(
-              width: constraints.maxWidth,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: AlignmentDirectional.centerStart,
-                child: headerTitle,
-              ),
+          // The title takes the slack so the trailing action keeps its full
+          // hit target as the panel narrows; below that, the action scales
+          // down too rather than overflowing the row.
+          return SizedBox(
+            width: constraints.maxWidth,
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerStart,
+                    child: headerTitle,
+                  ),
+                ),
+                if (trailingAction != null)
+                  Flexible(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: trailingAction,
+                    ),
+                  ),
+              ],
             ),
           );
         },

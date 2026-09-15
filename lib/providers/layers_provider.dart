@@ -805,10 +805,19 @@ class LayersProvider extends ChangeNotifier {
     );
   }
 
-  /// Finds the topmost visible layer whose pixel at canvas [offset] is not
-  /// fully transparent, i.e. the layer that "owns" the composited pixel the
-  /// artist sees there. Returns null when [offset] is outside the canvas or
-  /// every visible layer is transparent at that point.
+  /// Finds the topmost visible layer that visibly contributes to the
+  /// composited pixel at canvas [offset], i.e. the layer that "owns" what the
+  /// artist actually sees there. Returns null when [offset] is outside the
+  /// canvas or no visible layer changes that pixel.
+  ///
+  /// Contribution, not alpha, is the test. A layer can be fully opaque at a
+  /// pixel and still be invisible there: a Multiply layer whose raster carries
+  /// an opaque white backing (the comic-inking stack — Multiply ink over flat
+  /// colour) multiplies to a no-op, so the artist sees the colour layer beneath
+  /// and expects the pick to land there. Sampling the layer's own alpha would
+  /// hand back the ink layer for every pixel on the canvas. The composite below
+  /// the layer is therefore compared against the composite including it, and
+  /// the layer owns the pixel only when the two differ.
   Future<LayerProvider?> findTopmostOpaqueLayerAt(Offset offset) async {
     if (offset.dx < 0 || offset.dy < 0 || offset.dx >= size.width || offset.dy >= size.height) {
       return null;
@@ -821,22 +830,50 @@ class LayersProvider extends ChangeNotifier {
       AppMath.one.toDouble(),
     );
 
-    for (int i = 0; i < length; i++) {
-      final LayerProvider layer = get(i);
-      if (!layer.isVisible) {
+    // Walking bottom-up keeps this to one composite per layer: the stack below
+    // layer i is exactly the stack below layer i+1 plus layer i+1 itself, so
+    // each result is reused as the next comparison's baseline.
+    int? topmostContributingIndex;
+    int? previousPixel = await _compositePixelBelow(length, samplePixel);
+    for (int i = length - 1; i >= 0; i--) {
+      if (!get(i).isVisible) {
         continue;
       }
-      final ui.Image sample = await captureLayerRegion(i, samplePixel);
-      try {
-        final ByteData? byteData = await sample.toByteData(format: ui.ImageByteFormat.rawRgba);
-        if (byteData != null && byteData.getUint8(AppMath.rgbaAlphaOffset) > 0) {
-          return layer;
-        }
-      } finally {
-        sample.dispose();
+      final int? pixelIncludingLayer = await _compositePixelBelow(i, samplePixel);
+      if (pixelIncludingLayer != previousPixel) {
+        topmostContributingIndex = i;
       }
+      previousPixel = pixelIncludingLayer;
     }
-    return null;
+
+    return topmostContributingIndex == null ? null : get(topmostContributingIndex);
+  }
+
+  /// Composites every visible layer below [index] (exclusive) over [region] and
+  /// returns the resulting pixel as packed RGBA, or null when it cannot be read.
+  ///
+  /// [_list] is ordered top-first, so "below [index]" is indices after it.
+  /// Passing [length] composites nothing and yields the empty pixel.
+  Future<int?> _compositePixelBelow(int index, ui.Rect region) async {
+    final ui.Image sample = await renderCanvasImage(
+      width: region.width.toInt(),
+      height: region.height.toInt(),
+      draw: (ui.Canvas canvas) {
+        canvas.translate(-region.left, -region.top);
+        for (int i = length - 1; i >= index; i--) {
+          final LayerProvider layer = get(i);
+          if (layer.isVisible) {
+            layer.renderLayer(canvas);
+          }
+        }
+      },
+    );
+    try {
+      final ByteData? byteData = await sample.toByteData(format: ui.ImageByteFormat.rawRgba);
+      return byteData?.getUint32(0);
+    } finally {
+      sample.dispose();
+    }
   }
 
   /// Captures the canvas panel to an image and returns the image bytes.
