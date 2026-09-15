@@ -6,10 +6,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [2.0.2] - 2026-09-14
+## [2.0.3] - 2026-09-15
+
+### Add
+
+- Pick a layer straight off the canvas. Holding Shift+Alt now arms an on-canvas puck that magnifies the pixels under the crosshair and captions them with the name of the layer that owns them, so you can see which layer you are about to select before the pick commits — and on touch, the target is never hidden under your finger. The pick commits on release and the puck disarms, so the next stroke paints as usual.
+- The main menu button turns orange while the document has unsaved changes, and the Save entry inside the menu is tinted to match, so an unsaved document is visible without opening the menu.
+- Quitting on macOS with unsaved changes now asks for confirmation instead of closing the document silently.
+- Tool tooltips include the keyboard shortcut that selects the tool, so the bindings are discoverable from the rail rather than only from the shortcuts reference.
 
 ### Fix
 
+- Smudge and blur no longer leave a white fringe around every dab. The pipeline works in straight (un-premultiplied) RGBA, but the GPU upload path expects premultiplied bytes and so divided the colour by alpha a second time, blowing the feathered rim of each dab toward white. The buffer is now converted at the GPU boundary, and both the box downsample and the bilinear upscale interpolate colour weighted by alpha so the undefined RGB of transparent neighbours can no longer bleed into an alpha edge.
+- Layer picking no longer stops at a layer that makes no visible difference. Hit-testing read the layer's own alpha, but a layer with an opaque `backgroundColor` paints a full-canvas opaque rect before its action stack, so its alpha was 255 everywhere — in a comic stack (Multiply ink over flat colour) the ink layer's white backing multiplied to a no-op yet claimed every pick. A layer now owns a pixel only when it visibly changes the composite. Cost scales with layer count rather than canvas area (2 ms for 12 layers at 4000x4000).
+- Hiding and showing a layer is now immediate. Toggling visibility went through `clearCache`, which forced a full-canvas thumbnail re-render and dropped the display projection, so the next paint replayed the whole action stack at full resolution — seconds of stall on a large canvas before the eye icon could even repaint. Visibility is a compositing flag, not content, so it now just notifies.
 - Tooltips and snackbars no longer render their text with doubled yellow underlines. Both are drawn in an overlay entry, which is its own tree root: with no `DefaultTextStyle` ancestor the labels fell back to `MaterialApp`'s "consider putting your text in a Material" debug style, and styling the `Text` alone did not clear the decoration that fallback supplied. Each label is now wrapped in an explicit `DefaultTextStyle`.
 - Alignment haptics on macOS no longer flood the log with `MissingPluginException`s. The haptic tick is cosmetic, so its platform call is fire-and-forget with its failure swallowed; a host with no haptic handler registered (an engine still starting up, or a Runner built before the handler existed) used to log an unhandled exception on every notch of every drag.
 
