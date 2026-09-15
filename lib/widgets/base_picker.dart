@@ -67,7 +67,10 @@ abstract class BasePickerState<T> extends State<BasePicker<T>> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            AppText(widget.title),
+            // The title yields before the value does: the value is the reason
+            // the row exists, and a long title (or a wide locale) would
+            // otherwise push the pair past the panel width and overflow.
+            Flexible(child: AppText(widget.title)),
             AppText(formatValue(_value)),
           ],
         ),
