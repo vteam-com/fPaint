@@ -6,6 +6,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Add
+
+- Open Photoshop `.psd` files. The layer stack is rebuilt rather than flattened: each PSD layer keeps its name, opacity, blend mode, visibility and canvas position. Layer groups are flattened, since the canvas has no groups — the folders are dropped and their children become ordinary layers, with a hidden group's children imported hidden. Blend modes Flutter's compositor cannot express (Dissolve, Vivid/Linear/Pin Light, Hard Mix, Subtract, Divide, and the *Color variants) fall back to Normal. A flattened PSD, or one saved without "Maximize Compatibility" layer data, opens from its merged composite. PSD is import-only; saving still writes ORA, PNG, JPEG, TIFF, WebP or HEIC.
+
 ## [2.0.4] - 2026-09-16
 
 ### Update

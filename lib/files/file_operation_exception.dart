@@ -1,4 +1,5 @@
 // ignore: fcheck_one_class_per_file
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -46,6 +47,11 @@ class OraFileException extends FileOperationException {
   const OraFileException(super.message, {super.cause});
 }
 
+/// PSD import failure.
+class PsdFileException extends FileOperationException {
+  const PsdFileException(super.message, {super.cause});
+}
+
 /// TIFF import/export failure.
 class TiffFileException extends FileOperationException {
   const TiffFileException(super.message, {super.cause});
@@ -89,4 +95,40 @@ Future<ByteData> requireImageByteData<T extends FileOperationException>({
   }
 
   return byteData;
+}
+
+/// Decodes the bytes of a layered document into the canvas.
+typedef LayeredFileByteReader = Future<void> Function(Uint8List bytes);
+
+/// Reads the layered file at [path] and hands its bytes to [readBytes].
+///
+/// Every layered reader (ORA, PSD, TIFF) needs the same disk-side envelope:
+/// a missing-file check, a read, and failures reported as that format's own
+/// [FileOperationException] with the original stack trace preserved. Only the
+/// exception type and the two message prefixes differ, so they are parameters
+/// here rather than a copy per format.
+Future<void> readLayeredFileFromPath<T extends FileOperationException>({
+  required String path,
+  required LayeredFileByteReader readBytes,
+  required String fileNotFoundPrefix,
+  required String readFailedPrefix,
+  required FileOperationExceptionBuilder<T> exceptionBuilder,
+}) async {
+  final File file = File(path);
+  if (!await file.exists()) {
+    throw exceptionBuilder('$fileNotFoundPrefix "$path"');
+  }
+
+  try {
+    await readBytes(await file.readAsBytes());
+  } on T {
+    rethrow;
+  } catch (error, stackTrace) {
+    throwFileOperationException<T>(
+      message: '$readFailedPrefix "$path"',
+      error: error,
+      stackTrace: stackTrace,
+      exceptionBuilder: exceptionBuilder,
+    );
+  }
 }

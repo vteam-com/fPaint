@@ -10,6 +10,7 @@ const String logNameAppSnackbar = 'AppSnackbar';
 const String logNameColorPicker = 'ColorPicker';
 const String logNameFileHeic = 'FileHeic';
 const String logNameFileOra = 'FileOra';
+const String logNameFilePsd = 'FilePsd';
 const String logNameFileTiff = 'FileTiff';
 const String logNameImageHelper = 'ImageHelper';
 const String logNameImportFiles = 'ImportFiles';

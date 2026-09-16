@@ -8,6 +8,7 @@ import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_heic.dart' if (dart.library.html) 'package:fpaint/files/file_heic_web.dart';
 import 'package:fpaint/files/file_operation_exception.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/file_psd.dart';
 import 'package:fpaint/files/file_tiff.dart';
 import 'package:fpaint/files/import_file_format.dart';
 import 'package:fpaint/helpers/image_helper.dart';
@@ -179,6 +180,9 @@ Future<void> onFileOpen(BuildContext context) async {
             case ImportDecodeKind.ora:
               // readOraFileFromBytes handles its own clearing and sizing.
               await readOraFileFromBytes(layers, bytes);
+            case ImportDecodeKind.psd:
+              // readPsdFileFromBytes handles its own clearing and sizing.
+              await readPsdFileFromBytes(layers, bytes);
             case ImportDecodeKind.tiff:
               // readTiffFileFromBytes handles its own clearing and sizing.
               await readTiffFileFromBytes(layers, bytes);
@@ -258,6 +262,11 @@ Future<bool> openFileFromPath({
       case ImportDecodeKind.ora:
         // ORA embeds the selected layer, restored inside the reader.
         await readImageFromFilePathOra(layers, path);
+        return true;
+      case ImportDecodeKind.psd:
+        // PSD rebuilds the whole stack; it stores no selected-layer marker, so
+        // the selection stays on the layer replaceAll defaults to.
+        await readPsdFromFilePath(layers, path);
         return true;
       case ImportDecodeKind.tiff:
         // TIFF embeds the selected layer, restored inside the reader.
