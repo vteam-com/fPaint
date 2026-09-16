@@ -53,7 +53,7 @@ class ColorPickerDialog extends StatefulWidget {
 class _ColorPickerDialogState extends State<ColorPickerDialog> {
   late Color _currentColor;
   late TextEditingController _hexController;
-  _ColorPickerMode _pickerMode = _ColorPickerMode.sliders;
+  _ColorPickerMode _pickerMode = _ColorPickerMode.wheel;
   static const String _plainTextMimeType = 'text/plain';
   @override
   void initState() {
