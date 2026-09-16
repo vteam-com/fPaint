@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_import
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpaint/constants/keys.dart';
 import 'package:fpaint/helpers/color_helper.dart' hide hsvToColor;
 import 'package:fpaint/l10n/app_localizations.dart';
 import 'package:fpaint/models/app_icon_enum.dart';
@@ -299,6 +300,11 @@ void main() {
           ),
           findsOneWidget,
         );
+
+        // The dialog opens on the wheel; this test drives the slider picker,
+        // so switch to it first.
+        await tester.tap(find.byKey(Keys.colorPickerModeSlidersButton));
+        await tester.pumpAndSettle();
 
         // Simulate selecting a color by interacting with the ColorSelector's slider inside the dialog
         final Finder sliderInDialogFinder = find.descendant(

@@ -149,6 +149,19 @@ void main() {
       expect(find.byType(ColorPickerDialog), findsOneWidget);
     });
 
+    testWidgets('opens on the wheel picker by default', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        _buildTestWidget(
+          initialColor: Colors.red,
+          onColorChanged: (Color _) {},
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(Keys.colorPickerWheelSelector), findsOneWidget);
+      expect(find.byType(ColorSelector), findsNothing);
+    });
+
     testWidgets('toggle switches between slider and wheel pickers', (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildTestWidget(
@@ -158,20 +171,21 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(ColorSelector), findsOneWidget);
-      expect(find.byType(ColorWheelSelector), findsNothing);
-
-      await tester.tap(find.byKey(Keys.colorPickerModeToggle));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(ColorSelector), findsNothing);
+      // The dialog opens on the wheel.
       expect(find.byType(ColorWheelSelector), findsOneWidget);
+      expect(find.byType(ColorSelector), findsNothing);
 
       await tester.tap(find.byKey(Keys.colorPickerModeSlidersButton));
       await tester.pumpAndSettle();
 
       expect(find.byType(ColorSelector), findsOneWidget);
       expect(find.byType(ColorWheelSelector), findsNothing);
+
+      await tester.tap(find.byKey(Keys.colorPickerModeToggle));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ColorWheelSelector), findsOneWidget);
+      expect(find.byType(ColorSelector), findsNothing);
     });
 
     testWidgets('wheel picker updates the selected color', (WidgetTester tester) async {
@@ -263,6 +277,11 @@ void main() {
 
       final Finder cancelButton = find.widgetWithText(AppButtonText, 'Cancel');
       expect(cancelButton, findsOneWidget);
+      // The wheel is taller than the sliders, so in this viewport the action
+      // row starts below the fold. The sheet scrolls in the app; scroll it
+      // here too, since tap() does not do so on its own.
+      await tester.ensureVisible(cancelButton);
+      await tester.pumpAndSettle();
       await tester.tap(cancelButton);
       await tester.pump();
     });

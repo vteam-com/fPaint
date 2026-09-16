@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 - The main menu button turns orange while the document has unsaved changes, and the Save entry inside the menu is tinted to match, so an unsaved document is visible without opening the menu.
 - Quitting on macOS with unsaved changes now asks for confirmation instead of closing the document silently.
 - Tool tooltips include the keyboard shortcut that selects the tool, so the bindings are discoverable from the rail rather than only from the shortcuts reference.
+- The color dialog now opens on the **Wheel** picker instead of the sliders; the sliders remain one tap away on the same toggle.
 
 ### Fix
 
