@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.4] - 2026-09-16
+
+### Update
+
+- Upgraded `file_picker` to 13.1.0, a major version bringing new platform implementations across the board (`file_picker_darwin` 2.1.0, `file_picker_linux` 2.0.0, `android_file_picker` 2.0.0, `windows_file_picker` 2.0.0, `file_picker_web` 4.0.0).
+- Moved `material_ui` to a development dependency and updated it to 1.3.0. The app itself is Material-free — its widgets are hand-rolled on `package:flutter/widgets.dart` — and the package is only used by widget tests as a host to pump into, so it no longer ships as a runtime dependency of the app.
+
 ## [2.0.3] - 2026-09-15
 
 ### Add
