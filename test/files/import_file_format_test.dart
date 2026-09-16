@@ -7,6 +7,7 @@ void main() {
     test('resolves every declared extension to its format', () {
       const Map<String, ImportFileFormat> expected = <String, ImportFileFormat>{
         FileExtensions.ora: ImportFileFormat.ora,
+        FileExtensions.psd: ImportFileFormat.psd,
         FileExtensions.tif: ImportFileFormat.tiff,
         FileExtensions.tiff: ImportFileFormat.tiff,
         FileExtensions.heic: ImportFileFormat.heic,
@@ -40,6 +41,7 @@ void main() {
   group('ImportFileFormat.fromFileName', () {
     test('resolves from the file name extension', () {
       expect(ImportFileFormat.fromFileName('layers.ora'), ImportFileFormat.ora);
+      expect(ImportFileFormat.fromFileName('artwork.psd'), ImportFileFormat.psd);
       expect(ImportFileFormat.fromFileName('IMAGE.PNG'), ImportFileFormat.png);
     });
 
@@ -59,6 +61,7 @@ void main() {
   group('ImportFileFormat metadata', () {
     test('decodeKind routes each format to the right reader', () {
       expect(ImportFileFormat.ora.decodeKind, ImportDecodeKind.ora);
+      expect(ImportFileFormat.psd.decodeKind, ImportDecodeKind.psd);
       expect(ImportFileFormat.tiff.decodeKind, ImportDecodeKind.tiff);
       expect(ImportFileFormat.heic.decodeKind, ImportDecodeKind.heif);
       expect(ImportFileFormat.png.decodeKind, ImportDecodeKind.image);
@@ -68,6 +71,7 @@ void main() {
 
     test('only the layered formats report supportsLayers', () {
       expect(ImportFileFormat.ora.supportsLayers, isTrue);
+      expect(ImportFileFormat.psd.supportsLayers, isTrue);
       expect(ImportFileFormat.tiff.supportsLayers, isTrue);
       expect(ImportFileFormat.heic.supportsLayers, isFalse);
       expect(ImportFileFormat.png.supportsLayers, isFalse);

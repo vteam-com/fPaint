@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -784,25 +783,14 @@ _LayerMeta? _tryParseJsonMeta(String description, int frameIndex) {
 Future<void> readTiffFromFilePath(
   LayersProvider layers,
   String path,
-) async {
-  final File tiffFile = File(path);
-  if (!await tiffFile.exists()) {
-    throw TiffFileException('$_errorTiffFileNotFoundPrefix "$path"');
-  }
-
-  try {
-    final Uint8List bytes = await tiffFile.readAsBytes();
-    await readTiffFileFromBytes(layers, bytes);
-  } on TiffFileException {
-    rethrow;
-  } catch (error, stackTrace) {
-    throwFileOperationException<TiffFileException>(
-      message: '$_errorTiffReadFilePrefix "$path"',
-      error: error,
-      stackTrace: stackTrace,
-      exceptionBuilder: TiffFileException.new,
-    );
-  }
+) {
+  return readLayeredFileFromPath<TiffFileException>(
+    path: path,
+    readBytes: (Uint8List bytes) => readTiffFileFromBytes(layers, bytes),
+    fileNotFoundPrefix: _errorTiffFileNotFoundPrefix,
+    readFailedPrefix: _errorTiffReadFilePrefix,
+    exceptionBuilder: TiffFileException.new,
+  );
 }
 
 // Private helper to convert Uint8List to ui.Image

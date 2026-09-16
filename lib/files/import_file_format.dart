@@ -9,6 +9,9 @@ enum ImportDecodeKind {
   /// ORA — a layered format with its own reader.
   ora,
 
+  /// PSD — a layered format with its own reader.
+  psd,
+
   /// TIFF — a layered format with its own reader.
   tiff,
 
@@ -37,6 +40,12 @@ enum ImportFileFormat {
     _ImportFormatConfig(
       extensions: <String>[FileExtensions.ora],
       decodeKind: ImportDecodeKind.ora,
+    ),
+  ),
+  psd(
+    _ImportFormatConfig(
+      extensions: <String>[FileExtensions.psd],
+      decodeKind: ImportDecodeKind.psd,
     ),
   ),
   tiff(
@@ -80,9 +89,17 @@ enum ImportFileFormat {
   /// How this format's bytes are turned into layers.
   ImportDecodeKind get decodeKind => _config.decodeKind;
 
-  /// Whether the format rebuilds the full layer stack (and so embeds its own
-  /// selected-layer marker) rather than decoding to a single flat image.
-  bool get supportsLayers => _config.decodeKind == ImportDecodeKind.ora || _config.decodeKind == ImportDecodeKind.tiff;
+  /// Whether the format rebuilds the full layer stack rather than decoding to
+  /// a single flat image.
+  ///
+  /// Flat formats fall back to a selected-layer preference keyed by file path.
+  /// ORA and TIFF embed the selected layer and restore it inside their reader;
+  /// PSD has no such marker, so its selection simply defaults to the top layer.
+  bool get supportsLayers => const <ImportDecodeKind>{
+    ImportDecodeKind.ora,
+    ImportDecodeKind.psd,
+    ImportDecodeKind.tiff,
+  }.contains(_config.decodeKind);
 
   /// Resolves an import format from a file extension, or null when unsupported.
   static ImportFileFormat? fromExtension(String extension) {

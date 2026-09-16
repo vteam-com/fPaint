@@ -43,6 +43,7 @@ void main() {
         expect(isFileExtensionSupported('jpg'), isTrue);
         expect(isFileExtensionSupported('jpeg'), isTrue);
         expect(isFileExtensionSupported('ora'), isTrue);
+        expect(isFileExtensionSupported('psd'), isTrue);
         expect(isFileExtensionSupported('tif'), isTrue);
         expect(isFileExtensionSupported('tiff'), isTrue);
         expect(isFileExtensionSupported('webp'), isTrue);
@@ -54,6 +55,7 @@ void main() {
         expect(isFileExtensionSupported('PNG'), isTrue);
         expect(isFileExtensionSupported('JPG'), isTrue);
         expect(isFileExtensionSupported('ORA'), isTrue);
+        expect(isFileExtensionSupported('PSD'), isTrue);
         expect(isFileExtensionSupported('TIF'), isTrue);
         expect(isFileExtensionSupported('AVIF'), isTrue);
       });
@@ -68,7 +70,6 @@ void main() {
         expect(isFileExtensionSupported('gif'), isFalse);
         expect(isFileExtensionSupported('bmp'), isFalse);
         expect(isFileExtensionSupported('svg'), isFalse);
-        expect(isFileExtensionSupported('psd'), isFalse);
         expect(isFileExtensionSupported('xcf'), isFalse);
         expect(isFileExtensionSupported('txt'), isFalse);
         expect(isFileExtensionSupported('exe'), isFalse);

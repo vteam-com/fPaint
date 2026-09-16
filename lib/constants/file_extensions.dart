@@ -5,6 +5,7 @@ class FileExtensions {
   static const String jpeg = 'jpeg';
   static const String webp = 'webp';
   static const String ora = 'ora';
+  static const String psd = 'psd';
   static const String tif = 'tif';
   static const String tiff = 'tiff';
   static const String heic = 'heic';

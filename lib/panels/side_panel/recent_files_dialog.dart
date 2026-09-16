@@ -7,6 +7,7 @@ import 'package:flutter/material.dart' as flutter_material show MaterialLocaliza
 import 'package:flutter/widgets.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/files/file_ora.dart';
+import 'package:fpaint/files/file_psd.dart';
 import 'package:fpaint/files/import_files.dart';
 import 'package:fpaint/helpers/image_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
@@ -25,24 +26,30 @@ import 'package:logging/logging.dart';
 final Logger _log = Logger(logNameRecentFiles);
 
 const String _oraFileSuffix = '.${FileExtensions.ora}';
+const String _psdFileSuffix = '.${FileExtensions.psd}';
 
 typedef RecentFileMetadata = ({bool exists, DateTime? lastModified});
 typedef RecentFileMetadataLoader = Future<RecentFileMetadata> Function(String path, String? bookmark);
 
-/// Returns thumbnail-ready bytes for MRU previews, including ORA archives.
+/// Returns thumbnail-ready bytes for MRU previews.
+///
+/// ORA and PSD are containers the image decoder cannot read directly, so their
+/// embedded composite preview is extracted first. Every other format is already
+/// decodable as-is.
 Future<Uint8List?> resolveRecentFileThumbnailBytes({
   required Uint8List fileBytes,
   required String path,
 }) async {
-  if (!_isOraPath(path)) {
-    return fileBytes;
+  final String normalized = path.toLowerCase();
+
+  if (normalized.endsWith(_oraFileSuffix)) {
+    return extractOraPreviewPngBytes(fileBytes);
+  }
+  if (normalized.endsWith(_psdFileSuffix)) {
+    return extractPsdPreviewPngBytes(fileBytes);
   }
 
-  return extractOraPreviewPngBytes(fileBytes);
-}
-
-bool _isOraPath(String path) {
-  return path.toLowerCase().endsWith(_oraFileSuffix);
+  return fileBytes;
 }
 
 /// The unified import dialog widget.

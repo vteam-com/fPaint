@@ -13,7 +13,7 @@ This document lists the features currently available in fPaint.
 - Work with multiple layers, including visibility, opacity, rename, and merge
 - Resize/crop the canvas with anchor positioning
 - Save and export artwork as ORA, PNG, JPEG, TIFF, WEBP, and HEIC (macOS)
-- Import images in PNG, JPEG, TIFF, WEBP, HEIC, and ORA formats
+- Import images in PNG, JPEG, TIFF, WEBP, HEIC, ORA, and PSD (Photoshop) formats
 - Recover unsaved work automatically when restarting the app
 - Use the app across iOS, Android, macOS, Windows, Linux, and Web
 
