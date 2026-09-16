@@ -284,6 +284,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.10.1"
+  imclipboard:
+    dependency: "direct main"
+    description:
+      name: imclipboard
+      sha256: "060ff5c4608c4e3376d5e3f8061a3fca60cd14da8a89c1f2e40b85e8464187b4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
+  imcodec:
+    dependency: transitive
+    description:
+      name: imcodec
+      sha256: b8b49f227aa358998be149ffff9d5f2d96c6b2b947556a875797c8d43a76611d
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.4"
   intl:
     dependency: "direct main"
     description:
@@ -420,13 +436,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
-  pasteboard:
-    dependency: "direct main"
-    description:
-      path: "packages/pasteboard"
-      relative: true
-    source: path
-    version: "0.5.0"
   path:
     dependency: transitive
     description:
@@ -816,6 +825,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.4"
+  zcodec:
+    dependency: transitive
+    description:
+      name: zcodec
+      sha256: db516a895244b5ef9adfce79dd725b772d6c0f040d828e741cb8474cc31281d2
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.2"
 sdks:
   dart: ">=3.13.3 <4.0.0"
   flutter: ">=3.47.4"

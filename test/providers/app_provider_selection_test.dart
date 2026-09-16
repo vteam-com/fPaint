@@ -957,6 +957,65 @@ void main() {
     });
   });
 
+  group('paste placement', () {
+    test('scales an oversized clipboard image down to fit the canvas', () async {
+      final Size canvas = appProvider.layers.size;
+      final Image oversized = await createFilledLayerImage(
+        width: (canvas.width * 2).toInt(),
+        height: (canvas.height * 2).toInt(),
+        color: const Color(0xFF00FF00),
+      );
+      addTearDown(oversized.dispose);
+      await copyImageToClipboard(oversized);
+
+      await appProvider.paste();
+
+      // Half scale brings a 2x image exactly within the canvas.
+      final Rect bounds = appProvider.transformModel.quadBounds;
+      expect(bounds.width, closeTo(canvas.width, 0.001));
+      expect(bounds.height, closeTo(canvas.height, 0.001));
+    });
+
+    test('places an oversized image fully inside the canvas', () async {
+      final Size canvas = appProvider.layers.size;
+      // Wider than the canvas but shorter, so only width drives the fit.
+      final Image oversized = await createFilledLayerImage(
+        width: (canvas.width * 3).toInt(),
+        height: canvas.height ~/ 2,
+        color: const Color(0xFF00FF00),
+      );
+      addTearDown(oversized.dispose);
+      await copyImageToClipboard(oversized);
+
+      await appProvider.paste();
+
+      // The regression this guards: the image used to be centred at its full
+      // pixel size, putting its origin off canvas and its handles out of reach.
+      final Rect bounds = appProvider.transformModel.quadBounds;
+      expect(bounds.left, greaterThanOrEqualTo(-0.001));
+      expect(bounds.top, greaterThanOrEqualTo(-0.001));
+      expect(bounds.right, lessThanOrEqualTo(canvas.width + 0.001));
+      expect(bounds.bottom, lessThanOrEqualTo(canvas.height + 0.001));
+    });
+
+    test('leaves an image that already fits at its true pixel size', () async {
+      final Size canvas = appProvider.layers.size;
+      final Image small = await createFilledLayerImage(
+        width: canvas.width ~/ 4,
+        height: canvas.height ~/ 4,
+        color: const Color(0xFF00FF00),
+      );
+      addTearDown(small.dispose);
+      await copyImageToClipboard(small);
+
+      await appProvider.paste();
+
+      final Rect bounds = appProvider.transformModel.quadBounds;
+      expect(bounds.width, closeTo(canvas.width / 4, 0.001));
+      expect(bounds.height, closeTo(canvas.height / 4, 0.001));
+    });
+  });
+
   group('dispose', () {
     test('can be disposed without error', () {
       appProvider.dispose();

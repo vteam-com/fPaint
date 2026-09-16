@@ -40,6 +40,8 @@ const Map<String, String> dependencyVersions = <String, String>{
   'http_parser': '4.1.2',
   'http': '1.6.0',
   'image': '4.10.1',
+  'imclipboard': '0.2.2',
+  'imcodec': '0.4.4',
   'intl': '0.20.3',
   'jni_flutter': '1.0.3',
   'jni_util': '1.0.0',
@@ -57,7 +59,6 @@ const Map<String, String> dependencyVersions = <String, String>{
   'multi_split_view': '3.6.2',
   'objective_c': '9.6.0',
   'package_config': '3.0.0',
-  'pasteboard': '0.5.0',
   'path_parsing': '1.1.0',
   'path_provider_android': '2.3.1',
   'path_provider_foundation': '2.6.0',
@@ -107,4 +108,5 @@ const Map<String, String> dependencyVersions = <String, String>{
   'xdg_directories': '1.1.0',
   'xml': '7.0.1',
   'yaml': '3.1.4',
+  'zcodec': '0.2.2',
 };

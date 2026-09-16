@@ -6,11 +6,21 @@ import 'package:flutter/foundation.dart';
 import 'package:fpaint/constants/constants.dart';
 import 'package:fpaint/helpers/color_helper.dart';
 import 'package:fpaint/helpers/log_helper.dart';
+import 'package:imclipboard/imclipboard.dart';
 import 'package:logging/logging.dart';
-import 'package:pasteboard/pasteboard.dart';
 
 final Logger _log = Logger(logNameImageHelper);
 
+/// The image clipboard. Handles every platform we ship, including web, so no
+/// part of this file needs a platform branch.
+const ImClipboard _clipboard = ImClipboard();
+
+/// The last image this app put on the clipboard.
+///
+/// A fallback for hosts whose clipboard we cannot read back (a sandboxed or
+/// headless target where [ImClipboard] reports itself unsupported). It is only
+/// ever consulted after the real clipboard declines, so an image copied from
+/// another app always wins over a stale in-process copy.
 Uint8List? _sessionClipboardImageBytes;
 
 /// Extracts pixel bytes from [image] using the requested [format].
@@ -152,7 +162,7 @@ Future<void> copyImageToClipboard(ui.Image image) async {
 Future<void> copyImageBytesToClipboard(Uint8List imageBytes) async {
   _sessionClipboardImageBytes = imageBytes;
   try {
-    await Pasteboard.writeImage(imageBytes).timeout(AppDefaults.clipboardAccessTimeout);
+    await _clipboard.writeImage(imageBytes).timeout(AppDefaults.clipboardAccessTimeout);
   } catch (e) {
     _log.warning('Failed to copy image to clipboard: $e');
   }
@@ -165,11 +175,16 @@ Future<ui.Image?> getImageFromClipboard() async {
   Uint8List? bytes;
 
   try {
-    bytes = await Pasteboard.image.timeout(AppDefaults.clipboardAccessTimeout);
+    final ClipboardReadResult<ClipboardImage> result = await _clipboard.readImage().timeout(
+      AppDefaults.clipboardAccessTimeout,
+    );
+    bytes = result.value?.pngBytes;
   } catch (e) {
     _log.warning('Failed to retrieve image from clipboard: $e');
   }
 
+  // Only when the platform gave us nothing: an image copied in another app is
+  // always preferred over this session's own last copy.
   bytes ??= _sessionClipboardImageBytes;
 
   if (bytes != null) {
@@ -187,8 +202,12 @@ Future<ui.Image?> getImageFromClipboard() async {
 /// Returns true if the clipboard contains an image, otherwise returns false.
 Future<bool> clipboardHasImage() async {
   try {
-    final Uint8List? bytes = await Pasteboard.image.timeout(AppDefaults.clipboardAccessTimeout);
-    return bytes != null || _sessionClipboardImageBytes != null;
+    // Reads dimensions only, so probing for a paste target never transfers a
+    // full-resolution image off the clipboard.
+    final ClipboardReadResult<ClipboardImageInfo> result = await _clipboard.readImageInfo().timeout(
+      AppDefaults.clipboardAccessTimeout,
+    );
+    return result.value != null || _sessionClipboardImageBytes != null;
   } catch (e) {
     _log.warning('Failed to check clipboard for image: $e');
     return _sessionClipboardImageBytes != null;

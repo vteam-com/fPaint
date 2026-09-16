@@ -182,6 +182,17 @@ extension AppProviderSelection on AppProvider {
     ImagePlacementCommitMode commitMode = ImagePlacementCommitMode.newLayer,
     ImagePlacementLayerRestoreState? layerRestoreState,
   }) {
+    // An image from outside the document has no relationship to this canvas's
+    // size — a Retina screenshot is routinely several times wider than the
+    // default 1024x768. Placed at 1:1 and centred, it would start mostly off
+    // canvas with its transform handles out of reach, reading as "paste did
+    // nothing". Shrink it to fit so the whole thing is visible and grabbable;
+    // the session still starts in transform, so the user can scale it back up.
+    // Only ever scales down: an image that already fits is placed untouched.
+    final double initialScale = _fitToCanvasScale(image);
+    final double displayWidth = image.width * initialScale;
+    final double displayHeight = image.height * initialScale;
+
     final Offset center = Offset(
       layers.size.width / AppMath.pair,
       layers.size.height / AppMath.pair,
@@ -189,8 +200,8 @@ extension AppProviderSelection on AppProvider {
     final Offset resolvedInitialPosition =
         initialPosition ??
         Offset(
-          center.dx - image.width / AppMath.pair,
-          center.dy - image.height / AppMath.pair,
+          center.dx - displayWidth / AppMath.pair,
+          center.dy - displayHeight / AppMath.pair,
         );
 
     imagePlacementModel.start(
@@ -199,7 +210,24 @@ extension AppProviderSelection on AppProvider {
       commitMode: commitMode,
       layerRestoreState: layerRestoreState,
     );
+    imagePlacementModel.scale = initialScale;
     update();
+  }
+
+  /// The scale that fits [image] inside the canvas, never above 1.
+  ///
+  /// Returns 1 when the image already fits, so a paste that needs no help is
+  /// placed at its true pixel size.
+  double _fitToCanvasScale(ui.Image image) {
+    final double canvasWidth = layers.size.width;
+    final double canvasHeight = layers.size.height;
+    if (image.width <= canvasWidth && image.height <= canvasHeight) {
+      return AppMath.one.toDouble();
+    }
+    if (image.width <= 0 || image.height <= 0) {
+      return AppMath.one.toDouble();
+    }
+    return min(canvasWidth / image.width, canvasHeight / image.height);
   }
 
   /// Starts a duplicate transform using [commitMode] for the eventual commit.
