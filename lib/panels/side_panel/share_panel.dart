@@ -12,6 +12,7 @@ import 'package:fpaint/providers/app_preferences.dart';
 import 'package:fpaint/providers/app_provider.dart';
 import 'package:fpaint/providers/shell_provider.dart';
 import 'package:fpaint/widgets/app_icon.dart';
+import 'package:fpaint/widgets/file_type_icon.dart';
 import 'package:fpaint/widgets/material_free.dart';
 
 /// Export formats offered in the share panel, in display order.
@@ -56,6 +57,41 @@ Future<void> _runSharePanelAction(
   if (dismissOnAction && context.mounted) {
     Navigator.pop(context);
   }
+}
+
+/// Whether the panel can save over the loaded file rather than only export.
+///
+/// Mirrors the main menu's Save entry: the web build has no file to write back
+/// to, and an unsaved document has no path yet. A path whose extension no
+/// format handles (an imported PSD, say) is export-only too.
+bool _canSaveInPlace(String loadedFilePath) {
+  if (kIsWeb || loadedFilePath.isEmpty) {
+    return false;
+  }
+  return SaveFileFormat.fromFileName(loadedFilePath) != null;
+}
+
+/// Saves over the loaded file, showing the same progress feedback the main
+/// menu's Save entry uses.
+Future<void> _runSharePanelSaveAction({
+  required BuildContext context,
+  required LayersProvider layers,
+  required AppPreferences preferences,
+  required bool dismissOnAction,
+}) async {
+  final ShellProvider shellProvider = ShellProvider.of(context);
+
+  await _runSharePanelAction(
+    context,
+    () {
+      return runWithGlobalFileSaveSnackBar<void>(
+        initialFilePath: shellProvider.loadedFileName,
+        completedFilePathBuilder: () => shellProvider.loadedFileName,
+        task: () => saveFile(shellProvider, layers, preferences),
+      );
+    },
+    dismissOnAction,
+  );
 }
 
 /// Runs a share-panel export while showing global export progress feedback.
@@ -115,7 +151,30 @@ Future<void> sharePanel(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            if (loadedFilePath.isNotEmpty) ...<Widget>[
+            if (_canSaveInPlace(loadedFilePath)) ...<Widget>[
+              AppListTile(
+                leading: AppSvgIcon(
+                  icon: AppIcon.checkCircle,
+                  color: layers.hasChanged ? AppColors.unsavedChangesIndicator : null,
+                ),
+                title: AppText(l10n.saveLabel),
+                subtitle: Text(
+                  loadedFilePath,
+                  maxLines: AppMath.pair,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subtitle,
+                ),
+                onTap: () async {
+                  await _runSharePanelSaveAction(
+                    context: context,
+                    layers: layers,
+                    preferences: preferences,
+                    dismissOnAction: dismissOnAction,
+                  );
+                },
+              ),
+              const AppDivider(),
+            ] else if (loadedFilePath.isNotEmpty) ...<Widget>[
               AppListTile(
                 leading: const AppSvgIcon(icon: AppIcon.image),
                 title: Text(
@@ -140,7 +199,7 @@ Future<void> sharePanel(
             ),
             for (final SaveFileFormat format in _exportFormats(includeHeic: isHeicExportSupported))
               AppListTile(
-                leading: const AppSvgIcon(icon: AppIcon.iosShare),
+                leading: FileTypeIcon(extension: format.displayName),
                 title: textAction(_displayFileName(format), l10n),
                 onTap: () async {
                   await _runSharePanelExportAction(
