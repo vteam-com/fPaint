@@ -17,6 +17,9 @@ const int _exportPanelTransitionPumpCount = 4;
 const Duration _exportPanelTransitionPumpDuration = Duration(milliseconds: 50);
 const String _loadedImagePath = '/tmp/examples/reference-image.png';
 
+/// A format fPaint imports but cannot write back, so the panel exports only.
+const String _unsupportedSavePath = '/tmp/examples/reference-image.psd';
+
 void main() {
   late AppPreferences preferences;
   late AppProvider appProvider;
@@ -69,7 +72,7 @@ void main() {
   }
 
   group('sharePanel', () {
-    testWidgets('shows the loaded image path at the top when one is available', (WidgetTester tester) async {
+    testWidgets('offers Save over the loaded file, showing its full path', (WidgetTester tester) async {
       shellProvider.loadedFileName = _loadedImagePath;
 
       await tester.pumpWidget(buildHarness());
@@ -77,11 +80,45 @@ void main() {
 
       await openExportPanel(tester);
 
+      final AppLocalizations panelL10n = AppLocalizations.of(tester.element(find.byType(MainMenu)))!;
       final Finder bottomSheet = find.byType(AppBottomSheetContent);
       expect(bottomSheet, findsOneWidget);
       expect(
         find.descendant(of: bottomSheet, matching: find.text(_loadedImagePath)),
         findsOneWidget,
+      );
+      expect(
+        find.descendant(of: bottomSheet, matching: find.text(panelL10n.saveLabel)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: bottomSheet,
+          matching: find.byWidgetPredicate(
+            (Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.checkCircle,
+          ),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows the path without a Save action for an export-only format', (WidgetTester tester) async {
+      shellProvider.loadedFileName = _unsupportedSavePath;
+
+      await tester.pumpWidget(buildHarness());
+      await tester.pump();
+
+      await openExportPanel(tester);
+
+      final AppLocalizations panelL10n = AppLocalizations.of(tester.element(find.byType(MainMenu)))!;
+      final Finder bottomSheet = find.byType(AppBottomSheetContent);
+      expect(
+        find.descendant(of: bottomSheet, matching: find.text(_unsupportedSavePath)),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: bottomSheet, matching: find.text(panelL10n.saveLabel)),
+        findsNothing,
       );
       expect(
         find.descendant(
@@ -110,7 +147,8 @@ void main() {
         find.descendant(
           of: bottomSheet,
           matching: find.byWidgetPredicate(
-            (Widget widget) => widget is AppSvgIcon && widget.icon == AppIcon.image,
+            (Widget widget) =>
+                widget is AppSvgIcon && (widget.icon == AppIcon.image || widget.icon == AppIcon.checkCircle),
           ),
         ),
         findsNothing,

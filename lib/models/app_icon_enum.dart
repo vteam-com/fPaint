@@ -41,6 +41,7 @@ enum AppIcon {
   effectVignette('assets/icons/effect_vignette.svg'),
   eraser('assets/icons/eraser.svg'),
   fileDownload('assets/icons/file_download.svg'),
+  fileSheet('assets/icons/file_sheet.svg'),
   fillLinear('assets/icons/fill_linear.svg'),
   fillSolid('assets/icons/fill_solid.svg'),
   fillRadial('assets/icons/fill_radial.svg'),
