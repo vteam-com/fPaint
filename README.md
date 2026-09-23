@@ -105,6 +105,10 @@ We're building toward feature parity with commercial graphics editors. Current p
     flutter run
     ```
 
+### Linux desktop integration
+
+`flutter build linux` produces a portable bundle, and the same bundle is what the website offers for download. The first time that bundle's executable runs, it publishes the desktop entry and the icon it carries — `share/applications/com.vteam.fpaint.desktop` and `share/icons/hicolor/512x512/apps/com.vteam.fpaint.png` — into the user's data directory (`$XDG_DATA_HOME`, usually `~/.local/share`), with `Exec` aimed at the directory the application runs from. That is what lets a desktop environment draw fPaint's icon and name in the task bar, the window switcher and the window frame, and start the bundle from the application menu; on Wayland it is the only way, since an application cannot set its own window icon there. The entry is refreshed whenever the bundle moves, a desktop entry installed system-wide is left in charge, and `FPAINT_SKIP_DESKTOP_INTEGRATION=1` turns the publishing off for packagers that ship their own entry.
+
 ## Testing
 
 ### Integration Testing

@@ -7,7 +7,19 @@ project(runner LANGUAGES CXX)
 set(BINARY_NAME "fpaint")
 # The unique GTK application identifier for this application. See:
 # https://wiki.gnome.org/HowDoI/ChooseApplicationID
-set(APPLICATION_ID "com.example.fpaint")
+# The same reverse-DNS name identifies the app on the other platforms (the
+# Android application ID, the iOS and macOS bundle identifier), and it names the
+# desktop entry installed below, because a desktop environment resolves the icon
+# and the name of a window through the entry whose file name equals the window's
+# application ID.
+set(APPLICATION_ID "com.vteam.fpaint")
+
+# The icon theme directory the application icon is installed in, which names the
+# pixel size of the bundled image
+# (`packages/fpaint_assets/assets/app_icon.png`). The runner receives it as
+# APPLICATION_ICON_SIZE_DIRECTORY so that the icon it publishes for the user
+# lands in the same directory as the installed one.
+set(APPLICATION_ICON_SIZE_DIRECTORY "512x512")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
@@ -127,6 +139,27 @@ if(NOT CMAKE_BUILD_TYPE MATCHES "Debug")
     COMPONENT Runtime)
 endif()
 
-# Install the .desktop file for file type associations.
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/fpaint.desktop"
-  DESTINATION "${CMAKE_INSTALL_PREFIX}" COMPONENT Runtime)
+# The application icon, shared with the other platforms.
+set(APPLICATION_ICON_FILE
+  "${CMAKE_CURRENT_SOURCE_DIR}/../packages/fpaint_assets/assets/app_icon.png")
+
+# The desktop entry carries file type associations, and the icon and name a
+# desktop environment shows for a window, so the entry and the icon are installed
+# in the directories freedesktop.org defines for them. That layout works the same
+# for a portable bundle and for an installation into a system prefix. The runner
+# reads the entry from here and publishes a copy aimed at the bundle's own
+# location (see linux/runner/my_application.cc).
+set(APPLICATION_DESKTOP_ENTRY
+  "${CMAKE_CURRENT_SOURCE_DIR}/${APPLICATION_ID}.desktop")
+if(NOT EXISTS "${APPLICATION_DESKTOP_ENTRY}")
+  message(FATAL_ERROR "Missing desktop entry: ${APPLICATION_DESKTOP_ENTRY}")
+endif()
+
+install(FILES "${APPLICATION_DESKTOP_ENTRY}"
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/share/applications" COMPONENT Runtime)
+
+install(FILES "${APPLICATION_ICON_FILE}"
+  DESTINATION
+    "${CMAKE_INSTALL_PREFIX}/share/icons/hicolor/${APPLICATION_ICON_SIZE_DIRECTORY}/apps"
+  RENAME "${APPLICATION_ID}.png"
+  COMPONENT Runtime)

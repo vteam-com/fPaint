@@ -4,11 +4,15 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [2.0.5] - 2026-09-26
 
 ### Add
 
 - Open Photoshop `.psd` files. The layer stack is rebuilt rather than flattened: each PSD layer keeps its name, opacity, blend mode, visibility and canvas position. Layer groups are flattened, since the canvas has no groups — the folders are dropped and their children become ordinary layers, with a hidden group's children imported hidden. Blend modes Flutter's compositor cannot express (Dissolve, Vivid/Linear/Pin Light, Hard Mix, Subtract, Divide, and the *Color variants) fall back to Normal. A flattened PSD, or one saved without "Maximize Compatibility" layer data, opens from its merged composite. PSD is import-only; saving still writes ORA, PNG, JPEG, TIFF, WebP or HEIC.
+
+### Fix
+
+- The Linux bundle now wears the fPaint icon. A Wayland application cannot set its own window icon — GTK's list of pixbufs is ignored there — and a compositor takes both the icon and the name of a window from the desktop entry whose file name equals the window's application ID. The Linux application ID was still the Flutter placeholder `com.example.fpaint` while the entry was called `fpaint.desktop`, so nothing could be matched and the bundle drawn with the generic Wayland icon (a "W") in the task bar, the window switcher and the window frame. The ID is now the reverse-DNS name the other platforms use (`com.vteam.fpaint`), the entry is named after it with a matching `Icon` and `StartupWMClass`, and the entry and the icon are installed into `share/applications` and `share/icons/hicolor/512x512/apps`. The first time a bundle runs, the runner publishes that entry into the user's data directory with `Exec` aimed at the directory it is running from, so a downloaded-and-unzipped bundle shows its icon too. An entry installed system-wide is left in charge, and `FPAINT_SKIP_DESKTOP_INTEGRATION` turns the publishing off for packagers. X11 is unchanged: the window icon GTK sets there is still applied, which is what fills in `_NET_WM_ICON`. Because Linux names the application data directory after the application ID, the recovery drafts and preferences of an existing installation are moved from the placeholder directory to the new one the first time this build starts, so no saved work is orphaned.
 
 ## [2.0.4] - 2026-09-16
 

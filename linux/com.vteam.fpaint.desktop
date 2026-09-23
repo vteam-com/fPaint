@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=fPaint
+Comment=A feature-rich drawing and painting application
+Exec=fpaint %f
+Icon=com.vteam.fpaint
+Terminal=false
+Categories=Graphics;2DGraphics;RasterGraphics;
+MimeType=image/png;image/jpeg;image/webp;image/tiff;image/openraster;
+# Ties the window to this entry on X11, where a desktop environment matches a
+# window to its desktop entry through the window's WM_CLASS. On Wayland the
+# window's application ID does that job, which is why this file is named after it.
+StartupWMClass=com.vteam.fpaint
